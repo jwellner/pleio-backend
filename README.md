@@ -8,7 +8,7 @@ This repository contains the work in progress of Backend2, a brand new social en
 
 ## Features
 - Users and profile management
-- External OAuth2 support
+- External OAuth2 / OpenID support
 - Comments
 
 ## Setup
