@@ -11,13 +11,13 @@ This repository contains the work in progress of Backend2, a brand new social en
 - External OAuth2 / OpenID support
 - Comments
 
+This backend only provides a GraphQL interface and is probably used in conjunction with a Javascript frontend.
+
 ## Setup
 Before setup make sure you installed all the development requirements:
 
 - Python3
 - [virtualenvwrapper](https://virtualenvwrapper.readthedocs.io/en/latest/install.html)
-- Node.js v8
-- yarn
 - PostgreSQL with a new database "backend2"
 
 ## Installation
