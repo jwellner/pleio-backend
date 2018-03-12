@@ -28,7 +28,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'core'
+    'graphene_django',
+    'backend.core'
 ]
 
 if LOCAL_APPS:
@@ -102,7 +103,7 @@ LOCALE_PATHS = (
 )
 
 GRAPHENE = {
-    'SCHEMA': 'core.schema'
+    'SCHEMA': 'backend.schema.schema'
 }
 
 # Static files (CSS, JavaScript, Images)

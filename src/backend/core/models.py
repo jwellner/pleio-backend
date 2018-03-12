@@ -70,3 +70,9 @@ class User(AbstractBaseUser):
     def email_user(self, subject, message, from_email=None, **kwargs):
         send_mail(subject, message, from_email or settings.FROM_EMAIL, [
                   self.email], **kwargs)
+
+class Group(models.Model):
+    name = models.CharField(max_length=200)
+
+    def __str__(self):
+        return self.name

@@ -10,10 +10,3 @@
 .idea/
 __pycache__
 /.tox/
-
-# Javascript
-node_modules
-npm-debug.log
-assets/bundles
-webpack-stats.json
-webpack-stats-prod.json

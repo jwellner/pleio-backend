@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import User
+from .models import User, Group
 
 class UserAdmin(admin.ModelAdmin):
     readonly_fields = ('external_id', 'last_login')
@@ -7,3 +7,4 @@ class UserAdmin(admin.ModelAdmin):
     exclude = ('password', )
 
 admin.site.register(User, UserAdmin)
+admin.site.register(Group)
