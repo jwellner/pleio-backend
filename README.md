@@ -23,7 +23,6 @@ This backend only provides a GraphQL interface and is probably used in conjuncti
 The following projects could be interesting to provide some functionality:
 
 - django-revisions or django-simple-history
-- django-haystack
 - django-channels
 
 ## Setup
