@@ -1,17 +1,30 @@
 # Backend2
 This repository contains the work in progress of Backend2, a brand new social engine based on [Django](https://www.djangoproject.com/), [GraphQL](http://graphql.org/) and [React](https://facebook.github.io/react/). The backend offers a pluggable and easily extendable interface that allows users to easily develop their own extensions. The backend will initially be used by [Pleio](https://www.pleio.nl) and [GCCollab](https://gccollab.ca). The goal of this backend is to be:
 
-- Accessible
+- Generic
 - Scalable
-- Extensible
+- Accessible
 - Multi-lingual
+- Modular
+- Extensible
 
 ## Features
-- Users and profile management
-- External OAuth2 / OpenID support
-- Comments
+- Object versioning
+- Access control (read/write permissions, groups support)
+- Full-text search
+- OpenID connect support
+- Logging (audit trail)
+- Notifications
+- Handling large file uploads (attachments)
 
 This backend only provides a GraphQL interface and is probably used in conjunction with a Javascript frontend.
+
+## Dependencies
+The following projects could be interesting to provide some functionality:
+
+- django-revisions or django-simple-history
+- django-haystack
+- django-channels
 
 ## Setup
 Before setup make sure you installed all the development requirements:
