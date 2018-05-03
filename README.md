@@ -17,7 +17,7 @@ This repository contains the work in progress of Backend2, a brand new social en
 - Notifications
 - Handling large file uploads (attachments)
 
-This backend only provides a GraphQL interface and is probably used in conjunction with a Javascript frontend.
+This backend only provides a GraphQL interface and is probably used in conjunction with a Javascript frontend or an app.
 
 ## Dependencies
 The following projects could be interesting to provide some functionality:
