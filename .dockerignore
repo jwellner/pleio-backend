@@ -1,0 +1,11 @@
+.git/
+
+*.egg-info
+*.egg/
+*.pyc
+
+.tox
+__pycache__
+
+media/*
+static/*

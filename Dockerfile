@@ -1,7 +1,21 @@
-FROM python:3-jessie
+FROM python:3
 
-COPY . .
-RUN pip3 install -r requirements.txt
-RUN cp backend/config.example.py ./config.py
+# Install app dependencies
+RUN mkdir /app
+WORKDIR /app
+ADD requirements.txt /app
+RUN pip install --no-cache-dir -r requirements.txt
 
-ENTRYPOINT ["/bin/bash"]
+# Add app
+ADD . /app
+
+# Boot script
+ADD docker/config.py /app/src/backend/conf/config.py
+ADD docker/start.sh /start.sh
+RUN chmod +x /start.sh
+
+# HTTP port
+EXPOSE 8000
+
+# Define run script
+CMD ["/start.sh"]
