@@ -2,6 +2,7 @@
 .git
 .hg
 .svn
+.vscode
 *.pyc
 *.db
 *~
