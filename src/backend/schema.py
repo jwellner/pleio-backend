@@ -1,19 +1,20 @@
+
 import graphene
 
-import backend.core.query
-import backend.blog.query
+from .utils import get_queries_from_apps, get_mutations_from_apps
 
-import backend.core.mutation
-import backend.blog.mutation
+name = 'Query'
+Query = type(
+    name,
+    get_queries_from_apps() + (graphene.ObjectType,),
+    dict()
+)
 
-class Query(backend.core.query.Query, backend.blog.query.Query, graphene.ObjectType):
-    # This class will inherit from multiple Queries
-    # as we begin to add more apps to our project
-    pass
-
-class Mutation(backend.core.mutation.Mutation, backend.blog.mutation.Mutation, graphene.ObjectType):
-    # This class will inherit from multiple Mutations
-    # as we begin to add more apps to our project
-    pass
+name = 'Mutation'
+Mutation = type(
+    name,
+    get_mutations_from_apps() + (graphene.ObjectType,),
+    dict()
+)
 
 schema = graphene.Schema(query=Query, mutation=Mutation)
