@@ -1,11 +1,12 @@
 def get_acl(user):
-    acl = ['public']
+    acl = set(['public'])
 
     if user.is_authenticated:
-        acl.append('logged_in')
-        acl.append('user:{}'.format(user.id))
+        acl.add('logged_in')
+        acl.add('user:{}'.format(user.id))
 
     if user.groups:
-        acl = acl + ['group:{}'.format(group.id) for group in user.groups.all()]
+        groups = set('group:{}'.format(group.id) for group in user.groups.all())
+        acl = acl.union(groups)
 
     return acl

@@ -116,7 +116,12 @@ class Comment(models.Model):
 
 class ObjectManager(models.Manager):
     def visible(self, user):
-        return self.get_queryset().filter(read_access__contained_by=get_acl(user))
+        queryset = self.get_queryset()
+
+        if user.is_authenticated and user.is_admin:
+            return queryset
+
+        return queryset.filter(read_access__contained_by=list(get_acl(user)))
 
 class Object(models.Model):
     objects = ObjectManager()
@@ -124,8 +129,8 @@ class Object(models.Model):
     owner = models.ForeignKey(User, on_delete=models.PROTECT)
     group = models.ForeignKey(Group, on_delete=models.PROTECT, null=True)
 
-    read_access = ArrayField(models.CharField(max_length=32), blank=True, default=[])
-    write_access = ArrayField(models.CharField(max_length=32), blank=True, default=[])
+    read_access = ArrayField(models.CharField(max_length=32), blank=True, default=['private'])
+    write_access = ArrayField(models.CharField(max_length=32), blank=True, default=['private'])
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -136,11 +141,17 @@ class Object(models.Model):
 
     @property
     def can_read(self, user):
-        return get_acl(user) in self.read_access
+        if user.is_authenticated and user.is_admin:
+            return True
+
+        return get_acl(user) in set(self.read_access)
 
     @property
     def can_write(self, user):
-        return get_acl(user) in self.write_access
+        if user.is_authenticated and user.is_admin:
+            return True
+
+        return get_acl(user) in set(self.write_access)
 
     class Meta:
         abstract = True
