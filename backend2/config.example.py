@@ -20,7 +20,7 @@ EMAIL_HOST = 'localhost'
 EMAIL_PORT = 1025
 
 LOCAL_APPS = [
-    #'example'
+    'blog',
 ]
 
 LOCAL_MIDDLEWARE = []

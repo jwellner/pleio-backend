@@ -1,5 +1,5 @@
 from django.db import models
-from backend.core.models import Object
+from core.models import Object
 
 class Blog(Object):
     title = models.CharField(max_length=256)

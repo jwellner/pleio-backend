@@ -1,6 +1,6 @@
 import graphene
 from graphene_django.types import DjangoObjectType
-from backend.core.models import User, Group
+from core.models import User, Group
 
 class UserType(DjangoObjectType):
     class Meta:

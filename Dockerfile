@@ -10,7 +10,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 ADD . /app
 
 # Boot script
-ADD docker/config.py /app/src/backend/conf/config.py
+ADD docker/config.py /app/backend2/config.py
 ADD docker/start.sh /start.sh
 RUN chmod +x /start.sh
 

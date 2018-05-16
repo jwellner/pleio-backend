@@ -27,7 +27,7 @@ TIME_ZONE = 'UTC'
 STATIC_ROOT = '/app/static'
 
 LOCAL_APPS = [
-    'backend.blog',
+    'blog',
 ]
 
 LOCAL_MIDDLEWARE = []

@@ -1,4 +1,3 @@
-
 import graphene
 
 from .utils import get_queries_from_apps, get_mutations_from_apps

@@ -1,8 +1,8 @@
 from django.urls import path, include
 from graphene_django.views import GraphQLView
 
-from backend.core import admin
-from backend.core.views import index
+from core import admin
+from core.views import index
 
 urlpatterns = [
     path('graphql/', GraphQLView.as_view(graphiql=True)),
