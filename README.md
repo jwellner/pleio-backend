@@ -1,5 +1,5 @@
 # Backend2
-This repository contains the work in progress of Backend2, a brand new social engine based on [Django](https://www.djangoproject.com/), [GraphQL](http://graphql.org/) and [React](https://facebook.github.io/react/). The backend offers a pluggable and easily extendable interface that allows users to easily develop their own extensions. The backend will initially be used by [Pleio](https://www.pleio.nl) and [GCCollab](https://gccollab.ca). The goal of this backend is to be:
+This repository contains the work in progress of Backend2, a brand new social engine based on [Django](https://www.djangoproject.com/) and [GraphQL](http://graphql.org/). The backend offers a pluggable and extendable interface that allows developers to easily develop their own extensions. The backend will initially be used by [Pleio](https://www.pleio.nl) and [GCCollab](https://gccollab.ca). The goal of this backend is to be:
 
 - Generic
 - Scalable
