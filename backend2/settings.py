@@ -22,6 +22,7 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.pa
 # Application definition
 
 INSTALLED_APPS = [
+    'reversion',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -130,7 +131,7 @@ LOCALE_PATHS = (
 )
 
 GRAPHENE = {
-    'SCHEMA': 'backend.schema.schema'
+    'SCHEMA': 'backend2.schema.schema'
 }
 
 # Static files (CSS, JavaScript, Images)

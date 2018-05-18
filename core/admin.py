@@ -1,4 +1,6 @@
 from django.contrib.admin import AdminSite as BaseAdminSite
+from reversion.admin import VersionAdmin
+
 from .models import User, Group, GroupMembership
 
 class AdminSite(BaseAdminSite):
@@ -7,6 +9,17 @@ class AdminSite(BaseAdminSite):
 
 
 site = AdminSite(name='admin')
-site.register(User)
-site.register(Group)
-site.register(GroupMembership)
+
+class UserAdmin(VersionAdmin):
+    pass
+
+class GroupAdmin(VersionAdmin):
+    pass
+
+class GroupMembershipAdmin(VersionAdmin):
+    pass
+
+
+site.register(User, UserAdmin)
+site.register(Group, GroupAdmin)
+site.register(GroupMembership, GroupMembershipAdmin)

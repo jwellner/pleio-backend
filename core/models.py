@@ -5,6 +5,9 @@ from django.contrib.contenttypes.models import ContentType
 from django.contrib.postgres.fields import ArrayField
 from django.core.mail import send_mail
 from django.conf import settings
+
+import reversion
+
 from .lib import get_acl
 
 class Manager(BaseUserManager):
@@ -12,30 +15,39 @@ class Manager(BaseUserManager):
         if not email:
             raise ValueError('Users must have an email address')
 
-        user = self.model(
-            email=self.normalize_email(email),
-            name=name
-        )
+        with reversion.create_revision():
+            user = self.model(
+                email=self.normalize_email(email),
+                name=name
+            )
 
-        if password:
-            user.set_password(password)
+            if password:
+                user.set_password(password)
 
-        if external_id:
-            user.external_id = external_id
+            if external_id:
+                user.external_id = external_id
 
-        user.save(using=self._db)
+            user.save(using=self._db)
+
+            reversion.set_comment("New user created")
+
         return user
 
     def create_superuser(self, email, name, password):
-        user = self.create_user(
-            email=self.normalize_email(email),
-            name=name,
-            password=password
-        )
 
-        user.is_admin = True
-        user.is_active = True
-        user.save(using=self._db)
+        with reversion.create_revision():
+            user = self.create_user(
+                email=self.normalize_email(email),
+                name=name,
+                password=password
+            )
+
+            user.is_admin = True
+            user.is_active = True
+            user.save(using=self._db)
+
+            reversion.set_comment("Superuser created.")
+
         return user
 
 class User(AbstractBaseUser):

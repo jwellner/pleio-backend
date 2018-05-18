@@ -8,3 +8,4 @@ Celery==4.1
 elasticsearch-dsl>=6.0.0,<7.0.0
 uwsgi==2.0.17
 mozilla-django-oidc==1.0
+django-reversion>=2.0.13
