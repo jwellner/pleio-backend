@@ -1,4 +1,7 @@
 from mozilla_django_oidc.auth import OIDCAuthenticationBackend
+
+import reversion
+
 from .models import User
 
 class OIDCAuthBackend(OIDCAuthenticationBackend):
@@ -14,8 +17,11 @@ class OIDCAuthBackend(OIDCAuthenticationBackend):
         return User.objects.create_user(name=claims.get('name'), email=claims.get('email'), password=None, external_id=claims.get('sub'))
 
     def update_user(self, user, claims):
-        user.name = claims.get('name')
-        user.email = claims.get('email')
-        user.save()
+        with reversion.create_revision():
+            user.name = claims.get('name')
+            user.email = claims.get('email')
+            user.save()
+
+            reversion.set_comment("OIDC Update")
 
         return user
