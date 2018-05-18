@@ -10,3 +10,7 @@ def get_acl(user):
         acl = acl.union(groups)
 
     return acl
+
+def get_id(input_id):
+    splitted_id = input_id.split(':')
+    return splitted_id[1]

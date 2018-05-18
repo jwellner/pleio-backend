@@ -1,41 +1,63 @@
 import graphene
+from core.lib import get_id
+from .models import Blog
 from .types import BlogType
 
 class CreateBlog(graphene.Mutation):
     class Arguments:
-        title = graphene.String()
-        description = graphene.String()
+        title = graphene.String(required=True)
+        description = graphene.String(required=True)
 
     ok = graphene.Boolean()
     blog = graphene.Field(lambda: BlogType)
 
     def mutate(self, info, title, description):
-        blog = BlogType(title=title, description=description)
-        ok = True
+        try:
+            blog = Blog.objects.create(owner=info.context.user, title=title, description=description)
+            ok = True
+        except:
+            blog = None
+            ok = False
+
         return CreateBlog(blog=blog, ok=ok)
 
 class UpdateBlog(graphene.Mutation):
     class Arguments:
-        guid = graphene.ID()
-        title = graphene.String()
-        description = graphene.String()
+        id = graphene.ID(required=True)
+        title = graphene.String(required=True)
+        description = graphene.String(required=True)
 
     ok = graphene.Boolean()
     blog = graphene.Field(lambda: BlogType)
 
-    def mutate(self, info, guid, title, description):
-        blog = BlogType(guid=guid, title=title, description=description)
-        ok = True
+    def mutate(self, info, id, title, description):
+        try:
+            blog = Blog.objects.get(pk=get_id(id))
+            blog.title = title
+            blog.description = description
+            blog.save()
+            ok = True
+        except:
+            blog = None
+            ok = False
+
         return UpdateBlog(blog=blog, ok=ok)
 
 class DeleteBlog(graphene.Mutation):
     class Arguments:
-        guid = graphene.ID()
+        id = graphene.ID(required=True)
 
     ok = graphene.Boolean()
 
-    def mutate(self, info, guid):
-        ok = True
+    def mutate(self, info, id):
+        try:
+            blog = Blog.objects.get(pk=get_id(id))
+            blog.delete()
+            ok = True
+        except:
+            blog = None
+            ok = False
+
         return DeleteBlog(ok=ok)
 
 class Mutation(graphene.ObjectType):
