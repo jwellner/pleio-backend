@@ -130,7 +130,7 @@ LOCALE_PATHS = (
 )
 
 GRAPHENE = {
-    'SCHEMA': 'backend.schema.schema'
+    'SCHEMA': 'backend2.schema.schema'
 }
 
 # Static files (CSS, JavaScript, Images)
