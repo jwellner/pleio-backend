@@ -146,4 +146,7 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media/')
 PASSWORD_RESET_TIMEOUT_DAYS = 1
 ACCOUNT_ACTIVATION_DAYS = 7
 
+LOGIN_URL = '/oidc/authenticate/'
+LOGIN_REDIRECT_URL = '/'
+
 from .config import *
