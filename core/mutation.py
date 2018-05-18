@@ -1,4 +1,6 @@
 import graphene
+import reversion
+
 from core.lib import get_id
 from .models import Group
 from .types import GroupType
@@ -13,7 +15,15 @@ class CreateGroup(graphene.Mutation):
 
     def mutate(self, info, name, description):
         try:
-            group = Group.objects.create(name=name, description=description)
+            with reversion.create_revision():
+                group = Group.objects.create(
+                    name=name,
+                    description=description
+                )
+
+                reversion.set_user(info.context.user)
+                reversion.set_comment("createGroup mutation")
+
             ok = True
         except:
             group = None
@@ -32,10 +42,15 @@ class UpdateGroup(graphene.Mutation):
 
     def mutate(self, info, id, name, description):
         try:
-            group = Group.objects.get(pk=get_id(id))
-            group.name = name
-            group.description = description
-            group.save()
+            with reversion.create_revision():
+                group = Group.objects.get(pk=get_id(id))
+                group.name = name
+                group.description = description
+                group.save()
+
+                reversion.set_user(info.context.user)
+                reversion.set_comment("updateGroup mutation")
+
             ok = True
         except:
             group = None
@@ -51,8 +66,13 @@ class DeleteGroup(graphene.Mutation):
 
     def mutate(self, info, id):
         try:
-            group = Group.objects.get(pk=get_id(id))
-            group.delete()
+            with reversion.create_revision():
+                group = Group.objects.get(pk=get_id(id))
+                group.delete()
+
+                reversion.set_user(info.context.user)
+                reversion.set_comment("deleteGroup mutation")
+
             ok = True
         except:
             ok = False

@@ -1,4 +1,6 @@
 import graphene
+import reversion
+
 from core.lib import get_id
 from .models import Blog
 from .types import BlogType
@@ -13,7 +15,16 @@ class CreateBlog(graphene.Mutation):
 
     def mutate(self, info, title, description):
         try:
-            blog = Blog.objects.create(owner=info.context.user, title=title, description=description)
+            with reversion.create_revision():
+                blog = Blog.objects.create(
+                    owner=info.context.user,
+                    title=title,
+                    description=description
+                )
+
+                reversion.set_user(info.context.user)
+                reversion.set_comment("createBlog mutation")
+
             ok = True
         except:
             blog = None
@@ -32,10 +43,15 @@ class UpdateBlog(graphene.Mutation):
 
     def mutate(self, info, id, title, description):
         try:
-            blog = Blog.objects.get(pk=get_id(id))
-            blog.title = title
-            blog.description = description
-            blog.save()
+            with reversion.create_revision():
+                blog = Blog.objects.get(pk=get_id(id))
+                blog.title = title
+                blog.description = description
+                blog.save()
+
+                reversion.set_user(info.context.user)
+                reversion.set_comment("updateBlog mutation")
+
             ok = True
         except:
             blog = None
@@ -51,8 +67,13 @@ class DeleteBlog(graphene.Mutation):
 
     def mutate(self, info, id):
         try:
-            blog = Blog.objects.get(pk=get_id(id))
-            blog.delete()
+            with reversion.create_revision():
+                blog = Blog.objects.get(pk=get_id(id))
+                blog.delete()
+
+                reversion.set_user(info.context.user)
+                reversion.set_comment("deleteBlog mutation")
+
             ok = True
         except:
             blog = None
