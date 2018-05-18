@@ -139,7 +139,7 @@ class Object(models.Model):
     objects = ObjectManager()
 
     owner = models.ForeignKey(User, on_delete=models.PROTECT)
-    group = models.ForeignKey(Group, on_delete=models.PROTECT, null=True)
+    group = models.ForeignKey(Group, on_delete=models.PROTECT, blank=True, null=True)
 
     read_access = ArrayField(models.CharField(max_length=32), blank=True, default=['private'])
     write_access = ArrayField(models.CharField(max_length=32), blank=True, default=['private'])
