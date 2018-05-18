@@ -11,7 +11,7 @@ https://docs.djangoproject.com/en/1.10/ref/settings/
 """
 
 import os
-from .config import *
+from .config import LOCAL_APPS, LOCAL_MIDDLEWARE
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
@@ -145,3 +145,5 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media/')
 
 PASSWORD_RESET_TIMEOUT_DAYS = 1
 ACCOUNT_ACTIVATION_DAYS = 7
+
+from .config import *
