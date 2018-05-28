@@ -18,7 +18,7 @@ def get_queries_from_apps(module_name='query'):
                     queries.append(cls)
                 except AttributeError:
                     pass
-        except ModuleNotFoundError:
+        except ImportError:
             pass
     return tuple(queries)
 
@@ -37,6 +37,6 @@ def get_mutations_from_apps(module_name='mutation'):
                         mutations.append(cls)
                 except AttributeError:
                     pass
-        except ModuleNotFoundError:
+        except ImportError:
             pass
     return tuple(mutations)
