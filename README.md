@@ -9,7 +9,7 @@ This repository contains the work in progress of Backend2, a brand new social en
 - Extensible
 
 ## Features
-- Object versioning
+- Object versioning, including archival requirements
 - Access control (read/write permissions, groups support)
 - Full-text search
 - OpenID connect support
