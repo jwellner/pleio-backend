@@ -14,12 +14,19 @@ class OIDCAuthBackend(OIDCAuthenticationBackend):
         return User.objects.filter(external_id__iexact=sub)
 
     def create_user(self, claims):
-        return User.objects.create_user(name=claims.get('name'), email=claims.get('email'), password=None, external_id=claims.get('sub'))
+        return User.objects.create_user(
+            name=claims.get('name'),
+            email=claims.get('email'),
+            picture=claims.get('picture'),
+            password=None,
+            external_id=claims.get('sub')
+        )
 
     def update_user(self, user, claims):
         with reversion.create_revision():
             user.name = claims.get('name')
             user.email = claims.get('email')
+            user.picture = claims.get('picture')
             user.save()
 
             reversion.set_comment("OIDC Update")

@@ -35,7 +35,7 @@ LANGUAGES = [
 
 OIDC_RP_CLIENT_ID = '12345'
 OIDC_RP_CLIENT_SECRET = 'secret'
-OIDC_RP_SCOPES = 'openid profile email'
+OIDC_RP_SCOPES = 'openid profile email picture'
 
 OIDC_OP_AUTHORIZATION_ENDPOINT = 'http://localhost:8001/openid/authorize/'
 OIDC_OP_TOKEN_ENDPOINT = 'http://localhost:8001/openid/token/'

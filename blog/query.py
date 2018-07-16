@@ -1,10 +1,11 @@
 import graphene
+from graphene_django import DjangoConnectionField
 
-from .types import BlogType
+from .nodes import BlogNode
 from .models import Blog
 
 class Query(object):
-    blogs = graphene.List(BlogType)
+    blogs = DjangoConnectionField(BlogNode)
 
     def resolve_blogs(self, info, **kwargs):
         return Blog.objects.visible(info.context.user)

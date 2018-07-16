@@ -16,10 +16,10 @@ def get_queries_from_apps(module_name='query'):
                 try:
                     cls = getattr(mod, i)
                     queries.append(cls)
-                except AttributeError:
-                    pass
-        except ImportError:
-            pass
+                except AttributeError as e:
+                    print(e)
+        except ImportError as e:
+            print(e)
     return tuple(queries)
 
 def get_mutations_from_apps(module_name='mutation'):
@@ -35,8 +35,8 @@ def get_mutations_from_apps(module_name='mutation'):
                     cls = getattr(mod, i)
                     if graphene.ObjectType in cls.__bases__:
                         mutations.append(cls)
-                except AttributeError:
-                    pass
-        except ImportError:
-            pass
+                except AttributeError as e:
+                    print(e)
+        except ImportError as e:
+            print(e)
     return tuple(mutations)

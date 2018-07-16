@@ -3,7 +3,7 @@ import reversion
 
 from core.lib import get_id
 from .models import Blog
-from .types import BlogType
+from .nodes import BlogNode
 
 class CreateBlog(graphene.Mutation):
     class Arguments:
@@ -11,7 +11,7 @@ class CreateBlog(graphene.Mutation):
         description = graphene.String(required=True)
 
     ok = graphene.Boolean()
-    blog = graphene.Field(lambda: BlogType)
+    blog = graphene.Field(lambda: BlogNode)
 
     def mutate(self, info, title, description):
         try:
@@ -39,7 +39,7 @@ class UpdateBlog(graphene.Mutation):
         description = graphene.String(required=True)
 
     ok = graphene.Boolean()
-    blog = graphene.Field(lambda: BlogType)
+    blog = graphene.Field(lambda: BlogNode)
 
     def mutate(self, info, id, title, description):
         try:

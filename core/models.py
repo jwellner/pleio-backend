@@ -58,6 +58,7 @@ class User(AbstractBaseUser):
     is_active = models.BooleanField(default=True)
     is_admin = models.BooleanField(default=False)
     external_id = models.CharField(max_length=50, unique=True, blank=True, null=True)
+    picture = models.URLField(blank=True, null=True)
 
     groups = models.ManyToManyField('Group', through='GroupMembership', related_name='members')
 
