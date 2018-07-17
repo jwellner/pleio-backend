@@ -6,7 +6,7 @@ from core.models import User, Group
 class Node(graphene.Interface):
     id = graphene.ID()
 
-class PaginatedList(graphene.ObjectType):
+class PaginatedNodeList(graphene.ObjectType):
     totalCount = graphene.Int(required=True)
     edges = graphene.List(Node)
 
@@ -29,6 +29,10 @@ class GroupNode(DjangoObjectType):
 
     def resolve_id(self, info):
         return 'group:{}'.format(self.id)
+
+class PaginatedGroupList(graphene.ObjectType):
+    totalCount = graphene.Int(required=True)
+    edges = graphene.List(GroupNode)
 
 class ViewerNode(graphene.ObjectType):
     class Meta:

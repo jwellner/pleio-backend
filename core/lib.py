@@ -11,6 +11,10 @@ def get_acl(user):
 
     return acl
 
+def get_type(input_id):
+    splitted_id = input_id.split(':')
+    return splitted_id[0]
+
 def get_id(input_id):
     splitted_id = input_id.split(':')
     return splitted_id[1]

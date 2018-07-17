@@ -1,15 +1,15 @@
 import graphene
 from graphene import relay
-from .nodes import PaginatedList, Node, ViewerNode, GroupNode
+from .nodes import PaginatedGroupList, Node, ViewerNode, GroupNode
 from .models import Group
 
 class Query(object):
     node = graphene.Field(Node)
     viewer = graphene.Field(ViewerNode)
-    groups = graphene.Field(PaginatedList, offset=graphene.Int(required=True), limit=graphene.Int(required=True))
+    groups = graphene.Field(PaginatedGroupList, offset=graphene.Int(), limit=graphene.Int())
 
     def resolve_groups(self, info, offset=0, limit=20):
-        return PaginatedList(
+        return PaginatedGroupList(
             totalCount=Group.objects.count(),
             edges=Group.objects.all()[offset:(offset+limit)]
         )

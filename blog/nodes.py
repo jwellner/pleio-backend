@@ -7,3 +7,6 @@ class BlogNode(DjangoObjectType):
     class Meta:
         model = Blog
         interfaces = (Node, )
+
+    def resolve_id(self, info):
+        return 'blog:{}'.format(self.id)
