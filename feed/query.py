@@ -1,5 +1,5 @@
 import graphene
-from .nodes import PaginatedFeedList
+from .lists import PaginatedFeedList
 from .models import Feed
 
 class Query(object):

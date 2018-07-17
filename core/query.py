@@ -1,6 +1,7 @@
 import graphene
 from graphene import relay
-from .nodes import PaginatedGroupList, Node, ViewerNode, GroupNode
+from .nodes import Node, ViewerNode, GroupNode, GroupMembershipNode
+from .lists import PaginatedGroupList
 from .models import Group
 
 class Query(object):

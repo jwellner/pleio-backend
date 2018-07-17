@@ -60,7 +60,7 @@ class User(AbstractBaseUser):
     external_id = models.CharField(max_length=50, unique=True, blank=True, null=True)
     picture = models.URLField(blank=True, null=True)
 
-    groups = models.ManyToManyField('Group', through='GroupMembership', related_name='members')
+    groups = models.ManyToManyField('Group', through='GroupMembership')
 
     REQUIRED_FIELDS = ['name']
     USERNAME_FIELD = 'email'

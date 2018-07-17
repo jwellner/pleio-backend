@@ -18,7 +18,3 @@ class FeedNode(DjangoObjectType):
 
     def resolve_node(self, info):
         return self.node
-
-class PaginatedFeedList(graphene.ObjectType):
-    totalCount = graphene.Int(required=True)
-    edges = graphene.List(FeedNode)
