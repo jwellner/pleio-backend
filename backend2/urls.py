@@ -8,6 +8,7 @@ from core.views import index
 urlpatterns = [
     path('graphql/', csrf_exempt(GraphQLView.as_view(graphiql=True))),
     path('oidc/', include('mozilla_django_oidc.urls')),
+    path('files/', include('files.urls')),
     path('admin/', admin.site.urls),
     path('', index)
 ]
