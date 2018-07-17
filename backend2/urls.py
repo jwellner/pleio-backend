@@ -1,11 +1,12 @@
 from django.urls import path, include
 from graphene_django.views import GraphQLView
+from django.views.decorators.csrf import csrf_exempt
 
 from core import admin
 from core.views import index
 
 urlpatterns = [
-    path('graphql/', GraphQLView.as_view(graphiql=True)),
+    path('graphql/', csrf_exempt(GraphQLView.as_view(graphiql=True))),
     path('oidc/', include('mozilla_django_oidc.urls')),
     path('admin/', admin.site.urls),
     path('', index)
