@@ -190,14 +190,12 @@ class Object(models.Model):
 
     tags = ArrayField(models.CharField(max_length=256), blank=True, default=[])
 
-    @property
     def can_read(self, user):
         if user.is_authenticated and user.is_admin:
             return True
 
         return get_acl(user) in set(self.read_access)
 
-    @property
     def can_write(self, user):
         if user.is_authenticated and user.is_admin:
             return True
