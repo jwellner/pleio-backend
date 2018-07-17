@@ -89,6 +89,9 @@ class User(AbstractBaseUser):
                   self.email], **kwargs)
 
 class Group(models.Model):
+    class Meta:
+        ordering = ['name']
+
     name = models.CharField(max_length=200)
 
     description = models.TextField()
@@ -118,6 +121,9 @@ class GroupMembership(models.Model):
         return "{} - {} - {}".format(self.user.name, self.type, self.group.name)
 
 class Comment(models.Model):
+    class Meta:
+        ordering = ['-id']
+
     owner = models.ForeignKey(User, on_delete=models.PROTECT)
 
     description = models.TextField()
