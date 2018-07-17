@@ -1,7 +1,6 @@
 import graphene
-from graphene import relay
 from graphene_django.types import DjangoObjectType
-from core.models import User, Group
+from core.models import User, Group, GroupMembership
 
 class Node(graphene.Interface):
     id = graphene.ID()
@@ -20,6 +19,9 @@ class UserNode(DjangoObjectType):
         return 'user:{}'.format(self.id)
 
 class GroupNode(DjangoObjectType):
+
+    members = graphene.Field(PaginatedList, offset=graphene.Int(required=True), limit=graphene.Int(required=True))
+
     class Meta:
         model = Group
         filter_fields = {
@@ -29,6 +31,21 @@ class GroupNode(DjangoObjectType):
 
     def resolve_id(self, info):
         return 'group:{}'.format(self.id)
+
+    def resolve_members(self, info, offset=0, limit=20):
+        return PaginatedList(
+            totalCount=self.membership.count(),
+            edges=self.membership.all()[offset:(offset+limit)]
+        )
+
+class GroupMembershipNode(DjangoObjectType):
+
+    class Meta:
+        model = GroupMembership
+        interfaces = (Node,)
+
+    def resolve_id(self, info):
+        return 'group_membership:{}'.format(self.id)
 
 class ViewerNode(graphene.ObjectType):
     class Meta:
