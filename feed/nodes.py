@@ -14,7 +14,7 @@ class FeedNode(DjangoObjectType):
     node = graphene.Field(Node)
 
     def resolve_id(self, info):
-        return 'feed:{}'.format(self.id)
+        return '{}.{}:{}'.format(self._meta.app_label, self._meta.object_name, self.id).lower()
 
     def resolve_node(self, info):
         return self.node

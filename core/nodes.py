@@ -1,5 +1,6 @@
 import graphene
 from graphene_django.types import DjangoObjectType
+from django.contrib.contenttypes.models import ContentType
 from .models import User, Group, GroupMembership
 from .lists import PaginatedMembershipList
 
@@ -13,7 +14,7 @@ class UserNode(DjangoObjectType):
         interfaces = (Node, )
 
     def resolve_id(self, info):
-        return 'user:{}'.format(self.id)
+        return '{}.{}:{}'.format(self._meta.app_label, self._meta.object_name, self.id).lower()
 
 class GroupNode(DjangoObjectType):
     class Meta:
@@ -23,7 +24,7 @@ class GroupNode(DjangoObjectType):
     membership = graphene.Field(PaginatedMembershipList, offset=graphene.Int(), limit=graphene.Int())
 
     def resolve_id(self, info):
-        return 'group:{}'.format(self.id)
+        return '{}.{}:{}'.format(self._meta.app_label, self._meta.object_name, self.id).lower()
 
     def resolve_membership(self, info, offset=0, limit=20):
         return PaginatedMembershipList(
@@ -37,7 +38,7 @@ class GroupMembershipNode(DjangoObjectType):
         interfaces = (Node, )
 
     def resolve_id(self, info):
-        return 'group_membership:{}'.format(self.id)
+        return '{}.{}:{}'.format(self._meta.app_label, self._meta.object_name, self.id).lower()
 
 class ViewerNode(graphene.ObjectType):
     class Meta:

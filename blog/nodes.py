@@ -9,4 +9,4 @@ class BlogNode(DjangoObjectType):
         interfaces = (Node, )
 
     def resolve_id(self, info):
-        return 'blog:{}'.format(self.id)
+        return '{}.{}:{}'.format(self._meta.app_label, self._meta.object_name, self.id).lower()
