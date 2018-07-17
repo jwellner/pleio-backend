@@ -4,7 +4,7 @@ class PaginatedGroupList(graphene.ObjectType):
     totalCount = graphene.Int(required=True)
     edges = graphene.List('core.nodes.GroupNode')
 
-class PaginatedMembershipList(graphene.ObjectType):
+class PaginatedMembersList(graphene.ObjectType):
     totalCount = graphene.Int(required=True)
     edges = graphene.List('core.nodes.GroupMembershipNode')
 

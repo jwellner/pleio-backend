@@ -108,9 +108,9 @@ class GroupMembership(models.Model):
         ('member', 'Member')
     )
 
-    user = models.ForeignKey(User, related_name='membership', on_delete=models.PROTECT)
+    user = models.ForeignKey(User, related_name='members', on_delete=models.PROTECT)
     type = models.CharField(max_length=10, choices=MEMBER_TYPES, default='member')
-    group = models.ForeignKey(Group, related_name='membership', on_delete=models.PROTECT)
+    group = models.ForeignKey(Group, related_name='members', on_delete=models.PROTECT)
 
     def __str__(self):
         return "{} - {} - {}".format(self.user.name, self.type, self.group.name)
