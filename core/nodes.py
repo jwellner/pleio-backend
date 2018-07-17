@@ -19,9 +19,11 @@ class UserNode(DjangoObjectType):
 class GroupNode(DjangoObjectType):
     class Meta:
         model = Group
+        only_fields = ['id', 'name', 'description', 'created_at', 'updated_at' ,'is_open', 'tags', 'members', 'is_member']
         interfaces = (Node, )
 
     members = graphene.Field(PaginatedMembersList, offset=graphene.Int(), limit=graphene.Int())
+    is_member = graphene.Boolean(required=True)
 
     def resolve_id(self, info):
         return '{}.{}:{}'.format(self._meta.app_label, self._meta.object_name, self.id).lower()
@@ -31,6 +33,9 @@ class GroupNode(DjangoObjectType):
             totalCount=self.members.count(),
             edges=self.members.all()[offset:(offset+limit)]
         )
+
+    def resolve_is_member(self, info):
+        return self.is_member(info.context.user)
 
 class GroupMembershipNode(DjangoObjectType):
     class Meta:

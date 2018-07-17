@@ -3,15 +3,19 @@ import reversion
 
 from core.lib import get_id
 from .models import Group
-from .types import GroupType
+from .nodes import GroupNode
+
+class GroupInput(graphene.InputObjectType):
+    name = graphene.String(required=True)
+    description = graphene.String(required=True)
+    is_open = graphene.Boolean(required=True)
 
 class CreateGroup(graphene.Mutation):
     class Arguments:
-        name = graphene.String(required=True)
-        description = graphene.String(required=True)
+        input = GroupInput(required=True)
 
     ok = graphene.Boolean()
-    group = graphene.Field(lambda: GroupType)
+    group = graphene.Field(lambda: GroupNode)
 
     def mutate(self, info, name, description):
         try:
@@ -34,11 +38,10 @@ class CreateGroup(graphene.Mutation):
 class UpdateGroup(graphene.Mutation):
     class Arguments:
         id = graphene.ID(required=True)
-        name = graphene.String(required=True)
-        description = graphene.String(required=True)
+        input = GroupInput(required=True)
 
     ok = graphene.Boolean()
-    group = graphene.Field(lambda: GroupType)
+    group = graphene.Field(lambda: GroupNode)
 
     def mutate(self, info, id, name, description):
         try:
@@ -79,7 +82,44 @@ class DeleteGroup(graphene.Mutation):
 
         return DeleteGroup(ok=ok)
 
+class JoinGroup(graphene.Mutation):
+    class Arguments:
+        id = graphene.ID(required=True)
+
+    ok = graphene.Boolean()
+    group = graphene.Field(lambda: GroupNode)
+
+    def mutate(self, info, id):
+        group = Group.objects.get(pk=get_id(id))
+        if group.can_join(info.context.user):
+            group.join(info.context.user)
+            ok = True
+        else:
+            ok = False
+
+        return JoinGroup(ok=ok, group=group)
+
+class LeaveGroup(graphene.Mutation):
+    class Arguments:
+        id = graphene.ID(required=True)
+
+    ok = graphene.Boolean()
+    group = graphene.Field(lambda: GroupNode)
+
+    def mutate(self, info, id):
+        group = Group.objects.get(pk=get_id(id))
+
+        if info.context.user.is_authenticated:
+            group.leave(info.context.user)
+            ok = True
+        else:
+            ok = False
+
+        return LeaveGroup(ok=ok, group=group)
+
 class Mutation(graphene.ObjectType):
     create_group = CreateGroup.Field()
     update_group = UpdateGroup.Field()
     delete_group = DeleteGroup.Field()
+    join_group = JoinGroup.Field()
+    leave_group = LeaveGroup.Field()

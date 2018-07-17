@@ -5,10 +5,13 @@ from core.lib import get_id
 from .models import Blog
 from .nodes import BlogNode
 
+class BlogInput(graphene.InputObjectType):
+    title = graphene.String(required=True)
+    description = graphene.String(required=True)
+
 class CreateBlog(graphene.Mutation):
     class Arguments:
-        title = graphene.String(required=True)
-        description = graphene.String(required=True)
+        input = BlogInput(required=True)
 
     ok = graphene.Boolean()
     blog = graphene.Field(lambda: BlogNode)
@@ -35,8 +38,7 @@ class CreateBlog(graphene.Mutation):
 class UpdateBlog(graphene.Mutation):
     class Arguments:
         id = graphene.ID(required=True)
-        title = graphene.String(required=True)
-        description = graphene.String(required=True)
+        input = BlogInput(required=True)
 
     ok = graphene.Boolean()
     blog = graphene.Field(lambda: BlogNode)
@@ -76,7 +78,6 @@ class DeleteBlog(graphene.Mutation):
 
             ok = True
         except:
-            blog = None
             ok = False
 
         return DeleteBlog(ok=ok)

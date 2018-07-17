@@ -4,6 +4,7 @@ from django.contrib.contenttypes.fields import GenericForeignKey, GenericRelatio
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.postgres.fields import ArrayField
 from django.core.mail import send_mail
+from django.core.exceptions import ObjectDoesNotExist
 from django.conf import settings
 
 import reversion
@@ -34,7 +35,6 @@ class Manager(BaseUserManager):
         return user
 
     def create_superuser(self, email, name, password):
-
         with reversion.create_revision():
             user = self.create_user(
                 email=self.normalize_email(email),
@@ -106,7 +106,37 @@ class Group(models.Model):
     def __str__(self):
         return self.name
 
+    def is_member(self, user):
+        if not user.is_authenticated:
+            return False
+
+        try:
+            return self.members.filter(user=user).exists()
+        except ObjectDoesNotExist:
+            return False
+
+    def can_join(self, user):
+        if not user.is_authenticated:
+            return False
+
+        if self.is_open or user.is_admin:
+            return True
+
+        return False
+
+    def join(self, user):
+        return self.members.update_or_create(user=user)
+
+    def leave(self, user):
+        try:
+            return self.members.get(user=user).delete()
+        except ObjectDoesNotExist:
+            return False
+
 class GroupMembership(models.Model):
+    class Meta:
+        unique_together = ('user', 'group')
+
     MEMBER_TYPES = (
         ('owner', 'Owner'),
         ('admin', 'Admin'),
@@ -115,7 +145,7 @@ class GroupMembership(models.Model):
 
     user = models.ForeignKey(User, related_name='members', on_delete=models.PROTECT)
     type = models.CharField(max_length=10, choices=MEMBER_TYPES, default='member')
-    group = models.ForeignKey(Group, related_name='members', on_delete=models.PROTECT)
+    group = models.ForeignKey('Group', related_name='members', on_delete=models.PROTECT)
 
     def __str__(self):
         return "{} - {} - {}".format(self.user.name, self.type, self.group.name)
