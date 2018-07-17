@@ -96,6 +96,8 @@ class Group(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
+    is_open = models.BooleanField(default=True)
+
     tags = ArrayField(models.CharField(max_length=256), blank=True, default=[])
 
     def __str__(self):
