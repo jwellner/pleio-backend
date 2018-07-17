@@ -41,8 +41,5 @@ class GroupMembershipNode(DjangoObjectType):
         return '{}.{}:{}'.format(self._meta.app_label, self._meta.object_name, self.id).lower()
 
 class ViewerNode(graphene.ObjectType):
-    class Meta:
-        interfaces = (Node, )
-
     is_authenticated = graphene.Boolean()
     user = graphene.Field(UserNode)
