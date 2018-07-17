@@ -1,7 +1,7 @@
 from django.db import models
 from core.models import Object
 
-class Blog(Object):
+class Discussion(Object):
     class Meta:
         ordering = ['-id']
 
