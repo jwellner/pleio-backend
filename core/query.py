@@ -1,10 +1,18 @@
 import graphene
-from .nodes import ViewerNode, GroupNode
-from graphene_django.filter import DjangoFilterConnectionField
+from graphene import relay
+from .nodes import PaginatedList, Node, ViewerNode, GroupNode
+from .models import Group
 
 class Query(object):
+    node = graphene.Field(Node)
     viewer = graphene.Field(ViewerNode)
-    groups = DjangoFilterConnectionField(GroupNode)
+    groups = graphene.Field(PaginatedList, offset=graphene.Int(required=True), limit=graphene.Int(required=True))
+
+    def resolve_groups(self, info, offset=0, limit=20):
+        return PaginatedList(
+            totalCount=Group.objects.count(),
+            edges=Group.objects.all()[offset:(offset+limit)]
+        )
 
     def resolve_viewer(self, info, **kwargs):
         user = info.context.user
