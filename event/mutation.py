@@ -5,12 +5,15 @@ from core.lib import get_id
 from .models import Event
 from .nodes import EventNode
 
+class EventInput(graphene.InputObjectType):
+    title = graphene.String(required=True)
+    description = graphene.String(required=True)
+    start_date = graphene.DateTime(required=True)
+    end_date = graphene.DateTime(required=True)
+
 class CreateEvent(graphene.Mutation):
     class Arguments:
-        title = graphene.String(required=True)
-        description = graphene.String(required=True)
-        start_date = graphene.DateTime(required=True)
-        end_date = graphene.DateTime(required=True)
+        input = EventInput(required=True)
 
     ok = graphene.Boolean()
     event = graphene.Field(lambda: EventNode)
@@ -39,10 +42,7 @@ class CreateEvent(graphene.Mutation):
 class UpdateEvent(graphene.Mutation):
     class Arguments:
         id = graphene.ID(required=True)
-        title = graphene.String(required=True)
-        description = graphene.String(required=True)
-        start_date = graphene.DateTime(required=True)
-        end_date = graphene.DateTime(required=True)
+        input = EventInput(required=True)
 
     ok = graphene.Boolean()
     event = graphene.Field(lambda: EventNode)
