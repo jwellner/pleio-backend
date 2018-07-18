@@ -18,7 +18,7 @@ class Query(object):
 
             content_type = ContentType.objects.get(app_label=object_type[0], model=object_type[1])
             model_class = content_type.model_class()
-            return model_class.objects.get(id=parts[1])
+            return model_class.objects.visible(info.context.user).get(id=parts[1])
         except ContentType.DoesNotExist:
             pass
 

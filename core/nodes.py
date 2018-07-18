@@ -1,8 +1,12 @@
 import graphene
 from graphene_django.types import DjangoObjectType
 from django.contrib.contenttypes.models import ContentType
-from .models import User, Group, GroupMembership
+from .models import User, Group, GroupMembership, Comment
 from .lists import PaginatedMembersList
+
+class ViewerNode(graphene.ObjectType):
+    is_authenticated = graphene.Boolean()
+    user = graphene.Field('core.nodes.UserNode')
 
 class Node(graphene.Interface):
     id = graphene.ID()
@@ -45,6 +49,12 @@ class GroupMembershipNode(DjangoObjectType):
     def resolve_id(self, info):
         return '{}.{}:{}'.format(self._meta.app_label, self._meta.object_name, self.id).lower()
 
-class ViewerNode(graphene.ObjectType):
-    is_authenticated = graphene.Boolean()
-    user = graphene.Field(UserNode)
+class CommentNode(DjangoObjectType):
+    id = graphene.ID()
+
+    class Meta:
+        only_fields = ['id', 'owner', 'description', 'created_at', 'updated_at']
+        model = Comment
+
+    def resolve_id(self, info):
+        return '{}.{}:{}'.format(self._meta.app_label, self._meta.object_name, self.id).lower()

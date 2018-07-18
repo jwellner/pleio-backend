@@ -166,7 +166,16 @@ class Comment(models.Model):
 
     content_type = models.ForeignKey(ContentType, on_delete=models.PROTECT)
     object_id = models.PositiveIntegerField()
-    content_object = GenericForeignKey('content_type', 'object_id')
+    container = GenericForeignKey('content_type', 'object_id')
+
+    def can_write(self, user):
+        if not user.is_authenticated:
+            return False
+
+        if user.is_admin:
+            return True
+
+        return (user == self.owner)
 
 class ObjectManager(models.Manager):
     def visible(self, user):
@@ -179,18 +188,12 @@ class ObjectManager(models.Manager):
 
 class Object(models.Model):
     objects = ObjectManager()
-
     owner = models.ForeignKey(User, on_delete=models.PROTECT)
     group = models.ForeignKey(Group, on_delete=models.PROTECT, blank=True, null=True)
-
     read_access = ArrayField(models.CharField(max_length=32), blank=True, default=['private'])
     write_access = ArrayField(models.CharField(max_length=32), blank=True, default=['private'])
-
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-
-    comments = GenericRelation(Comment)
-
     tags = ArrayField(models.CharField(max_length=256), blank=True, default=[])
 
     def can_read(self, user):

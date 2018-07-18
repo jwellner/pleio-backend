@@ -1,5 +1,6 @@
+from django.contrib.contenttypes.fields import GenericForeignKey, GenericRelation
 from django.db import models
-from core.models import Object
+from core.models import Object, Comment
 
 class Blog(Object):
     class Meta:
@@ -7,8 +8,13 @@ class Blog(Object):
 
     title = models.CharField(max_length=256)
     description = models.TextField()
-
-    created_at = models.DateTimeField(auto_now_add=True)
+    comments = GenericRelation(Comment)
 
     def __str__(self):
         return self.title
+
+    def can_comment(self, user):
+        if not user.is_authenticated:
+            return False
+
+        return True
