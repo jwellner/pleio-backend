@@ -16,13 +16,13 @@ class CreateBlog(graphene.Mutation):
     ok = graphene.Boolean()
     blog = graphene.Field(lambda: BlogNode)
 
-    def mutate(self, info, title, description):
+    def mutate(self, info, input):
         try:
             with reversion.create_revision():
                 blog = Blog.objects.create(
                     owner=info.context.user,
-                    title=title,
-                    description=description
+                    title=input['title'],
+                    description=input['description']
                 )
 
                 reversion.set_user(info.context.user)
@@ -43,12 +43,12 @@ class UpdateBlog(graphene.Mutation):
     ok = graphene.Boolean()
     blog = graphene.Field(lambda: BlogNode)
 
-    def mutate(self, info, id, title, description):
+    def mutate(self, info, id, input):
         try:
             with reversion.create_revision():
                 blog = Blog.objects.get(pk=get_id(id))
-                blog.title = title
-                blog.description = description
+                blog.title = input['title']
+                blog.description = input['description']
                 blog.save()
 
                 reversion.set_user(info.context.user)

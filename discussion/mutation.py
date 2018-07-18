@@ -16,13 +16,13 @@ class CreateDiscussion(graphene.Mutation):
     ok = graphene.Boolean()
     discussion = graphene.Field(lambda: DiscussionNode)
 
-    def mutate(self, info, title, description):
+    def mutate(self, info, input):
         try:
             with reversion.create_revision():
                 discussion = Discussion.objects.create(
                     owner=info.context.user,
-                    title=title,
-                    description=description
+                    title=input['title'],
+                    description=input['description']
                 )
 
                 reversion.set_user(info.context.user)
@@ -43,12 +43,12 @@ class UpdateDiscussion(graphene.Mutation):
     ok = graphene.Boolean()
     discussion = graphene.Field(lambda: DiscussionNode)
 
-    def mutate(self, info, id, title, description):
+    def mutate(self, info, id, input):
         try:
             with reversion.create_revision():
                 discussion = Discussion.objects.get(pk=get_id(id))
-                discussion.title = title
-                discussion.description = description
+                discussion.title = input['title']
+                discussion.description = input['description']
                 discussion.save()
 
                 reversion.set_user(info.context.user)

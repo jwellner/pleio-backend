@@ -16,13 +16,13 @@ class CreateWiki(graphene.Mutation):
     ok = graphene.Boolean()
     wiki = graphene.Field(lambda: WikiNode)
 
-    def mutate(self, info, title, description):
+    def mutate(self, info, input):
         try:
             with reversion.create_revision():
                 wiki = Wiki.objects.create(
                     owner=info.context.user,
-                    title=title,
-                    description=description
+                    title=input['title'],
+                    description=input['description']
                 )
 
                 reversion.set_user(info.context.user)
@@ -43,12 +43,12 @@ class UpdateWiki(graphene.Mutation):
     ok = graphene.Boolean()
     wiki = graphene.Field(lambda: WikiNode)
 
-    def mutate(self, info, id, title, description):
+    def mutate(self, info, id, input):
         try:
             with reversion.create_revision():
                 wiki = Wiki.objects.get(pk=get_id(id))
-                wiki.title = title
-                wiki.description = description
+                wiki.title = input['title']
+                wiki.description = input['description']
                 wiki.save()
 
                 reversion.set_user(info.context.user)
