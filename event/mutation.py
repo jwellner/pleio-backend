@@ -5,25 +5,28 @@ from core.lib import get_id
 from .models import Event
 from .nodes import EventNode
 
+class EventInput(graphene.InputObjectType):
+    title = graphene.String(required=True)
+    description = graphene.String(required=True)
+    start_date = graphene.DateTime(required=True)
+    end_date = graphene.DateTime(required=True)
+
 class CreateEvent(graphene.Mutation):
     class Arguments:
-        title = graphene.String(required=True)
-        description = graphene.String(required=True)
-        start_date = graphene.DateTime(required=True)
-        end_date = graphene.DateTime(required=True)
+        input = EventInput(required=True)
 
     ok = graphene.Boolean()
     event = graphene.Field(lambda: EventNode)
 
-    def mutate(self, info, title, description, start_date, end_date):
+    def mutate(self, info, title, input):
         try:
             with reversion.create_revision():
                 event = Event.objects.create(
                     owner=info.context.user,
-                    title=title,
-                    description=description,
-                    start_date=start_date,
-                    end_date=end_date
+                    title=input['title'],
+                    description=input['description'],
+                    start_date=input['start_date'],
+                    end_date=input['end_date']
                 )
 
                 reversion.set_user(info.context.user)
@@ -39,22 +42,19 @@ class CreateEvent(graphene.Mutation):
 class UpdateEvent(graphene.Mutation):
     class Arguments:
         id = graphene.ID(required=True)
-        title = graphene.String(required=True)
-        description = graphene.String(required=True)
-        start_date = graphene.DateTime(required=True)
-        end_date = graphene.DateTime(required=True)
+        input = EventInput(required=True)
 
     ok = graphene.Boolean()
     event = graphene.Field(lambda: EventNode)
 
-    def mutate(self, info, id, title, description, start_date, end_date):
+    def mutate(self, info, id, input):
         try:
             with reversion.create_revision():
                 event = Event.objects.get(pk=get_id(id))
-                event.title = title,
-                event.description = description,
-                event.start_date = start_date,
-                event.end_date = end_date
+                event.title = input['title']
+                event.description = input['description']
+                event.start_date = input['start_date']
+                event.end_date = input['end_date']
                 event.save()
 
                 reversion.set_user(info.context.user)

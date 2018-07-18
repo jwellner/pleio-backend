@@ -16,13 +16,13 @@ class CreateCmsPage(graphene.Mutation):
     ok = graphene.Boolean()
     cms_page = graphene.Field(lambda: CmsPageNode)
 
-    def mutate(self, info, title, description):
+    def mutate(self, info, input):
         try:
             with reversion.create_revision():
                 cms_page = CmsPage.objects.create(
                     owner=info.context.user,
-                    title=title,
-                    description=description
+                    title=input['title'],
+                    description=input['description']
                 )
 
                 reversion.set_user(info.context.user)
@@ -43,12 +43,12 @@ class UpdateCmsPage(graphene.Mutation):
     ok = graphene.Boolean()
     cms_page = graphene.Field(lambda: CmsPageNode)
 
-    def mutate(self, info, id, title, description):
+    def mutate(self, info, id, input):
         try:
             with reversion.create_revision():
                 cms_page = CmsPage.objects.get(pk=get_id(id))
-                cms_page.title = title
-                cms_page.description = description
+                cms_page.title = input['title']
+                cms_page.description = input['description']
                 cms_page.save()
 
                 reversion.set_user(info.context.user)
