@@ -1,11 +1,11 @@
 Django==2.0
 graphene>=2.1
 graphene-django>=2.0
-psycopg2==2.7
+psycopg2-binary==2.7.5
 django-filter==1.1
 Pillow==5.1
 Celery==4.1
 elasticsearch-dsl>=6.0.0,<7.0.0
 uwsgi==2.0.17
-mozilla-django-oidc==1.0
+mozilla-django-oidc==1.1.1
 django-reversion>=2.0.13

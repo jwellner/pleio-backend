@@ -1,13 +1,15 @@
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth.views import LogoutView
 from django.http import HttpResponseBadRequest, JsonResponse
-from django.shortcuts import render
+from django.shortcuts import render, redirect
+from django.conf import settings
 from .models import BinaryFile
 
 def index(request):
     return JsonResponse({
         'app': 'backend2',
         'status': 200,
-        'description': 'Backend2 is working correctly. Visit /graphql/ for the GraphQL API, visit /oidc/authenticate/ for login, visit /admin/ for the admin panel.'
+        'description': 'Backend2 is working correctly. Visit /graphql/ for the GraphQL API, visit /oidc/authenticate/ for login, visit /oidc/logout/ for logout, visit /admin/ for the admin panel.'
     })
 
 @login_required
@@ -30,3 +32,18 @@ def upload(request):
     }
 
     return JsonResponse(data)
+
+def logout(request):
+    LogoutView.as_view()(request)
+
+    # logout at OpenId provider
+    redirect_uri = settings.OIDC_RP_LOGOUT_REDIRECT
+
+    oidc_url = settings.OIDC_OP_LOGOUT_ENDPOINT
+    return redirect(oidc_url + redirect_uri)
+
+def oidc_failure(request):
+    print('oidc_failure')
+
+    oidc_url = settings.OIDC_OP_LOGOUT_ENDPOINT
+    return redirect(oidc_url)
