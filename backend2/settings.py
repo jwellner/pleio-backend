@@ -148,5 +148,6 @@ ACCOUNT_ACTIVATION_DAYS = 7
 
 LOGIN_URL = '/oidc/authenticate/'
 LOGIN_REDIRECT_URL = '/'
+LOGOUT_REDIRECT_URL = '/'
 
 from .config import *

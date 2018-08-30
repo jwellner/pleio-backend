@@ -4,14 +4,15 @@ from graphene_django.views import GraphQLView
 from django.views.decorators.csrf import csrf_exempt
 
 from core import admin
-from core.views import index, upload, logout, oidc_failure
+from core import views
 
 urlpatterns = [
-    url(r'logout/', logout, name='logout'),
+    path('logout/', views.logout, name='logout'),
     path('graphql/', csrf_exempt(GraphQLView.as_view(graphiql=True)), name='graphql'),
+    path('oidc/failure/', views.oidc_failure, name='oidc_failure'),
     path('oidc/', include('mozilla_django_oidc.urls')),
-    path('files/upload/', csrf_exempt(upload), name='upload'),
+    path('files/upload/', csrf_exempt(views.upload), name='upload'),
+    path('admin/logout/', views.logout, name='logout'),
     path('admin/', admin.site.urls),
-    url(r'oidc_failure/', oidc_failure, name='oidc_failure'),
-    path('', index, name='index')
+    path('', views.index, name='index')
 ]
