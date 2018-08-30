@@ -15,7 +15,7 @@ import reversion
 from .lib import get_acl
 
 class Manager(BaseUserManager):
-    def create_user(self, email, name, password=None, external_id=None, is_active=False):
+    def create_user(self, email, name, password=None, external_id=None, is_active=False, picture=None):
         if not email:
             raise ValueError('Users must have an email address')
 
@@ -30,6 +30,9 @@ class Manager(BaseUserManager):
 
             if external_id:
                 user.external_id = external_id
+
+            if picture:
+                user.picture = picture
 
             user.save(using=self._db)
 
