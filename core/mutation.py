@@ -93,6 +93,7 @@ class GroupInput(graphene.InputObjectType):
     name = graphene.String(required=True)
     description = graphene.String(required=True)
     is_open = graphene.Boolean(required=True)
+    tags = graphene.List(graphene.NonNull(graphene.String))
 
 class CreateGroup(graphene.Mutation):
     class Arguments:
@@ -101,12 +102,14 @@ class CreateGroup(graphene.Mutation):
     ok = graphene.Boolean()
     group = graphene.Field(lambda: GroupNode)
 
-    def mutate(self, info, name, description):
+    def mutate(self, info, input):
         try:
             with reversion.create_revision():
                 group = Group.objects.create(
-                    name=name,
-                    description=description
+                    name=input['name'],
+                    description=input['description'],
+                    is_open=input['is_open'],
+                    tags=input['tags'],
                 )
 
                 reversion.set_user(info.context.user)
@@ -127,12 +130,14 @@ class UpdateGroup(graphene.Mutation):
     ok = graphene.Boolean()
     group = graphene.Field(lambda: GroupNode)
 
-    def mutate(self, info, id, name, description):
+    def mutate(self, info, id, input):
         try:
             with reversion.create_revision():
                 group = Group.objects.get(pk=get_id(id))
-                group.name = name
-                group.description = description
+                group.name = input['name']
+                group.description = input['description']
+                group.is_open=input['is_open']
+                group.tags=input['tags']
                 group.save()
 
                 reversion.set_user(info.context.user)

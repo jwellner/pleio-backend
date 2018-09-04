@@ -8,6 +8,9 @@ from .nodes import BlogNode
 class BlogInput(graphene.InputObjectType):
     title = graphene.String(required=True)
     description = graphene.String(required=True)
+    read_access = graphene.List(graphene.NonNull(graphene.String))
+    write_access = graphene.List(graphene.NonNull(graphene.String))
+    tags = graphene.List(graphene.NonNull(graphene.String))
 
 class CreateBlog(graphene.Mutation):
     class Arguments:
@@ -22,7 +25,10 @@ class CreateBlog(graphene.Mutation):
                 blog = Blog.objects.create(
                     owner=info.context.user,
                     title=input['title'],
-                    description=input['description']
+                    description=input['description'],
+                    read_access=input['read_access'],
+                    write_access=input['write_access'],
+                    tags=input['tags'],
                 )
 
                 reversion.set_user(info.context.user)
@@ -49,6 +55,9 @@ class UpdateBlog(graphene.Mutation):
                 blog = Blog.objects.get(pk=get_id(id))
                 blog.title = input['title']
                 blog.description = input['description']
+                blog.read_access=input['read_access']
+                blog.write_access=input['write_access']
+                blog.tags=input['tags']
                 blog.save()
 
                 reversion.set_user(info.context.user)
