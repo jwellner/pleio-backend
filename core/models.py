@@ -203,13 +203,13 @@ class Object(models.Model):
         if user.is_authenticated and user.is_admin:
             return True
 
-        return get_acl(user) in set(self.read_access)
+        return len(get_acl(user) & set(self.read_access)) > 0
 
     def can_write(self, user):
         if user.is_authenticated and user.is_admin:
             return True
 
-        return get_acl(user) in set(self.write_access)
+        return len(get_acl(user) & set(self.write_access)) > 0
 
     class Meta:
         abstract = True
