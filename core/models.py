@@ -187,7 +187,7 @@ class ObjectManager(models.Manager):
         if user.is_authenticated and user.is_admin:
             return queryset
 
-        return queryset.filter(read_access__contained_by=list(get_acl(user)))
+        return queryset.filter(read_access__overlap=list(get_acl(user)))
 
 class Object(models.Model):
     objects = ObjectManager()
