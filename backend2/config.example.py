@@ -21,6 +21,7 @@ EMAIL_PORT = 1025
 
 LOCAL_APPS = [
     'blog',
+    'notifications',
 ]
 
 LOCAL_MIDDLEWARE = []

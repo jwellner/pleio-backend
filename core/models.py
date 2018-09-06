@@ -121,6 +121,15 @@ class Group(models.Model):
         except ObjectDoesNotExist:
             return False
 
+    def can_change(self, user):
+        if not user.is_authenticated:
+            return False
+
+        if user.is_admin:
+            return True
+
+        return self.members.filter(user=user, type__in=['admin', 'owner']).exists()
+
     def can_join(self, user):
         if not user.is_authenticated:
             return False
@@ -130,8 +139,13 @@ class Group(models.Model):
 
         return False
 
-    def join(self, user):
-        return self.members.update_or_create(user=user)
+    def join(self, user, type):
+        try:
+            self.members.update_or_create(user=user)
+            self.members.filter(user=user).update(type=type)
+            return True
+        except:
+            return False
 
     def leave(self, user):
         try:
@@ -146,7 +160,8 @@ class GroupMembership(models.Model):
     MEMBER_TYPES = (
         ('owner', 'Owner'),
         ('admin', 'Admin'),
-        ('member', 'Member')
+        ('member', 'Member'),
+        ('pending', 'Pending')
     )
 
     user = models.ForeignKey(User, related_name='members', on_delete=models.PROTECT)

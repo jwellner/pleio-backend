@@ -29,6 +29,7 @@ EMAIL_PORT = os.getenv('EMAIL_PORT')
 
 LOCAL_APPS = [
     'blog',
+    'notifications',
 ]
 
 STATIC_ROOT = '/app/static'
