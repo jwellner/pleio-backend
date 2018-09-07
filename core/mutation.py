@@ -5,14 +5,11 @@ from core.lib import get_id
 from .models import Comment, Group, User
 from .nodes import Node, GroupNode, CommentNode
 from django.db import transaction
+from .exceptions import *
+import logging
 
-
-class GroupContainsMembers(Exception):
-    pass
-
-class NotAuthorized(Exception):
-    pass
-
+# Get an instance of a logger
+logger = logging.getLogger(__name__)
 
 class CommentInput(graphene.InputObjectType):
     description = graphene.String(required=True)
@@ -125,7 +122,8 @@ class CreateGroup(graphene.Mutation):
                 reversion.set_comment("createGroup mutation")
 
             ok = True
-        except:
+        except Exception as e:
+            logger.error('Exception in CreateGroup: {}.'.format(e))
             group = None
             ok = False
 
@@ -144,7 +142,7 @@ class UpdateGroup(graphene.Mutation):
             with reversion.create_revision():
                 group = Group.objects.get(pk=get_id(id))
                 if not group.can_change(info.context.user):
-                    raise NotAuthorized
+                    raise UserNotAuthorized()
                 group.name = input['name']
                 group.description = input['description']
                 group.is_open=input['is_open']
@@ -155,7 +153,8 @@ class UpdateGroup(graphene.Mutation):
                 reversion.set_comment("updateGroup mutation")
 
             ok = True
-        except:
+        except Exception as e:
+            logger.error('Exception in UpdateGroup: {}.'.format(e))
             group = None
             ok = False
 
@@ -172,7 +171,7 @@ class DeleteGroup(graphene.Mutation):
             with reversion.create_revision():
                 group = Group.objects.get(pk=get_id(id))
                 if not group.can_change(info.context.user):
-                    raise NotAuthorized
+                    raise UserNotAuthorized()
                 if group.members.exclude(user=info.context.user).exists():
                     #other members exist, cannot delete group
                     raise GroupContainsMembers
@@ -186,7 +185,8 @@ class DeleteGroup(graphene.Mutation):
                 reversion.set_comment("deleteGroup mutation")
 
             ok = True
-        except:
+        except Exception as e:
+            logger.error('Exception in DeleteGroup: {}.'.format(e))
             ok = False
 
         return DeleteGroup(ok=ok)
@@ -248,7 +248,7 @@ class ChangeMembershipGroup(graphene.Mutation):
             with reversion.create_revision():
                 group = Group.objects.get(pk=get_id(id))
                 if not group.can_change(info.context.user):
-                    raise NotAuthorized
+                    raise UserNotAuthorized()
                 user = User.objects.get(pk=get_id(input['userid']))
                 group.join(user, input['type'])
                 group.save()
@@ -257,7 +257,8 @@ class ChangeMembershipGroup(graphene.Mutation):
                 reversion.set_comment("changeMembershipGroup mutation")
 
             ok = True
-        except:
+        except Exception as e:
+            logger.error('Exception in ChangeMembershipGroup: {}.'.format(e))
             group = None
             ok = False
 
@@ -277,7 +278,7 @@ class RemoveMembershipGroup(graphene.Mutation):
             with reversion.create_revision():
                 group = Group.objects.get(pk=get_id(id))
                 if not group.can_change(info.context.user):
-                    raise NotAuthorized
+                    raise UserNotAuthorized()
                 user = User.objects.get(pk=get_id(userid))
                 group.leave(user)
                 group.save()
@@ -286,7 +287,8 @@ class RemoveMembershipGroup(graphene.Mutation):
                 reversion.set_comment("removeMembershipGroup mutation")
 
             ok = True
-        except:
+        except Exception as e:
+            logger.error('Exception in RemoveMembershipGroup: {}.'.format(e))
             group = None
             ok = False
 
