@@ -254,7 +254,7 @@ class ChangeMembershipGroup(graphene.Mutation):
                 group.save()
 
                 reversion.set_user(info.context.user)
-                reversion.set_comment("updateGroup mutation")
+                reversion.set_comment("changeMembershipGroup mutation")
 
             ok = True
         except:
@@ -262,6 +262,35 @@ class ChangeMembershipGroup(graphene.Mutation):
             ok = False
 
         return ChangeMembershipGroup(group=group, ok=ok)
+
+class RemoveMembershipGroup(graphene.Mutation):
+
+    class Arguments:
+        id = graphene.ID(required=True)
+        userid = graphene.ID(required=True)
+
+    ok = graphene.Boolean()
+    group = graphene.Field(lambda: GroupNode)
+
+    def mutate(self, info, id, userid):
+        try:
+            with reversion.create_revision():
+                group = Group.objects.get(pk=get_id(id))
+                if not group.can_change(info.context.user):
+                    raise NotAuthorized
+                user = User.objects.get(pk=get_id(userid))
+                group.leave(user)
+                group.save()
+
+                reversion.set_user(info.context.user)
+                reversion.set_comment("removeMembershipGroup mutation")
+
+            ok = True
+        except:
+            group = None
+            ok = False
+
+        return RemoveMembershipGroup(group=group, ok=ok)
 
 class Mutation(graphene.ObjectType):
     create_comment = CreateComment.Field()
@@ -271,5 +300,6 @@ class Mutation(graphene.ObjectType):
     update_group = UpdateGroup.Field()
     delete_group = DeleteGroup.Field()
     change_membership_group = ChangeMembershipGroup.Field()
+    remove_membership_group = RemoveMembershipGroup.Field()
     join_group = JoinGroup.Field()
     leave_group = LeaveGroup.Field()
