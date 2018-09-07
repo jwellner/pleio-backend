@@ -201,10 +201,13 @@ class JoinGroup(graphene.Mutation):
     def mutate(self, info, id):
         group = Group.objects.get(pk=get_id(id))
         if group.can_join(info.context.user):
-            group.join(info.context.user, 'member')
-            ok = True
+            if group.is_open:
+                group.join(info.context.user, 'member')
+                ok = True
+            else:
+                group.join(info.context.user, 'pending')
+                ok = True
         else:
-            group.join(info.context.user, 'pending')
             ok = False
 
         return JoinGroup(ok=ok, group=group)

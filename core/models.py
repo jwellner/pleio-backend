@@ -134,18 +134,10 @@ class Group(models.Model):
         if not user.is_authenticated:
             return False
 
-        if self.is_open or user.is_admin:
-            return True
-
-        return False
+        return True
 
     def join(self, user, type):
-        try:
-            self.members.update_or_create(user=user)
-            self.members.filter(user=user).update(type=type)
-            return True
-        except:
-            return False
+        return self.members.update_or_create(user=user, defaults={'type': type})
 
     def leave(self, user):
         try:
