@@ -15,7 +15,7 @@ import reversion
 from .lib import get_acl
 
 class Manager(BaseUserManager):
-    def create_user(self, email, name, password=None, external_id=None, is_active=False, picture=None):
+    def create_user(self, email, name, password=None, external_id=None, is_active=False, picture=None, is_government=False, has_2FA_enabled=False):
         if not email:
             raise ValueError('Users must have an email address')
 
@@ -33,6 +33,12 @@ class Manager(BaseUserManager):
 
             if picture:
                 user.picture = picture
+
+            if is_government:
+                user.is_government = is_government
+
+            if has_2FA_enabled:
+                user.has_2FA_enabled = has_2FA_enabled
 
             user.save(using=self._db)
 
@@ -65,6 +71,8 @@ class User(AbstractBaseUser):
     is_admin = models.BooleanField(default=False)
     external_id = models.CharField(max_length=50, unique=True, blank=True, null=True)
     picture = models.URLField(blank=True, null=True)
+    is_government = models.BooleanField(default=False)
+    has_2FA_enabled = models.BooleanField(default=False)
 
     groups = models.ManyToManyField('Group', through='GroupMembership')
 
@@ -106,6 +114,7 @@ class Group(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     is_open = models.BooleanField(default=True)
+    is_2FA_required = models.BooleanField(default=False)
 
     tags = ArrayField(models.CharField(max_length=256), blank=True, default=[])
 
@@ -132,6 +141,9 @@ class Group(models.Model):
 
     def can_join(self, user):
         if not user.is_authenticated:
+            return False
+
+        if self.is_2FA_required and not user.has_2FA_enabled:
             return False
 
         return True
