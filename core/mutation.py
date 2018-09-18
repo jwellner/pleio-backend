@@ -120,6 +120,9 @@ class CreateGroup(graphene.Mutation):
                     tags=input['tags'],
                 )
 
+                #add creator as group owner
+                group.join(info.context.user, 'owner')
+
                 reversion.set_user(info.context.user)
                 reversion.set_comment("createGroup mutation")
 
