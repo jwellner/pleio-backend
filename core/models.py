@@ -130,6 +130,24 @@ class Group(models.Model):
         except ObjectDoesNotExist:
             return False
 
+    def is_full_member(self, user):
+        if not user.is_authenticated:
+            return False
+
+        try:
+            return self.members.filter(user=user, type__in=['admin', 'owner', 'member']).exists()
+        except ObjectDoesNotExist:
+            return False
+
+    def is_pending_member(self, user):
+        if not user.is_authenticated:
+            return False
+
+        try:
+            return self.members.filter(user=user, type='pending').exists()
+        except ObjectDoesNotExist:
+            return False
+
     def can_change(self, user):
         if not user.is_authenticated:
             return False
