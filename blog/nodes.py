@@ -19,5 +19,4 @@ class BlogNode(DjangoObjectType):
         return self.can_write(info.context.user)
 
     def resolve_comments(self, info):
-        print(self.comments.all())
-        return Comment.objects.all()
+        return self.comments.visible(self._meta.app_label.lower(), self._meta.object_name.lower(), self.id)

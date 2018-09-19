@@ -175,9 +175,16 @@ class GroupMembership(models.Model):
     def __str__(self):
         return "{} - {} - {}".format(self.user.name, self.type, self.group.name)
 
+class CommentManager(models.Manager):
+    def visible(self, app_label, object_name, id):
+        queryset = self.get_queryset()
+
+        return queryset.filter(object_id=id, content_type__app_label=app_label, content_type__model=object_name)
+
 class Comment(models.Model):
     class Meta:
         ordering = ['-id']
+    objects = CommentManager()
 
     owner = models.ForeignKey(User, on_delete=models.PROTECT)
 
