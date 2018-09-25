@@ -111,6 +111,9 @@ class CreateGroup(graphene.Mutation):
 
     def mutate(self, info, input):
         try:
+            if not info.context.user.is_authenticated:
+                raise UserNotLoggedIn
+
             with reversion.create_revision():
                 group = Group.objects.create(
                     name=input['name'],
@@ -144,10 +147,12 @@ class UpdateGroup(graphene.Mutation):
 
     def mutate(self, info, id, input):
         try:
+            group = Group.objects.get(pk=get_id(id))
+
+            if not group.can_change(info.context.user):
+                raise UserNotAuthorized()
+
             with reversion.create_revision():
-                group = Group.objects.get(pk=get_id(id))
-                if not group.can_change(info.context.user):
-                    raise UserNotAuthorized()
                 group.name = input['name']
                 group.description = input['description']
                 group.is_open=input['is_open']
@@ -174,10 +179,12 @@ class DeleteGroup(graphene.Mutation):
 
     def mutate(self, info, id):
         try:
+            group = Group.objects.get(pk=get_id(id))
+
+            if not group.can_change(info.context.user):
+                raise UserNotAuthorized()
+
             with reversion.create_revision():
-                group = Group.objects.get(pk=get_id(id))
-                if not group.can_change(info.context.user):
-                    raise UserNotAuthorized()
                 if group.members.exclude(user=info.context.user).exists():
                     #other members exist, cannot delete group
                     raise GroupContainsMembers
@@ -205,15 +212,24 @@ class JoinGroup(graphene.Mutation):
     group = graphene.Field(lambda: GroupNode)
 
     def mutate(self, info, id):
-        group = Group.objects.get(pk=get_id(id))
-        if group.can_join(info.context.user):
-            if group.is_open:
-                group.join(info.context.user, 'member')
-                ok = True
-            else:
-                group.join(info.context.user, 'pending')
-                ok = True
-        else:
+        try:
+            group = Group.objects.get(pk=get_id(id))
+
+            if not group.can_join(info.context.user):
+                raise UserNotAuthorized
+
+            with reversion.create_revision():
+                if group.is_open:
+                    group.join(info.context.user, 'member')
+                else:
+                    group.join(info.context.user, 'pending')
+
+                reversion.set_user(info.context.user)
+                reversion.set_comment("joinGroup mutation")
+
+            ok = True
+        except Exception as e:
+            logger.error('Exception in JoinGroup: {}.'.format(e))
             ok = False
 
         return JoinGroup(ok=ok, group=group)
@@ -226,12 +242,21 @@ class LeaveGroup(graphene.Mutation):
     group = graphene.Field(lambda: GroupNode)
 
     def mutate(self, info, id):
-        group = Group.objects.get(pk=get_id(id))
+        try:
+            group = Group.objects.get(pk=get_id(id))
 
-        if info.context.user.is_authenticated:
-            group.leave(info.context.user)
+            if not info.context.user.is_authenticated:
+                raise UserNotLoggedIn
+
+            with reversion.create_revision():
+                group.leave(info.context.user)
+
+                reversion.set_user(info.context.user)
+                reversion.set_comment("leaveGroup mutation")
+
             ok = True
-        else:
+        except Exception as e:
+            logger.error('Exception in LeaveGroup: {}.'.format(e))
             ok = False
 
         return LeaveGroup(ok=ok, group=group)
@@ -251,10 +276,12 @@ class ChangeMembershipGroup(graphene.Mutation):
 
     def mutate(self, info, id, input):
         try:
+            group = Group.objects.get(pk=get_id(id))
+
+            if not group.can_change(info.context.user):
+                raise UserNotAuthorized
+
             with reversion.create_revision():
-                group = Group.objects.get(pk=get_id(id))
-                if not group.can_change(info.context.user):
-                    raise UserNotAuthorized()
                 user = User.objects.get(pk=get_id(input['userid']))
                 group.join(user, input['type'])
                 group.save()
@@ -267,6 +294,7 @@ class ChangeMembershipGroup(graphene.Mutation):
             logger.error('Exception in ChangeMembershipGroup: {}.'.format(e))
             group = None
             ok = False
+
 
         return ChangeMembershipGroup(group=group, ok=ok)
 
@@ -281,10 +309,12 @@ class RemoveMembershipGroup(graphene.Mutation):
 
     def mutate(self, info, id, userid):
         try:
+            group = Group.objects.get(pk=get_id(id))
+
+            if not group.can_change(info.context.user):
+                raise UserNotAuthorized()
+
             with reversion.create_revision():
-                group = Group.objects.get(pk=get_id(id))
-                if not group.can_change(info.context.user):
-                    raise UserNotAuthorized()
                 user = User.objects.get(pk=get_id(userid))
                 group.leave(user)
                 group.save()

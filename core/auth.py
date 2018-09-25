@@ -18,8 +18,8 @@ class OIDCAuthBackend(OIDCAuthenticationBackend):
             name=claims.get('name'),
             email=claims.get('email'),
             picture=claims.get('picture'),
-            is_government = claims.get('is_government'),
-            has_2fa_enabled = claims.get('has_2fa_enabled'),
+            is_government=claims.get('is_government'),
+            has_2fa_enabled=claims.get('has_2fa_enabled'),
 
             password=None,
             external_id=claims.get('sub')
