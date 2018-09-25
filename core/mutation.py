@@ -99,7 +99,7 @@ class GroupInput(graphene.InputObjectType):
     name = graphene.String(required=True)
     description = graphene.String(required=True)
     is_open = graphene.Boolean(required=True)
-    is_2FA_required = graphene.Boolean(required=True)
+    is_2fa_required = graphene.Boolean(required=True)
     tags = graphene.List(graphene.NonNull(graphene.String))
 
 class CreateGroup(graphene.Mutation):
@@ -116,7 +116,7 @@ class CreateGroup(graphene.Mutation):
                     name=input['name'],
                     description=input['description'],
                     is_open=input['is_open'],
-                    is_2FA_required=input['is_2FA_required'],
+                    is_2fa_required=input['is_2fa_required'],
                     tags=input['tags'],
                 )
 
@@ -151,7 +151,7 @@ class UpdateGroup(graphene.Mutation):
                 group.name = input['name']
                 group.description = input['description']
                 group.is_open=input['is_open']
-                group.is_2FA_required=input['is_2FA_required']
+                group.is_2fa_required=input['is_2fa_required']
                 group.tags=input['tags']
                 group.save()
 

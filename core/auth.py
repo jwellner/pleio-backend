@@ -19,7 +19,7 @@ class OIDCAuthBackend(OIDCAuthenticationBackend):
             email=claims.get('email'),
             picture=claims.get('picture'),
             is_government = claims.get('is_government'),
-            has_2FA_enabled = claims.get('has_2FA_enabled'),
+            has_2fa_enabled = claims.get('has_2fa_enabled'),
 
             password=None,
             external_id=claims.get('sub')
@@ -31,7 +31,7 @@ class OIDCAuthBackend(OIDCAuthenticationBackend):
             user.email = claims.get('email')
             user.picture = claims.get('picture')
             user.is_government = claims.get('is_government')
-            user.has_2FA_enabled = claims.get('has_2FA_enabled')
+            user.has_2fa_enabled = claims.get('has_2fa_enabled')
             user.save()
 
             reversion.set_comment("OIDC Update")

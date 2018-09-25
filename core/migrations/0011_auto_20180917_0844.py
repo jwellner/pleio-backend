@@ -12,12 +12,12 @@ class Migration(migrations.Migration):
     operations = [
         migrations.AddField(
             model_name='group',
-            name='is_2FA_required',
+            name='is_2fa_required',
             field=models.BooleanField(default=False),
         ),
         migrations.AddField(
             model_name='user',
-            name='has_2FA_enabled',
+            name='has_2fa_enabled',
             field=models.BooleanField(default=False),
         ),
         migrations.AddField(
