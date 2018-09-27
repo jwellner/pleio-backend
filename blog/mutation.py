@@ -4,6 +4,10 @@ import reversion
 from core.lib import get_id
 from .models import Blog
 from .nodes import BlogNode
+import logging
+
+# Get an instance of a logger
+logger = logging.getLogger(__name__)
 
 class BlogInput(graphene.InputObjectType):
     title = graphene.String(required=True)
@@ -35,7 +39,8 @@ class CreateBlog(graphene.Mutation):
                 reversion.set_comment("createBlog mutation")
 
             ok = True
-        except:
+        except Exception as e:
+            logger.error('Exception in CreateBlog: {}.'.format(e))
             blog = None
             ok = False
 
@@ -64,7 +69,8 @@ class UpdateBlog(graphene.Mutation):
                 reversion.set_comment("updateBlog mutation")
 
             ok = True
-        except:
+        except Exception as e:
+            logger.error('Exception in UpdateBlog: {}.'.format(e))
             blog = None
             ok = False
 
@@ -86,7 +92,8 @@ class DeleteBlog(graphene.Mutation):
                 reversion.set_comment("deleteBlog mutation")
 
             ok = True
-        except:
+        except Exception as e:
+            logger.error('Exception in DeleteBlog: {}.'.format(e))
             ok = False
 
         return DeleteBlog(ok=ok)

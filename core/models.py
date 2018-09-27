@@ -15,7 +15,7 @@ import reversion
 from .lib import get_acl
 
 class Manager(BaseUserManager):
-    def create_user(self, email, name, password=None, external_id=None, is_active=False, picture=None):
+    def create_user(self, email, name, password=None, external_id=None, is_active=False, picture=None, is_government=False, has_2fa_enabled=False):
         if not email:
             raise ValueError('Users must have an email address')
 
@@ -33,6 +33,12 @@ class Manager(BaseUserManager):
 
             if picture:
                 user.picture = picture
+
+            if is_government:
+                user.is_government = is_government
+
+            if has_2fa_enabled:
+                user.has_2fa_enabled = has_2fa_enabled
 
             user.save(using=self._db)
 
@@ -65,6 +71,8 @@ class User(AbstractBaseUser):
     is_admin = models.BooleanField(default=False)
     external_id = models.CharField(max_length=50, unique=True, blank=True, null=True)
     picture = models.URLField(blank=True, null=True)
+    is_government = models.BooleanField(default=False)
+    has_2fa_enabled = models.BooleanField(default=False)
 
     groups = models.ManyToManyField('Group', through='GroupMembership')
 
@@ -106,6 +114,7 @@ class Group(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     is_open = models.BooleanField(default=True)
+    is_2fa_required = models.BooleanField(default=False)
 
     tags = ArrayField(models.CharField(max_length=256), blank=True, default=[])
 
@@ -121,17 +130,44 @@ class Group(models.Model):
         except ObjectDoesNotExist:
             return False
 
+    def is_full_member(self, user):
+        if not user.is_authenticated:
+            return False
+
+        try:
+            return self.members.filter(user=user, type__in=['admin', 'owner', 'member']).exists()
+        except ObjectDoesNotExist:
+            return False
+
+    def is_pending_member(self, user):
+        if not user.is_authenticated:
+            return False
+
+        try:
+            return self.members.filter(user=user, type='pending').exists()
+        except ObjectDoesNotExist:
+            return False
+
+    def can_change(self, user):
+        if not user.is_authenticated:
+            return False
+
+        if user.is_admin:
+            return True
+
+        return self.members.filter(user=user, type__in=['admin', 'owner']).exists()
+
     def can_join(self, user):
         if not user.is_authenticated:
             return False
 
-        if self.is_open or user.is_admin:
-            return True
+        if self.is_2fa_required and not user.has_2fa_enabled:
+            return False
 
-        return False
+        return True
 
-    def join(self, user):
-        return self.members.update_or_create(user=user)
+    def join(self, user, type):
+        return self.members.update_or_create(user=user, defaults={'type': type})
 
     def leave(self, user):
         try:
@@ -146,7 +182,8 @@ class GroupMembership(models.Model):
     MEMBER_TYPES = (
         ('owner', 'Owner'),
         ('admin', 'Admin'),
-        ('member', 'Member')
+        ('member', 'Member'),
+        ('pending', 'Pending')
     )
 
     user = models.ForeignKey(User, related_name='members', on_delete=models.PROTECT)
@@ -156,9 +193,16 @@ class GroupMembership(models.Model):
     def __str__(self):
         return "{} - {} - {}".format(self.user.name, self.type, self.group.name)
 
+class CommentManager(models.Manager):
+    def visible(self, app_label, object_name, id):
+        queryset = self.get_queryset()
+
+        return queryset.filter(object_id=id, content_type__app_label=app_label, content_type__model=object_name)
+
 class Comment(models.Model):
     class Meta:
         ordering = ['-id']
+    objects = CommentManager()
 
     owner = models.ForeignKey(User, on_delete=models.PROTECT)
 

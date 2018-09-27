@@ -23,7 +23,7 @@ class UserNode(DjangoObjectType):
 class GroupNode(DjangoObjectType):
     class Meta:
         model = Group
-        only_fields = ['id', 'name', 'description', 'created_at', 'updated_at' ,'is_open', 'tags', 'members', 'is_member']
+        only_fields = ['id', 'name', 'description', 'created_at', 'updated_at' ,'is_open', 'is_2fa_required', 'tags', 'members', 'is_member']
         interfaces = (Node, )
 
     members = graphene.Field(PaginatedMembersList, offset=graphene.Int(), limit=graphene.Int())
