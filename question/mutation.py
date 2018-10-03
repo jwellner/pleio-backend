@@ -5,9 +5,11 @@ from core.lib import get_id
 from .models import Question
 from .nodes import QuestionNode
 
+
 class QuestionInput(graphene.InputObjectType):
     title = graphene.String(required=True)
     description = graphene.String(required=True)
+
 
 class CreateQuestion(graphene.Mutation):
     class Arguments:
@@ -29,11 +31,12 @@ class CreateQuestion(graphene.Mutation):
                 reversion.set_comment("createQuestion mutation")
 
             ok = True
-        except:
+        except Exception:
             question = None
             ok = False
 
         return CreateQuestion(question=question, ok=ok)
+
 
 class UpdateQuestion(graphene.Mutation):
     class Arguments:
@@ -55,11 +58,12 @@ class UpdateQuestion(graphene.Mutation):
                 reversion.set_comment("updateQuestion mutation")
 
             ok = True
-        except:
+        except Exception:
             question = None
             ok = False
 
         return UpdateQuestion(question=question, ok=ok)
+
 
 class DeleteQuestion(graphene.Mutation):
     class Arguments:
@@ -77,10 +81,11 @@ class DeleteQuestion(graphene.Mutation):
                 reversion.set_comment("deleteQuestion mutation")
 
             ok = True
-        except:
+        except Exception:
             ok = False
 
         return DeleteQuestion(ok=ok)
+
 
 class Mutation(graphene.ObjectType):
     create_question = CreateQuestion.Field()

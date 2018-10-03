@@ -4,6 +4,7 @@ import reversion
 
 from .models import User
 
+
 class OIDCAuthBackend(OIDCAuthenticationBackend):
     def filter_users_by_claims(self, claims):
         sub = claims.get('sub')

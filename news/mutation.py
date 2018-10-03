@@ -5,9 +5,11 @@ from core.lib import get_id
 from .models import News
 from .nodes import NewsNode
 
+
 class NewsInput(graphene.InputObjectType):
     title = graphene.String(required=True)
     description = graphene.String(required=True)
+
 
 class CreateNews(graphene.Mutation):
     class Arguments:
@@ -29,11 +31,12 @@ class CreateNews(graphene.Mutation):
                 reversion.set_comment("createNews mutation")
 
             ok = True
-        except:
+        except Exception:
             news = None
             ok = False
 
         return CreateNews(news=news, ok=ok)
+
 
 class UpdateNews(graphene.Mutation):
     class Arguments:
@@ -55,11 +58,12 @@ class UpdateNews(graphene.Mutation):
                 reversion.set_comment("updateNews mutation")
 
             ok = True
-        except:
+        except Exception:
             news = None
             ok = False
 
         return UpdateNews(news=news, ok=ok)
+
 
 class DeleteNews(graphene.Mutation):
     class Arguments:
@@ -77,10 +81,11 @@ class DeleteNews(graphene.Mutation):
                 reversion.set_comment("deleteNews mutation")
 
             ok = True
-        except:
+        except Exception:
             ok = False
 
         return DeleteNews(ok=ok)
+
 
 class Mutation(graphene.ObjectType):
     create_news = CreateNews.Field()

@@ -5,9 +5,11 @@ from core.lib import get_id
 from .models import Discussion
 from .nodes import DiscussionNode
 
+
 class DiscussionInput(graphene.InputObjectType):
     title = graphene.String(required=True)
     description = graphene.String(required=True)
+
 
 class CreateDiscussion(graphene.Mutation):
     class Arguments:
@@ -29,11 +31,12 @@ class CreateDiscussion(graphene.Mutation):
                 reversion.set_comment("createDiscussion mutation")
 
             ok = True
-        except:
+        except Exception:
             discussion = None
             ok = False
 
         return CreateDiscussion(discussion=discussion, ok=ok)
+
 
 class UpdateDiscussion(graphene.Mutation):
     class Arguments:
@@ -55,11 +58,12 @@ class UpdateDiscussion(graphene.Mutation):
                 reversion.set_comment("updateDiscussion mutation")
 
             ok = True
-        except:
+        except Exception:
             discussion = None
             ok = False
 
         return UpdateDiscussion(discussion=discussion, ok=ok)
+
 
 class DeleteDiscussion(graphene.Mutation):
     class Arguments:
@@ -77,10 +81,11 @@ class DeleteDiscussion(graphene.Mutation):
                 reversion.set_comment("deleteDiscussion mutation")
 
             ok = True
-        except:
+        except Exception:
             ok = False
 
         return DeleteDiscussion(ok=ok)
+
 
 class Mutation(graphene.ObjectType):
     create_discussion = CreateDiscussion.Field()

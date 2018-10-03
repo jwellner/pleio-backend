@@ -1,6 +1,7 @@
-from django.contrib.contenttypes.fields import GenericForeignKey, GenericRelation
+from django.contrib.contenttypes.fields import GenericRelation
 from django.db import models
 from core.models import Object, Comment
+
 
 class Blog(Object):
     class Meta:

@@ -12,8 +12,10 @@ import logging
 # Get an instance of a logger
 logger = logging.getLogger(__name__)
 
+
 class CommentInput(graphene.InputObjectType):
     description = graphene.String(required=True)
+
 
 class CreateComment(graphene.Mutation):
     class Arguments:
@@ -27,10 +29,15 @@ class CreateComment(graphene.Mutation):
         parts = container_id.split(':')
         container_type = parts[0].split('.')
 
-        content_type = ContentType.objects.get(app_label=container_type[0], model=container_type[1])
+        content_type = ContentType.objects.get(
+            app_label=container_type[0],
+            model=container_type[1]
+            )
         model_class = content_type.model_class()
 
-        container = model_class.objects.visible(info.context.user).get(id=parts[1])
+        container = model_class.objects.visible(
+            info.context.user
+            ).get(id=parts[1])
 
         if not container.can_comment(info.context.user):
             return CreateComment(ok=False, container=container)
@@ -48,6 +55,7 @@ class CreateComment(graphene.Mutation):
         ok = True
 
         return CreateComment(ok=ok, container=container)
+
 
 class UpdateComment(graphene.Mutation):
     class Arguments:
@@ -74,6 +82,7 @@ class UpdateComment(graphene.Mutation):
 
         return UpdateComment(ok=ok, comment=comment)
 
+
 class DeleteComment(graphene.Mutation):
     class Arguments:
         id = graphene.ID(required=True)
@@ -96,12 +105,14 @@ class DeleteComment(graphene.Mutation):
 
         return DeleteGroup(ok=ok)
 
+
 class GroupInput(graphene.InputObjectType):
     name = graphene.String(required=True)
     description = graphene.String(required=True)
     is_open = graphene.Boolean(required=True)
     is_2fa_required = graphene.Boolean(required=True)
     tags = graphene.List(graphene.NonNull(graphene.String))
+
 
 class CreateGroup(graphene.Mutation):
     class Arguments:
@@ -127,7 +138,7 @@ class CreateGroup(graphene.Mutation):
                     tags=input['tags'],
                 )
 
-                #add creator as group owner
+                # add creator as group owner
                 group.join(info.context.user, 'owner')
 
                 reversion.set_user(info.context.user)
@@ -142,6 +153,7 @@ class CreateGroup(graphene.Mutation):
             raise GraphQLError(str(UNKNOWN_ERROR + ': ' + e))
 
         return CreateGroup(ok=ok, group=group)
+
 
 class UpdateGroup(graphene.Mutation):
     class Arguments:
@@ -164,9 +176,9 @@ class UpdateGroup(graphene.Mutation):
             with reversion.create_revision():
                 group.name = input['name']
                 group.description = input['description']
-                group.is_open=input['is_open']
-                group.is_2fa_required=input['is_2fa_required']
-                group.tags=input['tags']
+                group.is_open = input['is_open']
+                group.is_2fa_required = input['is_2fa_required']
+                group.tags = input['tags']
                 group.save()
 
                 reversion.set_user(info.context.user)
@@ -174,16 +186,23 @@ class UpdateGroup(graphene.Mutation):
 
             ok = True
         except GraphQLError:
-            logger.warning('Warning in UpdateGroup: {}.'.format(USER_NOT_GROUP_OWNER_OR_SITE_ADMIN))
+            logger.warning(
+                'Warning in UpdateGroup: {}.'.format(
+                    USER_NOT_GROUP_OWNER_OR_SITE_ADMIN
+                    )
+                )
             raise
         except Group.DoesNotExist:
-            logger.error('Exception in UpdateGroup: {}.'.format(COULD_NOT_FIND_GROUP))
+            logger.error(
+                'Exception in UpdateGroup: {}.'.format(COULD_NOT_FIND_GROUP)
+                )
             raise GraphQLError(COULD_NOT_FIND_GROUP)
         except Exception as e:
             logger.error('Exception in UpdateGroup: {}.'.format(e))
             raise GraphQLError(str(UNKNOWN_ERROR + ': ' + e))
 
         return UpdateGroup(ok=ok, group=group)
+
 
 class DeleteGroup(graphene.Mutation):
     class Arguments:
@@ -202,11 +221,13 @@ class DeleteGroup(graphene.Mutation):
 
             with reversion.create_revision():
                 if group.members.exclude(user=info.context.user).exists():
-                    #other members exist, cannot delete group
+                    # other members exist, cannot delete group
                     raise GroupContainsMembers
                 with transaction.atomic():
-                    #owner will only leave group to clear all members from group.
-                    #if group.delete fails, owner membership delete will be rollbacked
+                    # owner will only leave group to clear all members from
+                    # group.
+                    # if group.delete fails, owner membership delete will be
+                    #  rollbacked
                     group.leave(info.context.user)
                     group.delete()
 
@@ -215,16 +236,25 @@ class DeleteGroup(graphene.Mutation):
 
             ok = True
         except GraphQLError:
-            logger.warning('Warning in DeleteGroup: {}.'.format(USER_NOT_GROUP_OWNER_OR_SITE_ADMIN))
+            logger.warning(
+                'Warning in DeleteGroup: {}.'.format(
+                    USER_NOT_GROUP_OWNER_OR_SITE_ADMIN
+                    )
+                )
             raise
         except Group.DoesNotExist:
-            logger.error('Exception in DeleteGroup: {}.'.format(COULD_NOT_FIND_GROUP))
+            logger.error(
+                'Exception in DeleteGroup: {}.'.format(COULD_NOT_FIND_GROUP)
+                )
             raise GraphQLError(COULD_NOT_FIND_GROUP)
         except Exception as e:
-            logger.error('Exception in DeleteGroup: {}, {}.'.format(COULD_NOT_DELETE, e))
-            raise GraphQLError(str(COULD_NOT_DELETE + ': ' + e)
+            logger.error(
+                'Exception in DeleteGroup: {}, {}.'.format(COULD_NOT_DELETE, e)
+                )
+            raise GraphQLError(str(COULD_NOT_DELETE + ': ' + e))
 
         return DeleteGroup(ok=ok)
+
 
 class JoinGroup(graphene.Mutation):
     class Arguments:
@@ -257,13 +287,20 @@ class JoinGroup(graphene.Mutation):
             logger.warning('Warning in JoinGroup: {}.'.format(COULD_NOT_ADD))
             raise
         except Group.DoesNotExist:
-            logger.error('Exception in JoinGroup: {}.'.format(COULD_NOT_FIND_GROUP))
+            logger.error(
+                'Exception in JoinGroup: {}.'.format(
+                    COULD_NOT_FIND_GROUP
+                    )
+                )
             raise GraphQLError(COULD_NOT_FIND_GROUP)
         except Exception as e:
-            logger.error('Exception in JoinGroup: {}, {}.'.format(COULD_NOT_ADD, e))
+            logger.error(
+                'Exception in JoinGroup: {}, {}.'.format(COULD_NOT_ADD, e)
+                )
             raise GraphQLError(str(COULD_NOT_ADD + ': ' + e))
 
         return JoinGroup(ok=ok, group=group)
+
 
 class LeaveGroup(graphene.Mutation):
     class Arguments:
@@ -293,17 +330,23 @@ class LeaveGroup(graphene.Mutation):
             logger.warning('Warning in LeaveGroup: {}.'.format(NOT_LOGGED_IN))
             raise
         except Group.DoesNotExist:
-            logger.error('Exception in LeaveGroup: {}.'.format(COULD_NOT_FIND_GROUP))
+            logger.error(
+                'Exception in LeaveGroup: {}.'.format(COULD_NOT_FIND_GROUP)
+                )
             raise GraphQLError(COULD_NOT_FIND_GROUP)
         except Exception as e:
-            logger.error('Exception in LeaveGroup: {}, {}.'.format(COULD_NOT_LEAVE, e))
+            logger.error(
+                'Exception in LeaveGroup: {}, {}.'.format(COULD_NOT_LEAVE, e)
+                )
             raise GraphQLError(str(COULD_NOT_LEAVE + ': ' + e))
 
         return LeaveGroup(ok=ok, group=group)
 
+
 class MembershipInput(graphene.InputObjectType):
     userid = graphene.ID(required=True)
     type = graphene.String(required=True)
+
 
 class ChangeMembershipGroup(graphene.Mutation):
 
@@ -334,16 +377,25 @@ class ChangeMembershipGroup(graphene.Mutation):
 
             ok = True
         except GraphQLError:
-            logger.warning('Warning in ChangeMembershipGroup: {}.'.format(USER_NOT_GROUP_OWNER_OR_SITE_ADMIN))
+            logger.warning(
+                'Warning in ChangeMembershipGroup: {}.'.format(
+                    USER_NOT_GROUP_OWNER_OR_SITE_ADMIN
+                    )
+                )
             raise
         except Group.DoesNotExist:
-            logger.error('Exception in ChangeMembershipGroup: {}.'.format(COULD_NOT_FIND_GROUP))
+            logger.error(
+                'Exception in ChangeMembershipGroup: {}.'.format(
+                    COULD_NOT_FIND_GROUP
+                    )
+                )
             raise GraphQLError(COULD_NOT_FIND_GROUP)
         except Exception as e:
             logger.error('Exception in ChangeMembershipGroup: {}.'.format(e))
             raise GraphQLError(str(UNKNOWN_ERROR + ': ' + e))
 
         return ChangeMembershipGroup(ok=ok, group=group)
+
 
 class RemoveMembershipGroup(graphene.Mutation):
 
@@ -374,16 +426,25 @@ class RemoveMembershipGroup(graphene.Mutation):
 
             ok = True
         except GraphQLError:
-            logger.warning('Warning in RemoveMembershipGroup: {}.'.format(USER_NOT_GROUP_OWNER_OR_SITE_ADMIN))
+            logger.warning(
+                'Warning in RemoveMembershipGroup: {}.'.format(
+                    USER_NOT_GROUP_OWNER_OR_SITE_ADMIN
+                    )
+                )
             raise
         except Group.DoesNotExist:
-            logger.error('Exception in RemoveMembershipGroup: {}.'.format(COULD_NOT_FIND_GROUP))
+            logger.error(
+                'Exception in RemoveMembershipGroup: {}.'.format(
+                    COULD_NOT_FIND_GROUP
+                    )
+                )
             raise GraphQLError(COULD_NOT_FIND_GROUP)
         except Exception as e:
             logger.error('Exception in RemoveMembershipGroup: {}.'.format(e))
             raise GraphQLError(str(UNKNOWN_ERROR + ': ' + e))
 
         return RemoveMembershipGroup(ok=ok, group=group)
+
 
 class Mutation(graphene.ObjectType):
     create_comment = CreateComment.Field()

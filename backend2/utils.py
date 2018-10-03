@@ -4,6 +4,7 @@ import inspect
 import graphene
 from django.apps import apps
 
+
 def get_queries_from_apps(module_name='query'):
     queries = []
     for app in apps.get_app_configs():
@@ -11,7 +12,11 @@ def get_queries_from_apps(module_name='query'):
             modentry = "%s.%s" % (app.name, module_name)
             mod = import_module(modentry)
             clsmembers = inspect.getmembers(mod, inspect.isclass)
-            clsmembers = [i for i, k in inspect.getmembers(mod, inspect.isclass) if k.__module__ == modentry]
+            clsmembers = [
+                i for i,
+                k in inspect.getmembers(mod, inspect.isclass)
+                if k.__module__ == modentry
+                ]
             for i in clsmembers:
                 try:
                     cls = getattr(mod, i)
@@ -22,6 +27,7 @@ def get_queries_from_apps(module_name='query'):
             print(e)
     return tuple(queries)
 
+
 def get_mutations_from_apps(module_name='mutation'):
     mutations = []
     for app in apps.get_app_configs():
@@ -29,7 +35,11 @@ def get_mutations_from_apps(module_name='mutation'):
             modentry = "%s.%s" % (app.name, module_name)
             mod = import_module(modentry)
             clsmembers = inspect.getmembers(mod, inspect.isclass)
-            clsmembers = [i for i, k in inspect.getmembers(mod, inspect.isclass) if k.__module__ == modentry]
+            clsmembers = [
+                i for i,
+                k in inspect.getmembers(mod, inspect.isclass)
+                if k.__module__ == modentry
+                ]
             for i in clsmembers:
                 try:
                     cls = getattr(mod, i)

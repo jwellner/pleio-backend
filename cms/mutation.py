@@ -5,9 +5,11 @@ from core.lib import get_id
 from .models import CmsPage
 from .nodes import CmsPageNode
 
+
 class CmsPageInput(graphene.InputObjectType):
     title = graphene.String(required=True)
     description = graphene.String(required=True)
+
 
 class CreateCmsPage(graphene.Mutation):
     class Arguments:
@@ -29,11 +31,12 @@ class CreateCmsPage(graphene.Mutation):
                 reversion.set_comment("createCmsPage mutation")
 
             ok = True
-        except:
+        except Exception:
             cms_page = None
             ok = False
 
         return CreateCmsPage(cms_page=cms_page, ok=ok)
+
 
 class UpdateCmsPage(graphene.Mutation):
     class Arguments:
@@ -55,11 +58,12 @@ class UpdateCmsPage(graphene.Mutation):
                 reversion.set_comment("updateCmsPage mutation")
 
             ok = True
-        except:
+        except Exception:
             cms_page = None
             ok = False
 
         return UpdateCmsPage(cms_page=cms_page, ok=ok)
+
 
 class DeleteCmsPage(graphene.Mutation):
     class Arguments:
@@ -77,10 +81,11 @@ class DeleteCmsPage(graphene.Mutation):
                 reversion.set_comment("deleteCmsPage mutation")
 
             ok = True
-        except:
+        except Exception:
             ok = False
 
         return DeleteCmsPage(ok=ok)
+
 
 class Mutation(graphene.ObjectType):
     create_cms_page = CreateCmsPage.Field()

@@ -1,13 +1,14 @@
+import logging
 import graphene
 import reversion
 
 from core.lib import get_id
 from .models import Blog
 from .nodes import BlogNode
-import logging
 
 # Get an instance of a logger
 logger = logging.getLogger(__name__)
+
 
 class BlogInput(graphene.InputObjectType):
     title = graphene.String(required=True)
@@ -15,6 +16,7 @@ class BlogInput(graphene.InputObjectType):
     read_access = graphene.List(graphene.NonNull(graphene.String))
     write_access = graphene.List(graphene.NonNull(graphene.String))
     tags = graphene.List(graphene.NonNull(graphene.String))
+
 
 class CreateBlog(graphene.Mutation):
     class Arguments:
@@ -46,6 +48,7 @@ class CreateBlog(graphene.Mutation):
 
         return CreateBlog(blog=blog, ok=ok)
 
+
 class UpdateBlog(graphene.Mutation):
     class Arguments:
         id = graphene.ID(required=True)
@@ -60,9 +63,9 @@ class UpdateBlog(graphene.Mutation):
                 blog = Blog.objects.get(pk=get_id(id))
                 blog.title = input['title']
                 blog.description = input['description']
-                blog.read_access=input['read_access']
-                blog.write_access=input['write_access']
-                blog.tags=input['tags']
+                blog.read_access = input['read_access']
+                blog.write_access = input['write_access']
+                blog.tags = input['tags']
                 blog.save()
 
                 reversion.set_user(info.context.user)
@@ -75,6 +78,7 @@ class UpdateBlog(graphene.Mutation):
             ok = False
 
         return UpdateBlog(blog=blog, ok=ok)
+
 
 class DeleteBlog(graphene.Mutation):
     class Arguments:
@@ -97,6 +101,7 @@ class DeleteBlog(graphene.Mutation):
             ok = False
 
         return DeleteBlog(ok=ok)
+
 
 class Mutation(graphene.ObjectType):
     create_blog = CreateBlog.Field()

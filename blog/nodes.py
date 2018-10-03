@@ -4,6 +4,7 @@ from core.nodes import Node, CommentNode
 from core.models import Comment
 from .models import Blog
 
+
 class BlogNode(DjangoObjectType):
     class Meta:
         model = Blog
@@ -13,10 +14,18 @@ class BlogNode(DjangoObjectType):
     comments = graphene.List(CommentNode)
 
     def resolve_id(self, info):
-        return '{}.{}:{}'.format(self._meta.app_label, self._meta.object_name, self.id).lower()
+        return '{}.{}:{}'.format(
+            self._meta.app_label,
+            self._meta.object_name,
+            self.id
+            ).lower()
 
     def resolve_can_write(self, info):
         return self.can_write(info.context.user)
 
     def resolve_comments(self, info):
-        return self.comments.visible(self._meta.app_label.lower(), self._meta.object_name.lower(), self.id)
+        return self.comments.visible(
+            self._meta.app_label.lower(),
+            self._meta.object_name.lower(),
+            self.id
+            )
