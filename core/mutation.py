@@ -125,32 +125,25 @@ class CreateGroup(graphene.Mutation):
         ok = False
         group = None
 
-        try:
-            if not info.context.user.is_authenticated:
-                raise GraphQLError(NOT_LOGGED_IN)
+        if not info.context.user.is_authenticated:
+            raise GraphQLError(NOT_LOGGED_IN)
 
-            with reversion.create_revision():
-                group = Group.objects.create(
-                    name=input['name'],
-                    description=input['description'],
-                    is_open=input['is_open'],
-                    is_2fa_required=input['is_2fa_required'],
-                    tags=input['tags'],
-                )
+        with reversion.create_revision():
+            group = Group.objects.create(
+                name=input['name'],
+                description=input['description'],
+                is_open=input['is_open'],
+                is_2fa_required=input['is_2fa_required'],
+                tags=input['tags'],
+            )
 
-                # add creator as group owner
-                group.join(info.context.user, 'owner')
+            # add creator as group owner
+            group.join(info.context.user, 'owner')
 
-                reversion.set_user(info.context.user)
-                reversion.set_comment("createGroup mutation")
+            reversion.set_user(info.context.user)
+            reversion.set_comment("createGroup mutation")
 
-            ok = True
-        except GraphQLError:
-            logger.warning('Warning in CreateGroup: {}.'.format(NOT_LOGGED_IN))
-            raise
-        except Exception as e:
-            logger.error('Exception in CreateGroup: {}.'.format(e))
-            raise GraphQLError(str(UNKNOWN_ERROR + ': ' + e))
+        ok = True
 
         return CreateGroup(ok=ok, group=group)
 
@@ -185,21 +178,8 @@ class UpdateGroup(graphene.Mutation):
                 reversion.set_comment("updateGroup mutation")
 
             ok = True
-        except GraphQLError:
-            logger.warning(
-                'Warning in UpdateGroup: {}.'.format(
-                    USER_NOT_GROUP_OWNER_OR_SITE_ADMIN
-                    )
-                )
-            raise
         except Group.DoesNotExist:
-            logger.error(
-                'Exception in UpdateGroup: {}.'.format(COULD_NOT_FIND_GROUP)
-                )
             raise GraphQLError(COULD_NOT_FIND_GROUP)
-        except Exception as e:
-            logger.error('Exception in UpdateGroup: {}.'.format(e))
-            raise GraphQLError(str(UNKNOWN_ERROR + ': ' + e))
 
         return UpdateGroup(ok=ok, group=group)
 
@@ -235,23 +215,8 @@ class DeleteGroup(graphene.Mutation):
                 reversion.set_comment("deleteGroup mutation")
 
             ok = True
-        except GraphQLError:
-            logger.warning(
-                'Warning in DeleteGroup: {}.'.format(
-                    USER_NOT_GROUP_OWNER_OR_SITE_ADMIN
-                    )
-                )
-            raise
         except Group.DoesNotExist:
-            logger.error(
-                'Exception in DeleteGroup: {}.'.format(COULD_NOT_FIND_GROUP)
-                )
             raise GraphQLError(COULD_NOT_FIND_GROUP)
-        except Exception as e:
-            logger.error(
-                'Exception in DeleteGroup: {}, {}.'.format(COULD_NOT_DELETE, e)
-                )
-            raise GraphQLError(str(COULD_NOT_DELETE + ': ' + e))
 
         return DeleteGroup(ok=ok)
 
@@ -273,6 +238,9 @@ class JoinGroup(graphene.Mutation):
             if not group.can_join(info.context.user):
                 raise GraphQLError(COULD_NOT_ADD)
 
+            if group.is_member(info.context.user):
+                raise GraphQLError(COULD_NOT_ADD)
+
             with reversion.create_revision():
                 if group.is_open:
                     group.join(info.context.user, 'member')
@@ -283,21 +251,8 @@ class JoinGroup(graphene.Mutation):
                 reversion.set_comment("joinGroup mutation")
 
             ok = True
-        except GraphQLError:
-            logger.warning('Warning in JoinGroup: {}.'.format(COULD_NOT_ADD))
-            raise
         except Group.DoesNotExist:
-            logger.error(
-                'Exception in JoinGroup: {}.'.format(
-                    COULD_NOT_FIND_GROUP
-                    )
-                )
             raise GraphQLError(COULD_NOT_FIND_GROUP)
-        except Exception as e:
-            logger.error(
-                'Exception in JoinGroup: {}, {}.'.format(COULD_NOT_ADD, e)
-                )
-            raise GraphQLError(str(COULD_NOT_ADD + ': ' + e))
 
         return JoinGroup(ok=ok, group=group)
 
@@ -319,6 +274,9 @@ class LeaveGroup(graphene.Mutation):
             if not info.context.user.is_authenticated:
                 raise GraphQLError(NOT_LOGGED_IN)
 
+            if not group.is_member(info.context.user):
+                raise GraphQLError(COULD_NOT_LEAVE)
+
             with reversion.create_revision():
                 group.leave(info.context.user)
 
@@ -326,19 +284,8 @@ class LeaveGroup(graphene.Mutation):
                 reversion.set_comment("leaveGroup mutation")
 
             ok = True
-        except GraphQLError:
-            logger.warning('Warning in LeaveGroup: {}.'.format(NOT_LOGGED_IN))
-            raise
         except Group.DoesNotExist:
-            logger.error(
-                'Exception in LeaveGroup: {}.'.format(COULD_NOT_FIND_GROUP)
-                )
             raise GraphQLError(COULD_NOT_FIND_GROUP)
-        except Exception as e:
-            logger.error(
-                'Exception in LeaveGroup: {}, {}.'.format(COULD_NOT_LEAVE, e)
-                )
-            raise GraphQLError(str(COULD_NOT_LEAVE + ': ' + e))
 
         return LeaveGroup(ok=ok, group=group)
 
@@ -376,23 +323,8 @@ class ChangeMembershipGroup(graphene.Mutation):
                 reversion.set_comment("changeMembershipGroup mutation")
 
             ok = True
-        except GraphQLError:
-            logger.warning(
-                'Warning in ChangeMembershipGroup: {}.'.format(
-                    USER_NOT_GROUP_OWNER_OR_SITE_ADMIN
-                    )
-                )
-            raise
         except Group.DoesNotExist:
-            logger.error(
-                'Exception in ChangeMembershipGroup: {}.'.format(
-                    COULD_NOT_FIND_GROUP
-                    )
-                )
             raise GraphQLError(COULD_NOT_FIND_GROUP)
-        except Exception as e:
-            logger.error('Exception in ChangeMembershipGroup: {}.'.format(e))
-            raise GraphQLError(str(UNKNOWN_ERROR + ': ' + e))
 
         return ChangeMembershipGroup(ok=ok, group=group)
 
@@ -425,23 +357,8 @@ class RemoveMembershipGroup(graphene.Mutation):
                 reversion.set_comment("removeMembershipGroup mutation")
 
             ok = True
-        except GraphQLError:
-            logger.warning(
-                'Warning in RemoveMembershipGroup: {}.'.format(
-                    USER_NOT_GROUP_OWNER_OR_SITE_ADMIN
-                    )
-                )
-            raise
         except Group.DoesNotExist:
-            logger.error(
-                'Exception in RemoveMembershipGroup: {}.'.format(
-                    COULD_NOT_FIND_GROUP
-                    )
-                )
             raise GraphQLError(COULD_NOT_FIND_GROUP)
-        except Exception as e:
-            logger.error('Exception in RemoveMembershipGroup: {}.'.format(e))
-            raise GraphQLError(str(UNKNOWN_ERROR + ': ' + e))
 
         return RemoveMembershipGroup(ok=ok, group=group)
 
