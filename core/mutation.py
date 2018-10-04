@@ -1,16 +1,12 @@
 import graphene
 import reversion
 from django.contrib.contenttypes.models import ContentType
-from core.lib import get_id
-from .models import Comment, Group, User
-from .nodes import Node, GroupNode, CommentNode
 from django.db import transaction
 from graphql import GraphQLError
+from .lib import get_id
+from .models import Comment, Group, User
+from .nodes import Node, GroupNode, CommentNode
 from .constances import *
-import logging
-
-# Get an instance of a logger
-logger = logging.getLogger(__name__)
 
 
 class CommentInput(graphene.InputObjectType):
@@ -40,7 +36,7 @@ class CreateComment(graphene.Mutation):
             ).get(id=parts[1])
 
         if not container.can_comment(info.context.user):
-            return CreateComment(ok=False, container=container)
+            raise GraphQLError(COULD_NOT_ADD)
 
         with reversion.create_revision():
             comment = Comment.objects.create(
@@ -69,7 +65,7 @@ class UpdateComment(graphene.Mutation):
         comment = Comment.objects.get(id=get_id(id))
 
         if not comment.can_write(info.context.user):
-            return UpdateComment(ok=False, comment=comment)
+            raise GraphQLError(COULD_NOT_ADD)
 
         with reversion.create_revision():
             comment.description = input['description']
@@ -93,7 +89,7 @@ class DeleteComment(graphene.Mutation):
         comment = Comment.objects.get(id=get_id(id))
 
         if not comment.can_write(info.context.user):
-            return UpdateComment(ok=False, comment=comment)
+            raise GraphQLError(COULD_NOT_DELETE)
 
         with reversion.create_revision():
             comment.delete()
@@ -275,7 +271,7 @@ class LeaveGroup(graphene.Mutation):
                 raise GraphQLError(NOT_LOGGED_IN)
 
             if not group.is_member(info.context.user):
-                raise GraphQLError(COULD_NOT_LEAVE)
+                raise GraphQLError(USER_NOT_MEMBER_OF_GROUP)
 
             with reversion.create_revision():
                 group.leave(info.context.user)

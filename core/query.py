@@ -1,8 +1,6 @@
 from django.contrib.contenttypes.models import ContentType
 import graphene
-from graphene import relay
-from core.lib import get_type, get_id
-from .nodes import Node, ViewerNode, GroupNode, GroupMembershipNode
+from .nodes import Node, ViewerNode
 from .lists import PaginatedGroupList
 from .models import Group
 
