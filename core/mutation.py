@@ -1,18 +1,17 @@
 import graphene
 import reversion
 from django.contrib.contenttypes.models import ContentType
-from core.lib import get_id
+from django.db import transaction
+from graphql import GraphQLError
+from .lib import get_id
 from .models import Comment, Group, User
 from .nodes import Node, GroupNode, CommentNode
-from django.db import transaction
-from .exceptions import *
-import logging
+from .constances import *
 
-# Get an instance of a logger
-logger = logging.getLogger(__name__)
 
 class CommentInput(graphene.InputObjectType):
     description = graphene.String(required=True)
+
 
 class CreateComment(graphene.Mutation):
     class Arguments:
@@ -26,13 +25,18 @@ class CreateComment(graphene.Mutation):
         parts = container_id.split(':')
         container_type = parts[0].split('.')
 
-        content_type = ContentType.objects.get(app_label=container_type[0], model=container_type[1])
+        content_type = ContentType.objects.get(
+            app_label=container_type[0],
+            model=container_type[1]
+            )
         model_class = content_type.model_class()
 
-        container = model_class.objects.visible(info.context.user).get(id=parts[1])
+        container = model_class.objects.visible(
+            info.context.user
+            ).get(id=parts[1])
 
         if not container.can_comment(info.context.user):
-            return CreateComment(ok=False, container=container)
+            raise GraphQLError(COULD_NOT_ADD)
 
         with reversion.create_revision():
             comment = Comment.objects.create(
@@ -48,6 +52,7 @@ class CreateComment(graphene.Mutation):
 
         return CreateComment(ok=ok, container=container)
 
+
 class UpdateComment(graphene.Mutation):
     class Arguments:
         id = graphene.ID(required=True)
@@ -60,7 +65,7 @@ class UpdateComment(graphene.Mutation):
         comment = Comment.objects.get(id=get_id(id))
 
         if not comment.can_write(info.context.user):
-            return UpdateComment(ok=False, comment=comment)
+            raise GraphQLError(COULD_NOT_ADD)
 
         with reversion.create_revision():
             comment.description = input['description']
@@ -73,6 +78,7 @@ class UpdateComment(graphene.Mutation):
 
         return UpdateComment(ok=ok, comment=comment)
 
+
 class DeleteComment(graphene.Mutation):
     class Arguments:
         id = graphene.ID(required=True)
@@ -83,7 +89,7 @@ class DeleteComment(graphene.Mutation):
         comment = Comment.objects.get(id=get_id(id))
 
         if not comment.can_write(info.context.user):
-            return UpdateComment(ok=False, comment=comment)
+            raise GraphQLError(COULD_NOT_DELETE)
 
         with reversion.create_revision():
             comment.delete()
@@ -95,12 +101,14 @@ class DeleteComment(graphene.Mutation):
 
         return DeleteGroup(ok=ok)
 
+
 class GroupInput(graphene.InputObjectType):
     name = graphene.String(required=True)
     description = graphene.String(required=True)
     is_open = graphene.Boolean(required=True)
     is_2fa_required = graphene.Boolean(required=True)
     tags = graphene.List(graphene.NonNull(graphene.String))
+
 
 class CreateGroup(graphene.Mutation):
     class Arguments:
@@ -110,32 +118,31 @@ class CreateGroup(graphene.Mutation):
     group = graphene.Field(lambda: GroupNode)
 
     def mutate(self, info, input):
-        try:
-            if not info.context.user.is_authenticated:
-                raise UserNotLoggedIn
+        ok = False
+        group = None
 
-            with reversion.create_revision():
-                group = Group.objects.create(
-                    name=input['name'],
-                    description=input['description'],
-                    is_open=input['is_open'],
-                    is_2fa_required=input['is_2fa_required'],
-                    tags=input['tags'],
-                )
+        if not info.context.user.is_authenticated:
+            raise GraphQLError(NOT_LOGGED_IN)
 
-                #add creator as group owner
-                group.join(info.context.user, 'owner')
+        with reversion.create_revision():
+            group = Group.objects.create(
+                name=input['name'],
+                description=input['description'],
+                is_open=input['is_open'],
+                is_2fa_required=input['is_2fa_required'],
+                tags=input['tags'],
+            )
 
-                reversion.set_user(info.context.user)
-                reversion.set_comment("createGroup mutation")
+            # add creator as group owner
+            group.join(info.context.user, 'owner')
 
-            ok = True
-        except Exception as e:
-            logger.error('Exception in CreateGroup: {}.'.format(e))
-            group = None
-            ok = False
+            reversion.set_user(info.context.user)
+            reversion.set_comment("createGroup mutation")
 
-        return CreateGroup(group=group, ok=ok)
+        ok = True
+
+        return CreateGroup(ok=ok, group=group)
+
 
 class UpdateGroup(graphene.Mutation):
     class Arguments:
@@ -146,30 +153,32 @@ class UpdateGroup(graphene.Mutation):
     group = graphene.Field(lambda: GroupNode)
 
     def mutate(self, info, id, input):
+        ok = False
+        group = None
+
         try:
             group = Group.objects.get(pk=get_id(id))
 
             if not group.can_change(info.context.user):
-                raise UserNotAuthorized()
+                raise GraphQLError(USER_NOT_GROUP_OWNER_OR_SITE_ADMIN)
 
             with reversion.create_revision():
                 group.name = input['name']
                 group.description = input['description']
-                group.is_open=input['is_open']
-                group.is_2fa_required=input['is_2fa_required']
-                group.tags=input['tags']
+                group.is_open = input['is_open']
+                group.is_2fa_required = input['is_2fa_required']
+                group.tags = input['tags']
                 group.save()
 
                 reversion.set_user(info.context.user)
                 reversion.set_comment("updateGroup mutation")
 
             ok = True
-        except Exception as e:
-            logger.error('Exception in UpdateGroup: {}.'.format(e))
-            group = None
-            ok = False
+        except Group.DoesNotExist:
+            raise GraphQLError(COULD_NOT_FIND_GROUP)
 
-        return UpdateGroup(group=group, ok=ok)
+        return UpdateGroup(ok=ok, group=group)
+
 
 class DeleteGroup(graphene.Mutation):
     class Arguments:
@@ -178,19 +187,23 @@ class DeleteGroup(graphene.Mutation):
     ok = graphene.Boolean()
 
     def mutate(self, info, id):
+        ok = False
+
         try:
             group = Group.objects.get(pk=get_id(id))
 
             if not group.can_change(info.context.user):
-                raise UserNotAuthorized()
+                raise GraphQLError(USER_NOT_GROUP_OWNER_OR_SITE_ADMIN)
 
             with reversion.create_revision():
                 if group.members.exclude(user=info.context.user).exists():
-                    #other members exist, cannot delete group
+                    # other members exist, cannot delete group
                     raise GroupContainsMembers
                 with transaction.atomic():
-                    #owner will only leave group to clear all members from group.
-                    #if group.delete fails, owner membership delete will be rollbacked
+                    # owner will only leave group to clear all members from
+                    # group.
+                    # if group.delete fails, owner membership delete will be
+                    #  rollbacked
                     group.leave(info.context.user)
                     group.delete()
 
@@ -198,11 +211,11 @@ class DeleteGroup(graphene.Mutation):
                 reversion.set_comment("deleteGroup mutation")
 
             ok = True
-        except Exception as e:
-            logger.error('Exception in DeleteGroup: {}.'.format(e))
-            ok = False
+        except Group.DoesNotExist:
+            raise GraphQLError(COULD_NOT_FIND_GROUP)
 
         return DeleteGroup(ok=ok)
+
 
 class JoinGroup(graphene.Mutation):
     class Arguments:
@@ -212,11 +225,17 @@ class JoinGroup(graphene.Mutation):
     group = graphene.Field(lambda: GroupNode)
 
     def mutate(self, info, id):
+        ok = False
+        group = None
+
         try:
             group = Group.objects.get(pk=get_id(id))
 
             if not group.can_join(info.context.user):
-                raise UserNotAuthorized
+                raise GraphQLError(COULD_NOT_ADD)
+
+            if group.is_member(info.context.user):
+                raise GraphQLError(COULD_NOT_ADD)
 
             with reversion.create_revision():
                 if group.is_open:
@@ -228,11 +247,11 @@ class JoinGroup(graphene.Mutation):
                 reversion.set_comment("joinGroup mutation")
 
             ok = True
-        except Exception as e:
-            logger.error('Exception in JoinGroup: {}.'.format(e))
-            ok = False
+        except Group.DoesNotExist:
+            raise GraphQLError(COULD_NOT_FIND_GROUP)
 
         return JoinGroup(ok=ok, group=group)
+
 
 class LeaveGroup(graphene.Mutation):
     class Arguments:
@@ -242,11 +261,17 @@ class LeaveGroup(graphene.Mutation):
     group = graphene.Field(lambda: GroupNode)
 
     def mutate(self, info, id):
+        ok = False
+        group = None
+
         try:
             group = Group.objects.get(pk=get_id(id))
 
             if not info.context.user.is_authenticated:
-                raise UserNotLoggedIn
+                raise GraphQLError(NOT_LOGGED_IN)
+
+            if not group.is_member(info.context.user):
+                raise GraphQLError(USER_NOT_MEMBER_OF_GROUP)
 
             with reversion.create_revision():
                 group.leave(info.context.user)
@@ -255,15 +280,16 @@ class LeaveGroup(graphene.Mutation):
                 reversion.set_comment("leaveGroup mutation")
 
             ok = True
-        except Exception as e:
-            logger.error('Exception in LeaveGroup: {}.'.format(e))
-            ok = False
+        except Group.DoesNotExist:
+            raise GraphQLError(COULD_NOT_FIND_GROUP)
 
         return LeaveGroup(ok=ok, group=group)
+
 
 class MembershipInput(graphene.InputObjectType):
     userid = graphene.ID(required=True)
     type = graphene.String(required=True)
+
 
 class ChangeMembershipGroup(graphene.Mutation):
 
@@ -275,11 +301,14 @@ class ChangeMembershipGroup(graphene.Mutation):
     group = graphene.Field(lambda: GroupNode)
 
     def mutate(self, info, id, input):
+        ok = False
+        group = None
+
         try:
             group = Group.objects.get(pk=get_id(id))
 
             if not group.can_change(info.context.user):
-                raise UserNotAuthorized
+                raise GraphQLError(USER_NOT_GROUP_OWNER_OR_SITE_ADMIN)
 
             with reversion.create_revision():
                 user = User.objects.get(pk=get_id(input['userid']))
@@ -290,13 +319,11 @@ class ChangeMembershipGroup(graphene.Mutation):
                 reversion.set_comment("changeMembershipGroup mutation")
 
             ok = True
-        except Exception as e:
-            logger.error('Exception in ChangeMembershipGroup: {}.'.format(e))
-            group = None
-            ok = False
+        except Group.DoesNotExist:
+            raise GraphQLError(COULD_NOT_FIND_GROUP)
 
+        return ChangeMembershipGroup(ok=ok, group=group)
 
-        return ChangeMembershipGroup(group=group, ok=ok)
 
 class RemoveMembershipGroup(graphene.Mutation):
 
@@ -308,11 +335,14 @@ class RemoveMembershipGroup(graphene.Mutation):
     group = graphene.Field(lambda: GroupNode)
 
     def mutate(self, info, id, userid):
+        ok = False
+        group = None
+
         try:
             group = Group.objects.get(pk=get_id(id))
 
             if not group.can_change(info.context.user):
-                raise UserNotAuthorized()
+                raise GraphQLError(USER_NOT_GROUP_OWNER_OR_SITE_ADMIN)
 
             with reversion.create_revision():
                 user = User.objects.get(pk=get_id(userid))
@@ -323,12 +353,11 @@ class RemoveMembershipGroup(graphene.Mutation):
                 reversion.set_comment("removeMembershipGroup mutation")
 
             ok = True
-        except Exception as e:
-            logger.error('Exception in RemoveMembershipGroup: {}.'.format(e))
-            group = None
-            ok = False
+        except Group.DoesNotExist:
+            raise GraphQLError(COULD_NOT_FIND_GROUP)
 
-        return RemoveMembershipGroup(group=group, ok=ok)
+        return RemoveMembershipGroup(ok=ok, group=group)
+
 
 class Mutation(graphene.ObjectType):
     create_comment = CreateComment.Field()

@@ -5,9 +5,11 @@ from core.lib import get_id
 from .models import Wiki
 from .nodes import WikiNode
 
+
 class WikiInput(graphene.InputObjectType):
     title = graphene.String(required=True)
     description = graphene.String(required=True)
+
 
 class CreateWiki(graphene.Mutation):
     class Arguments:
@@ -29,11 +31,12 @@ class CreateWiki(graphene.Mutation):
                 reversion.set_comment("createWiki mutation")
 
             ok = True
-        except:
+        except Exception:
             wiki = None
             ok = False
 
         return CreateWiki(wiki=wiki, ok=ok)
+
 
 class UpdateWiki(graphene.Mutation):
     class Arguments:
@@ -55,11 +58,12 @@ class UpdateWiki(graphene.Mutation):
                 reversion.set_comment("updateWiki mutation")
 
             ok = True
-        except:
+        except Exception:
             wiki = None
             ok = False
 
         return UpdateWiki(wiki=wiki, ok=ok)
+
 
 class DeleteWiki(graphene.Mutation):
     class Arguments:
@@ -77,10 +81,11 @@ class DeleteWiki(graphene.Mutation):
                 reversion.set_comment("deleteWiki mutation")
 
             ok = True
-        except:
+        except Exception:
             ok = False
 
         return DeleteWiki(ok=ok)
+
 
 class Mutation(graphene.ObjectType):
     create_wiki = CreateWiki.Field()

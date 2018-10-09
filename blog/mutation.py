@@ -1,13 +1,14 @@
+import logging
 import graphene
 import reversion
 
 from core.lib import get_id
 from .models import Blog
 from .nodes import BlogNode
-import logging
 
 # Get an instance of a logger
 logger = logging.getLogger(__name__)
+
 
 class BlogInput(graphene.InputObjectType):
     title = graphene.String(required=True)
@@ -15,6 +16,7 @@ class BlogInput(graphene.InputObjectType):
     read_access = graphene.List(graphene.NonNull(graphene.String))
     write_access = graphene.List(graphene.NonNull(graphene.String))
     tags = graphene.List(graphene.NonNull(graphene.String))
+
 
 class CreateBlog(graphene.Mutation):
     class Arguments:
@@ -24,27 +26,26 @@ class CreateBlog(graphene.Mutation):
     blog = graphene.Field(lambda: BlogNode)
 
     def mutate(self, info, input):
-        try:
-            with reversion.create_revision():
-                blog = Blog.objects.create(
-                    owner=info.context.user,
-                    title=input['title'],
-                    description=input['description'],
-                    read_access=input['read_access'],
-                    write_access=input['write_access'],
-                    tags=input['tags'],
-                )
+        ok = False
+        blog = None
 
-                reversion.set_user(info.context.user)
-                reversion.set_comment("createBlog mutation")
+        with reversion.create_revision():
+            blog = Blog.objects.create(
+                owner=info.context.user,
+                title=input['title'],
+                description=input['description'],
+                read_access=input['read_access'],
+                write_access=input['write_access'],
+                tags=input['tags'],
+            )
 
-            ok = True
-        except Exception as e:
-            logger.error('Exception in CreateBlog: {}.'.format(e))
-            blog = None
-            ok = False
+            reversion.set_user(info.context.user)
+            reversion.set_comment("createBlog mutation")
 
-        return CreateBlog(blog=blog, ok=ok)
+        ok = True
+
+        return CreateBlog(ok=ok, blog=blog)
+
 
 class UpdateBlog(graphene.Mutation):
     class Arguments:
@@ -55,26 +56,25 @@ class UpdateBlog(graphene.Mutation):
     blog = graphene.Field(lambda: BlogNode)
 
     def mutate(self, info, id, input):
-        try:
-            with reversion.create_revision():
-                blog = Blog.objects.get(pk=get_id(id))
-                blog.title = input['title']
-                blog.description = input['description']
-                blog.read_access=input['read_access']
-                blog.write_access=input['write_access']
-                blog.tags=input['tags']
-                blog.save()
+        ok = False
+        blog = None
 
-                reversion.set_user(info.context.user)
-                reversion.set_comment("updateBlog mutation")
+        with reversion.create_revision():
+            blog = Blog.objects.get(pk=get_id(id))
+            blog.title = input['title']
+            blog.description = input['description']
+            blog.read_access = input['read_access']
+            blog.write_access = input['write_access']
+            blog.tags = input['tags']
+            blog.save()
 
-            ok = True
-        except Exception as e:
-            logger.error('Exception in UpdateBlog: {}.'.format(e))
-            blog = None
-            ok = False
+            reversion.set_user(info.context.user)
+            reversion.set_comment("updateBlog mutation")
 
-        return UpdateBlog(blog=blog, ok=ok)
+        ok = True
+
+        return UpdateBlog(ok=ok, blog=blog)
+
 
 class DeleteBlog(graphene.Mutation):
     class Arguments:
@@ -83,20 +83,19 @@ class DeleteBlog(graphene.Mutation):
     ok = graphene.Boolean()
 
     def mutate(self, info, id):
-        try:
-            with reversion.create_revision():
-                blog = Blog.objects.get(pk=get_id(id))
-                blog.delete()
+        ok = False
 
-                reversion.set_user(info.context.user)
-                reversion.set_comment("deleteBlog mutation")
+        with reversion.create_revision():
+            blog = Blog.objects.get(pk=get_id(id))
+            blog.delete()
 
-            ok = True
-        except Exception as e:
-            logger.error('Exception in DeleteBlog: {}.'.format(e))
-            ok = False
+            reversion.set_user(info.context.user)
+            reversion.set_comment("deleteBlog mutation")
+
+        ok = True
 
         return DeleteBlog(ok=ok)
+
 
 class Mutation(graphene.ObjectType):
     create_blog = CreateBlog.Field()

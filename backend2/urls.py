@@ -8,7 +8,11 @@ from core import views
 
 urlpatterns = [
     path('logout/', views.logout, name='logout'),
-    path('graphql/', csrf_exempt(GraphQLView.as_view(graphiql=True)), name='graphql'),
+    path(
+        'graphql/',
+        csrf_exempt(GraphQLView.as_view(graphiql=True)),
+        name='graphql'
+        ),
     path('oidc/failure/', views.oidc_failure, name='oidc_failure'),
     path('oidc/', include('mozilla_django_oidc.urls')),
     path('files/upload/', csrf_exempt(views.upload), name='upload'),

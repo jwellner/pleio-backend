@@ -5,12 +5,18 @@ from django.shortcuts import render, redirect
 from django.conf import settings
 from .models import BinaryFile
 
+
 def index(request):
     return JsonResponse({
         'app': 'backend2',
         'status': 200,
-        'description': 'Backend2 is working correctly. Visit /graphql/ for the GraphQL API, visit /oidc/authenticate/ for login, visit /logout/ for logout, visit /admin/ for the admin panel.'
+        'description': 'Backend2 is working correctly. '
+                       'Visit /graphql/ for the GraphQL API, '
+                       'visit /oidc/authenticate/ for login, '
+                       'visit /logout/ for logout, '
+                       'visit /admin/ for the admin panel.'
     })
+
 
 @login_required
 def upload(request):
@@ -28,10 +34,15 @@ def upload(request):
     )
 
     data = {
-        'id': '{}.{}:{}'.format(binary_file._meta.app_label, binary_file._meta.object_name, binary_file.id).lower()
+        'id': '{}.{}:{}'.format(
+            binary_file._meta.app_label,
+            binary_file._meta.object_name,
+            binary_file.id
+            ).lower()
     }
 
     return JsonResponse(data)
+
 
 def logout(request):
     LogoutView.as_view()(request)
@@ -41,6 +52,7 @@ def logout(request):
 
     oidc_url = settings.OIDC_OP_LOGOUT_ENDPOINT
     return redirect(oidc_url + redirect_uri)
+
 
 def oidc_failure(request):
     print('oidc_failure')

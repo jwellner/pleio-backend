@@ -1,6 +1,7 @@
 from django.db import models
 from core.models import Object
 
+
 class Question(Object):
     class Meta:
         ordering = ['-id']

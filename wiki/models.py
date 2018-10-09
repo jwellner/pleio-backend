@@ -1,6 +1,7 @@
 from django.db import models
 from core.models import Object
 
+
 class Wiki(Object):
     class Meta:
         ordering = ['-id']

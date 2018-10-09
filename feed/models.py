@@ -1,8 +1,12 @@
-from django.contrib.contenttypes.fields import GenericForeignKey, GenericRelation
+from django.contrib.contenttypes.fields import (
+    GenericForeignKey,
+    GenericRelation
+    )
 from django.contrib.postgres.fields import ArrayField
 from django.contrib.contenttypes.models import ContentType
 from django.db import models
 from core.lib import get_acl
+
 
 class FeedManager(models.Manager):
     def visible(self, user):
@@ -13,11 +17,20 @@ class FeedManager(models.Manager):
 
         return queryset.filter(read_access__contained_by=list(get_acl(user)))
 
+
 class Feed(models.Model):
     objects = FeedManager()
 
-    read_access = ArrayField(models.CharField(max_length=32), blank=True, default=['private'])
-    write_access = ArrayField(models.CharField(max_length=32), blank=True, default=['private'])
+    read_access = ArrayField(
+        models.CharField(max_length=32),
+        blank=True,
+        default=['private']
+        )
+    write_access = ArrayField(
+        models.CharField(max_length=32),
+        blank=True,
+        default=['private']
+        )
 
     created_at = models.DateTimeField(auto_now_add=True)
 

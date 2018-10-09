@@ -5,11 +5,13 @@ from core.lib import get_id
 from .models import Event
 from .nodes import EventNode
 
+
 class EventInput(graphene.InputObjectType):
     title = graphene.String(required=True)
     description = graphene.String(required=True)
     start_date = graphene.DateTime(required=True)
     end_date = graphene.DateTime(required=True)
+
 
 class CreateEvent(graphene.Mutation):
     class Arguments:
@@ -33,11 +35,12 @@ class CreateEvent(graphene.Mutation):
                 reversion.set_comment("createEvent mutation")
 
             ok = True
-        except:
+        except Exception:
             event = None
             ok = False
 
         return CreateEvent(event=event, ok=ok)
+
 
 class UpdateEvent(graphene.Mutation):
     class Arguments:
@@ -61,11 +64,12 @@ class UpdateEvent(graphene.Mutation):
                 reversion.set_comment("updateEvent mutation")
 
             ok = True
-        except:
+        except Exception:
             event = None
             ok = False
 
         return UpdateEvent(event=event, ok=ok)
+
 
 class DeleteEvent(graphene.Mutation):
     class Arguments:
@@ -83,11 +87,12 @@ class DeleteEvent(graphene.Mutation):
                 reversion.set_comment("deleteEvent mutation")
 
             ok = True
-        except:
+        except Exception:
             event = None
             ok = False
 
         return DeleteEvent(ok=ok)
+
 
 class Mutation(graphene.ObjectType):
     create_event = CreateEvent.Field()
