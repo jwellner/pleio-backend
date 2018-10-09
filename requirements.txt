@@ -1,4 +1,4 @@
-Django==2.0
+Django==2.0.9
 graphene>=2.1
 graphene-django>=2.0
 psycopg2-binary==2.7.5
