@@ -21,9 +21,13 @@ before_script:
   - cp ./docker/config.py kees/config.py
 
 pylint:
+  tags:
+    - docker
   script:
-  - pylint blog cms core discussion event feed file news notifications poll question wiki
+    - pylint blog cms core discussion event feed file news notifications poll question wiki
 
 test:
+  tags:
+    - docker
   script:
-  - python manage.py test
+    - python manage.py test
