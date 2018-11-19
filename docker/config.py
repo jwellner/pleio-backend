@@ -30,6 +30,15 @@ EMAIL_PORT = os.getenv('EMAIL_PORT')
 LOCAL_APPS = [
     'blog',
     'notifications',
+    'cms',
+    'discussion',
+    'event',
+    'feed',
+    'file',
+    'news',
+    'poll',
+    'question',
+    'wiki',
 ]
 
 STATIC_ROOT = '/app/static'

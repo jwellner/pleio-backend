@@ -18,7 +18,7 @@ before_script:
   - python -V
   - pip install -r requirements.txt
   - ls
-  - cp ./docker/config.py kees/config.py
+  - cp ./docker/config.py backend2/config.py
 
 pylint:
   tags:
