@@ -1,20 +1,19 @@
 import graphene
-from .lists import PaginatedQuestionList
-from .nodes import QuestionNode
-from .models import Question
+from .lists import QuestionList
+from .models import Question as QuestionModel
 
 
 class Query(object):
     questions = graphene.Field(
-        PaginatedQuestionList,
+        QuestionList,
         offset=graphene.Int(),
         limit=graphene.Int()
         )
 
     def resolve_questions(self, info, offset=0, limit=20):
-        return PaginatedQuestionList(
-            totalCount=Question.objects.visible(info.context.user).count(),
-            edges=Question.objects.visible(
+        return QuestionList(
+            totalCount=QuestionModel.objects.visible(info.context.user).count(),
+            edges=QuestionModel.objects.visible(
                 info.context.user
                 )[offset:(offset+limit)]
         )

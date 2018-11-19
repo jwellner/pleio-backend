@@ -1,13 +1,13 @@
 import graphene
 from graphene_django.types import DjangoObjectType
-from core.nodes import Node
-from .models import News
+from core.entities import Entity
+from .models import News as NewsModel
 
 
-class NewsNode(DjangoObjectType):
+class News(DjangoObjectType):
     class Meta:
-        model = News
-        interfaces = (Node, )
+        model = NewsModel
+        interfaces = (Entity, )
 
     can_write = graphene.Boolean(required=True)
 

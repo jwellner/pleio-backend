@@ -3,8 +3,8 @@ import graphene
 import reversion
 
 from core.lib import get_id
-from .models import Blog
-from .nodes import BlogNode
+from .models import Blog as BlogModel
+from .entities import Blog
 
 # Get an instance of a logger
 logger = logging.getLogger(__name__)
@@ -23,7 +23,7 @@ class CreateBlog(graphene.Mutation):
         input = BlogInput(required=True)
 
     ok = graphene.Boolean()
-    blog = graphene.Field(lambda: BlogNode)
+    blog = graphene.Field(lambda: Blog)
 
     def mutate(self, info, input):
         ok = False
@@ -53,7 +53,7 @@ class UpdateBlog(graphene.Mutation):
         input = BlogInput(required=True)
 
     ok = graphene.Boolean()
-    blog = graphene.Field(lambda: BlogNode)
+    blog = graphene.Field(lambda: Blog)
 
     def mutate(self, info, id, input):
         ok = False

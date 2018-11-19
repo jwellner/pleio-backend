@@ -1,6 +1,6 @@
 import graphene
 
 
-class PaginatedEventList(graphene.ObjectType):
+class EventList(graphene.ObjectType):
     totalCount = graphene.Int(required=True)
-    edges = graphene.List('event.nodes.EventNode')
+    edges = graphene.List('event.entities.Event')

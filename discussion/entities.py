@@ -1,13 +1,13 @@
 import graphene
 from graphene_django.types import DjangoObjectType
-from core.nodes import Node
-from .models import Question
+from core.entities import Entity
+from .models import Discussion as DiscussionModel
 
 
-class QuestionNode(DjangoObjectType):
+class Discussion(DjangoObjectType):
     class Meta:
-        model = Question
-        interfaces = (Node, )
+        model = DiscussionModel
+        interfaces = (Entity, )
 
     can_write = graphene.Boolean(required=True)
 

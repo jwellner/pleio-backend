@@ -1,6 +1,6 @@
 import graphene
 
 
-class PaginatedWikiList(graphene.ObjectType):
+class WikiList(graphene.ObjectType):
     totalCount = graphene.Int(required=True)
-    edges = graphene.List('wiki.nodes.WikiNode')
+    edges = graphene.List('wiki.entities.Wiki')

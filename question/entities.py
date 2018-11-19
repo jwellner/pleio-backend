@@ -1,13 +1,13 @@
 import graphene
 from graphene_django.types import DjangoObjectType
-from core.nodes import Node
-from .models import CmsPage
+from core.entities import Entity
+from .models import Question as QuestionModel
 
 
-class CmsPageNode(DjangoObjectType):
+class Question(DjangoObjectType):
     class Meta:
-        model = CmsPage
-        interfaces = (Node, )
+        model = QuestionModel
+        interfaces = (Entity, )
 
     can_write = graphene.Boolean(required=True)
 

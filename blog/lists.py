@@ -1,6 +1,6 @@
 import graphene
 
 
-class PaginatedBlogList(graphene.ObjectType):
+class BlogList(graphene.ObjectType):
     totalCount = graphene.Int(required=True)
-    edges = graphene.List('blog.nodes.BlogNode')
+    edges = graphene.List('blog.entities.Blog')

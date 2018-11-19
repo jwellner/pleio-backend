@@ -1,17 +1,16 @@
 import graphene
 from graphene_django.types import DjangoObjectType
-from core.nodes import Node, CommentNode
-from core.models import Comment
-from .models import Blog
+from core.entities import Entity, Comment
+from .models import Blog as BlogModel
 
 
-class BlogNode(DjangoObjectType):
+class Blog(DjangoObjectType):
     class Meta:
-        model = Blog
-        interfaces = (Node, )
+        model = BlogModel
+        interfaces = (Entity, )
 
     can_write = graphene.Boolean(required=True)
-    comments = graphene.List(CommentNode)
+    comments = graphene.List(Comment)
 
     def resolve_id(self, info):
         return '{}.{}:{}'.format(
