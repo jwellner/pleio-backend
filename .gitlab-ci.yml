@@ -1,0 +1,29 @@
+image: python:latest
+
+services:
+  - postgres:latest
+
+variables:
+  SECRET_KEY: bg9kU6ckKXTLQeZxtovc
+  DB_HOST: postgres
+  DB_USER: postgres
+  DB_PASSWORD: postgres
+  DB_NAME: postgres
+
+cache:
+  paths:
+  - ~/.cache/pip/
+
+before_script:
+  - python -V
+  - pip install -r requirements.txt
+  - ls
+  - cp ./docker/config.py kees/config.py
+
+pylint:
+  script:
+  - pylint blog cms core discussion event feed file news notifications poll question wiki
+
+test:
+  script:
+  - python manage.py test

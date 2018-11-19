@@ -9,3 +9,7 @@ elasticsearch-dsl>=6.0.0,<7.0.0
 uwsgi==2.0.17
 mozilla-django-oidc==1.1.1
 django-reversion>=2.0.13
+Sphinx==1.7.4
+sphinx-autobuild==0.7.1
+pylint==2.1.1
+coverage==4.5.1
