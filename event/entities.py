@@ -1,13 +1,13 @@
 from graphene_django.types import DjangoObjectType
 from graphene import relay
-from core.nodes import Node
-from .models import Event
+from core.entities import Entity
+from .models import Event as EventModel
 
 
-class EventNode(DjangoObjectType):
+class Event(DjangoObjectType):
     class Meta:
-        model = Event
-        interfaces = (Node, )
+        model = EventModel
+        interfaces = (Entity, )
 
     def resolve_id(self, info):
         return '{}.{}:{}'.format(

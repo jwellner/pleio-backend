@@ -4,8 +4,8 @@ from django.contrib.contenttypes.models import ContentType
 from django.db import transaction
 from graphql import GraphQLError
 from .lib import get_id
-from .models import Comment, Group, User
-from .nodes import Node, GroupNode, CommentNode
+from .models import Comment as CommentModel, Group as GroupModel, User as UserModel
+from .entities import Entity, Group, Comment
 from .constances import *
 
 
@@ -19,7 +19,7 @@ class CreateComment(graphene.Mutation):
         input = CommentInput(required=True)
 
     ok = graphene.Boolean()
-    container = graphene.Field(lambda: Node)
+    container = graphene.Field(lambda: Entity)
 
     def mutate(self, info, container_id, input):
         parts = container_id.split(':')
@@ -39,7 +39,7 @@ class CreateComment(graphene.Mutation):
             raise GraphQLError(COULD_NOT_ADD)
 
         with reversion.create_revision():
-            comment = Comment.objects.create(
+            comment = CommentModel.objects.create(
                 container=container,
                 description=input['description'],
                 owner=info.context.user
@@ -59,10 +59,10 @@ class UpdateComment(graphene.Mutation):
         input = CommentInput(required=True)
 
     ok = graphene.Boolean()
-    comment = graphene.Field(lambda: CommentNode)
+    comment = graphene.Field(lambda: Comment)
 
     def mutate(self, info, id, input):
-        comment = Comment.objects.get(id=get_id(id))
+        comment = CommentModel.objects.get(id=get_id(id))
 
         if not comment.can_write(info.context.user):
             raise GraphQLError(COULD_NOT_ADD)
@@ -86,7 +86,7 @@ class DeleteComment(graphene.Mutation):
     ok = graphene.Boolean()
 
     def mutate(self, info, id):
-        comment = Comment.objects.get(id=get_id(id))
+        comment = CommentModel.objects.get(id=get_id(id))
 
         if not comment.can_write(info.context.user):
             raise GraphQLError(COULD_NOT_DELETE)
@@ -115,7 +115,7 @@ class CreateGroup(graphene.Mutation):
         input = GroupInput(required=True)
 
     ok = graphene.Boolean()
-    group = graphene.Field(lambda: GroupNode)
+    group = graphene.Field(lambda: Group)
 
     def mutate(self, info, input):
         ok = False
@@ -125,7 +125,7 @@ class CreateGroup(graphene.Mutation):
             raise GraphQLError(NOT_LOGGED_IN)
 
         with reversion.create_revision():
-            group = Group.objects.create(
+            group = GroupModel.objects.create(
                 name=input['name'],
                 description=input['description'],
                 is_open=input['is_open'],
@@ -150,14 +150,14 @@ class UpdateGroup(graphene.Mutation):
         input = GroupInput(required=True)
 
     ok = graphene.Boolean()
-    group = graphene.Field(lambda: GroupNode)
+    group = graphene.Field(lambda: Group)
 
     def mutate(self, info, id, input):
         ok = False
         group = None
 
         try:
-            group = Group.objects.get(pk=get_id(id))
+            group = GroupModel.objects.get(pk=get_id(id))
 
             if not group.can_change(info.context.user):
                 raise GraphQLError(USER_NOT_GROUP_OWNER_OR_SITE_ADMIN)
@@ -174,7 +174,7 @@ class UpdateGroup(graphene.Mutation):
                 reversion.set_comment("updateGroup mutation")
 
             ok = True
-        except Group.DoesNotExist:
+        except GroupModel.DoesNotExist:
             raise GraphQLError(COULD_NOT_FIND_GROUP)
 
         return UpdateGroup(ok=ok, group=group)
@@ -190,7 +190,7 @@ class DeleteGroup(graphene.Mutation):
         ok = False
 
         try:
-            group = Group.objects.get(pk=get_id(id))
+            group = GroupModel.objects.get(pk=get_id(id))
 
             if not group.can_change(info.context.user):
                 raise GraphQLError(USER_NOT_GROUP_OWNER_OR_SITE_ADMIN)
@@ -211,7 +211,7 @@ class DeleteGroup(graphene.Mutation):
                 reversion.set_comment("deleteGroup mutation")
 
             ok = True
-        except Group.DoesNotExist:
+        except GroupModel.DoesNotExist:
             raise GraphQLError(COULD_NOT_FIND_GROUP)
 
         return DeleteGroup(ok=ok)
@@ -222,14 +222,14 @@ class JoinGroup(graphene.Mutation):
         id = graphene.ID(required=True)
 
     ok = graphene.Boolean()
-    group = graphene.Field(lambda: GroupNode)
+    group = graphene.Field(lambda: Group)
 
     def mutate(self, info, id):
         ok = False
         group = None
 
         try:
-            group = Group.objects.get(pk=get_id(id))
+            group = GroupModel.objects.get(pk=get_id(id))
 
             if not group.can_join(info.context.user):
                 raise GraphQLError(COULD_NOT_ADD)
@@ -247,7 +247,7 @@ class JoinGroup(graphene.Mutation):
                 reversion.set_comment("joinGroup mutation")
 
             ok = True
-        except Group.DoesNotExist:
+        except GroupModel.DoesNotExist:
             raise GraphQLError(COULD_NOT_FIND_GROUP)
 
         return JoinGroup(ok=ok, group=group)
@@ -258,14 +258,14 @@ class LeaveGroup(graphene.Mutation):
         id = graphene.ID(required=True)
 
     ok = graphene.Boolean()
-    group = graphene.Field(lambda: GroupNode)
+    group = graphene.Field(lambda: Group)
 
     def mutate(self, info, id):
         ok = False
         group = None
 
         try:
-            group = Group.objects.get(pk=get_id(id))
+            group = GroupModel.objects.get(pk=get_id(id))
 
             if not info.context.user.is_authenticated:
                 raise GraphQLError(NOT_LOGGED_IN)
@@ -280,7 +280,7 @@ class LeaveGroup(graphene.Mutation):
                 reversion.set_comment("leaveGroup mutation")
 
             ok = True
-        except Group.DoesNotExist:
+        except GroupModel.DoesNotExist:
             raise GraphQLError(COULD_NOT_FIND_GROUP)
 
         return LeaveGroup(ok=ok, group=group)
@@ -298,20 +298,20 @@ class ChangeMembershipGroup(graphene.Mutation):
         input = MembershipInput(required=True)
 
     ok = graphene.Boolean()
-    group = graphene.Field(lambda: GroupNode)
+    group = graphene.Field(lambda: Group)
 
     def mutate(self, info, id, input):
         ok = False
         group = None
 
         try:
-            group = Group.objects.get(pk=get_id(id))
+            group = GroupModel.objects.get(pk=get_id(id))
 
             if not group.can_change(info.context.user):
                 raise GraphQLError(USER_NOT_GROUP_OWNER_OR_SITE_ADMIN)
 
             with reversion.create_revision():
-                user = User.objects.get(pk=get_id(input['userid']))
+                user = UserModel.objects.get(pk=get_id(input['userid']))
                 group.join(user, input['type'])
                 group.save()
 
@@ -319,7 +319,7 @@ class ChangeMembershipGroup(graphene.Mutation):
                 reversion.set_comment("changeMembershipGroup mutation")
 
             ok = True
-        except Group.DoesNotExist:
+        except GroupModel.DoesNotExist:
             raise GraphQLError(COULD_NOT_FIND_GROUP)
 
         return ChangeMembershipGroup(ok=ok, group=group)
@@ -332,20 +332,20 @@ class RemoveMembershipGroup(graphene.Mutation):
         userid = graphene.ID(required=True)
 
     ok = graphene.Boolean()
-    group = graphene.Field(lambda: GroupNode)
+    group = graphene.Field(lambda: Group)
 
     def mutate(self, info, id, userid):
         ok = False
         group = None
 
         try:
-            group = Group.objects.get(pk=get_id(id))
+            group = GroupModel.objects.get(pk=get_id(id))
 
             if not group.can_change(info.context.user):
                 raise GraphQLError(USER_NOT_GROUP_OWNER_OR_SITE_ADMIN)
 
             with reversion.create_revision():
-                user = User.objects.get(pk=get_id(userid))
+                user = UserModel.objects.get(pk=get_id(userid))
                 group.leave(user)
                 group.save()
 
@@ -353,7 +353,7 @@ class RemoveMembershipGroup(graphene.Mutation):
                 reversion.set_comment("removeMembershipGroup mutation")
 
             ok = True
-        except Group.DoesNotExist:
+        except GroupModel.DoesNotExist:
             raise GraphQLError(COULD_NOT_FIND_GROUP)
 
         return RemoveMembershipGroup(ok=ok, group=group)

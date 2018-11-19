@@ -1,13 +1,13 @@
 import graphene
 from graphene_django.types import DjangoObjectType
-from core.nodes import Node
-from .models import Wiki
+from core.entities import Entity
+from .models import CmsPage as CmsPageModel
 
 
-class WikiNode(DjangoObjectType):
+class CmsPage(DjangoObjectType):
     class Meta:
-        model = Wiki
-        interfaces = (Node, )
+        model = CmsPageModel
+        interfaces = (Entity, )
 
     can_write = graphene.Boolean(required=True)
 

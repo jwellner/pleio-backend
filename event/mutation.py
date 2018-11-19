@@ -2,8 +2,8 @@ import graphene
 import reversion
 
 from core.lib import get_id
-from .models import Event
-from .nodes import EventNode
+from .models import Event as EventModel
+from .entities import Event
 
 
 class EventInput(graphene.InputObjectType):
@@ -18,12 +18,12 @@ class CreateEvent(graphene.Mutation):
         input = EventInput(required=True)
 
     ok = graphene.Boolean()
-    event = graphene.Field(lambda: EventNode)
+    event = graphene.Field(lambda: Event)
 
     def mutate(self, info, title, input):
         try:
             with reversion.create_revision():
-                event = Event.objects.create(
+                event = EventModel.objects.create(
                     owner=info.context.user,
                     title=input['title'],
                     description=input['description'],
@@ -48,12 +48,12 @@ class UpdateEvent(graphene.Mutation):
         input = EventInput(required=True)
 
     ok = graphene.Boolean()
-    event = graphene.Field(lambda: EventNode)
+    event = graphene.Field(lambda: Event)
 
     def mutate(self, info, id, input):
         try:
             with reversion.create_revision():
-                event = Event.objects.get(pk=get_id(id))
+                event = EventModel.objects.get(pk=get_id(id))
                 event.title = input['title']
                 event.description = input['description']
                 event.start_date = input['start_date']
@@ -80,7 +80,7 @@ class DeleteEvent(graphene.Mutation):
     def mutate(self, info, id):
         try:
             with reversion.create_revision():
-                event = Event.objects.get(pk=get_id(id))
+                event = EventModel.objects.get(pk=get_id(id))
                 event.delete()
 
                 reversion.set_user(info.context.user)

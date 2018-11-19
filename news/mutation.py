@@ -2,8 +2,8 @@ import graphene
 import reversion
 
 from core.lib import get_id
-from .models import News
-from .nodes import NewsNode
+from .models import News as NewsModel
+from .entities import News
 
 
 class NewsInput(graphene.InputObjectType):
@@ -16,12 +16,12 @@ class CreateNews(graphene.Mutation):
         input = NewsInput(required=True)
 
     ok = graphene.Boolean()
-    news = graphene.Field(lambda: NewsNode)
+    news = graphene.Field(lambda: News)
 
     def mutate(self, info, input):
         try:
             with reversion.create_revision():
-                news = News.objects.create(
+                news = NewsModel.objects.create(
                     owner=info.context.user,
                     title=input['title'],
                     description=input['description']
@@ -44,12 +44,12 @@ class UpdateNews(graphene.Mutation):
         input = NewsInput(required=True)
 
     ok = graphene.Boolean()
-    news = graphene.Field(lambda: NewsNode)
+    news = graphene.Field(lambda: News)
 
     def mutate(self, info, id, input):
         try:
             with reversion.create_revision():
-                news = News.objects.get(pk=get_id(id))
+                news = NewsModel.objects.get(pk=get_id(id))
                 news.title = input['title']
                 news.description = input['description']
                 news.save()
@@ -74,7 +74,7 @@ class DeleteNews(graphene.Mutation):
     def mutate(self, info, id):
         try:
             with reversion.create_revision():
-                news = News.objects.get(pk=get_id(id))
+                news = NewsModel.objects.get(pk=get_id(id))
                 news.delete()
 
                 reversion.set_user(info.context.user)

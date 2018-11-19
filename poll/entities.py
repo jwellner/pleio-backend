@@ -1,12 +1,12 @@
 import graphene
 from graphene_django.types import DjangoObjectType
-from core.nodes import Node
-from .models import Poll
+from core.entities import Entity
+from .models import Poll as PollModel
 
-class PollNode(DjangoObjectType):
+class Poll(DjangoObjectType):
     class Meta:
-        model = Poll
-        interfaces = (Node, )
+        model = PollModel
+        interfaces = (Entity, )
 
     can_write = graphene.Boolean(required=True)
 

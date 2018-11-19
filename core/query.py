@@ -1,17 +1,18 @@
 from django.contrib.contenttypes.models import ContentType
 import graphene
-from .nodes import Node, ViewerNode
-from .lists import PaginatedGroupList
-from .models import Group
+from .entities import Entity, Viewer
+from .lists import GroupList
+from .models import Group as GroupModel
 
 
 class Query(object):
-    node = graphene.Field(Node, id=graphene.ID(required=True))
-    viewer = graphene.Field(ViewerNode)
+    entity = graphene.Field(Entity, id=graphene.ID(required=True))
+    viewer = graphene.Field(Viewer)
     groups = graphene.Field(
-        PaginatedGroupList,
+        GroupList,
+        filter=graphene.String(),
         offset=graphene.Int(),
-        limit=graphene.Int()
+        limit=graphene.Int(),
         )
 
     def resolve_node(self, info, id):
@@ -36,15 +37,15 @@ class Query(object):
             pass
 
     def resolve_groups(self, info, offset=0, limit=20):
-        return PaginatedGroupList(
-            totalCount=Group.objects.count(),
-            edges=Group.objects.all()[offset:(offset+limit)]
+        return GroupList(
+            totalCount=GroupModel.objects.count(),
+            edges=GroupModel.objects.all()[offset:(offset+limit)]
         )
 
     def resolve_viewer(self, info):
         user = info.context.user
 
-        return ViewerNode(
+        return Viewer(
             is_authenticated=user.is_authenticated,
             user=(user if user.is_authenticated else None)
         )

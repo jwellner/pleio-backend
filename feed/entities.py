@@ -2,17 +2,17 @@ from graphene_django.types import DjangoObjectType
 import graphene
 from graphene import relay
 from core.lib import get_type, get_id
-from core.nodes import Node
-from .models import Feed
+from core.entities import Entity
+from .models import Feed as FeedModel
 
 
-class FeedNode(DjangoObjectType):
+class Feed(DjangoObjectType):
     class Meta:
-        model = Feed
-        interfaces = (Node, )
+        model = FeedModel
+        interfaces = (Entity, )
         only_fields = ['id']
 
-    node = graphene.Field(Node)
+    node = graphene.Field(Entity)
 
     def resolve_id(self, info):
         return '{}.{}:{}'.format(

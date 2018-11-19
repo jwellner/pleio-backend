@@ -1,20 +1,19 @@
 import graphene
-from .lists import PaginatedEventList
-from .nodes import EventNode
-from .models import Event
+from .lists import EventList
+from .models import Event as EventModel
 
 
 class Query(object):
     events = graphene.Field(
-        PaginatedEventList,
+        EventList,
         offset=graphene.Int(),
         limit=graphene.Int()
         )
 
     def resolve_events(self, info, offset=0, limit=20):
-        return PaginatedEventList(
-            totalCount=Event.objects.visible(info.context.user).count(),
-            edges=Event.objects.visible(
+        return EventList(
+            totalCount=EventModel.objects.visible(info.context.user).count(),
+            edges=EventModel.objects.visible(
                 info.context.user
                 )[offset:(offset+limit)]
         )

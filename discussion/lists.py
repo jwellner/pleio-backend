@@ -1,6 +1,6 @@
 import graphene
 
 
-class PaginatedDiscussionList(graphene.ObjectType):
+class DiscussionList(graphene.ObjectType):
     totalCount = graphene.Int(required=True)
-    edges = graphene.List('discussion.nodes.DiscussionNode')
+    edges = graphene.List('discussion.entities.Discussion')

@@ -2,8 +2,8 @@ import graphene
 import reversion
 
 from core.lib import get_id
-from .models import Question
-from .nodes import QuestionNode
+from .models import Question as QuestionModel
+from .entities import Question
 
 
 class QuestionInput(graphene.InputObjectType):
@@ -16,12 +16,12 @@ class CreateQuestion(graphene.Mutation):
         input = QuestionInput(required=True)
 
     ok = graphene.Boolean()
-    question = graphene.Field(lambda: QuestionNode)
+    question = graphene.Field(lambda: Question)
 
     def mutate(self, info, title, description):
         try:
             with reversion.create_revision():
-                question = Question.objects.create(
+                question = QuestionModel.objects.create(
                     owner=info.context.user,
                     title=title,
                     description=description
@@ -44,12 +44,12 @@ class UpdateQuestion(graphene.Mutation):
         input = QuestionInput(required=True)
 
     ok = graphene.Boolean()
-    question = graphene.Field(lambda: QuestionNode)
+    question = graphene.Field(lambda: Question)
 
     def mutate(self, info, id, title, description):
         try:
             with reversion.create_revision():
-                question = Question.objects.get(pk=get_id(id))
+                question = QuestionModel.objects.get(pk=get_id(id))
                 question.title = title
                 question.description = description
                 question.save()
@@ -74,7 +74,7 @@ class DeleteQuestion(graphene.Mutation):
     def mutate(self, info, id):
         try:
             with reversion.create_revision():
-                question = Question.objects.get(pk=get_id(id))
+                question = QuestionModel.objects.get(pk=get_id(id))
                 question.delete()
 
                 reversion.set_user(info.context.user)

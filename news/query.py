@@ -1,20 +1,19 @@
 import graphene
-from .lists import PaginatedNewsList
-from .nodes import NewsNode
-from .models import News
+from .lists import NewsList
+from .models import News as NewsModel
 
 
 class Query(object):
     news = graphene.Field(
-        PaginatedNewsList,
+        NewsList,
         offset=graphene.Int(),
         limit=graphene.Int()
         )
 
     def resolve_news(self, info, offset=0, limit=20):
-        return PaginatedNewsList(
-            totalCount=News.objects.visible(info.context.user).count(),
-            edges=News.objects.visible(
+        return NewsList(
+            totalCount=NewsModel.objects.visible(info.context.user).count(),
+            edges=NewsModel.objects.visible(
                 info.context.user
                 )[offset:(offset+limit)]
         )

@@ -2,8 +2,8 @@ import graphene
 import reversion
 
 from core.lib import get_id
-from .models import Wiki
-from .nodes import WikiNode
+from .models import Wiki as WikiModel
+from .entities import Wiki
 
 
 class WikiInput(graphene.InputObjectType):
@@ -16,12 +16,12 @@ class CreateWiki(graphene.Mutation):
         input = WikiInput(required=True)
 
     ok = graphene.Boolean()
-    wiki = graphene.Field(lambda: WikiNode)
+    wiki = graphene.Field(lambda: Wiki)
 
     def mutate(self, info, input):
         try:
             with reversion.create_revision():
-                wiki = Wiki.objects.create(
+                wiki = WikiModel.objects.create(
                     owner=info.context.user,
                     title=input['title'],
                     description=input['description']
@@ -44,12 +44,12 @@ class UpdateWiki(graphene.Mutation):
         input = WikiInput(required=True)
 
     ok = graphene.Boolean()
-    wiki = graphene.Field(lambda: WikiNode)
+    wiki = graphene.Field(lambda: Wiki)
 
     def mutate(self, info, id, input):
         try:
             with reversion.create_revision():
-                wiki = Wiki.objects.get(pk=get_id(id))
+                wiki = WikiModel.objects.get(pk=get_id(id))
                 wiki.title = input['title']
                 wiki.description = input['description']
                 wiki.save()
@@ -74,7 +74,7 @@ class DeleteWiki(graphene.Mutation):
     def mutate(self, info, id):
         try:
             with reversion.create_revision():
-                wiki = Wiki.objects.get(pk=get_id(id))
+                wiki = WikiModel.objects.get(pk=get_id(id))
                 wiki.delete()
 
                 reversion.set_user(info.context.user)

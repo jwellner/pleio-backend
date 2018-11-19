@@ -1,16 +1,16 @@
 import graphene
 
 
-class PaginatedGroupList(graphene.ObjectType):
+class GroupList(graphene.ObjectType):
     totalCount = graphene.Int(required=True)
-    edges = graphene.List('core.nodes.GroupNode')
+    edges = graphene.List('core.entities.Group')
 
 
-class PaginatedMembersList(graphene.ObjectType):
+class MembersList(graphene.ObjectType):
     totalCount = graphene.Int(required=True)
-    edges = graphene.List('core.nodes.GroupMembershipNode')
+    edges = graphene.List('core.entities.GroupMembership')
 
 
-class PaginatedNodeList(graphene.ObjectType):
+class EntityList(graphene.ObjectType):
     totalCount = graphene.Int(required=True)
-    edges = graphene.List('core.nodes.Node')
+    edges = graphene.List('core.entities.Entity')

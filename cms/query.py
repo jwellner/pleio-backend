@@ -1,20 +1,19 @@
 import graphene
-from .lists import PaginatedCmsPageList
-from .nodes import CmsPageNode
-from .models import CmsPage
+from .lists import CmsPageList
+from .models import CmsPage as CmsPageModel
 
 
 class Query(object):
     cms_pages = graphene.Field(
-        PaginatedCmsPageList,
+        CmsPageList,
         offset=graphene.Int(),
         limit=graphene.Int()
         )
 
     def resolve_cms_pages(self, info, offset=0, limit=20):
-        return PaginatedCmsPageList(
-            totalCount=CmsPage.objects.visible(info.context.user).count(),
-            edges=CmsPage.objects.visible(
+        return CmsPageList(
+            totalCount=CmsPageModel.objects.visible(info.context.user).count(),
+            edges=CmsPageModel.objects.visible(
                 info.context.user
                 )[offset:(offset+limit)]
         )

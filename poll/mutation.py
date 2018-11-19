@@ -2,8 +2,8 @@ import graphene
 import reversion
 
 from core.lib import get_id
-from .models import Poll
-from .nodes import PollNode
+from .models import Poll as PollModel
+from .entities import Poll
 
 class PollInput(graphene.InputObjectType):
     title = graphene.String(required=True)
@@ -14,12 +14,12 @@ class CreatePoll(graphene.Mutation):
         input = PollInput(required=True)
 
     ok = graphene.Boolean()
-    poll = graphene.Field(lambda: PollNode)
+    poll = graphene.Field(lambda: Poll)
 
     def mutate(self, info, input):
         try:
             with reversion.create_revision():
-                poll = Poll.objects.create(
+                poll = PollModel.objects.create(
                     owner=info.context.user,
                     title=input['title'],
                     description=input['description']
@@ -41,12 +41,12 @@ class UpdatePoll(graphene.Mutation):
         input = PollInput(required=True)
 
     ok = graphene.Boolean()
-    poll = graphene.Field(lambda: PollNode)
+    poll = graphene.Field(lambda: Poll)
 
     def mutate(self, info, id, input):
         try:
             with reversion.create_revision():
-                poll = Poll.objects.get(pk=get_id(id))
+                poll = PollModel.objects.get(pk=get_id(id))
                 poll.title = input['title']
                 poll.description = input['description']
                 poll.save()
@@ -70,7 +70,7 @@ class DeletePoll(graphene.Mutation):
     def mutate(self, info, id):
         try:
             with reversion.create_revision():
-                poll = Poll.objects.get(pk=get_id(id))
+                poll = PollModel.objects.get(pk=get_id(id))
                 poll.delete()
 
                 reversion.set_user(info.context.user)

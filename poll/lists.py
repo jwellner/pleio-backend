@@ -1,5 +1,5 @@
 import graphene
 
-class PaginatedPollList(graphene.ObjectType):
+class PollList(graphene.ObjectType):
     totalCount = graphene.Int(required=True)
-    edges = graphene.List('poll.nodes.PollNode')
+    edges = graphene.List('poll.entities.Poll')

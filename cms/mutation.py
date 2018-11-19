@@ -2,8 +2,8 @@ import graphene
 import reversion
 
 from core.lib import get_id
-from .models import CmsPage
-from .nodes import CmsPageNode
+from .models import CmsPage as CmsPageModel
+from .entities import CmsPage
 
 
 class CmsPageInput(graphene.InputObjectType):
@@ -16,12 +16,12 @@ class CreateCmsPage(graphene.Mutation):
         input = CmsPageInput(required=True)
 
     ok = graphene.Boolean()
-    cms_page = graphene.Field(lambda: CmsPageNode)
+    cms_page = graphene.Field(lambda: CmsPage)
 
     def mutate(self, info, input):
         try:
             with reversion.create_revision():
-                cms_page = CmsPage.objects.create(
+                cms_page = CmsPageModel.objects.create(
                     owner=info.context.user,
                     title=input['title'],
                     description=input['description']
@@ -44,12 +44,12 @@ class UpdateCmsPage(graphene.Mutation):
         input = CmsPageInput(required=True)
 
     ok = graphene.Boolean()
-    cms_page = graphene.Field(lambda: CmsPageNode)
+    cms_page = graphene.Field(lambda: CmsPage)
 
     def mutate(self, info, id, input):
         try:
             with reversion.create_revision():
-                cms_page = CmsPage.objects.get(pk=get_id(id))
+                cms_page = CmsPageModel.objects.get(pk=get_id(id))
                 cms_page.title = input['title']
                 cms_page.description = input['description']
                 cms_page.save()
@@ -74,7 +74,7 @@ class DeleteCmsPage(graphene.Mutation):
     def mutate(self, info, id):
         try:
             with reversion.create_revision():
-                cms_page = CmsPage.objects.get(pk=get_id(id))
+                cms_page = CmsPageModel.objects.get(pk=get_id(id))
                 cms_page.delete()
 
                 reversion.set_user(info.context.user)

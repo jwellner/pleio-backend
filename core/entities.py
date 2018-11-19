@@ -1,24 +1,25 @@
 import graphene
 from graphene_django.types import DjangoObjectType
 from django.contrib.contenttypes.models import ContentType
-from .models import User, Group, GroupMembership, Comment
-from .lists import PaginatedMembersList
+from .models import User as UserModel, Group as GroupModel, GroupMembership as GroupMembershipModel, Comment as CommentModel
+
+from .lists import MembersList
 
 
-class ViewerNode(graphene.ObjectType):
+class Viewer(graphene.ObjectType):
     is_authenticated = graphene.Boolean()
-    user = graphene.Field('core.nodes.UserNode')
+    user = graphene.Field('core.entities.User')
 
 
-class Node(graphene.Interface):
+class Entity(graphene.Interface):
     id = graphene.ID()
 
 
-class UserNode(DjangoObjectType):
+class User(DjangoObjectType):
     class Meta:
-        model = User
+        model = UserModel
         only_fields = ['id', 'name', 'picture']
-        interfaces = (Node, )
+        interfaces = (Entity, )
 
     def resolve_id(self, info):
         return '{}.{}:{}'.format(
@@ -26,9 +27,9 @@ class UserNode(DjangoObjectType):
             ).lower()
 
 
-class GroupNode(DjangoObjectType):
+class Group(DjangoObjectType):
     class Meta:
-        model = Group
+        model = GroupModel
         only_fields = [
             'id',
             'name',
@@ -41,10 +42,10 @@ class GroupNode(DjangoObjectType):
             'members',
             'is_member'
             ]
-        interfaces = (Node, )
+        interfaces = (Entity, )
 
     members = graphene.Field(
-        PaginatedMembersList, offset=graphene.Int(), limit=graphene.Int()
+        MembersList, offset=graphene.Int(), limit=graphene.Int()
         )
     is_member = graphene.Boolean(required=True)
 
@@ -54,7 +55,7 @@ class GroupNode(DjangoObjectType):
             ).lower()
 
     def resolve_members(self, info, offset=0, limit=20):
-        return PaginatedMembersList(
+        return MembersList(
             totalCount=self.members.count(),
             edges=self.members.all()[offset:(offset+limit)]
         )
@@ -63,10 +64,10 @@ class GroupNode(DjangoObjectType):
         return self.is_member(info.context.user)
 
 
-class GroupMembershipNode(DjangoObjectType):
+class GroupMembership(DjangoObjectType):
     class Meta:
-        model = GroupMembership
-        interfaces = (Node, )
+        model = GroupMembershipModel
+        interfaces = (Entity, )
 
     def resolve_id(self, info):
         return '{}.{}:{}'.format(
@@ -74,7 +75,7 @@ class GroupMembershipNode(DjangoObjectType):
             ).lower()
 
 
-class CommentNode(DjangoObjectType):
+class Comment(DjangoObjectType):
     id = graphene.ID()
 
     class Meta:
@@ -85,7 +86,7 @@ class CommentNode(DjangoObjectType):
             'created_at',
             'updated_at'
             ]
-        model = Comment
+        model = CommentModel
 
     def resolve_id(self, info):
         return '{}.{}:{}'.format(

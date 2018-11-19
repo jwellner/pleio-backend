@@ -2,8 +2,8 @@ import graphene
 import reversion
 
 from core.lib import get_id
-from .models import Discussion
-from .nodes import DiscussionNode
+from .models import Discussion as DiscussionModel
+from .entities import Discussion
 
 
 class DiscussionInput(graphene.InputObjectType):
@@ -16,12 +16,12 @@ class CreateDiscussion(graphene.Mutation):
         input = DiscussionInput(required=True)
 
     ok = graphene.Boolean()
-    discussion = graphene.Field(lambda: DiscussionNode)
+    discussion = graphene.Field(lambda: Discussion)
 
     def mutate(self, info, input):
         try:
             with reversion.create_revision():
-                discussion = Discussion.objects.create(
+                discussion = DiscussionModel.objects.create(
                     owner=info.context.user,
                     title=input['title'],
                     description=input['description']
@@ -44,12 +44,12 @@ class UpdateDiscussion(graphene.Mutation):
         input = DiscussionInput(required=True)
 
     ok = graphene.Boolean()
-    discussion = graphene.Field(lambda: DiscussionNode)
+    discussion = graphene.Field(lambda: Discussion)
 
     def mutate(self, info, id, input):
         try:
             with reversion.create_revision():
-                discussion = Discussion.objects.get(pk=get_id(id))
+                discussion = DiscussionModel.objects.get(pk=get_id(id))
                 discussion.title = input['title']
                 discussion.description = input['description']
                 discussion.save()
@@ -74,7 +74,7 @@ class DeleteDiscussion(graphene.Mutation):
     def mutate(self, info, id):
         try:
             with reversion.create_revision():
-                discussion = Discussion.objects.get(pk=get_id(id))
+                discussion = DiscussionModel.objects.get(pk=get_id(id))
                 discussion.delete()
 
                 reversion.set_user(info.context.user)
