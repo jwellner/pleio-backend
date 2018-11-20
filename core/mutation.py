@@ -267,20 +267,22 @@ class DeleteGroup(graphene.Mutation):
 
         return DeleteGroup(ok=ok)
 
+class joinGroupInput(graphene.InputObjectType):
+    guid = graphene.String(required=True)
 
-class JoinGroup(graphene.Mutation):
+class joinGroupPayload(graphene.Mutation):
     class Arguments:
-        id = graphene.ID(required=True)
+        input = joinGroupInput(required=True)
 
     ok = graphene.Boolean()
     group = graphene.Field(lambda: Group)
 
-    def mutate(self, info, id):
+    def mutate(self, info, input):
         ok = False
         group = None
 
         try:
-            group = GroupModel.objects.get(pk=get_id(id))
+            group = GroupModel.objects.get(pk=get_id(input.get('guid')))
 
             if not group.can_join(info.context.user):
                 raise GraphQLError(COULD_NOT_ADD)
@@ -289,10 +291,10 @@ class JoinGroup(graphene.Mutation):
                 raise GraphQLError(COULD_NOT_ADD)
 
             with reversion.create_revision():
-                if group.is_open:
-                    group.join(info.context.user, 'member')
-                else:
+                if group.is_closed:
                     group.join(info.context.user, 'pending')
+                else:
+                    group.join(info.context.user, 'member')
 
                 reversion.set_user(info.context.user)
                 reversion.set_comment("joinGroup mutation")
@@ -301,22 +303,25 @@ class JoinGroup(graphene.Mutation):
         except GroupModel.DoesNotExist:
             raise GraphQLError(COULD_NOT_FIND_GROUP)
 
-        return JoinGroup(ok=ok, group=group)
+        return joinGroupPayload(ok=ok, group=group)
 
 
-class LeaveGroup(graphene.Mutation):
+class leaveGroupInput(graphene.InputObjectType):
+    guid = graphene.String(required=True)
+
+class leaveGroupPayload(graphene.Mutation):
     class Arguments:
-        id = graphene.ID(required=True)
+        input = joinGroupInput(required=True)
 
     ok = graphene.Boolean()
     group = graphene.Field(lambda: Group)
 
-    def mutate(self, info, id):
+    def mutate(self, info, input):
         ok = False
         group = None
 
         try:
-            group = GroupModel.objects.get(pk=get_id(id))
+            group = GroupModel.objects.get(pk=get_id(input.get('guid')))
 
             if not info.context.user.is_authenticated:
                 raise GraphQLError(NOT_LOGGED_IN)
@@ -334,7 +339,7 @@ class LeaveGroup(graphene.Mutation):
         except GroupModel.DoesNotExist:
             raise GraphQLError(COULD_NOT_FIND_GROUP)
 
-        return LeaveGroup(ok=ok, group=group)
+        return leaveGroupPayload(ok=ok, group=group)
 
 
 class MembershipInput(graphene.InputObjectType):
@@ -526,10 +531,9 @@ class Mutation(graphene.ObjectType):
     #delete_group = DeleteGroup.Field()
     change_membership_group = ChangeMembershipGroup.Field()
     remove_membership_group = RemoveMembershipGroup.Field()
-    join_group = JoinGroup.Field()
-    leave_group = LeaveGroup.Field()
+    join_group = joinGroupPayload.Field()
+    leave_group = leaveGroupPayload.Field()
     edit_avatar = editAvatarPayload.Field()
     edit_email = editEmailPayload.Field()
     edit_name = editNamePayload.Field()
     edit_password = editPasswordPayload.Field()
-
