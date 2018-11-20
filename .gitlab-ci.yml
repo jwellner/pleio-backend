@@ -1,5 +1,14 @@
 image: python:latest
 
+stages:
+  - test
+  - build
+  - deploy
+
+cache:
+  paths:
+  - ~/.cache/pip/
+
 services:
   - postgres:latest
 
@@ -10,23 +19,21 @@ variables:
   DB_PASSWORD: postgres
   DB_NAME: postgres
 
-cache:
-  paths:
-  - ~/.cache/pip/
-
 before_script:
   - python -V
   - pip install -r requirements.txt
   - ls
   - cp ./docker/config.py backend2/config.py
 
-pylint:
+prospector:
+  stage: test
   tags:
     - docker
   script:
-    - pylint blog cms core discussion event feed file news notifications poll question wiki
+    - prospector --tool pylint --tool pep8 --uses django
 
 test:
+  stage: test
   tags:
     - docker
   script:
