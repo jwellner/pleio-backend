@@ -1,5 +1,7 @@
 import graphene
+import requests
 import reversion
+from django.conf import settings
 from django.contrib.contenttypes.models import ContentType
 from django.db import transaction
 from graphql import GraphQLError
@@ -359,6 +361,113 @@ class RemoveMembershipGroup(graphene.Mutation):
         return RemoveMembershipGroup(ok=ok, group=group)
 
 
+class editEmailInput(graphene.InputObjectType):
+    guid = graphene.String(required=True)
+    email = graphene.String(required=True)
+
+
+class editEmailPayload(graphene.Mutation):
+
+    class Arguments:
+        input = editEmailInput(required=True)
+
+    ok = graphene.Boolean()
+
+    def mutate(self, info, input):
+        payload = {"email": input.email}
+
+        try:
+            token = info.context.session.get("oidc_access_token")
+            headers = {"Authorization": "Bearer " + token}
+            r = requests.post(settings.OIDC_OP_USER_ME_ENDPOINT + "change_email", data=payload, headers=headers)
+            ok = True
+        except GroupModel.DoesNotExist:
+            raise GraphQLError(COULD_NOT_CHANGE)
+
+        return editEmailPayload(ok=ok)
+
+
+class editPasswordInput(graphene.InputObjectType):
+    guid = graphene.String(required=True)
+    old_password = graphene.String(required=True)
+    new_password = graphene.String(required=True)
+
+
+class editPasswordPayload(graphene.Mutation):
+
+    class Arguments:
+        input = editPasswordInput(required=True)
+
+    ok = graphene.Boolean()
+
+    def mutate(self, info, input):
+        payload = {"old_password": input.old_password, "new_password": input.new_password}
+
+        try:
+            token = info.context.session.get("oidc_access_token")
+            headers = {"Authorization": "Bearer " + token}
+            r = requests.post(settings.OIDC_OP_USER_ME_ENDPOINT + "change_password", data=payload, headers=headers)
+            ok = True
+        except GroupModel.DoesNotExist:
+            raise GraphQLError(COULD_NOT_CHANGE)
+
+        return editPasswordPayload(ok=ok)
+
+
+class editAvatarInput(graphene.InputObjectType):
+    guid = graphene.String(required=True)
+    avatar = graphene.String(required=True)
+
+
+class editAvatarPayload(graphene.Mutation):
+
+    class Arguments:
+        input = editAvatarInput(required=True)
+
+    ok = graphene.Boolean()
+
+    def mutate(self, info, input):
+        files = {
+            'avatar': (input.avatar, open(input.avatar, 'rb'))
+        }
+
+        try:
+            token = info.context.session.get("oidc_access_token")
+            headers = {"Authorization": "Bearer " + token}
+            r = requests.post(settings.OIDC_OP_USER_ME_ENDPOINT + "change_avatar", files=files, headers=headers)
+            ok = True
+        except GroupModel.DoesNotExist:
+            raise GraphQLError("Could not change avatar")
+
+        return editAvatarPayload(ok=ok)
+
+
+class editNameInput(graphene.InputObjectType):
+    guid = graphene.String(required=True)
+    name = graphene.String(required=True)
+
+
+class editNamePayload(graphene.Mutation):
+
+    class Arguments:
+        input = editNameInput(required=True)
+
+    ok = graphene.Boolean()
+
+    def mutate(self, info, input):
+        payload = {"name": input.name}
+
+        try:
+            token = info.context.session.get("oidc_access_token")
+            headers = {"Authorization": "Bearer " + token}
+            r = requests.post(settings.OIDC_OP_USER_ME_ENDPOINT + "change_name", data=payload, headers=headers)
+            ok = True
+        except GroupModel.DoesNotExist:
+            raise GraphQLError(COULD_NOT_CHANGE)
+
+        return editNamePayload(ok=ok)
+
+
 class Mutation(graphene.ObjectType):
     create_comment = CreateComment.Field()
     update_comment = UpdateComment.Field()
@@ -370,3 +479,8 @@ class Mutation(graphene.ObjectType):
     remove_membership_group = RemoveMembershipGroup.Field()
     join_group = JoinGroup.Field()
     leave_group = LeaveGroup.Field()
+    edit_avatar = editAvatarPayload.Field()
+    edit_email = editEmailPayload.Field()
+    edit_name = editNamePayload.Field()
+    edit_password = editPasswordPayload.Field()
+
