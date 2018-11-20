@@ -164,11 +164,19 @@ class addGroupPayload(graphene.Mutation):
         return addGroupPayload(ok=ok, group=group)
 
 class editGroupInput(graphene.InputObjectType):
-    name = graphene.String(required=True)
-    description = graphene.String(required=True)
-    is_open = graphene.Boolean(required=True)
-    is_2fa_required = graphene.Boolean(required=True)
-    tags = graphene.List(graphene.NonNull(graphene.String))
+    guid = graphene.String(required=True)
+    name = graphene.String()
+    icon = graphene.String()
+    featured = graphene.InputField(FeaturedInput)
+    is_closed = graphene.Boolean(required=False)
+    is_featured = graphene.Boolean(required=False)
+    auto_notification = graphene.Boolean(required=False)
+    description = graphene.String(required=False)
+    richDescription = graphene.JSONString(required=False)
+    introduction = graphene.String(required=False)
+    welcomeMessage = graphene.String(required=False)
+    tags = graphene.List(graphene.String)
+    plugins = graphene.List(PLUGIN)
 
 class editGroupPayload(graphene.Mutation):
     class Arguments:
@@ -177,26 +185,33 @@ class editGroupPayload(graphene.Mutation):
     ok = graphene.Boolean()
     group = graphene.Field(lambda: Group)
 
-    def mutate(self, info, id, input):
+    def mutate(self, info, input):
         ok = False
         group = None
 
         try:
-            group = GroupModel.objects.get(pk=get_id(id))
+            group = GroupModel.objects.get(pk=get_id(input.get('guid')))
 
             if not group.can_change(info.context.user):
                 raise GraphQLError(USER_NOT_GROUP_OWNER_OR_SITE_ADMIN)
 
             with reversion.create_revision():
-                group.name = input['name']
-                group.description = input['description']
-                group.is_open = input['is_open']
-                group.is_2fa_required = input['is_2fa_required']
-                group.tags = input['tags']
+                group.name = input.get('name', group.name)
+                group.icon = input.get('icon', group.icon)
+                #featured=input['features'],
+                group.is_closed = input.get('is_closed', group.is_closed)
+                group.is_featured = input.get('is_featured', group.is_featured)
+                group.auto_notification = input.get('auto_notification', group.auto_notification)
+                group.description = input.get('description', group.description)
+                group.richDescription = input.get('rich_description', group.richDescription)
+                group.introduction = input.get('introduction', group.introduction)
+                group.welcome_message = input.get('welcome_message', group.welcome_message)
+                group.tags = input.get('tags', group.tags)
+                group.plugins = input.get('plugins', group.plugins)
                 group.save()
 
                 reversion.set_user(info.context.user)
-                reversion.set_comment("updateGroup mutation")
+                reversion.set_comment("editGroup mutation")
 
             ok = True
         except GroupModel.DoesNotExist:
