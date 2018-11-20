@@ -2,18 +2,43 @@ import graphene
 from graphene_django.types import DjangoObjectType
 from django.contrib.contenttypes.models import ContentType
 from .models import User as UserModel, Group as GroupModel, GroupMembership as GroupMembershipModel, Comment as CommentModel
+from .lists import MembersList, InviteList, MembershipRequestList, SubgroupList
 
-from .lists import MembersList
+MEMBERSHIP = graphene.Enum('Membership', [
+    ('not_joined', 'not_joined'),
+    ('requested', 'requested'),
+    ('invited', 'invited'),
+    ('joined', 'joined')
+])
 
+PLUGIN = graphene.Enum('Plugins', [
+    ('events', 'events'),
+    ('blog', 'blog'),
+    ('discussion', 'discussion'),
+    ('questions', 'questions'),
+    ('files', 'files'),
+    ('wiki', 'wiki'),
+    ('tasks', 'tasks')
+])
+
+ROLE = graphene.Enum('Role', [
+    ('owner', 'owner'),
+    ('admin', 'admin'),
+    ('member', 'member'),
+    ('removed', 'removed')
+])
+
+class Featured(graphene.ObjectType):
+    video = graphene.String()
+    image = graphene.String()
+    positionY = graphene.Int()
 
 class Viewer(graphene.ObjectType):
     is_authenticated = graphene.Boolean()
     user = graphene.Field('core.entities.User')
 
-
 class Entity(graphene.Interface):
-    id = graphene.ID()
-
+    guid = graphene.ID()
 
 class User(DjangoObjectType):
     class Meta:
@@ -26,30 +51,59 @@ class User(DjangoObjectType):
             self._meta.app_label, self._meta.object_name, self.id
             ).lower()
 
+class Member(graphene.ObjectType):
+    role = ROLE()
+    user = graphene.Field(User)
+    email = graphene.String()
 
 class Group(DjangoObjectType):
     class Meta:
         model = GroupModel
         only_fields = [
-            'id',
+            'status',
             'name',
             'description',
-            'created_at',
-            'updated_at',
-            'is_open',
-            'is_2fa_required',
-            'tags',
-            'members',
-            'is_member'
-            ]
+            'richDescription',
+            'excerp',
+            'introduction',
+            'icon',
+            'url',
+            'is_featured',
+            'is_closed',
+            'auto_notification',
+            'welcome_message'
+        ]
         interfaces = (Entity, )
 
-    members = graphene.Field(
-        MembersList, offset=graphene.Int(), limit=graphene.Int()
-        )
-    is_member = graphene.Boolean(required=True)
+    guid = graphene.ID(required=True)
 
-    def resolve_id(self, info):
+    featured = graphene.Field(Featured)
+    is_member = graphene.Boolean(required=True)
+    can_edit = graphene.Boolean()
+    can_change_ownership = graphene.Boolean()
+    membership = MEMBERSHIP()
+    access_ids = graphene.List(graphene.Int)
+    default_access_id = graphene.Int()
+    gets_notifications = graphene.Boolean()
+    tags = graphene.List(graphene.String)
+    members = graphene.Field(
+        MembersList, q=graphene.String(), offset=graphene.Int(), limit=graphene.Int(), in_subgroup_id=graphene.Int(), not_in_subgroup_id=graphene.Int()
+    )
+    invite = graphene.Field(
+        InviteList, q=graphene.String(), offset=graphene.Int(), limit=graphene.Int()
+    )
+    invited = graphene.Field(
+        InviteList, q=graphene.String(), offset=graphene.Int(), limit=graphene.Int()
+    )
+    membership_requests = graphene.Field(
+        MembershipRequestList
+    )
+    plugins = graphene.List(PLUGIN)
+    subgroups = graphene.Field(
+        SubgroupList
+    )
+
+    def resolve_guid(self, info):
         return '{}.{}:{}'.format(
             self._meta.app_label, self._meta.object_name, self.id
             ).lower()
@@ -62,17 +116,6 @@ class Group(DjangoObjectType):
 
     def resolve_is_member(self, info):
         return self.is_member(info.context.user)
-
-
-class GroupMembership(DjangoObjectType):
-    class Meta:
-        model = GroupMembershipModel
-        interfaces = (Entity, )
-
-    def resolve_id(self, info):
-        return '{}.{}:{}'.format(
-            self._meta.app_label, self._meta.object_name, self.id
-            ).lower()
 
 
 class Comment(DjangoObjectType):
@@ -92,3 +135,15 @@ class Comment(DjangoObjectType):
         return '{}.{}:{}'.format(
             self._meta.app_label, self._meta.object_name, self.id
             ).lower()
+
+class Invite(graphene.ObjectType):
+    id = graphene.ID()
+    time_created = graphene.String()
+    invited = graphene.NonNull(graphene.Boolean)
+    user = User
+    email = graphene.String()
+
+class Subgroup(graphene.ObjectType):
+    id = graphene.ID()
+    name = graphene.String()
+    members = graphene.List(User)

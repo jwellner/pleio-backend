@@ -5,7 +5,7 @@ from django.db import models
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
-from django.contrib.postgres.fields import ArrayField
+from django.contrib.postgres.fields import ArrayField, JSONField
 from django.core.mail import send_mail
 from django.core.exceptions import ObjectDoesNotExist
 from django.conf import settings
@@ -17,16 +17,16 @@ from .lib import get_acl
 
 class Manager(BaseUserManager):
     def create_user(
-            self,
-            email,
-            name,
-            password=None,
-            external_id=None,
-            is_active=False,
-            picture=None,
-            is_government=False,
-            has_2fa_enabled=False
-            ):
+        self,
+        email,
+        name,
+        password=None,
+        external_id=None,
+        is_active=False,
+        picture=None,
+        is_government=False,
+        has_2fa_enabled=False):
+
         if not email:
             raise ValueError('Users must have an email address')
 
@@ -124,15 +124,25 @@ class Group(models.Model):
     class Meta:
         ordering = ['name']
 
+    status = models.IntegerField(null=True, blank=True)
     name = models.CharField(max_length=200)
 
     description = models.TextField()
+    richDescription = JSONField(null=True, blank=True)
+
+    excerpt = models.TextField(default='')
+    introduction = models.TextField(default='')
+    icon = models.CharField(max_length=200, null=True, blank=True)
+    url = models.CharField(max_length=200, null=True, blank=True)
+    welcome_message = models.TextField(default='')
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
-    is_open = models.BooleanField(default=True)
+    is_featured = models.BooleanField(default=False)
+    is_closed = models.BooleanField(default=False)
     is_2fa_required = models.BooleanField(default=False)
+    auto_notification = models.BooleanField(default=False)
 
     tags = ArrayField(models.CharField(max_length=256), blank=True, default=[])
 

@@ -4,18 +4,19 @@ from .entities import Entity, Viewer
 from .lists import GroupList
 from .models import Group as GroupModel
 
+GroupFilter = graphene.Enum('FilterGroup', [('all', 'all'), ('mine', 'mine')])
 
-class Query(object):
-    entity = graphene.Field(Entity, id=graphene.ID(required=True))
+class Query():
+    entity = graphene.Field(Entity, guid=graphene.ID(required=True))
     viewer = graphene.Field(Viewer)
     groups = graphene.Field(
         GroupList,
-        filter=graphene.String(),
+        filter=GroupFilter(),
         offset=graphene.Int(),
-        limit=graphene.Int(),
-        )
+        limit=graphene.Int()
+    )
 
-    def resolve_node(self, info, id):
+    def resolve_entity(self, info, id):
         try:
             parts = id.split(':')
             object_type = parts[0].split('.')
@@ -36,10 +37,15 @@ class Query(object):
         except ContentType.DoesNotExist:
             pass
 
-    def resolve_groups(self, info, offset=0, limit=20):
+    def resolve_groups(self, info, filter=GroupFilter.all, offset=0, limit=20):
+        objects = GroupModel.objects.all()
+
+        if filter == GroupFilter.mine:
+            objects.filter(is_member=info.context.user)
+
         return GroupList(
-            totalCount=GroupModel.objects.count(),
-            edges=GroupModel.objects.all()[offset:(offset+limit)]
+            total=objects.count(),
+            edges=objects.all()[offset:(offset+limit)]
         )
 
     def resolve_viewer(self, info):
