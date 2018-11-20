@@ -7,8 +7,8 @@ class GroupList(graphene.ObjectType):
     edges = graphene.List('core.entities.Group')
 
 class MembersList(graphene.ObjectType):
-    totalCount = graphene.Int(required=True)
-    edges = graphene.List('core.entities.User')
+    total = graphene.Int(required=True)
+    edges = graphene.List('core.entities.Member')
 
 class EntityList(graphene.ObjectType):
     totalCount = graphene.Int(required=True)

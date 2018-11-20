@@ -124,7 +124,6 @@ class Group(models.Model):
     class Meta:
         ordering = ['name']
 
-    status = models.IntegerField(null=True, blank=True)
     name = models.CharField(max_length=200)
 
     description = models.TextField()
@@ -145,6 +144,7 @@ class Group(models.Model):
     auto_notification = models.BooleanField(default=False)
 
     tags = ArrayField(models.CharField(max_length=256), blank=True, default=[])
+    plugins = ArrayField(models.CharField(max_length=256), blank=True, default=[])
 
     def __str__(self):
         return self.name

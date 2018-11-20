@@ -7,7 +7,7 @@ from django.db import transaction
 from graphql import GraphQLError
 from .lib import get_id
 from .models import Comment as CommentModel, Group as GroupModel, User as UserModel
-from .entities import Entity, Group, Comment
+from .entities import Entity, Group, Comment, PLUGIN
 from .constances import *
 
 
@@ -103,18 +103,29 @@ class DeleteComment(graphene.Mutation):
 
         return DeleteGroup(ok=ok)
 
+class FeaturedInput(graphene.InputObjectType):
+    video = graphene.String()
+    image = graphene.String()
+    positionY = graphene.Int()
 
-class GroupInput(graphene.InputObjectType):
+
+class addGroupInput(graphene.InputObjectType):
     name = graphene.String(required=True)
-    description = graphene.String(required=True)
-    is_open = graphene.Boolean(required=True)
-    is_2fa_required = graphene.Boolean(required=True)
-    tags = graphene.List(graphene.NonNull(graphene.String))
+    icon = graphene.String(required=False)
+    featured = graphene.InputField(FeaturedInput)
+    is_closed = graphene.Boolean(required=False)
+    is_featured = graphene.Boolean(required=False)
+    auto_notification = graphene.Boolean(required=False)
+    description = graphene.String(required=False)
+    richDescription = graphene.JSONString(required=False)
+    introduction = graphene.String(required=False)
+    welcomeMessage = graphene.String(required=False)
+    tags = graphene.List(graphene.String)
+    plugins = graphene.List(PLUGIN)
 
-
-class CreateGroup(graphene.Mutation):
+class addGroupPayload(graphene.Mutation):
     class Arguments:
-        input = GroupInput(required=True)
+        input = addGroupInput(required=True)
 
     ok = graphene.Boolean()
     group = graphene.Field(lambda: Group)
@@ -128,28 +139,40 @@ class CreateGroup(graphene.Mutation):
 
         with reversion.create_revision():
             group = GroupModel.objects.create(
-                name=input['name'],
-                description=input['description'],
-                is_open=input['is_open'],
-                is_2fa_required=input['is_2fa_required'],
-                tags=input['tags'],
+                name=input.get('name'),
+                icon=input.get('icon', None),
+                #featured=input['features'],
+                is_closed=input.get('is_closed', False),
+                is_featured=input.get('is_featured', False),
+                auto_notification=input.get('auto_notification', False),
+                description=input.get('description', ''),
+                richDescription=input.get('rich_description', ''),
+                introduction=input.get('introduction', ''),
+                welcome_message=input.get('welcome_message', ''),
+                tags=input.get('tags', []),
+                plugins=input.get('plugins', []),
             )
 
             # add creator as group owner
             group.join(info.context.user, 'owner')
 
             reversion.set_user(info.context.user)
-            reversion.set_comment("createGroup mutation")
+            reversion.set_comment("addGroup mutation")
 
         ok = True
 
-        return CreateGroup(ok=ok, group=group)
+        return addGroupPayload(ok=ok, group=group)
 
+class editGroupInput(graphene.InputObjectType):
+    name = graphene.String(required=True)
+    description = graphene.String(required=True)
+    is_open = graphene.Boolean(required=True)
+    is_2fa_required = graphene.Boolean(required=True)
+    tags = graphene.List(graphene.NonNull(graphene.String))
 
-class UpdateGroup(graphene.Mutation):
+class editGroupPayload(graphene.Mutation):
     class Arguments:
-        id = graphene.ID(required=True)
-        input = GroupInput(required=True)
+        input = editGroupInput(required=True)
 
     ok = graphene.Boolean()
     group = graphene.Field(lambda: Group)
@@ -179,7 +202,7 @@ class UpdateGroup(graphene.Mutation):
         except GroupModel.DoesNotExist:
             raise GraphQLError(COULD_NOT_FIND_GROUP)
 
-        return UpdateGroup(ok=ok, group=group)
+        return editGroupPayload(ok=ok, group=group)
 
 
 class DeleteGroup(graphene.Mutation):
@@ -472,9 +495,9 @@ class Mutation(graphene.ObjectType):
     create_comment = CreateComment.Field()
     update_comment = UpdateComment.Field()
     delete_comment = DeleteComment.Field()
-    create_group = CreateGroup.Field()
-    update_group = UpdateGroup.Field()
-    delete_group = DeleteGroup.Field()
+    add_group = addGroupPayload.Field()
+    edit_group = editGroupPayload.Field()
+    #delete_group = DeleteGroup.Field()
     change_membership_group = ChangeMembershipGroup.Field()
     remove_membership_group = RemoveMembershipGroup.Field()
     join_group = JoinGroup.Field()

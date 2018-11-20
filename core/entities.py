@@ -1,8 +1,10 @@
-import graphene
+import graphene, logging
 from graphene_django.types import DjangoObjectType
 from django.contrib.contenttypes.models import ContentType
 from .models import User as UserModel, Group as GroupModel, GroupMembership as GroupMembershipModel, Comment as CommentModel
 from .lists import MembersList, InviteList, MembershipRequestList, SubgroupList
+
+logger = logging.getLogger(__name__)
 
 MEMBERSHIP = graphene.Enum('Membership', [
     ('not_joined', 'not_joined'),
@@ -51,16 +53,24 @@ class User(DjangoObjectType):
             self._meta.app_label, self._meta.object_name, self.id
             ).lower()
 
-class Member(graphene.ObjectType):
+class Member(DjangoObjectType):
+    class Meta:
+        model = GroupMembershipModel
+        only_fields = ['user']
+
     role = ROLE()
-    user = graphene.Field(User)
     email = graphene.String()
+
+    def resolve_role(self, info):
+        return self.type
+
+    def resolve_email(self, info):
+        return self.user.email
 
 class Group(DjangoObjectType):
     class Meta:
         model = GroupModel
         only_fields = [
-            'status',
             'name',
             'description',
             'richDescription',
@@ -110,7 +120,7 @@ class Group(DjangoObjectType):
 
     def resolve_members(self, info, offset=0, limit=20):
         return MembersList(
-            totalCount=self.members.count(),
+            total=self.members.count(),
             edges=self.members.all()[offset:(offset+limit)]
         )
 

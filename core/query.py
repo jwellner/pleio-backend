@@ -1,17 +1,19 @@
 from django.contrib.contenttypes.models import ContentType
-import graphene
+import graphene, logging
 from .entities import Entity, Viewer
 from .lists import GroupList
 from .models import Group as GroupModel
 
-GroupFilter = graphene.Enum('FilterGroup', [('all', 'all'), ('mine', 'mine')])
+logger = logging.getLogger('django')
+
+FilterGroup = graphene.Enum('FilterGroup', [('all', 'all'), ('mine', 'mine')])
 
 class Query():
     entity = graphene.Field(Entity, guid=graphene.ID(required=True))
     viewer = graphene.Field(Viewer)
     groups = graphene.Field(
         GroupList,
-        filter=GroupFilter(),
+        filter=FilterGroup(),
         offset=graphene.Int(),
         limit=graphene.Int()
     )
@@ -37,15 +39,16 @@ class Query():
         except ContentType.DoesNotExist:
             pass
 
-    def resolve_groups(self, info, filter=GroupFilter.all, offset=0, limit=20):
-        objects = GroupModel.objects.all()
-
-        if filter == GroupFilter.mine:
-            objects.filter(is_member=info.context.user)
+    def resolve_groups(self, info, filter='all', offset=0, limit=20):
+        if filter == 'mine':
+            return GroupList(
+                total=info.context.user.groups.count(),
+                edges=info.context.user.groups.all()[offset:(offset+limit)]
+            )
 
         return GroupList(
-            total=objects.count(),
-            edges=objects.all()[offset:(offset+limit)]
+            total=GroupModel.objects.all().count(),
+            edges=GroupModel.objects.all()[offset:(offset+limit)]
         )
 
     def resolve_viewer(self, info):
