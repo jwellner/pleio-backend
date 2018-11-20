@@ -113,6 +113,13 @@ class Group(DjangoObjectType):
         SubgroupList
     )
 
+    def resolve_featured(self, info):
+        return(Featured(
+            video=self.featured_video,
+            image=self.featured_image,
+            positionY=self.featured_position_y
+        ))
+
     def resolve_guid(self, info):
         return '{}.{}:{}'.format(
             self._meta.app_label, self._meta.object_name, self.id

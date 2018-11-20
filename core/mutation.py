@@ -1,7 +1,7 @@
-import graphene
 import requests
 import reversion
 from django.conf import settings
+import graphene, logging, reversion
 from django.contrib.contenttypes.models import ContentType
 from django.db import transaction
 from graphql import GraphQLError
@@ -10,6 +10,7 @@ from .models import Comment as CommentModel, Group as GroupModel, User as UserMo
 from .entities import Entity, Group, Comment, PLUGIN
 from .constances import *
 
+logger = logging.getLogger('django')
 
 class CommentInput(graphene.InputObjectType):
     description = graphene.String(required=True)
@@ -141,7 +142,6 @@ class addGroupPayload(graphene.Mutation):
             group = GroupModel.objects.create(
                 name=input.get('name'),
                 icon=input.get('icon', None),
-                #featured=input['features'],
                 is_closed=input.get('is_closed', False),
                 is_featured=input.get('is_featured', False),
                 auto_notification=input.get('auto_notification', False),
@@ -152,6 +152,13 @@ class addGroupPayload(graphene.Mutation):
                 tags=input.get('tags', []),
                 plugins=input.get('plugins', []),
             )
+
+            if input.get('featured') :
+                group.featured_video = input['featured'].get('video', None)
+                group.featured_image = input['featured'].get('image', None)
+                group.featured_position_y = input['featured'].get('positionY', None)
+
+            group.save()
 
             # add creator as group owner
             group.join(info.context.user, 'owner')
@@ -198,7 +205,11 @@ class editGroupPayload(graphene.Mutation):
             with reversion.create_revision():
                 group.name = input.get('name', group.name)
                 group.icon = input.get('icon', group.icon)
-                #featured=input['features'],
+                if input.get('featured') :
+                    group.featured_video = input['featured'].get('video', group.featured_video)
+                    group.featured_image = input['featured'].get('image', group.featured_video)
+                    group.featured_position_y = input['featured'].get('positionY', group.featured_video)
+
                 group.is_closed = input.get('is_closed', group.is_closed)
                 group.is_featured = input.get('is_featured', group.is_featured)
                 group.auto_notification = input.get('auto_notification', group.auto_notification)

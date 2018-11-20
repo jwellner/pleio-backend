@@ -139,6 +139,10 @@ class Group(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     is_featured = models.BooleanField(default=False)
+    featured_image = models.CharField(max_length=256, null=True, blank=True)
+    featured_video = models.CharField(max_length=256, null=True, blank=True)
+    featured_position_y = models.IntegerField(null=True)
+
     is_closed = models.BooleanField(default=False)
     is_2fa_required = models.BooleanField(default=False)
     auto_notification = models.BooleanField(default=False)
