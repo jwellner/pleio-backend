@@ -45,10 +45,10 @@ class Entity(graphene.Interface):
 class User(DjangoObjectType):
     class Meta:
         model = UserModel
-        only_fields = ['id', 'name', 'picture']
+        only_fields = ['name', 'picture']
         interfaces = (Entity, )
 
-    def resolve_id(self, info):
+    def resolve_guid(self, info):
         return '{}.{}:{}'.format(
             self._meta.app_label, self._meta.object_name, self.id
             ).lower()

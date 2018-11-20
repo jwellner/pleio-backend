@@ -7,7 +7,7 @@ from django.db import transaction
 from graphql import GraphQLError
 from .lib import get_id
 from .models import Comment as CommentModel, Group as GroupModel, User as UserModel
-from .entities import Entity, Group, Comment, PLUGIN
+from .entities import Entity, Group, Comment, PLUGIN, ROLE
 from .constances import *
 
 logger = logging.getLogger('django')
@@ -230,18 +230,20 @@ class editGroupPayload(graphene.Mutation):
 
         return editGroupPayload(ok=ok, group=group)
 
+class deleteGroupInput(graphene.InputObjectType):
+    guid = graphene.String(required=True)
 
-class DeleteGroup(graphene.Mutation):
+class deleteGroupPayload(graphene.Mutation):
     class Arguments:
-        id = graphene.ID(required=True)
+        input = deleteGroupInput(required=True)
 
     ok = graphene.Boolean()
 
-    def mutate(self, info, id):
+    def mutate(self, info, input):
         ok = False
 
         try:
-            group = GroupModel.objects.get(pk=get_id(id))
+            group = GroupModel.objects.get(pk=get_id(input.get('guid')))
 
             if not group.can_change(info.context.user):
                 raise GraphQLError(USER_NOT_GROUP_OWNER_OR_SITE_ADMIN)
@@ -265,7 +267,7 @@ class DeleteGroup(graphene.Mutation):
         except GroupModel.DoesNotExist:
             raise GraphQLError(COULD_NOT_FIND_GROUP)
 
-        return DeleteGroup(ok=ok)
+        return deleteGroupPayload(ok=ok)
 
 class joinGroupInput(graphene.InputObjectType):
     guid = graphene.String(required=True)
@@ -342,43 +344,46 @@ class leaveGroupPayload(graphene.Mutation):
         return leaveGroupPayload(ok=ok, group=group)
 
 
-class MembershipInput(graphene.InputObjectType):
-    userid = graphene.ID(required=True)
-    type = graphene.String(required=True)
+class changeGroupRoleInput(graphene.InputObjectType):
+    guid = graphene.ID(required=True)
+    userGuid = graphene.ID(required=True)
+    role = ROLE(required=True)
 
-
-class ChangeMembershipGroup(graphene.Mutation):
+class changeGroupRolePayload(graphene.Mutation):
 
     class Arguments:
-        id = graphene.ID(required=True)
-        input = MembershipInput(required=True)
+        input = changeGroupRoleInput(required=True)
 
     ok = graphene.Boolean()
     group = graphene.Field(lambda: Group)
 
-    def mutate(self, info, id, input):
+    def mutate(self, info, input):
         ok = False
         group = None
 
         try:
-            group = GroupModel.objects.get(pk=get_id(id))
+            group = GroupModel.objects.get(pk=get_id(input.get('guid')))
 
             if not group.can_change(info.context.user):
                 raise GraphQLError(USER_NOT_GROUP_OWNER_OR_SITE_ADMIN)
 
             with reversion.create_revision():
-                user = UserModel.objects.get(pk=get_id(input['userid']))
-                group.join(user, input['type'])
+                user = UserModel.objects.get(pk=get_id(input.get('userGuid')))
+
+                if input['role'] == 'removed':
+                    group.leave(user)
+                else:
+                    group.join(user, input['role'])
                 group.save()
 
                 reversion.set_user(info.context.user)
-                reversion.set_comment("changeMembershipGroup mutation")
+                reversion.set_comment("changeGroupRole mutation")
 
             ok = True
         except GroupModel.DoesNotExist:
             raise GraphQLError(COULD_NOT_FIND_GROUP)
 
-        return ChangeMembershipGroup(ok=ok, group=group)
+        return changeGroupRolePayload(ok=ok, group=group)
 
 
 class RemoveMembershipGroup(graphene.Mutation):
@@ -528,9 +533,8 @@ class Mutation(graphene.ObjectType):
     delete_comment = DeleteComment.Field()
     add_group = addGroupPayload.Field()
     edit_group = editGroupPayload.Field()
-    #delete_group = DeleteGroup.Field()
-    change_membership_group = ChangeMembershipGroup.Field()
-    remove_membership_group = RemoveMembershipGroup.Field()
+    delete_group = deleteGroupPayload.Field()
+    change_group_role = changeGroupRolePayload.Field()
     join_group = joinGroupPayload.Field()
     leave_group = leaveGroupPayload.Field()
     edit_avatar = editAvatarPayload.Field()
