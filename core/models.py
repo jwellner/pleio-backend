@@ -135,8 +135,8 @@ class Group(models.Model):
 
     excerpt = models.TextField(default='')
     introduction = models.TextField(default='')
-    icon = models.CharField(max_length=200, null=True, blank=True)
-    url = models.CharField(max_length=200, null=True, blank=True)
+    icon = models.CharField(max_length=200, default='')
+    url = models.CharField(max_length=200, default='')
     welcome_message = models.TextField(default='')
 
     created_at = models.DateTimeField(auto_now_add=True)

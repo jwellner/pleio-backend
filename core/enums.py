@@ -36,3 +36,11 @@ class EMAIL_FREQUENCY(enum.Enum):
     twoweekly = 'twoweekly'
     monthly = 'monthly'
     never = 'never'
+
+class OBJECT_TYPE(enum.Enum):
+    user = 'user'
+    group = 'group'
+    page = 'page'
+    wiki = 'wiki'
+    news = 'news'
+    object = 'object'

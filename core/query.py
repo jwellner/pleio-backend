@@ -7,7 +7,7 @@ from .enums import ORDER_DIRECTION, ORDER_BY
 
 logger = logging.getLogger('django')
 
-FilterGroup = graphene.Enum('FilterGroup', [('all', 'all'), ('mine', 'mine')])
+GroupFilter = graphene.Enum('GroupFilter', [('all', 'all'), ('mine', 'mine')])
 SearchType = graphene.Enum('Type', [('user', 'user'), ('group', 'group'), ('object', 'object'), ('page', 'page')])
 OrderBy = graphene.Enum.from_enum(ORDER_BY)
 OrderDirection = graphene.Enum.from_enum(ORDER_DIRECTION)
@@ -21,7 +21,7 @@ class Query:
     viewer = graphene.Field(Viewer)
     groups = graphene.Field(
         GroupList,
-        filter=FilterGroup(),
+        filter=GroupFilter(),
         offset=graphene.Int(),
         limit=graphene.Int()
     )
@@ -86,11 +86,13 @@ class Query:
         if filter == 'mine':
             return GroupList(
                 total=info.context.user.groups.count(),
+                can_write=True,
                 edges=info.context.user.groups.all()[offset:(offset+limit)]
             )
 
         return GroupList(
             total=GroupModel.objects.all().count(),
+            can_write=True,
             edges=GroupModel.objects.all()[offset:(offset+limit)]
         )
 
@@ -103,7 +105,8 @@ class Query:
             is_sub_editor=False,
             is_admin=False,
             tags=[],
-            user=(user if user.is_authenticated else None)
+            user=(user if user.is_authenticated else None),
+            can_write_to_container=True
         )
 
     def resolve_search(self, info, q, containerGuid, type, subType, offset=0, limit=20):

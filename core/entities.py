@@ -3,7 +3,7 @@ from graphene_django.types import DjangoObjectType
 from django.contrib.contenttypes.models import ContentType
 from .models import User as UserModel, Group as GroupModel, GroupMembership as GroupMembershipModel, Comment as CommentModel
 from .lists import MembersList, InviteList, MembershipRequestList, SubgroupList
-from .enums import MEMBERSHIP, PLUGIN, ROLE, EMAIL_FREQUENCY
+from .enums import MEMBERSHIP, PLUGIN, ROLE, EMAIL_FREQUENCY, OBJECT_TYPE
 
 logger = logging.getLogger(__name__)
 
@@ -11,6 +11,7 @@ Membership = graphene.Enum.from_enum(MEMBERSHIP)
 Plugin = graphene.Enum.from_enum(PLUGIN)
 Role = graphene.Enum.from_enum(ROLE)
 EmailFrequency = graphene.Enum.from_enum(EMAIL_FREQUENCY)
+ObjectType = graphene.Enum.from_enum(OBJECT_TYPE)
 
 class Featured(graphene.ObjectType):
     video = graphene.String()
@@ -24,6 +25,13 @@ class Viewer(graphene.ObjectType):
     is_admin = graphene.Boolean(required=True)
     tags = graphene.List(graphene.String)
     user = graphene.Field('core.entities.User')
+    can_write_to_container = graphene.Field(
+        graphene.Boolean,
+        containerGuid=graphene.Int(),
+        _type=ObjectType(name='type'),
+        subtype=graphene.String(),
+        required=True
+    )
 
 class Entity(graphene.Interface):
     guid = graphene.ID()
@@ -80,7 +88,7 @@ class Group(DjangoObjectType):
             'name',
             'description',
             'richDescription',
-            'excerp',
+            'excerpt',
             'introduction',
             'icon',
             'url',
