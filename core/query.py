@@ -1,23 +1,69 @@
 from django.contrib.contenttypes.models import ContentType
-import graphene
-from .entities import Entity, Viewer
-from .lists import GroupList
+import graphene, logging
+from .entities import Entity, Viewer, Site, MenuItem
+from .lists import GroupList, SearchList, EntityList, UserList, TrendingList, TopList
 from .models import Group as GroupModel
+from .enums import ORDER_DIRECTION, ORDER_BY
 
+logger = logging.getLogger('django')
 
-class Query(object):
-    entity = graphene.Field(Entity, id=graphene.ID(required=True))
+GroupFilter = graphene.Enum('GroupFilter', [('all', 'all'), ('mine', 'mine')])
+SearchType = graphene.Enum('Type', [('user', 'user'), ('group', 'group'), ('object', 'object'), ('page', 'page')])
+OrderBy = graphene.Enum.from_enum(ORDER_BY)
+OrderDirection = graphene.Enum.from_enum(ORDER_DIRECTION)
+
+class Query:
+    entity = graphene.Field(
+        Entity,
+        guid=graphene.ID(required=True),
+        username=graphene.String()
+    )
     viewer = graphene.Field(Viewer)
     groups = graphene.Field(
         GroupList,
-        filter=graphene.String(),
+        filter=GroupFilter(),
+        offset=graphene.Int(),
+        limit=graphene.Int()
+    )
+    search = graphene.Field(
+        SearchList,
+        q=graphene.String(required=True),
+        containerGuid=graphene.String(),
+        _type=SearchType(name='type'),
+        subType=graphene.String(),
         offset=graphene.Int(),
         limit=graphene.Int(),
-        )
+    )
+    users = graphene.Field(
+        UserList,
+        q=graphene.String(required=True),
+        offset=graphene.Int(),
+        limit=graphene.Int()
+    )
+    entities = graphene.Field(
+        EntityList,
+        _type=graphene.String(name='type'),
+        subtype=graphene.String(),
+        subtypes=graphene.List(graphene.String),
+        containerGuid=graphene.Int(),
+        tags=graphene.List(graphene.String),
+        orderBy=OrderBy(),
+        orderDirection=OrderDirection(),
+        offset=graphene.Int(),
+        limit=graphene.Int(),
+    )
+    site = graphene.Field(Site)
+    recommended = graphene.Field(
+        EntityList,
+        offset=graphene.Int(),
+        limit=graphene.Int()
+    )
+    trending = graphene.Field(graphene.List(TrendingList))
+    top = graphene.Field(graphene.List(TopList))
 
-    def resolve_node(self, info, id):
+    def resolve_entity(self, info, guid, username):
         try:
-            parts = id.split(':')
+            parts = guid.split(':')
             object_type = parts[0].split('.')
 
             content_type = ContentType.objects.get(
@@ -36,9 +82,17 @@ class Query(object):
         except ContentType.DoesNotExist:
             pass
 
-    def resolve_groups(self, info, offset=0, limit=20):
+    def resolve_groups(self, info, filter='all', offset=0, limit=20):
+        if filter == 'mine':
+            return GroupList(
+                total=info.context.user.groups.count(),
+                can_write=True,
+                edges=info.context.user.groups.all()[offset:(offset+limit)]
+            )
+
         return GroupList(
-            totalCount=GroupModel.objects.count(),
+            total=GroupModel.objects.all().count(),
+            can_write=True,
             edges=GroupModel.objects.all()[offset:(offset+limit)]
         )
 
@@ -46,6 +100,73 @@ class Query(object):
         user = info.context.user
 
         return Viewer(
-            is_authenticated=user.is_authenticated,
-            user=(user if user.is_authenticated else None)
+            guid=user.guid(),
+            logged_in=user.is_authenticated,
+            is_sub_editor=False,
+            is_admin=False,
+            tags=[],
+            user=(user if user.is_authenticated else None),
+            can_write_to_container=True
         )
+
+    def resolve_search(self, info, q, containerGuid, type, subType, offset=0, limit=20):
+
+        return SearchList(
+            total=0,
+            totals=[],
+            edges=[]
+        )
+
+    def resolve_entities(self, info, type=None, subtype=None, subtypes=[], containerGuid=None, tags=[], orderBy=ORDER_BY.timeUpdated, orderDirection=ORDER_DIRECTION.desc, offset=0, limit=20):
+
+        return EntityList(
+            total=0,
+            can_write=False,
+            edges=[]
+        )
+
+    def resolve_site(self, info):
+        return Site(
+            guid="1",
+            name="Backend2",
+            theme="leraar",
+            menu=[
+                MenuItem(
+                    title='Nieuws',
+                    link='/news',
+                    children=[]
+                ),
+                MenuItem(
+                    title='Groups',
+                    link='/groups',
+                    children=[]
+                )
+            ],
+            footer=[],
+            predefined_tags=[],
+            default_access_id=1,
+            show_icon=False,
+            show_leader=False,
+            show_leader_buttons=False,
+            show_initiative=False,
+            users_online=999
+        )
+
+    def resolve_recommended(self, info, offset=0, limit=20):
+        return EntityList(
+            total=0,
+            can_write=False,
+            edges=[]
+        )
+
+    def resolve_trending(self, info):
+        return [TrendingList(
+            tag="test",
+            likes=99
+        )]
+
+    def resolve_top(self, info):
+        return [TopList(
+            user=info.context.user,
+            likes=99
+        )]

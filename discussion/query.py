@@ -4,6 +4,9 @@ from .models import Discussion as DiscussionModel
 
 
 class Query(object):
+    """
+    Does not exist in old graphQL schema
+
     discussions = graphene.Field(
         DiscussionList,
         offset=graphene.Int(),
@@ -17,3 +20,4 @@ class Query(object):
                 info.context.user
                 )[offset:(offset+limit)]
         )
+    """

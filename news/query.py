@@ -4,6 +4,9 @@ from .models import News as NewsModel
 
 
 class Query(object):
+    """
+    Does not exist in old graphQL schema
+
     news = graphene.Field(
         NewsList,
         offset=graphene.Int(),
@@ -17,3 +20,4 @@ class Query(object):
                 info.context.user
                 )[offset:(offset+limit)]
         )
+    """

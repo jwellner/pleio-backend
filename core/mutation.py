@@ -1,19 +1,19 @@
-import graphene
 import requests
 import reversion
 from django.conf import settings
+import graphene, logging, reversion
 from django.contrib.contenttypes.models import ContentType
 from django.db import transaction
 from graphql import GraphQLError
 from .lib import get_id
 from .models import Comment as CommentModel, Group as GroupModel, User as UserModel
-from .entities import Entity, Group, Comment
+from .entities import Entity, Group, Comment, Role, Plugin
 from .constances import *
 
+logger = logging.getLogger('django')
 
 class CommentInput(graphene.InputObjectType):
     description = graphene.String(required=True)
-
 
 class CreateComment(graphene.Mutation):
     class Arguments:
@@ -103,18 +103,30 @@ class DeleteComment(graphene.Mutation):
 
         return DeleteGroup(ok=ok)
 
+class FeaturedInput(graphene.InputObjectType):
+    video = graphene.String()
+    image = graphene.String()
+    positionY = graphene.Int()
 
-class GroupInput(graphene.InputObjectType):
+
+class addGroupInput(graphene.InputObjectType):
+    client_mutation_id = graphene.Int()
     name = graphene.String(required=True)
-    description = graphene.String(required=True)
-    is_open = graphene.Boolean(required=True)
-    is_2fa_required = graphene.Boolean(required=True)
-    tags = graphene.List(graphene.NonNull(graphene.String))
+    icon = graphene.String(required=False)
+    featured = graphene.InputField(FeaturedInput)
+    is_closed = graphene.Boolean(required=False)
+    is_featured = graphene.Boolean(required=False)
+    auto_notification = graphene.Boolean(required=False)
+    description = graphene.String(required=False)
+    richDescription = graphene.JSONString(required=False)
+    introduction = graphene.String(required=False)
+    welcomeMessage = graphene.String(required=False)
+    tags = graphene.List(graphene.String)
+    plugins = graphene.List(Plugin)
 
-
-class CreateGroup(graphene.Mutation):
+class addGroupPayload(graphene.Mutation):
     class Arguments:
-        input = GroupInput(required=True)
+        input = addGroupInput(required=True)
 
     ok = graphene.Boolean()
     group = graphene.Field(lambda: Group)
@@ -128,71 +140,112 @@ class CreateGroup(graphene.Mutation):
 
         with reversion.create_revision():
             group = GroupModel.objects.create(
-                name=input['name'],
-                description=input['description'],
-                is_open=input['is_open'],
-                is_2fa_required=input['is_2fa_required'],
-                tags=input['tags'],
+                name=input.get('name'),
+                icon=input.get('icon', ''),
+                is_closed=input.get('is_closed', False),
+                is_featured=input.get('is_featured', False),
+                auto_notification=input.get('auto_notification', False),
+                description=input.get('description', ''),
+                richDescription=input.get('rich_description', ''),
+                introduction=input.get('introduction', ''),
+                welcome_message=input.get('welcome_message', ''),
+                tags=input.get('tags', []),
+                plugins=input.get('plugins', []),
             )
+
+            if input.get('featured') :
+                group.featured_video = input['featured'].get('video', None)
+                group.featured_image = input['featured'].get('image', None)
+                group.featured_position_y = input['featured'].get('positionY', None)
+
+            group.save()
 
             # add creator as group owner
             group.join(info.context.user, 'owner')
 
             reversion.set_user(info.context.user)
-            reversion.set_comment("createGroup mutation")
+            reversion.set_comment("addGroup mutation")
 
         ok = True
 
-        return CreateGroup(ok=ok, group=group)
+        return addGroupPayload(ok=ok, group=group)
 
+class editGroupInput(graphene.InputObjectType):
+    client_mutation_id = graphene.Int()
+    guid = graphene.String(required=True)
+    name = graphene.String()
+    icon = graphene.String()
+    featured = graphene.InputField(FeaturedInput)
+    is_closed = graphene.Boolean(required=False)
+    is_featured = graphene.Boolean(required=False)
+    auto_notification = graphene.Boolean(required=False)
+    description = graphene.String(required=False)
+    richDescription = graphene.JSONString(required=False)
+    introduction = graphene.String(required=False)
+    welcomeMessage = graphene.String(required=False)
+    tags = graphene.List(graphene.String)
+    plugins = graphene.List(Plugin)
 
-class UpdateGroup(graphene.Mutation):
+class editGroupPayload(graphene.Mutation):
     class Arguments:
-        id = graphene.ID(required=True)
-        input = GroupInput(required=True)
+        input = editGroupInput(required=True)
 
     ok = graphene.Boolean()
     group = graphene.Field(lambda: Group)
 
-    def mutate(self, info, id, input):
+    def mutate(self, info, input):
         ok = False
         group = None
 
         try:
-            group = GroupModel.objects.get(pk=get_id(id))
+            group = GroupModel.objects.get(pk=get_id(input.get('guid')))
 
             if not group.can_change(info.context.user):
                 raise GraphQLError(USER_NOT_GROUP_OWNER_OR_SITE_ADMIN)
 
             with reversion.create_revision():
-                group.name = input['name']
-                group.description = input['description']
-                group.is_open = input['is_open']
-                group.is_2fa_required = input['is_2fa_required']
-                group.tags = input['tags']
+                group.name = input.get('name', group.name)
+                group.icon = input.get('icon', group.icon)
+                if input.get('featured') :
+                    group.featured_video = input['featured'].get('video', group.featured_video)
+                    group.featured_image = input['featured'].get('image', group.featured_video)
+                    group.featured_position_y = input['featured'].get('positionY', group.featured_video)
+
+                group.is_closed = input.get('is_closed', group.is_closed)
+                group.is_featured = input.get('is_featured', group.is_featured)
+                group.auto_notification = input.get('auto_notification', group.auto_notification)
+                group.description = input.get('description', group.description)
+                group.richDescription = input.get('rich_description', group.richDescription)
+                group.introduction = input.get('introduction', group.introduction)
+                group.welcome_message = input.get('welcome_message', group.welcome_message)
+                group.tags = input.get('tags', group.tags)
+                group.plugins = input.get('plugins', group.plugins)
                 group.save()
 
                 reversion.set_user(info.context.user)
-                reversion.set_comment("updateGroup mutation")
+                reversion.set_comment("editGroup mutation")
 
             ok = True
         except GroupModel.DoesNotExist:
             raise GraphQLError(COULD_NOT_FIND_GROUP)
 
-        return UpdateGroup(ok=ok, group=group)
+        return editGroupPayload(ok=ok, group=group)
 
+class deleteGroupInput(graphene.InputObjectType):
+    client_mutation_id = graphene.Int()
+    guid = graphene.String(required=True)
 
-class DeleteGroup(graphene.Mutation):
+class deleteGroupPayload(graphene.Mutation):
     class Arguments:
-        id = graphene.ID(required=True)
+        input = deleteGroupInput(required=True)
 
     ok = graphene.Boolean()
 
-    def mutate(self, info, id):
+    def mutate(self, info, input):
         ok = False
 
         try:
-            group = GroupModel.objects.get(pk=get_id(id))
+            group = GroupModel.objects.get(pk=get_id(input.get('guid')))
 
             if not group.can_change(info.context.user):
                 raise GraphQLError(USER_NOT_GROUP_OWNER_OR_SITE_ADMIN)
@@ -216,22 +269,25 @@ class DeleteGroup(graphene.Mutation):
         except GroupModel.DoesNotExist:
             raise GraphQLError(COULD_NOT_FIND_GROUP)
 
-        return DeleteGroup(ok=ok)
+        return deleteGroupPayload(ok=ok)
 
+class joinGroupInput(graphene.InputObjectType):
+    client_mutation_id = graphene.Int()
+    guid = graphene.String(required=True)
 
-class JoinGroup(graphene.Mutation):
+class joinGroupPayload(graphene.Mutation):
     class Arguments:
-        id = graphene.ID(required=True)
+        input = joinGroupInput(required=True)
 
     ok = graphene.Boolean()
     group = graphene.Field(lambda: Group)
 
-    def mutate(self, info, id):
+    def mutate(self, info, input):
         ok = False
         group = None
 
         try:
-            group = GroupModel.objects.get(pk=get_id(id))
+            group = GroupModel.objects.get(pk=get_id(input.get('guid')))
 
             if not group.can_join(info.context.user):
                 raise GraphQLError(COULD_NOT_ADD)
@@ -240,10 +296,10 @@ class JoinGroup(graphene.Mutation):
                 raise GraphQLError(COULD_NOT_ADD)
 
             with reversion.create_revision():
-                if group.is_open:
-                    group.join(info.context.user, 'member')
-                else:
+                if group.is_closed:
                     group.join(info.context.user, 'pending')
+                else:
+                    group.join(info.context.user, 'member')
 
                 reversion.set_user(info.context.user)
                 reversion.set_comment("joinGroup mutation")
@@ -252,22 +308,26 @@ class JoinGroup(graphene.Mutation):
         except GroupModel.DoesNotExist:
             raise GraphQLError(COULD_NOT_FIND_GROUP)
 
-        return JoinGroup(ok=ok, group=group)
+        return joinGroupPayload(ok=ok, group=group)
 
 
-class LeaveGroup(graphene.Mutation):
+class leaveGroupInput(graphene.InputObjectType):
+    client_mutation_id = graphene.Int()
+    guid = graphene.String(required=True)
+
+class leaveGroupPayload(graphene.Mutation):
     class Arguments:
-        id = graphene.ID(required=True)
+        input = joinGroupInput(required=True)
 
     ok = graphene.Boolean()
     group = graphene.Field(lambda: Group)
 
-    def mutate(self, info, id):
+    def mutate(self, info, input):
         ok = False
         group = None
 
         try:
-            group = GroupModel.objects.get(pk=get_id(id))
+            group = GroupModel.objects.get(pk=get_id(input.get('guid')))
 
             if not info.context.user.is_authenticated:
                 raise GraphQLError(NOT_LOGGED_IN)
@@ -285,46 +345,50 @@ class LeaveGroup(graphene.Mutation):
         except GroupModel.DoesNotExist:
             raise GraphQLError(COULD_NOT_FIND_GROUP)
 
-        return LeaveGroup(ok=ok, group=group)
+        return leaveGroupPayload(ok=ok, group=group)
 
 
-class MembershipInput(graphene.InputObjectType):
-    userid = graphene.ID(required=True)
-    type = graphene.String(required=True)
+class changeGroupRoleInput(graphene.InputObjectType):
+    client_mutation_id = graphene.Int()
+    guid = graphene.ID(required=True)
+    userGuid = graphene.ID(required=True)
+    role = Role(required=True)
 
-
-class ChangeMembershipGroup(graphene.Mutation):
+class changeGroupRolePayload(graphene.Mutation):
 
     class Arguments:
-        id = graphene.ID(required=True)
-        input = MembershipInput(required=True)
+        input = changeGroupRoleInput(required=True)
 
     ok = graphene.Boolean()
     group = graphene.Field(lambda: Group)
 
-    def mutate(self, info, id, input):
+    def mutate(self, info, input):
         ok = False
         group = None
 
         try:
-            group = GroupModel.objects.get(pk=get_id(id))
+            group = GroupModel.objects.get(pk=get_id(input.get('guid')))
 
             if not group.can_change(info.context.user):
                 raise GraphQLError(USER_NOT_GROUP_OWNER_OR_SITE_ADMIN)
 
             with reversion.create_revision():
-                user = UserModel.objects.get(pk=get_id(input['userid']))
-                group.join(user, input['type'])
+                user = UserModel.objects.get(pk=get_id(input.get('userGuid')))
+
+                if input['role'] ==  ROLE.removed:
+                    group.leave(user)
+                else:
+                    group.join(user, input['role'])
                 group.save()
 
                 reversion.set_user(info.context.user)
-                reversion.set_comment("changeMembershipGroup mutation")
+                reversion.set_comment("changeGroupRole mutation")
 
             ok = True
         except GroupModel.DoesNotExist:
             raise GraphQLError(COULD_NOT_FIND_GROUP)
 
-        return ChangeMembershipGroup(ok=ok, group=group)
+        return changeGroupRolePayload(ok=ok, group=group)
 
 
 class RemoveMembershipGroup(graphene.Mutation):
@@ -472,15 +536,13 @@ class Mutation(graphene.ObjectType):
     create_comment = CreateComment.Field()
     update_comment = UpdateComment.Field()
     delete_comment = DeleteComment.Field()
-    create_group = CreateGroup.Field()
-    update_group = UpdateGroup.Field()
-    delete_group = DeleteGroup.Field()
-    change_membership_group = ChangeMembershipGroup.Field()
-    remove_membership_group = RemoveMembershipGroup.Field()
-    join_group = JoinGroup.Field()
-    leave_group = LeaveGroup.Field()
+    add_group = addGroupPayload.Field()
+    edit_group = editGroupPayload.Field()
+    delete_group = deleteGroupPayload.Field()
+    change_group_role = changeGroupRolePayload.Field()
+    join_group = joinGroupPayload.Field()
+    leave_group = leaveGroupPayload.Field()
     edit_avatar = editAvatarPayload.Field()
     edit_email = editEmailPayload.Field()
     edit_name = editNamePayload.Field()
     edit_password = editPasswordPayload.Field()
-

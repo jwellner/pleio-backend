@@ -5,7 +5,7 @@ from django.db import models
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
-from django.contrib.postgres.fields import ArrayField
+from django.contrib.postgres.fields import ArrayField, JSONField
 from django.core.mail import send_mail
 from django.core.exceptions import ObjectDoesNotExist
 from django.conf import settings
@@ -14,19 +14,18 @@ import reversion
 
 from .lib import get_acl
 
-
 class Manager(BaseUserManager):
     def create_user(
-            self,
-            email,
-            name,
-            password=None,
-            external_id=None,
-            is_active=False,
-            picture=None,
-            is_government=False,
-            has_2fa_enabled=False
-            ):
+        self,
+        email,
+        name,
+        password=None,
+        external_id=None,
+        is_active=False,
+        picture=None,
+        is_government=False,
+        has_2fa_enabled=False):
+
         if not email:
             raise ValueError('Users must have an email address')
 
@@ -115,6 +114,11 @@ class User(AbstractBaseUser):
     def get_short_name(self):
         return self.name
 
+    def guid(self):
+        return '{}.{}:{}'.format(
+            self._meta.app_label, self._meta.object_name, self.id
+        ).lower()
+
     def email_user(self, subject, message, from_email=None, **kwargs):
         send_mail(subject, message, from_email or settings.FROM_EMAIL, [
                   self.email], **kwargs)
@@ -127,14 +131,28 @@ class Group(models.Model):
     name = models.CharField(max_length=200)
 
     description = models.TextField()
+    richDescription = JSONField(null=True, blank=True)
+
+    excerpt = models.TextField(default='')
+    introduction = models.TextField(default='')
+    icon = models.CharField(max_length=200, default='')
+    url = models.CharField(max_length=200, default='')
+    welcome_message = models.TextField(default='')
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
-    is_open = models.BooleanField(default=True)
+    is_featured = models.BooleanField(default=False)
+    featured_image = models.CharField(max_length=256, null=True, blank=True)
+    featured_video = models.CharField(max_length=256, null=True, blank=True)
+    featured_position_y = models.IntegerField(null=True)
+
+    is_closed = models.BooleanField(default=False)
     is_2fa_required = models.BooleanField(default=False)
+    auto_notification = models.BooleanField(default=False)
 
     tags = ArrayField(models.CharField(max_length=256), blank=True, default=[])
+    plugins = ArrayField(models.CharField(max_length=256), blank=True, default=[])
 
     def __str__(self):
         return self.name

@@ -9,7 +9,7 @@ from core import views
 urlpatterns = [
     path('logout/', views.logout, name='logout'),
     path(
-        'graphql/',
+        'graphql',
         csrf_exempt(GraphQLView.as_view(graphiql=True)),
         name='graphql'
         ),
