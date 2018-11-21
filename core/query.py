@@ -143,12 +143,13 @@ class Query:
                 )
             ],
             footer=[],
-            defaultAccessId=1,
-            showIcon=False,
-            showLeader=False,
-            showLeaderButtons=False,
-            showInitiative=False,
-            usersOnline=999
+            predefined_tags=[],
+            default_access_id=1,
+            show_icon=False,
+            show_leader=False,
+            show_leader_buttons=False,
+            show_initiative=False,
+            users_online=999
         )
 
     def resolve_recommended(self, info, offset=0, limit=20):

@@ -110,6 +110,7 @@ class FeaturedInput(graphene.InputObjectType):
 
 
 class addGroupInput(graphene.InputObjectType):
+    client_mutation_id = graphene.Int()
     name = graphene.String(required=True)
     icon = graphene.String(required=False)
     featured = graphene.InputField(FeaturedInput)
@@ -140,7 +141,7 @@ class addGroupPayload(graphene.Mutation):
         with reversion.create_revision():
             group = GroupModel.objects.create(
                 name=input.get('name'),
-                icon=input.get('icon', None),
+                icon=input.get('icon', ''),
                 is_closed=input.get('is_closed', False),
                 is_featured=input.get('is_featured', False),
                 auto_notification=input.get('auto_notification', False),
@@ -170,6 +171,7 @@ class addGroupPayload(graphene.Mutation):
         return addGroupPayload(ok=ok, group=group)
 
 class editGroupInput(graphene.InputObjectType):
+    client_mutation_id = graphene.Int()
     guid = graphene.String(required=True)
     name = graphene.String()
     icon = graphene.String()
@@ -230,6 +232,7 @@ class editGroupPayload(graphene.Mutation):
         return editGroupPayload(ok=ok, group=group)
 
 class deleteGroupInput(graphene.InputObjectType):
+    client_mutation_id = graphene.Int()
     guid = graphene.String(required=True)
 
 class deleteGroupPayload(graphene.Mutation):
@@ -269,6 +272,7 @@ class deleteGroupPayload(graphene.Mutation):
         return deleteGroupPayload(ok=ok)
 
 class joinGroupInput(graphene.InputObjectType):
+    client_mutation_id = graphene.Int()
     guid = graphene.String(required=True)
 
 class joinGroupPayload(graphene.Mutation):
@@ -308,6 +312,7 @@ class joinGroupPayload(graphene.Mutation):
 
 
 class leaveGroupInput(graphene.InputObjectType):
+    client_mutation_id = graphene.Int()
     guid = graphene.String(required=True)
 
 class leaveGroupPayload(graphene.Mutation):
@@ -344,6 +349,7 @@ class leaveGroupPayload(graphene.Mutation):
 
 
 class changeGroupRoleInput(graphene.InputObjectType):
+    client_mutation_id = graphene.Int()
     guid = graphene.ID(required=True)
     userGuid = graphene.ID(required=True)
     role = Role(required=True)
