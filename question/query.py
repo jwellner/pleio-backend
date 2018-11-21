@@ -4,6 +4,9 @@ from .models import Question as QuestionModel
 
 
 class Query(object):
+    """
+    Does not exist in old graphQL schema
+
     questions = graphene.Field(
         QuestionList,
         offset=graphene.Int(),
@@ -17,3 +20,4 @@ class Query(object):
                 info.context.user
                 )[offset:(offset+limit)]
         )
+    """

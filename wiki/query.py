@@ -4,6 +4,9 @@ from .models import Wiki as WikiModel
 
 
 class Query(object):
+    """
+    Does not exist in old graphQL schema
+
     wikis = graphene.Field(
         WikiList,
         offset=graphene.Int(),
@@ -17,3 +20,4 @@ class Query(object):
                 info.context.user
                 )[offset:(offset+limit)]
         )
+    """
