@@ -114,6 +114,11 @@ class User(AbstractBaseUser):
     def get_short_name(self):
         return self.name
 
+    def guid(self):
+        return '{}.{}:{}'.format(
+            self._meta.app_label, self._meta.object_name, self.id
+        ).lower()
+
     def email_user(self, subject, message, from_email=None, **kwargs):
         send_mail(subject, message, from_email or settings.FROM_EMAIL, [
                   self.email], **kwargs)

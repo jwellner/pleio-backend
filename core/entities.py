@@ -3,13 +3,14 @@ from graphene_django.types import DjangoObjectType
 from django.contrib.contenttypes.models import ContentType
 from .models import User as UserModel, Group as GroupModel, GroupMembership as GroupMembershipModel, Comment as CommentModel
 from .lists import MembersList, InviteList, MembershipRequestList, SubgroupList
-from .enums import MEMBERSHIP, PLUGIN, ROLE
+from .enums import MEMBERSHIP, PLUGIN, ROLE, EMAIL_FREQUENCY
 
 logger = logging.getLogger(__name__)
 
 Membership = graphene.Enum.from_enum(MEMBERSHIP)
 Plugin = graphene.Enum.from_enum(PLUGIN)
 Role = graphene.Enum.from_enum(ROLE)
+EmailFrequency = graphene.Enum.from_enum(EMAIL_FREQUENCY)
 
 class Featured(graphene.ObjectType):
     video = graphene.String()
@@ -17,7 +18,11 @@ class Featured(graphene.ObjectType):
     positionY = graphene.Int()
 
 class Viewer(graphene.ObjectType):
-    is_authenticated = graphene.Boolean()
+    guid = graphene.String(required=True)
+    logged_in = graphene.Boolean(required=True)
+    is_sub_editor = graphene.Boolean(required=True)
+    is_admin = graphene.Boolean(required=True)
+    tags = graphene.List(graphene.String)
     user = graphene.Field('core.entities.User')
 
 class Entity(graphene.Interface):
@@ -26,13 +31,33 @@ class Entity(graphene.Interface):
 class User(DjangoObjectType):
     class Meta:
         model = UserModel
-        only_fields = ['name', 'picture']
+        only_fields = ['name']
         interfaces = (Entity, )
 
+    guid = graphene.ID()
+    username = graphene.String()
+    icon = graphene.String()
+    email = graphene.String()
+    emailNotifications = graphene.Boolean()
+    getsNewsletter = graphene.Boolean()
+    emailOverview = EmailFrequency()
+    profile = graphene.List('core.entities.ProfileItem')
+    stats = graphene.List('core.entities.StatsItem')
+    tags = graphene.List(graphene.String)
+    url = graphene.String()
+    can_edit = graphene.Boolean()
+
+    def resolve_email(self, info):
+        return self.email
+
+    def resolve_username(self, info):
+        return self.name
+
     def resolve_guid(self, info):
-        return '{}.{}:{}'.format(
-            self._meta.app_label, self._meta.object_name, self.id
-            ).lower()
+        return self.guid()
+
+    def resolve_icon(self, info):
+        return self.picture
 
 class Member(DjangoObjectType):
     class Meta:
@@ -207,3 +232,8 @@ class Site(graphene.ObjectType):
     filters = graphene.List('core.entities.Filter')
     predefinedTags = graphene.List('core.entities.PredifinedTagType')
     usersOnline = graphene.Boolean(required=True)
+
+class StatsItem(graphene.ObjectType):
+    key = graphene.String(required=True)
+    name = graphene.String(required=True)
+    value = graphene.String()

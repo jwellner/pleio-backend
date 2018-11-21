@@ -29,3 +29,10 @@ class ROLE(enum.Enum):
     admin = 'admin'
     member = 'member'
     removed = 'removed'
+
+class EMAIL_FREQUENCY(enum.Enum):
+    daily = 'daily'
+    weekly = 'weekly'
+    twoweekly = 'twoweekly'
+    monthly = 'monthly'
+    never = 'never'

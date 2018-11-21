@@ -150,4 +150,6 @@ LOGIN_URL = '/oidc/authenticate/'
 LOGIN_REDIRECT_URL = '/'
 LOGOUT_REDIRECT_URL = '/'
 
+APPEND_SLASH = False
+
 from .config import *

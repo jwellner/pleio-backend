@@ -1,6 +1,6 @@
 from django.contrib.contenttypes.models import ContentType
 import graphene, logging
-from .entities import Entity, Viewer, Site
+from .entities import Entity, Viewer, Site, MenuItem
 from .lists import GroupList, SearchList, EntityList, UserList, TrendingList, TopList
 from .models import Group as GroupModel
 from .enums import ORDER_DIRECTION, ORDER_BY
@@ -58,12 +58,8 @@ class Query:
         offset=graphene.Int(),
         limit=graphene.Int()
     )
-    trending = graphene.Field(
-        TrendingList
-    )
-    top = graphene.Field(
-        TopList
-    )
+    trending = graphene.Field(graphene.List(TrendingList))
+    top = graphene.Field(graphene.List(TopList))
 
     def resolve_entity(self, info, guid, username):
         try:
@@ -102,7 +98,11 @@ class Query:
         user = info.context.user
 
         return Viewer(
-            is_authenticated=user.is_authenticated,
+            guid=user.guid(),
+            logged_in=user.is_authenticated,
+            is_sub_editor=False,
+            is_admin=False,
+            tags=[],
             user=(user if user.is_authenticated else None)
         )
 
@@ -114,7 +114,7 @@ class Query:
             edges=[]
         )
 
-    def resolve_entities(self, info, type, subtype, subtypes, containerGuid, tags, orderBy=ORDER_BY.timeUpdated, orderDirection=ORDER_DIRECTION.desc, offset=0, limit=20):
+    def resolve_entities(self, info, type=None, subtype=None, subtypes=[], containerGuid=None, tags=[], orderBy=ORDER_BY.timeUpdated, orderDirection=ORDER_DIRECTION.desc, offset=0, limit=20):
 
         return EntityList(
             total=0,
@@ -126,7 +126,20 @@ class Query:
         return Site(
             guid="1",
             name="Backend2",
-            theme="base",
+            theme="leraar",
+            menu=[
+                MenuItem(
+                    title='Nieuws',
+                    link='/news',
+                    children=[]
+                ),
+                MenuItem(
+                    title='Groups',
+                    link='/groups',
+                    children=[]
+                )
+            ],
+            footer=[],
             defaultAccessId=1,
             showIcon=False,
             showLeader=False,
@@ -143,13 +156,13 @@ class Query:
         )
 
     def resolve_trending(self, info):
-        return TrendingList(
+        return [TrendingList(
             tag="test",
             likes=99
-        )
+        )]
 
     def resolve_top(self, info):
-        return TopList(
+        return [TopList(
             user=info.context.user,
             likes=99
-        )
+        )]
