@@ -1,6 +1,5 @@
 import graphene
 
-
 class GroupList(graphene.ObjectType):
     total = graphene.Int(required=True)
     can_write = graphene.Boolean(required=True)
@@ -11,7 +10,8 @@ class MembersList(graphene.ObjectType):
     edges = graphene.List('core.entities.Member')
 
 class EntityList(graphene.ObjectType):
-    totalCount = graphene.Int(required=True)
+    total = graphene.Int(required=True)
+    can_write = graphene.Boolean(required=True)
     edges = graphene.List('core.entities.Entity')
 
 class InviteList(graphene.ObjectType):
@@ -23,5 +23,10 @@ class MembershipRequestList(graphene.ObjectType):
     edges = graphene.List('core.entities.Member')
 
 class SubgroupList(graphene.ObjectType):
-    totel = graphene.Int(required=True)
+    total = graphene.Int(required=True)
     edges = graphene.List('core.entities.Subgroup')
+
+class SearchList(graphene.ObjectType):
+    total = graphene.Int(required=True)
+    totals = graphene.List('core.entities.SearchTotal')
+    edges = graphene.List('core.entities.Entity')

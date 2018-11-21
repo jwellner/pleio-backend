@@ -3,32 +3,13 @@ from graphene_django.types import DjangoObjectType
 from django.contrib.contenttypes.models import ContentType
 from .models import User as UserModel, Group as GroupModel, GroupMembership as GroupMembershipModel, Comment as CommentModel
 from .lists import MembersList, InviteList, MembershipRequestList, SubgroupList
+from .enums import MEMBERSHIP, PLUGIN, ROLE
 
 logger = logging.getLogger(__name__)
 
-MEMBERSHIP = graphene.Enum('Membership', [
-    ('not_joined', 'not_joined'),
-    ('requested', 'requested'),
-    ('invited', 'invited'),
-    ('joined', 'joined')
-])
-
-PLUGIN = graphene.Enum('Plugins', [
-    ('events', 'events'),
-    ('blog', 'blog'),
-    ('discussion', 'discussion'),
-    ('questions', 'questions'),
-    ('files', 'files'),
-    ('wiki', 'wiki'),
-    ('tasks', 'tasks')
-])
-
-ROLE = graphene.Enum('Role', [
-    ('owner', 'owner'),
-    ('admin', 'admin'),
-    ('member', 'member'),
-    ('removed', 'removed')
-])
+Membership = graphene.Enum.from_enum(MEMBERSHIP)
+Plugin = graphene.Enum.from_enum(PLUGIN)
+Role = graphene.Enum.from_enum(ROLE)
 
 class Featured(graphene.ObjectType):
     video = graphene.String()
@@ -58,7 +39,7 @@ class Member(DjangoObjectType):
         model = GroupMembershipModel
         only_fields = ['user']
 
-    role = ROLE()
+    role = Role()
     email = graphene.String()
 
     def resolve_role(self, info):
@@ -91,7 +72,7 @@ class Group(DjangoObjectType):
     is_member = graphene.Boolean(required=True)
     can_edit = graphene.Boolean()
     can_change_ownership = graphene.Boolean()
-    membership = MEMBERSHIP()
+    membership = Membership()
     access_ids = graphene.List(graphene.Int)
     default_access_id = graphene.Int()
     gets_notifications = graphene.Boolean()
@@ -108,7 +89,7 @@ class Group(DjangoObjectType):
     membership_requests = graphene.Field(
         MembershipRequestList
     )
-    plugins = graphene.List(PLUGIN)
+    plugins = graphene.List(Plugin)
     subgroups = graphene.Field(
         SubgroupList
     )
@@ -164,3 +145,65 @@ class Subgroup(graphene.ObjectType):
     id = graphene.ID()
     name = graphene.String()
     members = graphene.List(User)
+
+class SearchTotal(graphene.ObjectType):
+    subtype = graphene.String(required=True)
+    total = graphene.Int(required=True)
+
+class MenuItem(graphene.ObjectType):
+    title = graphene.String(required=True)
+    link = graphene.String()
+    children = graphene.List('core.entities.MenuItem')
+
+class ProfileItem(graphene.ObjectType):
+    key = graphene.String(required=True)
+    name = graphene.String(required=True)
+    value = graphene.String()
+    accessId = graphene.Int()
+
+class DirectLink(graphene.ObjectType):
+    title = graphene.String(required=True)
+    link = graphene.String(required=True)
+
+class AccessId(graphene.ObjectType):
+    id = graphene.String(required=True)
+    description = graphene.String(required=True)
+
+class StyleType(graphene.ObjectType):
+    colorPrimary = graphene.String()
+    colorSecondary = graphene.String()
+    colorTertiary = graphene.String()
+    colorQuaternary = graphene.String()
+
+class Filter(graphene.ObjectType):
+    name = graphene.String(required=True)
+    values = graphene.List(graphene.String)
+
+class PredifinedTagType(graphene.ObjectType):
+    tag = graphene.String()
+
+class Site(graphene.ObjectType):
+    guid = graphene.ID(required=True)
+    name = graphene.String(required=True)
+    theme = graphene.String(required=True)
+    menu = graphene.List('core.entities.MenuItem')
+    profile = graphene.List('core.entities.ProfileItem')
+    footer = graphene.List('core.entities.MenuItem')
+    directLinks = graphene.List('core.entities.DirectLink')
+    accessIds = graphene.List('core.entities.AccessId')
+    defaultAccessId = graphene.Int(required=True)
+    logo = graphene.String()
+    icon = graphene.String()
+    showIcon = graphene.Boolean(required=True)
+    initiatorLink = graphene.String()
+    startPage = graphene.String()
+    showLeader = graphene.Boolean(required=True)
+    showLeaderButtons = graphene.Boolean(required=True)
+    subtitle = graphene.String()
+    leaderImage = graphene.String()
+    showInitiative = graphene.Boolean(required=True)
+    initiativeImage = graphene.String()
+    style = graphene.Field('core.entities.StyleType')
+    filters = graphene.List('core.entities.Filter')
+    predefinedTags = graphene.List('core.entities.PredifinedTagType')
+    usersOnline = graphene.Boolean(required=True)

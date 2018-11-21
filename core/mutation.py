@@ -9,6 +9,7 @@ from .lib import get_id
 from .models import Comment as CommentModel, Group as GroupModel, User as UserModel
 from .entities import Entity, Group, Comment, PLUGIN, ROLE
 from .constances import *
+from .enums import ROLE
 
 logger = logging.getLogger('django')
 
@@ -370,7 +371,7 @@ class changeGroupRolePayload(graphene.Mutation):
             with reversion.create_revision():
                 user = UserModel.objects.get(pk=get_id(input.get('userGuid')))
 
-                if input['role'] == 'removed':
+                if input['role'] ==  ROLE.removed:
                     group.leave(user)
                 else:
                     group.join(user, input['role'])

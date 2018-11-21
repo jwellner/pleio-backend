@@ -14,7 +14,6 @@ import reversion
 
 from .lib import get_acl
 
-
 class Manager(BaseUserManager):
     def create_user(
         self,
