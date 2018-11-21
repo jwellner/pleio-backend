@@ -1,7 +1,7 @@
 from django.contrib.contenttypes.models import ContentType
 import graphene, logging
 from .entities import Entity, Viewer, Site
-from .lists import GroupList, SearchList, EntityList
+from .lists import GroupList, SearchList, EntityList, UserList
 from .models import Group as GroupModel
 from .enums import ORDER_DIRECTION, ORDER_BY
 
@@ -33,6 +33,12 @@ class Query:
         subType=graphene.String(),
         offset=graphene.Int(),
         limit=graphene.Int(),
+    )
+    users = graphene.Field(
+        UserList,
+        q=graphene.String(required=True),
+        offset=graphene.Int(),
+        limit=graphene.Int()
     )
     entities = graphene.Field(
         EntityList,

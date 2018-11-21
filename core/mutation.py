@@ -7,15 +7,13 @@ from django.db import transaction
 from graphql import GraphQLError
 from .lib import get_id
 from .models import Comment as CommentModel, Group as GroupModel, User as UserModel
-from .entities import Entity, Group, Comment, PLUGIN, ROLE
+from .entities import Entity, Group, Comment, Role, Plugin
 from .constances import *
-from .enums import ROLE
 
 logger = logging.getLogger('django')
 
 class CommentInput(graphene.InputObjectType):
     description = graphene.String(required=True)
-
 
 class CreateComment(graphene.Mutation):
     class Arguments:
@@ -123,7 +121,7 @@ class addGroupInput(graphene.InputObjectType):
     introduction = graphene.String(required=False)
     welcomeMessage = graphene.String(required=False)
     tags = graphene.List(graphene.String)
-    plugins = graphene.List(PLUGIN)
+    plugins = graphene.List(Plugin)
 
 class addGroupPayload(graphene.Mutation):
     class Arguments:
@@ -184,7 +182,7 @@ class editGroupInput(graphene.InputObjectType):
     introduction = graphene.String(required=False)
     welcomeMessage = graphene.String(required=False)
     tags = graphene.List(graphene.String)
-    plugins = graphene.List(PLUGIN)
+    plugins = graphene.List(Plugin)
 
 class editGroupPayload(graphene.Mutation):
     class Arguments:
@@ -348,7 +346,7 @@ class leaveGroupPayload(graphene.Mutation):
 class changeGroupRoleInput(graphene.InputObjectType):
     guid = graphene.ID(required=True)
     userGuid = graphene.ID(required=True)
-    role = ROLE(required=True)
+    role = Role(required=True)
 
 class changeGroupRolePayload(graphene.Mutation):
 

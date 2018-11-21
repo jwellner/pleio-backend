@@ -30,3 +30,7 @@ class SearchList(graphene.ObjectType):
     total = graphene.Int(required=True)
     totals = graphene.List('core.entities.SearchTotal')
     edges = graphene.List('core.entities.Entity')
+
+class UserList(graphene.ObjectType):
+    total = graphene.Int(required=True)
+    edges = graphene.List('core.entities.User')
