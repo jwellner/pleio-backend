@@ -34,3 +34,11 @@ class SearchList(graphene.ObjectType):
 class UserList(graphene.ObjectType):
     total = graphene.Int(required=True)
     edges = graphene.List('core.entities.User')
+
+class TrendingList(graphene.ObjectType):
+    tag = graphene.String()
+    likes = graphene.Int()
+
+class TopList(graphene.ObjectType):
+    user = graphene.Field('core.entities.User')
+    likes = graphene.Int()

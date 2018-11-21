@@ -1,7 +1,7 @@
 from django.contrib.contenttypes.models import ContentType
 import graphene, logging
 from .entities import Entity, Viewer, Site
-from .lists import GroupList, SearchList, EntityList, UserList
+from .lists import GroupList, SearchList, EntityList, UserList, TrendingList, TopList
 from .models import Group as GroupModel
 from .enums import ORDER_DIRECTION, ORDER_BY
 
@@ -53,6 +53,17 @@ class Query:
         limit=graphene.Int(),
     )
     site = graphene.Field(Site)
+    recommended = graphene.Field(
+        EntityList,
+        offset=graphene.Int(),
+        limit=graphene.Int()
+    )
+    trending = graphene.Field(
+        TrendingList
+    )
+    top = graphene.Field(
+        TopList
+    )
 
     def resolve_entity(self, info, guid, username):
         try:
@@ -122,4 +133,23 @@ class Query:
             showLeaderButtons=False,
             showInitiative=False,
             usersOnline=999
+        )
+
+    def resolve_recommended(self, info, offset=0, limit=20):
+        return EntityList(
+            total=0,
+            can_write=False,
+            edges=[]
+        )
+
+    def resolve_trending(self, info):
+        return TrendingList(
+            tag="test",
+            likes=99
+        )
+
+    def resolve_top(self, info):
+        return TopList(
+            user=info.context.user,
+            likes=99
         )
