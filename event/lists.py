@@ -2,5 +2,6 @@ import graphene
 
 
 class EventList(graphene.ObjectType):
-    totalCount = graphene.Int(required=True)
+    total = graphene.Int(required=True)
+    can_write = graphene.Boolean(required=True)
     edges = graphene.List('event.entities.Event')
