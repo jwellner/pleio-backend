@@ -202,6 +202,7 @@ class AccessId(graphene.ObjectType):
     description = graphene.String(required=True)
 
 class StyleType(graphene.ObjectType):
+    font = graphene.String()
     color_primary = graphene.String()
     color_secondary = graphene.String()
     color_tertiary = graphene.String()

@@ -1,6 +1,6 @@
 from django.contrib.contenttypes.models import ContentType
 import graphene, logging
-from .entities import Entity, Viewer, Site, MenuItem
+from .entities import Entity, Viewer, Site, MenuItem, StyleType
 from .lists import GroupList, SearchList, EntityList, UserList, TrendingList, TopList
 from .models import Group as GroupModel
 from .enums import ORDER_DIRECTION, ORDER_BY
@@ -100,7 +100,7 @@ class Query:
         user = info.context.user
 
         return Viewer(
-            guid=user.guid(),
+            guid= user.guid() if user.is_authenticated else 0,
             logged_in=user.is_authenticated,
             is_sub_editor=False,
             is_admin=False,
@@ -149,7 +149,14 @@ class Query:
             show_leader=False,
             show_leader_buttons=False,
             show_initiative=False,
-            users_online=999
+            users_online=999,
+            style=StyleType(
+                font='Rijksoverheid Sans',
+                color_primary='#000000',
+                color_secondary='#C21370',
+                color_tertiary='#37AC8C',
+                color_quaternary='#000000'
+            )
         )
 
     def resolve_recommended(self, info, offset=0, limit=20):
