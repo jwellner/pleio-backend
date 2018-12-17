@@ -4,10 +4,7 @@ from graphene import relay
 from core.entities import Entity, User
 
 class Notification(graphene.ObjectType):
-    class Meta:
-        interfaces = (Entity, )
-
-    id = graphene.Int()
+    guid = graphene.ID()
     action = graphene.String()
     performer = graphene.Field(User)
     entity = graphene.Field(Entity)

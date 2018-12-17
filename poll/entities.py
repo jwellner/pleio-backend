@@ -8,7 +8,6 @@ class Poll(DjangoObjectType):
         model = PollModel
         interfaces = (Entity, )
 
-    guid = graphene.ID()
     can_edit = graphene.Boolean(required=True)
     title = graphene.String()
     url = graphene.String()

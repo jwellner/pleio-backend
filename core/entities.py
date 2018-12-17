@@ -35,6 +35,7 @@ class Viewer(graphene.ObjectType):
 
 class Entity(graphene.Interface):
     guid = graphene.ID()
+    status = graphene.Int()
 
 class User(DjangoObjectType):
     class Meta:
@@ -42,7 +43,6 @@ class User(DjangoObjectType):
         only_fields = ['name']
         interfaces = (Entity, )
 
-    guid = graphene.ID()
     username = graphene.String()
     icon = graphene.String()
     email = graphene.String()
@@ -99,7 +99,6 @@ class Group(DjangoObjectType):
         ]
         interfaces = (Entity, )
 
-    guid = graphene.ID(required=True)
     featured = graphene.Field(Featured)
     is_member = graphene.Boolean(required=True)
     can_edit = graphene.Boolean()
@@ -147,21 +146,36 @@ class Group(DjangoObjectType):
     def resolve_is_member(self, info):
         return self.is_member(info.context.user)
 
-
 class Comment(DjangoObjectType):
-    id = graphene.ID()
 
     class Meta:
         only_fields = [
-            'id',
             'owner',
             'description',
-            'created_at',
-            'updated_at'
             ]
         model = CommentModel
+        interfaces = (Entity, )
 
-    def resolve_id(self, info):
+    subtype = graphene.String()
+    title = graphene.String()
+    description = graphene.String()
+    rich_description = graphene.String()
+    excerpt = graphene.String()
+    url = graphene.String()
+    tags = graphene.List(graphene.String)
+    time_created = graphene.String()
+    time_updated = graphene.String()
+    can_edit = graphene.Boolean()
+    can_vote = graphene.Boolean()
+    access_id = graphene.Int()
+    write_access_id = graphene.Int()
+    has_voted = graphene.Boolean()
+    votes = graphene.Int()
+    can_choose_best_answer = graphene.Boolean()
+    is_best_answer = graphene.Boolean()
+    owner = graphene.Field('core.entities.User')
+
+    def resolve_guid(self, info):
         return '{}.{}:{}'.format(
             self._meta.app_label, self._meta.object_name, self.id
             ).lower()
