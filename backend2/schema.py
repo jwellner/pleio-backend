@@ -1,6 +1,7 @@
 import graphene
 
 from .utils import get_queries_from_apps, get_mutations_from_apps
+from activity.entities import StatusUpdate
 
 name = 'Query'
 Query = type(
@@ -16,4 +17,4 @@ Mutation = type(
     dict()
 )
 
-schema = graphene.Schema(query=Query, mutation=Mutation)
+schema = graphene.Schema(query=Query, mutation=Mutation, types=[StatusUpdate, ])
