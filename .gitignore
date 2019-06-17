@@ -11,3 +11,6 @@
 .idea/
 __pycache__
 /.tox/
+.env
+postgres/
+static/
