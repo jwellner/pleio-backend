@@ -1,4 +1,9 @@
-.git/
+.git
+node_modules
+backend2/config.py
+db.sqlite3
+Dockerfile
+docker-compose.yml
 
 *.egg-info
 *.egg/
@@ -7,5 +12,5 @@
 .tox
 __pycache__
 
-media/*
-static/*
+static
+media
