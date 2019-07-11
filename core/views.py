@@ -1,7 +1,7 @@
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.views import LogoutView
 from django.http import HttpResponseBadRequest, JsonResponse
-from django.shortcuts import render, redirect
+from django.shortcuts import redirect
 from django.conf import settings
 from .models import BinaryFile
 
@@ -38,7 +38,7 @@ def upload(request):
             binary_file._meta.app_label,
             binary_file._meta.object_name,
             binary_file.id
-            ).lower()
+        ).lower()
     }
 
     return JsonResponse(data)
@@ -47,11 +47,7 @@ def upload(request):
 def logout(request):
     LogoutView.as_view()(request)
 
-    # logout at OpenId provider
-    redirect_uri = settings.OIDC_RP_LOGOUT_REDIRECT
-
-    oidc_url = settings.OIDC_OP_LOGOUT_ENDPOINT
-    return redirect(oidc_url + redirect_uri)
+    return redirect('/')
 
 
 def oidc_failure(request):

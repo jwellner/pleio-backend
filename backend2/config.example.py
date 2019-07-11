@@ -1,23 +1,31 @@
+import os
 from django.utils.translation import ugettext_lazy as _
 
-SECRET_KEY = 'b04*myk_%9&^x5elbx(j@l_76y%g(q4q98ny2*gdc0v#b+j2h7'
+# SECURITY WARNING: keep the secret key used in production secret!
+SECRET_KEY = os.getenv('SECRET_KEY')
 
-DEBUG = True
+# SECURITY WARNING: don't run with debug turned on in production!
+DEBUG = os.getenv('DEBUG')
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = [os.getenv('ALLOWED_HOST')]
 
+# Database
+# https://docs.djangoproject.com/en/1.10/ref/settings/#databases
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'backend2'
+        'HOST': os.getenv('DB_HOST'),
+        'USER': os.getenv('DB_USER'),
+        'PASSWORD': os.getenv('DB_PASSWORD'),
+        'NAME': os.getenv('DB_NAME'),
     }
 }
 
 TIME_ZONE = 'UTC'
 
-FROM_EMAIL = 'Backend <noreply@backend.com>'
-EMAIL_HOST = 'localhost'
-EMAIL_PORT = 1025
+FROM_EMAIL = os.getenv('FROM_EMAIL')
+EMAIL_HOST = os.getenv('EMAIL_HOST')
+EMAIL_PORT = os.getenv('EMAIL_PORT')
 
 LOCAL_APPS = [
     'blog',
@@ -31,7 +39,10 @@ LOCAL_APPS = [
     'poll',
     'question',
     'wiki',
+    'activity'
 ]
+
+STATIC_ROOT = '/app/static'
 
 LOCAL_MIDDLEWARE = []
 
@@ -43,10 +54,10 @@ LANGUAGES = [
     ('fr-fr', _('French'))
 ]
 
-OIDC_RP_CLIENT_ID = '12345'
-OIDC_RP_CLIENT_SECRET = 'secret'
-OIDC_RP_SCOPES = 'openid profile email picture'
+OIDC_RP_CLIENT_ID = os.getenv('OIDC_RP_CLIENT_ID')
+OIDC_RP_CLIENT_SECRET = os.getenv('OIDC_RP_CLIENT_SECRET')
+OIDC_RP_SCOPES = 'openid profile email'
 
-OIDC_OP_AUTHORIZATION_ENDPOINT = 'http://localhost:8001/openid/authorize/'
-OIDC_OP_TOKEN_ENDPOINT = 'http://localhost:8001/openid/token/'
-OIDC_OP_USER_ENDPOINT = 'http://localhost:8001/openid/userinfo/'
+OIDC_OP_AUTHORIZATION_ENDPOINT = os.getenv('OIDC_OP_AUTHORIZATION_ENDPOINT')
+OIDC_OP_TOKEN_ENDPOINT = os.getenv('OIDC_OP_TOKEN_ENDPOINT')
+OIDC_OP_USER_ENDPOINT = os.getenv('OIDC_OP_USER_ENDPOINT')

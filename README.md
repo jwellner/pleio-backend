@@ -73,4 +73,10 @@ To run the project in testing mode, use this command:
 
 For more information on setting up a production environment or how to develop on Backend2 consult the [documentation](/docs).
 
+### GraphQL schema
 
+This project uses a schema-first GraphQL implementation with Ariadne.
+
+You can find the schema in `backend2/schema.graphql` it is initially synced with the backend1 graphql Schema.
+
+It is possible to extend the basis schema using the extend directive. 

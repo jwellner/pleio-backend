@@ -1,0 +1,1615 @@
+input acceptGroupInvitationInput {
+  """The unique invite code."""
+  code: String
+  clientMutationId: String
+}
+
+type acceptGroupInvitationPayload {
+  group: Group
+  clientMutationId: String
+}
+
+input acceptMembershipRequestInput {
+  """The guid of the user."""
+  userGuid: String
+
+  """The guid of the group."""
+  groupGuid: String
+  clientMutationId: String
+}
+
+type acceptMembershipRequestPayload {
+  group: Group
+  clientMutationId: String
+}
+
+type AccessId {
+  id: Int!
+  description: String!
+}
+
+type Activity {
+  guid: String!
+  type: ActivityType!
+  entity: Entity!
+}
+
+type ActivityFilter {
+  contentTypes: [KeyValueItem]!
+}
+
+type ActivityList {
+  total: Int!
+  edges: [Activity]
+}
+
+"""The type of activity"""
+enum ActivityType {
+  create
+  update
+}
+
+input addEntityInput {
+  type: Type!
+  subtype: String!
+  title: String
+  description: String!
+  richDescription: String
+  isRecommended: Boolean
+  isFeatured: Boolean
+  featured: FeaturedInput
+  startDate: String
+  endDate: String
+  source: String
+  location: String
+  maxAttendees: String
+  rsvp: Boolean
+  containerGuid: String
+  accessId: Int
+  writeAccessId: Int
+  tags: [String]
+  mentions: [String]
+  clientMutationId: String
+}
+
+type addEntityPayload {
+  entity: Entity
+  clientMutationId: String
+}
+
+input addFileInput {
+  containerGuid: String
+  file: String
+  accessId: Int
+  writeAccessId: Int
+  clientMutationId: String
+}
+
+type addFilePayload {
+  entity: Entity
+  clientMutationId: String
+}
+
+input addGroupInput {
+  name: String
+  icon: String
+  featured: FeaturedInput
+  isClosed: Boolean
+
+  """
+  True when membership has to be requested by the user, False when every user can join the group.
+  """
+  isMembershipOnRequest: Boolean
+  isFeatured: Boolean
+  autoNotification: Boolean
+  description: String
+  richDescription: String
+  introduction: String
+  welcomeMessage: String
+  tags: [String]
+  plugins: [Plugins]
+  clientMutationId: String
+}
+
+type addGroupPayload {
+  group: Group
+  clientMutationId: String
+}
+
+input addGroupWidgetInput {
+  groupGuid: String!
+  position: Int!
+  type: String!
+  settings: [WidgetSettingInput]
+  clientMutationId: String
+}
+
+type addGroupWidgetPayload {
+  entity: Widget
+  clientMutationId: String
+}
+
+input addImageInput {
+  image: String
+  clientMutationId: String
+}
+
+type addImagePayload {
+  file: FileFolder
+  clientMutationId: String
+}
+
+input addPageInput {
+  title: String
+  description: String!
+  richDescription: String
+  pageType: String
+  containerGuid: String
+  accessId: Int
+  tags: [String]
+  clientMutationId: String
+}
+
+type addPagePayload {
+  entity: Entity
+  clientMutationId: String
+}
+
+input addPollInput {
+  title: String!
+  choices: [String]!
+  accessId: Int
+  clientMutationId: String
+}
+
+type addPollPayload {
+  entity: Entity!
+  clientMutationId: String
+}
+
+input addRowInput {
+  layout: String
+  containerGuid: String
+  clientMutationId: String
+}
+
+type addRowPayload {
+  row: Row
+  clientMutationId: String
+}
+
+input addSubgroupInput {
+  name: String
+  groupGuid: String
+  members: [String]
+  clientMutationId: String
+}
+
+type addSubgroupPayload {
+  success: Boolean
+  clientMutationId: String
+}
+
+input addWidgetInput {
+  rowGuid: String!
+  position: Int!
+  type: String!
+  settings: [WidgetSettingInput]
+  clientMutationId: String
+}
+
+type addWidgetPayload {
+  entity: Widget
+  clientMutationId: String
+}
+
+type AttendeesList {
+  total: Int!
+  totalMaybe: Int!
+  totalReject: Int!
+  edges: [User]
+}
+
+input attendEventInput {
+  guid: String
+  state: String
+  clientMutationId: String
+}
+
+type attendEventPayload {
+  entity: Event
+  clientMutationId: String
+}
+
+type Blog implements Entity {
+  guid: String!
+  status: Int
+  subtype: String
+  title: String
+  description: String
+  richDescription: String
+  inGroup: Boolean
+  group: Group
+  excerpt: String
+  url: String
+  tags: [String]
+  timeCreated: String
+  timeUpdated: String
+  isFeatured: Boolean
+  isHighlighted: Boolean
+  isRecommended: Boolean
+  featured: Featured
+  canEdit: Boolean
+  canComment: Boolean
+  canVote: Boolean
+  accessId: Int
+  writeAccessId: Int
+  isBookmarked: Boolean
+  isFollowing: Boolean
+  canBookmark: Boolean
+  hasVoted: Boolean
+  votes: Int
+  views: Int
+  owner: User
+  comments: [Comment]
+  commentCount: Int
+}
+
+input bookmarkInput {
+  """The guid of the entity to bookmark."""
+  guid: String!
+
+  """True when adding, false when removing."""
+  isAdding: Boolean!
+  clientMutationId: String
+}
+
+type bookmarkPayload {
+  object: Entity!
+  isFirstBookmark: Boolean!
+  clientMutationId: String
+}
+
+input changeGroupRoleInput {
+  """The group guid."""
+  guid: String
+
+  """The user guid."""
+  userGuid: String
+
+  """The new role for the user."""
+  role: Role
+  clientMutationId: String
+}
+
+type changeGroupRolePayload {
+  group: Group
+  clientMutationId: String
+}
+
+type Comment implements Entity {
+  guid: String!
+  status: Int
+  subtype: String
+  title: String
+  description: String
+  richDescription: String
+  excerpt: String
+  url: String
+  tags: [String]
+  timeCreated: String
+  timeUpdated: String
+  canEdit: Boolean
+  canVote: Boolean
+  accessId: Int
+  writeAccessId: Int
+  hasVoted: Boolean
+  votes: Int
+  isBestAnswer: Boolean
+  owner: User
+}
+
+input deleteEntityInput {
+  guid: String!
+  clientMutationId: String
+}
+
+type deleteEntityPayload {
+  success: Boolean
+  clientMutationId: String
+}
+
+input deleteGroupInvitationInput {
+  """The id of the invitation to delete."""
+  id: Int
+  clientMutationId: String
+}
+
+type deleteGroupInvitationPayload {
+  group: Group
+  clientMutationId: String
+}
+
+input deleteSubgroupInput {
+  id: String
+  clientMutationId: String
+}
+
+type deleteSubgroupPayload {
+  success: Boolean
+  clientMutationId: String
+}
+
+type DirectLink {
+  title: String!
+  link: String!
+}
+
+type Discussion implements Entity {
+  guid: String!
+  status: Int
+  subtype: String
+  title: String
+  description: String
+  richDescription: String
+  inGroup: Boolean
+  group: Group
+  excerpt: String
+  url: String
+  tags: [String]
+  timeCreated: String
+  timeUpdated: String
+  isFeatured: Boolean
+  isHighlighted: Boolean
+  isRecommended: Boolean
+  featured: Featured
+  canEdit: Boolean
+  canComment: Boolean
+  canVote: Boolean
+  accessId: Int
+  writeAccessId: Int
+  isBookmarked: Boolean
+  isFollowing: Boolean
+  canBookmark: Boolean
+  hasVoted: Boolean
+  votes: Int
+  views: Int
+  owner: User
+  comments: [Comment]
+  commentCount: Int
+}
+
+input editAvatarInput {
+  guid: String
+
+  """The string pointer to the file object."""
+  avatar: String
+  clientMutationId: String
+}
+
+type editAvatarPayload {
+  user: User
+  clientMutationId: String
+}
+
+input editEmailInput {
+  guid: String
+  email: String
+  clientMutationId: String
+}
+
+input editEmailOverviewInput {
+  guid: String
+  overview: Overview
+  clientMutationId: String
+}
+
+type editEmailOverviewPayload {
+  user: User
+  clientMutationId: String
+}
+
+type editEmailPayload {
+  user: User
+  clientMutationId: String
+}
+
+input editEntityInput {
+  guid: String!
+  title: String
+  description: String!
+  richDescription: String
+  isRecommended: Boolean
+  isFeatured: Boolean
+  featured: FeaturedInput
+  startDate: String
+  endDate: String
+  source: String
+  location: String
+  maxAttendees: String
+  rsvp: Boolean
+  accessId: Int
+  writeAccessId: Int
+  tags: [String]
+  mentions: [String]
+  clientMutationId: String
+}
+
+type editEntityPayload {
+  entity: Entity
+  clientMutationId: String
+}
+
+input editFileFolderInput {
+  guid: String
+  title: String
+  file: String
+  accessId: Int
+  writeAccessId: Int
+  isAccessRecursive: Boolean
+  clientMutationId: String
+}
+
+type editFileFolderPayload {
+  entity: Entity
+  clientMutationId: String
+}
+
+input editGroupInput {
+  guid: String
+  name: String
+  icon: String
+  featured: FeaturedInput
+
+  """
+  True when membership has to be requested by the user, False when every user can join the group.
+  """
+  isClosed: Boolean
+
+  """
+  True when membership has to be requested by the user, False when every user can join the group.
+  """
+  isMembershipOnRequest: Boolean
+  isFeatured: Boolean
+  autoNotification: Boolean
+  description: String
+  richDescription: String
+  introduction: String
+  welcomeMessage: String
+  tags: [String]
+  plugins: [Plugins]
+  clientMutationId: String
+}
+
+input editGroupNotificationsInput {
+  guid: String
+  getsNotifications: Boolean
+  clientMutationId: String
+}
+
+type editGroupNotificationsPayload {
+  group: Group
+  clientMutationId: String
+}
+
+type editGroupPayload {
+  group: Group
+  clientMutationId: String
+}
+
+input editGroupWidgetInput {
+  guid: String!
+  row: Int
+  col: Int
+  width: Int
+  settings: [WidgetSettingInput]
+  clientMutationId: String
+}
+
+type editGroupWidgetPayload {
+  entity: Widget
+  clientMutationId: String
+}
+
+input editInterestsInput {
+  guid: String
+  tags: [String]
+  clientMutationId: String
+}
+
+type editInterestsPayload {
+  user: User
+  clientMutationId: String
+}
+
+input editNotificationsInput {
+  guid: String
+  emailNotifications: Boolean
+  newsletter: Boolean
+  clientMutationId: String
+}
+
+type editNotificationsPayload {
+  user: User
+  clientMutationId: String
+}
+
+input editPageInput {
+  guid: String!
+  title: String
+  description: String!
+  richDescription: String
+  accessId: Int
+  tags: [String]
+  clientMutationId: String
+}
+
+type editPagePayload {
+  entity: Entity
+  clientMutationId: String
+}
+
+input editPasswordInput {
+  guid: String
+  oldPassword: String
+  newPassword: String
+  clientMutationId: String
+}
+
+type editPasswordPayload {
+  user: User
+  clientMutationId: String
+}
+
+input editPollInput {
+  guid: String!
+  title: String!
+  choices: [String]!
+  accessId: Int
+  clientMutationId: String
+}
+
+type editPollPayload {
+  entity: Entity!
+  clientMutationId: String
+}
+
+input editProfileFieldInput {
+  guid: String!
+  accessId: Int
+  key: String!
+  value: String
+  clientMutationId: String
+}
+
+type editProfileFieldPayload {
+  user: User
+  clientMutationId: String
+}
+
+input editSubgroupInput {
+  id: Int
+  name: String
+  members: [String]
+  clientMutationId: String
+}
+
+type editSubgroupPayload {
+  success: Boolean
+  clientMutationId: String
+}
+
+input editTaskInput {
+  guid: String
+  state: String
+  clientMutationId: String
+}
+
+type editTaskPayload {
+  entity: Task
+  clientMutationId: String
+}
+
+input editWidgetInput {
+  guid: String!
+  row: Int
+  col: Int
+  width: Int
+  settings: [WidgetSettingInput]
+  clientMutationId: String
+}
+
+type editWidgetPayload {
+  entity: Widget
+  clientMutationId: String
+}
+
+interface Entity {
+  guid: String!
+  status: Int
+}
+
+type EntityList {
+  total: Int!
+  canWrite: Boolean!
+  edges: [Entity]
+}
+
+type Event implements Entity {
+  guid: String!
+  status: Int
+  subtype: String
+  title: String
+  description: String
+  richDescription: String
+  inGroup: Boolean
+  group: Group
+  excerpt: String
+  url: String
+  tags: [String]
+  timeCreated: String
+  timeUpdated: String
+  startDate: String
+  endDate: String
+  location: String
+  source: String
+  maxAttendees: String
+  rsvp: Boolean
+  isFeatured: Boolean
+  isHighlighted: Boolean
+  isRecommended: Boolean
+  featured: Featured
+  canEdit: Boolean
+  canComment: Boolean
+  canVote: Boolean
+  accessId: Int
+  writeAccessId: Int
+  isBookmarked: Boolean
+  isFollowing: Boolean
+  canBookmark: Boolean
+  hasVoted: Boolean
+  votes: Int
+  views: Int
+  owner: User
+  isAttending: String
+  attendees(offset: Int, limit: Int, state: String): AttendeesList
+  comments: [Comment]
+  commentCount: Int
+}
+
+"""Show upcoming events or previous events"""
+enum EventFilter {
+  upcoming
+  previous
+}
+
+type EventList {
+  total: Int!
+  canWrite: Boolean!
+  edges: [Event]
+}
+
+type Featured {
+  video: String
+  image: String
+  positionY: Int
+}
+
+input FeaturedInput {
+  video: String
+  image: String
+  positionY: Int
+}
+
+type FileFolder implements Entity {
+  guid: String!
+  status: Int
+  subtype: String
+  title: String
+  description: String
+  richDescription: String
+  hasChildren: Boolean
+  inGroup: Boolean
+  group: Group
+  parentFolder: FileFolder
+  excerpt: String
+  mimeType: String
+  thumbnail: String
+  url: String
+  tags: [String]
+  timeCreated: String
+  timeUpdated: String
+  isFeatured: Boolean
+  isHighlighted: Boolean
+  isRecommended: Boolean
+  featured: Featured
+  canEdit: Boolean
+  canComment: Boolean
+  canVote: Boolean
+  accessId: Int
+  writeAccessId: Int
+  isBookmarked: Boolean
+  isFollowing: Boolean
+  canBookmark: Boolean
+  hasVoted: Boolean
+  votes: Int
+  views: Int
+  owner: User
+  comments: [Comment]
+  commentCount: Int
+}
+
+input FilterInput {
+  name: String!
+  values: [String]
+}
+
+"""Available Filters"""
+type Filters {
+  users: [UserFilter]
+}
+
+input followInput {
+  """The guid of the entity to follow."""
+  guid: String!
+
+  """True for following, false for not following."""
+  isFollowing: Boolean!
+  clientMutationId: String
+}
+
+type followPayload {
+  object: Entity!
+  clientMutationId: String
+}
+
+type Group implements Entity {
+  guid: String!
+  status: Int
+  name: String
+  description: String
+  richDescription: String
+  excerpt: String
+  introduction: String
+  icon: String
+  featured: Featured
+  url: String
+  canEdit: Boolean
+  canChangeOwnership: Boolean
+  isClosed: Boolean
+  isMembershipOnRequest: Boolean
+  isFeatured: Boolean
+  autoNotification: Boolean
+  membership: Membership
+  accessIds: [AccessId]
+  defaultAccessId: Int
+  getsNotifications: Boolean
+  tags: [String]
+  members(
+    q: String
+    offset: Int
+    limit: Int
+
+    """Filter resultset on a specific subgroup."""
+    inSubgroupId: String
+
+    """Filter resultset on users who are not in a specific subgroup."""
+    notInSubgroupId: String
+  ): MemberList
+  invite(q: String, offset: Int, limit: Int): InviteList
+  invited(q: String, offset: Int, limit: Int): InviteList
+  membershipRequests: MembershipRequestList
+  plugins: [Plugins]
+  subgroups: SubgroupList
+  welcomeMessage: String
+  widgets: [Widget]
+}
+
+"""Show all groups or only mine"""
+enum GroupFilter {
+  all
+  mine
+}
+
+type GroupList {
+  total: Int!
+  canWrite: Boolean!
+  edges: [Group]
+}
+
+type Invite {
+  id: Int
+  timeCreated: String
+  invited: Boolean!
+  user: User
+  email: String
+}
+
+type InviteList {
+  total: Int!
+  edges: [Invite]
+}
+
+input inviteToGroupInput {
+  """The guid of the group to invite to."""
+  guid: String
+
+  """A list of users to invite."""
+  users: [InviteToGroupUser]
+
+  """Directly add the users to the group without sending an invite"""
+  directAdd: Boolean
+  clientMutationId: String
+}
+
+type inviteToGroupPayload {
+  group: Group
+  clientMutationId: String
+}
+
+"""An object with either the guid or the e-mailaddress of a user."""
+input InviteToGroupUser {
+  guid: String
+  email: String
+}
+
+input joinGroupInput {
+  """The guid of the group to join."""
+  guid: String
+  clientMutationId: String
+}
+
+type joinGroupPayload {
+  group: Group
+  clientMutationId: String
+}
+
+type KeyValueItem {
+  key: String!
+  value: String!
+}
+
+input leaveGroupInput {
+  """The guid of the group to leave."""
+  guid: String
+  clientMutationId: String
+}
+
+type leaveGroupPayload {
+  group: Group
+  clientMutationId: String
+}
+
+input markAllAsReadInput {
+  id: String
+  clientMutationId: String
+}
+
+type markAllAsReadPayload {
+  success: Boolean
+  clientMutationId: String
+}
+
+input markAsReadInput {
+  id: String
+  clientMutationId: String
+}
+
+type markAsReadPayload {
+  success: Boolean
+  notification: Notification
+  clientMutationId: String
+}
+
+type Member {
+  role: Role
+  user: User
+  email: String
+}
+
+type MemberList {
+  total: Int!
+  edges: [Member]
+}
+
+"""The type of membership."""
+enum Membership {
+  not_joined
+  requested
+  invited
+  joined
+}
+
+type MembershipRequestList {
+  total: Int!
+  edges: [User]
+}
+
+type MenuItem {
+  title: String!
+  link: String
+  children: [MenuItem]
+}
+
+input moveFileFolderInput {
+  guid: String
+  containerGuid: String
+  clientMutationId: String
+}
+
+type moveFileFolderPayload {
+  entity: Entity
+  clientMutationId: String
+}
+
+type Mutation {
+  addEntity(input: addEntityInput!): addEntityPayload
+  editEntity(input: editEntityInput!): editEntityPayload
+  deleteEntity(input: deleteEntityInput!): deleteEntityPayload
+  addFile(input: addFileInput!): addFilePayload
+  editFileFolder(input: editFileFolderInput!): editFileFolderPayload
+  moveFileFolder(input: moveFileFolderInput!): moveFileFolderPayload
+  addPage(input: addPageInput!): addPagePayload
+  editPage(input: editPageInput!): editPagePayload
+  addRow(input: addRowInput!): addRowPayload
+  addWidget(input: addWidgetInput!): addWidgetPayload
+  editWidget(input: editWidgetInput!): editWidgetPayload
+  subscribeNewsletter(input: subscribeNewsletterInput!): subscribeNewsletterPayload
+  editInterests(input: editInterestsInput!): editInterestsPayload
+  editNotifications(input: editNotificationsInput!): editNotificationsPayload
+  editGroupNotifications(input: editGroupNotificationsInput!): editGroupNotificationsPayload
+  editEmailOverview(input: editEmailOverviewInput!): editEmailOverviewPayload
+  editEmail(input: editEmailInput!): editEmailPayload
+  editPassword(input: editPasswordInput!): editPasswordPayload
+  bookmark(input: bookmarkInput!): bookmarkPayload
+  vote(input: voteInput!): votePayload
+  follow(input: followInput!): followPayload
+  editAvatar(input: editAvatarInput!): editAvatarPayload
+  editProfileField(input: editProfileFieldInput!): editProfileFieldPayload
+  addImage(input: addImageInput!): addImagePayload
+  addGroup(input: addGroupInput!): addGroupPayload
+  editGroup(input: editGroupInput!): editGroupPayload
+  addSubgroup(input: addSubgroupInput!): addSubgroupPayload
+  editSubgroup(input: editSubgroupInput!): editSubgroupPayload
+  deleteSubgroup(input: deleteSubgroupInput!): deleteSubgroupPayload
+
+  """
+  Join a group. In the case of a closed group a membership request will be send,
+  in the case of an open group the user will be joined immediately.
+  """
+  joinGroup(input: joinGroupInput!): joinGroupPayload
+
+  """Leave a group."""
+  leaveGroup(input: leaveGroupInput!): leaveGroupPayload
+
+  """Create an invitation to join a group."""
+  inviteToGroup(input: inviteToGroupInput!): inviteToGroupPayload
+
+  """Resend an invitation to join a group."""
+  resendGroupInvitation(input: resendGroupInvitationInput!): resendGroupInvitationPayload
+
+  """Remove an invitation to join a group."""
+  deleteGroupInvitation(input: deleteGroupInvitationInput!): deleteGroupInvitationPayload
+
+  """Accept a membership request to a group."""
+  acceptMembershipRequest(input: acceptMembershipRequestInput!): acceptMembershipRequestPayload
+
+  """Reject a membership request to a group."""
+  rejectMembershipRequest(input: rejectMembershipRequestInput!): rejectMembershipRequestPayload
+
+  """Send a message to the group members."""
+  sendMessageToGroup(input: sendMessageToGroupInput!): sendMessageToGroupPayload
+
+  """Accept a group invitation."""
+  acceptGroupInvitation(input: acceptGroupInvitationInput!): acceptGroupInvitationPayload
+
+  """Change the role of a user in a group."""
+  changeGroupRole(input: changeGroupRoleInput!): changeGroupRolePayload
+  editTask(input: editTaskInput!): editTaskPayload
+  attendEvent(input: attendEventInput!): attendEventPayload
+  markAsRead(input: markAsReadInput!): markAsReadPayload
+  markAllAsRead(input: markAllAsReadInput!): markAllAsReadPayload
+  toggleBestAnswer(input: toggleBestAnswerInput!): toggleBestAnswerPayload
+  toggleIsClosed(input: toggleIsClosedInput!): toggleIsClosedPayload
+  reorder(input: reorderInput!): reorderPayload
+  voteOnPoll(input: voteOnPollInput!): voteOnPollPayload
+  addPoll(input: addPollInput!): addPollPayload
+  editPoll(input: editPollInput!): editPollPayload
+
+  """Send a message to a user."""
+  sendMessageToUser(input: sendMessageToUserInput!): sendMessageToUserPayload
+  addGroupWidget(input: addGroupWidgetInput!): addGroupWidgetPayload
+  editGroupWidget(input: editGroupWidgetInput!): editGroupWidgetPayload
+}
+
+type News implements Entity {
+  guid: String!
+  status: Int
+  subtype: String
+  title: String
+  description: String
+  richDescription: String
+  excerpt: String
+  url: String
+  tags: [String]
+  timeCreated: String
+  timeUpdated: String
+  startDate: String
+  endDate: String
+  source: String
+  isFeatured: Boolean
+  isHighlighted: Boolean
+  isRecommended: Boolean
+  featured: Featured
+  canEdit: Boolean
+  canComment: Boolean
+  canVote: Boolean
+  accessId: Int
+  writeAccessId: Int
+  isBookmarked: Boolean
+  isFollowing: Boolean
+  canBookmark: Boolean
+  hasVoted: Boolean
+  votes: Int
+  isBestAnswer: Boolean
+  views: Int
+  owner: User
+  comments: [Comment]
+  commentCount: Int
+}
+
+type Notification {
+  id: Int
+  action: String
+  performer: User
+  entity: Entity
+  container: Entity
+  timeCreated: String
+  isUnread: Boolean
+}
+
+type NotificationsList {
+  total: Int
+  totalUnread: Int
+  edges: [Notification]
+}
+
+"""
+Configure the way the entity list is ordered. lastAction is the last action that
+is performed on the object, e.g. the latest comment that is placed.
+"""
+enum OrderBy {
+  timeCreated
+  timeUpdated
+  lastAction
+}
+
+"""
+Configure the type of sorting, either ascending (asc) or descending (desc).
+"""
+enum OrderDirection {
+  asc
+  desc
+}
+
+enum Overview {
+  daily
+  weekly
+  twoweekly
+  monthly
+  never
+}
+
+type Page implements Entity {
+  guid: String!
+  status: Int
+  canEdit: Boolean!
+  title: String
+  description: String
+  hasChildren: Boolean
+  children: [Page]
+  parent: Page
+  richDescription: String
+  excerpt: String
+  url: String
+  timeCreated: String
+  timeUpdated: String
+  accessId: Int
+  pageType: String
+  rows: [Row]
+  tags: [String]
+}
+
+"""The available plugins."""
+enum Plugins {
+  events
+  blog
+  discussion
+  questions
+  files
+  wiki
+  tasks
+}
+
+type Poll implements Entity {
+  guid: String!
+  status: Int
+  canEdit: Boolean!
+  title: String
+  url: String
+  timeCreated: String
+  timeUpdated: String
+  accessId: Int
+  choices: [PollChoice]
+  hasVoted: Boolean
+}
+
+type PollChoice {
+  guid: String!
+  text: String
+  votes: Int
+}
+
+type ProfileItem {
+  key: String!
+  name: String!
+  value: String
+  category: String
+  isEditable: Boolean
+  isFilterable: Boolean
+  isFilter: Boolean
+  accessId: Int
+  fieldType: String
+  fieldOptions: [String]
+}
+
+type Query {
+  viewer: Viewer
+  entity(guid: String, username: String): Entity
+  search(q: String!, containerGuid: String, type: Type, subtype: String, offset: Int, limit: Int): SearchList
+  recommended(offset: Int, limit: Int): EntityList
+  trending: [TrendingList]
+  top: [TopItem]
+  breadcrumb(guid: String): [Entity]
+  files(containerGuid: String, filter: String, orderBy: String, orderDirection: String, offset: Int, limit: Int): EntityList
+  groups(q: String, filter: GroupFilter, offset: Int, limit: Int): GroupList
+  events(filter: EventFilter, containerGuid: String, offset: Int, limit: Int): EventList
+  users(q: String!, offset: Int, limit: Int, filters: [FilterInput]): UserList
+  entities(offset: Int, limit: Int, type: Type, subtype: String, subtypes: [String], containerGuid: String, tags: [String], orderBy: OrderBy, orderDirection: OrderDirection, addFeatured: Boolean, isFeatured: Boolean): EntityList
+  notifications(offset: Int, limit: Int): NotificationsList
+  activities(containerGuid: String, offset: Int, limit: Int, tags: [String], groupFilter: [String], subtypes: [String], orderBy: OrderBy, orderDirection: OrderDirection): ActivityList
+  bookmarks(offset: Int, limit: Int, subtype: String, tags: [String]): EntityList
+  filters: Filters
+  site: Site
+}
+
+type Question implements Entity {
+  guid: String!
+  status: Int
+  subtype: String
+  title: String
+  description: String
+  richDescription: String
+  inGroup: Boolean
+  group: Group
+  excerpt: String
+  url: String
+  tags: [String]
+  timeCreated: String
+  timeUpdated: String
+  isFeatured: Boolean
+  isHighlighted: Boolean
+  isClosed: Boolean
+  canChooseBestAnswer: Boolean
+  isRecommended: Boolean
+  featured: Featured
+  canEdit: Boolean
+  canClose: Boolean
+  canComment: Boolean
+  canVote: Boolean
+  accessId: Int
+  writeAccessId: Int
+  isBookmarked: Boolean
+  isFollowing: Boolean
+  canBookmark: Boolean
+  hasVoted: Boolean
+  votes: Int
+  isBestAnswer: Boolean
+  views: Int
+  owner: User
+  comments: [Comment]
+  commentCount: Int
+}
+
+input rejectMembershipRequestInput {
+  """The guid of the user."""
+  userGuid: Int
+
+  """The guid of the group."""
+  groupGuid: Int
+  clientMutationId: String
+}
+
+type rejectMembershipRequestPayload {
+  group: Group
+  clientMutationId: String
+}
+
+input reorderInput {
+  guid: String!
+  sourcePosition: Int!
+  destinationPosition: Int!
+  clientMutationId: String
+}
+
+type reorderPayload {
+  container: Entity!
+  clientMutationId: String
+}
+
+input resendGroupInvitationInput {
+  """The id of the invitation to resend."""
+  id: String
+  clientMutationId: String
+}
+
+type resendGroupInvitationPayload {
+  group: Group
+  clientMutationId: String
+}
+
+"""The type of role."""
+enum Role {
+  owner
+  admin
+  member
+  removed
+}
+
+type Row {
+  guid: String!
+  layout: String!
+  canEdit: Boolean!
+  widgets: [Widget]
+}
+
+type SearchList {
+  total: Int!
+  totals: [SearchTotal]
+  edges: [Entity]
+}
+
+type SearchTotal {
+  subtype: String!
+  total: Int!
+}
+
+input sendMessageToGroupInput {
+  """The guid of the group to send the message to."""
+  guid: String
+
+  """The subject of the message."""
+  subject: String
+
+  """The message to send."""
+  message: String
+
+  """Is this a test message (send only to current user)"""
+  isTest: Boolean
+
+  """An (optional) list of recipients to send the message to."""
+  recipients: [Int]
+  clientMutationId: String
+}
+
+type sendMessageToGroupPayload {
+  group: Group
+  clientMutationId: String
+}
+
+input sendMessageToUserInput {
+  """The guid of the user to send the message to."""
+  guid: String
+
+  """The subject of the message."""
+  subject: String
+
+  """The message to send."""
+  message: String
+  clientMutationId: String
+}
+
+type sendMessageToUserPayload {
+  success: Boolean
+  clientMutationId: String
+}
+
+"""The current site"""
+type Site {
+  guid: String!
+  name: String!
+  theme: String!
+  menu: [MenuItem]
+  profile: [ProfileItem]
+  footer: [MenuItem]
+  directLinks: [DirectLink]
+  accessIds: [AccessId]
+  defaultAccessId: Int!
+  logo: String
+  logoAlt: String
+  icon: String
+  iconAlt: String
+  showIcon: Boolean!
+  startpage: String
+  showLeader: Boolean!
+  showLeaderButtons: Boolean!
+  subtitle: String
+  leaderImage: String
+  showInitiative: Boolean!
+  initiativeTitle: String
+  initiativeImage: String
+  initiativeImageAlt: String
+  initiativeDescription: String
+  initiatorLink: String
+  style: Style!
+  customTagsAllowed: Boolean!
+  tagCategories: [TagCategory]!
+  activityFilter: ActivityFilter
+  showExtraHomepageFilters: Boolean!
+  usersOnline: Int!
+}
+
+type StatsItem {
+  key: String!
+  name: String!
+  value: String
+}
+
+type StatusUpdate implements Entity {
+  guid: String!
+  status: Int
+  subtype: String
+  title: String
+  description: String
+  richDescription: String
+  inGroup: Boolean
+  group: Group
+  excerpt: String
+  url: String
+  tags: [String]
+  timeCreated: String
+  timeUpdated: String
+  canEdit: Boolean
+  canComment: Boolean
+  canVote: Boolean
+  accessId: Int
+  writeAccessId: Int
+  isBookmarked: Boolean
+  isFollowing: Boolean
+  canBookmark: Boolean
+  hasVoted: Boolean
+  votes: Int
+  views: Int
+  owner: User
+  comments: [Comment]
+  commentCount: Int
+}
+
+type Style {
+  font: String
+  colorPrimary: String
+  colorSecondary: String
+  colorHeader: String
+}
+
+type Subgroup {
+  id: Int
+  name: String
+  members: [User]
+}
+
+type SubgroupList {
+  total: Int!
+  edges: [Subgroup]
+}
+
+input subscribeNewsletterInput {
+  email: String!
+  clientMutationId: String
+}
+
+type subscribeNewsletterPayload {
+  viewer: Viewer
+  clientMutationId: String
+}
+
+type TagCategory {
+  name: String!
+  values: [String]
+}
+
+type Task implements Entity {
+  guid: String!
+  status: Int
+  subtype: String
+  title: String
+  description: String
+  richDescription: String
+  inGroup: Boolean
+  group: Group
+  state: String
+  excerpt: String
+  thumbnail: String
+  url: String
+  tags: [String]
+  timeCreated: String
+  timeUpdated: String
+  canEdit: Boolean
+  canComment: Boolean
+  canVote: Boolean
+  accessId: Int
+  writeAccessId: Int
+  isFollowing: Boolean
+  hasVoted: Boolean
+  votes: Int
+  views: Int
+  owner: User
+  comments: [Comment]
+  commentCount: Int
+}
+
+input toggleBestAnswerInput {
+  guid: String
+  clientMutationId: String
+}
+
+type toggleBestAnswerPayload {
+  entity: Question!
+  clientMutationId: String
+}
+
+input toggleIsClosedInput {
+  guid: String
+  clientMutationId: String
+}
+
+type toggleIsClosedPayload {
+  entity: Question!
+  clientMutationId: String
+}
+
+type TopItem {
+  user: User
+  likes: Int
+}
+
+type TrendingList {
+  tag: String
+  likes: Int
+}
+
+"""The type of entity"""
+enum Type {
+  user
+  group
+  object
+  page
+  wiki
+}
+
+type User implements Entity {
+  guid: String!
+  status: Int
+  username: String
+  name: String
+  email: String
+  emailNotifications: Boolean
+  getsNewsletter: Boolean
+  emailOverview: Overview
+  profile: [ProfileItem]
+  stats: [StatsItem]
+  icon: String
+  url: String
+  canEdit: Boolean
+}
+
+type UserFilter {
+  name: String!
+  fieldType: String!
+  label: String!
+  keys: [String!]
+}
+
+type UserFilterCount {
+  name: String!
+  values: [UserFilterItemCount]
+}
+
+type UserFilterItemCount {
+  key: String!
+  count: Int
+}
+
+type UserList {
+  total: Int!
+  filterCount: [UserFilterCount]
+  edges: [User]
+}
+
+"""The current viewer"""
+type Viewer {
+  guid: String!
+  loggedIn: Boolean!
+  isSubEditor: Boolean!
+  isAdmin: Boolean!
+  tags: [String]
+  canWriteToContainer(containerGuid: String, type: Type, subtype: String): Boolean!
+  user: User
+}
+
+input voteInput {
+  """The guid of the entity to vote on."""
+  guid: String!
+
+  """1 for upvote, -1 for downvote, 0 for deleting."""
+  score: Int!
+  clientMutationId: String
+}
+
+input voteOnPollInput {
+  guid: String!
+  response: String!
+  clientMutationId: String
+}
+
+type voteOnPollPayload {
+  entity: Entity!
+  clientMutationId: String
+}
+
+type votePayload {
+  object: Entity!
+  clientMutationId: String
+}
+
+type Widget {
+  guid: String!
+  type: String!
+  position: Int
+  settings: [WidgetSetting]
+  canEdit: Boolean!
+}
+
+type WidgetSetting {
+  key: String!
+  value: String
+}
+
+input WidgetSettingInput {
+  key: String
+  value: String
+}
+
+type Wiki implements Entity {
+  guid: String!
+  status: Int
+  canEdit: Boolean!
+  title: String
+  description: String
+  hasChildren: Boolean
+  children: [Wiki]
+  parent: Wiki
+  richDescription: String
+  excerpt: String
+  url: String
+  timeCreated: String
+  timeUpdated: String
+  accessId: Int
+  writeAccessId: Int
+  isBookmarked: Boolean
+  canBookmark: Boolean
+  tags: [String]
+  inGroup: Boolean
+  group: Group
+}
+

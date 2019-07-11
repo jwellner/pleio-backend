@@ -14,18 +14,28 @@ import reversion
 
 from .lib import get_acl
 
+
+def read_access_default():
+    return ['private']
+
+
+def write_access_default():
+    return ['private']
+
+
 class Manager(BaseUserManager):
     def create_user(
-        self,
-        email,
-        name,
-        password=None,
-        external_id=None,
-        is_active=False,
-        picture=None,
-        is_government=False,
-        has_2fa_enabled=False):
-
+            self,
+            email,
+            name,
+            password=None,
+            external_id=None,
+            is_active=False,
+            picture=None,
+            is_government=False,
+            has_2fa_enabled=False):
+        # pylint: disable=too-many-arguments
+        # pylint: disable=unused-argument
         if not email:
             raise ValueError('Users must have an email address')
 
@@ -85,7 +95,7 @@ class User(AbstractBaseUser):
         unique=True,
         blank=True,
         null=True
-        )
+    )
     picture = models.URLField(blank=True, null=True)
     is_government = models.BooleanField(default=False)
     has_2fa_enabled = models.BooleanField(default=False)
@@ -103,9 +113,11 @@ class User(AbstractBaseUser):
         return self.is_admin
 
     def has_perm(self, perm, obj=None):
+        # pylint: disable=unused-argument
         return True
 
     def has_module_perms(self, app_label):
+        # pylint: disable=unused-argument
         return True
 
     def get_full_name(self):
@@ -151,8 +163,10 @@ class Group(models.Model):
     is_2fa_required = models.BooleanField(default=False)
     auto_notification = models.BooleanField(default=False)
 
-    tags = ArrayField(models.CharField(max_length=256), blank=True, default=[])
-    plugins = ArrayField(models.CharField(max_length=256), blank=True, default=[])
+    tags = ArrayField(models.CharField(max_length=256),
+                      blank=True, default=list)
+    plugins = ArrayField(models.CharField(
+        max_length=256), blank=True, default=list)
 
     def __str__(self):
         return self.name
@@ -174,7 +188,7 @@ class Group(models.Model):
             return self.members.filter(
                 user=user,
                 type__in=['admin', 'owner', 'member']
-                ).exists()
+            ).exists()
         except ObjectDoesNotExist:
             return False
 
@@ -197,7 +211,7 @@ class Group(models.Model):
         return self.members.filter(
             user=user,
             type__in=['admin', 'owner']
-            ).exists()
+        ).exists()
 
     def can_join(self, user):
         if not user.is_authenticated:
@@ -208,11 +222,11 @@ class Group(models.Model):
 
         return True
 
-    def join(self, user, type):
+    def join(self, user, member_type):
         return self.members.update_or_create(
             user=user,
-            defaults={'type': type}
-            )
+            defaults={'type': member_type}
+        )
 
     def leave(self, user):
         try:
@@ -236,35 +250,35 @@ class GroupMembership(models.Model):
         User,
         related_name='members',
         on_delete=models.PROTECT
-        )
+    )
     type = models.CharField(
         max_length=10,
         choices=MEMBER_TYPES,
         default='member'
-        )
+    )
     group = models.ForeignKey(
         'Group',
         related_name='members',
         on_delete=models.PROTECT
-        )
+    )
 
     def __str__(self):
         return "{} - {} - {}".format(
             self.user.name,
             self.type,
             self.group.name
-            )
+        )
 
 
 class CommentManager(models.Manager):
-    def visible(self, app_label, object_name, id):
+    def visible(self, app_label, object_name, object_id):
         queryset = self.get_queryset()
 
         return queryset.filter(
-            object_id=id,
+            object_id=object_id,
             content_type__app_label=app_label,
             content_type__model=object_name
-            )
+        )
 
 
 class Comment(models.Model):
@@ -311,20 +325,21 @@ class Object(models.Model):
         on_delete=models.PROTECT,
         blank=True,
         null=True
-        )
+    )
     read_access = ArrayField(
         models.CharField(max_length=32),
         blank=True,
-        default=['private']
-        )
+        default=read_access_default
+    )
     write_access = ArrayField(
         models.CharField(max_length=32),
         blank=True,
-        default=['private']
-        )
+        default=write_access_default
+    )
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    tags = ArrayField(models.CharField(max_length=256), blank=True, default=[])
+    tags = ArrayField(models.CharField(max_length=256),
+                      blank=True, default=list)
 
     def can_read(self, user):
         if user.is_authenticated and user.is_admin:
@@ -344,6 +359,7 @@ class Object(models.Model):
 
 
 def get_file_path(instance, filename):
+    # pylint: disable=unused-argument
     ext = filename.split('.')[-1]
     filename = "%s.%s" % (uuid.uuid4(), ext)
     return os.path.join('binary_file', time.strftime('%Y/%m/%d'), filename)
