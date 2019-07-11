@@ -1,11 +1,16 @@
-from django.contrib.contenttypes.fields import (
-    GenericForeignKey,
-    GenericRelation
-    )
+from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.postgres.fields import ArrayField
 from django.contrib.contenttypes.models import ContentType
 from django.db import models
 from core.lib import get_acl
+
+
+def default_read_access():
+    return ['private']
+
+
+def default_write_access():
+    return ['private']
 
 
 class FeedManager(models.Manager):
@@ -24,13 +29,14 @@ class Feed(models.Model):
     read_access = ArrayField(
         models.CharField(max_length=32),
         blank=True,
-        default=['private']
-        )
+        default=default_read_access
+    )
+
     write_access = ArrayField(
         models.CharField(max_length=32),
         blank=True,
-        default=['private']
-        )
+        default=default_write_access
+    )
 
     created_at = models.DateTimeField(auto_now_add=True)
 
