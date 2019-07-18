@@ -1,17 +1,86 @@
-from ariadne import ObjectType
+from ariadne import ObjectType, InterfaceType
 from .enums import ORDER_DIRECTION, ORDER_BY
+from .models import Object, Group, User
+from .lib import get_type, get_id
+from .constances import NOT_LOGGED_IN
+from news.models import News
+from poll.models import Poll
+from discussion.models import Discussion
+from event.models import Event
+from question.models import Question
+from wiki.models import Wiki
+from cms.models import CmsPage
+import logging
+import reversion
+from graphql import GraphQLError
+
+logger = logging.getLogger('django')
 
 query = ObjectType("Query")
 viewer = ObjectType("Viewer")
+entity = InterfaceType("Entity")
+mutation = ObjectType("Mutation")
+
+
+@entity.type_resolver
+def resolve_entity_type(obj, *_):
+    print(obj._meta.object_name)
+    return obj._meta.object_name
 
 
 @query.field("site")
 def resolve_site(*_):
     return {
         'guid': '1',
-        'name': 'Backend2',
-        'theme': 'Backend2',
-        'menu': [],
+        'name': 'Pleio 3.0',
+        'theme': 'Pleio',
+        'menu': [
+            {
+                'title': 'News',
+                'link': '/news',
+                'children': []
+            },
+            {
+                'title': 'Discussion',
+                'link': '/discussion',
+                'children': []
+            },
+            {
+                'title': 'Events',
+                'link': '/events',
+                'children': []
+            },
+            {
+                'title': 'Groups',
+                'link': '/groups',
+                'children': []
+            },
+            {
+                'title': 'Wiki',
+                'link': '/wiki',
+                'children': []
+            },
+            {
+                'title': 'Questions',
+                'link': '/questions',
+                'children': []
+            },
+            {
+                'title': 'CMS',
+                'link': '/cms',
+                'children': []
+            },
+            {
+                'title': 'Users',
+                'link': '/users',
+                'children': []
+            },
+            {
+                'title': 'Polls',
+                'link': '/polls',
+                'children': []
+            }
+        ],
         'profile': [],
         'footer': [],
         'directLinks': [],
@@ -27,7 +96,7 @@ def resolve_site(*_):
         'showLeaderButtons': False,
         'subtitle': '',
         'leaderImage': '',
-        'showInitiative': False,
+        'showInitiative': True,
         'initiativeTitle': '',
         'inititativeImageAlt': '',
         'inititativeDescription': '',
@@ -38,20 +107,22 @@ def resolve_site(*_):
             'colorSecondary': '#118df0',
             'colorHeader': 'red'
         },
-        'customTagsAllowed': False,
+        'customTagsAllowed': True,
         'tagCategories': [],
         'activityFilter': {
             'contentTypes': []
         },
-        'showExtraHomepageFilters': False,
-        'usersOnline': 1
+        'showExtraHomepageFilters': True,
+        'usersOnline': 1,
+        'achievementsEnabled': True,
     }
 
 
 @query.field("viewer")
 def resolve_viewer(_, info):
+    user = info.context.user
 
-    if not info.context.user.is_authenticated:
+    if not user.is_authenticated:
         return {
             'guid': '0',
             'loggedIn': False,
@@ -64,21 +135,20 @@ def resolve_viewer(_, info):
             }
         }
 
-    user = info.context.user
-
     return {
-        'guid': user.guid(),
+        'guid': user.guid,
         'loggedIn': True,
         'isSubEditor': False,
         'isAdmin': user.is_admin,
         'tags': [],
-        'canWriteToContainer': False,
+        'canWriteToContainer': True,
     }
 
 
 @query.field("entities")
 def resolve_entities(
     _,
+    info,
     offset=0,
     limit=20,
     type=None,
@@ -94,10 +164,154 @@ def resolve_entities(
     # pylint: disable=unused-argument
     # pylint: disable=too-many-arguments
     # pylint: disable=redefined-builtin
+
+    if subtype == "news":
+        objects = News.objects
+    elif subtype == "poll":
+        objects = Poll.objects
+    elif subtype == "discussion":
+        objects = Discussion.objects
+    elif subtype == "event":
+        objects = Event.objects
+    elif subtype == "wiki":
+        objects = Wiki.objects
+    elif subtype == "question":
+        objects = Question.objects
+    elif subtype == "page":
+        objects = CmsPage.objects
+    elif subtype is None:
+        objects = Object.objects
+    else:
+        return None
+
+    entities = objects.all()[offset:offset+limit]
+
+    return {
+        'total': entities.count(),
+        'canWrite': False,
+        'edges': entities,
+    }
+
+
+@query.field("entity")
+def resolve_entity(
+    _,
+    info,
+    guid
+):
+    # pylint: disable=unused-argument
+    # pylint: disable=too-many-arguments
+    # pylint: disable=redefined-builtin
+
+    subtype = get_type(guid)
+    entity_id = get_id(guid)
+
+    if subtype == "news":
+        objects = News.objects
+    elif subtype == "poll":
+        objects = Poll.objects
+    elif subtype == "discussion":
+        objects = Discussion.objects
+    elif subtype == "event":
+        objects = Event.objects
+    elif subtype == "wiki":
+        objects = Wiki.objects
+    elif subtype == "question":
+        objects = Question.objects
+    elif subtype == "page":
+        objects = CmsPage.objects
+    else:
+        return None
+
+    entity = objects.get(id=entity_id)
+
+    return entity
+
+# TODO: Implement search
+
+
+@query.field("search")
+def resolve_search(_, info, q=None, containerGuid=None, type=None, subtype=None, offset=0, limit=20):
+    # pylint: disable=unused-argument
+    # pylint: disable=too-many-arguments
+    # pylint: disable=redefined-builtin
+    return {
+        'total': 0,
+        'totals': [],
+        'edges': []
+    }
+
+# TODO: Implement recommended
+
+
+@query.field("recommended")
+def resolve_recommended(_, info, offset=0, limit=20):
+    # pylint: disable=unused-argument
     return {
         'total': 0,
         'canWrite': False,
         'edges': []
+    }
+
+# TODO: Implement trending
+
+
+@query.field("trending")
+def resolve_trending(_, info):
+    # pylint: disable=unused-argument
+    return [
+        {'tag': 'pleio', 'likes': 10},
+        {'tag': 'backend2', 'likes': 3}
+    ]
+
+# TODO: Implement top
+
+
+@query.field("top")
+def resolve_top(_, info):
+    # pylint: disable=unused-argument
+    user = info.context.user
+
+    if user.is_authenticated:
+        return [
+            {'user': user, 'likes': 42}
+        ]
+
+    return []
+
+# TODO: Implement breadcrumb
+
+
+@query.field("breadcrumb")
+def resolve_breadcrumb(_, info, guid=None):
+    # pylint: disable=unused-argument
+    return []
+
+
+@query.field("groups")
+def resolve_groups(
+    _,
+    info,
+    q=None,
+    filter=None,
+    offset=0,
+    limit=20
+):
+    # pylint: disable=unused-argument
+    # pylint: disable=too-many-arguments
+    # pylint: disable=redefined-builtin
+
+    groups = []
+
+    if q:
+        groups = Group.objects.get(title__contains=q)[offset, offset+limit]
+    else:
+        groups = Group.objects.all()[offset:offset+limit]
+
+    return {
+        'total': groups.count(),
+        'canWrite': False,
+        'edges': groups
     }
 
 
@@ -107,11 +321,70 @@ def resolve_user(_, info):
 
     if user.is_authenticated:
         return {
-            'guid': user.guid(),
-            'username': user.get_full_name(),
+            'guid': user.guid,
+            'username': user.guid,
             'name': user.get_short_name()
         }
     return None
 
 
-resolvers = [query, viewer]
+@query.field('users')
+def resolve_users(_, info, q=None, filters=None, offset=0, limit=20):
+    # pylint: disable=unused-argument
+    user = info.context.user
+
+    if not user.is_authenticated:
+        return None
+
+    users = []
+
+    if q:
+        users = User.objects.filter(name__icontains=q)[offset:offset+limit]
+    else:
+        users = User.objects.all()[offset:offset+limit]
+
+    return {
+        'total': users.count(),
+        'edges': users,
+        'filterCount': None
+    }
+
+
+@query.field('filters')
+def resolve_filters(_, info):
+    # pylint: disable=unused-argument
+    return {
+        'users': None
+    }
+
+
+@mutation.field("addEntity")
+def resolve_add_entity(_, info, input):
+    # pylint: disable=redefined-builtin
+
+    if not info.context.user.is_authenticated:
+        raise GraphQLError(NOT_LOGGED_IN)
+
+    result = None
+
+    if input.get("subtype") == "news":
+        with reversion.create_revision():
+            result = News.objects.create(
+                title=input.get("title"),
+                description=input.get("description"),
+                owner=info.context.user,
+            )
+
+            result.save()
+
+            reversion.set_user(info.context.user)
+            reversion.set_comment("addEntity mutation")
+    else:
+        raise GraphQLError("invalid_subtype")
+
+    return {
+        "entity": result
+    }
+
+
+resolvers = [query, viewer, entity, mutation]

@@ -1,5 +1,5 @@
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth.views import LogoutView
+from django.contrib.auth.views import LogoutView, LoginView
 from django.http import HttpResponseBadRequest, JsonResponse
 from django.shortcuts import redirect
 from django.conf import settings
@@ -49,6 +49,8 @@ def logout(request):
 
     return redirect('/')
 
+def login(request):
+    return LoginView.as_view()(request)
 
 def oidc_failure(request):
     print('oidc_failure')

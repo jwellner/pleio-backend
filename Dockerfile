@@ -14,6 +14,7 @@ RUN pip3 install -r requirements.txt
 # App assets
 COPY . /app
 COPY ./docker/start.sh ./docker/start-dev.sh /
+COPY ./docker/config.py ./backend2/
 RUN chmod +x /start.sh /start-dev.sh
 
 # Create media and static folders

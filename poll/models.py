@@ -13,7 +13,7 @@ class Poll(Object):
         return self.title
 
 
-class PollChoice(Object):
+class PollChoice(models.Model):
     poll = models.ForeignKey(Poll, on_delete=models.PROTECT)
     text = models.CharField(max_length=256)
     votes = models.IntegerField

@@ -14,6 +14,7 @@ for app in apps.get_app_configs():
         app_module = import_module(search)
         app_resolvers = getattr(app_module, "resolvers")
         resolvers.extend(app_resolvers)
+        print("Loaded resolver: %s" % app.name)
     except ImportError as e:
         print(e)
 
