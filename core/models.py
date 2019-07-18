@@ -9,6 +9,7 @@ from django.contrib.postgres.fields import ArrayField, JSONField
 from django.core.mail import send_mail
 from django.core.exceptions import ObjectDoesNotExist
 from django.conf import settings
+from model_utils.managers import InheritanceManager
 
 import reversion
 
@@ -126,9 +127,10 @@ class User(AbstractBaseUser):
     def get_short_name(self):
         return self.name
 
+    @property
     def guid(self):
-        return '{}.{}:{}'.format(
-            self._meta.app_label, self._meta.object_name, self.id
+        return '{}:{}'.format(
+            self._meta.object_name, self.id
         ).lower()
 
     def email_user(self, subject, message, from_email=None, **kwargs):
@@ -136,9 +138,22 @@ class User(AbstractBaseUser):
                   self.email], **kwargs)
 
 
+class GroupManager(models.Manager):
+    def visible(self, app_label, object_name, object_id):
+        queryset = self.get_queryset()
+
+        return queryset.filter(
+            object_id=object_id,
+            content_type__app_label=app_label,
+            content_type__model=object_name
+        )
+
+
 class Group(models.Model):
     class Meta:
         ordering = ['name']
+
+    objects = GroupManager()
 
     name = models.CharField(max_length=200)
 
@@ -234,6 +249,12 @@ class Group(models.Model):
         except ObjectDoesNotExist:
             return False
 
+    @property
+    def guid(self):
+        return '{}:{}'.format(
+            self._meta.object_name, self.id
+        ).lower()
+
 
 class GroupMembership(models.Model):
     class Meta:
@@ -307,7 +328,7 @@ class Comment(models.Model):
         return (user == self.owner)
 
 
-class ObjectManager(models.Manager):
+class ObjectManager(InheritanceManager):
     def visible(self, user):
         queryset = self.get_queryset()
 
@@ -353,8 +374,13 @@ class Object(models.Model):
 
         return len(get_acl(user) & set(self.write_access)) > 0
 
+    @property
+    def guid(self):
+        return '{}:{}'.format(
+            self._meta.object_name, self.id
+        ).lower()
+
     class Meta:
-        abstract = True
         ordering = ['created_at']
 
 

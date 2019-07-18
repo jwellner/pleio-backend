@@ -1,0 +1,48 @@
+{% load i18n static %}
+<!DOCTYPE html>
+<html>
+    <title>Login</title>
+    <style type="text/css">
+        html, body {
+            font-family: 'Arial';
+            height: 100%;
+            margin: 0;
+            padding: 0;
+        }
+
+        .main {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            background-color: #eee;
+            margin: 0;
+            padding: 0;
+        }
+
+        .box {
+            width: auto;
+            height: auto;
+            padding: 20px 40px;
+            background-color: white;
+        }
+
+        .box h2 {
+            margin: 0;
+            padding: 0;
+        }
+    </style>
+</html>
+
+<body>
+
+    <div class="main">
+
+        <div class="box">
+            <h2>Login</h2>
+            <p>{% blocktrans trimmed %}Please click on the button to login.{% endblocktrans %}</p>
+            <a href="{% url 'oidc_authentication_init' %}?next={{ next }}" class="button">{% trans 'Log in' %}</a>
+        </div>
+
+    </div>
+</body>

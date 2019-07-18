@@ -5,25 +5,24 @@ stages:
   - build
   - deploy
 
-cache:
-  paths:
-  - ~/.cache/pip/
-
-services:
-  - postgres:latest
-
 variables:
   SECRET_KEY: bg9kU6ckKXTLQeZxtovc
   DB_HOST: postgres
   DB_USER: postgres
   DB_PASSWORD: postgres
   DB_NAME: postgres
+  PIP_CACHE_DIR: $CI_PROJECT_DIR/.cache/pip
+
+cache:
+  paths:
+  - $PIP_CACHE_DIR
 
 before_script:
-  - python -V
   - pip install -r requirements.txt
-  - ls
   - cp ./docker/config.py backend2/config.py
+
+services:
+  - postgres:latest
 
 prospector:
   stage: test
@@ -38,3 +37,23 @@ test:
     - docker
   script:
     - python manage.py test
+
+build:
+  stage: build
+  tags:
+    - shell
+  only:
+    - master
+  script:
+    - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN $CI_REGISTRY
+    - docker build -t registry.gitlab.com/pleio/backend2:${CI_COMMIT_SHA:0:8} .
+    - docker push registry.gitlab.com/pleio/backend2:${CI_COMMIT_SHA:0:8}
+
+deploy-master:
+  stage: deploy
+  tags:
+    - control-vps
+  only:
+    - master
+  script:
+    - /snap/bin/kubectl -n backend2 set image deployment/api api=registry.gitlab.com/pleio/backend2:${CI_COMMIT_SHA:0:8}

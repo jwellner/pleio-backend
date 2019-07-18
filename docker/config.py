@@ -39,13 +39,11 @@ LOCAL_APPS = [
     'poll',
     'question',
     'wiki',
+    'activity',
+    'bookmark'
 ]
 
 STATIC_ROOT = '/app/static'
-
-LOCAL_APPS = [
-    'blog',
-]
 
 LOCAL_MIDDLEWARE = []
 
