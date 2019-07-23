@@ -5,7 +5,8 @@ RUN mkdir -p /usr/share/man/man1/ /usr/share/man/man3/ /usr/share/man/man7/
 
 RUN apt-get update && apt-get install --no-install-recommends -y \
     git \
-    build-essential
+    build-essential \
+    mime-support
 
 WORKDIR /app
 COPY requirements.txt /app
