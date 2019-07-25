@@ -482,8 +482,9 @@ input editGroupInput {
 }
 
 input editGroupNotificationsInput {
-  guid: String
-  getsNotifications: Boolean
+  guid: String!
+  getsNotifications: Boolean!
+  userGuid: String
   clientMutationId: String
 }
 
@@ -815,6 +816,12 @@ type GroupList {
   total: Int!
   canWrite: Boolean!
   edges: [Group]
+}
+
+type GroupNotificationItem {
+  guid: String!
+  name: String!
+  getsNotifications: Boolean!
 }
 
 type Invite {
@@ -1509,6 +1516,7 @@ type User implements Entity {
   emailOverview: Overview
   profile: [ProfileItem]
   stats: [StatsItem]
+  groupNotifications: [GroupNotificationItem]
   icon: String
   url: String
   canEdit: Boolean
@@ -1613,3 +1621,4 @@ type Wiki implements Entity {
   inGroup: Boolean
   group: Group
 }
+

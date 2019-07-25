@@ -80,3 +80,7 @@ This project uses a schema-first GraphQL implementation with Ariadne.
 You can find the schema in `backend2/schema.graphql` it is initially synced with the backend1 graphql Schema.
 
 It is possible to extend the basis schema using the extend directive. 
+
+You can download the backend1 graphql schema using the npm package `get-graphql-schema`. Install it using `npm -g get-graphql-schema` and run the following command:
+
+`get-graphql-schema https://nieuw-template.pleio-test.nl/graphql > schema.graphql`
