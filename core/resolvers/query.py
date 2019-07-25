@@ -1,8 +1,7 @@
-from ariadne import ObjectType, InterfaceType
-from .enums import ORDER_DIRECTION, ORDER_BY
-from .models import Object, Group, User
-from .lib import get_type, get_id
-from .constances import NOT_LOGGED_IN
+from ariadne import ObjectType
+from ..enums import ORDER_DIRECTION, ORDER_BY
+from ..models import Object, Group, User
+from ..lib import get_type, get_id
 from news.models import News
 from poll.models import Poll
 from discussion.models import Discussion
@@ -10,23 +9,12 @@ from event.models import Event
 from question.models import Question
 from wiki.models import Wiki
 from cms.models import CmsPage
+from blog.models import Blog
 import logging
-import reversion
-from graphql import GraphQLError
 
 logger = logging.getLogger('django')
 
 query = ObjectType("Query")
-viewer = ObjectType("Viewer")
-entity = InterfaceType("Entity")
-mutation = ObjectType("Mutation")
-
-
-@entity.type_resolver
-def resolve_entity_type(obj, *_):
-    print(obj._meta.object_name)
-    return obj._meta.object_name
-
 
 @query.field("site")
 def resolve_site(*_):
@@ -38,6 +26,11 @@ def resolve_site(*_):
             {
                 'title': 'News',
                 'link': '/news',
+                'children': []
+            },
+            {
+                'title': 'Blog',
+                'link': '/blog',
                 'children': []
             },
             {
@@ -63,16 +56,6 @@ def resolve_site(*_):
             {
                 'title': 'Questions',
                 'link': '/questions',
-                'children': []
-            },
-            {
-                'title': 'CMS',
-                'link': '/cms',
-                'children': []
-            },
-            {
-                'title': 'Users',
-                'link': '/users',
                 'children': []
             },
             {
@@ -179,6 +162,8 @@ def resolve_entities(
         objects = Question.objects
     elif subtype == "page":
         objects = CmsPage.objects
+    elif subtype == "blog":
+        objects = Blog.objects
     elif subtype is None:
         objects = Object.objects
     else:
@@ -220,6 +205,8 @@ def resolve_entity(
         objects = Question.objects
     elif subtype == "page":
         objects = CmsPage.objects
+    elif subtype == "blog":
+        objects = Blog.objects
     else:
         return None
 
@@ -314,20 +301,6 @@ def resolve_groups(
         'edges': groups
     }
 
-
-@viewer.field('user')
-def resolve_user(_, info):
-    user = info.context.user
-
-    if user.is_authenticated:
-        return {
-            'guid': user.guid,
-            'username': user.guid,
-            'name': user.get_short_name()
-        }
-    return None
-
-
 @query.field('users')
 def resolve_users(_, info, q=None, filters=None, offset=0, limit=20):
     # pylint: disable=unused-argument
@@ -356,35 +329,3 @@ def resolve_filters(_, info):
     return {
         'users': None
     }
-
-
-@mutation.field("addEntity")
-def resolve_add_entity(_, info, input):
-    # pylint: disable=redefined-builtin
-
-    if not info.context.user.is_authenticated:
-        raise GraphQLError(NOT_LOGGED_IN)
-
-    result = None
-
-    if input.get("subtype") == "news":
-        with reversion.create_revision():
-            result = News.objects.create(
-                title=input.get("title"),
-                description=input.get("description"),
-                owner=info.context.user,
-            )
-
-            result.save()
-
-            reversion.set_user(info.context.user)
-            reversion.set_comment("addEntity mutation")
-    else:
-        raise GraphQLError("invalid_subtype")
-
-    return {
-        "entity": result
-    }
-
-
-resolvers = [query, viewer, entity, mutation]
