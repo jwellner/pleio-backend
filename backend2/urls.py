@@ -1,4 +1,4 @@
-from django.urls import path, include
+from django.urls import path, include, re_path
 from django.views.decorators.csrf import csrf_exempt
 
 from ariadne.contrib.django.views import GraphQLView
@@ -17,5 +17,5 @@ urlpatterns = [
     path('admin/logout/', views.logout, name='logout'),
     path('admin/', admin.site.urls),
     path('graphql', GraphQLView.as_view(schema=schema), name='graphql'),
-    path('', views.index, name='index')
+    re_path(r'.*', views.default, name='default')
 ]

@@ -1,21 +1,23 @@
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.views import LogoutView, LoginView
 from django.http import HttpResponseBadRequest, JsonResponse
-from django.shortcuts import redirect
+from django.shortcuts import redirect, render
 from django.conf import settings
 from .models import BinaryFile
+from .helpers import get_settings
+import json
 
+def default(request):
 
-def index(request):
-    return JsonResponse({
-        'app': 'backend2',
-        'status': 200,
-        'description': 'Backend2 is working correctly. '
-                       'Visit /graphql/ for the GraphQL API, '
-                       'visit /oidc/authenticate/ for login, '
-                       'visit /logout/ for logout, '
-                       'visit /admin/ for the admin panel.'
-    })
+    context = {
+        'lang': 'nl',
+        'title': 'Pleio 3.0',
+        'theme': 'leraar',
+        'webpack_dev_server': settings.WEBPACK_DEV_SERVER,
+        'json_settings': json.dumps(get_settings())
+    }
+
+    return render(request, 'react.html', context)
 
 
 @login_required

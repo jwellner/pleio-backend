@@ -1,7 +1,16 @@
 version: '3'
 
 services:
-  web:
+  nginx:
+    image: nginx:alpine
+    ports:
+      - "8000:80"
+    volumes:
+      - ./docker/nginx.conf:/etc/nginx/nginx.conf
+    depends_on:
+      - api
+      - frontend
+  api:
     build: .
     restart: on-failure
     env_file:
@@ -11,10 +20,14 @@ services:
     command: ["/start-dev.sh"]
     volumes:
       - .:/app
-    ports:
-      - "8000:8000"
     depends_on:
       - db
+  frontend:
+    image: registry.gitlab.com/pleio/frontend:B2-latest
+    restart: on-failure
+    ports:
+      - "9000:80"
+
   db:
     image: postgres
     env_file:
