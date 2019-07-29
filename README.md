@@ -31,14 +31,14 @@ Copy `.env-example` to `.env` and update the OIDC endpoint credentials you got f
 Make sure [Docker](https://www.docker.com/) is installed. Then run the
 following commands within the repository:
 
-    docker-compose up
+    `docker-compose up`
 
 This will spin up a PostgreSQL container and a Django web container. Then
 create a superuser account using:
 
-    docker-compose exec web python manage.py createsuperuser
+    `docker-compose exec web python manage.py createsuperuser`
 
-Now login with your new (superuser) account on http://127.0.0.1:8000/admin/
+Now login with your new (superuser) account on http://localhost:8000/admin/
 
 ## Setup development (manually)
 Before setup make sure you installed all the development requirements:

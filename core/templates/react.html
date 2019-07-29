@@ -1,0 +1,37 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="{{ lang }}">
+<head>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta charset="utf-8">
+    <title>{{ title }}</title>
+    <meta name="description" content="">
+    <meta name="viewport" content="width=device-width,height=device-height,user-scalable=no,initial-scale=1.0,maximum-scale=1.0,minimum-scale=1.0">
+    <meta name="version" content="1.0.0">
+    <meta name="relative-path" content="">
+
+    {% if webpack_dev_server %}
+    <link href="http://localhost:9001/web.css?v={{ version }}" rel="stylesheet" type="text/css">
+    {% else %}
+    <link href="/frontend/web.css?v={{ version }}" rel="stylesheet" type="text/css">
+    {% endif %}
+</head>
+
+<body class="___{{ theme }}">
+
+    <div id="react-root" class="page-container"></div>
+
+    {% if json_settings %}
+    <script>window.__SETTINGS__ = {{ json_settings|safe }};</script>
+    {% endif %}
+
+    <script src="https://polyfill.io/v3/polyfill.js?gated=true&features=es2015,es2016,es2017,fetch,Element.prototype.closest"></script>
+    {% if webpack_dev_server %}
+    <script src="http://localhost:9001/vendor.js"></script>
+    <script src="http://localhost:9001/web.js"></script>
+    {% else %}
+    <script src="/frontend/vendor.js?v={{ version }}"></script>
+    <script src="/frontend/web.js?v={{ version }}"></script>
+    {% endif %}
+</body>
+</html>

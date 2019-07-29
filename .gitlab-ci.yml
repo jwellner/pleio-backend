@@ -11,6 +11,7 @@ variables:
   DB_USER: postgres
   DB_PASSWORD: postgres
   DB_NAME: postgres
+  ENV: test
   PIP_CACHE_DIR: $CI_PROJECT_DIR/.cache/pip
 
 cache:
