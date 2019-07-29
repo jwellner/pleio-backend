@@ -93,9 +93,34 @@ def resolve_site(*_):
         'customTagsAllowed': True,
         'tagCategories': [],
         'activityFilter': {
-            'contentTypes': []
+            'contentTypes': [
+                {
+                    'key': 'event',
+                    'value': 'Agenda-Item'
+                },
+                {
+                    'key': 'blog',
+                    'value': 'Blog'
+                },
+                {
+                    'key': 'discussion',
+                    'value': 'Discussie'
+                },
+                {
+                    'key': 'news',
+                    'value': 'Nieuws'
+                },
+                {
+                    'key': 'statusupdate',
+                    'value': 'Update'
+                },
+                {
+                    'key': 'question',
+                    'value': 'Vraag'
+                },   
+            ]
         },
-        'showExtraHomepageFilters': True,
+        'showExtraHomepageFilters': False,
         'usersOnline': 1,
         'achievementsEnabled': True,
     }

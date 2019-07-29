@@ -13,7 +13,6 @@ from cms.models import CmsPage
 import logging
 import reversion
 from graphql import GraphQLError
-from actstream import action
 from .mutation import mutation
 from .query import query
 

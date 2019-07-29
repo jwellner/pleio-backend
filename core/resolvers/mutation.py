@@ -1,7 +1,6 @@
 from ariadne import ObjectType
 import reversion
 from graphql import GraphQLError
-from actstream import action
 from ..lib import get_type, get_id
 from ..constances import NOT_LOGGED_IN
 from news.models import News
@@ -30,6 +29,7 @@ def resolve_add_entity(_, info, input):
                 title=input.get("title"),
                 description=input.get("description"),
                 owner=info.context.user,
+                tags=input.get("tags")
             )
 
             result.save()
@@ -37,7 +37,6 @@ def resolve_add_entity(_, info, input):
             reversion.set_user(info.context.user)
             reversion.set_comment("addEntity mutation")
 
-            action.send(info.context.user, verb='created', target=result)
     elif input.get("subtype") == "blog":
         with reversion.create_revision():
             result = Blog.objects.create(
@@ -51,7 +50,6 @@ def resolve_add_entity(_, info, input):
             reversion.set_user(info.context.user)
             reversion.set_comment("addEntity mutation")
 
-            action.send(info.context.user, verb='created', target=result)
     else:
         raise GraphQLError("invalid_subtype")
 
@@ -94,13 +92,12 @@ def resolve_edit_entity(_, info, input):
         with reversion.create_revision():
             entity.title = input.get("title")
             entity.description = input.get("description")
+            entity.tags = input.get("tags")
 
             entity.save()
 
             reversion.set_user(info.context.user)
             reversion.set_comment("editEntity mutation")
-
-            action.send(info.context.user, verb='updated', target=entity)
     else :
         return None
 
