@@ -29,7 +29,6 @@ prospector:
     - docker
   script:
     - pip install -r requirements.txt
-    - cp ./docker/config.py backend2/config.py
     - prospector --tool pylint --tool pep8 --uses django
 
 test:
@@ -38,7 +37,6 @@ test:
     - docker
   script:
     - pip install -r requirements.txt
-    - cp ./docker/config.py backend2/config.py
     - python manage.py test
 
 build:

@@ -1,6 +1,5 @@
 .git
 node_modules
-backend2/config.py
 db.sqlite3
 Dockerfile
 docker-compose.yml

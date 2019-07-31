@@ -7,7 +7,7 @@ SECRET_KEY = os.getenv('SECRET_KEY')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.getenv('DEBUG')
 
-ENV = 'test'
+ENV = os.getenv('ENV')
 
 ALLOWED_HOSTS = [os.getenv('ALLOWED_HOST')]
 
@@ -41,7 +41,8 @@ LOCAL_APPS = [
     'poll',
     'question',
     'wiki',
-    'activity'
+    'activity',
+    'bookmark'
 ]
 
 STATIC_ROOT = '/app/static'

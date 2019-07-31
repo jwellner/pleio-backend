@@ -56,7 +56,7 @@ Then install dependencies with
 
     pip3 install -r requirements.txt
 
-Now copy backend/config.example.py to backend/config.py and adjust your settings accordingly. Finally initialize the database by running the command:
+Finally initialize the database by running the command:
 
     python manage.py migrate
 
