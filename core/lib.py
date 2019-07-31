@@ -1,13 +1,15 @@
+from .enums import ACCESS_TYPE
+
 def get_acl(user):
-    acl = set(['public'])
+    acl = set([ACCESS_TYPE.public])
 
     if user.is_authenticated:
-        acl.add('logged_in')
-        acl.add('user:{}'.format(user.id))
+        acl.add(ACCESS_TYPE.logged_in)
+        acl.add(ACCESS_TYPE.user.format(user.id))
 
     if user.groups:
         groups = set(
-            'group:{}'.format(group.id) for group in user.groups.all()
+            ACCESS_TYPE.group.format(group.id) for group in user.groups.all()
             )
         acl = acl.union(groups)
 

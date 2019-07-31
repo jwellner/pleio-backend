@@ -149,7 +149,7 @@ def resolve_viewer(_, info):
         'isSubEditor': False,
         'isAdmin': user.is_admin,
         'tags': [],
-        'canWriteToContainer': True,
+        'canWriteToContainer': True
     }
 
 
@@ -194,7 +194,7 @@ def resolve_entities(
     else:
         return None
 
-    entities = objects.all()[offset:offset+limit]
+    entities = objects.visible(info.context.user)[offset:offset+limit]
 
     return {
         'total': entities.count(),
@@ -217,25 +217,28 @@ def resolve_entity(
     entity_id = get_id(guid)
 
     if subtype == "news":
-        objects = News.objects
+        model = News
     elif subtype == "poll":
-        objects = Poll.objects
+        model = Poll
     elif subtype == "discussion":
-        objects = Discussion.objects
+        model = Discussion
     elif subtype == "event":
-        objects = Event.objects
+        model = Event
     elif subtype == "wiki":
-        objects = Wiki.objects
+        model = Wiki
     elif subtype == "question":
-        objects = Question.objects
+        model = Question
     elif subtype == "page":
-        objects = CmsPage.objects
+        model = CmsPage
     elif subtype == "blog":
-        objects = Blog.objects
+        model = Blog
     else:
         return None
 
-    entity = objects.get(id=entity_id)
+    try:
+        entity = model.objects.visible(info.context.user).get(id=entity_id)
+    except model.DoesNotExist:
+        entity = None
 
     return entity
 

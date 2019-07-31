@@ -57,7 +57,7 @@ def resolve_activities(
     if orderDirection == 'desc':
         order_by = '-%s' % (order_by)
    
-    qs = Object.objects
+    qs = Object.objects.visible(info.context.user)
     qs = qs.filter(conditional_subtypes_filter(subtypes) & conditional_tags_filter(tags))
     qs = qs.order_by(order_by).select_subclasses()
     total = qs.count()

@@ -15,6 +15,7 @@ import reversion
 from graphql import GraphQLError
 from .mutation import mutation
 from .query import query
+from ..enums import ACCESS_TYPE
 
 logger = logging.getLogger('django')
 
@@ -23,20 +24,37 @@ entity = InterfaceType("Entity")
 
 @entity.type_resolver
 def resolve_entity_type(obj, *_):
-    print(obj._meta.object_name)
     return obj._meta.object_name
-
 
 @viewer.field('user')
 def resolve_user(_, info):
     user = info.context.user
 
     if user.is_authenticated:
-        return {
-            'guid': user.guid,
-            'username': user.guid,
-            'name': user.get_short_name()
-        }
+        return user
     return None
+
+# default entity resolvers 
+def resolve_entity_access_id(obj, info):
+    # pylint: disable=unused-argument
+
+    if ACCESS_TYPE.public in obj.read_access:
+        return 2
+    if ACCESS_TYPE.logged_in in obj.read_access:
+        return 1
+    return 0
+
+def resolve_entity_write_access_id(obj, info):
+    # pylint: disable=unused-argument
+
+    if ACCESS_TYPE.public in obj.read_access:
+        return 2
+    if ACCESS_TYPE.logged_in in obj.read_access:
+        return 1
+    return 0
+
+def resolve_entity_can_edit(obj, info):
+    return obj.can_write(info.context.user)
+
 
 resolvers = [query, viewer, entity, mutation]
