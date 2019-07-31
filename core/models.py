@@ -334,12 +334,11 @@ class Comment(models.Model):
 
 class ObjectManager(InheritanceManager):
     def visible(self, user):
-        queryset = self.get_queryset()
-
+        qs = self.get_queryset()
         if user.is_authenticated and user.is_admin:
-            return queryset
+            return qs
 
-        return queryset.filter(read_access__overlap=list(get_acl(user)))
+        return qs.filter(read_access__overlap=list(get_acl(user)))
 
 
 class Object(models.Model):
