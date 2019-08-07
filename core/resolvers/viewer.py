@@ -18,9 +18,15 @@ def resolve_can_write_to_container(obj, info, containerGuid=None, subtype=None, 
 
     user = info.context.user
 
+    # anonymous always return false
+    if not user.is_authenticated:
+        return False
+
+    # check site access
     if not containerGuid and user.is_authenticated:
         return True
 
+    # check group access
     if (containerGuid and containerGuid in get_acl(user)) or user.is_admin:
         return True
 
