@@ -1,5 +1,5 @@
 from ariadne import ObjectType
-from core.enums import ORDER_DIRECTION, ORDER_BY
+from core.constances import ORDER_DIRECTION, ORDER_BY
 
 query = ObjectType("Query")
 
@@ -12,7 +12,7 @@ def resolve_files(_, info, containerGuid=None, filter=None, orderBy=ORDER_BY.tim
     return {
         'total': 0,
         'canWrite': False,
-        'edged': [],
+        'edges': [],
     }
 
 

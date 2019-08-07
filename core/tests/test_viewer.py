@@ -7,13 +7,18 @@ import json
 from django.contrib.auth.models import AnonymousUser
 from django.http import HttpRequest
 from core.models import User
+from mixer.backend.django import mixer
 
 class ViewerTestCase(TestCase):
 
     def setUp(self):
         self.anonymousUser = AnonymousUser()
-        self.authenticatedUser = User.objects.create(name="Viewer Test1", email="viewer1@pleio.nl")
-        self.authenticatedAdminUser = User.objects.create(name="Viewer Test2", email="viewer2@pleio.nl", is_admin = True)
+        self.authenticatedUser = mixer.blend(User)
+        self.authenticatedAdminUser = mixer.blend(User, is_admin = True)
+
+    def tearDown(self):
+        self.authenticatedUser.delete()
+        self.authenticatedAdminUser.delete()
     
     def test_viewer_anonymous(self):
 
@@ -40,7 +45,7 @@ class ViewerTestCase(TestCase):
 
         data = result[1]["data"]
         
-        self.assertEqual(data["viewer"]["guid"], "0")
+        self.assertEqual(data["viewer"]["guid"], "viewer:0")
         self.assertEqual(data["viewer"]["loggedIn"], False)
         self.assertEqual(data["viewer"]["isSubEditor"], False)
         self.assertEqual(data["viewer"]["isAdmin"], False)
@@ -71,7 +76,7 @@ class ViewerTestCase(TestCase):
 
         data = result[1]["data"]
         
-        self.assertEqual(data["viewer"]["guid"], self.authenticatedUser.guid)
+        self.assertEqual(data["viewer"]["guid"], "viewer:{}".format(self.authenticatedUser.id))
         self.assertEqual(data["viewer"]["loggedIn"], True)
         self.assertEqual(data["viewer"]["isSubEditor"], False)
         self.assertEqual(data["viewer"]["isAdmin"], False)
@@ -103,7 +108,7 @@ class ViewerTestCase(TestCase):
 
         data = result[1]["data"]
         
-        self.assertEqual(data["viewer"]["guid"], self.authenticatedAdminUser.guid)
+        self.assertEqual(data["viewer"]["guid"], "viewer:{}".format(self.authenticatedAdminUser.id))
         self.assertEqual(data["viewer"]["loggedIn"], True)
         self.assertEqual(data["viewer"]["isSubEditor"], False)
         self.assertEqual(data["viewer"]["isAdmin"], True)

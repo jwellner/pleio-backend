@@ -36,3 +36,24 @@ UNKNOWN_ERROR = "unknown_error"
 USER_NOT_GROUP_OWNER_OR_SITE_ADMIN = "user_not_group_owner_or_site_admin"
 USER_NOT_MEMBER_OF_GROUP = "user_not_member_of_group"
 USER_NOT_SITE_ADMIN = "user_not_site_admin"
+
+class ORDER_DIRECTION:
+    asc = 'asc'
+    desc = 'desc'
+
+class ORDER_BY:
+    timeCreated = 'timeCreated'
+    timeUpdated = 'timeUpdated'
+    lastAction = 'lastAction'
+
+class ACCESS_TYPE:
+    logged_in = 'logged_in'
+    public = 'public'
+    user = 'user:{}'
+    group = 'group:{}'
+
+class MEMBERSHIP:
+    not_joined = 'not_joined'
+    requested = 'requested'
+    invited = 'invited'
+    joined = 'joined'
