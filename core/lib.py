@@ -11,11 +11,11 @@ def get_acl(user):
         acl.add(ACCESS_TYPE.logged_in)
         acl.add(ACCESS_TYPE.user.format(user.id))
 
-    if user.memberships:
-        groups = set(
-            ACCESS_TYPE.group.format(membership.group.id) for membership in user.memberships.filter(type__in=['admin', 'owner', 'member'])
-            )
-        acl = acl.union(groups)
+        if user.memberships:
+            groups = set(
+                ACCESS_TYPE.group.format(membership.group.id) for membership in user.memberships.filter(type__in=['admin', 'owner', 'member'])
+                )
+            acl = acl.union(groups)
 
     return acl
 
