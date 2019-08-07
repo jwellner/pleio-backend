@@ -10,11 +10,8 @@ from django.core.mail import send_mail
 from django.core.exceptions import ObjectDoesNotExist
 from django.conf import settings
 from model_utils.managers import InheritanceManager
-
 import reversion
-
-from .lib import get_acl
-
+from core.lib import get_acl
 
 def read_access_default():
     return ['private']
@@ -25,6 +22,11 @@ def write_access_default():
 
 
 class Manager(BaseUserManager):
+    def visible(self, user):
+        if not user.is_authenticated:
+            return self.get_queryset().none()
+        return self.get_queryset()
+
     def create_user(
             self,
             email,
@@ -101,8 +103,6 @@ class User(AbstractBaseUser):
     is_government = models.BooleanField(default=False)
     has_2fa_enabled = models.BooleanField(default=False)
 
-    groups = models.ManyToManyField('Group', through='GroupMembership')
-
     REQUIRED_FIELDS = ['name']
     USERNAME_FIELD = 'email'
 
@@ -143,15 +143,10 @@ class User(AbstractBaseUser):
 
 
 class GroupManager(models.Manager):
-    def visible(self, app_label, object_name, object_id):
-        queryset = self.get_queryset()
-
-        return queryset.filter(
-            object_id=object_id,
-            content_type__app_label=app_label,
-            content_type__model=object_name
-        )
-
+    def visible(self, user):
+        if not user.is_authenticated:
+            pass
+        return self.get_queryset()
 
 class Group(models.Model):
     class Meta:
@@ -159,16 +154,17 @@ class Group(models.Model):
 
     objects = GroupManager()
 
+    owner = models.ForeignKey(User, on_delete=models.PROTECT)
+
     name = models.CharField(max_length=200)
 
     description = models.TextField()
-    richDescription = JSONField(null=True, blank=True)
+    rich_description = JSONField(null=True, blank=True)
 
-    excerpt = models.TextField(default='')
     introduction = models.TextField(default='')
-    icon = models.CharField(max_length=200, default='')
-    url = models.CharField(max_length=200, default='')
     welcome_message = models.TextField(default='')
+
+    icon = models.CharField(max_length=200, default='')
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -179,7 +175,8 @@ class Group(models.Model):
     featured_position_y = models.IntegerField(null=True)
 
     is_closed = models.BooleanField(default=False)
-    is_2fa_required = models.BooleanField(default=False)
+    is_membership_on_request = models.BooleanField(default=False)
+
     auto_notification = models.BooleanField(default=False)
 
     tags = ArrayField(models.CharField(max_length=256),
@@ -215,31 +212,19 @@ class Group(models.Model):
         if not user.is_authenticated:
             return False
 
-        try:
-            return self.members.filter(user=user, type='pending').exists()
-        except ObjectDoesNotExist:
-            return False
+        return self.members.filter(user=user, type='pending').exists()
 
-    def can_change(self, user):
+    def can_write(self, user):
         if not user.is_authenticated:
             return False
 
         if user.is_admin:
             return True
 
-        return self.members.filter(
-            user=user,
-            type__in=['admin', 'owner']
-        ).exists()
+        if user == self.owner:
+            return True
 
-    def can_join(self, user):
-        if not user.is_authenticated:
-            return False
-
-        if self.is_2fa_required and not user.has_2fa_enabled:
-            return False
-
-        return True
+        return self.members.filter(user=user, type__in=['admin', 'owner']).exists()
 
     def join(self, user, member_type):
         return self.members.update_or_create(
@@ -272,8 +257,8 @@ class GroupMembership(models.Model):
     )
 
     user = models.ForeignKey(
-        User,
-        related_name='members',
+        'User',
+        related_name='memberships',
         on_delete=models.PROTECT
     )
     type = models.CharField(
@@ -284,7 +269,7 @@ class GroupMembership(models.Model):
     group = models.ForeignKey(
         'Group',
         related_name='members',
-        on_delete=models.PROTECT
+        on_delete=models.CASCADE
     )
 
     def __str__(self):

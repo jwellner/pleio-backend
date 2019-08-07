@@ -3,8 +3,8 @@ from django.contrib.auth.views import LogoutView, LoginView
 from django.http import HttpResponseBadRequest, JsonResponse
 from django.shortcuts import redirect, render
 from django.conf import settings
-from .models import BinaryFile
-from .helpers import get_settings
+from core.models import BinaryFile
+from core.lib import get_settings
 import json
 
 def default(request):
@@ -55,7 +55,4 @@ def login(request):
     return LoginView.as_view()(request)
 
 def oidc_failure(request):
-    print('oidc_failure')
-
-    oidc_url = settings.OIDC_OP_LOGOUT_ENDPOINT
-    return redirect(oidc_url)
+    return redirect(settings.OIDC_OP_LOGOUT_ENDPOINT)

@@ -1,6 +1,6 @@
 from ariadne import ObjectType
 from django.utils.text import slugify
-from core.resolvers import resolve_entity_access_id, resolve_entity_can_edit, resolve_entity_write_access_id
+from core.resolvers.shared import resolve_entity_access_id, resolve_entity_can_edit, resolve_entity_write_access_id
 
 news = ObjectType("News")
 
