@@ -103,5 +103,6 @@ def resolve_site(*_):
         },
         'showExtraHomepageFilters': False,
         'usersOnline': 1,
-        'achievementsEnabled': False,
+        'achievementsEnabled': True,
+        'cancelMembershipEnabled': True,
     }

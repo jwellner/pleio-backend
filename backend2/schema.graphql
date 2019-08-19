@@ -1018,6 +1018,7 @@ type Mutation {
   markAllAsRead(input: markAllAsReadInput!): markAllAsReadPayload
   toggleBestAnswer(input: toggleBestAnswerInput!): toggleBestAnswerPayload
   toggleIsClosed(input: toggleIsClosedInput!): toggleIsClosedPayload
+  toggleRequestDeleteUser(input: toggleRequestDeleteUserInput!): toggleRequestDeleteUserPayload
   reorder(input: reorderInput!): reorderPayload
   voteOnPoll(input: voteOnPollInput!): voteOnPollPayload
   addPoll(input: addPollInput!): addPollPayload
@@ -1339,6 +1340,7 @@ type Site {
   menu: [MenuItem]
   profile: [ProfileItem]
   achievementsEnabled: Boolean!
+  cancelMembershipEnabled: Boolean!
   footer: [MenuItem]
   directLinks: [DirectLink]
   accessIds: [AccessId]
@@ -1486,6 +1488,16 @@ type toggleIsClosedPayload {
   clientMutationId: String
 }
 
+input toggleRequestDeleteUserInput {
+  guid: String!
+  clientMutationId: String
+}
+
+type toggleRequestDeleteUserPayload {
+  viewer: Viewer
+  clientMutationId: String
+}
+
 type TopItem {
   user: User
   likes: Int
@@ -1520,6 +1532,7 @@ type User implements Entity {
   icon: String
   url: String
   canEdit: Boolean
+  requestDelete: Boolean
 }
 
 type UserFilter {

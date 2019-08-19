@@ -128,10 +128,6 @@ class User(AbstractBaseUser):
         return self.name
 
     @property
-    def username(self):
-        return self.name
-
-    @property
     def guid(self):
         return '{}:{}'.format(
             self._meta.object_name, self.id
