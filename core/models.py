@@ -11,7 +11,7 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.conf import settings
 from model_utils.managers import InheritanceManager
 import reversion
-from core.lib import get_acl
+from core.lib import get_acl, generate_object_filename
 
 def read_access_default():
     return ['private']
@@ -367,18 +367,52 @@ class Object(models.Model):
     class Meta:
         ordering = ['created_at']
 
+class FileFolderManager(models.Manager):
+    def visible(self, user):
+        qs = self.get_queryset()
+        if user.is_authenticated and user.is_admin:
+            return qs
+
+        return qs.filter(read_access__overlap=list(get_acl(user)))
+
+class FileFolder(models.Model):
+    objects = FileFolderManager()
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+
+    owner = models.ForeignKey(User, on_delete=models.PROTECT)
+    group = models.ForeignKey(
+        Group,
+        on_delete=models.PROTECT,
+        blank=True,
+        null=True
+    )
+    read_access = ArrayField(
+        models.CharField(max_length=32),
+        blank=True,
+        default=read_access_default
+    )
+    write_access = ArrayField(
+        models.CharField(max_length=32),
+        blank=True,
+        default=write_access_default
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    parent = models.ForeignKey('self', blank=True, null=True, related_name='children', on_delete=models.CASCADE)
+    is_folder = models.BooleanField(default=False)
+    upload = models.FileField(upload_to=generate_object_filename, blank=True, null=True)
+    content_type = models.CharField(null=True, blank=True, max_length=100)
+
+    def save(self, *args, **kwargs):
+        # pylint: disable=arguments-differ
+        if self.upload:
+            self.content_type = self.upload.file.content_type
+        super().save(*args, **kwargs)
 
 def get_file_path(instance, filename):
     # pylint: disable=unused-argument
     ext = filename.split('.')[-1]
     filename = "%s.%s" % (uuid.uuid4(), ext)
     return os.path.join('binary_file', time.strftime('%Y/%m/%d'), filename)
-
-
-class BinaryFile(models.Model):
-    owner = models.ForeignKey(User, on_delete=models.PROTECT)
-    name = models.CharField(max_length=200)
-    content_type = models.CharField(max_length=200)
-    size = models.BigIntegerField(default=0)
-    file = models.FileField(upload_to=get_file_path)
-    created_at = models.DateTimeField(auto_now_add=True)

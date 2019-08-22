@@ -7,7 +7,7 @@ from .query_viewer import resolve_viewer
 from .query_site import resolve_site
 from .query_entities import resolve_entities
 from .query_groups import resolve_groups
-from core.constances import INVALID_SUBTYPE, COULD_NOT_FIND
+from core.constances import INVALID_SUBTYPE, COULD_NOT_FIND, ORDER_DIRECTION, ORDER_BY
 from core.resolvers.shared import get_model_by_subtype
 
 query = ObjectType("Query")
@@ -135,4 +135,15 @@ def resolve_filters(_, info):
     # pylint: disable=unused-argument
     return {
         'users': None
+    }
+
+@query.field("files")
+def resolve_files(_, info, containerGuid=None, filter=None, orderBy=ORDER_BY.timeCreated, orderDirection=ORDER_DIRECTION.asc, offset=0, limit=20):
+    # pylint: disable=unused-argument
+    # pylint: disable=too-many-arguments
+    # pylint: disable=redefined-builtin
+    return {
+        'total': 0,
+        'canWrite': False,
+        'edges': [],
     }

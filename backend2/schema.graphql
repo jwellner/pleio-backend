@@ -79,7 +79,7 @@ type addEntityPayload {
 
 input addFileInput {
   containerGuid: String
-  file: String
+  file: Upload
   accessId: Int
   writeAccessId: Int
   clientMutationId: String
@@ -92,7 +92,7 @@ type addFilePayload {
 
 input addGroupInput {
   name: String
-  icon: String
+  icon: Upload
   featured: FeaturedInput
   isClosed: Boolean
 
@@ -130,7 +130,7 @@ type addGroupWidgetPayload {
 }
 
 input addImageInput {
-  image: String
+  image: Upload!
   clientMutationId: String
 }
 
@@ -380,10 +380,10 @@ type Discussion implements Entity {
 }
 
 input editAvatarInput {
-  guid: String
+  guid: String!
 
-  """The string pointer to the file object."""
-  avatar: String
+  """UploadFile"""
+  avatar: Upload!
   clientMutationId: String
 }
 
@@ -443,7 +443,7 @@ type editEntityPayload {
 input editFileFolderInput {
   guid: String
   title: String
-  file: String
+  file: Upload
   accessId: Int
   writeAccessId: Int
   isAccessRecursive: Boolean
@@ -458,7 +458,7 @@ type editFileFolderPayload {
 input editGroupInput {
   guid: String
   name: String
-  icon: String
+  icon: Upload
   featured: FeaturedInput
 
   """
@@ -698,7 +698,7 @@ type Featured {
 
 input FeaturedInput {
   video: String
-  image: String
+  image: Upload
   positionY: Int
 }
 
@@ -1516,6 +1516,12 @@ enum Type {
   page
   wiki
 }
+
+"""
+The `Upload` special type represents a file to be uploaded in the same HTTP request as specified by
+ [graphql-multipart-request-spec](https://github.com/jaydenseric/graphql-multipart-request-spec).
+"""
+scalar Upload
 
 type User implements Entity {
   guid: String!

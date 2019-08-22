@@ -5,7 +5,7 @@ from django.utils.translation import ugettext_lazy as _
 SECRET_KEY = os.getenv('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.getenv('DEBUG')
+DEBUG = os.getenv('DEBUG') == 'True'
 
 ENV = os.getenv('ENV')
 
@@ -36,7 +36,6 @@ LOCAL_APPS = [
     'discussion',
     'event',
     'feed',
-    'file',
     'news',
     'poll',
     'question',
@@ -67,3 +66,13 @@ OIDC_OP_USER_ENDPOINT = os.getenv('OIDC_OP_USER_ENDPOINT')
 OIDC_OP_LOGOUT_ENDPOINT = os.getenv('OIDC_OP_LOGOUT_ENDPOINT')
 
 PROFILE_PICTURE_URL = os.getenv('PROFILE_PICTURE_URL')
+
+# SWIFT FILE STORAGE
+SWIFT_AUTH_URL = os.getenv('SWIFT_AUTH_URL')
+SWIFT_USERNAME = os.getenv('SWIFT_USERNAME')
+SWIFT_KEY = os.getenv('SWIFT_KEY')
+SWIFT_CONTAINER_NAME = os.getenv('SWIFT_CONTAINER_NAME')
+SWIFT_AUTO_CREATE_CONTAINER = os.getenv('SWIFT_AUTO_CREATE_CONTAINER') == 'True'
+SWIFT_AUTO_CREATE_CONTAINER_PUBLIC = os.getenv('SWIFT_AUTO_CREATE_CONTAINER_PUBLIC') == 'True'
+SWIFT_AUTO_BASE_URL = False
+SWIFT_BASE_URL = "/file/download/"

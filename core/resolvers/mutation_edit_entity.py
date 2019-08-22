@@ -4,7 +4,7 @@ from django.core.exceptions import ObjectDoesNotExist
 from core.lib import get_type, get_id, remove_none_from_dict
 from core.constances import NOT_LOGGED_IN, COULD_NOT_SAVE, COULD_NOT_FIND, INVALID_SUBTYPE
 from core.resolvers.shared import get_model_by_subtype, access_id_to_acl
-
+from core.models import FileFolder
 
 def resolve_edit_entity(_, info, input):
     # pylint: disable=redefined-builtin
@@ -37,6 +37,32 @@ def resolve_edit_entity(_, info, input):
         entity.tags = clean_input.get("tags", [])
 
         entity.read_access = access_id_to_acl(entity, clean_input.get("accessId"))
+
+        if subtype in ["blog", "news"]:
+            if clean_input.get("featured"):
+                if clean_input.get("featured").get("image"):
+
+                    imageFile = FileFolder.objects.create(
+                        owner=entity.owner, 
+                        upload=clean_input.get("featured").get("image"), 
+                        read_access=entity.read_access,
+                        write_access=entity.write_access
+                    )
+
+                    entity.featured_image = imageFile
+                if clean_input.get("featured").get("positionY"):
+                    entity.featured_position_y = clean_input.get("featured").get("positionY")
+                else:
+                    entity.featured_position_y = 0
+                if clean_input.get("featured").get("video"):
+                    entity.featured_image = None
+                    entity.featured_video = clean_input.get("featured").get("video")
+                else:
+                    entity.featured_video = None
+            else:
+                entity.featured_image = None
+                entity.featured_position_y = 0
+                entity.featured_video = None
 
         entity.save()
 

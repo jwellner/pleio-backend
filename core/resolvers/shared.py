@@ -60,3 +60,17 @@ def resolve_entity_write_access_id(obj, info):
 
 def resolve_entity_can_edit(obj, info):
     return obj.can_write(info.context.user)
+
+def resolve_entity_featured(obj, info):
+    # pylint: disable=unused-argument
+
+    if obj.featured_image:
+        image = obj.featured_image.upload.url
+    else:
+        image = None
+
+    return {
+        'image': image,
+        'video': obj.featured_video,
+        'positionY': obj.featured_position_y
+    }
