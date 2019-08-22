@@ -149,3 +149,5 @@ LOGOUT_REDIRECT_URL = '/'
 APPEND_SLASH = False
 
 WEBPACK_DEV_SERVER = False
+
+DEFAULT_FILE_STORAGE = 'swift.storage.SwiftStorage'

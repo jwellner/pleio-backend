@@ -1,11 +1,12 @@
-from django.contrib.auth.decorators import login_required
 from django.contrib.auth.views import LogoutView, LoginView
-from django.http import HttpResponseBadRequest, JsonResponse
 from django.shortcuts import redirect, render
 from django.conf import settings
-from core.models import BinaryFile
 from core.lib import get_settings
 import json
+from django.core.exceptions import ObjectDoesNotExist
+from django.http import Http404 
+from core.models import FileFolder
+from django.http import StreamingHttpResponse
 
 def default(request):
 
@@ -19,33 +20,6 @@ def default(request):
 
     return render(request, 'react.html', context)
 
-
-@login_required
-def upload(request):
-    if not request.method == 'POST':
-        return HttpResponseBadRequest()
-
-    uploaded_file = request.FILES['file']
-
-    binary_file = BinaryFile.objects.create(
-        owner=request.user,
-        file=uploaded_file,
-        name=uploaded_file.name,
-        size=uploaded_file.size,
-        content_type=uploaded_file.content_type
-    )
-
-    data = {
-        'id': '{}.{}:{}'.format(
-            binary_file._meta.app_label,
-            binary_file._meta.object_name,
-            binary_file.id
-        ).lower()
-    }
-
-    return JsonResponse(data)
-
-
 def logout(request):
     LogoutView.as_view()(request)
 
@@ -56,3 +30,21 @@ def login(request):
 
 def oidc_failure(request):
     return redirect(settings.OIDC_OP_LOGOUT_ENDPOINT)
+
+def download(request, file_id=None, file_name=None):
+    user = request.user
+
+    if not file_id or not file_name:
+        raise Http404("File not found")
+
+    try:
+        entity = FileFolder.objects.visible(user).get(id=file_id)
+        response = StreamingHttpResponse(streaming_content=entity.upload.open(), content_type=entity.content_type)
+        response['Content-Length'] = entity.upload.size
+        response['Content-Disposition'] = "attachment; filename=%s" % file_name
+        return response
+
+    except ObjectDoesNotExist:
+        raise Http404("File not found")
+
+    raise Http404("File not found")

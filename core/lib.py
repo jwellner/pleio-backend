@@ -1,6 +1,8 @@
 from core.constances import ACCESS_TYPE
 from django.conf import settings
 from django.apps import apps
+from django.utils.text import slugify
+import os
 
 def get_acl(user):
     """Get user Access List"""
@@ -103,3 +105,9 @@ def get_settings():
         "statusUpdateGroups": True,
         "showExtraHomepageFilters": True,
     }
+
+def generate_object_filename(obj, filename):
+    ext = filename.split('.')[-1]
+    name = filename.split('.')[0]
+    filename = "%s.%s" % (slugify(name), ext)
+    return os.path.join(str(obj.id), filename)

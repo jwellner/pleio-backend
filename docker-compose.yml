@@ -27,13 +27,19 @@ services:
     restart: on-failure
     ports:
       - "9000:80"
-
   db:
     image: postgres
     env_file:
       - ./.env
     volumes:
       - postgres_data:/var/lib/postgresql/data/
+  storage:
+    image: morrisjobke/docker-swift-onlyone
+    ports:
+     - "12345:8080"
+    volumes:
+      - storage_data:/srv
 
 volumes:
   postgres_data:
+  storage_data:

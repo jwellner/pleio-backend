@@ -1,21 +1,20 @@
 from django.urls import path, include, re_path
-from django.views.decorators.csrf import csrf_exempt
 
 from ariadne.contrib.django.views import GraphQLView
 from .schema import schema
 
-from core import admin
-from core import views
+from core import admin as core_admin
+from core import views as core_views
 
 urlpatterns = [
-    path('logout', views.logout, name='logout'),
-    path('action/logout', views.logout, name='logout'),
-    path('login', views.login, name='login'),
-    path('oidc/failure/', views.oidc_failure, name='oidc_failure'),
+    path('logout', core_views.logout, name='logout'),
+    path('action/logout', core_views.logout, name='logout'),
+    path('login', core_views.login, name='login'),
+    path('oidc/failure/', core_views.oidc_failure, name='oidc_failure'),
     path('oidc/', include('mozilla_django_oidc.urls')),
-    path('files/upload/', csrf_exempt(views.upload), name='upload'),
-    path('admin/logout/', views.logout, name='logout'),
-    path('admin/', admin.site.urls),
+    path('admin/logout/', core_views.logout, name='logout'),
+    path('admin/', core_admin.site.urls),
     path('graphql', GraphQLView.as_view(schema=schema), name='graphql'),
-    re_path(r'.*', views.default, name='default')
+    path('file/download/<uuid:file_id>/<str:file_name>', core_views.download, name='download'),
+    re_path(r'.*', core_views.default, name='default')
 ]

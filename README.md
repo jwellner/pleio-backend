@@ -84,3 +84,19 @@ It is possible to extend the basis schema using the extend directive.
 You can download the backend1 graphql schema using the npm package `get-graphql-schema`. Install it using `npm -g get-graphql-schema` and run the following command:
 
 `get-graphql-schema https://nieuw-template.pleio-test.nl/graphql > schema.graphql`
+
+### Swift storage backend client
+
+To talk with the Swift storage backend you can use swiftclient by installing it using pip:
+
+`pip install python-swiftclient`
+
+## Example commands
+
+Test connection:
+
+`swift -A http://localhost:12345/auth/v1.0 -U test:tester -K testing stat`
+
+Create (public) container:
+
+`swift -A http://localhost:12345/auth/v1.0 -U test:tester -K testing post -r ".r:*" backend2-dev-public`

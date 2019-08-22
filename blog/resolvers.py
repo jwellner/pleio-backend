@@ -1,6 +1,6 @@
 from ariadne import ObjectType
 from django.utils.text import slugify
-from core.resolvers.shared import resolve_entity_access_id, resolve_entity_can_edit, resolve_entity_write_access_id
+from core.resolvers.shared import resolve_entity_access_id, resolve_entity_can_edit, resolve_entity_write_access_id, resolve_entity_featured
 
 blog = ObjectType("Blog")
 
@@ -35,15 +35,6 @@ def resolve_can_bookmark(obj, info):
     # pylint: disable=unused-argument
     return True
 
-@blog.field("featured")
-def resolve_featured(obj, info):
-    # pylint: disable=unused-argument
-    return {
-        'image': '',
-        'video': '',
-        'positionY': 0
-    }
-
 @blog.field("timeCreated")
 def resolve_time_created(obj, info):
     # pylint: disable=unused-argument
@@ -70,5 +61,6 @@ def resolve_url(obj, info):
 blog.set_field("canEdit", resolve_entity_can_edit)
 blog.set_field("accessId", resolve_entity_access_id)
 blog.set_field("writeAccessId", resolve_entity_write_access_id)
+blog.set_field("featured", resolve_entity_featured)
 
 resolvers = [blog]
