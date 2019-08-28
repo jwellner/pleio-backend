@@ -24,10 +24,10 @@ DEFAULT_SITE_CONFIG = {
     'INITIATIVE_DESCRIPTION': ('', 'Initiative description'),
     'INITIATOR_LINK': ('', 'Initiator link'),
     'STYLE': ({
-        'font': 'Arial',
+        'font': 'Rijksoverheid Sans',
         'colorPrimary': '#0e2f56',
-        'colorSecondary': '#118df0',
-        'colorHeader': 'red'
+        'colorSecondary': '#009ee3',
+        'colorHeader': ''
     }, 'Style'),
     'CUSTOM_TAGS_ENABLED': (True, 'Custom tags enabled'),
     'TAG_CATEGORIES': ([], 'Tag categories'),
