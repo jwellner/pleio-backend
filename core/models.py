@@ -20,7 +20,6 @@ def read_access_default():
 def write_access_default():
     return ['private']
 
-
 class Manager(BaseUserManager):
     def visible(self, user):
         if not user.is_authenticated:
@@ -410,6 +409,13 @@ class FileFolder(models.Model):
         if self.upload:
             self.content_type = self.upload.file.content_type
         super().save(*args, **kwargs)
+
+class Setting(models.Model):
+    key = models.CharField(max_length=255)
+    value = JSONField(null=True, blank=True, help_text="Please provide valid JSON data")
+
+    def __str__(self):
+        return self.key
 
 def get_file_path(instance, filename):
     # pylint: disable=unused-argument
