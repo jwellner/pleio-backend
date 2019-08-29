@@ -32,15 +32,22 @@ def resolve_edit_entity(_, info, input):
         raise GraphQLError(COULD_NOT_SAVE)
 
     with reversion.create_revision():
-        entity.title = clean_input.get("title")
-        entity.description = clean_input.get("description", "")
+
         entity.tags = clean_input.get("tags", [])
 
         entity.read_access = access_id_to_acl(entity, clean_input.get("accessId"))
 
         if subtype in ["blog", "news"]:
+            entity.title = clean_input.get("title")
+            entity.description = clean_input.get("description", "")
+            entity.rich_description = clean_input.get("richDescription")
+
             if clean_input.get("featured"):
-                if clean_input.get("featured").get("image"):
+                entity.featured_position_y = clean_input.get("featured").get("positionY", 0)
+                entity.featured_video = clean_input.get("featured").get("video", None)
+                if entity.featured_video:
+                    entity.featured_image = None
+                elif clean_input.get("featured").get("image"):
 
                     imageFile = FileFolder.objects.create(
                         owner=entity.owner, 
@@ -50,19 +57,17 @@ def resolve_edit_entity(_, info, input):
                     )
 
                     entity.featured_image = imageFile
-                if clean_input.get("featured").get("positionY"):
-                    entity.featured_position_y = clean_input.get("featured").get("positionY")
-                else:
-                    entity.featured_position_y = 0
-                if clean_input.get("featured").get("video"):
-                    entity.featured_image = None
-                    entity.featured_video = clean_input.get("featured").get("video")
-                else:
-                    entity.featured_video = None
+
+                entity.featured_position_y = clean_input.get("featured").get("positionY", 0)
             else:
                 entity.featured_image = None
                 entity.featured_position_y = 0
                 entity.featured_video = None
+
+        if subtype in ["blog"]:
+            # TODO: subeditor may also set recommended
+            if user.is_admin:
+                entity.is_recommended = clean_input.get("isRecommended")
 
         entity.save()
 
