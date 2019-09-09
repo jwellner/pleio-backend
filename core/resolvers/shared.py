@@ -1,6 +1,7 @@
 from core.constances import ACCESS_TYPE
 from django.apps import apps
 from enum import Enum
+from django.utils.text import Truncator
 
 class TypeModels(Enum):
     """Can be used to convert GraphQL types to Django models"""
@@ -59,7 +60,10 @@ def resolve_entity_write_access_id(obj, info):
     return 0
 
 def resolve_entity_can_edit(obj, info):
-    return obj.can_write(info.context.user)
+    try:
+        return obj.can_write(info.context.user)
+    except AttributeError:
+        return False
 
 def resolve_entity_featured(obj, info):
     # pylint: disable=unused-argument
@@ -74,3 +78,60 @@ def resolve_entity_featured(obj, info):
         'video': obj.featured_video,
         'positionY': obj.featured_position_y
     }
+
+def resolve_entity_guid(obj, info):
+    # pylint: disable=unused-argument
+    return obj.guid
+
+def resolve_entity_status(obj, info):
+    # pylint: disable=unused-argument
+    return 200
+
+def resolve_entity_title(obj, info):
+    # pylint: disable=unused-argument
+    return obj.title
+
+def resolve_entity_description(obj, info):
+    # pylint: disable=unused-argument
+    return obj.description
+
+def resolve_entity_rich_description(obj, info):
+    # pylint: disable=unused-argument
+    return obj.rich_description
+
+def resolve_entity_excerpt(obj, info):
+    # pylint: disable=unused-argument
+    return Truncator(obj.description).words(10)
+
+def resolve_entity_tags(obj, info):
+    # pylint: disable=unused-argument
+    return obj.tags
+
+def resolve_entity_time_created(obj, info):
+    # pylint: disable=unused-argument
+    return obj.created_at
+
+def resolve_entity_time_updated(obj, info):
+    # pylint: disable=unused-argument
+    return obj.updated_at
+
+def resolve_entity_can_vote(obj, info):
+    # pylint: disable=unused-argument
+    try:
+        return obj.can_comment(info.context.user)
+    except AttributeError:
+        return False
+
+def resolve_entity_can_comment(obj, info):
+    # pylint: disable=unused-argument
+    try:
+        return obj.can_comment(info.context.user)
+    except AttributeError:
+        return False
+
+def resolve_entity_can_bookmark(obj, info):
+    # pylint: disable=unused-argument
+    try:
+        return obj.can_bookmark(info.context.user)
+    except AttributeError:
+        return False
