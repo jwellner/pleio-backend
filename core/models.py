@@ -407,6 +407,10 @@ class FileFolder(models.Model):
     upload = models.FileField(upload_to=generate_object_filename, blank=True, null=True)
     content_type = models.CharField(null=True, blank=True, max_length=100)
 
+    @property
+    def guid(self):
+        return str(self.id)
+
     def save(self, *args, **kwargs):
         # pylint: disable=arguments-differ
         if self.upload:

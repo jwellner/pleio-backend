@@ -36,7 +36,7 @@ def resolve_entity(
         pass
 
     # Also try to get User, Group, Comment, FileFolder
-    # TODO: make separate queries for those types?
+    # TODO: make frontend use separate queries for those types?
     if not entity:
         try:
             entity = Group.objects.visible(user).get(id=guid)
@@ -51,7 +51,9 @@ def resolve_entity(
 
     if not entity:
         try:
-            entity = User.objects.visible(user).get(id=username)
+            if username:
+                guid = username
+            entity = User.objects.visible(user).get(id=guid)
         except ObjectDoesNotExist:
             pass
 
