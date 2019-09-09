@@ -5,6 +5,8 @@ from core.lib import get_type, get_id, remove_none_from_dict
 from core.constances import NOT_LOGGED_IN, COULD_NOT_SAVE, COULD_NOT_FIND, INVALID_SUBTYPE
 from core.resolvers.shared import get_model_by_subtype, access_id_to_acl
 from core.models import FileFolder
+from core.resolvers.mutation_edit_comment import resolve_edit_comment
+
 
 def resolve_edit_entity(_, info, input):
     # pylint: disable=redefined-builtin
@@ -12,11 +14,14 @@ def resolve_edit_entity(_, info, input):
 
     clean_input = remove_none_from_dict(input)
 
-    if not info.context.user.is_authenticated:
-        raise GraphQLError(NOT_LOGGED_IN)
-
     subtype = get_type(clean_input.get("guid"))
     entity_id = get_id(clean_input.get("guid"))
+
+    if subtype == "comment":
+        return resolve_edit_comment(_, info, input)
+
+    if not info.context.user.is_authenticated:
+        raise GraphQLError(NOT_LOGGED_IN)
 
     model = get_model_by_subtype(subtype)
 

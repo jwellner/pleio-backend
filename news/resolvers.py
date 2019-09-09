@@ -15,10 +15,15 @@ def resolve_has_voted(obj, info):
     # pylint: disable=unused-argument
     return False
 
+@news.field("comments")
+def resolve_comments(obj, info):
+    # pylint: disable=unused-argument
+    return obj.comments.all()
+
 @news.field("commentCount")
 def resolve_comment_count(obj, info):
     # pylint: disable=unused-argument
-    return 0
+    return obj.comments.all().count()
 
 @news.field("isBookmarked")
 def resolve_is_bookmarked(obj, info):

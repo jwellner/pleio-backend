@@ -5,6 +5,7 @@ from core.lib import get_type, get_id, remove_none_from_dict
 from core.constances import NOT_LOGGED_IN, COULD_NOT_FIND, INVALID_SUBTYPE, ACCESS_TYPE
 from core.resolvers.shared import get_model_by_subtype, access_id_to_acl
 from core.models import Group, FileFolder
+from core.resolvers.mutation_add_comment import resolve_add_comment
 
 
 def resolve_add_entity(_, info, input):
@@ -13,6 +14,9 @@ def resolve_add_entity(_, info, input):
     user = info.context.user
 
     clean_input = remove_none_from_dict(input)
+
+    if clean_input.get("subtype") == "comment":
+        return resolve_add_comment(_, info, input)
 
     if not user.is_authenticated:
         raise GraphQLError(NOT_LOGGED_IN)

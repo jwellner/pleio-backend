@@ -116,7 +116,7 @@ def get_settings():
         "showTagInNewsCard": False,
         "numberOfFeaturedItems": 2,
         "enableFeedSorting": True,
-        "commentsOnNews": False,
+        "commentsOnNews": True,
         "eventExport": False,
         "subgroups": False,
         "statusUpdateGroups": True,
