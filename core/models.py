@@ -1,6 +1,4 @@
 import uuid
-import os
-import time
 from django.db import models
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
 from django.contrib.contenttypes.fields import GenericForeignKey
@@ -423,9 +421,3 @@ class Setting(models.Model):
 
     def __str__(self):
         return self.key
-
-def get_file_path(instance, filename):
-    # pylint: disable=unused-argument
-    ext = filename.split('.')[-1]
-    filename = "%s.%s" % (uuid.uuid4(), ext)
-    return os.path.join('binary_file', time.strftime('%Y/%m/%d'), filename)
