@@ -21,10 +21,12 @@ class TypeModels(Enum):
 def get_model_by_subtype(subtype):
     """Get Django model by subtype name"""
 
-    if TypeModels[subtype]:
+    try:
         model_name = TypeModels[subtype].value
         return apps.get_model(model_name)
-    
+    except AttributeError:
+        return None
+
     return None
 
 def access_id_to_acl(obj, access_id):

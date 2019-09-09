@@ -6,6 +6,7 @@ from .group import group
 from .member import member
 from .viewer import viewer
 from .entity import entity
+from .comment import comment
 
 
-resolvers = [query, mutation, viewer, entity, user, group, member]
+resolvers = [query, mutation, viewer, entity, user, group, member, comment]
