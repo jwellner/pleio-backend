@@ -1,7 +1,7 @@
 from graphql import GraphQLError
 from django.core.exceptions import ObjectDoesNotExist
-from core.lib import get_type, get_id, remove_none_from_dict
-from core.constances import NOT_LOGGED_IN, COULD_NOT_FIND, INVALID_SUBTYPE, COULD_NOT_SAVE
+from core.lib import remove_none_from_dict
+from core.constances import NOT_LOGGED_IN, COULD_NOT_FIND, COULD_NOT_SAVE
 from core.models import Comment
 
 def resolve_edit_comment(_, info, input):
@@ -13,14 +13,8 @@ def resolve_edit_comment(_, info, input):
     if not user.is_authenticated:
         raise GraphQLError(NOT_LOGGED_IN)
 
-    subtype = get_type(clean_input.get("guid"))
-    comment_id = get_id(clean_input.get("guid"))
-
-    if subtype != "comment":
-        raise GraphQLError(INVALID_SUBTYPE)
-
     try:
-        comment = Comment.objects.get(id=comment_id)
+        comment = Comment.objects.get(id=clean_input.get("guid"))
     except ObjectDoesNotExist:
         raise GraphQLError(COULD_NOT_FIND)
 

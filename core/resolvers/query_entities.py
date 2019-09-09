@@ -1,7 +1,6 @@
 from django.db.models import Q
 from core.constances import ORDER_DIRECTION, ORDER_BY
-from core.models import Object
-from core.lib import get_id, get_type
+from core.models import Entity
 from news.models import News
 from poll.models import Poll
 from discussion.models import Discussion
@@ -14,13 +13,7 @@ from blog.models import Blog
 def conditional_group_filter(container_guid):
 
     if container_guid:
-        container_type = get_type(container_guid)
-        container_id = get_id(container_guid)
-
-        if not container_type == "group":
-            return Q()
-
-        return Q(group__id=container_id)
+        return Q(group__id=container_guid)
 
     return Q()
 
@@ -60,7 +53,7 @@ def resolve_entities(
     elif subtype == "blog":
         objects = Blog.objects
     elif subtype is None:
-        objects = Object.objects
+        objects = Entity.objects
     else:
         return None
 

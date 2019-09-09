@@ -1,10 +1,10 @@
 import reversion
 from graphql import GraphQLError
 from django.core.exceptions import ObjectDoesNotExist
-from core.lib import get_type, get_id, remove_none_from_dict
-from core.constances import NOT_LOGGED_IN, COULD_NOT_SAVE, COULD_NOT_FIND, INVALID_SUBTYPE
-from core.resolvers.shared import get_model_by_subtype, access_id_to_acl
-from core.models import FileFolder
+from core.lib import remove_none_from_dict
+from core.constances import NOT_LOGGED_IN, COULD_NOT_SAVE
+from core.resolvers.shared import access_id_to_acl
+from core.models import FileFolder, Entity
 from core.resolvers.mutation_edit_comment import resolve_edit_comment
 
 
@@ -14,24 +14,15 @@ def resolve_edit_entity(_, info, input):
 
     clean_input = remove_none_from_dict(input)
 
-    subtype = get_type(clean_input.get("guid"))
-    entity_id = get_id(clean_input.get("guid"))
-
-    if subtype == "comment":
-        return resolve_edit_comment(_, info, input)
-
     if not info.context.user.is_authenticated:
         raise GraphQLError(NOT_LOGGED_IN)
 
-    model = get_model_by_subtype(subtype)
-
-    if not model:
-        raise GraphQLError(INVALID_SUBTYPE)
-
     try:
-        entity = model.objects.get(id=entity_id)
+        entity = Entity.objects.get_subclass(id=clean_input.get("guid"))
     except ObjectDoesNotExist:
-        raise GraphQLError(COULD_NOT_FIND)
+        # TODO: update frontend to use editComment
+        # raise GraphQLError(COULD_NOT_FIND)
+        return resolve_edit_comment(_, info, input)
 
     if not entity.can_write(user):
         raise GraphQLError(COULD_NOT_SAVE)
@@ -42,7 +33,7 @@ def resolve_edit_entity(_, info, input):
 
         entity.read_access = access_id_to_acl(entity, clean_input.get("accessId"))
 
-        if subtype in ["blog", "news"]:
+        if entity._meta.model_name in ["blog", "news"]:
             entity.title = clean_input.get("title")
             entity.description = clean_input.get("description", "")
             entity.rich_description = clean_input.get("richDescription")
@@ -69,7 +60,7 @@ def resolve_edit_entity(_, info, input):
                 entity.featured_position_y = 0
                 entity.featured_video = None
 
-        if subtype in ["blog"]:
+        if entity._meta.model_name in ["blog"]:
             # TODO: subeditor may also set recommended
             if user.is_admin:
                 entity.is_recommended = clean_input.get("isRecommended")

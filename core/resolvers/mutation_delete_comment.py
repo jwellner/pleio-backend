@@ -1,21 +1,17 @@
 from graphql import GraphQLError
 from django.core.exceptions import ObjectDoesNotExist
-from core.lib import get_type, get_id
-from core.constances import INVALID_SUBTYPE, COULD_NOT_FIND, COULD_NOT_SAVE
+from core.constances import COULD_NOT_FIND, COULD_NOT_SAVE, NOT_LOGGED_IN
 from core.models import Comment
 
 def resolve_delete_comment(_, info, input):
     # pylint: disable=redefined-builtin
     user = info.context.user
 
-    subtype = get_type(input.get("guid"))
-    entity_id = get_id(input.get("guid"))
-
-    if subtype != "comment":
-        raise GraphQLError(INVALID_SUBTYPE)
+    if not user.is_authenticated:
+        raise GraphQLError(NOT_LOGGED_IN)
 
     try:
-        comment = Comment.objects.get(id=entity_id)
+        comment = Comment.objects.get(id=input.get("guid"))
     except ObjectDoesNotExist:
         raise GraphQLError(COULD_NOT_FIND)
 

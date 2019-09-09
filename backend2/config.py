@@ -35,7 +35,6 @@ LOCAL_APPS = [
     'cms',
     'discussion',
     'event',
-    'feed',
     'news',
     'poll',
     'question',

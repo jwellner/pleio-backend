@@ -1,10 +1,10 @@
 from django.contrib.contenttypes.fields import GenericRelation
 from django.db import models
-from core.models import Object, Comment
+from core.models import Entity, Comment
 
-class StatusUpdate(Object):
+class StatusUpdate(Entity):
     class Meta:
-        ordering = ['-id']
+        ordering = ['-created_at']
 
     title = models.CharField(max_length=256)
     description = models.TextField()
