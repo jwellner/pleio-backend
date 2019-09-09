@@ -1,8 +1,8 @@
 from django.contrib.contenttypes.fields import GenericRelation
 from django.db import models
-from core.models import Object, Comment, FileFolder
+from core.models import Entity, Comment, FileFolder
 
-class Blog(Object):
+class Blog(Entity):
     """
     TODO: Implement
         - comments

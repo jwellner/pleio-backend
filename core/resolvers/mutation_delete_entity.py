@@ -1,33 +1,23 @@
 import reversion
 from graphql import GraphQLError
 from django.core.exceptions import ObjectDoesNotExist
-from core.lib import get_type, get_id
-from core.constances import NOT_LOGGED_IN, INVALID_SUBTYPE, COULD_NOT_FIND, COULD_NOT_SAVE
-from core.resolvers.shared import get_model_by_subtype
+from core.constances import NOT_LOGGED_IN, COULD_NOT_SAVE
+from core.models import Entity
 from core.resolvers.mutation_delete_comment import resolve_delete_comment
 
 def resolve_delete_entity(_, info, input):
     # pylint: disable=redefined-builtin
     user = info.context.user
 
-    subtype = get_type(input.get("guid"))
-    entity_id = get_id(input.get("guid"))
-
-    if subtype == "comment":
-        return resolve_delete_comment(_, info, input)
-
-    if not info.context.user.is_authenticated:
+    if not user.is_authenticated:
         raise GraphQLError(NOT_LOGGED_IN)
 
-    model = get_model_by_subtype(subtype)
-
-    if not model:
-        raise GraphQLError(INVALID_SUBTYPE)
-
     try:
-        entity = model.objects.get(id=entity_id)
+        entity = Entity.objects.get(id=input.get("guid"))
     except ObjectDoesNotExist:
-        raise GraphQLError(COULD_NOT_FIND)
+        # TODO: update frontend to use deleteComment
+        # raise GraphQLError(COULD_NOT_FIND)
+        return resolve_delete_comment(_, info, input)
 
     if not entity.can_write(user):
         raise GraphQLError(COULD_NOT_SAVE)

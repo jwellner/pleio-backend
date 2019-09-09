@@ -88,6 +88,8 @@ class Manager(BaseUserManager):
 class User(AbstractBaseUser):
     objects = Manager()
 
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+
     email = models.EmailField(max_length=255, unique=True)
     name = models.CharField(max_length=100)
     is_active = models.BooleanField(default=True)
@@ -128,9 +130,7 @@ class User(AbstractBaseUser):
 
     @property
     def guid(self):
-        return '{}:{}'.format(
-            self._meta.object_name, self.id
-        ).lower()
+        return str(self.id)
 
     def email_user(self, subject, message, from_email=None, **kwargs):
         send_mail(subject, message, from_email or settings.FROM_EMAIL, [
@@ -148,6 +148,8 @@ class Group(models.Model):
         ordering = ['name']
 
     objects = GroupManager()
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
 
     owner = models.ForeignKey(User, on_delete=models.PROTECT)
 
@@ -235,9 +237,7 @@ class Group(models.Model):
 
     @property
     def guid(self):
-        return '{}:{}'.format(
-            self._meta.object_name, self.id
-        ).lower()
+        return str(self.id)
 
 
 class GroupMembership(models.Model):
@@ -276,20 +276,17 @@ class GroupMembership(models.Model):
 
 
 class CommentManager(models.Manager):
-    def visible(self, app_label, object_name, object_id):
+    def visible(self):
         queryset = self.get_queryset()
 
-        return queryset.filter(
-            object_id=object_id,
-            content_type__app_label=app_label,
-            content_type__model=object_name
-        )
-
+        return queryset
 
 class Comment(models.Model):
     class Meta:
         ordering = ['created_at']
     objects = CommentManager()
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
 
     owner = models.ForeignKey(User, on_delete=models.PROTECT)
 
@@ -300,7 +297,7 @@ class Comment(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     content_type = models.ForeignKey(ContentType, on_delete=models.PROTECT)
-    object_id = models.PositiveIntegerField()
+    object_id = models.UUIDField(default=uuid.uuid4)
     container = GenericForeignKey('content_type', 'object_id')
 
     def can_write(self, user):
@@ -314,12 +311,10 @@ class Comment(models.Model):
 
     @property
     def guid(self):
-        return '{}:{}'.format(
-            self._meta.object_name, self.id
-        ).lower()
+        return str(self.id)
 
 
-class ObjectManager(InheritanceManager):
+class EntityManager(InheritanceManager):
     def visible(self, user):
         qs = self.get_queryset()
         if user.is_authenticated and user.is_admin:
@@ -328,8 +323,11 @@ class ObjectManager(InheritanceManager):
         return qs.filter(read_access__overlap=list(get_acl(user)))
 
 
-class Object(models.Model):
-    objects = ObjectManager()
+class Entity(models.Model):
+    objects = EntityManager()
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+
     owner = models.ForeignKey(User, on_delete=models.PROTECT)
     group = models.ForeignKey(
         Group,
@@ -366,9 +364,7 @@ class Object(models.Model):
 
     @property
     def guid(self):
-        return '{}:{}'.format(
-            self._meta.object_name, self.id
-        ).lower()
+        return str(self.id)
 
     class Meta:
         ordering = ['created_at']

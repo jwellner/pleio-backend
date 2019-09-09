@@ -1,7 +1,7 @@
 import reversion
 from graphql import GraphQLError
 from django.core.exceptions import ObjectDoesNotExist
-from core.lib import get_type, get_id, remove_none_from_dict
+from core.lib import remove_none_from_dict
 from core.constances import NOT_LOGGED_IN, COULD_NOT_FIND, INVALID_SUBTYPE, ACCESS_TYPE
 from core.resolvers.shared import get_model_by_subtype, access_id_to_acl
 from core.models import Group, FileFolder
@@ -29,14 +29,8 @@ def resolve_add_entity(_, info, input):
     group = None
 
     if clean_input.get("containerGuid"):
-        container_type = get_type(clean_input.get("containerGuid"))
-        container_id = get_id(clean_input.get("containerGuid"))
-
-        if not container_type == "group":
-            raise GraphQLError("INVALID_CONTAINER_SUBTYPE")
-        
         try:
-            group = Group.objects.get(id=container_id)
+            group = Group.objects.get(id=clean_input.get("containerGuid"))
         except ObjectDoesNotExist:
             raise GraphQLError(COULD_NOT_FIND)
 

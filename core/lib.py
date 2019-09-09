@@ -22,21 +22,6 @@ def get_acl(user):
 
     return acl
 
-
-def get_type(guid):
-    """Get content type from guid"""
-
-    splitted_id = guid.split(':')
-    return splitted_id[0]
-
-
-def get_id(guid):
-    """Get content id from guid"""
-
-    splitted_id = guid.split(':')
-    return splitted_id[1]
-
-
 def remove_none_from_dict(values):
     """Cleanup resolver input: remove keys with None values"""
 

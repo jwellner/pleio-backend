@@ -1,8 +1,8 @@
 from django.contrib.contenttypes.fields import GenericRelation
 from django.db import models
-from core.models import Object, FileFolder, Comment
+from core.models import Entity, FileFolder, Comment
 
-class News(Object):
+class News(Entity):
     class Meta:
         ordering = ['-id']
 

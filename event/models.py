@@ -1,8 +1,8 @@
 from django.db import models
-from core.models import Object
+from core.models import Entity
 
 
-class Event(Object):
+class Event(Entity):
     class Meta:
         ordering = ['-id']
 

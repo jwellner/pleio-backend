@@ -1,14 +1,12 @@
 from ariadne import ObjectType
 from django.core.exceptions import ObjectDoesNotExist
 from graphql import GraphQLError
-from core.lib import get_type, get_id
-from core.models import User
+from core.models import User, Entity
 from .query_viewer import resolve_viewer
 from .query_site import resolve_site
 from .query_entities import resolve_entities
 from .query_groups import resolve_groups
-from core.constances import INVALID_SUBTYPE, COULD_NOT_FIND, ORDER_DIRECTION, ORDER_BY
-from core.resolvers.shared import get_model_by_subtype
+from core.constances import COULD_NOT_FIND, ORDER_DIRECTION, ORDER_BY
 
 query = ObjectType("Query")
 
@@ -30,20 +28,8 @@ def resolve_entity(
 
     user = info.context.user
 
-    if guid:
-        subtype = get_type(guid)
-        entity_id = get_id(guid)
-    else:
-        subtype = get_type(username)
-        entity_id = get_id(username)
-
-    model = get_model_by_subtype(subtype)
-
-    if not model:
-        raise GraphQLError(INVALID_SUBTYPE)
-
     try:
-        entity = model.objects.visible(user).get(id=entity_id)
+        entity = Entity.objects.visible(user).get_subclass(id=guid)
     except ObjectDoesNotExist:
         raise GraphQLError(COULD_NOT_FIND)
 

@@ -1,8 +1,8 @@
 from graphql import GraphQLError
 from django.core.exceptions import ObjectDoesNotExist
 from core.models import Group
-from core.constances import NOT_LOGGED_IN, COULD_NOT_FIND, INVALID_SUBTYPE, USER_NOT_MEMBER_OF_GROUP
-from core.lib import remove_none_from_dict, get_type, get_id
+from core.constances import NOT_LOGGED_IN, COULD_NOT_FIND, USER_NOT_MEMBER_OF_GROUP
+from core.lib import remove_none_from_dict
 
 def resolve_leave_group(_, info, input):
     # pylint: disable=redefined-builtin
@@ -13,17 +13,8 @@ def resolve_leave_group(_, info, input):
     if not user.is_authenticated:
         raise GraphQLError(NOT_LOGGED_IN)
 
-    if (clean_input.get("guid")):
-        subtype = get_type(clean_input.get("guid"))
-        entity_id = get_id(clean_input.get("guid"))
-    else:
-        raise GraphQLError(COULD_NOT_FIND)
-
-    if not subtype == "group":
-        raise GraphQLError(INVALID_SUBTYPE)
-
     try:
-        group = Group.objects.get(id=entity_id)
+        group = Group.objects.get(id=clean_input.get("guid"))
     except ObjectDoesNotExist:
         raise GraphQLError(COULD_NOT_FIND)
 

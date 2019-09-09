@@ -1,7 +1,6 @@
 from ariadne import ObjectType
-from core.models import Object
+from core.models import Entity
 from django.db.models import Q
-from core.lib import get_id, get_type
 
 query = ObjectType("Query")
 
@@ -34,13 +33,7 @@ def conditional_tags_filter(tags):
 def conditional_group_filter(container_guid):
 
     if container_guid:
-        container_type = get_type(container_guid)
-        container_id = get_id(container_guid)
-
-        if not container_type == "group":
-            return Q()
-
-        return Q(group__id=container_id)
+        return Q(group__id=container_guid)
 
     return Q()
 
@@ -71,7 +64,7 @@ def resolve_activities(
     if orderDirection == 'desc':
         order_by = '-%s' % (order_by)
        
-    qs = Object.objects.visible(info.context.user)
+    qs = Entity.objects.visible(info.context.user)
     qs = qs.filter(conditional_subtypes_filter(subtypes) & conditional_tags_filter(tags) & conditional_group_filter(containerGuid))
     qs = qs.order_by(order_by).select_subclasses()
     total = qs.count()
