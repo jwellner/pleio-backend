@@ -1,7 +1,7 @@
 from ariadne import ObjectType
 from django.core.exceptions import ObjectDoesNotExist
 from graphql import GraphQLError
-from core.models import User, Entity
+from core.models import User, Entity, Group, FileFolder
 from .query_viewer import resolve_viewer
 from .query_site import resolve_site
 from .query_entities import resolve_entities
@@ -28,9 +28,34 @@ def resolve_entity(
 
     user = info.context.user
 
+    entity = None
+
     try:
         entity = Entity.objects.visible(user).get_subclass(id=guid)
     except ObjectDoesNotExist:
+        pass
+
+    # Also try to get User, Group, Comment, FileFolder
+    # TODO: make separate queries for those types?
+    if not entity:
+        try:
+            entity = Group.objects.visible(user).get(id=guid)
+        except ObjectDoesNotExist:
+            pass
+
+    if not entity:
+        try:
+            entity = FileFolder.objects.visible(user).get(id=guid)
+        except ObjectDoesNotExist:
+            pass
+
+    if not entity:
+        try:
+            entity = User.objects.visible(user).get(id=username)
+        except ObjectDoesNotExist:
+            pass
+
+    if not entity:
         raise GraphQLError(COULD_NOT_FIND)
 
     return entity
