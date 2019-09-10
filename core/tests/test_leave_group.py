@@ -48,7 +48,7 @@ class LeaveGroupTestCase(TestCase):
         request = HttpRequest()
         request.user = self.anonymousUser
 
-        result = graphql_sync(schema, { "query": mutation, "variables": variables }, context_value=request)
+        result = graphql_sync(schema, { "query": mutation, "variables": variables }, context_value=request, logger="test")
 
         errors = result[1]["errors"]
 

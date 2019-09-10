@@ -1,6 +1,7 @@
 from ariadne import ObjectType
 from django.utils.text import slugify
 from core.resolvers import shared
+from bookmark.models import Bookmark
 
 blog = ObjectType("Blog")
 
@@ -39,6 +40,11 @@ def resolve_is_recommended(obj, info):
 @blog.field("isBookmarked")
 def resolve_is_bookmarked(obj, info):
     # pylint: disable=unused-argument
+
+    hasBookmark = Bookmark.objects.get_for(content_object=obj, key='bookmark')
+    if hasBookmark:
+        return True
+        
     return False
 
 @blog.field("isFollowing")
