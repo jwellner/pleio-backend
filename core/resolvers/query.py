@@ -6,6 +6,7 @@ from .query_viewer import resolve_viewer
 from .query_site import resolve_site
 from .query_entities import resolve_entities
 from .query_groups import resolve_groups
+from .query_bookmarks import resolve_bookmarks
 from core.constances import COULD_NOT_FIND, ORDER_DIRECTION, ORDER_BY
 
 query = ObjectType("Query")
@@ -14,6 +15,7 @@ query.set_field("viewer", resolve_viewer)
 query.set_field("site", resolve_site)
 query.set_field("entities", resolve_entities)
 query.set_field("groups", resolve_groups)
+query.set_field("bookmarks", resolve_bookmarks)
 
 @query.field("entity")
 def resolve_entity(

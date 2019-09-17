@@ -7,7 +7,6 @@ from django.contrib.auth.models import AnonymousUser
 from django.http import HttpRequest
 from core.models import User, Group
 from blog.models import Blog
-from bookmark.models import Bookmark
 from mixer.backend.django import mixer
 from core.constances import ACCESS_TYPE
 from core.lib import get_acl
@@ -40,8 +39,9 @@ class BookmarkTestCase(TestCase):
             is_recommended=True
         )
 
-        self.bookmark1 = Bookmark.objects.add(self.authenticatedUser, self.blog1, 'bookmark')
-        self.bookmark2 = Bookmark.objects.add(self.authenticatedUser, self.blog2, 'bookmark')
+        self.bookmark1 = self.blog1.add_bookmark(self.authenticatedUser)
+        self.bookmark2 = self.blog2.add_bookmark(self.authenticatedUser)
+
 
     def tearDown(self):
         self.bookmark1.delete()
@@ -66,7 +66,8 @@ class BookmarkTestCase(TestCase):
         request = HttpRequest()
         request.user = self.authenticatedUser
 
-        variables = {}
+        variables = {
+        }
 
         result = graphql_sync(schema, { "query": query , "variables": variables}, context_value=request)
 

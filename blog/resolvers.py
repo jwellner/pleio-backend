@@ -1,7 +1,6 @@
 from ariadne import ObjectType
 from django.utils.text import slugify
 from core.resolvers import shared
-from bookmark.models import Bookmark
 
 blog = ObjectType("Blog")
 
@@ -37,30 +36,10 @@ def resolve_is_recommended(obj, info):
     # pylint: disable=unused-argument
     return obj.is_recommended
 
-@blog.field("isBookmarked")
-def resolve_is_bookmarked(obj, info):
-    # pylint: disable=unused-argument
-
-    hasBookmark = Bookmark.objects.get_for(content_object=obj, key='bookmark')
-    if hasBookmark:
-        return True
-        
-    return False
-
 @blog.field("isFollowing")
 def resolve_is_following(obj, info):
     # pylint: disable=unused-argument
     return False
-
-@blog.field("hasVoted")
-def resolve_has_voted(obj, info):
-    # pylint: disable=unused-argument
-    return False
-
-@blog.field("votes")
-def resolve_votes(obj, info):
-    # pylint: disable=unused-argument
-    return 0
 
 @blog.field("views")
 def resolve_views(obj, info):
@@ -87,16 +66,6 @@ def resolve_url(obj, info):
         prefix, obj.guid, slugify(obj.title)
     ).lower()
 
-@blog.field("comments")
-def resolve_comments(obj, info):
-    # pylint: disable=unused-argument
-    return obj.comments.all()
-
-@blog.field("commentCount")
-def resolve_comment_count(obj, info):
-    # pylint: disable=unused-argument
-    return obj.comments.all().count()
-
 
 blog.set_field("guid", shared.resolve_entity_guid)
 blog.set_field("status", shared.resolve_entity_status)
@@ -110,8 +79,14 @@ blog.set_field("canEdit", shared.resolve_entity_can_edit)
 blog.set_field("canComment", shared.resolve_entity_can_comment)
 blog.set_field("canVote", shared.resolve_entity_can_vote)
 blog.set_field("canBookmark", shared.resolve_entity_can_bookmark)
+blog.set_field("isBookmarked", shared.resolve_entity_is_bookmarked)
 blog.set_field("accessId", shared.resolve_entity_access_id)
 blog.set_field("writeAccessId", shared.resolve_entity_write_access_id)
 blog.set_field("featured", shared.resolve_entity_featured)
+blog.set_field("votes", shared.resolve_entity_votes)
+blog.set_field("hasVoted", shared.resolve_entity_has_voted)
+blog.set_field("canComment", shared.resolve_entity_can_comment)
+blog.set_field("comments", shared.resolve_entity_comments)
+blog.set_field("commentCount", shared.resolve_entity_comment_count)
 
 resolvers = [blog]
