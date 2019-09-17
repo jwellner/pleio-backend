@@ -2,7 +2,7 @@ from django.contrib.admin import AdminSite as BaseAdminSite
 from reversion.admin import VersionAdmin
 
 from core import config
-from .models import User, Group, GroupMembership, Comment, FileFolder, Setting
+from .models import User, Group, GroupMembership, Comment, FileFolder, Setting, Annotation
 
 class AdminSite(BaseAdminSite):
     site_header = 'Backend2'
@@ -27,7 +27,6 @@ class GroupMembershipAdmin(VersionAdmin):
 class FileFolderAdmin(VersionAdmin):
     pass
 
-
 class SettingAdmin(VersionAdmin):
     readonly_fields = ('key', )
 
@@ -42,3 +41,4 @@ site.register(GroupMembership, GroupMembershipAdmin)
 site.register(Comment)
 site.register(FileFolder, FileFolderAdmin)
 site.register(Setting, SettingAdmin)
+site.register(Annotation)

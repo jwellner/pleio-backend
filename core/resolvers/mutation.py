@@ -6,6 +6,8 @@ from .mutation_leave_group import resolve_leave_group
 from .mutation_add_entity import resolve_add_entity
 from .mutation_edit_entity import resolve_edit_entity
 from .mutation_delete_entity import resolve_delete_entity
+from .mutation_vote import resolve_vote
+from .mutation_bookmark import resolve_bookmark
 
 
 mutation = ObjectType("Mutation")
@@ -17,3 +19,7 @@ mutation.set_field("leaveGroup", resolve_leave_group)
 mutation.set_field("addEntity", resolve_add_entity)
 mutation.set_field("editEntity", resolve_edit_entity)
 mutation.set_field("deleteEntity", resolve_delete_entity)
+
+mutation.set_field("vote", resolve_vote)
+
+mutation.set_field("bookmark", resolve_bookmark)
