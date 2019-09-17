@@ -174,3 +174,10 @@ def resolve_entity_comment_count(obj, info):
         return obj.comments.count()
     except AttributeError:
         return 0
+
+def resolve_entity_is_following(obj, info):
+    # pylint: disable=unused-argument
+    try:
+        return obj.is_following(info.context.user)
+    except AttributeError:
+        return False

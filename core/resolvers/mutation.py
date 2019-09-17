@@ -8,6 +8,7 @@ from .mutation_edit_entity import resolve_edit_entity
 from .mutation_delete_entity import resolve_delete_entity
 from .mutation_vote import resolve_vote
 from .mutation_bookmark import resolve_bookmark
+from .mutation_follow import resolve_follow
 
 
 mutation = ObjectType("Mutation")
@@ -23,3 +24,4 @@ mutation.set_field("deleteEntity", resolve_delete_entity)
 mutation.set_field("vote", resolve_vote)
 
 mutation.set_field("bookmark", resolve_bookmark)
+mutation.set_field("follow", resolve_follow)
