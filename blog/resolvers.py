@@ -36,11 +36,6 @@ def resolve_is_recommended(obj, info):
     # pylint: disable=unused-argument
     return obj.is_recommended
 
-@blog.field("isFollowing")
-def resolve_is_following(obj, info):
-    # pylint: disable=unused-argument
-    return False
-
 @blog.field("views")
 def resolve_views(obj, info):
     # pylint: disable=unused-argument
@@ -88,5 +83,6 @@ blog.set_field("hasVoted", shared.resolve_entity_has_voted)
 blog.set_field("canComment", shared.resolve_entity_can_comment)
 blog.set_field("comments", shared.resolve_entity_comments)
 blog.set_field("commentCount", shared.resolve_entity_comment_count)
+blog.set_field("isFollowing", shared.resolve_entity_is_following)
 
 resolvers = [blog]

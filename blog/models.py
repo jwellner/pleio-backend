@@ -1,7 +1,7 @@
 from django.db import models
-from core.models import Entity, FileFolder, VoteMixin, CommentMixin, BookmarkMixin
+from core.models import Entity, FileFolder, VoteMixin, CommentMixin, BookmarkMixin, FollowMixin
 
-class Blog(Entity, VoteMixin, BookmarkMixin, CommentMixin):
+class Blog(Entity, VoteMixin, BookmarkMixin, FollowMixin, CommentMixin):
     """
     Blog
     """
