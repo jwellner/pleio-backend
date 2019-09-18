@@ -65,6 +65,10 @@ def resolve_edit_entity(_, info, input):
             if user.is_admin:
                 entity.is_recommended = clean_input.get("isRecommended")
 
+        if entity._meta.model_name in ["news"]:
+            entity.is_featured = clean_input.get("isFeatured", False)
+            entity.source = clean_input.get("source", "")
+
         entity.save()
 
         reversion.set_user(user)

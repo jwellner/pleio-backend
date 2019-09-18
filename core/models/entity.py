@@ -28,12 +28,12 @@ class Entity(models.Model):
         null=True
     )
     read_access = ArrayField(
-        models.CharField(max_length=32),
+        models.CharField(max_length=64),
         blank=True,
         default=read_access_default
     )
     write_access = ArrayField(
-        models.CharField(max_length=32),
+        models.CharField(max_length=64),
         blank=True,
         default=write_access_default
     )

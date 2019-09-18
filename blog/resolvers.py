@@ -36,16 +36,6 @@ def resolve_is_recommended(obj, info):
     # pylint: disable=unused-argument
     return obj.is_recommended
 
-@blog.field("views")
-def resolve_views(obj, info):
-    # pylint: disable=unused-argument
-    return 0
-
-@blog.field("owner")
-def resolve_owner(obj, info):
-    # pylint: disable=unused-argument
-    return obj.owner
-
 @blog.field("url")
 def resolve_url(obj, info):
     # pylint: disable=unused-argument
@@ -64,6 +54,7 @@ def resolve_url(obj, info):
 
 blog.set_field("guid", shared.resolve_entity_guid)
 blog.set_field("status", shared.resolve_entity_status)
+blog.set_field("title", shared.resolve_entity_title)
 blog.set_field("description", shared.resolve_entity_description)
 blog.set_field("richDescription", shared.resolve_entity_rich_description)
 blog.set_field("excerpt", shared.resolve_entity_excerpt)
@@ -84,5 +75,7 @@ blog.set_field("canComment", shared.resolve_entity_can_comment)
 blog.set_field("comments", shared.resolve_entity_comments)
 blog.set_field("commentCount", shared.resolve_entity_comment_count)
 blog.set_field("isFollowing", shared.resolve_entity_is_following)
+blog.set_field("views", shared.resolve_entity_views)
+blog.set_field("owner", shared.resolve_entity_owner)
 
 resolvers = [blog]

@@ -82,6 +82,9 @@ def resolve_add_entity(_, info, input):
             if user.is_admin:
                 entity.is_recommended = clean_input.get("isRecommended")
 
+        if clean_input.get("subtype") in ["news"]:
+            entity.is_featured = clean_input.get("isFeatured", False)
+            entity.source = clean_input.get("source", "")
 
         entity.save()
 

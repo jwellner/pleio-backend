@@ -21,7 +21,7 @@ class EntityTestCase(TestCase):
             is_folder=False, 
             parent=None, 
             read_access=[ACCESS_TYPE.public],
-            write_access=[ACCESS_TYPE.user.format(self.authenticatedUser)]
+            write_access=[ACCESS_TYPE.user.format(self.authenticatedUser.id)]
         )
 
     def tearDown(self):

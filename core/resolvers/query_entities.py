@@ -1,19 +1,24 @@
 from django.db.models import Q
-from core.constances import ORDER_DIRECTION, ORDER_BY
+from core.constances import ORDER_DIRECTION, ORDER_BY, INVALID_SUBTYPE
 from core.models import Entity
-from news.models import News
-from poll.models import Poll
-from discussion.models import Discussion
-from event.models import Event
-from question.models import Question
-from wiki.models import Wiki
-from cms.models import CmsPage
-from blog.models import Blog
+from core.resolvers.shared import get_model_by_subtype
+from graphql import GraphQLError
 
 def conditional_group_filter(container_guid):
-
+    """
+    Filter only items in group 
+    """
     if container_guid:
         return Q(group__id=container_guid)
+
+    return Q()
+
+def conditional_is_featured_filter(subtype, is_featured):
+    """
+    Only filter is_featured on news list
+    """
+    if subtype == "news" and is_featured:
+        return Q(is_featured=is_featured)
 
     return Q()
 
@@ -36,26 +41,12 @@ def resolve_entities(
     # pylint: disable=too-many-arguments
     # pylint: disable=redefined-builtin
 
-    if subtype == "news":
-        objects = News.objects
-    elif subtype == "poll":
-        objects = Poll.objects
-    elif subtype == "discussion":
-        objects = Discussion.objects
-    elif subtype == "event":
-        objects = Event.objects
-    elif subtype == "wiki":
-        objects = Wiki.objects
-    elif subtype == "question":
-        objects = Question.objects
-    elif subtype == "page":
-        objects = CmsPage.objects
-    elif subtype == "blog":
-        objects = Blog.objects
-    elif subtype is None:
-        objects = Entity.objects
+    if not subtype:
+        Model = Entity
+    elif subtype in ["news", "poll", "discussion", "event", "wiki", "question", "page", "blog"]:
+        Model = get_model_by_subtype(subtype)
     else:
-        return None
+        raise GraphQLError(INVALID_SUBTYPE)
 
     if orderBy == ORDER_BY.timeUpdated:
         order_by = 'updated_at'
@@ -64,11 +55,11 @@ def resolve_entities(
     else:
         order_by = 'created_at'
     
-    if orderDirection == ORDER_DIRECTION.desc:
+    if orderDirection == ORDER_DIRECTION.asc:
         order_by = '-%s' % (order_by)
 
-    entities = objects.visible(info.context.user)
-    entities = entities.filter(conditional_group_filter(containerGuid))
+    entities = Model.objects.visible(info.context.user)
+    entities = entities.filter(conditional_group_filter(containerGuid) & conditional_is_featured_filter(subtype, isFeatured))
     entities = entities.order_by(order_by)
     entities = entities[offset:offset+limit]
 
