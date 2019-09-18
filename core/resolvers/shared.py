@@ -16,7 +16,7 @@ class TypeModels(Enum):
     blog = "blog.Blog"
     group = "core.Group"
     user = "core.User"
-    
+
 
 def get_model_by_subtype(subtype):
     """Get Django model by subtype name"""
@@ -181,3 +181,11 @@ def resolve_entity_is_following(obj, info):
         return obj.is_following(info.context.user)
     except AttributeError:
         return False
+
+def resolve_entity_views(obj, info):
+    # pylint: disable=unused-argument
+    return 0
+
+def resolve_entity_owner(obj, info):
+    # pylint: disable=unused-argument
+    return obj.owner

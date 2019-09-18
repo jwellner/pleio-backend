@@ -24,7 +24,7 @@ class FollowTestCase(TestCase):
             description="Description",
             rich_description="",
             read_access=[ACCESS_TYPE.public],
-            write_access=[ACCESS_TYPE.user.format(self.authenticatedUser)],
+            write_access=[ACCESS_TYPE.user.format(self.authenticatedUser.id)],
             owner=self.authenticatedUser,
             is_recommended=True
         )
