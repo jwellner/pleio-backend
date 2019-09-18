@@ -7,6 +7,7 @@ from .query_site import resolve_site
 from .query_entities import resolve_entities
 from .query_groups import resolve_groups
 from .query_bookmarks import resolve_bookmarks
+from .query_search import resolve_search
 from core.constances import COULD_NOT_FIND, ORDER_DIRECTION, ORDER_BY
 
 query = ObjectType("Query")
@@ -16,6 +17,7 @@ query.set_field("site", resolve_site)
 query.set_field("entities", resolve_entities)
 query.set_field("groups", resolve_groups)
 query.set_field("bookmarks", resolve_bookmarks)
+query.set_field("search", resolve_search)
 
 @query.field("entity")
 def resolve_entity(
@@ -65,20 +67,8 @@ def resolve_entity(
     return entity
 
 
-# TODO: Implement search
-@query.field("search")
-def resolve_search(_, info, q=None, containerGuid=None, type=None, subtype=None, offset=0, limit=20):
-    # pylint: disable=unused-argument
-    # pylint: disable=too-many-arguments
-    # pylint: disable=redefined-builtin
-    return {
-        'total': 0,
-        'totals': [],
-        'edges': []
-    }
 
 # TODO: Implement recommended
-
 
 @query.field("recommended")
 def resolve_recommended(_, info, offset=0, limit=20):

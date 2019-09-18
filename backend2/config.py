@@ -75,3 +75,15 @@ SWIFT_AUTO_CREATE_CONTAINER = os.getenv('SWIFT_AUTO_CREATE_CONTAINER') == 'True'
 SWIFT_AUTO_CREATE_CONTAINER_PUBLIC = os.getenv('SWIFT_AUTO_CREATE_CONTAINER_PUBLIC') == 'True'
 SWIFT_AUTO_BASE_URL = False
 SWIFT_BASE_URL = "/file/download/"
+
+# Elasticsearch
+ELASTICSEARCH_DSL = {
+    'default': {
+        'hosts': os.getenv('ELASTICSEARCH_HOST')
+    },
+}
+
+ELASTICSEARCH_DSL_INDEX_SETTINGS = {'number_of_shards': 1,
+                                    'number_of_replicas': 0}
+
+ELASTICSEARCH_INDEX = 'local'

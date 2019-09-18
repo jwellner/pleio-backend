@@ -31,7 +31,8 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'mozilla_django_oidc',
     'ariadne.contrib.django',
-    'core'
+    'core',
+    'django_elasticsearch_dsl',
 ]
 
 if LOCAL_APPS:
