@@ -1,0 +1,52 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  namespace: backend2
+  name: elasticsearch
+  labels:
+    service: elasticsearch
+spec:
+  serviceName: es
+  # NOTE: This is number of nodes that we want to run
+  # you may update this
+  replicas: 1
+  selector:
+    matchLabels:
+      service: elasticsearch
+  template:
+    metadata:
+      labels:
+        service: elasticsearch
+    spec:
+      terminationGracePeriodSeconds: 300
+      containers:
+      - name: elasticsearch
+        image: docker.elastic.co/elasticsearch/elasticsearch:7.3.1
+        ports:
+        - containerPort: 9200
+          name: http
+        - containerPort: 9300
+          name: tcp
+        env:
+          # NOTE: the cluster name; update this
+          - name: cluster.name
+            value: elasticsearch-cluster
+          # NOTE: This will tell the elasticsearch node where to connect to other nodes to form a cluster
+          - name: discovery.type
+            value: "single-node"
+          # NOTE: You can increase the heap size
+          - name: ES_JAVA_OPTS
+            value: "-Xms512m -Xmx512m"
+        volumeMounts:
+        - name: data
+          mountPath: /usr/share/elasticsearch/data
+  volumeClaimTemplates:
+  - metadata:
+      name: data
+    spec:
+      accessModes:
+        - ReadWriteOnce
+      storageClassName: gluster-heketi-external
+      resources:
+        requests:
+          storage: 1Gi
