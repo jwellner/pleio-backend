@@ -33,7 +33,7 @@ def resolve_entities(
     containerGuid=None,
     tags=None,
     orderBy=ORDER_BY.timeCreated,
-    orderDirection=ORDER_DIRECTION.asc,
+    orderDirection=ORDER_DIRECTION.desc,
     addFeatured=False,
     isFeatured=False
 ):
@@ -55,7 +55,7 @@ def resolve_entities(
     else:
         order_by = 'created_at'
     
-    if orderDirection == ORDER_DIRECTION.asc:
+    if orderDirection == ORDER_DIRECTION.desc:
         order_by = '-%s' % (order_by)
 
     entities = Model.objects.visible(info.context.user)

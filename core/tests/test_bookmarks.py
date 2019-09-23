@@ -76,7 +76,7 @@ class BookmarkTestCase(TestCase):
         data = result[1]["data"]
        
         self.assertEqual(data["bookmarks"]["total"], 2)
-        self.assertEqual(data["bookmarks"]["edges"][0]["guid"], self.bookmark1.content_object.guid)
+        self.assertEqual(data["bookmarks"]["edges"][0]["guid"], self.bookmark2.content_object.guid)
 
     def test_bookmark_list_filter(self):
 
