@@ -8,6 +8,13 @@ def resolve_can_edit(obj, info):
     # pylint: disable=unused-argument
     return obj.can_write(info.context.user)
 
+@comment.field("isBestAnswer")
+def resolve_is_best_answer(obj, info):
+    # pylint: disable=unused-argument
+    if obj.container.best_answer and obj.container.best_answer == obj:
+        return True
+    return False
+
 comment.set_field("description", shared.resolve_entity_description)
 comment.set_field("richDescription", shared.resolve_entity_rich_description)
 comment.set_field("timeCreated", shared.resolve_entity_time_created)

@@ -56,6 +56,7 @@ class Annotation(models.Model):
     objects = AnnotationManager()
     
     class Meta:
+        ordering = ['-created_at']
         unique_together = ('content_type', 'object_id', 'user', 'key')
 
     def __str__(self):

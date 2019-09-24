@@ -10,6 +10,8 @@ from core.resolvers.mutation_edit_comment import resolve_edit_comment
 
 def resolve_edit_entity(_, info, input):
     # pylint: disable=redefined-builtin
+    # pylint: disable=too-many-branches
+
     user = info.context.user
 
     clean_input = remove_none_from_dict(input)
@@ -33,11 +35,12 @@ def resolve_edit_entity(_, info, input):
 
         entity.read_access = access_id_to_acl(entity, clean_input.get("accessId"))
 
-        if entity._meta.model_name in ["blog", "news"]:
+        if entity._meta.model_name in ["blog", "news", "question"]:
             entity.title = clean_input.get("title")
             entity.description = clean_input.get("description", "")
             entity.rich_description = clean_input.get("richDescription")
 
+        if clean_input.get("subtype") in ["blog", "news"]:
             if clean_input.get("featured"):
                 entity.featured_position_y = clean_input.get("featured").get("positionY", 0)
                 entity.featured_video = clean_input.get("featured").get("video", None)
