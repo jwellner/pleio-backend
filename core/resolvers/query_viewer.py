@@ -17,7 +17,7 @@ def resolve_viewer(_, info):
     return {
         'guid': 'viewer:{}'.format(user.id),
         'loggedIn': True,
-        'isSubEditor': False,
+        'isSubEditor': user.is_admin,
         'isAdmin': user.is_admin,
         'tags': [],
         'canWriteToContainer': True
