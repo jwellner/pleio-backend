@@ -4,10 +4,14 @@ from core.models import Entity
 from core.resolvers.shared import get_model_by_subtype
 from graphql import GraphQLError
 
-def conditional_group_filter(container_guid):
+def conditional_group_filter(subtype, container_guid):
     """
     Filter only items in group 
     """
+    if container_guid == "1" and subtype == "wiki":
+        return Q(group=None) & Q(parent=None)
+    if container_guid == "1":
+        return Q(group=None)
     if container_guid:
         return Q(group__id=container_guid)
 
@@ -59,7 +63,7 @@ def resolve_entities(
         order_by = '-%s' % (order_by)
 
     entities = Model.objects.visible(info.context.user)
-    entities = entities.filter(conditional_group_filter(containerGuid) & conditional_is_featured_filter(subtype, isFeatured))
+    entities = entities.filter(conditional_group_filter(subtype, containerGuid) & conditional_is_featured_filter(subtype, isFeatured))
     entities = entities.order_by(order_by)
     entities = entities[offset:offset+limit]
 

@@ -33,9 +33,10 @@ def resolve_edit_entity(_, info, input):
 
         entity.tags = clean_input.get("tags", [])
 
-        entity.read_access = access_id_to_acl(entity, clean_input.get("accessId"))
+        entity.read_access = access_id_to_acl(entity, clean_input.get("accessId", 0))
+        entity.write_access = access_id_to_acl(entity, clean_input.get("writeAccessId", 0))
 
-        if entity._meta.model_name in ["blog", "news", "question"]:
+        if entity._meta.model_name in ["blog", "news", "question", "wiki"]:
             entity.title = clean_input.get("title")
             entity.description = clean_input.get("description", "")
             entity.rich_description = clean_input.get("richDescription")

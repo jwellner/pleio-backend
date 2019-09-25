@@ -78,8 +78,8 @@ class ViewerTestCase(TestCase):
         
         self.assertEqual(data["viewer"]["guid"], "viewer:{}".format(self.authenticatedUser.id))
         self.assertEqual(data["viewer"]["loggedIn"], True)
-        self.assertEqual(data["viewer"]["isSubEditor"], False)
-        self.assertEqual(data["viewer"]["isAdmin"], False)
+        self.assertEqual(data["viewer"]["isSubEditor"], self.authenticatedUser.is_admin)
+        self.assertEqual(data["viewer"]["isAdmin"], self.authenticatedUser.is_admin)
         self.assertEqual(data["viewer"]["user"]["guid"], self.authenticatedUser.guid)
         self.assertEqual(data["viewer"]["user"]["email"], self.authenticatedUser.email)
 
@@ -110,7 +110,7 @@ class ViewerTestCase(TestCase):
         
         self.assertEqual(data["viewer"]["guid"], "viewer:{}".format(self.authenticatedAdminUser.id))
         self.assertEqual(data["viewer"]["loggedIn"], True)
-        self.assertEqual(data["viewer"]["isSubEditor"], False)
-        self.assertEqual(data["viewer"]["isAdmin"], True)
+        self.assertEqual(data["viewer"]["isSubEditor"], self.authenticatedAdminUser.is_admin)
+        self.assertEqual(data["viewer"]["isAdmin"], self.authenticatedAdminUser.is_admin)
         self.assertEqual(data["viewer"]["user"]["name"], self.authenticatedAdminUser.name)
         self.assertEqual(data["viewer"]["user"]["guid"], self.authenticatedAdminUser.guid)

@@ -50,13 +50,15 @@ enum ActivityType {
 }
 
 input addEntityInput {
-  type: Type!
+  """deprecated: use subtype"""
+  type: Type
   subtype: String!
   title: String
   description: String!
   richDescription: String
   isRecommended: Boolean
   isFeatured: Boolean
+  attendEventWithoutAccount: Boolean
   featured: FeaturedInput
   startDate: String
   endDate: String
@@ -217,6 +219,18 @@ input attendEventInput {
 }
 
 type attendEventPayload {
+  entity: Event
+  clientMutationId: String
+}
+
+input attendEventWithoutAccountInput {
+  guid: String!
+  name: String!
+  email: String!
+  clientMutationId: String
+}
+
+type attendEventWithoutAccountPayload {
   entity: Event
   clientMutationId: String
 }
@@ -392,12 +406,6 @@ type editAvatarPayload {
   clientMutationId: String
 }
 
-input editEmailInput {
-  guid: String
-  email: String
-  clientMutationId: String
-}
-
 input editEmailOverviewInput {
   guid: String
   overview: Overview
@@ -409,11 +417,6 @@ type editEmailOverviewPayload {
   clientMutationId: String
 }
 
-type editEmailPayload {
-  user: User
-  clientMutationId: String
-}
-
 input editEntityInput {
   guid: String!
   title: String
@@ -421,6 +424,7 @@ input editEntityInput {
   richDescription: String
   isRecommended: Boolean
   isFeatured: Boolean
+  attendEventWithoutAccount: Boolean
   featured: FeaturedInput
   startDate: String
   endDate: String
@@ -550,18 +554,6 @@ type editPagePayload {
   clientMutationId: String
 }
 
-input editPasswordInput {
-  guid: String
-  oldPassword: String
-  newPassword: String
-  clientMutationId: String
-}
-
-type editPasswordPayload {
-  user: User
-  clientMutationId: String
-}
-
 input editPollInput {
   guid: String!
   title: String!
@@ -658,6 +650,7 @@ type Event implements Entity {
   rsvp: Boolean
   isFeatured: Boolean
   isHighlighted: Boolean
+  attendEventWithoutAccount: Boolean
   isRecommended: Boolean
   featured: Featured
   canEdit: Boolean
@@ -674,6 +667,7 @@ type Event implements Entity {
   owner: User
   isAttending: String
   attendees(offset: Int, limit: Int, state: String): AttendeesList
+  attendeesWithoutAccount: Int
   comments: [Comment]
   commentCount: Int
 }
@@ -966,8 +960,6 @@ type Mutation {
   editNotifications(input: editNotificationsInput!): editNotificationsPayload
   editGroupNotifications(input: editGroupNotificationsInput!): editGroupNotificationsPayload
   editEmailOverview(input: editEmailOverviewInput!): editEmailOverviewPayload
-  editEmail(input: editEmailInput!): editEmailPayload
-  editPassword(input: editPasswordInput!): editPasswordPayload
   bookmark(input: bookmarkInput!): bookmarkPayload
   vote(input: voteInput!): votePayload
   follow(input: followInput!): followPayload
@@ -1014,6 +1006,7 @@ type Mutation {
   changeGroupRole(input: changeGroupRoleInput!): changeGroupRolePayload
   editTask(input: editTaskInput!): editTaskPayload
   attendEvent(input: attendEventInput!): attendEventPayload
+  attendEventWithoutAccount(input: attendEventWithoutAccountInput!): attendEventWithoutAccountPayload
   markAsRead(input: markAsReadInput!): markAsReadPayload
   markAllAsRead(input: markAllAsReadInput!): markAllAsReadPayload
   toggleBestAnswer(input: toggleBestAnswerInput!): toggleBestAnswerPayload

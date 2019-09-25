@@ -2,14 +2,15 @@ import reversion
 from graphql import GraphQLError
 from django.core.exceptions import ObjectDoesNotExist
 from core.lib import remove_none_from_dict
-from core.constances import NOT_LOGGED_IN, COULD_NOT_FIND, INVALID_SUBTYPE, ACCESS_TYPE
+from core.constances import NOT_LOGGED_IN, INVALID_SUBTYPE, COULD_NOT_FIND_GROUP
 from core.resolvers.shared import get_model_by_subtype, access_id_to_acl
-from core.models import Group, FileFolder
+from core.models import Group, FileFolder, Entity
 from core.resolvers.mutation_add_comment import resolve_add_comment
 
 
 def resolve_add_entity(_, info, input):
     # pylint: disable=redefined-builtin
+    # pylint: disable=too-many-statements
     # pylint: disable=too-many-branches
 
     user = info.context.user
@@ -28,15 +29,31 @@ def resolve_add_entity(_, info, input):
         raise GraphQLError(INVALID_SUBTYPE)
 
     group = None
+    parent = None
 
-    if clean_input.get("containerGuid"):
+    # containerGuid can be parent objects for some subtypes
+    # TODO: should we refactor this in backend 2 to use parentGuid?
+    if clean_input.get("containerGuid") and clean_input.get("subtype") in ["wiki"]:
         try:
             group = Group.objects.get(id=clean_input.get("containerGuid"))
         except ObjectDoesNotExist:
-            raise GraphQLError(COULD_NOT_FIND)
+            try:
+                parent = Entity.objects.get_subclass(id=clean_input.get("containerGuid"))
 
-        if not group.is_full_member(user) and not user.is_admin:
-            raise GraphQLError("NOT_GROUP_MEMBER")
+            except ObjectDoesNotExist:
+                raise GraphQLError(COULD_NOT_FIND_GROUP)
+
+    elif clean_input.get("containerGuid"):
+        try:
+            group = Group.objects.get(id=clean_input.get("containerGuid"))
+        except ObjectDoesNotExist:
+            raise GraphQLError(COULD_NOT_FIND_GROUP)
+
+    if parent and parent.group:
+        group = parent.group
+
+    if group and not group.is_full_member(user) and not user.is_admin:
+        raise GraphQLError("NOT_GROUP_MEMBER")
 
     with reversion.create_revision():
         # default fields for all entities
@@ -49,9 +66,9 @@ def resolve_add_entity(_, info, input):
             entity.group = group
 
         entity.read_access = access_id_to_acl(entity, clean_input.get("accessId"))
-        entity.write_access = [ACCESS_TYPE.user.format(user.id)]
+        entity.write_access = access_id_to_acl(entity, clean_input.get("writeAccessId"))
 
-        if clean_input.get("subtype") in ["blog", "news", "question"]:
+        if clean_input.get("subtype") in ["blog", "news", "question", "wiki"]:
             entity.title = clean_input.get("title")
             entity.description = clean_input.get("description")
             entity.rich_description = clean_input.get("richDescription")
@@ -87,6 +104,9 @@ def resolve_add_entity(_, info, input):
         if clean_input.get("subtype") in ["news"]:
             entity.is_featured = clean_input.get("isFeatured", False)
             entity.source = clean_input.get("source", "")
+
+        if clean_input.get("subtype") in ["wiki"]:
+            entity.parent = parent
 
         entity.save()
 
