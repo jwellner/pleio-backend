@@ -33,7 +33,13 @@ DEFAULT_SITE_CONFIG = {
     'CUSTOM_TAGS_ENABLED': (True, 'Custom tags enabled'),
     'TAG_CATEGORIES': ([], 'Tag categories'),
     'ACTIVITY_FEED_FILTERS_ENABLED': (True, 'Activity filters enabled'),
-    'MENU': ([], 'Menu'),
+    'MENU': ([
+        {"link": "/blog", "title": "Blog", "children": []}, 
+        {"link": "/news", "title": "Nieuws", "children": []}, 
+        {"link": "/groups", "title": "Groepen", "children": []}, 
+        {"link": "/questions", "title": "Vragen", "children": []}, 
+        {"link": "/wiki", "title": "Wiki", "children": []}
+    ], 'Menu'),
     'FOOTER': ([], 'Footer'),
     'DIRECT_LINKS': ([], 'Direct links')
 }
