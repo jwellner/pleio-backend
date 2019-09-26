@@ -4,6 +4,7 @@ from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
 from django.core.mail import send_mail
 from django.conf import settings
 import reversion
+from core.lib import ACCESS_TYPE
 
 
 class Manager(BaseUserManager):
@@ -89,12 +90,20 @@ class User(AbstractBaseUser):
     picture = models.URLField(blank=True, null=True)
     is_government = models.BooleanField(default=False)
     has_2fa_enabled = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
 
     REQUIRED_FIELDS = ['name']
     USERNAME_FIELD = 'email'
 
     def __str__(self):
         return self.email
+
+    def type_to_string(self):
+        return 'user'
+
+    def search_read_access(self):
+        return [ACCESS_TYPE.logged_in]
 
     @property
     def is_staff(self):

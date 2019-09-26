@@ -104,4 +104,4 @@ Create (public) container:
 
 ### Build search index
 
-`sudo docker-compose exec api python manage.py search_index --rebuild`
+`docker-compose exec api python manage.py search_index --rebuild`
