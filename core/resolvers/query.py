@@ -8,6 +8,7 @@ from .query_entities import resolve_entities
 from .query_groups import resolve_groups
 from .query_bookmarks import resolve_bookmarks
 from .query_search import resolve_search
+from .query_users import resolve_users
 from core.constances import COULD_NOT_FIND, ORDER_DIRECTION, ORDER_BY
 
 query = ObjectType("Query")
@@ -18,6 +19,8 @@ query.set_field("entities", resolve_entities)
 query.set_field("groups", resolve_groups)
 query.set_field("bookmarks", resolve_bookmarks)
 query.set_field("search", resolve_search)
+query.set_field("users", resolve_users)
+
 
 @query.field("entity")
 def resolve_entity(
@@ -112,27 +115,6 @@ def resolve_top(_, info):
 def resolve_breadcrumb(_, info, guid=None):
     # pylint: disable=unused-argument
     return []
-
-@query.field('users')
-def resolve_users(_, info, q=None, filters=None, offset=0, limit=20):
-    # pylint: disable=unused-argument
-    user = info.context.user
-
-    if not user.is_authenticated:
-        return None
-
-    users = []
-
-    if q:
-        users = User.objects.filter(name__icontains=q)[offset:offset+limit]
-    else:
-        users = User.objects.all()[offset:offset+limit]
-
-    return {
-        'total': users.count(),
-        'edges': users,
-        'filterCount': None
-    }
 
 
 @query.field('filters')
