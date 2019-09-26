@@ -8,6 +8,7 @@ DEFAULT_SITE_CONFIG = {
     'ACHIEVEMENTS_ENABLED': (True, 'Achievements enabled'),
     'CANCEL_MEMBERSHIP_ENABLED': (True, 'Cancel membership enabled'),
     'DEFAULT_ACCESS_ID': (1, 'Default accessId'),
+    'LANGUAGE': ('nl', 'Language'),
     'LOGO': ('', 'Logo'),
     'LOGO_ALT': ('', 'Logo alt text'),
     'ICON': ('', 'Icon'),

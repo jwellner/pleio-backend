@@ -119,6 +119,7 @@ def get_site():
         'directLinks': config.DIRECT_LINKS,
         'accessIds': get_access_ids(),
         'defaultAccessId': config.DEFAULT_ACCESS_ID,
+        'language': config.LANGUAGE,
         'logo': config.LOGO,
         'logoAlt': config.LOGO_ALT,
         'icon': config.ICON,
