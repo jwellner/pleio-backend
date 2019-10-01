@@ -33,6 +33,7 @@ INSTALLED_APPS = [
     'ariadne.contrib.django',
     'core',
     'django_elasticsearch_dsl',
+    'elasticapm.contrib.django',
 ]
 
 if LOCAL_APPS:
@@ -44,6 +45,7 @@ AUTHENTICATION_BACKENDS = [
 ]
 
 MIDDLEWARE = [
+    'elasticapm.contrib.django.middleware.TracingMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.locale.LocaleMiddleware',
@@ -152,3 +154,13 @@ APPEND_SLASH = False
 WEBPACK_DEV_SERVER = False
 
 DEFAULT_FILE_STORAGE = 'swift.storage.SwiftStorage'
+
+ELASTIC_APM = {
+  # Set required service name. Allowed characters:
+  # a-z, A-Z, 0-9, -, _, and space
+  'SERVICE_NAME': 'apm-server',
+
+  # Set custom APM Server URL (default: http://localhost:8200)
+  'SERVER_URL': 'http://apm-server:8200',
+  'DEBUG': True
+}
