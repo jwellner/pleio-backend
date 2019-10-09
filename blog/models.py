@@ -13,6 +13,8 @@ class Blog(Entity, VoteMixin, BookmarkMixin, FollowMixin, CommentMixin):
     rich_description = models.TextField(null=True, blank=True)
     is_recommended = models.BooleanField(default=False)
 
+    is_featured = models.BooleanField(default=False)
+
     featured_image = models.ForeignKey(
         FileFolder,
         on_delete=models.PROTECT,

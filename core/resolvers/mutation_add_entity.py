@@ -6,7 +6,7 @@ from core.constances import NOT_LOGGED_IN, INVALID_SUBTYPE, COULD_NOT_FIND_GROUP
 from core.resolvers.shared import get_model_by_subtype, access_id_to_acl
 from core.models import Group, FileFolder, Entity
 from core.resolvers.mutation_add_comment import resolve_add_comment
-
+from core.resolvers.mutation_add_event import resolve_add_event
 
 def resolve_add_entity(_, info, input):
     # pylint: disable=redefined-builtin
@@ -19,6 +19,8 @@ def resolve_add_entity(_, info, input):
 
     if clean_input.get("subtype") == "comment":
         return resolve_add_comment(_, info, input)
+    if clean_input.get("subtype") == "event":
+        return resolve_add_event(_, info, input)
 
     if not user.is_authenticated:
         raise GraphQLError(NOT_LOGGED_IN)
