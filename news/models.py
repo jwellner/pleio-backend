@@ -11,6 +11,7 @@ class News(Entity, VoteMixin, BookmarkMixin, FollowMixin, CommentMixin):
     title = models.CharField(max_length=256)
     description = models.TextField()
     rich_description = models.TextField(null=True, blank=True)
+    
     is_featured = models.BooleanField(default=False)
 
     featured_image = models.ForeignKey(

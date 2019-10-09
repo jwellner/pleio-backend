@@ -28,6 +28,7 @@ INVALID_OLD_PASSWORD = "invalid_old_password"
 INVALID_SUBTYPE = "invalid_subtype"
 INVALID_TYPE = "invalid_type"
 INVALID_VALUE = "invalid_value"
+INVALID_DATE = "invalid_date"
 NO_FILE = "no_file"
 NOT_A_USER = "not_a_user"
 NOT_LOGGED_IN = "not_logged_in"
@@ -36,6 +37,8 @@ UNKNOWN_ERROR = "unknown_error"
 USER_NOT_GROUP_OWNER_OR_SITE_ADMIN = "user_not_group_owner_or_site_admin"
 USER_NOT_MEMBER_OF_GROUP = "user_not_member_of_group"
 USER_NOT_SITE_ADMIN = "user_not_site_admin"
+EVENT_IS_FULL = "event_is_full"
+EVENT_INVALID_STATE = "event_invalid_state"
 
 class ORDER_DIRECTION:
     asc = 'asc'

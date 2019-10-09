@@ -1,8 +1,8 @@
 from ariadne import ObjectType
-from .models import Event
+from event.models import Event
+
 
 query = ObjectType("Query")
-
 
 @query.field("events")
 def resolve_events(obj, info, filter=None, containerGuid=None, offset=0, limit=20):
@@ -18,6 +18,3 @@ def resolve_events(obj, info, filter=None, containerGuid=None, offset=0, limit=2
         'canWrite': False,
         'edges': events
     }
-
-
-resolvers = [query]

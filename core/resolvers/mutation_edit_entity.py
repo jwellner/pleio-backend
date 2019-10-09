@@ -6,7 +6,7 @@ from core.constances import NOT_LOGGED_IN, COULD_NOT_SAVE
 from core.resolvers.shared import access_id_to_acl
 from core.models import FileFolder, Entity
 from core.resolvers.mutation_edit_comment import resolve_edit_comment
-
+from core.resolvers.mutation_edit_event import resolve_edit_event
 
 def resolve_edit_entity(_, info, input):
     # pylint: disable=redefined-builtin
@@ -26,6 +26,9 @@ def resolve_edit_entity(_, info, input):
         # raise GraphQLError(COULD_NOT_FIND)
         return resolve_edit_comment(_, info, input)
 
+    if entity._meta.model_name == "event":
+        return resolve_edit_event(_, info, input)
+
     if not entity.can_write(user):
         raise GraphQLError(COULD_NOT_SAVE)
 
@@ -36,12 +39,12 @@ def resolve_edit_entity(_, info, input):
         entity.read_access = access_id_to_acl(entity, clean_input.get("accessId", 0))
         entity.write_access = access_id_to_acl(entity, clean_input.get("writeAccessId", 0))
 
-        if entity._meta.model_name in ["blog", "news", "question", "wiki"]:
+        if entity._meta.model_name in ["blog", "news", "question", "wiki", "event"]:
             entity.title = clean_input.get("title")
             entity.description = clean_input.get("description", "")
             entity.rich_description = clean_input.get("richDescription")
 
-        if clean_input.get("subtype") in ["blog", "news"]:
+        if clean_input.get("subtype") in ["blog", "news", "event"]:
             if clean_input.get("featured"):
                 entity.featured_position_y = clean_input.get("featured").get("positionY", 0)
                 entity.featured_video = clean_input.get("featured").get("video", None)
@@ -72,6 +75,10 @@ def resolve_edit_entity(_, info, input):
         if entity._meta.model_name in ["news"]:
             entity.is_featured = clean_input.get("isFeatured", False)
             entity.source = clean_input.get("source", "")
+
+        if entity._meta.model_name in ["event"]:
+            entity.is_featured = clean_input.get("isFeatured", False)
+
 
         entity.save()
 
