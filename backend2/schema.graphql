@@ -323,6 +323,18 @@ type Comment implements Entity {
   owner: User
 }
 
+input confirmAttendEventWithoutAccountInput {
+  guid: String!
+  email: String!
+  code: String!
+  clientMutationId: String
+}
+
+type confirmAttendEventWithoutAccountPayload {
+  entity: Event
+  clientMutationId: String
+}
+
 input deleteEntityInput {
   guid: String!
   clientMutationId: String
@@ -373,10 +385,6 @@ type Discussion implements Entity {
   tags: [String]
   timeCreated: String
   timeUpdated: String
-  isFeatured: Boolean
-  isHighlighted: Boolean
-  isRecommended: Boolean
-  featured: Featured
   canEdit: Boolean
   canComment: Boolean
   canVote: Boolean
@@ -1007,6 +1015,7 @@ type Mutation {
   editTask(input: editTaskInput!): editTaskPayload
   attendEvent(input: attendEventInput!): attendEventPayload
   attendEventWithoutAccount(input: attendEventWithoutAccountInput!): attendEventWithoutAccountPayload
+  confirmAttendEventWithoutAccount(input: confirmAttendEventWithoutAccountInput!): confirmAttendEventWithoutAccountPayload
   markAsRead(input: markAsReadInput!): markAsReadPayload
   markAllAsRead(input: markAllAsReadInput!): markAllAsReadPayload
   toggleBestAnswer(input: toggleBestAnswerInput!): toggleBestAnswerPayload
@@ -1338,6 +1347,7 @@ type Site {
   directLinks: [DirectLink]
   accessIds: [AccessId]
   defaultAccessId: Int!
+  language: String!
   logo: String
   logoAlt: String
   icon: String
