@@ -104,6 +104,8 @@ input addGroupInput {
   isMembershipOnRequest: Boolean
   isFeatured: Boolean
   autoNotification: Boolean
+  isLeavingGroupDisabled: Boolean
+  isAutoMembershipEnabled: Boolean
   description: String
   richDescription: String
   introduction: String
@@ -385,6 +387,10 @@ type Discussion implements Entity {
   tags: [String]
   timeCreated: String
   timeUpdated: String
+  isFeatured: Boolean
+  isHighlighted: Boolean
+  isRecommended: Boolean
+  featured: Featured
   canEdit: Boolean
   canComment: Boolean
   canVote: Boolean
@@ -484,6 +490,8 @@ input editGroupInput {
   isMembershipOnRequest: Boolean
   isFeatured: Boolean
   autoNotification: Boolean
+  isLeavingGroupDisabled: Boolean
+  isAutoMembershipEnabled: Boolean
   description: String
   richDescription: String
   introduction: String
@@ -783,6 +791,8 @@ type Group implements Entity {
   isMembershipOnRequest: Boolean
   isFeatured: Boolean
   autoNotification: Boolean
+  isLeavingGroupDisabled: Boolean
+  isAutoMembershipEnabled: Boolean
   membership: Membership
   accessIds: [AccessId]
   defaultAccessId: Int
