@@ -6,7 +6,8 @@ from core.constances import NOT_LOGGED_IN, COULD_NOT_SAVE
 from core.resolvers.shared import access_id_to_acl
 from core.models import FileFolder, Entity
 from core.resolvers.mutation_edit_comment import resolve_edit_comment
-from core.resolvers.mutation_edit_event import resolve_edit_event
+from event.resolvers.mutation import resolve_edit_event
+from discussion.resolvers.mutation import resolve_edit_discussion
 
 def resolve_edit_entity(_, info, input):
     # pylint: disable=redefined-builtin
@@ -28,6 +29,9 @@ def resolve_edit_entity(_, info, input):
 
     if entity._meta.model_name == "event":
         return resolve_edit_event(_, info, input)
+
+    if entity._meta.model_name == "discussion":
+        return resolve_edit_discussion(_, info, input)
 
     if not entity.can_write(user):
         raise GraphQLError(COULD_NOT_SAVE)
