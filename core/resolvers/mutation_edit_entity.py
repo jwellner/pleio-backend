@@ -8,6 +8,7 @@ from core.models import FileFolder, Entity
 from core.resolvers.mutation_edit_comment import resolve_edit_comment
 from event.resolvers.mutation import resolve_edit_event
 from discussion.resolvers.mutation import resolve_edit_discussion
+from activity.resolvers.mutation import resolve_edit_status_update
 
 def resolve_edit_entity(_, info, input):
     # pylint: disable=redefined-builtin
@@ -32,6 +33,9 @@ def resolve_edit_entity(_, info, input):
 
     if entity._meta.model_name == "discussion":
         return resolve_edit_discussion(_, info, input)
+
+    if entity._meta.model_name == "statusupdate":
+        return resolve_edit_status_update(_, info, input)
 
     if not entity.can_write(user):
         raise GraphQLError(COULD_NOT_SAVE)

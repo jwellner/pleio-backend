@@ -1,3 +1,11 @@
-# from django.contrib import admin
+from reversion.admin import VersionAdmin
 
-# Register your models here.
+from core import admin
+from .models import StatusUpdate
+
+
+class StatusUpdateAdmin(VersionAdmin):
+    pass
+
+
+admin.site.register(StatusUpdate, StatusUpdateAdmin)
