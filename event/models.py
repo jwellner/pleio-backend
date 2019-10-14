@@ -46,6 +46,10 @@ class Event(Entity, CommentMixin, BookmarkMixin):
     def __str__(self):
         return self.title
 
+    def type_to_string(self):
+        return 'event'
+
+
 class EventAttendee(models.Model):
 
     STATE_TYPES = (

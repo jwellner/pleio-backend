@@ -27,3 +27,6 @@ class News(Entity, VoteMixin, BookmarkMixin, FollowMixin, CommentMixin):
 
     def __str__(self):
         return self.title
+
+    def type_to_string(self):
+        return 'news'
