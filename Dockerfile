@@ -1,4 +1,4 @@
-FROM python:3.6-slim
+FROM python:3.7-slim
 
 # Workaround for error with postgresql-client package
 RUN mkdir -p /usr/share/man/man1/ /usr/share/man/man3/ /usr/share/man/man7/
