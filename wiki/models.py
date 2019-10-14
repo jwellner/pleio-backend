@@ -22,3 +22,6 @@ class Wiki(Entity, BookmarkMixin):
 
     def __str__(self):
         return self.title
+
+    def type_to_string(self):
+        return 'wiki'
