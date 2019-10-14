@@ -9,7 +9,7 @@ def conditional_subtypes_filter(subtypes):
     q_objects = Q()
     if subtypes:
         for object_type in subtypes:
-            if object_type == 'news': 
+            if object_type == 'news':
                 q_objects.add(~Q(news__isnull = True), Q.OR)
             elif object_type == 'blog':
                 q_objects.add(~Q(blog__isnull = True), Q.OR)
@@ -60,10 +60,10 @@ def resolve_activities(
         order_by = 'updated_at'
     else:
         order_by = 'created_at'
-    
+
     if orderDirection == 'desc':
         order_by = '-%s' % (order_by)
-       
+
     qs = Entity.objects.visible(info.context.user)
     qs = qs.filter(conditional_subtypes_filter(subtypes) & conditional_tags_filter(tags) & conditional_group_filter(containerGuid))
     qs = qs.order_by(order_by).select_subclasses()
@@ -74,11 +74,11 @@ def resolve_activities(
     activities = []
 
     for item in qs :
-        
+
         activity = {
             'guid': 'activity:%s' % (item.guid),
             'type': 'create',
-            'entity': item 
+            'entity': item
         }
 
         activities.append(activity)
@@ -87,6 +87,3 @@ def resolve_activities(
         'total': total,
         'edges': activities
     }
-
-
-resolvers = [query]

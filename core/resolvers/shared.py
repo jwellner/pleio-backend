@@ -16,6 +16,8 @@ class TypeModels(Enum):
     blog = "blog.Blog"
     group = "core.Group"
     user = "core.User"
+    status_update = "activity.StatusUpdate"
+    thewire = "activity.StatusUpdate"
 
 
 def get_model_by_subtype(subtype):
@@ -31,7 +33,7 @@ def get_model_by_subtype(subtype):
 
 def access_id_to_acl(obj, access_id):
 
-    acl = [ACCESS_TYPE.user.format(obj.owner.id)] # owner can always read
+    acl = [ACCESS_TYPE.user.format(obj.owner.id)] # owner can always read/write
 
     if access_id == 1:
         acl.append(ACCESS_TYPE.logged_in)

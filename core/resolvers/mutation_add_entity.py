@@ -8,7 +8,7 @@ from core.models import Group, FileFolder, Entity
 from core.resolvers.mutation_add_comment import resolve_add_comment
 from event.resolvers.mutation import resolve_add_event
 from discussion.resolvers.mutation import resolve_add_discussion
-
+from activity.resolvers.mutation import resolve_add_status_update
 
 def resolve_add_entity(_, info, input):
     # pylint: disable=redefined-builtin
@@ -25,6 +25,8 @@ def resolve_add_entity(_, info, input):
         return resolve_add_event(_, info, input)
     if clean_input.get("subtype") == "discussion":
         return resolve_add_discussion(_, info, input)
+    if clean_input.get("subtype") in ["status_update", "thewire"]:
+        return resolve_add_status_update(_, info, input)
 
     if not user.is_authenticated:
         raise GraphQLError(NOT_LOGGED_IN)
