@@ -4,7 +4,7 @@ django-filter==1.1
 Pillow==5.4.1
 Celery==4.3.0
 django-elasticsearch-dsl==7.0.0
-uwsgi==2.0.17
+uwsgi==2.0.18
 mozilla-django-oidc==1.2.2
 django-reversion==3.0.4
 Sphinx==1.8.5
