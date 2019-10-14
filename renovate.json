@@ -2,5 +2,9 @@
   "extends": [
     "config:base"
   ],
-  "prConcurrentLimit": 5
+  "prConcurrentLimit": 5,
+  "automerge": true,
+  "major": {
+    "automerge": false
+  }
 }
