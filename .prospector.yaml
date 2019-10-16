@@ -1,0 +1,18 @@
+strictness: medium
+test-warnings: false
+doc-warnings: false
+inherits:
+  - strictness_medium
+uses:
+  - django
+autodetect: false
+pylint:
+  run: true
+pep8:
+  run: true
+mccabe:
+  run: false
+dodgy:
+  run: false
+pyflakes:
+  run: false

@@ -1,9 +1,7 @@
 import uuid
 from django.db import models
 from django.contrib.postgres.fields import ArrayField
-from core.models import User
 from core.lib import get_acl, generate_object_filename
-from . import User, Group
 from .shared import read_access_default, write_access_default
 
 class FileFolderManager(models.Manager):
@@ -19,9 +17,9 @@ class FileFolder(models.Model):
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
 
-    owner = models.ForeignKey(User, on_delete=models.PROTECT)
+    owner = models.ForeignKey('core.User', on_delete=models.PROTECT)
     group = models.ForeignKey(
-        Group,
+        'core.Group',
         on_delete=models.PROTECT,
         blank=True,
         null=True

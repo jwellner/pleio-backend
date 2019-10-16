@@ -1,5 +1,6 @@
 from django.db import OperationalError, ProgrammingError
 from django.core.cache import cache
+from django.apps import apps
 
 DEFAULT_SITE_CONFIG = {
     'NAME': ('Pleio 2.0', 'Name'),
@@ -57,8 +58,7 @@ Valid JSONFields types:
 
 class ConfigBackend():
     def __init__(self):
-        from core.models import Setting
-        self._model = Setting
+        self._model = apps.get_model('core.Setting')
         self._cache_prefix = ""
 
     def cache_prefix(self, key):

@@ -15,6 +15,7 @@ def resolve_is_best_answer(obj, info):
         return True
     return False
 
+
 comment.set_field("description", shared.resolve_entity_description)
 comment.set_field("richDescription", shared.resolve_entity_rich_description)
 comment.set_field("timeCreated", shared.resolve_entity_time_created)

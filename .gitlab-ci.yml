@@ -24,7 +24,7 @@ before_script:
 
 services:
   - postgres:latest
-  - name: docker.elastic.co/elasticsearch/elasticsearch:7.3.1
+  - name: docker.elastic.co/elasticsearch/elasticsearch:7.4.0
     alias: elasticsearch
     command: [ "bin/elasticsearch", "-Expack.security.enabled=false", "-Ediscovery.type=single-node" ]
 
@@ -34,8 +34,8 @@ prospector:
   tags:
     - docker
   script:
-    - pip install -r requirements.txt
-    - prospector --tool pylint --tool pep8 --uses django
+    - pip3 install -r requirements.txt
+    - prospector
 
 test:
   stage: test
