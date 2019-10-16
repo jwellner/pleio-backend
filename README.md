@@ -101,7 +101,6 @@ Create (public) container:
 
 `swift -A http://localhost:12345/auth/v1.0 -U test:tester -K testing post -r ".r:*" backend2-dev-public`
 
-
 ### Build search index
 
 `docker-compose exec api python manage.py search_index --rebuild`

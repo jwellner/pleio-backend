@@ -10,6 +10,7 @@ def conditional_state_filter(state):
     
     return Q()
 
+
 event = ObjectType("Event")
 
 @event.field("subtype")
@@ -119,6 +120,7 @@ def resolve_attendees(obj, info, limit=20, offset=0, state=None):
 def resolve_attendees_without_account(obj, info, limit):
     # pylint: disable=unused-argument
     return obj.attendees.exclude(user__isnull=False).count()
+
 
 event.set_field("guid", shared.resolve_entity_guid)
 event.set_field("status", shared.resolve_entity_status)

@@ -34,7 +34,8 @@ def resolve_vote(_, info, input):
 
     if vote and vote.data.get("score", 0) == clean_input.get("score"):
         raise GraphQLError(ALREADY_VOTED)
-    elif vote:
+
+    if vote:
         vote.delete()
     else:
         entity.add_vote(user=user, score=clean_input.get("score"))

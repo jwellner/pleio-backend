@@ -2,7 +2,7 @@ import uuid
 from django.db import models
 from django.contrib.contenttypes.fields import GenericForeignKey, GenericRelation
 from django.contrib.contenttypes.models import ContentType
-from core.models import VoteMixin, User
+from .annotation import VoteMixin
 
 class CommentManager(models.Manager):
     def visible(self):
@@ -17,7 +17,7 @@ class Comment(VoteMixin):
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
 
-    owner = models.ForeignKey(User, on_delete=models.PROTECT)
+    owner = models.ForeignKey('core.User', on_delete=models.PROTECT)
 
     description = models.TextField()
     rich_description = models.TextField(null=True, blank=True)
