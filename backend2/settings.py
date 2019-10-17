@@ -13,6 +13,25 @@ https://docs.djangoproject.com/en/1.10/ref/settings/
 import os
 from .config import *  # pylint: disable=unused-wildcard-import
 
+FROM_EMAIL = os.getenv('FROM_EMAIL')
+EMAIL_HOST = os.getenv('EMAIL_HOST')
+EMAIL_PORT = os.getenv('EMAIL_PORT')
+
+# For email backend AWS SES
+if os.getenv('AWS_SES_ACCESS_KEY_ID') and os.getenv('AWS_SES_REGION_NAME'):
+    EMAIL_BACKEND = 'django_ses.SESBackend'
+
+    AWS_SES_ACCESS_KEY_ID = os.getenv('AWS_SES_ACCESS_KEY_ID')
+    AWS_SES_SECRET_ACCESS_KEY = os.getenv('AWS_SES_SECRET_ACCESS_KEY')
+
+    # i.e. us-west-2
+    AWS_SES_REGION_NAME = os.getenv('AWS_SES_REGION_NAME')
+    # i.e. email.us-west-2.amazonaws.com
+    AWS_SES_REGION_ENDPOINT = os.getenv('AWS_SES_REGION_ENDPOINT')
+# For local development
+elif os.getenv('DEBUG'):
+    EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -34,6 +53,7 @@ INSTALLED_APPS = [
     'core',
     'django_elasticsearch_dsl',
     'elasticapm.contrib.django',
+    'django_ses'
 ]
 
 if LOCAL_APPS:
