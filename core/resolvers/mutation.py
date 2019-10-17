@@ -9,7 +9,8 @@ from .mutation_delete_entity import resolve_delete_entity
 from .mutation_vote import resolve_vote
 from .mutation_bookmark import resolve_bookmark
 from .mutation_follow import resolve_follow
-from .mutation_send_message import resolve_send_message_to_user
+from .mutation_send_message_to_user import resolve_send_message_to_user
+from .mutation_toggle_request_delete_user import resolve_toggle_request_delete_user
 
 
 mutation = ObjectType("Mutation")
@@ -28,3 +29,4 @@ mutation.set_field("bookmark", resolve_bookmark)
 mutation.set_field("follow", resolve_follow)
 
 mutation.set_field("sendMessageToUser", resolve_send_message_to_user)
+mutation.set_field("toggleRequestDeleteUser", resolve_toggle_request_delete_user)

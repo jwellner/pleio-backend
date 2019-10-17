@@ -96,7 +96,7 @@ class SendMessageToUserTestCase(TestCase):
 
         self.assertEqual(errors[0]["message"], "could_not_find")
 
-    @mock.patch('core.resolvers.mutation_send_message.EmailMessage')
+    @mock.patch('core.resolvers.mutation_send_message_to_user.EmailMessage')
     def test_call_send_email(self, mocked_EmailMessage):
         mutation = """
             mutation SendMessageModal($input: sendMessageToUserInput!) {
