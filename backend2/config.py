@@ -36,7 +36,8 @@ LOCAL_APPS = [
     'question',
     'wiki',
     'activity',
-    'bookmark'
+    'bookmark',
+    'task'
 ]
 
 STATIC_ROOT = '/app/static'
