@@ -1,6 +1,6 @@
 from core.constances import NOT_LOGGED_IN, INVALID_SUBTYPE
 from core.models import Annotation
-from core.resolvers.shared import get_model_by_subtype
+from core.lib import get_model_by_subtype
 from graphql import GraphQLError
 from django.contrib.contenttypes.models import ContentType
 from django.db.models import Q

@@ -1,9 +1,52 @@
+import os
 from core.constances import ACCESS_TYPE
 from core import config
 from django.conf import settings
 from django.apps import apps
 from django.utils.text import slugify
-import os
+from enum import Enum
+
+
+class TypeModels(Enum):
+    """Can be used to convert GraphQL types to Django models"""
+
+    news = "news.News"
+    poll = "poll.Poll"
+    discussion = "discussion.Discussion"
+    event = "event.Event"
+    wiki = "wiki.Wiki"
+    question = "question.Question"
+    page = "cms.CmsPage"
+    blog = "blog.Blog"
+    group = "core.Group"
+    user = "core.User"
+    status_update = "activity.StatusUpdate"
+    thewire = "activity.StatusUpdate"
+
+
+def get_model_by_subtype(subtype):
+    """Get Django model by subtype name"""
+
+    try:
+        model_name = TypeModels[subtype].value
+        return apps.get_model(model_name)
+    except AttributeError:
+        return None
+
+    return None
+
+def access_id_to_acl(obj, access_id):
+
+    acl = [ACCESS_TYPE.user.format(obj.owner.id)] # owner can always read/write
+
+    if access_id == 1:
+        acl.append(ACCESS_TYPE.logged_in)
+    elif access_id == 2:
+        acl.append(ACCESS_TYPE.public)
+    elif obj.group and access_id == 4:
+        acl.append(ACCESS_TYPE.group.format(obj.group.id))
+
+    return acl
 
 def get_acl(user):
     """Get user Access List"""

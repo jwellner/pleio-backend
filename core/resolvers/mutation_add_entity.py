@@ -1,14 +1,14 @@
 import reversion
 from graphql import GraphQLError
 from django.core.exceptions import ObjectDoesNotExist
-from core.lib import remove_none_from_dict
+from core.lib import remove_none_from_dict, get_model_by_subtype, access_id_to_acl
 from core.constances import NOT_LOGGED_IN, INVALID_SUBTYPE, COULD_NOT_FIND_GROUP
-from core.resolvers.shared import get_model_by_subtype, access_id_to_acl
 from core.models import Group, FileFolder, Entity
 from core.resolvers.mutation_add_comment import resolve_add_comment
 from event.resolvers.mutation import resolve_add_event
 from discussion.resolvers.mutation import resolve_add_discussion
 from activity.resolvers.mutation import resolve_add_status_update
+
 
 def resolve_add_entity(_, info, input):
     # pylint: disable=redefined-builtin

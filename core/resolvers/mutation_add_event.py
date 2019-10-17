@@ -2,9 +2,8 @@ import reversion
 from graphql import GraphQLError
 from django.core.exceptions import ObjectDoesNotExist
 from django.utils import dateparse
-from core.lib import remove_none_from_dict
+from core.lib import remove_none_from_dict, access_id_to_acl
 from core.constances import NOT_LOGGED_IN, COULD_NOT_FIND_GROUP, INVALID_DATE
-from core.resolvers.shared import access_id_to_acl
 from core.models import Group, FileFolder
 from event.models import Event
 

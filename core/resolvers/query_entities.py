@@ -1,8 +1,9 @@
 from django.db.models import Q
 from core.constances import ORDER_DIRECTION, ORDER_BY, INVALID_SUBTYPE
 from core.models import Entity
-from core.resolvers.shared import get_model_by_subtype
+from core.lib import get_model_by_subtype
 from graphql import GraphQLError
+
 
 def conditional_group_filter(subtype, container_guid):
     """

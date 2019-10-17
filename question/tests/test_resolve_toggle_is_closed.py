@@ -9,8 +9,7 @@ from core.models import User, Group
 from question.models import Question
 from mixer.backend.django import mixer
 from core.constances import ACCESS_TYPE
-from core.lib import get_acl
-from core.resolvers.shared import access_id_to_acl
+from core.lib import get_acl, access_id_to_acl
 from django.utils.text import slugify
 
 class ToggleIsClosedTestCase(TestCase):

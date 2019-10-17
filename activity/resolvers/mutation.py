@@ -2,9 +2,8 @@ import reversion
 from graphql import GraphQLError
 from django.core.exceptions import ObjectDoesNotExist
 from core.constances import NOT_LOGGED_IN, COULD_NOT_FIND, COULD_NOT_FIND_GROUP, COULD_NOT_SAVE
-from core.lib import remove_none_from_dict
+from core.lib import remove_none_from_dict, access_id_to_acl
 from core.models import Group
-from core.resolvers.shared import access_id_to_acl
 from ..models import StatusUpdate
 
 
