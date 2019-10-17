@@ -1503,12 +1503,12 @@ type toggleIsClosedPayload {
 
 input toggleRequestDeleteUserInput {
   guid: String!
-  clientMutationId: String
+  clientMutationId: Int
 }
 
 type toggleRequestDeleteUserPayload {
   viewer: Viewer
-  clientMutationId: String
+  clientMutationId: Int
 }
 
 type TopItem {

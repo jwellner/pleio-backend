@@ -90,6 +90,8 @@ class User(AbstractBaseUser):
     picture = models.URLField(blank=True, null=True)
     is_government = models.BooleanField(default=False)
     has_2fa_enabled = models.BooleanField(default=False)
+    is_delete_requested = models.BooleanField(default=False)
+
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 

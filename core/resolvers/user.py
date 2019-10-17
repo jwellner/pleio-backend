@@ -31,8 +31,12 @@ def resolve_icon(obj, info):
 def resolve_can_edit(obj, info):
     return info.context.user == obj
 
-
 @user.field("username")
 def resolve_username(obj, info):
     # pylint: disable=unused-argument
     return obj.guid
+
+@user.field("requestDelete")
+def resolve_request_delete(obj, info):
+    # pylint: disable=unused-argument
+    return obj.is_delete_requested

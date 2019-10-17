@@ -4,6 +4,7 @@ FROM python:3.7-slim
 RUN mkdir -p /usr/share/man/man1/ /usr/share/man/man3/ /usr/share/man/man7/
 
 RUN apt-get update && apt-get install --no-install-recommends -y \
+    gettext \
     git \
     build-essential \
     mime-support \
