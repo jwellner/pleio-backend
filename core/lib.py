@@ -22,6 +22,7 @@ class TypeModels(Enum):
     user = "core.User"
     status_update = "activity.StatusUpdate"
     thewire = "activity.StatusUpdate"
+    task = "task.Task"
 
 
 def get_model_by_subtype(subtype):

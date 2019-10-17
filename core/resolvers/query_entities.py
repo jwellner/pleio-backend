@@ -48,9 +48,10 @@ def resolve_entities(
 
     if not subtype:
         Model = Entity
-    elif subtype in ["news", "poll", "discussion", "event", "wiki", "question", "page", "blog"]:
-        Model = get_model_by_subtype(subtype)
     else:
+        Model = get_model_by_subtype(subtype)
+
+    if not Model:
         raise GraphQLError(INVALID_SUBTYPE)
 
     if orderBy == ORDER_BY.timeUpdated:
