@@ -25,10 +25,6 @@ DATABASES = {
 
 TIME_ZONE = 'UTC'
 
-FROM_EMAIL = os.getenv('FROM_EMAIL')
-EMAIL_HOST = os.getenv('EMAIL_HOST')
-EMAIL_PORT = os.getenv('EMAIL_PORT')
-
 LOCAL_APPS = [
     'blog',
     'notifications',
