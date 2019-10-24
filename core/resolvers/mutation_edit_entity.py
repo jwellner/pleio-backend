@@ -3,8 +3,9 @@ from graphql import GraphQLError
 from django.core.exceptions import ObjectDoesNotExist
 from core.lib import remove_none_from_dict, access_id_to_acl
 from core.constances import NOT_LOGGED_IN, COULD_NOT_SAVE
-from core.models import FileFolder, Entity
+from core.models import Entity
 from core.resolvers.mutation_edit_comment import resolve_edit_comment
+from file.models import FileFolder
 from event.resolvers.mutation import resolve_edit_event
 from discussion.resolvers.mutation import resolve_edit_discussion
 from activity.resolvers.mutation import resolve_edit_status_update

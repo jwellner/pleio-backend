@@ -1,6 +1,7 @@
 from django.db import connection
 from django.test import TestCase
-from core.models import User, Group, FileFolder
+from core.models import User, Group
+from file.models import FileFolder
 from core.constances import ACCESS_TYPE
 from backend2.schema import schema
 from ariadne import graphql_sync

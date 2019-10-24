@@ -1,5 +1,7 @@
 from django.db import models
-from core.models import Entity, FileFolder, VoteMixin, CommentMixin, BookmarkMixin, FollowMixin
+from core.models import Entity, VoteMixin, CommentMixin, BookmarkMixin, FollowMixin
+from file.models import FileFolder
+
 
 class News(Entity, VoteMixin, BookmarkMixin, FollowMixin, CommentMixin):
     """

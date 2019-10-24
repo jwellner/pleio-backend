@@ -3,13 +3,14 @@ from graphql import GraphQLError
 from django.core.exceptions import ObjectDoesNotExist
 from core.lib import remove_none_from_dict, get_model_by_subtype, access_id_to_acl
 from core.constances import NOT_LOGGED_IN, INVALID_SUBTYPE, COULD_NOT_FIND_GROUP
-from core.models import Group, FileFolder, Entity
+from core.models import Group, Entity
 from core.resolvers.mutation_add_comment import resolve_add_comment
+from file.models import FileFolder
 from event.resolvers.mutation import resolve_add_event
 from discussion.resolvers.mutation import resolve_add_discussion
 from activity.resolvers.mutation import resolve_add_status_update
 from task.resolvers.mutation import resolve_add_task
-
+from file.resolvers.mutation import resolve_add_folder
 
 
 def resolve_add_entity(_, info, input):
@@ -31,6 +32,8 @@ def resolve_add_entity(_, info, input):
         return resolve_add_status_update(_, info, input)
     if clean_input.get("subtype") == "task":
         return resolve_add_task(_, info, input)
+    if clean_input.get("subtype") == "folder":
+        return resolve_add_folder(_, info, input)
 
     if not user.is_authenticated:
         raise GraphQLError(NOT_LOGGED_IN)

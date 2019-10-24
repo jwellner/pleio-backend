@@ -2,7 +2,8 @@ from django.contrib.admin import AdminSite as BaseAdminSite
 from reversion.admin import VersionAdmin
 
 from core import config
-from .models import User, Group, GroupMembership, Comment, FileFolder, Setting, Annotation
+from .models import User, Group, GroupMembership, Comment, Setting, Annotation
+from file.models import FileFolder
 
 class AdminSite(BaseAdminSite):
     site_header = 'Backend2'
