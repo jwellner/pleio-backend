@@ -104,3 +104,15 @@ Create (public) container:
 ### Build search index
 
 `docker-compose exec api python manage.py search_index --rebuild`
+
+## Translations
+
+### (re)Generate the translastions files 
+
+With this command, you will create and edit .po files. The files will be filled with strings added in de code as msgid's
+
+`python manage.py makemessages`
+
+With this command, you will compile the translation files which the application will use
+
+`python manage.py comilemessages`

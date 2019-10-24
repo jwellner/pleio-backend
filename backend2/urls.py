@@ -16,5 +16,5 @@ urlpatterns = [
     path('admin/', core_admin.site.urls),
     path('graphql', GraphQLView.as_view(schema=schema), name='graphql'),
     path('file/download/<uuid:file_id>/<str:file_name>', core_views.download, name='download'),
-    re_path(r'.*', core_views.default, name='default')
+    re_path(r'.*', core_views.default, name='default'),
 ]

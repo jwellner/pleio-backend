@@ -1,10 +1,9 @@
 from graphql import GraphQLError
-from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist
-from django.core.mail import EmailMessage
+from django.utils.translation import ugettext_lazy
 from core.models import User
 from core.constances import NOT_LOGGED_IN, COULD_NOT_FIND, COULD_NOT_SAVE
-from core.lib import remove_none_from_dict
+from core.lib import remove_none_from_dict, send_mail_multi
 
 
 def resolve_toggle_request_delete_user(_, info, input):
@@ -27,22 +26,20 @@ def resolve_toggle_request_delete_user(_, info, input):
     if user.is_delete_requested:
         user.is_delete_requested = False
         user.save()
-        email = EmailMessage(
-            "Request to remove account cancelled",
-            f"You, as <strong> {user.name} </strong> user, have cancelled your request to remove your account.",
-            settings.FROM_EMAIL,
-            [user.email]
-        )
+
+        subject = ugettext_lazy("Request to remove account cancelled")
+        context = {'username': user.name}
+
+        email = send_mail_multi(subject, 'email/toggle_request_delete_user_cancelled.html', context, [user.email])
+
     else:
         user.is_delete_requested = True
         user.save()
-        email = EmailMessage(
-            "Request to remove account",
-            f"""You, as user, <strong> {user.name} </strong> have requested that your account be removed. You will be informed once the website \
-            administrator has done so.""",
-            settings.FROM_EMAIL,
-            [user.email]
-        )
+
+        subject = ugettext_lazy("Request to remove account")
+        context = {'username': user.name}
+
+        email = send_mail_multi(subject, 'email/toggle_request_delete_user_requested.html', context, [user.email])
 
     email.send()
 

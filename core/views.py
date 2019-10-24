@@ -8,6 +8,7 @@ from django.http import Http404
 from core.models import FileFolder
 from django.http import StreamingHttpResponse
 
+
 def default(request):
 
     context = {

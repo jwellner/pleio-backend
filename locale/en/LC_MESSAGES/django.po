@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2019-10-15 13:03+0000\n"
+"POT-Creation-Date: 2019-10-17 10:28+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -16,6 +16,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
 #: backend2/config.py:49
 msgid "English"
@@ -29,8 +30,12 @@ msgstr ""
 msgid "French"
 msgstr ""
 
-#: core/resolvers/mutation_toggle_request_delete_user.py:32
+#: core/resolvers/mutation_toggle_request_delete_user.py:35
 msgid "Request to remove account cancelled"
+msgstr ""
+
+#: core/resolvers/mutation_toggle_request_delete_user.py:47
+msgid "Request to remove account"
 msgstr ""
 
 #: core/templates/admin/oidc_login.html:21
@@ -57,3 +62,18 @@ msgstr ""
 #: core/templates/registration/login.html:44
 msgid "Log in"
 msgstr ""
+
+#: core/templates/email/toggle_request_delete_user_cancelled.html:7
+#, python-format
+msgid ""
+"You, as <strong> %(username)s </strong> user, have cancelled your request to "
+"remove your account. "
+msgstr ""
+
+#: core/templates/email/toggle_request_delete_user_requested.html:7
+#, python-format
+msgid ""
+"You, as user, <strong>%(username)s</strong> have requested that your account "
+"be removed. You will be informed once the website administrator has done so. "
+msgstr ""
+
