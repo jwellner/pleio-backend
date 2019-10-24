@@ -37,7 +37,8 @@ LOCAL_APPS = [
     'wiki',
     'activity',
     'bookmark',
-    'task'
+    'task',
+    'file'
 ]
 
 STATIC_ROOT = '/app/static'
@@ -63,6 +64,7 @@ OIDC_OP_LOGOUT_ENDPOINT = os.getenv('OIDC_OP_LOGOUT_ENDPOINT')
 PROFILE_PICTURE_URL = os.getenv('PROFILE_PICTURE_URL')
 
 # SWIFT FILE STORAGE
+SWIFT_ENABLED = os.getenv('SWIFT_ENABLED')
 SWIFT_AUTH_URL = os.getenv('SWIFT_AUTH_URL')
 SWIFT_USERNAME = os.getenv('SWIFT_USERNAME')
 SWIFT_KEY = os.getenv('SWIFT_KEY')

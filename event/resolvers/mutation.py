@@ -4,7 +4,8 @@ from django.core.exceptions import ObjectDoesNotExist
 from ariadne import ObjectType
 from core.constances import NOT_LOGGED_IN, COULD_NOT_FIND, EVENT_IS_FULL, EVENT_INVALID_STATE, COULD_NOT_FIND_GROUP, INVALID_DATE, COULD_NOT_SAVE
 from core.lib import remove_none_from_dict, access_id_to_acl
-from core.models import Group, FileFolder
+from core.models import Group
+from file.models import FileFolder
 from django.utils import dateparse
 from ..models import Event, EventAttendee
 

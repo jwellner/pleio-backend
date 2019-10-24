@@ -1,7 +1,8 @@
 from ariadne import ObjectType
 from django.core.exceptions import ObjectDoesNotExist
 from graphql import GraphQLError
-from core.models import User, Entity, Group, FileFolder
+from core.models import User, Entity, Group
+from file.models import FileFolder
 from .query_viewer import resolve_viewer
 from .query_site import resolve_site
 from .query_entities import resolve_entities

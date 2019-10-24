@@ -53,7 +53,7 @@ INSTALLED_APPS = [
     'core',
     'django_elasticsearch_dsl',
     'elasticapm.contrib.django',
-    'django_ses'
+    'django_ses',
 ]
 
 if LOCAL_APPS:
@@ -175,7 +175,8 @@ APPEND_SLASH = False
 
 WEBPACK_DEV_SERVER = False
 
-DEFAULT_FILE_STORAGE = 'swift.storage.SwiftStorage'
+if SWIFT_ENABLED:
+    DEFAULT_FILE_STORAGE = 'swift.storage.SwiftStorage'
 
 ELASTIC_APM = {
   # Set required service name. Allowed characters:

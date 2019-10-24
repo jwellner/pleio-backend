@@ -1,7 +1,7 @@
 from django.db import models
-from core.models import Entity, FileFolder, CommentMixin, BookmarkMixin, User
+from core.models import Entity, CommentMixin, BookmarkMixin, User
 from django.core.exceptions import ObjectDoesNotExist
-
+from file.models import FileFolder
 
 class Event(Entity, CommentMixin, BookmarkMixin):
     class Meta:
