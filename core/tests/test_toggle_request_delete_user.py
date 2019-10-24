@@ -70,8 +70,8 @@ class ToggleRequestDeleteUserTestCase(TestCase):
 
         self.assertEqual(data["toggleRequestDeleteUser"]["viewer"], None)
 
-    @mock.patch('core.resolvers.mutation_toggle_request_delete_user.EmailMessage')
-    def test_call_send_email(self, mocked_EmailMessage):
+    @mock.patch('core.resolvers.mutation_toggle_request_delete_user.send_mail_multi')
+    def test_call_send_email(self, mocked_send_mail_multi):
         mutation = """
             mutation toggleRequestDeleteUser($input: toggleRequestDeleteUserInput!) {
                 toggleRequestDeleteUser(input: $input) {
@@ -91,8 +91,10 @@ class ToggleRequestDeleteUserTestCase(TestCase):
         request.user = self.user1
         result = graphql_sync(schema, {"query": mutation, "variables": variables}, context_value=request)
 
-        mocked_EmailMessage.assert_called_once_with("Request to remove account", f"You, as user, <strong> {self.user1.name} </strong> have requested that your account be removed. You will be informed once the website             administrator has done so.", settings.FROM_EMAIL, [self.user1.email])
+        mocked_send_mail_multi.assert_called_once_with("Request to remove account", 'email/toggle_request_delete_user_requested.html',
+                                                       {'username': self.user1.name}, [self.user1.email])
 
         result2 = graphql_sync(schema, {"query": mutation, "variables": variables}, context_value=request)
 
-        mocked_EmailMessage.assert_called_with("Request to remove account cancelled", f"You, as <strong> {self.user1.name} </strong> user, have cancelled your request to remove your account.", settings.FROM_EMAIL, [self.user1.email])
+        mocked_send_mail_multi.assert_called_with("Request to remove account cancelled", 'email/toggle_request_delete_user_cancelled.html',
+                                                  {'username': self.user1.name}, [self.user1.email])

@@ -96,8 +96,8 @@ class SendMessageToUserTestCase(TestCase):
 
         self.assertEqual(errors[0]["message"], "could_not_find")
 
-    @mock.patch('core.resolvers.mutation_send_message_to_user.EmailMessage')
-    def test_call_send_email(self, mocked_EmailMessage):
+    @mock.patch('core.resolvers.mutation_send_message_to_user.send_mail_multi')
+    def test_call_send_email(self, mocked_send_mail_multi):
         mutation = """
             mutation SendMessageModal($input: sendMessageToUserInput!) {
                 sendMessageToUser(input: $input) {
@@ -117,5 +117,5 @@ class SendMessageToUserTestCase(TestCase):
         request.user = self.user1
         result = graphql_sync(schema, {"query": mutation, "variables": variables}, context_value=request)
 
-        mocked_EmailMessage.assert_called_once_with('testMessageSubject', '<p>testMessageContent</p>', settings.FROM_EMAIL, [self.user2.email],
-                                                    reply_to=[self.user1.email])
+        mocked_send_mail_multi.assert_called_once_with('testMessageSubject', 'email/send_message_to_user.html', {'message': '<p>testMessageContent</p>'}, [self.user2.email],
+                                                       [self.user1.email])

@@ -3,6 +3,9 @@
 # Collect static
 python /app/manage.py collectstatic --noinput
 
+# Compile messages
+python /app/manage.py compilemessages
+
 # Run migrations
 python /app/manage.py migrate
 

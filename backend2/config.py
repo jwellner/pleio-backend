@@ -44,12 +44,11 @@ STATIC_ROOT = '/app/static'
 
 LOCAL_MIDDLEWARE = []
 
-LANGUAGE_CODE = 'en-us'
+LANGUAGE_CODE = 'en'
 
 LANGUAGES = [
-    ('en-us', _('English')),
-    ('nl-nl', _('Dutch')),
-    ('fr-fr', _('French'))
+    ('en', _('English')),
+    ('nl', _('Dutch'))
 ]
 
 OIDC_RP_CLIENT_ID = os.getenv('OIDC_RP_CLIENT_ID')
