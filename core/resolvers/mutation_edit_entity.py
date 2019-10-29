@@ -56,7 +56,7 @@ def resolve_edit_entity(_, info, input):
             entity.description = clean_input.get("description", "")
             entity.rich_description = clean_input.get("richDescription")
 
-        if clean_input.get("subtype") in ["blog", "news", "event"]:
+        if entity._meta.model_name in ["blog", "news", "event"]:
             if clean_input.get("featured"):
                 entity.featured_position_y = clean_input.get("featured").get("positionY", 0)
                 entity.featured_video = clean_input.get("featured").get("video", None)
