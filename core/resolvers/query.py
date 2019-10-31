@@ -10,6 +10,7 @@ from .query_groups import resolve_groups
 from .query_bookmarks import resolve_bookmarks
 from .query_search import resolve_search
 from .query_users import resolve_users
+from .query_notifications import resolve_notifications
 from core.constances import COULD_NOT_FIND, ORDER_DIRECTION, ORDER_BY
 
 query = ObjectType("Query")
@@ -21,7 +22,7 @@ query.set_field("groups", resolve_groups)
 query.set_field("bookmarks", resolve_bookmarks)
 query.set_field("search", resolve_search)
 query.set_field("users", resolve_users)
-
+query.set_field("notifications", resolve_notifications)
 
 @query.field("entity")
 def resolve_entity(
@@ -135,3 +136,6 @@ def resolve_files(_, info, containerGuid=None, filter=None, orderBy=ORDER_BY.tim
         'canWrite': False,
         'edges': [],
     }
+
+
+# TODO: Implement files

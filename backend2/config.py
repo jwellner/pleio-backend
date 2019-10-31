@@ -27,7 +27,6 @@ TIME_ZONE = 'UTC'
 
 LOCAL_APPS = [
     'blog',
-    'notifications',
     'cms',
     'discussion',
     'event',
