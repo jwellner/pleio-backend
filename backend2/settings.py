@@ -15,7 +15,6 @@ from .config import *  # pylint: disable=unused-wildcard-import
 
 FROM_EMAIL = os.getenv('FROM_EMAIL')
 EMAIL_HOST = os.getenv('EMAIL_HOST')
-EMAIL_PORT = os.getenv('EMAIL_PORT')
 
 # For email backend AWS SES
 if os.getenv('AWS_SES_ACCESS_KEY_ID') and os.getenv('AWS_SES_REGION_NAME'):
@@ -54,6 +53,7 @@ INSTALLED_APPS = [
     'django_elasticsearch_dsl',
     'elasticapm.contrib.django',
     'django_ses',
+    'notifications'
 ]
 
 if LOCAL_APPS:
