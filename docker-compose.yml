@@ -64,7 +64,7 @@ services:
       timeout: 10s
       retries: 5
   apm-server:
-    image: docker.elastic.co/apm/apm-server:7.4.0
+    image: docker.elastic.co/apm/apm-server:7.4.1
     environment:
       - KIBANA_HOST=kibana
       - KIBANA_PORT=5601
