@@ -11,6 +11,7 @@ from .mutation_bookmark import resolve_bookmark
 from .mutation_follow import resolve_follow
 from .mutation_send_message_to_user import resolve_send_message_to_user
 from .mutation_toggle_request_delete_user import resolve_toggle_request_delete_user
+from .mutation_mark_as_read import resolve_mark_as_read, resolve_mark_all_as_read
 
 
 mutation = ObjectType("Mutation")
@@ -30,3 +31,6 @@ mutation.set_field("follow", resolve_follow)
 
 mutation.set_field("sendMessageToUser", resolve_send_message_to_user)
 mutation.set_field("toggleRequestDeleteUser", resolve_toggle_request_delete_user)
+
+mutation.set_field("markAsRead", resolve_mark_as_read)
+mutation.set_field("markAllAsRead", resolve_mark_all_as_read)

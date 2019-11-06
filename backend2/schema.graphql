@@ -910,7 +910,7 @@ type markAllAsReadPayload {
 }
 
 input markAsReadInput {
-  id: String
+  id: Int
   clientMutationId: String
 }
 
