@@ -9,7 +9,7 @@ mozilla-django-oidc==1.2.2
 django-reversion==3.0.4
 Sphinx==2.2.1
 sphinx-autobuild==0.7.1
-coverage==4.5.4
+coverage==5.0a7
 prospector==1.1.7
 ariadne==0.7.0
 django-model-utils==3.2.0
@@ -18,4 +18,3 @@ django-storage-swift==1.2.19
 elastic-apm==5.2.2
 django-ses
 django-notifications-hq
-coverage==4.5.4
