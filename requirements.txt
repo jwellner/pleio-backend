@@ -18,3 +18,4 @@ django-storage-swift==1.2.19
 elastic-apm==5.2.2
 django-ses
 django-notifications-hq
+coverage==4.5.4
