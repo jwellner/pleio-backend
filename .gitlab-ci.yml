@@ -45,6 +45,7 @@ test:
     - curl "http://elasticsearch:9200/_cat/health"
     - pip install -r requirements.txt
     - coverage run --source='.' manage.py test
+    - coverage report
 
 build:
   stage: build
