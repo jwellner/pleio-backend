@@ -187,3 +187,5 @@ ELASTIC_APM = {
   'SERVER_URL': 'http://apm-server:8200',
   'DEBUG': True
 }
+
+ELASTICSEARCH_DSL_SIGNAL_PROCESSOR = 'core.elasticsearch.CustomSignalProcessor'
