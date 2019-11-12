@@ -43,11 +43,24 @@ def conditional_tags_filter(tags):
 
 
 def conditional_group_filter(container_guid):
-
+    """ Filter on one group """
     if container_guid:
         return Q(group__id=container_guid)
 
     return Q()
+
+def conditional_groups_filter(group_filter, user):
+    """ Filter on all or mine groups """
+    if group_filter == ["all"]:
+        return Q(group__isnull=False)
+    if group_filter == ["mine"]:
+        groups = []
+        for membership in user.memberships.filter(type__in=['admin', 'owner', 'member']):
+            groups.append(membership.group.id)
+        return Q(group__in=groups)
+
+    return Q()
+
 
 @query.field("activities")
 def resolve_activities(
@@ -77,7 +90,8 @@ def resolve_activities(
         order_by = '-%s' % (order_by)
 
     qs = Entity.objects.visible(info.context.user)
-    qs = qs.filter(conditional_subtypes_filter(subtypes) & conditional_tags_filter(tags) & conditional_group_filter(containerGuid))
+    qs = qs.filter(conditional_subtypes_filter(subtypes) & conditional_tags_filter(tags) & conditional_group_filter(containerGuid) &
+                   conditional_groups_filter(groupFilter, info.context.user))
     qs = qs.order_by(order_by).select_subclasses()
     total = qs.count()
 
