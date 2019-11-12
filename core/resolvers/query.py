@@ -11,6 +11,7 @@ from .query_bookmarks import resolve_bookmarks
 from .query_search import resolve_search
 from .query_users import resolve_users
 from .query_notifications import resolve_notifications
+from .query_recommended import resolve_recommended
 from core.constances import COULD_NOT_FIND, ORDER_DIRECTION, ORDER_BY
 
 query = ObjectType("Query")
@@ -23,6 +24,7 @@ query.set_field("bookmarks", resolve_bookmarks)
 query.set_field("search", resolve_search)
 query.set_field("users", resolve_users)
 query.set_field("notifications", resolve_notifications)
+query.set_field("recommended", resolve_recommended)
 
 @query.field("entity")
 def resolve_entity(
@@ -71,18 +73,6 @@ def resolve_entity(
 
     return entity
 
-
-
-# TODO: Implement recommended
-
-@query.field("recommended")
-def resolve_recommended(_, info, offset=0, limit=20):
-    # pylint: disable=unused-argument
-    return {
-        'total': 0,
-        'canWrite': False,
-        'edges': []
-    }
 
 # TODO: Implement trending
 
