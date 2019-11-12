@@ -49,7 +49,7 @@ class SignalsTestCase(TestCase):
     @mock.patch('notifications.signals.notify.send')
     def test_user_handler(self, mocked_send):
         user_handler(self.user1, self.user1, True)
-        mocked_send.assert_called_once_with(self.user1, recipient=self.user1, verb="welcome")
+        mocked_send.assert_called_once_with(self.user1, recipient=self.user1, verb="welcome", action_object=self.user1)
 
     @mock.patch('notifications.signals.notify.send')
     def test_user_handler_not_created(self, mocked_send):

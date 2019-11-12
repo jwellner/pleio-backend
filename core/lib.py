@@ -86,6 +86,7 @@ def webpack_dev_server_is_available():
     import socket
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
         try:
+            s.settimeout(1.0)
             return s.connect_ex(('host.docker.internal', 9001)) == 0
         except Exception:
             return False

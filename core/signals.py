@@ -22,7 +22,7 @@ def user_handler(sender, instance, created, **kwargs):
     # pylint: disable=unused-argument
     if not created:
         return
-    notify.send(instance, recipient=instance, verb='welcome')
+    notify.send(instance, recipient=instance, verb='welcome', action_object=instance)
 
 
 # TODO: we should check if user has turned notification setting on for group
