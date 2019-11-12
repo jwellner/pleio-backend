@@ -10,6 +10,8 @@ RUN apt-get update && apt-get install --no-install-recommends -y \
     mime-support \
     libmagic-dev
 
+RUN apt-get update && apt-get upgrade -y
+
 WORKDIR /app
 COPY requirements.txt /app
 RUN pip3 install -r requirements.txt

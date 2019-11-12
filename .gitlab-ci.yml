@@ -47,6 +47,14 @@ test:
     - coverage run --source='.' manage.py test
     - coverage report
 
+scan:
+  stage: test
+  tags:
+    - shell
+  script:
+    - docker build -t registry.gitlab.com/pleio/backend2:${CI_COMMIT_SHA:0:8} .
+    - scan.sh registry.gitlab.com/pleio/backend2:${CI_COMMIT_SHA:0:8}
+
 build:
   stage: build
   tags:
