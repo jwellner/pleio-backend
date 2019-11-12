@@ -1,30 +1,11 @@
-from core.models import Entity, User
-
-
-def get_notification_action_object_entity(notification):
-    if notification['action_object_object_id']:
-        entity = Entity.objects.get_subclass(id=notification['action_object_object_id'])
-    else:
-        entity = User.objects.get(id=notification['actor_object_id'])
-        entity.group = None
-    return entity
+from core.mapper import get_notification
 
 
 def get_notifications(user, offset=0, limit=20):
     result = []
     notifications = user.notifications.all()[offset:offset+limit].values()
     for notification in notifications:
-        entity = get_notification_action_object_entity(notification)
-        performer = User.objects.get(id=notification['actor_object_id'])
-        result.append({
-            'id': notification['id'],
-            'action': notification['verb'],
-            'performer': performer,
-            'entity': entity,
-            'container': entity.group,
-            'timeCreated': notification['timestamp'],
-            'isUnread': notification['unread']
-        })
+        result.append(get_notification(notification))
     return result
 
 
