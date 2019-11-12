@@ -51,13 +51,16 @@ INSTALLED_APPS = [
     'ariadne.contrib.django',
     'core',
     'django_elasticsearch_dsl',
-    'elasticapm.contrib.django',
     'django_ses',
     'notifications'
 ]
 
 if LOCAL_APPS:
     INSTALLED_APPS += LOCAL_APPS
+
+elif os.getenv('DEBUG'):
+    INSTALLED_APPS += ['elasticapm.contrib.django']
+
 
 AUTHENTICATION_BACKENDS = [
     'django.contrib.auth.backends.ModelBackend',

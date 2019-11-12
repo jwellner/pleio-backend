@@ -34,9 +34,13 @@ def conditional_subtypes_filter(subtypes):
 
 def conditional_tags_filter(tags):
     if tags:
-        return Q(tags__icontains=tags)
+        filters = Q()
+        for tag in tags:
+            filters.add(Q(tags__icontains=tag), Q.AND) # of Q.OR
 
+        return filters
     return Q()
+
 
 def conditional_group_filter(container_guid):
 
@@ -82,7 +86,7 @@ def resolve_activities(
     activities = []
 
     for item in qs :
-
+        
         activity = {
             'guid': 'activity:%s' % (item.guid),
             'type': 'create',
