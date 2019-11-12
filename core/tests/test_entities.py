@@ -26,18 +26,20 @@ class EntityTestCase(TestCase):
             owner=self.authenticatedUser,
             read_access=[ACCESS_TYPE.public],
             write_access=[ACCESS_TYPE.user.format(self.authenticatedUser.id)],
+            tags=["tag_one"]
         )
         self.blog3 = Blog.objects.create(
             title="Blog3",
             owner=self.authenticatedUser,
             read_access=[ACCESS_TYPE.public],
             write_access=[ACCESS_TYPE.user.format(self.authenticatedUser.id)],
-            group=self.group
+            group=self.group,
+            tags=["tag_two", "tag_one"]
         )
 
         self.query = """
-            query getEntities($containerGuid: String) {
-                entities(containerGuid: $containerGuid) {
+            query getEntities($containerGuid: String, $tags: [String!]) {
+                entities(containerGuid: $containerGuid, tags: $tags) {
                     total
                     edges {
                         guid
@@ -101,3 +103,49 @@ class EntityTestCase(TestCase):
         data = result[1]["data"]
 
         self.assertEqual(data["entities"]["total"], 1)
+
+    def test_entities_filtered_by_tags_find_one(self):
+        request = HttpRequest()
+        request.user = self.authenticatedUser
+
+        variables = {"tags": ["tag_two"]}
+
+        result = graphql_sync(schema, { "query": self.query, "variables": variables }, context_value=request)
+
+        self.assertTrue(result[0])
+
+        data = result[1]["data"]
+
+        self.assertEqual(data["entities"]["total"], 1)
+        self.assertEqual(data["entities"]["edges"][0]["guid"], self.blog3.guid)
+
+    def test_entities_filtered_by_tags_find_two(self):
+        request = HttpRequest()
+        request.user = self.authenticatedUser
+
+        variables = {"tags": ["tag_one"]}
+
+        result = graphql_sync(schema, { "query": self.query, "variables": variables }, context_value=request)
+
+        self.assertTrue(result[0])
+
+        data = result[1]["data"]
+
+        self.assertEqual(data["entities"]["total"], 2)
+        self.assertEqual(data["entities"]["edges"][0]["guid"], self.blog3.guid)
+        self.assertEqual(data["entities"]["edges"][1]["guid"], self.blog2.guid)
+
+
+    def test_entities_filtered_by_tags_find_one_with_two_tags(self):
+        request = HttpRequest()
+        request.user = self.authenticatedUser
+
+        variables = {"tags": ["tag_one", "tag_two"]}
+
+        result = graphql_sync(schema, { "query": self.query, "variables": variables }, context_value=request)
+
+        self.assertTrue(result[0])
+
+        data = result[1]["data"]
+        self.assertEqual(data["entities"]["total"], 1)
+        self.assertEqual(data["entities"]["edges"][0]["guid"], self.blog3.guid)

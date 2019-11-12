@@ -27,6 +27,18 @@ def conditional_is_featured_filter(subtype, is_featured):
 
     return Q()
 
+def conditional_tags_filter(tags):
+    if tags:
+        filters = Q()
+        for tag in tags:
+            filters.add(Q(tags__icontains=tag), Q.AND) # of Q.OR
+
+        return filters
+    return Q()
+
+
+
+
 def resolve_entities(
     _,
     info,
@@ -46,7 +58,7 @@ def resolve_entities(
     # pylint: disable=too-many-arguments
     # pylint: disable=redefined-builtin
 
-    if not subtype:
+    if not subtype or subtype == 'all':
         Model = Entity
     else:
         Model = get_model_by_subtype(subtype)
@@ -60,13 +72,14 @@ def resolve_entities(
         order_by = 'updated_at'
     else:
         order_by = 'created_at'
-    
+
     if orderDirection == ORDER_DIRECTION.desc:
         order_by = '-%s' % (order_by)
 
     entities = Model.objects.visible(info.context.user)
-    entities = entities.filter(conditional_group_filter(subtype, containerGuid) & conditional_is_featured_filter(subtype, isFeatured))
-    entities = entities.order_by(order_by)
+    entities = entities.filter(conditional_group_filter(subtype, containerGuid) & conditional_tags_filter(tags) &
+                               conditional_is_featured_filter(subtype, isFeatured))
+    entities = entities.order_by(order_by).select_subclasses()
     entities = entities[offset:offset+limit]
 
     return {
