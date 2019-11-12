@@ -10,6 +10,7 @@ from .query_groups import resolve_groups
 from .query_bookmarks import resolve_bookmarks
 from .query_search import resolve_search
 from .query_users import resolve_users
+from .query_trending import resolve_trending
 from .query_notifications import resolve_notifications
 from .query_recommended import resolve_recommended
 from core.constances import COULD_NOT_FIND, ORDER_DIRECTION, ORDER_BY
@@ -24,7 +25,9 @@ query.set_field("bookmarks", resolve_bookmarks)
 query.set_field("search", resolve_search)
 query.set_field("users", resolve_users)
 query.set_field("notifications", resolve_notifications)
+query.set_field("trending", resolve_trending)
 query.set_field("recommended", resolve_recommended)
+
 
 @query.field("entity")
 def resolve_entity(
@@ -72,18 +75,6 @@ def resolve_entity(
         raise GraphQLError(COULD_NOT_FIND)
 
     return entity
-
-
-# TODO: Implement trending
-
-
-@query.field("trending")
-def resolve_trending(_, info):
-    # pylint: disable=unused-argument
-    return [
-        {'tag': 'pleio', 'likes': 10},
-        {'tag': 'backend2', 'likes': 3}
-    ]
 
 # TODO: Implement top
 
