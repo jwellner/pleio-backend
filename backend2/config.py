@@ -42,7 +42,7 @@ LOCAL_APPS = [
 
 STATIC_ROOT = '/app/static'
 
-LOCAL_MIDDLEWARE = []
+LOCAL_MIDDLEWARE = ['core.middleware.UserLastOnlineMiddleware']
 
 LANGUAGE_CODE = 'en'
 

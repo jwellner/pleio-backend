@@ -18,10 +18,13 @@ def comment_handler(sender, instance, created, **kwargs):
 
 
 def user_handler(sender, instance, created, **kwargs):
-    """ Add welcome notification if user is created """
+    """ Add welcome notification if user is created /
+        Create UserProfile if User is created
+    """
     # pylint: disable=unused-argument
     if not created:
         return
+
     notify.send(instance, recipient=instance, verb='welcome', action_object=instance)
 
 

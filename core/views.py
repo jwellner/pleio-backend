@@ -1,5 +1,5 @@
 import json
-from core.lib import get_settings
+from core.resolvers.query_site import get_settings
 from core import config
 from django.contrib.auth.views import LogoutView, LoginView
 from django.shortcuts import redirect, render

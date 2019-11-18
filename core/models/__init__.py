@@ -1,4 +1,4 @@
-from .user import User
+from .user import User, UserProfile
 from .group import Group, GroupMembership
 from .annotation import Annotation, VoteMixin, BookmarkMixin, FollowMixin
 from .comment import Comment, CommentMixin

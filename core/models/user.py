@@ -1,8 +1,10 @@
 import uuid
 from django.db import models
+from django.db.models.signals import post_save
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
 from django.core.mail import send_mail
 from django.conf import settings
+from django.dispatch import receiver
 import reversion
 from core.lib import ACCESS_TYPE
 
@@ -132,3 +134,25 @@ class User(AbstractBaseUser):
     def email_user(self, subject, message, from_email=None, **kwargs):
         send_mail(subject, message, from_email or settings.FROM_EMAIL, [
                   self.email], **kwargs)
+
+    @property
+    def profile(self):
+        try:
+            return self._profile
+        except UserProfile.DoesNotExist:
+            return UserProfile.objects.create(
+                user=self,
+            )
+
+
+class UserProfile(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    user = models.OneToOneField('core.User', on_delete=models.CASCADE, related_name="_profile")
+    last_online = models.DateTimeField(blank=True, null=True)
+
+
+@receiver(post_save, sender=User)
+def create_user_profile(sender, instance, created, **kwargs):
+    # pylint: disable=unused-argument
+    if created:
+        UserProfile.objects.create(user=instance)
