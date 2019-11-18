@@ -3,6 +3,7 @@ from unittest.mock import patch
 from core import config
 from core.base_config import DEFAULT_SITE_CONFIG
 
+
 class BaseConfigCase(FastTenantTestCase):
     def setUp(self):
         pass

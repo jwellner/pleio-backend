@@ -61,15 +61,9 @@ Valid JSONFields types:
 class ConfigBackend():
     def __init__(self):
         self._model = apps.get_model('core.Setting')
-        self._cache_prefix = ""
-        print(connection.schema_name)
-
-    def cache_prefix(self, key):
-        return "%s%s" % (self._cache_prefix, key)
 
     def get(self, key):
-
-        value = cache.get(self.cache_prefix(key))
+        value = cache.get("%s%s" % (connection.schema_name, key))
 
         if value is None:
             try:
@@ -77,8 +71,8 @@ class ConfigBackend():
             except (OperationalError, ProgrammingError, self._model.DoesNotExist):
                 pass
             else:
-                cache.set(self.cache_prefix(key), value)
-        
+                cache.set("%s%s" % (connection.schema_name, key), value)
+
         return value
 
     def set(self, key, value):
@@ -92,7 +86,7 @@ class ConfigBackend():
             setting.value = value
             setting.save()
 
-        cache.set(self.cache_prefix(key), value)
+        cache.set("%s%s" % (connection.schema_name, key), value)
 
 
 class Config():

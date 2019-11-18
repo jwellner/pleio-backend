@@ -44,10 +44,10 @@ TENANT_APPS = [
     'django.contrib.auth',
     'django.contrib.sessions',
     'django.contrib.messages',
+    'core',
     'mozilla_django_oidc',
     'ariadne.contrib.django',
     'reversion',
-    'core',
     'django_elasticsearch_dsl',
     'notifications',
 ]

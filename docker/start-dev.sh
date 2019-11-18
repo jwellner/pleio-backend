@@ -6,9 +6,6 @@ python /app/manage.py collectstatic --noinput
 # Compile messages
 python /app/manage.py compilemessages
 
-# Run migrations
-python /app/manage.py migrate
-
 # Run migrations shared
 python /app/manage.py migrate_schemas --shared
 
