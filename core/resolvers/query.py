@@ -13,6 +13,7 @@ from .query_users import resolve_users
 from .query_trending import resolve_trending
 from .query_notifications import resolve_notifications
 from .query_recommended import resolve_recommended
+from .query_top import resolve_top
 from core.constances import COULD_NOT_FIND, ORDER_DIRECTION, ORDER_BY
 
 query = ObjectType("Query")
@@ -27,6 +28,7 @@ query.set_field("users", resolve_users)
 query.set_field("notifications", resolve_notifications)
 query.set_field("trending", resolve_trending)
 query.set_field("recommended", resolve_recommended)
+query.set_field("top", resolve_top)
 
 
 @query.field("entity")
@@ -76,23 +78,7 @@ def resolve_entity(
 
     return entity
 
-# TODO: Implement top
-
-
-@query.field("top")
-def resolve_top(_, info):
-    # pylint: disable=unused-argument
-    user = info.context.user
-
-    if user.is_authenticated:
-        return [
-            {'user': user, 'likes': 42}
-        ]
-
-    return []
-
 # TODO: Implement breadcrumb
-
 
 @query.field("breadcrumb")
 def resolve_breadcrumb(_, info, guid=None):
