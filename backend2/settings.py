@@ -181,15 +181,16 @@ WEBPACK_DEV_SERVER = False
 if SWIFT_ENABLED:
     DEFAULT_FILE_STORAGE = 'swift.storage.SwiftStorage'
 
-ELASTIC_APM = {
-  # Set required service name. Allowed characters:
-  # a-z, A-Z, 0-9, -, _, and space
-  'SERVICE_NAME': 'apm-server',
+if os.getenv('DEBUG'):
+    ELASTIC_APM = {
+    # Set required service name. Allowed characters:
+    # a-z, A-Z, 0-9, -, _, and space
+        'SERVICE_NAME': 'apm-server',
 
-  # Set custom APM Server URL (default: http://localhost:8200)
-  'SERVER_URL': 'http://apm-server:8200',
-  'DEBUG': True
-}
+    # Set custom APM Server URL (default: http://localhost:8200)
+        'SERVER_URL': 'http://apm-server:8200',
+        'DEBUG': True
+    }
 
 ELASTICSEARCH_DSL_SIGNAL_PROCESSOR = 'core.elasticsearch.CustomSignalProcessor'
 DATABASE_ROUTERS = (
