@@ -532,17 +532,6 @@ type editGroupWidgetPayload {
   clientMutationId: String
 }
 
-input editInterestsInput {
-  guid: String
-  tags: [String]
-  clientMutationId: String
-}
-
-type editInterestsPayload {
-  user: User
-  clientMutationId: String
-}
-
 input editNotificationsInput {
   guid: String
   emailNotifications: Boolean
@@ -973,8 +962,6 @@ type Mutation {
   addRow(input: addRowInput!): addRowPayload
   addWidget(input: addWidgetInput!): addWidgetPayload
   editWidget(input: editWidgetInput!): editWidgetPayload
-  subscribeNewsletter(input: subscribeNewsletterInput!): subscribeNewsletterPayload
-  editInterests(input: editInterestsInput!): editInterestsPayload
   editNotifications(input: editNotificationsInput!): editNotificationsPayload
   editGroupNotifications(input: editGroupNotificationsInput!): editGroupNotificationsPayload
   editEmailOverview(input: editEmailOverviewInput!): editEmailOverviewPayload
@@ -1434,16 +1421,6 @@ type Subgroup {
 type SubgroupList {
   total: Int!
   edges: [Subgroup]
-}
-
-input subscribeNewsletterInput {
-  email: String!
-  clientMutationId: String
-}
-
-type subscribeNewsletterPayload {
-  viewer: Viewer
-  clientMutationId: String
 }
 
 type TagCategory {
