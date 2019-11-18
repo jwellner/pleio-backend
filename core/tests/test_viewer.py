@@ -1,5 +1,5 @@
 from django.db import connection
-from django.test import TestCase
+from django_tenants.test.cases import FastTenantTestCase
 from ..models import User
 from backend2.schema import schema
 from ariadne import graphql_sync
@@ -9,7 +9,7 @@ from django.http import HttpRequest
 from core.models import User
 from mixer.backend.django import mixer
 
-class ViewerTestCase(TestCase):
+class ViewerTestCase(FastTenantTestCase):
 
     def setUp(self):
         self.anonymousUser = AnonymousUser()

@@ -1,5 +1,5 @@
 from django.db import connection
-from django.test import TestCase
+from django_tenants.test.cases import FastTenantTestCase
 from backend2.schema import schema
 from ariadne import graphql_sync
 import json
@@ -8,7 +8,7 @@ from django.http import HttpRequest
 from core.models import Group, User
 from mixer.backend.django import mixer
 
-class GroupsEmptyTestCase(TestCase):
+class GroupsEmptyTestCase(FastTenantTestCase):
 
     def setUp(self):
         self.anonymousUser = AnonymousUser()
@@ -44,7 +44,7 @@ class GroupsEmptyTestCase(TestCase):
         self.assertEqual(data["groups"]["canWrite"], False)
         self.assertEqual(data["groups"]["edges"], [])
 
-class GroupsNotEmptyTestCase(TestCase):
+class GroupsNotEmptyTestCase(FastTenantTestCase):
 
     def setUp(self):
         self.anonymousUser = AnonymousUser()

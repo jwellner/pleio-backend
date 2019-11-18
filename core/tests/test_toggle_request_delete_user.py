@@ -1,6 +1,6 @@
 from django.conf import settings
 from django.db import connection
-from django.test import TestCase
+from django_tenants.test.cases import FastTenantTestCase
 from backend2.schema import schema
 from ariadne import graphql_sync
 import json
@@ -12,7 +12,7 @@ from graphql import GraphQLError
 from unittest import mock
 
 
-class ToggleRequestDeleteUserTestCase(TestCase):
+class ToggleRequestDeleteUserTestCase(FastTenantTestCase):
 
     def setUp(self):
         self.anonymousUser = AnonymousUser()

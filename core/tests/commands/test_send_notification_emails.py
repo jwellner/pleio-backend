@@ -1,4 +1,4 @@
-from django.test import TestCase
+from django_tenants.test.cases import FastTenantTestCase
 from core.models import User, Group, Comment
 from blog.models import Blog
 from core.constances import ACCESS_TYPE
@@ -13,7 +13,7 @@ from core import config
 from datetime import datetime, timedelta
 
 
-class SendNotificationEmailsTestCase(TestCase):
+class SendNotificationEmailsTestCase(FastTenantTestCase):
 
     def setUp(self):
         self.user1 = mixer.blend(User)

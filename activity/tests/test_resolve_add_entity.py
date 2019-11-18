@@ -1,5 +1,5 @@
 from django.db import connection
-from django.test import TestCase
+from django_tenants.test.cases import FastTenantTestCase
 from backend2.schema import schema
 from ariadne import graphql_sync
 import json
@@ -12,7 +12,7 @@ from mixer.backend.django import mixer
 from graphql import GraphQLError
 from datetime import datetime
 
-class AddStatusUpdateTestCase(TestCase):
+class AddStatusUpdateTestCase(FastTenantTestCase):
 
     def setUp(self):
         self.anonymousUser = AnonymousUser()

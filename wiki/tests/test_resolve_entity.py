@@ -1,5 +1,5 @@
 from django.db import connection
-from django.test import TestCase
+from django_tenants.test.cases import FastTenantTestCase
 from backend2.schema import schema
 from ariadne import graphql_sync
 import json
@@ -12,7 +12,7 @@ from core.constances import ACCESS_TYPE
 from core.lib import get_acl, access_id_to_acl
 from django.utils.text import slugify
 
-class WikiTestCase(TestCase):
+class WikiTestCase(FastTenantTestCase):
 
     def setUp(self):
         self.anonymousUser = AnonymousUser()
