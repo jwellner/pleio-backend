@@ -16,19 +16,8 @@ from .config import *  # pylint: disable=unused-wildcard-import
 FROM_EMAIL = os.getenv('FROM_EMAIL')
 EMAIL_HOST = os.getenv('EMAIL_HOST')
 
-# For email backend AWS SES
-if os.getenv('AWS_SES_ACCESS_KEY_ID') and os.getenv('AWS_SES_REGION_NAME'):
-    EMAIL_BACKEND = 'django_ses.SESBackend'
-
-    AWS_SES_ACCESS_KEY_ID = os.getenv('AWS_SES_ACCESS_KEY_ID')
-    AWS_SES_SECRET_ACCESS_KEY = os.getenv('AWS_SES_SECRET_ACCESS_KEY')
-
-    # i.e. us-west-2
-    AWS_SES_REGION_NAME = os.getenv('AWS_SES_REGION_NAME')
-    # i.e. email.us-west-2.amazonaws.com
-    AWS_SES_REGION_ENDPOINT = os.getenv('AWS_SES_REGION_ENDPOINT')
 # For local development
-elif os.getenv('DEBUG'):
+if os.getenv('DEBUG'):
     EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
@@ -39,26 +28,36 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 # Application definition
 
-INSTALLED_APPS = [
-    'reversion',
+SHARED_APPS = (
+    'django_tenants',  # mandatory
+    'tenants', # you must list the app where your tenant model resides in
+    'django.contrib.contenttypes',
+    'django.contrib.staticfiles',
+)
+
+TENANT_APPS = [
+    # The following Django contrib apps must be in TENANT_APPS
+    'django.contrib.contenttypes',
+
+    # Optional
     'django.contrib.admin',
     'django.contrib.auth',
-    'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
-    'django.contrib.staticfiles',
     'mozilla_django_oidc',
     'ariadne.contrib.django',
+    'reversion',
     'core',
     'django_elasticsearch_dsl',
-    'django_ses',
-    'notifications'
+    'notifications',
 ]
 
 if LOCAL_APPS:
-    INSTALLED_APPS += LOCAL_APPS
+    TENANT_APPS += LOCAL_APPS
 
-elif os.getenv('DEBUG'):
+INSTALLED_APPS = list(SHARED_APPS) + [app for app in TENANT_APPS if app not in SHARED_APPS]
+
+if os.getenv('DEBUG'):
     INSTALLED_APPS += ['elasticapm.contrib.django']
 
 
@@ -69,6 +68,7 @@ AUTHENTICATION_BACKENDS = [
 
 MIDDLEWARE = [
     'elasticapm.contrib.django.middleware.TracingMiddleware',
+    'django_tenants.middleware.main.TenantMainMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.locale.LocaleMiddleware',
@@ -192,3 +192,10 @@ ELASTIC_APM = {
 }
 
 ELASTICSEARCH_DSL_SIGNAL_PROCESSOR = 'core.elasticsearch.CustomSignalProcessor'
+DATABASE_ROUTERS = (
+    'django_tenants.routers.TenantSyncRouter',
+)
+
+TENANT_MODEL = "tenants.Client"
+
+TENANT_DOMAIN_MODEL = "tenants.Domain"

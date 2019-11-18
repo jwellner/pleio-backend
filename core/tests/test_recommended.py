@@ -1,5 +1,5 @@
 from django.db import connection
-from django.test import TestCase
+from django_tenants.test.cases import FastTenantTestCase
 from core.models import User, Group
 from blog.models import Blog
 from news.models import News
@@ -11,7 +11,7 @@ from django.contrib.auth.models import AnonymousUser
 from django.http import HttpRequest
 from mixer.backend.django import mixer
 
-class RecommendedTestCase(TestCase):
+class RecommendedTestCase(FastTenantTestCase):
 
     def setUp(self):
         self.user1 = mixer.blend(User)

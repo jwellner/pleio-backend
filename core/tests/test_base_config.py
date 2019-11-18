@@ -1,9 +1,9 @@
-from django.test import TestCase
+from django_tenants.test.cases import FastTenantTestCase
 from unittest.mock import patch
 from core import config
 from core.base_config import DEFAULT_SITE_CONFIG
 
-class BaseConfigCase(TestCase):
+class BaseConfigCase(FastTenantTestCase):
     def setUp(self):
         pass
     
@@ -39,7 +39,7 @@ class BaseConfigCase(TestCase):
             config.NON_EXISTING = False
 
 
-class BaseConfigCacheCase(TestCase):
+class BaseConfigCacheCase(FastTenantTestCase):
     def setUp(self):
         patcher_cache = patch('core.base_config.cache')
         self.mock_cache = patcher_cache.start()

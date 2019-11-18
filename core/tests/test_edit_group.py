@@ -1,5 +1,5 @@
 from django.db import connection
-from django.test import TestCase
+from django_tenants.test.cases import FastTenantTestCase
 from backend2.schema import schema
 from ariadne import graphql_sync
 import json
@@ -9,7 +9,7 @@ from core.models import Group, User
 from mixer.backend.django import mixer
 from graphql import GraphQLError
 
-class EditGroupCase(TestCase):
+class EditGroupCase(FastTenantTestCase):
 
     def setUp(self):
         self.anonymousUser = AnonymousUser()

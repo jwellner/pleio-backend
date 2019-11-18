@@ -1,5 +1,5 @@
 from django.db import connection
-from django.test import TestCase
+from django_tenants.test.cases import FastTenantTestCase
 from core.models import User, Group
 from blog.models import Blog
 from core.constances import ACCESS_TYPE
@@ -10,7 +10,7 @@ from django.contrib.auth.models import AnonymousUser
 from django.http import HttpRequest
 from mixer.backend.django import mixer
 
-class EntityTestCase(TestCase):
+class EntityTestCase(FastTenantTestCase):
 
     def setUp(self):
         self.authenticatedUser = mixer.blend(User)

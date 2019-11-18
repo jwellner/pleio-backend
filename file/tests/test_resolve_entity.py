@@ -1,6 +1,6 @@
 import json
 from django.db import connection
-from django.test import TestCase
+from django_tenants.test.cases import FastTenantTestCase
 from backend2.schema import schema
 from ariadne import graphql_sync
 from django.contrib.auth.models import AnonymousUser
@@ -16,7 +16,7 @@ from django.core.files import File
 from unittest.mock import MagicMock, patch
 from django.conf import settings
 
-class FileFolderTestCase(TestCase):
+class FileFolderTestCase(FastTenantTestCase):
 
     def setUp(self):
         self.anonymousUser = AnonymousUser()

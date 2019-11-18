@@ -8,7 +8,8 @@ RUN apt-get update && apt-get install --no-install-recommends -y \
     git \
     build-essential \
     mime-support \
-    libmagic-dev
+    libmagic-dev \
+    libpq-dev
 
 RUN apt-get update && apt-get upgrade -y
 

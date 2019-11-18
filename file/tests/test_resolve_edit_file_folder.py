@@ -1,5 +1,5 @@
 from django.db import connection
-from django.test import TestCase
+from django_tenants.test.cases import FastTenantTestCase
 from django.core.files import File
 from django.conf import settings
 from backend2.schema import schema
@@ -16,7 +16,7 @@ from graphql import GraphQLError
 from unittest.mock import MagicMock, patch
 from ..models import FileFolder
 
-class EditFileFolderTestCase(TestCase):
+class EditFileFolderTestCase(FastTenantTestCase):
 
     def setUp(self):
         self.anonymousUser = AnonymousUser()

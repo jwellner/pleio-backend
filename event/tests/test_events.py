@@ -1,5 +1,5 @@
 from django.db import connection
-from django.test import TestCase
+from django_tenants.test.cases import FastTenantTestCase
 from backend2.schema import schema
 from ariadne import graphql_sync
 import json
@@ -14,7 +14,7 @@ from core.lib import get_acl, access_id_to_acl
 from django.utils.text import slugify
 
 
-class EventsTestCase(TestCase):
+class EventsTestCase(FastTenantTestCase):
 
     def setUp(self):
         tomorrow = timezone.now() + timezone.timedelta(days=1)

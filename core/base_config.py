@@ -1,4 +1,5 @@
 from django.db import OperationalError, ProgrammingError
+from django.db import connection
 from django.core.cache import cache
 from django.apps import apps
 
@@ -61,6 +62,7 @@ class ConfigBackend():
     def __init__(self):
         self._model = apps.get_model('core.Setting')
         self._cache_prefix = ""
+        print(connection.schema_name)
 
     def cache_prefix(self, key):
         return "%s%s" % (self._cache_prefix, key)
