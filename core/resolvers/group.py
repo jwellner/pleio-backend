@@ -1,7 +1,8 @@
 from ariadne import ObjectType
 from django.utils.text import slugify
 from core.constances import MEMBERSHIP
-from core.lib import get_settings, get_access_ids
+from core.lib import get_access_ids
+from core.resolvers.query_site import get_settings
 
 group = ObjectType("Group")
 
