@@ -185,7 +185,6 @@ class ProfileTestCase(FastTenantTestCase):
         variables = { "username": self.user1.guid}
 
         result = graphql_sync(schema, { "query": self.query, "variables": variables }, context_value=request)
-
         self.assertTrue(result[0])
 
         data = result[1]["data"]

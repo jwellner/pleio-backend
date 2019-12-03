@@ -423,12 +423,12 @@ type editAvatarPayload {
 input editEmailOverviewInput {
   guid: String
   overview: Overview
-  clientMutationId: String
+  clientMutationId: Int
 }
 
 type editEmailOverviewPayload {
   user: User
-  clientMutationId: String
+  clientMutationId: Int
 }
 
 input editEntityInput {
@@ -505,12 +505,12 @@ input editGroupNotificationsInput {
   guid: String!
   getsNotifications: Boolean!
   userGuid: String
-  clientMutationId: String
+  clientMutationId: Int
 }
 
 type editGroupNotificationsPayload {
   group: Group
-  clientMutationId: String
+  clientMutationId: Int
 }
 
 type editGroupPayload {
@@ -536,12 +536,12 @@ input editNotificationsInput {
   guid: String
   emailNotifications: Boolean
   newsletter: Boolean
-  clientMutationId: String
+  clientMutationId: Int
 }
 
 type editNotificationsPayload {
   user: User
-  clientMutationId: String
+  clientMutationId: Int
 }
 
 input editPageInput {
