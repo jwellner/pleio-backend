@@ -12,6 +12,9 @@ from .mutation_follow import resolve_follow
 from .mutation_send_message_to_user import resolve_send_message_to_user
 from .mutation_toggle_request_delete_user import resolve_toggle_request_delete_user
 from .mutation_mark_as_read import resolve_mark_as_read, resolve_mark_all_as_read
+from .mutation_edit_email_overview import resolve_edit_email_overview
+from .mutation_edit_notifications import resolve_edit_notifications
+from .mutation_edit_group_notifications import resolve_edit_group_notifications
 
 
 mutation = ObjectType("Mutation")
@@ -34,3 +37,7 @@ mutation.set_field("toggleRequestDeleteUser", resolve_toggle_request_delete_user
 
 mutation.set_field("markAsRead", resolve_mark_as_read)
 mutation.set_field("markAllAsRead", resolve_mark_all_as_read)
+
+mutation.set_field("editEmailOverview", resolve_edit_email_overview)
+mutation.set_field("editNotifications", resolve_edit_notifications)
+mutation.set_field("editGroupNotifications", resolve_edit_group_notifications)

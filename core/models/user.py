@@ -148,9 +148,28 @@ class User(AbstractBaseUser):
 
 
 class UserProfile(models.Model):
+    """
+    Email overview intervals
+    """
+    INTERVALS = (
+        ('never', 'Never'),
+        ('daily', 'Daily'),
+        ('weekly', 'Weekly'),
+        ('monthly', 'Monthly')
+    )
+
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     user = models.OneToOneField('core.User', on_delete=models.CASCADE, related_name="_profile")
     last_online = models.DateTimeField(blank=True, null=True)
+    receive_notification_email = models.BooleanField(default=False)
+    group_notifications = ArrayField(models.CharField(max_length=64),
+                                     blank=True, default=list)
+    overview_email_interval = models.CharField(
+        max_length=10,
+        choices=INTERVALS,
+        default='weekly'
+    )
+    receive_newsletter = models.BooleanField(default=False)
 
 
 @receiver(post_save, sender=User)

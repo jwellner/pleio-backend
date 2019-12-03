@@ -4,6 +4,10 @@ from django.core.exceptions import ObjectDoesNotExist
 
 user = ObjectType("User")
 
+def is_user_or_admin(obj, info):
+    if info.context.user == obj or info.context.user.is_admin:
+        return True
+    return False
 
 @user.field("url")
 def resolve_url(obj, info):
@@ -38,7 +42,37 @@ def resolve_stats(obj, info):
 @user.field("groupNotifications")
 def resolve_group_notifications(obj, info):
     # pylint: disable=unused-argument
+    if is_user_or_admin(obj, info):
+        groups = []
+        for membership in obj.memberships.filter(type__in=['admin', 'owner', 'member']):
+            gets_notification = False
+            if membership.group.guid in obj.profile.group_notifications:
+                gets_notification = True
+            groups.append({"guid": membership.group.guid, "name": membership.group.name, "getsNotifications": gets_notification})
+
+        return groups
     return []
+
+@user.field("emailNotifications")
+def resolve_email_notifications(obj, info):
+    # pylint: disable=unused-argument
+    if is_user_or_admin(obj, info):
+        return obj.profile.receive_notification_email
+    return None
+
+@user.field("emailOverview")
+def resolve_email_overview(obj, info):
+    # pylint: disable=unused-argument
+    if is_user_or_admin(obj, info):
+        return obj.profile.overview_email_interval
+    return None
+
+@user.field("getsNewsletter")
+def resolve_gets_newsletter(obj, info):
+    # pylint: disable=unused-argument
+    if is_user_or_admin(obj, info):
+        return obj.profile.receive_newsletter
+    return None
 
 @user.field("icon")
 def resolve_icon(obj, info):
@@ -47,7 +81,9 @@ def resolve_icon(obj, info):
 
 @user.field("canEdit")
 def resolve_can_edit(obj, info):
-    return info.context.user == obj
+    if is_user_or_admin(obj, info):
+        return True
+    return False
 
 @user.field("username")
 def resolve_username(obj, info):
@@ -57,4 +93,6 @@ def resolve_username(obj, info):
 @user.field("requestDelete")
 def resolve_request_delete(obj, info):
     # pylint: disable=unused-argument
-    return obj.is_delete_requested
+    if is_user_or_admin(obj, info):
+        return obj.is_delete_requested
+    return None
