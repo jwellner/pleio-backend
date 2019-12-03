@@ -2,11 +2,13 @@ import uuid
 from django.db import models
 from django.db.models.signals import post_save
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
+from django.contrib.postgres.fields import ArrayField
 from django.core.mail import send_mail
 from django.conf import settings
 from django.dispatch import receiver
 import reversion
-from core.lib import ACCESS_TYPE
+from core.lib import ACCESS_TYPE, get_acl
+from .shared import read_access_default, write_access_default
 
 
 class Manager(BaseUserManager):
@@ -156,3 +158,67 @@ def create_user_profile(sender, instance, created, **kwargs):
     # pylint: disable=unused-argument
     if created:
         UserProfile.objects.create(user=instance)
+
+
+class ProfileField(models.Model):
+    """
+    Profile field types
+    """
+    FIELD_TYPES = (
+        ('select_field', 'SelectField'),
+        ('date_field', 'DateField'),
+        ('html_field', 'HTMLField'),
+        ('multi_select_field', 'MultiSelectField'),
+        ('text_field', 'TextField'),
+    )
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    key = models.CharField(max_length=255)
+    name = models.CharField(max_length=512)
+    category = models.CharField(max_length=512, blank=True, null=True)
+    field_type = models.CharField(
+        max_length=24,
+        choices=FIELD_TYPES,
+        default='text_field'
+    )
+    field_options = ArrayField(models.CharField(max_length=512),
+                               blank=True, default=list)
+
+    is_editable_by_user = models.BooleanField(default=True)
+    is_filter = models.BooleanField(default=False)
+
+    @property
+    def is_filterable(self):
+        if self.field_type in ['date_field', 'html_field']:
+            return False
+        if self.field_type == 'text_field' and self.is_editable_by_user:
+            return False
+        return True
+
+
+class UserProfileFieldManager(models.Manager):
+    def visible(self, user):
+        qs = self.get_queryset()
+        if user.is_authenticated and user.is_admin:
+            return qs
+        return qs.filter(read_access__overlap=list(get_acl(user)))
+
+
+class UserProfileField(models.Model):
+
+    objects = UserProfileFieldManager()
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    user_profile = models.ForeignKey('core.UserProfile', on_delete=models.PROTECT)
+    profile_field = models.ForeignKey('core.ProfileField', on_delete=models.PROTECT)
+    value = models.CharField(max_length=4096)
+    read_access = ArrayField(
+        models.CharField(max_length=64),
+        blank=True,
+        default=read_access_default
+    )
+    write_access = ArrayField(
+        models.CharField(max_length=64),
+        blank=True,
+        default=write_access_default
+    )

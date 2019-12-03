@@ -2,7 +2,7 @@ from django.contrib.admin import AdminSite as BaseAdminSite
 from reversion.admin import VersionAdmin
 
 from core import config
-from .models import User, Group, GroupMembership, Comment, Setting, Annotation
+from .models import User, Group, GroupMembership, Comment, Setting, Annotation, ProfileField
 from file.models import FileFolder
 
 class AdminSite(BaseAdminSite):
@@ -16,6 +16,8 @@ site = AdminSite(name='admin')
 class UserAdmin(VersionAdmin):
     pass
 
+class ProfileFieldAdmin(VersionAdmin):
+    pass
 
 class GroupAdmin(VersionAdmin):
     pass
@@ -37,6 +39,7 @@ class SettingAdmin(VersionAdmin):
 
 
 site.register(User, UserAdmin)
+site.register(ProfileField, ProfileFieldAdmin)
 site.register(Group, GroupAdmin)
 site.register(GroupMembership, GroupMembershipAdmin)
 site.register(Comment)

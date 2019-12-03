@@ -7,7 +7,7 @@ python /app/manage.py collectstatic --noinput
 python /app/manage.py compilemessages
 
 # Run migrations shared
-python /app/manage.py migrate_schemas --shared
+python /app/manage.py migrate_schemas
 
 # Create initial revisions
 python /app/manage.py createinitialrevisions

@@ -1,6 +1,9 @@
 from ariadne import ObjectType
+from core.models import ProfileField, UserProfileField
+from django.core.exceptions import ObjectDoesNotExist
 
 user = ObjectType("User")
+
 
 @user.field("url")
 def resolve_url(obj, info):
@@ -10,7 +13,22 @@ def resolve_url(obj, info):
 @user.field("profile")
 def resolve_profile(obj, info):
     # pylint: disable=unused-argument
-    return []
+    user_profile_fields = []
+    for field in ProfileField.objects.all():
+        field.value = ""
+        field.read_access = []
+        try:
+            qs = UserProfileField.objects.visible(info.context.user)
+            field.value = qs.get(profile_field=field, user_profile=obj.profile).value
+        except ObjectDoesNotExist:
+            pass
+        try:
+            qs = UserProfileField.objects.visible(info.context.user)
+            field.read_access = qs.get(profile_field=field, user_profile=obj.profile).read_access
+        except ObjectDoesNotExist:
+            pass
+        user_profile_fields.append(field)
+    return user_profile_fields
 
 @user.field("stats")
 def resolve_stats(obj, info):
