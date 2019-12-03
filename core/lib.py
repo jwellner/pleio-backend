@@ -91,6 +91,13 @@ def webpack_dev_server_is_available():
         except Exception:
             return False
 
+def get_access_id(obj):
+    if ACCESS_TYPE.public in obj.read_access:
+        return 2
+    if ACCESS_TYPE.logged_in in obj.read_access:
+        return 1
+    return 0
+
 
 def get_access_ids(obj=None):
     """Return the available accessId's"""
@@ -151,3 +158,15 @@ def send_mail_multi(subject, html_template, context, email_addresses, reply_to=N
     email = EmailMultiAlternatives(subject, text_content, settings.FROM_EMAIL, email_addresses, reply_to=reply_to)
     email.attach_alternative(html_content, "text/html")
     return email
+
+
+def get_field_type(field_type):
+    if field_type == 'select_field':
+        return 'selectField'
+    if field_type == 'date_field':
+        return 'dateField'
+    if field_type == 'html_field':
+        return 'htmlField'
+    if field_type == 'multi_select_field':
+        return 'multiSelectField'
+    return 'textField'

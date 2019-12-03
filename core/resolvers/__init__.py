@@ -7,6 +7,7 @@ from .member import member
 from .viewer import viewer
 from .entity import entity
 from .comment import comment
+from .profile_item import profile_item
 
 
-resolvers = [query, mutation, viewer, entity, user, group, member, comment]
+resolvers = [query, mutation, viewer, entity, user, group, member, comment, profile_item]
