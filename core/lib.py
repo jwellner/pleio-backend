@@ -1,3 +1,4 @@
+import json
 import os
 import secrets
 from core.constances import ACCESS_TYPE
@@ -42,14 +43,16 @@ def get_model_by_subtype(subtype):
     return None
 
 def access_id_to_acl(obj, access_id):
-
-    acl = [ACCESS_TYPE.user.format(obj.owner.id)] # owner can always read/write
+    if "type_to_string" in dir(obj) and obj.type_to_string() and obj.type_to_string() == 'user':
+        acl = [ACCESS_TYPE.user.format(obj.id)]
+    else:
+        acl = [ACCESS_TYPE.user.format(obj.owner.id)]
 
     if access_id == 1:
         acl.append(ACCESS_TYPE.logged_in)
     elif access_id == 2:
         acl.append(ACCESS_TYPE.public)
-    elif obj.group and access_id == 4:
+    elif access_id == 4 and obj.group:
         acl.append(ACCESS_TYPE.group.format(obj.group.id))
 
     return acl
@@ -171,6 +174,14 @@ def get_field_type(field_type):
     if field_type == 'multi_select_field':
         return 'multiSelectField'
     return 'textField'
+
+
+def is_valid_json(string):
+    try:
+        string = json.loads(string)
+    except ValueError:
+        return False
+    return True
 
 
 def get_base_url(context):

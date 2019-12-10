@@ -192,7 +192,7 @@ class ProfileField(models.Model):
     )
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    key = models.CharField(max_length=255)
+    key = models.CharField(max_length=255, unique=True)
     name = models.CharField(max_length=512)
     category = models.CharField(max_length=512, blank=True, null=True)
     field_type = models.CharField(
@@ -225,11 +225,14 @@ class UserProfileFieldManager(models.Manager):
 
 class UserProfileField(models.Model):
 
+    class META:
+        unique_together = ('user_profile', 'profile_field')
+
     objects = UserProfileFieldManager()
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    user_profile = models.ForeignKey('core.UserProfile', on_delete=models.PROTECT)
-    profile_field = models.ForeignKey('core.ProfileField', on_delete=models.PROTECT)
+    user_profile = models.ForeignKey('core.UserProfile', on_delete=models.CASCADE)
+    profile_field = models.ForeignKey('core.ProfileField', on_delete=models.CASCADE)
     value = models.CharField(max_length=4096)
     read_access = ArrayField(
         models.CharField(max_length=64),
