@@ -3,6 +3,14 @@ from .mutation_add_group import resolve_add_group
 from .mutation_edit_group import resolve_edit_group
 from .mutation_join_group import resolve_join_group
 from .mutation_leave_group import resolve_leave_group
+from .mutation_invite_to_group import resolve_invite_to_group
+from .mutation_accept_group_invitation import resolve_accept_group_invitation
+from .mutation_resend_group_invitation import resolve_resend_group_invitation
+from .mutation_delete_group_invitation import resolve_delete_group_invitation
+from .mutation_change_group_role import resolve_change_group_role
+from .mutation_send_message_to_group import resolve_send_message_to_group
+from .mutation_accept_membership_request import resolve_accept_membership_request
+from .mutation_reject_membership_request import resolve_reject_membership_request
 from .mutation_add_entity import resolve_add_entity
 from .mutation_edit_entity import resolve_edit_entity
 from .mutation_delete_entity import resolve_delete_entity
@@ -22,6 +30,14 @@ mutation.set_field("addGroup", resolve_add_group)
 mutation.set_field("editGroup", resolve_edit_group)
 mutation.set_field("joinGroup", resolve_join_group)
 mutation.set_field("leaveGroup", resolve_leave_group)
+mutation.set_field("inviteToGroup", resolve_invite_to_group)
+mutation.set_field("acceptGroupInvitation", resolve_accept_group_invitation)
+mutation.set_field("resendGroupInvitation", resolve_resend_group_invitation)
+mutation.set_field("deleteGroupInvitation", resolve_delete_group_invitation)
+mutation.set_field("changeGroupRole", resolve_change_group_role)
+mutation.set_field("sendMessageToGroup", resolve_send_message_to_group)
+mutation.set_field("acceptMembershipRequest", resolve_accept_membership_request)
+mutation.set_field("rejectMembershipRequest", resolve_reject_membership_request)
 
 mutation.set_field("addEntity", resolve_add_entity)
 mutation.set_field("editEntity", resolve_edit_entity)

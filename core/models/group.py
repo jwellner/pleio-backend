@@ -139,3 +139,24 @@ class GroupMembership(models.Model):
             self.type,
             self.group.name
         )
+
+
+class GroupInvitation(models.Model):
+    class Meta:
+        unique_together = ('invited_user', 'group')
+
+    group = models.ForeignKey(
+        'Group',
+        related_name='invitations',
+        on_delete=models.CASCADE
+    )
+    invited_user = models.ForeignKey(
+        'User',
+        related_name='invitation',
+        on_delete=models.CASCADE
+    )
+
+    code = models.CharField(max_length=36)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)

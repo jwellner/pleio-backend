@@ -847,6 +847,10 @@ input inviteToGroupInput {
 
   """Directly add the users to the group without sending an invite"""
   directAdd: Boolean
+
+  """Add all site users to group. Admin only and no invites wil be send!"""
+  addAllUsers: Boolean
+  
   clientMutationId: String
 }
 
@@ -1230,10 +1234,10 @@ type Question implements Entity {
 
 input rejectMembershipRequestInput {
   """The guid of the user."""
-  userGuid: Int
+  userGuid: String
 
   """The guid of the group."""
-  groupGuid: Int
+  groupGuid: String
   clientMutationId: String
 }
 
@@ -1256,7 +1260,7 @@ type reorderPayload {
 
 input resendGroupInvitationInput {
   """The id of the invitation to resend."""
-  id: String
+  id: Int
   clientMutationId: String
 }
 
@@ -1305,7 +1309,7 @@ input sendMessageToGroupInput {
   isTest: Boolean
 
   """An (optional) list of recipients to send the message to."""
-  recipients: [Int]
+  recipients: [String]
   clientMutationId: String
 }
 

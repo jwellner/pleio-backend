@@ -1,4 +1,5 @@
 import os
+import secrets
 from core.constances import ACCESS_TYPE
 from core import config
 from django.conf import settings
@@ -170,3 +171,11 @@ def get_field_type(field_type):
     if field_type == 'multi_select_field':
         return 'multiSelectField'
     return 'textField'
+
+
+def get_base_url(context):
+    return 'https://' + context.get_host()
+
+
+def generate_code():
+    return secrets.token_hex(10)
