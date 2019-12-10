@@ -23,7 +23,7 @@ from .mutation_mark_as_read import resolve_mark_as_read, resolve_mark_all_as_rea
 from .mutation_edit_email_overview import resolve_edit_email_overview
 from .mutation_edit_notifications import resolve_edit_notifications
 from .mutation_edit_group_notifications import resolve_edit_group_notifications
-
+from .mutation_edit_profile_field import resolve_edit_profile_field
 
 mutation = ObjectType("Mutation")
 mutation.set_field("addGroup", resolve_add_group)
@@ -57,3 +57,5 @@ mutation.set_field("markAllAsRead", resolve_mark_all_as_read)
 mutation.set_field("editEmailOverview", resolve_edit_email_overview)
 mutation.set_field("editNotifications", resolve_edit_notifications)
 mutation.set_field("editGroupNotifications", resolve_edit_group_notifications)
+
+mutation.set_field("editProfileField", resolve_edit_profile_field)
