@@ -2,6 +2,7 @@ from ariadne import ObjectType
 from django.utils.text import slugify
 from core.constances import MEMBERSHIP
 from core.lib import get_access_ids
+from core.models import User, GroupInvitation
 from core.resolvers.query_site import get_settings
 
 group = ObjectType("Group")
@@ -9,7 +10,7 @@ group = ObjectType("Group")
 @group.field("widgets")
 def resolve_group_widgets(obj, info):
     # pylint: disable=unused-argument
-    return []
+    return obj.widgets.all()
 
 @group.field("richDescription")
 def resolve_group_rich_description(obj, info):
@@ -72,20 +73,50 @@ def resolve_group_subgroups(obj, info):
         'edges': []
     }
 
-@group.field("invited")
-def resolve_group_intived(obj, info):
+@group.field("invite")
+def resolve_group_invite(obj, info, q=None, offset=0, limit=10):
     # pylint: disable=unused-argument
+    # TODO: schema must be altered, this should not be type InvitedList
+    if q:
+        users = User.objects.filter(name__icontains=q)[offset:offset+limit]
+    else:
+        users = User.objects.all()[offset:offset+limit]
+
+    edges = []
+
+    for user in users:
+        if user == info.context.user:
+            continue
+        if obj.is_member(user):
+            continue
+        invite = GroupInvitation(invited_user=user)
+        invite.invited = False
+        edges.append(invite)
+
     return {
-        'total': 0,
-        'edges': []
+        'total': len(edges),
+        'edges': edges
+    }
+
+@group.field("invited")
+def resolve_group_invited(obj, info):
+    # pylint: disable=unused-argument
+    invited = obj.invitations.filter(group=obj)
+    return {
+        'total': len(invited),
+        'edges': invited
     }
 
 @group.field("membershipRequests")
 def resolve_group_membership_requests(obj, info):
     # pylint: disable=unused-argument
+    membership_requests = obj.members.filter(type='pending')
+    users = []
+    for m in membership_requests:
+        users.append(m.user)
     return {
-        'total': 0,
-        'edges': []
+        'total': len(users),
+        'edges': users
     }
 
 @group.field("members")

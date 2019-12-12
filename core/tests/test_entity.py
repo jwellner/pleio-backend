@@ -1,6 +1,6 @@
 from django.db import connection
 from django_tenants.test.cases import FastTenantTestCase
-from core.models import User, Group
+from core.models import User, Group, GroupInvitation
 from file.models import FileFolder
 from core.constances import ACCESS_TYPE
 from backend2.schema import schema
@@ -15,6 +15,7 @@ class EntityTestCase(FastTenantTestCase):
     def setUp(self):
         self.anonymousUser = AnonymousUser()
         self.authenticatedUser = mixer.blend(User)
+        self.user1 = mixer.blend(User)
         self.group = mixer.blend(Group, owner=self.authenticatedUser)
         self.file = FileFolder.objects.create(
             owner=self.authenticatedUser, 
@@ -24,12 +25,13 @@ class EntityTestCase(FastTenantTestCase):
             read_access=[ACCESS_TYPE.public],
             write_access=[ACCESS_TYPE.user.format(self.authenticatedUser.id)]
         )
+        self.invitation = GroupInvitation.objects.create(code="7d97cea90c83722c7262", invited_user=self.user1, group=self.group)
 
     def tearDown(self):
         self.group.delete()
         self.file.delete()
+        self.user1.delete()
         self.authenticatedUser.delete()
-    
 
     def test_entity_user_anonymous(self):
 
