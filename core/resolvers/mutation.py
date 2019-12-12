@@ -11,6 +11,8 @@ from .mutation_change_group_role import resolve_change_group_role
 from .mutation_send_message_to_group import resolve_send_message_to_group
 from .mutation_accept_membership_request import resolve_accept_membership_request
 from .mutation_reject_membership_request import resolve_reject_membership_request
+from .mutation_add_group_widget import resolve_add_group_widget
+from .mutation_edit_group_widget import resolve_edit_group_widget
 from .mutation_add_entity import resolve_add_entity
 from .mutation_edit_entity import resolve_edit_entity
 from .mutation_delete_entity import resolve_delete_entity
@@ -38,6 +40,8 @@ mutation.set_field("changeGroupRole", resolve_change_group_role)
 mutation.set_field("sendMessageToGroup", resolve_send_message_to_group)
 mutation.set_field("acceptMembershipRequest", resolve_accept_membership_request)
 mutation.set_field("rejectMembershipRequest", resolve_reject_membership_request)
+mutation.set_field("addGroupWidget", resolve_add_group_widget)
+mutation.set_field("editGroupWidget", resolve_edit_group_widget)
 
 mutation.set_field("addEntity", resolve_add_entity)
 mutation.set_field("editEntity", resolve_edit_entity)

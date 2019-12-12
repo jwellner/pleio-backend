@@ -5,3 +5,4 @@ from .comment import Comment, CommentMixin
 from .entity import Entity
 from .setting import Setting
 from .shared import read_access_default, write_access_default
+from .widget import Widget
