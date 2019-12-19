@@ -1,0 +1,12 @@
+
+{% autoescape off %}   
+{% load i18n %}
+{% blocktrans %}
+ 
+    Confirm your registration for {{ title }}.<br />
+    Location: {{ location }}
+    Date: {{ start_date }}<br />
+    Click on the link below to conirm. <br />
+    <a href="{{ link }}">{{ link }}</a>
+{% endblocktrans %}
+{% endautoescape %}
