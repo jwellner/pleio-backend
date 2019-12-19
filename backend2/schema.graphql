@@ -1614,6 +1614,7 @@ type Viewer {
   loggedIn: Boolean!
   isSubEditor: Boolean!
   isAdmin: Boolean!
+  isBanned: Boolean!
   tags: [String]
   canWriteToContainer(containerGuid: String, type: Type, subtype: String): Boolean!
   user: User

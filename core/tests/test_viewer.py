@@ -19,7 +19,7 @@ class ViewerTestCase(FastTenantTestCase):
     def tearDown(self):
         self.authenticatedUser.delete()
         self.authenticatedAdminUser.delete()
-    
+
     def test_viewer_anonymous(self):
 
         query = """
@@ -92,6 +92,7 @@ class ViewerTestCase(FastTenantTestCase):
                     loggedIn
                     isSubEditor
                     isAdmin
+                    isBanned
                     user {
                         guid
                         name
@@ -112,5 +113,6 @@ class ViewerTestCase(FastTenantTestCase):
         self.assertEqual(data["viewer"]["loggedIn"], True)
         self.assertEqual(data["viewer"]["isSubEditor"], self.authenticatedAdminUser.is_admin)
         self.assertEqual(data["viewer"]["isAdmin"], self.authenticatedAdminUser.is_admin)
+        self.assertEqual(data["viewer"]["isBanned"], False)
         self.assertEqual(data["viewer"]["user"]["name"], self.authenticatedAdminUser.name)
         self.assertEqual(data["viewer"]["user"]["guid"], self.authenticatedAdminUser.guid)
