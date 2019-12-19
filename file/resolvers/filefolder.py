@@ -43,6 +43,15 @@ def resolve_url(obj, info):
         prefix, obj.guid, slugify(obj.title)
     ).lower()
 
+@filefolder.field("download")
+def resolve_download(obj, info):
+    # pylint: disable=unused-argument
+
+    if obj.is_folder:
+        return None
+
+    return obj.upload.url
+
 
 filefolder.set_field("guid", shared.resolve_entity_guid)
 filefolder.set_field("status", shared.resolve_entity_status)
