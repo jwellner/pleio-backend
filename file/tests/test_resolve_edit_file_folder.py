@@ -21,6 +21,55 @@ class EditFileFolderTestCase(FastTenantTestCase):
     def setUp(self):
         self.anonymousUser = AnonymousUser()
         self.authenticatedUser = mixer.blend(User)
+        self.user1 = mixer.blend(User)
+
+        self.group = mixer.blend(Group, owner=self.authenticatedUser)
+        self.group.join(self.user1, 'member')
+        self.folder1 = FileFolder.objects.create(
+            owner=self.authenticatedUser,
+            upload=None,
+            is_folder=True,
+            group=self.group,
+            parent=None,
+            read_access=[ACCESS_TYPE.public],
+            write_access=[ACCESS_TYPE.user.format(self.authenticatedUser.id)]
+        )
+        self.folder2 = FileFolder.objects.create(
+            owner=self.authenticatedUser,
+            upload=None,
+            is_folder=True,
+            group=self.group,
+            parent=self.folder1,
+            read_access=[ACCESS_TYPE.public],
+            write_access=[ACCESS_TYPE.user.format(self.authenticatedUser.id)]
+        )
+        self.folder3 = FileFolder.objects.create(
+            owner=self.user1,
+            upload=None,
+            is_folder=True,
+            group=self.group,
+            parent=None,
+            read_access=[ACCESS_TYPE.public],
+            write_access=[ACCESS_TYPE.user.format(self.user1.id)]
+        )
+        self.file = FileFolder.objects.create(
+            owner=self.authenticatedUser,
+            upload=None,
+            is_folder=False,
+            group=self.group,
+            parent=self.folder2,
+            read_access=[ACCESS_TYPE.public],
+            write_access=[ACCESS_TYPE.user.format(self.authenticatedUser.id)]
+        )
+        self.file2 = FileFolder.objects.create(
+            owner=self.authenticatedUser,
+            upload=None,
+            is_folder=False,
+            group=self.group,
+            parent=self.folder3,
+            read_access=[ACCESS_TYPE.public],
+            write_access=[ACCESS_TYPE.user.format(self.authenticatedUser.id)]
+        )
 
         self.group = mixer.blend(Group, owner=self.authenticatedUser)
         self.folder1 = FileFolder.objects.create(
@@ -484,5 +533,82 @@ class EditFileFolderTestCase(FastTenantTestCase):
         data = result[1]["data"]
 
         self.assertEqual(data["files"]["edges"][0]["guid"], self.file.guid)
+        self.assertEqual(data["files"]["edges"][0]["accessId"], 2)
+        self.assertEqual(data["files"]["edges"][0]["writeAccessId"], 0)
+
+
+    def test_edit_folder_access_ids_recursive_no_read_access_file(self):
+
+        mutation = """
+            mutation editFileFolder($input: editFileFolderInput!) {
+            editFileFolder(input: $input) {
+                entity {
+                guid
+                ... on FileFolder {
+                    accessId
+                    writeAccessId
+                    __typename
+                }
+                __typename
+                }
+                __typename
+            }
+            }
+        """
+        request = HttpRequest()
+        request.user = self.user1
+
+        variables = { 
+            "input": {
+                "guid": self.folder3.guid,
+                "accessId": 1,
+                "writeAccessId": 1,
+                "isAccessRecursive": True
+            }
+        }
+
+        result = graphql_sync(schema, { "query": mutation, "variables": variables }, context_value=request)
+
+        self.assertTrue(result[0])
+
+        data = result[1]["data"]
+
+        self.assertEqual(data["editFileFolder"]["entity"]["guid"], self.folder3.guid)
+        self.assertEqual(data["editFileFolder"]["entity"]["__typename"], "FileFolder")
+
+        query = """
+            query OpenFolder($guid: String, $filter: String) {
+                files(containerGuid: $guid, filter: $filter) {
+                    edges {
+                        guid
+                        ... on FileFolder {
+                            hasChildren
+                            title
+                            subtype
+                            url
+                            accessId
+                            writeAccessId
+                            mimeType
+                            __typename
+                        }
+                    __typename
+                    }
+                    __typename
+                }
+            }
+        """
+
+        variables = {
+            "guid": self.folder3.guid,
+            "filter": "files"
+        }
+
+        result = graphql_sync(schema, { "query": query, "variables": variables }, context_value=request)
+
+        self.assertTrue(result[0])
+
+        data = result[1]["data"]
+
+        self.assertEqual(data["files"]["edges"][0]["guid"], self.file2.guid)
         self.assertEqual(data["files"]["edges"][0]["accessId"], 2)
         self.assertEqual(data["files"]["edges"][0]["writeAccessId"], 0)

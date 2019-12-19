@@ -12,6 +12,8 @@ def update_access_recursive(user, entity, access_id, write_access_id):
     qs = FileFolder.objects.visible(user)
     qs = qs.filter(parent=entity)
     for file_folder in qs:
+        if not file_folder.can_write(user):
+            continue
         if access_id:
             file_folder.read_access = access_id_to_acl(file_folder, access_id)
         if write_access_id:
