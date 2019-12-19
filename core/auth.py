@@ -1,12 +1,19 @@
+from django.core.exceptions import SuspiciousOperation
 from mozilla_django_oidc.auth import OIDCAuthenticationBackend
+from mozilla_django_oidc.utils import absolutify
 from core.apps import settings
+from django.urls import reverse
 
+import logging
 import reversion
 
 from .models import User
 
+LOGGER = logging.getLogger(__name__)
+
 
 class OIDCAuthBackend(OIDCAuthenticationBackend):
+    # TODO: is there a more upgrade friendly way for overriding methods?
     def filter_users_by_claims(self, claims):
         sub = claims.get('sub')
 
@@ -38,7 +45,6 @@ class OIDCAuthBackend(OIDCAuthenticationBackend):
 
         return user
 
-
     def update_user(self, user, claims):
 
         with reversion.create_revision():
@@ -56,3 +62,56 @@ class OIDCAuthBackend(OIDCAuthenticationBackend):
             reversion.set_comment("OIDC Update")
 
         return user
+
+    def authenticate(self, request, **kwargs):
+        """Authenticates a user based on the OIDC code flow."""
+        # pylint: disable=too-many-locals
+
+        self.request = request
+        if not self.request:
+            return None
+
+        state = self.request.GET.get('state')
+        code = self.request.GET.get('code')
+        nonce = kwargs.pop('nonce', None)
+
+        if not code or not state:
+            return None
+
+        reverse_url = self.get_settings('OIDC_AUTHENTICATION_CALLBACK_URL',
+                                        'oidc_authentication_callback')
+
+        token_payload = {
+            'client_id': self.OIDC_RP_CLIENT_ID,
+            'client_secret': self.OIDC_RP_CLIENT_SECRET,
+            'grant_type': 'authorization_code',
+            'code': code,
+            'redirect_uri': absolutify(
+                self.request,
+                reverse(reverse_url)
+            ),
+        }
+
+        # Get the token
+        token_info = self.get_token(token_payload)
+        id_token = token_info.get('id_token')
+        access_token = token_info.get('access_token')
+
+        # Validate the token
+        payload = self.verify_token(id_token, nonce=nonce)
+
+        if payload:
+            self.store_tokens(access_token, id_token)
+            try:
+                user = self.get_or_create_user(access_token, id_token, payload)
+                is_active = getattr(user, 'is_active', None)
+                if not is_active:
+                    request.session['pleio_user_is_banned'] = True
+                elif 'pleio_user_is_banned' in request.session:
+                    del request.session['pleio_user_is_banned']
+                return user
+            except SuspiciousOperation as exc:
+                LOGGER.warning('failed to get or create user: %s', exc)
+                return None
+
+        return None
