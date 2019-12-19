@@ -222,3 +222,29 @@ def resolve_move_file_folder(_, info, input):
     return {
         "entity": entity
     }
+
+@mutation.field("addImage")
+def resolve_add_image(_, info, input):
+    # pylint: disable=redefined-builtin
+
+    user = info.context.user
+
+    clean_input = remove_none_from_dict(input)
+
+    if not user.is_authenticated:
+        raise GraphQLError(NOT_LOGGED_IN)
+
+    entity = FileFolder()
+
+    entity.owner = user
+
+    if not clean_input.get("image"):
+        raise GraphQLError("NO_FILE")
+
+    entity.upload = clean_input.get("image")
+
+    entity.save()
+
+    return {
+        "file": entity
+    }

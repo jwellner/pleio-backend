@@ -157,6 +157,6 @@ def resolve_default_access_id(group, info):
     # pylint: disable=unused-argument
     settings = get_settings()
 
-    # TODO: implement
-
+    if group.is_closed:
+        return 4
     return settings["site"]["defaultAccessId"]
