@@ -8,6 +8,18 @@ from core.models import Group
 from ..models import FileFolder
 
 
+def update_access_recursive(user, entity, access_id, write_access_id):
+    qs = FileFolder.objects.visible(user)
+    qs = qs.filter(parent=entity)
+    for file_folder in qs:
+        if access_id:
+            file_folder.read_access = access_id_to_acl(file_folder, access_id)
+        if write_access_id:
+            file_folder.write_access = access_id_to_acl(file_folder, write_access_id)
+        file_folder.save()
+        update_access_recursive(user, file_folder, access_id, write_access_id)
+
+
 mutation = ObjectType("Mutation")
 
 @mutation.field("addFile")
@@ -163,8 +175,7 @@ def resolve_edit_file_folder(_, info, input):
             entity.write_access = access_id_to_acl(entity, clean_input.get("writeAccessId"))
 
         if entity.is_folder and clean_input.get("isAccessRecursive", False):
-            # TODO: implement recursive access
-            pass
+            update_access_recursive(user, entity, clean_input.get("accessId"), clean_input.get("writeAccessId"))
 
         entity.save()
 
