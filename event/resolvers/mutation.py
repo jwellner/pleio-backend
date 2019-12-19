@@ -8,9 +8,13 @@ from core.models import Group
 from file.models import FileFolder
 from django.utils import dateparse
 from ..models import Event, EventAttendee
-
+from event.resolvers.mutation_attend_event_without_account import resolve_attend_event_without_account
+from event.resolvers.mutation_confirm_attend_event_without_account import resolve_confirm_attend_event_without_account
 
 mutation = ObjectType("Mutation")
+
+mutation.set_field("attendEventWithoutAccount", resolve_attend_event_without_account)
+mutation.set_field("confirmAttendEventWithoutAccount", resolve_confirm_attend_event_without_account)
 
 @mutation.field("attendEvent")
 def resolve_attend_event(_, info, input):
@@ -51,7 +55,6 @@ def resolve_attend_event(_, info, input):
     return {
         "entity": event
     }
-
 
 def resolve_add_event(_, info, input):
     # pylint: disable=redefined-builtin

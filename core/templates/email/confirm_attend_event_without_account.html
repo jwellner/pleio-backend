@@ -1,0 +1,12 @@
+
+{% autoescape off %}   
+{% load i18n %}
+{% blocktrans %}
+ 
+    This is confirmation of your registration for {{ title }}.<br />
+    Location: {{ location }}
+    Date: {{ start_date }}<br />
+    Click on the link below to see or make changes to your registration and to add this appointment to your agenda. <br />
+    <a href="{{ link }}">{{ link }}</a>
+{% endblocktrans %}
+{% endautoescape %}

@@ -7,7 +7,7 @@ from django.db.models import Q
 def conditional_state_filter(state):
     if state:
         return Q(state=state)
-    
+
     return Q()
 
 
@@ -48,7 +48,6 @@ def resolve_is_recommended(obj, info):
 @event.field("url")
 def resolve_url(obj, info):
     # pylint: disable=unused-argument
-
     prefix = ''
 
     if obj.group:
@@ -59,6 +58,7 @@ def resolve_url(obj, info):
     return '{}/events/view/{}/{}'.format(
         prefix, obj.guid, slugify(obj.title)
     ).lower()
+
 
 @event.field("startDate")
 def resolve_start_date(obj, info):
