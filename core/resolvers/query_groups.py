@@ -17,7 +17,11 @@ def resolve_groups(
     groups = Group.objects.visible(user)
     if q:
         groups = groups.filter(name__icontains=q)
-    
+
+    if filter == 'mine':
+        group_ids = user.memberships.filter(type__in=('member', 'admin', 'owner')).values_list('group', flat=True)
+        groups = groups.filter(id__in=group_ids)
+
     groups = groups[offset:offset+limit]
 
     return {

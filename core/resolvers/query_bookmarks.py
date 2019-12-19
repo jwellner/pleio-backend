@@ -18,9 +18,8 @@ def conditional_subtype_filter(subtype):
     
     raise GraphQLError(INVALID_SUBTYPE)
 
-def resolve_bookmarks(_, info, subtype=None, tags=None, offset=0, limit=20):
+def resolve_bookmarks(_, info, subtype=None, offset=0, limit=20):
     # pylint: disable=unused-argument
-    # TODO: tags are not used in frontend: i would like to propose to remove them from this query.
 
     user = info.context.user
 

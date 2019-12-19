@@ -36,9 +36,6 @@ def conditional_tags_filter(tags):
         return filters
     return Q()
 
-
-
-
 def resolve_entities(
     _,
     info,
@@ -51,7 +48,6 @@ def resolve_entities(
     tags=None,
     orderBy=ORDER_BY.timeCreated,
     orderDirection=ORDER_DIRECTION.desc,
-    addFeatured=False,
     isFeatured=False
 ):
     # pylint: disable=unused-argument
