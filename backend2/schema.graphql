@@ -760,6 +760,7 @@ type FileFolder implements Entity {
   mimeType: String
   thumbnail: String
   url: String
+  download: String
   tags: [String]
   timeCreated: String
   timeUpdated: String

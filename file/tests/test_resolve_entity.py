@@ -50,6 +50,7 @@ class FileFolderTestCase(FastTenantTestCase):
                 }
                 hasChildren
                 mimeType
+                download
             }
             query GetFile($guid: String!) {
                 entity(guid: $guid) {
@@ -104,6 +105,7 @@ class FileFolderTestCase(FastTenantTestCase):
         self.assertEqual(data["entity"]["subtype"], "file")
         self.assertEqual(data["entity"]["hasChildren"], False)
         self.assertEqual(data["entity"]["mimeType"], file_mock.content_type)
+        self.assertEqual(data["entity"]["download"], self.file.upload.url)
 
         mock_save.assert_called_once()
 
