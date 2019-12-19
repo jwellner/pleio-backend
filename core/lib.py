@@ -48,9 +48,13 @@ def access_id_to_acl(obj, access_id):
     else:
         acl = [ACCESS_TYPE.user.format(obj.owner.id)]
 
-    if access_id == 1:
+    in_closed_group = False
+    if hasattr(obj, 'group') and obj.group:
+        in_closed_group = obj.group.is_closed
+
+    if access_id == 1 and not in_closed_group:
         acl.append(ACCESS_TYPE.logged_in)
-    elif access_id == 2:
+    elif access_id == 2 and not in_closed_group:
         acl.append(ACCESS_TYPE.public)
     elif access_id == 4 and obj.group:
         acl.append(ACCESS_TYPE.group.format(obj.group.id))
@@ -107,11 +111,15 @@ def get_access_ids(obj=None):
     """Return the available accessId's"""
     accessIds = []
     accessIds.append({ 'id': 0, 'description': 'Alleen eigenaar'})
-    accessIds.append({ 'id': 1, 'description': 'Gebruikers van deze site'})
-    accessIds.append({ 'id': 2, 'description': 'Iedereen (publiek zichtbaar)'})
 
     if isinstance(obj, apps.get_model('core.Group')):
         accessIds.append({ 'id': 4, 'description': "Group: {}".format(obj.name)})
+
+    if isinstance(obj, apps.get_model('core.Group')) and obj.is_closed:
+        pass
+    else:
+        accessIds.append({ 'id': 1, 'description': 'Gebruikers van deze site'})
+        accessIds.append({ 'id': 2, 'description': 'Iedereen (publiek zichtbaar)'})
 
     return accessIds
 

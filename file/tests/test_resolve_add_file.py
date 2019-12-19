@@ -15,7 +15,7 @@ from mixer.backend.django import mixer
 from graphql import GraphQLError
 from unittest.mock import MagicMock, patch
 
-class AddEventTestCase(FastTenantTestCase):
+class AddFileTestCase(FastTenantTestCase):
 
     def setUp(self):
         self.anonymousUser = AnonymousUser()
