@@ -49,11 +49,14 @@ class GroupsNotEmptyTestCase(FastTenantTestCase):
     def setUp(self):
         self.anonymousUser = AnonymousUser()
         self.user = mixer.blend(User)
+        self.group1 = mixer.blend(Group)
+        self.group1.join(self.user, 'member')
         self.groups = mixer.cycle(5).blend(Group, is_closed=False)
   
     def tearDown(self):
         for group in self.groups:
             group.delete()
+        self.group1.delete()
         self.user.delete()
 
     def test_groups_default(self):
@@ -83,7 +86,7 @@ class GroupsNotEmptyTestCase(FastTenantTestCase):
 
         data = result[1]["data"]
         
-        self.assertEqual(data["groups"]["total"], 5)
+        self.assertEqual(data["groups"]["total"], 6)
         self.assertEqual(data["groups"]["canWrite"], False)
 
     def test_groups_limit(self):
@@ -116,3 +119,52 @@ class GroupsNotEmptyTestCase(FastTenantTestCase):
         self.assertEqual(data["groups"]["total"], 2)
         self.assertEqual(data["groups"]["canWrite"], False)
 
+    def test_groups_mine(self):
+
+        query = """
+            query GroupsQuery($filter: GroupFilter, $offset: Int!, $limit: Int!, $q: String!) {
+                groups(filter: $filter, offset: $offset, limit: $limit, q: $q) {
+                    total
+                    canWrite
+                    edges {
+                        guid
+                        name
+                        description
+                        richDescription
+                        canEdit
+                        excerpt
+                        isMembershipOnRequest
+                        isClosed
+                        isFeatured
+                        membership
+                        members {
+                            total
+                            __typename
+                        }
+                        icon
+                        url
+                        __typename
+                    }
+                    __typename
+                }
+            }
+        """
+        variables = {
+            "filter": "mine",
+            "offset": 0,
+            "limit": 20,
+            "q": ""
+        }
+
+        request = HttpRequest()
+        request.user = self.user
+
+        result = graphql_sync(schema, {"query": query, "variables": variables}, context_value=request)
+
+        self.assertTrue(result[0])
+
+        data = result[1]["data"]
+
+        self.assertEqual(data["groups"]["total"], 1)
+        self.assertEqual(data["groups"]["canWrite"], False)
+        self.assertEqual(data["groups"]["edges"][0]["guid"], self.group1.guid)
