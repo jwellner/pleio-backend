@@ -1,3 +1,53 @@
-# from django.shortcuts import render
+import csv
+from django.core.exceptions import ObjectDoesNotExist
+from django.http import Http404, StreamingHttpResponse
+from event.models import Event
 
-# Create your views here.
+class Echo:
+    """An object that implements just the write method of the file-like
+    interface.
+    """
+    def write(self, value):
+        """Write the value by returning it, instead of storing in a buffer."""
+        return value
+
+def export(request, event_id=None):
+    # TODO: add check if setting for exporting is set
+    # TODO: add tests
+    user = request.user
+
+    if not user.is_authenticated:
+        raise Http404("Event not found")
+
+    try:
+        event = Event.objects.get(id=event_id)
+    except ObjectDoesNotExist:
+        raise Http404("Event not found")
+
+    if not event.can_write(user):
+        raise Http404("Event not found")
+
+    headers = ['guid', 'name', 'email (only for admins)', 'status', 'datetime']
+    rows = [headers]
+    for attendee in event.attendees.all():
+        if user.is_admin:
+            if attendee.user:
+                email = attendee.user.email
+            else:
+                email = attendee.email
+        if attendee.user:
+            guid = attendee.user.guid
+            name = attendee.user.name
+        else:
+            guid = ''
+            name = attendee.name
+
+        rows.append([guid, name, email, attendee.state, attendee.updated_at])
+
+    pseudo_buffer = Echo()
+    writer = csv.writer(pseudo_buffer, delimiter=';', quotechar='"')
+    writer.writerow(headers)
+    response = StreamingHttpResponse((writer.writerow(row) for row in rows),
+                                     content_type="text/csv")
+    response['Content-Disposition'] = 'attachment; filename="' + event.title + '.csv"'
+    return response
