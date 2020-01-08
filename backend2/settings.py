@@ -180,8 +180,10 @@ APPEND_SLASH = False
 
 WEBPACK_DEV_SERVER = False
 
+DEFAULT_FILE_STORAGE = "django_tenants.files.storage.TenantFileSystemStorage"
+
 if SWIFT_ENABLED:
-    DEFAULT_FILE_STORAGE = 'swift.storage.SwiftStorage'
+    DEFAULT_FILE_STORAGE = 'core.backends.tenant_swift_storage.TenantSwiftStorage'
 
 if os.getenv('DEBUG'):
     ELASTIC_APM = {

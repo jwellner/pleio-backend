@@ -30,10 +30,6 @@ def resolve_url(obj, info):
 
     prefix = ''
 
-    if obj.group:
-        prefix = '/groups/view/{}/{}'.format(
-            obj.group.guid, slugify(obj.group.name)
-        )
     if obj.is_folder:
         return '{}/files/view/{}'.format(
             prefix, obj.guid
