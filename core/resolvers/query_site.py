@@ -29,6 +29,7 @@ def get_settings():
         "subgroups": False,
         "statusUpdateGroups": True,
         "showExtraHomepageFilters": True,
+        'showViewsCount': True
     }
 
 def get_site():

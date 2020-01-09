@@ -1,7 +1,7 @@
 from ariadne import ObjectType
 from django.core.exceptions import ObjectDoesNotExist
 from graphql import GraphQLError
-from core.models import User, Entity, Group
+from core.models import User, Entity, Group, EntityView, EntityViewCount
 from file.models import FileFolder
 from .query_viewer import resolve_viewer
 from .query_site import resolve_site
@@ -76,9 +76,28 @@ def resolve_entity(
     if not entity:
         raise GraphQLError(COULD_NOT_FIND)
 
+    # Increase view count of entities
+    try:
+        Entity.objects.get(id=entity.id)
+        try:
+            view_count = EntityViewCount.objects.get(entity=entity)
+        except ObjectDoesNotExist:
+            view_count = None
+
+        if view_count:
+            view_count.views += 1
+            view_count.save(update_fields=["views"])
+        else:
+            EntityViewCount.objects.create(entity=entity, views=1)
+
+        if user.is_authenticated:
+            EntityView.objects.create(entity=entity, viewer=user)
+    except ObjectDoesNotExist:
+        pass
+
     return entity
 
-# TODO: Implement breadcrumb
+# TODO: Implement breadcrumbs
 
 @query.field("breadcrumb")
 def resolve_breadcrumb(_, info, guid=None):

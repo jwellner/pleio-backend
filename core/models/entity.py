@@ -59,3 +59,16 @@ class Entity(models.Model):
 
     class Meta:
         ordering = ['created_at']
+
+
+class EntityView(models.Model):
+    entity = models.ForeignKey('core.Entity', on_delete=models.CASCADE, related_name="views")
+    viewer = models.ForeignKey('core.User', on_delete=models.CASCADE)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+
+class EntityViewCount(models.Model):
+    entity = models.OneToOneField('core.Entity', on_delete=models.CASCADE, related_name="view_count")
+    views = models.IntegerField(default=0)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
