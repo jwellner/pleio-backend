@@ -22,7 +22,7 @@ class TypeModels(Enum):
     event = "event.Event"
     wiki = "wiki.Wiki"
     question = "question.Question"
-    page = "cms.CmsPage"
+    page = "cms.Page"
     blog = "blog.Blog"
     group = "core.Group"
     user = "core.User"

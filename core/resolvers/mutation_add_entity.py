@@ -17,6 +17,7 @@ def resolve_add_entity(_, info, input):
     # pylint: disable=redefined-builtin
     # pylint: disable=too-many-statements
     # pylint: disable=too-many-branches
+    # TODO: check if non admins can add news (roles)
 
     user = info.context.user
 
