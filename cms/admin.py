@@ -1,11 +1,11 @@
 from reversion.admin import VersionAdmin
 
 from core import admin
-from .models import CmsPage
+from .models import Page
 
 
-class CmsPageAdmin(VersionAdmin):
+class PageAdmin(VersionAdmin):
     pass
 
 
-admin.site.register(CmsPage, CmsPageAdmin)
+admin.site.register(Page, PageAdmin)
