@@ -1,5 +1,7 @@
 from core.constances import ACCESS_TYPE
+from core.models import EntityViewCount
 from django.utils.text import Truncator
+from django.core.exceptions import ObjectDoesNotExist
 
 
 def resolve_entity_access_id(obj, info):
@@ -145,7 +147,10 @@ def resolve_entity_is_following(obj, info):
 
 def resolve_entity_views(obj, info):
     # pylint: disable=unused-argument
-    return 0
+    try:
+        return EntityViewCount.objects.get(entity=obj).views
+    except ObjectDoesNotExist:
+        return 0
 
 def resolve_entity_owner(obj, info):
     # pylint: disable=unused-argument
