@@ -686,6 +686,16 @@ type editWidgetPayload {
   clientMutationId: Int
 }
 
+input deleteWidgetInput {
+  guid: String!
+  clientMutationId: Int
+}
+
+type deleteWidgetPayload {
+  success: Boolean
+  clientMutationId: Int
+}
+
 interface Entity {
   guid: String!
   status: Int
@@ -1035,6 +1045,7 @@ type Mutation {
   deleteColumn(input: deleteColumnInput!): deleteColumnPayload
   addWidget(input: addWidgetInput!): addWidgetPayload
   editWidget(input: editWidgetInput!): editWidgetPayload
+  deleteWidget(input: deleteWidgetInput!): deleteWidgetPayload
   editNotifications(input: editNotificationsInput!): editNotificationsPayload
   editGroupNotifications(input: editGroupNotificationsInput!): editGroupNotificationsPayload
   editEmailOverview(input: editEmailOverviewInput!): editEmailOverviewPayload

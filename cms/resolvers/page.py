@@ -51,7 +51,7 @@ def resolve_columns(obj, info):
 @page.field("widgets")
 def resolve_widgets(obj, info):
     # pylint: disable=unused-argument
-    return []
+    return obj.widgets.all()
 
 
 page.set_field("guid", shared.resolve_entity_guid)

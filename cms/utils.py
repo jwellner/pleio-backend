@@ -1,6 +1,7 @@
 from cms.models import Row, Column
 from graphql import GraphQLError
 from core.constances import COULD_NOT_FIND
+from core.models import Widget
 
 
 def order_positions(parent_id):
@@ -11,6 +12,9 @@ def order_positions(parent_id):
     children = Row.objects.filter(parent_id=parent_id)
     if not children:
         children = Column.objects.filter(parent_id=parent_id)
+
+    if not children:
+        children = Widget.objects.filter(parent_id=parent_id)
 
     if not children:
         raise GraphQLError(COULD_NOT_FIND)
@@ -38,6 +42,9 @@ def reorder_positions(obj, old_position, new_position):
     children = Row.objects.filter(parent_id=obj.parent_id)
     if not children:
         children = Column.objects.filter(parent_id=obj.parent_id)
+
+    if not children:
+        children = Widget.objects.filter(parent_id=obj.parent_id)
 
     if not children:
         raise GraphQLError(COULD_NOT_FIND)
