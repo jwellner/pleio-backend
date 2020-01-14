@@ -630,6 +630,16 @@ type editRowPayload {
   clientMutationId: Int
 }
 
+input deleteRowInput {
+  guid: String!
+  clientMutationId: Int
+}
+
+type deleteRowPayload {
+  success: Boolean
+  clientMutationId: Int
+}
+
 input editSubgroupInput {
   id: Int
   name: String
@@ -1009,6 +1019,7 @@ type Mutation {
   editPage(input: editPageInput!): editPagePayload
   addRow(input: addRowInput!): addRowPayload
   editRow(input: editRowInput!): editRowPayload
+  deleteRow(input: deleteRowInput!): deleteRowPayload
   addColumn(input: addColumnInput!): addColumnPayload
   editColumn(input: editColumnInput!): editColumnPayload
   addWidget(input: addWidgetInput!): addWidgetPayload

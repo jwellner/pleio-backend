@@ -1,10 +1,11 @@
+import uuid
 from django.db import models
 from core.models import Entity
 
 
 class Page(Entity):
     """
-    Annotate content with user data
+    Page for CMS
     """
     PAGE_TYPES = (
         ('campagne', 'Campagne'),
@@ -28,3 +29,19 @@ class Page(Entity):
 
     def __str__(self):
         return self.title
+
+
+class Row(models.Model):
+    """
+    Row for CMS
+    """
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+
+    position = models.IntegerField(null=False)
+    is_full_width = models.BooleanField(default=False)
+    parent_id = models.UUIDField(default=uuid.uuid4)
+    page = models.ForeignKey('Page', related_name='rows', on_delete=models.CASCADE)
+
+    @property
+    def guid(self):
+        return str(self.id)

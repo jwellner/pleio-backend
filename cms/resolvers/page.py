@@ -36,7 +36,7 @@ def resolve_url(obj, info):
 @page.field("rows")
 def resolve_rows(obj, info):
     # pylint: disable=unused-argument
-    return []
+    return obj.rows.all()
 
 @page.field("columns")
 def resolve_columns(obj, info):
