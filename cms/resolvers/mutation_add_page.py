@@ -2,7 +2,7 @@ import reversion
 from graphql import GraphQLError
 from django.core.exceptions import ObjectDoesNotExist
 from core.lib import remove_none_from_dict, access_id_to_acl
-from core.constances import NOT_LOGGED_IN, COULD_NOT_FIND
+from core.constances import NOT_LOGGED_IN, COULD_NOT_SAVE, COULD_NOT_FIND
 from cms.models import Page
 
 
@@ -20,6 +20,9 @@ def resolve_add_page(_, info, input):
 
     with reversion.create_revision():
         entity = Page()
+
+        if not entity.can_write(user):
+            raise GraphQLError(COULD_NOT_SAVE)
 
         entity.owner = user
         entity.tags = clean_input.get("tags")

@@ -169,7 +169,7 @@ class PageTestCase(FastTenantTestCase):
         self.assertEqual(data["entity"]["richDescription"], "JSON to string")
         self.assertEqual(data["entity"]["tags"], [])
         self.assertEqual(data["entity"]["accessId"], 2)
-        self.assertEqual(data["entity"]["canEdit"], True)
+        self.assertEqual(data["entity"]["canEdit"], False)
         self.assertEqual(data["entity"]["parent"]["guid"], self.page_parent.guid)
         self.assertEqual(data["entity"]["hasChildren"], True)
         self.assertEqual(data["entity"]["url"], "/cms/view/{}/{}".format(self.page_child.guid, slugify(self.page_child.title)))

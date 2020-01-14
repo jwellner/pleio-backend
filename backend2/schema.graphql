@@ -455,6 +455,16 @@ type editColumnPayload {
   clientMutationId: Int
 }
 
+input deleteColumnInput {
+  guid: String!
+  clientMutationId: Int
+}
+
+type deleteColumnPayload {
+  success: Boolean
+  clientMutationId: Int
+}
+
 input editEmailOverviewInput {
   guid: String
   overview: Overview
@@ -1022,6 +1032,7 @@ type Mutation {
   deleteRow(input: deleteRowInput!): deleteRowPayload
   addColumn(input: addColumnInput!): addColumnPayload
   editColumn(input: editColumnInput!): editColumnPayload
+  deleteColumn(input: deleteColumnInput!): deleteColumnPayload
   addWidget(input: addWidgetInput!): addWidgetPayload
   editWidget(input: editWidgetInput!): editWidgetPayload
   editNotifications(input: editNotificationsInput!): editNotificationsPayload
