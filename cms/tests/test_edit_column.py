@@ -9,9 +9,9 @@ from core.models import Group, User
 from core.constances import ACCESS_TYPE
 from mixer.backend.django import mixer
 from graphql import GraphQLError
-from cms.models import Page, Row
+from cms.models import Page, Row, Column
 
-class EditRowTestCase(FastTenantTestCase):
+class EditColumnTestCase(FastTenantTestCase):
 
     def setUp(self):
         self.anonymousUser = AnonymousUser()
@@ -23,18 +23,20 @@ class EditRowTestCase(FastTenantTestCase):
                                 read_access=[ACCESS_TYPE.public],
                                 write_access=[ACCESS_TYPE.user.format(self.user.id)]
                                 )
-        self.row1 = mixer.blend(Row, position=0, parent_id=self.page.guid, page=self.page)
-        self.row2 = mixer.blend(Row, position=1, parent_id=self.page.guid, page=self.page)
-        self.row3 = mixer.blend(Row, position=2, parent_id=self.page.guid, page=self.page)
-        self.row4 = mixer.blend(Row, position=3, parent_id=self.page.guid, page=self.page)
-        self.row5 = mixer.blend(Row, position=4, parent_id=self.page.guid, page=self.page)
+        self.row = mixer.blend(Row, position=0, parent_id=self.page.guid, page=self.page)
 
-    def test_edit_row_move_up_positions_by_admin(self):
+        self.column1 = mixer.blend(Column, position=0, parent_id=self.row.guid, page=self.page, width=[3])
+        self.column2 = mixer.blend(Column, position=1, parent_id=self.row.guid, page=self.page, width=[3])
+        self.column3 = mixer.blend(Column, position=2, parent_id=self.row.guid, page=self.page, width=[3])
+        self.column4 = mixer.blend(Column, position=3, parent_id=self.row.guid, page=self.page, width=[3])
+        self.column5 = mixer.blend(Column, position=4, parent_id=self.row.guid, page=self.page, width=[3])
+
+    def test_edit_column_move_up_positions_by_admin(self):
 
         mutation = """
-            mutation EditRow($input: editRowInput!) {
-                editRow(input: $input) {
-                    row {
+            mutation EditColumn($input: editColumnInput!) {
+                editColumn(input: $input) {
+                    column {
                         guid
                         position
                     }
@@ -43,7 +45,7 @@ class EditRowTestCase(FastTenantTestCase):
         """
         variables = {
             "input": {
-                "guid": self.row2.guid,
+                "guid": self.column2.guid,
                 "position": 3
             }
         }
@@ -55,18 +57,18 @@ class EditRowTestCase(FastTenantTestCase):
 
         data = result[1]["data"]
 
-        self.assertEqual(data["editRow"]["row"]["position"], 3)
-        self.assertEqual(Row.objects.get(id=self.row1.id).position, 0)
-        self.assertEqual(Row.objects.get(id=self.row3.id).position, 1)
-        self.assertEqual(Row.objects.get(id=self.row4.id).position, 2)
-        self.assertEqual(Row.objects.get(id=self.row5.id).position, 4)
+        self.assertEqual(data["editColumn"]["column"]["position"], 3)
+        self.assertEqual(Column.objects.get(id=self.column1.id).position, 0)
+        self.assertEqual(Column.objects.get(id=self.column3.id).position, 1)
+        self.assertEqual(Column.objects.get(id=self.column4.id).position, 2)
+        self.assertEqual(Column.objects.get(id=self.column5.id).position, 4)
 
-    def test_edit_row_move_down_positions_by_admin(self):
+    def test_edit_column_move_down_positions_by_admin(self):
 
         mutation = """
-            mutation EditRow($input: editRowInput!) {
-                editRow(input: $input) {
-                    row {
+            mutation EditColumn($input: editColumnInput!) {
+                editColumn(input: $input) {
+                    column {
                         guid
                         position
                     }
@@ -75,7 +77,7 @@ class EditRowTestCase(FastTenantTestCase):
         """
         variables = {
             "input": {
-                "guid": self.row4.guid,
+                "guid": self.column4.guid,
                 "position": 1
             }
         }
@@ -87,19 +89,19 @@ class EditRowTestCase(FastTenantTestCase):
 
         data = result[1]["data"]
 
-        self.assertEqual(data["editRow"]["row"]["position"], 1)
-        self.assertEqual(Row.objects.get(id=self.row1.id).position, 0)
-        self.assertEqual(Row.objects.get(id=self.row2.id).position, 2)
-        self.assertEqual(Row.objects.get(id=self.row3.id).position, 3)
-        self.assertEqual(Row.objects.get(id=self.row5.id).position, 4)
+        self.assertEqual(data["editColumn"]["column"]["position"], 1)
+        self.assertEqual(Column.objects.get(id=self.column1.id).position, 0)
+        self.assertEqual(Column.objects.get(id=self.column2.id).position, 2)
+        self.assertEqual(Column.objects.get(id=self.column3.id).position, 3)
+        self.assertEqual(Column.objects.get(id=self.column5.id).position, 4)
 
 
-    def test_edit_row_move_up_positions_by_anonymous(self):
+    def test_edit_column_move_up_positions_by_anonymous(self):
 
         mutation = """
-            mutation EditRow($input: editRowInput!) {
-                editRow(input: $input) {
-                    row {
+            mutation EditColumn($input: editColumnInput!) {
+                editColumn(input: $input) {
+                    column {
                         guid
                         position
                     }
@@ -108,7 +110,7 @@ class EditRowTestCase(FastTenantTestCase):
         """
         variables = {
             "input": {
-                "guid": self.row2.guid,
+                "guid": self.column2.guid,
                 "position": 3
             }
         }
@@ -123,12 +125,12 @@ class EditRowTestCase(FastTenantTestCase):
         self.assertEqual(errors[0]["message"], "not_logged_in")
 
 
-    def test_edit_row_move_up_positions_by_user(self):
+    def test_edit_column_move_up_positions_by_user(self):
 
         mutation = """
-            mutation EditRow($input: editRowInput!) {
-                editRow(input: $input) {
-                    row {
+            mutation EditColumn($input: editColumnInput!) {
+                editColumn(input: $input) {
+                    column {
                         guid
                         position
                     }
@@ -137,7 +139,7 @@ class EditRowTestCase(FastTenantTestCase):
         """
         variables = {
             "input": {
-                "guid": self.row2.guid,
+                "guid": self.column2.guid,
                 "position": 3
             }
         }

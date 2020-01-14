@@ -1,4 +1,6 @@
-from cms.models import Row
+from cms.models import Row, Column
+from graphql import GraphQLError
+from core.constances import COULD_NOT_FIND
 
 
 def order_positions(parent_id):
@@ -7,6 +9,12 @@ def order_positions(parent_id):
     """
 
     children = Row.objects.filter(parent_id=parent_id)
+    if not children:
+        children = Column.objects.filter(parent_id=parent_id)
+
+    if not children:
+        raise GraphQLError(COULD_NOT_FIND)
+
     sorted_children = sorted(children, key=lambda k: k.position)
 
     position = 0
@@ -28,6 +36,11 @@ def reorder_positions(obj, old_position, new_position):
         return
 
     children = Row.objects.filter(parent_id=obj.parent_id)
+    if not children:
+        children = Column.objects.filter(parent_id=obj.parent_id)
+
+    if not children:
+        raise GraphQLError(COULD_NOT_FIND)
 
     # If no old_position provided, raise_one all children with same position or higher. Skip altered object.
     if not old_position:

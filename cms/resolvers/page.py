@@ -33,6 +33,11 @@ def resolve_url(obj, info):
         obj.guid, slugify(obj.title)
     ).lower()
 
+@page.field("canEdit")
+def resolve_can_edit(obj, info):
+    # pylint: disable=unused-argument
+    return obj.can_write(info.context.user)
+
 @page.field("rows")
 def resolve_rows(obj, info):
     # pylint: disable=unused-argument
@@ -41,7 +46,7 @@ def resolve_rows(obj, info):
 @page.field("columns")
 def resolve_columns(obj, info):
     # pylint: disable=unused-argument
-    return []
+    return obj.columns.all()
 
 @page.field("widgets")
 def resolve_widgets(obj, info):
@@ -58,5 +63,4 @@ page.set_field("excerpt", shared.resolve_entity_excerpt)
 page.set_field("tags", shared.resolve_entity_tags)
 page.set_field("timeCreated", shared.resolve_entity_time_created)
 page.set_field("timeUpdated", shared.resolve_entity_time_updated)
-page.set_field("canEdit", shared.resolve_entity_can_edit)
 page.set_field("accessId", shared.resolve_entity_access_id)

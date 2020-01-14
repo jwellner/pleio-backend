@@ -1,6 +1,7 @@
 import uuid
 from django.db import models
 from core.models import Entity
+from django.contrib.postgres.fields import ArrayField
 
 
 class Page(Entity):
@@ -27,6 +28,11 @@ class Page(Entity):
             return True
         return False
 
+    def can_write(self, user):
+        if user.is_authenticated and user.is_admin:
+            return True
+        return False
+
     def __str__(self):
         return self.title
 
@@ -41,6 +47,22 @@ class Row(models.Model):
     is_full_width = models.BooleanField(default=False)
     parent_id = models.UUIDField(default=uuid.uuid4)
     page = models.ForeignKey('Page', related_name='rows', on_delete=models.CASCADE)
+
+    @property
+    def guid(self):
+        return str(self.id)
+
+
+class Column(models.Model):
+    """
+    Column for CMS
+    """
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+
+    position = models.IntegerField(null=False)
+    width = ArrayField(models.IntegerField())
+    parent_id = models.UUIDField(default=uuid.uuid4)
+    page = models.ForeignKey('Page', related_name='columns', on_delete=models.CASCADE)
 
     @property
     def guid(self):
