@@ -1,9 +1,7 @@
 from ariadne import ObjectType
 from event.models import Event
-from graphql import GraphQLError
 from datetime import datetime
 from django.utils import timezone
-from core.constances import INVALID_FILTER
 
 query = ObjectType("Query")
 
@@ -21,12 +19,11 @@ def resolve_events(obj, info, filter=None, containerGuid=None, offset=0, limit=2
     # pylint: disable=redefined-builtin
 
     events = Event.objects.visible(info.context.user)
-    if filter == 'upcoming':
-        events = events.filter(start_date__gt=get_end_of_yesterday())
-    elif filter == 'previous':
+    
+    if filter == 'previous':
         events = events.filter(start_date__lte=get_end_of_yesterday())
     else:
-        raise GraphQLError(INVALID_FILTER)
+        events = events.filter(start_date__gt=get_end_of_yesterday())
 
     return {
         'total': events.count(),

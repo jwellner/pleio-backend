@@ -11,8 +11,9 @@ def resolve_guid(obj, info):
 @widget.field("containerGuid")
 def resolve_container_guid(obj, info):
     # pylint: disable=unused-argument
-    # TODO: implement widget with container page
-    return obj.group.guid
+    if obj.group:
+        return obj.group.guid
+    return obj.page.guid
 
 @widget.field("position")
 def resolve_position(obj, info):
