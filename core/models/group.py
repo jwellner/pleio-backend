@@ -2,7 +2,9 @@ import uuid
 from django.db import models
 from django.contrib.postgres.fields import ArrayField, JSONField
 from django.core.exceptions import ObjectDoesNotExist
+from django.utils.text import slugify
 from core.lib import ACCESS_TYPE
+
 
 class GroupManager(models.Manager):
     def visible(self, user):
@@ -110,6 +112,11 @@ class Group(models.Model):
     def guid(self):
         return str(self.id)
 
+    @property
+    def url(self):
+        return "/groups/view/{}/{}".format(self.guid, slugify(self.name))
+
+    @property
     def type_to_string(self):
         return 'group'
 

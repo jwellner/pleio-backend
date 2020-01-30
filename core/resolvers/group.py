@@ -1,5 +1,4 @@
 from ariadne import ObjectType
-from django.utils.text import slugify
 from core.constances import MEMBERSHIP
 from core.lib import get_access_ids
 from core.models import User, GroupInvitation, Subgroup
@@ -30,7 +29,7 @@ def resolve_welcome_message(obj, info):
 @group.field("url")
 def resolve_group_url(obj, info):
     # pylint: disable=unused-argument
-    return "/groups/view/{}/{}".format(obj.guid, slugify(obj.name))
+    return obj.url
 
 @group.field("isClosed")
 def resolve_group_is_closed(obj, info):

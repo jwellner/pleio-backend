@@ -1,5 +1,4 @@
 from ariadne import ObjectType
-from django.utils.text import slugify
 from core.resolvers import shared
 
 
@@ -9,7 +8,7 @@ task = ObjectType("Task")
 @task.field("subtype")
 def resolve_excerpt(obj, info):
     # pylint: disable=unused-argument
-    return obj.type_to_string()
+    return obj.type_to_string
 
 @task.field("inGroup")
 def resolve_in_group(obj, info):
@@ -24,17 +23,7 @@ def resolve_group(obj, info):
 @task.field("url")
 def resolve_url(obj, info):
     # pylint: disable=unused-argument
-
-    prefix = ''
-
-    if obj.group:
-        prefix = '/groups/view/{}/{}'.format(
-            obj.group.guid, slugify(obj.group.name)
-        )
-
-    return '{}/task/view/{}/{}'.format(
-        prefix, obj.guid, slugify(obj.title)
-    ).lower()
+    return obj.url
 
 @task.field("state")
 def resolve_state(obj, info):

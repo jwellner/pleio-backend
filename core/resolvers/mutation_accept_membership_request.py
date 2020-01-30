@@ -1,10 +1,9 @@
 from graphql import GraphQLError
 from django.core.exceptions import ObjectDoesNotExist
-from django.utils.text import slugify
 from django.utils.translation import ugettext_lazy
 from core.models import Group, User
 from core.constances import NOT_LOGGED_IN, COULD_NOT_FIND, COULD_NOT_SAVE
-from core.lib import remove_none_from_dict, send_mail_multi, get_base_url
+from core.lib import remove_none_from_dict, send_mail_multi, get_base_url, get_default_email_context
 
 def resolve_accept_membership_request(_, info, input):
     # pylint: disable=redefined-builtin
@@ -27,15 +26,19 @@ def resolve_accept_membership_request(_, info, input):
     except ObjectDoesNotExist:
         raise GraphQLError(COULD_NOT_FIND)
 
-    if group.is_full_member(user):
+    if group.is_full_member(requesting_user):
         return {
             "group": group
         }
 
-    group.join(user, 'member')
+    group.join(requesting_user, 'member')
     subject = ugettext_lazy("Request for access to the %s group has been approved" % group.name)
-    link = get_base_url(info.context) + "/groups/view/{}/{}".format(group.guid, slugify(group.name))
-    context = {'link': link, 'group_name': group.name, 'user_name': user.name}
+    link = get_base_url(info.context) + group.url
+
+    context = get_default_email_context(info.context)
+    context['group_name'] = group.name
+    context['link'] = link
+
     email = send_mail_multi(subject, 'email/accept_membership_request.html', context, [requesting_user.email])
     email.send()
 

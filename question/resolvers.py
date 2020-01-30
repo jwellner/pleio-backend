@@ -1,7 +1,6 @@
 from ariadne import ObjectType
 from graphql import GraphQLError
 from django.core.exceptions import ObjectDoesNotExist
-from django.utils.text import slugify
 from core.resolvers import shared
 from core.lib import remove_none_from_dict
 from core.models import Comment
@@ -46,17 +45,7 @@ def resolve_is_recommended(obj, info):
 @question.field("url")
 def resolve_url(obj, info):
     # pylint: disable=unused-argument
-
-    prefix = ''
-
-    if obj.group:
-        prefix = '/groups/view/{}/{}'.format(
-            obj.group.guid, slugify(obj.group.name)
-        )
-
-    return '{}/questions/view/{}/{}'.format(
-        prefix, obj.guid, slugify(obj.title)
-    ).lower()
+    return obj.url
 
 @question.field("isClosed")
 def resolve_is_closed(obj, info):

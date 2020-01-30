@@ -1,5 +1,4 @@
 from ariadne import ObjectType
-from django.utils.text import slugify
 from core.resolvers import shared
 
 
@@ -9,7 +8,7 @@ status_update = ObjectType("StatusUpdate")
 @status_update.field("subtype")
 def resolve_excerpt(obj, info):
     # pylint: disable=unused-argument
-    return obj.type_to_string()
+    return obj.type_to_string
 
 @status_update.field("inGroup")
 def resolve_in_group(obj, info):
@@ -24,17 +23,7 @@ def resolve_group(obj, info):
 @status_update.field("url")
 def resolve_url(obj, info):
     # pylint: disable=unused-argument
-
-    prefix = ''
-
-    if obj.group:
-        prefix = '/groups/view/{}/{}'.format(
-            obj.group.guid, slugify(obj.group.name)
-        )
-
-    return '{}#{}'.format(
-        prefix, obj.guid
-    ).lower()
+    return obj.url
 
 
 status_update.set_field("guid", shared.resolve_entity_guid)

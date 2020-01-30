@@ -1,3 +1,35 @@
+{% extends "email/base.html" %}
+
+{% block title %}{{subject}}{% endblock %}
+
+{% block link_color %} 
+    a { color:{{primary_color}}; text-decoration:underline }
+{% endblock %}
+
+{% block header %}
+    {% include "email/header.html" %}
+{% endblock %}
+
+{% block notification_overview %}
+
 {% for notification in notifications  %}
-  <p>{{ notification.action }}</p>
-{% endfor %}
+    {% if notification.entity.type_to_string == 'blog' %}
+        {% include "email/notifications/blog.html" %}
+    {% endif %}
+    {% if notification.entity.type_to_string == 'discussion' %}
+        {% include "email/notifications/discussion.html" %}
+    {% endif %}
+    {% if notification.entity.type_to_string == 'event' %}
+        {% include "email/notifications/event.html" %}
+    {% endif %}
+    {% if notification.entity.type_to_string == 'question' %}
+        {% include "email/notifications/question.html" %}
+    {% endif %}    
+    {% if notification.entity.type_to_string == 'wiki' %}
+        {% include "email/notifications/wiki.html" %}
+    {% endif %}
+    {% if notification.entity.type_to_string == 'thewire' %}
+        {% include "email/notifications/update.html" %}
+    {% endif %}    
+  {% endfor %}
+{% endblock %}

@@ -1,4 +1,5 @@
 from django.db import models
+from django.utils.text import slugify
 from core.models import Entity, VoteMixin, CommentMixin, BookmarkMixin, FollowMixin
 from file.models import FileFolder
 
@@ -30,5 +31,12 @@ class News(Entity, VoteMixin, BookmarkMixin, FollowMixin, CommentMixin):
     def __str__(self):
         return self.title
 
+    @property
     def type_to_string(self):
         return 'news'
+
+    @property
+    def url(self):
+        return '/news/view/{}/{}'.format(
+            self.guid, slugify(self.title)
+        ).lower()

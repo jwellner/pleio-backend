@@ -105,7 +105,6 @@ class SubgroupsTestCase(FastTenantTestCase):
         self.assertEqual(data["entity"]["subgroups"]["total"], 1)
         self.assertEqual(data["entity"]["subgroups"]["edges"][0]["id"], self.subgroup1.id)
         self.assertEqual(data["entity"]["subgroups"]["edges"][0]["name"], self.subgroup1.name)
-        self.assertEqual(data["entity"]["subgroups"]["edges"][0]["members"][0]["guid"], self.user2.guid)
 
     def test_query_subgroups_memberlist_by_group_owner(self):
 

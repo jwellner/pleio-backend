@@ -82,10 +82,12 @@ class AcceptMembershipRequestTestCase(FastTenantTestCase):
 
         link = "https://test.test" + "/groups/view/{}/{}".format(self.group1.guid, slugify(self.group1.name))
         subject = ugettext_lazy("Request for access to the %s group has been approved" % self.group1.name)
+        user_url = 'https://test.test' + self.user1.url
 
         self.assertEqual(data["acceptMembershipRequest"]["group"]["guid"], self.group1.guid)
-        mocked_send_mail_multi.assert_called_once_with(subject, 'email/accept_membership_request.html', {'link': link, 'group_name': self.group1.name,
-                                                       'user_name': self.user1.name}, [self.user2.email])
+        mocked_send_mail_multi.assert_called_once_with(subject, 'email/accept_membership_request.html', {'user_name': self.user1.name, 'user_url': user_url, 
+            'site_url': 'https://test.test', 'site_name': 'Pleio 2.0', 'primary_color': '#0e2f56', 'group_name': self.group1.name, 'link': link}, [self.user2.email])
+
 
     @override_settings(ALLOWED_HOSTS=['test.test'])
     @mock.patch('core.resolvers.mutation_accept_membership_request.send_mail_multi')
@@ -134,10 +136,11 @@ class AcceptMembershipRequestTestCase(FastTenantTestCase):
 
         link = "https://test.test" + "/groups/view/{}/{}".format(self.group1.guid, slugify(self.group1.name))
         subject = ugettext_lazy("Request for access to the %s group has been approved" % self.group1.name)
+        user_url = 'https://test.test' + self.admin.url
 
         self.assertEqual(data["acceptMembershipRequest"]["group"]["guid"], self.group1.guid)
-        mocked_send_mail_multi.assert_called_once_with(subject, 'email/accept_membership_request.html', {'link': link, 'group_name': self.group1.name,
-                                                       'user_name': self.admin.name}, [self.user2.email])
+        mocked_send_mail_multi.assert_called_once_with(subject, 'email/accept_membership_request.html', {'user_name': self.admin.name, 'user_url': user_url, 
+            'site_url': 'https://test.test', 'site_name': 'Pleio 2.0', 'primary_color': '#0e2f56', 'group_name': self.group1.name, 'link': link}, [self.user2.email])
 
     @override_settings(ALLOWED_HOSTS=['test.test'])
     @mock.patch('core.resolvers.mutation_accept_membership_request.send_mail_multi')

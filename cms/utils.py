@@ -43,10 +43,10 @@ def reorder_positions(obj, old_position, new_position):
     if old_position == new_position:
         return
 
-    if obj.type_to_string() == 'page':
+    if obj.type_to_string == 'page':
         children = Page.objects.filter(parent=obj.parent)
 
-    if obj.type_to_string() == 'wiki':
+    if obj.type_to_string == 'wiki':
         children = Wiki.objects.filter(parent=obj.parent)
 
     if not children:

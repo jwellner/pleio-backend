@@ -1,6 +1,7 @@
 from django.db import models
 from core.models import Entity, CommentMixin, BookmarkMixin, User
 from django.core.exceptions import ObjectDoesNotExist
+from django.utils.text import slugify
 from file.models import FileFolder
 
 class Event(Entity, CommentMixin, BookmarkMixin):
@@ -46,8 +47,22 @@ class Event(Entity, CommentMixin, BookmarkMixin):
     def __str__(self):
         return self.title
 
+    @property
     def type_to_string(self):
         return 'event'
+
+    @property
+    def url(self):
+        prefix = ''
+
+        if self.group:
+            prefix = '/groups/view/{}/{}'.format(
+                self.group.guid, slugify(self.group.name)
+            )
+
+        return '{}/events/view/{}/{}'.format(
+            prefix, self.guid, slugify(self.title)
+        ).lower()
 
 
 class EventAttendee(models.Model):

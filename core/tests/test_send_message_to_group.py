@@ -1,6 +1,7 @@
 from django.conf import settings
 from django.db import connection
 from django_tenants.test.cases import FastTenantTestCase
+from django.test import override_settings
 from backend2.schema import schema
 from ariadne import graphql_sync
 import json
@@ -35,6 +36,7 @@ class SendMessageToGroupTestCase(FastTenantTestCase):
         self.user3.delete()
         self.user4.delete()
 
+    @override_settings(ALLOWED_HOSTS=['test.test'])
     @mock.patch('core.resolvers.mutation_send_message_to_group.send_mail_multi')
     def test_send_message_to_group_by_group_owner(self, mocked_send_mail_multi):
         mutation = """
@@ -62,15 +64,26 @@ class SendMessageToGroupTestCase(FastTenantTestCase):
 
         request = HttpRequest()
         request.user = self.user1
+        request.META = {
+            'HTTP_HOST': 'test.test'
+        }
 
         result = graphql_sync(schema, {"query": mutation, "variables": variables}, context_value=request)
 
         data = result[1]["data"]
 
         self.assertEqual(data["sendMessageToGroup"]["group"]["guid"], self.group1.guid)
-        mocked_send_mail_multi.assert_called_once_with("testMessageSubject", "email/send_message_to_group.html",
-                                                       {"message": "<p>testMessageContent</p>"}, [self.user2.email, self.user3.email])
 
+        subject = "Message from group {0}: {1}".format(self.group1.name, 'testMessageSubject')
+        user_url = 'https://test.test' + self.user1.url
+        mocked_send_mail_multi.assert_called_once_with(subject, 'email/send_message_to_group.html',
+                                                       {'user_name': self.user1.name, 'user_url': user_url,
+                                                        'site_url': 'https://test.test', 'site_name': 'Pleio 2.0', 'primary_color': '#0e2f56',
+                                                        'message': '<p>testMessageContent</p>'}, [self.user2.email, self.user3.email])
+
+
+
+    @override_settings(ALLOWED_HOSTS=['test.test'])
     @mock.patch('core.resolvers.mutation_send_message_to_group.send_mail_multi')
     def test_send_message_to_group_by_admin(self, mocked_send_mail_multi):
         mutation = """
@@ -98,14 +111,21 @@ class SendMessageToGroupTestCase(FastTenantTestCase):
 
         request = HttpRequest()
         request.user = self.admin
+        request.META = {
+            'HTTP_HOST': 'test.test'
+        }
 
         result = graphql_sync(schema, {"query": mutation, "variables": variables}, context_value=request)
 
         data = result[1]["data"]
 
-        self.assertEqual(data["sendMessageToGroup"]["group"]["guid"], self.group1.guid)
-        mocked_send_mail_multi.assert_called_once_with("testMessageSubject", "email/send_message_to_group.html",
-                                                       {"message": "<p>testMessageContent</p>"}, [self.user2.email, self.user3.email])
+        subject = "Message from group {0}: {1}".format(self.group1.name, 'testMessageSubject')
+        user_url = 'https://test.test' + self.admin.url
+        mocked_send_mail_multi.assert_called_once_with(subject, 'email/send_message_to_group.html',
+                                                       {'user_name': self.admin.name, 'user_url': user_url,
+                                                        'site_url': 'https://test.test', 'site_name': 'Pleio 2.0', 'primary_color': '#0e2f56',
+                                                        'message': '<p>testMessageContent</p>'}, [self.user2.email, self.user3.email])
+
 
     @mock.patch('core.resolvers.mutation_send_message_to_group.send_mail_multi')
     def test_send_message_to_group_by_group_member(self, mocked_send_mail_multi):
@@ -214,6 +234,7 @@ class SendMessageToGroupTestCase(FastTenantTestCase):
         assert not mocked_send_mail_multi.called
 
 
+    @override_settings(ALLOWED_HOSTS=['test.test'])
     @mock.patch('core.resolvers.mutation_send_message_to_group.send_mail_multi')
     def test_send_message_as_test_by_group_owner(self, mocked_send_mail_multi):
         mutation = """
@@ -242,11 +263,17 @@ class SendMessageToGroupTestCase(FastTenantTestCase):
 
         request = HttpRequest()
         request.user = self.user1
+        request.META = {
+            'HTTP_HOST': 'test.test'
+        }
 
         result = graphql_sync(schema, {"query": mutation, "variables": variables}, context_value=request)
 
         data = result[1]["data"]
 
-        self.assertEqual(data["sendMessageToGroup"]["group"]["guid"], self.group1.guid)
-        mocked_send_mail_multi.assert_called_once_with("testMessageSubject", "email/send_message_to_group.html",
-                                                       {"message": "<p>testMessageContent</p>"}, [self.user1.email])
+        subject = "Message from group {0}: {1}".format(self.group1.name, 'testMessageSubject')
+        user_url = 'https://test.test' + self.user1.url
+        mocked_send_mail_multi.assert_called_once_with(subject, 'email/send_message_to_group.html',
+                                                       {'user_name': self.user1.name, 'user_url': user_url,
+                                                        'site_url': 'https://test.test', 'site_name': 'Pleio 2.0', 'primary_color': '#0e2f56',
+                                                        'message': '<p>testMessageContent</p>'}, [self.user1.email])

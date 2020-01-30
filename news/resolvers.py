@@ -1,5 +1,4 @@
 from ariadne import ObjectType
-from django.utils.text import slugify
 from core.resolvers import shared
 
 news = ObjectType("News")
@@ -46,10 +45,7 @@ def resolve_is_recommended(obj, info):
 @news.field("url")
 def resolve_url(obj, info):
     # pylint: disable=unused-argument
-
-    return '/news/view/{}/{}'.format(
-        obj.guid, slugify(obj.title)
-    ).lower()
+    return obj.url
 
 
 news.set_field("guid", shared.resolve_entity_guid)

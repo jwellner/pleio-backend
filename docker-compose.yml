@@ -72,7 +72,12 @@ services:
     ports: ['8200:8200']
     command: --strict.perms=false -e  # -e flag to log to stderr and disable syslog/file output
     depends_on: ['elasticsearch', 'kibana']
-
+  mailcatcher:
+    restart: on-failure:10
+    image: dockage/mailcatcher:0.7.1
+    ports:
+    - "1080:1080"
+    - "1025:1025"
 
 volumes:
   postgres_data:
