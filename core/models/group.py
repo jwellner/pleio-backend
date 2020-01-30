@@ -189,3 +189,7 @@ class Subgroup(models.Model):
     name = models.CharField(max_length=512)
     members = models.ManyToManyField('core.User', related_name='subgroups')
     group = models.ForeignKey('core.Group', related_name='subgroups', on_delete=models.CASCADE)
+
+    @property
+    def access_id(self):
+        return 10000 + self.id

@@ -80,7 +80,7 @@ def get_acl(user):
             acl = acl.union(groups)
         if user.subgroups:
             subgroups = set(
-                ACCESS_TYPE.subgroup.format(subgroup.id) for subgroup in user.subgroups.all()
+                ACCESS_TYPE.subgroup.format(subgroup.access_id) for subgroup in user.subgroups.all()
             )
             acl = acl.union(subgroups)
 
@@ -123,7 +123,7 @@ def get_access_ids(obj=None):
         accessIds.append({ 'id': 4, 'description': "Group: {}".format(obj.name)})
         if obj.subgroups:
             for subgroup in obj.subgroups.all():
-                accessIds.append({ 'id': subgroup.id, 'description': "Subgroup: {}".format(subgroup.name)})
+                accessIds.append({ 'id': subgroup.access_id, 'description': "Subgroup: {}".format(subgroup.name)})
 
     if isinstance(obj, apps.get_model('core.Group')) and obj.is_closed:
         pass
