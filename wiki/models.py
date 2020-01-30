@@ -7,8 +7,9 @@ class Wiki(Entity, BookmarkMixin):
     Wiki
     """
     class Meta:
-        ordering = ['-created_at']
+        ordering = ['position', '-created_at']
 
+    position = models.IntegerField(null=False, default=0)
     title = models.CharField(max_length=256)
     description = models.TextField()
     rich_description = models.TextField(null=True, blank=True)

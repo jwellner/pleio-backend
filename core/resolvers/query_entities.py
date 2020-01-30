@@ -53,6 +53,7 @@ def resolve_entities(
     # pylint: disable=unused-argument
     # pylint: disable=too-many-arguments
     # pylint: disable=redefined-builtin
+    # TODO: exclude page objects of subtype not is page?
 
     if not subtype or subtype == 'all':
         Model = Entity
@@ -75,6 +76,9 @@ def resolve_entities(
     entities = Model.objects.visible(info.context.user)
     entities = entities.filter(conditional_group_filter(subtype, containerGuid) & conditional_tags_filter(tags) &
                                conditional_is_featured_filter(subtype, isFeatured))
+    if subtype and subtype == 'page':
+        entities = entities.filter(parent=None)
+
     entities = entities.order_by(order_by).select_subclasses()
     entities = entities[offset:offset+limit]
 

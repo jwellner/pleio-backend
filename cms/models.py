@@ -14,7 +14,7 @@ class Page(Entity):
     )
 
     class Meta:
-        ordering = ['-id']
+        ordering = ['position', '-created_at']
 
     title = models.CharField(max_length=256)
     description = models.TextField()
@@ -22,6 +22,8 @@ class Page(Entity):
 
     page_type = models.CharField(max_length=256, choices=PAGE_TYPES)
     parent = models.ForeignKey('self', blank=True, null=True, related_name='children', on_delete=models.CASCADE)
+
+    position = models.IntegerField(null=False, default=0)
 
     def has_children(self):
         if self.children.count() > 0:
@@ -35,6 +37,9 @@ class Page(Entity):
 
     def __str__(self):
         return self.title
+
+    def type_to_string(self):
+        return 'page'
 
 
 class Row(models.Model):
@@ -52,6 +57,8 @@ class Row(models.Model):
     def guid(self):
         return str(self.id)
 
+    def type_to_string(self):
+        return 'row'
 
 class Column(models.Model):
     """
@@ -67,3 +74,6 @@ class Column(models.Model):
     @property
     def guid(self):
         return str(self.id)
+
+    def type_to_string(self):
+        return 'column'
