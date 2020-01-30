@@ -2,6 +2,7 @@ import uuid
 from django.db import models
 from django.contrib.postgres.fields import ArrayField, JSONField
 from django.core.exceptions import ObjectDoesNotExist
+from core.lib import ACCESS_TYPE
 
 class GroupManager(models.Manager):
     def visible(self, user):
@@ -108,6 +109,12 @@ class Group(models.Model):
     @property
     def guid(self):
         return str(self.id)
+
+    def type_to_string(self):
+        return 'group'
+
+    def search_read_access(self):
+        return [ACCESS_TYPE.public]
 
 
 class GroupMembership(models.Model):

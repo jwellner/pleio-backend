@@ -10,6 +10,7 @@ from .query_groups import resolve_groups
 from .query_bookmarks import resolve_bookmarks
 from .query_search import resolve_search
 from .query_users import resolve_users
+from .query_filters import resolve_filters
 from .query_trending import resolve_trending
 from .query_notifications import resolve_notifications
 from .query_recommended import resolve_recommended
@@ -29,6 +30,7 @@ query.set_field("notifications", resolve_notifications)
 query.set_field("trending", resolve_trending)
 query.set_field("recommended", resolve_recommended)
 query.set_field("top", resolve_top)
+query.set_field("filters", resolve_filters)
 
 
 @query.field("entity")
@@ -103,13 +105,6 @@ def resolve_breadcrumb(_, info, guid=None):
     # pylint: disable=unused-argument
     return []
 
-
-@query.field('filters')
-def resolve_filters(_, info):
-    # pylint: disable=unused-argument
-    return {
-        'users': None
-    }
 
 @query.field("files")
 def resolve_files(_, info, containerGuid=None, filter=None, orderBy=ORDER_BY.timeCreated, orderDirection=ORDER_DIRECTION.asc, offset=0, limit=20):

@@ -1,11 +1,11 @@
 from django_elasticsearch_dsl import fields
 from django_elasticsearch_dsl.registries import registry
-from .models import Discussion
+from .models import Question
 from core.documents import DefaultDocument
 
 
 @registry.register_document
-class DiscussionDocument(DefaultDocument):
+class QuestionDocument(DefaultDocument):
     id = fields.StringField()
     tags = fields.ListField(fields.StringField())
     read_access = fields.ListField(fields.StringField())
@@ -15,8 +15,8 @@ class DiscussionDocument(DefaultDocument):
         name = 'entities'
 
     class Django:
-        model = Discussion
-
+        model = Question
+        
         fields = [
             'title',
             'description',
