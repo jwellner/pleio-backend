@@ -103,7 +103,7 @@ Create (public) container:
 
 ### Build search index
 
-`docker-compose exec api python manage.py search_index --rebuild`
+`docker-compose exec api python manage.py tenant_command search_index --rebuild --schema=qw `
 
 ## Translations
 

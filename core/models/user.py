@@ -231,8 +231,8 @@ class UserProfileField(models.Model):
     objects = UserProfileFieldManager()
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    user_profile = models.ForeignKey('core.UserProfile', on_delete=models.CASCADE)
-    profile_field = models.ForeignKey('core.ProfileField', on_delete=models.CASCADE)
+    user_profile = models.ForeignKey('core.UserProfile', on_delete=models.CASCADE, related_name="user_profile_fields")
+    profile_field = models.ForeignKey('core.ProfileField', on_delete=models.CASCADE, related_name="profile_fields")
     value = models.CharField(max_length=4096)
     read_access = ArrayField(
         models.CharField(max_length=64),
@@ -244,3 +244,11 @@ class UserProfileField(models.Model):
         blank=True,
         default=write_access_default
     )
+
+    @property
+    def name(self):
+        return str(self.profile_field.name)
+
+    @property
+    def key(self):
+        return str(self.profile_field.key)
