@@ -34,7 +34,7 @@ class SubgroupsTestCase(FastTenantTestCase):
         self.subgroup1 = Subgroup.objects.create(
             name='testSubgroup1',
             group=self.group,
-            id=10000
+            id=1
         )
         self.subgroup1.members.add(self.user2)
         self.subgroup1.members.add(self.user3)
@@ -46,7 +46,7 @@ class SubgroupsTestCase(FastTenantTestCase):
             title="Test subgroup blog",
             description="Description",
             rich_description="JSON to string",
-            read_access=[ACCESS_TYPE.user.format(self.user1.id), ACCESS_TYPE.subgroup.format(self.subgroup1.id)],
+            read_access=[ACCESS_TYPE.user.format(self.user1.id), ACCESS_TYPE.subgroup.format(self.subgroup1.access_id)],
             write_access=[ACCESS_TYPE.user.format(self.user1.id)],
             owner=self.user1,
             group=self.group,
@@ -214,7 +214,7 @@ class SubgroupsTestCase(FastTenantTestCase):
 
         self.assertEqual(data["entity"]["guid"], self.group.guid)
         self.assertEqual(data["entity"]["defaultAccessId"], 1)
-        self.assertEqual(data["entity"]["accessIds"][2]["id"], 10000)
+        self.assertEqual(data["entity"]["accessIds"][2]["id"], 10001)
 
 
     def test_blog_in_subgroup_by_subgroup_member(self):
@@ -252,7 +252,7 @@ class SubgroupsTestCase(FastTenantTestCase):
         data = result[1]["data"]
        
         self.assertEqual(data["entity"]["guid"], self.blog.guid)
-        self.assertEqual(data["entity"]["accessId"], 10000)
+        self.assertEqual(data["entity"]["accessId"], 10001)
 
     def test_blog_in_subgroup_by_non_subgroup_member(self):
 

@@ -55,6 +55,6 @@ class AddImageTestCase(FastTenantTestCase):
         result = graphql_sync(schema, {"query": self.mutation, "variables": variables}, context_value=request)
 
         data = result[1]["data"]
-        print(data["addImage"]["file"]["url"])
+
         self.assertIsNotNone(data["addImage"]["file"]["guid"])
         self.assertIsNotNone(data["addImage"]["file"]["url"])
