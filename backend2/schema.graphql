@@ -95,6 +95,7 @@ type addEntityPayload {
 input addFileInput {
   containerGuid: String
   file: Upload
+  tags: [String]
   accessId: Int
   writeAccessId: Int
   clientMutationId: Int
@@ -507,6 +508,7 @@ input editFileFolderInput {
   guid: String
   title: String
   file: Upload
+  tags: [String]
   accessId: Int
   writeAccessId: Int
   isAccessRecursive: Boolean

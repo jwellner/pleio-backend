@@ -26,7 +26,8 @@ class AddFileTestCase(FastTenantTestCase):
         self.data = {
             "input": {
                 "containerGuid": self.group.guid,
-                "file": "test.gif"
+                "file": "test.gif",
+                "tags": ["tag_one", "tag_two"]
             }
         }
         self.mutation = """
@@ -76,3 +77,5 @@ class AddFileTestCase(FastTenantTestCase):
         self.assertEqual(data["addFile"]["entity"]["title"], file_mock.name)
         self.assertEqual(data["addFile"]["entity"]["mimeType"], file_mock.content_type)
         self.assertEqual(data["addFile"]["entity"]["group"]["guid"], self.group.guid)
+        self.assertEqual(data["addFile"]["entity"]["tags"][0], "tag_one")
+        self.assertEqual(data["addFile"]["entity"]["tags"][1], "tag_two")

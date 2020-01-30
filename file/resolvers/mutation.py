@@ -164,6 +164,8 @@ def resolve_edit_file_folder(_, info, input):
     with reversion.create_revision():
         entity.owner = user
 
+        entity.tags = clean_input.get("tags", [])
+
         if clean_input.get("title"):
             entity.title = clean_input.get("title")
 

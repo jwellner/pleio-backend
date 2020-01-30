@@ -97,7 +97,6 @@ def resolve_entity(
 
     return entity
 
-# TODO: Implement breadcrumbs
 
 @query.field("breadcrumb")
 def resolve_breadcrumb(_, info, guid=None):
