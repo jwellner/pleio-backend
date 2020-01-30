@@ -34,3 +34,6 @@ class Widget(models.Model):
             return True
 
         return self.group.can_write(user)
+
+    def type_to_string(self):
+        return 'widget'
