@@ -96,6 +96,10 @@ class Group(models.Model):
         )
 
     def leave(self, user):
+        if self.subgroups:
+            for subgroup in self.subgroups.all():
+                if user in subgroup.members.all():
+                    subgroup.members.remove(user)
         try:
             return self.members.get(user=user).delete()
         except ObjectDoesNotExist:
@@ -160,3 +164,14 @@ class GroupInvitation(models.Model):
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+
+
+class Subgroup(models.Model):
+    """
+    A group of users within a group
+    """
+    #TODO: access_id is same as id, now it conflicts with some of core access_ids, ie 0,1,2,4. Solution needed
+
+    name = models.CharField(max_length=512)
+    members = models.ManyToManyField('core.User', related_name='subgroups')
+    group = models.ForeignKey('core.Group', related_name='subgroups', on_delete=models.CASCADE)

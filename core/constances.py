@@ -56,6 +56,7 @@ class ACCESS_TYPE:
     public = 'public'
     user = 'user:{}'
     group = 'group:{}'
+    subgroup = 'subgroup:{}'
 
 class MEMBERSHIP:
     not_joined = 'not_joined'

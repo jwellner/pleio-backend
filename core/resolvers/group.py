@@ -2,7 +2,7 @@ from ariadne import ObjectType
 from django.utils.text import slugify
 from core.constances import MEMBERSHIP
 from core.lib import get_access_ids
-from core.models import User, GroupInvitation
+from core.models import User, GroupInvitation, Subgroup
 from core.resolvers.query_site import get_settings
 
 group = ObjectType("Group")
@@ -68,10 +68,7 @@ def resolve_group_can_edit(obj, info):
 @group.field("subgroups")
 def resolve_group_subgroups(obj, info):
     # pylint: disable=unused-argument
-    return {
-        'total': 0,
-        'edges': []
-    }
+    return obj.subgroups.all()
 
 @group.field("invite")
 def resolve_group_invite(obj, info, q=None, offset=0, limit=10):
@@ -124,7 +121,20 @@ def resolve_group_members(group, info, q=None, offset=0, limit=5, inSubgroupId=N
     # pylint: disable=unused-argument
     # pylint: disable=too-many-arguments
 
-    members = group.members.filter(type__in=['admin', 'owner', 'member'])[offset:offset+limit]
+    members = group.members.filter(type__in=['admin', 'owner', 'member'])
+
+    if inSubgroupId:
+        subgroup_members = Subgroup.objects.get(id=inSubgroupId).members.all()
+        members = members.filter(user__in=subgroup_members)
+
+    if notInSubgroupId:
+        subgroup_members = Subgroup.objects.get(id=notInSubgroupId).members.all()
+        members = members.exclude(user__in=subgroup_members)
+
+    if q:
+        members = members.filter(user__name__icontains=q)
+
+    members = members[offset:offset+limit]
 
     return {
         'total': members.count(),

@@ -26,7 +26,7 @@ def get_settings():
         "enableFeedSorting": True,
         "commentsOnNews": True,
         "eventExport": True,
-        "subgroups": False,
+        "subgroups": True,
         "statusUpdateGroups": True,
         "showExtraHomepageFilters": True,
         'showViewsCount': True

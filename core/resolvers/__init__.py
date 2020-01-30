@@ -10,5 +10,7 @@ from .comment import comment
 from .profile_item import profile_item
 from .widget import widget
 from .invite import invite
+from .subgroup_list import subgroup_list
+from .subgroup import subgroup
 
-resolvers = [query, mutation, viewer, entity, user, group, member, comment, profile_item, widget, invite]
+resolvers = [query, mutation, viewer, entity, user, group, member, comment, profile_item, widget, invite, subgroup_list, subgroup]
