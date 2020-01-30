@@ -1,9 +1,9 @@
 from graphql import GraphQLError
 from django.core.exceptions import ObjectDoesNotExist
+from django.utils.translation import ugettext_lazy
 from core.models import User
 from core.constances import NOT_LOGGED_IN, COULD_NOT_FIND
-from core.lib import remove_none_from_dict, send_mail_multi
-
+from core.lib import remove_none_from_dict, send_mail_multi, get_default_email_context
 
 def resolve_send_message_to_user(_, info, input):
     # pylint: disable=redefined-builtin
@@ -19,9 +19,12 @@ def resolve_send_message_to_user(_, info, input):
     except ObjectDoesNotExist:
         raise GraphQLError(COULD_NOT_FIND)
 
-    context = {'message': clean_input.get('message')}
+    context = get_default_email_context(info.context)
+    context['message'] = clean_input.get('message')
 
-    email = send_mail_multi(clean_input.get('subject'), 'email/send_message_to_user.html', context, [receiving_user.email], [user.email])
+    subject = ugettext_lazy("Message from {0}: {1}").format(user.name, clean_input.get('subject'))
+
+    email = send_mail_multi(subject, 'email/send_message_to_user.html', context, [receiving_user.email], [user.email])
 
     result = email.send()
 

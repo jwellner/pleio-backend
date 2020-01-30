@@ -12,7 +12,7 @@ def is_user_or_admin(obj, info):
 @user.field("url")
 def resolve_url(obj, info):
     # pylint: disable=unused-argument
-    return "/user/{}/profile".format(obj.guid)
+    return obj.url
 
 @user.field("profile")
 def resolve_profile(obj, info):

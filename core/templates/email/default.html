@@ -1,0 +1,16 @@
+{% extends "email/base.html" %}
+
+{% block title %}{{subject}}{% endblock %}
+
+{% block link_color %} 
+    a { color:{{primary_color}}; text-decoration:underline }
+{% endblock %}
+
+{% block header %}
+    {% include "email/header.html" %}
+{% endblock %}
+
+{% block notification %}
+    {% block content %}
+    {% endblock %}
+{% endblock %}

@@ -1,5 +1,4 @@
 from ariadne import ObjectType
-from django.utils.text import slugify
 from core.resolvers import shared
 
 
@@ -28,10 +27,7 @@ def resolve_parent(obj, info):
 @page.field("url")
 def resolve_url(obj, info):
     # pylint: disable=unused-argument
-
-    return '/cms/view/{}/{}'.format(
-        obj.guid, slugify(obj.title)
-    ).lower()
+    return obj.url
 
 @page.field("canEdit")
 def resolve_can_edit(obj, info):

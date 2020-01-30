@@ -1,8 +1,9 @@
 from graphql import GraphQLError
 from django.core.exceptions import ObjectDoesNotExist
 from core.models import User, Group
+from django.utils.translation import ugettext_lazy
 from core.constances import NOT_LOGGED_IN, COULD_NOT_FIND, COULD_NOT_SAVE
-from core.lib import remove_none_from_dict, send_mail_multi
+from core.lib import remove_none_from_dict, send_mail_multi, get_default_email_context
 
 
 def resolve_send_message_to_group(_, info, input):
@@ -37,8 +38,12 @@ def resolve_send_message_to_group(_, info, input):
 
             email_addresses.append(receiving_user.email)
 
-    context = {'message': clean_input.get('message')}
-    email = send_mail_multi(clean_input.get('subject'), 'email/send_message_to_group.html', context, email_addresses)
+    context = get_default_email_context(info.context)
+    context['message'] = clean_input.get('message')
+
+    subject = ugettext_lazy("Message from group {0}: {1}").format(group.name, clean_input.get('subject'))
+
+    email = send_mail_multi(subject, 'email/send_message_to_group.html', context, email_addresses)
     email.send()
 
     return {

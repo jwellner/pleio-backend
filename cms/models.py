@@ -2,7 +2,7 @@ import uuid
 from django.db import models
 from core.models import Entity
 from django.contrib.postgres.fields import ArrayField
-
+from django.utils.text import slugify
 
 class Page(Entity):
     """
@@ -38,8 +38,16 @@ class Page(Entity):
     def __str__(self):
         return self.title
 
+    @property
+    def url(self):
+        return '/cms/view/{}/{}'.format(
+            self.guid, slugify(self.title)
+        ).lower()
+
+    @property
     def type_to_string(self):
         return 'page'
+
 
 
 class Row(models.Model):
@@ -57,6 +65,7 @@ class Row(models.Model):
     def guid(self):
         return str(self.id)
 
+    @property
     def type_to_string(self):
         return 'row'
 
@@ -75,5 +84,6 @@ class Column(models.Model):
     def guid(self):
         return str(self.id)
 
+    @property
     def type_to_string(self):
         return 'column'

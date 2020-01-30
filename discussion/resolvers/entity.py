@@ -1,5 +1,4 @@
 from ariadne import ObjectType
-from django.utils.text import slugify
 from core.resolvers import shared
 
 discussion = ObjectType("Discussion")
@@ -22,17 +21,7 @@ def resolve_group(obj, info):
 @discussion.field("url")
 def resolve_url(obj, info):
     # pylint: disable=unused-argument
-
-    prefix = ''
-
-    if obj.group:
-        prefix = '/groups/view/{}/{}'.format(
-            obj.group.guid, slugify(obj.group.name)
-        )
-
-    return '{}/discussion/view/{}/{}'.format(
-        prefix, obj.guid, slugify(obj.title)
-    ).lower()
+    return obj.url
 
 
 discussion.set_field("guid", shared.resolve_entity_guid)

@@ -1,5 +1,4 @@
 from ariadne import ObjectType
-from django.utils.text import slugify
 from core.resolvers import shared
 
 filefolder = ObjectType("FileFolder")
@@ -7,7 +6,7 @@ filefolder = ObjectType("FileFolder")
 @filefolder.field("subtype")
 def resolve_subtype(obj, info):
     # pylint: disable=unused-argument
-    return obj.type_to_string()
+    return obj.type_to_string
 
 @filefolder.field("parentFolder")
 def resolve_parent_folder(obj, info):
@@ -27,21 +26,8 @@ def resolve_has_children(obj, info):
 @filefolder.field("url")
 def resolve_url(obj, info):
     # pylint: disable=unused-argument
+    return obj.url
 
-    prefix = ''
-
-    if obj.is_folder:
-        if obj.group:
-            prefix = '/groups/view/{}/{}'.format(
-                obj.group.guid, slugify(obj.group.name)
-            )
-        return '{}/files/{}'.format(
-            prefix, obj.guid
-        ).lower()
-
-    return '{}/files/view/{}/{}'.format(
-        prefix, obj.guid, slugify(obj.title)
-    ).lower()
 
 @filefolder.field("download")
 def resolve_download(obj, info):

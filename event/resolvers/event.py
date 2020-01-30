@@ -1,5 +1,4 @@
 from ariadne import ObjectType
-from django.utils.text import slugify
 from core.resolvers import shared
 from django.db.models import Q
 
@@ -48,17 +47,7 @@ def resolve_is_recommended(obj, info):
 @event.field("url")
 def resolve_url(obj, info):
     # pylint: disable=unused-argument
-    prefix = ''
-
-    if obj.group:
-        prefix = '/groups/view/{}/{}'.format(
-            obj.group.guid, slugify(obj.group.name)
-        )
-
-    return '{}/events/view/{}/{}'.format(
-        prefix, obj.guid, slugify(obj.title)
-    ).lower()
-
+    return obj.url
 
 @event.field("startDate")
 def resolve_start_date(obj, info):

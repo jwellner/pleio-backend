@@ -1,4 +1,5 @@
 from django.db import models
+from django.utils.text import slugify
 from core.models import Entity, VoteMixin, CommentMixin, BookmarkMixin, FollowMixin
 
 class StatusUpdate(Entity, VoteMixin, CommentMixin, BookmarkMixin, FollowMixin):
@@ -12,5 +13,19 @@ class StatusUpdate(Entity, VoteMixin, CommentMixin, BookmarkMixin, FollowMixin):
     def __str__(self):
         return self.title
 
+    @property
     def type_to_string(self):
         return 'thewire'
+
+    @property
+    def url(self):
+        prefix = ''
+
+        if self.group:
+            prefix = '/groups/view/{}/{}'.format(
+                self.group.guid, slugify(self.group.name)
+            )
+
+        return '{}#{}'.format(
+            prefix, self.guid
+        ).lower()

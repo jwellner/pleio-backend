@@ -43,7 +43,7 @@ def get_model_by_subtype(subtype):
     return None
 
 def access_id_to_acl(obj, access_id):
-    if "type_to_string" in dir(obj) and obj.type_to_string() and obj.type_to_string() == 'user':
+    if "type_to_string" in dir(obj) and obj.type_to_string and obj.type_to_string == 'user':
         acl = [ACCESS_TYPE.user.format(obj.id)]
     else:
         acl = [ACCESS_TYPE.user.format(obj.owner.id)]
@@ -204,6 +204,14 @@ def is_valid_json(string):
 
 def get_base_url(context):
     return 'https://' + context.get_host()
+
+
+def get_default_email_context(context):
+    site_url = get_base_url(context)
+    user_url = site_url + context.user.url
+    site_name = config.NAME
+    primary_color = config.STYLE['colorPrimary']
+    return {'user_name': context.user.name, 'user_url': user_url, 'site_url': site_url, 'site_name': site_name, 'primary_color': primary_color}
 
 
 def generate_code():

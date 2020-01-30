@@ -12,8 +12,8 @@ class BaseConfigCase(FastTenantTestCase):
         self.assertEqual(config.NAME, DEFAULT_SITE_CONFIG['NAME'][0])
 
         # String
-        config.NAME = 'Just a test site'
-        self.assertEqual(config.NAME, 'Just a test site')
+        config.NAME = 'Pleio 2.0'
+        self.assertEqual(config.NAME, 'Pleio 2.0')
 
         # Boolean
         config.ACHIEVEMENTS_ENABLED = False

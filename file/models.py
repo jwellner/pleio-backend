@@ -3,6 +3,7 @@ from core.lib import generate_object_filename
 from core.models import Entity
 from django.db.models.signals import pre_save
 from django.dispatch import receiver
+from django.utils.text import slugify
 
 def read_access_default():
     return []
@@ -21,10 +22,28 @@ class FileFolder(Entity):
 
     mime_type = models.CharField(null=True, blank=True, max_length=100)
 
+    @property
     def type_to_string(self):
         if self.is_folder:
             return 'folder'
         return 'file'
+
+    @property
+    def url(self):
+        prefix = ''
+
+        if self.is_folder:
+            if self.group:
+                prefix = '/groups/view/{}/{}'.format(
+                    self.group.guid, slugify(self.group.name)
+                )
+            return '{}/files/{}'.format(
+                prefix, self.guid
+            ).lower()
+
+        return '{}/files/view/{}/{}'.format(
+            prefix, self.guid, slugify(self.title)
+        ).lower()
 
     def has_children(self):
         if self.children.count() > 0:

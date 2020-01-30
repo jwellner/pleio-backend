@@ -1,6 +1,6 @@
 from django.db import models
-from core.models import Entity
-from core.models import BookmarkMixin
+from core.models import Entity, BookmarkMixin
+from django.utils.text import slugify
 
 class Wiki(Entity, BookmarkMixin):
     """
@@ -24,5 +24,19 @@ class Wiki(Entity, BookmarkMixin):
     def __str__(self):
         return self.title
 
+    @property
     def type_to_string(self):
         return 'wiki'
+
+    @property
+    def url(self):
+        prefix = ''
+
+        if self.group:
+            prefix = '/groups/view/{}/{}'.format(
+                self.group.guid, slugify(self.group.name)
+            )
+
+        return '{}/wiki/view/{}/{}'.format(
+            prefix, self.guid, slugify(self.title)
+        ).lower()

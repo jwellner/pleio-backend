@@ -1,5 +1,6 @@
 from django.db import models
 from core.models import Entity
+from django.utils.text import slugify
 
 class Task(Entity):
     """
@@ -27,5 +28,19 @@ class Task(Entity):
     def __str__(self):
         return self.title
 
+    @property
     def type_to_string(self):
         return 'task'
+
+    @property
+    def url(self):
+        prefix = ''
+
+        if self.group:
+            prefix = '/groups/view/{}/{}'.format(
+                self.group.guid, slugify(self.group.name)
+            )
+
+        return '{}/task/view/{}/{}'.format(
+            prefix, self.guid, slugify(self.title)
+        ).lower()

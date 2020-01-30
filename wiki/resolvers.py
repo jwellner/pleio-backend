@@ -1,5 +1,4 @@
 from ariadne import ObjectType
-from django.utils.text import slugify
 from core.resolvers import shared
 
 wiki = ObjectType("Wiki")
@@ -35,17 +34,7 @@ def resolve_group(obj, info):
 @wiki.field("url")
 def resolve_url(obj, info):
     # pylint: disable=unused-argument
-
-    prefix = ''
-
-    if obj.group:
-        prefix = '/groups/view/{}/{}'.format(
-            obj.group.guid, slugify(obj.group.name)
-        )
-
-    return '{}/wiki/view/{}/{}'.format(
-        prefix, obj.guid, slugify(obj.title)
-    ).lower()
+    return obj.url
 
 
 wiki.set_field("guid", shared.resolve_entity_guid)

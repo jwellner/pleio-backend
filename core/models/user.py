@@ -105,8 +105,13 @@ class User(AbstractBaseUser):
     def __str__(self):
         return self.email
 
+    @property
     def type_to_string(self):
         return 'user'
+
+    @property
+    def url(self):
+        return "/user/{}/profile".format(self.guid)
 
     def search_read_access(self):
         return [ACCESS_TYPE.logged_in]
