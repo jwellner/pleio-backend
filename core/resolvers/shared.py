@@ -5,7 +5,11 @@ from django.core.exceptions import ObjectDoesNotExist
 
 
 def resolve_entity_access_id(obj, info):
-    # pylint: disable=unused-argument
+    # pylint: disable=unused-argument 
+    if obj.group and obj.group.subgroups:
+        for subgroup in obj.group.subgroups.all():
+            if ACCESS_TYPE.subgroup.format(subgroup.id) in obj.read_access:
+                return subgroup.id
     if obj.group and ACCESS_TYPE.group.format(obj.group.id) in obj.read_access:
         return 4
     if ACCESS_TYPE.public in obj.read_access:

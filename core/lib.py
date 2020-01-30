@@ -58,6 +58,8 @@ def access_id_to_acl(obj, access_id):
         acl.append(ACCESS_TYPE.public)
     elif access_id == 4 and obj.group:
         acl.append(ACCESS_TYPE.group.format(obj.group.id))
+    elif access_id and access_id >= 10000 and obj.group:
+        acl.append(ACCESS_TYPE.subgroup.format(access_id))
 
     return acl
 
@@ -76,6 +78,11 @@ def get_acl(user):
                 ACCESS_TYPE.group.format(membership.group.id) for membership in user.memberships.filter(type__in=['admin', 'owner', 'member'])
                 )
             acl = acl.union(groups)
+        if user.subgroups:
+            subgroups = set(
+                ACCESS_TYPE.subgroup.format(subgroup.id) for subgroup in user.subgroups.all()
+            )
+            acl = acl.union(subgroups)
 
     return acl
 
@@ -114,6 +121,9 @@ def get_access_ids(obj=None):
 
     if isinstance(obj, apps.get_model('core.Group')):
         accessIds.append({ 'id': 4, 'description': "Group: {}".format(obj.name)})
+        if obj.subgroups:
+            for subgroup in obj.subgroups.all():
+                accessIds.append({ 'id': subgroup.id, 'description': "Subgroup: {}".format(subgroup.name)})
 
     if isinstance(obj, apps.get_model('core.Group')) and obj.is_closed:
         pass

@@ -385,7 +385,7 @@ type deleteGroupInvitationPayload {
 }
 
 input deleteSubgroupInput {
-  id: String
+  id: Int
   clientMutationId: Int
 }
 
@@ -868,10 +868,10 @@ type Group implements Entity {
     limit: Int
 
     """Filter resultset on a specific subgroup."""
-    inSubgroupId: String
+    inSubgroupId: Int
 
     """Filter resultset on users who are not in a specific subgroup."""
-    notInSubgroupId: String
+    notInSubgroupId: Int
   ): MemberList
   invite(q: String, offset: Int, limit: Int): InviteList
   invited(q: String, offset: Int, limit: Int): InviteList
