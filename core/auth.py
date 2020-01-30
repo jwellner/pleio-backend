@@ -1,7 +1,6 @@
 from django.core.exceptions import SuspiciousOperation
 from mozilla_django_oidc.auth import OIDCAuthenticationBackend
 from mozilla_django_oidc.utils import absolutify
-from core.apps import settings
 from django.urls import reverse
 
 import logging
@@ -25,7 +24,7 @@ class OIDCAuthBackend(OIDCAuthenticationBackend):
     def create_user(self, claims):
 
         if claims.get('picture'):
-            picture = settings.PROFILE_PICTURE_URL + claims.get('picture')
+            picture = claims.get('picture')
         else:
             picture = None
 
@@ -51,7 +50,7 @@ class OIDCAuthBackend(OIDCAuthenticationBackend):
             user.name = claims.get('name')
             user.email = claims.get('email')
             if claims.get('picture'):
-                user.picture = settings.PROFILE_PICTURE_URL + claims.get('picture')
+                user.picture = claims.get('picture')
             else:
                 user.picture = None
             user.is_government = claims.get('is_government')
