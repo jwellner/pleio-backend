@@ -17,11 +17,27 @@ class EntityTestCase(FastTenantTestCase):
         self.authenticatedUser = mixer.blend(User)
         self.user1 = mixer.blend(User)
         self.group = mixer.blend(Group, owner=self.authenticatedUser)
+        self.folder = FileFolder.objects.create(
+            owner=self.authenticatedUser,
+            upload=None,
+            is_folder=True,
+            parent=None,
+            read_access=[ACCESS_TYPE.public],
+            write_access=[ACCESS_TYPE.user.format(self.authenticatedUser.id)]
+        )
+        self.subFolder = FileFolder.objects.create(
+            owner=self.authenticatedUser,
+            upload=None,
+            is_folder=True,
+            parent=self.folder,
+            read_access=[ACCESS_TYPE.public],
+            write_access=[ACCESS_TYPE.user.format(self.authenticatedUser.id)]
+        )
         self.file = FileFolder.objects.create(
-            owner=self.authenticatedUser, 
-            upload=None, 
-            is_folder=False, 
-            parent=None, 
+            owner=self.authenticatedUser,
+            upload=None,
+            is_folder=False,
+            parent=self.subFolder,
             read_access=[ACCESS_TYPE.public],
             write_access=[ACCESS_TYPE.user.format(self.authenticatedUser.id)]
         )
@@ -30,6 +46,8 @@ class EntityTestCase(FastTenantTestCase):
     def tearDown(self):
         self.group.delete()
         self.file.delete()
+        self.subFolder.delete()
+        self.folder.delete()
         self.user1.delete()
         self.authenticatedUser.delete()
 
@@ -167,3 +185,33 @@ class EntityTestCase(FastTenantTestCase):
         self.assertEqual(data["entity"]["guid"], self.file.guid)
         self.assertEqual(data["entity"]["__typename"], "FileFolder")
 
+
+    def test_entity_breadcrumb_file_folder(self):
+
+        query = """
+            query Breadcrumb($guid: String!) {
+                breadcrumb(guid: $guid) {
+                    ... on FileFolder {
+                        guid
+                        title
+                        __typename
+                    }
+                    __typename
+                }
+            }
+        """
+        request = HttpRequest()
+        request.user = self.authenticatedUser
+
+        variables = { 
+            "guid": self.file.guid
+        }
+
+        result = graphql_sync(schema, { "query": query, "variables": variables }, context_value=request)
+
+        self.assertTrue(result[0])
+
+        data = result[1]["data"]
+
+        self.assertEqual(data["breadcrumb"][0]["guid"], self.folder.guid)
+        self.assertEqual(data["breadcrumb"][1]["guid"], self.subFolder.guid)

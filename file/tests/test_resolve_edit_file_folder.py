@@ -156,6 +156,7 @@ class EditFileFolderTestCase(FastTenantTestCase):
 
         variables["input"]["guid"] = test_file.guid
         variables["input"]["title"] = "test123.gif"
+        variables["input"]["tags"] = ["tag_one", "tag_two"]
 
         request = HttpRequest()
         request.user = self.authenticatedUser
@@ -170,6 +171,8 @@ class EditFileFolderTestCase(FastTenantTestCase):
 
         self.assertEqual(data["editFileFolder"]["entity"]["title"], test_file.title)
         self.assertEqual(data["editFileFolder"]["entity"]["mimeType"], test_file.mime_type)
+        self.assertEqual(data["editFileFolder"]["entity"]["tags"][0], "tag_one")
+        self.assertEqual(data["editFileFolder"]["entity"]["tags"][1], "tag_two")
 
     def test_edit_folder_access_ids_recursive(self):
 
