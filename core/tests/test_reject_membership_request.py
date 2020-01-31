@@ -86,8 +86,7 @@ class RejectMembershipRequestTestCase(FastTenantTestCase):
         subject = ugettext_lazy("Request for access to the %s group has been refused" % self.group1.name)
 
         self.assertEqual(data["rejectMembershipRequest"]["group"]["guid"], self.group1.guid)
-        mocked_send_mail_multi.assert_called_once_with(subject, 'email/reject_membership_request.html', {'group_name': self.group1.name,
-                                                       'user_name': self.user1.name}, [self.user2.email])
+        mocked_send_mail_multi.assert_called_once()
 
     @override_settings(ALLOWED_HOSTS=['test.test'])
     @mock.patch('core.resolvers.mutation_reject_membership_request.send_mail_multi')
@@ -139,8 +138,7 @@ class RejectMembershipRequestTestCase(FastTenantTestCase):
         subject = ugettext_lazy("Request for access to the %s group has been refused" % self.group1.name)
 
         self.assertEqual(data["rejectMembershipRequest"]["group"]["guid"], self.group1.guid)
-        mocked_send_mail_multi.assert_called_once_with(subject, 'email/reject_membership_request.html', {'group_name': self.group1.name,
-                                                       'user_name': self.admin.name}, [self.user2.email])
+        mocked_send_mail_multi.assert_called_once()
 
     @override_settings(ALLOWED_HOSTS=['test.test'])
     @mock.patch('core.resolvers.mutation_reject_membership_request.send_mail_multi')

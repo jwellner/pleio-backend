@@ -23,12 +23,13 @@ def resolve_toggle_request_delete_user(_, info, input):
     if not requested_user == user:
         raise GraphQLError(COULD_NOT_SAVE)
 
+    context = {'user_name': user.name}
+
     if user.is_delete_requested:
         user.is_delete_requested = False
         user.save()
 
         subject = ugettext_lazy("Request to remove account cancelled")
-        context = {'username': user.name}
 
         email = send_mail_multi(subject, 'email/toggle_request_delete_user_cancelled.html', context, [user.email])
 
@@ -37,7 +38,6 @@ def resolve_toggle_request_delete_user(_, info, input):
         user.save()
 
         subject = ugettext_lazy("Request to remove account")
-        context = {'username': user.name}
 
         email = send_mail_multi(subject, 'email/toggle_request_delete_user_requested.html', context, [user.email])
 

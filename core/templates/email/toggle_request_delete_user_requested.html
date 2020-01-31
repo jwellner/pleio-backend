@@ -1,3 +1,7 @@
-
+    
+{% extends "email/default.html" %}
 {% load i18n %}
-{% blocktrans %}You, as user, <strong>{{ username }}</strong> have requested that your account be removed. You will be informed once the website administrator has done so. {% endblocktrans %}
+
+{% block content %}
+    {% blocktrans %}You, as user, <strong>{{ user_name }}</strong> have requested that your account be removed. You will be informed once the website administrator has done so. {% endblocktrans %}
+{% endblock %}

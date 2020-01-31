@@ -3,7 +3,7 @@ from django.core.exceptions import ObjectDoesNotExist
 from core.models import Group, User, GroupMembership
 from django.utils.translation import ugettext_lazy
 from core.constances import NOT_LOGGED_IN, COULD_NOT_SAVE, COULD_NOT_FIND
-from core.lib import remove_none_from_dict, send_mail_multi
+from core.lib import remove_none_from_dict, send_mail_multi, get_default_email_context
 
 def resolve_reject_membership_request(_, info, input):
     # pylint: disable=redefined-builtin
@@ -34,7 +34,10 @@ def resolve_reject_membership_request(_, info, input):
     membership_request.delete()
 
     subject = ugettext_lazy("Request for access to the %s group has been refused" % group.name)
-    context = {'group_name': group.name, 'user_name': user.name}
+
+    context = get_default_email_context(info.context)
+    context['group_name'] = group.name
+
     email = send_mail_multi(subject, 'email/reject_membership_request.html', context, [requesting_user.email])
     email.send()
 
