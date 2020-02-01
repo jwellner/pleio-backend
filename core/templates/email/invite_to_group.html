@@ -1,4 +1,7 @@
     
+{% extends "email/default.html" %}
 {% load i18n %}
-{% blocktrans %}You have been invited by {{ user_name }} to join the {{ group_name }} group. Follow the link below to become a member of the group: <br /><a href="{{ link }}">{{ link }}</a> {% endblocktrans %}
 
+{% block content %}
+{% blocktrans %}You have been invited by {{ user_name }} to join the {{ group_name }} group. Follow the link below to become a member of the group: <br /><a href="{{ link }}">{{ link }}</a> {% endblocktrans %}
+{% endblock %}

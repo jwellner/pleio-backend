@@ -3,7 +3,7 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.utils.translation import ugettext_lazy
 from core.models import User, Group, GroupInvitation
 from core.constances import NOT_LOGGED_IN, COULD_NOT_FIND, COULD_NOT_INVITE, USER_NOT_SITE_ADMIN
-from core.lib import remove_none_from_dict, send_mail_multi, get_base_url, generate_code
+from core.lib import remove_none_from_dict, send_mail_multi, get_base_url, generate_code, get_default_email_context
 
 def resolve_invite_to_group(_, info, input):
     # pylint: disable=redefined-builtin
@@ -60,8 +60,9 @@ def resolve_invite_to_group(_, info, input):
                 GroupInvitation.objects.create(code=code, invited_user=receiving_user, group=group)
 
             try:
-                link = url + code
-                context = {'link': link, 'group_name': group.name, 'user_name': user.name}
+                context = get_default_email_context(info.context)
+                context['link'] = link
+                context['group_name'] = group.name
                 email = send_mail_multi(subject, 'email/invite_to_group.html', context, [receiving_user.email])
                 email.send()
             except Exception:
