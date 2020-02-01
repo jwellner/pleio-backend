@@ -3,7 +3,7 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.utils.translation import ugettext_lazy
 from core.models import GroupInvitation
 from core.constances import NOT_LOGGED_IN, COULD_NOT_FIND, COULD_NOT_INVITE
-from core.lib import remove_none_from_dict, send_mail_multi, get_base_url
+from core.lib import remove_none_from_dict, send_mail_multi, get_base_url, get_default_email_context
 
 def resolve_resend_group_invitation(_, info, input):
     # pylint: disable=redefined-builtin
@@ -26,7 +26,10 @@ def resolve_resend_group_invitation(_, info, input):
     link = get_base_url(info.context) + '/groups/invitations/?invitecode=' + invitation.code
 
     try:
-        context = {'link': link, 'group_name': group.name, 'user_name': user.name}
+        context = get_default_email_context(info.context)
+        context['link'] = link
+        context['group_name'] = group.name
+
         email = send_mail_multi(subject, 'email/resend_group_invitation.html', context, [invitation.invited_user.email])
         email.send()
     except Exception:
