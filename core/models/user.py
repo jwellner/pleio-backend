@@ -174,6 +174,8 @@ class UserProfile(models.Model):
         choices=INTERVALS,
         default='weekly'
     )
+    overview_email_tags = ArrayField(models.CharField(max_length=256),
+                                     blank=True, default=list)
     receive_newsletter = models.BooleanField(default=False)
 
 

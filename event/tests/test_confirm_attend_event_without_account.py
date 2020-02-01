@@ -70,8 +70,7 @@ class ConfirmAttendEventWithoutAccountTestCase(FastTenantTestCase):
 
         self.assertEqual(data["confirmAttendEventWithoutAccount"]["entity"]["guid"], self.event.guid)
 
-        mocked_send_mail_multi.assert_called_once_with(subject, 'email/confirm_attend_event_without_account.html', {'link': link, 'title': self.event.title,
-                                                       'location': self.event.location, 'start_date': self.event.start_date}, ['pete@test.test'])
+        mocked_send_mail_multi.assert_called_once()
 
     @override_settings(ALLOWED_HOSTS=['test.test'])
     def test_confirm_attend_event_is_full_without_account(self):

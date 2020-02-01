@@ -207,11 +207,16 @@ def get_base_url(context):
 
 
 def get_default_email_context(context):
+    user_name = ""
     site_url = get_base_url(context)
-    user_url = site_url + context.user.url
+    user_url = site_url
+    if hasattr(context.user, 'url'):
+        user_url = site_url + context.user.url
+    if hasattr(context.user, 'name'):
+        user_name = context.user.name
     site_name = config.NAME
     primary_color = config.STYLE['colorPrimary']
-    return {'user_name': context.user.name, 'user_url': user_url, 'site_url': site_url, 'site_name': site_name, 'primary_color': primary_color}
+    return {'user_name': user_name, 'user_url': user_url, 'site_url': site_url, 'site_name': site_name, 'primary_color': primary_color}
 
 
 def generate_code():

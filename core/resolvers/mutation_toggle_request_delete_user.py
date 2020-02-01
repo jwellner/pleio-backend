@@ -3,7 +3,7 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.utils.translation import ugettext_lazy
 from core.models import User
 from core.constances import NOT_LOGGED_IN, COULD_NOT_FIND, COULD_NOT_SAVE
-from core.lib import remove_none_from_dict, send_mail_multi
+from core.lib import remove_none_from_dict, send_mail_multi, get_default_email_context
 
 
 def resolve_toggle_request_delete_user(_, info, input):
@@ -23,7 +23,7 @@ def resolve_toggle_request_delete_user(_, info, input):
     if not requested_user == user:
         raise GraphQLError(COULD_NOT_SAVE)
 
-    context = {'user_name': user.name}
+    context = get_default_email_context(info.context)
 
     if user.is_delete_requested:
         user.is_delete_requested = False

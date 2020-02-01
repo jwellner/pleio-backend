@@ -4,7 +4,7 @@ from django.core.validators import validate_email
 from django.core.exceptions import ValidationError
 from django.utils.translation import ugettext_lazy
 from core.constances import COULD_NOT_FIND, INVALID_EMAIL, EVENT_IS_FULL, COULD_NOT_SAVE
-from core.lib import remove_none_from_dict, send_mail_multi
+from core.lib import remove_none_from_dict, send_mail_multi, get_default_email_context
 from event.models import Event, EventAttendeeRequest, EventAttendee
 from event.lib import get_url
 
@@ -48,7 +48,12 @@ def resolve_confirm_attend_event_without_account(_, info, input):
     link = get_url(event, info.context)
     subject = ugettext_lazy("Confirmation of registration for %s" % event.title)
 
-    context = {'link': link, 'title': event.title, 'location': event.location, 'start_date': event.start_date}
+    context = get_default_email_context(info.context)
+    context['link'] = link
+    context['title'] = event.title
+    context['location'] = event.location
+    context['start_date'] = event.start_date
+
     email = send_mail_multi(subject, 'email/confirm_attend_event_without_account.html', context, [email])
 
     email.send()

@@ -21,10 +21,11 @@ def resolve_edit_email_overview(_, info, input):
     if not requested_user == user and not user.is_admin:
         raise GraphQLError(COULD_NOT_SAVE)
 
-    if clean_input.get('overview') not in ['never', 'daily', 'weekly', 'monthly']:
+    if clean_input.get('frequency') not in ['never', 'daily', 'weekly', 'monthly']:
         raise GraphQLError(COULD_NOT_SAVE)
 
-    requested_user.profile.overview_email_interval = clean_input.get('overview')
+    requested_user.profile.overview_email_interval = clean_input.get('frequency')
+    requested_user.profile.overview_email_tags = clean_input.get("tags", [])
     requested_user.profile.save()
 
     return {

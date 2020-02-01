@@ -34,7 +34,9 @@ class EditEmailOverviewTestCase(FastTenantTestCase):
                 editEmailOverview(input: $input) {
                     user {
                         guid
-                        emailOverview
+                        emailOverview {
+                            frequency
+                        }
                         __typename
                     }
                     __typename
@@ -45,7 +47,7 @@ class EditEmailOverviewTestCase(FastTenantTestCase):
         variables = {
             "input":  {
                 "guid": self.user1.guid, 
-                "overview": "monthly"
+                "frequency": "monthly"
                 }
             }
 
@@ -58,7 +60,7 @@ class EditEmailOverviewTestCase(FastTenantTestCase):
         data = result[1]["data"]
 
         self.assertEqual(data["editEmailOverview"]["user"]["guid"], self.user1.guid)
-        self.assertEqual(data["editEmailOverview"]["user"]["emailOverview"], "monthly")
+        self.assertEqual(data["editEmailOverview"]["user"]["emailOverview"]["frequency"], "monthly")
 
 
     def test_edit_email_overview_by_admin(self):
@@ -67,7 +69,9 @@ class EditEmailOverviewTestCase(FastTenantTestCase):
                 editEmailOverview(input: $input) {
                     user {
                         guid
-                        emailOverview
+                        emailOverview {
+                            frequency
+                        }
                         __typename
                     }
                     __typename
@@ -78,7 +82,7 @@ class EditEmailOverviewTestCase(FastTenantTestCase):
         variables = {
             "input":  {
                 "guid": self.user1.guid, 
-                "overview": "monthly"
+                "frequency": "monthly"
                 }
             }
 
@@ -91,7 +95,7 @@ class EditEmailOverviewTestCase(FastTenantTestCase):
         data = result[1]["data"]
 
         self.assertEqual(data["editEmailOverview"]["user"]["guid"], self.user1.guid)
-        self.assertEqual(data["editEmailOverview"]["user"]["emailOverview"], "monthly")
+        self.assertEqual(data["editEmailOverview"]["user"]["emailOverview"]["frequency"], "monthly")
 
     def test_edit_email_overview_by_logged_in_user(self):
         mutation = """
@@ -99,7 +103,9 @@ class EditEmailOverviewTestCase(FastTenantTestCase):
                 editEmailOverview(input: $input) {
                     user {
                         guid
-                        emailOverview
+                        emailOverview {
+                            frequency
+                        }
                         __typename
                     }
                     __typename
@@ -110,7 +116,7 @@ class EditEmailOverviewTestCase(FastTenantTestCase):
         variables = {
             "input":  {
                 "guid": self.user1.guid, 
-                "overview": "monthly"
+                "frequency": "monthly"
                 }
             }
 
@@ -131,7 +137,9 @@ class EditEmailOverviewTestCase(FastTenantTestCase):
                 editEmailOverview(input: $input) {
                     user {
                         guid
-                        emailOverview
+                        emailOverview {
+                            frequency
+                        }
                         __typename
                     }
                     __typename
@@ -142,7 +150,7 @@ class EditEmailOverviewTestCase(FastTenantTestCase):
         variables = {
             "input":  {
                 "guid": self.user1.guid, 
-                "overview": "monthly"
+                "frequency": "monthly"
                 }
             }
 

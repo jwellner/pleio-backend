@@ -468,7 +468,8 @@ type deleteColumnPayload {
 
 input editEmailOverviewInput {
   guid: String
-  overview: Overview
+  frequency: Frequency
+  tags: [String]
   clientMutationId: Int
 }
 
@@ -840,6 +841,14 @@ type followPayload {
   clientMutationId: Int
 }
 
+enum Frequency {
+  daily
+  weekly
+  twoweekly
+  monthly
+  never
+}
+
 type Group implements Entity {
   guid: String!
   status: Int
@@ -1185,12 +1194,9 @@ enum OrderDirection {
   desc
 }
 
-enum Overview {
-  daily
-  weekly
-  twoweekly
-  monthly
-  never
+type EmailOverview {
+  frequency: Frequency
+  tags: [String]
 }
 
 type Page implements Entity {
@@ -1611,7 +1617,7 @@ type User implements Entity {
   email: String
   emailNotifications: Boolean
   getsNewsletter: Boolean
-  emailOverview: Overview
+  emailOverview: EmailOverview
   profile: [ProfileItem]
   stats: [StatsItem]
   groupNotifications: [GroupNotificationItem]

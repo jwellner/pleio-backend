@@ -64,7 +64,7 @@ def resolve_email_notifications(obj, info):
 def resolve_email_overview(obj, info):
     # pylint: disable=unused-argument
     if is_user_or_admin(obj, info):
-        return obj.profile.overview_email_interval
+        return obj.profile
     return None
 
 @user.field("getsNewsletter")

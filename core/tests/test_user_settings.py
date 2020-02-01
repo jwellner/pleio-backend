@@ -40,7 +40,9 @@ class UserSettingsTestCase(FastTenantTestCase):
                         canEdit
                         emailNotifications
                         getsNewsletter
-                        emailOverview
+                        emailOverview {
+                            frequency
+                        }
                         requestDelete
                         groupNotifications {
                             guid
@@ -81,7 +83,7 @@ class UserSettingsTestCase(FastTenantTestCase):
         self.assertEqual(data["entity"]["username"], self.user1.guid)
         self.assertEqual(data["entity"]["emailNotifications"], False)
         self.assertEqual(data["entity"]["getsNewsletter"], False)
-        self.assertEqual(data["entity"]["emailOverview"], "weekly")
+        self.assertEqual(data["entity"]["emailOverview"]["frequency"], "weekly")
         self.assertEqual(data["entity"]["groupNotifications"][0]["guid"], self.group1.guid)
         self.assertEqual(data["entity"]["groupNotifications"][0]["getsNotifications"], True)
         self.assertEqual(data["entity"]["groupNotifications"][1]["guid"], self.group2.guid)
@@ -107,7 +109,7 @@ class UserSettingsTestCase(FastTenantTestCase):
         self.assertEqual(data["entity"]["username"], self.user1.guid)
         self.assertEqual(data["entity"]["emailNotifications"], False)
         self.assertEqual(data["entity"]["getsNewsletter"], False)
-        self.assertEqual(data["entity"]["emailOverview"], "weekly")
+        self.assertEqual(data["entity"]["emailOverview"]["frequency"], "weekly")
         self.assertEqual(data["entity"]["groupNotifications"][0]["guid"], self.group1.guid)
         self.assertEqual(data["entity"]["groupNotifications"][0]["getsNotifications"], True)
         self.assertEqual(data["entity"]["groupNotifications"][1]["guid"], self.group2.guid)
