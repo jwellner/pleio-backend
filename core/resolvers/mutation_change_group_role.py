@@ -4,7 +4,7 @@ from django.utils.text import slugify
 from django.utils.translation import ugettext_lazy
 from core.models import User, Group, GroupMembership
 from core.constances import NOT_LOGGED_IN, COULD_NOT_FIND, COULD_NOT_SAVE, USER_NOT_MEMBER_OF_GROUP
-from core.lib import remove_none_from_dict, send_mail_multi, get_base_url
+from core.lib import remove_none_from_dict, send_mail_multi, get_base_url, get_default_email_context
 
 def resolve_change_group_role(_, info, input):
     # pylint: disable=redefined-builtin
@@ -36,7 +36,11 @@ def resolve_change_group_role(_, info, input):
     if clean_input.get("role") == "owner":
         subject = ugettext_lazy("Ownership of the %s group has been transferred" % group.name)
         link = get_base_url(info.context) + "/groups/view/{}/{}".format(group.guid, slugify(group.name))
-        context = {'link': link, 'group_name': group.name, 'user_name': user.name}
+
+        context = get_default_email_context(info.context)
+        context['link'] = link
+        context['group_name'] = group.name
+
         email = send_mail_multi(subject, 'email/group_ownership_transferred.html', context, [changing_user.email])
 
         changing_user_membership = GroupMembership.objects.get(group=group, user=changing_user)

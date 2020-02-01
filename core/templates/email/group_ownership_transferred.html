@@ -1,4 +1,7 @@
-    
-{% load i18n %}
-{% blocktrans %}The administrator {{ user_name }} has transferred the ownership of the group {{ group_name }} to you. View the group at: <br /><a href="{{ link }}">{{ link }}</a> {% endblocktrans %}
 
+{% extends "email/default.html" %}
+{% load i18n %}
+
+{% block content %}
+{% blocktrans %}The administrator {{ user_name }} has transferred the ownership of the group {{ group_name }} to you. View the group at: <br /><a href="{{ link }}">{{ link }}</a> {% endblocktrans %}
+{% endblock %}
