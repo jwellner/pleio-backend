@@ -1,4 +1,5 @@
 {% extends "email/base.html" %}
+{% load i18n %}
 
 {% block title %}{{subject}}{% endblock %}
 
@@ -32,4 +33,9 @@
         {% include "email/notifications/update.html" %}
     {% endif %}    
   {% endfor %}
+{% endblock %}
+
+
+{% block footer_settings %}
+    {% blocktrans %} You have received this e-mail because you registered to receive notifications.<br /> Click <a href="{{user_url}}">here</a> to change your settings.{% endblocktrans %}
 {% endblock %}

@@ -76,8 +76,7 @@ class InviteToGroupTestCase(FastTenantTestCase):
         subject = ugettext_lazy("Invitation to become a member of the %s group" % self.group1.name)
 
         self.assertEqual(data["inviteToGroup"]["group"]["guid"], self.group1.guid)
-        mocked_send_mail_multi.assert_called_once_with(subject, 'email/invite_to_group.html', {'link': link, 'group_name': self.group1.name,
-                                                       'user_name': self.user1.name}, [self.user2.email])
+        mocked_send_mail_multi.assert_called_once()
 
     @override_settings(ALLOWED_HOSTS=['test.test'])
     @mock.patch('core.resolvers.mutation_invite_to_group.send_mail_multi')

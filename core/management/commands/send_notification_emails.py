@@ -23,8 +23,10 @@ class Command(BaseCommand):
             mapped_notifications.append(get_notification(notification))
         if notifications:
             site_name = config.NAME
+            user_url = site_url + '/user/' + user.guid + '/settings'
             primary_color = config.STYLE['colorPrimary']
-            context = {'site_name': site_name, 'site_url': site_url, 'primary_color': primary_color, 'notifications': mapped_notifications}
+            context = {'user_url': user_url, 'site_name': site_name, 'site_url': site_url, 'primary_color': primary_color, 
+                       'notifications': mapped_notifications}
             email = send_mail_multi(subject, 'email/send_notification_emails.html', context, [user.email])
             email.send()
             user.notifications.mark_as_sent()
@@ -51,7 +53,7 @@ class Command(BaseCommand):
                 continue
 
             # do not send a mail when there is an notification less old than 24 hours emailed
-            time_threshold = datetime.now()  - timedelta(hours=24)
+            time_threshold = datetime.now() - timedelta(hours=24)
             notifications_emailed_in_last_24_hours = user.notifications.filter(emailed=True, timestamp__gte=time_threshold)
             if notifications_emailed_in_last_24_hours:
                 continue

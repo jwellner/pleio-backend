@@ -61,6 +61,7 @@ def resolve_invite_to_group(_, info, input):
 
             try:
                 context = get_default_email_context(info.context)
+                link = url + code
                 context['link'] = link
                 context['group_name'] = group.name
                 email = send_mail_multi(subject, 'email/invite_to_group.html', context, [receiving_user.email])
