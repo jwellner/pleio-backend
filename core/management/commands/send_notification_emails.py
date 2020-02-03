@@ -3,8 +3,23 @@ from django.utils import timezone
 from core.lib import send_mail_multi, get_default_email_context
 from core.models import User
 from core import config
-from core.mapper import get_notification
 from datetime import datetime, timedelta
+from core.resolvers.notification import get_notification_action_entity
+
+
+def get_notification(notification):
+    """ get a mapped notification """
+    entity = get_notification_action_entity(notification)
+    performer = User.objects.get(id=notification.actor_object_id)
+    return {
+        'id': notification.id,
+        'action': notification.verb,
+        'performer': performer,
+        'entity': entity,
+        'container': entity.group,
+        'timeCreated': notification.timestamp,
+        'isUnread': notification.unread
+    }
 
 
 class Command(BaseCommand):
@@ -19,7 +34,7 @@ class Command(BaseCommand):
     def send_notifications(self, user, notifications, subject, site_url):
 
         mapped_notifications = []
-        for notification in notifications.values():
+        for notification in notifications:
             mapped_notifications.append(get_notification(notification))
         if notifications:
             site_name = config.NAME

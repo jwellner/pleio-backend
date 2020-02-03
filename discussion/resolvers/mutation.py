@@ -45,6 +45,8 @@ def resolve_add_discussion(_, info, input):
 
         entity.save()
 
+        entity.add_follow(user)
+
         reversion.set_user(user)
         reversion.set_comment("addEntity mutation")
 

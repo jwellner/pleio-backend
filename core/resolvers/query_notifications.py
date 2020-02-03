@@ -1,14 +1,3 @@
-from core.mapper import get_notification
-
-
-def get_notifications(user, offset=0, limit=20):
-    result = []
-    notifications = user.notifications.all()[offset:offset+limit].values()
-    for notification in notifications:
-        result.append(get_notification(notification))
-    return result
-
-
 def resolve_notifications(_, info, offset=0, limit=20):
     """ Returns notification, which are created through methods in signals.py """
     # pylint: disable=unused-argument
@@ -24,9 +13,9 @@ def resolve_notifications(_, info, offset=0, limit=20):
             'edges': list(),
         }
 
-    edges = get_notifications(user)
+    edges = user.notifications.all()[offset:offset+limit]
 
-    total_unread = len([item for item in edges if item['isUnread']])
+    total_unread = len([item for item in edges if item.unread])
     return {
         'total': len(edges),
         'totalUnread': total_unread,

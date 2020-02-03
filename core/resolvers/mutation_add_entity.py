@@ -125,6 +125,8 @@ def resolve_add_entity(_, info, input):
             entity.parent = parent
 
         entity.save()
+        if clean_input.get("subtype") in ["blog", "news", "question"]:
+            entity.add_follow(user)
 
         reversion.set_user(user)
         reversion.set_comment("addEntity mutation")
