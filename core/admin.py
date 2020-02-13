@@ -2,7 +2,8 @@ from django.contrib.admin import AdminSite as BaseAdminSite
 from reversion.admin import VersionAdmin
 
 from core import config
-from .models import User, Group, GroupMembership, Comment, Setting, Annotation, ProfileField
+from core.models import Group, GroupMembership, Comment, Setting, Annotation, ProfileField
+from user.models import User
 from file.models import FileFolder
 
 class AdminSite(BaseAdminSite):

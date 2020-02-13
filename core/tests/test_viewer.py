@@ -1,12 +1,12 @@
 from django.db import connection
 from django_tenants.test.cases import FastTenantTestCase
-from ..models import User
+from user.models import User
 from backend2.schema import schema
 from ariadne import graphql_sync
 import json
 from django.contrib.auth.models import AnonymousUser
 from django.http import HttpRequest
-from core.models import User
+from user.models import User
 from mixer.backend.django import mixer
 
 class ViewerTestCase(FastTenantTestCase):

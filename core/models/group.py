@@ -20,7 +20,7 @@ class Group(models.Model):
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
 
-    owner = models.ForeignKey('core.User', on_delete=models.PROTECT)
+    owner = models.ForeignKey('user.User', on_delete=models.PROTECT)
 
     name = models.CharField(max_length=200)
 
@@ -136,7 +136,7 @@ class GroupMembership(models.Model):
     )
 
     user = models.ForeignKey(
-        'User',
+        'user.User',
         related_name='memberships',
         on_delete=models.PROTECT
     )
@@ -146,7 +146,7 @@ class GroupMembership(models.Model):
         default='member'
     )
     group = models.ForeignKey(
-        'Group',
+        'core.Group',
         related_name='members',
         on_delete=models.CASCADE
     )
@@ -164,12 +164,12 @@ class GroupInvitation(models.Model):
         unique_together = ('invited_user', 'group')
 
     group = models.ForeignKey(
-        'Group',
+        'core.Group',
         related_name='invitations',
         on_delete=models.CASCADE
     )
     invited_user = models.ForeignKey(
-        'User',
+        'user.User',
         related_name='invitation',
         on_delete=models.CASCADE
     )
@@ -187,7 +187,7 @@ class Subgroup(models.Model):
     #TODO: access_id is same as id, now it conflicts with some of core access_ids, ie 0,1,2,4. Solution needed
 
     name = models.CharField(max_length=512)
-    members = models.ManyToManyField('core.User', related_name='subgroups')
+    members = models.ManyToManyField('user.User', related_name='subgroups')
     group = models.ForeignKey('core.Group', related_name='subgroups', on_delete=models.CASCADE)
 
     @property

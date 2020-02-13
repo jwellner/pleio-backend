@@ -2,7 +2,8 @@ from graphql import GraphQLError
 from django.core.exceptions import ObjectDoesNotExist
 from django.utils.text import slugify
 from django.utils.translation import ugettext_lazy
-from core.models import User, Group, GroupMembership
+from core.models import Group, GroupMembership
+from user.models import User
 from core.constances import NOT_LOGGED_IN, COULD_NOT_FIND, COULD_NOT_SAVE, USER_NOT_MEMBER_OF_GROUP
 from core.lib import remove_none_from_dict, send_mail_multi, get_base_url, get_default_email_context
 

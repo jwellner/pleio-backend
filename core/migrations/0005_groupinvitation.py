@@ -20,7 +20,7 @@ class Migration(migrations.Migration):
                 ('created_at', models.DateTimeField(auto_now_add=True)),
                 ('updated_at', models.DateTimeField(auto_now=True)),
                 ('group', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='invitations', to='core.Group')),
-                ('invited_user', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='invitation', to=settings.AUTH_USER_MODEL)),
+                ('invited_user', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='invitation', to='user.User')),
             ],
             options={
                 'unique_together': {('invited_user', 'group')},

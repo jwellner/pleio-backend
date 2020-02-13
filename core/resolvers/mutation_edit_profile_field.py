@@ -1,7 +1,8 @@
 from graphql import GraphQLError
 from django.core.exceptions import ObjectDoesNotExist
 from core.constances import NOT_LOGGED_IN, COULD_NOT_FIND, COULD_NOT_SAVE, INVALID_VALUE
-from core.models import User, UserProfileField, ProfileField
+from core.models import UserProfileField, ProfileField
+from user.models import User
 from core.lib import remove_none_from_dict, access_id_to_acl, is_valid_json
 from datetime import datetime
 

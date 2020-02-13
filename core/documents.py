@@ -1,7 +1,8 @@
 from django_elasticsearch_dsl import Document, fields
 from django_elasticsearch_dsl.registries import registry
-from .models.user import User, UserProfile, UserProfileField
+from .models.user import UserProfile, UserProfileField
 from .models.group import Group
+from user.models import User
 from django_tenants.utils import parse_tenant_config_path
 
 

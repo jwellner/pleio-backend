@@ -42,7 +42,10 @@ LOCAL_APPS = [
 
 STATIC_ROOT = '/app/static'
 
-LOCAL_MIDDLEWARE = ['core.middleware.UserLastOnlineMiddleware']
+LOCAL_MIDDLEWARE = []
+
+if not os.getenv('RUN_AS_ADMIN_APP'):
+    LOCAL_MIDDLEWARE = ['core.middleware.UserLastOnlineMiddleware']
 
 LANGUAGE_CODE = 'en'
 

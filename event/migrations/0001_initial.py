@@ -11,7 +11,7 @@ class Migration(migrations.Migration):
 
     dependencies = [
         ('file', '0001_initial'),
-        migrations.swappable_dependency(settings.AUTH_USER_MODEL),
+        migrations.swappable_dependency('user.User'),
         ('core', '0001_initial'),
     ]
 
@@ -61,7 +61,7 @@ class Migration(migrations.Migration):
                 ('created_at', models.DateTimeField(auto_now_add=True)),
                 ('updated_at', models.DateTimeField(auto_now=True)),
                 ('event', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='attendees', to='event.Event')),
-                ('user', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL)),
+                ('user', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to='user.User')),
             ],
         ),
     ]

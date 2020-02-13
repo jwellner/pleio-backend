@@ -6,7 +6,8 @@ import json
 from core.lib import is_valid_json
 from django.contrib.auth.models import AnonymousUser
 from django.http import HttpRequest
-from core.models import Group, User, ProfileField
+from core.models import Group, ProfileField
+from user.models import User
 from mixer.backend.django import mixer
 from graphql import GraphQLError
 

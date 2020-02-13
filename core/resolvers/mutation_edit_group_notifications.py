@@ -1,7 +1,8 @@
 from graphql import GraphQLError
 from django.core.exceptions import ObjectDoesNotExist
 from core.constances import NOT_LOGGED_IN, COULD_NOT_FIND, COULD_NOT_SAVE
-from core.models import User, Group
+from core.models import Group
+from user.models import User
 from core.lib import remove_none_from_dict
 
 def resolve_edit_group_notifications(_, info, input):

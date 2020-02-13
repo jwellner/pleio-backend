@@ -17,7 +17,7 @@ class Comment(VoteMixin):
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
 
-    owner = models.ForeignKey('core.User', on_delete=models.PROTECT)
+    owner = models.ForeignKey('user.User', on_delete=models.PROTECT)
 
     description = models.TextField()
     rich_description = models.TextField(null=True, blank=True)

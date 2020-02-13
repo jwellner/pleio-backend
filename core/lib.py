@@ -25,7 +25,7 @@ class TypeModels(Enum):
     page = "cms.Page"
     blog = "blog.Blog"
     group = "core.Group"
-    user = "core.User"
+    user = "user.User"
     status_update = "activity.StatusUpdate"
     thewire = "activity.StatusUpdate"
     task = "task.Task"

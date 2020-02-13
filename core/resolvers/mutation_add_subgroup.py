@@ -1,6 +1,7 @@
 from graphql import GraphQLError
 from django.core.exceptions import ObjectDoesNotExist
-from core.models import Group, User, Subgroup
+from core.models import Group, Subgroup
+from user.models import User
 from core.constances import NOT_LOGGED_IN, INVALID_VALUE, COULD_NOT_FIND, COULD_NOT_SAVE
 from core.lib import remove_none_from_dict
 

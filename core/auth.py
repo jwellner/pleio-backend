@@ -6,7 +6,7 @@ from django.urls import reverse
 import logging
 import reversion
 
-from .models import User
+from user.models import User
 
 LOGGER = logging.getLogger(__name__)
 

@@ -11,10 +11,15 @@ class UserLastOnlineMiddleware:
             return response
 
         ten_minutes_ago = timezone.now() - timezone.timedelta(minutes=10)
-        if user.profile.last_online and user.profile.last_online > ten_minutes_ago:
-            return response
 
-        user.profile.last_online = timezone.now()
-        user.profile.save()
+        try:
+            if user.profile.last_online and user.profile.last_online > ten_minutes_ago:
+                return response
+
+            user.profile.last_online = timezone.now()
+            user.profile.save()
+        except Exception:
+            pass
+        
 
         return response

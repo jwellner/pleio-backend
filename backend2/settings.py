@@ -16,6 +16,9 @@ from .config import *  # pylint: disable=unused-wildcard-import
 FROM_EMAIL = os.getenv('FROM_EMAIL')
 EMAIL_HOST = os.getenv('EMAIL_HOST')
 
+# Set to true if to run the public variant
+RUN_AS_ADMIN_APP = os.getenv('RUN_AS_ADMIN_APP') == "True"
+
 # For local development
 if os.getenv('DEBUG'):
     EMAIL_HOST = 'mailcatcher'
@@ -32,12 +35,18 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 # Application definition
 
-SHARED_APPS = (
+SHARED_APPS = [
     'django_tenants',  # mandatory
     'tenants', # you must list the app where your tenant model resides in
     'django.contrib.contenttypes',
     'django.contrib.staticfiles',
-)
+    'django.contrib.admin',
+    'django.contrib.auth',
+    'django.contrib.sessions',
+    'django.contrib.messages',
+
+    'user',
+]
 
 TENANT_APPS = [
     # The following Django contrib apps must be in TENANT_APPS
@@ -48,10 +57,11 @@ TENANT_APPS = [
     'django.contrib.auth',
     'django.contrib.sessions',
     'django.contrib.messages',
+    'reversion',
     'core',
+    'user',
     'mozilla_django_oidc',
     'ariadne.contrib.django',
-    'reversion',
     'django_elasticsearch_dsl',
     'notifications',
 ]
@@ -67,8 +77,10 @@ if os.getenv('DEBUG'):
 
 AUTHENTICATION_BACKENDS = [
     'django.contrib.auth.backends.ModelBackend',
-    'core.auth.OIDCAuthBackend'
 ]
+
+if not RUN_AS_ADMIN_APP:
+    AUTHENTICATION_BACKENDS.append('core.auth.OIDCAuthBackend')
 
 MIDDLEWARE = [
     'django_tenants.middleware.main.TenantMainMiddleware',
@@ -79,9 +91,11 @@ MIDDLEWARE = [
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
-    'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'mozilla_django_oidc.middleware.SessionRefresh'
+    'django.middleware.clickjacking.XFrameOptionsMiddleware'
 ]
+
+if not RUN_AS_ADMIN_APP:
+    MIDDLEWARE.append('mozilla_django_oidc.middleware.SessionRefresh')
 
 if LOCAL_MIDDLEWARE:
     MIDDLEWARE += LOCAL_MIDDLEWARE
@@ -90,6 +104,7 @@ if os.getenv('DEBUG'):
     MIDDLEWARE = ['elasticapm.contrib.django.middleware.TracingMiddleware'] + MIDDLEWARE
 
 ROOT_URLCONF = 'backend2.urls'
+PUBLIC_SCHEMA_URLCONF = 'backend2.urls_public'
 
 TEMPLATES = [
     {
@@ -127,7 +142,7 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-AUTH_USER_MODEL = 'core.User'
+AUTH_USER_MODEL = 'user.User'
 
 LOGGING = {
     'version': 1,
@@ -176,9 +191,10 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media/')
 PASSWORD_RESET_TIMEOUT_DAYS = 1
 ACCOUNT_ACTIVATION_DAYS = 7
 
-LOGIN_URL = '/oidc/authenticate/'
-LOGIN_REDIRECT_URL = '/'
-LOGOUT_REDIRECT_URL = '/'
+if not RUN_AS_ADMIN_APP:
+    LOGIN_URL = '/oidc/authenticate/'
+    LOGIN_REDIRECT_URL = '/'
+    LOGOUT_REDIRECT_URL = '/'
 
 APPEND_SLASH = False
 

@@ -1,5 +1,6 @@
 import logging
 from django.db import models
+from django.conf import settings
 from django_elasticsearch_dsl.registries import registry
 from django_elasticsearch_dsl.signals import BaseSignalProcessor
 
@@ -28,17 +29,19 @@ class CustomSignalProcessor(BaseSignalProcessor):
             logger.error("Error updating elasticsearch: %s", e)
 
     def setup(self):
-        # Listen to all model saves.
-        models.signals.post_save.connect(self.handle_save)
-        models.signals.post_delete.connect(self.handle_delete)
+        if not settings.RUN_AS_ADMIN_APP:
+            # Listen to all model saves.
+            models.signals.post_save.connect(self.handle_save)
+            models.signals.post_delete.connect(self.handle_delete)
 
-        # Use to manage related objects update
-        models.signals.m2m_changed.connect(self.handle_m2m_changed)
-        models.signals.pre_delete.connect(self.handle_pre_delete)
+            # Use to manage related objects update
+            models.signals.m2m_changed.connect(self.handle_m2m_changed)
+            models.signals.pre_delete.connect(self.handle_pre_delete)
 
     def teardown(self):
-        # Listen to all model saves.
-        models.signals.post_save.disconnect(self.handle_save)
-        models.signals.post_delete.disconnect(self.handle_delete)
-        models.signals.m2m_changed.disconnect(self.handle_m2m_changed)
-        models.signals.pre_delete.disconnect(self.handle_pre_delete)
+        if not settings.RUN_AS_ADMIN_APP:
+            # Listen to all model saves.
+            models.signals.post_save.disconnect(self.handle_save)
+            models.signals.post_delete.disconnect(self.handle_delete)
+            models.signals.m2m_changed.disconnect(self.handle_m2m_changed)
+            models.signals.pre_delete.disconnect(self.handle_pre_delete)

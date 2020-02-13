@@ -1,5 +1,6 @@
 from django.db import models
-from core.models import Entity, CommentMixin, BookmarkMixin, User
+from core.models import Entity, CommentMixin, BookmarkMixin
+from user.models import User
 from django.core.exceptions import ObjectDoesNotExist
 from django.utils.text import slugify
 from file.models import FileFolder
