@@ -1,7 +1,7 @@
 from django.core.management.base import BaseCommand
 from django.utils import timezone
 from core.lib import send_mail_multi, get_default_email_context
-from core.models import User
+from user.models import User
 from core import config
 from datetime import datetime, timedelta
 from core.resolvers.notification import get_notification_action_entity

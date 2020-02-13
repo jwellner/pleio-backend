@@ -1,6 +1,7 @@
 from core.lib import get_acl
 from core.constances import INVALID_SUBTYPE
-from core.models import Entity, User, Group
+from core.models import Entity, Group
+from user.models import User
 from elasticsearch_dsl import Search
 from elasticsearch_dsl import A, Q
 from graphql import GraphQLError

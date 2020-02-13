@@ -1,6 +1,8 @@
 from django.db.models.signals import post_save
+from django.conf import settings
 from notifications.signals import notify
-from core.models import Comment, User
+from core.models import Comment
+from user.models import User
 from event.models import Event
 from blog.models import Blog
 from discussion.models import Discussion
@@ -18,11 +20,11 @@ def comment_handler(sender, instance, created, **kwargs):
 
 
 def user_handler(sender, instance, created, **kwargs):
-    """ Add welcome notification if user is created /
-        Create UserProfile if User is created
+    """
+        Add welcome notification if user is created
     """
     # pylint: disable=unused-argument
-    if not created:
+    if not created or settings.RUN_AS_ADMIN_APP:
         return
 
     notify.send(instance, recipient=instance, verb='welcome', action_object=instance)

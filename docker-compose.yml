@@ -22,11 +22,28 @@ services:
       - .:/app
     depends_on:
       - db
+      - admin
   frontend:
     image: registry.gitlab.com/pleio/frontend:B2-latest
     restart: on-failure
     ports:
       - "9000:80"
+  admin:
+    build: .
+    restart: on-failure
+    environment: 
+      RUN_AS_ADMIN_APP: 'True'
+    env_file:
+      - ./.env
+    stdin_open: true
+    tty: true
+    command: ["/start-admin-dev.sh"]
+    volumes:
+      - .:/app
+    depends_on:
+      - db
+    ports:
+      - "8888:8888"
   db:
     image: postgres
     env_file:

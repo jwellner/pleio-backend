@@ -33,12 +33,18 @@ following commands within the repository:
 
     `docker-compose up`
 
-This will spin up a PostgreSQL container and a Django web container. Then
-create a superuser account using:
+On an empty postgres database perform   
+- ```docker-compose exec admin /app/manage.py migrate_schemas --shared```
+- ```docker-compose exec admin /app/manage.py create_tenant```
+    -   schema: public
+    -   name: public
+    -   domain: localhost
+    -   is_primary: True
 
-    `docker-compose exec web python manage.py createsuperuser`
 
-Now login with your new (superuser) account on http://localhost:8000/admin/
+Now login in the admin tool on http://localhost:8888/login   
+
+Create tenants through the admin   
 
 ## Setup development (manually)
 Before setup make sure you installed all the development requirements:

@@ -5,7 +5,8 @@ from ariadne import graphql_sync
 import json
 from django.contrib.auth.models import AnonymousUser
 from django.http import HttpRequest
-from core.models import Group, User
+from core.models import Group
+from user.models import User
 from event.models import Event
 from core.constances import ACCESS_TYPE
 from mixer.backend.django import mixer

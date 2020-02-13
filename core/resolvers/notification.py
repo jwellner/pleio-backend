@@ -1,5 +1,6 @@
 from ariadne import ObjectType
-from core.models import Entity, User
+from core.models import Entity
+from user.models import User
 
 
 def get_notification_action_entity(notification):

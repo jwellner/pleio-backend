@@ -7,7 +7,8 @@ import json
 from django.utils.translation import ugettext_lazy
 from django.contrib.auth.models import AnonymousUser
 from django.http import HttpRequest
-from core.models import Group, GroupInvitation, User
+from core.models import Group, GroupInvitation
+from user.models import User
 from mixer.backend.django import mixer
 from graphql import GraphQLError
 from unittest import mock

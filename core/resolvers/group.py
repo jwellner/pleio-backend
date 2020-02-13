@@ -1,7 +1,8 @@
 from ariadne import ObjectType
 from core.constances import MEMBERSHIP
 from core.lib import get_access_ids
-from core.models import User, GroupInvitation, Subgroup
+from core.models import GroupInvitation, Subgroup
+from user.models import User
 from core.resolvers.query_site import get_settings
 
 group = ObjectType("Group")

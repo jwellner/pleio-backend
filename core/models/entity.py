@@ -19,7 +19,7 @@ class Entity(models.Model):
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
 
-    owner = models.ForeignKey('core.User', on_delete=models.PROTECT)
+    owner = models.ForeignKey('user.User', on_delete=models.PROTECT)
     group = models.ForeignKey(
         'core.Group',
         on_delete=models.PROTECT,
@@ -63,7 +63,7 @@ class Entity(models.Model):
 
 class EntityView(models.Model):
     entity = models.ForeignKey('core.Entity', on_delete=models.CASCADE, related_name="views")
-    viewer = models.ForeignKey('core.User', on_delete=models.CASCADE)
+    viewer = models.ForeignKey('user.User', on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)
 
 

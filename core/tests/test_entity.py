@@ -1,6 +1,7 @@
 from django.db import connection
 from django_tenants.test.cases import FastTenantTestCase
-from core.models import User, Group, GroupInvitation
+from core.models import Group, GroupInvitation
+from user.models import User
 from file.models import FileFolder
 from core.constances import ACCESS_TYPE
 from backend2.schema import schema

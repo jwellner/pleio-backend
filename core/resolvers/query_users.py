@@ -1,5 +1,5 @@
 from core.lib import get_acl
-from core.models import User
+from user.models import User
 from core.constances import NOT_LOGGED_IN
 from elasticsearch_dsl import Search
 from elasticsearch_dsl import Q

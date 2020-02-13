@@ -1,6 +1,7 @@
 from django.db import connection
 from django_tenants.test.cases import FastTenantTestCase
-from core.models import User, EntityView, EntityViewCount
+from core.models import EntityView, EntityViewCount
+from user.models import User
 from blog.models import Blog
 from core.constances import ACCESS_TYPE
 from backend2.schema import schema

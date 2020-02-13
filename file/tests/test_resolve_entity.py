@@ -6,7 +6,8 @@ from ariadne import graphql_sync
 from django.contrib.auth.models import AnonymousUser
 from django.http import HttpRequest
 from django.utils import timezone
-from core.models import User, Group
+from core.models import Group
+from user.models import User
 from file.models import FileFolder
 from mixer.backend.django import mixer
 from core.constances import ACCESS_TYPE

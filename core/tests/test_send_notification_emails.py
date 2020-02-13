@@ -1,5 +1,6 @@
 from django_tenants.test.cases import FastTenantTestCase
-from core.models import User, Group, Comment
+from core.models import Group, Comment
+from user.models import User
 from blog.models import Blog
 from core.constances import ACCESS_TYPE
 from django.utils.translation import ugettext_lazy
