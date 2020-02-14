@@ -273,7 +273,7 @@ type Blog implements Entity {
   isHighlighted: Boolean
   isRecommended: Boolean
   featured: Featured
-  canEdit: Boolean
+  canEdit: Boolean!
   canComment: Boolean
   canVote: Boolean
   accessId: Int
@@ -342,7 +342,7 @@ type Comment implements Entity {
   tags: [String]
   timeCreated: String
   timeUpdated: String
-  canEdit: Boolean
+  canEdit: Boolean!
   canVote: Boolean
   accessId: Int
   writeAccessId: Int
@@ -414,7 +414,7 @@ type Discussion implements Entity {
   tags: [String]
   timeCreated: String
   timeUpdated: String
-  canEdit: Boolean
+  canEdit: Boolean!
   canComment: Boolean
   canVote: Boolean
   accessId: Int
@@ -706,7 +706,6 @@ interface Entity {
 
 type EntityList {
   total: Int!
-  canWrite: Boolean!
   edges: [Entity]
 }
 
@@ -735,7 +734,7 @@ type Event implements Entity {
   attendEventWithoutAccount: Boolean
   isRecommended: Boolean
   featured: Featured
-  canEdit: Boolean
+  canEdit: Boolean!
   canComment: Boolean
   canVote: Boolean
   accessId: Int
@@ -762,7 +761,6 @@ enum EventFilter {
 
 type EventList {
   total: Int!
-  canWrite: Boolean!
   edges: [Event]
 }
 
@@ -801,7 +799,7 @@ type FileFolder implements Entity {
   isHighlighted: Boolean
   isRecommended: Boolean
   featured: Featured
-  canEdit: Boolean
+  canEdit: Boolean!
   canComment: Boolean
   canVote: Boolean
   accessId: Int
@@ -860,7 +858,7 @@ type Group implements Entity {
   icon: String
   featured: Featured
   url: String
-  canEdit: Boolean
+  canEdit: Boolean!
   canChangeOwnership: Boolean
   isClosed: Boolean
   isMembershipOnRequest: Boolean
@@ -901,7 +899,6 @@ enum GroupFilter {
 
 type GroupList {
   total: Int!
-  canWrite: Boolean!
   edges: [Group]
 }
 
@@ -1143,7 +1140,7 @@ type News implements Entity {
   isHighlighted: Boolean
   isRecommended: Boolean
   featured: Featured
-  canEdit: Boolean
+  canEdit: Boolean!
   canComment: Boolean
   canVote: Boolean
   accessId: Int
@@ -1304,7 +1301,7 @@ type Question implements Entity {
   canChooseBestAnswer: Boolean
   isRecommended: Boolean
   featured: Featured
-  canEdit: Boolean
+  canEdit: Boolean!
   canClose: Boolean
   canComment: Boolean
   canVote: Boolean
@@ -1485,7 +1482,7 @@ type StatusUpdate implements Entity {
   tags: [String]
   timeCreated: String
   timeUpdated: String
-  canEdit: Boolean
+  canEdit: Boolean!
   canComment: Boolean
   canVote: Boolean
   accessId: Int
@@ -1540,7 +1537,7 @@ type Task implements Entity {
   tags: [String]
   timeCreated: String
   timeUpdated: String
-  canEdit: Boolean
+  canEdit: Boolean!
   canComment: Boolean
   canVote: Boolean
   accessId: Int
@@ -1623,7 +1620,7 @@ type User implements Entity {
   groupNotifications: [GroupNotificationItem]
   icon: String
   url: String
-  canEdit: Boolean
+  canEdit: Boolean!
   requestDelete: Boolean
 }
 

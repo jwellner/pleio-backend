@@ -26,6 +26,5 @@ def resolve_groups(
 
     return {
         'total': groups.count(),
-        'canWrite': False,
         'edges': groups
     }

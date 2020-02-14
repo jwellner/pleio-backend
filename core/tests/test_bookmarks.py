@@ -56,7 +56,6 @@ class BookmarkTestCase(FastTenantTestCase):
             {
                 bookmarks {
                     total
-                    canWrite
                     edges {
                         guid
                     }
@@ -84,7 +83,6 @@ class BookmarkTestCase(FastTenantTestCase):
             {
                 bookmarks(subtype: "news") {
                     total
-                    canWrite
                     edges {
                         guid
                     }
@@ -138,7 +136,6 @@ class BookmarkTestCase(FastTenantTestCase):
             {
                 bookmarks {
                     total
-                    canWrite
                     edges {
                         guid
                     }

@@ -27,6 +27,5 @@ def resolve_events(obj, info, filter=None, containerGuid=None, offset=0, limit=2
 
     return {
         'total': events.count(),
-        'canWrite': False,
         'edges': events
     }

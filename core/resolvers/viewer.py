@@ -24,7 +24,9 @@ def resolve_can_write_to_container(obj, info, containerGuid=None, subtype=None, 
 
     # check site access
     if not containerGuid and user.is_authenticated:
-        return True
+        if subtype not in ['news', 'page'] or user.is_admin:
+            return True
+        return False
 
     # check group access
     if (containerGuid and containerGuid in get_acl(user)) or user.is_admin:

@@ -14,7 +14,6 @@ def resolve_viewer(_, info):
             'isAdmin': False,
             'isBanned': banned,
             'tags': [],
-            'canWriteToContainer': False,
             'user': {
                 'guid': '0'
             }
@@ -26,6 +25,5 @@ def resolve_viewer(_, info):
         'isSubEditor': user.is_admin,
         'isAdmin': user.is_admin,
         'isBanned': banned,
-        'tags': [],
-        'canWriteToContainer': True
+        'tags': []
     }

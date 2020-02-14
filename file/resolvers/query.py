@@ -71,7 +71,6 @@ def resolve_files(
     qs = qs.order_by(order_by)
 
     return {
-        'canWrite': True,
         'total': qs.count(),
         'edges': qs
     }
