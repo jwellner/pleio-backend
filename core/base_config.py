@@ -44,7 +44,8 @@ DEFAULT_SITE_CONFIG = {
     ], 'Menu'),
     'FOOTER': ([], 'Footer'),
     'DIRECT_LINKS': ([], 'Direct links'),
-    'MAIL_REPLY_TO': ('noreply@pleio.nl', 'default reply-to mail address')
+    'MAIL_REPLY_TO': ('noreply@pleio.nl', 'default reply-to mail address'),
+    'SHOW_LOGIN_REGISTER': (True, 'Login and register buttons visible'),
 }
 """
 Default site configuration

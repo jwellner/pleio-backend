@@ -29,7 +29,8 @@ def get_settings():
         "subgroups": True,
         "statusUpdateGroups": True,
         "showExtraHomepageFilters": True,
-        'showViewsCount': True
+        "showViewsCount": True,
+        "showLoginRegister": config.SHOW_LOGIN_REGISTER,
     }
 
 def get_site():
@@ -67,6 +68,7 @@ def get_site():
         'usersOnline': get_online_users(),
         'achievementsEnabled': config.ACHIEVEMENTS_ENABLED,
         'cancelMembershipEnabled': config.CANCEL_MEMBERSHIP_ENABLED,
+        'showLoginRegister': config.SHOW_LOGIN_REGISTER,
     }
 
     return site
