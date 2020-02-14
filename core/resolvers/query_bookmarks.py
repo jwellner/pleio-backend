@@ -35,6 +35,5 @@ def resolve_bookmarks(_, info, subtype=None, offset=0, limit=20):
 
     return {
         'total': qs.count(),
-        'canWrite': False,
         'edges': entities,
     }

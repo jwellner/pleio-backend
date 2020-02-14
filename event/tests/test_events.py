@@ -83,7 +83,6 @@ class EventsTestCase(FastTenantTestCase):
             query EventsList($filter: EventFilter, $offset: Int, $limit: Int) {
                 events(filter: $filter, offset: $offset, limit: $limit) {
                         total
-                        canWrite
                         edges {
                         guid
                         ...EventListFragment

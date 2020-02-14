@@ -18,6 +18,5 @@ def resolve_recommended(
 
     return {
         'total': entities.count(),
-        'canWrite': False,
         'edges': entities,
     }

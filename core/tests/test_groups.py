@@ -19,7 +19,6 @@ class GroupsEmptyTestCase(FastTenantTestCase):
             {
                 groups {
                     total
-                    canWrite
                     edges {
                         guid
                         name
@@ -41,7 +40,6 @@ class GroupsEmptyTestCase(FastTenantTestCase):
         data = result[1]["data"]
         
         self.assertEqual(data["groups"]["total"], 0)
-        self.assertEqual(data["groups"]["canWrite"], False)
         self.assertEqual(data["groups"]["edges"], [])
 
 class GroupsNotEmptyTestCase(FastTenantTestCase):
@@ -65,7 +63,6 @@ class GroupsNotEmptyTestCase(FastTenantTestCase):
             {
                 groups {
                     total
-                    canWrite
                     edges {
                         guid
                         name
@@ -87,7 +84,6 @@ class GroupsNotEmptyTestCase(FastTenantTestCase):
         data = result[1]["data"]
         
         self.assertEqual(data["groups"]["total"], 6)
-        self.assertEqual(data["groups"]["canWrite"], False)
 
     def test_groups_limit(self):
 
@@ -95,7 +91,6 @@ class GroupsNotEmptyTestCase(FastTenantTestCase):
             {
                 groups(limit:2) {
                     total
-                    canWrite
                     edges {
                         guid
                         name
@@ -117,7 +112,6 @@ class GroupsNotEmptyTestCase(FastTenantTestCase):
         data = result[1]["data"]
         
         self.assertEqual(data["groups"]["total"], 2)
-        self.assertEqual(data["groups"]["canWrite"], False)
 
     def test_groups_mine(self):
 
@@ -125,7 +119,6 @@ class GroupsNotEmptyTestCase(FastTenantTestCase):
             query GroupsQuery($filter: GroupFilter, $offset: Int!, $limit: Int!, $q: String!) {
                 groups(filter: $filter, offset: $offset, limit: $limit, q: $q) {
                     total
-                    canWrite
                     edges {
                         guid
                         name
@@ -166,5 +159,4 @@ class GroupsNotEmptyTestCase(FastTenantTestCase):
         data = result[1]["data"]
 
         self.assertEqual(data["groups"]["total"], 1)
-        self.assertEqual(data["groups"]["canWrite"], False)
         self.assertEqual(data["groups"]["edges"][0]["guid"], self.group1.guid)

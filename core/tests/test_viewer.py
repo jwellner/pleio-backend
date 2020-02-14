@@ -116,3 +116,95 @@ class ViewerTestCase(FastTenantTestCase):
         self.assertEqual(data["viewer"]["isBanned"], False)
         self.assertEqual(data["viewer"]["user"]["name"], self.authenticatedAdminUser.name)
         self.assertEqual(data["viewer"]["user"]["guid"], self.authenticatedAdminUser.guid)
+
+    def test_viewer_can_write_to_container_anonymous(self):
+        query = """
+            {
+                viewer {
+                    canWriteToContainer(subtype: "news")
+                }
+            }
+        """
+        request = HttpRequest()
+        request.user = self.anonymousUser
+
+        result = graphql_sync(schema, { "query": query}, context_value=request)
+
+        self.assertTrue(result[0])
+
+        data = result[1]["data"]
+        
+        self.assertEqual(data["viewer"]["canWriteToContainer"], False)
+
+    def test_viewer_can_write_to_container_user(self):
+        query = """
+            {
+                viewer {
+                    canWriteToContainer(subtype: "news")
+                }
+            }
+        """
+        request = HttpRequest()
+        request.user = self.authenticatedUser
+
+        result = graphql_sync(schema, { "query": query}, context_value=request)
+
+        self.assertTrue(result[0])
+
+        data = result[1]["data"]
+        
+        self.assertEqual(data["viewer"]["canWriteToContainer"], False)
+
+        query = """
+            {
+                viewer {
+                    canWriteToContainer(subtype: "blog")
+                }
+            }
+        """
+
+        result = graphql_sync(schema, { "query": query}, context_value=request)
+
+        self.assertTrue(result[0])
+
+        data = result[1]["data"]
+        
+        self.assertEqual(data["viewer"]["canWriteToContainer"], True)
+
+    def test_viewer_can_write_to_container_group_user(self):
+        query = """
+            {
+                viewer {
+                    canWriteToContainer(subtype: "news")
+                }
+            }
+        """
+        request = HttpRequest()
+        request.user = self.authenticatedUser
+
+        result = graphql_sync(schema, { "query": query}, context_value=request)
+
+        self.assertTrue(result[0])
+
+        data = result[1]["data"]
+        
+        self.assertEqual(data["viewer"]["canWriteToContainer"], False)
+
+    def test_viewer_can_write_to_container_admin(self):
+        query = """
+            {
+                viewer {
+                    canWriteToContainer(subtype: "news")
+                }
+            }
+        """
+        request = HttpRequest()
+        request.user = self.authenticatedAdminUser
+
+        result = graphql_sync(schema, { "query": query}, context_value=request)
+
+        self.assertTrue(result[0])
+
+        data = result[1]["data"]
+        
+        self.assertEqual(data["viewer"]["canWriteToContainer"], True)

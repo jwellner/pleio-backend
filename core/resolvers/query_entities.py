@@ -84,6 +84,5 @@ def resolve_entities(
 
     return {
         'total': entities.count(),
-        'canWrite': False,
         'edges': entities,
     }

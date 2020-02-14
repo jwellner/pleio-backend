@@ -113,7 +113,6 @@ def resolve_files(_, info, containerGuid=None, filter=None, orderBy=ORDER_BY.tim
     # pylint: disable=redefined-builtin
     return {
         'total': 0,
-        'canWrite': False,
         'edges': [],
     }
 
