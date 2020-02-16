@@ -7,6 +7,7 @@ stages:
 
 variables:
   SECRET_KEY: bg9kU6ckKXTLQeZxtovc
+  POSTGRES_PASSWORD: postgres
   DB_HOST: postgres
   DB_USER: postgres
   DB_PASSWORD: postgres
@@ -23,7 +24,7 @@ cache:
 before_script:
 
 services:
-  - postgres:latest
+  - postgres:9.6-alpine
   - name: docker.elastic.co/elasticsearch/elasticsearch:7.4.0
     alias: elasticsearch
     command: [ "bin/elasticsearch", "-Expack.security.enabled=false", "-Ediscovery.type=single-node" ]
