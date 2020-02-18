@@ -1,9 +1,9 @@
-from reversion.admin import VersionAdmin
+from django.contrib.admin import ModelAdmin
 
 from core import admin
 from .models import Poll
 
-class PollAdmin(VersionAdmin):
+class PollAdmin(ModelAdmin):
     pass
 
 

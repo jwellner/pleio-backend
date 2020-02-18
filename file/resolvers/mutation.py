@@ -1,4 +1,3 @@
-import reversion
 from graphql import GraphQLError
 from django.core.exceptions import ObjectDoesNotExist
 from ariadne import ObjectType
@@ -54,30 +53,26 @@ def resolve_add_file(_, info, input):
     if group and not group.is_full_member(user) and not user.is_admin:
         raise GraphQLError("NOT_GROUP_MEMBER")
 
-    with reversion.create_revision():
-        entity = FileFolder()
+    entity = FileFolder()
 
-        entity.owner = user
-        entity.tags = clean_input.get("tags", [])
+    entity.owner = user
+    entity.tags = clean_input.get("tags", [])
 
-        if not clean_input.get("file"):
-            raise GraphQLError("NO_FILE")
+    if not clean_input.get("file"):
+        raise GraphQLError("NO_FILE")
 
-        entity.upload = clean_input.get("file")
+    entity.upload = clean_input.get("file")
 
-        if parent:
-            entity.parent = parent
+    if parent:
+        entity.parent = parent
 
-        if group:
-            entity.group = group
+    if group:
+        entity.group = group
 
-        entity.read_access = access_id_to_acl(entity, clean_input.get("accessId"))
-        entity.write_access = access_id_to_acl(entity, clean_input.get("writeAccessId"))
+    entity.read_access = access_id_to_acl(entity, clean_input.get("accessId"))
+    entity.write_access = access_id_to_acl(entity, clean_input.get("writeAccessId"))
 
-        entity.save()
-
-        reversion.set_user(user)
-        reversion.set_comment("addFile mutation")
+    entity.save()
 
     return {
         "entity": entity
@@ -116,27 +111,23 @@ def resolve_add_folder(_, info, input):
     if group and not group.is_full_member(user) and not user.is_admin:
         raise GraphQLError("NOT_GROUP_MEMBER")
 
-    with reversion.create_revision():
-        entity = FileFolder()
+    entity = FileFolder()
 
-        entity.owner = user
-        entity.tags = clean_input.get("tags", [])
-        entity.title = clean_input.get("title")
-        entity.is_folder = True
+    entity.owner = user
+    entity.tags = clean_input.get("tags", [])
+    entity.title = clean_input.get("title")
+    entity.is_folder = True
 
-        if parent:
-            entity.parent = parent
+    if parent:
+        entity.parent = parent
 
-        if group:
-            entity.group = group
+    if group:
+        entity.group = group
 
-        entity.read_access = access_id_to_acl(entity, clean_input.get("accessId"))
-        entity.write_access = access_id_to_acl(entity, clean_input.get("writeAccessId"))
+    entity.read_access = access_id_to_acl(entity, clean_input.get("accessId"))
+    entity.write_access = access_id_to_acl(entity, clean_input.get("writeAccessId"))
 
-        entity.save()
-
-        reversion.set_user(user)
-        reversion.set_comment("addEntity mutation")
+    entity.save()
 
     return {
         "entity": entity
@@ -161,30 +152,26 @@ def resolve_edit_file_folder(_, info, input):
     if not entity.can_write(user):
         raise GraphQLError(COULD_NOT_SAVE)
 
-    with reversion.create_revision():
-        entity.owner = user
+    entity.owner = user
 
-        entity.tags = clean_input.get("tags", [])
+    entity.tags = clean_input.get("tags", [])
 
-        if clean_input.get("title"):
-            entity.title = clean_input.get("title")
+    if clean_input.get("title"):
+        entity.title = clean_input.get("title")
 
-        if clean_input.get("file"):
-            entity.upload = clean_input.get("file")
+    if clean_input.get("file"):
+        entity.upload = clean_input.get("file")
 
-        if clean_input.get("accessId"):
-            entity.read_access = access_id_to_acl(entity, clean_input.get("accessId"))
+    if clean_input.get("accessId"):
+        entity.read_access = access_id_to_acl(entity, clean_input.get("accessId"))
 
-        if clean_input.get("writeAccessId"):
-            entity.write_access = access_id_to_acl(entity, clean_input.get("writeAccessId"))
+    if clean_input.get("writeAccessId"):
+        entity.write_access = access_id_to_acl(entity, clean_input.get("writeAccessId"))
 
-        if entity.is_folder and clean_input.get("isAccessRecursive", False):
-            update_access_recursive(user, entity, clean_input.get("accessId"), clean_input.get("writeAccessId"))
+    if entity.is_folder and clean_input.get("isAccessRecursive", False):
+        update_access_recursive(user, entity, clean_input.get("accessId"), clean_input.get("writeAccessId"))
 
-        entity.save()
-
-        reversion.set_user(user)
-        reversion.set_comment("editFileFolder mutation")
+    entity.save()
 
     return {
         "entity": entity
@@ -220,19 +207,14 @@ def resolve_move_file_folder(_, info, input):
         except ObjectDoesNotExist:
             raise GraphQLError("invalid_new_container")
 
+    if group:
+        entity.group = group
+        entity.parent = None
 
-    with reversion.create_revision():
-        if group:
-            entity.group = group
-            entity.parent = None
+    if parent:
+        entity.parent = parent
 
-        if parent:
-            entity.parent = parent
-
-        entity.save()
-
-        reversion.set_user(user)
-        reversion.set_comment("editFileFolder mutation")
+    entity.save()
 
     return {
         "entity": entity

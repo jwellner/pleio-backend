@@ -1,10 +1,10 @@
-from reversion.admin import VersionAdmin
+from django.contrib.admin import ModelAdmin
 
 from core import admin
 from .models import News
 
 
-class NewsAdmin(VersionAdmin):
+class NewsAdmin(ModelAdmin):
     pass
 
 

@@ -1,4 +1,3 @@
-import reversion
 from graphql import GraphQLError
 from django.core.exceptions import ObjectDoesNotExist
 from core.constances import NOT_LOGGED_IN, COULD_NOT_SAVE
@@ -22,11 +21,7 @@ def resolve_delete_entity(_, info, input):
     if not entity.can_write(user):
         raise GraphQLError(COULD_NOT_SAVE)
     
-    with reversion.create_revision():
-        entity.delete()
-
-        reversion.set_user(user)
-        reversion.set_comment("editEntity mutation")
+    entity.delete()
 
     return {
         'success': True

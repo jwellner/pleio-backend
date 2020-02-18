@@ -1,4 +1,3 @@
-import reversion
 from graphql import GraphQLError
 from django.core.exceptions import ObjectDoesNotExist
 from core.constances import NOT_LOGGED_IN, COULD_NOT_SAVE, COULD_NOT_FIND
@@ -20,14 +19,10 @@ def resolve_delete_column(_, info, input):
     if not column.page.can_write(user):
         raise GraphQLError(COULD_NOT_SAVE)
 
-    with reversion.create_revision():
-        parent_id = column.parent_id
-        column.delete()
+    parent_id = column.parent_id
+    column.delete()
 
-        reversion.set_user(user)
-        reversion.set_comment("deleteColumn mutation")
-
-        order_positions(parent_id)
+    order_positions(parent_id)
 
     return {
         'success': True

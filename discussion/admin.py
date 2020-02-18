@@ -1,10 +1,10 @@
-from reversion.admin import VersionAdmin
+from django.contrib.admin import ModelAdmin
 
 from core import admin
 from .models import Discussion
 
 
-class DiscussionAdmin(VersionAdmin):
+class DiscussionAdmin(ModelAdmin):
     pass
 
 

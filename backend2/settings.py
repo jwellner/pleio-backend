@@ -57,7 +57,6 @@ TENANT_APPS = [
     'django.contrib.auth',
     'django.contrib.sessions',
     'django.contrib.messages',
-    'reversion',
     'core',
     'user',
     'mozilla_django_oidc',

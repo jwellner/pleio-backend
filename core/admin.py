@@ -1,5 +1,4 @@
-from django.contrib.admin import AdminSite as BaseAdminSite
-from reversion.admin import VersionAdmin
+from django.contrib.admin import AdminSite as BaseAdminSite, ModelAdmin
 
 from core import config
 from core.models import Group, GroupMembership, Comment, Setting, Annotation, ProfileField
@@ -14,24 +13,24 @@ class AdminSite(BaseAdminSite):
 site = AdminSite(name='admin')
 
 
-class UserAdmin(VersionAdmin):
+class UserAdmin(ModelAdmin):
     pass
 
-class ProfileFieldAdmin(VersionAdmin):
+class ProfileFieldAdmin(ModelAdmin):
     pass
 
-class GroupAdmin(VersionAdmin):
-    pass
-
-
-class GroupMembershipAdmin(VersionAdmin):
+class GroupAdmin(ModelAdmin):
     pass
 
 
-class FileFolderAdmin(VersionAdmin):
+class GroupMembershipAdmin(ModelAdmin):
     pass
 
-class SettingAdmin(VersionAdmin):
+
+class FileFolderAdmin(ModelAdmin):
+    pass
+
+class SettingAdmin(ModelAdmin):
     readonly_fields = ('key', )
 
     """Overwrite save_model to use core.config"""
