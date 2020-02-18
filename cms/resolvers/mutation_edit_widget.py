@@ -1,4 +1,3 @@
-import reversion
 from graphql import GraphQLError
 from django.core.exceptions import ObjectDoesNotExist
 from core.lib import remove_none_from_dict
@@ -27,23 +26,19 @@ def resolve_edit_widget(_, info, input):
     if not widget.page.can_write(user):
         raise GraphQLError(COULD_NOT_SAVE)
 
-    with reversion.create_revision():
-        old_position = widget.position
-        new_position = clean_input.get("position")
+    old_position = widget.position
+    new_position = clean_input.get("position")
 
-        if clean_input.get("position"):
-            widget.position = clean_input.get("position")
-        if clean_input.get("parentGuid"):
-            widget.parent_id = clean_input.get("parentGuid")
-        if clean_input.get("settings"):
-            widget.is_full_width = clean_input.get("settings")
+    if clean_input.get("position"):
+        widget.position = clean_input.get("position")
+    if clean_input.get("parentGuid"):
+        widget.parent_id = clean_input.get("parentGuid")
+    if clean_input.get("settings"):
+        widget.is_full_width = clean_input.get("settings")
 
-        widget.save()
+    widget.save()
 
-        reversion.set_user(user)
-        reversion.set_comment("editWidget mutation")
-
-        reorder_positions(widget, old_position, new_position)
+    reorder_positions(widget, old_position, new_position)
 
     return {
         "widget": widget

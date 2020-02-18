@@ -1,4 +1,3 @@
-import reversion
 from graphql import GraphQLError
 from django.core.exceptions import ObjectDoesNotExist
 from core.lib import remove_none_from_dict, get_model_by_subtype, access_id_to_acl
@@ -71,65 +70,61 @@ def resolve_add_entity(_, info, input):
     if group and not group.is_full_member(user) and not user.is_admin:
         raise GraphQLError("NOT_GROUP_MEMBER")
 
-    with reversion.create_revision():
-        # default fields for all entities
-        entity = model()
+    # default fields for all entities
+    entity = model()
 
-        entity.owner = user
-        entity.tags = clean_input.get("tags")
+    entity.owner = user
+    entity.tags = clean_input.get("tags")
 
-        if group:
-            entity.group = group
+    if group:
+        entity.group = group
 
-        entity.read_access = access_id_to_acl(entity, clean_input.get("accessId"))
-        entity.write_access = access_id_to_acl(entity, clean_input.get("writeAccessId"))
+    entity.read_access = access_id_to_acl(entity, clean_input.get("accessId"))
+    entity.write_access = access_id_to_acl(entity, clean_input.get("writeAccessId"))
 
-        if clean_input.get("subtype") in ["blog", "news", "question", "wiki"]:
-            entity.title = clean_input.get("title")
-            entity.description = clean_input.get("description")
-            entity.rich_description = clean_input.get("richDescription")
+    if clean_input.get("subtype") in ["blog", "news", "question", "wiki"]:
+        entity.title = clean_input.get("title")
+        entity.description = clean_input.get("description")
+        entity.rich_description = clean_input.get("richDescription")
 
-        if clean_input.get("subtype") in ["blog", "news"]:
-            if clean_input.get("featured"):
-                entity.featured_position_y = clean_input.get("featured").get("positionY", 0)
-                entity.featured_video = clean_input.get("featured").get("video", None)
-                if entity.featured_video:
-                    entity.featured_image = None
-                elif clean_input.get("featured").get("image"):
-
-                    imageFile = FileFolder.objects.create(
-                        owner=entity.owner, 
-                        upload=clean_input.get("featured").get("image"), 
-                        read_access=entity.read_access,
-                        write_access=entity.write_access
-                    )
-
-                    entity.featured_image = imageFile
-
-                entity.featured_position_y = clean_input.get("featured").get("positionY", 0)
-            else:
+    if clean_input.get("subtype") in ["blog", "news"]:
+        if clean_input.get("featured"):
+            entity.featured_position_y = clean_input.get("featured").get("positionY", 0)
+            entity.featured_video = clean_input.get("featured").get("video", None)
+            if entity.featured_video:
                 entity.featured_image = None
-                entity.featured_position_y = 0
-                entity.featured_video = None
+            elif clean_input.get("featured").get("image"):
 
-        if clean_input.get("subtype") in ["blog"]:
-            # TODO: subeditor may also set recommended
-            if user.is_admin:
-                entity.is_recommended = clean_input.get("isRecommended")
+                imageFile = FileFolder.objects.create(
+                    owner=entity.owner, 
+                    upload=clean_input.get("featured").get("image"), 
+                    read_access=entity.read_access,
+                    write_access=entity.write_access
+                )
 
-        if clean_input.get("subtype") in ["news"]:
-            entity.is_featured = clean_input.get("isFeatured", False)
-            entity.source = clean_input.get("source", "")
+                entity.featured_image = imageFile
 
-        if clean_input.get("subtype") in ["wiki"]:
-            entity.parent = parent
+            entity.featured_position_y = clean_input.get("featured").get("positionY", 0)
+        else:
+            entity.featured_image = None
+            entity.featured_position_y = 0
+            entity.featured_video = None
 
-        entity.save()
-        if clean_input.get("subtype") in ["blog", "news", "question"]:
-            entity.add_follow(user)
+    if clean_input.get("subtype") in ["blog"]:
+        # TODO: subeditor may also set recommended
+        if user.is_admin:
+            entity.is_recommended = clean_input.get("isRecommended")
 
-        reversion.set_user(user)
-        reversion.set_comment("addEntity mutation")
+    if clean_input.get("subtype") in ["news"]:
+        entity.is_featured = clean_input.get("isFeatured", False)
+        entity.source = clean_input.get("source", "")
+
+    if clean_input.get("subtype") in ["wiki"]:
+        entity.parent = parent
+
+    entity.save()
+    if clean_input.get("subtype") in ["blog", "news", "question"]:
+        entity.add_follow(user)
 
     return {
         "entity": entity

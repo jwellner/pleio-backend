@@ -1,4 +1,3 @@
-import reversion
 from graphql import GraphQLError
 from django.core.exceptions import ObjectDoesNotExist
 from core.constances import NOT_LOGGED_IN, COULD_NOT_SAVE, COULD_NOT_FIND
@@ -20,14 +19,10 @@ def resolve_delete_widget(_, info, input):
     if not widget.page.can_write(user):
         raise GraphQLError(COULD_NOT_SAVE)
 
-    with reversion.create_revision():
-        parent_id = widget.parent_id
-        widget.delete()
+    parent_id = widget.parent_id
+    widget.delete()
 
-        reversion.set_user(user)
-        reversion.set_comment("deleteWidget mutation")
-
-        order_positions(parent_id)
+    order_positions(parent_id)
 
     return {
         'success': True

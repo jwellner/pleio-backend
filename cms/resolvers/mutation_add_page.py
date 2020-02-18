@@ -1,4 +1,3 @@
-import reversion
 from graphql import GraphQLError
 from django.core.exceptions import ObjectDoesNotExist
 from core.lib import remove_none_from_dict, access_id_to_acl
@@ -18,36 +17,32 @@ def resolve_add_page(_, info, input):
     if not user.is_authenticated:
         raise GraphQLError(NOT_LOGGED_IN)
 
-    with reversion.create_revision():
-        entity = Page()
+    entity = Page()
 
-        if not entity.can_write(user):
-            raise GraphQLError(COULD_NOT_SAVE)
+    if not entity.can_write(user):
+        raise GraphQLError(COULD_NOT_SAVE)
 
-        entity.owner = user
-        entity.tags = clean_input.get("tags")
+    entity.owner = user
+    entity.tags = clean_input.get("tags")
 
-        if clean_input.get("accessId"):
-            entity.read_access = access_id_to_acl(entity, clean_input.get("accessId"))
-        else:
-            entity.read_access = access_id_to_acl(entity, 0)
-        entity.write_access = access_id_to_acl(entity, 0)
+    if clean_input.get("accessId"):
+        entity.read_access = access_id_to_acl(entity, clean_input.get("accessId"))
+    else:
+        entity.read_access = access_id_to_acl(entity, 0)
+    entity.write_access = access_id_to_acl(entity, 0)
 
-        if clean_input.get("containerGuid"):
-            try:
-                entity.parent = Page.objects.get(id=clean_input.get("containerGuid"))
-            except ObjectDoesNotExist:
-                raise GraphQLError(COULD_NOT_FIND)
+    if clean_input.get("containerGuid"):
+        try:
+            entity.parent = Page.objects.get(id=clean_input.get("containerGuid"))
+        except ObjectDoesNotExist:
+            raise GraphQLError(COULD_NOT_FIND)
 
-        entity.title = clean_input.get("title")
-        entity.description = clean_input.get("description")
-        entity.rich_description = clean_input.get("richDescription")
-        entity.page_type = clean_input.get("pageType")
+    entity.title = clean_input.get("title")
+    entity.description = clean_input.get("description")
+    entity.rich_description = clean_input.get("richDescription")
+    entity.page_type = clean_input.get("pageType")
 
-        entity.save()
-
-        reversion.set_user(user)
-        reversion.set_comment("addPage mutation")
+    entity.save()
 
     return {
         "entity": entity

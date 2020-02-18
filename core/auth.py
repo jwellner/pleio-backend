@@ -4,7 +4,6 @@ from mozilla_django_oidc.utils import absolutify
 from django.urls import reverse
 
 import logging
-import reversion
 
 from user.models import User
 
@@ -46,19 +45,16 @@ class OIDCAuthBackend(OIDCAuthenticationBackend):
 
     def update_user(self, user, claims):
 
-        with reversion.create_revision():
-            user.name = claims.get('name')
-            user.email = claims.get('email')
-            if claims.get('picture'):
-                user.picture = claims.get('picture')
-            else:
-                user.picture = None
-            user.is_government = claims.get('is_government')
-            user.has_2fa_enabled = claims.get('has_2fa_enabled')
-            user.is_admin = claims.get('is_admin')
-            user.save()
-
-            reversion.set_comment("OIDC Update")
+        user.name = claims.get('name')
+        user.email = claims.get('email')
+        if claims.get('picture'):
+            user.picture = claims.get('picture')
+        else:
+            user.picture = None
+        user.is_government = claims.get('is_government')
+        user.has_2fa_enabled = claims.get('has_2fa_enabled')
+        user.is_admin = claims.get('is_admin')
+        user.save()
 
         return user
 

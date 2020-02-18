@@ -1,4 +1,3 @@
-import reversion
 from graphql import GraphQLError
 from django.core.exceptions import ObjectDoesNotExist
 from core.lib import remove_none_from_dict, access_id_to_acl
@@ -26,21 +25,16 @@ def resolve_edit_page(_, info, input):
     if not entity.can_write(user):
         raise GraphQLError(COULD_NOT_SAVE)
 
-    with reversion.create_revision():
+    entity.tags = clean_input.get("tags")
 
-        entity.tags = clean_input.get("tags")
+    if clean_input.get("accessId"):
+        entity.read_access = access_id_to_acl(entity, clean_input.get("accessId"))
 
-        if clean_input.get("accessId"):
-            entity.read_access = access_id_to_acl(entity, clean_input.get("accessId"))
+    entity.title = clean_input.get("title")
+    entity.description = clean_input.get("description")
+    entity.rich_description = clean_input.get("richDescription")
 
-        entity.title = clean_input.get("title")
-        entity.description = clean_input.get("description")
-        entity.rich_description = clean_input.get("richDescription")
-
-        entity.save()
-
-        reversion.set_user(user)
-        reversion.set_comment("editPage mutation")
+    entity.save()
 
     return {
         "entity": entity

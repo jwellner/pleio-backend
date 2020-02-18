@@ -1,4 +1,3 @@
-import reversion
 from graphql import GraphQLError
 from django.core.exceptions import ObjectDoesNotExist
 from core.lib import remove_none_from_dict, access_id_to_acl
@@ -27,28 +26,24 @@ def resolve_add_discussion(_, info, input):
     if group and not group.is_full_member(user) and not user.is_admin:
         raise GraphQLError("NOT_GROUP_MEMBER")
 
-    with reversion.create_revision():
-        entity = Discussion()
+    entity = Discussion()
 
-        entity.owner = user
-        entity.tags = clean_input.get("tags")
+    entity.owner = user
+    entity.tags = clean_input.get("tags")
 
-        if group:
-            entity.group = group
+    if group:
+        entity.group = group
 
-        entity.read_access = access_id_to_acl(entity, clean_input.get("accessId"))
-        entity.write_access = access_id_to_acl(entity, clean_input.get("writeAccessId"))
+    entity.read_access = access_id_to_acl(entity, clean_input.get("accessId"))
+    entity.write_access = access_id_to_acl(entity, clean_input.get("writeAccessId"))
 
-        entity.title = clean_input.get("title")
-        entity.description = clean_input.get("description")
-        entity.rich_description = clean_input.get("richDescription")
+    entity.title = clean_input.get("title")
+    entity.description = clean_input.get("description")
+    entity.rich_description = clean_input.get("richDescription")
 
-        entity.save()
+    entity.save()
 
-        entity.add_follow(user)
-
-        reversion.set_user(user)
-        reversion.set_comment("addEntity mutation")
+    entity.add_follow(user)
 
     return {
         "entity": entity
@@ -73,20 +68,15 @@ def resolve_edit_discussion(_, info, input):
     if not entity.can_write(user):
         raise GraphQLError(COULD_NOT_SAVE)
 
-    with reversion.create_revision():
+    entity.title = clean_input.get("title")
+    entity.description = clean_input.get("description", "")
+    entity.rich_description = clean_input.get("richDescription")
 
-        entity.title = clean_input.get("title")
-        entity.description = clean_input.get("description", "")
-        entity.rich_description = clean_input.get("richDescription")
+    entity.tags = clean_input.get("tags", [])
+    entity.read_access = access_id_to_acl(entity, clean_input.get("accessId", 0))
+    entity.write_access = access_id_to_acl(entity, clean_input.get("writeAccessId", 0))
 
-        entity.tags = clean_input.get("tags", [])
-        entity.read_access = access_id_to_acl(entity, clean_input.get("accessId", 0))
-        entity.write_access = access_id_to_acl(entity, clean_input.get("writeAccessId", 0))
-
-        entity.save()
-
-        reversion.set_user(user)
-        reversion.set_comment("editEntity mutation")
+    entity.save()
 
     return {
         "entity": entity

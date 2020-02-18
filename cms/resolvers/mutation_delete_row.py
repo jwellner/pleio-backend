@@ -1,4 +1,3 @@
-import reversion
 from graphql import GraphQLError
 from django.core.exceptions import ObjectDoesNotExist
 from core.constances import NOT_LOGGED_IN, COULD_NOT_SAVE, COULD_NOT_FIND
@@ -20,14 +19,10 @@ def resolve_delete_row(_, info, input):
     if not row.page.can_write(user):
         raise GraphQLError(COULD_NOT_SAVE)
 
-    with reversion.create_revision():
-        parent_id = row.parent_id
-        row.delete()
+    parent_id = row.parent_id
+    row.delete()
 
-        reversion.set_user(user)
-        reversion.set_comment("deleteRow mutation")
-
-        order_positions(parent_id)
+    order_positions(parent_id)
 
     return {
         'success': True

@@ -1,4 +1,3 @@
-import reversion
 from graphql import GraphQLError
 from django.core.exceptions import ObjectDoesNotExist
 from core.lib import remove_none_from_dict
@@ -27,23 +26,19 @@ def resolve_edit_row(_, info, input):
     if not row.page.can_write(user):
         raise GraphQLError(COULD_NOT_SAVE)
 
-    with reversion.create_revision():
-        old_position = row.position
-        new_position = clean_input.get("position")
+    old_position = row.position
+    new_position = clean_input.get("position")
 
-        if clean_input.get("position"):
-            row.position = clean_input.get("position")
-        if clean_input.get("parentGuid"):
-            row.parent_id = clean_input.get("parentGuid")
-        if clean_input.get("isFullWidth"):
-            row.is_full_width = clean_input.get("isFullWidth")
+    if clean_input.get("position"):
+        row.position = clean_input.get("position")
+    if clean_input.get("parentGuid"):
+        row.parent_id = clean_input.get("parentGuid")
+    if clean_input.get("isFullWidth"):
+        row.is_full_width = clean_input.get("isFullWidth")
 
-        row.save()
+    row.save()
 
-        reversion.set_user(user)
-        reversion.set_comment("editRow mutation")
-
-        reorder_positions(row, old_position, new_position)
+    reorder_positions(row, old_position, new_position)
 
     return {
         "row": row

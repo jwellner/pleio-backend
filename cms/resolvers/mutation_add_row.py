@@ -1,4 +1,3 @@
-import reversion
 from graphql import GraphQLError
 from django.core.exceptions import ObjectDoesNotExist
 from core.lib import remove_none_from_dict
@@ -19,29 +18,25 @@ def resolve_add_row(_, info, input):
     if not user.is_authenticated:
         raise GraphQLError(NOT_LOGGED_IN)
 
-    with reversion.create_revision():
-        old_position = None
-        new_position = clean_input.get("position")
-        row = Row()
+    old_position = None
+    new_position = clean_input.get("position")
+    row = Row()
 
-        try:
-            row.page = Page.objects.get(id=clean_input.get("containerGuid"))
-        except ObjectDoesNotExist:
-            raise GraphQLError(COULD_NOT_FIND)
+    try:
+        row.page = Page.objects.get(id=clean_input.get("containerGuid"))
+    except ObjectDoesNotExist:
+        raise GraphQLError(COULD_NOT_FIND)
 
-        if not row.page.can_write(user):
-            raise GraphQLError(COULD_NOT_SAVE)
+    if not row.page.can_write(user):
+        raise GraphQLError(COULD_NOT_SAVE)
 
-        row.position = clean_input.get("position")
-        row.parent_id = clean_input.get("parentGuid")
-        row.is_full_width = clean_input.get("isFullWidth")
+    row.position = clean_input.get("position")
+    row.parent_id = clean_input.get("parentGuid")
+    row.is_full_width = clean_input.get("isFullWidth")
 
-        row.save()
+    row.save()
 
-        reversion.set_user(user)
-        reversion.set_comment("addRow mutation")
-
-        reorder_positions(row, old_position, new_position)
+    reorder_positions(row, old_position, new_position)
 
     return {
         "row": row
