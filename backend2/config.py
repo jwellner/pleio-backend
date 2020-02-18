@@ -20,7 +20,14 @@ DATABASES = {
         'USER': os.getenv('DB_USER'),
         'PASSWORD': os.getenv('DB_PASSWORD'),
         'NAME': os.getenv('DB_NAME'),
-    }
+    },
+    'elgg_control': {
+        'ENGINE': 'django.db.backends.mysql',
+        'HOST': os.getenv('ELGG_DB_HOST'),
+        'USER': os.getenv('ELGG_DB_USER'),
+        'PASSWORD': os.getenv('ELGG_DB_PASSWORD'),
+        'NAME': os.getenv('ELGG_DB_NAME'),
+    },
 }
 
 TIME_ZONE = 'UTC'

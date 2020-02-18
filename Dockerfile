@@ -2,7 +2,9 @@ FROM python:3.7-slim AS build
 
 RUN apt-get update && apt-get install --no-install-recommends -y \
     build-essential \
-    libpq-dev
+    libpq-dev \ 
+    python3-dev \
+    default-libmysqlclient-dev
 
 RUN python -m venv /app-tmp/venv && /app-tmp/venv/bin/pip install --upgrade pip
 
@@ -21,7 +23,8 @@ RUN apt-get update && apt-get install --no-install-recommends -y \
     git \
     mime-support \
     libmagic-dev \
-    libpq-dev
+    libpq-dev \
+    libmariadb3
 
 COPY --from=build /app-tmp/venv /app-tmp/venv
 ENV PATH="/app-tmp/venv/bin:${PATH}"
