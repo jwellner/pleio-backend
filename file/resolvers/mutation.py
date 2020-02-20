@@ -162,10 +162,10 @@ def resolve_edit_file_folder(_, info, input):
     if clean_input.get("file"):
         entity.upload = clean_input.get("file")
 
-    if clean_input.get("accessId"):
+    if clean_input.get("accessId") is not None:
         entity.read_access = access_id_to_acl(entity, clean_input.get("accessId"))
 
-    if clean_input.get("writeAccessId"):
+    if clean_input.get("writeAccessId") is not None:
         entity.write_access = access_id_to_acl(entity, clean_input.get("writeAccessId"))
 
     if entity.is_folder and clean_input.get("isAccessRecursive", False):

@@ -25,7 +25,7 @@ def resolve_add_page(_, info, input):
     entity.owner = user
     entity.tags = clean_input.get("tags")
 
-    if clean_input.get("accessId"):
+    if clean_input.get("accessId") is not None:
         entity.read_access = access_id_to_acl(entity, clean_input.get("accessId"))
     else:
         entity.read_access = access_id_to_acl(entity, 0)
