@@ -18,6 +18,7 @@ urlpatterns = [
     path('admin/', core_admin.site.urls),
     path('graphql', GraphQLView.as_view(schema=schema), name='graphql'),
     path('file/download/<uuid:file_id>/<str:file_name>', file_views.download, name='download'),
+    path('bulk_download', file_views.bulk_download, name='bulk_download'),
     path('exporting/event/<uuid:event_id>', event_views.export, name='event_export'),
     re_path(r'.*', core_views.default, name='default')
 ]
