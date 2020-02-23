@@ -28,6 +28,21 @@ def resolve_url(obj, info):
     # pylint: disable=unused-argument
     return obj.url
 
+@filefolder.field("thumbnail")
+def resolve_thumbnail(obj, info):
+    # pylint: disable=unused-argument
+    mime_types = [
+                    'image/jpeg',
+                    'image/pjpeg',
+                    'image/png',
+                    'image/x-png',
+                    'image/gif'
+                 ]
+    # Only thumbnails for images
+    if obj.mime_type not in mime_types:
+        return None
+
+    return obj.thumbnail_url
 
 @filefolder.field("download")
 def resolve_download(obj, info):

@@ -71,24 +71,6 @@ services:
       - "9200:9200"
     volumes:
       - esdata01:/usr/share/elasticsearch/data
-  kibana:
-    image: docker.elastic.co/kibana/kibana:7.5.0
-    ports: ['5601:5601']
-    depends_on: ['elasticsearch']
-    healthcheck:
-      test: curl --cacert /usr/share/elasticsearch/config/certs/ca/ca.crt -s https://localhost:5601 >/dev/null; if [[ $$? == 52 ]]; then echo 0; else echo 1; fi
-      interval: 30s
-      timeout: 10s
-      retries: 5
-  apm-server:
-    image: docker.elastic.co/apm/apm-server:7.5.0
-    environment:
-      - KIBANA_HOST=kibana
-      - KIBANA_PORT=5601
-
-    ports: ['8200:8200']
-    command: --strict.perms=false -e  # -e flag to log to stderr and disable syslog/file output
-    depends_on: ['elasticsearch', 'kibana']
   mailcatcher:
     restart: on-failure:10
     image: dockage/mailcatcher:0.7.1
