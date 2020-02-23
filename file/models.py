@@ -19,6 +19,7 @@ class FileFolder(Entity):
     parent = models.ForeignKey('self', blank=True, null=True, related_name='children', on_delete=models.CASCADE)
     is_folder = models.BooleanField(default=False)
     upload = models.FileField(upload_to=generate_object_filename, blank=True, null=True)
+    thumbnail = models.FileField(upload_to='thumbnails/', blank=True, null=True)
 
     mime_type = models.CharField(null=True, blank=True, max_length=100)
 
@@ -44,6 +45,10 @@ class FileFolder(Entity):
         return '{}/files/view/{}/{}'.format(
             prefix, self.guid, slugify(self.title)
         ).lower()
+
+    @property
+    def thumbnail_url(self):
+        return "/file/thumbnail/{}".format(self.id)
 
     def has_children(self):
         if self.children.count() > 0:

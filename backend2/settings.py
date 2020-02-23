@@ -70,8 +70,8 @@ if LOCAL_APPS:
 
 INSTALLED_APPS = list(SHARED_APPS) + [app for app in TENANT_APPS if app not in SHARED_APPS]
 
-if os.getenv('DEBUG'):
-    INSTALLED_APPS += ['elasticapm.contrib.django']
+#if os.getenv('DEBUG'):
+#    INSTALLED_APPS += ['elasticapm.contrib.django']
 
 
 AUTHENTICATION_BACKENDS = [
@@ -204,16 +204,17 @@ DEFAULT_FILE_STORAGE = "django_tenants.files.storage.TenantFileSystemStorage"
 if SWIFT_ENABLED:
     DEFAULT_FILE_STORAGE = 'core.backends.tenant_swift_storage.TenantSwiftStorage'
 
-if os.getenv('DEBUG'):
-    ELASTIC_APM = {
+#if os.getenv('DEBUG'):
+
+#    ELASTIC_APM = {
     # Set required service name. Allowed characters:
     # a-z, A-Z, 0-9, -, _, and space
-        'SERVICE_NAME': 'apm-server',
+#        'SERVICE_NAME': 'apm-server',
 
     # Set custom APM Server URL (default: http://localhost:8200)
-        'SERVER_URL': 'http://apm-server:8200',
-        'DEBUG': True
-    }
+#        'SERVER_URL': 'http://apm-server:8200',
+#        'DEBUG': True
+#    }
 
 ELASTICSEARCH_DSL_SIGNAL_PROCESSOR = 'core.elasticsearch.CustomSignalProcessor'
 DATABASE_ROUTERS = (

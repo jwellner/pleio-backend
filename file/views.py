@@ -1,11 +1,12 @@
-import os
 import tempfile
 import zipfile
 from django.core.exceptions import ObjectDoesNotExist
-from django.http import Http404
+from django.http import Http404, FileResponse, StreamingHttpResponse
 from file.models import FileFolder
 from file.helpers import add_folders_to_zip
-from django.http import StreamingHttpResponse, FileResponse
+from file.helpers import generate_thumbnail
+from os import path
+
 
 def download(request, file_id=None, file_name=None):
     user = request.user
@@ -43,7 +44,7 @@ def bulk_download(request):
     # Add selected files to zip
     files = FileFolder.objects.visible(user).filter(id__in=file_ids, is_folder=False)
     for f in files:
-        zipf.writestr(os.path.basename(f.upload.name), f.upload.read())
+        zipf.writestr(path.basename(f.upload.name), f.upload.read())
 
     # Add selected folders to zip
     folders = FileFolder.objects.visible(user).filter(id__in=folder_ids, is_folder=True)
@@ -55,3 +56,24 @@ def bulk_download(request):
     response['Content-Disposition'] = "attachment; filename=file_contents.zip"
 
     return response
+
+def thumbnail(request, file_id=None):
+    user = request.user
+
+    if not file_id:
+        raise Http404("File not found")
+
+    try:
+        entity = FileFolder.objects.visible(user).get(id=file_id)
+
+    except ObjectDoesNotExist:
+        raise Http404("File not found")
+
+    if not entity.thumbnail:
+        generate_thumbnail(entity, 153)
+
+    if entity.thumbnail:
+        response = FileResponse(entity.thumbnail.open())
+        return response
+
+    raise Http404("File not found")

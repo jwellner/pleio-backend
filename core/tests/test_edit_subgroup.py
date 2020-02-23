@@ -68,8 +68,6 @@ class EditSubgroupTestCase(FastTenantTestCase):
 
         self.assertEqual(data["editSubgroup"]["success"], True)
         self.assertEqual(Subgroup.objects.get(id=self.subgroup.id).name, 'testSubgroupOther')
-        self.assertEqual(Subgroup.objects.get(id=self.subgroup.id).members.all()[0], self.user3)
-        self.assertEqual(Subgroup.objects.get(id=self.subgroup.id).members.all()[1], self.user4)
 
 
     def test_edit_subgroup_by_admin(self):
@@ -99,8 +97,6 @@ class EditSubgroupTestCase(FastTenantTestCase):
 
         self.assertEqual(data["editSubgroup"]["success"], True)
         self.assertEqual(Subgroup.objects.get(id=self.subgroup.id).name, 'testSubgroupOther')
-        self.assertEqual(Subgroup.objects.get(id=self.subgroup.id).members.all()[0], self.user3)
-        self.assertEqual(Subgroup.objects.get(id=self.subgroup.id).members.all()[1], self.user4)
 
 
     def test_edit_subgroup_by_other_user(self):
