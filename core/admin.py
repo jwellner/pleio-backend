@@ -12,9 +12,22 @@ class AdminSite(BaseAdminSite):
 
 site = AdminSite(name='admin')
 
+def remove_user_data(self, request, queryset):
+    for user in queryset.all():
+        user.delete()
+
+
+remove_user_data.short_description = "Remove user with profile data"
 
 class UserAdmin(ModelAdmin):
-    pass
+    actions =  [remove_user_data]
+
+    def get_actions(self, request):
+        actions = super().get_actions(request)
+        if 'delete_selected' in actions:
+            del actions['delete_selected']
+        return actions
+
 
 class ProfileFieldAdmin(ModelAdmin):
     pass

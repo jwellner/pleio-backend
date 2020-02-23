@@ -143,6 +143,27 @@ class User(AbstractBaseUser):
                     user=self,
                 )
 
+    def delete(self, using='', keep_parents=False):
+        self.is_active = False
+        self.email = "%s@deleted" % self.guid
+        self.name = "Verwijderde gebruiker"
+        self.external_id = None
+        self.picture = None
+        self.is_government = False
+        self.has_2fa_enabled = False
+
+        # delete user profile data
+        try:
+            self._profile.delete()
+        except UserProfile.DoesNotExist:
+            pass
+
+        self.notifications.all().delete()
+
+        self.save()
+
+        return True
+
 @receiver(post_save, sender=User)
 def create_user_profile(sender, instance, created, **kwargs):
     # pylint: disable=unused-argument
