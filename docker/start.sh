@@ -11,4 +11,4 @@ python /app/manage.py migrate_schemas
 
 # Start Gunicorn processes
 echo Starting uwsgi
-uwsgi --http :8000 --module backend2.wsgi --static-map /static=/app/static --static-map /media=/app/media
+uwsgi --http :8000 --wsgi-disable-file-wrapper --module backend2.wsgi --static-map /static=/app/static --static-map /media=/app/media 
