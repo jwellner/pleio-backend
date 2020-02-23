@@ -55,7 +55,7 @@ def resolve_users(_, info, q="", filters=None, offset=0, limit=20):
     for hit in response:
         ids.append(hit['id'])
 
-    users = User.objects.filter(id__in=ids)[offset:offset+limit]
+    users = User.objects.filter(id__in=ids, is_active=True)[offset:offset+limit]
 
     return {
         'total': users.count(),
