@@ -46,7 +46,8 @@ LOCAL_APPS = [
     'activity',
     'bookmark',
     'task',
-    'file'
+    'file',
+    'elgg'
 ]
 
 STATIC_ROOT = '/app/static'
