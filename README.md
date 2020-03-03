@@ -79,7 +79,7 @@ To run the project in testing mode, use this command:
 
 For more information on setting up a production environment or how to develop on Backend2 consult the [documentation](/docs).
 
-### GraphQL schema
+## GraphQL schema
 
 This project uses a schema-first GraphQL implementation with Ariadne.
 
@@ -91,13 +91,15 @@ You can download the backend1 graphql schema using the npm package `get-graphql-
 
 `get-graphql-schema https://nieuw-template.pleio-test.nl/graphql > schema.graphql`
 
-### Swift storage backend client
+## Storage 
+
+### Swift storage local development
 
 To talk with the Swift storage backend you can use swiftclient by installing it using pip:
 
 `pip install python-swiftclient`
 
-## Example commands
+#### Example commands
 
 Test connection:
 
@@ -106,6 +108,21 @@ Test connection:
 Create (public) container:
 
 `swift -A http://localhost:12345/auth/v1.0 -U test:tester -K testing post -r ".r:*" backend2-dev-public`
+
+### S3 storage local development
+
+Create s3 bucket:
+
+`aws --endpoint-url=http://localhost:4572 s3 mb s3://demo-bucket`
+
+Make bucket public:
+`aws --endpoint-url=http://localhost:4572 s3api put-bucket-acl --bucket demo-bucket --acl public-read`
+
+Add localstack to /etc/hosts to test from browser:
+
+`127.0.0.1 localstack`
+
+## Elasticsearch
 
 ### Build search index
 

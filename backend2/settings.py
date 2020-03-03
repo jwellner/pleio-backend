@@ -204,6 +204,9 @@ DEFAULT_FILE_STORAGE = "django_tenants.files.storage.TenantFileSystemStorage"
 if SWIFT_ENABLED:
     DEFAULT_FILE_STORAGE = 'core.backends.tenant_swift_storage.TenantSwiftStorage'
 
+if S3_ENABLED:
+    DEFAULT_FILE_STORAGE = 'core.backends.tenant_s3_storage.TenantS3Boto3Storage'
+
 #if os.getenv('DEBUG'):
 
 #    ELASTIC_APM = {
