@@ -1,4 +1,5 @@
 import json
+import os
 from django.db import connection
 from django_tenants.test.cases import FastTenantTestCase
 from backend2.schema import schema
@@ -102,13 +103,13 @@ class FileFolderTestCase(FastTenantTestCase):
         self.assertEqual(data["entity"]["timeCreated"], str(self.file.created_at))
         self.assertEqual(data["entity"]["tags"], self.file.tags)
         self.assertEqual(data["entity"]["canEdit"], True)
-        self.assertEqual(data["entity"]["url"], "/files/view/{}/{}".format(self.file.guid, slugify(self.file.title)))
+        self.assertEqual(data["entity"]["url"], "/files/view/{}/{}".format(self.file.guid, os.path.basename(self.file.upload.name)))
         self.assertEqual(data["entity"]["parentFolder"], None)
         self.assertEqual(data["entity"]["subtype"], "file")
         self.assertEqual(data["entity"]["hasChildren"], False)
         self.assertEqual(data["entity"]["mimeType"], file_mock.content_type)
         self.assertEqual(data["entity"]["thumbnail"], self.file.thumbnail_url)
-        self.assertEqual(data["entity"]["download"], self.file.upload.url)
+        self.assertEqual(data["entity"]["download"], self.file.download)
 
         mock_save.assert_called_once()
 
@@ -174,7 +175,7 @@ class FileFolderTestCase(FastTenantTestCase):
         self.assertEqual(data["entity"]["timeCreated"], str(self.file_in_folder.created_at))
         self.assertEqual(data["entity"]["tags"], self.file_in_folder.tags)
         self.assertEqual(data["entity"]["canEdit"], True)
-        self.assertEqual(data["entity"]["url"], "/files/view/{}/{}".format(self.file_in_folder.guid, slugify(self.file_in_folder.title)))
+        self.assertEqual(data["entity"]["url"], "/files/view/{}/{}".format(self.file_in_folder.guid, os.path.basename(self.file_in_folder.upload.name)))
         self.assertEqual(data["entity"]["parentFolder"]["guid"], self.folder.guid)
         self.assertEqual(data["entity"]["subtype"], "file")
         self.assertEqual(data["entity"]["hasChildren"], False)

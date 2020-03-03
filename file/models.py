@@ -1,3 +1,5 @@
+import os
+from django.urls import reverse
 from django.db import models
 from core.lib import generate_object_filename
 from core.models import Entity
@@ -43,8 +45,11 @@ class FileFolder(Entity):
             ).lower()
 
         return '{}/files/view/{}/{}'.format(
-            prefix, self.guid, slugify(self.title)
+            prefix, self.guid, os.path.basename(self.upload.name)
         ).lower()
+    @property
+    def download(self):
+        return reverse('download', args=[self.id, os.path.basename(self.upload.name)])
 
     @property
     def thumbnail_url(self):
