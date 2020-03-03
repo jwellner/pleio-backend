@@ -2,7 +2,7 @@ Django==2.2.8
 psycopg2-binary==2.8.4
 django-filter==2.2.0
 Pillow==6.2.1
-Celery==4.3.0
+Celery==4.4.1
 django-elasticsearch-dsl==7.1.0
 uwsgi==2.0.18
 mozilla-django-oidc==1.2.2
