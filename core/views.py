@@ -4,9 +4,7 @@ from core import config
 from django.contrib.auth.views import LogoutView, LoginView
 from django.shortcuts import redirect, render
 from django.conf import settings
-from django.views.decorators.csrf import ensure_csrf_cookie
 
-@ensure_csrf_cookie
 def default(request):
 
     context = {
