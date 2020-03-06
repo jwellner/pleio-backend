@@ -118,6 +118,28 @@ class ElggEntities(models.Model):
     last_action = models.BigIntegerField()
     enabled = models.CharField(max_length=3)
 
+    def get_metadata_value_by_name(self, name):
+        items = self.metadata.filter(name__string=name).all()
+        
+        data = None
+
+        if items.count() > 1:
+            data = []
+            for item in items:
+                data.append(item.value.string)
+        elif items.count() == 1:
+            data = items[0].value.string
+        
+        return data
+
+    def get_private_value_by_name(self, name):
+        item = self.private.filter(name=name).first()
+        
+        if item:
+            return item.value
+        
+        return None
+
     class Meta:
         managed = False
         db_table = 'elgg_entities'
@@ -191,7 +213,8 @@ class ElggGeocodeCache(models.Model):
 
 
 class ElggGroupsEntity(models.Model):
-    guid = models.BigIntegerField(primary_key=True)
+    #guid = models.BigIntegerField(primary_key=True)
+    entity = models.OneToOneField(ElggEntities, db_column='guid', to_field='guid', on_delete=models.CASCADE, primary_key=True)
     name = models.TextField()
     description = models.TextField()
 
@@ -276,7 +299,7 @@ class ElggPrivateSettings(models.Model):
     class Meta:
         managed = False
         db_table = 'elgg_private_settings'
-        #unique_together = (('entity_guid', 'name'),)
+        unique_together = (('entity', 'name'),)
 
 
 class ElggPushNotificationsCount(models.Model):

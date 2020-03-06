@@ -3,6 +3,7 @@ from core.constances import MEMBERSHIP
 from core.lib import get_access_ids
 from core.models import GroupInvitation, Subgroup
 from user.models import User
+from core.resolvers import shared
 from core.resolvers.query_site import get_settings
 
 group = ObjectType("Group")
@@ -134,11 +135,11 @@ def resolve_group_members(group, info, q=None, offset=0, limit=5, inSubgroupId=N
     if q:
         members = members.filter(user__name__icontains=q)
 
-    members = members[offset:offset+limit]
+    edges = members[offset:offset+limit]
 
     return {
         'total': members.count(),
-        'edges': members
+        'edges': edges
     }
 
 @group.field("membership")
@@ -170,3 +171,6 @@ def resolve_default_access_id(group, info):
     if group.is_closed:
         return 4
     return settings["site"]["defaultAccessId"]
+
+
+group.set_field("excerpt", shared.resolve_entity_excerpt)

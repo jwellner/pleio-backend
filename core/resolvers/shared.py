@@ -70,7 +70,7 @@ def resolve_entity_rich_description(obj, info):
 
 def resolve_entity_excerpt(obj, info):
     # pylint: disable=unused-argument
-    return Truncator(obj.description).words(10)
+    return Truncator(obj.description).words(26)
 
 def resolve_entity_tags(obj, info):
     # pylint: disable=unused-argument

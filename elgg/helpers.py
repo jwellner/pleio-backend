@@ -6,6 +6,11 @@ class ElggHelpers():
     def __init__(self, database):
         self.database = database
 
+    def get_list_values(self, value):
+        if not value:
+            return []
+        return value if isinstance(value, list) else [value]
+
     def get_plugin_setting(self, setting, plugin="pleio_template"):
         try:
             plugin = ElggObjectsEntity.objects.using(self.database).get(entity__subtype__subtype='plugin', title=plugin)
@@ -25,7 +30,11 @@ class ElggHelpers():
         profile_field_entity = ElggEntities.objects.using(self.database).filter(
             subtype__subtype="custom_profile_field",
             metadata__value__string=name,
-            metadata__name__string="metadata_name")[:1].get()
+            metadata__name__string="metadata_name").first()
+
+        if not profile_field_entity:
+            return 'textField'
+
         metadata_type = profile_field_entity.metadata.filter(name__string="metadata_type").first()
 
         elgg_type = metadata_type.value.string if metadata_type else None
@@ -47,7 +56,11 @@ class ElggHelpers():
         profile_field_entity = ElggEntities.objects.using(self.database).filter(
             subtype__subtype="custom_profile_field",
             metadata__value__string=name,
-            metadata__name__string="metadata_name")[:1].get()
+            metadata__name__string="metadata_name").first()
+
+        if not profile_field_entity:
+            return None
+
         metadata_type = profile_field_entity.metadata.filter(name__string="metadata_label").first()
 
         category = metadata_type.value.string if metadata_type else None
@@ -57,7 +70,11 @@ class ElggHelpers():
         profile_field_entity = ElggEntities.objects.using(self.database).filter(
             subtype__subtype="custom_profile_field",
             metadata__value__string=name,
-            metadata__name__string="metadata_name")[:1].get()
+            metadata__name__string="metadata_name").first()
+        
+        if not profile_field_entity:
+            return []
+
         metadata_type = profile_field_entity.metadata.filter(name__string="metadata_options").first()
 
         options = metadata_type.value.string.split(',') if metadata_type else []
@@ -67,7 +84,11 @@ class ElggHelpers():
         profile_field_entity = ElggEntities.objects.using(self.database).filter(
             subtype__subtype="custom_profile_field",
             metadata__value__string=name,
-            metadata__name__string="metadata_name")[:1].get()
+            metadata__name__string="metadata_name").first()
+        
+        if not profile_field_entity:
+            return True
+
         metadata_type = profile_field_entity.metadata.filter(name__string="user_editable").first()
 
         editable = metadata_type.value.string == 'yes' if metadata_type else True # default True
