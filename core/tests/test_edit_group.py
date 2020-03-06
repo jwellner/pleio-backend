@@ -54,6 +54,7 @@ class EditGroupCase(FastTenantTestCase):
                         name
                         icon
                         description
+                        excerpt
                         richDescription
                         introduction
                         welcomeMessage
@@ -92,6 +93,7 @@ class EditGroupCase(FastTenantTestCase):
         self.assertEqual(data["editGroup"]["group"]["name"], variables["group"]["name"])
         self.assertEqual(data["editGroup"]["group"]["icon"], variables["group"]["icon"])
         self.assertEqual(data["editGroup"]["group"]["description"], variables["group"]["description"])
+        self.assertEqual(data["editGroup"]["group"]["excerpt"], variables["group"]["description"])
         self.assertEqual(data["editGroup"]["group"]["richDescription"], variables["group"]["richDescription"])
         self.assertEqual(data["editGroup"]["group"]["introduction"], variables["group"]["introduction"])
         self.assertEqual(data["editGroup"]["group"]["welcomeMessage"], variables["group"]["welcomeMessage"])
