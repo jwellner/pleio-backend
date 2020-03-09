@@ -38,7 +38,7 @@ def get_site():
         'guid': 1,
         'name': config.NAME,
         'theme': config.THEME,
-        'menu': config.MENU,
+        'menu': get_menu(),
         'profile': [],
         'footer': config.FOOTER,
         'directLinks': config.DIRECT_LINKS,
@@ -72,6 +72,17 @@ def get_site():
     }
 
     return site
+
+def get_menu():
+
+    menu = []
+
+    for item in config.MENU:
+        if 'children' not in item:
+            item["children"] = []
+        menu.append(item)
+
+    return menu
 
 def resolve_site(*_):
     return get_site()

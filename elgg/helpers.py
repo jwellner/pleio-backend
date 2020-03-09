@@ -1,4 +1,5 @@
-from elgg.models import ElggEntities, ElggObjectsEntity, ElggPrivateSettings
+from phpserialize import unserialize
+from elgg.models import ElggEntities, ElggObjectsEntity, ElggPrivateSettings, ElggConfig
 
 class ElggHelpers():
     database = None
@@ -25,6 +26,16 @@ class ElggHelpers():
             return None
 
         return setting.value
+
+    def get_site_config(self, name):
+        try:
+            config = ElggConfig.objects.using(self.database).get(name=name)
+        except Exception:
+            print(f"Site config {name} not found")
+            return None
+
+        value = bytes(config.value.encode())
+        return unserialize(value, decode_strings=True)
 
     def get_profile_field_type(self, name):
         profile_field_entity = ElggEntities.objects.using(self.database).filter(
