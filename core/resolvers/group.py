@@ -3,8 +3,8 @@ from core.constances import MEMBERSHIP
 from core.lib import get_access_ids
 from core.models import GroupInvitation, Subgroup
 from user.models import User
+from core import config
 from core.resolvers import shared
-from core.resolvers.query_site import get_settings
 
 group = ObjectType("Group")
 
@@ -166,11 +166,11 @@ def resolve_access_ids(group, info):
 @group.field("defaultAccessId")
 def resolve_default_access_id(group, info):
     # pylint: disable=unused-argument
-    settings = get_settings()
 
     if group.is_closed:
         return 4
-    return settings["site"]["defaultAccessId"]
+
+    return config.DEFAULT_ACCESS_ID
 
 
 group.set_field("excerpt", shared.resolve_entity_excerpt)

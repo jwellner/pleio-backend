@@ -16,7 +16,7 @@ from django.db import connections, connection
 from django.db import IntegrityError
 
 import json
-
+import html
 
 class Command(InteractiveTenantOption, BaseCommand):
     help = 'Import elgg site'
@@ -98,6 +98,7 @@ class Command(InteractiveTenantOption, BaseCommand):
             self.stdout.write(f"Import already run on tenant {tenant.schema_name}. Exiting.")
             return False
 
+        self._import_settings()
         self._import_users()
         self._import_groups()
 
@@ -106,6 +107,50 @@ class Command(InteractiveTenantOption, BaseCommand):
 
         if self.dry:
             GuidMap.objects.all().delete()
+
+    def _import_settings(self):
+
+        self.stdout.write("\n>> Settings (x) ", ending="")
+
+        elgg_site = ElggSitesEntity.objects.using(self.import_id).first()
+
+        config.NAME = html.unescape(elgg_site.name)
+        config.SUBTITLE = html.unescape(elgg_site.description)
+        config.THEME = self.helpers.get_plugin_setting("theme")
+        config.ACHIEVEMENTS_ENABLED = self.helpers.get_plugin_setting("achievements_enabled") == "yes"
+        config.CANCEL_MEMBERSHIP_ENABLED = self.helpers.get_plugin_setting("cancel_membership_enabled") == "yes"
+        config.DEFAULT_ACCESS_ID = self.helpers.get_site_config('default_access')
+        config.LANGUAGE = self.helpers.get_site_config('language') if self.helpers.get_site_config('language') else "nl"
+        # config.LOGO = TODO: check /mod/pleio_template/logo.php
+        config.LOGO_ALT = html.unescape(self.helpers.get_plugin_setting("logo_alt"))
+        # config.ICON = TODO: check /mod/pleio_template/icon.php
+        config.ICON_ALT = html.unescape(self.helpers.get_plugin_setting("icon_alt"))
+        config.ICON_ENABLED = self.helpers.get_plugin_setting("show_icon") == "yes"
+        config.STARTPAGE = self.helpers.get_plugin_setting("startpage") # TODO: what if CMS page, convert to guid?
+        config.LEADER_ENABLED = self.helpers.get_plugin_setting("show_leader") == "yes"
+        config.LEADER_BUTTONS_ENABLED = self.helpers.get_plugin_setting("show_leader_buttons") == "yes"
+        config.LEADER_IMAGE = self.helpers.get_plugin_setting("leader_image") # TODO: convert URL ?
+        config.INITIATIVE_ENABLED = self.helpers.get_plugin_setting("show_initiative") == "yes"
+        config.INITIATIVE_TITLE = html.unescape(self.helpers.get_plugin_setting("initiative_title"))
+        config.INITIATIVE_IMAGE = self.helpers.get_plugin_setting("initiative_image")
+        config.INITIATIVE_IMAGE_ALT = html.unescape(self.helpers.get_plugin_setting("initiative_image_alt"))
+        config.INITIATIVE_DESCRIPTION = html.unescape(self.helpers.get_plugin_setting("initiative_description"))
+        config.INITIATOR_LINK = self.helpers.get_plugin_setting("initiator_link")
+        config.STYLE = {
+            'font': self.helpers.get_plugin_setting("font"),
+            'colorPrimary': self.helpers.get_plugin_setting("color_primary"),
+            'colorSecondary': self.helpers.get_plugin_setting("color_secondary"),
+            'colorHeader': self.helpers.get_plugin_setting("color_header")
+        }
+        config.CUSTOM_TAGS_ENABLED = self.helpers.get_plugin_setting("custom_tags_allowed")
+        config.TAG_CATEGORIES = json.loads(html.unescape(self.helpers.get_plugin_setting("tagCategories")))
+        config.ACTIVITY_FEED_FILTERS_ENABLED = self.helpers.get_plugin_setting("show_extra_homepage_filters") == "yes"
+        config.MENU = json.loads(html.unescape(self.helpers.get_plugin_setting("menu")))
+        config.FOOTER = json.loads(html.unescape(self.helpers.get_plugin_setting("footer")))
+        config.DIRECT_LINKS = json.loads(html.unescape(self.helpers.get_plugin_setting("directLinks")))
+        config.SHOW_LOGIN_REGISTER = self.helpers.get_plugin_setting("show_extra_homepage_filters")
+
+        self.stdout.write(".", ending="")
 
     def _import_groups(self):
         # Groups
