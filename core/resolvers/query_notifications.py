@@ -1,4 +1,4 @@
-def resolve_notifications(_, info, offset=0, limit=20):
+def resolve_notifications(_, info, offset=0, limit=20, unread=None):
     """ Returns notification, which are created through methods in signals.py """
     # pylint: disable=unused-argument
     # pylint: disable=too-many-arguments
@@ -13,11 +13,19 @@ def resolve_notifications(_, info, offset=0, limit=20):
             'edges': list(),
         }
 
-    edges = user.notifications.all()[offset:offset+limit]
+    total_unread = user.notifications.filter(unread=True).count()
 
-    total_unread = len([item for item in edges if item.unread])
+    notifications = user.notifications.all()
+
+    if unread is False:
+        notifications = notifications.filter(unread=False)
+    if unread is True:
+        notifications = notifications.filter(unread=True)
+
+    edges = notifications[offset:offset+limit]
+
     return {
-        'total': len(edges),
+        'total': notifications.count(),
         'totalUnread': total_unread,
         'edges': edges,
     }
