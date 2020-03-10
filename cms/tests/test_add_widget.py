@@ -18,8 +18,8 @@ class AddWidgetTestCase(FastTenantTestCase):
         self.admin = mixer.blend(User, is_admin=True)
         self.user = mixer.blend(User)
         self.page = mixer.blend(Page)
-        self.row = mixer.blend(Row, position=0, parent_id=self.page.guid, page=self.page)
-        self.column1 = mixer.blend(Row, position=1, parent_id=self.row.guid, page=self.page, width=[6])
+        self.row = mixer.blend(Row, position=0, page=self.page)
+        self.column1 = mixer.blend(Column, position=1, row=self.row, page=self.page, width=[6])
 
     def test_add_widget_to_column_by_admin(self):
 

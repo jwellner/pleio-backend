@@ -2,7 +2,7 @@ from graphql import GraphQLError
 from django.core.exceptions import ObjectDoesNotExist
 from core.lib import remove_none_from_dict
 from core.constances import NOT_LOGGED_IN, COULD_NOT_SAVE, COULD_NOT_FIND
-from cms.models import Page, Column
+from cms.models import Page, Column, Row
 from cms.utils import reorder_positions
 
 
@@ -30,8 +30,12 @@ def resolve_add_column(_, info, input):
     if not column.page.can_write(user):
         raise GraphQLError(COULD_NOT_SAVE)
 
+    try:
+        column.row = Row.objects.get(id=clean_input.get("parentGuid"))
+    except ObjectDoesNotExist:
+        raise GraphQLError(COULD_NOT_FIND)
+
     column.position = clean_input.get("position")
-    column.parent_id = clean_input.get("parentGuid")
     column.width = clean_input.get("width")
 
     column.save()

@@ -36,4 +36,6 @@ def resolve_can_edit(obj, info):
 @widget.field("parentGuid")
 def resolve_parent_guid(obj, info):
     # pylint: disable=unused-argument
-    return obj.parent_id
+    if obj.group:
+        return obj.group.guid
+    return obj.column.guid

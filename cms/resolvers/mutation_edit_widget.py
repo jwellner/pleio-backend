@@ -3,6 +3,7 @@ from django.core.exceptions import ObjectDoesNotExist
 from core.lib import remove_none_from_dict
 from core.constances import NOT_LOGGED_IN, COULD_NOT_FIND, COULD_NOT_SAVE
 from core.models import Widget
+from cms.models import Column
 from cms.utils import reorder_positions
 
 
@@ -32,7 +33,10 @@ def resolve_edit_widget(_, info, input):
     if clean_input.get("position"):
         widget.position = clean_input.get("position")
     if clean_input.get("parentGuid"):
-        widget.parent_id = clean_input.get("parentGuid")
+        try:
+            widget.column = Column.objects.get(id=clean_input.get("parentGuid"))
+        except ObjectDoesNotExist:
+            raise GraphQLError(COULD_NOT_FIND)
     if clean_input.get("settings"):
         widget.is_full_width = clean_input.get("settings")
 

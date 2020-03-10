@@ -16,7 +16,6 @@ class Widget(models.Model):
     settings = ArrayField(JSONField(help_text="Please provide valid JSON data"), blank=True, default=list)
     position = models.IntegerField(null=False)
     type = models.CharField(max_length=64)
-    parent_id = models.UUIDField(default=uuid.uuid4)
     page = models.ForeignKey(
         'cms.Page',
         on_delete=models.CASCADE,
@@ -24,7 +23,13 @@ class Widget(models.Model):
         null=True,
         related_name='widgets'
     )
-
+    column = models.ForeignKey(
+        'cms.Column',
+        on_delete=models.CASCADE,
+        blank=True,
+        null=True,
+        related_name='widgets'
+    )
     @property
     def guid(self):
         return str(self.id)

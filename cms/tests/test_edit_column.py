@@ -24,13 +24,13 @@ class EditColumnTestCase(FastTenantTestCase):
                                 read_access=[ACCESS_TYPE.public],
                                 write_access=[ACCESS_TYPE.user.format(self.user.id)]
                                 )
-        self.row = mixer.blend(Row, position=0, parent_id=self.page.guid, page=self.page)
+        self.row = mixer.blend(Row, position=0, page=self.page)
 
-        self.column1 = mixer.blend(Column, position=0, parent_id=self.row.guid, page=self.page, width=[3])
-        self.column2 = mixer.blend(Column, position=1, parent_id=self.row.guid, page=self.page, width=[3])
-        self.column3 = mixer.blend(Column, position=2, parent_id=self.row.guid, page=self.page, width=[3])
-        self.column4 = mixer.blend(Column, position=3, parent_id=self.row.guid, page=self.page, width=[3])
-        self.column5 = mixer.blend(Column, position=4, parent_id=self.row.guid, page=self.page, width=[3])
+        self.column1 = mixer.blend(Column, position=0, row=self.row, page=self.page, width=[3])
+        self.column2 = mixer.blend(Column, position=1, row=self.row, page=self.page, width=[3])
+        self.column3 = mixer.blend(Column, position=2, row=self.row, page=self.page, width=[3])
+        self.column4 = mixer.blend(Column, position=3, row=self.row, page=self.page, width=[3])
+        self.column5 = mixer.blend(Column, position=4, row=self.row, page=self.page, width=[3])
 
     def test_edit_column_move_up_positions_by_admin(self):
 
@@ -87,7 +87,6 @@ class EditColumnTestCase(FastTenantTestCase):
         request.user = self.admin
 
         result = graphql_sync(schema, {"query": mutation, "variables": variables }, context_value=request)
-
         data = result[1]["data"]
 
         self.assertEqual(data["editColumn"]["column"]["position"], 1)

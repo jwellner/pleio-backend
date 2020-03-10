@@ -19,7 +19,7 @@ class EditGroupWidgetTestCase(FastTenantTestCase):
         self.admin.is_admin = True
         self.admin.save()
         self.group = mixer.blend(Group, owner=self.user1)
-        self.widget = Widget.objects.create(group=self.group, parent_id=self.group.guid, position=0,
+        self.widget = Widget.objects.create(group=self.group, position=0,
                                             settings=[{"key": "key1", "value": "value1"}, {"key": "key2", "value": "value2"}])
 
     def tearDown(self):

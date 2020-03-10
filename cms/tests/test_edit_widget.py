@@ -24,13 +24,13 @@ class EditWidgetTestCase(FastTenantTestCase):
                                 read_access=[ACCESS_TYPE.public],
                                 write_access=[ACCESS_TYPE.user.format(self.user.id)]
                                 )
-        self.row = mixer.blend(Row, position=0, parent_id=self.page.guid, page=self.page)
-        self.column = mixer.blend(Column, position=0, parent_id=self.row.guid, page=self.page, width=[6])
-        self.widget1 = mixer.blend(Widget, position=0, parent_id=self.column.guid, page=self.page)
-        self.widget2 = mixer.blend(Widget, position=1, parent_id=self.column.guid, page=self.page)
-        self.widget3 = mixer.blend(Widget, position=2, parent_id=self.column.guid, page=self.page)
-        self.widget4 = mixer.blend(Widget, position=3, parent_id=self.column.guid, page=self.page)
-        self.widget5 = mixer.blend(Widget, position=4, parent_id=self.column.guid, page=self.page)
+        self.row = mixer.blend(Row, position=0, page=self.page)
+        self.column = mixer.blend(Column, position=0, row=self.row, page=self.page, width=[6])
+        self.widget1 = mixer.blend(Widget, position=0, column=self.column, page=self.page)
+        self.widget2 = mixer.blend(Widget, position=1, column=self.column, page=self.page)
+        self.widget3 = mixer.blend(Widget, position=2, column=self.column, page=self.page)
+        self.widget4 = mixer.blend(Widget, position=3, column=self.column, page=self.page)
+        self.widget5 = mixer.blend(Widget, position=4, column=self.column, page=self.page)
 
     def test_edit_widget_move_up_positions_by_admin(self):
 

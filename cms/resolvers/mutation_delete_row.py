@@ -19,10 +19,10 @@ def resolve_delete_row(_, info, input):
     if not row.page.can_write(user):
         raise GraphQLError(COULD_NOT_SAVE)
 
-    parent_id = row.parent_id
+    page = row.page
     row.delete()
 
-    order_positions(parent_id)
+    order_positions(page)
 
     return {
         'success': True

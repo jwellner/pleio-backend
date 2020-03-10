@@ -58,7 +58,7 @@ class Row(models.Model):
 
     position = models.IntegerField(null=False)
     is_full_width = models.BooleanField(default=False)
-    parent_id = models.UUIDField(default=uuid.uuid4)
+
     page = models.ForeignKey('Page', related_name='rows', on_delete=models.CASCADE)
 
     @property
@@ -77,7 +77,13 @@ class Column(models.Model):
 
     position = models.IntegerField(null=False)
     width = ArrayField(models.IntegerField())
-    parent_id = models.UUIDField(default=uuid.uuid4)
+    row = models.ForeignKey(
+        'cms.Row',
+        on_delete=models.CASCADE,
+        blank=True,
+        null=True,
+        related_name='columns'
+    )
     page = models.ForeignKey('Page', related_name='columns', on_delete=models.CASCADE)
 
     @property

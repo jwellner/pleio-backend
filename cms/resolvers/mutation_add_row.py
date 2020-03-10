@@ -31,7 +31,6 @@ def resolve_add_row(_, info, input):
         raise GraphQLError(COULD_NOT_SAVE)
 
     row.position = clean_input.get("position")
-    row.parent_id = clean_input.get("parentGuid")
     row.is_full_width = clean_input.get("isFullWidth")
 
     row.save()

@@ -24,12 +24,12 @@ class DeleteColumnTestCase(FastTenantTestCase):
                                 read_access=[ACCESS_TYPE.public],
                                 write_access=[ACCESS_TYPE.user.format(self.user.id)]
                                 )
-        self.row = mixer.blend(Row, position=0, parent_id=self.page.guid, page=self.page)
-        self.column1 = mixer.blend(Column, position=0, parent_id=self.row.guid, page=self.page, width=[3])
-        self.column2 = mixer.blend(Column, position=1, parent_id=self.row.guid, page=self.page, width=[3])
-        self.column3 = mixer.blend(Column, position=2, parent_id=self.row.guid, page=self.page, width=[3])
-        self.column4 = mixer.blend(Column, position=3, parent_id=self.row.guid, page=self.page, width=[3])
-        self.column5 = mixer.blend(Column, position=4, parent_id=self.row.guid, page=self.page, width=[3])
+        self.row = mixer.blend(Row, position=0, page=self.page)
+        self.column1 = mixer.blend(Column, position=0, row=self.row, page=self.page, width=[3])
+        self.column2 = mixer.blend(Column, position=1, row=self.row, page=self.page, width=[3])
+        self.column3 = mixer.blend(Column, position=2, row=self.row, page=self.page, width=[3])
+        self.column4 = mixer.blend(Column, position=3, row=self.row, page=self.page, width=[3])
+        self.column5 = mixer.blend(Column, position=4, row=self.row, page=self.page, width=[3])
 
     def test_delete_column_by_admin(self):
 
