@@ -37,8 +37,8 @@ class NotificationsTestCase(FastTenantTestCase):
         self.follow1 = self.blog1.add_follow(self.user2)
 
         self.query = """
-            query NotificationsList($offset: Int) {
-                notifications(offset: $offset, limit: 20) {
+            query NotificationsList($offset: Int, $unread: Boolean) {
+                notifications(offset: $offset, limit: 20, unread: $unread) {
                     total
                     totalUnread
                     edges {
@@ -49,69 +49,54 @@ class NotificationsTestCase(FastTenantTestCase):
                         name
                         username
                         icon
-                        __typename
                     }
                     entity {
                         guid
                         ... on Blog {
                         title
                         url
-                        __typename
                         }
                         ... on News {
                         title
                         url
-                        __typename
                         }
                         ... on Discussion {
                         title
                         url
-                        __typename
                         }
                         ... on Event {
                         title
                         url
-                        __typename
                         }
                         ... on Question {
                         title
                         url
-                        __typename
                         }
                         ... on Task {
                         title
                         url
-                        __typename
                         }
                         ... on FileFolder {
                         title
                         url
-                        __typename
                         }
                         ... on StatusUpdate {
                         url
-                        __typename
                         }
                         ... on Wiki {
                         title
                         url
-                        __typename
                         }
-                        __typename
                     }
                     container {
                         guid
                         ... on Group {
                         name
-                        __typename
                         }
-                        __typename
                     }
                     isUnread
                     timeCreated
-                    __typename
                     }
-                    __typename
                 }
             }
 
@@ -148,16 +133,47 @@ class NotificationsTestCase(FastTenantTestCase):
         variables = {
         }
         comment1 = mixer.blend(Comment, is_closed=False, owner=self.user1, container=self.blog1)
+        mixer.cycle(45).blend(Comment, is_closed=False, owner=self.user1, container=self.blog1)  
         result = graphql_sync(schema, {"query": self.query, "variables": variables}, context_value=request)
 
         self.assertTrue(result[0])
         data = result[1]["data"]
-        self.assertEqual(data["notifications"]["total"], 3)
-        self.assertEqual(data["notifications"]["totalUnread"], 3)
+        self.assertEqual(data["notifications"]["total"], 48)
+        self.assertEqual(data["notifications"]["totalUnread"], 48)
         self.assertEqual(data["notifications"]["edges"][0]["performer"]["guid"], str(self.user1.id))
         self.assertEqual(data["notifications"]["edges"][0]["entity"]["guid"], str(self.blog1.id))
         self.assertEqual(data["notifications"]["edges"][0]["isUnread"], True)
         self.assertEqual(data["notifications"]["edges"][0]["action"], "commented")
+
+    def test_notifications_unread_filter(self):
+        request = HttpRequest()
+        request.user = self.user2
+
+        variables = {
+            "unread": True
+        }
+        comment1 = mixer.blend(Comment, is_closed=False, owner=self.user1, container=self.blog1)
+        notification = self.user2.notifications.all()[0]
+        notification.mark_as_read()
+        result = graphql_sync(schema, {"query": self.query, "variables": variables}, context_value=request)
+
+        self.assertTrue(result[0])
+        data = result[1]["data"]
+
+        self.assertEqual(data["notifications"]["total"], 2)
+        self.assertEqual(data["notifications"]["totalUnread"], 2)
+
+        variables = {
+            "unread": False
+        }
+        result = graphql_sync(schema, {"query": self.query, "variables": variables}, context_value=request)
+
+        self.assertTrue(result[0])
+        data = result[1]["data"]
+
+        self.assertEqual(data["notifications"]["total"], 1)
+        self.assertEqual(data["notifications"]["totalUnread"], 2)
+
 
     def test_notifications_content_to_group_added(self):
         request = HttpRequest()
