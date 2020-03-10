@@ -18,8 +18,8 @@ class AddColumnTestCase(FastTenantTestCase):
         self.admin = mixer.blend(User, is_admin=True)
         self.user = mixer.blend(User)
         self.page = mixer.blend(Page)
-        self.row1 = mixer.blend(Row, position=0, parent_id=self.page.guid, page=self.page)
-        self.row2 = mixer.blend(Row, position=1, parent_id=self.page.guid, page=self.page)
+        self.row1 = mixer.blend(Row, position=0, page=self.page)
+        self.row2 = mixer.blend(Row, position=1, page=self.page)
 
     def test_add_column_to_row_by_admin(self):
 

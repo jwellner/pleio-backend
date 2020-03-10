@@ -5,18 +5,19 @@ from core.models import Widget
 from wiki.models import Wiki
 
 
-def order_positions(parent_id):
+def order_positions(parent):
     """
     Order Rows, Columns or Widgets with same parent_id so that the positions are following numbers
     """
 
-    children = Row.objects.filter(parent_id=parent_id)
+    if parent.type_to_string == 'page':
+        children = Row.objects.filter(page=parent)
 
-    if not children:
-        children = Column.objects.filter(parent_id=parent_id)
+    if parent.type_to_string == 'row':
+        children = Column.objects.filter(row=parent)
 
-    if not children:
-        children = Widget.objects.filter(parent_id=parent_id)
+    if parent.type_to_string == 'column':
+        children = Widget.objects.filter(column=parent)
 
     if not children:
         raise GraphQLError(COULD_NOT_FIND)
@@ -32,7 +33,7 @@ def order_positions(parent_id):
 
 def reorder_positions(obj, old_position, new_position):
     """
-    Reorder Rows, Columns or Widgets with same parent_id
+    Reorder Rows, Columns or Widgets with same parent
     """
     # pylint: disable=too-many-branches
     children = []
@@ -49,14 +50,14 @@ def reorder_positions(obj, old_position, new_position):
     if obj.type_to_string == 'wiki':
         children = Wiki.objects.filter(parent=obj.parent)
 
-    if not children:
-        children = Row.objects.filter(parent_id=obj.parent_id)
+    if obj.type_to_string == 'row':
+        children = Row.objects.filter(page=obj.page)
 
-    if not children:
-        children = Column.objects.filter(parent_id=obj.parent_id)
+    if obj.type_to_string == 'column':
+        children = Column.objects.filter(row=obj.row)
 
-    if not children:
-        children = Widget.objects.filter(parent_id=obj.parent_id)
+    if obj.type_to_string == 'widget':
+        children = Widget.objects.filter(column=obj.column)
 
     if not children:
         raise GraphQLError(COULD_NOT_FIND)

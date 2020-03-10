@@ -21,7 +21,7 @@ def resolve_position(obj, info):
 @column.field("parentGuid")
 def resolve_parent_guid(obj, info):
     # pylint: disable=unused-argument
-    return obj.parent_id
+    return obj.row.guid
 
 @column.field("width")
 def resolve_is_full_width(obj, info):

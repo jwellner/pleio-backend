@@ -27,7 +27,6 @@ def resolve_add_group_widget(_, info, input):
     widget = Widget.objects.create(
         group=group,
         position=clean_input.get("position"),
-        parent_id=group.guid,
         type=clean_input.get("type"),
         settings=settings
     )

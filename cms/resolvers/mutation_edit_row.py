@@ -31,8 +31,6 @@ def resolve_edit_row(_, info, input):
 
     if clean_input.get("position"):
         row.position = clean_input.get("position")
-    if clean_input.get("parentGuid"):
-        row.parent_id = clean_input.get("parentGuid")
     if clean_input.get("isFullWidth"):
         row.is_full_width = clean_input.get("isFullWidth")
 

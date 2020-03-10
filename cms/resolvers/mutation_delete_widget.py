@@ -19,10 +19,10 @@ def resolve_delete_widget(_, info, input):
     if not widget.page.can_write(user):
         raise GraphQLError(COULD_NOT_SAVE)
 
-    parent_id = widget.parent_id
+    column = widget.column
     widget.delete()
 
-    order_positions(parent_id)
+    order_positions(column)
 
     return {
         'success': True

@@ -2,7 +2,7 @@ from graphql import GraphQLError
 from django.core.exceptions import ObjectDoesNotExist
 from core.lib import remove_none_from_dict
 from core.constances import NOT_LOGGED_IN, COULD_NOT_FIND, COULD_NOT_SAVE
-from cms.models import Column
+from cms.models import Column, Row
 from cms.utils import reorder_positions
 
 
@@ -32,7 +32,10 @@ def resolve_edit_column(_, info, input):
     if clean_input.get("position"):
         column.position = clean_input.get("position")
     if clean_input.get("parentGuid"):
-        column.parent_id = clean_input.get("parentGuid")
+        try:
+            column.row = Row.objects.get(id=clean_input.get("parentGuid"))
+        except ObjectDoesNotExist:
+            raise GraphQLError(COULD_NOT_FIND)
     if clean_input.get("width"):
         column.is_full_width = clean_input.get("width")
 

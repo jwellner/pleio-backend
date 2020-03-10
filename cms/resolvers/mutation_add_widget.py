@@ -3,7 +3,7 @@ from django.core.exceptions import ObjectDoesNotExist
 from core.models import Widget
 from core.constances import NOT_LOGGED_IN, COULD_NOT_FIND, COULD_NOT_SAVE
 from core.lib import remove_none_from_dict
-from cms.models import Page
+from cms.models import Page, Column
 from cms.utils import reorder_positions
 
 
@@ -27,10 +27,14 @@ def resolve_add_widget(_, info, input):
     new_position = clean_input.get("position")
     widget = Widget()
 
+    try:
+        widget.column = Column.objects.get(id=clean_input.get("parentGuid"))
+    except ObjectDoesNotExist:
+        raise GraphQLError(COULD_NOT_FIND)
+
     widget.page = page
 
     widget.position = clean_input.get("position")
-    widget.parent_id = clean_input.get("parentGuid")
 
     if clean_input.get("settings"):
         widget.settings = clean_input.get("settings")
