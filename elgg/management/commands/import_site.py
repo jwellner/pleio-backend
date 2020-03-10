@@ -175,6 +175,12 @@ class Command(InteractiveTenantOption, BaseCommand):
                     user = User.objects.get(id=GuidMap.objects.get(id=relation.left.guid).guid)
                     group.join(user, "member")
 
+                    # also check of user is subscribed
+                    subscribed = elgg_group.entity.relation_inverse.filter(relationship="subscribed", left__type='user', left__guid=relation.left.guid).first()
+                    if subscribed:
+                        user.profile.group_notifications.append(group.id)
+                        user.profile.save()
+
                 # then update or add admins
                 relations = elgg_group.entity.relation_inverse.filter(relationship="group_admin", left__type='user')
                 for relation in relations:
