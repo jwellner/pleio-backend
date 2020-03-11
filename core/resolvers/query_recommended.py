@@ -14,9 +14,10 @@ def resolve_recommended(
     Model = get_model_by_subtype('blog')
     entities = Model.objects.visible(info.context.user)
     entities = entities.filter(is_recommended=True)
-    entities = entities[offset:offset+limit]
+
+    edges = entities[offset:offset+limit]
 
     return {
         'total': entities.count(),
-        'edges': entities,
+        'edges': edges,
     }

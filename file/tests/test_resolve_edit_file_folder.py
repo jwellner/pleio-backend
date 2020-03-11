@@ -91,16 +91,26 @@ class EditFileFolderTestCase(FastTenantTestCase):
             read_access=[ACCESS_TYPE.public],
             write_access=[ACCESS_TYPE.user.format(self.authenticatedUser.id)]
         )
-        self.file = FileFolder.objects.create(
+        self.file3 = FileFolder.objects.create(
             owner=self.authenticatedUser,
             upload=None,
             is_folder=False,
             group=self.group,
             parent=self.folder2,
+            title="a file",
             read_access=[ACCESS_TYPE.public],
             write_access=[ACCESS_TYPE.user.format(self.authenticatedUser.id)]
         )
-
+        self.file4 = FileFolder.objects.create(
+            owner=self.authenticatedUser,
+            upload=None,
+            is_folder=False,
+            group=self.group,
+            parent=self.folder2,
+            title="b file",
+            read_access=[ACCESS_TYPE.public],
+            write_access=[ACCESS_TYPE.user.format(self.authenticatedUser.id)]
+        )
         self.data = {
             "input": {
                 "guid": None,
@@ -217,6 +227,7 @@ class EditFileFolderTestCase(FastTenantTestCase):
         query = """
             query OpenFolder($guid: String, $filter: String) {
                 files(containerGuid: $guid, filter: $filter) {
+                    total
                     edges {
                         guid
                         ... on FileFolder {
@@ -253,7 +264,8 @@ class EditFileFolderTestCase(FastTenantTestCase):
 
         variables = {
             "guid": self.folder2.guid,
-            "filter": "files"
+            "filter": "files",
+            "limit": 1
         }
 
         result = graphql_sync(schema, { "query": query, "variables": variables }, context_value=request)
@@ -262,9 +274,10 @@ class EditFileFolderTestCase(FastTenantTestCase):
 
         data = result[1]["data"]
 
-        self.assertEqual(data["files"]["edges"][0]["guid"], self.file.guid)
+        self.assertEqual(data["files"]["edges"][0]["guid"], self.file3.guid)
         self.assertEqual(data["files"]["edges"][0]["accessId"], 1)
         self.assertEqual(data["files"]["edges"][0]["writeAccessId"], 1)
+        self.assertEqual(data["files"]["total"], 2)
 
 
     def test_edit_folder_access_id_recursive(self):
@@ -353,7 +366,7 @@ class EditFileFolderTestCase(FastTenantTestCase):
 
         data = result[1]["data"]
 
-        self.assertEqual(data["files"]["edges"][0]["guid"], self.file.guid)
+        self.assertEqual(data["files"]["edges"][0]["guid"], self.file3.guid)
         self.assertEqual(data["files"]["edges"][0]["accessId"], 1)
         self.assertEqual(data["files"]["edges"][0]["writeAccessId"], 0)
 
@@ -444,7 +457,7 @@ class EditFileFolderTestCase(FastTenantTestCase):
 
         data = result[1]["data"]
 
-        self.assertEqual(data["files"]["edges"][0]["guid"], self.file.guid)
+        self.assertEqual(data["files"]["edges"][0]["guid"], self.file3.guid)
         self.assertEqual(data["files"]["edges"][0]["accessId"], 2)
         self.assertEqual(data["files"]["edges"][0]["writeAccessId"], 1)
 
@@ -536,7 +549,7 @@ class EditFileFolderTestCase(FastTenantTestCase):
 
         data = result[1]["data"]
 
-        self.assertEqual(data["files"]["edges"][0]["guid"], self.file.guid)
+        self.assertEqual(data["files"]["edges"][0]["guid"], self.file3.guid)
         self.assertEqual(data["files"]["edges"][0]["accessId"], 2)
         self.assertEqual(data["files"]["edges"][0]["writeAccessId"], 0)
 

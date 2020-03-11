@@ -22,9 +22,9 @@ def resolve_groups(
         group_ids = user.memberships.filter(type__in=('member', 'admin', 'owner')).values_list('group', flat=True)
         groups = groups.filter(id__in=group_ids)
 
-    groups = groups[offset:offset+limit]
+    edges = groups[offset:offset+limit]
 
     return {
         'total': groups.count(),
-        'edges': groups
+        'edges': edges
     }

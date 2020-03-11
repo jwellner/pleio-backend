@@ -20,9 +20,10 @@ class AcceptGroupInvitationTestCase(FastTenantTestCase):
         self.anonymousUser = AnonymousUser()
         self.user1 = mixer.blend(User)
         self.user2 = mixer.blend(User)
+        self.user3 = mixer.blend(User)
         self.group1 = mixer.blend(Group, owner=self.user1)
         GroupInvitation.objects.create(code="7d97cea90c83722c7262", invited_user=self.user2, group=self.group1)
-
+        self.group1.join(self.user3, 'member')
 
     def tearDown(self):
         self.group1.delete()
@@ -45,7 +46,7 @@ class AcceptGroupInvitationTestCase(FastTenantTestCase):
                         url
                         canEdit
                         membership
-                        members(limit: 5) {
+                        members(limit: 1) {
                         total
                         edges {
                             role
@@ -86,6 +87,8 @@ class AcceptGroupInvitationTestCase(FastTenantTestCase):
         data = result[1]["data"]
 
         self.assertEqual(data["acceptGroupInvitation"]["group"]["guid"], self.group1.guid)
+        self.assertEqual(len(data["acceptGroupInvitation"]["group"]["members"]["edges"]), 1)
+        self.assertEqual(data["acceptGroupInvitation"]["group"]["members"]["total"], 2)
 
 
     def test_accept_group_inivitation_twice(self):

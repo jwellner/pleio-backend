@@ -151,14 +151,20 @@ class ActivitiesTestCase(FastTenantTestCase):
             "subtypes": [],
             "tags": []
         }
-
+        mixer.cycle(45).blend(
+            Blog,
+            owner=self.user2,
+            read_access=[ACCESS_TYPE.public],
+            write_access=[ACCESS_TYPE.user.format(self.user2.id)],
+            group=self.group2
+        )
         result = graphql_sync(schema, { "query": self.query, "variables": variables }, context_value=request)
 
         self.assertTrue(result[0])
 
         data = result[1]["data"]
 
-        self.assertEqual(data["activities"]["total"], 2)
+        self.assertEqual(data["activities"]["total"], 47)
 
     def test_activities_group_filter_mine(self):
         request = HttpRequest()

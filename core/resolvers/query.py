@@ -16,7 +16,7 @@ from .query_trending import resolve_trending
 from .query_notifications import resolve_notifications
 from .query_recommended import resolve_recommended
 from .query_top import resolve_top
-from core.constances import COULD_NOT_FIND, ORDER_DIRECTION, ORDER_BY
+from core.constances import COULD_NOT_FIND
 
 query = ObjectType("Query")
 
@@ -99,23 +99,3 @@ def resolve_entity(
         pass
 
     return entity
-
-
-@query.field("breadcrumb")
-def resolve_breadcrumb(_, info, guid=None):
-    # pylint: disable=unused-argument
-    return []
-
-
-@query.field("files")
-def resolve_files(_, info, containerGuid=None, filter=None, orderBy=ORDER_BY.timeCreated, orderDirection=ORDER_DIRECTION.asc, offset=0, limit=20):
-    # pylint: disable=unused-argument
-    # pylint: disable=too-many-arguments
-    # pylint: disable=redefined-builtin
-    return {
-        'total': 0,
-        'edges': [],
-    }
-
-
-# TODO: Implement files

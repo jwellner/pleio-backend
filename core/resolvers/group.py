@@ -80,7 +80,7 @@ def resolve_group_invite(obj, info, q=None, offset=0, limit=10):
     else:
         users = User.objects.all()[offset:offset+limit]
 
-    edges = []
+    invites = []
 
     for user in users:
         if user == info.context.user:
@@ -89,20 +89,24 @@ def resolve_group_invite(obj, info, q=None, offset=0, limit=10):
             continue
         invite = GroupInvitation(invited_user=user)
         invite.invited = False
-        edges.append(invite)
+        invites.append(invite)
+
+    edges = invites[offset:offset+limit]
 
     return {
-        'total': len(edges),
+        'total': len(invites),
         'edges': edges
     }
 
 @group.field("invited")
-def resolve_group_invited(obj, info):
+def resolve_group_invited(obj, info, q=None, offset=0, limit=10):
     # pylint: disable=unused-argument
     invited = obj.invitations.filter(group=obj)
+
+    edges = invited[offset:offset+limit]
     return {
-        'total': len(invited),
-        'edges': invited
+        'total': invited.count(),
+        'edges': edges
     }
 
 @group.field("membershipRequests")

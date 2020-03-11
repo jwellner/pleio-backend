@@ -90,7 +90,7 @@ class GroupsNotEmptyTestCase(FastTenantTestCase):
 
         query = """
             {
-                groups(limit:2) {
+                groups(limit:1) {
                     total
                     edges {
                         guid
@@ -111,8 +111,8 @@ class GroupsNotEmptyTestCase(FastTenantTestCase):
         self.assertTrue(result[0])
 
         data = result[1]["data"]
-        
-        self.assertEqual(data["groups"]["total"], 2)
+
+        self.assertEqual(data["groups"]["total"], 6)
 
     def test_groups_mine(self):
 
