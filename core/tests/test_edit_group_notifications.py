@@ -23,6 +23,8 @@ class EditGroupNotificationsTestCase(FastTenantTestCase):
         self.admin.is_admin = True
         self.admin.save()
         self.group1 = mixer.blend(Group)
+        self.group1.join(self.user1)
+        self.group1.join(self.user2)
 
 
     def tearDown(self):
@@ -161,6 +163,40 @@ class EditGroupNotificationsTestCase(FastTenantTestCase):
         errors = result[1]["errors"]
 
         self.assertEqual(errors[0]["message"], "could_not_save")
+
+    def test_edit_group_notifications_by_owner_without_id(self):
+        mutation = """
+            mutation editGroupNotifications($input: editGroupNotificationsInput!) {
+                editGroupNotifications(input: $input) {
+                    group {
+                        guid
+                        getsNotifications
+                        __typename
+                    }
+                    __typename
+                }
+            }
+        """
+
+        variables = {
+            "input": {
+                "clientMutationId": 1,
+                "getsNotifications": True,
+                "guid": self.group1.guid
+                }
+            }
+
+
+        request = HttpRequest()
+        request.user = self.user1
+
+        result = graphql_sync(schema, {"query": mutation, "variables": variables}, context_value=request)
+
+        self.assertTrue(result[0])
+        data = result[1]["data"]
+
+        self.assertEqual(data["editGroupNotifications"]["group"]["guid"], self.group1.guid)
+        self.assertEqual(data["editGroupNotifications"]["group"]["getsNotifications"], True)
 
     def test_edit_group_notifications_by_anonymous(self):
         mutation = """

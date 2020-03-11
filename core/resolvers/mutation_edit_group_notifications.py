@@ -14,10 +14,13 @@ def resolve_edit_group_notifications(_, info, input):
     if not user.is_authenticated:
         raise GraphQLError(NOT_LOGGED_IN)
 
-    try:
-        requested_user = User.objects.get(id=clean_input.get('userGuid'))
-    except ObjectDoesNotExist:
-        raise GraphQLError(COULD_NOT_FIND)
+    if clean_input.get('userGuid'):
+        try:
+            requested_user = User.objects.get(id=clean_input.get('userGuid'))
+        except ObjectDoesNotExist:
+            raise GraphQLError(COULD_NOT_FIND)
+    else:
+        requested_user = user
 
     try:
         group = Group.objects.get(id=clean_input.get('guid'))
@@ -29,20 +32,8 @@ def resolve_edit_group_notifications(_, info, input):
     
     group.getsNotifications = None
     if 'getsNotifications' in clean_input:
-        if clean_input.get('getsNotifications'):
-            try:
-                requested_user.profile.group_notifications.append(clean_input.get('guid'))
-                group.getsNotifications = True
-            except Exception:
-                pass
-        else:
-            try:
-                requested_user.profile.group_notifications.remove(clean_input.get('guid'))
-                group.getsNotifications = False
-            except Exception:
-                pass
-    
-    requested_user.profile.save()
+        group.set_member_notification(requested_user, clean_input['getsNotifications'])
+        group.getsNotifications = clean_input['getsNotifications']
     
     return {
         "group": group
