@@ -23,8 +23,7 @@ class UserSettingsTestCase(FastTenantTestCase):
         self.group1.join(self.user1, 'member')
         self.group2.join(self.user1, 'member')
 
-        self.user1.profile.group_notifications = [self.group1.guid]
-        self.user1.profile.save()
+        self.group1.set_member_notification(self.user1, True)
 
         self.admin.is_admin = True
         self.admin.save()

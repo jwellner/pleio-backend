@@ -94,10 +94,13 @@ class Group(models.Model):
 
         return self.members.filter(user=user, type__in=['admin', 'owner']).exists()
 
-    def join(self, user, member_type):
+    def join(self, user, member_type='member'):
         return self.members.update_or_create(
             user=user,
-            defaults={'type': member_type}
+            defaults={
+                'type': member_type,
+                'enable_notification': self.auto_notification
+            }
         )
 
     def leave(self, user):
@@ -109,6 +112,14 @@ class Group(models.Model):
             return self.members.get(user=user).delete()
         except ObjectDoesNotExist:
             return False
+
+    def set_member_notification(self, user, notification=True):
+        member = self.members.filter(user=user).first()
+        if member:
+            member.enable_notification = notification
+            member.save()
+            return True
+        return False
 
     @property
     def guid(self):
@@ -152,6 +163,7 @@ class GroupMembership(models.Model):
         related_name='members',
         on_delete=models.CASCADE
     )
+    enable_notification = models.BooleanField(default=False)
 
     def __str__(self):
         return "{} - {} - {}".format(

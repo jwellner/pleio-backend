@@ -35,7 +35,6 @@ class Mapper():
         
         user_profile = UserProfile()
         user_profile.last_online = last_online
-        user_profile.group_notifications = []
         user_profile.overview_email_interval = interval_private.value if interval_private else 'weekly' # TODO: should get default for site
         user_profile.overview_email_tags = [] # Not implemented uet
         user_profile.receive_newsletter = receive_newsletter

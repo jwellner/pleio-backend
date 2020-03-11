@@ -173,22 +173,56 @@ class Command(InteractiveTenantOption, BaseCommand):
                 relations = elgg_group.entity.relation_inverse.filter(relationship="member", left__type='user')
                 for relation in relations:
                     user = User.objects.get(id=GuidMap.objects.get(id=relation.left.guid).guid)
-                    group.join(user, "member")
+                    
+                    # check if user has notifications enabled
+                    enabled_notifications = True if elgg_group.entity.relation_inverse.filter(
+                            relationship="subscribed", 
+                            left__type='user', 
+                            left__guid=relation.left.guid
+                        ).first() else False
 
-                    # also check of user is subscribed
-                    subscribed = elgg_group.entity.relation_inverse.filter(relationship="subscribed", left__type='user', left__guid=relation.left.guid).first()
-                    if subscribed:
-                        user.profile.group_notifications.append(group.id)
-                        user.profile.save()
+                    group.members.update_or_create(
+                        user=user,
+                        defaults={
+                            'type': 'member',
+                            'enable_notification': enabled_notifications
+                        }
+                    )
 
                 # then update or add admins
                 relations = elgg_group.entity.relation_inverse.filter(relationship="group_admin", left__type='user')
                 for relation in relations:
                     user = User.objects.get(id=GuidMap.objects.get(id=relation.left.guid).guid)
-                    group.join(user, "admin")
+
+                    # check if user has notifications enabled
+                    enabled_notifications = True if elgg_group.entity.relation_inverse.filter(
+                            relationship="subscribed", 
+                            left__type='user', 
+                            left__guid=relation.left.guid
+                        ).first() else  False
+
+                    group.members.update_or_create(
+                        user=user,
+                        defaults={
+                            'type': 'admin',
+                            'enable_notification': enabled_notifications
+                        }
+                    )
 
                 # finally update or add owner
-                group.join(owner, 'owner')
+                enabled_notifications = True if elgg_group.entity.relation_inverse.filter(
+                        relationship="subscribed",
+                        left__type='user', 
+                        left__guid=elgg_group.entity.owner_guid
+                    ).first() else False
+
+                group.members.update_or_create(
+                    user=owner,
+                    defaults={
+                        'type': 'owner',
+                        'enable_notification': enabled_notifications
+                    }
+                )
 
                 # TODO: subgroups
                 if subgroups_enabled:
