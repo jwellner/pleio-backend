@@ -19,6 +19,6 @@ django-notifications-hq==1.5.0
 django-tenants==2.2.3
 mysqlclient==1.4.6
 django-storages==1.9.1
-boto3==1.12.6
+boto3==1.12.18
 docutils==0.15
 phpserialize==1.3
