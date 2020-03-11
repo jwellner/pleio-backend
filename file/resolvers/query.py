@@ -35,8 +35,8 @@ def resolve_files(
         containerGuid=None,
         offset=0,
         limit=20,
-        orderBy="filename",
-        orderDirection="desc"
+        orderBy="title",
+        orderDirection="asc"
     ):
     #pylint: disable=unused-argument
     #pylint: disable=too-many-arguments
@@ -70,9 +70,11 @@ def resolve_files(
     qs = qs.filter(conditional_group_or_folder_filter(containerGuid, is_folder) & conditional_filter_subtype(filter))
     qs = qs.order_by(order_by)
 
+    edges = qs[offset:offset+limit]
+
     return {
         'total': qs.count(),
-        'edges': qs
+        'edges': edges
     }
 
 @query.field("breadcrumb")

@@ -66,6 +66,7 @@ class BookmarkTestCase(FastTenantTestCase):
         request.user = self.authenticatedUser
 
         variables = {
+            "limit": 1
         }
 
         result = graphql_sync(schema, { "query": query , "variables": variables}, context_value=request)

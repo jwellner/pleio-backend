@@ -22,7 +22,7 @@ class Entity(models.Model):
     owner = models.ForeignKey('user.User', on_delete=models.PROTECT)
     group = models.ForeignKey(
         'core.Group',
-        on_delete=models.PROTECT,
+        on_delete=models.CASCADE,
         blank=True,
         null=True
     )

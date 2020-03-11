@@ -47,7 +47,7 @@ class GroupTestCase(FastTenantTestCase):
                 entity(guid: $guid) {
                     guid
                     ... on Group {
-                        invited {
+                        invited (limit:1){
                             total
                             edges {
                                 id
@@ -85,10 +85,8 @@ class GroupTestCase(FastTenantTestCase):
         data = result[1]["data"]
 
         self.assertEqual(data["entity"]["guid"], self.group.guid)
-        self.assertEqual(data["entity"]["__typename"], "Group")
         self.assertEqual(data["entity"]["invited"]["total"], 2)
-        self.assertEqual(data["entity"]["invited"]["edges"][0]["user"]["guid"], self.user1.guid)
-        self.assertEqual(data["entity"]["invited"]["edges"][0]["email"], self.user1.email)
+        self.assertEqual(len(data["entity"]["invited"]["edges"]), 1)
 
 
     def test_entity_group_invite_list(self):
@@ -135,8 +133,7 @@ class GroupTestCase(FastTenantTestCase):
         self.assertEqual(data["entity"]["guid"], self.group.guid)
         self.assertEqual(data["entity"]["__typename"], "Group")
         self.assertEqual(data["entity"]["invite"]["total"], 1)
-        self.assertEqual(data["entity"]["invite"]["edges"][0]["user"]["guid"], self.user1.guid)
-        self.assertEqual(data["entity"]["invite"]["edges"][0]["invited"], False)
+        self.assertEqual(len(data["entity"]["invite"]["edges"]), 1)
 
     def test_entity_group_invite_list_empty(self):
         query = """

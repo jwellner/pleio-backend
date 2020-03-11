@@ -8,7 +8,7 @@ from django.http import HttpRequest
 from django.utils import timezone
 from core.models import Group
 from user.models import User
-from event.models import Event
+from event.models import Event, EventAttendee
 from mixer.backend.django import mixer
 from core.constances import ACCESS_TYPE
 from core.lib import get_acl, access_id_to_acl
@@ -24,6 +24,20 @@ class EventsTestCase(FastTenantTestCase):
         self.anonymousUser = AnonymousUser()
         self.user1 = mixer.blend(User)
         self.user2 = mixer.blend(User)
+
+        self.eventOneHourAgo = Event.objects.create(
+            title="Test past event 1 hour ago",
+            description="Description",
+            rich_description="JSON to string",
+            read_access=[ACCESS_TYPE.public],
+            write_access=[ACCESS_TYPE.user.format(self.user1.id)],
+            owner=self.user1,
+            start_date=hours_ago_1,
+            location="Utrecht",
+            external_link="https://www.pleio.nl",
+            rsvp=True,
+            max_attendees=None
+        )
 
         self.eventFuture1 = Event.objects.create(
             title="Test future event 1",
@@ -66,19 +80,7 @@ class EventsTestCase(FastTenantTestCase):
             rsvp=True,
             max_attendees=None
         )
-        self.eventOneHourAgo = Event.objects.create(
-            title="Test past event 1",
-            description="Description",
-            rich_description="JSON to string",
-            read_access=[ACCESS_TYPE.public],
-            write_access=[ACCESS_TYPE.user.format(self.user1.id)],
-            owner=self.user1,
-            start_date=hours_ago_1,
-            location="Utrecht",
-            external_link="https://www.pleio.nl",
-            rsvp=True,
-            max_attendees=None
-        )
+
 
         self.query = """
             query EventsList($filter: EventFilter, $offset: Int, $limit: Int) {
@@ -87,9 +89,7 @@ class EventsTestCase(FastTenantTestCase):
                         edges {
                         guid
                         ...EventListFragment
-                        __typename
                         }
-                        __typename
                     }
                 }
 
@@ -110,7 +110,6 @@ class EventsTestCase(FastTenantTestCase):
                         image
                         video
                         positionY
-                        __typename
                     }
                     startDate
                     endDate
@@ -131,9 +130,7 @@ class EventsTestCase(FastTenantTestCase):
                         name
                         icon
                         url
-                        __typename
                         }
-                        __typename
                     }
                     owner {
                         guid
@@ -141,18 +138,15 @@ class EventsTestCase(FastTenantTestCase):
                         name
                         url
                         icon
-                        __typename
                     }
-                    attendees(limit: 5) {
+                    attendees(limit: 1) {
                         total
                         edges {
                         guid
                         username
                         name
                         icon
-                        __typename
                         }
-                        __typename
                     }
                     group {
                         guid
@@ -160,11 +154,8 @@ class EventsTestCase(FastTenantTestCase):
                         name
                         url
                         membership
-                        __typename
                         }
-                        __typename
                     }
-                    __typename
                     }
         """
 
@@ -200,17 +191,20 @@ class EventsTestCase(FastTenantTestCase):
         request.user = self.user2
 
         variables = {
-            "limit": 20,
+            "limit": 1,
             "offset": 0,
             "filter": "upcoming"
         }
 
+        mixer.cycle(2).blend(EventAttendee, event=self.eventFuture2, state='accept')
         result = graphql_sync(schema, { "query": self.query , "variables": variables}, context_value=request)
 
         self.assertTrue(result[0])
 
         data = result[1]["data"]
+
         self.assertEqual(data["events"]["total"], 3)
+        self.assertEqual(data["events"]["edges"][0]["attendees"]["total"], 2)
 
     def test_events_previous(self):
 

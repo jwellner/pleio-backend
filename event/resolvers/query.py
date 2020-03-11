@@ -19,13 +19,15 @@ def resolve_events(obj, info, filter=None, containerGuid=None, offset=0, limit=2
     # pylint: disable=redefined-builtin
 
     events = Event.objects.visible(info.context.user)
-    
+
     if filter == 'previous':
         events = events.filter(start_date__lte=get_end_of_yesterday())
     else:
         events = events.filter(start_date__gt=get_end_of_yesterday())
 
+    edges = events[offset:offset+limit]
+
     return {
         'total': events.count(),
-        'edges': events
+        'edges': edges
     }
