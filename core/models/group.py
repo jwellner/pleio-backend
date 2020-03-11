@@ -140,6 +140,7 @@ class Group(models.Model):
 class GroupMembership(models.Model):
     class Meta:
         unique_together = ('user', 'group')
+        ordering = ['group']
 
     MEMBER_TYPES = (
         ('owner', 'Owner'),

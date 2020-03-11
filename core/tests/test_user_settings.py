@@ -18,8 +18,8 @@ class UserSettingsTestCase(FastTenantTestCase):
         self.user1 = mixer.blend(User)
         self.user2 = mixer.blend(User)
         self.admin = mixer.blend(User)
-        self.group1 = mixer.blend(Group, owner=self.user2)
-        self.group2 = mixer.blend(Group, owner=self.user2)
+        self.group1 = mixer.blend(Group, owner=self.user2, name='a')
+        self.group2 = mixer.blend(Group, owner=self.user2, name='b')
         self.group1.join(self.user1, 'member')
         self.group2.join(self.user1, 'member')
 
