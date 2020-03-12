@@ -62,6 +62,7 @@ class EditGroupCase(FastTenantTestCase):
                         isMembershipOnRequest
                         isFeatured
                         autoNotification
+                        tags
                     }
                 }
             }
@@ -79,6 +80,7 @@ class EditGroupCase(FastTenantTestCase):
                 "isMembershipOnRequest": True,
                 "isFeatured": True,
                 "autoNotification": True,
+                "tags": ["tag_one", "tag_two"]
             }
         }
 
@@ -101,3 +103,4 @@ class EditGroupCase(FastTenantTestCase):
         self.assertEqual(data["editGroup"]["group"]["isMembershipOnRequest"], variables["group"]["isMembershipOnRequest"])
         self.assertEqual(data["editGroup"]["group"]["isFeatured"], variables["group"]["isFeatured"])
         self.assertEqual(data["editGroup"]["group"]["autoNotification"], variables["group"]["autoNotification"])
+        self.assertEqual(data["editGroup"]["group"]["tags"], ["tag_one", "tag_two"])
