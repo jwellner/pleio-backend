@@ -35,7 +35,8 @@ def resolve_edit_group(_, info, input):
     group.auto_notification = clean_input.get("autoNotification", False)
 
     group.plugins = clean_input.get("plugins", [])
-    group.tags = clean_input.get("tags", [])
+    if clean_input.get('tags'):
+        group.tags = clean_input.get("tags", [])
 
     group.save()
 
