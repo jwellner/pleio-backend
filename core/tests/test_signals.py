@@ -22,7 +22,7 @@ class SignalsTestCase(FastTenantTestCase):
     def setUp(self):
         self.user1 = mixer.blend(User)
         self.user2 = mixer.blend(User)
-        self.group = mixer.blend(Group, owner=self.user1)
+        self.group = mixer.blend(Group, owner=self.user1, auto_notification=True)
         self.group.join(self.user2, 'member')
         self.blog1 = Blog.objects.create(
             title="Blog1",
@@ -65,6 +65,6 @@ class SignalsTestCase(FastTenantTestCase):
         # mocked_send.assert_called_once_with(self.user1, recipient=self.user2, verb='commented', action_object=self.blog1)
 
     @mock.patch('notifications.signals.notify.send')
-    def test_entitty_handler(self, mocked_send):
+    def test_entity_handler(self, mocked_send):
         entity_handler(self.user1, self.blog2, True, action_object=self.blog2)
         mocked_send.assert_called_once_with(self.user1, recipient=self.user2, verb='created', action_object=self.blog2)

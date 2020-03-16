@@ -1,7 +1,7 @@
 from django.db.models.signals import post_save
 from django.conf import settings
 from notifications.signals import notify
-from core.models import Comment
+from core.models import Comment, Group
 from user.models import User
 from event.models import Event
 from blog.models import Blog
@@ -29,8 +29,11 @@ def user_handler(sender, instance, created, **kwargs):
 
     notify.send(instance, recipient=instance, verb='welcome', action_object=instance)
 
+    # Auto join groups where is_auto_membership_enabled
+    for group in Group.objects.filter(is_auto_membership_enabled=True):
+        group.join(instance)
 
-# TODO: we should check if user has turned notification setting on for group
+
 def entity_handler(sender, instance, created, **kwargs):
     """ Adds notification for group members if entity in group is created
 
@@ -38,14 +41,14 @@ def entity_handler(sender, instance, created, **kwargs):
     member in this group.
 
     """
+
     # pylint: disable=unused-argument
     if not instance.group or not created:
         return
-    for member in instance.group.members.filter(type__in=['admin', 'owner', 'member']):
-        user = member.user
-        if instance.owner == user:
+    for member in instance.group.members.filter(type__in=['admin', 'owner', 'member'], enable_notification=True):
+        if instance.owner == member.user:
             continue
-        notify.send(instance.owner, recipient=user, verb='created', action_object=instance)
+        notify.send(instance.owner, recipient=member.user, verb='created', action_object=instance)
 
 
 post_save.connect(comment_handler, sender=Comment)

@@ -15,6 +15,7 @@ class EditGroupCase(FastTenantTestCase):
     def setUp(self):
         self.anonymousUser = AnonymousUser()
         self.user = mixer.blend(User)
+        self.admin = mixer.blend(User, is_admin=True)
         self.group = mixer.blend(Group, owner=self.user)
 
     def test_edit_group_anon(self):
@@ -63,6 +64,8 @@ class EditGroupCase(FastTenantTestCase):
                         isFeatured
                         autoNotification
                         tags
+                        isLeavingGroupDisabled
+                        isAutoMembershipEnabled
                     }
                 }
             }
@@ -80,7 +83,9 @@ class EditGroupCase(FastTenantTestCase):
                 "isMembershipOnRequest": True,
                 "isFeatured": True,
                 "autoNotification": True,
-                "tags": ["tag_one", "tag_two"]
+                "tags": ["tag_one", "tag_two"],
+                "isLeavingGroupDisabled": True,
+                "isAutoMembershipEnabled": True,
             }
         }
 
@@ -101,6 +106,8 @@ class EditGroupCase(FastTenantTestCase):
         self.assertEqual(data["editGroup"]["group"]["welcomeMessage"], variables["group"]["welcomeMessage"])
         self.assertEqual(data["editGroup"]["group"]["isClosed"], variables["group"]["isClosed"])
         self.assertEqual(data["editGroup"]["group"]["isMembershipOnRequest"], variables["group"]["isMembershipOnRequest"])
-        self.assertEqual(data["editGroup"]["group"]["isFeatured"], variables["group"]["isFeatured"])
+        self.assertEqual(data["editGroup"]["group"]["isFeatured"], False)
+        self.assertEqual(data["editGroup"]["group"]["isLeavingGroupDisabled"], False)
+        self.assertEqual(data["editGroup"]["group"]["isAutoMembershipEnabled"], False)
         self.assertEqual(data["editGroup"]["group"]["autoNotification"], variables["group"]["autoNotification"])
         self.assertEqual(data["editGroup"]["group"]["tags"], ["tag_one", "tag_two"])

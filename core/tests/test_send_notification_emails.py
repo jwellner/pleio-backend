@@ -19,7 +19,7 @@ class SendNotificationEmailsTestCase(FastTenantTestCase):
     def setUp(self):
         self.user1 = mixer.blend(User)
         self.user2 = mixer.blend(User)
-        self.group = mixer.blend(Group, owner=self.user1)
+        self.group = mixer.blend(Group, owner=self.user1, auto_notification=True)
         self.group.join(self.user2, 'member')
         self.blog1 = Blog.objects.create(
             title='Blog1',

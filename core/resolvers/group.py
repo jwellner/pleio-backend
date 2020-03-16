@@ -61,6 +61,16 @@ def resolve_group_is_featured(obj, info):
     # pylint: disable=unused-argument
     return obj.is_featured
 
+@group.field("isLeavingGroupDisabled")
+def resolve_group_is_leaving_group_disabled(obj, info):
+    # pylint: disable=unused-argument
+    return obj.is_leaving_group_disabled
+
+@group.field("isAutoMembershipEnabled")
+def resolve_group_is_auto_membership_enabled(obj, info):
+    # pylint: disable=unused-argument
+    return obj.is_auto_membership_enabled
+
 @group.field("canEdit")
 def resolve_group_can_edit(obj, info):
     # pylint: disable=unused-argument
@@ -153,10 +163,10 @@ def resolve_membership(group, info):
 
     if group.is_full_member(user):
         return MEMBERSHIP.joined
-    
+
     if group.is_pending_member(user):
         return MEMBERSHIP.requested
-    
+
     return MEMBERSHIP.not_joined
 
 @group.field("accessIds")

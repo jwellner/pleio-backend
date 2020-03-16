@@ -25,8 +25,12 @@ def resolve_add_group(_, info, input):
 
     group.is_closed = clean_input.get("isClosed", False)
     group.is_membership_on_request = clean_input.get("isMembershipOnRequest", False)
-    group.is_featured = clean_input.get("isFeatured", False)
     group.auto_notification = clean_input.get("autoNotification", False)
+
+    if user.is_admin:
+        group.is_featured = clean_input.get("isFeatured", False)
+        group.is_leaving_group_disabled = clean_input.get("isLeavingGroupDisabled", False)
+        group.is_auto_membership_enabled = clean_input.get("isAutoMembershipEnabled", False)
 
     group.plugins = clean_input.get("plugins", [])
     group.tags = clean_input.get("tags", [])
