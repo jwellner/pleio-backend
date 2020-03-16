@@ -21,6 +21,8 @@ class NotificationsTestCase(FastTenantTestCase):
         self.anonymousUser = AnonymousUser()
         self.group = mixer.blend(Group, owner=self.user1)
         self.group.join(self.user2, 'member')
+        self.group.set_member_notification(self.user2, True)
+
         self.blog1 = Blog.objects.create(
             title="Blog1",
             owner=self.user1,

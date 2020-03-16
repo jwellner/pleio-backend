@@ -3,7 +3,7 @@ from django.core.exceptions import ObjectDoesNotExist
 from core.models import Group
 from core.constances import NOT_LOGGED_IN, COULD_NOT_SAVE, COULD_NOT_FIND
 from core.lib import remove_none_from_dict
- 
+
 
 def resolve_edit_group(_, info, input):
     # pylint: disable=redefined-builtin
@@ -31,8 +31,13 @@ def resolve_edit_group(_, info, input):
 
     group.is_closed = clean_input.get("isClosed", False)
     group.is_membership_on_request = clean_input.get("isMembershipOnRequest", False)
-    group.is_featured = clean_input.get("isFeatured", False)
+
     group.auto_notification = clean_input.get("autoNotification", False)
+
+    if user.is_admin:
+        group.is_featured = clean_input.get("isFeatured", False)
+        group.is_leaving_group_disabled = clean_input.get("isLeavingGroupDisabled", False)
+        group.is_auto_membership_enabled = clean_input.get("isAutoMembershipEnabled", False)
 
     group.plugins = clean_input.get("plugins", [])
     if clean_input.get('tags'):
