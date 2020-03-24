@@ -46,6 +46,7 @@ DEFAULT_SITE_CONFIG = {
     'DIRECT_LINKS': ([], 'Direct links'),
     'MAIL_REPLY_TO': ('noreply@pleio.nl', 'default reply-to mail address'),
     'SHOW_LOGIN_REGISTER': (True, 'Login and register buttons visible'),
+    'ADVANCED_PERMISSIONS_ENABLED': (False, 'Advanced permissions'),
 }
 """
 Default site configuration

@@ -23,7 +23,6 @@ class Command(InteractiveTenantOption, BaseCommand):
     import_id = None
     helpers = None
     mapper = None
-    dry = False
 
     def get_elgg_from_options_or_interactive(self, **options):
         all_elgg_sites = Instances.objects.using("elgg_control").all()
@@ -52,7 +51,6 @@ class Command(InteractiveTenantOption, BaseCommand):
     def add_arguments(self, parser):
         super().add_arguments(parser)
         parser.add_argument('--elgg', help='elgg database')
-        parser.add_argument('--dry-run', help='do not save data', default=False, action="store_true")
         parser.add_argument('--flush', help='clean tenant database before import', default=False, action="store_true")
 
     def handle(self, *args, **options):
@@ -60,8 +58,7 @@ class Command(InteractiveTenantOption, BaseCommand):
             self.stdout.write("Only run this command from admin instance.")
             return
 
-        self.dry = options.get("dry-run")
-        
+       
         elgg_instance = self.get_elgg_from_options_or_interactive(**options)
         tenant = self.get_tenant_from_options_or_interactive(**options)
 
@@ -71,9 +68,6 @@ class Command(InteractiveTenantOption, BaseCommand):
             # docker-compose exec admin python manage.py tenant_command flush --schema test2 --no-input
             self.stdout.write(f"* flush database {tenant.schema_name}")
             management.execute_from_command_line(['manage.py', 'tenant_command', 'flush', '--schema', tenant.schema_name, '--no-input'])
-
-        if self.dry:
-            self.stdout.write("- running in dry-run mode, not saving data")
 
         self.import_id = "import_%s" % elgg_instance.name
 
@@ -89,11 +83,6 @@ class Command(InteractiveTenantOption, BaseCommand):
         self.helpers = ElggHelpers(self.import_id)
         self.mapper = Mapper(self.import_id)
 
-        # Clean GuidMap (maybe we can use it to check if import is already done?)
-
-        if self.dry:
-            GuidMap.objects.all().delete()
-
         if GuidMap.objects.count() > 0:
             self.stdout.write(f"Import already run on tenant {tenant.schema_name}. Exiting.")
             return False
@@ -102,12 +91,10 @@ class Command(InteractiveTenantOption, BaseCommand):
         self._import_users()
         self._import_groups()
         self._import_blogs()
+        self._import_news()
 
         # All done!
         self.stdout.write("\n>> Done!")
-
-        if self.dry:
-            GuidMap.objects.all().delete()
 
     def _import_settings(self):
 
@@ -149,7 +136,8 @@ class Command(InteractiveTenantOption, BaseCommand):
         config.MENU = json.loads(html.unescape(self.helpers.get_plugin_setting("menu")))
         config.FOOTER = json.loads(html.unescape(self.helpers.get_plugin_setting("footer")))
         config.DIRECT_LINKS = json.loads(html.unescape(self.helpers.get_plugin_setting("directLinks")))
-        config.SHOW_LOGIN_REGISTER = self.helpers.get_plugin_setting("show_extra_homepage_filters") == "yes"
+        config.SHOW_LOGIN_REGISTER = self.helpers.get_plugin_setting("show_login_register") == "yes"
+        config.ADVANCED_PERMISSIONS_ENABLED = self.helpers.get_plugin_setting("advanced_permissions") == "yes"
 
         self.stdout.write(".", ending="")
 
@@ -164,70 +152,66 @@ class Command(InteractiveTenantOption, BaseCommand):
         for elgg_group in elgg_groups:
 
             group = self.mapper.get_group(elgg_group)
+            group.save()
 
-            if not self.dry:
-                owner = User.objects.get(id=GuidMap.objects.get(id=elgg_group.entity.owner_guid).guid)
-                group.owner = owner
-                group.save()
-
-                # first add members
-                relations = elgg_group.entity.relation_inverse.filter(relationship="member", left__type='user')
-                for relation in relations:
-                    user = User.objects.get(id=GuidMap.objects.get(id=relation.left.guid).guid)
-                    
-                    # check if user has notifications enabled
-                    enabled_notifications = True if elgg_group.entity.relation_inverse.filter(
-                            relationship="subscribed", 
-                            left__type='user', 
-                            left__guid=relation.left.guid
-                        ).first() else False
-
-                    group.members.update_or_create(
-                        user=user,
-                        defaults={
-                            'type': 'member',
-                            'enable_notification': enabled_notifications
-                        }
-                    )
-
-                # then update or add admins
-                relations = elgg_group.entity.relation_inverse.filter(relationship="group_admin", left__type='user')
-                for relation in relations:
-                    user = User.objects.get(id=GuidMap.objects.get(id=relation.left.guid).guid)
-
-                    # check if user has notifications enabled
-                    enabled_notifications = True if elgg_group.entity.relation_inverse.filter(
-                            relationship="subscribed", 
-                            left__type='user', 
-                            left__guid=relation.left.guid
-                        ).first() else  False
-
-                    group.members.update_or_create(
-                        user=user,
-                        defaults={
-                            'type': 'admin',
-                            'enable_notification': enabled_notifications
-                        }
-                    )
-
-                # finally update or add owner
+            # first add members
+            relations = elgg_group.entity.relation_inverse.filter(relationship="member", left__type='user')
+            for relation in relations:
+                user = User.objects.get(id=GuidMap.objects.get(id=relation.left.guid).guid)
+                
+                # check if user has notifications enabled
                 enabled_notifications = True if elgg_group.entity.relation_inverse.filter(
-                        relationship="subscribed",
+                        relationship="subscribed", 
                         left__type='user', 
-                        left__guid=elgg_group.entity.owner_guid
+                        left__guid=relation.left.guid
                     ).first() else False
 
                 group.members.update_or_create(
-                    user=owner,
+                    user=user,
                     defaults={
-                        'type': 'owner',
+                        'type': 'member',
                         'enable_notification': enabled_notifications
                     }
                 )
 
-                # TODO: subgroups
-                if subgroups_enabled:
-                    pass
+            # then update or add admins
+            relations = elgg_group.entity.relation_inverse.filter(relationship="group_admin", left__type='user')
+            for relation in relations:
+                user = User.objects.get(id=GuidMap.objects.get(id=relation.left.guid).guid)
+
+                # check if user has notifications enabled
+                enabled_notifications = True if elgg_group.entity.relation_inverse.filter(
+                        relationship="subscribed", 
+                        left__type='user', 
+                        left__guid=relation.left.guid
+                    ).first() else  False
+
+                group.members.update_or_create(
+                    user=user,
+                    defaults={
+                        'type': 'admin',
+                        'enable_notification': enabled_notifications
+                    }
+                )
+
+            # finally update or add owner
+            enabled_notifications = True if elgg_group.entity.relation_inverse.filter(
+                    relationship="subscribed",
+                    left__type='user', 
+                    left__guid=elgg_group.entity.owner_guid
+                ).first() else False
+
+            group.members.update_or_create(
+                user=group.owner,
+                defaults={
+                    'type': 'owner',
+                    'enable_notification': enabled_notifications
+                }
+            )
+
+            # TODO: subgroups
+            if subgroups_enabled:
+                pass
 
             GuidMap.objects.create(id=elgg_group.entity.guid, guid=group.guid, object_type='group')
 
@@ -249,10 +233,9 @@ class Command(InteractiveTenantOption, BaseCommand):
             for item in profile_items:
 
                 profile_field = self.mapper.get_profile_field(item)
+                profile_field.save()
                 profile_fields.append(profile_field)
 
-                if not self.dry:
-                    profile_field.save()
                 self.stdout.write(".", ending="")
 
         # Import users
@@ -264,19 +247,16 @@ class Command(InteractiveTenantOption, BaseCommand):
             user = self.mapper.get_user(elgg_user)
 
             try:
-                if not self.dry:
-                    user.save()
-
+                user.save()
+                
                 user_profile = self.mapper.get_user_profile(elgg_user)
                 user_profile.user = user
-
-                if not self.dry:
-                    user_profile.save()
+                user_profile.save()
 
                 # get user profile field data
                 for field in profile_fields:
                     user_profile_field = self.mapper.get_user_profile_field(elgg_user, user_profile, field, user)
-                    if not self.dry and user_profile_field:
+                    if user_profile_field:
                         user_profile_field.save()
 
                 GuidMap.objects.create(id=elgg_user.entity.guid, guid=user.guid, object_type='user')
@@ -295,16 +275,7 @@ class Command(InteractiveTenantOption, BaseCommand):
             blog = self.mapper.get_blog(elgg_blog)
 
             try:
-                if not self.dry:
-                    owner = User.objects.get(id=GuidMap.objects.get(id=elgg_blog.entity.owner_guid).guid)
-                    blog.owner = owner
-
-                    in_group = GuidMap.objects.filter(id=elgg_blog.entity.container_guid, object_type="group").first()
-                    if in_group:
-                        blog.group = Group.objects.get(id=in_group.guid)
-
-                    blog.save()
-
+                blog.save()
                 GuidMap.objects.create(id=elgg_blog.entity.guid, guid=blog.guid, object_type='blog')
 
                 self.stdout.write(".", ending="")
@@ -312,6 +283,22 @@ class Command(InteractiveTenantOption, BaseCommand):
                 self.stdout.write(self.style.WARNING("Error: %s\n" % str(e)))
                 pass
 
+    def _import_news(self):
+        elgg_news_items = ElggObjectsEntity.objects.using(self.import_id).filter(entity__subtype__subtype='news')
+
+        self.stdout.write("\n>> News (%i) " % elgg_news_items.count(), ending="")
+
+        for elgg_news in elgg_news_items:
+            news = self.mapper.get_news(elgg_news)
+
+            try:
+                news.save()
+                GuidMap.objects.create(id=elgg_news.entity.guid, guid=news.guid, object_type='news')
+
+                self.stdout.write(".", ending="")
+            except IntegrityError as e:
+                self.stdout.write(self.style.WARNING("Error: %s\n" % str(e)))
+                pass
 
     def debug_model(self, model):
         self.stdout.write(', '.join("%s: %s" % item for item in vars(model).items() if not item[0].startswith('_')))

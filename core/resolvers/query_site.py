@@ -29,7 +29,7 @@ def get_settings():
         "subgroups": True,
         "statusUpdateGroups": True,
         "showExtraHomepageFilters": True,
-        "showViewsCount": True,
+        "showViewsCount": config.ADVANCED_PERMISSIONS_ENABLED,
         "showLoginRegister": config.SHOW_LOGIN_REGISTER,
     }
 

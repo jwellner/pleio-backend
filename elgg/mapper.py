@@ -2,8 +2,9 @@ from datetime import datetime
 from user.models import User
 from core.models import UserProfile, UserProfileField, ProfileField, Group
 from blog.models import Blog
+from news.models import News
 from core.lib import ACCESS_TYPE, access_id_to_acl
-from elgg.models import ElggUsersEntity, ElggSitesEntity, ElggGroupsEntity, ElggObjectsEntity
+from elgg.models import ElggUsersEntity, ElggSitesEntity, ElggGroupsEntity, ElggObjectsEntity, GuidMap
 from elgg.helpers import ElggHelpers
 
 class Mapper():
@@ -91,21 +92,57 @@ class Mapper():
         group.auto_notification = elgg_group.entity.get_metadata_value_by_name("autoNotification:") == "1"
         group.tags = self.helpers.get_list_values(elgg_group.entity.get_metadata_value_by_name("tags"))
         group.plugins = self.helpers.get_list_values(elgg_group.entity.get_metadata_value_by_name("plugins"))
+
+        group.owner = User.objects.get(id=GuidMap.objects.get(id=elgg_group.entity.owner_guid).guid)
+
         return group
 
     def get_blog(self, elgg_entity: ElggObjectsEntity):
-        blog = Blog()
-        blog.created_at = datetime.fromtimestamp(elgg_entity.entity.time_created)
-        blog.title = elgg_entity.title
-        blog.description = elgg_entity.description
-        blog.rich_description = elgg_entity.entity.get_metadata_value_by_name("richDescription")
-        blog.is_recommended = elgg_entity.entity.get_metadata_value_by_name("isRecommended") == "1"
-        blog.is_featured = elgg_entity.entity.get_metadata_value_by_name("isFeatured") == "1"
-        # blog.featured_image = '' # TODO: import files
-        blog.featured_video = elgg_entity.entity.get_metadata_value_by_name("featuredVideo")
-        blog.featured_position_y = int(elgg_entity.entity.get_metadata_value_by_name("featuredPositionY")) \
+        entity = Blog()
+        entity.created_at = datetime.fromtimestamp(elgg_entity.entity.time_created)
+        entity.title = elgg_entity.title
+        entity.description = elgg_entity.description
+        entity.rich_description = elgg_entity.entity.get_metadata_value_by_name("richDescription")
+        entity.is_recommended = elgg_entity.entity.get_metadata_value_by_name("isRecommended") == "1"
+        entity.is_featured = elgg_entity.entity.get_metadata_value_by_name("isFeatured") == "1"
+        # entity.featured_image = '' # TODO: import files
+        entity.featured_video = elgg_entity.entity.get_metadata_value_by_name("featuredVideo")
+        entity.featured_position_y = int(elgg_entity.entity.get_metadata_value_by_name("featuredPositionY")) \
             if elgg_entity.entity.get_metadata_value_by_name("featuredPositionY") else 0
-        blog.tags = self.helpers.get_list_values(elgg_entity.entity.get_metadata_value_by_name("tags"))
+        entity.tags = self.helpers.get_list_values(elgg_entity.entity.get_metadata_value_by_name("tags"))
+        entity.owner = User.objects.get(id=GuidMap.objects.get(id=elgg_entity.entity.owner_guid).guid)
+
+        in_group = GuidMap.objects.filter(id=elgg_entity.entity.container_guid, object_type="group").first()
+        if in_group:
+            entity.group = Group.objects.get(id=in_group.guid)
+
+        entity.write_access = [ACCESS_TYPE.user.format(entity.owner.guid)]
+        entity.read_access = access_id_to_acl(entity.owner, elgg_entity.entity.access_id)
 
         # TODO: comments, following, bookmark (separate for all content types?)
-        return blog
+        return entity
+
+    def get_news(self, elgg_entity: ElggObjectsEntity):
+        entity = News()
+        entity.created_at = datetime.fromtimestamp(elgg_entity.entity.time_created)
+        entity.title = elgg_entity.title
+        entity.description = elgg_entity.description
+        entity.rich_description = elgg_entity.entity.get_metadata_value_by_name("richDescription")
+        entity.is_featured = elgg_entity.entity.get_metadata_value_by_name("isFeatured") == "1"
+        # news.featured_image = '' # TODO: import files
+        entity.featured_video = elgg_entity.entity.get_metadata_value_by_name("featuredVideo")
+        entity.featured_position_y = int(elgg_entity.entity.get_metadata_value_by_name("featuredPositionY")) \
+            if elgg_entity.entity.get_metadata_value_by_name("featuredPositionY") else 0
+        entity.tags = self.helpers.get_list_values(elgg_entity.entity.get_metadata_value_by_name("tags"))
+        entity.source = elgg_entity.entity.get_metadata_value_by_name("source")
+        entity.owner = User.objects.get(id=GuidMap.objects.get(id=elgg_entity.entity.owner_guid).guid)
+
+        in_group = GuidMap.objects.filter(id=elgg_entity.entity.container_guid, object_type="group").first()
+        if in_group:
+            entity.group = Group.objects.get(id=in_group.guid)
+
+        entity.write_access = [ACCESS_TYPE.user.format(entity.owner.guid)]
+        entity.read_access = access_id_to_acl(entity.owner, elgg_entity.entity.access_id)
+
+        # TODO: comments, following, bookmark (separate for all content types?)
+        return entity
