@@ -5,7 +5,7 @@ from core import config
 from core.lib import ACCESS_TYPE, access_id_to_acl
 from core.models import ProfileField, UserProfile, UserProfileField, Group
 from backend2 import settings
-from elgg.models import Instances, ElggUsersEntity, GuidMap, ElggSitesEntity, ElggGroupsEntity
+from elgg.models import Instances, ElggUsersEntity, GuidMap, ElggSitesEntity, ElggGroupsEntity, ElggObjectsEntity
 from elgg.helpers import ElggHelpers
 from elgg.mapper import Mapper
 from user.models import User
@@ -101,6 +101,7 @@ class Command(InteractiveTenantOption, BaseCommand):
         self._import_settings()
         self._import_users()
         self._import_groups()
+        self._import_blogs()
 
         # All done!
         self.stdout.write("\n>> Done!")
@@ -142,13 +143,13 @@ class Command(InteractiveTenantOption, BaseCommand):
             'colorSecondary': self.helpers.get_plugin_setting("color_secondary"),
             'colorHeader': self.helpers.get_plugin_setting("color_header")
         }
-        config.CUSTOM_TAGS_ENABLED = self.helpers.get_plugin_setting("custom_tags_allowed")
+        config.CUSTOM_TAGS_ENABLED = self.helpers.get_plugin_setting("custom_tags_allowed") == "yes"
         config.TAG_CATEGORIES = json.loads(html.unescape(self.helpers.get_plugin_setting("tagCategories")))
         config.ACTIVITY_FEED_FILTERS_ENABLED = self.helpers.get_plugin_setting("show_extra_homepage_filters") == "yes"
         config.MENU = json.loads(html.unescape(self.helpers.get_plugin_setting("menu")))
         config.FOOTER = json.loads(html.unescape(self.helpers.get_plugin_setting("footer")))
         config.DIRECT_LINKS = json.loads(html.unescape(self.helpers.get_plugin_setting("directLinks")))
-        config.SHOW_LOGIN_REGISTER = self.helpers.get_plugin_setting("show_extra_homepage_filters")
+        config.SHOW_LOGIN_REGISTER = self.helpers.get_plugin_setting("show_extra_homepage_filters") == "yes"
 
         self.stdout.write(".", ending="")
 
@@ -228,6 +229,8 @@ class Command(InteractiveTenantOption, BaseCommand):
                 if subgroups_enabled:
                     pass
 
+            GuidMap.objects.create(id=elgg_group.entity.guid, guid=group.guid, object_type='group')
+
             self.stdout.write(".", ending="")
 
     def _import_users(self):
@@ -282,6 +285,33 @@ class Command(InteractiveTenantOption, BaseCommand):
             except IntegrityError as e:
                 self.stdout.write(self.style.WARNING("Error: %s\n" % str(e)))
                 pass
+
+    def _import_blogs(self):
+        elgg_blogs = ElggObjectsEntity.objects.using(self.import_id).filter(entity__subtype__subtype='blog')
+
+        self.stdout.write("\n>> Blogs (%i) " % elgg_blogs.count(), ending="")
+
+        for elgg_blog in elgg_blogs:
+            blog = self.mapper.get_blog(elgg_blog)
+
+            try:
+                if not self.dry:
+                    owner = User.objects.get(id=GuidMap.objects.get(id=elgg_blog.entity.owner_guid).guid)
+                    blog.owner = owner
+
+                    in_group = GuidMap.objects.filter(id=elgg_blog.entity.container_guid, object_type="group").first()
+                    if in_group:
+                        blog.group = Group.objects.get(id=in_group.guid)
+
+                    blog.save()
+
+                GuidMap.objects.create(id=elgg_blog.entity.guid, guid=blog.guid, object_type='blog')
+
+                self.stdout.write(".", ending="")
+            except IntegrityError as e:
+                self.stdout.write(self.style.WARNING("Error: %s\n" % str(e)))
+                pass
+
 
     def debug_model(self, model):
         self.stdout.write(', '.join("%s: %s" % item for item in vars(model).items() if not item[0].startswith('_')))
