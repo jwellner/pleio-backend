@@ -1,8 +1,9 @@
 from datetime import datetime
 from user.models import User
 from core.models import UserProfile, UserProfileField, ProfileField, Group
+from blog.models import Blog
 from core.lib import ACCESS_TYPE, access_id_to_acl
-from elgg.models import ElggUsersEntity, ElggSitesEntity, ElggGroupsEntity
+from elgg.models import ElggUsersEntity, ElggSitesEntity, ElggGroupsEntity, ElggObjectsEntity
 from elgg.helpers import ElggHelpers
 
 class Mapper():
@@ -79,7 +80,7 @@ class Mapper():
         group.icon = '' # TODO: import files
         group.created_at = datetime.fromtimestamp(elgg_group.entity.time_created)
         group.is_featured = elgg_group.entity.get_metadata_value_by_name("isFeatured") == "1"
-        group.featured_image = '' # TODO: import files
+        # group.featured_image = '' # TODO: import files
         group.featured_video = elgg_group.entity.get_metadata_value_by_name("featuredVideo")
         group.featured_position_y = int(elgg_group.entity.get_metadata_value_by_name("featuredPositionY")) \
             if elgg_group.entity.get_metadata_value_by_name("featuredPositionY") else 0
@@ -91,3 +92,20 @@ class Mapper():
         group.tags = self.helpers.get_list_values(elgg_group.entity.get_metadata_value_by_name("tags"))
         group.plugins = self.helpers.get_list_values(elgg_group.entity.get_metadata_value_by_name("plugins"))
         return group
+
+    def get_blog(self, elgg_entity: ElggObjectsEntity):
+        blog = Blog()
+        blog.created_at = datetime.fromtimestamp(elgg_entity.entity.time_created)
+        blog.title = elgg_entity.title
+        blog.description = elgg_entity.description
+        blog.rich_description = elgg_entity.entity.get_metadata_value_by_name("richDescription")
+        blog.is_recommended = elgg_entity.entity.get_metadata_value_by_name("isRecommended") == "1"
+        blog.is_featured = elgg_entity.entity.get_metadata_value_by_name("isFeatured") == "1"
+        # blog.featured_image = '' # TODO: import files
+        blog.featured_video = elgg_entity.entity.get_metadata_value_by_name("featuredVideo")
+        blog.featured_position_y = int(elgg_entity.entity.get_metadata_value_by_name("featuredPositionY")) \
+            if elgg_entity.entity.get_metadata_value_by_name("featuredPositionY") else 0
+        blog.tags = self.helpers.get_list_values(elgg_entity.entity.get_metadata_value_by_name("tags"))
+
+        # TODO: comments, following, bookmark (separate for all content types?)
+        return blog
