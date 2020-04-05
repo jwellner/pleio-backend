@@ -163,6 +163,15 @@ LOGGING = {
     }
 }
 
+if os.getenv('MEMCACHE_HOST_PORT'):
+    CACHES = {
+        'default': {
+            'BACKEND': 'django.core.cache.backends.memcached.MemcachedCache',
+            'LOCATION': os.getenv('MEMCACHE_HOST_PORT'),
+        }
+    }
+
+
 # Internationalization
 # https://docs.djangoproject.com/en/1.10/topics/i18n/
 
