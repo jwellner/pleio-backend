@@ -29,7 +29,8 @@ def resolve_add_comment(_, info, input):
     comment = Comment.objects.create(
         container=entity,
         owner=user,
-        description=clean_input.get("description", "")
+        description=clean_input.get("description", ""),
+        rich_description=clean_input.get("richDescription")
     )
 
     return {
