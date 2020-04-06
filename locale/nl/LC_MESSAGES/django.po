@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2019-10-17 10:28+0000\n"
+"POT-Creation-Date: 2020-04-02 09:21+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -18,25 +18,104 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#: backend2/config.py:49
+#: backend2/config.py:63 core/resolvers/query_site.py:89
 msgid "English"
-msgstr ""
+msgstr "Engels"
 
-#: backend2/config.py:50
+#: backend2/config.py:64 core/resolvers/query_site.py:89
 msgid "Dutch"
+msgstr "Nederlands"
+
+#: core/resolvers/mutation_accept_membership_request.py:36
+#: core/tests/test_accept_membership_request.py:85
+#: core/tests/test_accept_membership_request.py:139
+#, python-format
+msgid "Request for access to the %s group has been approved"
 msgstr ""
 
-#: backend2/config.py:51
-msgid "French"
+#: core/resolvers/mutation_change_group_role.py:38
+#: core/tests/test_change_group_role.py:80
+#: core/tests/test_change_group_role.py:129
+#: core/tests/test_change_group_role.py:181
+#: core/tests/test_change_group_role.py:233
+#: core/tests/test_change_group_role.py:276
+#, python-format
+msgid "Ownership of the %s group has been transferred"
 msgstr ""
 
-#: core/resolvers/mutation_toggle_request_delete_user.py:35
+#: core/resolvers/mutation_invite_to_group.py:40
+#: core/tests/test_invite_to_group.py:77
+#, python-format
+msgid "Invitation to become a member of the %s group"
+msgstr ""
+
+#: core/resolvers/mutation_reject_membership_request.py:37
+#: core/tests/test_reject_membership_request.py:87
+#: core/tests/test_reject_membership_request.py:139
+#, python-format
+msgid "Request for access to the %s group has been refused"
+msgstr ""
+
+#: core/resolvers/mutation_resend_group_invitation.py:25
+#: core/tests/test_resend_group_invitation.py:91
+#: core/tests/test_resend_group_invitation.py:148
+#, python-format
+msgid "Reminder to become a member of the %s group"
+msgstr ""
+
+#: core/resolvers/mutation_send_message_to_group.py:45
+#, python-brace-format
+msgid "Message from group {0}: {1}"
+msgstr ""
+
+#: core/resolvers/mutation_send_message_to_user.py:25
+#, python-brace-format
+msgid "Message from {0}: {1}"
+msgstr ""
+
+#: core/resolvers/mutation_toggle_request_delete_user.py:32
 msgid "Request to remove account cancelled"
 msgstr ""
 
-#: core/resolvers/mutation_toggle_request_delete_user.py:47
+#: core/resolvers/mutation_toggle_request_delete_user.py:40
 msgid "Request to remove account"
 msgstr ""
+
+#: core/resolvers/query_site.py:94
+msgid "Just me"
+msgstr "Alleen mijzelf"
+
+#: core/resolvers/query_site.py:95
+msgid "Logged in users"
+msgstr "Ingelogde gebruikers"
+
+#: core/resolvers/query_site.py:96
+msgid "Public"
+msgstr "Iedereen publiek zichtbaar"
+
+#: core/resolvers/query_site.py:114
+msgid "Activity stream"
+msgstr "Activiteitenstroom"
+
+#: core/resolvers/query_site.py:114
+msgid "CMS page"
+msgstr "CMS pagina"
+
+#: core/resolvers/query_site.py:144
+msgid "Daily"
+msgstr "Dagelijks"
+
+#: core/resolvers/query_site.py:145
+msgid "Weekly"
+msgstr "Wekelijks"
+
+#: core/resolvers/query_site.py:146
+msgid "Monthly"
+msgstr "Maandelijks"
+
+#: core/resolvers/query_site.py:147
+msgid "Never"
+msgstr "Nooit"
 
 #: core/templates/admin/oidc_login.html:21
 msgid "Please correct the error below."
@@ -63,16 +142,163 @@ msgstr ""
 msgid "Log in"
 msgstr ""
 
-#: core/templates/email/toggle_request_delete_user_cancelled.html:7
+#: core/templates/email/accept_membership_request.html:6
 #, python-format
 msgid ""
-"You, as <strong> %(username)s </strong> user, have cancelled your request to "
-"remove your account. "
-msgstr "Je hebt als gebruiker <strong> %(username)s </strong> het verzoek om je account te laten verwijderen geannuleerd."
+"The administrator %(user_name)s has approved your request to join the "
+"%(group_name)s group. Follow the link below to go directly to the group:<br /"
+"><a href=\"%(link)s\">%(link)s</a> "
+msgstr ""
 
-#: core/templates/email/toggle_request_delete_user_requested.html:7
+#: core/templates/email/attend_event_without_account.html:6
 #, python-format
 msgid ""
-"You, as user, <strong>%(username)s</strong> have requested that your account "
-"be removed. You will be informed once the website administrator has done so. "
-msgstr "Je hebt als gebruiker <strong>%(username)s</strong> verzocht aan de deelsitebeheerders om je account te laten verwijderen. Wanneer de deelsitebeheerder dit heeft doorgevoerd, ontvang je hierover bericht. "
+"\n"
+"    \n"
+"        Confirm your registration for %(title)s.<br />\n"
+"        Location: %(location)s\n"
+"        Date: %(start_date)s<br />\n"
+"        Click on the link below to conirm. <br />\n"
+"        <a href=\"%(link)s\">%(link)s</a>\n"
+"    "
+msgstr ""
+
+#: core/templates/email/confirm_attend_event_without_account.html:6
+#, python-format
+msgid ""
+"\n"
+"        This is confirmation of your registration for %(title)s.<br />\n"
+"        Location: %(location)s\n"
+"        Date: %(start_date)s<br />\n"
+"        Click on the link below to see or make changes to your registration "
+"and to add this appointment to your agenda. <br />\n"
+"        <a href=\"%(link)s\">%(link)s</a>\n"
+"    "
+msgstr ""
+
+#: core/templates/email/group_ownership_transferred.html:6
+#, python-format
+msgid ""
+"The administrator %(user_name)s has transferred the ownership of the group "
+"%(group_name)s to you. View the group at: <br /><a href=\"%(link)s\">"
+"%(link)s</a> "
+msgstr ""
+
+#: core/templates/email/invite_to_group.html:6
+#, python-format
+msgid ""
+"You have been invited by %(user_name)s to join the %(group_name)s group. "
+"Follow the link below to become a member of the group: <br /><a href="
+"\"%(link)s\">%(link)s</a> "
+msgstr ""
+
+#: core/templates/email/notifications/blog.html:3
+msgid " has posted a new Blog: "
+msgstr ""
+
+#: core/templates/email/notifications/blog.html:6
+#: core/templates/email/notifications/discussion.html:6
+#: core/templates/email/notifications/event.html:6
+#: core/templates/email/notifications/question.html:6
+#: core/templates/email/notifications/update.html:6
+#: core/templates/email/notifications/wiki.html:6
+msgid " has responded at: "
+msgstr ""
+
+#: core/templates/email/notifications/discussion.html:3
+msgid " has begun a new Discussion: "
+msgstr ""
+
+#: core/templates/email/notifications/event.html:3
+msgid " has posted a new Agenda item: "
+msgstr ""
+
+#: core/templates/email/notifications/question.html:3
+msgid " has posted a Question: "
+msgstr ""
+
+#: core/templates/email/notifications/update.html:3
+msgid " has placed an Update: "
+msgstr ""
+
+#: core/templates/email/notifications/wiki.html:3
+msgid " has posted a new Wiki: "
+msgstr ""
+
+#: core/templates/email/reject_membership_request.html:6
+#, python-format
+msgid ""
+"The administrator  %%s has rejected your request to join the %%s group. "
+"Contact the administrator for more information. "
+msgstr ""
+
+#: core/templates/email/resend_group_invitation.html:6
+#, python-format
+msgid ""
+"You have been invited again by %(user_name)s to join the %(group_name)s "
+"group. Follow the link below to become a member of the group: <br /><a href="
+"\"%(link)s\">%(link)s</a> "
+msgstr ""
+
+#: core/templates/email/send_message_to_group.html:6
+#: core/templates/email/send_message_to_user.html:6
+#, python-format
+msgid ""
+"This message is sent from <a href=\"%(site_url)s\">%(site_url)s</a> by <a "
+"href=\"%(user_url)s\">%(user_name)s</a>"
+msgstr ""
+
+#: core/templates/email/send_notification_emails.html:40
+#, python-format
+msgid ""
+" You have received this e-mail because you registered to receive "
+"notifications.<br /> Click <a href=\"%(user_url)s\">here</a> to change your "
+"settings."
+msgstr ""
+
+#: core/templates/email/toggle_request_delete_user_cancelled.html:6
+#, fuzzy, python-format
+#| msgid ""
+#| "You, as <strong> %(username)s </strong> user, have cancelled your request "
+#| "to remove your account. "
+msgid ""
+"You, as <strong> %(user_name)s </strong> user, have cancelled your request "
+"to remove your account. "
+msgstr ""
+"Je hebt als gebruiker <strong> %(username)s </strong> het verzoek om je "
+"account te laten verwijderen geannuleerd."
+
+#: core/templates/email/toggle_request_delete_user_requested.html:6
+#, fuzzy, python-format
+#| msgid ""
+#| "You, as user, <strong>%(username)s</strong> have requested that your "
+#| "account be removed. You will be informed once the website administrator "
+#| "has done so. "
+msgid ""
+"You, as user, <strong>%(user_name)s</strong> have requested that your "
+"account be removed. You will be informed once the website administrator has "
+"done so. "
+msgstr ""
+"Je hebt als gebruiker <strong>%(username)s</strong> verzocht aan de "
+"deelsitebeheerders om je account te laten verwijderen. Wanneer de "
+"deelsitebeheerder dit heeft doorgevoerd, ontvang je hierover bericht. "
+
+#: core/tests/test_send_notification_emails.py:41
+#: core/tests/test_send_notification_emails.py:93
+#: core/tests/test_send_notification_emails.py:114
+#, python-format
+msgid "New notifications at %s"
+msgstr ""
+
+#: event/resolvers/mutation_attend_event_without_account.py:31
+#: event/tests/test_attend_event_without_account.py:70
+#: event/tests/test_attend_event_without_account.py:127
+#, python-format
+msgid "Confirmation of registration %s"
+msgstr ""
+
+#: event/resolvers/mutation_confirm_attend_event_without_account.py:49
+#: event/tests/test_confirm_attend_event_without_account.py:70
+#, python-format
+msgid "Confirmation of registration for %s"
+msgstr ""

@@ -364,6 +364,16 @@ type confirmAttendEventWithoutAccountPayload {
   clientMutationId: Int
 }
 
+input deleteColumnInput {
+  guid: String!
+  clientMutationId: Int
+}
+
+type deleteColumnPayload {
+  success: Boolean
+  clientMutationId: Int
+}
+
 input deleteEntityInput {
   guid: String!
   clientMutationId: Int
@@ -385,6 +395,16 @@ type deleteGroupInvitationPayload {
   clientMutationId: Int
 }
 
+input deleteRowInput {
+  guid: String!
+  clientMutationId: Int
+}
+
+type deleteRowPayload {
+  success: Boolean
+  clientMutationId: Int
+}
+
 input deleteSubgroupInput {
   id: Int
   clientMutationId: Int
@@ -395,7 +415,22 @@ type deleteSubgroupPayload {
   clientMutationId: Int
 }
 
+input deleteWidgetInput {
+  guid: String!
+  clientMutationId: Int
+}
+
+type deleteWidgetPayload {
+  success: Boolean
+  clientMutationId: Int
+}
+
 type DirectLink {
+  title: String!
+  link: String!
+}
+
+input DirectLinkInput {
   title: String!
   link: String!
 }
@@ -456,16 +491,6 @@ type editColumnPayload {
   clientMutationId: Int
 }
 
-input deleteColumnInput {
-  guid: String!
-  clientMutationId: Int
-}
-
-type deleteColumnPayload {
-  success: Boolean
-  clientMutationId: Int
-}
-
 input editEmailOverviewInput {
   guid: String
   frequency: Frequency
@@ -509,10 +534,10 @@ input editFileFolderInput {
   guid: String
   title: String
   file: Upload
-  tags: [String]
   accessId: Int
   writeAccessId: Int
   isAccessRecursive: Boolean
+  tags: [String]
   clientMutationId: Int
 }
 
@@ -643,13 +668,73 @@ type editRowPayload {
   clientMutationId: Int
 }
 
-input deleteRowInput {
-  guid: String!
+input editSiteSettingInput {
+  name: String
+  description: String
+  language: String
+  isClosed: Boolean
+  allowRegistration: Boolean
+  defaultAccessId: Int
+  googleAnalyticsUrl: String
+  piwikUrl: String
+  piwikId: String
+  font: String
+  colorPrimary: String
+  colorSecondary: String
+  colorHeader: String
+  theme: String
+  logo: Upload
+  removeLogo: Boolean
+  logoAlt: String
+  likeIcon: String
+  startPage: String
+  startPageCms: String
+  icon: Upload
+  showIcon: Boolean
+  removeIcon: Boolean
+  menu: [MenuItemInput]
+  numberOfFeaturedItems: Int
+  enableFeedSorting: Boolean
+  showExtraHomepageFilters: Boolean
+  showLeader: Boolean
+  showLeaderButtons: Boolean
+  subtitle: String
+  leaderImage: String
+  showInitiative: Boolean
+  initiativeTitle: String
+  initiativeImage: String
+  initiativeImageAlt: String
+  initiativeDescription: String
+  initiativeLink: String
+  directLinks: [DirectLinkInput]
+  footer: [FooterInput]
+  tagCategories: [TagCategoryInput]
+  profile: [ProfileItemInput]
+  defaultEmailOverviewFrequency: String
+  emailOverviewSubject: String
+  emailOverviewTitle: String
+  emailOverviewIntro: String
+  showLoginRegister: Boolean
+  customTagsAllowed: Boolean
+  showUpDownVoting: Boolean
+  enableSharing: Boolean
+  showViewsCount: Boolean
+  newsletter: Boolean
+  cancelMembershipEnabled: Boolean
+  advancedPermissions: Boolean
+  showExcerptInNewsCard: Boolean
+  showTagInNewsCard: Boolean
+  commentsOnNews: Boolean
+  eventExport: Boolean
+  questionerCanChooseBestAnswer: Boolean
+  statusUpdateGroups: Boolean
+  subgroups: Boolean
+  groupMemberExport: Boolean
   clientMutationId: Int
 }
 
-type deleteRowPayload {
-  success: Boolean
+type editSiteSettingPayload {
+  siteSettings: SiteSettings
   clientMutationId: Int
 }
 
@@ -689,14 +774,9 @@ type editWidgetPayload {
   clientMutationId: Int
 }
 
-input deleteWidgetInput {
-  guid: String!
-  clientMutationId: Int
-}
-
-type deleteWidgetPayload {
-  success: Boolean
-  clientMutationId: Int
+type EmailOverview {
+  frequency: Frequency
+  tags: [String]
 }
 
 interface Entity {
@@ -837,6 +917,11 @@ input followInput {
 type followPayload {
   object: Entity!
   clientMutationId: Int
+}
+
+input FooterInput {
+  title: String!
+  link: String!
 }
 
 enum Frequency {
@@ -1025,6 +1110,17 @@ type MenuItem {
   children: [MenuItem]
 }
 
+input MenuItemInput {
+  title: String!
+  link: String
+
+  """Temporary id of this menu item."""
+  id: Int!
+
+  """Temporary id of the parent menu item."""
+  parentId: Int
+}
+
 input moveFileFolderInput {
   guid: String
   containerGuid: String
@@ -1037,6 +1133,7 @@ type moveFileFolderPayload {
 }
 
 type Mutation {
+  editSiteSetting(input: editSiteSettingInput!): editSiteSettingPayload
   addEntity(input: addEntityInput!): addEntityPayload
   editEntity(input: editEntityInput!): editEntityPayload
   deleteEntity(input: deleteEntityInput!): deleteEntityPayload
@@ -1173,6 +1270,16 @@ type NotificationsList {
   edges: [Notification]
 }
 
+type Option {
+  value: String!
+  label: String
+}
+
+type OptionInteger {
+  value: Int!
+  label: String
+}
+
 """
 Configure the way the entity list is ordered. lastAction is the last action that
 is performed on the object, e.g. the latest comment that is placed.
@@ -1189,11 +1296,6 @@ Configure the type of sorting, either ascending (asc) or descending (desc).
 enum OrderDirection {
   asc
   desc
-}
-
-type EmailOverview {
-  frequency: Frequency
-  tags: [String]
 }
 
 type Page implements Entity {
@@ -1261,6 +1363,12 @@ type ProfileItem {
   fieldOptions: [String]
 }
 
+input ProfileItemInput {
+  key: String!
+  name: String!
+  isFilter: Boolean!
+}
+
 type Query {
   viewer: Viewer
   entity(guid: String, username: String): Entity
@@ -1279,6 +1387,7 @@ type Query {
   bookmarks(offset: Int, limit: Int, subtype: String): EntityList
   filters: Filters
   site: Site
+  siteSettings: SiteSettings
 }
 
 type Question implements Entity {
@@ -1462,6 +1571,75 @@ type Site {
   usersOnline: Int!
 }
 
+type SiteSettings {
+  name: String!
+  description: String
+  language: String!
+  languageOptions: [Option]
+  isClosed: Boolean!
+  allowRegistration: Boolean!
+  defaultAccessId: Int!
+  defaultAccessIdOptions: [OptionInteger]
+  googleAnalyticsUrl: String
+  piwikUrl: String
+  piwikId: String
+  font: String
+  fontOptions: [Option]
+  colorPrimary: String
+  colorSecondary: String
+  colorHeader: String
+  theme: String
+  themeOptions: [Option]
+  logo: String
+  logoAlt: String
+  likeIcon: String
+  startPage: String
+  startPageOptions: [Option]
+  startPageCms: String
+  startPageCmsOptions: [Option]
+  icon: String
+  showIcon: Boolean!
+  menu: [MenuItem]
+  numberOfFeaturedItems: Int
+  enableFeedSorting: Boolean!
+  showExtraHomepageFilters: Boolean!
+  showLeader: Boolean!
+  showLeaderButtons: Boolean!
+  subtitle: String
+  leaderImage: String
+  showInitiative: Boolean!
+  initiativeTitle: String
+  initiativeImage: String
+  initiativeImageAlt: String
+  initiativeDescription: String
+  initiativeLink: String
+  directLinks: [DirectLink]
+  footer: [MenuItem]
+  defaultEmailOverviewFrequency: String
+  defaultEmailOverviewFrequencyOptions: [Option]
+  emailOverviewSubject: String
+  emailOverviewTitle: String
+  emailOverviewIntro: String
+  tagCategories: [TagCategory]!
+  profile: [ProfileItem]
+  showLoginRegister: Boolean!
+  customTagsAllowed: Boolean!
+  showUpDownVoting: Boolean!
+  enableSharing: Boolean!
+  showViewsCount: Boolean!
+  newsletter: Boolean!
+  cancelMembershipEnabled: Boolean!
+  advancedPermissions: Boolean!
+  showExcerptInNewsCard: Boolean!
+  showTagInNewsCard: Boolean!
+  commentsOnNews: Boolean!
+  eventExport: Boolean!
+  questionerCanChooseBestAnswer: Boolean!
+  statusUpdateGroups: Boolean!
+  subgroups: Boolean!
+  groupMemberExport: Boolean!
+}
+
 type StatsItem {
   key: String!
   name: String!
@@ -1517,6 +1695,11 @@ type SubgroupList {
 }
 
 type TagCategory {
+  name: String!
+  values: [String]
+}
+
+input TagCategoryInput {
   name: String!
   values: [String]
 }

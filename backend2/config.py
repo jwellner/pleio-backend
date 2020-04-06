@@ -57,7 +57,7 @@ LOCAL_MIDDLEWARE = []
 if not os.getenv('RUN_AS_ADMIN_APP'):
     LOCAL_MIDDLEWARE = ['core.middleware.UserLastOnlineMiddleware']
 
-LANGUAGE_CODE = 'en'
+LANGUAGE_CODE = 'nl-NL'
 
 LANGUAGES = [
     ('en', _('English')),

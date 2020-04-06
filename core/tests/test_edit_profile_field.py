@@ -3,10 +3,11 @@ from django_tenants.test.cases import FastTenantTestCase
 from backend2.schema import schema
 from ariadne import graphql_sync
 import json
+from django.core.cache import cache
 from core.lib import is_valid_json
 from django.contrib.auth.models import AnonymousUser
 from django.http import HttpRequest
-from core.models import Group, ProfileField
+from core.models import Group, ProfileField, Setting
 from user.models import User
 from mixer.backend.django import mixer
 from graphql import GraphQLError
@@ -26,11 +27,18 @@ class EditProfileFieldTestCase(FastTenantTestCase):
         ProfileField.objects.create(key='date_key', name='date_name', field_type='date_field')
         ProfileField.objects.create(key='multi_key', name='multi_name', field_type='multi_select_field',
                                     field_options=['select_value_1', 'select_value_2', 'select_value_3'])
+        Setting.objects.create(key='PROFILE', value=[{"key": "text_key", "name": "text_name", "isFilter": False},
+                                {"key": "html_key", "name": "html_name", "isFilter": False},
+                                {"key": "select_key", "name": "select_name", "isFilter": False},
+                                {"key": "date_key", "name": "date_name", "isFilter": False},
+                                {"key": "multi_key", "name": "multi_name", "isFilter": False}])
 
     def tearDown(self):
         self.admin.delete()
         self.other.delete()
         self.user.delete()
+        Setting.objects.all().delete()
+        cache.clear()
 
     def test_edit_profile_field_by_user(self):
 

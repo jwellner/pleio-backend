@@ -1,8 +1,9 @@
 from django.db import connection
 from django_tenants.test.cases import FastTenantTestCase
-from core.models import UserProfile, ProfileField, UserProfileField
+from core.models import UserProfile, ProfileField, UserProfileField, Setting
 from user.models import User
 from blog.models import Blog
+from django.core.cache import cache
 from core.constances import ACCESS_TYPE
 from backend2.schema import schema
 from ariadne import graphql_sync
@@ -54,6 +55,10 @@ class ProfileTestCase(FastTenantTestCase):
             value="option1, option2",
             read_access=[ACCESS_TYPE.user.format(self.user1.id)]
         )
+        Setting.objects.create(key='PROFILE', value=[{"key": "profile_field1", "name": "profile_field1_name", "isFilter": False},
+                                                     {"key": "profile_field2", "name": "profile_field2_name", "isFilter": False},
+                                                     {"key": "profile_field3", "name": "profile_field3_name", "isFilter": False}])
+
 
         self.query = """
             query Profile($username: String!) {
@@ -92,6 +97,9 @@ class ProfileTestCase(FastTenantTestCase):
         self.profile_field3.delete()
         self.user2.delete()
         self.user1.delete()
+        Setting.objects.all().delete()
+        cache.clear()
+
 
 
     def test_get_profile_items_by_owner(self):

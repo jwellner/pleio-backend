@@ -58,7 +58,7 @@ class Command(InteractiveTenantOption, BaseCommand):
             self.stdout.write("Only run this command from admin instance.")
             return
 
-       
+
         elgg_instance = self.get_elgg_from_options_or_interactive(**options)
         tenant = self.get_tenant_from_options_or_interactive(**options)
 
@@ -124,12 +124,11 @@ class Command(InteractiveTenantOption, BaseCommand):
         config.INITIATIVE_IMAGE_ALT = html.unescape(self.helpers.get_plugin_setting("initiative_image_alt"))
         config.INITIATIVE_DESCRIPTION = html.unescape(self.helpers.get_plugin_setting("initiative_description"))
         config.INITIATOR_LINK = self.helpers.get_plugin_setting("initiator_link")
-        config.STYLE = {
-            'font': self.helpers.get_plugin_setting("font"),
-            'colorPrimary': self.helpers.get_plugin_setting("color_primary"),
-            'colorSecondary': self.helpers.get_plugin_setting("color_secondary"),
-            'colorHeader': self.helpers.get_plugin_setting("color_header")
-        }
+
+        config.FONT = self.helpers.get_plugin_setting("font")
+        config.COLOR_PRIMARY = self.helpers.get_plugin_setting("color_primary")
+        config.COLOR_SECONDARY = self.helpers.get_plugin_setting("color_secondary")
+        config.COLOR_HEADER = self.helpers.get_plugin_setting("color_header")
         config.CUSTOM_TAGS_ENABLED = self.helpers.get_plugin_setting("custom_tags_allowed") == "yes"
         config.TAG_CATEGORIES = json.loads(html.unescape(self.helpers.get_plugin_setting("tagCategories")))
         config.ACTIVITY_FEED_FILTERS_ENABLED = self.helpers.get_plugin_setting("show_extra_homepage_filters") == "yes"
@@ -158,11 +157,11 @@ class Command(InteractiveTenantOption, BaseCommand):
             relations = elgg_group.entity.relation_inverse.filter(relationship="member", left__type='user')
             for relation in relations:
                 user = User.objects.get(id=GuidMap.objects.get(id=relation.left.guid).guid)
-                
+
                 # check if user has notifications enabled
                 enabled_notifications = True if elgg_group.entity.relation_inverse.filter(
-                        relationship="subscribed", 
-                        left__type='user', 
+                        relationship="subscribed",
+                        left__type='user',
                         left__guid=relation.left.guid
                     ).first() else False
 
@@ -181,8 +180,8 @@ class Command(InteractiveTenantOption, BaseCommand):
 
                 # check if user has notifications enabled
                 enabled_notifications = True if elgg_group.entity.relation_inverse.filter(
-                        relationship="subscribed", 
-                        left__type='user', 
+                        relationship="subscribed",
+                        left__type='user',
                         left__guid=relation.left.guid
                     ).first() else  False
 
@@ -197,7 +196,7 @@ class Command(InteractiveTenantOption, BaseCommand):
             # finally update or add owner
             enabled_notifications = True if elgg_group.entity.relation_inverse.filter(
                     relationship="subscribed",
-                    left__type='user', 
+                    left__type='user',
                     left__guid=elgg_group.entity.owner_guid
                 ).first() else False
 
@@ -248,7 +247,7 @@ class Command(InteractiveTenantOption, BaseCommand):
 
             try:
                 user.save()
-                
+
                 user_profile = self.mapper.get_user_profile(elgg_user)
                 user_profile.user = user
                 user_profile.save()

@@ -5,18 +5,42 @@ from django.apps import apps
 
 DEFAULT_SITE_CONFIG = {
     'NAME': ('Pleio 2.0', 'Name'),
-    'SUBTITLE': ('', 'Subtitle'),
-    'THEME': ('', 'Theme'),
-    'ACHIEVEMENTS_ENABLED': (True, 'Achievements enabled'),
-    'CANCEL_MEMBERSHIP_ENABLED': (True, 'Cancel membership enabled'),
-    'DEFAULT_ACCESS_ID': (1, 'Default accessId'),
+    'DESCRIPTION': ('Omschrijving site', 'Description'),
     'LANGUAGE': ('nl', 'Language'),
+    'IS_CLOSED': (False, 'Is site closed'),
+    'ALLOW_REGISTRATION': (True, 'Allow registrations'),
+    'DEFAULT_ACCESS_ID': (1, 'Default accessId'),
+
+    'GOOGLE_ANALYTICS_URL': ('', 'Goggle analytics url'),
+    'PIWIK_URL': ('', 'Piwik url'),
+    'PIWIK_ID': ('', 'Piwik id'),
+
+    'THEME_OPTIONS': (
+        [{"value": 'leraar', 'label': 'Standaard'}, {'value': 'rijkshuisstijl', 'label': 'Rijkshuisstijl'}],
+        'Default theme options'
+    ),
+
+    'FONT': ('Rijksoverheid Sans', 'Font'),
+    'COLOR_PRIMARY': ('#0e2f56', 'Primary color'),
+    'COLOR_SECONDARY': ('#009ee3', 'Secondary color'),
+    'COLOR_HEADER': ('#0e2f56', 'Header color'),
+
+    'THEME': ('leraar', 'Theme'),
     'LOGO': ('', 'Logo'),
     'LOGO_ALT': ('', 'Logo alt text'),
+    'LIKE_ICON': ('heart', 'Like icon'),
+
     'ICON': ('', 'Icon'),
     'ICON_ALT': ('', 'Icon alt text'),
     'ICON_ENABLED': (False, 'Icon enabled'),
     'STARTPAGE': ('activity', 'Startpage'),
+
+    'STARTPAGE_CMS': ('', 'Startpage cms'),
+
+    'NUMBER_OF_FEATURED_ITEMS': (0, 'Number of featured items'),
+    'ENABLE_FEED_SORTING': (False, 'Enable feed sorting'),
+    'ACTIVITY_FEED_FILTERS_ENABLED': (True, 'Activity filters enabled'),
+    'SUBTITLE': ('', 'Subtitle'),
     'LEADER_ENABLED': (False, 'Leader enabled'),
     'LEADER_BUTTONS_ENABLED': (False, 'Leader buttons enabled'),
     'LEADER_IMAGE': ('', 'Leader image'),
@@ -25,28 +49,49 @@ DEFAULT_SITE_CONFIG = {
     'INITIATIVE_IMAGE': ('', 'Initiavite image'),
     'INITIATIVE_IMAGE_ALT': ('', 'Initiative image alt text'),
     'INITIATIVE_DESCRIPTION': ('', 'Initiative description'),
-    'INITIATOR_LINK': ('', 'Initiator link'),
-    'STYLE': ({
-        'font': 'Rijksoverheid Sans',
-        'colorPrimary': '#0e2f56',
-        'colorSecondary': '#009ee3',
-        'colorHeader': ''
-    }, 'Style'),
-    'CUSTOM_TAGS_ENABLED': (True, 'Custom tags enabled'),
-    'TAG_CATEGORIES': ([], 'Tag categories'),
-    'ACTIVITY_FEED_FILTERS_ENABLED': (True, 'Activity filters enabled'),
+    'INITIATIVE_LINK': ('', 'Initiative link'),
+    'DIRECT_LINKS': ([], 'Direct links'),
+    'FOOTER': ([], 'Footer'),
+
     'MENU': ([
-        {"link": "/blog", "title": "Blog", "children": []}, 
-        {"link": "/news", "title": "Nieuws", "children": []}, 
-        {"link": "/groups", "title": "Groepen", "children": []}, 
-        {"link": "/questions", "title": "Vragen", "children": []}, 
+        {"link": "/blog", "title": "Blog", "children": []},
+        {"link": "/news", "title": "Nieuws", "children": []},
+        {"link": "/groups", "title": "Groepen", "children": []},
+        {"link": "/questions", "title": "Vragen", "children": []},
         {"link": "/wiki", "title": "Wiki", "children": []}
     ], 'Menu'),
-    'FOOTER': ([], 'Footer'),
-    'DIRECT_LINKS': ([], 'Direct links'),
-    'MAIL_REPLY_TO': ('noreply@pleio.nl', 'default reply-to mail address'),
+
+    'PROFILE': ([], 'Profile'),
+
+    'TAG_CATEGORIES': ([], 'Tag categories'),
+
+    'EMAIL_OVERVIEW_DEFAULT_FREQUENCY':  ("weekly", 'Email overview default frequency'),
+    'EMAIL_OVERVIEW_SUBJECT': ("Periodiek overzicht", "Email overview subject"),
+    'EMAIL_OVERVIEW_TITLE': ("Pleio 2.0", "Email overview subject"),
+    'EMAIL_OVERVIEW_INTRO': ("", "Email overview intro"),
+
     'SHOW_LOGIN_REGISTER': (True, 'Login and register buttons visible'),
+    'CUSTOM_TAGS_ENABLED': (True, 'Custom tags enabled'),
+    'SHOW_UP_DOWN_VOTING': (True, 'Show up and down voting'),
+    'ENABLE_SHARING': (True, 'Enable sharing'),
+    'SHOW_VIEW_COUNT': (True, 'Show view count'),
+    'NEWSLETTER': (False, 'Newsletter'),
+    'CANCEL_MEMBERSHIP_ENABLED': (True, 'Cancel membership enabled'),
     'ADVANCED_PERMISSIONS_ENABLED': (False, 'Advanced permissions'),
+    'SHOW_EXCERPT_IN_NEWS_CARD': (False, 'Show excerpt in news card'),
+    'SHOW_TAG_IN_NEWS_CARD': (False, 'Show tag in news card'),
+    'COMMENT_ON_NEWS': (False, 'Comment on news'),
+    'EVENT_EXPORT': (False, 'Event Export'),
+    'QUESTIONER_CAN_CHOOSE_BEST_ANSWER': (False, 'Questioner can choose best answer'),
+    'STATUS_UPDATE_GROUPS': (True, 'Status update groups'),
+    'SUBGROUPS': (False, 'Subgroups'),
+    'GROUP_MEMBER_EXPORT': (False, 'Group member export'),
+
+
+    'ACHIEVEMENTS_ENABLED': (True, 'Achievements enabled'),
+    'INITIATOR_LINK': ('', 'Initiator link'),
+    'MAIL_REPLY_TO': ('noreply@pleio.nl', 'default reply-to mail address'),
+
 }
 """
 Default site configuration
@@ -103,6 +148,7 @@ class Config():
         except KeyError:
             raise AttributeError(key)
         result = self._backend.get(key)
+
         if result is None:
             result = default
             setattr(self, key, default)

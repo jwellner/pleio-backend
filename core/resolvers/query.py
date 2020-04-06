@@ -5,7 +5,7 @@ from core.models import Entity, Group, EntityView, EntityViewCount
 from user.models import User
 from file.models import FileFolder
 from .query_viewer import resolve_viewer
-from .query_site import resolve_site
+from .query_site import resolve_site, resolve_site_settings
 from .query_entities import resolve_entities
 from .query_groups import resolve_groups
 from .query_bookmarks import resolve_bookmarks
@@ -22,6 +22,7 @@ query = ObjectType("Query")
 
 query.set_field("viewer", resolve_viewer)
 query.set_field("site", resolve_site)
+query.set_field("siteSettings", resolve_site_settings)
 query.set_field("entities", resolve_entities)
 query.set_field("groups", resolve_groups)
 query.set_field("bookmarks", resolve_bookmarks)
