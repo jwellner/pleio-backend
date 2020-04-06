@@ -18,9 +18,11 @@ class LeaveGroupTestCase(FastTenantTestCase):
         self.user2 = mixer.blend(User)
         self.user3 = mixer.blend(User)
         self.group = mixer.blend(Group, owner=self.user1, is_membership_on_request=False)
+        self.mandatory_group = mixer.blend(Group, owner=self.user3, is_membership_on_request=False, is_leaving_group_disabled=True)
 
         self.group.join(self.user1, 'member')
         self.group.join(self.user2, 'owner')
+        self.mandatory_group.join(self.user3, 'member')
 
     def tearDown(self):
         self.group.delete()
@@ -86,7 +88,7 @@ class LeaveGroupTestCase(FastTenantTestCase):
 
         self.assertEqual(errors[0]["message"], "user_not_member_of_group")
 
-        request.user = self.user2   
+        request.user = self.user2
         result = graphql_sync(schema, { "query": mutation, "variables": variables }, context_value=request)
 
         data = result[1]["data"]
@@ -99,3 +101,35 @@ class LeaveGroupTestCase(FastTenantTestCase):
         data = result[1]["data"]
 
         self.assertEqual(data["leaveGroup"]["group"]["members"]["total"], 0)
+
+
+    def test_leave_mandatory_group(self):
+        mutation = """
+            mutation ($group: leaveGroupInput!) {
+                leaveGroup(input: $group) {
+                    group {
+                        members {
+                            total
+                            edges {
+                                user {
+                                    guid
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        """
+        variables = {
+            "group": {
+                "guid": self.mandatory_group.guid
+            }
+        }
+
+        request = HttpRequest()
+        request.user = self.user3
+        result = graphql_sync(schema, { "query": mutation, "variables": variables }, context_value=request)
+
+        errors = result[1]["errors"]
+
+        self.assertEqual(errors[0]["message"], "leaving_group_is_disabled")
