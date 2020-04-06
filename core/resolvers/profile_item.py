@@ -14,6 +14,11 @@ def resolve_name(obj, info):
     # pylint: disable=unused-argument
     return obj.name
 
+@profile_item.field("isFilter")
+def resolve_is_filter(obj, info):
+    # pylint: disable=unused-argument
+    return obj.is_filter
+
 @profile_item.field("value")
 def resolve_value(obj, info):
     # pylint: disable=unused-argument

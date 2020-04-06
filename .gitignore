@@ -5,7 +5,7 @@
 .vscode
 *.pyc
 *.db
-*.mo
+#*.mo
 *~
 *.egg-info
 .babel

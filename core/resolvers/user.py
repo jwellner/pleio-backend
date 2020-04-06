@@ -1,4 +1,5 @@
 from ariadne import ObjectType
+from core import config
 from core.models import ProfileField, UserProfileField
 from django.core.exceptions import ObjectDoesNotExist
 
@@ -18,7 +19,11 @@ def resolve_url(obj, info):
 def resolve_profile(obj, info):
     # pylint: disable=unused-argument
     user_profile_fields = []
-    for field in ProfileField.objects.all():
+
+    # only get configured profile fields
+    profile_setting_keys = [d['key'] for d in config.PROFILE if 'key' in d]
+
+    for field in ProfileField.objects.filter(key__in=profile_setting_keys):
         field.value = ""
         field.read_access = []
         try:
