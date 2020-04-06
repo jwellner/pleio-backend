@@ -2,6 +2,7 @@ from django.core.exceptions import SuspiciousOperation
 from mozilla_django_oidc.auth import OIDCAuthenticationBackend
 from mozilla_django_oidc.utils import absolutify
 from django.urls import reverse
+from django.conf import settings
 
 import logging
 
@@ -110,3 +111,6 @@ class OIDCAuthBackend(OIDCAuthenticationBackend):
                 return None
 
         return None
+
+def oidc_provider_logout(request):
+    return settings.OIDC_OP_LOGOUT_ENDPOINT
