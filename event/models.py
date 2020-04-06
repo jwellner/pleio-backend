@@ -3,6 +3,7 @@ from core.models import Entity, CommentMixin, BookmarkMixin
 from user.models import User
 from django.core.exceptions import ObjectDoesNotExist
 from django.utils.text import slugify
+from django.utils import timezone
 from file.models import FileFolder
 
 class Event(Entity, CommentMixin, BookmarkMixin):
@@ -90,8 +91,8 @@ class EventAttendee(models.Model):
 
     user = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)
 
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
+    created_at = models.DateTimeField(default=timezone.now)
+    updated_at = models.DateTimeField(default=timezone.now)
 
 class EventAttendeeRequest(models.Model):
 
@@ -104,4 +105,4 @@ class EventAttendeeRequest(models.Model):
     email = models.CharField(max_length=256)
     code = models.CharField(max_length=36)
 
-    created_at = models.DateTimeField(auto_now_add=True)
+    created_at = models.DateTimeField(default=timezone.now)

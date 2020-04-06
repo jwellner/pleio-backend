@@ -6,6 +6,7 @@ from django.contrib.postgres.fields.jsonb import KeyTextTransform
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.postgres.fields import JSONField
+from django.utils import timezone
 
 
 class AnnotationManager(models.Manager):
@@ -50,7 +51,7 @@ class Annotation(models.Model):
 
     user = models.ForeignKey('user.User', on_delete=models.CASCADE)
 
-    created_at = models.DateTimeField(auto_now_add=True)
+    created_at = models.DateTimeField(default=timezone.now)
 
     objects = AnnotationManager()
     

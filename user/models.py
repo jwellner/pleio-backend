@@ -6,6 +6,7 @@ from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
 from django.core.mail import send_mail
 from django.conf import settings
 from django.dispatch import receiver
+from django.utils import timezone
 
 
 class Manager(BaseUserManager):
@@ -87,8 +88,8 @@ class User(AbstractBaseUser):
     has_2fa_enabled = models.BooleanField(default=False)
     is_delete_requested = models.BooleanField(default=False)
 
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
+    created_at = models.DateTimeField(default=timezone.now)
+    updated_at = models.DateTimeField(default=timezone.now)
 
     REQUIRED_FIELDS = ['name']
     USERNAME_FIELD = 'email'

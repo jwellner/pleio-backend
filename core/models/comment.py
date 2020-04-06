@@ -2,6 +2,7 @@ import uuid
 from django.db import models
 from django.contrib.contenttypes.fields import GenericForeignKey, GenericRelation
 from django.contrib.contenttypes.models import ContentType
+from django.utils import timezone
 from .annotation import VoteMixin
 
 class CommentManager(models.Manager):
@@ -22,8 +23,8 @@ class Comment(VoteMixin):
     description = models.TextField()
     rich_description = models.TextField(null=True, blank=True)
 
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
+    created_at = models.DateTimeField(default=timezone.now)
+    updated_at = models.DateTimeField(default=timezone.now)
 
     content_type = models.ForeignKey(ContentType, on_delete=models.PROTECT)
     object_id = models.UUIDField(default=uuid.uuid4)
@@ -41,6 +42,7 @@ class Comment(VoteMixin):
     @property
     def guid(self):
         return str(self.id)
+
 
 class CommentMixin(models.Model):
     comments = GenericRelation(Comment)

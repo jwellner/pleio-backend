@@ -3,6 +3,7 @@ from django.db import models
 from django.contrib.postgres.fields import ArrayField, JSONField
 from django.core.exceptions import ObjectDoesNotExist
 from django.utils.text import slugify
+from django.utils import timezone
 from core.lib import ACCESS_TYPE
 
 
@@ -32,8 +33,8 @@ class Group(models.Model):
 
     icon = models.CharField(max_length=200, default='')
 
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
+    created_at = models.DateTimeField(default=timezone.now)
+    updated_at = models.DateTimeField(default=timezone.now)
 
     is_featured = models.BooleanField(default=False)
     featured_image = models.CharField(max_length=256, null=True, blank=True)
@@ -191,8 +192,8 @@ class GroupInvitation(models.Model):
 
     code = models.CharField(max_length=36)
 
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
+    created_at = models.DateTimeField(default=timezone.now)
+    updated_at = models.DateTimeField(default=timezone.now)
 
 
 class Subgroup(models.Model):

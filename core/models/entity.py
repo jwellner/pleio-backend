@@ -1,6 +1,7 @@
 import uuid
 from django.db import models
 from django.contrib.postgres.fields import ArrayField
+from django.utils import timezone
 from model_utils.managers import InheritanceManager
 from core.lib import get_acl
 from .shared import read_access_default, write_access_default
@@ -36,8 +37,8 @@ class Entity(models.Model):
         blank=True,
         default=write_access_default
     )
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
+    created_at = models.DateTimeField(default=timezone.now)
+    updated_at = models.DateTimeField(default=timezone.now)
     tags = ArrayField(models.CharField(max_length=256),
                       blank=True, default=list)
 
@@ -64,11 +65,11 @@ class Entity(models.Model):
 class EntityView(models.Model):
     entity = models.ForeignKey('core.Entity', on_delete=models.CASCADE, related_name="views")
     viewer = models.ForeignKey('user.User', on_delete=models.CASCADE)
-    created_at = models.DateTimeField(auto_now_add=True)
+    created_at = models.DateTimeField(default=timezone.now)
 
 
 class EntityViewCount(models.Model):
     entity = models.OneToOneField('core.Entity', on_delete=models.CASCADE, related_name="view_count")
     views = models.IntegerField(default=0)
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
+    created_at = models.DateTimeField(default=timezone.now)
+    updated_at = models.DateTimeField(default=timezone.now)
