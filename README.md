@@ -33,7 +33,7 @@ following commands within the repository:
 
     `docker-compose up`
 
-On an empty postgres database perform   
+On an empty postgres database perform
 - ```docker-compose exec admin /app/manage.py migrate_schemas --shared```
 - ```docker-compose exec admin /app/manage.py create_tenant```
     -   schema: public
@@ -42,9 +42,9 @@ On an empty postgres database perform
     -   is_primary: True
 
 
-Now login in the admin tool on http://localhost:8888/login   
+Now login in the admin tool on http://localhost:8888/login
 
-Create tenants through the admin   
+Create tenants through the admin
 
 ## Setup development (manually)
 Before setup make sure you installed all the development requirements:
@@ -85,13 +85,13 @@ This project uses a schema-first GraphQL implementation with Ariadne.
 
 You can find the schema in `backend2/schema.graphql` it is initially synced with the backend1 graphql Schema.
 
-It is possible to extend the basis schema using the extend directive. 
+It is possible to extend the basis schema using the extend directive.
 
 You can download the backend1 graphql schema using the npm package `get-graphql-schema`. Install it using `npm -g get-graphql-schema` and run the following command:
 
 `get-graphql-schema https://nieuw-template.pleio-test.nl/graphql > schema.graphql`
 
-## Storage 
+## Storage
 
 ### Swift storage local development
 
@@ -128,9 +128,15 @@ Add localstack to /etc/hosts to test from browser:
 
 `docker-compose exec api python manage.py tenant_command search_index --rebuild --schema=qw `
 
+## Caching
+
+To use memcache as caching service add the following environment variable. for example 127.0.0.1:11211
+
+`MEMCACHE_HOST_PORT`
+
 ## Translations
 
-### (re)Generate the translastions files 
+### (re)Generate the translastions files
 
 With this command, you will create and edit .po files. The files will be filled with strings added in de code as msgid's
 
