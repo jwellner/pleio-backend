@@ -1,9 +1,10 @@
-from django.db.models.signals import post_save
+from django.db.models.signals import post_save, pre_save
 from django.conf import settings
+from django.utils import timezone
 from notifications.signals import notify
-from core.models import Comment, Group
+from core.models import Comment, Group, GroupInvitation, Entity, EntityViewCount
 from user.models import User
-from event.models import Event
+from event.models import Event, EventAttendee
 from blog.models import Blog
 from discussion.models import Discussion
 from question.models import Question
@@ -51,6 +52,19 @@ def entity_handler(sender, instance, created, **kwargs):
         notify.send(instance.owner, recipient=member.user, verb='created', action_object=instance)
 
 
+def updated_at_handler(sender, instance, **kwargs):
+    """ This adds the current date/time to updated_at only when the instance is updated
+
+    This way we can still set the updated_at date/time when importing data.
+    """
+
+    # pylint: disable=unused-argument
+    # pylint: disable=protected-access
+    if not instance._state.adding:
+        instance.updated_at = timezone.now()
+
+
+# Notification handlers
 post_save.connect(comment_handler, sender=Comment)
 post_save.connect(user_handler, sender=User)
 post_save.connect(entity_handler, sender=Blog)
@@ -58,3 +72,15 @@ post_save.connect(entity_handler, sender=Discussion)
 post_save.connect(entity_handler, sender=Event)
 post_save.connect(entity_handler, sender=Question)
 post_save.connect(entity_handler, sender=StatusUpdate)
+
+# Set updated_at
+pre_save.connect(updated_at_handler, sender=Comment)
+pre_save.connect(updated_at_handler, sender=EntityViewCount)
+pre_save.connect(updated_at_handler, sender=Group)
+pre_save.connect(updated_at_handler, sender=GroupInvitation)
+pre_save.connect(updated_at_handler, sender=EventAttendee)
+pre_save.connect(updated_at_handler, sender=User)
+
+# Connect to all Entity subclasses
+for subclass in Entity.__subclasses__():
+    pre_save.connect(updated_at_handler, subclass)

@@ -92,6 +92,7 @@ class Command(InteractiveTenantOption, BaseCommand):
         self._import_groups()
         self._import_blogs()
         self._import_news()
+        self._import_events()
 
         # All done!
         self.stdout.write("\n>> Done!")
@@ -294,6 +295,75 @@ class Command(InteractiveTenantOption, BaseCommand):
             try:
                 news.save()
                 GuidMap.objects.create(id=elgg_news.entity.guid, guid=news.guid, object_type='news')
+
+                self.stdout.write(".", ending="")
+            except IntegrityError as e:
+                self.stdout.write(self.style.WARNING("Error: %s\n" % str(e)))
+                pass
+
+    def _import_events(self):
+        elgg_event_items = ElggObjectsEntity.objects.using(self.import_id).filter(entity__subtype__subtype='event')
+
+        self.stdout.write("\n>> Events (%i) " % elgg_event_items.count(), ending="")
+
+        for elgg_event in elgg_event_items:
+            event = self.mapper.get_event(elgg_event)
+
+            try:
+                event.save()
+
+                # attending
+                relations = elgg_event.entity.relation.filter(relationship="event_attending", right__type='user')
+                for relation in relations:
+                    user = User.objects.get(id=GuidMap.objects.get(id=relation.right.guid).guid)
+
+                    event.attendees.update_or_create(
+                        user=user,
+                        state="accept",
+                        created_at=datetime.fromtimestamp(relation.time_created),
+                        updated_at=datetime.fromtimestamp(relation.time_created)
+                    )
+
+                # maybe
+                relations = elgg_event.entity.relation.filter(relationship="event_maybe", right__type='user')
+                for relation in relations:
+                    user = User.objects.get(id=GuidMap.objects.get(id=relation.right.guid).guid)
+
+                    event.attendees.update_or_create(
+                        user=user,
+                        state="maybe",
+                        created_at=datetime.fromtimestamp(relation.time_created),
+                        updated_at=datetime.fromtimestamp(relation.time_created)
+                    )
+
+                # reject
+                relations = elgg_event.entity.relation.filter(relationship="event_reject", right__type='user')
+                for relation in relations:
+                    user = User.objects.get(id=GuidMap.objects.get(id=relation.right.guid).guid)
+
+                    event.attendees.update_or_create(
+                        user=user,
+                        state="reject",
+                        created_at=datetime.fromtimestamp(relation.time_created),
+                        updated_at=datetime.fromtimestamp(relation.time_created)
+                    )
+
+                # attending without account
+                relations = elgg_event.entity.relation.filter(relationship="event_attending", right__type='object')
+                for relation in relations:
+
+                    event.attendees.update_or_create(
+                        email=relation.right.get_metadata_value_by_name("email"),
+                        name=relation.right.get_metadata_value_by_name("name"),
+                        user=None,
+                        state="accept",
+                        created_at=datetime.fromtimestamp(relation.time_created),
+                        updated_at=datetime.fromtimestamp(relation.time_created)
+                    )
+
+                #TODO: attending without account that still have to be confirmed? skipped for now.
+
+                GuidMap.objects.create(id=elgg_event.entity.guid, guid=event.guid, object_type='event')
 
                 self.stdout.write(".", ending="")
             except IntegrityError as e:

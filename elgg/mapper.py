@@ -3,6 +3,7 @@ from user.models import User
 from core.models import UserProfile, UserProfileField, ProfileField, Group
 from blog.models import Blog
 from news.models import News
+from event.models import Event
 from core.lib import ACCESS_TYPE, access_id_to_acl
 from elgg.models import ElggUsersEntity, ElggSitesEntity, ElggGroupsEntity, ElggObjectsEntity, GuidMap
 from elgg.helpers import ElggHelpers
@@ -24,6 +25,7 @@ class Mapper():
         user.name = elgg_user.name
         user.external_id = elgg_user.pleio_guid
         user.created_at = datetime.fromtimestamp(elgg_user.entity.time_created)
+        user.updated_at = datetime.fromtimestamp(elgg_user.entity.time_updated)
         user.is_active = elgg_user.banned == "no"
         return user
 
@@ -73,6 +75,8 @@ class Mapper():
         #    print(f"{data.name.string}: {data.value.string}")
         group = Group()
         group.name = elgg_group.name
+        group.created_at = datetime.fromtimestamp(elgg_group.entity.time_created)
+        group.updated_at = datetime.fromtimestamp(elgg_group.entity.time_updated)
         group.description = elgg_group.description
         group.rich_description = elgg_group.entity.get_metadata_value_by_name("richDescription")
         group.introduction = elgg_group.entity.get_metadata_value_by_name("introduction")
@@ -100,6 +104,7 @@ class Mapper():
     def get_blog(self, elgg_entity: ElggObjectsEntity):
         entity = Blog()
         entity.created_at = datetime.fromtimestamp(elgg_entity.entity.time_created)
+        entity.updated_at = datetime.fromtimestamp(elgg_entity.entity.time_updated)
         entity.title = elgg_entity.title
         entity.description = elgg_entity.description
         entity.rich_description = elgg_entity.entity.get_metadata_value_by_name("richDescription")
@@ -125,6 +130,7 @@ class Mapper():
     def get_news(self, elgg_entity: ElggObjectsEntity):
         entity = News()
         entity.created_at = datetime.fromtimestamp(elgg_entity.entity.time_created)
+        entity.updated_at = datetime.fromtimestamp(elgg_entity.entity.time_updated)
         entity.title = elgg_entity.title
         entity.description = elgg_entity.description
         entity.rich_description = elgg_entity.entity.get_metadata_value_by_name("richDescription")
@@ -135,6 +141,41 @@ class Mapper():
             if elgg_entity.entity.get_metadata_value_by_name("featuredPositionY") else 0
         entity.tags = self.helpers.get_list_values(elgg_entity.entity.get_metadata_value_by_name("tags"))
         entity.source = elgg_entity.entity.get_metadata_value_by_name("source")
+        entity.owner = User.objects.get(id=GuidMap.objects.get(id=elgg_entity.entity.owner_guid).guid)
+
+        in_group = GuidMap.objects.filter(id=elgg_entity.entity.container_guid, object_type="group").first()
+        if in_group:
+            entity.group = Group.objects.get(id=in_group.guid)
+
+        entity.write_access = [ACCESS_TYPE.user.format(entity.owner.guid)]
+        entity.read_access = access_id_to_acl(entity.owner, elgg_entity.entity.access_id)
+
+        # TODO: comments, following, bookmark (separate for all content types?)
+        return entity
+
+    def get_event(self, elgg_entity: ElggObjectsEntity):
+        entity = Event()
+        entity.created_at = datetime.fromtimestamp(elgg_entity.entity.time_created)
+        entity.updated_at = datetime.fromtimestamp(elgg_entity.entity.time_updated)
+        entity.title = elgg_entity.title
+        entity.description = elgg_entity.description
+        entity.rich_description = elgg_entity.entity.get_metadata_value_by_name("richDescription")
+        entity.is_featured = elgg_entity.entity.get_metadata_value_by_name("isFeatured") == "1"
+        # news.featured_image = '' # TODO: import files
+        entity.featured_video = elgg_entity.entity.get_metadata_value_by_name("featuredVideo")
+        entity.featured_position_y = int(elgg_entity.entity.get_metadata_value_by_name("featuredPositionY")) \
+            if elgg_entity.entity.get_metadata_value_by_name("featuredPositionY") else 0
+        entity.tags = self.helpers.get_list_values(elgg_entity.entity.get_metadata_value_by_name("tags"))
+
+        entity.start_date = datetime.fromtimestamp(int(elgg_entity.entity.get_metadata_value_by_name("start_day")))
+        entity.end_date = datetime.fromtimestamp(int(elgg_entity.entity.get_metadata_value_by_name("end_ts")))
+        entity.location = elgg_entity.entity.get_metadata_value_by_name("location") if elgg_entity.entity.get_metadata_value_by_name("location") else ""
+        entity.external_link = elgg_entity.entity.get_metadata_value_by_name("source") if elgg_entity.entity.get_metadata_value_by_name("source") else ""
+        entity.max_attendees = int(elgg_entity.entity.get_metadata_value_by_name("maxAttendees")) \
+            if elgg_entity.entity.get_metadata_value_by_name("maxAttendees") else None
+        entity.rsvp = elgg_entity.entity.get_metadata_value_by_name("rsvp") == "1"
+        entity.attend_event_without_account = elgg_entity.entity.get_metadata_value_by_name("attend_event_without_account") == "1"
+
         entity.owner = User.objects.get(id=GuidMap.objects.get(id=elgg_entity.entity.owner_guid).guid)
 
         in_group = GuidMap.objects.filter(id=elgg_entity.entity.container_guid, object_type="group").first()
