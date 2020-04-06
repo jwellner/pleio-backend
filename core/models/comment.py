@@ -13,7 +13,7 @@ class CommentManager(models.Manager):
 
 class Comment(VoteMixin):
     class Meta:
-        ordering = ['created_at']
+        ordering = ['-created_at']
     objects = CommentManager()
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)

@@ -30,7 +30,14 @@ class CommentTestCase(FastTenantTestCase):
             group=None
         )
 
-        self.comments = mixer.cycle(5).blend(Comment, is_closed=False, owner=self.authenticatedUser, container=self.blogPublic)
+        self.comments = mixer.cycle(5).blend(Comment, owner=self.authenticatedUser, container=self.blogPublic)
+
+        self.lastComment = Comment.objects.create(
+            owner=self.authenticatedUser,
+            container=self.blogPublic,
+            description="Just testing",
+            rich_description="Just testing"
+        )
 
     def tearDown(self):
         self.blogPublic.delete()
@@ -45,6 +52,7 @@ class CommentTestCase(FastTenantTestCase):
                 comments {
                     guid
                     description
+                    richDescription
                 }
             }
             query GetBlog($guid: String!) {
@@ -69,5 +77,8 @@ class CommentTestCase(FastTenantTestCase):
         data = result[1]["data"]
        
         self.assertEqual(data["entity"]["guid"], self.blogPublic.guid)
-        self.assertEqual(data["entity"]["commentCount"], 5)
-        self.assertEqual(data["entity"]["comments"][4]['guid'], self.comments[4].guid)
+        self.assertEqual(data["entity"]["commentCount"], 6)
+        # first should be last added comment
+        self.assertEqual(data["entity"]["comments"][0]['guid'], self.lastComment.guid)
+        self.assertEqual(data["entity"]["comments"][0]['richDescription'], self.lastComment.rich_description)
+        self.assertEqual(data["entity"]["comments"][0]['description'], self.lastComment.description)

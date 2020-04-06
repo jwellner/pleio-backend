@@ -1,9 +1,10 @@
 from datetime import datetime
 from user.models import User
-from core.models import UserProfile, UserProfileField, ProfileField, Group
+from core.models import UserProfile, UserProfileField, ProfileField, Group, Comment
 from blog.models import Blog
 from news.models import News
 from event.models import Event
+from discussion.models import Discussion
 from core.lib import ACCESS_TYPE, access_id_to_acl
 from elgg.models import ElggUsersEntity, ElggSitesEntity, ElggGroupsEntity, ElggObjectsEntity, GuidMap
 from elgg.helpers import ElggHelpers
@@ -186,4 +187,35 @@ class Mapper():
         entity.read_access = access_id_to_acl(entity.owner, elgg_entity.entity.access_id)
 
         # TODO: comments, following, bookmark (separate for all content types?)
+        return entity
+
+    def get_discussion(self, elgg_entity: ElggObjectsEntity):
+        entity = Discussion()
+        entity.title = elgg_entity.title
+        entity.description = elgg_entity.description
+        entity.rich_description = elgg_entity.entity.get_metadata_value_by_name("richDescription")
+        entity.tags = self.helpers.get_list_values(elgg_entity.entity.get_metadata_value_by_name("tags"))
+
+        entity.owner = User.objects.get(id=GuidMap.objects.get(id=elgg_entity.entity.owner_guid).guid)
+
+        in_group = GuidMap.objects.filter(id=elgg_entity.entity.container_guid, object_type="discussion").first()
+        if in_group:
+            entity.group = Group.objects.get(id=in_group.guid)
+
+        entity.write_access = [ACCESS_TYPE.user.format(entity.owner.guid)]
+        entity.read_access = access_id_to_acl(entity.owner, elgg_entity.entity.access_id)
+
+        entity.created_at = datetime.fromtimestamp(elgg_entity.entity.time_created)
+        entity.updated_at = datetime.fromtimestamp(elgg_entity.entity.time_updated)
+
+        return entity
+
+    def get_comment(self, elgg_entity: ElggObjectsEntity):
+        entity = Comment()
+        entity.description = elgg_entity.description
+        entity.rich_description = elgg_entity.entity.get_metadata_value_by_name("richDescription")
+        entity.owner = User.objects.get(id=GuidMap.objects.get(id=elgg_entity.entity.owner_guid).guid)
+        entity.created_at = datetime.fromtimestamp(elgg_entity.entity.time_created)
+        entity.updated_at = datetime.fromtimestamp(elgg_entity.entity.time_updated)
+
         return entity

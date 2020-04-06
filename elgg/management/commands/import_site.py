@@ -3,7 +3,7 @@ from django.core.management.base import BaseCommand, CommandError
 from django.utils import timezone
 from core import config
 from core.lib import ACCESS_TYPE, access_id_to_acl
-from core.models import ProfileField, UserProfile, UserProfileField, Group
+from core.models import ProfileField, UserProfile, UserProfileField, Group, Entity, Comment
 from backend2 import settings
 from elgg.models import Instances, ElggUsersEntity, GuidMap, ElggSitesEntity, ElggGroupsEntity, ElggObjectsEntity
 from elgg.helpers import ElggHelpers
@@ -93,6 +93,7 @@ class Command(InteractiveTenantOption, BaseCommand):
         self._import_blogs()
         self._import_news()
         self._import_events()
+        self._import_discussions()
 
         # All done!
         self.stdout.write("\n>> Done!")
@@ -276,6 +277,9 @@ class Command(InteractiveTenantOption, BaseCommand):
 
             try:
                 blog.save()
+
+                self._import_comments_for(blog, elgg_blog.entity.guid)
+
                 GuidMap.objects.create(id=elgg_blog.entity.guid, guid=blog.guid, object_type='blog')
 
                 self.stdout.write(".", ending="")
@@ -293,6 +297,9 @@ class Command(InteractiveTenantOption, BaseCommand):
 
             try:
                 news.save()
+
+                self._import_comments_for(news, elgg_news.entity.guid)
+
                 GuidMap.objects.create(id=elgg_news.entity.guid, guid=news.guid, object_type='news')
 
                 self.stdout.write(".", ending="")
@@ -362,9 +369,47 @@ class Command(InteractiveTenantOption, BaseCommand):
 
                 #TODO: attending without account that still have to be confirmed? skipped for now.
 
+                self._import_comments_for(event, elgg_event.entity.guid)
+
                 GuidMap.objects.create(id=elgg_event.entity.guid, guid=event.guid, object_type='event')
 
                 self.stdout.write(".", ending="")
+            except IntegrityError as e:
+                self.stdout.write(self.style.WARNING("Error: %s\n" % str(e)))
+                pass
+
+    def _import_discussions(self):
+        elgg_discussion_items = ElggObjectsEntity.objects.using(self.import_id).filter(entity__subtype__subtype='discussion')
+
+        self.stdout.write("\n>> Discussions (%i) " % elgg_discussion_items.count(), ending="")
+
+        for elgg_discussion in elgg_discussion_items:
+            discussion = self.mapper.get_discussion(elgg_discussion)
+
+            try:
+                discussion.save()
+
+                self._import_comments_for(discussion, elgg_discussion.entity.guid)
+
+                GuidMap.objects.create(id=elgg_discussion.entity.guid, guid=discussion.guid, object_type='discussion')
+
+                self.stdout.write(".", ending="")
+            except IntegrityError as e:
+                self.stdout.write(self.style.WARNING("Error: %s\n" % str(e)))
+                pass
+
+
+    def _import_comments_for(self, entity: Entity, elgg_guid):
+        elgg_comment_items = ElggObjectsEntity.objects.using(self.import_id).filter(entity__subtype__subtype='comment', entity__container_guid=elgg_guid)
+
+        for elgg_comment in elgg_comment_items:
+            comment = self.mapper.get_comment(elgg_comment)
+
+            try:
+                comment.container = entity
+                comment.save()
+
+                GuidMap.objects.create(id=elgg_comment.entity.guid, guid=comment.guid, object_type='comment')
             except IntegrityError as e:
                 self.stdout.write(self.style.WARNING("Error: %s\n" % str(e)))
                 pass
