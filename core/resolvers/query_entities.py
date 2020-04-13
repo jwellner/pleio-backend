@@ -7,7 +7,7 @@ from graphql import GraphQLError
 
 def conditional_group_filter(subtype, container_guid):
     """
-    Filter only items in group 
+    Filter only items in group
     """
     if container_guid == "1" and subtype == "wiki":
         return Q(group=None) & Q(parent=None)
@@ -36,6 +36,14 @@ def conditional_tags_filter(tags):
         return filters
     return Q()
 
+def conditional_tag_lists_filter(tag_lists):
+    filters = Q()
+    if tag_lists:
+        for tags in tag_lists:
+            if tags:
+                filters.add(Q(tags__overlap=tags), Q.AND) # of Q.OR
+    return filters
+
 def resolve_entities(
     _,
     info,
@@ -46,6 +54,7 @@ def resolve_entities(
     subtypes=None,
     containerGuid=None,
     tags=None,
+    tagLists=None,
     orderBy=ORDER_BY.timeCreated,
     orderDirection=ORDER_DIRECTION.desc,
     isFeatured=False
@@ -74,7 +83,9 @@ def resolve_entities(
         order_by = '-%s' % (order_by)
 
     entities = Model.objects.visible(info.context.user)
-    entities = entities.filter(conditional_group_filter(subtype, containerGuid) & conditional_tags_filter(tags) &
+    entities = entities.filter(conditional_group_filter(subtype, containerGuid) &
+                               conditional_tags_filter(tags) &
+                               conditional_tag_lists_filter(tagLists) &
                                conditional_is_featured_filter(subtype, isFeatured))
     if subtype and subtype == 'page':
         entities = entities.filter(parent=None)
