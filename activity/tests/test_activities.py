@@ -26,32 +26,42 @@ class ActivitiesTestCase(FastTenantTestCase):
             owner=self.user1,
             read_access=[ACCESS_TYPE.public],
             write_access=[ACCESS_TYPE.user.format(self.user1.id)],
+            tags=["tag_one", "tag_two"]
         )
         self.blog2 = Blog.objects.create(
             title="Blog2",
             owner=self.user1,
             read_access=[ACCESS_TYPE.public],
             write_access=[ACCESS_TYPE.user.format(self.user1.id)],
-            group=self.group2
+            group=self.group2,
+            tags=["tag_two", "tag_three"]
         )
         self.blog3 = Blog.objects.create(
             title="Blog3",
             owner=self.user1,
             read_access=[ACCESS_TYPE.public],
             write_access=[ACCESS_TYPE.user.format(self.user1.id)],
-            group=self.group1
+            group=self.group1,
+            tags=["tag_three"]
         )
         self.blog4 = Blog.objects.create(
             title="Blog4",
             owner=self.user2,
             read_access=[ACCESS_TYPE.group.format(self.group2.id)],
             write_access=[ACCESS_TYPE.user.format(self.user1.id)],
-            group=self.group2
+            group=self.group2,
+            tags=["tag_four"]
+        )
+        self.blog5 = Blog.objects.create(
+            title="Blog5",
+            owner=self.user1,
+            read_access=[ACCESS_TYPE.public],
+            write_access=[ACCESS_TYPE.user.format(self.user1.id)]
         )
 
         self.query = """
-            query ActivityList($offset: Int!, $limit: Int!, $subtypes: [String!], $groupFilter: [String!], $tags: [String!], $orderBy: OrderBy, $orderDirection: OrderDirection) {
-                activities(offset: $offset, limit: $limit, tags: $tags, subtypes: $subtypes, groupFilter: $groupFilter, orderBy: $orderBy, orderDirection: $orderDirection) {
+            query ActivityList($offset: Int!, $limit: Int!, $subtypes: [String!], $groupFilter: [String!], $tags: [String!], $tagLists: [[String]], $orderBy: OrderBy, $orderDirection: OrderDirection) {
+                activities(offset: $offset, limit: $limit, tags: $tags, tagLists: $tagLists, subtypes: $subtypes, groupFilter: $groupFilter, orderBy: $orderBy, orderDirection: $orderDirection) {
                     total
                     edges {
                     guid
@@ -185,3 +195,23 @@ class ActivitiesTestCase(FastTenantTestCase):
         data = result[1]["data"]
 
         self.assertEqual(data["activities"]["total"], 1)
+
+    def test_activities_taglists_filter(self):
+        request = HttpRequest()
+        request.user = self.user2
+
+        variables = {
+            "limit": 20,
+            "offset": 0,
+            "subtypes": [],
+            "tags": [],
+            "tagLists": [["tag_one", "tag_three"], ["tag_two"]]
+        }
+
+        result = graphql_sync(schema, { "query": self.query, "variables": variables }, context_value=request)
+
+        self.assertTrue(result[0])
+
+        data = result[1]["data"]
+
+        self.assertEqual(data["activities"]["total"], 2)
