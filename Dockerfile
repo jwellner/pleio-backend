@@ -19,6 +19,7 @@ FROM python:3.8-slim
 RUN mkdir -p /usr/share/man/man1/ /usr/share/man/man3/ /usr/share/man/man7/
 
 RUN apt-get update && apt-get install --no-install-recommends -y \
+    libgnutls30 \
     gettext \
     git \
     mime-support \
