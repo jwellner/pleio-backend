@@ -1,8 +1,8 @@
-FROM python:3.7-slim AS build
+FROM python:3.8-slim AS build
 
 RUN apt-get update && apt-get install --no-install-recommends -y \
     build-essential \
-    libpq-dev \ 
+    libpq-dev \
     python3-dev \
     default-libmysqlclient-dev
 
@@ -13,7 +13,7 @@ COPY requirements.txt /app-tmp
 RUN /app-tmp/venv/bin/pip3 install -r requirements.txt
 
 
-FROM python:3.7-slim
+FROM python:3.8-slim
 
 # Workaround for error with postgresql-client package
 RUN mkdir -p /usr/share/man/man1/ /usr/share/man/man3/ /usr/share/man/man7/
