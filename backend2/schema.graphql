@@ -1381,9 +1381,9 @@ type Query {
   groups(q: String, filter: GroupFilter, offset: Int, limit: Int): GroupList
   events(filter: EventFilter, containerGuid: String, offset: Int, limit: Int): EventList
   users(q: String!, offset: Int, limit: Int, filters: [FilterInput]): UserList
-  entities(offset: Int, limit: Int, type: Type, subtype: String, subtypes: [String], containerGuid: String, tags: [String], tagLists:[[String]], orderBy: OrderBy, orderDirection: OrderDirection, isFeatured: Boolean): EntityList
+  entities(offset: Int, limit: Int, type: Type, subtype: String, subtypes: [String], containerGuid: String, tags: [String], orderBy: OrderBy, orderDirection: OrderDirection, isFeatured: Boolean): EntityList
   notifications(offset: Int, limit: Int, unread: Boolean): NotificationsList
-  activities(containerGuid: String, offset: Int, limit: Int, tags: [String], tagLists:[[String]], groupFilter: [String], subtypes: [String], orderBy: OrderBy, orderDirection: OrderDirection): ActivityList
+  activities(containerGuid: String, offset: Int, limit: Int, tags: [String], groupFilter: [String], subtypes: [String], orderBy: OrderBy, orderDirection: OrderDirection): ActivityList
   bookmarks(offset: Int, limit: Int, subtype: String): EntityList
   filters: Filters
   site: Site

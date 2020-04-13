@@ -42,15 +42,6 @@ def conditional_tags_filter(tags):
     return Q()
 
 
-def conditional_tag_lists_filter(tag_lists):
-    filters = Q()
-    if tag_lists:
-        for tags in tag_lists:
-            if tags:
-                filters.add(Q(tags__overlap=tags), Q.AND) # of Q.OR
-    return filters
-
-
 def conditional_group_filter(container_guid):
     """ Filter on one group """
     if container_guid:
@@ -79,7 +70,6 @@ def resolve_activities(
         offset=0,
         limit=20,
         tags=None,
-        tagLists=None,
         groupFilter=None,
         subtypes=None,
         orderBy="timeCreated",
@@ -87,7 +77,6 @@ def resolve_activities(
     ):
     #pylint: disable=unused-argument
     #pylint: disable=too-many-arguments
-    #pylint: disable=too-many-locals
 
     # TODO: how to do lastAction?
     if orderBy == 'timeUpdated':
@@ -101,10 +90,7 @@ def resolve_activities(
         order_by = '-%s' % (order_by)
 
     qs = Entity.objects.visible(info.context.user)
-    qs = qs.filter(conditional_subtypes_filter(subtypes) &
-                   conditional_tags_filter(tags) &
-                   conditional_tag_lists_filter(tagLists) &
-                   conditional_group_filter(containerGuid) &
+    qs = qs.filter(conditional_subtypes_filter(subtypes) & conditional_tags_filter(tags) & conditional_group_filter(containerGuid) &
                    conditional_groups_filter(groupFilter, info.context.user))
     qs = qs.order_by(order_by).select_subclasses()
     total = qs.count()
@@ -114,7 +100,7 @@ def resolve_activities(
     activities = []
 
     for item in qs :
-
+        
         activity = {
             'guid': 'activity:%s' % (item.guid),
             'type': 'create',

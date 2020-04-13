@@ -29,7 +29,7 @@ class EntitiesTestCase(FastTenantTestCase):
             owner=self.authenticatedUser,
             read_access=[ACCESS_TYPE.public],
             write_access=[ACCESS_TYPE.user.format(self.authenticatedUser.id)],
-            tags=["tag_one", "tag_four"]
+            tags=["tag_one"]
         )
         self.blog3 = Blog.objects.create(
             title="Blog3",
@@ -37,15 +37,7 @@ class EntitiesTestCase(FastTenantTestCase):
             read_access=[ACCESS_TYPE.public],
             write_access=[ACCESS_TYPE.user.format(self.authenticatedUser.id)],
             group=self.group,
-            tags=["tag_two", "tag_one", "tag_four"]
-        )
-        self.blog4 = Blog.objects.create(
-            title="Blog4",
-            owner=self.authenticatedUser,
-            read_access=[ACCESS_TYPE.public],
-            write_access=[ACCESS_TYPE.user.format(self.authenticatedUser.id)],
-            group=self.group,
-            tags=["tag_four", "tag_three"]
+            tags=["tag_two", "tag_one"]
         )
         self.page1 = mixer.blend(Page,
                                  owner=self.admin,
@@ -68,18 +60,14 @@ class EntitiesTestCase(FastTenantTestCase):
                                  )
 
         self.query = """
-            query getEntities($subtype: String, $containerGuid: String, $tags: [String!], $tagLists: [[String]]) {
-                entities(subtype: $subtype, containerGuid: $containerGuid, tags: $tags, tagLists: $tagLists) {
+            query getEntities($subtype: String, $containerGuid: String, $tags: [String!]) {
+                entities(subtype: $subtype, containerGuid: $containerGuid, tags: $tags) {
                     total
                     edges {
                         guid
-                        ...BlogListFragment
                         __typename
                     }
                 }
-            }
-            fragment BlogListFragment on Blog {
-                title
             }
         """
 
@@ -108,7 +96,7 @@ class EntitiesTestCase(FastTenantTestCase):
 
         data = result[1]["data"]
 
-        self.assertEqual(data["entities"]["total"], 7)
+        self.assertEqual(data["entities"]["total"], 6)
 
     def test_entities_site(self):
         request = HttpRequest()
@@ -140,7 +128,7 @@ class EntitiesTestCase(FastTenantTestCase):
 
         data = result[1]["data"]
 
-        self.assertEqual(data["entities"]["total"], 2)
+        self.assertEqual(data["entities"]["total"], 1)
 
     def test_entities_filtered_by_tags_find_one(self):
         request = HttpRequest()
@@ -201,20 +189,6 @@ class EntitiesTestCase(FastTenantTestCase):
 
         self.assertTrue(result[0])
 
-        data = result[1]["data"]
+        data = result[1]["data"] 
 
         self.assertEqual(data["entities"]["total"], 1)
-
-
-    def test_entities_filtered_by_tag_lists(self):
-        request = HttpRequest()
-        request.user = self.authenticatedUser
-
-        variables = {"tagLists": [["tag_four", "tag_three"], ["tag_one"]]}
-
-        result = graphql_sync(schema, { "query": self.query, "variables": variables }, context_value=request)
-
-        self.assertTrue(result[0])
-
-        data = result[1]["data"]
-        self.assertEqual(data["entities"]["total"], 2)
