@@ -148,6 +148,7 @@ class EventsTestCase(FastTenantTestCase):
                         icon
                         }
                     }
+                    attendeesWithoutAccount
                     group {
                         guid
                         ... on Group {
@@ -178,12 +179,20 @@ class EventsTestCase(FastTenantTestCase):
             "filter": "upcoming"
         }
 
+        mixer.blend(EventAttendee, user=self.user2, email=None, event=self.eventFuture1)
+        mixer.blend(EventAttendee, user=None, event=self.eventFuture1)
+        mixer.blend(EventAttendee, user=self.user2, email=None, event=self.eventFuture2)
+        mixer.blend(EventAttendee, user=None, event=self.eventFuture2)
+
         result = graphql_sync(schema, { "query": self.query , "variables": variables}, context_value=request)
 
         self.assertTrue(result[0])
 
         data = result[1]["data"]
         self.assertEqual(data["events"]["total"], 2)
+        self.assertEqual(data["events"]["edges"][0]["attendees"]["total"], 0)
+        self.assertEqual(len(data["events"]["edges"][0]["attendees"]["edges"]), 0)
+        self.assertEqual(data["events"]["edges"][0]["attendeesWithoutAccount"], 0)
 
     def test_events_upcoming(self):
 

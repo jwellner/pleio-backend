@@ -90,6 +90,15 @@ def resolve_is_attending(obj, info):
 def resolve_attendees(obj, info, limit=20, offset=0, state=None):
     # pylint: disable=unused-argument
 
+    user = info.context.user
+    if not user.is_authenticated:
+        return {
+            "total": 0,
+            "totalMaybe": 0,
+            "totalReject": 0,
+            "edges": []
+        }
+
     # only return attending registered users
     # TODO: create other type for edges to support external attendees?
     qs = obj.attendees.exclude(user__isnull=True)
@@ -106,8 +115,12 @@ def resolve_attendees(obj, info, limit=20, offset=0, state=None):
     }
 
 @event.field("attendeesWithoutAccount")
-def resolve_attendees_without_account(obj, info, limit):
+def resolve_attendees_without_account(obj, info):
     # pylint: disable=unused-argument
+    user = info.context.user
+    if not user.is_authenticated:
+        return 0
+
     return obj.attendees.exclude(user__isnull=False).count()
 
 
