@@ -70,15 +70,6 @@ build:
     - docker push registry.gitlab.com/pleio/backend2:${CI_COMMIT_SHA:0:8}
     - docker push registry.gitlab.com/pleio/backend2:latest
 
-deploy-master-vps:
-  stage: deploy
-  tags:
-    - control-vps
-  only:
-    - master
-  script:
-    - /snap/bin/kubectl -n backend2 set image deployment/api api=registry.gitlab.com/pleio/backend2:${CI_COMMIT_SHA:0:8}
-
 deploy-master-aws:
   stage: deploy
   tags:
