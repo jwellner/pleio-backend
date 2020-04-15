@@ -78,3 +78,4 @@ deploy-master-aws:
     - master
   script:
     - /usr/local/bin/kubectl -n pleio2 set image deployment/api-test api-test=registry.gitlab.com/pleio/backend2:${CI_COMMIT_SHA:0:8}
+    - /usr/local/bin/kubectl -n pleio2 set image deployment/api-test api-admin-test=registry.gitlab.com/pleio/backend2:${CI_COMMIT_SHA:0:8}
