@@ -82,7 +82,7 @@ class ElggHelpers():
             subtype__subtype="custom_profile_field",
             metadata__value__string=name,
             metadata__name__string="metadata_name").first()
-        
+
         if not profile_field_entity:
             return []
 
@@ -96,7 +96,7 @@ class ElggHelpers():
             subtype__subtype="custom_profile_field",
             metadata__value__string=name,
             metadata__name__string="metadata_name").first()
-        
+
         if not profile_field_entity:
             return True
 
@@ -104,3 +104,19 @@ class ElggHelpers():
 
         editable = metadata_type.value.string == 'yes' if metadata_type else True # default True
         return editable
+
+    def get_menu(self, menu_input):
+
+        menu = []
+
+        for item in menu_input:
+            if 'children' not in item:
+                item["children"] = []
+            menu.append(item)
+
+        return menu
+
+    def save_best_answer(self, question, comment, elgg_entity):
+        if elgg_entity.relation.filter(relationship="correctAnswer", left__guid=elgg_entity.guid).first():
+            question.best_answer = comment
+            question.save()

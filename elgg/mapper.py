@@ -5,6 +5,7 @@ from blog.models import Blog
 from news.models import News
 from event.models import Event
 from discussion.models import Discussion
+from question.models import Question
 from core.lib import ACCESS_TYPE, access_id_to_acl
 from elgg.models import ElggUsersEntity, ElggSitesEntity, ElggGroupsEntity, ElggObjectsEntity, GuidMap
 from elgg.helpers import ElggHelpers
@@ -37,7 +38,7 @@ class Mapper():
         receive_notification_email = receive_notification_metadata.value.string == "1" if receive_notification_metadata else False
 
         receive_newsletter = bool(elgg_user.entity.relation.filter(relationship="subscribed", right__guid=self.elgg_site.guid).first())
-        
+
         user_profile = UserProfile()
         user_profile.last_online = last_online
         user_profile.overview_email_interval = interval_private.value if interval_private else 'weekly' # TODO: should get default for site
@@ -80,7 +81,8 @@ class Mapper():
         group.updated_at = datetime.fromtimestamp(elgg_group.entity.time_updated)
         group.description = elgg_group.description
         group.rich_description = elgg_group.entity.get_metadata_value_by_name("richDescription")
-        group.introduction = elgg_group.entity.get_metadata_value_by_name("introduction")
+        group.introduction = elgg_group.entity.get_metadata_value_by_name("introduction") \
+            if elgg_group.entity.get_metadata_value_by_name("introduction") else ""
         group.welcome_message = elgg_group.entity.get_private_value_by_name("group_tools:welcome_message") \
             if elgg_group.entity.get_private_value_by_name("group_tools:welcome_message") else ""
         group.icon = '' # TODO: import files
@@ -199,6 +201,29 @@ class Mapper():
         entity.owner = User.objects.get(id=GuidMap.objects.get(id=elgg_entity.entity.owner_guid).guid)
 
         in_group = GuidMap.objects.filter(id=elgg_entity.entity.container_guid, object_type="discussion").first()
+        if in_group:
+            entity.group = Group.objects.get(id=in_group.guid)
+
+        entity.write_access = [ACCESS_TYPE.user.format(entity.owner.guid)]
+        entity.read_access = access_id_to_acl(entity.owner, elgg_entity.entity.access_id)
+
+        entity.created_at = datetime.fromtimestamp(elgg_entity.entity.time_created)
+        entity.updated_at = datetime.fromtimestamp(elgg_entity.entity.time_updated)
+
+        return entity
+
+    def get_question(self, elgg_entity: ElggObjectsEntity):
+        entity = Question()
+        entity.title = elgg_entity.title
+        entity.description = elgg_entity.description
+        entity.rich_description = elgg_entity.entity.get_metadata_value_by_name("richDescription")
+        entity.is_closed = elgg_entity.entity.get_metadata_value_by_name("isClosed") == "1"
+
+        entity.tags = self.helpers.get_list_values(elgg_entity.entity.get_metadata_value_by_name("tags"))
+
+        entity.owner = User.objects.get(id=GuidMap.objects.get(id=elgg_entity.entity.owner_guid).guid)
+
+        in_group = GuidMap.objects.filter(id=elgg_entity.entity.container_guid, object_type="question").first()
         if in_group:
             entity.group = Group.objects.get(id=in_group.guid)
 
