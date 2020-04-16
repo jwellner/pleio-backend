@@ -1,5 +1,6 @@
 from django.db import connection
 from django_tenants.test.cases import FastTenantTestCase
+from django.test import override_settings
 from backend2.schema import schema
 from ariadne import graphql_sync
 import json
@@ -9,6 +10,7 @@ from core.models import Group
 from user.models import User
 from mixer.backend.django import mixer
 from graphql import GraphQLError
+from unittest import mock
 
 class JoinGroupTestCase(FastTenantTestCase):
 
@@ -19,11 +21,15 @@ class JoinGroupTestCase(FastTenantTestCase):
 
         self.user2 = mixer.blend(User) # auto joined to group_auto
         self.user3 = mixer.blend(User) # auto joined to group_auto
+        self.user4 = mixer.blend(User)
         self.group = mixer.blend(Group, owner=self.user1, is_membership_on_request=False)
+        self.group2 = mixer.blend(Group, owner=self.user1, is_membership_on_request=False)
         self.group_on_request = mixer.blend(Group, owner=self.user1, is_membership_on_request=True)
+        self.group2.join(self.user4, 'member')
 
     def tearDown(self):
         self.group.delete()
+        self.group2.delete()
         self.group_on_request.delete()
         self.group_auto.delete()
         self.user1.delete()
@@ -56,6 +62,7 @@ class JoinGroupTestCase(FastTenantTestCase):
         errors = result[1]["errors"]
 
         self.assertEqual(errors[0]["message"], "not_logged_in")
+
 
     def test_join_group(self):
         mutation = """
@@ -101,7 +108,9 @@ class JoinGroupTestCase(FastTenantTestCase):
         self.assertEqual(self.user1.memberships.filter(group=self.group, type="member").count(), 1)
         self.assertEqual(self.user2.memberships.filter(group=self.group, type="member").count(), 1)
 
-    def test_join_group_on_request(self):
+    @override_settings(ALLOWED_HOSTS=['test.test'])
+    @mock.patch('core.resolvers.mutation_join_group.send_mail_multi')
+    def test_join_group_on_request(self, mocked_send_mail_multi):
         mutation = """
             mutation ($group: joinGroupInput!) {
                 joinGroup(input: $group) {
@@ -126,11 +135,16 @@ class JoinGroupTestCase(FastTenantTestCase):
 
         request = HttpRequest()
         request.user = self.user2
+        request.META = {
+            'HTTP_HOST': 'test.test'
+        }
+
         result = graphql_sync(schema, { "query": mutation, "variables": variables }, context_value=request)
 
         data = result[1]["data"]
 
         self.assertEqual(data["joinGroup"]["group"]["members"]["total"], 0)
+        mocked_send_mail_multi.assert_called_once()
 
         request.user = self.user3
         result = graphql_sync(schema, { "query": mutation, "variables": variables }, context_value=request)
@@ -178,5 +192,37 @@ class JoinGroupTestCase(FastTenantTestCase):
         data = result[1]["data"]
 
         self.assertEqual(data["entity"]["guid"], self.group_auto.guid)
-        self.assertEqual(data["entity"]["members"]["total"], 2) # to users should be added on create
-        self.assertEqual(len(data["entity"]["members"]["edges"]), 2)
+        self.assertEqual(data["entity"]["members"]["total"], 3) # to users should be added on create
+        self.assertEqual(len(data["entity"]["members"]["edges"]), 3)
+
+
+    def test_join_group_by_member_of_group(self):
+        mutation = """
+            mutation ($group: joinGroupInput!) {
+                joinGroup(input: $group) {
+                    group {
+                        members {
+                            total
+                            edges {
+                                user {
+                                    guid
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        """
+        variables = {
+            "group": {
+                "guid": self.group2.guid
+            }
+        }
+
+        request = HttpRequest()
+        request.user = self.user4
+        result = graphql_sync(schema, { "query": mutation, "variables": variables }, context_value=request)
+
+        errors = result[1]["errors"]
+
+        self.assertEqual(errors[0]["message"], "already_member_of_group")

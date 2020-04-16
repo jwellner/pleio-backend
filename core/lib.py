@@ -219,5 +219,16 @@ def get_default_email_context(context):
     return {'user_name': user_name, 'user_url': user_url, 'site_url': site_url, 'site_name': site_name, 'primary_color': primary_color}
 
 
+def obfuscate_email(email):
+    # alter email: example@domain.com -> e******@domain.com
+    try:
+        email_splitted = email.split("@")
+        nr_char = len(email_splitted[0])
+        return email_splitted[0][0] + '*'*nr_char + '@' + email_splitted[1]
+    except Exception:
+        pass
+    return ""
+
+
 def generate_code():
     return secrets.token_hex(10)
