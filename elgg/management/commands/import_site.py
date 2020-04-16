@@ -58,7 +58,6 @@ class Command(InteractiveTenantOption, BaseCommand):
             self.stdout.write("Only run this command from admin instance.")
             return
 
-
         elgg_instance = self.get_elgg_from_options_or_interactive(**options)
         tenant = self.get_tenant_from_options_or_interactive(**options)
 
@@ -94,6 +93,7 @@ class Command(InteractiveTenantOption, BaseCommand):
         self._import_news()
         self._import_events()
         self._import_discussions()
+        self._import_questions()
 
         # All done!
         self.stdout.write("\n>> Done!")
@@ -134,7 +134,10 @@ class Command(InteractiveTenantOption, BaseCommand):
         config.CUSTOM_TAGS_ENABLED = self.helpers.get_plugin_setting("custom_tags_allowed") == "yes"
         config.TAG_CATEGORIES = json.loads(html.unescape(self.helpers.get_plugin_setting("tagCategories")))
         config.ACTIVITY_FEED_FILTERS_ENABLED = self.helpers.get_plugin_setting("show_extra_homepage_filters") == "yes"
-        config.MENU = json.loads(html.unescape(self.helpers.get_plugin_setting("menu")))
+        config.MENU = self.helpers.get_menu(json.loads(html.unescape(self.helpers.get_plugin_setting("menu")))) \
+            if self.helpers.get_plugin_setting("menu") else []
+        config.PROFILE = self.helpers.get_menu(json.loads(html.unescape(self.helpers.get_plugin_setting("profile")))) \
+            if self.helpers.get_plugin_setting("profile") else []
         config.FOOTER = json.loads(html.unescape(self.helpers.get_plugin_setting("footer")))
         config.DIRECT_LINKS = json.loads(html.unescape(self.helpers.get_plugin_setting("directLinks")))
         config.SHOW_LOGIN_REGISTER = self.helpers.get_plugin_setting("show_login_register") == "yes"
@@ -398,8 +401,28 @@ class Command(InteractiveTenantOption, BaseCommand):
                 self.stdout.write(self.style.WARNING("Error: %s\n" % str(e)))
                 pass
 
+    def _import_questions(self):
+        elgg_question_items = ElggObjectsEntity.objects.using(self.import_id).filter(entity__subtype__subtype='question')
 
-    def _import_comments_for(self, entity: Entity, elgg_guid):
+        self.stdout.write("\n>> Questions (%i) " % elgg_question_items.count(), ending="")
+
+        for elgg_question in elgg_question_items:
+            question = self.mapper.get_question(elgg_question)
+
+            try:
+
+                question.save()
+                self._import_comments_for(question, elgg_question.entity.guid, elgg_question.entity)
+
+                GuidMap.objects.create(id=elgg_question.entity.guid, guid=question.guid, object_type='question')
+
+                self.stdout.write(".", ending="")
+            except IntegrityError as e:
+                self.stdout.write(self.style.WARNING("Error: %s\n" % str(e)))
+                pass
+
+
+    def _import_comments_for(self, entity: Entity, elgg_guid, elgg_entity=None):
         elgg_comment_items = ElggObjectsEntity.objects.using(self.import_id).filter(entity__subtype__subtype='comment', entity__container_guid=elgg_guid)
 
         for elgg_comment in elgg_comment_items:
@@ -413,6 +436,10 @@ class Command(InteractiveTenantOption, BaseCommand):
             except IntegrityError as e:
                 self.stdout.write(self.style.WARNING("Error: %s\n" % str(e)))
                 pass
+
+            # question needs comment to be created before save
+            if entity.type_to_string is 'question':
+                self.helpers.save_best_answer(entity, comment, elgg_entity)
 
     def debug_model(self, model):
         self.stdout.write(', '.join("%s: %s" % item for item in vars(model).items() if not item[0].startswith('_')))
