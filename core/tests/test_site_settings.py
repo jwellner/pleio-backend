@@ -4,6 +4,7 @@ from django.test import override_settings
 from core.models import Group, Comment
 from user.models import User
 from blog.models import Blog
+from cms.models import Page
 from core.constances import ACCESS_TYPE
 from backend2.schema import schema
 from ariadne import graphql_sync
@@ -20,6 +21,8 @@ class SiteSettingsTestCase(FastTenantTestCase):
         self.user = mixer.blend(User)
         self.admin = mixer.blend(User, is_admin=True)
         self.anonymousUser = AnonymousUser()
+        self.cmsPage1 = mixer.blend(Page, title="Z title")
+        self.cmsPage2 = mixer.blend(Page, title="A title")
 
         self.query = """
             query SiteGeneralSettings {
@@ -144,6 +147,8 @@ class SiteSettingsTestCase(FastTenantTestCase):
         """
 
     def tearDown(self):
+            self.cmsPage1.delete()
+            self.cmsPage2.delete()
             self.admin.delete()
             self.user.delete()
 
@@ -179,16 +184,19 @@ class SiteSettingsTestCase(FastTenantTestCase):
         self.assertEqual(data["siteSettings"]["colorPrimary"], "#0e2f56")
         self.assertEqual(data["siteSettings"]["colorSecondary"], "#009ee3")
         self.assertEqual(data["siteSettings"]["theme"], "leraar")
-        # TODO: self.assertEqual(data["siteSettings"]["logo"], "")
+        self.assertEqual(data["siteSettings"]["logo"], "")
         self.assertEqual(data["siteSettings"]["logoAlt"], "")
         self.assertEqual(data["siteSettings"]["likeIcon"], "heart")
 
         self.assertEqual(data["siteSettings"]["startPageOptions"], [{"value": "activity", "label": "Activiteitenstroom"},{"value": "cms", "label": "CMS pagina"}])
         self.assertEqual(data["siteSettings"]["startPage"], "activity")
-        self.assertEqual(data["siteSettings"]["startPageCmsOptions"], [])
+        self.assertEqual(data["siteSettings"]["startPageCmsOptions"], [
+            {"value": self.cmsPage2.guid, 'label': self.cmsPage2.title},
+            {"value": self.cmsPage1.guid, 'label': self.cmsPage1.title}
+        ])
         self.assertEqual(data["siteSettings"]["startPageCms"], "")
         self.assertEqual(data["siteSettings"]["showIcon"], False)
-        # TODO: self.assertEqual(data["siteSettings"]["icon"], "heart")
+        self.assertEqual(data["siteSettings"]["icon"], "")
         self.assertEqual(data["siteSettings"]["menu"], [
             {"link": "/blog", "title": "Blog", "children": []},
             {"link": "/news", "title": "Nieuws", "children": []},

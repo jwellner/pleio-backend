@@ -1,15 +1,18 @@
 from django.conf import settings
 from django.utils import timezone
 from django.utils.translation import ugettext_lazy
+from cms.models import Page
 from core import config
 from core.constances import NOT_LOGGED_IN, USER_NOT_SITE_ADMIN
 from core.lib import get_access_ids, get_activity_filters
 from core.models import UserProfile, ProfileField
 from graphql import GraphQLError
 
+
 def get_online_users():
     ten_minutes_ago = timezone.now() - timezone.timedelta(minutes=10)
     return UserProfile.objects.filter(last_online__gte=ten_minutes_ago).count()
+
 
 def get_settings():
     """Temporary helper to build window.__SETTINGS__"""
@@ -38,6 +41,7 @@ def get_settings():
 
 
 def get_site():
+
     site = {
         'guid': 1,
         'name': config.NAME,
@@ -68,7 +72,7 @@ def get_site():
             'font': config.FONT,
             'colorPrimary': config.COLOR_PRIMARY,
             'colorSecondary': config.COLOR_SECONDARY,
-            'colorHeader': config.COLOR_HEADER,
+            'colorHeader': get_color_header(),
         },
         'customTagsAllowed': config.CUSTOM_TAGS_ENABLED,
         'tagCategories': config.TAG_CATEGORIES,
@@ -84,6 +88,18 @@ def get_site():
 
 def get_site_settings():
 
+    defaultAccessIdOptions = [
+            {"value": 0, "label": ugettext_lazy("Just me")},
+            {"value": 1, "label": ugettext_lazy("Logged in users")}
+        ]
+
+    if not config.IS_CLOSED:
+        defaultAccessIdOptions.append({"value": 2, "label": ugettext_lazy("Public")})
+
+    start_page_cms_options = []
+    for page in Page.objects.all().order_by('title'):
+        start_page_cms_options.append({"value": page.guid, "label": page.title})
+
     site_settings = {
         'guid': 1,
         'name': config.NAME,
@@ -93,11 +109,7 @@ def get_site_settings():
         'isClosed': config.IS_CLOSED,
         'allowRegistration': config.ALLOW_REGISTRATION,
         'defaultAccessId': config.DEFAULT_ACCESS_ID,
-        'defaultAccessIdOptions': [
-            {"value": 0, "label": ugettext_lazy("Just me")},
-            {"value": 1, "label": ugettext_lazy("Logged in users")},
-            {"value": 2, "label": ugettext_lazy("Public")}
-        ],
+        'defaultAccessIdOptions': defaultAccessIdOptions,
 
         'googleAnalyticsUrl': config.GOOGLE_ANALYTICS_URL,
         'piwikUrl': config.PIWIK_URL,
@@ -106,7 +118,7 @@ def get_site_settings():
         'font': config.FONT,
         'colorPrimary': config.COLOR_PRIMARY,
         'colorSecondary': config.COLOR_SECONDARY,
-        'colorHeader': config.COLOR_HEADER,
+        'colorHeader': get_color_header(),
         'theme': config.THEME,
         'themeOptions': config.THEME_OPTIONS,
         'fontOptions': [
@@ -120,8 +132,8 @@ def get_site_settings():
 
         'startPageOptions': [{"value": "activity", "label": ugettext_lazy("Activity stream")},{"value": "cms", "label": ugettext_lazy("CMS page")}],
         'startPage': config.STARTPAGE,
-        # TODO: Get all cms pages
-        'startPageCmsOptions': [],
+
+        'startPageCmsOptions': start_page_cms_options,
         'startPageCms': config.STARTPAGE_CMS,
         'icon': config.ICON,
         'showIcon': config.ICON_ENABLED,
@@ -189,6 +201,11 @@ def get_site_settings():
     }
 
     return site_settings
+
+def get_color_header():
+    if not config.COLOR_HEADER:
+        return config.COLOR_PRIMARY
+    return config.COLOR_HEADER
 
 def get_profile():
     profile_fields = []

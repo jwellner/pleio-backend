@@ -23,7 +23,7 @@ DEFAULT_SITE_CONFIG = {
     'FONT': ('Rijksoverheid Sans', 'Font'),
     'COLOR_PRIMARY': ('#0e2f56', 'Primary color'),
     'COLOR_SECONDARY': ('#009ee3', 'Secondary color'),
-    'COLOR_HEADER': ('#0e2f56', 'Header color'),
+    'COLOR_HEADER': ('', 'Header color'),
 
     'THEME': ('leraar', 'Theme'),
     'LOGO': ('', 'Logo'),
