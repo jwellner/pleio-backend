@@ -1,6 +1,8 @@
 from django.db import connection
+from django.core.files import File
 from django_tenants.test.cases import FastTenantTestCase
 from backend2.schema import schema
+from django.conf import settings
 from ariadne import graphql_sync
 import json
 from django.core.cache import cache
@@ -10,6 +12,7 @@ from core.models import Group, Widget, Setting
 from user.models import User
 from mixer.backend.django import mixer
 from graphql import GraphQLError
+from unittest.mock import patch, MagicMock
 
 class EditSiteSettingTestCase(FastTenantTestCase):
 
@@ -25,7 +28,6 @@ class EditSiteSettingTestCase(FastTenantTestCase):
         Setting.objects.all().delete()
         cache.clear()
 
-
     def test_edit_site_setting_by_admin(self):
         mutation = """
             mutation EditSiteSetting($input: editSiteSettingInput!) {
@@ -37,6 +39,10 @@ class EditSiteSettingTestCase(FastTenantTestCase):
                         isClosed
                         allowRegistration
                         defaultAccessId
+                        defaultAccessIdOptions {
+                            value
+                            label
+                        }
                         googleAnalyticsUrl
                         piwikUrl
                         piwikId
@@ -209,6 +215,7 @@ class EditSiteSettingTestCase(FastTenantTestCase):
         self.assertEqual(data["editSiteSetting"]["siteSettings"]["isClosed"], True)
         self.assertEqual(data["editSiteSetting"]["siteSettings"]["allowRegistration"], False)
         self.assertEqual(data["editSiteSetting"]["siteSettings"]["defaultAccessId"], 0)
+        self.assertEqual(data["editSiteSetting"]["siteSettings"]["defaultAccessIdOptions"], [{'value': 0, 'label': 'Alleen mijzelf'}, {'value': 1, 'label': 'Ingelogde gebruikers'}])
         self.assertEqual(data["editSiteSetting"]["siteSettings"]["googleAnalyticsUrl"], "url2")
         self.assertEqual(data["editSiteSetting"]["siteSettings"]["piwikUrl"], "url3")
         self.assertEqual(data["editSiteSetting"]["siteSettings"]["piwikId"], "id1")
@@ -274,6 +281,43 @@ class EditSiteSettingTestCase(FastTenantTestCase):
         self.assertEqual(data["editSiteSetting"]["siteSettings"]["statusUpdateGroups"], False)
         self.assertEqual(data["editSiteSetting"]["siteSettings"]["subgroups"], True)
         self.assertEqual(data["editSiteSetting"]["siteSettings"]["groupMemberExport"], True)
+
+
+    @patch("{}.open".format(settings.DEFAULT_FILE_STORAGE))
+    def test_edit_site_setting_logo_and_icon(self, mock_open):
+        file_mock = MagicMock(spec=File)
+        file_mock.name = 'logo.png'
+        file_mock.content_type = 'image/png'
+        file_mock.id = 'a12'
+
+        mock_open.return_value = file_mock
+
+        mutation = """
+            mutation EditSiteSetting($input: editSiteSettingInput!) {
+                editSiteSetting(input: $input) {
+                    siteSettings {
+                        logo
+                        icon
+                    }
+                }
+            }
+        """
+
+        variables = {
+            "input": {
+                "logo": "image.png",
+                "icon": "image.png"
+            }
+        }
+
+        request = HttpRequest()
+        request.user = self.admin
+        result = graphql_sync(schema, { "query": mutation, "variables": variables }, context_value=request)
+
+        data = result[1]["data"]
+
+        self.assertIsNotNone(data["editSiteSetting"]["siteSettings"]["logo"])
+        self.assertIsNotNone(data["editSiteSetting"]["siteSettings"]["icon"])
 
 
     def test_edit_site_setting_by_anonymous(self):

@@ -1,10 +1,12 @@
 from graphql import GraphQLError
+from core import config
 from core.models import Setting, ProfileField
 from core.constances import NOT_LOGGED_IN, USER_NOT_SITE_ADMIN
-from core.lib import remove_none_from_dict
+from core.lib import remove_none_from_dict, access_id_to_acl
 from core.resolvers.query_site import get_site_settings
 from django.db import connection
 from django.core.cache import cache
+from file.models import FileFolder
 
 
 def save_setting(key, value):
@@ -30,6 +32,9 @@ def get_menu_children(menu, item_id, depth=0):
 def resolve_edit_site_setting(_, info, input):
     # pylint: disable=redefined-builtin
     # pylint: disable=unused-variable
+    # pylint: disable=too-many-branches
+    # pylint: disable=too-many-locals
+
     user = info.context.user
     clean_input = remove_none_from_dict(input)
 
@@ -123,6 +128,57 @@ def resolve_edit_site_setting(_, info, input):
             profile_field.save()
 
         save_setting('PROFILE', clean_input.get('profile'))
+
+    if 'logo' in clean_input:
+        if not clean_input.get("logo"):
+            raise GraphQLError("NO_FILE")
+
+        # TODO: upload to a logo folder?
+        logo = FileFolder()
+
+        logo.owner = user
+        logo.upload = clean_input.get("logo")
+
+        logo.read_access = access_id_to_acl(logo, 2)
+        logo.write_access = access_id_to_acl(logo, 0)
+
+        logo.save()
+
+        logo_url = "/site/logo/" + str(logo.id)
+        save_setting('LOGO', logo_url)
+
+    if 'removeLogo' in clean_input:
+        try:
+            FileFolder.objects.get(id=config.LOGO[11:]).delete()
+        except Exception:
+            pass
+        save_setting('LOGO', "")
+
+    if 'icon' in clean_input:
+        if not clean_input.get("icon"):
+            raise GraphQLError("NO_FILE")
+
+        # TODO: upload to an icon folder?
+        icon = FileFolder()
+
+        icon.owner = user
+        icon.upload = clean_input.get("icon")
+
+        icon.read_access = access_id_to_acl(icon, 2)
+        icon.write_access = access_id_to_acl(icon, 0)
+
+        icon.save()
+
+        icon_url = "/site/icon/" + str(icon.id)
+
+        save_setting('ICON', icon_url)
+
+    if 'removeIcon' in clean_input:
+        try:
+            FileFolder.objects.get(id=config.ICON[11:]).delete()
+        except Exception:
+            pass
+        save_setting('ICON', "")
 
     return {
         "siteSettings": get_site_settings()
