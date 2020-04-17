@@ -5,7 +5,7 @@ from core import config
 from core.lib import ACCESS_TYPE, access_id_to_acl
 from core.models import ProfileField, UserProfile, UserProfileField, Group, Entity, Comment
 from backend2 import settings
-from elgg.models import Instances, ElggUsersEntity, GuidMap, ElggSitesEntity, ElggGroupsEntity, ElggObjectsEntity
+from elgg.models import Instances, ElggUsersEntity, GuidMap, ElggSitesEntity, ElggGroupsEntity, ElggObjectsEntity, ElggNotifications
 from elgg.helpers import ElggHelpers
 from elgg.mapper import Mapper
 from user.models import User
@@ -99,6 +99,7 @@ class Command(InteractiveTenantOption, BaseCommand):
         self._import_columns()
         self._import_widgets()
         self._import_status_updates()
+        self._import_notifications()
 
         # All done!
         self.stdout.write("\n>> Done!")
@@ -513,6 +514,22 @@ class Command(InteractiveTenantOption, BaseCommand):
                 self._import_comments_for(status_update, elgg_status_update.entity.guid)
 
                 GuidMap.objects.create(id=elgg_status_update.entity.guid, guid=status_update.guid, object_type='status_update')
+
+                self.stdout.write(".", ending="")
+            except IntegrityError as e:
+                self.stdout.write(self.style.WARNING("Error: %s\n" % str(e)))
+                pass
+
+    def _import_notifications(self):
+        elgg_notification_items = ElggNotifications.objects.using(self.import_id).all()
+
+        self.stdout.write("\n>> Notifications (%i) " % elgg_notification_items.count(), ending="")
+
+        for elgg_notification in elgg_notification_items:
+            notification = self.mapper.get_notification(elgg_notification)
+
+            try:
+                notification.save()
 
                 self.stdout.write(".", ending="")
             except IntegrityError as e:
