@@ -1,5 +1,6 @@
 from phpserialize import unserialize
-from elgg.models import ElggEntities, ElggObjectsEntity, ElggPrivateSettings, ElggConfig
+from elgg.models import ElggEntities, ElggObjectsEntity, ElggPrivateSettings, ElggConfig, GuidMap
+from cms.models import Page
 
 class ElggHelpers():
     database = None
@@ -120,3 +121,17 @@ class ElggHelpers():
         if elgg_entity.relation.filter(relationship="correctAnswer", left__guid=elgg_entity.guid).first():
             question.best_answer = comment
             question.save()
+
+    def save_parent_page(self, elgg_page):
+        guid_map_page = GuidMap.objects.get(id=elgg_page.entity.guid, object_type='page')
+        page = Page.objects.get(id=guid_map_page.guid)
+
+        try:
+
+            guid_map_parent = GuidMap.objects.get(id=elgg_page.entity.container_guid, object_type='page')
+            parent = Page.objects.get(id=guid_map_parent.guid)
+            page.parent = parent
+            page.save()
+
+        except Exception:
+            pass

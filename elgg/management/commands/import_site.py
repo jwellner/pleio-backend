@@ -94,6 +94,10 @@ class Command(InteractiveTenantOption, BaseCommand):
         self._import_events()
         self._import_discussions()
         self._import_questions()
+        self._import_pages()
+        self._import_rows()
+        self._import_columns()
+        self._import_widgets()
 
         # All done!
         self.stdout.write("\n>> Done!")
@@ -421,6 +425,79 @@ class Command(InteractiveTenantOption, BaseCommand):
                 self.stdout.write(self.style.WARNING("Error: %s\n" % str(e)))
                 pass
 
+    def _import_pages(self):
+        elgg_page_items = ElggObjectsEntity.objects.using(self.import_id).filter(entity__subtype__subtype='page')
+
+        self.stdout.write("\n>> Pages (%i) " % elgg_page_items.count(), ending="")
+
+        for elgg_page in elgg_page_items:
+            page = self.mapper.get_page(elgg_page)
+
+            try:
+                page.save()
+
+                GuidMap.objects.create(id=elgg_page.entity.guid, guid=page.guid, object_type='page')
+
+                self.stdout.write(".", ending="")
+            except IntegrityError as e:
+                self.stdout.write(self.style.WARNING("Error: %s\n" % str(e)))
+                pass
+
+        # add parent pages
+        for elgg_page in elgg_page_items:
+            self.helpers.save_parent_page(elgg_page)
+
+    def _import_rows(self):
+        elgg_row_items = ElggObjectsEntity.objects.using(self.import_id).filter(entity__subtype__subtype='row')
+
+        self.stdout.write("\n>> Rows (%i) " % elgg_row_items.count(), ending="")
+
+        for elgg_row in elgg_row_items:
+            row = self.mapper.get_row(elgg_row)
+
+            try:
+                row.save()
+
+                GuidMap.objects.create(id=elgg_row.entity.guid, guid=row.guid, object_type='row')
+
+                self.stdout.write(".", ending="")
+            except IntegrityError as e:
+                self.st
+
+    def _import_columns(self):
+        elgg_column_items = ElggObjectsEntity.objects.using(self.import_id).filter(entity__subtype__subtype='column')
+
+        self.stdout.write("\n>> Columns (%i) " % elgg_column_items.count(), ending="")
+
+        for elgg_column in elgg_column_items:
+            column = self.mapper.get_column(elgg_column)
+
+            try:
+                column.save()
+
+                GuidMap.objects.create(id=elgg_column.entity.guid, guid=column.guid, object_type='column')
+
+                self.stdout.write(".", ending="")
+            except IntegrityError as e:
+                self.st
+
+    def _import_widgets(self):
+        elgg_widget_items = ElggObjectsEntity.objects.using(self.import_id).filter(entity__subtype__subtype='page_widget')
+
+        self.stdout.write("\n>> Widgets (%i) " % elgg_widget_items.count(), ending="")
+
+        for elgg_widget in elgg_widget_items:
+            widget = self.mapper.get_widget(elgg_widget)
+
+            try:
+                widget.save()
+
+                GuidMap.objects.create(id=elgg_widget.entity.guid, guid=widget.guid, object_type='widget')
+
+                self.stdout.write(".", ending="")
+            except IntegrityError as e:
+                self.st
+
 
     def _import_comments_for(self, entity: Entity, elgg_guid, elgg_entity=None):
         elgg_comment_items = ElggObjectsEntity.objects.using(self.import_id).filter(entity__subtype__subtype='comment', entity__container_guid=elgg_guid)
@@ -438,7 +515,7 @@ class Command(InteractiveTenantOption, BaseCommand):
                 pass
 
             # question needs comment to be created before save
-            if entity.type_to_string is 'question':
+            if entity.type_to_string == 'question':
                 self.helpers.save_best_answer(entity, comment, elgg_entity)
 
     def debug_model(self, model):

@@ -1,14 +1,19 @@
+import json
+import html
 from datetime import datetime
 from user.models import User
-from core.models import UserProfile, UserProfileField, ProfileField, Group, Comment
+from core.models import UserProfile, UserProfileField, ProfileField, Group, Comment, Widget
 from blog.models import Blog
 from news.models import News
 from event.models import Event
 from discussion.models import Discussion
 from question.models import Question
+from cms.models import Page, Row, Column
 from core.lib import ACCESS_TYPE, access_id_to_acl
-from elgg.models import ElggUsersEntity, ElggSitesEntity, ElggGroupsEntity, ElggObjectsEntity, GuidMap
+from elgg.models import ElggUsersEntity, ElggSitesEntity, ElggGroupsEntity, ElggObjectsEntity, ElggPrivateSettings, GuidMap
 from elgg.helpers import ElggHelpers
+
+
 
 class Mapper():
 
@@ -234,6 +239,86 @@ class Mapper():
         entity.updated_at = datetime.fromtimestamp(elgg_entity.entity.time_updated)
 
         return entity
+
+    def get_page(self, elgg_entity: ElggObjectsEntity):
+        entity = Page()
+        entity.title = elgg_entity.title
+        entity.description = elgg_entity.description
+        entity.rich_description = elgg_entity.entity.get_metadata_value_by_name("richDescription")
+        entity.page_type = elgg_entity.entity.get_metadata_value_by_name("pageType")
+
+        entity.position = int(elgg_entity.entity.get_metadata_value_by_name("position")) \
+            if elgg_entity.entity.get_metadata_value_by_name("position") else 0
+        entity.tags = self.helpers.get_list_values(elgg_entity.entity.get_metadata_value_by_name("tags"))
+
+        entity.owner = User.objects.get(id=GuidMap.objects.get(id=elgg_entity.entity.owner_guid).guid)
+
+        entity.write_access = [ACCESS_TYPE.user.format(entity.owner.guid)]
+        entity.read_access = access_id_to_acl(entity.owner, elgg_entity.entity.access_id)
+
+        entity.created_at = datetime.fromtimestamp(elgg_entity.entity.time_created)
+        entity.updated_at = datetime.fromtimestamp(elgg_entity.entity.time_updated)
+
+        return entity
+
+    def get_row(self, elgg_entity: ElggObjectsEntity):
+        entity = Row()
+        entity.position = int(elgg_entity.entity.get_metadata_value_by_name("position")) \
+            if elgg_entity.entity.get_metadata_value_by_name("position") else 0
+        entity.is_full_width = elgg_entity.entity.get_metadata_value_by_name("is_full_width") == "1"
+
+        # get the parent page
+        parent_guid = elgg_entity.entity.get_metadata_value_by_name("parent_guid")
+        guid_map_page = GuidMap.objects.get(id=parent_guid, object_type='page')
+        entity.page = Page.objects.get(id=guid_map_page.guid)
+
+        return entity
+
+    def get_column(self, elgg_entity: ElggObjectsEntity):
+        entity = Column()
+        entity.position = int(elgg_entity.entity.get_metadata_value_by_name("position")) \
+            if elgg_entity.entity.get_metadata_value_by_name("position") else 0
+        entity.width = [int(elgg_entity.entity.get_metadata_value_by_name("width"))]
+
+        # get the parent page
+        guid_map_page = GuidMap.objects.get(id=elgg_entity.entity.container_guid, object_type='page')
+        entity.page = Page.objects.get(id=guid_map_page.guid)
+
+        # get the parent row
+        parent_guid = elgg_entity.entity.get_metadata_value_by_name("parent_guid")
+        guid_map_page = GuidMap.objects.get(id=parent_guid, object_type='row')
+        entity.row = Row.objects.get(id=guid_map_page.guid)
+
+        return entity
+
+    def get_widget(self, elgg_entity: ElggObjectsEntity):
+        entity = Widget()
+        entity.position = int(elgg_entity.entity.get_metadata_value_by_name("position")) \
+            if elgg_entity.entity.get_metadata_value_by_name("position") else 0
+        entity.type = elgg_entity.entity.get_metadata_value_by_name("widget_type")
+
+        try:
+            has_settings = ElggPrivateSettings.objects.using(self.db).get(entity__guid=elgg_entity.entity.guid, name='settings')
+            entity.settings = json.loads(html.unescape(has_settings.value))
+        except Exception:
+            entity.settings = []
+
+        in_group = GuidMap.objects.filter(id=elgg_entity.entity.container_guid, object_type="group").first()
+        if in_group:
+            entity.group = Group.objects.get(id=in_group.guid)
+
+        in_page = GuidMap.objects.filter(id=elgg_entity.entity.container_guid, object_type="page").first()
+        if in_page:
+            entity.page = Page.objects.get(id=in_page.guid)
+
+        parent_guid = elgg_entity.entity.get_metadata_value_by_name("parent_guid")
+        if parent_guid:
+            in_column = GuidMap.objects.filter(id=parent_guid, object_type="column").first()
+            if in_column:
+                entity.column = Column.objects.get(id=in_column.guid)
+
+        return entity
+
 
     def get_comment(self, elgg_entity: ElggObjectsEntity):
         entity = Comment()
