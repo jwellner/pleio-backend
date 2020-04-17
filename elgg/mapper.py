@@ -9,6 +9,7 @@ from event.models import Event
 from discussion.models import Discussion
 from question.models import Question
 from cms.models import Page, Row, Column
+from activity.models import StatusUpdate
 from core.lib import ACCESS_TYPE, access_id_to_acl
 from elgg.models import ElggUsersEntity, ElggSitesEntity, ElggGroupsEntity, ElggObjectsEntity, ElggPrivateSettings, GuidMap
 from elgg.helpers import ElggHelpers
@@ -205,7 +206,7 @@ class Mapper():
 
         entity.owner = User.objects.get(id=GuidMap.objects.get(id=elgg_entity.entity.owner_guid).guid)
 
-        in_group = GuidMap.objects.filter(id=elgg_entity.entity.container_guid, object_type="discussion").first()
+        in_group = GuidMap.objects.filter(id=elgg_entity.entity.container_guid, object_type="group").first()
         if in_group:
             entity.group = Group.objects.get(id=in_group.guid)
 
@@ -228,7 +229,7 @@ class Mapper():
 
         entity.owner = User.objects.get(id=GuidMap.objects.get(id=elgg_entity.entity.owner_guid).guid)
 
-        in_group = GuidMap.objects.filter(id=elgg_entity.entity.container_guid, object_type="question").first()
+        in_group = GuidMap.objects.filter(id=elgg_entity.entity.container_guid, object_type="group").first()
         if in_group:
             entity.group = Group.objects.get(id=in_group.guid)
 
@@ -319,6 +320,26 @@ class Mapper():
 
         return entity
 
+    def get_status_update(self, elgg_entity: ElggObjectsEntity):
+        entity = StatusUpdate()
+        entity.title = elgg_entity.title
+        entity.description = elgg_entity.description
+        entity.rich_description = elgg_entity.entity.get_metadata_value_by_name("richDescription")
+        entity.tags = self.helpers.get_list_values(elgg_entity.entity.get_metadata_value_by_name("tags"))
+
+        entity.owner = User.objects.get(id=GuidMap.objects.get(id=elgg_entity.entity.owner_guid).guid)
+
+        in_group = GuidMap.objects.filter(id=elgg_entity.entity.container_guid, object_type="group").first()
+        if in_group:
+            entity.group = Group.objects.get(id=in_group.guid)
+
+        entity.write_access = [ACCESS_TYPE.user.format(entity.owner.guid)]
+        entity.read_access = access_id_to_acl(entity.owner, elgg_entity.entity.access_id)
+
+        entity.created_at = datetime.fromtimestamp(elgg_entity.entity.time_created)
+        entity.updated_at = datetime.fromtimestamp(elgg_entity.entity.time_updated)
+
+        return entity
 
     def get_comment(self, elgg_entity: ElggObjectsEntity):
         entity = Comment()

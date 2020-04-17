@@ -98,6 +98,7 @@ class Command(InteractiveTenantOption, BaseCommand):
         self._import_rows()
         self._import_columns()
         self._import_widgets()
+        self._import_status_updates()
 
         # All done!
         self.stdout.write("\n>> Done!")
@@ -498,6 +499,25 @@ class Command(InteractiveTenantOption, BaseCommand):
             except IntegrityError as e:
                 self.st
 
+    def _import_status_updates(self):
+        elgg_status_update_items = ElggObjectsEntity.objects.using(self.import_id).filter(entity__subtype__subtype='thewire')
+
+        self.stdout.write("\n>> StatusUpdates (%i) " % elgg_status_update_items.count(), ending="")
+
+        for elgg_status_update in elgg_status_update_items:
+            status_update = self.mapper.get_status_update(elgg_status_update)
+
+            try:
+                status_update.save()
+
+                self._import_comments_for(status_update, elgg_status_update.entity.guid)
+
+                GuidMap.objects.create(id=elgg_status_update.entity.guid, guid=status_update.guid, object_type='status_update')
+
+                self.stdout.write(".", ending="")
+            except IntegrityError as e:
+                self.stdout.write(self.style.WARNING("Error: %s\n" % str(e)))
+                pass
 
     def _import_comments_for(self, entity: Entity, elgg_guid, elgg_entity=None):
         elgg_comment_items = ElggObjectsEntity.objects.using(self.import_id).filter(entity__subtype__subtype='comment', entity__container_guid=elgg_guid)
