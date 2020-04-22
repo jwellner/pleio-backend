@@ -13,7 +13,7 @@ class AnnotationManager(models.Manager):
     def get_for(self, user, content_object, key, **kwargs):
         content_type = ContentType.objects.get_for_model(content_object)
         try:
-            return self.get(key=key, content_type=content_type, 
+            return self.get(key=key, content_type=content_type,
                 object_id=content_object.pk, user=user, **kwargs)
         except self.model.DoesNotExist:
             return None
@@ -54,7 +54,7 @@ class Annotation(models.Model):
     created_at = models.DateTimeField(default=timezone.now)
 
     objects = AnnotationManager()
-    
+
     class Meta:
         ordering = ['-created_at']
         unique_together = ('content_type', 'object_id', 'user', 'key')
@@ -68,7 +68,7 @@ class VoteMixin(models.Model):
         result = Annotation.objects.get_all_for(content_object=self, key="voted").annotate(
             score=Cast(KeyTextTransform('score', 'data'), IntegerField())
         ).aggregate(Sum("score"))
-        
+
         count = result.get("score__sum")
 
         if count:
@@ -79,12 +79,12 @@ class VoteMixin(models.Model):
     def has_voted(self, user):
         if not user.is_authenticated:
             return False
-        
+
         vote = Annotation.objects.get_for(content_object=self, key="voted", user=user)
 
         if vote:
             return True
-        
+
         return False
 
     def can_vote(self, user):
@@ -96,7 +96,7 @@ class VoteMixin(models.Model):
     def get_vote(self, user):
         if not user.is_authenticated:
             return None
-        
+
         return Annotation.objects.get_for(content_object=self, key="voted", user=user)
 
     def add_vote(self, user, score):
@@ -105,12 +105,12 @@ class VoteMixin(models.Model):
 
         if score in [-1,1]:
             return Annotation.objects.create(
-                user=user, 
-                content_object=self, 
-                key="voted", 
+                user=user,
+                content_object=self,
+                key="voted",
                 data={"score": score}
             )
-        
+
         return None
 
     def remove_vote(self, user):
@@ -147,7 +147,7 @@ class BookmarkMixin(models.Model):
     def get_bookmark(self, user):
         if not user.is_authenticated:
             return None
-        
+
         return Annotation.objects.get_for(content_object=self, key="bookmarked", user=user)
 
     def add_bookmark(self, user):
@@ -155,8 +155,8 @@ class BookmarkMixin(models.Model):
             return None
 
         return Annotation.objects.create(
-            user=user, 
-            content_object=self, 
+            user=user,
+            content_object=self,
             key="bookmarked"
         )
 

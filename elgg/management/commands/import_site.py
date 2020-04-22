@@ -328,7 +328,7 @@ class Command(InteractiveTenantOption, BaseCommand):
 
             try:
                 blog.save()
-
+                self.helpers.save_entity_annotations(elgg_blog, blog)
                 self._import_comments_for(blog, elgg_blog.entity.guid)
 
                 GuidMap.objects.create(id=elgg_blog.entity.guid, guid=blog.guid, object_type='blog')
@@ -348,7 +348,7 @@ class Command(InteractiveTenantOption, BaseCommand):
 
             try:
                 news.save()
-
+                self.helpers.save_entity_annotations(elgg_news, news)
                 self._import_comments_for(news, elgg_news.entity.guid)
 
                 GuidMap.objects.create(id=elgg_news.entity.guid, guid=news.guid, object_type='news')
@@ -368,7 +368,7 @@ class Command(InteractiveTenantOption, BaseCommand):
 
             try:
                 event.save()
-
+                self.helpers.save_entity_annotations(elgg_event, event)
                 # attending
                 relations = elgg_event.entity.relation.filter(relationship="event_attending", right__type='user')
                 for relation in relations:
@@ -439,7 +439,7 @@ class Command(InteractiveTenantOption, BaseCommand):
 
             try:
                 discussion.save()
-
+                self.helpers.save_entity_annotations(elgg_discussion, discussion)
                 self._import_comments_for(discussion, elgg_discussion.entity.guid)
 
                 GuidMap.objects.create(id=elgg_discussion.entity.guid, guid=discussion.guid, object_type='discussion')
@@ -460,6 +460,8 @@ class Command(InteractiveTenantOption, BaseCommand):
             try:
 
                 question.save()
+
+                self.helpers.save_entity_annotations(elgg_question, question)
                 self._import_comments_for(question, elgg_question.entity.guid, elgg_question.entity)
 
                 GuidMap.objects.create(id=elgg_question.entity.guid, guid=question.guid, object_type='question')
@@ -581,6 +583,7 @@ class Command(InteractiveTenantOption, BaseCommand):
 
             try:
                 status_update.save()
+                self.helpers.save_entity_annotations(elgg_status_update, status_update)
 
                 self._import_comments_for(status_update, elgg_status_update.entity.guid)
 
@@ -706,6 +709,8 @@ class Command(InteractiveTenantOption, BaseCommand):
             try:
                 comment.container = entity
                 comment.save()
+
+                self.helpers.save_entity_annotations(elgg_comment, comment, ["vote"])
 
                 GuidMap.objects.create(id=elgg_comment.entity.guid, guid=comment.guid, object_type='comment')
             except IntegrityError as e:
