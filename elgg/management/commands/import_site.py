@@ -149,6 +149,34 @@ class Command(InteractiveTenantOption, BaseCommand):
         config.SHOW_LOGIN_REGISTER = self.helpers.get_plugin_setting("show_login_register") == "yes"
         config.ADVANCED_PERMISSIONS_ENABLED = self.helpers.get_plugin_setting("advanced_permissions") == "yes"
 
+        config.DESCRIPTION = html.unescape(elgg_site.description)
+        config.IS_CLOSED = self.helpers.get_site_config('walled_garden')
+        config.ALLOW_REGISTRATION = self.helpers.get_site_config('allow_registration')
+        config.GOOGLE_ANALYTICS_URL = html.unescape(self.helpers.get_plugin_setting("google_analytics"))
+        config.PIWIK_URL = html.unescape(self.helpers.get_plugin_setting("piwik_url"))
+        config.PIWIK_ID = html.unescape(self.helpers.get_plugin_setting("piwik"))
+        config.LIKE_ICON = self.helpers.get_plugin_setting("like_icon") == "yes"
+        config.NUMBER_OF_FEATURED_ITEMS = self.helpers.get_plugin_setting("number_of_featured_items")
+        config.ENABLE_FEED_SORTING = self.helpers.get_plugin_setting("enable_feed_sorting") == "yes"
+        config.SUBTITLE = html.unescape(self.helpers.get_plugin_setting("subtitle"))
+        config.EMAIL_OVERVIEW_DEFAULT_FREQUENCY = html.unescape(self.helpers.get_plugin_setting("default_email_overview"))
+        config.EMAIL_OVERVIEW_SUBJECT = html.unescape(self.helpers.get_plugin_setting("email_overview_subject"))
+        config.EMAIL_OVERVIEW_TITLE = html.unescape(self.helpers.get_plugin_setting("email_overview_title"))
+        config.EMAIL_OVERVIEW_INTRO = html.unescape(self.helpers.get_plugin_setting("email_overview_intro"))
+        config.SHOW_UP_DOWN_VOTING = self.helpers.get_plugin_setting("enable_up_down_voting") == "yes"
+        config.ENABLE_SHARING = self.helpers.get_plugin_setting("enable_sharing") == "yes"
+        config.SHOW_VIEW_COUNT = self.helpers.get_plugin_setting("enable_views_count") == "yes"
+        config.NEWSLETTER = self.helpers.get_plugin_setting("newsletter") == "yes"
+        config.CANCEL_MEMBERSHIP_ENABLED = self.helpers.get_plugin_setting("cancel_membership_enabled") == "yes"
+        config.SHOW_EXCERPT_IN_NEWS_CARD = self.helpers.get_plugin_setting("show_excerpt_in_news_card") == "yes"
+        config.SHOW_TAG_IN_NEWS_CARD = self.helpers.get_plugin_setting("show_tag_in_news_card") == "yes"
+        config.COMMENT_ON_NEWS = self.helpers.get_plugin_setting("comments_on_news") == "yes"
+        config.EVENT_EXPORT = self.helpers.get_plugin_setting("event_export") == "yes"
+        config.QUESTIONER_CAN_CHOOSE_BEST_ANSWER = self.helpers.get_plugin_setting("questioner_can_choose_best_answer") == "yes"
+        config.STATUS_UPDATE_GROUPS = self.helpers.get_plugin_setting("status_update_groups") == "yes"
+        config.SUBGROUPS = self.helpers.get_plugin_setting("subgroups") == "yes"
+        config.GROUP_MEMBER_EXPORT = self.helpers.get_plugin_setting("member_export") == "yes"
+
         self.stdout.write(".", ending="")
 
     def _import_groups(self):
@@ -448,6 +476,11 @@ class Command(InteractiveTenantOption, BaseCommand):
         # add parent pages
         for elgg_page in elgg_page_items:
             self.helpers.save_parent_page(elgg_page)
+
+        config_cms_page = self.helpers.get_plugin_setting("startpage_cms")
+        if config_cms_page:
+            cms_page_guid = GuidMap.objects.get(id=int(config_cms_page)).guid
+            config.STARTPAGE_CMS = str(cms_page_guid)
 
     def _import_rows(self):
         elgg_row_items = ElggObjectsEntity.objects.using(self.import_id).filter(entity__subtype__subtype='row')
