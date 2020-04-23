@@ -97,6 +97,7 @@ class Command(InteractiveTenantOption, BaseCommand):
         self._import_events()
         self._import_discussions()
         self._import_questions()
+        self._import_tasks()
         self._import_pages()
         self._import_rows()
         self._import_columns()
@@ -431,6 +432,27 @@ class Command(InteractiveTenantOption, BaseCommand):
             except IntegrityError as e:
                 self.stdout.write(self.style.WARNING("Error: %s\n" % str(e)))
                 pass
+
+    def _import_tasks(self):
+        elgg_task_items = ElggObjectsEntity.objects.using(self.import_id).filter(entity__subtype__subtype='task')
+
+        self.stdout.write("\n>> Tasks (%i) " % elgg_task_items.count(), ending="")
+
+        for elgg_task in elgg_task_items:
+            task = self.mapper.get_task(elgg_task)
+
+            try:
+                task.save()
+
+                self._import_comments_for(task, elgg_task.entity.guid)
+
+                GuidMap.objects.create(id=elgg_task.entity.guid, guid=task.guid, object_type='task')
+
+                self.stdout.write(".", ending="")
+            except IntegrityError as e:
+                self.stdout.write(self.style.WARNING("Error: %s\n" % str(e)))
+                pass
+
 
     def _import_pages(self):
         elgg_page_items = ElggObjectsEntity.objects.using(self.import_id).filter(entity__subtype__subtype='page')
