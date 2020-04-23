@@ -41,6 +41,7 @@ class Mapper():
         user.created_at = datetime.fromtimestamp(elgg_user.entity.time_created)
         user.updated_at = datetime.fromtimestamp(elgg_user.entity.time_updated)
         user.is_active = elgg_user.banned == "no"
+        user.is_admin = elgg_user.admin == "yes"
         return user
 
     def get_user_profile(self, elgg_user: ElggUsersEntity):
@@ -49,7 +50,7 @@ class Mapper():
         receive_notification_metadata = elgg_user.entity.metadata.filter(name__string="notification:method:email").first()
         receive_notification_email = receive_notification_metadata.value.string == "1" if receive_notification_metadata else False
 
-        receive_newsletter = bool(elgg_user.entity.relation.filter(relationship="subscribed", right__guid=self.elgg_site.guid).first())
+        receive_newsletter = bool(elgg_user.entity.relation.filter(relationship="subscribed", right__guid=self.elgg_site.entity.guid).first())
 
         user_profile = UserProfile()
         user_profile.last_online = last_online
@@ -97,7 +98,7 @@ class Mapper():
             if elgg_group.entity.get_metadata_value_by_name("introduction") else ""
         group.welcome_message = elgg_group.entity.get_private_value_by_name("group_tools:welcome_message") \
             if elgg_group.entity.get_private_value_by_name("group_tools:welcome_message") else ""
-        group.icon = '' # TODO: import files
+        group.icon = self.helpers.save_and_get_group_icon(elgg_group)
         group.created_at = datetime.fromtimestamp(elgg_group.entity.time_created)
         group.is_featured = elgg_group.entity.get_metadata_value_by_name("isFeatured") == "1"
         group.featured_image = self.helpers.save_and_get_featured_image(elgg_group)
@@ -167,7 +168,8 @@ class Mapper():
         entity.featured_position_y = int(elgg_entity.entity.get_metadata_value_by_name("featuredPositionY")) \
             if elgg_entity.entity.get_metadata_value_by_name("featuredPositionY") else 0
         entity.tags = self.helpers.get_list_values(elgg_entity.entity.get_metadata_value_by_name("tags"))
-        entity.source = elgg_entity.entity.get_metadata_value_by_name("source")
+        entity.source = elgg_entity.entity.get_metadata_value_by_name("source") \
+            if elgg_entity.entity.get_metadata_value_by_name("source") else ""
         entity.owner = User.objects.get(id=GuidMap.objects.get(id=elgg_entity.entity.owner_guid).guid)
 
         in_group = GuidMap.objects.filter(id=elgg_entity.entity.container_guid, object_type="group").first()
@@ -413,29 +415,36 @@ class Mapper():
         return entity
 
     def get_poll_choice(self, elgg_entity: ElggObjectsEntity):
-        entity = PollChoice()
+        try:
+            entity = PollChoice()
 
-        poll_id = elgg_entity.entity.relation.filter(relationship="poll_choice").first().right.guid
-        poll_guid = GuidMap.objects.get(id=poll_id, object_type="poll").guid
-        entity.poll = Poll.objects.get(id=poll_guid)
+            poll_id = elgg_entity.entity.relation.filter(relationship="poll_choice").first().right.guid
+            poll_guid = GuidMap.objects.get(id=poll_id, object_type="poll").guid
+            entity.poll = Poll.objects.get(id=poll_guid)
 
-        entity.text = elgg_entity.entity.get_metadata_value_by_name("text")
-        # TODO: poll must use annotations
+            entity.text = elgg_entity.entity.get_metadata_value_by_name("text")
 
-        return entity
+            return entity
+        except Exception:
+            return None
+
 
     def get_notification(self, elgg_notification: ElggNotifications):
-        notification = Notification()
 
-        notification.actor_object_id = GuidMap.objects.get(id=elgg_notification.performer_guid).guid
-        notification.recipient_id = GuidMap.objects.get(id=elgg_notification.user_guid).guid
-        notification.action_object_object_id = GuidMap.objects.get(id=elgg_notification.entity_guid).guid
-        notification.unread = elgg_notification.unread == "yes"
-        notification.verb = elgg_notification.action
-        notification.actor_content_type = ContentType.objects.get(app_label='user', model='user')
-        notification.timestamp = datetime.fromtimestamp(elgg_notification.time_created)
+        try:
+            notification = Notification()
 
-        return notification
+            notification.actor_object_id = GuidMap.objects.get(id=elgg_notification.performer_guid).guid
+            notification.recipient_id = GuidMap.objects.get(id=elgg_notification.user_guid).guid
+            notification.action_object_object_id = GuidMap.objects.get(id=elgg_notification.entity_guid).guid
+            notification.unread = elgg_notification.unread == "yes"
+            notification.verb = elgg_notification.action
+            notification.actor_content_type = ContentType.objects.get(app_label='user', model='user')
+            notification.timestamp = datetime.fromtimestamp(elgg_notification.time_created)
+
+            return notification
+        except Exception:
+            return None
 
     def get_folder(self, elgg_entity: ElggObjectsEntity):
         entity = FileFolder()

@@ -89,8 +89,8 @@ class Command(InteractiveTenantOption, BaseCommand):
             self.stdout.write(f"Import already run on tenant {tenant.schema_name}. Exiting.")
             return False
 
-        self._import_settings()
         self._import_users()
+        self._import_settings()
         self._import_groups()
         self._import_group_folders()
         self._import_files()
@@ -126,9 +126,9 @@ class Command(InteractiveTenantOption, BaseCommand):
         config.CANCEL_MEMBERSHIP_ENABLED = self.helpers.get_plugin_setting("cancel_membership_enabled") == "yes"
         config.DEFAULT_ACCESS_ID = self.helpers.get_site_config('default_access')
         config.LANGUAGE = self.helpers.get_site_config('language') if self.helpers.get_site_config('language') else "nl"
-        # config.LOGO = TODO: check /mod/pleio_template/logo.php
+        config.LOGO = self.helpers.save_and_get_site_logo_or_icon(elgg_site, 'logo')
         config.LOGO_ALT = html.unescape(self.helpers.get_plugin_setting("logo_alt"))
-        # config.ICON = TODO: check /mod/pleio_template/icon.php
+        config.ICON = self.helpers.save_and_get_site_logo_or_icon(elgg_site, 'icon')
         config.ICON_ALT = html.unescape(self.helpers.get_plugin_setting("icon_alt"))
         config.ICON_ENABLED = self.helpers.get_plugin_setting("show_icon") == "yes"
         config.STARTPAGE = self.helpers.get_plugin_setting("startpage") # TODO: what if CMS page, convert to guid?
@@ -368,7 +368,7 @@ class Command(InteractiveTenantOption, BaseCommand):
 
             try:
                 event.save()
-                self.helpers.save_entity_annotations(elgg_event, event)
+                self.helpers.save_entity_annotations(elgg_event, event, ["bookmark", "view_count", "views"])
                 # attending
                 relations = elgg_event.entity.relation.filter(relationship="event_attending", right__type='user')
                 for relation in relations:
@@ -633,7 +633,7 @@ class Command(InteractiveTenantOption, BaseCommand):
                     poll_choice.add_vote(user, 1)
 
                 self.stdout.write(".", ending="")
-            except IntegrityError as e:
+            except Exception as e:
                 self.stdout.write(self.style.WARNING("Error: %s\n" % str(e)))
                 pass
 
@@ -649,7 +649,7 @@ class Command(InteractiveTenantOption, BaseCommand):
                 notification.save()
 
                 self.stdout.write(".", ending="")
-            except IntegrityError as e:
+            except Exception as e:
                 self.stdout.write(self.style.WARNING("Error: %s\n" % str(e)))
                 pass
 

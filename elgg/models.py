@@ -120,7 +120,7 @@ class ElggEntities(models.Model):
 
     def get_metadata_value_by_name(self, name):
         items = self.metadata.filter(name__string=name).all()
-        
+
         data = None
 
         if items.count() > 1:
@@ -129,15 +129,15 @@ class ElggEntities(models.Model):
                 data.append(item.value.string)
         elif items.count() == 1:
             data = items[0].value.string
-        
+
         return data
 
     def get_private_value_by_name(self, name):
         item = self.private.filter(name=name).first()
-        
+
         if item:
             return item.value
-        
+
         return None
 
     class Meta:
@@ -347,10 +347,12 @@ class ElggRiver(models.Model):
 
 
 class ElggSitesEntity(models.Model):
-    guid = models.BigIntegerField(primary_key=True)
+    #guid = models.BigIntegerField(primary_key=True)
     name = models.TextField()
     description = models.TextField()
     url = models.CharField(unique=True, max_length=255)
+
+    entity = models.OneToOneField(ElggEntities, db_column='guid', to_field='guid', on_delete=models.CASCADE, primary_key=True)
 
     class Meta:
         managed = False
