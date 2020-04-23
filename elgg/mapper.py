@@ -2,7 +2,7 @@ import json
 import html
 from datetime import datetime
 from user.models import User
-from core.models import UserProfile, UserProfileField, ProfileField, Group, Comment, Widget
+from core.models import UserProfile, UserProfileField, ProfileField, Group, Comment, Widget, Subgroup
 from blog.models import Blog
 from news.models import News
 from event.models import Event
@@ -14,7 +14,10 @@ from poll.models import Poll, PollChoice
 from core.lib import ACCESS_TYPE, access_id_to_acl
 from notifications.models import Notification
 from file.models import FileFolder
-from elgg.models import ElggUsersEntity, ElggSitesEntity, ElggGroupsEntity, ElggObjectsEntity, ElggPrivateSettings, GuidMap, ElggNotifications
+from elgg.models import (
+    ElggUsersEntity, ElggSitesEntity, ElggGroupsEntity, ElggObjectsEntity, ElggPrivateSettings, GuidMap, ElggNotifications,
+    ElggAccessCollections, ElggAccessCollectionMembership
+)
 from elgg.helpers import ElggHelpers
 
 from django.contrib.contenttypes.models import ContentType
@@ -112,6 +115,18 @@ class Mapper():
         group.owner = User.objects.get(id=GuidMap.objects.get(id=elgg_group.entity.owner_guid).guid)
 
         return group
+
+    def save_subgroup(self, elgg_access_collection: ElggAccessCollections, group):
+        subgroup = Subgroup()
+        subgroup.name = elgg_access_collection.name
+        subgroup.group = group
+        user_ids = list(ElggAccessCollectionMembership.objects.using(self.db).filter(
+            access_collection_id=elgg_access_collection.id).values_list("user_guid", flat=True)
+        )
+        user_guids = list(GuidMap.objects.filter(id__in=user_ids, object_type="user").values_list("guid", flat=True))
+        users = User.objects.filter(id__in=user_guids)
+        subgroup.save()
+        subgroup.members.set(users)
 
     def get_blog(self, elgg_entity: ElggObjectsEntity):
         entity = Blog()
