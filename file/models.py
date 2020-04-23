@@ -1,5 +1,6 @@
 import os
 from django.urls import reverse
+from django.conf import settings
 from django.db import models
 from core.lib import generate_object_filename
 from core.models import Entity
@@ -70,6 +71,8 @@ def set_parent_folders_updated_at(instance):
 @receiver(pre_save, sender=FileFolder)
 def file_pre_save(sender, instance, **kwargs):
     # pylint: disable=unused-argument
+    if settings.IMPORTING:
+        return
     if instance.upload and not instance.title:
         instance.title = instance.upload.file.name
     if instance.upload and not instance.mime_type:
@@ -78,4 +81,6 @@ def file_pre_save(sender, instance, **kwargs):
 @receiver(post_save, sender=FileFolder)
 def file_post_save(sender, instance, **kwargs):
     # pylint: disable=unused-argument
+    if settings.IMPORTING:
+        return
     set_parent_folders_updated_at(instance)

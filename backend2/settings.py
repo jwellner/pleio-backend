@@ -236,3 +236,5 @@ DATABASE_ROUTERS = (
 TENANT_MODEL = "tenants.Client"
 
 TENANT_DOMAIN_MODEL = "tenants.Domain"
+
+IMPORTING = False
