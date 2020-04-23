@@ -168,5 +168,7 @@ class User(AbstractBaseUser):
 @receiver(post_save, sender=User)
 def create_user_profile(sender, instance, created, **kwargs):
     # pylint: disable=unused-argument
+    if settings.IMPORTING:
+        return
     if not settings.RUN_AS_ADMIN_APP and created:
         UserProfile.objects.create(user=instance)
