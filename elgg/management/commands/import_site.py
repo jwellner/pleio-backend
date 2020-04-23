@@ -92,6 +92,9 @@ class Command(InteractiveTenantOption, BaseCommand):
         self._import_settings()
         self._import_users()
         self._import_groups()
+        self._import_group_folders()
+        self._import_files()
+
         self._import_blogs()
         self._import_news()
         self._import_events()
@@ -524,7 +527,8 @@ class Command(InteractiveTenantOption, BaseCommand):
 
                 self.stdout.write(".", ending="")
             except IntegrityError as e:
-                self.st
+                self.stdout.write(self.style.WARNING("Error: %s\n" % str(e)))
+                pass
 
     def _import_columns(self):
         elgg_column_items = ElggObjectsEntity.objects.using(self.import_id).filter(entity__subtype__subtype='column')
@@ -541,7 +545,8 @@ class Command(InteractiveTenantOption, BaseCommand):
 
                 self.stdout.write(".", ending="")
             except IntegrityError as e:
-                self.st
+                self.stdout.write(self.style.WARNING("Error: %s\n" % str(e)))
+                pass
 
     def _import_widgets(self):
         elgg_widget_items = ElggObjectsEntity.objects.using(self.import_id).filter(entity__subtype__subtype='page_widget')
@@ -558,7 +563,8 @@ class Command(InteractiveTenantOption, BaseCommand):
 
                 self.stdout.write(".", ending="")
             except IntegrityError as e:
-                self.st
+                self.stdout.write(self.style.WARNING("Error: %s\n" % str(e)))
+                pass
 
     def _import_status_updates(self):
         elgg_status_update_items = ElggObjectsEntity.objects.using(self.import_id).filter(entity__subtype__subtype='thewire')
@@ -638,6 +644,53 @@ class Command(InteractiveTenantOption, BaseCommand):
             except IntegrityError as e:
                 self.stdout.write(self.style.WARNING("Error: %s\n" % str(e)))
                 pass
+
+    def _import_group_folders(self):
+        elgg_folder_items = ElggObjectsEntity.objects.using(self.import_id).filter(entity__subtype__subtype='folder')
+
+        self.stdout.write("\n>> Group folders (%i) " % elgg_folder_items.count(), ending="")
+
+        for elgg_folder in elgg_folder_items:
+            folder = self.mapper.get_folder(elgg_folder)
+
+            try:
+                folder.save()
+
+                GuidMap.objects.create(id=elgg_folder.entity.guid, guid=folder.guid, object_type='folder')
+
+                self.stdout.write(".", ending="")
+            except IntegrityError as e:
+                self.stdout.write(self.style.WARNING("Error: %s\n" % str(e)))
+                pass
+
+        for elgg_folder in elgg_folder_items:
+
+            try:
+                self.helpers.save_parent_folder(elgg_folder)
+
+                self.stdout.write(".", ending="")
+            except IntegrityError as e:
+                self.stdout.write(self.style.WARNING("Error: saving parent of folder %s\n" % str(e)))
+                pass
+
+    def _import_files(self):
+        elgg_file_items = ElggObjectsEntity.objects.using(self.import_id).filter(entity__subtype__subtype='file')
+
+        self.stdout.write("\n>> Files (%i) " % elgg_file_items.count(), ending="")
+
+        for elgg_file in elgg_file_items:
+            file = self.mapper.get_file(elgg_file)
+
+            try:
+                file.save()
+
+                GuidMap.objects.create(id=elgg_file.entity.guid, guid=file.guid, object_type='file')
+
+                self.stdout.write(".", ending="")
+            except Exception as e:
+                self.stdout.write(self.style.WARNING("Error: %s\n" % str(e)))
+                pass
+
 
     def _import_comments_for(self, entity: Entity, elgg_guid, elgg_entity=None):
         elgg_comment_items = ElggObjectsEntity.objects.using(self.import_id).filter(entity__subtype__subtype='comment', entity__container_guid=elgg_guid)

@@ -37,7 +37,13 @@ class Group(models.Model):
     updated_at = models.DateTimeField(default=timezone.now)
 
     is_featured = models.BooleanField(default=False)
-    featured_image = models.CharField(max_length=256, null=True, blank=True)
+    featured_image = models.ForeignKey(
+        'file.FileFolder',
+        on_delete=models.PROTECT,
+        blank=True,
+        null=True,
+        related_name='group_featured_image'
+    )
     featured_video = models.CharField(max_length=256, null=True, blank=True)
     featured_position_y = models.IntegerField(null=True)
 
