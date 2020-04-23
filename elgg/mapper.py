@@ -13,6 +13,7 @@ from activity.models import StatusUpdate
 from poll.models import Poll, PollChoice
 from core.lib import ACCESS_TYPE, access_id_to_acl
 from notifications.models import Notification
+from file.models import FileFolder
 from elgg.models import ElggUsersEntity, ElggSitesEntity, ElggGroupsEntity, ElggObjectsEntity, ElggPrivateSettings, GuidMap, ElggNotifications
 from elgg.helpers import ElggHelpers
 
@@ -96,7 +97,7 @@ class Mapper():
         group.icon = '' # TODO: import files
         group.created_at = datetime.fromtimestamp(elgg_group.entity.time_created)
         group.is_featured = elgg_group.entity.get_metadata_value_by_name("isFeatured") == "1"
-        # group.featured_image = '' # TODO: import files
+        group.featured_image = self.helpers.save_and_get_featured_image(elgg_group)
         group.featured_video = elgg_group.entity.get_metadata_value_by_name("featuredVideo")
         group.featured_position_y = int(elgg_group.entity.get_metadata_value_by_name("featuredPositionY")) \
             if elgg_group.entity.get_metadata_value_by_name("featuredPositionY") else 0
@@ -121,7 +122,7 @@ class Mapper():
         entity.rich_description = elgg_entity.entity.get_metadata_value_by_name("richDescription")
         entity.is_recommended = elgg_entity.entity.get_metadata_value_by_name("isRecommended") == "1"
         entity.is_featured = elgg_entity.entity.get_metadata_value_by_name("isFeatured") == "1"
-        # entity.featured_image = '' # TODO: import files
+        entity.featured_image = self.helpers.save_and_get_featured_image(elgg_entity)
         entity.featured_video = elgg_entity.entity.get_metadata_value_by_name("featuredVideo")
         entity.featured_position_y = int(elgg_entity.entity.get_metadata_value_by_name("featuredPositionY")) \
             if elgg_entity.entity.get_metadata_value_by_name("featuredPositionY") else 0
@@ -146,7 +147,7 @@ class Mapper():
         entity.description = elgg_entity.description
         entity.rich_description = elgg_entity.entity.get_metadata_value_by_name("richDescription")
         entity.is_featured = elgg_entity.entity.get_metadata_value_by_name("isFeatured") == "1"
-        # news.featured_image = '' # TODO: import files
+        entity.featured_image = self.helpers.save_and_get_featured_image(elgg_entity)
         entity.featured_video = elgg_entity.entity.get_metadata_value_by_name("featuredVideo")
         entity.featured_position_y = int(elgg_entity.entity.get_metadata_value_by_name("featuredPositionY")) \
             if elgg_entity.entity.get_metadata_value_by_name("featuredPositionY") else 0
@@ -172,7 +173,7 @@ class Mapper():
         entity.description = elgg_entity.description
         entity.rich_description = elgg_entity.entity.get_metadata_value_by_name("richDescription")
         entity.is_featured = elgg_entity.entity.get_metadata_value_by_name("isFeatured") == "1"
-        # news.featured_image = '' # TODO: import files
+        entity.featured_image = self.helpers.save_and_get_featured_image(elgg_entity)
         entity.featured_video = elgg_entity.entity.get_metadata_value_by_name("featuredVideo")
         entity.featured_position_y = int(elgg_entity.entity.get_metadata_value_by_name("featuredPositionY")) \
             if elgg_entity.entity.get_metadata_value_by_name("featuredPositionY") else 0
@@ -411,14 +412,67 @@ class Mapper():
     def get_notification(self, elgg_notification: ElggNotifications):
         notification = Notification()
 
+        notification.actor_object_id = GuidMap.objects.get(id=elgg_notification.performer_guid).guid
+        notification.recipient_id = GuidMap.objects.get(id=elgg_notification.user_guid).guid
+        notification.action_object_object_id = GuidMap.objects.get(id=elgg_notification.entity_guid).guid
+        notification.unread = elgg_notification.unread == "yes"
+        notification.verb = elgg_notification.action
+        notification.actor_content_type = ContentType.objects.get(app_label='user', model='user')
+        notification.timestamp = datetime.fromtimestamp(elgg_notification.time_created)
+
+        return notification
+
+    def get_folder(self, elgg_entity: ElggObjectsEntity):
+        entity = FileFolder()
+        entity.title = elgg_entity.title
+        entity.tags = self.helpers.get_list_values(elgg_entity.entity.get_metadata_value_by_name("tags"))
+
+        entity.owner = User.objects.get(id=GuidMap.objects.get(id=elgg_entity.entity.owner_guid).guid)
+
+        entity.is_folder = True
+
+        in_group = GuidMap.objects.filter(id=elgg_entity.entity.container_guid, object_type="group").first()
+
+        entity.group = Group.objects.get(id=in_group.guid)
+
+        entity.write_access = [ACCESS_TYPE.user.format(entity.owner.guid)]
+        entity.read_access = access_id_to_acl(entity.owner, elgg_entity.entity.access_id)
+
+        entity.created_at = datetime.fromtimestamp(elgg_entity.entity.time_created)
+        entity.updated_at = datetime.fromtimestamp(elgg_entity.entity.time_updated)
+
+        return entity
+
+    def get_file(self, elgg_entity: ElggObjectsEntity):
+
         try:
-            notification.actor_object_id = GuidMap.objects.get(id=elgg_notification.performer_guid).guid
-            notification.recipient_id = GuidMap.objects.get(id=elgg_notification.user_guid).guid
-            notification.action_object_object_id = GuidMap.objects.get(id=elgg_notification.entity_guid).guid
-            notification.unread = elgg_notification.unread == "yes"
-            notification.verb = elgg_notification.action
-            notification.actor_content_type = ContentType.objects.get(app_label='user', model='user')
-            notification.timestamp = datetime.fromtimestamp(elgg_notification.time_created)
-            return notification
+            entity = FileFolder()
+            entity.title = elgg_entity.title
+            entity.tags = self.helpers.get_list_values(elgg_entity.entity.get_metadata_value_by_name("tags"))
+
+            folder_relation = elgg_entity.entity.relation_inverse.filter(relationship="folder_of", right__guid=elgg_entity.entity.guid).first()
+            if folder_relation:
+                parent_guid = GuidMap.objects.get(id=folder_relation.left.guid, object_type='folder').guid
+                entity.parent = FileFolder.objects.get(id=parent_guid, is_folder=True)
+
+            entity.mime_type = str(elgg_entity.entity.get_metadata_value_by_name("mimetype"))
+            entity.upload.name = self.helpers.get_elgg_file_path(elgg_entity)
+
+            entity.owner = User.objects.get(id=GuidMap.objects.get(id=elgg_entity.entity.owner_guid).guid)
+
+            entity.is_folder = False
+
+            in_group = GuidMap.objects.filter(id=elgg_entity.entity.container_guid, object_type="group").first()
+            if in_group:
+                entity.group = Group.objects.get(id=in_group.guid)
+
+            entity.write_access = [ACCESS_TYPE.user.format(entity.owner.guid)]
+            entity.read_access = access_id_to_acl(entity.owner, elgg_entity.entity.access_id)
+
+            entity.created_at = datetime.fromtimestamp(elgg_entity.entity.time_created)
+            entity.updated_at = datetime.fromtimestamp(elgg_entity.entity.time_updated)
+
+            return entity
+
         except Exception:
             return None

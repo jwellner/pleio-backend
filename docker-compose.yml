@@ -23,6 +23,7 @@ services:
     depends_on:
       - db
       - admin
+      - localstack
   frontend:
     image: registry.gitlab.com/pleio/frontend:B2-latest
     restart: on-failure
@@ -86,9 +87,9 @@ services:
     environment:
       - SERVICES=s3
       - DEBUG=1
-      - DATA_DIR=/tmp/localstack/data
+      - DATA_DIR=/home/localstack/data
     volumes:
-      - "./.localstack:/tmp/localstack"
+      - "./.localstack:/home/localstack"
       - "/var/run/docker.sock:/var/run/docker.sock"
   memcached:
     image: memcached
@@ -99,5 +100,6 @@ services:
 volumes:
   postgres_data:
   storage_data:
+  localstack_data:
   esdata01:
     driver: local

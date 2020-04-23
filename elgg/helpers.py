@@ -1,6 +1,11 @@
+import os
+from datetime import datetime
 from phpserialize import unserialize
 from elgg.models import ElggEntities, ElggObjectsEntity, ElggPrivateSettings, ElggConfig, GuidMap
 from cms.models import Page
+from user.models import User
+from file.models import FileFolder
+from core.lib import ACCESS_TYPE, access_id_to_acl
 
 class ElggHelpers():
     database = None
@@ -135,3 +140,70 @@ class ElggHelpers():
 
         except Exception:
             pass
+
+
+    def save_parent_folder(self, elgg_folder):
+        guid_map_folder = GuidMap.objects.get(id=elgg_folder.entity.guid, object_type='folder')
+        folder = FileFolder.objects.get(id=guid_map_folder.guid)
+
+        try:
+            parent_id = elgg_folder.entity.get_metadata_value_by_name("parent_guid")
+            if parent_id:
+                guid_map_parent = GuidMap.objects.get(id=parent_id, object_type='folder')
+                parent_folder = FileFolder.objects.get(id=guid_map_parent.guid)
+                folder.parent = parent_folder
+                folder.save()
+
+        except Exception:
+            pass
+
+    def get_elgg_file_path(self, elgg_file):
+        filename = elgg_file.entity.get_metadata_value_by_name("filename")
+
+        user_guid = GuidMap.objects.get(id=elgg_file.entity.owner_guid, object_type='user').guid
+        user = User.objects.get(id=user_guid)
+
+        dt_user = user.created_at
+        year = dt_user.strftime('%Y')
+        month = dt_user.strftime('%m')
+        day = dt_user.strftime('%d')
+        file_path = os.path.join(
+            "migrated", year, month, day, str(elgg_file.entity.owner_guid), filename
+        )
+        return file_path
+
+    def save_and_get_featured_image(self, elgg_entity):
+
+        try:
+            time_created = datetime.fromtimestamp(elgg_entity.entity.time_created)
+            year = time_created.strftime('%Y')
+            month = time_created.strftime('%m')
+            day = time_created.strftime('%d')
+
+            filename = "%s.jpg" % (str(elgg_entity.entity.guid))
+
+            file_path = os.path.join(
+                "migrated", year, month, day, str(elgg_entity.entity.guid), 'featured', filename
+            )
+
+            # Featured images do not have a file entity
+            entity = FileFolder()
+
+            entity.mime_type = "image/jpeg"
+            entity.title = ""
+            entity.upload.name = file_path
+
+            entity.owner = User.objects.get(id=GuidMap.objects.get(id=elgg_entity.entity.owner_guid).guid)
+
+            entity.is_folder = False
+
+            entity.write_access = [ACCESS_TYPE.user.format(entity.owner.guid)]
+            entity.read_access = access_id_to_acl(entity.owner, elgg_entity.entity.access_id)
+
+            entity.created_at = datetime.fromtimestamp(elgg_entity.entity.time_created)
+            entity.updated_at = datetime.fromtimestamp(elgg_entity.entity.time_updated)
+
+            entity.save()
+            return entity
+        except Exception:
+            return None

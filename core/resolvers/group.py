@@ -51,11 +51,17 @@ def auto_notification(obj, info):
 @group.field("featured")
 def resolve_group_featured(obj, info):
     # pylint: disable=unused-argument
+    if obj.featured_image:
+        image = obj.featured_image.download
+    else:
+        image = None
+
     return {
-        'image': None,
-        'video': None,
-        'positionY': 0
+        'image': image,
+        'video': obj.featured_video,
+        'positionY': obj.featured_position_y
     }
+
 @group.field("isFeatured")
 def resolve_group_is_featured(obj, info):
     # pylint: disable=unused-argument
