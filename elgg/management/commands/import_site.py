@@ -5,7 +5,10 @@ from core import config
 from core.lib import ACCESS_TYPE, access_id_to_acl
 from core.models import ProfileField, UserProfile, UserProfileField, Group, Entity, Comment
 from backend2 import settings
-from elgg.models import Instances, ElggUsersEntity, GuidMap, ElggSitesEntity, ElggGroupsEntity, ElggObjectsEntity, ElggNotifications
+from elgg.models import (
+    Instances, ElggUsersEntity, GuidMap, ElggSitesEntity, ElggGroupsEntity, ElggObjectsEntity, ElggNotifications,
+    ElggAnnotations, ElggMetastrings
+)
 from elgg.helpers import ElggHelpers
 from elgg.mapper import Mapper
 from user.models import User
@@ -100,6 +103,8 @@ class Command(InteractiveTenantOption, BaseCommand):
         self._import_widgets()
         self._import_status_updates()
         self._import_notifications()
+        self._import_polls()
+        self._import_poll_choices()
 
         # All done!
         self.stdout.write("\n>> Done!")
@@ -514,6 +519,49 @@ class Command(InteractiveTenantOption, BaseCommand):
                 self._import_comments_for(status_update, elgg_status_update.entity.guid)
 
                 GuidMap.objects.create(id=elgg_status_update.entity.guid, guid=status_update.guid, object_type='status_update')
+
+                self.stdout.write(".", ending="")
+            except IntegrityError as e:
+                self.stdout.write(self.style.WARNING("Error: %s\n" % str(e)))
+                pass
+
+    def _import_polls(self):
+        elgg_poll_items = ElggObjectsEntity.objects.using(self.import_id).filter(entity__subtype__subtype='poll')
+
+        self.stdout.write("\n>> Polls (%i) " % elgg_poll_items.count(), ending="")
+
+        for elgg_poll in elgg_poll_items:
+            poll = self.mapper.get_poll(elgg_poll)
+
+            try:
+                poll.save()
+
+                GuidMap.objects.create(id=elgg_poll.entity.guid, guid=poll.guid, object_type='poll')
+
+                self.stdout.write(".", ending="")
+            except IntegrityError as e:
+                self.stdout.write(self.style.WARNING("Error: %s\n" % str(e)))
+                pass
+
+    def _import_poll_choices(self):
+        elgg_poll_choice_items = ElggObjectsEntity.objects.using(self.import_id).filter(entity__subtype__subtype='poll_choice')
+
+        self.stdout.write("\n>> Poll choices (%i) " % elgg_poll_choice_items.count(), ending="")
+
+        for elgg_poll_choice in elgg_poll_choice_items:
+            poll_choice = self.mapper.get_poll_choice(elgg_poll_choice)
+
+            try:
+                poll_choice.save()
+
+                # import the votes
+                poll_id = GuidMap.objects.get(guid=poll_choice.poll.guid, object_type="poll").id
+                name_id = ElggMetastrings.objects.using(self.import_id).filter(string="vote").first().id
+                value_id = ElggMetastrings.objects.using(self.import_id).filter(string=poll_choice.text).first().id
+
+                for vote in ElggAnnotations.objects.using(self.import_id).filter(entity_guid=poll_id, name_id=name_id, value_id=value_id):
+                    user = User.objects.get(id=GuidMap.objects.get(id=vote.owner_guid, object_type="user").guid)
+                    poll_choice.add_vote(user, 1)
 
                 self.stdout.write(".", ending="")
             except IntegrityError as e:
