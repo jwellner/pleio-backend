@@ -1,11 +1,16 @@
 import os
 from datetime import datetime
 from phpserialize import unserialize
-from elgg.models import ElggEntities, ElggObjectsEntity, ElggPrivateSettings, ElggConfig, GuidMap
+
 from cms.models import Page
 from user.models import User
 from file.models import FileFolder
 from core.lib import ACCESS_TYPE, access_id_to_acl
+from elgg.models import (
+    ElggEntities, ElggObjectsEntity, ElggPrivateSettings, ElggMetastrings, ElggConfig, GuidMap, ElggAnnotations,
+    ElggEntityViews, ElggEntityViewsLog
+)
+from core.models import EntityView, EntityViewCount
 
 class ElggHelpers():
     database = None
@@ -207,3 +212,37 @@ class ElggHelpers():
             return entity
         except Exception:
             return None
+
+    def save_entity_annotations(self, elgg_entity, entity, annotation_types=['vote', 'bookmark', 'follow', 'view_count', 'views']):
+        # pylint: disable=dangerous-default-value
+        # pylint: disable=too-many-locals
+        if "vote" in annotation_types:
+            name_id = ElggMetastrings.objects.using(self.database).filter(string="vote").first().id
+            value_id = ElggMetastrings.objects.using(self.database).filter(string="1").first().id
+            entity_guid = elgg_entity.entity.guid
+            for vote in ElggAnnotations.objects.using(self.database).filter(entity_guid=entity_guid, name_id=name_id, value_id=value_id):
+                user = User.objects.get(id=GuidMap.objects.get(id=vote.owner_guid, object_type="user").guid)
+                entity.add_vote(user, 1)
+        if "bookmark" in annotation_types:
+            bookmarks = elgg_entity.entity.relation_inverse.filter(relationship="bookmarked", right__guid=elgg_entity.entity.guid)
+            for bookmark in bookmarks:
+                user = User.objects.get(id=GuidMap.objects.get(id=bookmark.left.guid, object_type="user").guid)
+                entity.add_bookmark(user)
+        if "follow" in annotation_types:
+            follows = elgg_entity.entity.relation_inverse.filter(relationship="content_subscription", right__guid=elgg_entity.entity.guid)
+            for follow in follows:
+                user = User.objects.get(id=GuidMap.objects.get(id=follow.left.guid, object_type="user").guid)
+                entity.add_follow(user)
+        if "view_count" in annotation_types:
+            view_count = ElggEntityViews.objects.using(self.database).filter(guid=elgg_entity.entity.guid).first()
+            if view_count:
+                EntityViewCount.objects.create(entity=entity, views=view_count.views)
+        if "views" in annotation_types:
+            user_ids = list(ElggEntityViewsLog.objects.using(self.database).filter(
+                entity_guid=elgg_entity.entity.guid).values_list('performed_by_guid', flat=True)
+            )
+            user_guids = list(GuidMap.objects.filter(id__in=user_ids, object_type="user").values_list('guid', flat=True))
+            users = User.objects.filter(id__in=user_guids)
+            if users:
+                for user in users:
+                    EntityView.objects.create(entity=entity, viewer=user)
