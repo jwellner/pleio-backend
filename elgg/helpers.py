@@ -213,6 +213,90 @@ class ElggHelpers():
         except Exception:
             return None
 
+    def save_and_get_group_icon(self, elgg_entity):
+
+        # TODO: maybe group icon will be saved as a FileFolde in the future
+        try:
+            group_owner = User.objects.get(id=GuidMap.objects.get(id=elgg_entity.entity.owner_guid).guid)
+
+            time_created = group_owner.created_at
+            year = time_created.strftime('%Y')
+            month = time_created.strftime('%m')
+            day = time_created.strftime('%d')
+
+            filename = "%slarge.jpg" % (str(elgg_entity.entity.guid))
+
+            file_path = os.path.join(
+                "migrated", year, month, day, str(elgg_entity.entity.owner_guid), 'groups', filename
+            )
+
+            # Group icons do not have a file entity
+            entity = FileFolder()
+
+            entity.mime_type = "image/jpeg"
+            entity.title = ""
+            entity.upload.name = file_path
+
+            entity.owner = group_owner
+
+            entity.is_folder = False
+
+            entity.write_access = [ACCESS_TYPE.user.format(entity.owner.guid)]
+            entity.read_access = access_id_to_acl(entity.owner, elgg_entity.entity.access_id)
+
+            entity.created_at = datetime.fromtimestamp(elgg_entity.entity.time_created)
+            entity.updated_at = datetime.fromtimestamp(elgg_entity.entity.time_updated)
+
+            entity.save()
+
+            return entity.url
+
+        except Exception:
+            return ""
+
+    def save_and_get_site_logo_or_icon(self, elgg_site, image_type):
+
+        try:
+            time_created = datetime.fromtimestamp(elgg_site.entity.time_created)
+            year = time_created.strftime('%Y')
+            month = time_created.strftime('%m')
+            day = time_created.strftime('%d')
+
+            if elgg_site.entity.get_metadata_value_by_name(image_type + "_extension"):
+                extension = elgg_site.entity.get_metadata_value_by_name(image_type + "_extension")
+            else:
+                extension = 'jpg'
+
+            if extension == 'svg':
+                mime_type = 'image/svg+xml'
+            elif extension == 'png':
+                mime_type = 'image/png'
+            else:
+                mime_type = 'image/jpeg'
+
+            filename = "%s_%s.%s" % (str(elgg_site.entity.guid), image_type, extension)
+
+            file_path = os.path.join(
+                "migrated", year, month, day, str(elgg_site.entity.guid), 'pleio_template/', filename
+            )
+
+            entity = FileFolder()
+
+            entity.owner = User.objects.filter(is_admin=True).first()
+
+            entity.upload.name = file_path
+            entity.mime_type = mime_type
+
+            entity.read_access = access_id_to_acl(entity, 2)
+            entity.write_access = access_id_to_acl(entity, 0)
+
+            entity.save()
+
+            url = "/site/%s/%s" % (image_type, str(entity.id))
+            return url
+        except Exception:
+            return ""
+
     def save_entity_annotations(self, elgg_entity, entity, annotation_types=['vote', 'bookmark', 'follow', 'view_count', 'views']):
         # pylint: disable=dangerous-default-value
         # pylint: disable=too-many-locals
