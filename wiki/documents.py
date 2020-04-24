@@ -6,9 +6,9 @@ from core.documents import DefaultDocument
 
 @registry.register_document
 class WikiDocument(DefaultDocument):
-    id = fields.StringField()
-    tags = fields.ListField(fields.StringField())
-    read_access = fields.ListField(fields.StringField())
+    id = fields.TextField()
+    tags = fields.ListField(fields.TextField())
+    read_access = fields.ListField(fields.TextField())
     type = fields.KeywordField(attr="type_to_string")
 
     class Index:
@@ -16,7 +16,7 @@ class WikiDocument(DefaultDocument):
 
     class Django:
         model = Wiki
-        
+
         fields = [
             'title',
             'description',

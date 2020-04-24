@@ -16,16 +16,16 @@ class DefaultDocument(Document):
 
 @registry.register_document
 class UserDocument(DefaultDocument):
-    id = fields.StringField()
+    id = fields.TextField()
     type = fields.KeywordField(attr="type_to_string")
-    read_access = fields.ListField(fields.StringField(attr="search_read_access"))
+    read_access = fields.ListField(fields.TextField(attr="search_read_access"))
 
     _profile = fields.NestedField(properties={
         'user_profile_fields': fields.ObjectField(properties={
             'value': fields.KeywordField(),
             'name': fields.KeywordField(),
             'key': fields.KeywordField(),
-            'read_access': fields.ListField(fields.StringField(attr="read_access"))
+            'read_access': fields.ListField(fields.TextField(attr="read_access"))
         })
     })
 
@@ -55,17 +55,17 @@ class UserDocument(DefaultDocument):
 
 @registry.register_document
 class GroupDocument(DefaultDocument):
-    id = fields.StringField()
-    tags = fields.ListField(fields.StringField())
+    id = fields.TextField()
+    tags = fields.ListField(fields.TextField())
     type = fields.KeywordField(attr="type_to_string")
-    read_access = fields.ListField(fields.StringField(attr="search_read_access"))
+    read_access = fields.ListField(fields.TextField(attr="search_read_access"))
 
     class Index:
         name = 'groups'
 
     class Django:
         model = Group
-        
+
         fields = [
             'name',
             'description',
