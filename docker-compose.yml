@@ -59,7 +59,7 @@ services:
     volumes:
       - storage_data:/srv
   elasticsearch:
-    image: docker.elastic.co/elasticsearch/elasticsearch:7.5.0
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.1.1
     environment:
       - cluster.name=docker-cluster
       - discovery.type=single-node

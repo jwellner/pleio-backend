@@ -30,6 +30,8 @@ def resolve_users(_, info, q="", filters=None, offset=0, limit=20):
             'terms', read_access=list(get_acl(user))
         ).filter(
             'match', tenant_name=tenant_name
+        ).filter(
+            'term', is_active=True
         )
 
     else:
@@ -37,6 +39,8 @@ def resolve_users(_, info, q="", filters=None, offset=0, limit=20):
             'terms', read_access=list(get_acl(user))
         ).filter(
             'match', tenant_name=tenant_name
+        ).filter(
+            'term', is_active=True
         )
 
     if filters:
@@ -55,7 +59,7 @@ def resolve_users(_, info, q="", filters=None, offset=0, limit=20):
     for hit in response:
         ids.append(hit['id'])
 
-    users = User.objects.filter(id__in=ids, is_active=True)
+    users = User.objects.filter(id__in=ids)
     edges = users[offset:offset+limit]
 
     return {

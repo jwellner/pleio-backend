@@ -19,6 +19,7 @@ class UserDocument(DefaultDocument):
     id = fields.TextField()
     type = fields.KeywordField(attr="type_to_string")
     read_access = fields.ListField(fields.TextField(attr="search_read_access"))
+    is_active = fields.BooleanField()
 
     _profile = fields.NestedField(properties={
         'user_profile_fields': fields.ObjectField(properties={
