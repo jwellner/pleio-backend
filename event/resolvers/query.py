@@ -1,4 +1,5 @@
 from ariadne import ObjectType
+from elgg.helpers import get_guid
 from event.models import Event
 from datetime import datetime
 from django.utils import timezone
@@ -19,6 +20,7 @@ def resolve_events(obj, info, filter=None, containerGuid=None, offset=0, limit=2
     # pylint: disable=redefined-builtin
 
     events = Event.objects.visible(info.context.user)
+    containerGuid = get_guid(containerGuid)
 
     if filter == 'previous':
         events = events.filter(start_date__lte=get_end_of_yesterday())

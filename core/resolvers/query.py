@@ -17,6 +17,7 @@ from .query_notifications import resolve_notifications
 from .query_recommended import resolve_recommended
 from .query_top import resolve_top
 from core.constances import COULD_NOT_FIND
+from elgg.helpers import get_guid
 
 query = ObjectType("Query")
 
@@ -35,6 +36,8 @@ query.set_field("top", resolve_top)
 query.set_field("filters", resolve_filters)
 
 
+
+
 @query.field("entity")
 def resolve_entity(
     _,
@@ -47,6 +50,7 @@ def resolve_entity(
     # pylint: disable=redefined-builtin
 
     user = info.context.user
+    guid = get_guid(guid)
 
     entity = None
 

@@ -1,5 +1,6 @@
 from ariadne import ObjectType
 from core.lib import get_acl
+from elgg.helpers import get_guid
 
 viewer = ObjectType("Viewer")
 
@@ -17,6 +18,7 @@ def resolve_can_write_to_container(obj, info, containerGuid=None, subtype=None, 
     # pylint: disable=redefined-builtin
 
     user = info.context.user
+    containerGuid = get_guid(containerGuid)
 
     # anonymous always return false
     if not user.is_authenticated:
