@@ -2,6 +2,7 @@ from django.db.models import Q
 from core.constances import ORDER_DIRECTION, ORDER_BY, INVALID_SUBTYPE
 from core.models import Entity
 from core.lib import get_model_by_subtype
+from elgg.helpers import get_guid
 from graphql import GraphQLError
 
 
@@ -63,6 +64,7 @@ def resolve_entities(
     # pylint: disable=too-many-arguments
     # pylint: disable=redefined-builtin
     # TODO: exclude page objects of subtype not is page?
+    containerGuid = get_guid(containerGuid)
 
     if not subtype or subtype == 'all':
         Model = Entity

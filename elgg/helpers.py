@@ -12,6 +12,13 @@ from elgg.models import (
 )
 from core.models import EntityView, EntityViewCount
 
+# TODO: How to implement everywhere ?
+def get_guid(guid):
+    try:
+        return GuidMap.objects.get(id=guid).guid
+    except Exception:
+        return guid
+
 class ElggHelpers():
     database = None
 

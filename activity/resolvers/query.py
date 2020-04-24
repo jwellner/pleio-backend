@@ -1,5 +1,6 @@
 from ariadne import ObjectType
 from core.models import Entity
+from elgg.helpers import get_guid
 from django.db.models import Q
 
 query = ObjectType("Query")
@@ -88,6 +89,8 @@ def resolve_activities(
     #pylint: disable=unused-argument
     #pylint: disable=too-many-arguments
     #pylint: disable=too-many-locals
+
+    containerGuid = get_guid(containerGuid)
 
     # TODO: how to do lastAction?
     if orderBy == 'timeUpdated':

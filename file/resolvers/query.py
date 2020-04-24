@@ -1,4 +1,5 @@
 from ariadne import ObjectType
+from elgg.helpers import get_guid
 from graphql import GraphQLError
 from django.core.exceptions import ObjectDoesNotExist
 from core.models import Group, Entity
@@ -42,6 +43,8 @@ def resolve_files(
     #pylint: disable=too-many-arguments
     #pylint: disable=redefined-builtin
 
+    containerGuid = get_guid(containerGuid)
+
     # TODO: how to do lastAction?
     if orderBy == 'timeUpdated':
         order_by = 'updated_at'
@@ -83,6 +86,7 @@ def resolve_breadcrumb(_, info, guid):
     path = []
 
     entity = None
+    guid = get_guid(guid)
 
     try:
         entity = Entity.objects.get_subclass(id=guid)
