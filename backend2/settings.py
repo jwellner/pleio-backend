@@ -25,7 +25,7 @@ EMAIL_USE_TLS = True
 RUN_AS_ADMIN_APP = os.getenv('RUN_AS_ADMIN_APP') == "True"
 
 # For local development
-if os.getenv('DEBUG'):
+if DEBUG:
     EMAIL_HOST = 'mailcatcher'
     EMAIL_HOST_USER = ''
     EMAIL_HOST_PASSWORD = ''
@@ -104,7 +104,7 @@ if not RUN_AS_ADMIN_APP:
 if LOCAL_MIDDLEWARE:
     MIDDLEWARE += LOCAL_MIDDLEWARE
 
-if os.getenv('DEBUG'):
+if DEBUG:
     MIDDLEWARE = ['elasticapm.contrib.django.middleware.TracingMiddleware'] + MIDDLEWARE
 
 ROOT_URLCONF = 'backend2.urls'
