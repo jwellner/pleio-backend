@@ -15,6 +15,10 @@ from .config import *  # pylint: disable=unused-wildcard-import
 
 FROM_EMAIL = os.getenv('FROM_EMAIL')
 EMAIL_HOST = os.getenv('EMAIL_HOST')
+EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER')
+EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD')
+EMAIL_USE_TLS = True
+
 
 # Set to true if to run the public variant
 RUN_AS_ADMIN_APP = os.getenv('RUN_AS_ADMIN_APP') == "True"
