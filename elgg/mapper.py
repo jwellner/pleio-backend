@@ -21,6 +21,7 @@ from elgg.models import (
 from elgg.helpers import ElggHelpers
 
 from django.contrib.contenttypes.models import ContentType
+from django.db.models import ObjectDoesNotExist
 
 class Mapper():
 
@@ -84,10 +85,7 @@ class Mapper():
         return profile_field
 
     def get_group(self, elgg_group: ElggGroupsEntity):
-
-        # metadata = elgg_group.entity.metadata.all()
-        # for data in metadata:
-        #    print(f"{data.name.string}: {data.value.string}")
+        
         group = Group()
         group.name = elgg_group.name
         group.created_at = datetime.fromtimestamp(elgg_group.entity.time_created)
@@ -152,7 +150,6 @@ class Mapper():
         entity.write_access = [ACCESS_TYPE.user.format(entity.owner.guid)]
         entity.read_access = access_id_to_acl(entity.owner, elgg_entity.entity.access_id)
 
-        # TODO: comments, following, bookmark (separate for all content types?)
         return entity
 
     def get_news(self, elgg_entity: ElggObjectsEntity):
@@ -179,7 +176,6 @@ class Mapper():
         entity.write_access = [ACCESS_TYPE.user.format(entity.owner.guid)]
         entity.read_access = access_id_to_acl(entity.owner, elgg_entity.entity.access_id)
 
-        # TODO: comments, following, bookmark (separate for all content types?)
         return entity
 
     def get_event(self, elgg_entity: ElggObjectsEntity):
@@ -214,7 +210,6 @@ class Mapper():
         entity.write_access = [ACCESS_TYPE.user.format(entity.owner.guid)]
         entity.read_access = access_id_to_acl(entity.owner, elgg_entity.entity.access_id)
 
-        # TODO: comments, following, bookmark (separate for all content types?)
         return entity
 
     def get_discussion(self, elgg_entity: ElggObjectsEntity):
@@ -418,14 +413,19 @@ class Mapper():
         try:
             entity = PollChoice()
 
-            poll_id = elgg_entity.entity.relation.filter(relationship="poll_choice").first().right.guid
-            poll_guid = GuidMap.objects.get(id=poll_id, object_type="poll").guid
+            elgg_poll_relation = elgg_entity.entity.relation.filter(relationship="poll_choice").first()
+
+            if not elgg_poll_relation:
+                return None
+
+            poll_guid = GuidMap.objects.get(id=elgg_poll_relation.right.guid, object_type="poll").guid
             entity.poll = Poll.objects.get(id=poll_guid)
 
             entity.text = elgg_entity.entity.get_metadata_value_by_name("text")
 
             return entity
-        except Exception:
+        except ObjectDoesNotExist:
+            # Skip when old data is inconsistent
             return None
 
 
@@ -443,7 +443,8 @@ class Mapper():
             notification.timestamp = datetime.fromtimestamp(elgg_notification.time_created)
 
             return notification
-        except Exception:
+        except ObjectDoesNotExist:
+            # Skip when old data is inconsistent
             return None
 
     def get_folder(self, elgg_entity: ElggObjectsEntity):
@@ -498,5 +499,6 @@ class Mapper():
 
             return entity
 
-        except Exception:
+        except ObjectDoesNotExist:
+            # Skip when old data is inconsistent
             return None
