@@ -15,10 +15,15 @@ from .config import *  # pylint: disable=unused-wildcard-import
 
 FROM_EMAIL = os.getenv('FROM_EMAIL')
 EMAIL_HOST = os.getenv('EMAIL_HOST')
-EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER')
-EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD')
-EMAIL_PORT = os.getenv('EMAIL_PORT')
-EMAIL_USE_TLS = True
+
+if os.getenv('AWS_SES_ACCESS_KEY_ID'):
+    EMAIL_BACKEND = 'django_ses.SESBackend'
+    AWS_SES_REGION_NAME = os.getenv('AWS_SES_REGION_NAME') # 'us-west-2'
+    AWS_SES_REGION_ENDPOINT = os.getenv('AWS_SES_REGION_ENDPOINT') #'email.us-west-2.amazonaws.com'
+
+    AWS_SES_ACCESS_KEY_ID = os.getenv('AWS_SES_ACCESS_KEY_ID')
+    AWS_SES_SECRET_ACCESS_KEY = os.getenv('AWS_SES_SECRET_ACCESS_KEY')
+
 
 
 # Set to true if to run the public variant
