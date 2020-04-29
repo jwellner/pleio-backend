@@ -621,18 +621,21 @@ class Command(InteractiveTenantOption, BaseCommand):
             poll_choice = self.mapper.get_poll_choice(elgg_poll_choice)
 
             try:
-                poll_choice.save()
+                if poll_choice:
+                    poll_choice.save()
 
-                # import the votes
-                poll_id = GuidMap.objects.get(guid=poll_choice.poll.guid, object_type="poll").id
-                name_id = ElggMetastrings.objects.using(self.import_id).filter(string="vote").first().id
-                value_id = ElggMetastrings.objects.using(self.import_id).filter(string=poll_choice.text).first().id
+                    # import the votes
+                    poll_id = GuidMap.objects.get(guid=poll_choice.poll.guid, object_type="poll").id
+                    name_id = ElggMetastrings.objects.using(self.import_id).filter(string="vote").first().id
+                    value_id = ElggMetastrings.objects.using(self.import_id).filter(string=poll_choice.text).first().id
 
-                for vote in ElggAnnotations.objects.using(self.import_id).filter(entity_guid=poll_id, name_id=name_id, value_id=value_id):
-                    user = User.objects.get(id=GuidMap.objects.get(id=vote.owner_guid, object_type="user").guid)
-                    poll_choice.add_vote(user, 1)
+                    for vote in ElggAnnotations.objects.using(self.import_id).filter(entity_guid=poll_id, name_id=name_id, value_id=value_id):
+                        user = User.objects.get(id=GuidMap.objects.get(id=vote.owner_guid, object_type="user").guid)
+                        poll_choice.add_vote(user, 1)
 
-                self.stdout.write(".", ending="")
+                    self.stdout.write(".", ending="")
+                else:
+                    self.stdout.write("x", ending="")
             except Exception as e:
                 self.stdout.write(self.style.WARNING("Error: %s\n" % str(e)))
                 pass
@@ -646,9 +649,11 @@ class Command(InteractiveTenantOption, BaseCommand):
             notification = self.mapper.get_notification(elgg_notification)
 
             try:
-                notification.save()
-
-                self.stdout.write(".", ending="")
+                if notification:
+                    notification.save()
+                    self.stdout.write(".", ending="")
+                else:
+                    self.stdout.write("x", ending="")
             except Exception as e:
                 self.stdout.write(self.style.WARNING("Error: %s\n" % str(e)))
                 pass
@@ -662,11 +667,15 @@ class Command(InteractiveTenantOption, BaseCommand):
             folder = self.mapper.get_folder(elgg_folder)
 
             try:
-                folder.save()
+                if folder:
+                    folder.save()
 
-                GuidMap.objects.create(id=elgg_folder.entity.guid, guid=folder.guid, object_type='folder')
+                    GuidMap.objects.create(id=elgg_folder.entity.guid, guid=folder.guid, object_type='folder')
 
-                self.stdout.write(".", ending="")
+                    self.stdout.write(".", ending="")
+                else:
+                    self.stdout.write("x", ending="")
+
             except IntegrityError as e:
                 self.stdout.write(self.style.WARNING("Error: %s\n" % str(e)))
                 pass
