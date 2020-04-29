@@ -127,19 +127,24 @@ class Command(InteractiveTenantOption, BaseCommand):
         config.DEFAULT_ACCESS_ID = self.helpers.get_site_config('default_access')
         config.LANGUAGE = self.helpers.get_site_config('language') if self.helpers.get_site_config('language') else "nl"
         config.LOGO = self.helpers.save_and_get_site_logo_or_icon(elgg_site, 'logo')
-        config.LOGO_ALT = html.unescape(self.helpers.get_plugin_setting("logo_alt"))
+        config.LOGO_ALT = html.unescape(self.helpers.get_plugin_setting("logo_alt")) \
+            if self.helpers.get_plugin_setting("logo_alt") else ""
         config.ICON = self.helpers.save_and_get_site_logo_or_icon(elgg_site, 'icon')
-        config.ICON_ALT = html.unescape(self.helpers.get_plugin_setting("icon_alt"))
+        config.ICON_ALT = html.unescape(self.helpers.get_plugin_setting("icon_alt")) \
+            if self.helpers.get_plugin_setting("icon_alt") else ""
         config.ICON_ENABLED = self.helpers.get_plugin_setting("show_icon") == "yes"
         config.STARTPAGE = self.helpers.get_plugin_setting("startpage") # TODO: what if CMS page, convert to guid?
         config.LEADER_ENABLED = self.helpers.get_plugin_setting("show_leader") == "yes"
         config.LEADER_BUTTONS_ENABLED = self.helpers.get_plugin_setting("show_leader_buttons") == "yes"
         config.LEADER_IMAGE = self.helpers.get_plugin_setting("leader_image") # TODO: convert URL ?
         config.INITIATIVE_ENABLED = self.helpers.get_plugin_setting("show_initiative") == "yes"
-        config.INITIATIVE_TITLE = html.unescape(self.helpers.get_plugin_setting("initiative_title"))
+        config.INITIATIVE_TITLE = html.unescape(self.helpers.get_plugin_setting("initiative_title")) \
+            if self.helpers.get_plugin_setting("initiative_title") else ""
         config.INITIATIVE_IMAGE = self.helpers.get_plugin_setting("initiative_image")
-        config.INITIATIVE_IMAGE_ALT = html.unescape(self.helpers.get_plugin_setting("initiative_image_alt"))
-        config.INITIATIVE_DESCRIPTION = html.unescape(self.helpers.get_plugin_setting("initiative_description"))
+        config.INITIATIVE_IMAGE_ALT = html.unescape(self.helpers.get_plugin_setting("initiative_image_alt")) \
+            if self.helpers.get_plugin_setting("initiative_image_alt") else ""
+        config.INITIATIVE_DESCRIPTION = html.unescape(self.helpers.get_plugin_setting("initiative_description")) \
+            if self.helpers.get_plugin_setting("initiative_description") else ""
         config.INITIATOR_LINK = self.helpers.get_plugin_setting("initiator_link")
 
         config.FONT = self.helpers.get_plugin_setting("font")
@@ -147,32 +152,42 @@ class Command(InteractiveTenantOption, BaseCommand):
         config.COLOR_SECONDARY = self.helpers.get_plugin_setting("color_secondary")
         config.COLOR_HEADER = self.helpers.get_plugin_setting("color_header")
         config.CUSTOM_TAGS_ENABLED = self.helpers.get_plugin_setting("custom_tags_allowed") == "yes"
-        config.TAG_CATEGORIES = json.loads(html.unescape(self.helpers.get_plugin_setting("tagCategories")))
+        config.TAG_CATEGORIES = json.loads(html.unescape(self.helpers.get_plugin_setting("tagCategories"))) \
+            if self.helpers.get_plugin_setting("tagCategories") else []
         config.ACTIVITY_FEED_FILTERS_ENABLED = self.helpers.get_plugin_setting("show_extra_homepage_filters") == "yes"
         config.MENU = self.helpers.get_menu(json.loads(html.unescape(self.helpers.get_plugin_setting("menu")))) \
             if self.helpers.get_plugin_setting("menu") else []
         config.PROFILE = self.helpers.get_menu(json.loads(html.unescape(self.helpers.get_plugin_setting("profile")))) \
             if self.helpers.get_plugin_setting("profile") else []
-        config.FOOTER = json.loads(html.unescape(self.helpers.get_plugin_setting("footer")))
-        config.DIRECT_LINKS = json.loads(html.unescape(self.helpers.get_plugin_setting("directLinks")))
+        config.FOOTER = json.loads(html.unescape(self.helpers.get_plugin_setting("footer"))) \
+            if self.helpers.get_plugin_setting("footer") else []
+        config.DIRECT_LINKS = json.loads(html.unescape(self.helpers.get_plugin_setting("directLinks"))) \
+            if self.helpers.get_plugin_setting("directLinks") else []
         config.SHOW_LOGIN_REGISTER = self.helpers.get_plugin_setting("show_login_register") == "yes"
         config.ADVANCED_PERMISSIONS_ENABLED = self.helpers.get_plugin_setting("advanced_permissions") == "yes"
         config.SUBGROUPS = self.helpers.get_plugin_setting("subgroups") == "yes"
-
-        config.DESCRIPTION = html.unescape(elgg_site.description)
+        config.DESCRIPTION = html.unescape(elgg_site.description) \
+            if elgg_site.description else ""
         config.IS_CLOSED = self.helpers.get_site_config('walled_garden')
         config.ALLOW_REGISTRATION = self.helpers.get_site_config('allow_registration')
         config.GOOGLE_ANALYTICS_URL = html.unescape(self.helpers.get_plugin_setting("google_analytics"))
-        config.PIWIK_URL = html.unescape(self.helpers.get_plugin_setting("piwik_url"))
-        config.PIWIK_ID = html.unescape(self.helpers.get_plugin_setting("piwik"))
+        config.PIWIK_URL = html.unescape(self.helpers.get_plugin_setting("piwik_url")) \
+            if self.helpers.get_plugin_setting("piwik_url") else ""
+        config.PIWIK_ID = html.unescape(self.helpers.get_plugin_setting("piwik")) \
+            if self.helpers.get_plugin_setting("piwik") else ""
         config.LIKE_ICON = self.helpers.get_plugin_setting("like_icon") == "yes"
         config.NUMBER_OF_FEATURED_ITEMS = self.helpers.get_plugin_setting("number_of_featured_items")
         config.ENABLE_FEED_SORTING = self.helpers.get_plugin_setting("enable_feed_sorting") == "yes"
-        config.SUBTITLE = html.unescape(self.helpers.get_plugin_setting("subtitle"))
-        config.EMAIL_OVERVIEW_DEFAULT_FREQUENCY = html.unescape(self.helpers.get_plugin_setting("default_email_overview"))
-        config.EMAIL_OVERVIEW_SUBJECT = html.unescape(self.helpers.get_plugin_setting("email_overview_subject"))
-        config.EMAIL_OVERVIEW_TITLE = html.unescape(self.helpers.get_plugin_setting("email_overview_title"))
-        config.EMAIL_OVERVIEW_INTRO = html.unescape(self.helpers.get_plugin_setting("email_overview_intro"))
+        config.SUBTITLE = html.unescape(self.helpers.get_plugin_setting("subtitle")) \
+            if self.helpers.get_plugin_setting("subtitle") else ""
+        config.EMAIL_OVERVIEW_DEFAULT_FREQUENCY = html.unescape(self.helpers.get_plugin_setting("default_email_overview")) \
+            if self.helpers.get_plugin_setting("default_email_overview") else ""
+        config.EMAIL_OVERVIEW_SUBJECT = html.unescape(self.helpers.get_plugin_setting("email_overview_subject")) \
+            if self.helpers.get_plugin_setting("email_overview_subject") else ""
+        config.EMAIL_OVERVIEW_TITLE = html.unescape(self.helpers.get_plugin_setting("email_overview_title")) \
+            if self.helpers.get_plugin_setting("email_overview_title") else ""
+        config.EMAIL_OVERVIEW_INTRO = html.unescape(self.helpers.get_plugin_setting("email_overview_intro")) \
+            if self.helpers.get_plugin_setting("email_overview_intro") else ""
         config.SHOW_UP_DOWN_VOTING = self.helpers.get_plugin_setting("enable_up_down_voting") == "yes"
         config.ENABLE_SHARING = self.helpers.get_plugin_setting("enable_sharing") == "yes"
         config.SHOW_VIEW_COUNT = self.helpers.get_plugin_setting("enable_views_count") == "yes"
@@ -515,7 +530,8 @@ class Command(InteractiveTenantOption, BaseCommand):
             self.helpers.save_parent_page(elgg_page)
 
         config_cms_page = self.helpers.get_plugin_setting("startpage_cms")
-        if config_cms_page:
+
+        if config_cms_page and int(config_cms_page) > 0:
             cms_page_guid = GuidMap.objects.get(id=int(config_cms_page)).guid
             config.STARTPAGE_CMS = str(cms_page_guid)
 
