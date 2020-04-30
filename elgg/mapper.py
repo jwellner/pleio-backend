@@ -20,6 +20,7 @@ from elgg.models import (
 )
 from elgg.helpers import ElggHelpers
 
+from django.conf import settings
 from django.contrib.contenttypes.models import ContentType
 from django.db.models import ObjectDoesNotExist
 
@@ -39,6 +40,7 @@ class Mapper():
         user.email = elgg_user.email if elgg_user.email != '' else f'deleted@{user.guid}'
         user.name = elgg_user.name
         user.external_id = elgg_user.pleio_guid
+        user.picture = f"{settings.PROFILE_PICTURE_URL}/mod/profile/icondirect.php?guid={elgg_user.pleio_guid}&size=large"
         user.created_at = datetime.fromtimestamp(elgg_user.entity.time_created)
         user.updated_at = datetime.fromtimestamp(elgg_user.entity.time_updated)
         user.is_active = elgg_user.banned == "no"
