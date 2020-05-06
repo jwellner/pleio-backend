@@ -1,0 +1,18 @@
+
+{% extends "email/default.html" %}
+{% load i18n %}
+
+{% block content %}
+{% blocktrans %}
+
+Hi {{ name_of_user_admin_role_changed }},
+
+Your site administrator role was removed by {{ user_name }}.
+
+If you believe this was done in error, please contact one of the other site administrators.",
+
+{% endblocktrans %}
+{% endblock %}
+
+
+

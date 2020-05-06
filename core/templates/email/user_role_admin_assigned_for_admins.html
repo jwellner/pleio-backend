@@ -1,0 +1,19 @@
+
+{% extends "email/default.html" %}
+{% load i18n %}
+
+{% block content %}
+{% blocktrans %}
+
+Hi,
+
+The user {{ name_of_user_admin_role_changed }} was assigned as a new site administrator by {{ user_name }}.
+Check out the profile of the new site administrator here {{ link }} .
+
+If you believe this was done in error, please login here {{ site_url }} and undo this action.
+
+{% endblocktrans %}
+{% endblock %}
+
+
+

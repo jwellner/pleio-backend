@@ -1,0 +1,18 @@
+
+{% extends "email/default.html" %}
+{% load i18n %}
+
+{% block content %}
+{% blocktrans %}
+
+Dear {{ name_deleted_user }},<br><br> Your membership of <a href="{{ site_url }}">{{ site_url }}</a> has been cancelled by the administrator.<br>
+
+Your profile, settings and saved items have been removed from the site and your content has been made anonymous.
+
+Your Pleio account will continue to exist as will your membership of any other sites. See <a href="https://account.pleio.nl">account.pleio.nl</a> for more information.
+
+{% endblocktrans %}
+{% endblock %}
+
+
+

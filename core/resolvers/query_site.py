@@ -19,6 +19,7 @@ def get_settings():
 
     return {
         "site": get_site(),
+        "backendVersion": config.BACKEND_VERSION,
         "env": settings.ENV,
         "odtEnabled": False,
         "enableSharing": config.ENABLE_SHARING,
