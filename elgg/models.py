@@ -42,9 +42,13 @@ class ElggAccessCollections(models.Model):
 
 class ElggAnnotations(models.Model):
     id = models.BigAutoField(primary_key=True)
-    entity_guid = models.BigIntegerField()
-    name_id = models.BigIntegerField()
-    value_id = models.BigIntegerField()
+
+    # entity_guid = models.BigIntegerField()
+    entity = models.ForeignKey('ElggEntities', db_column='entity_guid', to_field='guid', on_delete=models.CASCADE, related_name='annotation')
+    #name_id = models.BigIntegerField()
+    name = models.OneToOneField('ElggMetastrings', db_column='name_id', to_field='id', on_delete=models.CASCADE, related_name='annotation_name')
+    #value_id = models.BigIntegerField()
+    value = models.OneToOneField('ElggMetastrings', db_column='value_id', to_field='id', on_delete=models.CASCADE, related_name='annotation_value')
     value_type = models.CharField(max_length=7)
     owner_guid = models.BigIntegerField()
     access_id = models.BigIntegerField()

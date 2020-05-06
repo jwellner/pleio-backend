@@ -7,8 +7,7 @@ from user.models import User
 from file.models import FileFolder
 from core.lib import ACCESS_TYPE, access_id_to_acl
 from elgg.models import (
-    ElggEntities, ElggObjectsEntity, ElggPrivateSettings, ElggMetastrings, ElggConfig, GuidMap, ElggAnnotations,
-    ElggEntityViews, ElggEntityViewsLog
+    ElggEntities, ElggObjectsEntity, ElggPrivateSettings, ElggConfig, GuidMap, ElggEntityViews, ElggEntityViewsLog
 )
 from core.models import EntityView, EntityViewCount
 
@@ -308,10 +307,8 @@ class ElggHelpers():
         # pylint: disable=dangerous-default-value
         # pylint: disable=too-many-locals
         if "vote" in annotation_types:
-            name_id = ElggMetastrings.objects.using(self.database).filter(string="vote").first().id
-            value_id = ElggMetastrings.objects.using(self.database).filter(string="1").first().id
-            entity_guid = elgg_entity.entity.guid
-            for vote in ElggAnnotations.objects.using(self.database).filter(entity_guid=entity_guid, name_id=name_id, value_id=value_id):
+            annotations = elgg_entity.entity.annotation.filter(name__string="vote", value__string="1")
+            for vote in annotations:
                 user = User.objects.get(id=GuidMap.objects.get(id=vote.owner_guid, object_type="user").guid)
                 entity.add_vote(user, 1)
         if "bookmark" in annotation_types:
