@@ -283,14 +283,16 @@ class EditSiteSettingTestCase(FastTenantTestCase):
         self.assertEqual(data["editSiteSetting"]["siteSettings"]["groupMemberExport"], True)
 
 
+    @patch("file.models.get_mimetype")
     @patch("{}.open".format(settings.DEFAULT_FILE_STORAGE))
-    def test_edit_site_setting_logo_and_icon(self, mock_open):
+    def test_edit_site_setting_logo_and_icon(self, mock_open, mock_mimetype):
         file_mock = MagicMock(spec=File)
         file_mock.name = 'logo.png'
         file_mock.content_type = 'image/png'
         file_mock.id = 'a12'
 
         mock_open.return_value = file_mock
+        mock_mimetype.return_value = file_mock.content_type
 
         mutation = """
             mutation EditSiteSetting($input: editSiteSettingInput!) {

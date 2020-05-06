@@ -1,4 +1,5 @@
 import os
+import magic
 from django.urls import reverse
 from django.conf import settings
 from django.db import models
@@ -15,6 +16,15 @@ def read_access_default():
 
 def write_access_default():
     return []
+
+
+def get_mimetype(file):
+    """
+    Get mimetype by reading the header of the file
+    """
+    mime_type = magic.from_buffer(file.upload.open().read(2048), mime=True)
+    return mime_type
+
 
 class FileFolder(Entity):
 
@@ -68,7 +78,6 @@ def set_parent_folders_updated_at(instance):
         instance.parent.save()
         set_parent_folders_updated_at(instance.parent)
 
-# TODO: we should get the "real" mime-type of the file. Right now it is send by the user client.
 @receiver(pre_save, sender=FileFolder)
 def file_pre_save(sender, instance, **kwargs):
     # pylint: disable=unused-argument
@@ -76,8 +85,8 @@ def file_pre_save(sender, instance, **kwargs):
         return
     if instance.upload and not instance.title:
         instance.title = instance.upload.file.name
-    if instance.upload and not instance.mime_type:
-        instance.mime_type = instance.upload.file.content_type
+    if instance.upload:
+        instance.mime_type = get_mimetype(instance)
 
 # update parent folders updated_at when adding, moving and deleting files
 @receiver([pre_save, pre_delete], sender=FileFolder)
