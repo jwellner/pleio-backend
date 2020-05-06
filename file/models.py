@@ -4,7 +4,8 @@ from django.conf import settings
 from django.db import models
 from core.lib import generate_object_filename
 from core.models import Entity
-from django.db.models.signals import pre_save, post_save
+from django.db.models import ObjectDoesNotExist
+from django.db.models.signals import pre_save, pre_delete
 from django.dispatch import receiver
 from django.utils.text import slugify
 
@@ -78,9 +79,19 @@ def file_pre_save(sender, instance, **kwargs):
     if instance.upload and not instance.mime_type:
         instance.mime_type = instance.upload.file.content_type
 
-@receiver(post_save, sender=FileFolder)
-def file_post_save(sender, instance, **kwargs):
+# update parent folders updated_at when adding, moving and deleting files
+@receiver([pre_save, pre_delete], sender=FileFolder)
+def update_parent_timestamps(sender, instance, **kwargs):
     # pylint: disable=unused-argument
     if settings.IMPORTING:
         return
+
     set_parent_folders_updated_at(instance)
+
+    try:
+        # Also update old parent if changed
+        old_instance = FileFolder.objects.get(id=instance.id)
+        if old_instance.parent != instance.parent:
+            set_parent_folders_updated_at(old_instance)
+    except ObjectDoesNotExist:
+        pass
