@@ -4,7 +4,6 @@ from django.core.files.base import ContentFile
 from PIL import Image
 from io import BytesIO
 
-
 def add_folders_to_zip(zip_file, folders, user, file_path):
     for folder in folders:
         files = FileFolder.objects.visible(user).filter(parent=folder.id, is_folder=False)

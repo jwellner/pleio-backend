@@ -58,13 +58,15 @@ class AddFileTestCase(FastTenantTestCase):
             }
         """
 
+    @patch("file.models.get_mimetype")
     @patch("{}.open".format(settings.DEFAULT_FILE_STORAGE))
-    def test_add_file(self, mock_open):
+    def test_add_file(self, mock_open, mock_mimetype):
         file_mock = MagicMock(spec=File)
         file_mock.name = 'test.gif'
         file_mock.content_type = 'image/gif'
 
         mock_open.return_value = file_mock
+        mock_mimetype.return_value = file_mock.content_type
 
         variables = self.data
 

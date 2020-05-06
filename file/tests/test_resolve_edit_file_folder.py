@@ -145,15 +145,17 @@ class EditFileFolderTestCase(FastTenantTestCase):
             }
         """
 
+    @patch("file.models.get_mimetype")
     @patch("{}.save".format(settings.DEFAULT_FILE_STORAGE))
     @patch("{}.open".format(settings.DEFAULT_FILE_STORAGE))
-    def test_edit_file_title(self, mock_open, mock_save):
+    def test_edit_file_title(self, mock_open, mock_save, mock_mimetype):
         file_mock = MagicMock(spec=File)
         file_mock.name = 'test.gif'
         file_mock.content_type = 'image/gif'
 
         mock_save.return_value = "test.gif"
         mock_open.return_value = file_mock
+        mock_mimetype.return_value = file_mock.content_type
 
         test_file = FileFolder.objects.create(
             read_access=[ACCESS_TYPE.user.format(self.authenticatedUser.id)],
