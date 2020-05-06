@@ -400,6 +400,16 @@ input deleteRowInput {
   clientMutationId: Int
 }
 
+input deleteUserInput {
+  guid: String!
+  clientMutationId: Int
+}
+
+input toggleUserIsAdminInput {
+  guid: String!
+  clientMutationId: Int
+}
+
 type deleteRowPayload {
   success: Boolean
   clientMutationId: Int
@@ -411,6 +421,16 @@ input deleteSubgroupInput {
 }
 
 type deleteSubgroupPayload {
+  success: Boolean
+  clientMutationId: Int
+}
+
+type deleteUserPayload {
+  success: Boolean
+  clientMutationId: Int
+}
+
+type toggleUserIsAdminPayload {
   success: Boolean
   clientMutationId: Int
 }
@@ -1137,6 +1157,8 @@ type Mutation {
   addEntity(input: addEntityInput!): addEntityPayload
   editEntity(input: editEntityInput!): editEntityPayload
   deleteEntity(input: deleteEntityInput!): deleteEntityPayload
+  deleteUser(input: deleteUserInput!): deleteUserPayload
+  toggleUserIsAdmin(input: toggleUserIsAdminInput!): toggleUserIsAdminPayload
   addFile(input: addFileInput!): addFilePayload
   editFileFolder(input: editFileFolderInput!): editFileFolderPayload
   moveFileFolder(input: moveFileFolderInput!): moveFileFolderPayload
@@ -1388,6 +1410,7 @@ type Query {
   filters: Filters
   site: Site
   siteSettings: SiteSettings
+  siteUsers(q: String, offset: Int, limit: Int, isAdmin: Boolean, isDeleteRequested: Boolean): SiteUserList
 }
 
 type Question implements Entity {
@@ -1805,6 +1828,7 @@ type User implements Entity {
   url: String
   canEdit: Boolean!
   requestDelete: Boolean
+  isAdmin: Boolean
 }
 
 type UserFilter {
@@ -1827,6 +1851,11 @@ type UserFilterItemCount {
 type UserList {
   total: Int!
   filterCount: [UserFilterCount]
+  edges: [User]
+}
+
+type SiteUserList {
+  total: Int!
   edges: [User]
 }
 

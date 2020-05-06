@@ -87,6 +87,12 @@ def resolve_can_edit(obj, info):
         return True
     return False
 
+@user.field("isAdmin")
+def resolve_is_admin(obj, info):
+    if not info.context.user.is_admin:
+        return None
+    return obj.is_admin
+
 @user.field("username")
 def resolve_username(obj, info):
     # pylint: disable=unused-argument

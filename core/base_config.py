@@ -4,6 +4,7 @@ from django.core.cache import cache
 from django.apps import apps
 
 DEFAULT_SITE_CONFIG = {
+    'BACKEND_VERSION': ('2.0', 'Backend version'),
     'NAME': ('Pleio 2.0', 'Name'),
     'DESCRIPTION': ('Omschrijving site', 'Description'),
     'LANGUAGE': ('nl', 'Language'),

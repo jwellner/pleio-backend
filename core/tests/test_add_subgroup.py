@@ -14,11 +14,11 @@ class AddSubgroupTestCase(FastTenantTestCase):
 
     def setUp(self):
         self.anonymousUser = AnonymousUser()
-        self.admin = mixer.blend(User, is_admin=True) 
-        self.user1 = mixer.blend(User)
-        self.user2 = mixer.blend(User)
-        self.user3 = mixer.blend(User)
-        self.user4 = mixer.blend(User)
+        self.admin = mixer.blend(User, is_admin=True)
+        self.user1 = mixer.blend(User, name='a')
+        self.user2 = mixer.blend(User, name='b')
+        self.user3 = mixer.blend(User, name='c')
+        self.user4 = mixer.blend(User, name='d')
 
         self.group = mixer.blend(Group, owner=self.user1)
         self.group.join(self.user2, 'member')
