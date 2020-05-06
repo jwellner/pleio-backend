@@ -58,8 +58,8 @@ class AddSubgroupTestCase(FastTenantTestCase):
 
         self.assertEqual(data["addSubgroup"]["success"], True)
         self.assertEqual(Group.objects.get(id=self.group.id).subgroups.all()[0].name, 'testSubgroup')
-        self.assertEqual(Group.objects.get(id=self.group.id).subgroups.all()[0].members.all()[0], self.user2)
-        self.assertEqual(Group.objects.get(id=self.group.id).subgroups.all()[0].members.all()[1], self.user4)
+        self.assertEqual(Group.objects.get(id=self.group.id).subgroups.all()[0].members.filter(id=self.user2.guid)[0], self.user2)
+        self.assertEqual(Group.objects.get(id=self.group.id).subgroups.all()[0].members.filter(id=self.user4.guid)[0], self.user4)
 
     def test_add_subgroup_by_admin(self):
 
