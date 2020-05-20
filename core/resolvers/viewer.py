@@ -1,5 +1,6 @@
 from ariadne import ObjectType
 from core.lib import get_acl
+from core.constances import ACCESS_TYPE
 from elgg.helpers import get_guid
 
 viewer = ObjectType("Viewer")
@@ -30,8 +31,8 @@ def resolve_can_write_to_container(obj, info, containerGuid=None, subtype=None, 
             return True
         return False
 
-    # check group access
-    if (containerGuid and containerGuid in get_acl(user)) or user.is_admin:
+    # check group access (is containerGuid always group?)
+    if (containerGuid and ACCESS_TYPE.group.format(containerGuid) in get_acl(user)) or user.is_admin:
         return True
 
     return False

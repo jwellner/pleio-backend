@@ -1,12 +1,12 @@
 from django.db import connection
 from django_tenants.test.cases import FastTenantTestCase
+from core.models import Group
 from user.models import User
 from backend2.schema import schema
 from ariadne import graphql_sync
 import json
 from django.contrib.auth.models import AnonymousUser
 from django.http import HttpRequest
-from user.models import User
 from mixer.backend.django import mixer
 
 class ViewerTestCase(FastTenantTestCase):
@@ -14,9 +14,14 @@ class ViewerTestCase(FastTenantTestCase):
     def setUp(self):
         self.anonymousUser = AnonymousUser()
         self.authenticatedUser = mixer.blend(User)
+        self.groupUser = mixer.blend(User)
         self.authenticatedAdminUser = mixer.blend(User, is_admin = True)
+        self.group = mixer.blend(Group, owner=self.groupUser)
+        self.group.join(self.groupUser, 'member')
 
     def tearDown(self):
+        self.group.delete()
+        self.groupUser.delete()
         self.authenticatedUser.delete()
         self.authenticatedAdminUser.delete()
 
@@ -200,6 +205,51 @@ class ViewerTestCase(FastTenantTestCase):
         """
         request = HttpRequest()
         request.user = self.authenticatedAdminUser
+
+        result = graphql_sync(schema, { "query": query}, context_value=request)
+
+        self.assertTrue(result[0])
+
+        data = result[1]["data"]
+        
+        self.assertEqual(data["viewer"]["canWriteToContainer"], True)
+
+    def test_viewer_can_write_to_container_group_nonmember(self):
+        query = """
+            {
+                viewer {
+                    canWriteToContainer(
+                        containerGuid: "{self.group.id}"
+                        subtype: "blog"
+                    )
+                }
+            }
+        """
+        request = HttpRequest()
+        request.user = self.authenticatedUser
+
+        result = graphql_sync(schema, { "query": query}, context_value=request)
+
+        self.assertTrue(result[0])
+
+        data = result[1]["data"]
+        
+        self.assertEqual(data["viewer"]["canWriteToContainer"], False)
+
+    def test_viewer_can_write_to_container_group_member(self):
+        query = f"""
+            {{
+                viewer {{
+                    canWriteToContainer(
+                        containerGuid: "{self.group.id}"
+                        subtype: "blog"
+                    )
+                }}
+            }}
+        """
+
+        request = HttpRequest()
+        request.user = self.groupUser
 
         result = graphql_sync(schema, { "query": query}, context_value=request)
 
