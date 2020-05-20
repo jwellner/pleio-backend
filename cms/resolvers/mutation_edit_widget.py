@@ -37,8 +37,9 @@ def resolve_edit_widget(_, info, input):
             widget.column = Column.objects.get(id=clean_input.get("parentGuid"))
         except ObjectDoesNotExist:
             raise GraphQLError(COULD_NOT_FIND)
+
     if clean_input.get("settings"):
-        widget.is_full_width = clean_input.get("settings")
+        widget.settings = clean_input.get("settings")
 
     widget.save()
 
