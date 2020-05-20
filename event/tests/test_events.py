@@ -24,6 +24,7 @@ class EventsTestCase(FastTenantTestCase):
         self.anonymousUser = AnonymousUser()
         self.user1 = mixer.blend(User)
         self.user2 = mixer.blend(User)
+        self.group = mixer.blend(Group, owner=self.user1)
 
         self.eventOneHourAgo = Event.objects.create(
             title="Test past event 1 hour ago",
@@ -81,10 +82,24 @@ class EventsTestCase(FastTenantTestCase):
             max_attendees=None
         )
 
+        self.eventFutureGroup = Event.objects.create(
+            title="Test future event in group",
+            description="Description",
+            rich_description="JSON to string",
+            read_access=[ACCESS_TYPE.public],
+            write_access=[ACCESS_TYPE.user.format(self.user1.id)],
+            owner=self.user1,
+            start_date=tomorrow,
+            location="Utrecht",
+            external_link="https://www.pleio.nl",
+            rsvp=True,
+            max_attendees=None,
+            group=self.group
+        )
 
         self.query = """
-            query EventsList($filter: EventFilter, $offset: Int, $limit: Int) {
-                events(filter: $filter, offset: $offset, limit: $limit) {
+            query EventsList($filter: EventFilter, $containerGuid: String, $offset: Int, $limit: Int) {
+                events(filter: $filter, containerGuid: $containerGuid, offset: $offset, limit: $limit) {
                         total
                         edges {
                         guid
@@ -163,6 +178,7 @@ class EventsTestCase(FastTenantTestCase):
     def tearDown(self):
         self.eventFuture1.delete()
         self.eventFuture2.delete()
+        self.eventFutureGroup.delete()
         self.eventPast1.delete()
         self.eventOneHourAgo.delete()
         self.user1.delete()
@@ -176,6 +192,7 @@ class EventsTestCase(FastTenantTestCase):
         variables = {
             "limit": 20,
             "offset": 0,
+            "containerGuid": "1", # Only get events on site level
             "filter": "upcoming"
         }
 
@@ -202,6 +219,7 @@ class EventsTestCase(FastTenantTestCase):
         variables = {
             "limit": 1,
             "offset": 0,
+            "containerGuid": "1",
             "filter": "upcoming"
         }
 
@@ -251,3 +269,21 @@ class EventsTestCase(FastTenantTestCase):
         errors = result[1]["errors"]
 
         self.assertEqual(errors[0]["message"], "Variable '$filter' got invalid value ''; Expected type EventFilter.")
+
+    def test_events_in_group(self):
+
+        request = HttpRequest()
+        request.user = self.user2
+
+        variables = {
+            "limit": 20,
+            "offset": 0,
+            "containerGuid": self.group.guid
+        }
+
+        result = graphql_sync(schema, { "query": self.query , "variables": variables}, context_value=request)
+
+        self.assertTrue(result[0])
+
+        data = result[1]["data"]
+        self.assertEqual(data["events"]["total"], 1)
