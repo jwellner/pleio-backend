@@ -106,6 +106,7 @@ def resolve_edit_site_setting(_, info, input):
         'statusUpdateGroups': 'STATUS_UPDATE_GROUPS',
         'subgroups': 'SUBGROUPS',
         'groupMemberExport': 'GROUP_MEMBER_EXPORT',
+        'limitedGroupAdd': 'LIMITED_GROUP_ADD',
 
     }
 

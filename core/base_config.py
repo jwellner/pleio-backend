@@ -87,6 +87,7 @@ DEFAULT_SITE_CONFIG = {
     'STATUS_UPDATE_GROUPS': (True, 'Status update groups'),
     'SUBGROUPS': (False, 'Subgroups'),
     'GROUP_MEMBER_EXPORT': (False, 'Group member export'),
+    'LIMITED_GROUP_ADD': (True, 'Adding of groups limited to admins'),
 
 
     'ACHIEVEMENTS_ENABLED': (True, 'Achievements enabled'),
