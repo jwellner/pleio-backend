@@ -2,6 +2,7 @@ from ariadne import ObjectType
 from elgg.helpers import get_guid
 from event.models import Event
 from datetime import datetime
+from django.db.models import Q
 from django.utils import timezone
 
 query = ObjectType("Query")
@@ -11,6 +12,18 @@ def get_end_of_yesterday():
 
     return datetime(year=yesterday.year, month=yesterday.month,
                     day=yesterday.day, hour=23, minute=59, second=59)
+
+def conditional_date_filter(date_filter):
+    if date_filter == 'previous':
+        return Q(start_date__lte=get_end_of_yesterday())
+    return Q(start_date__gt=get_end_of_yesterday())
+
+def conditional_group_filter(container_guid):
+    if container_guid == "1":
+        return Q(group=None)
+    if container_guid:
+        return Q(group__id=container_guid)
+    return Q()
 
 
 @query.field("events")
@@ -22,10 +35,10 @@ def resolve_events(obj, info, filter=None, containerGuid=None, offset=0, limit=2
     events = Event.objects.visible(info.context.user)
     containerGuid = get_guid(containerGuid)
 
-    if filter == 'previous':
-        events = events.filter(start_date__lte=get_end_of_yesterday())
-    else:
-        events = events.filter(start_date__gt=get_end_of_yesterday())
+    events = events.filter(
+        conditional_date_filter(filter) & 
+        conditional_group_filter(containerGuid)
+    )
 
     edges = events[offset:offset+limit]
 
