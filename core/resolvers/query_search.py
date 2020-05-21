@@ -10,7 +10,7 @@ from itertools import chain
 from django_tenants.utils import parse_tenant_config_path
 
 
-def resolve_search(_, info, q=None, containerGuid=None, type=None, subtype=None, offset=0, limit=20):
+def resolve_search(_, info, q=None, containerGuid=None, type=None, subtype=None, dateFrom="", dateTo="", offset=0, limit=20):
     # pylint: disable=unused-argument
     # pylint: disable=too-many-arguments
     # pylint: disable=redefined-builtin
@@ -42,6 +42,8 @@ def resolve_search(_, info, q=None, containerGuid=None, type=None, subtype=None,
             'terms', read_access=list(get_acl(user))
         ).filter(
             'match', tenant_name=tenant_name
+        ).filter(
+            'range', created_at={'gte': dateFrom, 'lte': dateTo}
         )
 
     a = A('terms', field='type')
@@ -74,6 +76,8 @@ def resolve_search(_, info, q=None, containerGuid=None, type=None, subtype=None,
             'terms', read_access=list(get_acl(user))
         ).filter(
             'match', tenant_name=tenant_name
+        ).filter(
+            'range', created_at={'gte': dateFrom, 'lte': dateTo}
         )
 
     a = A('terms', field='type')
@@ -99,6 +103,8 @@ def resolve_search(_, info, q=None, containerGuid=None, type=None, subtype=None,
             'terms', read_access=list(get_acl(user))
         ).filter(
             'match', tenant_name=tenant_name
+        ).filter(
+            'range', created_at={'gte': dateFrom, 'lte': dateTo}
         )
 
     a = A('terms', field='type')
