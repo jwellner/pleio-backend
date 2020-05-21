@@ -56,6 +56,7 @@ def get_site():
         'language': config.LANGUAGE,
         'logo': config.LOGO,
         'logoAlt': config.LOGO_ALT,
+        'likeIcon': config.LIKE_ICON,
         'icon': config.ICON,
         'iconAlt': config.ICON_ALT,
         'showIcon': config.ICON_ENABLED,
