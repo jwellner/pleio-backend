@@ -1,10 +1,12 @@
 from ariadne import ObjectType
+from django.core.exceptions import ObjectDoesNotExist
 from core.constances import MEMBERSHIP
 from core.lib import get_access_ids
 from core.models import GroupInvitation, Subgroup
 from user.models import User
 from core import config
 from core.resolvers import shared
+
 
 group = ObjectType("Group")
 
@@ -81,6 +83,18 @@ def resolve_group_is_auto_membership_enabled(obj, info):
 def resolve_group_can_edit(obj, info):
     # pylint: disable=unused-argument
     return obj.can_write(info.context.user)
+
+@group.field("getsNotifications")
+def resolve_group_getsNotifications(obj, info):
+    # pylint: disable=unused-argument
+    user = info.context.user
+    if not user.is_authenticated:
+        return False
+
+    try:
+        return obj.members.get(user=user).enable_notification
+    except ObjectDoesNotExist:
+        return False
 
 @group.field("subgroups")
 def resolve_group_subgroups(obj, info):
