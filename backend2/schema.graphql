@@ -1394,7 +1394,7 @@ input ProfileItemInput {
 type Query {
   viewer: Viewer
   entity(guid: String, username: String): Entity
-  search(q: String!, containerGuid: String, type: Type, subtype: String, offset: Int, limit: Int): SearchList
+  search(q: String!, containerGuid: String, type: Type, subtype: String, dateFrom: String, dateTo: String, offset: Int, limit: Int): SearchList
   recommended(offset: Int, limit: Int): EntityList
   trending: [TrendingList]
   top: [TopItem]
