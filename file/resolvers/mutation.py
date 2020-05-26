@@ -1,7 +1,7 @@
 from graphql import GraphQLError
 from django.core.exceptions import ObjectDoesNotExist
 from ariadne import ObjectType
-from core.constances import NOT_LOGGED_IN, COULD_NOT_FIND, COULD_NOT_FIND_GROUP, COULD_NOT_SAVE
+from core.constances import ACCESS_TYPE, NOT_LOGGED_IN, COULD_NOT_FIND, COULD_NOT_FIND_GROUP, COULD_NOT_SAVE
 from core.lib import remove_none_from_dict, access_id_to_acl
 from core.models import Group
 from ..models import FileFolder
@@ -237,6 +237,8 @@ def resolve_add_image(_, info, input):
 
     if not clean_input.get("image"):
         raise GraphQLError("NO_FILE")
+
+    entity.read_access = [ACCESS_TYPE.public]
 
     entity.upload = clean_input.get("image")
 
