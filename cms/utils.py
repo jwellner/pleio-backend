@@ -20,7 +20,7 @@ def order_positions(parent):
         children = Widget.objects.filter(column=parent)
 
     if not children:
-        raise GraphQLError(COULD_NOT_FIND)
+        return
 
     sorted_children = sorted(children, key=lambda k: k.position)
 
