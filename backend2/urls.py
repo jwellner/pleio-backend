@@ -26,5 +26,7 @@ urlpatterns = [
     path('site/logo/<uuid:file_id>', file_views.file_cache_header, name='site_logo'),
     path('site/icon/<uuid:file_id>', file_views.file_cache_header, name='site_icon'),
     path('exporting/event/<uuid:event_id>', event_views.export, name='event_export'),
+
+    re_path(r'view/(?P<entity_id>[0-9A-Fa-f-]+)/(?P<entity_title>[\w]+)$', core_views.entity_view, name='entity_view'),
     re_path(r'.*', core_views.default, name='default')
 ]
