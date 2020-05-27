@@ -1,28 +1,79 @@
 {% load static %}
 <!DOCTYPE html>
-<html lang="{{ lang }}">
+<html lang="{{ config.LANG }}">
 <head>
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta charset="utf-8">
-    <title>{{ title }}</title>
-    <meta name="description" content="">
-    <meta name="viewport" content="width=device-width,height=device-height,user-scalable=no,initial-scale=1.0,maximum-scale=1.0,minimum-scale=1.0">
+    <title>{{ config.NAME }}</title>
+    <link rel="apple-touch-icon" sizes="180x180" href="{% static 'apple-touch-icon.png' %}">
+    <link rel="icon" type="image/png" sizes="32x32" href="{% static 'favicon-32x32.png' %}">
+    <link rel="icon" type="image/png" sizes="16x16" href="{% static 'favicon-16x16.png' %}">
+    <link rel="manifest" href="{% static 'site.webmanifest' %}">
+    <meta name="msapplication-TileColor" content="#da532c">
+    {% if config.COLOR_HEADER %}
+        <meta name="theme-color" content="{{ config.COLOR_HEADER }}">
+    {% else %}
+        <meta name="theme-color" content="{{ config.COLOR_PRIMARY }}">
+    {% endif %}
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <meta name="version" content="1.0.0">
     <meta name="relative-path" content="">
+    {% for key, value in metadata.items %}<meta name="{{ key }}" content="{{ value|striptags }}">
+    {% endfor %}
 
     {% if webpack_dev_server %}
-    <link href="http://localhost:9001/web.css?v={{ version }}" rel="stylesheet" type="text/css">
+    <link href="http://localhost:9001/web.css?v={{ version }}" rel="stylesheet" type="text/css" media="screen">
     {% else %}
-    <link href="/frontend/web.css?v={{ version }}" rel="stylesheet" type="text/css">
+    <link href="/frontend/web.css?v={{ version }}" rel="stylesheet" type="text/css" media="screen">
+    {% endif %}
+
+    {% if config.FONT %}
+        {% if config.FONT == "Roboto" %}
+            <link href="https://fonts.googleapis.com/css?family=Roboto:400,500,700&display=swap" rel="stylesheet">
+        {% elif config.FONT == "Merriweather" %}
+            <link href="https://fonts.googleapis.com/css?family=Merriweather:400,700&display=swap" rel="stylesheet">
+        {% elif config.FONT == "Source Sans Pro" %}
+            <link href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,600,700&display=swap" rel="stylesheet">
+        {% elif config.FONT == "Open Sans" %}
+            <link href="https://fonts.googleapis.com/css?family=Open+Sans:400,600,700&display=swap" rel="stylesheet">
+        {% endif %}
     {% endif %}
 </head>
 
-<body class="___{{ theme }}">
+<body class="___{{ config.THEME }}">
 
-    <div id="react-root" class="page-container"></div>
+    <noscript class="container">
+        <section class="section">
+            <div class="container">
+                <div class="row">
+                    <div class="col-sm-8 col-sm-offset-2 col-lg-6 col-lg-offset-3">
+                        <div class="http-error-page">
+                            <div class="http-error-page__title">Geen Javascript ondersteuning</div>
+                            <div class="http-error-page__text">Helaas, je browser ondersteunt geen Javascript. Gebruik een moderne browser en zorg ervoor dat Javascript aanstaat om deze pagina te bekijken.</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </noscript>
+
+    <div id="react-root" class="page-container">
+        <div class="loading-pleio">
+            {% if config.ICON_ENABLED and config.ICON %}
+                <img src="{{ config.ICON }}">
+            {% else %}
+                <img src="{% static 'apple-touch-icon.png' %}">
+            {% endif %}
+            <p class="text-1">Pleio start op...</p><p class="text-2">In oude browsers (IE11) duurt het langer.</p>
+        </div>
+    </div>
 
     {% if json_settings %}
     <script>window.__SETTINGS__ = {{ json_settings|safe }};</script>
+    {% endif %}
+
+    {% if apollo_state %}
+    <script>window.__APOLLO_STATE__ = {{ apollo_state|safe }};</script>
     {% endif %}
 
     <script src="https://polyfill.io/v3/polyfill.js?gated=true&features=es2015,es2016,es2017,fetch,Element.prototype.closest"></script>
