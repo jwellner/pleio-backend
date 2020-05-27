@@ -14,5 +14,5 @@ __pycache__
 /.tox/
 .env
 postgres/
-static/
+/static/
 .localstack
