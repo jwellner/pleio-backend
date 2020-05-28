@@ -83,6 +83,7 @@ def get_site():
         'showExtraHomepageFilters': config.ACTIVITY_FEED_FILTERS_ENABLED,
         'usersOnline': get_online_users(),
         'achievementsEnabled': config.ACHIEVEMENTS_ENABLED,
+        'limitedGroupAdd': config.LIMITED_GROUP_ADD,
         'cancelMembershipEnabled': config.CANCEL_MEMBERSHIP_ENABLED,
         'showLoginRegister': config.SHOW_LOGIN_REGISTER,
     }
@@ -189,6 +190,7 @@ def get_site_settings():
         'statusUpdateGroups': config.STATUS_UPDATE_GROUPS,
         'subgroups': config.SUBGROUPS,
         'groupMemberExport': config.GROUP_MEMBER_EXPORT,
+        'limitedGroupAdd': config.LIMITED_GROUP_ADD,
 
         'accessIds': get_access_ids(),
         'startpage': config.STARTPAGE,

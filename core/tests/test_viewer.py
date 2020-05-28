@@ -49,7 +49,7 @@ class ViewerTestCase(FastTenantTestCase):
         self.assertTrue(result[0])
 
         data = result[1]["data"]
-        
+
         self.assertEqual(data["viewer"]["guid"], "viewer:0")
         self.assertEqual(data["viewer"]["loggedIn"], False)
         self.assertEqual(data["viewer"]["isSubEditor"], False)
@@ -64,7 +64,7 @@ class ViewerTestCase(FastTenantTestCase):
                     guid
                     loggedIn
                     isSubEditor
-                    isAdmin 
+                    isAdmin
                     user {
                         guid
                         email
@@ -80,7 +80,7 @@ class ViewerTestCase(FastTenantTestCase):
         self.assertTrue(result[0])
 
         data = result[1]["data"]
-        
+
         self.assertEqual(data["viewer"]["guid"], "viewer:{}".format(self.authenticatedUser.id))
         self.assertEqual(data["viewer"]["loggedIn"], True)
         self.assertEqual(data["viewer"]["isSubEditor"], self.authenticatedUser.is_admin)
@@ -113,7 +113,7 @@ class ViewerTestCase(FastTenantTestCase):
         self.assertTrue(result[0])
 
         data = result[1]["data"]
-        
+
         self.assertEqual(data["viewer"]["guid"], "viewer:{}".format(self.authenticatedAdminUser.id))
         self.assertEqual(data["viewer"]["loggedIn"], True)
         self.assertEqual(data["viewer"]["isSubEditor"], self.authenticatedAdminUser.is_admin)
@@ -138,7 +138,7 @@ class ViewerTestCase(FastTenantTestCase):
         self.assertTrue(result[0])
 
         data = result[1]["data"]
-        
+
         self.assertEqual(data["viewer"]["canWriteToContainer"], False)
 
     def test_viewer_can_write_to_container_user(self):
@@ -157,7 +157,7 @@ class ViewerTestCase(FastTenantTestCase):
         self.assertTrue(result[0])
 
         data = result[1]["data"]
-        
+
         self.assertEqual(data["viewer"]["canWriteToContainer"], False)
 
         query = """
@@ -173,7 +173,7 @@ class ViewerTestCase(FastTenantTestCase):
         self.assertTrue(result[0])
 
         data = result[1]["data"]
-        
+
         self.assertEqual(data["viewer"]["canWriteToContainer"], True)
 
     def test_viewer_can_write_to_container_group_user(self):
@@ -192,7 +192,7 @@ class ViewerTestCase(FastTenantTestCase):
         self.assertTrue(result[0])
 
         data = result[1]["data"]
-        
+
         self.assertEqual(data["viewer"]["canWriteToContainer"], False)
 
     def test_viewer_can_write_to_container_admin(self):
@@ -211,7 +211,7 @@ class ViewerTestCase(FastTenantTestCase):
         self.assertTrue(result[0])
 
         data = result[1]["data"]
-        
+
         self.assertEqual(data["viewer"]["canWriteToContainer"], True)
 
     def test_viewer_can_write_to_container_group_nonmember(self):
