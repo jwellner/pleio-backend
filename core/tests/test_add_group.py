@@ -3,12 +3,15 @@ from django_tenants.test.cases import FastTenantTestCase
 from backend2.schema import schema
 from ariadne import graphql_sync
 import json
+from core import config
+from django.core.cache import cache
 from django.contrib.auth.models import AnonymousUser
 from django.http import HttpRequest
 from core.models import Group
 from user.models import User
 from mixer.backend.django import mixer
 from graphql import GraphQLError
+
 
 class AddGroupCase(FastTenantTestCase):
 
@@ -71,6 +74,8 @@ class AddGroupCase(FastTenantTestCase):
 
     def test_add_group(self):
 
+        cache.set("%s%s" % (connection.schema_name, 'LIMITED_GROUP_ADD'), False)
+
         mutation = """
             mutation ($group: addGroupInput!) {
                 addGroup(input: $group) {
@@ -117,6 +122,42 @@ class AddGroupCase(FastTenantTestCase):
         self.assertEqual(data["addGroup"]["group"]["autoNotification"], variables["group"]["autoNotification"])
         self.assertEqual(data["addGroup"]["group"]["tags"], ["tag_one", "tag_two"])
 
+        cache.clear()
+
+    def test_add_group_limited_group_add(self):
+
+        mutation = """
+            mutation ($group: addGroupInput!) {
+                addGroup(input: $group) {
+                    group {
+                        guid
+                        name
+                        icon
+                        description
+                        richDescription
+                        introduction
+                        welcomeMessage
+                        isClosed
+                        isMembershipOnRequest
+                        isFeatured
+                        autoNotification
+                        tags
+                        isLeavingGroupDisabled
+                        isAutoMembershipEnabled
+                    }
+                }
+            }
+        """
+        variables = self.data
+
+        request = HttpRequest()
+        request.user = self.user
+
+        result = graphql_sync(schema, { "query": mutation, "variables": variables }, context_value=request)
+
+        errors = result[1]["errors"]
+
+        self.assertEqual(errors[0]["message"], "could_not_save")
 
     def test_add_group_by_admin(self):
 

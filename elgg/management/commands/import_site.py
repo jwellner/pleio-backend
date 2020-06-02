@@ -201,6 +201,7 @@ class Command(InteractiveTenantOption, BaseCommand):
         config.STATUS_UPDATE_GROUPS = self.helpers.get_plugin_setting("status_update_groups") == "yes"
         config.SUBGROUPS = self.helpers.get_plugin_setting("subgroups") == "yes"
         config.GROUP_MEMBER_EXPORT = self.helpers.get_plugin_setting("member_export") == "yes"
+        config.LIMITED_GROUP_ADD = self.helpers.get_plugin_setting("limited_groups", "groups") == "yes"
 
         self.stdout.write(".", ending="")
 

@@ -1,6 +1,7 @@
 from graphql import GraphQLError
+from core import config
 from core.models import Group
-from core.constances import NOT_LOGGED_IN
+from core.constances import NOT_LOGGED_IN, COULD_NOT_SAVE
 from core.lib import remove_none_from_dict
 
 
@@ -11,6 +12,9 @@ def resolve_add_group(_, info, input):
 
     if not user.is_authenticated:
         raise GraphQLError(NOT_LOGGED_IN)
+
+    if config.LIMITED_GROUP_ADD and not user.is_admin:
+        raise GraphQLError(COULD_NOT_SAVE)
 
     clean_input = remove_none_from_dict(input)
 
