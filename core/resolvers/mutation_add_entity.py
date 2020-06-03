@@ -48,7 +48,7 @@ def resolve_add_entity(_, info, input):
 
     # containerGuid can be parent objects for some subtypes
     # TODO: should we refactor this in backend 2 to use parentGuid?
-    if clean_input.get("containerGuid") and clean_input.get("subtype") in ["wiki"]:
+    if 'containerGuid' in clean_input and clean_input.get("subtype") in ["wiki"]:
         try:
             group = Group.objects.get(id=clean_input.get("containerGuid"))
         except ObjectDoesNotExist:
@@ -58,7 +58,7 @@ def resolve_add_entity(_, info, input):
             except ObjectDoesNotExist:
                 raise GraphQLError(COULD_NOT_FIND_GROUP)
 
-    elif clean_input.get("containerGuid"):
+    elif 'containerGuid' in clean_input:
         try:
             group = Group.objects.get(id=clean_input.get("containerGuid"))
         except ObjectDoesNotExist:
@@ -88,7 +88,7 @@ def resolve_add_entity(_, info, input):
         entity.rich_description = clean_input.get("richDescription")
 
     if clean_input.get("subtype") in ["blog", "news"]:
-        if clean_input.get("featured"):
+        if 'featured' in clean_input:
             entity.featured_position_y = clean_input.get("featured").get("positionY", 0)
             entity.featured_video = clean_input.get("featured").get("video", None)
             if entity.featured_video:
@@ -96,8 +96,8 @@ def resolve_add_entity(_, info, input):
             elif clean_input.get("featured").get("image"):
 
                 imageFile = FileFolder.objects.create(
-                    owner=entity.owner, 
-                    upload=clean_input.get("featured").get("image"), 
+                    owner=entity.owner,
+                    upload=clean_input.get("featured").get("image"),
                     read_access=entity.read_access,
                     write_access=entity.write_access
                 )

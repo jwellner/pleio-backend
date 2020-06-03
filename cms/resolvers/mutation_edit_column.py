@@ -29,14 +29,16 @@ def resolve_edit_column(_, info, input):
     old_position = column.position
     new_position = clean_input.get("position")
 
-    if clean_input.get("position"):
+    if 'position' in clean_input:
         column.position = clean_input.get("position")
-    if clean_input.get("parentGuid"):
+
+    if 'parentGuid' in clean_input:
         try:
             column.row = Row.objects.get(id=clean_input.get("parentGuid"))
         except ObjectDoesNotExist:
             raise GraphQLError(COULD_NOT_FIND)
-    if clean_input.get("width"):
+
+    if 'width' in clean_input:
         column.is_full_width = clean_input.get("width")
 
     column.save()

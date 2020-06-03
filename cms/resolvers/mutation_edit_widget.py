@@ -30,15 +30,16 @@ def resolve_edit_widget(_, info, input):
     old_position = widget.position
     new_position = clean_input.get("position")
 
-    if clean_input.get("position"):
+    if 'position' in clean_input:
         widget.position = clean_input.get("position")
-    if clean_input.get("parentGuid"):
+
+    if 'parentGuid' in clean_input:
         try:
             widget.column = Column.objects.get(id=clean_input.get("parentGuid"))
         except ObjectDoesNotExist:
             raise GraphQLError(COULD_NOT_FIND)
 
-    if clean_input.get("settings"):
+    if 'settings' in clean_input:
         widget.settings = clean_input.get("settings")
 
     widget.save()

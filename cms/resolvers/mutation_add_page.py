@@ -25,13 +25,13 @@ def resolve_add_page(_, info, input):
     entity.owner = user
     entity.tags = clean_input.get("tags")
 
-    if clean_input.get("accessId") is not None:
+    if 'accessId' in clean_input:
         entity.read_access = access_id_to_acl(entity, clean_input.get("accessId"))
     else:
         entity.read_access = access_id_to_acl(entity, 0)
     entity.write_access = access_id_to_acl(entity, 0)
 
-    if clean_input.get("containerGuid"):
+    if 'containerGuid' in clean_input:
         try:
             entity.parent = Page.objects.get(id=clean_input.get("containerGuid"))
         except ObjectDoesNotExist:

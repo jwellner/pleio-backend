@@ -40,7 +40,7 @@ def resolve_edit_group(_, info, input):
         group.is_auto_membership_enabled = clean_input.get("isAutoMembershipEnabled", False)
 
     group.plugins = clean_input.get("plugins", [])
-    if clean_input.get('tags'):
+    if 'tags' in clean_input:
         group.tags = clean_input.get("tags", [])
 
     group.save()

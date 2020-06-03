@@ -26,7 +26,7 @@ def resolve_edit_subgroup(_, info, input):
         raise GraphQLError(COULD_NOT_SAVE)
 
     members = []
-    if clean_input.get("members"):
+    if 'members' in clean_input:
         for member in clean_input.get("members"):
             try:
                 user = User.objects.get(id=member)
@@ -38,7 +38,7 @@ def resolve_edit_subgroup(_, info, input):
                 raise GraphQLError(COULD_NOT_SAVE)
             members.append(user)
 
-    if clean_input.get("name"):
+    if 'name' in clean_input:
         subgroup.name = clean_input.get("name")
 
     subgroup.save()

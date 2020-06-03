@@ -17,7 +17,7 @@ def resolve_add_discussion(_, info, input):
 
     group = None
 
-    if clean_input.get("containerGuid"):
+    if 'containerGuid' in clean_input:
         try:
             group = Group.objects.get(id=clean_input.get("containerGuid"))
         except ObjectDoesNotExist:

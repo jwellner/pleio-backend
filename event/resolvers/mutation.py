@@ -48,7 +48,7 @@ def resolve_attend_event(_, info, input):
             raise GraphQLError(EVENT_IS_FULL)
 
     attendee.state = clean_input.get("state")
-   
+
     attendee.save()
 
     return {
@@ -67,7 +67,7 @@ def resolve_add_event(_, info, input):
 
     group = None
 
-    if clean_input.get("containerGuid"):
+    if 'containerGuid' in clean_input:
         try:
             group = Group.objects.get(id=clean_input.get("containerGuid"))
         except ObjectDoesNotExist:
@@ -91,7 +91,7 @@ def resolve_add_event(_, info, input):
     entity.description = clean_input.get("description")
     entity.rich_description = clean_input.get("richDescription")
 
-    if clean_input.get("featured"):
+    if 'featured' in clean_input:
         entity.featured_position_y = clean_input.get("featured").get("positionY", 0)
         entity.featured_video = clean_input.get("featured").get("video", None)
         if entity.featured_video:
@@ -127,7 +127,7 @@ def resolve_add_event(_, info, input):
     entity.external_link = clean_input.get("source", "")
     entity.location = clean_input.get("location", "")
 
-    if clean_input.get("maxAttendees", None):
+    if 'maxAttendees' in clean_input:
         entity.max_attendees = int(clean_input.get("maxAttendees"))
 
     entity.rsvp = clean_input.get("rsvp", False)
@@ -166,7 +166,7 @@ def resolve_edit_event(_, info, input):
     entity.read_access = access_id_to_acl(entity, clean_input.get("accessId", 0))
     entity.write_access = access_id_to_acl(entity, clean_input.get("writeAccessId", 0))
 
-    if clean_input.get("featured"):
+    if 'featured' in clean_input:
         entity.featured_position_y = clean_input.get("featured").get("positionY", 0)
         entity.featured_video = clean_input.get("featured").get("video", None)
         if entity.featured_video:
@@ -202,7 +202,7 @@ def resolve_edit_event(_, info, input):
     entity.external_link = clean_input.get("source", "")
     entity.location = clean_input.get("location", "")
 
-    if clean_input.get("maxAttendees", None):
+    if 'maxAttendees' in clean_input:
         entity.max_attendees = int(clean_input.get("maxAttendees"))
 
     entity.rsvp = clean_input.get("rsvp", False)
