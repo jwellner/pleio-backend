@@ -37,7 +37,7 @@ def resolve_add_file(_, info, input):
     group = None
     parent = None
 
-    if clean_input.get("containerGuid"):
+    if 'containerGuid' in clean_input:
         try:
             group = Group.objects.get(id=clean_input.get("containerGuid"))
         except ObjectDoesNotExist:
@@ -95,7 +95,7 @@ def resolve_add_folder(_, info, input):
     group = None
     parent = None
 
-    if clean_input.get("containerGuid"):
+    if 'containerGuid' in clean_input:
         try:
             group = Group.objects.get(id=clean_input.get("containerGuid"))
         except ObjectDoesNotExist:
@@ -156,16 +156,16 @@ def resolve_edit_file_folder(_, info, input):
 
     entity.tags = clean_input.get("tags", [])
 
-    if clean_input.get("title"):
+    if 'title' in clean_input:
         entity.title = clean_input.get("title")
 
-    if clean_input.get("file"):
+    if 'file' in clean_input:
         entity.upload = clean_input.get("file")
 
-    if clean_input.get("accessId") is not None:
+    if 'accessId' in clean_input:
         entity.read_access = access_id_to_acl(entity, clean_input.get("accessId"))
 
-    if clean_input.get("writeAccessId") is not None:
+    if 'writeAccessId' in clean_input:
         entity.write_access = access_id_to_acl(entity, clean_input.get("writeAccessId"))
 
     if entity.is_folder and clean_input.get("isAccessRecursive", False):

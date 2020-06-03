@@ -29,9 +29,10 @@ def resolve_edit_row(_, info, input):
     old_position = row.position
     new_position = clean_input.get("position")
 
-    if clean_input.get("position"):
+    if 'position' in clean_input:
         row.position = clean_input.get("position")
-    if clean_input.get("isFullWidth"):
+
+    if 'isFullWidth' in clean_input:
         row.is_full_width = clean_input.get("isFullWidth")
 
     row.save()

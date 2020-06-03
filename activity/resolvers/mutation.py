@@ -18,7 +18,7 @@ def resolve_add_status_update(_, info, input):
 
     group = None
 
-    if clean_input.get("containerGuid"):
+    if 'containerGuid' in clean_input:
         try:
             group = Group.objects.get(id=clean_input.get("containerGuid"))
         except ObjectDoesNotExist:

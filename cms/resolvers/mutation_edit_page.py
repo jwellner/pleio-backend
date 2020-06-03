@@ -27,7 +27,7 @@ def resolve_edit_page(_, info, input):
 
     entity.tags = clean_input.get("tags")
 
-    if clean_input.get("accessId") is not None:
+    if 'accessId' in clean_input:
         entity.read_access = access_id_to_acl(entity, clean_input.get("accessId"))
 
     entity.title = clean_input.get("title")

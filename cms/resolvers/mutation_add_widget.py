@@ -36,7 +36,7 @@ def resolve_add_widget(_, info, input):
 
     widget.position = clean_input.get("position")
 
-    if clean_input.get("settings"):
+    if 'settings' in clean_input:
         widget.settings = clean_input.get("settings")
 
     widget.type = clean_input.get("type")

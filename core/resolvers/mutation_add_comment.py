@@ -14,7 +14,7 @@ def resolve_add_comment(_, info, input):
     if not user.is_authenticated:
         raise GraphQLError(NOT_LOGGED_IN)
 
-    if clean_input.get("containerGuid"):
+    if 'containerGuid' in clean_input:
         try:
             entity = Entity.objects.get_subclass(id=clean_input.get("containerGuid"))
         except ObjectDoesNotExist:
@@ -24,7 +24,6 @@ def resolve_add_comment(_, info, input):
             raise GraphQLError("NOT_GROUP_MEMBER")
     else:
         raise GraphQLError("NO_CONTAINER_GUID")
-
 
     comment = Comment.objects.create(
         container=entity,

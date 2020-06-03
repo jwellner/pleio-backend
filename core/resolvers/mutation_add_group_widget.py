@@ -21,7 +21,7 @@ def resolve_add_group_widget(_, info, input):
     if not group.can_write(user):
         raise GraphQLError(COULD_NOT_SAVE)
 
-    if clean_input.get("settings"):
+    if 'settings' in clean_input:
         settings = clean_input.get("settings")
 
     widget = Widget.objects.create(

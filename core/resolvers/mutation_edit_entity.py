@@ -54,7 +54,7 @@ def resolve_edit_entity(_, info, input):
         entity.rich_description = clean_input.get("richDescription")
 
     if entity._meta.model_name in ["blog", "news", "event"]:
-        if clean_input.get("featured"):
+        if 'featured' in clean_input:
             entity.featured_position_y = clean_input.get("featured").get("positionY", 0)
             entity.featured_video = clean_input.get("featured").get("video", None)
             if entity.featured_video:
@@ -62,8 +62,8 @@ def resolve_edit_entity(_, info, input):
             elif clean_input.get("featured").get("image"):
 
                 imageFile = FileFolder.objects.create(
-                    owner=entity.owner, 
-                    upload=clean_input.get("featured").get("image"), 
+                    owner=entity.owner,
+                    upload=clean_input.get("featured").get("image"),
                     read_access=entity.read_access,
                     write_access=entity.write_access
                 )
