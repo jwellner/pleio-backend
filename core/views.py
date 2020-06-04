@@ -9,6 +9,7 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.utils.text import Truncator
 
 def default(request, exception=None):
+    # pylint: disable=unused-argument
 
     metadata = {
         "description" : config.DESCRIPTION,
