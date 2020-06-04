@@ -1,5 +1,4 @@
 from ariadne import ObjectType
-from elgg.helpers import get_guid
 from event.models import Event
 from datetime import datetime
 from django.db.models import Q
@@ -33,7 +32,6 @@ def resolve_events(obj, info, filter=None, containerGuid=None, offset=0, limit=2
     # pylint: disable=redefined-builtin
 
     events = Event.objects.visible(info.context.user)
-    containerGuid = get_guid(containerGuid)
 
     events = events.filter(
         conditional_date_filter(filter) & 
