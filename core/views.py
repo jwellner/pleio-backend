@@ -26,6 +26,7 @@ def default(request):
     return render(request, 'react.html', context)
 
 def entity_view(request, entity_id=None, entity_title=None):
+    # pylint: disable=unused-argument
     user = request.user
 
     entity = None

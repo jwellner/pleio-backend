@@ -13,6 +13,7 @@ class AdminSite(BaseAdminSite):
 site = AdminSite(name='admin')
 
 def remove_user_data(self, request, queryset):
+    # pylint: disable=unused-argument
     for user in queryset.all():
         user.delete()
 
@@ -23,6 +24,7 @@ class UserAdmin(ModelAdmin):
     actions =  [remove_user_data]
 
     def get_actions(self, request):
+        # pylint: disable=unused-argument
         actions = super().get_actions(request)
         if 'delete_selected' in actions:
             del actions['delete_selected']
@@ -48,6 +50,7 @@ class SettingAdmin(ModelAdmin):
 
     """Overwrite save_model to use core.config"""
     def save_model(self, request, obj, form, change):
+        # pylint: disable=unused-argument
         setattr(config, obj.key, obj.value)
 
 
