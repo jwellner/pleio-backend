@@ -94,6 +94,7 @@ def remove_none_from_dict(values):
 
 def webpack_dev_server_is_available():
     """Return true when webpack developer server is available"""
+    # pylint: disable=import-outside-toplevel
 
     if settings.ENV == 'prod':
         return False

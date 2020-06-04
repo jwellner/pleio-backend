@@ -52,6 +52,8 @@ def get_site():
         'footer': config.FOOTER,
         'directLinks': config.DIRECT_LINKS,
         'accessIds': get_access_ids(),
+        # TODO: implement isClosed when functionality is available
+        'isClosed': False,
         'defaultAccessId': config.DEFAULT_ACCESS_ID,
         'language': config.LANGUAGE,
         'logo': config.LOGO,
@@ -85,6 +87,7 @@ def get_site():
         'achievementsEnabled': config.ACHIEVEMENTS_ENABLED,
         'limitedGroupAdd': config.LIMITED_GROUP_ADD,
         'cancelMembershipEnabled': config.CANCEL_MEMBERSHIP_ENABLED,
+        'newsletter': config.NEWSLETTER,
         'showLoginRegister': config.SHOW_LOGIN_REGISTER,
     }
 
