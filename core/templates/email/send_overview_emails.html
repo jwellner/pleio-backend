@@ -1,0 +1,119 @@
+{% extends "email/base.html" %}
+{% load i18n %}
+
+{% block title %}{{subject}}{% endblock %}
+
+{% block link_color %}
+    a { color:{{primary_color}}; text-decoration:underline }
+{% endblock %}
+
+{% block header %}
+    {% include "email/header.html" %}
+    {% if intro_text %}
+        <tr>
+            <td class="intro" style="font-family:Arial,sans-serif; font-size:14px; line-height:22px; text-align:left; padding:27px 50px" bgcolor="#ffffff">
+                {{ intro_text }}
+            </td>
+        </tr>
+    {% endif %}
+{% endblock %}
+
+
+
+
+{% block periodical_overview %}
+
+
+{% if featured %}
+    <table width="100%" border="0" cellspacing="0" cellpadding="0" style="padding:16px 0 3px 0;">
+        <tr>
+            <td class="featured-title" style="font-family:Arial,sans-serif; font-size:24px; line-height:28px; text-align:left; font-weight:bold; padding:0 50px;">
+                {% blocktrans %}From the editors:{% endblocktrans %}
+            </td>
+        </tr>
+    </table>
+
+    {% for entity in featured  %}
+        {% if entity.type_to_string == 'blog' %}
+            {% include "email/entities/blog.html" %}
+        {% endif %}
+        {% if entity.type_to_string == 'news' %}
+            {% include "email/entities/news.html" %}
+        {% endif %}
+    {% endfor %}
+
+    <table width="100%" border="0" cellspacing="0" cellpadding="0">
+        <tr>
+            <td style="font-family:Arial,sans-serif; font-size:26px; line-height:30px; text-align:left; padding:16px 50px 0 50px;">
+                <hr>
+            </td>
+        </tr>
+    </table>
+
+{% endif %}
+
+{% for entity in entities  %}
+    {% if entity.type_to_string == 'blog' %}
+        {% include "email/entities/blog.html" %}
+    {% endif %}
+    {% if entity.type_to_string == 'event' %}
+        {% include "email/entities/event.html" %}
+    {% endif %}
+    {% if entity.type_to_string == 'news' %}
+        {% include "email/entities/news.html" %}
+    {% endif %}
+    {% if entity.type_to_string == 'question' %}
+        {% include "email/entities/question.html" %}
+    {% endif %}
+    {% if entity.type_to_string == 'wiki' %}
+        {% include "email/entities/wiki.html" %}
+    {% endif %}
+{% endfor %}
+
+<hr>
+
+<!-- goto button -->
+<table width="100%" border="0" cellspacing="0" cellpadding="0" style="padding:16px 0 3px 0;">
+    <tr>
+        <td class="footer" style="padding:26px 50px" bgcolor="#ffffff">
+            <table width="100%" border="0" cellspacing="0" cellpadding="0">
+                <tr>
+                    <td class="footer-title" style="font-family:Arial,sans-serif; font-size:24px; line-height:28px; text-align:left; font-weight:bold; padding-bottom:17px">
+                        For all new messages visit {{ site_name }}
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <table width="100%" border="0" cellspacing="0" cellpadding="0">
+                            <tr>
+                                <td align="left">
+                                    <table border="0" cellspacing="0" cellpadding="0">
+                                        <tr>
+                                            <td style="border-radius: 5px;" bgcolor="{{ primary_color }}">
+                                                <table width="100%" border="0" cellspacing="0" cellpadding="0">
+                                                    <tr>
+                                                        <td class="text-button2" style="color:#ffffff; font-family:Arial,sans-serif; font-size:16px; line-height:20px; text-align:center; padding:11px 18px">
+                                                            <a href="{{ site_url }}?utm_medium=email&utm_campaign=overview" target="_blank" class="link-white" style="color:#ffffff; text-decoration:none"><span class="link-white" style="color:#ffffff; text-decoration:none">
+                                                                Go to {{ site_name }}
+                                                            </span></a>
+                                                        </td>
+                                                    </tr>
+                                                </table>
+                                            </td>
+                                        </tr>
+                                    </table>
+                                </td>
+                            </tr>
+                        </table>
+                    </td>
+                </tr>
+            </table>
+        </td>
+    </tr>
+</table>
+
+{% endblock %}
+
+{% block footer_settings %}
+    {% blocktrans %} You have received this e-mail because you registered to receive notifications.<br /> Click <a href="{{user_url}}">here</a> to change your settings.{% endblocktrans %}
+{% endblock %}

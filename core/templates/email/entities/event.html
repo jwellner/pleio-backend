@@ -1,0 +1,31 @@
+{% load i18n %}
+
+<table width="100%" border="0" cellspacing="0" cellpadding="0">
+    <tr>
+        <td class="pt-22" style="padding-top:16px">
+            <table width="100%" border="0" cellspacing="0" cellpadding="0">
+                <tr>
+                    <td class="section" style="padding:24px 50px" bgcolor="#ffffff">
+                        <table width="100%" border="0" cellspacing="0" cellpadding="0">
+                            <tr>
+                                <td class="h1" style="color:{{ primary_color }}; font-family:Arial,sans-serif; font-size:24px; line-height:28px; text-align:left; font-weight:bold">
+                                    <a href="{{ site_url }}{{ entity.url }}?utm_medium=email&utm_campaign=overview" target="_blank" style="color:{{ primary_color }}; text-decoration:none">
+                                        {{ entity.title }}
+                                    </a>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="h2" style="color:#999999; font-family:Arial,sans-serif; font-size:12px; line-height:18px; text-align:left; padding-bottom:12px">
+                                    {% blocktrans %}Agenda item created by{% endblocktrans %} {{ entity.owner.name }} {% blocktrans %}on{% endblocktrans %} {{ entity.created_at}}
+                                    {% if entity.group %} in <strong><a href="{{ site_url }}{{ entity.group.url }}?utm_medium=email&utm_campaign=overview">{{ entity.group.name }}</a></strong>{% endif %}.
+                                </td>
+                            </tr>
+                        </table>
+                    </td>
+                </tr>
+            </table>
+        </td>
+    </tr>
+</table>
+
+

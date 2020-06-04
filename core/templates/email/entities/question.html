@@ -1,0 +1,35 @@
+{% load i18n %}
+
+<table width="100%" border="0" cellspacing="0" cellpadding="0">
+    <tr>
+        <td class="article2" style="padding:16px 0 0 0;">
+            <table width="100%" border="0" cellspacing="0" cellpadding="0">
+                <tr>
+                    <td class="article-body3" style="padding:16px 66px 29px 49px; background: #ffffff;">
+                        <table width="100%" border="0" cellspacing="0" cellpadding="0">
+                            <tr>
+                                <td class="h1" style="color:{{ primary_color }}; font-family:Arial,sans-serif; font-size:24px; line-height:28px; text-align:left; padding-bottom:4px; font-weight:bold">
+                                    <a href="{{ site_url }}{{ entity.url }}?utm_medium=email&utm_campaign=overview" target="_blank" style="color:{{ primary_color }}; text-decoration:none">
+                                        {{ entity.title }}
+                                    </a>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="h2" style="color:#999999; font-family:Arial,sans-serif; font-size:12px; line-height:18px; text-align:left; padding-bottom:12px">
+                                    {% blocktrans %}Question asked by{% endblocktrans %} {{ entity.owner.name }} {% blocktrans %}on{% endblocktrans %} {{ entity.created_at}}
+                                    {% if entity.group %} in <strong><a href="{{ site_url }}{{ entity.group.url }}">{{ entity.group.name }}</a></strong>{% endif %}.
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="text" style="color:#000001; font-family:Arial,sans-serif; font-size:14px; line-height:20px; text-align:left">
+                                    {{ entity.description }}
+                                </td>
+                            </tr>
+                        </table>
+                    </td>
+                </tr>
+            </table>
+        </td>
+    </tr>
+</table>
+

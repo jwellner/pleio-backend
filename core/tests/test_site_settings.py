@@ -232,7 +232,7 @@ class SiteSettingsTestCase(FastTenantTestCase):
             {"value": "never", "label": "Nooit"}
         ])
         self.assertEqual(data["siteSettings"]["defaultEmailOverviewFrequency"], "weekly")
-        self.assertEqual(data["siteSettings"]["emailOverviewSubject"], "Periodiek overzicht")
+        self.assertEqual(data["siteSettings"]["emailOverviewSubject"], "")
         self.assertEqual(data["siteSettings"]["emailOverviewTitle"], "Pleio 2.0")
         self.assertEqual(data["siteSettings"]["emailOverviewIntro"], "")
 

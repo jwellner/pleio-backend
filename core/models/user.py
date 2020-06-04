@@ -4,6 +4,7 @@ from django.contrib.postgres.fields import ArrayField
 from core.lib import get_acl
 from .shared import read_access_default, write_access_default
 
+
 class UserProfile(models.Model):
     """
     Email overview intervals
@@ -22,11 +23,15 @@ class UserProfile(models.Model):
     overview_email_interval = models.CharField(
         max_length=10,
         choices=INTERVALS,
-        default='weekly'
+        default=None,
+        blank=True,
+        null=True
     )
     overview_email_tags = ArrayField(models.CharField(max_length=256),
                                      blank=True, default=list)
+    overview_email_last_received = models.DateTimeField(blank=True, null=True)
     receive_newsletter = models.BooleanField(default=False)
+
 
 class ProfileField(models.Model):
     """

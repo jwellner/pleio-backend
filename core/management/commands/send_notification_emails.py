@@ -1,5 +1,6 @@
 from django.core.management.base import BaseCommand
 from django.utils import timezone
+from django.utils.translation import ugettext_lazy
 from core.lib import send_mail_multi, get_default_email_context
 from user.models import User
 from core import config
@@ -48,9 +49,9 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         site_url = options['url']
-        users = User.objects.all()
+        users = User.objects.filter(is_active=True)
 
-        subject = "New notifications at %s" % config.NAME
+        subject = ugettext_lazy("New notifications at %s" % config.NAME)
 
         for user in users:
 
@@ -68,9 +69,9 @@ class Command(BaseCommand):
                 continue
 
             # do not send a mail when there is an notification less old than 24 hours emailed
-            time_threshold = datetime.now() - timedelta(hours=24)
-            notifications_emailed_in_last_24_hours = user.notifications.filter(emailed=True, timestamp__gte=time_threshold)
-            if notifications_emailed_in_last_24_hours:
+            time_threshold = datetime.now() - timedelta(hours=4)
+            notifications_emailed_in_last_4_hours = user.notifications.filter(emailed=True, timestamp__gte=time_threshold)
+            if notifications_emailed_in_last_4_hours:
                 continue
 
             self.send_notifications(user, notifications, subject, site_url)

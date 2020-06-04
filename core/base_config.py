@@ -67,8 +67,8 @@ DEFAULT_SITE_CONFIG = {
     'TAG_CATEGORIES': ([], 'Tag categories'),
 
     'EMAIL_OVERVIEW_DEFAULT_FREQUENCY':  ("weekly", 'Email overview default frequency'),
-    'EMAIL_OVERVIEW_SUBJECT': ("Periodiek overzicht", "Email overview subject"),
-    'EMAIL_OVERVIEW_TITLE': ("Pleio 2.0", "Email overview subject"),
+    'EMAIL_OVERVIEW_SUBJECT': ("", "Email overview subject"),
+    'EMAIL_OVERVIEW_TITLE': ("Pleio 2.0", "Email overview title"),
     'EMAIL_OVERVIEW_INTRO': ("", "Email overview intro"),
 
     'SHOW_LOGIN_REGISTER': (True, 'Login and register buttons visible'),
