@@ -3,7 +3,7 @@ from django.core.management.base import BaseCommand, CommandError
 from django.utils import timezone
 from core import config
 from core.lib import ACCESS_TYPE, access_id_to_acl
-from core.models import ProfileField, UserProfile, UserProfileField, Group, Entity, Comment
+from core.models import ProfileField, UserProfile, UserProfileField, Group, Entity, Comment, Widget
 from backend2 import settings
 from elgg.models import (
     Instances, ElggUsersEntity, GuidMap, ElggSitesEntity, ElggGroupsEntity, ElggObjectsEntity, ElggNotifications,
@@ -20,6 +20,7 @@ from django.db import IntegrityError
 
 import json
 import html
+
 
 class Command(InteractiveTenantOption, BaseCommand):
     help = 'Import elgg site'
@@ -724,7 +725,6 @@ class Command(InteractiveTenantOption, BaseCommand):
             except Exception as e:
                 self.stdout.write(self.style.WARNING("Error: %s\n" % str(e)))
                 pass
-
 
     def _import_comments_for(self, entity: Entity, elgg_guid, elgg_entity=None):
         elgg_comment_items = ElggObjectsEntity.objects.using(self.import_id).filter(entity__subtype__subtype='comment', entity__container_guid=elgg_guid)

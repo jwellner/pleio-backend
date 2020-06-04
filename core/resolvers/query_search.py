@@ -1,7 +1,6 @@
 from core.lib import get_acl
 from core.constances import INVALID_SUBTYPE
 from core.models import Entity, Group
-from elgg.helpers import get_guid
 from user.models import User
 from elasticsearch_dsl import Search
 from elasticsearch_dsl import A, Q
@@ -22,7 +21,6 @@ def resolve_search(_, info, q=None, containerGuid=None, type=None, subtype=None,
 
     user = info.context.user
     tenant_name = parse_tenant_config_path("")
-    containerGuid = get_guid(containerGuid)
 
     if type in ['group', 'user']:
         subtype = type
