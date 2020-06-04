@@ -7,6 +7,7 @@ from core import admin as core_admin
 from core import views as core_views
 from file import views as file_views
 from event import views as event_views
+from elgg import views as elgg_views
 
 urlpatterns = [
     path('logout', core_views.logout, name='logout'),
@@ -27,6 +28,12 @@ urlpatterns = [
     path('site/icon/<uuid:file_id>', file_views.file_cache_header, name='site_icon'),
     path('exporting/event/<uuid:event_id>', event_views.export, name='event_export'),
 
-    re_path(r'view/(?P<entity_id>[0-9A-Fa-f-]+)/(?P<entity_title>[\w\-_]+)$', core_views.entity_view, name='entity_view'),
+    # Match old ID's and try to redirect
+    re_path(r'view\/(?P<entity_id>[0-9]+)\/(?:.+)$', elgg_views.entity_redirect, name='entity_redirect'),
+
+    # Default catch all URL's
+    re_path(r'view\/(?P<entity_id>[0-9A-Fa-f-]+)\/(?P<entity_title>[\w\-_]+)$', core_views.entity_view, name='entity_view'),
     re_path(r'.*', core_views.default, name='default')
 ]
+
+handler404 = 'core.views.default'

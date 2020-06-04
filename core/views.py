@@ -8,7 +8,7 @@ from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist
 from django.utils.text import Truncator
 
-def default(request):
+def default(request, exception=None):
 
     metadata = {
         "description" : config.DESCRIPTION,
@@ -30,6 +30,7 @@ def entity_view(request, entity_id=None, entity_title=None):
     user = request.user
 
     entity = None
+
     metadata = {
         "description" : config.DESCRIPTION,
         "og:title" : config.NAME,
@@ -43,6 +44,7 @@ def entity_view(request, entity_id=None, entity_title=None):
             pass
 
     if entity:
+        status_code = 200
         metadata["description"] = Truncator(entity.description).words(26).replace("\"", "")
         metadata["og:title"] = entity.title
         metadata["og:type"] = 'article'
@@ -54,6 +56,8 @@ def entity_view(request, entity_id=None, entity_title=None):
         metadata["og:site_name"] = config.NAME
         metadata["article:published_time"] = entity.created_at.strftime("%Y-%m-%d %H:%M")
         metadata["article:modified_time"] = entity.updated_at.strftime("%Y-%m-%d %H:%M")
+    else:
+        status_code = 404
 
     context = {
         'webpack_dev_server': settings.WEBPACK_DEV_SERVER,
@@ -62,7 +66,7 @@ def entity_view(request, entity_id=None, entity_title=None):
         'config': config
     }
 
-    return render(request, 'react.html', context)
+    return render(request, 'react.html', context, status=status_code)
 
 def logout(request):
     # should find out how we can make this better. OIDC logout only allows POST
