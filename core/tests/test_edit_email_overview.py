@@ -47,7 +47,7 @@ class EditEmailOverviewTestCase(FastTenantTestCase):
 
         variables = {
             "input":  {
-                "guid": self.user1.guid, 
+                "guid": self.user1.guid,
                 "frequency": "monthly"
                 }
             }
@@ -82,7 +82,7 @@ class EditEmailOverviewTestCase(FastTenantTestCase):
 
         variables = {
             "input":  {
-                "guid": self.user1.guid, 
+                "guid": self.user1.guid,
                 "frequency": "monthly"
                 }
             }
@@ -116,7 +116,7 @@ class EditEmailOverviewTestCase(FastTenantTestCase):
 
         variables = {
             "input":  {
-                "guid": self.user1.guid, 
+                "guid": self.user1.guid,
                 "frequency": "monthly"
                 }
             }
@@ -150,7 +150,7 @@ class EditEmailOverviewTestCase(FastTenantTestCase):
 
         variables = {
             "input":  {
-                "guid": self.user1.guid, 
+                "guid": self.user1.guid,
                 "frequency": "monthly"
                 }
             }
@@ -165,3 +165,39 @@ class EditEmailOverviewTestCase(FastTenantTestCase):
         errors = result[1]["errors"]
 
         self.assertEqual(errors[0]["message"], "not_logged_in")
+
+
+    def test_edit_email_overview_by_owner_add_tag(self):
+        mutation = """
+            mutation editEmailOverview($input: editEmailOverviewInput!) {
+                editEmailOverview(input: $input) {
+                    user {
+                        guid
+                        emailOverview {
+                            frequency
+                            tags
+                        }
+                        __typename
+                    }
+                    __typename
+                }
+            }
+        """
+
+        variables = {
+            "input":  {
+                "guid": self.user1.guid,
+                "tags": ['tag_one']
+                }
+            }
+
+        request = HttpRequest()
+        request.user = self.user1
+
+        result = graphql_sync(schema, {"query": mutation, "variables": variables}, context_value=request)
+
+        self.assertTrue(result[0])
+        data = result[1]["data"]
+
+        self.assertEqual(data["editEmailOverview"]["user"]["guid"], self.user1.guid)
+        self.assertEqual(data["editEmailOverview"]["user"]["emailOverview"]["tags"][0], 'tag_one')

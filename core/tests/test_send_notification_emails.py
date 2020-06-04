@@ -59,15 +59,6 @@ class SendNotificationEmailsTestCase(FastTenantTestCase):
         self.assertEqual(len(self.user2.notifications.filter(emailed=False)), 0)
 
     @mock.patch('core.management.commands.send_notification_emails.send_mail_multi')
-    def test_notifications_not_sent_twice_in_24_hours(self, mocked_send_mail_multi):
-        comment1 = mixer.blend(Comment, is_closed=False, owner=self.user1, container=self.blog1)
-        call_command('send_notification_emails', url='http://test.test')
-        self.assertEqual(mocked_send_mail_multi.call_count, 1)
-        comment2 = mixer.blend(Comment, is_closed=False, owner=self.user1, container=self.blog1)
-        call_command('send_notification_emails', url='http://test.test')
-        self.assertEqual(mocked_send_mail_multi.call_count, 1)
-
-    @mock.patch('core.management.commands.send_notification_emails.send_mail_multi')
     def test_notifications_not_sent_to_banned_users(self, mocked_send_mail_multi):
         comment1 = mixer.blend(Comment, is_closed=False, owner=self.user1, container=self.blog1)
         self.user2.is_active = False

@@ -1,7 +1,7 @@
 {% load i18n %}
 {% if notification.action == 'created' %}
-    <strong>{{ notification.performer.name }}</strong>{% blocktrans %} has posted a new Wiki: {% endblocktrans %}<strong><a href="{{ site_url }}{{ notification.entity.url }}">{{ notification.entity.title }}</a></strong> {% if notification.entity.group %}in <strong><a href="{{ site_url }}{{ notification.entity.group.url }}">{{ notification.entity.group.name }}</a></strong> {% endif %}.
+    <strong>{{ notification.performer.name }}</strong>{% blocktrans %} has posted a new Wiki: {% endblocktrans %}<strong><a href="{{ site_url }}{{ notification.entity.url }}">{{ notification.entity.title }}</a></strong>{% if notification.entity.group %} in <strong><a href="{{ site_url }}{{ notification.entity.group.url }}">{{ notification.entity.group.name }}</a></strong>{% endif %}. <br><br>
 {% endif %}
 {% if notification.action == 'commented' %}
-    <strong>{{ notification.performer.name }}</strong>{% blocktrans %} has responded at: {% endblocktrans %}<strong><a href="{{ site_url }}{{ notification.entity.url }}">{{ notification.entity.title }}</a></strong> {% if notification.entity.group %}in <strong><a href="{{ site_url }}{{ notification.entity.group.url }}">{{ notification.entity.group.name }}</a></strong> {% endif %}.
+    <strong>{{ notification.performer.name }}</strong>{% blocktrans %} has responded at: {% endblocktrans %}<strong><a href="{{ site_url }}{{ notification.entity.url }}">{{ notification.entity.title }}</a></strong>{% if notification.entity.group %} in <strong><a href="{{ site_url }}{{ notification.entity.group.url }}">{{ notification.entity.group.name }}</a></strong>{% endif %}. <br><br>
 {% endif %}
