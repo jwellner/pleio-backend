@@ -90,11 +90,11 @@ class Command(InteractiveTenantOption, BaseCommand):
 
         menu_items = config.MENU
         for item in menu_items:
-            if 'link' in item:
+            if 'link' in item and item['link']:
                 item['link'] = self._replace_links(item['link'])
 
             for child in item.get("children", []):
-                if 'link' in child:
+                if 'link' in child and child['link']:
                     child['link'] = self._replace_links(child['link'])
 
         config.MENU = menu_items
