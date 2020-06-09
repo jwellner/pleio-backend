@@ -12,7 +12,7 @@ DEFAULT_SITE_CONFIG = {
     'ALLOW_REGISTRATION': (True, 'Allow registrations'),
     'DEFAULT_ACCESS_ID': (1, 'Default accessId'),
 
-    'GOOGLE_ANALYTICS_URL': ('', 'Goggle analytics url'),
+    'GOOGLE_ANALYTICS_URL': ('', 'Google analytics url'),
     'PIWIK_URL': ('', 'Piwik url'),
     'PIWIK_ID': ('', 'Piwik id'),
 
@@ -93,7 +93,7 @@ DEFAULT_SITE_CONFIG = {
     'ACHIEVEMENTS_ENABLED': (True, 'Achievements enabled'),
     'INITIATOR_LINK': ('', 'Initiator link'),
     'MAIL_REPLY_TO': ('noreply@pleio.nl', 'default reply-to mail address'),
-
+    'ENABLE_SEARCH_ENGINE_INDEXING': (False, 'Enable indexing by search engines'),
 }
 """
 Default site configuration

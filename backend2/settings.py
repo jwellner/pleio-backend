@@ -67,6 +67,7 @@ TENANT_APPS = [
     'django.contrib.auth',
     'django.contrib.sessions',
     'django.contrib.messages',
+    'django.contrib.sitemaps',
     'core',
     'user',
     'mozilla_django_oidc',

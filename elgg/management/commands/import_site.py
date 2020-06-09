@@ -203,6 +203,8 @@ class Command(InteractiveTenantOption, BaseCommand):
         config.SUBGROUPS = self.helpers.get_plugin_setting("subgroups") == "yes"
         config.GROUP_MEMBER_EXPORT = self.helpers.get_plugin_setting("member_export") == "yes"
         config.LIMITED_GROUP_ADD = self.helpers.get_plugin_setting("limited_groups", "groups") == "yes"
+        config.ENABLE_SEARCH_ENGINE_INDEXING = self.helpers.get_site_config('enable_frontpage_indexing') \
+            if self.helpers.get_site_config('enable_frontpage_indexing') else False
 
         self.stdout.write(".", ending="")
 
