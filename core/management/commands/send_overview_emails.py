@@ -66,7 +66,7 @@ class Command(BaseCommand):
                 continue
 
             # do not send mail to users that not logged in for 6 months
-            if user.last_login and (user.last_login < datetime.now() - timedelta(hours=4460)):
+            if user.profile and user.profile.last_online and (user.user.profile.last_online < (datetime.now() - timedelta(hours=4460))):
                 continue
 
             featured_entities = Entity.objects.none()

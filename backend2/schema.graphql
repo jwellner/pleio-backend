@@ -1531,6 +1531,8 @@ input sendMessageToGroupInput {
 
   """An (optional) list of recipients to send the message to."""
   recipients: [String]
+  """An (optional) parameter for sending the message to all members of the group."""
+  sendToAllMembers: Boolean
   clientMutationId: Int
 }
 

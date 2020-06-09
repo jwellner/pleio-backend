@@ -5,6 +5,7 @@ from user.models import User
 from django.utils.translation import ugettext_lazy
 from core.constances import NOT_LOGGED_IN, COULD_NOT_FIND, COULD_NOT_SAVE
 from core.lib import remove_none_from_dict, send_mail_multi, get_default_email_context
+from datetime import datetime, timedelta
 
 
 def resolve_send_message_to_group(_, info, input):
@@ -24,14 +25,20 @@ def resolve_send_message_to_group(_, info, input):
     if not group.can_write(user):
         raise GraphQLError(COULD_NOT_SAVE)
 
+    # threshold for deciding inactive user
+    threshold = datetime.now() - timedelta(hours=4460)
+
     email_addresses = []
 
     if clean_input.get('isTest'):
         email_addresses = [user.email]
+    elif clean_input.get('sendToAllMembers'):
+        active_members = User.objects.filter(memberships__group__in=[group], is_active=True, _profile__last_online__gte=threshold)
+        email_addresses = list(active_members.values_list('email', flat=True))
     else:
         for guid in clean_input.get('recipients'):
             try:
-                receiving_user = User.objects.get(id=guid)
+                receiving_user = User.objects.get(id=guid, is_active=True, _profile__last_online__gte=threshold)
                 if not group.is_member(receiving_user):
                     continue
             except ObjectDoesNotExist:
