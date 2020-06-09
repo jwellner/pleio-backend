@@ -70,7 +70,8 @@ class SendNotificationEmailsTestCase(FastTenantTestCase):
     def test_notifications_not_sent_to_users_with_last_login_more_6_months_ago(self, mocked_send_mail_multi):
         comment1 = mixer.blend(Comment, is_closed=False, owner=self.user1, container=self.blog1)
         nr_months_ago_6 = datetime.now() - timedelta(hours=4464)
-        self.user2.last_login = nr_months_ago_6
+        self.user2.profile.last_online = nr_months_ago_6
+        self.user2.profile.save()
         self.user2.save()
         call_command('send_notification_emails', url='http://test.test')
         assert not mocked_send_mail_multi.called
