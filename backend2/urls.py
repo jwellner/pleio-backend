@@ -1,13 +1,17 @@
+from django.contrib.sitemaps.views import sitemap
 from django.urls import path, include, re_path
+from django.views.decorators.cache import cache_page
 
 from ariadne.contrib.django.views import GraphQLView
 from .schema import schema
 
+from core.sitemaps import sitemaps
 from core import admin as core_admin
 from core import views as core_views
 from file import views as file_views
 from event import views as event_views
 from elgg import views as elgg_views
+
 
 urlpatterns = [
     path('logout', core_views.logout, name='logout'),
@@ -27,6 +31,9 @@ urlpatterns = [
     path('site/logo/<uuid:file_id>', file_views.file_cache_header, name='site_logo'),
     path('site/icon/<uuid:file_id>', file_views.file_cache_header, name='site_icon'),
     path('exporting/event/<uuid:event_id>', event_views.export, name='event_export'),
+
+    path('robots.txt', core_views.robots_txt),
+    path('sitemap.xml', cache_page(3600)(sitemap), {'sitemaps': sitemaps}, name='sitemap'),
 
     # Match old ID's and try to redirect
     re_path(r'view\/(?P<entity_id>[0-9]+)\/(?:.+)$', elgg_views.entity_redirect, name='entity_redirect'),

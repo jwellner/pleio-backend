@@ -7,6 +7,10 @@ from django.shortcuts import redirect, render
 from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist
 from django.utils.text import Truncator
+from django.urls import reverse
+from django.views.decorators.http import require_GET
+from django.http import HttpResponse
+
 
 def default(request, exception=None):
     # pylint: disable=unused-argument
@@ -80,3 +84,23 @@ def login(request):
 
 def oidc_failure(request):
     return redirect(settings.OIDC_OP_LOGOUT_ENDPOINT)
+
+@require_GET
+def robots_txt(request):
+    if config.ENABLE_SEARCH_ENGINE_INDEXING:
+        lines = [
+            "User-Agent: *",
+            f"Sitemap: {request.build_absolute_uri(reverse('sitemap'))}",
+            "Disallow: /user",
+            "Disallow: /search",
+            "Disallow: /search/",
+            "Disallow: /tags",
+            "Disallow: /tags/",
+        ]
+    else:
+        lines = [
+            "User-Agent: *",
+            "Disallow: /",
+        ]
+
+    return HttpResponse("\n".join(lines), content_type="text/plain")
