@@ -69,6 +69,7 @@ class JoinGroupTestCase(FastTenantTestCase):
             mutation ($group: joinGroupInput!) {
                 joinGroup(input: $group) {
                     group {
+                        memberCount
                         members {
                             total
                             edges {
@@ -93,6 +94,7 @@ class JoinGroupTestCase(FastTenantTestCase):
 
         data = result[1]["data"]
 
+        self.assertEqual(data["joinGroup"]["group"]["memberCount"], 1)
         self.assertEqual(data["joinGroup"]["group"]["members"]["total"], 1)
         self.assertEqual(data["joinGroup"]["group"]["members"]["edges"][0]["user"]["guid"], self.user1.guid)
 
@@ -101,6 +103,7 @@ class JoinGroupTestCase(FastTenantTestCase):
 
         data = result[1]["data"]
 
+        self.assertEqual(data["joinGroup"]["group"]["memberCount"], 2)
         self.assertEqual(data["joinGroup"]["group"]["members"]["total"], 2)
         self.assertEqual(data["joinGroup"]["group"]["members"]["edges"][0]["user"]["guid"], self.user1.guid)
         self.assertEqual(data["joinGroup"]["group"]["members"]["edges"][1]["user"]["guid"], self.user2.guid)
@@ -115,6 +118,7 @@ class JoinGroupTestCase(FastTenantTestCase):
             mutation ($group: joinGroupInput!) {
                 joinGroup(input: $group) {
                     group {
+                        memberCount
                         members {
                             total
                             edges {
@@ -143,6 +147,7 @@ class JoinGroupTestCase(FastTenantTestCase):
 
         data = result[1]["data"]
 
+        self.assertEqual(data["joinGroup"]["group"]["memberCount"], 0)
         self.assertEqual(data["joinGroup"]["group"]["members"]["total"], 0)
         mocked_send_mail_multi.assert_called_once()
 
@@ -151,6 +156,7 @@ class JoinGroupTestCase(FastTenantTestCase):
 
         data = result[1]["data"]
 
+        self.assertEqual(data["joinGroup"]["group"]["memberCount"], 0)
         self.assertEqual(data["joinGroup"]["group"]["members"]["total"], 0)
         self.assertEqual(self.user2.memberships.filter(group=self.group_on_request, type="pending").count(), 1)
         self.assertEqual(self.user3.memberships.filter(group=self.group_on_request, type="pending").count(), 1)
@@ -166,6 +172,7 @@ class JoinGroupTestCase(FastTenantTestCase):
                 entity(guid: $guid) {
                     guid
                     ... on Group {
+                        memberCount
                         members {
                             total
                             edges {
@@ -192,6 +199,7 @@ class JoinGroupTestCase(FastTenantTestCase):
         data = result[1]["data"]
 
         self.assertEqual(data["entity"]["guid"], self.group_auto.guid)
+        self.assertEqual(data["entity"]["memberCount"], 3) # to users should be added on create
         self.assertEqual(data["entity"]["members"]["total"], 3) # to users should be added on create
         self.assertEqual(len(data["entity"]["members"]["edges"]), 3)
 

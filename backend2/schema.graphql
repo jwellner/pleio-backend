@@ -976,6 +976,7 @@ type Group implements Entity {
   defaultAccessId: Int
   getsNotifications: Boolean
   tags: [String]
+  memberCount: Int!
   members(
     q: String
     offset: Int
