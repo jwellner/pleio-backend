@@ -119,6 +119,7 @@ def get_site_settings():
         'defaultAccessIdOptions': defaultAccessIdOptions,
 
         'googleAnalyticsUrl': config.GOOGLE_ANALYTICS_URL,
+        'googleSiteVerification': config.GOOGLE_SITE_VERIFICATION,
         'piwikUrl': config.PIWIK_URL,
         'piwikId': config.PIWIK_ID,
 

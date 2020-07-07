@@ -52,6 +52,7 @@ def resolve_edit_site_setting(_, info, input):
         'allowRegistration': 'ALLOW_REGISTRATION',
         'defaultAccessId': 'DEFAULT_ACCESS_ID',
         'googleAnalyticsUrl': 'GOOGLE_ANALYTICS_URL',
+        'googleSiteVerification': 'GOOGLE_SITE_VERIFICATION',
         'piwikUrl': 'PIWIK_URL',
         'piwikId': 'PIWIK_ID',
 
