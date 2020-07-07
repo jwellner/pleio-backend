@@ -151,6 +151,13 @@ def resolve_group_membership_requests(obj, info):
         'edges': users
     }
 
+@group.field("memberCount")
+def resolve_group_member_count(group, info):
+    # pylint: disable=unused-argument
+    members = group.members.filter(type__in=['admin', 'owner', 'member'])
+
+    return members.count()
+
 @group.field("members")
 def resolve_group_members(group, info, q=None, offset=0, limit=5, inSubgroupId=None, notInSubgroupId=None):
     # pylint: disable=unused-argument
