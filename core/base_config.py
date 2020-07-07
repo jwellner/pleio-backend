@@ -66,6 +66,8 @@ DEFAULT_SITE_CONFIG = {
     'PROFILE': ([], 'Profile'),
 
     'TAG_CATEGORIES': ([], 'Tag categories'),
+    'SHOW_TAGS_IN_FEED': (False, 'Show tags in feed'),
+    'SHOW_TAGS_IN_DETAIL': (False, 'Show tags in detail'),
 
     'EMAIL_OVERVIEW_DEFAULT_FREQUENCY':  ("weekly", 'Email overview default frequency'),
     'EMAIL_OVERVIEW_SUBJECT': ("", "Email overview subject"),
@@ -81,7 +83,6 @@ DEFAULT_SITE_CONFIG = {
     'CANCEL_MEMBERSHIP_ENABLED': (True, 'Cancel membership enabled'),
     'ADVANCED_PERMISSIONS_ENABLED': (False, 'Advanced permissions'),
     'SHOW_EXCERPT_IN_NEWS_CARD': (False, 'Show excerpt in news card'),
-    'SHOW_TAG_IN_NEWS_CARD': (False, 'Show tag in news card'),
     'COMMENT_ON_NEWS': (False, 'Comment on news'),
     'EVENT_EXPORT': (False, 'Event Export'),
     'QUESTIONER_CAN_CHOOSE_BEST_ANSWER': (False, 'Questioner can choose best answer'),

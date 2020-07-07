@@ -45,6 +45,7 @@ class EditSiteSettingTestCase(FastTenantTestCase):
                         }
                         googleAnalyticsUrl
                         googleSiteVerification
+
                         piwikUrl
                         piwikId
 
@@ -104,6 +105,8 @@ class EditSiteSettingTestCase(FastTenantTestCase):
                             name
                             values
                         }
+                        showTagsInFeed
+                        showTagsInDetail
 
                         defaultEmailOverviewFrequency
                         emailOverviewSubject
@@ -119,7 +122,6 @@ class EditSiteSettingTestCase(FastTenantTestCase):
                         cancelMembershipEnabled
                         advancedPermissions
                         showExcerptInNewsCard
-                        showTagInNewsCard
                         commentsOnNews
                         eventExport
                         questionerCanChooseBestAnswer
@@ -140,6 +142,7 @@ class EditSiteSettingTestCase(FastTenantTestCase):
                 "defaultAccessId": 0,
                 "googleAnalyticsUrl": "url2",
                 "googleSiteVerification": "code1",
+
                 "piwikUrl": "url3",
                 "piwikId": "id1",
 
@@ -180,6 +183,8 @@ class EditSiteSettingTestCase(FastTenantTestCase):
 
                 "tagCategories": [{"name": "cat1", "values": ["tag1", "tag2"]},
                                   {"name": "cat2", "values": ["tag3", "tag4"]}],
+                'showTagsInFeed': True,
+                'showTagsInDetail': True,
 
                 "defaultEmailOverviewFrequency": "monthly",
                 "emailOverviewSubject": "emailOverviewSubject1",
@@ -195,7 +200,6 @@ class EditSiteSettingTestCase(FastTenantTestCase):
                 'cancelMembershipEnabled': False,
                 'advancedPermissions': True,
                 'showExcerptInNewsCard': True,
-                'showTagInNewsCard': True,
                 'commentsOnNews': True,
                 'eventExport': True,
                 'questionerCanChooseBestAnswer': True,
@@ -220,6 +224,7 @@ class EditSiteSettingTestCase(FastTenantTestCase):
         self.assertEqual(data["editSiteSetting"]["siteSettings"]["defaultAccessIdOptions"], [{'value': 0, 'label': 'Alleen mijzelf'}, {'value': 1, 'label': 'Ingelogde gebruikers'}])
         self.assertEqual(data["editSiteSetting"]["siteSettings"]["googleAnalyticsUrl"], "url2")
         self.assertEqual(data["editSiteSetting"]["siteSettings"]["googleSiteVerification"], "code1")
+
         self.assertEqual(data["editSiteSetting"]["siteSettings"]["piwikUrl"], "url3")
         self.assertEqual(data["editSiteSetting"]["siteSettings"]["piwikId"], "id1")
 
@@ -262,6 +267,8 @@ class EditSiteSettingTestCase(FastTenantTestCase):
 
         self.assertEqual(data["editSiteSetting"]["siteSettings"]["tagCategories"], [{"name": "cat1", "values": ["tag1", "tag2"]},
                                                                                     {"name": "cat2", "values": ["tag3", "tag4"]}])
+        self.assertEqual(data["editSiteSetting"]["siteSettings"]["showTagsInFeed"], True)
+        self.assertEqual(data["editSiteSetting"]["siteSettings"]["showTagsInDetail"], True)
 
         self.assertEqual(data["editSiteSetting"]["siteSettings"]["defaultEmailOverviewFrequency"], "monthly")
         self.assertEqual(data["editSiteSetting"]["siteSettings"]["emailOverviewSubject"], "emailOverviewSubject1")
@@ -277,7 +284,6 @@ class EditSiteSettingTestCase(FastTenantTestCase):
         self.assertEqual(data["editSiteSetting"]["siteSettings"]["cancelMembershipEnabled"], False)
         self.assertEqual(data["editSiteSetting"]["siteSettings"]["advancedPermissions"], True)
         self.assertEqual(data["editSiteSetting"]["siteSettings"]["showExcerptInNewsCard"], True)
-        self.assertEqual(data["editSiteSetting"]["siteSettings"]["showTagInNewsCard"], True)
         self.assertEqual(data["editSiteSetting"]["siteSettings"]["commentsOnNews"], True)
         self.assertEqual(data["editSiteSetting"]["siteSettings"]["eventExport"], True)
         self.assertEqual(data["editSiteSetting"]["siteSettings"]["questionerCanChooseBestAnswer"], True)

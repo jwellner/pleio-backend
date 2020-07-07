@@ -117,6 +117,8 @@ class SiteSettingsTestCase(FastTenantTestCase):
                         name
                         values
                     }
+                    showTagsInFeed
+                    showTagsInDetail
 
                     defaultEmailOverviewFrequencyOptions {
                         value
@@ -136,7 +138,6 @@ class SiteSettingsTestCase(FastTenantTestCase):
                     cancelMembershipEnabled
                     advancedPermissions
                     showExcerptInNewsCard
-                    showTagInNewsCard
                     commentsOnNews
                     eventExport
                     questionerCanChooseBestAnswer
@@ -226,6 +227,8 @@ class SiteSettingsTestCase(FastTenantTestCase):
         self.assertEqual(data["siteSettings"]["profile"], [])
 
         self.assertEqual(data["siteSettings"]["tagCategories"], [])
+        self.assertEqual(data["siteSettings"]["showTagsInFeed"], False)
+        self.assertEqual(data["siteSettings"]["showTagsInDetail"], False)
 
         self.assertEqual(data["siteSettings"]["defaultEmailOverviewFrequencyOptions"], [
             {"value": "daily", "label": "Dagelijks"},
@@ -247,7 +250,6 @@ class SiteSettingsTestCase(FastTenantTestCase):
         self.assertEqual(data["siteSettings"]["cancelMembershipEnabled"], True)
         self.assertEqual(data["siteSettings"]["advancedPermissions"], False)
         self.assertEqual(data["siteSettings"]["showExcerptInNewsCard"], False)
-        self.assertEqual(data["siteSettings"]["showTagInNewsCard"], False)
         self.assertEqual(data["siteSettings"]["commentsOnNews"], False)
         self.assertEqual(data["siteSettings"]["eventExport"], False)
         self.assertEqual(data["siteSettings"]["questionerCanChooseBestAnswer"], False)

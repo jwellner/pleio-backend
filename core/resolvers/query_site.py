@@ -28,7 +28,6 @@ def get_settings():
         "advancedPermissions": config.ADVANCED_PERMISSIONS_ENABLED,
         "groupMemberExport": config.GROUP_MEMBER_EXPORT,
         "showExcerptInNewsCard": config.SHOW_EXCERPT_IN_NEWS_CARD,
-        "showTagInNewsCard": config.SHOW_TAG_IN_NEWS_CARD,
         "numberOfFeaturedItems": config.NUMBER_OF_FEATURED_ITEMS,
         "enableFeedSorting": config.ENABLE_FEED_SORTING,
         "commentsOnNews": config.COMMENT_ON_NEWS,
@@ -81,6 +80,8 @@ def get_site():
         },
         'customTagsAllowed': config.CUSTOM_TAGS_ENABLED,
         'tagCategories': config.TAG_CATEGORIES,
+        'showTagsInFeed': config.SHOW_TAGS_IN_FEED,
+        'showTagsInDetail': config.SHOW_TAGS_IN_DETAIL,
         'activityFilter': get_activity_filters(),
         'showExtraHomepageFilters': config.ACTIVITY_FEED_FILTERS_ENABLED,
         'usersOnline': get_online_users(),
@@ -166,6 +167,8 @@ def get_site_settings():
         'profile': get_profile(),
 
         'tagCategories': config.TAG_CATEGORIES,
+        'showTagsInFeed': config.SHOW_TAGS_IN_FEED,
+        'showTagsInDetail': config.SHOW_TAGS_IN_DETAIL,
 
         'defaultEmailOverviewFrequencyOptions': [
             {"value": "daily", "label": ugettext_lazy("Daily")},
@@ -187,7 +190,6 @@ def get_site_settings():
         'cancelMembershipEnabled': config.CANCEL_MEMBERSHIP_ENABLED,
         'advancedPermissions': config.ADVANCED_PERMISSIONS_ENABLED,
         'showExcerptInNewsCard': config.SHOW_EXCERPT_IN_NEWS_CARD,
-        'showTagInNewsCard': config.SHOW_TAG_IN_NEWS_CARD,
         'commentsOnNews': config.COMMENT_ON_NEWS,
         'eventExport': config.EVENT_EXPORT,
         'questionerCanChooseBestAnswer': config.QUESTIONER_CAN_CHOOSE_BEST_ANSWER,

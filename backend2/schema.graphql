@@ -730,6 +730,8 @@ input editSiteSettingInput {
   directLinks: [DirectLinkInput]
   footer: [FooterInput]
   tagCategories: [TagCategoryInput]
+  showTagsInFeed: Boolean
+  showTagsInDetail: Boolean
   profile: [ProfileItemInput]
   defaultEmailOverviewFrequency: String
   emailOverviewSubject: String
@@ -744,7 +746,6 @@ input editSiteSettingInput {
   cancelMembershipEnabled: Boolean
   advancedPermissions: Boolean
   showExcerptInNewsCard: Boolean
-  showTagInNewsCard: Boolean
   commentsOnNews: Boolean
   eventExport: Boolean
   questionerCanChooseBestAnswer: Boolean
@@ -1649,6 +1650,8 @@ type SiteSettings {
   emailOverviewTitle: String
   emailOverviewIntro: String
   tagCategories: [TagCategory]!
+  showTagsInFeed: Boolean!
+  showTagsInDetail: Boolean!
   profile: [ProfileItem]
   showLoginRegister: Boolean!
   customTagsAllowed: Boolean!
@@ -1659,7 +1662,6 @@ type SiteSettings {
   cancelMembershipEnabled: Boolean!
   advancedPermissions: Boolean!
   showExcerptInNewsCard: Boolean!
-  showTagInNewsCard: Boolean!
   commentsOnNews: Boolean!
   eventExport: Boolean!
   questionerCanChooseBestAnswer: Boolean!
