@@ -59,6 +59,7 @@ class ProfileField(models.Model):
 
     is_editable_by_user = models.BooleanField(default=True)
     is_filter = models.BooleanField(default=False)
+    is_in_overview = models.BooleanField(default=False)
 
     @property
     def is_filterable(self):

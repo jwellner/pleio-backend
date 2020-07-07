@@ -98,6 +98,7 @@ class EditSiteSettingTestCase(FastTenantTestCase):
                             key
                             name
                             isFilter
+                            isInOverview
                         }
 
                         tagCategories {
@@ -174,9 +175,9 @@ class EditSiteSettingTestCase(FastTenantTestCase):
                 "directLinks": [{"title":"extern","link":"https://nos.nl"},{"title":"intern","link":"/news"},{"title":"intern lang","link":"https://nieuw-template.pleio-test.nl/news"}],
                 "footer": [{"link":"https://www.nieuw.nl","title":"Nieuwe link"},{"link":"https://wnas.nl","title":"wnas"}],
 
-                "profile": [{"isFilter": False, "key": "key1", "name": "name1"},
-                            {"isFilter": False, "key": "key2", "name": "name2"},
-                            {"isFilter": True, "key": "key3", "name": "name3"}],
+                "profile": [{"isFilter": False, "isInOverview": False, "key": "key1", "name": "name1"},
+                            {"isFilter": False, "isInOverview": False, "key": "key2", "name": "name2"},
+                            {"isFilter": True, "isInOverview": True, "key": "key3", "name": "name3"}],
 
                 "tagCategories": [{"name": "cat1", "values": ["tag1", "tag2"]},
                                   {"name": "cat2", "values": ["tag3", "tag4"]}],
@@ -256,9 +257,9 @@ class EditSiteSettingTestCase(FastTenantTestCase):
         self.assertEqual(data["editSiteSetting"]["siteSettings"]["directLinks"], [{"title":"extern","link":"https://nos.nl"},{"title":"intern","link":"/news"},{"title":"intern lang","link":"https://nieuw-template.pleio-test.nl/news"}])
         self.assertEqual(data["editSiteSetting"]["siteSettings"]["footer"], [{"title":"Nieuwe link","link":"https://www.nieuw.nl"},{"title":"wnas","link":"https://wnas.nl"}])
 
-        self.assertEqual(data["editSiteSetting"]["siteSettings"]["profile"], [{"isFilter": False, "key": "key1", "name": "name1"},
-                                                                              {"isFilter": False, "key": "key2", "name": "name2"},
-                                                                              {"isFilter": True, "key": "key3", "name": "name3"}])
+        self.assertEqual(data["editSiteSetting"]["siteSettings"]["profile"], [{"isFilter": False, "isInOverview": False, "key": "key1", "name": "name1"},
+                                                                              {"isFilter": False, "isInOverview": False, "key": "key2", "name": "name2"},
+                                                                              {"isFilter": True, "isInOverview": True, "key": "key3", "name": "name3"}])
 
         self.assertEqual(data["editSiteSetting"]["siteSettings"]["tagCategories"], [{"name": "cat1", "values": ["tag1", "tag2"]},
                                                                                     {"name": "cat2", "values": ["tag3", "tag4"]}])

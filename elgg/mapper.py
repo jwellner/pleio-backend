@@ -84,6 +84,7 @@ class Mapper():
         profile_field.field_options = self.helpers.get_profile_options(pleio_template_profile_item.get("key"))
         profile_field.is_editable_by_user = self.helpers.get_profile_is_editable(pleio_template_profile_item.get("key"))
         profile_field.is_filter = bool(pleio_template_profile_item.get("isFilter"))
+        profile_field.is_in_overview = bool(pleio_template_profile_item.get("isInOverview"))
         return profile_field
 
     def get_group(self, elgg_group: ElggGroupsEntity):
