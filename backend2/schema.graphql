@@ -1594,6 +1594,8 @@ type Site {
   style: Style!
   customTagsAllowed: Boolean!
   tagCategories: [TagCategory]!
+  showTagsInFeed: Boolean!
+  showTagsInDetail: Boolean!
   activityFilter: ActivityFilter
   showExtraHomepageFilters: Boolean!
   usersOnline: Int!
