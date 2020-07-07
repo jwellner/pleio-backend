@@ -128,6 +128,7 @@ def resolve_edit_site_setting(_, info, input):
             profile_field, created = ProfileField.objects.get_or_create(key=field['key'])
             profile_field.name = field['name']
             profile_field.is_filter = field['isFilter']
+            profile_field.is_in_overview = field['isInOverview']
             profile_field.save()
 
         save_setting('PROFILE', clean_input.get('profile'))

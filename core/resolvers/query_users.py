@@ -1,5 +1,6 @@
 from core.lib import get_acl
 from user.models import User
+from core.models import ProfileField
 from core.constances import NOT_LOGGED_IN
 from elasticsearch_dsl import Search
 from elasticsearch_dsl import Q
@@ -9,6 +10,7 @@ from django_tenants.utils import parse_tenant_config_path
 
 def resolve_users(_, info, q="", filters=None, offset=0, limit=20):
     # pylint: disable=unused-argument
+    # pylint: disable=too-many-locals
     ids = []
 
     user = info.context.user
@@ -62,8 +64,13 @@ def resolve_users(_, info, q="", filters=None, offset=0, limit=20):
     users = User.objects.filter(id__in=ids)
     edges = users[offset:offset+limit]
 
+    fields_in_overview = []
+    for item in ProfileField.objects.filter(is_in_overview=True).all():
+        fields_in_overview.append({ 'key': item.key, 'label': item.name })
+
     return {
         'total': users.count(),
         'edges': edges,
-        'filterCount': []
+        'filterCount': [],
+        'fieldsInOverview': fields_in_overview
     }

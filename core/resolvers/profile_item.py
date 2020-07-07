@@ -19,6 +19,11 @@ def resolve_is_filter(obj, info):
     # pylint: disable=unused-argument
     return obj.is_filter
 
+@profile_item.field("isInOverview")
+def resolve_is_in_overview(obj, info):
+    # pylint: disable=unused-argument
+    return obj.is_in_overview
+
 @profile_item.field("value")
 def resolve_value(obj, info):
     # pylint: disable=unused-argument

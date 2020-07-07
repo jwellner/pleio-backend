@@ -1383,6 +1383,7 @@ type ProfileItem {
   isEditable: Boolean
   isFilterable: Boolean
   isFilter: Boolean
+  isInOverview: Boolean
   accessId: Int
   fieldType: String
   fieldOptions: [String]
@@ -1392,6 +1393,7 @@ input ProfileItemInput {
   key: String!
   name: String!
   isFilter: Boolean!
+  isInOverview: Boolean
 }
 
 type Query {
@@ -1861,6 +1863,12 @@ type UserList {
   total: Int!
   filterCount: [UserFilterCount]
   edges: [User]
+  fieldsInOverview: [UserListOverviewItem]
+}
+
+type UserListOverviewItem {
+  key: String!
+  label: String
 }
 
 type SiteUserList {

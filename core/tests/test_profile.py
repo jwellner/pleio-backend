@@ -55,9 +55,9 @@ class ProfileTestCase(FastTenantTestCase):
             value="option1, option2",
             read_access=[ACCESS_TYPE.user.format(self.user1.id)]
         )
-        Setting.objects.create(key='PROFILE', value=[{"key": "profile_field1", "name": "profile_field1_name", "isFilter": False},
-                                                     {"key": "profile_field2", "name": "profile_field2_name", "isFilter": False},
-                                                     {"key": "profile_field3", "name": "profile_field3_name", "isFilter": False}])
+        Setting.objects.create(key='PROFILE', value=[{"key": "profile_field1", "name": "profile_field1_name", "isFilter": False, "isInOverview": False},
+                                                     {"key": "profile_field2", "name": "profile_field2_name", "isFilter": False, "isInOverview": False},
+                                                     {"key": "profile_field3", "name": "profile_field3_name", "isFilter": False, "isInOverview": False}])
 
 
         self.query = """
