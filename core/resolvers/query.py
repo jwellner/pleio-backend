@@ -3,7 +3,6 @@ from django.core.exceptions import ObjectDoesNotExist
 from graphql import GraphQLError
 from core.models import Entity, Group, EntityView, EntityViewCount
 from user.models import User
-from file.models import FileFolder
 from .query_viewer import resolve_viewer
 from .query_site import resolve_site, resolve_site_settings
 from .query_site_users import resolve_site_users
@@ -17,7 +16,7 @@ from .query_trending import resolve_trending
 from .query_notifications import resolve_notifications
 from .query_recommended import resolve_recommended
 from .query_top import resolve_top
-from core.constances import COULD_NOT_FIND
+from core.constances import COULD_NOT_FIND, USER_NOT_MEMBER_OF_GROUP
 
 query = ObjectType("Query")
 
@@ -37,8 +36,6 @@ query.set_field("top", resolve_top)
 query.set_field("filters", resolve_filters)
 
 
-
-
 @query.field("entity")
 def resolve_entity(
     _,
@@ -56,20 +53,18 @@ def resolve_entity(
 
     try:
         entity = Entity.objects.visible(user).get_subclass(id=guid)
+
+        if entity.group and entity.group.is_closed and not entity.group.is_full_member(user) and not user.is_admin:
+            raise GraphQLError(USER_NOT_MEMBER_OF_GROUP)
+
     except ObjectDoesNotExist:
         pass
 
-    # Also try to get User, Group, Comment, FileFolder
+    # Also try to get User, Group, Comment
     # TODO: make frontend use separate queries for those types?
     if not entity:
         try:
             entity = Group.objects.visible(user).get(id=guid)
-        except ObjectDoesNotExist:
-            pass
-
-    if not entity:
-        try:
-            entity = FileFolder.objects.visible(user).get(id=guid)
         except ObjectDoesNotExist:
             pass
 

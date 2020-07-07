@@ -16,6 +16,10 @@ def download(request, file_id=None, file_name=None):
 
     try:
         entity = FileFolder.objects.visible(user).get(id=file_id)
+
+        if entity.group and entity.group.is_closed and not entity.group.is_full_member(user) and not user.is_admin:
+            raise Http404("File not found")
+
         response = StreamingHttpResponse(streaming_content=entity.upload.open(), content_type=entity.mime_type)
         response['Content-Length'] = entity.upload.size
         response['Content-Disposition'] = "attachment; filename=%s" % file_name
@@ -44,6 +48,8 @@ def bulk_download(request):
     # Add selected files to zip
     files = FileFolder.objects.visible(user).filter(id__in=file_ids, is_folder=False)
     for f in files:
+        if f.group and f.group.is_closed and not f.group.is_full_member(user) and not user.is_admin:
+            continue
         zipf.writestr(path.basename(f.upload.name), f.upload.read())
 
     # Add selected folders to zip
@@ -87,6 +93,9 @@ def file_cache_header(request, file_id=None, cache_seconds=15724800):
 
     try:
         entity = FileFolder.objects.visible(user).get(id=file_id)
+
+        if entity.group and entity.group.is_closed and not entity.group.is_full_member(user) and not user.is_admin:
+            raise Http404("File not found")
 
     except ObjectDoesNotExist:
         raise Http404("File not found")

@@ -1,7 +1,12 @@
 import uuid
-from django.db import models
+from django.apps import apps
+from django.conf import settings
 from django.contrib.postgres.fields import ArrayField, JSONField
 from django.core.exceptions import ObjectDoesNotExist
+from django.db import models
+from django.db.models import Q
+from django.db.models.signals import pre_save
+from django.dispatch import receiver
 from django.utils.text import slugify
 from django.utils import timezone
 from core.lib import ACCESS_TYPE
@@ -215,3 +220,30 @@ class Subgroup(models.Model):
     @property
     def access_id(self):
         return 10000 + self.id
+
+@receiver([pre_save], sender=Group)
+def update_entity_access(sender, instance, **kwargs):
+    # pylint: disable=unused-argument
+    """
+    Update Entity read_access when group is set to 'Closed'
+    """
+    if settings.IMPORTING:
+        return
+
+    if instance.is_closed:
+        # to prevent cyclic import
+        Entity = apps.get_model('core', 'Entity')
+
+        filters = Q()
+        filters.add(Q(group__id=instance.id), Q.AND)
+        filters.add(Q(read_access__overlap=list([ACCESS_TYPE.public, ACCESS_TYPE.logged_in])), Q.AND)
+        
+        entities = Entity.objects.filter(filters)
+        for entity in entities:
+            if ACCESS_TYPE.public in entity.read_access:
+                entity.read_access.remove(ACCESS_TYPE.public)
+            if ACCESS_TYPE.logged_in in entity.read_access:
+                entity.read_access.remove(ACCESS_TYPE.logged_in)
+            if not ACCESS_TYPE.group.format(instance.id) in entity.read_access:
+                entity.read_access.append(ACCESS_TYPE.group.format(instance.id))
+            entity.save()
