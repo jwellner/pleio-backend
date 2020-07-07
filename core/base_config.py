@@ -13,6 +13,7 @@ DEFAULT_SITE_CONFIG = {
     'DEFAULT_ACCESS_ID': (1, 'Default accessId'),
 
     'GOOGLE_ANALYTICS_URL': ('', 'Google analytics url'),
+    'GOOGLE_SITE_VERIFICATION': ('', 'Google site verification code'),
     'PIWIK_URL': ('', 'Piwik url'),
     'PIWIK_ID': ('', 'Piwik id'),
 

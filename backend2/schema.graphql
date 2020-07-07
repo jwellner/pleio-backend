@@ -696,6 +696,7 @@ input editSiteSettingInput {
   allowRegistration: Boolean
   defaultAccessId: Int
   googleAnalyticsUrl: String
+  googleSiteVerification: String
   piwikUrl: String
   piwikId: String
   font: String
@@ -1607,6 +1608,7 @@ type SiteSettings {
   defaultAccessId: Int!
   defaultAccessIdOptions: [OptionInteger]
   googleAnalyticsUrl: String
+  googleSiteVerification: String
   piwikUrl: String
   piwikId: String
   font: String
