@@ -155,6 +155,8 @@ class Command(InteractiveTenantOption, BaseCommand):
         config.CUSTOM_TAGS_ENABLED = self.helpers.get_plugin_setting("custom_tags_allowed") == "yes"
         config.TAG_CATEGORIES = json.loads(html.unescape(self.helpers.get_plugin_setting("tagCategories"))) \
             if self.helpers.get_plugin_setting("tagCategories") else []
+        config.SHOW_TAGS_IN_FEED = self.helpers.get_plugin_setting("show_tags_in_feed") == "yes"
+        config.SHOW_TAGS_IN_DETAIL = self.helpers.get_plugin_setting("show_tags_in_detail") == "yes"
         config.ACTIVITY_FEED_FILTERS_ENABLED = self.helpers.get_plugin_setting("show_extra_homepage_filters") == "yes"
         config.MENU = self.helpers.get_menu(json.loads(html.unescape(self.helpers.get_plugin_setting("menu")))) \
             if self.helpers.get_plugin_setting("menu") else []

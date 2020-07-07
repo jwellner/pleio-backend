@@ -85,6 +85,8 @@ def resolve_edit_site_setting(_, info, input):
         'footer': 'FOOTER',
 
         'tagCategories': 'TAG_CATEGORIES',
+        'showTagsInFeed': 'SHOW_TAGS_IN_FEED',
+        'showTagsInDetail': 'SHOW_TAGS_IN_DETAIL',
 
         'defaultEmailOverviewFrequency': 'EMAIL_OVERVIEW_DEFAULT_FREQUENCY',
         'emailOverviewSubject': 'EMAIL_OVERVIEW_SUBJECT',
@@ -100,7 +102,6 @@ def resolve_edit_site_setting(_, info, input):
         'cancelMembershipEnabled': 'CANCEL_MEMBERSHIP_ENABLED',
         'advancedPermissions': 'ADVANCED_PERMISSIONS_ENABLED',
         'showExcerptInNewsCard': 'SHOW_EXCERPT_IN_NEWS_CARD',
-        'showTagInNewsCard': 'SHOW_TAG_IN_NEWS_CARD',
         'commentsOnNews': 'COMMENT_ON_NEWS',
         'eventExport': 'EVENT_EXPORT',
         'questionerCanChooseBestAnswer': 'QUESTIONER_CAN_CHOOSE_BEST_ANSWER',
