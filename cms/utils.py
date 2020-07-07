@@ -19,6 +19,9 @@ def order_positions(parent):
     if parent.type_to_string == 'column':
         children = Widget.objects.filter(column=parent)
 
+    if parent.type_to_string == 'group':
+        children = Widget.objects.filter(group=parent)
+
     if not children:
         return
 
@@ -56,7 +59,10 @@ def reorder_positions(obj, old_position, new_position):
     if obj.type_to_string == 'column':
         children = Column.objects.filter(row=obj.row)
 
-    if obj.type_to_string == 'widget':
+    if obj.type_to_string == 'widget' and obj.group:
+        children = Widget.objects.filter(group=obj.group)
+
+    if obj.type_to_string == 'widget' and not obj.group:
         children = Widget.objects.filter(column=obj.column)
 
     if not children:

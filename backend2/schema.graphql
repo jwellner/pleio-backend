@@ -614,6 +614,7 @@ type editGroupPayload {
 input editGroupWidgetInput {
   guid: String!
   settings: [WidgetSettingInput]
+  position: Int
   clientMutationId: Int
 }
 
