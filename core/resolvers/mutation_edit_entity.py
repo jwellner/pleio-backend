@@ -43,15 +43,22 @@ def resolve_edit_entity(_, info, input):
     if not entity.can_write(user):
         raise GraphQLError(COULD_NOT_SAVE)
 
-    entity.tags = clean_input.get("tags", [])
+    if 'tags' in clean_input:
+        entity.tags = clean_input.get("tags")
 
-    entity.read_access = access_id_to_acl(entity, clean_input.get("accessId", 0))
-    entity.write_access = access_id_to_acl(entity, clean_input.get("writeAccessId", 0))
+    if 'accessId' in clean_input:
+        entity.read_access = access_id_to_acl(entity, clean_input.get("accessId"))
+
+    if 'writeAccessId' in clean_input:
+        entity.write_access = access_id_to_acl(entity, clean_input.get("writeAccessId"))
 
     if entity._meta.model_name in ["blog", "news", "question", "wiki", "event"]:
-        entity.title = clean_input.get("title")
-        entity.description = clean_input.get("description", "")
-        entity.rich_description = clean_input.get("richDescription")
+        if 'title' in clean_input:
+            entity.title = clean_input.get("title")
+        if 'description' in clean_input:
+            entity.description = clean_input.get("description")
+        if 'richDescription' in clean_input:
+            entity.rich_description = clean_input.get("richDescription")
 
     if entity._meta.model_name in ["blog", "news", "event"]:
         if 'featured' in clean_input:
@@ -78,15 +85,18 @@ def resolve_edit_entity(_, info, input):
 
     if entity._meta.model_name in ["blog"]:
         # TODO: subeditor may also set recommended
-        if user.is_admin:
+        if user.is_admin and 'isRecommended' in clean_input:
             entity.is_recommended = clean_input.get("isRecommended")
 
     if entity._meta.model_name in ["news"]:
-        entity.is_featured = clean_input.get("isFeatured", False)
-        entity.source = clean_input.get("source", "")
+        if 'isFeatured' in clean_input:
+            entity.is_featured = clean_input.get("isFeatured")
+        if 'source' in clean_input:
+            entity.source = clean_input.get("source")
 
     if entity._meta.model_name in ["event"]:
-        entity.is_featured = clean_input.get("isFeatured", False)
+        if 'isFeatured' in clean_input:
+            entity.is_featured = clean_input.get("isFeatured")
 
 
     entity.save()
