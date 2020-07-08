@@ -3,6 +3,7 @@ from django.core.exceptions import ObjectDoesNotExist
 from core.models import Widget
 from core.constances import NOT_LOGGED_IN, COULD_NOT_FIND, COULD_NOT_SAVE
 from core.lib import remove_none_from_dict
+from cms.utils import reorder_positions
 
 def resolve_edit_group_widget(_, info, input):
     # pylint: disable=redefined-builtin
@@ -19,6 +20,16 @@ def resolve_edit_group_widget(_, info, input):
 
     if not widget.group.can_write(user):
         raise GraphQLError(COULD_NOT_SAVE)
+
+    old_position = widget.position
+    new_position = clean_input.get("position")
+
+    if 'position' in clean_input:
+        old_position = widget.position
+        new_position = clean_input.get("position")
+        widget.position = clean_input.get('position')
+        widget.save()
+        reorder_positions(widget, old_position, new_position)
 
     if 'settings' in clean_input:
         widget.settings = clean_input.get('settings')

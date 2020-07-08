@@ -16,13 +16,22 @@ def resolve_delete_widget(_, info, input):
     except ObjectDoesNotExist:
         raise GraphQLError(COULD_NOT_FIND)
 
-    if not widget.page.can_write(user):
+    if widget.group and not widget.group.can_write(user):
         raise GraphQLError(COULD_NOT_SAVE)
 
-    column = widget.column
+    if not widget.group and not widget.page.can_write(user):
+        raise GraphQLError(COULD_NOT_SAVE)
+
+    if widget.group:
+        parent = widget.group
+    elif widget.column:
+        parent = widget.column
+    else:
+        raise GraphQLError(COULD_NOT_SAVE)
+
     widget.delete()
 
-    order_positions(column)
+    order_positions(parent)
 
     return {
         'success': True
