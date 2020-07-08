@@ -1,5 +1,6 @@
 from ariadne import ObjectType
 from core import config
+from core.constances import ACCESS_TYPE
 from core.models import ProfileField, UserProfileField
 from django.core.exceptions import ObjectDoesNotExist
 
@@ -35,7 +36,7 @@ def resolve_profile(obj, info):
             qs = UserProfileField.objects.visible(info.context.user)
             field.read_access = qs.get(profile_field=field, user_profile=obj.profile).read_access
         except ObjectDoesNotExist:
-            pass
+            field.read_access = [ACCESS_TYPE.logged_in]
         user_profile_fields.append(field)
     return user_profile_fields
 

@@ -181,7 +181,7 @@ class ProfileTestCase(FastTenantTestCase):
         self.assertEqual(data["entity"]["profile"][2]["name"], "profile_field3_name")
         self.assertEqual(data["entity"]["profile"][2]["value"], "")
         self.assertEqual(data["entity"]["profile"][2]["category"], "profile_field3_category")
-        self.assertEqual(data["entity"]["profile"][2]["accessId"], 0)
+        self.assertEqual(data["entity"]["profile"][2]["accessId"], 1)
         self.assertEqual(data["entity"]["profile"][2]["fieldType"], "multiSelectField")
         self.assertEqual(data["entity"]["profile"][2]["isEditable"], True)
         self.assertEqual(data["entity"]["profile"][2]["fieldOptions"], ["option1", "option2", "option3"])
