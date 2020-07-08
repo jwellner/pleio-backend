@@ -142,6 +142,7 @@ def resolve_add_event(_, info, input):
 
 def resolve_edit_event(_, info, input):
     # pylint: disable=redefined-builtin
+    # pylint: disable=too-many-branches
 
     user = info.context.user
 
@@ -158,13 +159,19 @@ def resolve_edit_event(_, info, input):
     if not entity.can_write(user):
         raise GraphQLError(COULD_NOT_SAVE)
 
-    entity.title = clean_input.get("title")
-    entity.description = clean_input.get("description", "")
-    entity.rich_description = clean_input.get("richDescription")
+    if 'title' in clean_input:
+        entity.title = clean_input.get("title")
+    if 'description' in clean_input:
+        entity.description = clean_input.get("description")
+    if 'richDescription' in clean_input:
+        entity.rich_description = clean_input.get("richDescription")
 
-    entity.tags = clean_input.get("tags", [])
-    entity.read_access = access_id_to_acl(entity, clean_input.get("accessId", 0))
-    entity.write_access = access_id_to_acl(entity, clean_input.get("writeAccessId", 0))
+    if 'tags' in clean_input:
+        entity.tags = clean_input.get("tags")
+    if 'accessId' in clean_input:
+        entity.read_access = access_id_to_acl(entity, clean_input.get("accessId"))
+    if 'writeAccessId' in clean_input:
+        entity.write_access = access_id_to_acl(entity, clean_input.get("writeAccessId"))
 
     if 'featured' in clean_input:
         entity.featured_position_y = clean_input.get("featured").get("positionY", 0)
@@ -188,25 +195,32 @@ def resolve_edit_event(_, info, input):
         entity.featured_position_y = 0
         entity.featured_video = None
 
-    entity.is_featured = clean_input.get("isFeatured", False)
+    if 'isFeatured' in clean_input:
+        entity.is_featured = clean_input.get("isFeatured")
 
     if not clean_input.get("startDate", None) or not clean_input.get("endDate", None):
         raise GraphQLError(INVALID_DATE)
 
-    entity.start_date = dateparse.parse_datetime(clean_input.get("startDate"))
-    entity.end_date = dateparse.parse_datetime(clean_input.get("endDate"))
+    if 'startDate' in clean_input:
+        entity.start_date = dateparse.parse_datetime(clean_input.get("startDate"))
+    if 'endDate' in clean_input:
+        entity.end_date = dateparse.parse_datetime(clean_input.get("endDate"))
 
     if entity.start_date > entity.end_date:
         raise GraphQLError(INVALID_DATE)
 
-    entity.external_link = clean_input.get("source", "")
-    entity.location = clean_input.get("location", "")
+    if 'source' in clean_input:
+        entity.external_link = clean_input.get("source")
+    if 'location' in clean_input:
+        entity.location = clean_input.get("location")
 
     if 'maxAttendees' in clean_input:
         entity.max_attendees = int(clean_input.get("maxAttendees"))
 
-    entity.rsvp = clean_input.get("rsvp", False)
-    entity.attend_event_without_account = clean_input.get("attendEventWithoutAccount", False)
+    if 'rsvp' in clean_input:
+        entity.rsvp = clean_input.get("rsvp")
+    if 'attendEventWithoutAccount' in clean_input:
+        entity.attend_event_without_account = clean_input.get("attendEventWithoutAccount")
 
     entity.save()
 
