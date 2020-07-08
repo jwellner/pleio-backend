@@ -173,8 +173,10 @@ class Command(InteractiveTenantOption, BaseCommand):
             if elgg_site.description else ""
         config.IS_CLOSED = self.helpers.get_site_config('walled_garden')
         config.ALLOW_REGISTRATION = self.helpers.get_site_config('allow_registration')
-        config.GOOGLE_ANALYTICS_URL = html.unescape(self.helpers.get_plugin_setting("google_analytics"))
-        config.GOOGLE_SITE_VERIFICATION = html.unescape(self.helpers.get_plugin_setting("google_site_verification"))
+        config.GOOGLE_ANALYTICS_URL = html.unescape(self.helpers.get_plugin_setting("google_analytics")) \
+            if self.helpers.get_plugin_setting("google_analytics") else ""
+        config.GOOGLE_SITE_VERIFICATION = html.unescape(self.helpers.get_plugin_setting("google_site_verification")) \
+            if self.helpers.get_plugin_setting("google_site_verification") else ""
         config.PIWIK_URL = html.unescape(self.helpers.get_plugin_setting("piwik_url")) \
             if self.helpers.get_plugin_setting("piwik_url") else ""
         config.PIWIK_ID = html.unescape(self.helpers.get_plugin_setting("piwik")) \
@@ -197,8 +199,6 @@ class Command(InteractiveTenantOption, BaseCommand):
         config.SHOW_VIEW_COUNT = self.helpers.get_plugin_setting("enable_views_count") == "yes"
         config.NEWSLETTER = self.helpers.get_plugin_setting("newsletter") == "yes"
         config.CANCEL_MEMBERSHIP_ENABLED = self.helpers.get_plugin_setting("cancel_membership_enabled") == "yes"
-        config.SHOW_EXCERPT_IN_NEWS_CARD = self.helpers.get_plugin_setting("show_excerpt_in_news_card") == "yes"
-        config.SHOW_TAG_IN_NEWS_CARD = self.helpers.get_plugin_setting("show_tag_in_news_card") == "yes"
         config.COMMENT_ON_NEWS = self.helpers.get_plugin_setting("comments_on_news") == "yes"
         config.EVENT_EXPORT = self.helpers.get_plugin_setting("event_export") == "yes"
         config.QUESTIONER_CAN_CHOOSE_BEST_ANSWER = self.helpers.get_plugin_setting("questioner_can_choose_best_answer") == "yes"
