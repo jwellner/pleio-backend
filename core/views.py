@@ -77,7 +77,7 @@ def logout(request):
     # should find out how we can make this better. OIDC logout only allows POST
     LogoutView.as_view()(request)
 
-    return redirect('/')
+    return redirect(settings.OIDC_OP_LOGOUT_ENDPOINT)
 
 def login(request):
     return redirect('oidc_authentication_init')
