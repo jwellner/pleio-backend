@@ -154,7 +154,8 @@ def resolve_edit_file_folder(_, info, input):
 
     entity.owner = user
 
-    entity.tags = clean_input.get("tags", [])
+    if 'tags' in clean_input:
+        entity.tags = clean_input.get("tags")
 
     if 'title' in clean_input:
         entity.title = clean_input.get("title")

@@ -49,8 +49,11 @@ def resolve_edit_poll(_, info, input):
     if not entity.can_write(user):
         raise GraphQLError(COULD_NOT_SAVE)
 
-    entity.read_access = access_id_to_acl(entity, clean_input.get("accessId"))
-    entity.title = clean_input.get("title")
+    if 'accessId' in clean_input:
+        entity.read_access = access_id_to_acl(entity, clean_input.get("accessId"))
+
+    if 'title' in clean_input:
+        entity.title = clean_input.get("title")
 
     entity.save()
 

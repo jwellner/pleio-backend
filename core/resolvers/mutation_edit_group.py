@@ -7,6 +7,8 @@ from core.lib import remove_none_from_dict
 
 def resolve_edit_group(_, info, input):
     # pylint: disable=redefined-builtin
+    # pylint: disable=too-many-branches
+
 
     user = info.context.user
     clean_input = remove_none_from_dict(input)
@@ -22,26 +24,38 @@ def resolve_edit_group(_, info, input):
     if not group.can_write(user):
         raise GraphQLError(COULD_NOT_SAVE)
 
-    group.name = clean_input.get("name", "")
-    group.icon = clean_input.get("icon", "")
-    group.description = clean_input.get("description", "")
-    group.rich_description = clean_input.get("richDescription", "")
-    group.introduction = clean_input.get("introduction", "")
-    group.welcome_message = clean_input.get("welcomeMessage", "")
+    if 'name' in clean_input:
+        group.name = clean_input.get("name")
+    if 'icon' in clean_input:
+        group.icon = clean_input.get("icon")
+    if 'description' in clean_input:
+        group.description = clean_input.get("description")
+    if 'richDescription' in clean_input:
+        group.rich_description = clean_input.get("richDescription")
+    if 'introduction' in clean_input:
+        group.introduction = clean_input.get("introduction")
+    if 'welcomeMessage' in clean_input:
+        group.welcome_message = clean_input.get("welcomeMessage")
 
-    group.is_closed = clean_input.get("isClosed", False)
-    group.is_membership_on_request = clean_input.get("isMembershipOnRequest", False)
-
-    group.auto_notification = clean_input.get("autoNotification", False)
+    if 'isClosed' in clean_input:
+        group.is_closed = clean_input.get("isClosed")
+    if 'isMembershipOnRequest' in clean_input:
+        group.is_membership_on_request = clean_input.get("isMembershipOnRequest")
+    if 'autoNotification' in clean_input:
+        group.auto_notification = clean_input.get("autoNotification")
 
     if user.is_admin:
-        group.is_featured = clean_input.get("isFeatured", False)
-        group.is_leaving_group_disabled = clean_input.get("isLeavingGroupDisabled", False)
-        group.is_auto_membership_enabled = clean_input.get("isAutoMembershipEnabled", False)
+        if 'isFeatured' in clean_input:
+            group.is_featured = clean_input.get("isFeatured")
+        if 'isLeavingGroupDisabled' in clean_input:
+            group.is_leaving_group_disabled = clean_input.get("isLeavingGroupDisabled")
+        if 'isAutoMembershipEnabled' in clean_input:
+            group.is_auto_membership_enabled = clean_input.get("isAutoMembershipEnabled")
 
-    group.plugins = clean_input.get("plugins", [])
+    if 'plugins' in clean_input:
+        group.plugins = clean_input.get("plugins")
     if 'tags' in clean_input:
-        group.tags = clean_input.get("tags", [])
+        group.tags = clean_input.get("tags")
 
     group.save()
 

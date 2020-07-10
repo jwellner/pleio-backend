@@ -25,14 +25,18 @@ def resolve_edit_page(_, info, input):
     if not entity.can_write(user):
         raise GraphQLError(COULD_NOT_SAVE)
 
-    entity.tags = clean_input.get("tags")
+    if 'tags' in clean_input:
+        entity.tags = clean_input.get("tags")
 
     if 'accessId' in clean_input:
         entity.read_access = access_id_to_acl(entity, clean_input.get("accessId"))
 
-    entity.title = clean_input.get("title")
-    entity.description = clean_input.get("description")
-    entity.rich_description = clean_input.get("richDescription")
+    if 'title' in clean_input:
+        entity.title = clean_input.get("title")
+    if 'description' in clean_input:
+        entity.description = clean_input.get("description")
+    if 'richDescription' in clean_input:
+        entity.rich_description = clean_input.get("richDescription")
 
     entity.save()
 
