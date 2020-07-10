@@ -665,9 +665,9 @@ type editPollPayload {
 
 input editProfileFieldInput {
   guid: String!
-  accessId: Int
+  accessId: Int!
   key: String!
-  value: String
+  value: String!
   clientMutationId: Int
 }
 
