@@ -14,6 +14,7 @@ from poll.models import Poll, PollChoice
 from core.lib import ACCESS_TYPE, access_id_to_acl
 from notifications.models import Notification
 from file.models import FileFolder
+from wiki.models import Wiki
 from elgg.models import (
     ElggUsersEntity, ElggSitesEntity, ElggGroupsEntity, ElggObjectsEntity, ElggPrivateSettings, GuidMap, ElggNotifications,
     ElggAccessCollections, ElggAccessCollectionMembership
@@ -505,3 +506,26 @@ class Mapper():
         except ObjectDoesNotExist:
             # Skip when old data is inconsistent
             return None
+
+    def get_wiki(self, elgg_entity: ElggObjectsEntity):
+        entity = Wiki()
+        entity.created_at = datetime.fromtimestamp(elgg_entity.entity.time_created)
+        entity.updated_at = datetime.fromtimestamp(elgg_entity.entity.time_updated)
+        entity.title = elgg_entity.title
+        entity.description = elgg_entity.description.replace("&amp;", "&")
+        entity.rich_description = elgg_entity.entity.get_metadata_value_by_name("richDescription")
+        entity.tags = self.helpers.get_list_values(elgg_entity.entity.get_metadata_value_by_name("tags"))
+        entity.owner = User.objects.get(id=GuidMap.objects.get(id=elgg_entity.entity.owner_guid).guid)
+
+        in_group = GuidMap.objects.filter(id=elgg_entity.entity.container_guid, object_type="group").first()
+        if in_group:
+            entity.group = Group.objects.get(id=in_group.guid)
+
+        write_access_id = int(elgg_entity.entity.get_metadata_value_by_name("write_access_id")) \
+            if elgg_entity.entity.get_metadata_value_by_name("write_access_id") else 0
+
+        entity.write_access = [ACCESS_TYPE.user.format(entity.owner.guid)]
+        entity.write_access = access_id_to_acl(entity.owner, write_access_id)
+        entity.read_access = access_id_to_acl(entity.owner, elgg_entity.entity.access_id)
+
+        return entity

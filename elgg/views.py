@@ -1,6 +1,6 @@
 from django.shortcuts import redirect
 from django.core.exceptions import ObjectDoesNotExist
-from core.models import Entity
+from core.models import Entity, Group
 from core.views import entity_view
 from elgg.models import GuidMap
 
@@ -11,8 +11,13 @@ def entity_redirect(request, entity_id):
 
     if entity_id:
         try:
-            guid = GuidMap.objects.get(id=int(entity_id)).guid
-            entity = Entity.objects.visible(user).select_subclasses().get(id=guid)
+            mapper = GuidMap.objects.get(id=int(entity_id))
+
+            if mapper.object_type == "group":
+                entity = Group.objects.visible(user).get(id=mapper.guid)
+            else:
+                entity = Entity.objects.visible(user).select_subclasses().get(id=mapper.guid)
+
         except ObjectDoesNotExist:
             pass
 
