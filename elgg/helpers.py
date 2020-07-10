@@ -5,6 +5,7 @@ from phpserialize import unserialize
 from cms.models import Page
 from user.models import User
 from file.models import FileFolder
+from wiki.models import Wiki
 from core.lib import ACCESS_TYPE, access_id_to_acl
 from elgg.models import (
     ElggEntities, ElggObjectsEntity, ElggPrivateSettings, ElggConfig, GuidMap, ElggEntityViews, ElggEntityViewsLog
@@ -146,6 +147,18 @@ class ElggHelpers():
         except Exception:
             pass
 
+    def save_parent_wiki(self, elgg_wiki):
+        guid_map_wiki = GuidMap.objects.get(id=elgg_wiki.entity.guid, object_type='wiki')
+        wiki = Wiki.objects.get(id=guid_map_wiki.guid)
+
+        try:
+            guid_map_parent = GuidMap.objects.get(id=elgg_wiki.entity.container_guid, object_type='wiki')
+            parent = Wiki.objects.get(id=guid_map_parent.guid)
+            wiki.parent = parent
+            wiki.save()
+
+        except Exception:
+            pass
 
     def save_parent_folder(self, elgg_folder):
         guid_map_folder = GuidMap.objects.get(id=elgg_folder.entity.guid, object_type='folder')

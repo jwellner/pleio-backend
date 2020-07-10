@@ -93,9 +93,11 @@ class Command(InteractiveTenantOption, BaseCommand):
         self._import_users()
         self._import_settings()
         self._import_groups()
-        self._import_group_folders()
+        
+        self._import_file_folders()
         self._import_files()
 
+        self._import_wikis()
         self._import_blogs()
         self._import_news()
         self._import_events()
@@ -681,10 +683,10 @@ class Command(InteractiveTenantOption, BaseCommand):
                 self.stdout.write(self.style.WARNING("Error: %s\n" % str(e)))
                 pass
 
-    def _import_group_folders(self):
+    def _import_file_folders(self):
         elgg_folder_items = ElggObjectsEntity.objects.using(self.import_id).filter(entity__subtype__subtype='folder')
 
-        self.stdout.write("\n>> Group folders (%i) " % elgg_folder_items.count(), ending="")
+        self.stdout.write("\n>> File folders (%i) " % elgg_folder_items.count(), ending="")
 
         for elgg_folder in elgg_folder_items:
             folder = self.mapper.get_folder(elgg_folder)
@@ -751,6 +753,28 @@ class Command(InteractiveTenantOption, BaseCommand):
             # question needs comment to be created before save
             if entity.type_to_string == 'question':
                 self.helpers.save_best_answer(entity, comment, elgg_entity)
+
+    def _import_wikis(self):
+        elgg_wiki_items = ElggObjectsEntity.objects.using(self.import_id).filter(entity__subtype__subtype='wiki')
+
+        self.stdout.write("\n>> Wikis (%i) " % elgg_wiki_items.count(), ending="")
+
+        for elgg_wiki in elgg_wiki_items:
+            wiki = self.mapper.get_wiki(elgg_wiki)
+
+            try:
+                wiki.save()
+
+                GuidMap.objects.create(id=elgg_wiki.entity.guid, guid=wiki.guid, object_type='wiki')
+
+                self.stdout.write(".", ending="")
+            except IntegrityError as e:
+                self.stdout.write(self.style.WARNING("Error: %s\n" % str(e)))
+                pass
+
+        # add parent wikis
+        for elgg_wiki in elgg_wiki_items:
+            self.helpers.save_parent_wiki(elgg_wiki)
 
     def debug_model(self, model):
         self.stdout.write(', '.join("%s: %s" % item for item in vars(model).items() if not item[0].startswith('_')))

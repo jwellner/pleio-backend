@@ -113,3 +113,28 @@ With this command, you will create and edit .po files. The files will be filled 
 With this command, you will compile the translation files which the application will use
 
 `python manage.py comilemessages`
+
+## Import Elgg site
+
+Commands for importing a elgg site:
+
+`docker-compose exec admin python manage.py import_site --settings=elgg.import_settings`
+
+Optional parameters:
+
+- `--elgg <databasename>` elgg database name, will be asked when not provided
+- `--schema <to_schema>` import to this schema, will be asked when not provided
+- `--flush` delete data from schema before import
+
+### Replace old IDs in content
+
+After the import you have to run the replace links command:
+
+`docker-compose exec admin python manage.py import_site --settings=elgg.import_settings --elgg_domain <search_domain_name>`
+
+`--elgg_domain` should be the domain name only ie `support.pleio.nl`
+
+Optional parameters:
+
+- `--elgg <databasename>` elgg database name, will be asked when not provided
+- `--schema <to_schema>` import to this schema, will be asked when not provided
