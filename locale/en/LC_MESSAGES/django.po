@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-04-02 09:21+0200\n"
+"POT-Creation-Date: 2020-07-10 10:26+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -18,12 +18,32 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#: backend2/config.py:63 core/resolvers/query_site.py:89
+#: backend2/config.py:63 core/resolvers/query_site.py:116
 msgid "English"
 msgstr ""
 
-#: backend2/config.py:64 core/resolvers/query_site.py:89
+#: backend2/config.py:64 core/resolvers/query_site.py:116
 msgid "Dutch"
+msgstr ""
+
+#: core/management/commands/send_notification_emails.py:54
+#: core/tests/test_send_notification_emails.py:41
+#: core/tests/test_send_notification_emails.py:85
+#: core/tests/test_send_notification_emails.py:106
+#, python-format
+msgid "New notifications at %s"
+msgstr ""
+
+#: core/management/commands/send_overview_emails.py:48
+#: core/tests/test_send_overview_emails.py:82
+#: core/tests/test_send_overview_emails.py:119
+#: core/tests/test_send_overview_emails.py:130
+#: core/tests/test_send_overview_emails.py:167
+#: core/tests/test_send_overview_emails.py:207
+#: core/tests/test_send_overview_emails.py:253
+#: core/tests/test_send_overview_emails.py:292
+#, python-format
+msgid "Regular overview of %s"
 msgstr ""
 
 #: core/resolvers/mutation_accept_membership_request.py:36
@@ -43,10 +63,26 @@ msgstr ""
 msgid "Ownership of the %s group has been transferred"
 msgstr ""
 
+#: core/resolvers/mutation_delete_user.py:33
+#, python-format
+msgid "Account of %s removed"
+msgstr ""
+
+#: core/resolvers/mutation_delete_user.py:42
+#: core/resolvers/mutation_toggle_user_is_admin.py:35
+#, python-format
+msgid "A site administrator was removed from %s"
+msgstr ""
+
 #: core/resolvers/mutation_invite_to_group.py:40
 #: core/tests/test_invite_to_group.py:77
 #, python-format
 msgid "Invitation to become a member of the %s group"
+msgstr ""
+
+#: core/resolvers/mutation_join_group.py:30
+#, python-format
+msgid "Access request for the %s group"
 msgstr ""
 
 #: core/resolvers/mutation_reject_membership_request.py:37
@@ -63,7 +99,7 @@ msgstr ""
 msgid "Reminder to become a member of the %s group"
 msgstr ""
 
-#: core/resolvers/mutation_send_message_to_group.py:45
+#: core/resolvers/mutation_send_message_to_group.py:52
 #, python-brace-format
 msgid "Message from group {0}: {1}"
 msgstr ""
@@ -81,39 +117,54 @@ msgstr ""
 msgid "Request to remove account"
 msgstr ""
 
-#: core/resolvers/query_site.py:94
+#: core/resolvers/mutation_toggle_user_is_admin.py:41
+#, python-format
+msgid "Your site administrator rights for %s were removed"
+msgstr ""
+
+#: core/resolvers/mutation_toggle_user_is_admin.py:53
+#, python-format
+msgid "A new site administrator was assigned for %s"
+msgstr ""
+
+#: core/resolvers/mutation_toggle_user_is_admin.py:58
+#, python-format
+msgid "You're granted site administrator right on %s"
+msgstr ""
+
+#: core/resolvers/query_site.py:100
 msgid "Just me"
 msgstr ""
 
-#: core/resolvers/query_site.py:95
+#: core/resolvers/query_site.py:101
 msgid "Logged in users"
 msgstr ""
 
-#: core/resolvers/query_site.py:96
+#: core/resolvers/query_site.py:105
 msgid "Public"
 msgstr ""
 
-#: core/resolvers/query_site.py:114
+#: core/resolvers/query_site.py:142
 msgid "Activity stream"
 msgstr ""
 
-#: core/resolvers/query_site.py:114
+#: core/resolvers/query_site.py:142
 msgid "CMS page"
 msgstr ""
 
-#: core/resolvers/query_site.py:144
+#: core/resolvers/query_site.py:174
 msgid "Daily"
 msgstr ""
 
-#: core/resolvers/query_site.py:145
+#: core/resolvers/query_site.py:175
 msgid "Weekly"
 msgstr ""
 
-#: core/resolvers/query_site.py:146
+#: core/resolvers/query_site.py:176
 msgid "Monthly"
 msgstr ""
 
-#: core/resolvers/query_site.py:147
+#: core/resolvers/query_site.py:177
 msgid "Never"
 msgstr ""
 
@@ -150,6 +201,16 @@ msgid ""
 "><a href=\"%(link)s\">%(link)s</a> "
 msgstr ""
 
+#: core/templates/email/admin_user_deleted.html:6
+#, python-format
+msgid ""
+"\n"
+"Hi,\n"
+"\n"
+"The administrator %(name_deleted_user)s is deleted. This action was taken by "
+"%(user_name)s.\n"
+msgstr ""
+
 #: core/templates/email/attend_event_without_account.html:6
 #, python-format
 msgid ""
@@ -176,6 +237,34 @@ msgid ""
 "    "
 msgstr ""
 
+#: core/templates/email/entities/blog.html:27
+msgid "Blog created by"
+msgstr ""
+
+#: core/templates/email/entities/blog.html:27
+#: core/templates/email/entities/event.html:19
+#: core/templates/email/entities/news.html:33
+#: core/templates/email/entities/question.html:19
+#: core/templates/email/entities/wiki.html:19
+msgid "on"
+msgstr ""
+
+#: core/templates/email/entities/event.html:19
+msgid "Agenda item created by"
+msgstr ""
+
+#: core/templates/email/entities/news.html:33
+msgid "News added on"
+msgstr ""
+
+#: core/templates/email/entities/question.html:19
+msgid "Question asked by"
+msgstr ""
+
+#: core/templates/email/entities/wiki.html:19
+msgid "Wiki created by"
+msgstr ""
+
 #: core/templates/email/group_ownership_transferred.html:6
 #, python-format
 msgid ""
@@ -190,6 +279,14 @@ msgid ""
 "You have been invited by %(user_name)s to join the %(group_name)s group. "
 "Follow the link below to become a member of the group: <br /><a href="
 "\"%(link)s\">%(link)s</a> "
+msgstr ""
+
+#: core/templates/email/join_group.html:6
+#, python-format
+msgid ""
+"The user %(user_name)s (%(user_obfuscated_email)s) has requested access to "
+"the group %(group_name)s. Follow the link below to become a member of the "
+"group: <br /><a href=\"%(link)s\">%(link)s</a> "
 msgstr ""
 
 #: core/templates/email/notifications/blog.html:3
@@ -228,8 +325,8 @@ msgstr ""
 #: core/templates/email/reject_membership_request.html:6
 #, python-format
 msgid ""
-"The administrator  %%s has rejected your request to join the %%s group. "
-"Contact the administrator for more information. "
+"The administrator %(user_name)s has rejected your request to join the "
+"%(group_name)s group. Contact the administrator for more information. "
 msgstr ""
 
 #: core/templates/email/resend_group_invitation.html:6
@@ -249,11 +346,16 @@ msgid ""
 msgstr ""
 
 #: core/templates/email/send_notification_emails.html:40
+#: core/templates/email/send_overview_emails.html:118
 #, python-format
 msgid ""
 " You have received this e-mail because you registered to receive "
 "notifications.<br /> Click <a href=\"%(user_url)s\">here</a> to change your "
 "settings."
+msgstr ""
+
+#: core/templates/email/send_overview_emails.html:31
+msgid "From the editors:"
 msgstr ""
 
 #: core/templates/email/toggle_request_delete_user_cancelled.html:6
@@ -271,11 +373,84 @@ msgid ""
 "done so. "
 msgstr ""
 
-#: core/tests/test_send_notification_emails.py:41
-#: core/tests/test_send_notification_emails.py:93
-#: core/tests/test_send_notification_emails.py:114
+#: core/templates/email/user_deleted.html:6
 #, python-format
-msgid "New notifications at %s"
+msgid ""
+"\n"
+"\n"
+"Dear %(name_deleted_user)s,<br><br> Your membership of <a href=\"%(site_url)s"
+"\">%(site_url)s</a> has been cancelled by the administrator.<br>\n"
+"\n"
+"Your profile, settings and saved items have been removed from the site and "
+"your content has been made anonymous.\n"
+"\n"
+"Your Pleio account will continue to exist as will your membership of any "
+"other sites. See <a href=\"https://account.pleio.nl\">account.pleio.nl</a> "
+"for more information.\n"
+"\n"
+msgstr ""
+
+#: core/templates/email/user_role_admin_assigned_for_admins.html:6
+#, python-format
+msgid ""
+"\n"
+"\n"
+"Hi,\n"
+"\n"
+"The user %(name_of_user_admin_role_changed)s was assigned as a new site "
+"administrator by %(user_name)s.\n"
+"Check out the profile of the new site administrator here %(link)s .\n"
+"\n"
+"If you believe this was done in error, please login here %(site_url)s and "
+"undo this action.\n"
+"\n"
+msgstr ""
+
+#: core/templates/email/user_role_admin_assigned_for_user.html:6
+#, python-format
+msgid ""
+"\n"
+"\n"
+"Hi %(name_of_user_admin_role_changed)s,\n"
+"\n"
+"You've been assigned as a new site administrator by %(user_name)s.\n"
+"\n"
+"Enjoy your new found rights by logging in here %(site_url)s.\n"
+"\n"
+"If you believe this was done in error, please contact one of the other site "
+"administrators.\n"
+"\n"
+msgstr ""
+
+#: core/templates/email/user_role_admin_removed_for_admins.html:6
+#, python-format
+msgid ""
+"\n"
+"\n"
+"\n"
+"Hi,\n"
+"\n"
+"The user %(name_of_user_admin_role_changed)s is no longer a site "
+"administrator. This action was taken by %(user_name)s.\n"
+"Check out the profile of the old site administrator here %(link)s.\n"
+"\n"
+"If you believe this was done in error, please login here %(site_url)s and "
+"undo this action.\n"
+"\n"
+msgstr ""
+
+#: core/templates/email/user_role_admin_removed_for_user.html:6
+#, python-format
+msgid ""
+"\n"
+"\n"
+"Hi %(name_of_user_admin_role_changed)s,\n"
+"\n"
+"Your site administrator role was removed by %(user_name)s.\n"
+"\n"
+"If you believe this was done in error, please contact one of the other site "
+"administrators.\",\n"
+"\n"
 msgstr ""
 
 #: event/resolvers/mutation_attend_event_without_account.py:31

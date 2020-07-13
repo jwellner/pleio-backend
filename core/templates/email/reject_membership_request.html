@@ -1,9 +1,7 @@
-    
+
 {% extends "email/default.html" %}
 {% load i18n %}
 
 {% block content %}
-    {% blocktrans %}The administrator  %s has rejected your request to join the %s group. Contact the administrator for more information. {% endblocktrans %}
+    {% blocktrans %}The administrator {{ user_name }} has rejected your request to join the {{ group_name }} group. Contact the administrator for more information. {% endblocktrans %}
 {% endblock %}
-
-

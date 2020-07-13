@@ -36,7 +36,7 @@ class SendMessageToUserTestCase(FastTenantTestCase):
         variables = {
             "input": {
                 "guid": self.user2.guid,
-                "subject": "testMessageSubject", 
+                "subject": "testMessageSubject",
                 "message": "<p>testMessageContent</p>"
             }
         }
@@ -62,7 +62,7 @@ class SendMessageToUserTestCase(FastTenantTestCase):
         variables = {
             "input": {
                 "guid": self.user2.guid,
-                "subject": "testMessageSubject", 
+                "subject": "testMessageSubject",
                 "message": "<p>testMessageContent</p>"
             }
         }
@@ -89,7 +89,7 @@ class SendMessageToUserTestCase(FastTenantTestCase):
         variables = {
             "input": {
                 "guid": "11111111-1111-1111-1111-111111111111",
-                "subject": "testMessageSubject", 
+                "subject": "testMessageSubject",
                 "message": "<p>testMessageContent</p>"
             }
         }
@@ -116,7 +116,7 @@ class SendMessageToUserTestCase(FastTenantTestCase):
         variables = {
             "input": {
                 "guid": self.user2.guid,
-                "subject": "testMessageSubject", 
+                "subject": "testMessageSubject",
                 "message": "<p>testMessageContent</p>"
             }
         }
@@ -128,7 +128,7 @@ class SendMessageToUserTestCase(FastTenantTestCase):
         }
         result = graphql_sync(schema, {"query": mutation, "variables": variables}, context_value=request)
 
-        subject = "Message from {0}: {1}".format(self.user1.name, 'testMessageSubject')
+        subject = "Bericht van {0}: {1}".format(self.user1.name, 'testMessageSubject')
         user_url = 'https://test.test' + self.user1.url
         mocked_send_mail_multi.assert_called_once_with(subject, 'email/send_message_to_user.html',
                                                        {'user_name': self.user1.name, 'user_url': user_url,
