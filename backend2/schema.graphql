@@ -538,6 +538,7 @@ input editEntityInput {
   location: String
   maxAttendees: String
   rsvp: Boolean
+  containerGuid: String
   accessId: Int
   writeAccessId: Int
   tags: [String]

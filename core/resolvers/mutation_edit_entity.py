@@ -1,7 +1,7 @@
 from graphql import GraphQLError
 from django.core.exceptions import ObjectDoesNotExist
 from core.lib import remove_none_from_dict, access_id_to_acl
-from core.constances import NOT_LOGGED_IN, COULD_NOT_SAVE
+from core.constances import NOT_LOGGED_IN, COULD_NOT_SAVE, INVALID_PARENT, COULD_NOT_FIND
 from core.models import Entity
 from core.resolvers.mutation_edit_comment import resolve_edit_comment
 from file.models import FileFolder
@@ -13,6 +13,7 @@ from task.resolvers.mutation import resolve_edit_task
 def resolve_edit_entity(_, info, input):
     # pylint: disable=redefined-builtin
     # pylint: disable=too-many-branches
+    # pylint: disable=too-many-statements
 
     user = info.context.user
 
@@ -98,6 +99,16 @@ def resolve_edit_entity(_, info, input):
         if 'isFeatured' in clean_input:
             entity.is_featured = clean_input.get("isFeatured")
 
+    if entity._meta.model_name in ["wiki"]:
+        if 'containerGuid' in clean_input:
+            try:
+                container = Entity.objects.get_subclass(id=clean_input.get("containerGuid"))
+            except ObjectDoesNotExist:
+                GraphQLError(COULD_NOT_FIND)
+            if container._meta.model_name in ["wiki"]:
+                entity.parent = container
+            else:
+                raise GraphQLError(INVALID_PARENT)
 
     entity.save()
 
