@@ -91,7 +91,7 @@ class SendMessageToGroupTestCase(FastTenantTestCase):
 
         self.assertEqual(data["sendMessageToGroup"]["group"]["guid"], self.group1.guid)
 
-        subject = "Message from group {0}: {1}".format(self.group1.name, 'testMessageSubject')
+        subject = "Bericht van groep {0}: {1}".format(self.group1.name, 'testMessageSubject')
         user_url = 'https://test.test' + self.user1.url
         mocked_send_mail_multi.assert_called_once_with(subject, 'email/send_message_to_group.html',
                                                        {'user_name': self.user1.name, 'user_url': user_url,
@@ -136,7 +136,7 @@ class SendMessageToGroupTestCase(FastTenantTestCase):
 
         data = result[1]["data"]
 
-        subject = "Message from group {0}: {1}".format(self.group1.name, 'testMessageSubject')
+        subject = "Bericht van groep {0}: {1}".format(self.group1.name, 'testMessageSubject')
         user_url = 'https://test.test' + self.admin.url
         mocked_send_mail_multi.assert_called_once_with(subject, 'email/send_message_to_group.html',
                                                        {'user_name': self.admin.name, 'user_url': user_url,
@@ -288,7 +288,7 @@ class SendMessageToGroupTestCase(FastTenantTestCase):
 
         data = result[1]["data"]
 
-        subject = "Message from group {0}: {1}".format(self.group1.name, 'testMessageSubject')
+        subject = "Bericht van groep {0}: {1}".format(self.group1.name, 'testMessageSubject')
         user_url = 'https://test.test' + self.user1.url
         mocked_send_mail_multi.assert_called_once_with(subject, 'email/send_message_to_group.html',
                                                        {'user_name': self.user1.name, 'user_url': user_url,
@@ -334,7 +334,7 @@ class SendMessageToGroupTestCase(FastTenantTestCase):
 
         self.assertEqual(data["sendMessageToGroup"]["group"]["guid"], self.group1.guid)
 
-        subject = "Message from group {0}: {1}".format(self.group1.name, 'testMessageSubject')
+        subject = "Bericht van groep {0}: {1}".format(self.group1.name, 'testMessageSubject')
         user_url = 'https://test.test' + self.user1.url
         mocked_send_mail_multi.assert_called_once_with(subject, 'email/send_message_to_group.html',
                                                        {'user_name': self.user1.name, 'user_url': user_url,
