@@ -3,17 +3,21 @@ from graphql import GraphQLError
 from django.core.exceptions import ObjectDoesNotExist
 from core.models import Group, Entity
 from file.models import FileFolder
+from user.models import User
 from django.db.models import Q
 
 query = ObjectType("Query")
 
 
-def conditional_group_or_folder_filter(container_guid, is_folder):
-    if container_guid and not is_folder:
+def conditional_group_folder_user_container_filter(container_guid, is_folder, is_user):
+    if container_guid and not is_folder and not is_user:
         return Q(Q(group__id=container_guid) & Q(parent=None))
 
     if container_guid and is_folder:
         return Q(parent__id=container_guid)
+
+    if container_guid and is_user:
+        return Q(Q(owner__id=container_guid) & Q(parent=None) & Q(group=None))
 
     return Q()
 
@@ -54,8 +58,9 @@ def resolve_files(
         order_by = '-%s' % (order_by)
 
     is_folder = False
+    is_user = False
 
-    # check if containerGuid is group or folder
+    # check if containerGuid is group, folder or user
     if containerGuid:
         try:
             Group.objects.get(id=containerGuid)
@@ -64,10 +69,14 @@ def resolve_files(
                 FileFolder.objects.get_subclass(id=containerGuid)
                 is_folder = True
             except ObjectDoesNotExist:
-                raise GraphQLError("INVALID_CONTAINER_GUID")
+                try:
+                    User.objects.get(id=containerGuid)
+                    is_user = True
+                except ObjectDoesNotExist:
+                    raise GraphQLError("INVALID_CONTAINER_GUID")
 
     qs = FileFolder.objects.visible(info.context.user)
-    qs = qs.filter(conditional_group_or_folder_filter(containerGuid, is_folder) & conditional_filter_subtype(filter))
+    qs = qs.filter(conditional_group_folder_user_container_filter(containerGuid, is_folder, is_user) & conditional_filter_subtype(filter))
     qs = qs.order_by(order_by)
 
     edges = qs[offset:offset+limit]
