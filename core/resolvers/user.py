@@ -105,3 +105,23 @@ def resolve_request_delete(obj, info):
     if is_user_or_admin(obj, info):
         return obj.is_delete_requested
     return None
+
+@user.field("fieldsInOverview")
+def resolve_fields_in_overview(obj, info):
+    # pylint: disable=unused-argument
+    user_profile_fields = []
+
+    # only get configured profile fields
+    profile_setting_keys = [d['key'] for d in config.PROFILE if 'key' in d and ('isInOverview' in d and d['isInOverview'])]
+
+    for field in ProfileField.objects.filter(key__in=profile_setting_keys):
+        field.value = ""
+        field.label = field.name
+        try:
+            qs = UserProfileField.objects.visible(info.context.user)
+            field.value = qs.get(profile_field=field, user_profile=obj.profile).value
+        except ObjectDoesNotExist:
+            pass
+
+        user_profile_fields.append(field)
+    return user_profile_fields
