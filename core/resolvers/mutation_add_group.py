@@ -2,8 +2,8 @@ from graphql import GraphQLError
 from core import config
 from core.models import Group
 from core.constances import NOT_LOGGED_IN, COULD_NOT_SAVE
-from core.lib import remove_none_from_dict
-
+from core.lib import remove_none_from_dict, ACCESS_TYPE
+from file.models import FileFolder
 
 def resolve_add_group(_, info, input):
     # pylint: disable=redefined-builtin
@@ -21,7 +21,39 @@ def resolve_add_group(_, info, input):
     group = Group()
     group.owner = user
     group.name = clean_input.get("name", "")
-    group.icon = clean_input.get("icon", "")
+
+    if 'icon' in clean_input:
+        icon_file = FileFolder.objects.create(
+            owner=group.owner,
+            upload=clean_input.get("icon"),
+            read_access=[ACCESS_TYPE.public],
+            write_access=[ACCESS_TYPE.user.format(user.id)]
+        )
+
+        group.icon = icon_file
+
+    if 'featured' in clean_input:
+        group.featured_position_y = clean_input.get("featured").get("positionY", 0)
+        group.featured_video = clean_input.get("featured").get("video", None)
+        if group.featured_video:
+            group.featured_image = None
+        elif clean_input.get("featured").get("image"):
+
+            image_file = FileFolder.objects.create(
+                owner=group.owner,
+                upload=clean_input.get("featured").get("image"),
+                read_access=[ACCESS_TYPE.public],
+                write_access=[ACCESS_TYPE.user.format(user.id)]
+            )
+
+            group.featured_image = image_file
+
+        group.featured_position_y = clean_input.get("featured").get("positionY", 0)
+    else:
+        group.featured_image = None
+        group.featured_position_y = 0
+        group.featured_video = None
+        
     group.description = clean_input.get("description", "")
     group.rich_description = clean_input.get("richDescription", "")
     group.introduction = clean_input.get("introduction", "")

@@ -213,5 +213,14 @@ def resolve_default_access_id(group, info):
 
     return config.DEFAULT_ACCESS_ID
 
+@group.field("icon")
+def resolve_icon(group, info):
+    # pylint: disable=unused-argument
+
+    if group.icon:
+        return group.icon.download
+
+    return None
+
 
 group.set_field("excerpt", shared.resolve_entity_excerpt)
