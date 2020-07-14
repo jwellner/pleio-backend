@@ -180,6 +180,9 @@ def get_site_settings():
         'emailOverviewSubject': config.EMAIL_OVERVIEW_SUBJECT,
         'emailOverviewTitle': config.EMAIL_OVERVIEW_TITLE,
         'emailOverviewIntro': config.EMAIL_OVERVIEW_INTRO,
+        'emailOverviewEnableFeatured': config.EMAIL_OVERVIEW_ENABLE_FEATURED,
+        'emailOverviewFeaturedTitle': config.EMAIL_OVERVIEW_FEATURED_TITLE,
+        'emailNotificationShowExcerpt': config.EMAIL_NOTIFICATION_SHOW_EXCERPT,
 
         'showLoginRegister': config.SHOW_LOGIN_REGISTER,
         'customTagsAllowed': config.CUSTOM_TAGS_ENABLED,

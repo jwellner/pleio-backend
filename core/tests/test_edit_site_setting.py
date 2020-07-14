@@ -113,6 +113,7 @@ class EditSiteSettingTestCase(FastTenantTestCase):
                         emailOverviewSubject
                         emailOverviewTitle
                         emailOverviewIntro
+                        emailNotificationShowExcerpt
 
                         showLoginRegister
                         customTagsAllowed
@@ -191,6 +192,7 @@ class EditSiteSettingTestCase(FastTenantTestCase):
                 "emailOverviewSubject": "emailOverviewSubject1",
                 "emailOverviewTitle": "emailOverviewTitle1",
                 "emailOverviewIntro": "emailOverviewIntro1",
+                "emailNotificationShowExcerpt": True,
 
                 'showLoginRegister': False,
                 'customTagsAllowed': False,
@@ -275,6 +277,7 @@ class EditSiteSettingTestCase(FastTenantTestCase):
         self.assertEqual(data["editSiteSetting"]["siteSettings"]["emailOverviewSubject"], "emailOverviewSubject1")
         self.assertEqual(data["editSiteSetting"]["siteSettings"]["emailOverviewTitle"], "emailOverviewTitle1")
         self.assertEqual(data["editSiteSetting"]["siteSettings"]["emailOverviewIntro"], "emailOverviewIntro1")
+        self.assertEqual(data["editSiteSetting"]["siteSettings"]["emailNotificationShowExcerpt"], True)
 
         self.assertEqual(data["editSiteSetting"]["siteSettings"]["showLoginRegister"], False)
         self.assertEqual(data["editSiteSetting"]["siteSettings"]["customTagsAllowed"], False)

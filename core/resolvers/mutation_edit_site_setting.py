@@ -92,6 +92,9 @@ def resolve_edit_site_setting(_, info, input):
         'emailOverviewSubject': 'EMAIL_OVERVIEW_SUBJECT',
         'emailOverviewTitle': 'EMAIL_OVERVIEW_TITLE',
         'emailOverviewIntro': 'EMAIL_OVERVIEW_INTRO',
+        'emailOverviewEnableFeatured': 'EMAIL_OVERVIEW_ENABLE_FEATURED',
+        'emailOverviewFeaturedTitle': 'EMAIL_OVERVIEW_FEATURED_TITLE',
+        'emailNotificationShowExcerpt': 'EMAIL_NOTIFICATION_SHOW_EXCERPT',
 
         'showLoginRegister': 'SHOW_LOGIN_REGISTER',
         'customTagsAllowed': 'CUSTOM_TAGS_ENABLED',

@@ -128,6 +128,7 @@ class SiteSettingsTestCase(FastTenantTestCase):
                     emailOverviewSubject
                     emailOverviewTitle
                     emailOverviewIntro
+                    emailNotificationShowExcerpt
 
                     showLoginRegister
                     customTagsAllowed
@@ -240,6 +241,7 @@ class SiteSettingsTestCase(FastTenantTestCase):
         self.assertEqual(data["siteSettings"]["emailOverviewSubject"], "")
         self.assertEqual(data["siteSettings"]["emailOverviewTitle"], "Pleio 2.0")
         self.assertEqual(data["siteSettings"]["emailOverviewIntro"], "")
+        self.assertEqual(data["siteSettings"]["emailNotificationShowExcerpt"], False)
 
         self.assertEqual(data["siteSettings"]["showLoginRegister"], True)
         self.assertEqual(data["siteSettings"]["customTagsAllowed"], True)

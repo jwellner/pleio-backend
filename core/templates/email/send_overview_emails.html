@@ -24,11 +24,12 @@
 {% block periodical_overview %}
 
 
-{% if featured %}
+{% if featured_enabled and featured %}
+
     <table width="100%" border="0" cellspacing="0" cellpadding="0" style="padding:16px 0 3px 0;">
         <tr>
             <td class="featured-title" style="font-family:Arial,sans-serif; font-size:24px; line-height:28px; text-align:left; font-weight:bold; padding:0 50px;">
-                {% blocktrans %}From the editors:{% endblocktrans %}
+                {% blocktrans %}{{ featured_title }}{% endblocktrans %}
             </td>
         </tr>
     </table>
@@ -70,7 +71,9 @@
     {% endif %}
 {% endfor %}
 
+{% if entities %}
 <hr>
+{% endif %}
 
 <!-- goto button -->
 <table width="100%" border="0" cellspacing="0" cellpadding="0" style="padding:16px 0 3px 0;">
