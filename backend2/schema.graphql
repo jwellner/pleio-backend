@@ -1401,6 +1401,12 @@ input ProfileItemInput {
   isInOverview: Boolean
 }
 
+type ProfileOverviewItem {
+  key: String!
+  label: String!
+  value: String
+}
+
 type Query {
   viewer: Viewer
   entity(guid: String, username: String): Entity
@@ -1841,6 +1847,7 @@ type User implements Entity {
   getsNewsletter: Boolean
   emailOverview: EmailOverview
   profile: [ProfileItem]
+  fieldsInOverview: [ProfileOverviewItem]
   stats: [StatsItem]
   groupNotifications: [GroupNotificationItem]
   icon: String

@@ -47,7 +47,8 @@ class ProfileTestCase(FastTenantTestCase):
             name="profile_field3_name",
             category="profile_field3_category",
             field_type="multi_select_field",
-            field_options=['option1', 'option2', 'option3']
+            field_options=['option1', 'option2', 'option3'],
+            is_in_overview=True
         )
         self.user_profile_field3 = UserProfileField.objects.create(
             user_profile_id=self.user1.profile.id,
@@ -57,7 +58,7 @@ class ProfileTestCase(FastTenantTestCase):
         )
         Setting.objects.create(key='PROFILE', value=[{"key": "profile_field1", "name": "profile_field1_name", "isFilter": False, "isInOverview": False},
                                                      {"key": "profile_field2", "name": "profile_field2_name", "isFilter": False, "isInOverview": False},
-                                                     {"key": "profile_field3", "name": "profile_field3_name", "isFilter": False, "isInOverview": False}])
+                                                     {"key": "profile_field3", "name": "profile_field3_name", "isFilter": False, "isInOverview": True}])
 
 
         self.query = """
@@ -78,7 +79,13 @@ class ProfileTestCase(FastTenantTestCase):
                             isEditable
                             fieldOptions
                             isFilterable
+                            isInOverview
                             __typename
+                        }
+                        fieldsInOverview {
+                            key
+                            label
+                            value
                         }
                         __typename
                     }
@@ -142,6 +149,9 @@ class ProfileTestCase(FastTenantTestCase):
         self.assertEqual(data["entity"]["profile"][2]["fieldType"], "multiSelectField")
         self.assertEqual(data["entity"]["profile"][2]["fieldOptions"], ["option1", "option2", "option3"])
         self.assertEqual(data["entity"]["profile"][2]["isFilterable"], True)
+        self.assertEqual(data["entity"]["profile"][2]["isInOverview"], True)
+
+        self.assertEqual(data["entity"]["fieldsInOverview"][0]["key"], "profile_field3")
 
 
     def test_get_profile_items_by_logged_in_user(self):
@@ -186,6 +196,9 @@ class ProfileTestCase(FastTenantTestCase):
         self.assertEqual(data["entity"]["profile"][2]["isEditable"], True)
         self.assertEqual(data["entity"]["profile"][2]["fieldOptions"], ["option1", "option2", "option3"])
         self.assertEqual(data["entity"]["profile"][2]["isFilterable"], True)
+        self.assertEqual(data["entity"]["profile"][2]["isInOverview"], True)
+
+        self.assertEqual(data["entity"]["fieldsInOverview"][0]["key"], "profile_field3")
 
     def test_get_profile_items_by_anonymous_user(self):
         request = HttpRequest()
