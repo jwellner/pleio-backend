@@ -146,6 +146,8 @@ class SendOverviewEmailsTestCase(FastTenantTestCase):
         cache.set("%s%s" % (connection.schema_name, 'EMAIL_OVERVIEW_SUBJECT'), 'test other subject')
         cache.set("%s%s" % (connection.schema_name, 'EMAIL_OVERVIEW_TITLE'), 'title text')
         cache.set("%s%s" % (connection.schema_name, 'EMAIL_OVERVIEW_INTRO'), 'introduction text')
+        cache.set("%s%s" % (connection.schema_name, 'EMAIL_OVERVIEW_ENABLE_FEATURED'), True)
+        cache.set("%s%s" % (connection.schema_name, 'EMAIL_OVERVIEW_FEATURED_TITLE'), 'By the editors')
 
         blogs = mixer.cycle(3).blend(
             Blog,
@@ -172,6 +174,8 @@ class SendOverviewEmailsTestCase(FastTenantTestCase):
         self.assertEqual(len(args[2]['entities']), 5)
         self.assertEqual(args[2]['intro_text'], 'introduction text')
         self.assertEqual(args[2]['title'], 'title text')
+        self.assertEqual(args[2]['featured_enabled'], True)
+        self.assertEqual(args[2]['featured_title'], 'By the editors')
         self.assertEqual(args[3], [self.user2.email])
 
         cache.clear()
@@ -179,6 +183,8 @@ class SendOverviewEmailsTestCase(FastTenantTestCase):
 
     @mock.patch('core.management.commands.send_overview_emails.send_mail_multi')
     def test_command_send_overview_5_entities_one_featured(self, mocked_send_mail_multi):
+
+        cache.set("%s%s" % (connection.schema_name, 'EMAIL_OVERVIEW_ENABLE_FEATURED'), True)
 
         mixer.cycle(3).blend(
             Blog,
@@ -215,9 +221,12 @@ class SendOverviewEmailsTestCase(FastTenantTestCase):
         self.assertEqual(args[2]['featured'][0].guid, featuredBlog.guid)
         self.assertEqual(args[3], [self.user2.email])
 
+        cache.clear()
 
     @mock.patch('core.management.commands.send_overview_emails.send_mail_multi')
     def test_command_not_send_viewed_entities(self, mocked_send_mail_multi):
+
+        cache.set("%s%s" % (connection.schema_name, 'EMAIL_OVERVIEW_ENABLE_FEATURED'), True)
 
         featuredBlog1 = Blog.objects.create(
             owner=self.user1,
@@ -261,6 +270,7 @@ class SendOverviewEmailsTestCase(FastTenantTestCase):
         self.assertEqual(len(args[2]['featured']), 2)
         self.assertEqual(args[3], [self.user2.email])
 
+        cache.clear()
 
     @mock.patch('core.management.commands.send_overview_emails.send_mail_multi')
     def test_command_send_overview_5_entities_with_tag_preference(self, mocked_send_mail_multi):

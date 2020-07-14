@@ -739,6 +739,9 @@ input editSiteSettingInput {
   emailOverviewSubject: String
   emailOverviewTitle: String
   emailOverviewIntro: String
+  emailOverviewEnableFeatured: Boolean
+  emailOverviewFeaturedTitle: String
+  emailNotificationShowExcerpt: Boolean
   showLoginRegister: Boolean
   customTagsAllowed: Boolean
   showUpDownVoting: Boolean
@@ -1655,6 +1658,9 @@ type SiteSettings {
   emailOverviewSubject: String
   emailOverviewTitle: String
   emailOverviewIntro: String
+  emailOverviewEnableFeatured: Boolean!
+  emailOverviewFeaturedTitle: String
+  emailNotificationShowExcerpt: Boolean!
   tagCategories: [TagCategory]!
   showTagsInFeed: Boolean!
   showTagsInDetail: Boolean!

@@ -93,7 +93,7 @@ class Command(InteractiveTenantOption, BaseCommand):
         self._import_users()
         self._import_settings()
         self._import_groups()
-        
+
         self._import_file_folders()
         self._import_files()
 
@@ -196,6 +196,10 @@ class Command(InteractiveTenantOption, BaseCommand):
             if self.helpers.get_plugin_setting("email_overview_title") else ""
         config.EMAIL_OVERVIEW_INTRO = html.unescape(self.helpers.get_plugin_setting("email_overview_intro")) \
             if self.helpers.get_plugin_setting("email_overview_intro") else ""
+        config.EMAIL_OVERVIEW_ENABLE_FEATURED = self.helpers.get_plugin_setting("email_overview_enable_featured") == "yes"
+        config.EMAIL_OVERVIEW_FEATURED_TITLE = html.unescape(self.helpers.get_plugin_setting("email_overview_featured_title")) \
+            if self.helpers.get_plugin_setting("email_overview_featured_title") else ""
+        config.EMAIL_NOTIFICATION_SHOW_EXCERPT = self.helpers.get_plugin_setting("email_notification_show_excerpt") == "yes"
         config.SHOW_UP_DOWN_VOTING = self.helpers.get_plugin_setting("enable_up_down_voting") == "yes"
         config.ENABLE_SHARING = self.helpers.get_plugin_setting("enable_sharing") == "yes"
         config.SHOW_VIEW_COUNT = self.helpers.get_plugin_setting("enable_views_count") == "yes"

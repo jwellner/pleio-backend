@@ -1,5 +1,6 @@
 from django.core.management.base import BaseCommand
 from django.utils import timezone
+from django.utils.text import Truncator
 from django.utils.translation import ugettext_lazy
 from core.lib import send_mail_multi, get_default_email_context
 from user.models import User
@@ -12,6 +13,7 @@ def get_notification(notification):
     """ get a mapped notification """
     entity = get_notification_action_entity(notification)
     performer = User.objects.get(id=notification.actor_object_id)
+
     return {
         'id': notification.id,
         'action': notification.verb,
@@ -32,7 +34,7 @@ class Command(BaseCommand):
             help='url in notification emails',
         )
 
-    def send_notifications(self, user, notifications, subject, site_url):
+    def send_notifications(self, user, notifications, subject, site_url, show_excerpt):
 
         mapped_notifications = []
         for notification in notifications:
@@ -42,7 +44,7 @@ class Command(BaseCommand):
             user_url = site_url + '/user/' + user.guid + '/settings'
             primary_color = config.COLOR_PRIMARY
             context = {'user_url': user_url, 'site_name': site_name, 'site_url': site_url, 'primary_color': primary_color,
-                       'notifications': mapped_notifications}
+                       'notifications': mapped_notifications, 'show_excerpt': show_excerpt}
             email = send_mail_multi(subject, 'email/send_notification_emails.html', context, [user.email])
             email.send()
             user.notifications.mark_as_sent()
@@ -51,6 +53,7 @@ class Command(BaseCommand):
         site_url = options['url']
         users = User.objects.filter(is_active=True)
 
+        show_excerpt = config.EMAIL_NOTIFICATION_SHOW_EXCERPT
         subject = ugettext_lazy("New notifications at %s" % config.NAME)
 
         for user in users:
@@ -74,4 +77,4 @@ class Command(BaseCommand):
             if notifications_emailed_in_last_4_hours:
                 continue
 
-            self.send_notifications(user, notifications, subject, site_url)
+            self.send_notifications(user, notifications, subject, site_url, show_excerpt)

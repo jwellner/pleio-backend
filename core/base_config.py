@@ -73,6 +73,9 @@ DEFAULT_SITE_CONFIG = {
     'EMAIL_OVERVIEW_SUBJECT': ("", "Email overview subject"),
     'EMAIL_OVERVIEW_TITLE': ("Pleio 2.0", "Email overview title"),
     'EMAIL_OVERVIEW_INTRO': ("", "Email overview intro"),
+    'EMAIL_OVERVIEW_ENABLE_FEATURED': (False, 'Show featured items in overview email'),
+    'EMAIL_OVERVIEW_FEATURED_TITLE': ("", "Email overview featured title"),
+    'EMAIL_NOTIFICATION_SHOW_EXCERPT': (False, 'Show excerpts in notification email'),
 
     'SHOW_LOGIN_REGISTER': (True, 'Login and register buttons visible'),
     'CUSTOM_TAGS_ENABLED': (True, 'Custom tags enabled'),
