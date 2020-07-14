@@ -228,7 +228,6 @@ class ElggHelpers():
 
     def save_and_get_group_icon(self, elgg_entity):
 
-        # TODO: maybe group icon will be saved as a FileFolde in the future
         try:
             group_owner = User.objects.get(id=GuidMap.objects.get(id=elgg_entity.entity.owner_guid).guid)
 
@@ -247,7 +246,7 @@ class ElggHelpers():
             entity = FileFolder()
 
             entity.mime_type = "image/jpeg"
-            entity.title = ""
+            entity.title = filename
             entity.upload.name = file_path
 
             entity.owner = group_owner
@@ -262,10 +261,10 @@ class ElggHelpers():
 
             entity.save()
 
-            return entity.url
+            return entity
 
         except Exception:
-            return ""
+            return None
 
     def save_and_get_site_logo_or_icon(self, elgg_site, image_type):
 
@@ -299,6 +298,7 @@ class ElggHelpers():
 
             entity.upload.name = file_path
             entity.mime_type = mime_type
+            entity.title = filename
 
             entity.read_access = access_id_to_acl(entity, 2)
             entity.write_access = access_id_to_acl(entity, 0)

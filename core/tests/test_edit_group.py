@@ -3,12 +3,16 @@ from django_tenants.test.cases import FastTenantTestCase
 from backend2.schema import schema
 from ariadne import graphql_sync
 import json
+from django.conf import settings
 from django.contrib.auth.models import AnonymousUser
+from django.core.files import File
 from django.http import HttpRequest
 from core.models import Group
 from user.models import User
 from mixer.backend.django import mixer
 from graphql import GraphQLError
+from unittest.mock import patch, MagicMock
+
 
 class EditGroupCase(FastTenantTestCase):
 
@@ -45,7 +49,16 @@ class EditGroupCase(FastTenantTestCase):
 
         self.assertEqual(errors[0]["message"], "not_logged_in")
 
-    def test_edit_group(self):
+    @patch("file.models.get_mimetype")
+    @patch("{}.open".format(settings.DEFAULT_FILE_STORAGE))
+    def test_edit_group(self, mock_open, mock_mimetype):
+
+        file_mock = MagicMock(spec=File)
+        file_mock.name = 'icon.png'
+        file_mock.content_type = 'image/png'
+
+        mock_open.return_value = file_mock
+        mock_mimetype.return_value = file_mock.content_type
 
         mutation = """
             mutation ($group: editGroupInput!) {
@@ -74,7 +87,7 @@ class EditGroupCase(FastTenantTestCase):
             "group": {
                 "guid": self.group.guid,
                 "name": "Name",
-                "icon": "/icon.png",
+                "icon": "icon.png",
                 "description": "description",
                 "richDescription": "<p>richDescription</p>",
                 "introduction": "introdcution",
@@ -98,7 +111,7 @@ class EditGroupCase(FastTenantTestCase):
 
         self.assertEqual(data["editGroup"]["group"]["guid"], variables["group"]["guid"])
         self.assertEqual(data["editGroup"]["group"]["name"], variables["group"]["name"])
-        self.assertEqual(data["editGroup"]["group"]["icon"], variables["group"]["icon"])
+        self.assertIn('/icon.png', data["editGroup"]["group"]["icon"])
         self.assertEqual(data["editGroup"]["group"]["description"], variables["group"]["description"])
         self.assertEqual(data["editGroup"]["group"]["excerpt"], variables["group"]["description"])
         self.assertEqual(data["editGroup"]["group"]["richDescription"], variables["group"]["richDescription"])

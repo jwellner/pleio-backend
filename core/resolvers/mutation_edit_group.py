@@ -2,8 +2,8 @@ from graphql import GraphQLError
 from django.core.exceptions import ObjectDoesNotExist
 from core.models import Group
 from core.constances import NOT_LOGGED_IN, COULD_NOT_SAVE, COULD_NOT_FIND
-from core.lib import remove_none_from_dict
-
+from core.lib import remove_none_from_dict, ACCESS_TYPE
+from file.models import FileFolder
 
 def resolve_edit_group(_, info, input):
     # pylint: disable=redefined-builtin
@@ -26,8 +26,39 @@ def resolve_edit_group(_, info, input):
 
     if 'name' in clean_input:
         group.name = clean_input.get("name")
+
     if 'icon' in clean_input:
-        group.icon = clean_input.get("icon")
+        icon_file = FileFolder.objects.create(
+            owner=group.owner,
+            upload=clean_input.get("icon"),
+            read_access=[ACCESS_TYPE.public],
+            write_access=[ACCESS_TYPE.user.format(user.id)]
+        )
+
+        group.icon = icon_file
+
+    if 'featured' in clean_input:
+        group.featured_position_y = clean_input.get("featured").get("positionY", 0)
+        group.featured_video = clean_input.get("featured").get("video", None)
+        if group.featured_video:
+            group.featured_image = None
+        elif clean_input.get("featured").get("image"):
+
+            imageFile = FileFolder.objects.create(
+                owner=group.owner,
+                upload=clean_input.get("featured").get("image"),
+                read_access=[ACCESS_TYPE.public],
+                write_access=[ACCESS_TYPE.user.format(user.id)]
+            )
+
+            group.featured_image = imageFile
+
+        group.featured_position_y = clean_input.get("featured").get("positionY", 0)
+    else:
+        group.featured_image = None
+        group.featured_position_y = 0
+        group.featured_video = None
+
     if 'description' in clean_input:
         group.description = clean_input.get("description")
     if 'richDescription' in clean_input:

@@ -36,7 +36,13 @@ class Group(models.Model):
     introduction = models.TextField(default='')
     welcome_message = models.TextField(default='')
 
-    icon = models.CharField(max_length=200, default='')
+    icon = models.ForeignKey(
+        'file.FileFolder',
+        on_delete=models.PROTECT,
+        blank=True,
+        null=True,
+        related_name='group_icon'
+    )
 
     created_at = models.DateTimeField(default=timezone.now)
     updated_at = models.DateTimeField(default=timezone.now)
