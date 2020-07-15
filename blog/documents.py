@@ -30,7 +30,7 @@ ngram_analyzer = analyzer(
 class BlogDocument(DefaultDocument):
     id = fields.TextField()
     tags = fields.ListField(fields.TextField())
-    read_access = fields.ListField(fields.TextField())
+    read_access = fields.ListField(fields.KeywordField())
     type = fields.KeywordField(attr="type_to_string")
     description = fields.TextField(
         analyzer=ngram_analyzer

@@ -8,7 +8,7 @@ from core.documents import DefaultDocument
 class EventDocument(DefaultDocument):
     id = fields.TextField()
     tags = fields.ListField(fields.TextField())
-    read_access = fields.ListField(fields.TextField())
+    read_access = fields.ListField(fields.KeywordField())
     type = fields.KeywordField(attr="type_to_string")
 
     class Index:
