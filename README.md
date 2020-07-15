@@ -138,3 +138,26 @@ Optional parameters:
 
 - `--elgg <databasename>` elgg database name, will be asked when not provided
 - `--schema <to_schema>` import to this schema, will be asked when not provided
+
+## Background
+
+Pleio uses [Celery](http://www.celeryproject.org/) for running background tasks.
+
+### Manual call commands
+
+To manually call commands from the CLI, use:
+
+```bash
+celery -A backend2.celery call {taskname} --args='{args}'
+```
+
+Possible tasknames and arguments:
+
+- background.dispatch_cron, ["{period}"]
+
+Some example commands:
+
+- Run the daily cron on all tenants:
+    ```bash
+    celery -A background.app call background.dispatch_cron --args='["daily"]'
+    ```

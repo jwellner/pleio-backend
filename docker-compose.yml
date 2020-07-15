@@ -24,6 +24,25 @@ services:
       - db
       - admin
       - localstack
+      - rabbitmq
+
+  background:
+    build: .
+    restart: on-failure
+
+    environment:
+      CELERY_BROKER_URL: 'amqp://rabbitmq'
+    env_file:
+      - ./.env
+    stdin_open: true
+    command: ["/start-background.sh"]
+    volumes:
+      - .:/app
+    depends_on:
+      - db
+      - localstack
+      - rabbitmq
+
   frontend:
     image: registry.gitlab.com/pleio/frontend:B2-latest
     restart: on-failure
@@ -89,6 +108,21 @@ services:
     ports:
       - "11211:11211"
     restart: always
+  rabbitmq:
+    image: 'rabbitmq:3.6-management-alpine'
+    ports:
+      # The standard AMQP protocol port
+      - '5672:5672'
+      # HTTP management UI
+      - '15672:15672'
+    environment:
+      # The location of the RabbitMQ server.  "amqp" is the protocol;
+      # "rabbitmq" is the hostname.  Note that there is not a guarantee
+      # that the server will start first!  Telling the pika client library
+      # to try multiple times gets around this ordering issue.
+      AMQP_URL: 'amqp://localhost?connection_attempts=5&retry_delay=5'
+      RABBITMQ_DEFAULT_USER: "guest"
+      RABBITMQ_DEFAULT_PASS: "guest"
 
 volumes:
   postgres_data:

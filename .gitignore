@@ -16,3 +16,4 @@ __pycache__
 postgres/
 /static/
 .localstack
+celerybeat-schedule
