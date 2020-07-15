@@ -11,7 +11,6 @@ from django.urls import reverse
 from django.views.decorators.http import require_GET
 from django.http import HttpResponse
 
-
 def default(request, exception=None):
     # pylint: disable=unused-argument
 

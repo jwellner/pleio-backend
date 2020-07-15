@@ -33,8 +33,8 @@ ENV PATH="/app-tmp/venv/bin:${PATH}"
 WORKDIR /app
 # App assets
 COPY . /app
-COPY ./docker/start.sh ./docker/start-dev.sh ./docker/start-admin-dev.sh /
-RUN chmod +x /start.sh /start-dev.sh /start-admin-dev.sh
+COPY ./docker/start.sh ./docker/start-dev.sh ./docker/start-admin-dev.sh ./docker/start-background.sh  /
+RUN chmod +x /start.sh /start-dev.sh /start-admin-dev.sh /start-background.sh
 
 # Create media and static folders
 RUN mkdir -p /app/media /app/static && chown www-data:www-data /app/media /app/static
