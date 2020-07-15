@@ -1,14 +1,7 @@
 from ariadne import ObjectType
-from graphql import GraphQLError
-from django.core.exceptions import ObjectDoesNotExist
 from core.resolvers import shared
-from core.lib import remove_none_from_dict
-from core.models import Comment
-from core.constances import NOT_LOGGED_IN, COULD_NOT_FIND, COULD_NOT_SAVE
-from question.models import Question
 
 question = ObjectType("Question")
-mutation = ObjectType("Mutation")
 
 @question.field("subtype")
 def resolve_excerpt(obj, info):
@@ -87,60 +80,3 @@ question.set_field("commentCount", shared.resolve_entity_comment_count)
 question.set_field("isFollowing", shared.resolve_entity_is_following)
 question.set_field("views", shared.resolve_entity_views)
 question.set_field("owner", shared.resolve_entity_owner)
-
-@mutation.field("toggleBestAnswer")
-def resolve_toggle_best_answer(_, info, input):
-    # pylint: disable=redefined-builtin
-
-    user = info.context.user
-    clean_input = remove_none_from_dict(input)
-
-    if not user.is_authenticated:
-        raise GraphQLError(NOT_LOGGED_IN)
-
-    try:
-        comment = Comment.objects.get(id=clean_input.get("guid"))
-        question = Question.objects.visible(user).get(id=comment.object_id)
-    except ObjectDoesNotExist:
-        raise GraphQLError(COULD_NOT_FIND)
-
-    if not question.can_choose_best_answer(user):
-        raise GraphQLError(COULD_NOT_SAVE)
-
-    if question.best_answer == comment:
-        question.best_answer = None
-    else:
-        question.best_answer = comment
-    question.save()
-
-    return {
-        "entity": question
-    }
-
-@mutation.field("toggleIsClosed")
-def resolve_toggle_item_closed(_, info, input):
-    # pylint: disable=redefined-builtin
-
-    user = info.context.user
-    clean_input = remove_none_from_dict(input)
-
-    if not user.is_authenticated:
-        raise GraphQLError(NOT_LOGGED_IN)
-
-    try:
-        question = Question.objects.visible(user).get(id=clean_input.get("guid"))
-    except ObjectDoesNotExist:
-        raise GraphQLError(COULD_NOT_FIND)
-
-    if not question.can_write(user):
-        raise GraphQLError(COULD_NOT_SAVE)
-
-    question.is_closed = not question.is_closed
-    question.save()
-
-    return {
-        "entity": question
-    }
-
-
-resolvers = [question, mutation]

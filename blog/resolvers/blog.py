@@ -65,5 +65,3 @@ blog.set_field("commentCount", shared.resolve_entity_comment_count)
 blog.set_field("isFollowing", shared.resolve_entity_is_following)
 blog.set_field("views", shared.resolve_entity_views)
 blog.set_field("owner", shared.resolve_entity_owner)
-
-resolvers = [blog]

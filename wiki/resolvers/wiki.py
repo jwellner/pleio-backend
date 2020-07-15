@@ -51,5 +51,3 @@ wiki.set_field("canBookmark", shared.resolve_entity_can_bookmark)
 wiki.set_field("isBookmarked", shared.resolve_entity_is_bookmarked)
 wiki.set_field("accessId", shared.resolve_entity_access_id)
 wiki.set_field("writeAccessId", shared.resolve_entity_write_access_id)
-
-resolvers = [wiki]
