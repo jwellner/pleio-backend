@@ -400,16 +400,6 @@ input deleteRowInput {
   clientMutationId: Int
 }
 
-input deleteUserInput {
-  guid: String!
-  clientMutationId: Int
-}
-
-input toggleUserIsAdminInput {
-  guid: String!
-  clientMutationId: Int
-}
-
 type deleteRowPayload {
   success: Boolean
   clientMutationId: Int
@@ -421,16 +411,6 @@ input deleteSubgroupInput {
 }
 
 type deleteSubgroupPayload {
-  success: Boolean
-  clientMutationId: Int
-}
-
-type deleteUserPayload {
-  success: Boolean
-  clientMutationId: Int
-}
-
-type toggleUserIsAdminPayload {
   success: Boolean
   clientMutationId: Int
 }
@@ -526,7 +506,7 @@ type editEmailOverviewPayload {
 input editEntityInput {
   guid: String!
   title: String
-  description: String!
+  description: String
   richDescription: String
   isRecommended: Boolean
   isFeatured: Boolean
@@ -538,8 +518,8 @@ input editEntityInput {
   location: String
   maxAttendees: String
   rsvp: Boolean
-  containerGuid: String
   accessId: Int
+  containerGuid: String
   writeAccessId: Int
   tags: [String]
   mentions: [String]
@@ -1165,8 +1145,6 @@ type Mutation {
   addEntity(input: addEntityInput!): addEntityPayload
   editEntity(input: editEntityInput!): editEntityPayload
   deleteEntity(input: deleteEntityInput!): deleteEntityPayload
-  deleteUser(input: deleteUserInput!): deleteUserPayload
-  toggleUserIsAdmin(input: toggleUserIsAdminInput!): toggleUserIsAdminPayload
   addFile(input: addFileInput!): addFilePayload
   editFileFolder(input: editFileFolderInput!): editFileFolderPayload
   moveFileFolder(input: moveFileFolderInput!): moveFileFolderPayload
@@ -1419,14 +1397,13 @@ type Query {
   groups(q: String, filter: GroupFilter, tags: [String], offset: Int, limit: Int): GroupList
   events(filter: EventFilter, containerGuid: String, offset: Int, limit: Int): EventList
   users(q: String!, offset: Int, limit: Int, filters: [FilterInput]): UserList
-  entities(offset: Int, limit: Int, type: Type, subtype: String, subtypes: [String], containerGuid: String, tags: [String], tagLists:[[String]], orderBy: OrderBy, orderDirection: OrderDirection, isFeatured: Boolean): EntityList
+  entities(offset: Int, limit: Int, type: Type, subtype: String, subtypes: [String], containerGuid: String, tags: [String], tagLists: [[String]], orderBy: OrderBy, orderDirection: OrderDirection, isFeatured: Boolean): EntityList
   notifications(offset: Int, limit: Int, unread: Boolean): NotificationsList
-  activities(containerGuid: String, offset: Int, limit: Int, tags: [String], tagLists:[[String]], groupFilter: [String], subtypes: [String], orderBy: OrderBy, orderDirection: OrderDirection): ActivityList
+  activities(containerGuid: String, offset: Int, limit: Int, tags: [String], tagLists: [[String]], groupFilter: [String], subtypes: [String], orderBy: OrderBy, orderDirection: OrderDirection): ActivityList
   bookmarks(offset: Int, limit: Int, subtype: String): EntityList
   filters: Filters
   site: Site
   siteSettings: SiteSettings
-  siteUsers(q: String, offset: Int, limit: Int, isAdmin: Boolean, isDeleteRequested: Boolean): SiteUserList
 }
 
 type Question implements Entity {
@@ -1607,10 +1584,10 @@ type Site {
   style: Style!
   customTagsAllowed: Boolean!
   tagCategories: [TagCategory]!
-  showTagsInFeed: Boolean!
-  showTagsInDetail: Boolean!
   activityFilter: ActivityFilter
   showExtraHomepageFilters: Boolean!
+  showTagsInFeed: Boolean!
+  showTagsInDetail: Boolean!
   usersOnline: Int!
 }
 
@@ -1854,7 +1831,6 @@ type User implements Entity {
   url: String
   canEdit: Boolean!
   requestDelete: Boolean
-  isAdmin: Boolean
 }
 
 type UserFilter {
@@ -1884,11 +1860,6 @@ type UserList {
 type UserListOverviewItem {
   key: String!
   label: String
-}
-
-type SiteUserList {
-  total: Int!
-  edges: [User]
 }
 
 """The current viewer"""
