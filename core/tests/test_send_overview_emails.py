@@ -46,7 +46,7 @@ class SendOverviewEmailsTestCase(FastTenantTestCase):
             write_access=[ACCESS_TYPE.user.format(self.user1.id)]
         )
 
-        call_command('send_overview_emails', url='http://test.test', interval='weekly')
+        call_command('send_overview_emails', interval='weekly')
 
         args, kwargs = mocked_send_mail_multi.call_args
 
@@ -75,8 +75,8 @@ class SendOverviewEmailsTestCase(FastTenantTestCase):
             write_access=[ACCESS_TYPE.user.format(self.user1.id)]
         )
 
-        call_command('send_overview_emails', url='http://test.test', interval='weekly')
-        call_command('send_overview_emails', url='http://test.test', interval='weekly')
+        call_command('send_overview_emails', interval='weekly')
+        call_command('send_overview_emails', interval='weekly')
 
         args, kwargs = mocked_send_mail_multi.call_args
         subject = ugettext_lazy("Regular overview of %s" % config.NAME)
@@ -113,7 +113,7 @@ class SendOverviewEmailsTestCase(FastTenantTestCase):
             write_access=[ACCESS_TYPE.user.format(self.user1.id)]
         )
 
-        call_command('send_overview_emails', url='http://test.test', interval='daily')
+        call_command('send_overview_emails', interval='daily')
 
         args, kwargs = mocked_send_mail_multi.call_args
         subject = ugettext_lazy("Regular overview of %s" % config.NAME)
@@ -124,7 +124,7 @@ class SendOverviewEmailsTestCase(FastTenantTestCase):
         self.assertEqual(len(args[2]['entities']), 5)
         self.assertEqual(args[3], [user3.email])
 
-        call_command('send_overview_emails', url='http://test.test', interval='monthly')
+        call_command('send_overview_emails', interval='monthly')
 
         args, kwargs = mocked_send_mail_multi.call_args
         subject = ugettext_lazy("Regular overview of %s" % config.NAME)
@@ -163,7 +163,7 @@ class SendOverviewEmailsTestCase(FastTenantTestCase):
             write_access=[ACCESS_TYPE.user.format(self.user1.id)]
         )
 
-        call_command('send_overview_emails', url='http://test.test', interval='daily')
+        call_command('send_overview_emails', interval='daily')
 
         args, kwargs = mocked_send_mail_multi.call_args
         subject = ugettext_lazy("Regular overview of %s" % config.NAME)
@@ -207,7 +207,7 @@ class SendOverviewEmailsTestCase(FastTenantTestCase):
             write_access=[ACCESS_TYPE.user.format(self.user1.id)]
         )
 
-        call_command('send_overview_emails', url='http://test.test', interval='weekly')
+        call_command('send_overview_emails', interval='weekly')
 
         args, kwargs = mocked_send_mail_multi.call_args
         subject = ugettext_lazy("Regular overview of %s" % config.NAME)
@@ -256,7 +256,7 @@ class SendOverviewEmailsTestCase(FastTenantTestCase):
         EntityView.objects.create(entity=blog1, viewer=self.user2)
         EntityView.objects.create(entity=featuredBlog1, viewer=self.user2)
 
-        call_command('send_overview_emails', url='http://test.test', interval='weekly')
+        call_command('send_overview_emails', interval='weekly')
 
         args, kwargs = mocked_send_mail_multi.call_args
         subject = ugettext_lazy("Regular overview of %s" % config.NAME)
@@ -296,7 +296,7 @@ class SendOverviewEmailsTestCase(FastTenantTestCase):
             write_access=[ACCESS_TYPE.user.format(self.user1.id)]
         )
 
-        call_command('send_overview_emails', url='http://test.test', interval='weekly')
+        call_command('send_overview_emails', interval='weekly')
 
         args, kwargs = mocked_send_mail_multi.call_args
         subject = ugettext_lazy("Regular overview of %s" % config.NAME)
