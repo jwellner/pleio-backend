@@ -1,0 +1,37 @@
+input deleteUserInput {
+  guid: String!
+  clientMutationId: Int
+}
+
+input toggleUserIsAdminInput {
+  guid: String!
+  clientMutationId: Int
+}
+
+type deleteUserPayload {
+  success: Boolean
+  clientMutationId: Int
+}
+
+type toggleUserIsAdminPayload {
+  success: Boolean
+  clientMutationId: Int
+}
+
+type SiteUserList {
+  total: Int!
+  edges: [User]
+}
+
+extend type Mutation {
+  deleteUser(input: deleteUserInput!): deleteUserPayload
+  toggleUserIsAdmin(input: toggleUserIsAdminInput!): toggleUserIsAdminPayload
+}
+
+extend type Query {
+  siteUsers(q: String, offset: Int, limit: Int, isAdmin: Boolean, isDeleteRequested: Boolean): SiteUserList
+}
+
+extend type User {
+  isAdmin: Boolean
+}
