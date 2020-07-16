@@ -2,12 +2,13 @@ from django.core.management.base import BaseCommand
 from django.utils import timezone
 from django.utils.text import Truncator
 from django.utils.translation import ugettext_lazy
+from django.db import connection
 from core.lib import send_mail_multi, get_default_email_context
 from user.models import User
 from core import config
 from datetime import datetime, timedelta
 from core.resolvers.notification import get_notification_action_entity
-
+from tenants.models import Client
 
 def get_notification(notification):
     """ get a mapped notification """
@@ -28,11 +29,11 @@ def get_notification(notification):
 class Command(BaseCommand):
     help = 'Send notification emails'
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
     def add_arguments(self, parser):
-        parser.add_argument(
-            '--url', dest='url', required=True,
-            help='url in notification emails',
-        )
+        super().add_arguments(parser)
 
     def send_notifications(self, user, notifications, subject, site_url, show_excerpt):
 
@@ -50,7 +51,10 @@ class Command(BaseCommand):
             user.notifications.mark_as_sent()
 
     def handle(self, *args, **options):
-        site_url = options['url']
+        tenant = Client.objects.get(schema_name=connection.schema_name)
+
+        site_url = 'https://' + tenant.domains.first().domain
+
         users = User.objects.filter(is_active=True)
 
         show_excerpt = config.EMAIL_NOTIFICATION_SHOW_EXCERPT

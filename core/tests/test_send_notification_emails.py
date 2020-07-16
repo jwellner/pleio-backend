@@ -35,7 +35,7 @@ class SendNotificationEmailsTestCase(FastTenantTestCase):
     @mock.patch('core.management.commands.send_notification_emails.send_mail_multi')
     def test_command_send_5_notifications(self, mocked_send_mail_multi):
         comments = mixer.cycle(5).blend(Comment, is_closed=False, owner=self.user1, container=self.blog1)
-        call_command('send_notification_emails', url='http://test.test')
+        call_command('send_notification_emails')
 
         args, kwargs = mocked_send_mail_multi.call_args
         subject = ugettext_lazy("New notifications at %s" % config.NAME)
@@ -49,12 +49,12 @@ class SendNotificationEmailsTestCase(FastTenantTestCase):
     @mock.patch('core.management.commands.send_notification_emails.send_mail_multi')
     def test_command_do_not_send_welcome_notification(self, mocked_send_mail_multi):
         """ Welcome notification is created on user creation, this should not be send """
-        call_command('send_notification_emails', url='http://test.test')
+        call_command('send_notification_emails')
         assert not mocked_send_mail_multi.called
 
     def test_notifications_marked_as_sent(self):
         comments = mixer.cycle(10).blend(Comment, is_closed=False, owner=self.user1, container=self.blog1)
-        call_command('send_notification_emails', url='http://test.test')
+        call_command('send_notification_emails')
 
         self.assertEqual(len(self.user2.notifications.filter(emailed=False)), 0)
 
@@ -63,7 +63,7 @@ class SendNotificationEmailsTestCase(FastTenantTestCase):
         comment1 = mixer.blend(Comment, is_closed=False, owner=self.user1, container=self.blog1)
         self.user2.is_active = False
         self.user2.save()
-        call_command('send_notification_emails', url='http://test.test')
+        call_command('send_notification_emails')
         assert not mocked_send_mail_multi.called
 
     @mock.patch('core.management.commands.send_notification_emails.send_mail_multi')
@@ -73,13 +73,13 @@ class SendNotificationEmailsTestCase(FastTenantTestCase):
         self.user2.profile.last_online = nr_months_ago_6
         self.user2.profile.save()
         self.user2.save()
-        call_command('send_notification_emails', url='http://test.test')
+        call_command('send_notification_emails')
         assert not mocked_send_mail_multi.called
 
     @mock.patch('core.management.commands.send_notification_emails.send_mail_multi')
     def test_template_context_of_commented_notification(self, mocked_send_mail_multi):
         comment1 = mixer.blend(Comment, is_closed=False, owner=self.user1, container=self.blog1)
-        call_command('send_notification_emails', url='http://test.test')
+        call_command('send_notification_emails')
 
         args, kwargs = mocked_send_mail_multi.call_args
         subject = ugettext_lazy("New notifications at %s" % config.NAME)
@@ -100,7 +100,7 @@ class SendNotificationEmailsTestCase(FastTenantTestCase):
             write_access=[ACCESS_TYPE.user.format(self.user1.id)],
             group=self.group
         )
-        call_command('send_notification_emails', url='http://test.test')
+        call_command('send_notification_emails')
 
         args, kwargs = mocked_send_mail_multi.call_args
         subject = ugettext_lazy("New notifications at %s" % config.NAME)

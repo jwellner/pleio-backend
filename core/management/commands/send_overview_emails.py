@@ -2,21 +2,18 @@ from django.core.management.base import BaseCommand
 from django.db.models import Q
 from django.utils import timezone
 from django.utils.translation import ugettext_lazy
+from core import config
 from core.lib import send_mail_multi, get_default_email_context
 from core.models import Entity, EntityView
-from user.models import User
-from core import config
 from datetime import datetime, timedelta
-
+from django.db import connection
+from tenants.models import Client
+from user.models import User
 
 class Command(BaseCommand):
     help = 'Send overview emails'
 
     def add_arguments(self, parser):
-        parser.add_argument(
-            '--url', dest='url', required=True,
-            help='url in overview emails',
-        )
         parser.add_argument(
             '--interval', dest='interval', required=True, choices=['daily', 'weekly', 'monthly'],
             help='interval of overview emails(daily, weekly, or monthly)',
@@ -36,7 +33,10 @@ class Command(BaseCommand):
             user.profile.save()
 
     def handle(self, *args, **options):
-        site_url = options['url']
+        tenant = Client.objects.get(schema_name=connection.schema_name)
+
+        site_url = 'https://' + tenant.domains.first().domain
+
         interval = options['interval']
 
         default_interval = config.EMAIL_OVERVIEW_DEFAULT_FREQUENCY
