@@ -1,21 +1,17 @@
 input deleteUserInput {
   guid: String!
-  clientMutationId: Int
 }
 
 input toggleUserIsAdminInput {
   guid: String!
-  clientMutationId: Int
 }
 
 type deleteUserPayload {
   success: Boolean
-  clientMutationId: Int
 }
 
 type toggleUserIsAdminPayload {
   success: Boolean
-  clientMutationId: Int
 }
 
 type SiteUserList {
