@@ -49,7 +49,6 @@ class EditGroupNotificationsTestCase(FastTenantTestCase):
 
         variables = {
             "input": {
-                "clientMutationId": 1,
                 "getsNotifications": True,
                 "guid": self.group1.guid,
                 "userGuid": self.user1.guid
@@ -84,7 +83,6 @@ class EditGroupNotificationsTestCase(FastTenantTestCase):
 
         variables = {
             "input": {
-                "clientMutationId": 1,
                 "getsNotifications": True,
                 "guid": self.group1.guid,
                 "userGuid": self.user1.guid
@@ -111,7 +109,6 @@ class EditGroupNotificationsTestCase(FastTenantTestCase):
 
         variables = {
             "input": {
-                "clientMutationId": 1,
                 "getsNotifications": False,
                 "guid": self.group1.guid,
                 "userGuid": self.user1.guid
@@ -145,7 +142,6 @@ class EditGroupNotificationsTestCase(FastTenantTestCase):
 
         variables = {
             "input": {
-                "clientMutationId": 1,
                 "getsNotifications": True,
                 "guid": self.group1.guid,
                 "userGuid": self.user1.guid
@@ -180,7 +176,6 @@ class EditGroupNotificationsTestCase(FastTenantTestCase):
 
         variables = {
             "input": {
-                "clientMutationId": 1,
                 "getsNotifications": True,
                 "guid": self.group1.guid
                 }
@@ -214,7 +209,6 @@ class EditGroupNotificationsTestCase(FastTenantTestCase):
 
         variables = {
             "input": {
-                "clientMutationId": 1,
                 "getsNotifications": True,
                 "guid": self.group1.guid,
                 "userGuid": self.user1.guid

@@ -1,12 +1,10 @@
 input acceptGroupInvitationInput {
   """The unique invite code."""
   code: String
-  clientMutationId: Int
 }
 
 type acceptGroupInvitationPayload {
   group: Group
-  clientMutationId: Int
 }
 
 input acceptMembershipRequestInput {
@@ -15,12 +13,10 @@ input acceptMembershipRequestInput {
 
   """The guid of the group."""
   groupGuid: String
-  clientMutationId: Int
 }
 
 type acceptMembershipRequestPayload {
   group: Group
-  clientMutationId: Int
 }
 
 type AccessId {
@@ -54,12 +50,10 @@ input addColumnInput {
   containerGuid: String!
   parentGuid: String!
   width: [Int]
-  clientMutationId: Int
 }
 
 type addColumnPayload {
   column: Column
-  clientMutationId: Int
 }
 
 input addEntityInput {
@@ -84,26 +78,22 @@ input addEntityInput {
   writeAccessId: Int
   tags: [String]
   mentions: [String]
-  clientMutationId: Int
 }
 
 type addEntityPayload {
   entity: Entity
-  clientMutationId: Int
 }
 
 input addFileInput {
   containerGuid: String
   file: Upload
-  tags: [String]
   accessId: Int
   writeAccessId: Int
-  clientMutationId: Int
+  tags: [String]
 }
 
 type addFilePayload {
   entity: Entity
-  clientMutationId: Int
 }
 
 input addGroupInput {
@@ -126,12 +116,10 @@ input addGroupInput {
   welcomeMessage: String
   tags: [String]
   plugins: [Plugins]
-  clientMutationId: Int
 }
 
 type addGroupPayload {
   group: Group
-  clientMutationId: Int
 }
 
 input addGroupWidgetInput {
@@ -139,22 +127,18 @@ input addGroupWidgetInput {
   position: Int!
   type: String!
   settings: [WidgetSettingInput]
-  clientMutationId: Int
 }
 
 type addGroupWidgetPayload {
   entity: Widget
-  clientMutationId: Int
 }
 
 input addImageInput {
   image: Upload!
-  clientMutationId: Int
 }
 
 type addImagePayload {
   file: FileFolder
-  clientMutationId: Int
 }
 
 input addPageInput {
@@ -165,24 +149,20 @@ input addPageInput {
   containerGuid: String
   accessId: Int
   tags: [String]
-  clientMutationId: Int
 }
 
 type addPagePayload {
   entity: Entity
-  clientMutationId: Int
 }
 
 input addPollInput {
   title: String!
   choices: [String]!
   accessId: Int
-  clientMutationId: Int
 }
 
 type addPollPayload {
   entity: Entity!
-  clientMutationId: Int
 }
 
 input addRowInput {
@@ -190,24 +170,20 @@ input addRowInput {
   containerGuid: String!
   parentGuid: String!
   isFullWidth: Boolean!
-  clientMutationId: Int
 }
 
 type addRowPayload {
   row: Row
-  clientMutationId: Int
 }
 
 input addSubgroupInput {
   name: String
   groupGuid: String
   members: [String]
-  clientMutationId: Int
 }
 
 type addSubgroupPayload {
   success: Boolean
-  clientMutationId: Int
 }
 
 input addWidgetInput {
@@ -216,12 +192,10 @@ input addWidgetInput {
   parentGuid: String!
   type: String!
   settings: [WidgetSettingInput]
-  clientMutationId: Int
 }
 
 type addWidgetPayload {
   widget: Widget
-  clientMutationId: Int
 }
 
 type AttendeesList {
@@ -234,12 +208,10 @@ type AttendeesList {
 input attendEventInput {
   guid: String
   state: String
-  clientMutationId: Int
 }
 
 type attendEventPayload {
   entity: Event
-  clientMutationId: Int
 }
 
 input attendEventWithoutAccountInput {
@@ -247,12 +219,10 @@ input attendEventWithoutAccountInput {
   name: String!
   email: String!
   resend: Boolean
-  clientMutationId: Int
 }
 
 type attendEventWithoutAccountPayload {
   entity: Event
-  clientMutationId: Int
 }
 
 type Blog implements Entity {
@@ -295,13 +265,11 @@ input bookmarkInput {
 
   """True when adding, false when removing."""
   isAdding: Boolean!
-  clientMutationId: Int
 }
 
 type bookmarkPayload {
   object: Entity!
   isFirstBookmark: Boolean!
-  clientMutationId: Int
 }
 
 input changeGroupRoleInput {
@@ -313,12 +281,10 @@ input changeGroupRoleInput {
 
   """The new role for the user."""
   role: Role
-  clientMutationId: Int
 }
 
 type changeGroupRolePayload {
   group: Group
-  clientMutationId: Int
 }
 
 type Column {
@@ -356,73 +322,59 @@ input confirmAttendEventWithoutAccountInput {
   guid: String!
   email: String!
   code: String!
-  clientMutationId: Int
 }
 
 type confirmAttendEventWithoutAccountPayload {
   entity: Event
-  clientMutationId: Int
 }
 
 input deleteColumnInput {
   guid: String!
-  clientMutationId: Int
 }
 
 type deleteColumnPayload {
   success: Boolean
-  clientMutationId: Int
 }
 
 input deleteEntityInput {
   guid: String!
-  clientMutationId: Int
 }
 
 type deleteEntityPayload {
   success: Boolean
-  clientMutationId: Int
 }
 
 input deleteGroupInvitationInput {
   """The id of the invitation to delete."""
   id: Int
-  clientMutationId: Int
 }
 
 type deleteGroupInvitationPayload {
   group: Group
-  clientMutationId: Int
 }
 
 input deleteRowInput {
   guid: String!
-  clientMutationId: Int
 }
 
 type deleteRowPayload {
   success: Boolean
-  clientMutationId: Int
 }
 
 input deleteSubgroupInput {
   id: Int
-  clientMutationId: Int
 }
 
 type deleteSubgroupPayload {
   success: Boolean
-  clientMutationId: Int
 }
 
 input deleteWidgetInput {
   guid: String!
-  clientMutationId: Int
 }
 
 type deleteWidgetPayload {
   success: Boolean
-  clientMutationId: Int
 }
 
 type DirectLink {
@@ -470,12 +422,10 @@ input editAvatarInput {
 
   """UploadFile"""
   avatar: Upload!
-  clientMutationId: Int
 }
 
 type editAvatarPayload {
   user: User
-  clientMutationId: Int
 }
 
 input editColumnInput {
@@ -483,24 +433,20 @@ input editColumnInput {
   parentGuid: String
   position: Int
   width: [Int]
-  clientMutationId: Int
 }
 
 type editColumnPayload {
   column: Column
-  clientMutationId: Int
 }
 
 input editEmailOverviewInput {
   guid: String
   frequency: Frequency
   tags: [String]
-  clientMutationId: Int
 }
 
 type editEmailOverviewPayload {
   user: User
-  clientMutationId: Int
 }
 
 input editEntityInput {
@@ -523,12 +469,10 @@ input editEntityInput {
   writeAccessId: Int
   tags: [String]
   mentions: [String]
-  clientMutationId: Int
 }
 
 type editEntityPayload {
   entity: Entity
-  clientMutationId: Int
 }
 
 input editFileFolderInput {
@@ -539,12 +483,10 @@ input editFileFolderInput {
   writeAccessId: Int
   isAccessRecursive: Boolean
   tags: [String]
-  clientMutationId: Int
 }
 
 type editFileFolderPayload {
   entity: Entity
-  clientMutationId: Int
 }
 
 input editGroupInput {
@@ -572,48 +514,40 @@ input editGroupInput {
   welcomeMessage: String
   tags: [String]
   plugins: [Plugins]
-  clientMutationId: Int
 }
 
 input editGroupNotificationsInput {
   guid: String!
   getsNotifications: Boolean!
   userGuid: String
-  clientMutationId: Int
 }
 
 type editGroupNotificationsPayload {
   group: Group
-  clientMutationId: Int
 }
 
 type editGroupPayload {
   group: Group
-  clientMutationId: Int
 }
 
 input editGroupWidgetInput {
   guid: String!
   settings: [WidgetSettingInput]
   position: Int
-  clientMutationId: Int
 }
 
 type editGroupWidgetPayload {
   entity: Widget
-  clientMutationId: Int
 }
 
 input editNotificationsInput {
   guid: String
   emailNotifications: Boolean
   newsletter: Boolean
-  clientMutationId: Int
 }
 
 type editNotificationsPayload {
   user: User
-  clientMutationId: Int
 }
 
 input editPageInput {
@@ -623,12 +557,10 @@ input editPageInput {
   richDescription: String
   accessId: Int
   tags: [String]
-  clientMutationId: Int
 }
 
 type editPagePayload {
   entity: Entity
-  clientMutationId: Int
 }
 
 input editPollInput {
@@ -636,12 +568,10 @@ input editPollInput {
   title: String!
   choices: [String]!
   accessId: Int
-  clientMutationId: Int
 }
 
 type editPollPayload {
   entity: Entity!
-  clientMutationId: Int
 }
 
 input editProfileFieldInput {
@@ -649,12 +579,10 @@ input editProfileFieldInput {
   accessId: Int!
   key: String!
   value: String!
-  clientMutationId: Int
 }
 
 type editProfileFieldPayload {
   user: User
-  clientMutationId: Int
 }
 
 input editRowInput {
@@ -662,12 +590,10 @@ input editRowInput {
   parentGuid: String
   position: Int
   isFullWidth: Boolean
-  clientMutationId: Int
 }
 
 type editRowPayload {
   row: Row
-  clientMutationId: Int
 }
 
 input editSiteSettingInput {
@@ -737,35 +663,29 @@ input editSiteSettingInput {
   statusUpdateGroups: Boolean
   subgroups: Boolean
   groupMemberExport: Boolean
-  clientMutationId: Int
 }
 
 type editSiteSettingPayload {
   siteSettings: SiteSettings
-  clientMutationId: Int
 }
 
 input editSubgroupInput {
   id: Int
   name: String
   members: [String]
-  clientMutationId: Int
 }
 
 type editSubgroupPayload {
   success: Boolean
-  clientMutationId: Int
 }
 
 input editTaskInput {
   guid: String
   state: String
-  clientMutationId: Int
 }
 
 type editTaskPayload {
   entity: Task
-  clientMutationId: Int
 }
 
 input editWidgetInput {
@@ -773,12 +693,10 @@ input editWidgetInput {
   settings: [WidgetSettingInput]
   parentGuid: String
   position: Int
-  clientMutationId: Int
 }
 
 type editWidgetPayload {
   widget: Widget
-  clientMutationId: Int
 }
 
 type EmailOverview {
@@ -918,12 +836,10 @@ input followInput {
 
   """True for following, false for not following."""
   isFollowing: Boolean!
-  clientMutationId: Int
 }
 
 type followPayload {
   object: Entity!
-  clientMutationId: Int
 }
 
 input FooterInput {
@@ -1026,12 +942,10 @@ input inviteToGroupInput {
 
   """Add all site users to group. Admin only and no invites wil be send!"""
   addAllUsers: Boolean
-  clientMutationId: Int
 }
 
 type inviteToGroupPayload {
   group: Group
-  clientMutationId: Int
 }
 
 """An object with either the guid or the e-mailaddress of a user."""
@@ -1043,12 +957,10 @@ input InviteToGroupUser {
 input joinGroupInput {
   """The guid of the group to join."""
   guid: String
-  clientMutationId: Int
 }
 
 type joinGroupPayload {
   group: Group
-  clientMutationId: Int
 }
 
 type KeyValueItem {
@@ -1059,33 +971,27 @@ type KeyValueItem {
 input leaveGroupInput {
   """The guid of the group to leave."""
   guid: String
-  clientMutationId: Int
 }
 
 type leaveGroupPayload {
   group: Group
-  clientMutationId: Int
 }
 
 input markAllAsReadInput {
   id: String
-  clientMutationId: Int
 }
 
 type markAllAsReadPayload {
   success: Boolean
-  clientMutationId: Int
 }
 
 input markAsReadInput {
   id: Int
-  clientMutationId: Int
 }
 
 type markAsReadPayload {
   success: Boolean
   notification: Notification
-  clientMutationId: Int
 }
 
 type Member {
@@ -1132,12 +1038,10 @@ input MenuItemInput {
 input moveFileFolderInput {
   guid: String
   containerGuid: String
-  clientMutationId: Int
 }
 
 type moveFileFolderPayload {
   entity: Entity
-  clientMutationId: Int
 }
 
 type Mutation {
@@ -1450,35 +1354,29 @@ input rejectMembershipRequestInput {
 
   """The guid of the group."""
   groupGuid: String
-  clientMutationId: Int
 }
 
 type rejectMembershipRequestPayload {
   group: Group
-  clientMutationId: Int
 }
 
 input reorderInput {
   guid: String!
   sourcePosition: Int!
   destinationPosition: Int!
-  clientMutationId: Int
 }
 
 type reorderPayload {
   container: Entity!
-  clientMutationId: Int
 }
 
 input resendGroupInvitationInput {
   """The id of the invitation to resend."""
   id: Int
-  clientMutationId: Int
 }
 
 type resendGroupInvitationPayload {
   group: Group
-  clientMutationId: Int
 }
 
 """The type of role."""
@@ -1524,14 +1422,15 @@ input sendMessageToGroupInput {
 
   """An (optional) list of recipients to send the message to."""
   recipients: [String]
-  """An (optional) parameter for sending the message to all members of the group."""
+
+  """
+  An (optional) parameter for sending the message to all members of the group.
+  """
   sendToAllMembers: Boolean
-  clientMutationId: Int
 }
 
 type sendMessageToGroupPayload {
   group: Group
-  clientMutationId: Int
 }
 
 input sendMessageToUserInput {
@@ -1543,12 +1442,10 @@ input sendMessageToUserInput {
 
   """The message to send."""
   message: String
-  clientMutationId: Int
 }
 
 type sendMessageToUserPayload {
   success: Boolean
-  clientMutationId: Int
 }
 
 """The current site"""
@@ -1761,32 +1658,26 @@ type Task implements Entity {
 
 input toggleBestAnswerInput {
   guid: String
-  clientMutationId: Int
 }
 
 type toggleBestAnswerPayload {
   entity: Question!
-  clientMutationId: Int
 }
 
 input toggleIsClosedInput {
   guid: String
-  clientMutationId: Int
 }
 
 type toggleIsClosedPayload {
   entity: Question!
-  clientMutationId: Int
 }
 
 input toggleRequestDeleteUserInput {
   guid: String!
-  clientMutationId: Int
 }
 
 type toggleRequestDeleteUserPayload {
   viewer: Viewer
-  clientMutationId: Int
 }
 
 type TopItem {
@@ -1880,23 +1771,19 @@ input voteInput {
 
   """1 for upvote, -1 for downvote, 0 for deleting."""
   score: Int!
-  clientMutationId: Int
 }
 
 input voteOnPollInput {
   guid: String!
   response: String!
-  clientMutationId: Int
 }
 
 type voteOnPollPayload {
   entity: Entity!
-  clientMutationId: Int
 }
 
 type votePayload {
   object: Entity!
-  clientMutationId: Int
 }
 
 type Widget {
