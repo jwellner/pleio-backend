@@ -145,7 +145,7 @@ def get_site_settings():
 
         'startPageCmsOptions': start_page_cms_options,
         'startPageCms': config.STARTPAGE_CMS,
-        'icon': config.ICON,
+        'icon': config.ICON if config.ICON else static('icon.svg'),
         'showIcon': config.ICON_ENABLED,
         'menu': config.MENU,
 
@@ -206,13 +206,10 @@ def get_site_settings():
         'startpage': config.STARTPAGE,
         'initiatorLink': config.INITIATOR_LINK,
 
-
         'activityFilter': get_activity_filters(),
 
         'usersOnline': get_online_users(),
         'achievementsEnabled': config.ACHIEVEMENTS_ENABLED,
-
-
     }
 
     return site_settings
