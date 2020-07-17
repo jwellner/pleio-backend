@@ -38,7 +38,6 @@ RUN chmod +x /start.sh /start-dev.sh /start-admin-dev.sh /start-background.sh
 
 # Create media and static folders
 RUN mkdir -p /app/media /app/static && chown www-data:www-data /app/media /app/static
-RUN touch /app/celerybeat-schedule && chown www-data:www-data /app/celerybeat-schedule
 
 ENV PYTHONUNBUFFERED 1
 EXPOSE 8000
