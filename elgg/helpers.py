@@ -1,5 +1,6 @@
 import os
 from datetime import datetime
+from django.core.files.storage import default_storage
 from phpserialize import unserialize
 
 from cms.models import Page
@@ -295,24 +296,26 @@ class ElggHelpers():
             filename = "%s_%s.%s" % (str(elgg_site.entity.guid), image_type, extension)
 
             file_path = os.path.join(
-                "migrated", year, month, day, str(elgg_site.entity.guid), 'pleio_template/', filename
+                "migrated", year, month, day, str(elgg_site.entity.guid), 'pleio_template', filename
             )
 
-            entity = FileFolder()
+            if default_storage.exists(file_path):
+                entity = FileFolder()
 
-            entity.owner = User.objects.filter(is_admin=True).first()
+                entity.owner = User.objects.filter(is_admin=True).first()
 
-            entity.upload.name = file_path
-            entity.mime_type = mime_type
-            entity.title = filename
+                entity.upload.name = file_path
+                entity.mime_type = mime_type
+                entity.title = filename
 
-            entity.read_access = access_id_to_acl(entity, 2)
-            entity.write_access = access_id_to_acl(entity, 0)
+                entity.read_access = access_id_to_acl(entity, 2)
+                entity.write_access = access_id_to_acl(entity, 0)
 
-            entity.save()
+                entity.save()
 
-            url = "/site/%s/%s" % (image_type, str(entity.id))
-            return url
+                return "/site/%s/%s" % (image_type, str(entity.id))
+            else:
+                return ""
         except Exception:
             return ""
 
