@@ -192,6 +192,9 @@ class ElggHelpers():
 
     def save_and_get_featured_image(self, elgg_entity):
 
+        if not elgg_entity.entity.get_metadata_value_by_name("featuredIcontime"):
+            return None
+
         try:
             time_created = datetime.fromtimestamp(elgg_entity.entity.time_created)
             year = time_created.strftime('%Y')
@@ -208,7 +211,7 @@ class ElggHelpers():
             entity = FileFolder()
 
             entity.mime_type = "image/jpeg"
-            entity.title = ""
+            entity.title = filename
             entity.upload.name = file_path
 
             entity.owner = User.objects.get(id=GuidMap.objects.get(id=elgg_entity.entity.owner_guid).guid)
@@ -227,6 +230,9 @@ class ElggHelpers():
             return None
 
     def save_and_get_group_icon(self, elgg_entity):
+
+        if not elgg_entity.entity.get_metadata_value_by_name("icontime"):
+            return None
 
         try:
             group_owner = User.objects.get(id=GuidMap.objects.get(id=elgg_entity.entity.owner_guid).guid)
