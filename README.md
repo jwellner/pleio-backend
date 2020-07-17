@@ -86,6 +86,10 @@ Create s3 bucket:
 Make bucket public:
 `aws --endpoint-url=http://localhost:4572 s3api put-bucket-acl --bucket demo-bucket --acl public-read`
 
+Copy files to bucket:
+`aws --endpoint-url=http://localhost:4572 s3 cp 2019  s3://demo-bucket/test2/migrated/2019/ --recursive`
+
+
 Add localstack to /etc/hosts to test from browser:
 
 `127.0.0.1 localstack`
