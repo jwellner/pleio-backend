@@ -314,8 +314,7 @@ class ElggHelpers():
                 entity.save()
 
                 return "/site/%s/%s" % (image_type, str(entity.id))
-            else:
-                return ""
+            return ""
         except Exception:
             return ""
 
