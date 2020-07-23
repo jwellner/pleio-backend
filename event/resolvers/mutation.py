@@ -128,7 +128,10 @@ def resolve_add_event(_, info, input):
     entity.location = clean_input.get("location", "")
 
     if 'maxAttendees' in clean_input:
-        entity.max_attendees = int(clean_input.get("maxAttendees"))
+        if clean_input.get("maxAttendees") == "":
+            entity.max_attendees = None
+        else:
+            entity.max_attendees = int(clean_input.get("maxAttendees"))
 
     entity.rsvp = clean_input.get("rsvp", False)
     entity.attend_event_without_account = clean_input.get("attendEventWithoutAccount", False)
@@ -215,7 +218,10 @@ def resolve_edit_event(_, info, input):
         entity.location = clean_input.get("location")
 
     if 'maxAttendees' in clean_input:
-        entity.max_attendees = int(clean_input.get("maxAttendees"))
+        if clean_input.get("maxAttendees") == "":
+            entity.max_attendees = None
+        else:
+            entity.max_attendees = int(clean_input.get("maxAttendees"))
 
     if 'rsvp' in clean_input:
         entity.rsvp = clean_input.get("rsvp")
