@@ -89,6 +89,7 @@ def resolve_entities(
                                conditional_is_featured_filter(subtype, isFeatured))
     if subtype and subtype == 'page':
         entities = entities.filter(parent=None)
+        order_by = 'title'
 
     entities = entities.order_by(order_by).select_subclasses()
     entities = entities[offset:offset+limit]
