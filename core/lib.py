@@ -182,7 +182,7 @@ def send_mail_multi(subject, html_template, context, email_addresses, reply_to=N
     html_template = get_template(html_template)
     html_content = html_template.render(context)
     text_content = strip_tags(html_content)
-    email = EmailMultiAlternatives(subject, text_content, settings.FROM_EMAIL, email_addresses, reply_to=reply_to)
+    email = EmailMultiAlternatives(subject, text_content, settings.FROM_EMAIL, bcc=email_addresses, reply_to=reply_to)
     email.attach_alternative(html_content, "text/html")
     return email
 
