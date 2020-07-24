@@ -1,10 +1,31 @@
 from django_elasticsearch_dsl import Document, fields
 from django_elasticsearch_dsl.registries import registry
+from django_tenants.utils import parse_tenant_config_path
+from elasticsearch_dsl import analysis, analyzer, tokenizer
 from .models.user import UserProfile, UserProfileField
 from .models.group import Group
 from user.models import User
-from django_tenants.utils import parse_tenant_config_path
 
+
+custom_stop_filter = analysis.token_filter(
+    "custom_stop_filter",
+    type="stop",
+    stopwords=['_dutch_'],
+    ignore_case=True
+)
+
+
+ngram_analyzer = analyzer(
+    'ngram_analyzer',
+    tokenizer=tokenizer(
+        'description_ngram',
+        type='ngram',
+        min_gram=3,
+        max_gram=3,
+        token_chars=["letter", "digit", "punctuation", "symbol"]
+    ),
+    filter=['lowercase', custom_stop_filter]
+)
 
 class DefaultDocument(Document):
     tenant_name = fields.KeywordField()
@@ -20,6 +41,9 @@ class UserDocument(DefaultDocument):
     type = fields.KeywordField(attr="type_to_string")
     read_access = fields.ListField(fields.TextField(attr="search_read_access"))
     is_active = fields.BooleanField()
+    name = fields.TextField(
+        analyzer=ngram_analyzer
+    )
 
     _profile = fields.NestedField(properties={
         'user_profile_fields': fields.ObjectField(properties={
@@ -37,7 +61,6 @@ class UserDocument(DefaultDocument):
         model = User
 
         fields = [
-            'name',
             'email',
             'created_at',
             'updated_at'
@@ -60,6 +83,15 @@ class GroupDocument(DefaultDocument):
     tags = fields.ListField(fields.TextField())
     type = fields.KeywordField(attr="type_to_string")
     read_access = fields.ListField(fields.TextField(attr="search_read_access"))
+    name = fields.TextField(
+        analyzer=ngram_analyzer
+    )
+    description = fields.TextField(
+        analyzer=ngram_analyzer
+    )
+    introduction = fields.TextField(
+        analyzer=ngram_analyzer
+    )
 
     class Index:
         name = 'groups'
@@ -68,9 +100,6 @@ class GroupDocument(DefaultDocument):
         model = Group
 
         fields = [
-            'name',
-            'description',
-            'introduction',
             'created_at',
             'updated_at'
         ]
