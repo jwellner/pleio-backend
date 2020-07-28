@@ -6,7 +6,7 @@ from core.documents import DefaultDocument, ngram_analyzer
 
 @registry.register_document
 class EventDocument(DefaultDocument):
-    id = fields.TextField()
+    id = fields.KeywordField()
     tags = fields.ListField(fields.TextField())
     read_access = fields.ListField(fields.KeywordField())
     type = fields.KeywordField(attr="type_to_string")
