@@ -51,7 +51,7 @@ class SendOverviewEmailsTestCase(FastTenantTestCase):
         args, kwargs = mocked_send_mail_multi.call_args
 
         self.assertEqual(mocked_send_mail_multi.call_count, 1)
-        self.assertEqual(args[0], "Regular overview of %s" % config.NAME)
+        self.assertEqual(args[0], "Periodiek overzicht van %s" % config.NAME)
         self.assertEqual(args[1], 'email/send_overview_emails.html')
         self.assertEqual(len(args[2]['entities']), 5)
         self.assertEqual(args[2]['intro_text'], '')
@@ -79,7 +79,7 @@ class SendOverviewEmailsTestCase(FastTenantTestCase):
         call_command('send_overview_emails', interval='weekly')
 
         args, kwargs = mocked_send_mail_multi.call_args
-        subject = ugettext_lazy("Regular overview of %s" % config.NAME)
+        subject = ugettext_lazy("Periodiek overzicht van %s" % config.NAME)
 
         self.assertEqual(mocked_send_mail_multi.call_count, 1)
         self.assertEqual(args[0], subject)
@@ -116,7 +116,7 @@ class SendOverviewEmailsTestCase(FastTenantTestCase):
         call_command('send_overview_emails', interval='daily')
 
         args, kwargs = mocked_send_mail_multi.call_args
-        subject = ugettext_lazy("Regular overview of %s" % config.NAME)
+        subject = ugettext_lazy("Periodiek overzicht van %s" % config.NAME)
 
         self.assertEqual(mocked_send_mail_multi.call_count, 1)
         self.assertEqual(args[0], subject)
@@ -127,7 +127,7 @@ class SendOverviewEmailsTestCase(FastTenantTestCase):
         call_command('send_overview_emails', interval='monthly')
 
         args, kwargs = mocked_send_mail_multi.call_args
-        subject = ugettext_lazy("Regular overview of %s" % config.NAME)
+        subject = ugettext_lazy("Periodiek overzicht van %s" % config.NAME)
 
         self.assertEqual(mocked_send_mail_multi.call_count, 2)
         self.assertEqual(args[0], subject)
@@ -166,7 +166,7 @@ class SendOverviewEmailsTestCase(FastTenantTestCase):
         call_command('send_overview_emails', interval='daily')
 
         args, kwargs = mocked_send_mail_multi.call_args
-        subject = ugettext_lazy("Regular overview of %s" % config.NAME)
+        subject = ugettext_lazy("Periodiek overzicht van %s" % config.NAME)
 
         self.assertEqual(mocked_send_mail_multi.call_count, 1)
         self.assertEqual(args[0], 'test other subject')
@@ -210,7 +210,7 @@ class SendOverviewEmailsTestCase(FastTenantTestCase):
         call_command('send_overview_emails', interval='weekly')
 
         args, kwargs = mocked_send_mail_multi.call_args
-        subject = ugettext_lazy("Regular overview of %s" % config.NAME)
+        subject = ugettext_lazy("Periodiek overzicht van %s" % config.NAME)
 
         self.assertEqual(mocked_send_mail_multi.call_count, 1)
         self.assertEqual(args[0], subject)
@@ -259,7 +259,7 @@ class SendOverviewEmailsTestCase(FastTenantTestCase):
         call_command('send_overview_emails', interval='weekly')
 
         args, kwargs = mocked_send_mail_multi.call_args
-        subject = ugettext_lazy("Regular overview of %s" % config.NAME)
+        subject = ugettext_lazy("Periodiek overzicht van %s" % config.NAME)
 
         self.assertEqual(mocked_send_mail_multi.call_count, 1)
         self.assertEqual(args[0], subject)
@@ -299,7 +299,7 @@ class SendOverviewEmailsTestCase(FastTenantTestCase):
         call_command('send_overview_emails', interval='weekly')
 
         args, kwargs = mocked_send_mail_multi.call_args
-        subject = ugettext_lazy("Regular overview of %s" % config.NAME)
+        subject = ugettext_lazy("Periodiek overzicht van %s" % config.NAME)
 
         self.assertEqual(mocked_send_mail_multi.call_count, 1)
         self.assertEqual(args[0], subject)

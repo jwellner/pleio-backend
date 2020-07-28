@@ -30,7 +30,7 @@ def resolve_delete_user(_, info, input):
     # Send email to user which is deleted
     context = get_default_email_context(info.context)
     context['name_deleted_user'] = name_deleted_user
-    subject = ugettext_lazy("Account of %s removed" % name_deleted_user)
+    subject = ugettext_lazy("Account of %(name_deleted_user)s removed") % {'name_deleted_user': name_deleted_user}
 
     email = send_mail_multi(subject, 'email/admin_user_deleted.html', context, [email_deleted_user])
     email.send()
@@ -39,7 +39,7 @@ def resolve_delete_user(_, info, input):
     if is_deleted_user_admin:
         context = get_default_email_context(info.context)
         context['name_deleted_user'] = performing_user.name
-        subject = ugettext_lazy("A site administrator was removed from %s" % context["site_name"])
+        subject = ugettext_lazy("A site administrator was removed from %(site_name)s") % {'site_name': context["site_name"]}
 
         admin_email_addresses = User.objects.filter(is_admin=True).values_list('email', flat=True)
         email = send_mail_multi(subject, 'email/admin_user_deleted.html', context, admin_email_addresses)

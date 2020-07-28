@@ -9,6 +9,8 @@ from core import config
 from datetime import datetime, timedelta
 from core.resolvers.notification import get_notification_action_entity
 from tenants.models import Client
+from django.utils import translation
+
 
 def get_notification(notification):
     """ get a mapped notification """
@@ -58,7 +60,7 @@ class Command(BaseCommand):
         users = User.objects.filter(is_active=True)
 
         show_excerpt = config.EMAIL_NOTIFICATION_SHOW_EXCERPT
-        subject = ugettext_lazy("New notifications at %s" % config.NAME)
+        subject = ugettext_lazy("New notifications at %(site_name)s") % {'site_name': config.NAME}
 
         for user in users:
 

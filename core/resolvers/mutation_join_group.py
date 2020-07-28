@@ -27,7 +27,7 @@ def resolve_join_group(_, info, input):
         group.join(user, 'member')
     else:
         group.join(user, 'pending')
-        subject = ugettext_lazy("Access request for the %s group" % group.name)
+        subject = ugettext_lazy("Access request for the %(group_name)s group") % {'group_name': group.name}
         context = get_default_email_context(info.context)
         link = get_base_url(info.context) + group.url
         context['link'] = link

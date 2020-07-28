@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-07-10 10:26+0200\n"
+"POT-Creation-Date: 2020-07-23 11:47+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -26,78 +26,56 @@ msgstr "Engels"
 msgid "Dutch"
 msgstr "Nederlands"
 
-#: core/management/commands/send_notification_emails.py:54
-#: core/tests/test_send_notification_emails.py:41
-#: core/tests/test_send_notification_emails.py:85
-#: core/tests/test_send_notification_emails.py:106
+#: core/management/commands/send_notification_emails.py:63
 #, python-format
-msgid "New notifications at %s"
-msgstr "Nieuwe notificaties op %s"
+msgid "New notifications at %(site_name)s"
+msgstr "Nieuwe notificaties op %(site_name)s"
 
-#: core/management/commands/send_overview_emails.py:48
-#: core/tests/test_send_overview_emails.py:82
-#: core/tests/test_send_overview_emails.py:119
-#: core/tests/test_send_overview_emails.py:130
-#: core/tests/test_send_overview_emails.py:167
-#: core/tests/test_send_overview_emails.py:207
-#: core/tests/test_send_overview_emails.py:253
-#: core/tests/test_send_overview_emails.py:292
+#: core/management/commands/send_overview_emails.py:49
 #, python-format
-msgid "Regular overview of %s"
-msgstr "Periodiek overzicht van %s"
+msgid "Regular overview of %(site_name)s"
+msgstr "Periodiek overzicht van %(site_name)s"
 
 #: core/resolvers/mutation_accept_membership_request.py:36
-#: core/tests/test_accept_membership_request.py:85
-#: core/tests/test_accept_membership_request.py:139
-#, python-format
-msgid "Request for access to the %s group has been approved"
-msgstr "Toegangsaanvraag voor de groep %s goedgekeurd"
+#| msgid "Request for access to the %s group has been approved"
+msgid "Request for access to the %(group_name)s group has been approved"
+msgstr "Toegangsaanvraag voor de groep %(group_name)s goedgekeurd"
 
 #: core/resolvers/mutation_change_group_role.py:38
-#: core/tests/test_change_group_role.py:80
-#: core/tests/test_change_group_role.py:129
-#: core/tests/test_change_group_role.py:181
-#: core/tests/test_change_group_role.py:233
-#: core/tests/test_change_group_role.py:276
-#, python-format
-msgid "Ownership of the %s group has been transferred"
-msgstr "Eigenaarschap van de groep %s overgedragen"
+#| msgid "Ownership of the %s group has been transferred"
+msgid "Ownership of the %(group_name)s group has been transferred"
+msgstr "Eigenaarschap van de groep %(group_name)s overgedragen"
 
 #: core/resolvers/mutation_delete_user.py:33
-#, python-format
-msgid "Account of %s removed"
-msgstr "Account verwijderd van %s"
+#| msgid "Account of %s removed"
+msgid "Account of %(name_deleted_user)s removed"
+msgstr "Account verwijderd van %(name_deleted_user)s"
 
 #: core/resolvers/mutation_delete_user.py:42
 #: core/resolvers/mutation_toggle_user_is_admin.py:35
-#, python-format
-msgid "A site administrator was removed from %s"
-msgstr "Een site beheerder is verwijderd van %s"
+#| msgid "A site administrator was removed from %s"
+msgid "A site administrator was removed from %(site_name)s"
+msgstr "Een site beheerder is verwijderd van %(site_name)s"
 
 #: core/resolvers/mutation_invite_to_group.py:40
-#: core/tests/test_invite_to_group.py:77
-#, python-format
-msgid "Invitation to become a member of the %s group"
-msgstr "Uitnodiging om lid te worden van de groep %s"
+#| msgid "Invitation to become a member of the %s group"
+msgid "Invitation to become a member of the %(group_name)s group"
+msgstr "Uitnodiging om lid te worden van de groep %(group_name)s"
 
 #: core/resolvers/mutation_join_group.py:30
-#, python-format
-msgid "Access request for the %s group"
-msgstr "Toegangsaanvraag voor de groep %s"
+#| msgid "Access request for the %s group"
+msgid "Access request for the %(group_name)s group"
+msgstr "Toegangsaanvraag voor de groep %(group_name)s"
 
 #: core/resolvers/mutation_reject_membership_request.py:37
-#: core/tests/test_reject_membership_request.py:87
-#: core/tests/test_reject_membership_request.py:139
-#, python-format
-msgid "Request for access to the %s group has been refused"
-msgstr "Toegangsaanvraag voor de groep %s afgewezen"
+#| msgid "Request for access to the %s group has been refused"
+msgid "Request for access to the %(group_name)s group has been refused"
+msgstr "Toegangsaanvraag voor de groep %(group_name)s afgewezen"
 
 #: core/resolvers/mutation_resend_group_invitation.py:25
-#: core/tests/test_resend_group_invitation.py:91
-#: core/tests/test_resend_group_invitation.py:148
-#, python-format
-msgid "Reminder to become a member of the %s group"
-msgstr "Herinnering om lid te worden van de groep %s"
+#| msgid "Reminder to become a member of the %s group"
+msgid "Reminder to become a member of the %(group_name)s group"
+msgstr "Herinnering om lid te worden van de groep %(group_name)s"
 
 #: core/resolvers/mutation_send_message_to_group.py:52
 #, python-brace-format
@@ -118,19 +96,19 @@ msgid "Request to remove account"
 msgstr "Verzoek om account te verwijderen"
 
 #: core/resolvers/mutation_toggle_user_is_admin.py:41
-#, python-format
-msgid "Your site administrator rights for %s were removed"
-msgstr "U bent niet langer site beheerder van %s"
+#| msgid "Your site administrator rights for %s were removed"
+msgid "Your site administrator rights for %(site_name)s were removed"
+msgstr "U bent niet langer site beheerder van %(site_name)s"
 
 #: core/resolvers/mutation_toggle_user_is_admin.py:53
-#, python-format
-msgid "A new site administrator was assigned for %s"
-msgstr "Een nieuwe site beheerder is toegewezen aan %s"
+#| msgid "A new site administrator was assigned for %s"
+msgid "A new site administrator was assigned for %(site_name)s"
+msgstr "Een nieuwe site beheerder is toegewezen aan %(site_name)s"
 
 #: core/resolvers/mutation_toggle_user_is_admin.py:58
-#, python-format
-msgid "You're granted site administrator right on %s"
-msgstr "U bent aangewezen als site beheerder van %s"
+#| msgid "You're granted site administrator right on %s"
+msgid "You're granted site administrator right on %(site_name)s"
+msgstr "U bent aangewezen als site beheerder van %(site_name)s"
 
 #: core/resolvers/query_site.py:100
 msgid "Just me"
@@ -280,8 +258,6 @@ msgid "Agenda item created by"
 msgstr "Agenda-item gemaakt door"
 
 #: core/templates/email/entities/news.html:33
-#, fuzzy
-#| msgid "News added by"
 msgid "News added on"
 msgstr "Nieuws geplaats op"
 
@@ -330,12 +306,12 @@ msgstr ""
 msgid " has posted a new Blog: "
 msgstr " heeft een nieuw Blog gemaakt "
 
-#: core/templates/email/notifications/blog.html:6
-#: core/templates/email/notifications/discussion.html:6
-#: core/templates/email/notifications/event.html:6
-#: core/templates/email/notifications/question.html:6
-#: core/templates/email/notifications/update.html:6
-#: core/templates/email/notifications/wiki.html:6
+#: core/templates/email/notifications/blog.html:9
+#: core/templates/email/notifications/discussion.html:9
+#: core/templates/email/notifications/event.html:9
+#: core/templates/email/notifications/question.html:9
+#: core/templates/email/notifications/update.html:10
+#: core/templates/email/notifications/wiki.html:9
 msgid " has responded at: "
 msgstr " heeft gereageerd op "
 
@@ -360,10 +336,7 @@ msgid " has posted a new Wiki: "
 msgstr " heeft een nieuwe Wiki gemaakt "
 
 #: core/templates/email/reject_membership_request.html:6
-#, fuzzy, python-format
-#| msgid ""
-#| "The administrator  %%s has rejected your request to join the %%s group. "
-#| "Contact the administrator for more information."
+#, python-format
 msgid ""
 "The administrator %(user_name)s has rejected your request to join the "
 "%(group_name)s group. Contact the administrator for more information. "
@@ -393,7 +366,7 @@ msgstr ""
 "<a href=\"%(user_url)s\">%(user_name)s</a>"
 
 #: core/templates/email/send_notification_emails.html:40
-#: core/templates/email/send_overview_emails.html:118
+#: core/templates/email/send_overview_emails.html:121
 #, python-format
 msgid ""
 " You have received this e-mail because you registered to receive "
@@ -403,34 +376,28 @@ msgstr ""
 " Je ontvangt deze e-mail omdat je aangemeld bent voor de notificaties.<br /> "
 "Klik <a href=\"%(user_url)s\">hier</a> om je instellingen aan te passen."
 
-#: core/templates/email/send_overview_emails.html:31
-msgid "From the editors:"
-msgstr "Van de redactie"
+#: core/templates/email/send_overview_emails.html:32
+#, python-format
+msgid "%(featured_title)s"
+msgstr ""
 
 #: core/templates/email/toggle_request_delete_user_cancelled.html:6
-#, fuzzy, python-format
-#| msgid ""
-#| "You, as <strong> %(username)s </strong> user, have cancelled your request "
-#| "to remove your account. "
+#, python-format
 msgid ""
 "You, as <strong> %(user_name)s </strong> user, have cancelled your request "
 "to remove your account. "
 msgstr ""
-"Je hebt als gebruiker <strong> %(username)s </strong> het verzoek om je "
+"Je hebt als gebruiker <strong> %(user_name)s </strong> het verzoek om je "
 "account te laten verwijderen geannuleerd."
 
 #: core/templates/email/toggle_request_delete_user_requested.html:6
-#, fuzzy, python-format
-#| msgid ""
-#| "You, as user, <strong>%(username)s</strong> have requested that your "
-#| "account be removed. You will be informed once the website administrator "
-#| "has done so. "
+#, python-format
 msgid ""
 "You, as user, <strong>%(user_name)s</strong> have requested that your "
 "account be removed. You will be informed once the website administrator has "
 "done so. "
 msgstr ""
-"Je hebt als gebruiker <strong>%(username)s</strong> verzocht aan de "
+"Je hebt als gebruiker <strong>%(user_name)s</strong> verzocht aan de "
 "deelsitebeheerders om je account te laten verwijderen. Wanneer de "
 "deelsitebeheerder dit heeft doorgevoerd, ontvang je hierover bericht. "
 
@@ -570,6 +537,56 @@ msgstr ""
 "andere site beheerders.\",\n"
 "\n"
 
+#: core/tests/test_accept_membership_request.py:85
+#: core/tests/test_accept_membership_request.py:139
+#, python-format
+msgid "Request for access to the %s group has been approved"
+msgstr "Toegangsaanvraag voor de groep %s goedgekeurd"
+
+#: core/tests/test_change_group_role.py:80
+#: core/tests/test_change_group_role.py:129
+#: core/tests/test_change_group_role.py:181
+#: core/tests/test_change_group_role.py:233
+#: core/tests/test_change_group_role.py:276
+#, python-format
+msgid "Ownership of the %s group has been transferred"
+msgstr "Eigenaarschap van de groep %s overgedragen"
+
+#: core/tests/test_invite_to_group.py:77
+#, python-format
+msgid "Invitation to become a member of the %s group"
+msgstr "Uitnodiging om lid te worden van de groep %s"
+
+#: core/tests/test_reject_membership_request.py:87
+#: core/tests/test_reject_membership_request.py:139
+#, python-format
+msgid "Request for access to the %s group has been refused"
+msgstr "Toegangsaanvraag voor de groep %s afgewezen"
+
+#: core/tests/test_resend_group_invitation.py:91
+#: core/tests/test_resend_group_invitation.py:148
+#, python-format
+msgid "Reminder to become a member of the %s group"
+msgstr "Herinnering om lid te worden van de groep %s"
+
+#: core/tests/test_send_notification_emails.py:41
+#: core/tests/test_send_notification_emails.py:85
+#: core/tests/test_send_notification_emails.py:106
+#, python-format
+msgid "New notifications at %s"
+msgstr "Nieuwe notificaties op %s"
+
+#: core/tests/test_send_overview_emails.py:82
+#: core/tests/test_send_overview_emails.py:119
+#: core/tests/test_send_overview_emails.py:130
+#: core/tests/test_send_overview_emails.py:169
+#: core/tests/test_send_overview_emails.py:213
+#: core/tests/test_send_overview_emails.py:262
+#: core/tests/test_send_overview_emails.py:302
+#, python-format
+msgid "Regular overview of %s"
+msgstr "Periodiek overzicht van %s"
+
 #: event/resolvers/mutation_attend_event_without_account.py:31
 #: event/tests/test_attend_event_without_account.py:70
 #: event/tests/test_attend_event_without_account.py:127
@@ -582,3 +599,10 @@ msgstr "Bevestiging aanmelding %s"
 #, python-format
 msgid "Confirmation of registration for %s"
 msgstr "Bevestiging aanmelding voor %s"
+
+#~| msgid "New notifications at %s"
+#~ msgid "New notifications at"
+#~ msgstr "Nieuwe notificaties op"
+
+#~ msgid "From the editors:"
+#~ msgstr "Van de redactie"

@@ -38,7 +38,7 @@ class SendNotificationEmailsTestCase(FastTenantTestCase):
         call_command('send_notification_emails')
 
         args, kwargs = mocked_send_mail_multi.call_args
-        subject = ugettext_lazy("New notifications at %s" % config.NAME)
+        subject = ugettext_lazy("Nieuwe notificaties op %s" % config.NAME)
 
         self.assertEqual(mocked_send_mail_multi.call_count, 1)
         self.assertEqual(args[0], subject)
@@ -82,7 +82,7 @@ class SendNotificationEmailsTestCase(FastTenantTestCase):
         call_command('send_notification_emails')
 
         args, kwargs = mocked_send_mail_multi.call_args
-        subject = ugettext_lazy("New notifications at %s" % config.NAME)
+        subject = ugettext_lazy("Nieuwe notificaties op %s" % config.NAME)
 
         self.assertEqual(mocked_send_mail_multi.call_count, 1)
         self.assertEqual(args[2]['notifications'][0]['action'], 'commented')
@@ -103,7 +103,7 @@ class SendNotificationEmailsTestCase(FastTenantTestCase):
         call_command('send_notification_emails')
 
         args, kwargs = mocked_send_mail_multi.call_args
-        subject = ugettext_lazy("New notifications at %s" % config.NAME)
+        subject = ugettext_lazy("Nieuwe notificaties op %s" % config.NAME)
 
         self.assertEqual(mocked_send_mail_multi.call_count, 1)
         self.assertEqual(args[2]['notifications'][0]['action'], 'created')
