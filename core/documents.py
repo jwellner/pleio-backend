@@ -16,7 +16,7 @@ class DefaultDocument(Document):
 
 @registry.register_document
 class UserDocument(DefaultDocument):
-    id = fields.TextField()
+    id = fields.KeywordField()
     type = fields.KeywordField(attr="type_to_string")
     read_access = fields.ListField(fields.TextField(attr="search_read_access"))
     is_active = fields.BooleanField()
@@ -56,7 +56,7 @@ class UserDocument(DefaultDocument):
 
 @registry.register_document
 class GroupDocument(DefaultDocument):
-    id = fields.TextField()
+    id = fields.KeywordField()
     tags = fields.ListField(fields.TextField())
     type = fields.KeywordField(attr="type_to_string")
     read_access = fields.ListField(fields.TextField(attr="search_read_access"))

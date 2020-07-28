@@ -14,6 +14,7 @@ def resolve_search(_, info, q=None, containerGuid=None, type=None, subtype=None,
     # pylint: disable=too-many-arguments
     # pylint: disable=redefined-builtin
     # pylint: disable=too-many-locals
+    # pylint: disable=too-many-branches
 
     total = 0
     totals = []
@@ -34,12 +35,13 @@ def resolve_search(_, info, q=None, containerGuid=None, type=None, subtype=None,
     # TODO: Tests
 
     # search in index entities
+
     s = Search(index='entities').query(
             Q('multi_match', query=q, fields=['title^2', 'description', 'tags'])
         ).filter(
             'terms', read_access=list(get_acl(user))
         ).filter(
-            'match', tenant_name=tenant_name
+            'term', tenant_name=tenant_name
         ).filter(
             'range', created_at={'gte': dateFrom, 'lte': dateTo}
         )
@@ -55,11 +57,17 @@ def resolve_search(_, info, q=None, containerGuid=None, type=None, subtype=None,
         totals.append({"subtype": t.key, "total": t.doc_count})
         total = total + t.doc_count
 
+    if subtype and subtype in ['file', 'folder', 'blog', 'discussion', 'event', 'news', 'question', 'wiki', 'page']:
+        s = s.filter('term', type=subtype)
+        response = s.execute()
+
     ids = []
-    for hit in response:
-        if subtype and subtype != hit['type']:
-            continue
-        ids.append(hit['id'])
+
+    if subtype and subtype not in ['file', 'folder', 'blog', 'discussion', 'event', 'news', 'question', 'wiki', 'page']:
+        pass
+    else:
+        for hit in response:
+            ids.append(hit['id'])
 
     # search in index users
     s = Search(index='users').query(
@@ -73,7 +81,7 @@ def resolve_search(_, info, q=None, containerGuid=None, type=None, subtype=None,
         ).filter(
             'terms', read_access=list(get_acl(user))
         ).filter(
-            'match', tenant_name=tenant_name
+            'term', tenant_name=tenant_name
         ).filter(
             'range', created_at={'gte': dateFrom, 'lte': dateTo}
         )
@@ -89,10 +97,16 @@ def resolve_search(_, info, q=None, containerGuid=None, type=None, subtype=None,
         totals.append({"subtype": t.key, "total": t.doc_count})
         total = total + t.doc_count
 
-    for hit in response:
-        if subtype and subtype != hit['type']:
-            continue
-        ids.append(hit['id'])
+    if subtype and subtype == 'user':
+        s = s.filter('term', type=subtype)
+        response = s.execute()
+
+    if subtype and subtype != 'user':
+        pass
+    else:
+        for hit in response:
+            ids.append(hit['id'])
+
 
     # search in index groups
     s = Search(index='groups').query(
@@ -100,7 +114,7 @@ def resolve_search(_, info, q=None, containerGuid=None, type=None, subtype=None,
         ).filter(
             'terms', read_access=list(get_acl(user))
         ).filter(
-            'match', tenant_name=tenant_name
+            'term', tenant_name=tenant_name
         ).filter(
             'range', created_at={'gte': dateFrom, 'lte': dateTo}
         )
@@ -116,11 +130,15 @@ def resolve_search(_, info, q=None, containerGuid=None, type=None, subtype=None,
         totals.append({"subtype": t.key, "total": t.doc_count})
         total = total + t.doc_count
 
-    for hit in response:
-        if subtype and subtype != hit['type']:
-            continue
-        ids.append(hit['id'])
+    if subtype and subtype == 'group':
+        s = s.filter('term', type=subtype)
+        response = s.execute()
 
+    if subtype and subtype != 'group':
+        pass
+    else:
+        for hit in response:
+            ids.append(hit['id'])
 
     # get and combine objects
     entities = Entity.objects.filter(id__in=ids).select_subclasses()
