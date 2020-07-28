@@ -46,7 +46,7 @@ class Command(BaseCommand):
         if config.EMAIL_OVERVIEW_SUBJECT:
             subject = config.EMAIL_OVERVIEW_SUBJECT
         else:
-            subject = ugettext_lazy("Regular overview of %s" % config.NAME)
+            subject = ugettext_lazy("Regular overview of %(site_name)s") % {'site_name': config.NAME}
 
         for user in users:
 

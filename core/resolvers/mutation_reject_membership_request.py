@@ -34,7 +34,7 @@ def resolve_reject_membership_request(_, info, input):
 
     membership_request.delete()
 
-    subject = ugettext_lazy("Request for access to the %s group has been refused" % group.name)
+    subject = ugettext_lazy("Request for access to the %(group_name)s group has been refused") % {'group_name': group.name}
 
     context = get_default_email_context(info.context)
     context['group_name'] = group.name

@@ -32,13 +32,13 @@ def resolve_toggle_user_is_admin(_, info, input):
         user.save()
 
         admin_email_addresses = list(User.objects.filter(is_admin=True).values_list('email', flat=True))
-        subject = ugettext_lazy("A site administrator was removed from %s" % context["site_name"])
+        subject = ugettext_lazy("A site administrator was removed from %(site_name)s") % {'site_name': context["site_name"]}
 
         # mail to admins to notify about removed admin
         email = send_mail_multi(subject, 'email/user_role_admin_removed_for_admins.html', context, admin_email_addresses)
         email.send()
 
-        subject = ugettext_lazy("Your site administrator rights for %s were removed" % context["site_name"])
+        subject = ugettext_lazy("Your site administrator rights for %(site_name)s were removed") % {'site_name': context["site_name"]}
 
         # mail to user to notify about removed rigths
         email = send_mail_multi(subject, 'email/user_role_admin_removed_for_user.html', context, [user.email])
@@ -50,12 +50,12 @@ def resolve_toggle_user_is_admin(_, info, input):
         user.is_admin = True
         user.save()
 
-        subject = ugettext_lazy("A new site administrator was assigned for %s" % context["site_name"])
+        subject = ugettext_lazy("A new site administrator was assigned for %(site_name)s") % {'site_name': context["site_name"]}
         # mail to admins to notify about added admin
         email = send_mail_multi(subject, 'email/user_role_admin_assigned_for_admins.html', context, admin_email_addresses)
         email.send()
 
-        subject = ugettext_lazy("You're granted site administrator right on %s" % context["site_name"])
+        subject = ugettext_lazy("You're granted site administrator right on %(site_name)s") % {'site_name': context["site_name"]}
 
         # mail to user to notify about added rigths
         email = send_mail_multi(subject, 'email/user_role_admin_assigned_for_user.html', context, [user.email])

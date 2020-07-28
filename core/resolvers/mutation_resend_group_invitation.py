@@ -22,7 +22,7 @@ def resolve_resend_group_invitation(_, info, input):
     if not group.can_write(user):
         raise GraphQLError(COULD_NOT_INVITE)
 
-    subject = ugettext_lazy("Reminder to become a member of the %s group" % group.name)
+    subject = ugettext_lazy("Reminder to become a member of the %(group_name)s group") % {'group_name': group.name}
     link = get_base_url(info.context) + '/groups/invitations/?invitecode=' + invitation.code
 
     try:

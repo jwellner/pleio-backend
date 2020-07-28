@@ -35,7 +35,7 @@ def resolve_change_group_role(_, info, input):
         raise GraphQLError(COULD_NOT_SAVE)
 
     if clean_input.get("role") == "owner":
-        subject = ugettext_lazy("Ownership of the %s group has been transferred" % group.name)
+        subject = ugettext_lazy("Ownership of the %(group_name)s group has been transferred") % {'group_name':group.name}
         link = get_base_url(info.context) + "/groups/view/{}/{}".format(group.guid, slugify(group.name))
 
         context = get_default_email_context(info.context)
