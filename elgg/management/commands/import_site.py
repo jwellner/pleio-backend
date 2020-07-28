@@ -727,6 +727,9 @@ class Command(InteractiveTenantOption, BaseCommand):
         for elgg_file in elgg_file_items:
             file = self.mapper.get_file(elgg_file)
 
+            if not file:
+                continue
+
             try:
                 file.save()
 

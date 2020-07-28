@@ -1,6 +1,7 @@
 from django.conf import settings
 from django.utils import timezone
 from django.utils.translation import ugettext_lazy
+from django.templatetags.static import static
 from cms.models import Page
 from core import config
 from core.constances import NOT_LOGGED_IN, USER_NOT_SITE_ADMIN
@@ -58,7 +59,7 @@ def get_site():
         'logo': config.LOGO,
         'logoAlt': config.LOGO_ALT,
         'likeIcon': config.LIKE_ICON,
-        'icon': config.ICON,
+        'icon': config.ICON if config.ICON else static('icon.svg'),
         'iconAlt': config.ICON_ALT,
         'showIcon': config.ICON_ENABLED,
         'startPage': config.STARTPAGE,
@@ -144,7 +145,7 @@ def get_site_settings():
 
         'startPageCmsOptions': start_page_cms_options,
         'startPageCms': config.STARTPAGE_CMS,
-        'icon': config.ICON,
+        'icon': config.ICON if config.ICON else static('icon.svg'),
         'showIcon': config.ICON_ENABLED,
         'menu': config.MENU,
 
@@ -205,13 +206,10 @@ def get_site_settings():
         'startpage': config.STARTPAGE,
         'initiatorLink': config.INITIATOR_LINK,
 
-
         'activityFilter': get_activity_filters(),
 
         'usersOnline': get_online_users(),
         'achievementsEnabled': config.ACHIEVEMENTS_ENABLED,
-
-
     }
 
     return site_settings
