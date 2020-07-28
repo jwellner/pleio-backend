@@ -19,6 +19,8 @@ def resolve_add_poll(_, info, input):
     entity.owner = user
 
     entity.read_access = access_id_to_acl(entity, clean_input.get("accessId"))
+    entity.write_access = access_id_to_acl(entity, clean_input.get("writeAccessId"))
+
     entity.title = clean_input.get("title")
 
     entity.save()
