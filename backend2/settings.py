@@ -110,8 +110,8 @@ if not RUN_AS_ADMIN_APP:
 if LOCAL_MIDDLEWARE:
     MIDDLEWARE += LOCAL_MIDDLEWARE
 
-if DEBUG:
-    MIDDLEWARE = ['elasticapm.contrib.django.middleware.TracingMiddleware'] + MIDDLEWARE
+#if DEBUG:
+#    MIDDLEWARE = ['elasticapm.contrib.django.middleware.TracingMiddleware'] + MIDDLEWARE
 
 ROOT_URLCONF = 'backend2.urls'
 PUBLIC_SCHEMA_URLCONF = 'backend2.urls_public'
@@ -162,6 +162,10 @@ LOGGING = {
             'class': 'logging.StreamHandler',
         },
     },
+    'root': {
+        'handlers': ['console'],
+        'level': 'WARNING',
+    },
     'loggers': {
         'django': {
             'handlers': ['console'],
@@ -169,7 +173,7 @@ LOGGING = {
         },
         'mozilla_django_oidc': {
             'handlers': ['console'],
-            'level': 'DEBUG'
+            'level': 'WARNING'
         }
     }
 }
@@ -249,3 +253,21 @@ TENANT_MODEL = "tenants.Client"
 TENANT_DOMAIN_MODEL = "tenants.Domain"
 
 IMPORTING = False
+
+# Celery
+CELERY_BROKER_URL = os.getenv('CELERY_BROKER_URL')
+# Added because of: https://github.com/celery/celery/issues/4296
+CELERY_BROKER_TRANSPORT_OPTIONS = {
+    'max_retries': 3,
+    'interval_start': 0,
+    'interval_step': 0.2,
+    'interval_max': 0.2,
+}
+CELERY_TASK_ALWAYS_EAGER = os.getenv('CELERY_TASK_ALWAYS_EAGER') == 'True'
+CELERY_TASK_PUBLISH_RETRY = True
+CELERY_TASK_PUBLISH_RETRY_POLICY = {
+    'max_retries': 3,
+    'interval_start': 0,
+    'interval_step': 0.2,
+    'interval_max': 0.2
+}

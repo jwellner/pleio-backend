@@ -25,7 +25,11 @@ RUN apt-get update && apt-get install --no-install-recommends -y \
     mime-support \
     libmagic-dev \
     libpq-dev \
-    libmariadb3
+    libmariadb3 \
+    antiword \
+    poppler-utils \
+    tesseract-ocr \
+    swig
 
 COPY --from=build /app-tmp/venv /app-tmp/venv
 ENV PATH="/app-tmp/venv/bin:${PATH}"
