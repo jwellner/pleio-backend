@@ -28,13 +28,14 @@ following commands within the repository:
     `docker-compose up`
 
 On an empty postgres database perform
-- ```docker-compose exec admin /app/manage.py migrate_schemas --shared```
-- ```docker-compose exec admin /app/manage.py create_tenant```
+- `docker-compose exec admin /app/manage.py migrate_schemas --shared`
+- `docker-compose exec admin /app/manage.py create_tenant`
     -   schema: public
     -   name: public
     -   domain: localhost
     -   is_primary: True
-
+- `docker-compose exec admin /app/manage.py createsuperuser`
+- Login on http://localhost:8000/admin and create your first tenant
 
 Now login in the admin tool on http://localhost:8888/login
 

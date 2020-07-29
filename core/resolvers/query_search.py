@@ -37,7 +37,7 @@ def resolve_search(_, info, q=None, containerGuid=None, type=None, subtype=None,
     # search in index entities
 
     s = Search(index='entities').query(
-            Q('multi_match', query=q, fields=['title^2', 'description', 'tags'])
+            Q('multi_match', query=q, fields=['title^2', 'description', 'tags', 'file_contents'])
         ).filter(
             'terms', read_access=list(get_acl(user))
         ).filter(

@@ -1,9 +1,11 @@
 import logging
+from django.apps import apps
 from django.db import models
 from django.conf import settings
 from django_elasticsearch_dsl.registries import registry
 from django_elasticsearch_dsl.signals import BaseSignalProcessor
-
+from django_tenants.utils import parse_tenant_config_path
+from core.tasks import elasticsearch_index_file
 
 logger = logging.getLogger(__name__)
 
@@ -15,16 +17,29 @@ class CustomSignalProcessor(BaseSignalProcessor):
         """Overwrite default handle_save and stop raising exception on error
         """
         try:
-            registry.update(instance)
-            registry.update_related(instance)
+            if isinstance(instance, apps.get_model('file.FileFolder')):
+                schema_name = parse_tenant_config_path("")
+                elasticsearch_index_file.delay(schema_name, instance.id)
+            else:
+                registry.update(instance)
+                registry.update_related(instance)
+
         except Exception as e:
-            logger.error("Error updating elasticsearch: %s", e)
+            logger.error("Error sending update task: %s", e)
 
     def handle_pre_delete(self, sender, instance, **kwargs):
         """Overwrite default handle_pre_delete and stop raising exception on error
         """
         try:
             registry.delete_related(instance)
+        except Exception as e:
+            logger.error("Error updating elasticsearch: %s", e)
+
+    def handle_delete(self, sender, instance, **kwargs):
+        """Overwrite default handle_pre_delete and stop raising exception on error
+        """
+        try:
+            registry.delete(instance, raise_on_error=False)
         except Exception as e:
             logger.error("Error updating elasticsearch: %s", e)
 
