@@ -10,6 +10,7 @@ from django.db import connection
 from tenants.models import Client
 from user.models import User
 
+
 class Command(BaseCommand):
     help = 'Send overview emails'
 
@@ -89,6 +90,13 @@ class Command(BaseCommand):
 
             # filter on created_at after last received overview or maximum lower bound
             entities = entities.filter(created_at__gte=lower_bound)
+            entities = entities.filter(
+                ~Q(news__isnull=True) |
+                ~Q(blog__isnull=True) |
+                ~Q(event__isnull=True) |
+                ~Q(wiki__isnull=True) |
+                ~Q(question__isnull=True)
+            )
             entity_views = entity_views.filter(created_at__gte=lower_bound)
 
             # remove featured and viewed entities from entities
