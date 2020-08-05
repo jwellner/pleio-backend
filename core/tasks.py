@@ -8,14 +8,18 @@ from django.core import management
 from tenants.models import Client
 from django_tenants.utils import schema_context
 from django_elasticsearch_dsl.registries import registry
+from elasticsearch_dsl import Search
 
 from file.models import FileFolder
 
 logger = get_task_logger(__name__)
 
-@shared_task(name='background.dispatch_cron', bind=True)
+@shared_task(bind=True)
 def dispatch_crons(self, period):
     # pylint: disable=unused-argument
+    '''
+    Dispatch period cron tasks for all tenants
+    '''
     for client in Client.objects.exclude(schema_name='public'):
         logger.info('Schedule cron %s for %s', period, client.schema_name)
 
@@ -25,27 +29,61 @@ def dispatch_crons(self, period):
         if period in ['daily', 'weekly', 'monthly']:
             send_overview.delay(client.schema_name, period)
 
+@shared_task(bind=True)
+def dispatch_task(self, task, **kwargs):
+    # pylint: disable=unused-argument
+    '''
+    Dispatch task for all tenants
+    '''
+    for client in Client.objects.exclude(schema_name='public'):
+        logger.info('Dispatch task %s for %s', task, client.schema_name)
+        self.app.tasks[task].delay(client.schema_name, *kwargs)
 
-@shared_task(name='send.notifications', bind=True)
+@shared_task(bind=True)
 def send_notifications(self, schema_name):
     # pylint: disable=unused-argument
+    '''
+    Send notification mails for tenant
+    '''
     management.execute_from_command_line(['manage.py', 'tenant_command', 'send_notification_emails', '--schema', schema_name])
 
-@shared_task(name='send.overview', bind=True)
+@shared_task(bind=True)
 def send_overview(self, schema_name, period):
     # pylint: disable=unused-argument
+    '''
+    Send overview mails for tenant
+    '''
     management.execute_from_command_line(['manage.py', 'tenant_command', 'send_overview_emails', '--schema', schema_name, '--interval', period])
 
 @shared_task(bind=True, ignore_result=True)
 def elasticsearch_rebuild(self, schema_name):
     # pylint: disable=unused-argument
+    '''
+    Rebuild search index for tenant
+    '''
     with schema_context(schema_name):
         logger.info('elasticsearch_rebuild \'%s\'', schema_name)
 
         models = registry.get_models()
 
+        # create indexs if not exist
+        for index in registry.get_indices(models):
+            try:
+                index.create()
+                logger.info('created index %s')
+            except Exception:
+                logger.info('index %s already exists')
+
+        # delete all objects for tenant before updating
+        s = Search(index='_all').query().filter(
+            'term', tenant_name=schema_name
+        )
+
+        logger.info('deleting %i objects', s.count())
+        s.delete()
+
         for doc in registry.get_documents(models):
-            logger.info("Indexing %i '%s' objects",
+            logger.info("indexing %i '%s' objects",
                 doc().get_queryset().count(),
                 doc.django.model.__name__
             )
@@ -55,6 +93,9 @@ def elasticsearch_rebuild(self, schema_name):
 @shared_task(bind=True, ignore_result=True)
 def elasticsearch_index_file(self, schema_name, file_guid):
     # pylint: disable=unused-argument
+    '''
+    Index file for tenant
+    '''
     with schema_context(schema_name):
         try:
             instance = FileFolder.objects.get(id=file_guid)
