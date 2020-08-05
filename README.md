@@ -1,5 +1,20 @@
-# Backend2
-This repository contains the work in progress of Backend2, a brand new social engine based on [Django](https://www.djangoproject.com/) and [GraphQL](http://graphql.org/). The backend offers a pluggable and extendable interface that allows developers to easily develop their own extensions. The backend will initially be used by [Pleio](https://www.pleio.nl). The goal of this backend is to be:
+The code for backend2
+
+## Table of contents
+
+- [Project overview](#project-overview)
+- [Requirements](#requirements)
+- [Getting started](#getting-started)
+- [Advanced](#advanced)
+    - [File storage](#file-storage)
+    - [Elasticsearch](#elasticsearch)
+    - [Background](#background)
+    - [Translations](#translations)
+    - [Import Elgg site](elgg/README.md)
+
+## Project overview
+
+This repository contains the work in progress of Backend2, a brand new social engine based on [Django](https://www.djangoproject.com/) and [GraphQL](http://graphql.org/). The backend will initially be used by [Pleio](https://www.pleio.nl). The goal of this backend is to be:
 
 - Generic
 - Scalable
@@ -8,103 +23,183 @@ This repository contains the work in progress of Backend2, a brand new social en
 - Modular
 - Extensible
 
-## Features
-- Object versioning, including archival requirements
+#### Features
+
+- Object versioning, including archival requirements (in progress)
 - Access control (read/write permissions, groups support)
 - Full-text search
 - OpenID connect support
-- Logging (audit trail)
+- Logging (audit trail) (in progress)
 - Notifications
-- Handling large file uploads (attachments)
+- Handling large file uploads
 
-This backend only provides a GraphQL interface and is probably used in conjunction with a Javascript frontend or an app.
+## Requirements
 
-## Setup development (through docker-compose)
+- [docker](https://docs.docker.com/desktop/)
+- Local DNS for tenants (for example [Dnsmasq](#dnsmasq) for mac)
+
+## Getting started
+
+How to get started with your development environment.
+
 Copy `.env-example` to `.env` and update the OIDC endpoint credentials you got for account.pleio-test.nl
 
-Make sure [Docker](https://www.docker.com/) is installed. Then run the
-following commands within the repository:
+Make sure [Docker](https://www.docker.com/) is installed. Then run the following commands within the repository:
 
-    `docker-compose up`
+```bash
+docker-compose pull
+docker-compose up
+```
 
-On an empty postgres database perform
-- `docker-compose exec admin /app/manage.py migrate_schemas --shared`
-- `docker-compose exec admin /app/manage.py create_tenant`
-    -   schema: public
-    -   name: public
-    -   domain: localhost
-    -   is_primary: True
-- `docker-compose exec admin /app/manage.py createsuperuser`
-- Login on http://localhost:8000/admin and create your first tenant
+If you started your development environment for the first time execute the following commands:
 
-Now login in the admin tool on http://localhost:8888/login
+#### Migrate schemas
 
-Create tenants through the admin
+```bash
+docker-compose exec admin /app/manage.py migrate_schemas --shared
+```
 
-## GraphQL schema
+#### Create admin tenant
 
-This project uses a schema-first GraphQL implementation with Ariadne.
+```bash
+docker-compose exec admin /app/manage.py create_tenant
+```
 
-You can find the schema in `backend2/schema.graphql` it is initially synced with the backend1 graphql Schema.
+Use the following parameters:
 
-It is possible to extend the basis schema using the extend directive.
+- schema: public
+- name: public
+- domain: localhost
+- is_primary: True
 
-You can download the backend1 graphql schema using the npm package `get-graphql-schema`. Install it using `npm -g get-graphql-schema` and run the following command:
+#### Create superuser for admin 
 
-`get-graphql-schema https://nieuw-template.pleio-test.nl/graphql > schema.graphql`
+```bash
+docker-compose exec admin /app/manage.py createsuperuser
+```
 
-## Storage
+#### Create your first tenant
 
-Right now we have 2 storage backend options:
+- Login on http://localhost:8888/admin/
+- Add client (example):
+    - Schema name: `test1`
+    - Name: `My first test client`
+    - Domain: `test1.pleio.local`
+
+Now browse to: http://test.pleio.local
+
+#### Cleanup and start over
+
+When you want to start with a clean installations run the following command to delete all volumes:
+
+```bash
+docker-compose down -v
+docker-compose rm -f
+docker-compose pull
+```
+
+## Dnsmasq
+
+How to setup Dnsmasq for `*.local` domains on a mac:
+
+```bash
+brew install dnsmasq
+echo 'address=/.local/127.0.0.1' > $(brew --prefix)/etc/dnsmasq.conf
+brew services start dnsmasq
+sudo mkdir -v /etc/resolver
+sudo bash -c 'echo "nameserver 127.0.0.1" > /etc/resolver/local'
+```
+
+## Advanced
+
+Now you have your first tenant running there are some more advanced topics:
+
+- [File storage](#file-storage)
+- [Elasticsearch](#elasticsearch)
+- [Background](#background)
+- [Translations](#translations)
+- [Import Elgg site](elgg/README.md)
+
+## File storage
+
+Right now we have 2 file storage backend options:
 
 - Swift storage
 - S3 storage
 
 They can be enabled using environment variables `SWIFT_ENABLED` and `S3_ENABLED`. Check `backend/config.py` for configuration options.
 
+You can use them both for local development. Default we use S3.
+
+### S3 storage local development
+
+Install the [aws cli client](https://docs.aws.amazon.com/cli/latest/userguide/install-cliv2.html)
+
+#### First time setup
+
+Create s3 bucket
+
+```bash
+aws --endpoint-url=http://localhost:4572 s3 mb s3://demo-bucket
+```
+
+Make bucket public
+
+```bash
+aws --endpoint-url=http://localhost:4572 s3api put-bucket-acl --bucket demo-bucket --acl public-read
+```
+
+#### More examples
+
+Copy existing files to bucket
+
+```bash
+aws --endpoint-url=http://localhost:4572 s3 cp support  s3://demo-bucket/test2/migrated/ --recursive
+```
+
+Add localstack to /etc/hosts to test from browser: `127.0.0.1 localstack`
+
 ### Swift storage local development
 
 To talk with the Swift storage backend you can use swiftclient by installing it using pip:
 
-`pip install python-swiftclient`
+```bash
+pip install python-swiftclient
+```
 
 #### Example commands
 
 Test connection:
 
-`swift -A http://localhost:12345/auth/v1.0 -U test:tester -K testing stat`
+```bash
+swift -A http://localhost:12345/auth/v1.0 -U test:tester -K testing stat
+```
 
 Create (public) container:
 
-`swift -A http://localhost:12345/auth/v1.0 -U test:tester -K testing post -r ".r:*" backend2-dev-public`
-
-### S3 storage local development
-
-Create s3 bucket:
-
-`aws --endpoint-url=http://localhost:4572 s3 mb s3://demo-bucket`
-
-Make bucket public:
-`aws --endpoint-url=http://localhost:4572 s3api put-bucket-acl --bucket demo-bucket --acl public-read`
-
-Copy files to bucket:
-`aws --endpoint-url=http://localhost:4572 s3 cp support  s3://demo-bucket/test2/migrated/ --recursive`
-
-Add localstack to /etc/hosts to test from browser:
-
-`127.0.0.1 localstack`
+```bash
+swift -A http://localhost:12345/auth/v1.0 -U test:tester -K testing post -r ".r:*" backend2-dev-public
+```
 
 ## Elasticsearch
 
-### Build search index
+We use [elasticsearch](https://www.elastic.co/) for searching.
 
-`docker-compose exec api python manage.py tenant_command search_index --rebuild --schema=qw `
+#### Create search index
 
-## Caching
+First time you have to create the search index.
 
-To use memcache as caching service add the following environment variable. for example 127.0.0.1:11211
+```bash
+docker-compose exec api python manage.py tenant_command search_index --create --schema=test1
+```
 
-`MEMCACHE_HOST_PORT`
+#### Rebuilding search index
+
+All tenants use the same search index. So when you want to rebuild the index for one tenant user the `--populate` argument.
+
+```bash
+docker-compose exec api python manage.py tenant_command search_index --populate --schema=test1
+```
 
 ## Translations
 
@@ -112,36 +207,15 @@ To use memcache as caching service add the following environment variable. for e
 
 With this command, you will create and edit .po files. The files will be filled with strings added in de code as msgid's
 
-`python manage.py makemessages`
+```bash
+docker-compose exec api python manage.py makemessages
+```
 
 With this command, you will compile the translation files which the application will use
 
-`python manage.py comilemessages`
-
-## Import Elgg site
-
-Commands for importing a elgg site:
-
-`docker-compose exec admin python manage.py import_site --settings=elgg.import_settings`
-
-Optional parameters:
-
-- `--elgg <databasename>` elgg database name, will be asked when not provided
-- `--schema <to_schema>` import to this schema, will be asked when not provided
-- `--flush` delete data from schema before import
-
-### Replace old IDs in content
-
-After the import you have to run the replace links command:
-
-`docker-compose exec admin python manage.py import_site --settings=elgg.import_settings --elgg_domain <search_domain_name>`
-
-`--elgg_domain` should be the domain name only ie `support.pleio.nl`
-
-Optional parameters:
-
-- `--elgg <databasename>` elgg database name, will be asked when not provided
-- `--schema <to_schema>` import to this schema, will be asked when not provided
+```bash
+docker-compose exec api python manage.py comilemessages
+```
 
 ## Background
 
@@ -152,7 +226,7 @@ Pleio uses [Celery](http://www.celeryproject.org/) for running background tasks.
 To manually call commands from the CLI, use:
 
 ```bash
-celery -A backend2.celery call {taskname} --args='{args}'
+docker-compose exec background celery -A backend2.celery call {taskname} --args='{args}'
 ```
 
 Possible tasknames and arguments:
@@ -161,7 +235,8 @@ Possible tasknames and arguments:
 
 Some example commands:
 
-- Run the daily cron on all tenants:
-    ```bash
-    celery -A background.app call background.dispatch_cron --args='["daily"]'
-    ```
+#### Run the daily cron on all tenants:
+
+```bash
+docker-compose exec background celery -A backend2.celery call background.dispatch_cron --args='["daily"]'
+```
