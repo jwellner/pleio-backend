@@ -151,12 +151,11 @@ def resolve_edit_site_setting(_, info, input):
 
         logo.save()
 
-        logo_url = "/site/logo/" + str(logo.id)
-        save_setting('LOGO', logo_url)
+        save_setting('LOGO', logo.embed_url)
 
     if 'removeLogo' in clean_input:
         try:
-            FileFolder.objects.get(id=config.LOGO[11:]).delete()
+            FileFolder.objects.get(id=config.LOGO.split('/')[3]).delete()
         except Exception:
             pass
         save_setting('LOGO', "")
@@ -176,13 +175,11 @@ def resolve_edit_site_setting(_, info, input):
 
         icon.save()
 
-        icon_url = "/site/icon/" + str(icon.id)
-
-        save_setting('ICON', icon_url)
+        save_setting('ICON', icon.embed_url)
 
     if 'removeIcon' in clean_input:
         try:
-            FileFolder.objects.get(id=config.ICON[11:]).delete()
+            FileFolder.objects.get(id=config.ICON.split('/')[3]).delete()
         except Exception:
             pass
         save_setting('ICON', "")

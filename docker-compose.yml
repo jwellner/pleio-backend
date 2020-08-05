@@ -39,7 +39,7 @@ services:
       - localstack
       - rabbitmq
   frontend:
-    image: registry.gitlab.com/pleio/frontend:latest
+    image: registry.gitlab.com/pleio/frontend:B2-latest
     volumes:
       - frontend-build:/shared
     command: "cp -Rp /usr/share/nginx/html/. /shared"
