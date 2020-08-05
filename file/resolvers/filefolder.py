@@ -51,7 +51,7 @@ def resolve_download(obj, info):
     if obj.is_folder:
         return None
 
-    return obj.download
+    return obj.download_url
 
 
 filefolder.set_field("guid", shared.resolve_entity_guid)

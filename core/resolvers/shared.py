@@ -38,7 +38,7 @@ def resolve_entity_featured(obj, info):
     # pylint: disable=unused-argument
 
     if obj.featured_image:
-        image = obj.featured_image.download
+        image = obj.featured_image.embed_url
     else:
         image = None
 

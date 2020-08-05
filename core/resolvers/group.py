@@ -54,7 +54,7 @@ def auto_notification(obj, info):
 def resolve_group_featured(obj, info):
     # pylint: disable=unused-argument
     if obj.featured_image:
-        image = obj.featured_image.download
+        image = obj.featured_image.embed_url
     else:
         image = None
 
@@ -218,7 +218,7 @@ def resolve_icon(group, info):
     # pylint: disable=unused-argument
 
     if group.icon:
-        return group.icon.download
+        return group.icon.embed_url
 
     return None
 

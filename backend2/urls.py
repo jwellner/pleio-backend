@@ -24,12 +24,10 @@ urlpatterns = [
     path('graphql', GraphQLView.as_view(schema=schema), name='graphql'),
 
     path('file/download/<uuid:file_id>/<str:file_name>', file_views.download, name='download'),
-    path('bulk_download', file_views.bulk_download, name='bulk_download'),
+    path('file/embed/<uuid:file_id>/<str:file_name>', file_views.embed, name='embed'),
     path('file/thumbnail/<uuid:file_id>', file_views.thumbnail, name='thumbnail'),
+    path('bulk_download', file_views.bulk_download, name='bulk_download'),
 
-    # TODO: make 1 url for logo and icon
-    path('site/logo/<uuid:file_id>', file_views.file_cache_header, name='site_logo'),
-    path('site/icon/<uuid:file_id>', file_views.file_cache_header, name='site_icon'),
     path('exporting/event/<uuid:event_id>', event_views.export, name='event_export'),
 
     path('robots.txt', core_views.robots_txt),

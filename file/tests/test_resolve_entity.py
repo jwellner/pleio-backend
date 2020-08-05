@@ -111,7 +111,7 @@ class FileFolderTestCase(FastTenantTestCase):
         self.assertEqual(data["entity"]["hasChildren"], False)
         self.assertEqual(data["entity"]["mimeType"], file_mock.content_type)
         self.assertEqual(data["entity"]["thumbnail"], self.file.thumbnail_url)
-        self.assertEqual(data["entity"]["download"], self.file.download)
+        self.assertEqual(data["entity"]["download"], self.file.download_url)
 
         mock_save.assert_called_once()
 

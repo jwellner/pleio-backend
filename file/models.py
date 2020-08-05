@@ -60,12 +60,16 @@ class FileFolder(Entity):
             prefix, self.guid, os.path.basename(self.upload.name)
         ).lower()
     @property
-    def download(self):
+    def download_url(self):
         return reverse('download', args=[self.id, os.path.basename(self.upload.name)])
 
     @property
+    def embed_url(self):
+        return reverse('embed', args=[self.id, os.path.basename(self.upload.name)])
+
+    @property
     def thumbnail_url(self):
-        return "/file/thumbnail/{}".format(self.id)
+        return reverse('thumbnail', args=[self.id])
 
     def has_children(self):
         if self.children.count() > 0:

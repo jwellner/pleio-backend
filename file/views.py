@@ -2,6 +2,7 @@ import tempfile
 import zipfile
 from django.core.exceptions import ObjectDoesNotExist
 from django.http import Http404, FileResponse, StreamingHttpResponse
+from django.views.decorators.cache import cache_control
 from file.models import FileFolder
 from file.helpers import add_folders_to_zip
 from file.helpers import generate_thumbnail
@@ -22,7 +23,30 @@ def download(request, file_id=None, file_name=None):
 
         response = StreamingHttpResponse(streaming_content=entity.upload.open(), content_type=entity.mime_type)
         response['Content-Length'] = entity.upload.size
-        response['Content-Disposition'] = "attachment; filename=%s" % file_name
+        response['Content-Disposition'] = "attachment; filename=%s" % path.basename(entity.upload.name)
+        return response
+
+    except ObjectDoesNotExist:
+        raise Http404("File not found")
+
+    raise Http404("File not found")
+
+@cache_control(public=True, max_age=15724800)
+def embed(request, file_id=None, file_name=None):
+    user = request.user
+
+    if not file_id or not file_name:
+        raise Http404("File not found")
+
+    try:
+        entity = FileFolder.objects.visible(user).get(id=file_id)
+
+        if entity.group and entity.group.is_closed and not entity.group.is_full_member(user) and not user.is_admin:
+            raise Http404("File not found")
+
+        response = StreamingHttpResponse(streaming_content=entity.upload.open(), content_type=entity.mime_type)
+        response['Content-Length'] = entity.upload.size
+        response['Content-Disposition'] = "attachment; filename=%s" % path.basename(entity.upload.name)
         return response
 
     except ObjectDoesNotExist:
@@ -63,6 +87,7 @@ def bulk_download(request):
 
     return response
 
+@cache_control(public=True, max_age=15724800)
 def thumbnail(request, file_id=None):
     user = request.user
 
@@ -83,26 +108,3 @@ def thumbnail(request, file_id=None):
         return response
 
     raise Http404("File not found")
-
-
-def file_cache_header(request, file_id=None, cache_seconds=15724800):
-    user = request.user
-
-    if not file_id:
-        raise Http404("File not found")
-
-    try:
-        entity = FileFolder.objects.visible(user).get(id=file_id)
-
-        if entity.group and entity.group.is_closed and not entity.group.is_full_member(user) and not user.is_admin:
-            raise Http404("File not found")
-
-    except ObjectDoesNotExist:
-        raise Http404("File not found")
-
-    response = FileResponse(entity.upload.open(), content_type=entity.mime_type)
-
-    response['Content-Length'] = entity.upload.size
-    response['Cache-Control'] = 'public, max-age=' + str(cache_seconds)
-
-    return response

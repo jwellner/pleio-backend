@@ -313,7 +313,7 @@ class ElggHelpers():
 
                 entity.save()
 
-                return "/site/%s/%s" % (image_type, str(entity.id))
+                return "/file/embed/%s" % (str(entity.id))
             return ""
         except Exception:
             return ""
