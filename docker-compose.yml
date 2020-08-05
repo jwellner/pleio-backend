@@ -1,19 +1,11 @@
 version: '3'
 
 services:
-  nginx:
-    image: nginx:alpine
-    ports:
-      - "8000:80"
-    volumes:
-      - ./docker/nginx.conf:/etc/nginx/nginx.conf
-    depends_on:
-      - api
-      - frontend
   api:
     build: .
     restart: on-failure
     environment:
+      DEBUG: 'True'
       CELERY_BROKER_URL: 'amqp://rabbitmq'
     env_file:
       - ./.env
@@ -22,12 +14,15 @@ services:
     command: ["/start-dev.sh"]
     volumes:
       - .:/app
+      - frontend-build:/app/frontend
+    ports:
+      - "8000:8000"
     depends_on:
       - db
+      - frontend
       - admin
       - localstack
       - rabbitmq
-
   background:
     build: .
     restart: on-failure
@@ -43,12 +38,11 @@ services:
       - db
       - localstack
       - rabbitmq
-
   frontend:
-    image: registry.gitlab.com/pleio/frontend:B2-latest
-    restart: on-failure
-    ports:
-      - "9000:80"
+    image: registry.gitlab.com/pleio/frontend:latest
+    volumes:
+      - frontend-build:/shared
+    command: "cp -Rp /usr/share/nginx/html/. /shared"
   admin:
     build: .
     restart: on-failure
@@ -128,6 +122,7 @@ services:
       RABBITMQ_DEFAULT_PASS: "guest"
 
 volumes:
+  frontend-build:
   postgres_data:
   esdata01:
     driver: local

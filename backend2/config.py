@@ -47,10 +47,8 @@ LOCAL_APPS = [
     'bookmark',
     'task',
     'file',
-    'elgg'
+    'elgg',
 ]
-
-STATIC_ROOT = '/app/static'
 
 LOCAL_MIDDLEWARE = []
 
