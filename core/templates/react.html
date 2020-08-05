@@ -24,7 +24,7 @@
     {% if webpack_dev_server %}
     <link href="http://localhost:9001/web.css?v={{ version }}" rel="stylesheet" type="text/css" media="screen">
     {% else %}
-    <link href="/frontend/web.css?v={{ version }}" rel="stylesheet" type="text/css" media="screen">
+    <link href="{% static 'frontend/web.css' %}" rel="stylesheet" type="text/css" media="screen">
     {% endif %}
 
     {% if config.GOOGLE_SITE_VERIFICATION %}
@@ -80,13 +80,12 @@
     <script>window.__APOLLO_STATE__ = {{ apollo_state|safe }};</script>
     {% endif %}
 
-    <script src="https://polyfill.io/v3/polyfill.js?gated=true&features=es2015,es2016,es2017,fetch,Element.prototype.closest"></script>
     {% if webpack_dev_server %}
     <script src="http://localhost:9001/vendor.js"></script>
     <script src="http://localhost:9001/web.js"></script>
     {% else %}
-    <script src="/frontend/vendor.js?v={{ version }}"></script>
-    <script src="/frontend/web.js?v={{ version }}"></script>
+    <script src="{% static 'frontend/vendor.js' %}"></script>
+    <script src="{% static 'frontend/web.js' %}"></script>
     {% endif %}
 </body>
 </html>
