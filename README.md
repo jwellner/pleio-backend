@@ -231,7 +231,12 @@ docker-compose exec background celery -A backend2.celery call {taskname} --args=
 
 Possible tasknames and arguments:
 
-- background.dispatch_cron, ["{period}"]
+- core.tasks.dispatch_cron, ["{period}"]
+- core.tasks.dispatch_task, ["{task_name}", **"{arguments}"]
+- core.tasks.send_notifications, ["{schema_name}"]
+- core.tasks.send_overview, ["{schema_name}", "{overview}"]
+- core.tasks.elasticsearch_rebuild, ["{schema_name}""]
+- core.tasks.elasticsearch_index_file, ["{schema_name}", "{file_guid}"]
 
 Some example commands:
 

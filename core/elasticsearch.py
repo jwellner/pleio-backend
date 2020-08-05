@@ -17,7 +17,7 @@ class CustomSignalProcessor(BaseSignalProcessor):
         """Overwrite default handle_save and stop raising exception on error
         """
         try:
-            if isinstance(instance, apps.get_model('file.FileFolder')):
+            if isinstance(instance, apps.get_model('file.FileFolder')) and instance.group:
                 schema_name = parse_tenant_config_path("")
                 elasticsearch_index_file.delay(schema_name, instance.id)
             else:

@@ -271,3 +271,4 @@ CELERY_TASK_PUBLISH_RETRY_POLICY = {
     'interval_step': 0.2,
     'interval_max': 0.2
 }
+CELERY_TIMEZONE = 'Europe/Amsterdam'
