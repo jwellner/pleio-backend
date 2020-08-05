@@ -1,4 +1,4 @@
-image: python:3.7
+image: python:3.8
 
 stages:
   - test
@@ -13,6 +13,7 @@ variables:
   DB_PASSWORD: postgres
   DB_NAME: postgres
   ENV: test
+  DEBUG: "True"
   PIP_CACHE_DIR: $CI_PROJECT_DIR/.cache/pip
   ELASTICSEARCH_URL: http://elasticsearch:9200
   ELASTICSEARCH_HOST: http://elasticsearch:9200
@@ -46,6 +47,8 @@ test:
   script:
     - curl "http://elasticsearch:9200/_cat/health"
     - pip install -r requirements.txt
+    - mkdir -p static frontend
+    - python manage.py collectstatic --noinput
     - coverage run --source='.' manage.py test
     - coverage report
 
