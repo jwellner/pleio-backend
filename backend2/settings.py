@@ -209,7 +209,7 @@ STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'static/')
 
 STATICFILES_DIRS = [
-    ("frontend", os.path.join(BASE_DIR, 'frontend')),
+    ("frontend", os.path.join(BASE_DIR, 'static-frontend')),
 ]
 STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.ManifestStaticFilesStorage'
 

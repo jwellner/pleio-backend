@@ -15,6 +15,6 @@ __pycache__
 .env
 postgres/
 /static/
-/static-frontend/
+/static-fronted/
 .localstack
 celerybeat-schedule

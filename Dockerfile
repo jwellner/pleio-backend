@@ -41,7 +41,7 @@ COPY ./docker/start.sh ./docker/start-dev.sh ./docker/start-admin-dev.sh ./docke
 RUN chmod +x /start.sh /start-dev.sh /start-admin-dev.sh /start-background.sh
 
 # Create media and static folders
-RUN mkdir -p /app/static /app/frontend && chown www-data:www-data /app/static /app/frontend
+RUN mkdir -p /app/static /app/static-frontend && chown www-data:www-data /app/static /app/static-frontend
 
 ENV PYTHONUNBUFFERED 1
 EXPOSE 8000

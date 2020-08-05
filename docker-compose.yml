@@ -14,7 +14,7 @@ services:
     command: ["/start-dev.sh"]
     volumes:
       - .:/app
-      - frontend-build:/app/frontend
+      - frontend-build:/app/static-frontend
     ports:
       - "8000:8000"
     depends_on:
