@@ -199,7 +199,7 @@ class Command(InteractiveTenantOption, BaseCommand):
         for match in matches:
             link = match[0]
             new_link = link
-            ids = re.findall(r'(?:view|download)\/([0-9]+)', link)
+            ids = re.findall(r'\/([0-9]+)', link)
             for id in ids:
                 map_entity = GuidMap.objects.filter(id=id).first()
                 if map_entity:
