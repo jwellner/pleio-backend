@@ -200,7 +200,7 @@ class SiteSettingsTestCase(FastTenantTestCase):
         ])
         self.assertEqual(data["siteSettings"]["startPageCms"], "")
         self.assertEqual(data["siteSettings"]["showIcon"], False)
-        self.assertIn("/static/icon", data["siteSettings"]["icon"]) # show default 
+        self.assertIn("/static/icon", data["siteSettings"]["icon"]) # show default
         self.assertEqual(data["siteSettings"]["menu"], [
             {"link": "/blog", "title": "Blog", "children": []},
             {"link": "/news", "title": "Nieuws", "children": []},
