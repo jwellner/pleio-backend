@@ -516,6 +516,8 @@ class Mapper():
         entity.rich_description = elgg_entity.entity.get_metadata_value_by_name("richDescription")
         entity.tags = self.helpers.get_list_values(elgg_entity.entity.get_metadata_value_by_name("tags"))
         entity.owner = User.objects.get(id=GuidMap.objects.get(id=elgg_entity.entity.owner_guid).guid)
+        entity.position = int(elgg_entity.entity.get_metadata_value_by_name("position")) \
+            if elgg_entity.entity.get_metadata_value_by_name("position") else 0
 
         in_group = GuidMap.objects.filter(id=elgg_entity.entity.container_guid, object_type="group").first()
         if in_group:
