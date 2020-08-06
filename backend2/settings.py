@@ -13,6 +13,8 @@ https://docs.djangoproject.com/en/1.10/ref/settings/
 import os
 from .config import *  # pylint: disable=unused-wildcard-import
 
+APM_ENABLED = os.getenv('APM_ENABLED') == 'True'
+
 FROM_EMAIL = os.getenv('FROM_EMAIL')
 EMAIL_HOST = os.getenv('EMAIL_HOST')
 
@@ -81,8 +83,8 @@ if LOCAL_APPS:
 
 INSTALLED_APPS = list(SHARED_APPS) + [app for app in TENANT_APPS if app not in SHARED_APPS]
 
-#if os.getenv('DEBUG'):
-#    INSTALLED_APPS += ['elasticapm.contrib.django']
+if os.getenv('APM_ENABLED'):
+    INSTALLED_APPS += ['elasticapm.contrib.django']
 
 
 AUTHENTICATION_BACKENDS = [
@@ -110,8 +112,8 @@ if not RUN_AS_ADMIN_APP:
 if LOCAL_MIDDLEWARE:
     MIDDLEWARE += LOCAL_MIDDLEWARE
 
-#if DEBUG:
-#    MIDDLEWARE = ['elasticapm.contrib.django.middleware.TracingMiddleware'] + MIDDLEWARE
+if APM_ENABLED:
+    MIDDLEWARE = ['elasticapm.contrib.django.middleware.TracingMiddleware'] + MIDDLEWARE
 
 ROOT_URLCONF = 'backend2.urls'
 PUBLIC_SCHEMA_URLCONF = 'backend2.urls_public'
@@ -274,3 +276,10 @@ CELERY_TASK_PUBLISH_RETRY_POLICY = {
     'interval_max': 0.2
 }
 CELERY_TIMEZONE = 'Europe/Amsterdam'
+
+if APM_ENABLED:
+    ELASTIC_APM = {
+        'SERVICE_NAME': os.getenv('APM_SERVICE_NAME'),
+        'SECRET_TOKEN': os.getenv('APM_TOKEN'),
+        'SERVER_URL': os.getenv('APM_SERVER_URL')
+    }

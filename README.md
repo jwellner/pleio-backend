@@ -72,7 +72,7 @@ Use the following parameters:
 - domain: localhost
 - is_primary: True
 
-#### Create superuser for admin 
+#### Create superuser for admin
 
 ```bash
 docker-compose exec admin /app/manage.py createsuperuser
@@ -245,3 +245,25 @@ Some example commands:
 ```bash
 docker-compose exec background celery -A backend2.celery call background.dispatch_cron --args='["daily"]'
 ```
+
+### APM elasticsearch
+
+If you want to monitor your application with APM from elasticsearch https://www.elastic.co/apm
+
+Set following environment variables (you need a running APM server)
+
+
+**APM_ENABLED**
+- True/False
+
+**APM_SERVICE_NAME**
+- Set required service name.
+- Allowed characters:
+- a-z, A-Z, 0-9, -, _, and space
+
+**APM_TOKEN**
+- Use if APM Server requires a token
+
+**APM_SERVER_URL**
+- Set custom APM Server URL (
+- default: http://localhost:8200)
