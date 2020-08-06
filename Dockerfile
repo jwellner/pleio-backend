@@ -29,7 +29,8 @@ RUN apt-get update && apt-get install --no-install-recommends -y \
     antiword \
     poppler-utils \
     tesseract-ocr \
-    swig
+    swig \
+    ca-certificates
 
 COPY --from=build /app-tmp/venv /app-tmp/venv
 ENV PATH="/app-tmp/venv/bin:${PATH}"
