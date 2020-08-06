@@ -18,7 +18,8 @@ class ReorderTestCase(FastTenantTestCase):
     def setUp(self):
         self.anonymousUser = AnonymousUser()
         self.user = mixer.blend(User)
-        self.admin = mixer.blend(User, is_admin=True)        
+        self.admin = mixer.blend(User, is_admin=True)      
+
         self.page1 = mixer.blend(Page,
                                  owner=self.user,
                                  read_access=[ACCESS_TYPE.public],
@@ -57,6 +58,7 @@ class ReorderTestCase(FastTenantTestCase):
                                  read_access=[ACCESS_TYPE.public],
                                  write_access=[ACCESS_TYPE.user.format(self.user.id)]
                                  )
+        # when no position is set order is created_at (OLD -> NEW)
         self.page7 = mixer.blend(Page,
                                  owner=self.user,
                                  read_access=[ACCESS_TYPE.public],
@@ -113,6 +115,7 @@ class ReorderTestCase(FastTenantTestCase):
                                  read_access=[ACCESS_TYPE.public],
                                  write_access=[ACCESS_TYPE.user.format(self.user.id)]
                                  )
+        # when no position is set order is created_at (OLD -> NEW)
         self.wiki7 = mixer.blend(Wiki,
                                  owner=self.user,
                                  read_access=[ACCESS_TYPE.public],
@@ -131,9 +134,6 @@ class ReorderTestCase(FastTenantTestCase):
                                  read_access=[ACCESS_TYPE.public],
                                  write_access=[ACCESS_TYPE.user.format(self.user.id)]
                                  )         
-
-
-
 
     def tearDown(self):
         self.wiki9.delete()
@@ -283,6 +283,8 @@ class ReorderTestCase(FastTenantTestCase):
 
     def test_reorder_page_move_up_position_unordered_children_by_admin(self):
 
+        # default order is OLD -> NEW when no position is set
+
         mutation = """
             mutation SubNavReorder($input: reorderInput!) {
                 reorder(input: $input) {
@@ -317,14 +319,15 @@ class ReorderTestCase(FastTenantTestCase):
 
         data = result[1]["data"]
 
-        self.assertEqual(Page.objects.get(id=self.page7.id).position, 1)
+        self.assertEqual(Page.objects.get(id=self.page7.id).position, 0)
         self.assertEqual(Page.objects.get(id=self.page8.id).position, 2)
-        self.assertEqual(Page.objects.get(id=self.page9.id).position, 0)
-        self.assertEqual(data["reorder"]["container"]["children"][0]["guid"], self.page9.guid)
-        self.assertEqual(data["reorder"]["container"]["children"][1]["guid"], self.page7.guid)
-
+        self.assertEqual(Page.objects.get(id=self.page9.id).position, 1)
+        self.assertEqual(data["reorder"]["container"]["children"][0]["guid"], self.page7.guid)
+        self.assertEqual(data["reorder"]["container"]["children"][1]["guid"], self.page9.guid)
 
     def test_reorder_page_move_down_position_unordered_children_by_admin(self):
+
+        # default order is OLD -> NEW when no position is set
 
         mutation = """
             mutation SubNavReorder($input: reorderInput!) {
@@ -360,11 +363,11 @@ class ReorderTestCase(FastTenantTestCase):
 
         data = result[1]["data"]
 
-        self.assertEqual(Page.objects.get(id=self.page7.id).position, 2)
+        self.assertEqual(Page.objects.get(id=self.page7.id).position, 1)
         self.assertEqual(Page.objects.get(id=self.page8.id).position, 0)
-        self.assertEqual(Page.objects.get(id=self.page9.id).position, 1)
+        self.assertEqual(Page.objects.get(id=self.page9.id).position, 2)
         self.assertEqual(data["reorder"]["container"]["children"][0]["guid"], self.page8.guid)
-        self.assertEqual(data["reorder"]["container"]["children"][1]["guid"], self.page9.guid)
+        self.assertEqual(data["reorder"]["container"]["children"][1]["guid"], self.page7.guid)
 
     def test_reorder_wiki_move_up_position_by_admin(self):
 
@@ -476,6 +479,8 @@ class ReorderTestCase(FastTenantTestCase):
 
     def test_reorder_wiki_move_up_position_unordered_children_by_admin(self):
 
+        # default order is OLD -> NEW when no position is set
+
         mutation = """
             mutation WikiNavMutation($input: reorderInput!) {
                 reorder(input: $input) {
@@ -520,14 +525,16 @@ class ReorderTestCase(FastTenantTestCase):
 
         data = result[1]["data"]
 
-        self.assertEqual(Wiki.objects.get(id=self.wiki7.id).position, 1)
+        self.assertEqual(Wiki.objects.get(id=self.wiki7.id).position, 0)
         self.assertEqual(Wiki.objects.get(id=self.wiki8.id).position, 2)
-        self.assertEqual(Wiki.objects.get(id=self.wiki9.id).position, 0)
-        self.assertEqual(data["reorder"]["container"]["children"][0]["guid"], self.wiki9.guid)
-        self.assertEqual(data["reorder"]["container"]["children"][1]["guid"], self.wiki7.guid)
+        self.assertEqual(Wiki.objects.get(id=self.wiki9.id).position, 1)
+        self.assertEqual(data["reorder"]["container"]["children"][0]["guid"], self.wiki7.guid)
+        self.assertEqual(data["reorder"]["container"]["children"][1]["guid"], self.wiki9.guid)
 
 
     def test_reorder_wiki_move_down_position_unordered_children_by_admin(self):
+
+        # default order is OLD -> NEW when no position is set
 
         mutation = """
             mutation WikiNavMutation($input: reorderInput!) {
@@ -573,8 +580,8 @@ class ReorderTestCase(FastTenantTestCase):
 
         data = result[1]["data"]
 
-        self.assertEqual(Wiki.objects.get(id=self.wiki7.id).position, 2)
+        self.assertEqual(Wiki.objects.get(id=self.wiki7.id).position, 1)
         self.assertEqual(Wiki.objects.get(id=self.wiki8.id).position, 0)
-        self.assertEqual(Wiki.objects.get(id=self.wiki9.id).position, 1)
+        self.assertEqual(Wiki.objects.get(id=self.wiki9.id).position, 2)
         self.assertEqual(data["reorder"]["container"]["children"][0]["guid"], self.wiki8.guid)
-        self.assertEqual(data["reorder"]["container"]["children"][1]["guid"], self.wiki9.guid)
+        self.assertEqual(data["reorder"]["container"]["children"][1]["guid"], self.wiki7.guid)
