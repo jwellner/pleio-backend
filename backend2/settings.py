@@ -281,5 +281,6 @@ if APM_ENABLED:
     ELASTIC_APM = {
         'SERVICE_NAME': os.getenv('APM_SERVICE_NAME'),
         'SECRET_TOKEN': os.getenv('APM_TOKEN'),
-        'SERVER_URL': os.getenv('APM_SERVER_URL')
+        'SERVER_URL': os.getenv('APM_SERVER_URL'),
+        'VERIFY_SERVER_CERT': False
     }
