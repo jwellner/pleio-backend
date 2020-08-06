@@ -58,3 +58,18 @@ def resolve_is_editable(obj, info):
 def resolve_is_filterable(obj, info):
     # pylint: disable=unused-argument
     return obj.is_filterable
+
+@profile_item.field("isInOnboarding")
+def resolve_is_in_onboarding(obj, info):
+    # pylint: disable=unused-argument
+    return obj.is_in_onboarding
+
+@profile_item.field("isMandatory")
+def resolve_is_mandatory(obj, info):
+    # pylint: disable=unused-argument
+    return obj.is_mandatory
+
+@profile_item.field("isHidden")
+def resolve_is_hidden(obj, info):
+    # pylint: disable=unused-argument
+    return obj.is_hidden

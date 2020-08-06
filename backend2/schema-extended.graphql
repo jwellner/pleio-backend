@@ -22,6 +22,8 @@ type SiteUserList {
 extend type Mutation {
   deleteUser(input: deleteUserInput!): deleteUserPayload
   toggleUserIsAdmin(input: toggleUserIsAdminInput!): toggleUserIsAdminPayload
+  addSiteSettingProfileField(input: addSiteSettingProfileFieldInput!): addSiteSettingProfileFieldPayload
+  editSiteSettingProfileField(input: editSiteSettingProfileFieldInput!): editSiteSettingProfileFieldPayload
 }
 
 extend type Query {
@@ -30,4 +32,47 @@ extend type Query {
 
 extend type User {
   isAdmin: Boolean
+}
+
+
+input addSiteSettingProfileFieldInput {
+  key: String!
+  name: String!
+  category: String
+  isEditable: Boolean
+  isFilter: Boolean
+  isInOverview: Boolean
+  fieldType: String!
+  fieldOptions: [String]
+  isInOnboarding: Boolean
+  isMandatory: Boolean
+  isHidden: Boolean
+}
+
+type addSiteSettingProfileFieldPayload {
+  profileItem: ProfileItem
+}
+
+input editSiteSettingProfileFieldInput {
+  key: String!
+  name: String
+  category: String
+  isEditable: Boolean
+  isFilter: Boolean
+  isInOverview: Boolean
+  fieldType: String
+  fieldOptions: [String]
+  isInOnboarding: Boolean
+  isMandatory: Boolean
+  isHidden: Boolean
+}
+
+type editSiteSettingProfileFieldPayload {
+  profileItem: ProfileItem
+}
+
+extend type ProfileItem {
+  isInOnboarding: Boolean
+  isMandatory: Boolean
+  isHidden: Boolean
 }
