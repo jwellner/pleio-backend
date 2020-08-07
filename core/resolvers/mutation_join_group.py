@@ -9,7 +9,7 @@ from core.lib import remove_none_from_dict, get_base_url, get_default_email_cont
 def resolve_join_group(_, info, input):
     # pylint: disable=redefined-builtin
 
-    user = info.context.user
+    user = info.context["request"].user
     clean_input = remove_none_from_dict(input)
 
     if not user.is_authenticated:

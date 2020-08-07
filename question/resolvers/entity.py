@@ -48,12 +48,12 @@ def resolve_is_closed(obj, info):
 @question.field("canClose")
 def resolve_can_close(obj, info):
     # pylint: disable=unused-argument
-    return obj.can_close(info.context.user)
+    return obj.can_close(info.context["request"].user)
 
 @question.field("canChooseBestAnswer")
 def resolve_can_choose_best_answer(obj, info):
     # pylint: disable=unused-argument
-    return obj.can_choose_best_answer(info.context.user)
+    return obj.can_choose_best_answer(info.context["request"].user)
 
 
 question.set_field("guid", shared.resolve_entity_guid)

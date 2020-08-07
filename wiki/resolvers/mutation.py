@@ -10,7 +10,7 @@ def resolve_add_wiki(_, info, input):
     # pylint: disable=too-many-statements
     # pylint: disable=too-many-branches
 
-    user = info.context.user
+    user = info.context["request"].user
 
     clean_input = remove_none_from_dict(input)
 
@@ -62,11 +62,11 @@ def resolve_edit_wiki(_, info, input):
     # pylint: disable=too-many-branches
     # pylint: disable=too-many-statements
 
-    user = info.context.user
+    user = info.context["request"].user
 
     clean_input = remove_none_from_dict(input)
 
-    if not info.context.user.is_authenticated:
+    if not info.context["request"].user.is_authenticated:
         raise GraphQLError(NOT_LOGGED_IN)
 
     try:

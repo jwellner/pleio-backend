@@ -1,8 +1,8 @@
 def resolve_viewer(_, info):
-    user = info.context.user
+    user = info.context["request"].user
     banned = False
     try:
-        if 'pleio_user_is_banned' in info.context.session:
+        if 'pleio_user_is_banned' in info.context["request"].session:
             banned = True
     except Exception:
         pass

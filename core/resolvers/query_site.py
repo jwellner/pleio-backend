@@ -233,7 +233,7 @@ def resolve_site(*_):
 
 
 def resolve_site_settings(_, info):
-    user = info.context.user
+    user = info.context["request"].user
 
     if not user.is_authenticated:
         raise GraphQLError(NOT_LOGGED_IN)

@@ -31,4 +31,4 @@ def resolve_is_full_width(obj, info):
 @column.field("canEdit")
 def resolve_can_edit(obj, info):
     # pylint: disable=unused-argument
-    return obj.page.can_write(info.context.user)
+    return obj.page.can_write(info.context["request"].user)

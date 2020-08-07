@@ -9,7 +9,7 @@ from core.lib import remove_none_from_dict, send_mail_multi, get_default_email_c
 def resolve_toggle_user_is_admin(_, info, input):
     # pylint: disable=redefined-builtin
 
-    performing_user = info.context.user
+    performing_user = info.context["request"].user
     clean_input = remove_none_from_dict(input)
 
     if not performing_user.is_authenticated:

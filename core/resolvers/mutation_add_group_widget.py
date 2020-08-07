@@ -7,7 +7,7 @@ from core.lib import remove_none_from_dict
 def resolve_add_group_widget(_, info, input):
     # pylint: disable=redefined-builtin
     settings = []
-    user = info.context.user
+    user = info.context["request"].user
     clean_input = remove_none_from_dict(input)
 
     if not user.is_authenticated:

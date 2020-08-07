@@ -8,7 +8,7 @@ from question.models import Question
 def resolve_toggle_best_answer(_, info, input):
     # pylint: disable=redefined-builtin
 
-    user = info.context.user
+    user = info.context["request"].user
     clean_input = remove_none_from_dict(input)
 
     if not user.is_authenticated:
@@ -36,7 +36,7 @@ def resolve_toggle_best_answer(_, info, input):
 def resolve_toggle_item_closed(_, info, input):
     # pylint: disable=redefined-builtin
 
-    user = info.context.user
+    user = info.context["request"].user
     clean_input = remove_none_from_dict(input)
 
     if not user.is_authenticated:
@@ -63,7 +63,7 @@ def resolve_add_question(_, info, input):
     # pylint: disable=too-many-branches
     # TODO: check if non admins can add news (roles)
 
-    user = info.context.user
+    user = info.context["request"].user
 
     clean_input = remove_none_from_dict(input)
 
@@ -108,11 +108,11 @@ def resolve_edit_question(_, info, input):
     # pylint: disable=too-many-branches
     # pylint: disable=too-many-statements
 
-    user = info.context.user
+    user = info.context["request"].user
 
     clean_input = remove_none_from_dict(input)
 
-    if not info.context.user.is_authenticated:
+    if not info.context["request"].user.is_authenticated:
         raise GraphQLError(NOT_LOGGED_IN)
 
     try:

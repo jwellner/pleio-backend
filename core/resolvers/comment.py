@@ -6,7 +6,7 @@ comment = ObjectType("Comment")
 @comment.field("canEdit")
 def resolve_can_edit(obj, info):
     # pylint: disable=unused-argument
-    return obj.can_write(info.context.user)
+    return obj.can_write(info.context["request"].user)
 
 @comment.field("isBestAnswer")
 def resolve_is_best_answer(obj, info):

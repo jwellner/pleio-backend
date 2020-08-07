@@ -8,7 +8,7 @@ from user.models import User
 
 def resolve_delete_user(_, info, input):
     # pylint: disable=redefined-builtin
-    performing_user = info.context.user
+    performing_user = info.context["request"].user
     clean_input = remove_none_from_dict(input)
 
     if not performing_user.is_authenticated:

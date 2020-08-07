@@ -82,7 +82,7 @@ def resolve_entities(
     if orderDirection == ORDER_DIRECTION.desc:
         order_by = '-%s' % (order_by)
 
-    entities = Model.objects.visible(info.context.user)
+    entities = Model.objects.visible(info.context["request"].user)
     entities = entities.filter(conditional_group_filter(subtype, containerGuid) &
                                conditional_tags_filter(tags) &
                                conditional_tag_lists_filter(tagLists) &

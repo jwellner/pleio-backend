@@ -8,7 +8,7 @@ from file.models import FileFolder
 def resolve_add_group(_, info, input):
     # pylint: disable=redefined-builtin
 
-    user = info.context.user
+    user = info.context["request"].user
 
     if not user.is_authenticated:
         raise GraphQLError(NOT_LOGGED_IN)

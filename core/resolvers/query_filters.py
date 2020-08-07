@@ -34,7 +34,7 @@ def resolve_filters(_, info):
     # pylint: disable=unused-argument
     user_filters = []
 
-    user = info.context.user
+    user = info.context["request"].user
     profile_fields = ProfileField.objects.all()
 
     for field in profile_fields:

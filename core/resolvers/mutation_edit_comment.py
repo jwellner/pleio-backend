@@ -6,7 +6,7 @@ from core.models import Comment
 
 def resolve_edit_comment(_, info, input):
     # pylint: disable=redefined-builtin
-    user = info.context.user
+    user = info.context["request"].user
 
     clean_input = remove_none_from_dict(input)
 

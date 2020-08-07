@@ -9,7 +9,7 @@ from core.lib import remove_none_from_dict, send_mail_multi, get_base_url, gener
 def resolve_invite_to_group(_, info, input):
     # pylint: disable=redefined-builtin
     # pylint: disable=too-many-branches
-    user = info.context.user
+    user = info.context["request"].user
     clean_input = remove_none_from_dict(input)
 
     if not user.is_authenticated:

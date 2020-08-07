@@ -21,7 +21,7 @@ def conditional_subtype_filter(subtype):
 def resolve_bookmarks(_, info, subtype=None, offset=0, limit=20):
     # pylint: disable=unused-argument
 
-    user = info.context.user
+    user = info.context["request"].user
 
     if not user.is_authenticated:
         raise GraphQLError(NOT_LOGGED_IN)

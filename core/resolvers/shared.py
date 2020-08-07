@@ -30,7 +30,7 @@ def resolve_entity_write_access_id(obj, info):
 
 def resolve_entity_can_edit(obj, info):
     try:
-        return obj.can_write(info.context.user)
+        return obj.can_write(info.context["request"].user)
     except AttributeError:
         return False
 
@@ -87,20 +87,20 @@ def resolve_entity_time_updated(obj, info):
 def resolve_entity_can_vote(obj, info):
     # pylint: disable=unused-argument
     try:
-        return obj.can_vote(info.context.user)
+        return obj.can_vote(info.context["request"].user)
     except AttributeError:
         return False
 
 def resolve_entity_can_bookmark(obj, info):
     # pylint: disable=unused-argument
     try:
-        return obj.can_bookmark(info.context.user)
+        return obj.can_bookmark(info.context["request"].user)
     except AttributeError:
         return False
 
 def resolve_entity_has_voted(obj, info):
     # pylint: disable=unused-argument
-    user = info.context.user
+    user = info.context["request"].user
     try:
         return obj.has_voted(user)
     except AttributeError:
@@ -115,7 +115,7 @@ def resolve_entity_votes(obj, info):
 
 def resolve_entity_is_bookmarked(obj, info):
     # pylint: disable=unused-argument
-    user = info.context.user
+    user = info.context["request"].user
     try:
         return obj.is_bookmarked(user)
     except AttributeError:
@@ -124,7 +124,7 @@ def resolve_entity_is_bookmarked(obj, info):
 def resolve_entity_can_comment(obj, info):
     # pylint: disable=unused-argument
     try:
-        return obj.can_comment(info.context.user)
+        return obj.can_comment(info.context["request"].user)
     except AttributeError:
         return False
 
@@ -145,7 +145,7 @@ def resolve_entity_comment_count(obj, info):
 def resolve_entity_is_following(obj, info):
     # pylint: disable=unused-argument
     try:
-        return obj.is_following(info.context.user)
+        return obj.is_following(info.context["request"].user)
     except AttributeError:
         return False
 

@@ -12,7 +12,7 @@ def resolve_add_news(_, info, input):
     # pylint: disable=too-many-branches
     # TODO: check if non admins can add news (roles)
 
-    user = info.context.user
+    user = info.context["request"].user
 
     clean_input = remove_none_from_dict(input)
 
@@ -86,11 +86,11 @@ def resolve_edit_news(_, info, input):
     # pylint: disable=too-many-branches
     # pylint: disable=too-many-statements
 
-    user = info.context.user
+    user = info.context["request"].user
 
     clean_input = remove_none_from_dict(input)
 
-    if not info.context.user.is_authenticated:
+    if not info.context["request"].user.is_authenticated:
         raise GraphQLError(NOT_LOGGED_IN)
 
     try:

@@ -21,7 +21,7 @@ def resolve_search(_, info, q=None, containerGuid=None, type=None, subtype=None,
     totals = []
     ids = []
 
-    user = info.context.user
+    user = info.context["request"].user
     tenant_name = parse_tenant_config_path("")
 
     if type in ['group', 'user']:

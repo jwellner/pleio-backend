@@ -12,7 +12,7 @@ def resolve_recommended(
     # pylint: disable=redefined-builtin
 
     Model = get_model_by_subtype('blog')
-    entities = Model.objects.visible(info.context.user)
+    entities = Model.objects.visible(info.context["request"].user)
     entities = entities.filter(is_recommended=True)
 
     edges = entities[offset:offset+limit]

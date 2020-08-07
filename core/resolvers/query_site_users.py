@@ -7,7 +7,7 @@ def resolve_site_users(_, info, q=None, isAdmin=None, isDeleteRequested=None, of
     # pylint: disable=unused-argument
     # pylint: disable=too-many-arguments
 
-    user = info.context.user
+    user = info.context["request"].user
 
     if not user.is_authenticated:
         raise GraphQLError(NOT_LOGGED_IN)

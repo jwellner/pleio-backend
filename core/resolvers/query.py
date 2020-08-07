@@ -47,7 +47,7 @@ def resolve_entity(
     # pylint: disable=too-many-arguments
     # pylint: disable=redefined-builtin
 
-    user = info.context.user
+    user = info.context["request"].user
 
     entity = None
 

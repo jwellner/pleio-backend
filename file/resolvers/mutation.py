@@ -27,7 +27,7 @@ mutation = ObjectType("Mutation")
 def resolve_add_file(_, info, input):
     # pylint: disable=redefined-builtin
 
-    user = info.context.user
+    user = info.context["request"].user
 
     clean_input = remove_none_from_dict(input)
 
@@ -85,7 +85,7 @@ def resolve_add_folder(_, info, input):
     """
     # pylint: disable=redefined-builtin
 
-    user = info.context.user
+    user = info.context["request"].user
 
     clean_input = remove_none_from_dict(input)
 
@@ -137,7 +137,7 @@ def resolve_add_folder(_, info, input):
 def resolve_edit_file_folder(_, info, input):
     # pylint: disable=redefined-builtin
 
-    user = info.context.user
+    user = info.context["request"].user
 
     clean_input = remove_none_from_dict(input)
 
@@ -182,7 +182,7 @@ def resolve_edit_file_folder(_, info, input):
 def resolve_move_file_folder(_, info, input):
     # pylint: disable=redefined-builtin
 
-    user = info.context.user
+    user = info.context["request"].user
 
     clean_input = remove_none_from_dict(input)
 
@@ -225,7 +225,7 @@ def resolve_move_file_folder(_, info, input):
 def resolve_add_image(_, info, input):
     # pylint: disable=redefined-builtin
 
-    user = info.context.user
+    user = info.context["request"].user
 
     clean_input = remove_none_from_dict(input)
 

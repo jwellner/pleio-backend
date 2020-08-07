@@ -82,12 +82,12 @@ def resolve_group_is_auto_membership_enabled(obj, info):
 @group.field("canEdit")
 def resolve_group_can_edit(obj, info):
     # pylint: disable=unused-argument
-    return obj.can_write(info.context.user)
+    return obj.can_write(info.context["request"].user)
 
 @group.field("getsNotifications")
 def resolve_group_getsNotifications(obj, info):
     # pylint: disable=unused-argument
-    user = info.context.user
+    user = info.context["request"].user
     if not user.is_authenticated:
         return False
 
@@ -113,7 +113,7 @@ def resolve_group_invite(obj, info, q=None, offset=0, limit=10):
     invites = []
 
     for user in users:
-        if user == info.context.user:
+        if user == info.context["request"].user:
             continue
         if obj.is_member(user):
             continue
@@ -186,7 +186,7 @@ def resolve_group_members(group, info, q=None, offset=0, limit=5, inSubgroupId=N
 @group.field("membership")
 def resolve_membership(group, info):
     # pylint: disable=unused-argument
-    user = info.context.user
+    user = info.context["request"].user
 
     if group.is_full_member(user):
         return MEMBERSHIP.joined

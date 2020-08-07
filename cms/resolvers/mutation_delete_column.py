@@ -6,7 +6,7 @@ from cms.utils import order_positions
 
 def resolve_delete_column(_, info, input):
     # pylint: disable=redefined-builtin
-    user = info.context.user
+    user = info.context["request"].user
 
     if not user.is_authenticated:
         raise GraphQLError(NOT_LOGGED_IN)

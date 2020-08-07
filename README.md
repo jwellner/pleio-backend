@@ -11,6 +11,7 @@ The code for backend2
     - [Background](#background)
     - [Translations](#translations)
     - [Import Elgg site](elgg/README.md)
+    - [Elastic APM](#elastic-apm)
 
 ## Project overview
 
@@ -86,7 +87,7 @@ docker-compose exec admin /app/manage.py createsuperuser
     - Name: `My first test client`
     - Domain: `test1.pleio.local`
 
-Now browse to: http://test.pleio.local
+Now browse to: http://test1.pleio.local
 
 #### Cleanup and start over
 
@@ -246,24 +247,33 @@ Some example commands:
 docker-compose exec background celery -A backend2.celery call background.dispatch_cron --args='["daily"]'
 ```
 
-### APM elasticsearch
+## Elastic APM
 
-If you want to monitor your application with APM from elasticsearch https://www.elastic.co/apm
+If you want to monitor your application with [APM from Elastic](https://www.elastic.co/apm)
 
 Set following environment variables (you need a running APM server)
 
+#### APM_ENABLED
 
-**APM_ENABLED**
 - True/False
 
-**APM_SERVICE_NAME**
+#### APM_SERVICE_NAME
+
 - Set required service name.
 - Allowed characters:
 - a-z, A-Z, 0-9, -, _, and space
 
-**APM_TOKEN**
+#### APM_TOKEN
+
 - Use if APM Server requires a token
 
-**APM_SERVER_URL**
+#### APM_SERVER_URL
+
 - Set custom APM Server URL (
 - default: http://localhost:8200)
+
+You can also run AMP in locally with docker-compose:
+
+```bash
+docker-compose -f docker-compose.yml -f docker-compose.apm.yml up
+```

@@ -8,7 +8,7 @@ from core.lib import remove_none_from_dict, send_mail_multi, get_base_url, get_d
 
 def resolve_accept_membership_request(_, info, input):
     # pylint: disable=redefined-builtin
-    user = info.context.user
+    user = info.context["request"].user
     clean_input = remove_none_from_dict(input)
 
     if not user.is_authenticated:

@@ -61,7 +61,7 @@ services:
       - "8888:8888"
 
   db:
-    image: postgres
+    image: postgres:12
     environment:
       POSTGRES_PASSWORD: ${DB_PASSWORD}
     env_file:
@@ -69,12 +69,13 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data/
   elasticsearch:
-    image: docker.elastic.co/elasticsearch/elasticsearch:7.1.1
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.8.1
     environment:
-      - cluster.name=docker-cluster
-      - discovery.type=single-node
       - bootstrap.memory_lock=true
-      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+      - cluster.name=docker-cluster
+      - cluster.routing.allocation.disk.threshold_enabled=false
+      - discovery.type=single-node
+      - ES_JAVA_OPTS=-XX:UseAVX=2 -Xms1g -Xmx1g
     ulimits:
       memlock:
         soft: -1
@@ -83,6 +84,11 @@ services:
       - "9200:9200"
     volumes:
       - esdata01:/usr/share/elasticsearch/data
+    healthcheck:
+      interval: 20s
+      retries: 10
+      test: curl -s http://localhost:9200/_cluster/health | grep -vq '"status":"red"'
+
   mailcatcher:
     restart: on-failure:10
     image: dockage/mailcatcher:0.7.1
@@ -108,15 +114,9 @@ services:
   rabbitmq:
     image: 'rabbitmq:3.6-management-alpine'
     ports:
-      # The standard AMQP protocol port
       - '5672:5672'
-      # HTTP management UI
       - '15672:15672'
     environment:
-      # The location of the RabbitMQ server.  "amqp" is the protocol;
-      # "rabbitmq" is the hostname.  Note that there is not a guarantee
-      # that the server will start first!  Telling the pika client library
-      # to try multiple times gets around this ordering issue.
       AMQP_URL: 'amqp://localhost?connection_attempts=5&retry_delay=5'
       RABBITMQ_DEFAULT_USER: "guest"
       RABBITMQ_DEFAULT_PASS: "guest"

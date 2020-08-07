@@ -13,7 +13,7 @@ def resolve_users(_, info, q="", filters=None, offset=0, limit=20):
     # pylint: disable=too-many-locals
     ids = []
 
-    user = info.context.user
+    user = info.context["request"].user
     tenant_name = parse_tenant_config_path("")
 
     if not user.is_authenticated:

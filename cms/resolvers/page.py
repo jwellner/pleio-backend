@@ -32,7 +32,7 @@ def resolve_url(obj, info):
 @page.field("canEdit")
 def resolve_can_edit(obj, info):
     # pylint: disable=unused-argument
-    return obj.can_write(info.context.user)
+    return obj.can_write(info.context["request"].user)
 
 @page.field("rows")
 def resolve_rows(obj, info):

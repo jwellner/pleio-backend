@@ -29,7 +29,7 @@ def resolve_settings(obj, info):
 def resolve_can_edit(obj, info):
     # pylint: disable=unused-argument
     try:
-        return obj.can_write(info.context.user)
+        return obj.can_write(info.context["request"].user)
     except AttributeError:
         return False
 
