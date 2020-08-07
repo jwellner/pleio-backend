@@ -55,7 +55,7 @@ class EditEmailOverviewTestCase(FastTenantTestCase):
         request = HttpRequest()
         request.user = self.user1
 
-        result = graphql_sync(schema, {"query": mutation, "variables": variables}, context_value={ 'request': request })
+        result = graphql_sync(schema, {"query": mutation, "variables": variables}, context_value={ "request": request })
 
         self.assertTrue(result[0])
         data = result[1]["data"]
@@ -90,7 +90,7 @@ class EditEmailOverviewTestCase(FastTenantTestCase):
         request = HttpRequest()
         request.user = self.admin
 
-        result = graphql_sync(schema, {"query": mutation, "variables": variables}, context_value={ 'request': request })
+        result = graphql_sync(schema, {"query": mutation, "variables": variables}, context_value={ "request": request })
 
         self.assertTrue(result[0])
         data = result[1]["data"]
@@ -124,7 +124,7 @@ class EditEmailOverviewTestCase(FastTenantTestCase):
         request = HttpRequest()
         request.user = self.user2
 
-        result = graphql_sync(schema, {"query": mutation, "variables": variables}, context_value={ 'request': request })
+        result = graphql_sync(schema, {"query": mutation, "variables": variables}, context_value={ "request": request })
 
         self.assertTrue(result[0])
 
@@ -158,7 +158,7 @@ class EditEmailOverviewTestCase(FastTenantTestCase):
         request = HttpRequest()
         request.user = self.anonymousUser
 
-        result = graphql_sync(schema, {"query": mutation, "variables": variables}, context_value={ 'request': request })
+        result = graphql_sync(schema, {"query": mutation, "variables": variables}, context_value={ "request": request })
 
         self.assertTrue(result[0])
 
@@ -194,7 +194,7 @@ class EditEmailOverviewTestCase(FastTenantTestCase):
         request = HttpRequest()
         request.user = self.user1
 
-        result = graphql_sync(schema, {"query": mutation, "variables": variables}, context_value={ 'request': request })
+        result = graphql_sync(schema, {"query": mutation, "variables": variables}, context_value={ "request": request })
 
         self.assertTrue(result[0])
         data = result[1]["data"]

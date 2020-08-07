@@ -57,7 +57,7 @@ class JoinGroupTestCase(FastTenantTestCase):
         request = HttpRequest()
         request.user = self.anonymousUser
 
-        result = graphql_sync(schema, { "query": mutation, "variables": variables }, context_value={ 'request': request })
+        result = graphql_sync(schema, { "query": mutation, "variables": variables }, context_value={ "request": request })
 
         errors = result[1]["errors"]
 
@@ -90,7 +90,7 @@ class JoinGroupTestCase(FastTenantTestCase):
 
         request = HttpRequest()
         request.user = self.user1
-        result = graphql_sync(schema, { "query": mutation, "variables": variables }, context_value={ 'request': request })
+        result = graphql_sync(schema, { "query": mutation, "variables": variables }, context_value={ "request": request })
 
         data = result[1]["data"]
 
@@ -99,7 +99,7 @@ class JoinGroupTestCase(FastTenantTestCase):
         self.assertEqual(data["joinGroup"]["group"]["members"]["edges"][0]["user"]["guid"], self.user1.guid)
 
         request.user = self.user2
-        result = graphql_sync(schema, { "query": mutation, "variables": variables }, context_value={ 'request': request })
+        result = graphql_sync(schema, { "query": mutation, "variables": variables }, context_value={ "request": request })
 
         data = result[1]["data"]
 
@@ -143,7 +143,7 @@ class JoinGroupTestCase(FastTenantTestCase):
             'HTTP_HOST': 'test.test'
         }
 
-        result = graphql_sync(schema, { "query": mutation, "variables": variables }, context_value={ 'request': request })
+        result = graphql_sync(schema, { "query": mutation, "variables": variables }, context_value={ "request": request })
 
         data = result[1]["data"]
 
@@ -152,7 +152,7 @@ class JoinGroupTestCase(FastTenantTestCase):
         mocked_send_mail_multi.assert_called_once()
 
         request.user = self.user3
-        result = graphql_sync(schema, { "query": mutation, "variables": variables }, context_value={ 'request': request })
+        result = graphql_sync(schema, { "query": mutation, "variables": variables }, context_value={ "request": request })
 
         data = result[1]["data"]
 
@@ -192,7 +192,7 @@ class JoinGroupTestCase(FastTenantTestCase):
             "guid": self.group_auto.guid
         }
 
-        result = graphql_sync(schema, { "query": query, "variables": variables }, context_value={ 'request': request })
+        result = graphql_sync(schema, { "query": query, "variables": variables }, context_value={ "request": request })
 
         self.assertTrue(result[0])
 
@@ -229,7 +229,7 @@ class JoinGroupTestCase(FastTenantTestCase):
 
         request = HttpRequest()
         request.user = self.user4
-        result = graphql_sync(schema, { "query": mutation, "variables": variables }, context_value={ 'request': request })
+        result = graphql_sync(schema, { "query": mutation, "variables": variables }, context_value={ "request": request })
 
         errors = result[1]["errors"]
 

@@ -58,11 +58,11 @@ class EntityViewTestCase(FastTenantTestCase):
             "guid": self.blog1.guid
         }
 
-        graphql_sync(schema, {"query": query, "variables": variables }, context_value={ 'request': request })
-        graphql_sync(schema, {"query": query, "variables": variables }, context_value={ 'request': request })
-        graphql_sync(schema, {"query": query, "variables": variables }, context_value={ 'request': request })
+        graphql_sync(schema, {"query": query, "variables": variables }, context_value={ "request": request })
+        graphql_sync(schema, {"query": query, "variables": variables }, context_value={ "request": request })
+        graphql_sync(schema, {"query": query, "variables": variables }, context_value={ "request": request })
 
-        result = graphql_sync(schema, {"query": query, "variables": variables }, context_value={ 'request': request })
+        result = graphql_sync(schema, {"query": query, "variables": variables }, context_value={ "request": request })
 
         self.assertTrue(result[0])
 
@@ -74,10 +74,10 @@ class EntityViewTestCase(FastTenantTestCase):
         request = HttpRequest()
         request.user = self.user1
 
-        graphql_sync(schema, {"query": query, "variables": variables }, context_value={ 'request': request })
-        graphql_sync(schema, {"query": query, "variables": variables }, context_value={ 'request': request })
+        graphql_sync(schema, {"query": query, "variables": variables }, context_value={ "request": request })
+        graphql_sync(schema, {"query": query, "variables": variables }, context_value={ "request": request })
 
-        result = graphql_sync(schema, {"query": query, "variables": variables }, context_value={ 'request': request })
+        result = graphql_sync(schema, {"query": query, "variables": variables }, context_value={ "request": request })
 
         self.assertTrue(result[0])
 

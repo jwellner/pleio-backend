@@ -102,7 +102,7 @@ class EntitiesTestCase(FastTenantTestCase):
             "containerGuid": None
         }
 
-        result = graphql_sync(schema, { "query": self.query, "variables": variables }, context_value={ 'request': request })
+        result = graphql_sync(schema, { "query": self.query, "variables": variables }, context_value={ "request": request })
 
         self.assertTrue(result[0])
 
@@ -118,7 +118,7 @@ class EntitiesTestCase(FastTenantTestCase):
             "containerGuid": "1"
         }
 
-        result = graphql_sync(schema, { "query": self.query, "variables": variables }, context_value={ 'request': request })
+        result = graphql_sync(schema, { "query": self.query, "variables": variables }, context_value={ "request": request })
 
         self.assertTrue(result[0])
 
@@ -134,7 +134,7 @@ class EntitiesTestCase(FastTenantTestCase):
             "containerGuid": self.group.guid
         }
 
-        result = graphql_sync(schema, { "query": self.query, "variables": variables }, context_value={ 'request': request })
+        result = graphql_sync(schema, { "query": self.query, "variables": variables }, context_value={ "request": request })
 
         self.assertTrue(result[0])
 
@@ -148,7 +148,7 @@ class EntitiesTestCase(FastTenantTestCase):
 
         variables = {"tags": ["tag_two"]}
 
-        result = graphql_sync(schema, { "query": self.query, "variables": variables }, context_value={ 'request': request })
+        result = graphql_sync(schema, { "query": self.query, "variables": variables }, context_value={ "request": request })
 
         self.assertTrue(result[0])
 
@@ -163,7 +163,7 @@ class EntitiesTestCase(FastTenantTestCase):
 
         variables = {"tags": ["tag_one"]}
 
-        result = graphql_sync(schema, { "query": self.query, "variables": variables }, context_value={ 'request': request })
+        result = graphql_sync(schema, { "query": self.query, "variables": variables }, context_value={ "request": request })
 
         self.assertTrue(result[0])
 
@@ -180,7 +180,7 @@ class EntitiesTestCase(FastTenantTestCase):
 
         variables = {"tags": ["tag_one", "tag_two"]}
 
-        result = graphql_sync(schema, { "query": self.query, "variables": variables }, context_value={ 'request': request })
+        result = graphql_sync(schema, { "query": self.query, "variables": variables }, context_value={ "request": request })
 
         self.assertTrue(result[0])
 
@@ -197,7 +197,7 @@ class EntitiesTestCase(FastTenantTestCase):
             "subtype": "page"
         }
 
-        result = graphql_sync(schema, { "query": self.query, "variables": variables }, context_value={ 'request': request })
+        result = graphql_sync(schema, { "query": self.query, "variables": variables }, context_value={ "request": request })
 
         self.assertTrue(result[0])
 
@@ -212,7 +212,7 @@ class EntitiesTestCase(FastTenantTestCase):
 
         variables = {"tagLists": [["tag_four", "tag_three"], ["tag_one"]]}
 
-        result = graphql_sync(schema, { "query": self.query, "variables": variables }, context_value={ 'request': request })
+        result = graphql_sync(schema, { "query": self.query, "variables": variables }, context_value={ "request": request })
 
         self.assertTrue(result[0])
 

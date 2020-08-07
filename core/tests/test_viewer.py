@@ -44,7 +44,7 @@ class ViewerTestCase(FastTenantTestCase):
         request = HttpRequest()
         request.user = self.anonymousUser
 
-        result = graphql_sync(schema, { "query": query }, context_value={ 'request': request })
+        result = graphql_sync(schema, { "query": query }, context_value={ "request": request })
 
         self.assertTrue(result[0])
 
@@ -75,7 +75,7 @@ class ViewerTestCase(FastTenantTestCase):
         request = HttpRequest()
         request.user = self.authenticatedUser
 
-        result = graphql_sync(schema, { "query": query }, context_value={ 'request': request })
+        result = graphql_sync(schema, { "query": query }, context_value={ "request": request })
 
         self.assertTrue(result[0])
 
@@ -108,7 +108,7 @@ class ViewerTestCase(FastTenantTestCase):
         request = HttpRequest()
         request.user = self.authenticatedAdminUser
 
-        result = graphql_sync(schema, { "query": query }, context_value={ 'request': request })
+        result = graphql_sync(schema, { "query": query }, context_value={ "request": request })
 
         self.assertTrue(result[0])
 
@@ -133,7 +133,7 @@ class ViewerTestCase(FastTenantTestCase):
         request = HttpRequest()
         request.user = self.anonymousUser
 
-        result = graphql_sync(schema, { "query": query}, context_value={ 'request': request })
+        result = graphql_sync(schema, { "query": query}, context_value={ "request": request })
 
         self.assertTrue(result[0])
 
@@ -152,7 +152,7 @@ class ViewerTestCase(FastTenantTestCase):
         request = HttpRequest()
         request.user = self.authenticatedUser
 
-        result = graphql_sync(schema, { "query": query}, context_value={ 'request': request })
+        result = graphql_sync(schema, { "query": query}, context_value={ "request": request })
 
         self.assertTrue(result[0])
 
@@ -168,7 +168,7 @@ class ViewerTestCase(FastTenantTestCase):
             }
         """
 
-        result = graphql_sync(schema, { "query": query}, context_value={ 'request': request })
+        result = graphql_sync(schema, { "query": query}, context_value={ "request": request })
 
         self.assertTrue(result[0])
 
@@ -187,7 +187,7 @@ class ViewerTestCase(FastTenantTestCase):
         request = HttpRequest()
         request.user = self.authenticatedUser
 
-        result = graphql_sync(schema, { "query": query}, context_value={ 'request': request })
+        result = graphql_sync(schema, { "query": query}, context_value={ "request": request })
 
         self.assertTrue(result[0])
 
@@ -206,7 +206,7 @@ class ViewerTestCase(FastTenantTestCase):
         request = HttpRequest()
         request.user = self.authenticatedAdminUser
 
-        result = graphql_sync(schema, { "query": query}, context_value={ 'request': request })
+        result = graphql_sync(schema, { "query": query}, context_value={ "request": request })
 
         self.assertTrue(result[0])
 
@@ -228,7 +228,7 @@ class ViewerTestCase(FastTenantTestCase):
         request = HttpRequest()
         request.user = self.authenticatedUser
 
-        result = graphql_sync(schema, { "query": query}, context_value={ 'request': request })
+        result = graphql_sync(schema, { "query": query}, context_value={ "request": request })
 
         self.assertTrue(result[0])
 
@@ -251,7 +251,7 @@ class ViewerTestCase(FastTenantTestCase):
         request = HttpRequest()
         request.user = self.groupUser
 
-        result = graphql_sync(schema, { "query": query}, context_value={ 'request': request })
+        result = graphql_sync(schema, { "query": query}, context_value={ "request": request })
 
         self.assertTrue(result[0])
 

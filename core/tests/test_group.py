@@ -78,7 +78,7 @@ class GroupTestCase(FastTenantTestCase):
             "guid": self.group.guid
         }
 
-        result = graphql_sync(schema, { "query": query, "variables": variables }, context_value={ 'request': request })
+        result = graphql_sync(schema, { "query": query, "variables": variables }, context_value={ "request": request })
 
         self.assertTrue(result[0])
 
@@ -124,7 +124,7 @@ class GroupTestCase(FastTenantTestCase):
             "q": ""
         }
 
-        result = graphql_sync(schema, { "query": query, "variables": variables }, context_value={ 'request': request })
+        result = graphql_sync(schema, { "query": query, "variables": variables }, context_value={ "request": request })
 
         self.assertTrue(result[0])
 
@@ -170,7 +170,7 @@ class GroupTestCase(FastTenantTestCase):
             "q": "DFWETCCVSDFFSDGSER43254457453tqertq345"
         }
 
-        result = graphql_sync(schema, { "query": query, "variables": variables }, context_value={ 'request': request })
+        result = graphql_sync(schema, { "query": query, "variables": variables }, context_value={ "request": request })
 
         self.assertTrue(result[0])
 
@@ -210,7 +210,7 @@ class GroupTestCase(FastTenantTestCase):
             "guid": self.group.guid
         }
 
-        result = graphql_sync(schema, { "query": query, "variables": variables }, context_value={ 'request': request })
+        result = graphql_sync(schema, { "query": query, "variables": variables }, context_value={ "request": request })
 
         self.assertTrue(result[0])
 

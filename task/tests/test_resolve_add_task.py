@@ -71,7 +71,7 @@ class AddTaskTestCase(FastTenantTestCase):
         request = HttpRequest()
         request.user = self.authenticatedUser
 
-        result = graphql_sync(schema, { "query": self.mutation, "variables": variables }, context_value={ 'request': request })
+        result = graphql_sync(schema, { "query": self.mutation, "variables": variables }, context_value={ "request": request })
 
         data = result[1]["data"]
 
@@ -88,7 +88,7 @@ class AddTaskTestCase(FastTenantTestCase):
         request = HttpRequest()
         request.user = self.authenticatedUser
 
-        result = graphql_sync(schema, { "query": self.mutation, "variables": variables }, context_value={ 'request': request })
+        result = graphql_sync(schema, { "query": self.mutation, "variables": variables }, context_value={ "request": request })
 
         data = result[1]["data"]
 

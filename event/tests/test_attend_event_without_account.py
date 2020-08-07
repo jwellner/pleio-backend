@@ -62,7 +62,7 @@ class AttendEventWithoutAccountTestCase(FastTenantTestCase):
             'HTTP_HOST': 'test.test'
         }
 
-        result = graphql_sync(schema, { "query": mutation, "variables": variables }, context_value={ 'request': request })
+        result = graphql_sync(schema, { "query": mutation, "variables": variables }, context_value={ "request": request })
 
         data = result[1]["data"]
 
@@ -109,7 +109,7 @@ class AttendEventWithoutAccountTestCase(FastTenantTestCase):
             'HTTP_HOST': 'test.test'
         }
 
-        result = graphql_sync(schema, { "query": mutation, "variables": variables }, context_value={ 'request': request })
+        result = graphql_sync(schema, { "query": mutation, "variables": variables }, context_value={ "request": request })
         mocked_send_mail_multi.assert_called_once()
         variables = {
             "input": {
@@ -119,7 +119,7 @@ class AttendEventWithoutAccountTestCase(FastTenantTestCase):
                 "resend": True
             }
         }
-        result = graphql_sync(schema, { "query": mutation, "variables": variables }, context_value={ 'request': request })
+        result = graphql_sync(schema, { "query": mutation, "variables": variables }, context_value={ "request": request })
 
         data = result[1]["data"]
 
@@ -160,8 +160,8 @@ class AttendEventWithoutAccountTestCase(FastTenantTestCase):
         request.META = {
             'HTTP_HOST': 'test.test'
         }
-        result = graphql_sync(schema, { "query": mutation, "variables": variables }, context_value={ 'request': request })
-        result = graphql_sync(schema, { "query": mutation, "variables": variables }, context_value={ 'request': request })
+        result = graphql_sync(schema, { "query": mutation, "variables": variables }, context_value={ "request": request })
+        result = graphql_sync(schema, { "query": mutation, "variables": variables }, context_value={ "request": request })
 
         errors = result[1]["errors"]
 
@@ -203,7 +203,7 @@ class AttendEventWithoutAccountTestCase(FastTenantTestCase):
         request.META = {
             'HTTP_HOST': 'test.test'
         }
-        result = graphql_sync(schema, { "query": mutation, "variables": variables }, context_value={ 'request': request })
+        result = graphql_sync(schema, { "query": mutation, "variables": variables }, context_value={ "request": request })
         errors = result[1]["errors"]
 
         self.assertEqual(errors[0]["message"], "event_is_full")

@@ -49,7 +49,7 @@ class DeleteColumnTestCase(FastTenantTestCase):
         request = HttpRequest()
         request.user = self.admin
 
-        result = graphql_sync(schema, {"query": mutation, "variables": variables }, context_value={ 'request': request })
+        result = graphql_sync(schema, {"query": mutation, "variables": variables }, context_value={ "request": request })
 
         data = result[1]["data"]
 
@@ -78,7 +78,7 @@ class DeleteColumnTestCase(FastTenantTestCase):
         request = HttpRequest()
         request.user = self.user
 
-        result = graphql_sync(schema, {"query": mutation, "variables": variables }, context_value={ 'request': request })
+        result = graphql_sync(schema, {"query": mutation, "variables": variables }, context_value={ "request": request })
 
         errors = result[1]["errors"]
 
@@ -103,7 +103,7 @@ class DeleteColumnTestCase(FastTenantTestCase):
         request = HttpRequest()
         request.user = self.anonymousUser
 
-        result = graphql_sync(schema, {"query": mutation, "variables": variables }, context_value={ 'request': request })
+        result = graphql_sync(schema, {"query": mutation, "variables": variables }, context_value={ "request": request })
 
         errors = result[1]["errors"]
 
@@ -127,7 +127,7 @@ class DeleteColumnTestCase(FastTenantTestCase):
         request = HttpRequest()
         request.user = self.user2
 
-        result = graphql_sync(schema, {"query": mutation, "variables": variables }, context_value={ 'request': request })
+        result = graphql_sync(schema, {"query": mutation, "variables": variables }, context_value={ "request": request })
 
         errors = result[1]["errors"]
 

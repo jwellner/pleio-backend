@@ -51,7 +51,7 @@ class LeaveGroupTestCase(FastTenantTestCase):
         request = HttpRequest()
         request.user = self.anonymousUser
 
-        result = graphql_sync(schema, { "query": mutation, "variables": variables }, context_value={ 'request': request }, logger="test")
+        result = graphql_sync(schema, { "query": mutation, "variables": variables }, context_value={ "request": request }, logger="test")
 
         errors = result[1]["errors"]
 
@@ -82,21 +82,21 @@ class LeaveGroupTestCase(FastTenantTestCase):
 
         request = HttpRequest()
         request.user = self.user3
-        result = graphql_sync(schema, { "query": mutation, "variables": variables }, context_value={ 'request': request })
+        result = graphql_sync(schema, { "query": mutation, "variables": variables }, context_value={ "request": request })
 
         errors = result[1]["errors"]
 
         self.assertEqual(errors[0]["message"], "user_not_member_of_group")
 
         request.user = self.user2
-        result = graphql_sync(schema, { "query": mutation, "variables": variables }, context_value={ 'request': request })
+        result = graphql_sync(schema, { "query": mutation, "variables": variables }, context_value={ "request": request })
 
         data = result[1]["data"]
 
         self.assertEqual(data["leaveGroup"]["group"]["members"]["total"], 1)
 
         request.user = self.user1
-        result = graphql_sync(schema, { "query": mutation, "variables": variables }, context_value={ 'request': request })
+        result = graphql_sync(schema, { "query": mutation, "variables": variables }, context_value={ "request": request })
 
         data = result[1]["data"]
 
@@ -128,7 +128,7 @@ class LeaveGroupTestCase(FastTenantTestCase):
 
         request = HttpRequest()
         request.user = self.user3
-        result = graphql_sync(schema, { "query": mutation, "variables": variables }, context_value={ 'request': request })
+        result = graphql_sync(schema, { "query": mutation, "variables": variables }, context_value={ "request": request })
 
         errors = result[1]["errors"]
 

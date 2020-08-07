@@ -81,7 +81,7 @@ class AcceptGroupInvitationTestCase(FastTenantTestCase):
         request = HttpRequest()
         request.user = self.user2
 
-        result = graphql_sync(schema, {"query": mutation, "variables": variables}, context_value={ 'request': request })
+        result = graphql_sync(schema, {"query": mutation, "variables": variables}, context_value={ "request": request })
 
         self.assertTrue(result[0])
         data = result[1]["data"]
@@ -141,10 +141,10 @@ class AcceptGroupInvitationTestCase(FastTenantTestCase):
         request = HttpRequest()
         request.user = self.user2
 
-        result = graphql_sync(schema, {"query": mutation, "variables": variables}, context_value={ 'request': request })
+        result = graphql_sync(schema, {"query": mutation, "variables": variables}, context_value={ "request": request })
 
         # Call second time
-        result = graphql_sync(schema, {"query": mutation, "variables": variables}, context_value={ 'request': request })
+        result = graphql_sync(schema, {"query": mutation, "variables": variables}, context_value={ "request": request })
 
         self.assertTrue(result[0])
 
