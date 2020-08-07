@@ -47,7 +47,7 @@ def resolve_send_message_to_group(_, info, input):
 
             email_addresses.append(receiving_user.email)
 
-    context = get_default_email_context(info.context)
+    context = get_default_email_context(info.context['request'])
     context['message'] = format_html(clean_input.get('message'))
 
     subject = ugettext_lazy("Message from group {0}: {1}").format(group.name, clean_input.get('subject'))

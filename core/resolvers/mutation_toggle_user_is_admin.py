@@ -23,7 +23,7 @@ def resolve_toggle_user_is_admin(_, info, input):
     except ObjectDoesNotExist:
         raise GraphQLError(COULD_NOT_FIND)
 
-    context = get_default_email_context(info.context)
+    context = get_default_email_context(info.context['request'])
     context['name_of_user_admin_role_changed'] = user.name
     context['link'] = context['site_url'] + user.url
 

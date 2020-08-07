@@ -36,9 +36,9 @@ def resolve_change_group_role(_, info, input):
 
     if clean_input.get("role") == "owner":
         subject = ugettext_lazy("Ownership of the %(group_name)s group has been transferred") % {'group_name':group.name}
-        link = get_base_url(info.context) + "/groups/view/{}/{}".format(group.guid, slugify(group.name))
+        link = get_base_url(info.context['request']) + "/groups/view/{}/{}".format(group.guid, slugify(group.name))
 
-        context = get_default_email_context(info.context)
+        context = get_default_email_context(info.context['request'])
         context['link'] = link
         context['group_name'] = group.name
 

@@ -38,7 +38,7 @@ def resolve_invite_to_group(_, info, input):
 
     if not clean_input.get("addAllUsers"):
         subject = ugettext_lazy("Invitation to become a member of the %(group_name)s group") % {'group_name': group.name}
-        url = get_base_url(info.context) + '/groups/invitations/?invitecode='
+        url = get_base_url(info.context['request']) + '/groups/invitations/?invitecode='
 
         for user_guid in clean_input.get("users"):
             try:
@@ -61,7 +61,7 @@ def resolve_invite_to_group(_, info, input):
                 GroupInvitation.objects.create(code=code, invited_user=receiving_user, group=group)
 
             try:
-                context = get_default_email_context(info.context)
+                context = get_default_email_context(info.context['request'])
                 link = url + code
                 context['link'] = link
                 context['group_name'] = group.name

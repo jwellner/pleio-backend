@@ -6,8 +6,6 @@ viewer = ObjectType("Viewer")
 
 @viewer.field('user')
 def resolve_user(_, info):
-    print("info:")
-    print(info.context)
     user = info.context["request"].user
 
     if user.is_authenticated:
