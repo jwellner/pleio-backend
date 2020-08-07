@@ -11,6 +11,9 @@ https://docs.djangoproject.com/en/1.10/ref/settings/
 """
 
 import os
+from elasticapm.contrib.opentracing import Tracer
+from opentracing import set_global_tracer
+
 from .config import *  # pylint: disable=unused-wildcard-import
 
 APM_ENABLED = os.getenv('APM_ENABLED') == 'True'
@@ -111,9 +114,6 @@ if not RUN_AS_ADMIN_APP:
 
 if LOCAL_MIDDLEWARE:
     MIDDLEWARE += LOCAL_MIDDLEWARE
-
-if APM_ENABLED:
-    MIDDLEWARE = ['elasticapm.contrib.django.middleware.TracingMiddleware'] + MIDDLEWARE
 
 ROOT_URLCONF = 'backend2.urls'
 PUBLIC_SCHEMA_URLCONF = 'backend2.urls_public'
@@ -281,4 +281,6 @@ if APM_ENABLED:
         'SERVER_URL': os.getenv('APM_SERVER_URL'),
         'VERIFY_SERVER_CERT': False,
         'DEBUG': True,
+        'DJANGO_TRANSACTION_NAME_FROM_ROUTE': True
     }
+    set_global_tracer(Tracer(config=ELASTIC_APM))
