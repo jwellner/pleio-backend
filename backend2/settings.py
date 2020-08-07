@@ -281,6 +281,5 @@ if APM_ENABLED:
         'SERVER_URL': os.getenv('APM_SERVER_URL'),
         'VERIFY_SERVER_CERT': False,
         'DEBUG': True,
-        'DJANGO_TRANSACTION_NAME_FROM_ROUTE': True
     }
     set_global_tracer(Tracer(config=ELASTIC_APM))
