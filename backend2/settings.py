@@ -280,4 +280,5 @@ if APM_ENABLED:
         'SECRET_TOKEN': os.getenv('APM_TOKEN'),
         'SERVER_URL': os.getenv('APM_SERVER_URL'),
         'VERIFY_SERVER_CERT': False,
+        'DEBUG': True,
     }
