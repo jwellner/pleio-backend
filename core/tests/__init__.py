@@ -1,3 +1,3 @@
 import logging
 
-#logging.disable(logging.CRITICAL)
+logging.disable(logging.CRITICAL)
