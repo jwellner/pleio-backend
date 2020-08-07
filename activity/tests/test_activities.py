@@ -168,7 +168,7 @@ class ActivitiesTestCase(FastTenantTestCase):
             write_access=[ACCESS_TYPE.user.format(self.user2.id)],
             group=self.group2
         )
-        result = graphql_sync(schema, { "query": self.query, "variables": variables }, context_value=request)
+        result = graphql_sync(schema, { "query": self.query, "variables": variables }, context_value={ 'request': request })
 
         self.assertTrue(result[0])
 
@@ -188,7 +188,7 @@ class ActivitiesTestCase(FastTenantTestCase):
             "tags": []
         }
 
-        result = graphql_sync(schema, { "query": self.query, "variables": variables }, context_value=request)
+        result = graphql_sync(schema, { "query": self.query, "variables": variables }, context_value={ 'request': request })
 
         self.assertTrue(result[0])
 
@@ -208,7 +208,7 @@ class ActivitiesTestCase(FastTenantTestCase):
             "tagLists": [["tag_one", "tag_three"], ["tag_two"]]
         }
 
-        result = graphql_sync(schema, { "query": self.query, "variables": variables }, context_value=request)
+        result = graphql_sync(schema, { "query": self.query, "variables": variables }, context_value={ 'request': request })
 
         self.assertTrue(result[0])
 

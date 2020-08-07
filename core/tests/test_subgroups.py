@@ -98,7 +98,7 @@ class SubgroupsTestCase(FastTenantTestCase):
         request = HttpRequest()
         request.user = self.user1
 
-        result = graphql_sync(schema, { "query": query, "variables": variables }, context_value=request)
+        result = graphql_sync(schema, { "query": query, "variables": variables }, context_value={ 'request': request })
 
         data = result[1]["data"]
 
@@ -174,7 +174,7 @@ class SubgroupsTestCase(FastTenantTestCase):
         request = HttpRequest()
         request.user = self.user1
 
-        result = graphql_sync(schema, { "query": query, "variables": variables }, context_value=request)
+        result = graphql_sync(schema, { "query": query, "variables": variables }, context_value={ 'request': request })
 
         data = result[1]["data"]
 
@@ -208,7 +208,7 @@ class SubgroupsTestCase(FastTenantTestCase):
         request = HttpRequest()
         request.user = self.user1
 
-        result = graphql_sync(schema, { "query": query, "variables": variables }, context_value=request)
+        result = graphql_sync(schema, { "query": query, "variables": variables }, context_value={ 'request': request })
 
         data = result[1]["data"]
 
@@ -245,7 +245,7 @@ class SubgroupsTestCase(FastTenantTestCase):
             "guid": self.blog.guid
         }
 
-        result = graphql_sync(schema, { "query": query , "variables": variables}, context_value=request)
+        result = graphql_sync(schema, { "query": query , "variables": variables}, context_value={ 'request': request })
 
         self.assertTrue(result[0])
 
@@ -282,7 +282,7 @@ class SubgroupsTestCase(FastTenantTestCase):
             "guid": self.blog.guid
         }
 
-        result = graphql_sync(schema, { "query": query , "variables": variables}, context_value=request)
+        result = graphql_sync(schema, { "query": query , "variables": variables}, context_value={ 'request': request })
 
         self.assertTrue(result[0])
 
@@ -319,7 +319,7 @@ class SubgroupsTestCase(FastTenantTestCase):
             "guid": self.blog.guid
         }
 
-        result = graphql_sync(schema, { "query": query , "variables": variables}, context_value=request)
+        result = graphql_sync(schema, { "query": query , "variables": variables}, context_value={ 'request': request })
 
         self.assertTrue(result[0])
 
@@ -395,7 +395,7 @@ class SubgroupsTestCase(FastTenantTestCase):
         request = HttpRequest()
         request.user = self.user1
 
-        result = graphql_sync(schema, { "query": query, "variables": variables }, context_value=request)
+        result = graphql_sync(schema, { "query": query, "variables": variables }, context_value={ 'request': request })
 
         data = result[1]["data"]
 

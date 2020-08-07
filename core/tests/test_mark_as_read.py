@@ -49,7 +49,7 @@ class MarkAsReadTestCase(FastTenantTestCase):
         request = HttpRequest()
         request.user = self.anonymousUser
 
-        result = graphql_sync(schema, {"query": mutation, "variables": variables}, context_value=request)
+        result = graphql_sync(schema, {"query": mutation, "variables": variables}, context_value={ 'request': request })
         errors = result[1]["errors"]
         self.assertEqual(errors[0]["message"], "not_logged_in")
 
@@ -77,7 +77,7 @@ class MarkAsReadTestCase(FastTenantTestCase):
                 "id": notification.id
             }
         }
-        result = graphql_sync(schema, {"query": mutation, "variables": variables}, context_value=request)
+        result = graphql_sync(schema, {"query": mutation, "variables": variables}, context_value={ 'request': request })
         data = result[1]["data"]
 
         self.assertEqual(data["markAsRead"]["success"], True)

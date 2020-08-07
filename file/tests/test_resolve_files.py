@@ -93,7 +93,7 @@ class FilesCase(FastTenantTestCase):
             "containerGuid": self.authenticatedUser.guid
         }
 
-        result = graphql_sync(schema, { "query": self.query , "variables": variables}, context_value=request)
+        result = graphql_sync(schema, { "query": self.query , "variables": variables}, context_value={ 'request': request })
 
         self.assertTrue(result[0])
 
@@ -111,7 +111,7 @@ class FilesCase(FastTenantTestCase):
             "containerGuid": self.folder.guid
         }
 
-        result = graphql_sync(schema, { "query": self.query , "variables": variables}, context_value=request)
+        result = graphql_sync(schema, { "query": self.query , "variables": variables}, context_value={ 'request': request })
 
         self.assertTrue(result[0])
 
@@ -128,7 +128,7 @@ class FilesCase(FastTenantTestCase):
             "containerGuid": self.group.guid
         }
 
-        result = graphql_sync(schema, { "query": self.query , "variables": variables}, context_value=request)
+        result = graphql_sync(schema, { "query": self.query , "variables": variables}, context_value={ 'request': request })
 
         self.assertTrue(result[0])
 

@@ -201,7 +201,7 @@ class EventsTestCase(FastTenantTestCase):
         mixer.blend(EventAttendee, user=self.user2, email=None, event=self.eventFuture2)
         mixer.blend(EventAttendee, user=None, event=self.eventFuture2)
 
-        result = graphql_sync(schema, { "query": self.query , "variables": variables}, context_value=request)
+        result = graphql_sync(schema, { "query": self.query , "variables": variables}, context_value={ 'request': request })
 
         self.assertTrue(result[0])
 
@@ -224,7 +224,7 @@ class EventsTestCase(FastTenantTestCase):
         }
 
         mixer.cycle(2).blend(EventAttendee, event=self.eventFuture2, state='accept')
-        result = graphql_sync(schema, { "query": self.query , "variables": variables}, context_value=request)
+        result = graphql_sync(schema, { "query": self.query , "variables": variables}, context_value={ 'request': request })
 
         self.assertTrue(result[0])
 
@@ -244,7 +244,7 @@ class EventsTestCase(FastTenantTestCase):
             "filter": "previous"
         }
 
-        result = graphql_sync(schema, { "query": self.query , "variables": variables}, context_value=request)
+        result = graphql_sync(schema, { "query": self.query , "variables": variables}, context_value={ 'request': request })
 
         self.assertTrue(result[0])
 
@@ -262,7 +262,7 @@ class EventsTestCase(FastTenantTestCase):
             "filter": ""
         }
 
-        result = graphql_sync(schema, { "query": self.query , "variables": variables}, context_value=request)
+        result = graphql_sync(schema, { "query": self.query , "variables": variables}, context_value={ 'request': request })
 
         self.assertTrue(result[0])
 
@@ -281,7 +281,7 @@ class EventsTestCase(FastTenantTestCase):
             "containerGuid": self.group.guid
         }
 
-        result = graphql_sync(schema, { "query": self.query , "variables": variables}, context_value=request)
+        result = graphql_sync(schema, { "query": self.query , "variables": variables}, context_value={ 'request': request })
 
         self.assertTrue(result[0])
 

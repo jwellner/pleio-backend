@@ -86,7 +86,7 @@ class SendMessageToGroupTestCase(FastTenantTestCase):
             'HTTP_HOST': 'test.test'
         }
 
-        result = graphql_sync(schema, {"query": mutation, "variables": variables}, context_value=request)
+        result = graphql_sync(schema, {"query": mutation, "variables": variables}, context_value={ 'request': request })
         data = result[1]["data"]
 
         self.assertEqual(data["sendMessageToGroup"]["group"]["guid"], self.group1.guid)
@@ -132,7 +132,7 @@ class SendMessageToGroupTestCase(FastTenantTestCase):
             'HTTP_HOST': 'test.test'
         }
 
-        result = graphql_sync(schema, {"query": mutation, "variables": variables}, context_value=request)
+        result = graphql_sync(schema, {"query": mutation, "variables": variables}, context_value={ 'request': request })
 
         data = result[1]["data"]
 
@@ -172,7 +172,7 @@ class SendMessageToGroupTestCase(FastTenantTestCase):
         request = HttpRequest()
         request.user = self.user2
 
-        result = graphql_sync(schema, {"query": mutation, "variables": variables}, context_value=request)
+        result = graphql_sync(schema, {"query": mutation, "variables": variables}, context_value={ 'request': request })
 
         errors = result[1]["errors"]
 
@@ -207,7 +207,7 @@ class SendMessageToGroupTestCase(FastTenantTestCase):
         request = HttpRequest()
         request.user = self.user4
 
-        result = graphql_sync(schema, {"query": mutation, "variables": variables}, context_value=request)
+        result = graphql_sync(schema, {"query": mutation, "variables": variables}, context_value={ 'request': request })
 
         errors = result[1]["errors"]
 
@@ -243,7 +243,7 @@ class SendMessageToGroupTestCase(FastTenantTestCase):
         request = HttpRequest()
         request.user = self.anonymousUser
 
-        result = graphql_sync(schema, {"query": mutation, "variables": variables}, context_value=request)
+        result = graphql_sync(schema, {"query": mutation, "variables": variables}, context_value={ 'request': request })
 
         errors = result[1]["errors"]
 
@@ -284,7 +284,7 @@ class SendMessageToGroupTestCase(FastTenantTestCase):
             'HTTP_HOST': 'test.test'
         }
 
-        result = graphql_sync(schema, {"query": mutation, "variables": variables}, context_value=request)
+        result = graphql_sync(schema, {"query": mutation, "variables": variables}, context_value={ 'request': request })
 
         data = result[1]["data"]
 
@@ -328,7 +328,7 @@ class SendMessageToGroupTestCase(FastTenantTestCase):
             'HTTP_HOST': 'test.test'
         }
 
-        result = graphql_sync(schema, {"query": mutation, "variables": variables}, context_value=request)
+        result = graphql_sync(schema, {"query": mutation, "variables": variables}, context_value={ 'request': request })
 
         data = result[1]["data"]
 

@@ -214,7 +214,7 @@ class EditSiteSettingTestCase(FastTenantTestCase):
 
         request = HttpRequest()
         request.user = self.admin
-        result = graphql_sync(schema, { "query": mutation, "variables": variables }, context_value=request)
+        result = graphql_sync(schema, { "query": mutation, "variables": variables }, context_value={ 'request': request })
 
         data = result[1]["data"]
 
@@ -327,7 +327,7 @@ class EditSiteSettingTestCase(FastTenantTestCase):
 
         request = HttpRequest()
         request.user = self.admin
-        result = graphql_sync(schema, { "query": mutation, "variables": variables }, context_value=request)
+        result = graphql_sync(schema, { "query": mutation, "variables": variables }, context_value={ 'request': request })
 
         data = result[1]["data"]
 
@@ -354,7 +354,7 @@ class EditSiteSettingTestCase(FastTenantTestCase):
 
         request = HttpRequest()
         request.user = self.anonymousUser
-        result = graphql_sync(schema, { "query": mutation, "variables": variables}, context_value=request)
+        result = graphql_sync(schema, { "query": mutation, "variables": variables}, context_value={ 'request': request })
 
         self.assertTrue(result[0])
 
@@ -381,7 +381,7 @@ class EditSiteSettingTestCase(FastTenantTestCase):
 
         request = HttpRequest()
         request.user = self.user
-        result = graphql_sync(schema, { "query": mutation, "variables": variables}, context_value=request)
+        result = graphql_sync(schema, { "query": mutation, "variables": variables}, context_value={ 'request': request })
 
         self.assertTrue(result[0])
 

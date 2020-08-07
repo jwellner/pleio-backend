@@ -120,7 +120,7 @@ class NotificationsTestCase(FastTenantTestCase):
         variables = {
         }
 
-        result = graphql_sync(schema, {"query": self.query, "variables": variables}, context_value=request)
+        result = graphql_sync(schema, {"query": self.query, "variables": variables}, context_value={ 'request': request })
         self.assertTrue(result[0])
         data = result[1]["data"]
 
@@ -136,7 +136,7 @@ class NotificationsTestCase(FastTenantTestCase):
         }
         comment1 = mixer.blend(Comment, is_closed=False, owner=self.user1, container=self.blog1)
         mixer.cycle(45).blend(Comment, is_closed=False, owner=self.user1, container=self.blog1)  
-        result = graphql_sync(schema, {"query": self.query, "variables": variables}, context_value=request)
+        result = graphql_sync(schema, {"query": self.query, "variables": variables}, context_value={ 'request': request })
 
         self.assertTrue(result[0])
         data = result[1]["data"]
@@ -157,7 +157,7 @@ class NotificationsTestCase(FastTenantTestCase):
         comment1 = mixer.blend(Comment, is_closed=False, owner=self.user1, container=self.blog1)
         notification = self.user2.notifications.all()[0]
         notification.mark_as_read()
-        result = graphql_sync(schema, {"query": self.query, "variables": variables}, context_value=request)
+        result = graphql_sync(schema, {"query": self.query, "variables": variables}, context_value={ 'request': request })
 
         self.assertTrue(result[0])
         data = result[1]["data"]
@@ -168,7 +168,7 @@ class NotificationsTestCase(FastTenantTestCase):
         variables = {
             "unread": False
         }
-        result = graphql_sync(schema, {"query": self.query, "variables": variables}, context_value=request)
+        result = graphql_sync(schema, {"query": self.query, "variables": variables}, context_value={ 'request': request })
 
         self.assertTrue(result[0])
         data = result[1]["data"]
@@ -184,7 +184,7 @@ class NotificationsTestCase(FastTenantTestCase):
         variables = {
         }
 
-        result = graphql_sync(schema, {"query": self.query, "variables": variables}, context_value=request)
+        result = graphql_sync(schema, {"query": self.query, "variables": variables}, context_value={ 'request': request })
 
         self.assertTrue(result[0])
         data = result[1]["data"]
@@ -203,7 +203,7 @@ class NotificationsTestCase(FastTenantTestCase):
         variables = {
         }
 
-        result = graphql_sync(schema, {"query": self.query, "variables": variables}, context_value=request)
+        result = graphql_sync(schema, {"query": self.query, "variables": variables}, context_value={ 'request': request })
         self.assertTrue(result[0])
         data = result[1]["data"]
         self.assertEqual(data["notifications"]["total"], 0)

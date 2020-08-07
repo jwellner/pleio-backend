@@ -71,7 +71,7 @@ class VoteOnPollTestCase(FastTenantTestCase):
         request = HttpRequest()
         request.user = self.authenticatedUser1
 
-        result = graphql_sync(schema, {"query": self.mutation, "variables": variables }, context_value=request)
+        result = graphql_sync(schema, {"query": self.mutation, "variables": variables }, context_value={ 'request': request })
 
         data = result[1]["data"]
 
@@ -85,7 +85,7 @@ class VoteOnPollTestCase(FastTenantTestCase):
 
         request.user = self.authenticatedUser2
 
-        result = graphql_sync(schema, {"query": self.mutation, "variables": variables }, context_value=request)
+        result = graphql_sync(schema, {"query": self.mutation, "variables": variables }, context_value={ 'request': request })
 
         data = result[1]["data"]
 
@@ -99,7 +99,7 @@ class VoteOnPollTestCase(FastTenantTestCase):
 
         request.user = self.authenticatedUser2
 
-        result = graphql_sync(schema, {"query": self.mutation, "variables": variables }, context_value=request)
+        result = graphql_sync(schema, {"query": self.mutation, "variables": variables }, context_value={ 'request': request })
 
         errors = result[1]["errors"]
 

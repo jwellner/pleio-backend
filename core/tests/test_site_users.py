@@ -57,7 +57,7 @@ class SiteUsersTestCase(FastTenantTestCase):
         variables = {
         }
 
-        result = graphql_sync(schema, {"query": self.query, "variables": variables}, context_value=request)
+        result = graphql_sync(schema, {"query": self.query, "variables": variables}, context_value={ 'request': request })
 
         self.assertTrue(result[0])
         data = result[1]["data"]
@@ -74,7 +74,7 @@ class SiteUsersTestCase(FastTenantTestCase):
             "isAdmin": True
         }
 
-        result = graphql_sync(schema, {"query": self.query, "variables": variables}, context_value=request)
+        result = graphql_sync(schema, {"query": self.query, "variables": variables}, context_value={ 'request': request })
 
         self.assertTrue(result[0])
         data = result[1]["data"]
@@ -91,7 +91,7 @@ class SiteUsersTestCase(FastTenantTestCase):
             "isDeleteRequested": True
         }
 
-        result = graphql_sync(schema, {"query": self.query, "variables": variables}, context_value=request)
+        result = graphql_sync(schema, {"query": self.query, "variables": variables}, context_value={ 'request': request })
 
         self.assertTrue(result[0])
         data = result[1]["data"]
@@ -109,7 +109,7 @@ class SiteUsersTestCase(FastTenantTestCase):
             "q": "c_user_nam"
         }
 
-        result = graphql_sync(schema, {"query": self.query, "variables": variables}, context_value=request)
+        result = graphql_sync(schema, {"query": self.query, "variables": variables}, context_value={ 'request': request })
 
         self.assertTrue(result[0])
         data = result[1]["data"]
@@ -125,7 +125,7 @@ class SiteUsersTestCase(FastTenantTestCase):
         variables = {
         }
 
-        result = graphql_sync(schema, {"query": self.query, "variables": variables}, context_value=request)
+        result = graphql_sync(schema, {"query": self.query, "variables": variables}, context_value={ 'request': request })
 
         self.assertTrue(result[0])
 
@@ -142,7 +142,7 @@ class SiteUsersTestCase(FastTenantTestCase):
         variables = {
         }
 
-        result = graphql_sync(schema, {"query": self.query, "variables": variables}, context_value=request)
+        result = graphql_sync(schema, {"query": self.query, "variables": variables}, context_value={ 'request': request })
 
         self.assertTrue(result[0])
 

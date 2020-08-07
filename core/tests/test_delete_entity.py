@@ -71,7 +71,7 @@ class DeleteEntityTestCase(FastTenantTestCase):
 
         self.assertEqual(Blog.objects.all().count(), 2)
 
-        result = graphql_sync(schema, {"query": mutation, "variables": variables }, context_value=request)
+        result = graphql_sync(schema, {"query": mutation, "variables": variables }, context_value={ 'request': request })
 
         data = result[1]["data"]
 
@@ -99,7 +99,7 @@ class DeleteEntityTestCase(FastTenantTestCase):
 
         self.assertEqual(Blog.objects.all().count(), 2)
 
-        result = graphql_sync(schema, {"query": mutation, "variables": variables }, context_value=request)
+        result = graphql_sync(schema, {"query": mutation, "variables": variables }, context_value={ 'request': request })
 
         data = result[1]["data"]
 
@@ -127,7 +127,7 @@ class DeleteEntityTestCase(FastTenantTestCase):
 
         self.assertEqual(Blog.objects.all().count(), 2)
 
-        result = graphql_sync(schema, {"query": mutation, "variables": variables }, context_value=request)
+        result = graphql_sync(schema, {"query": mutation, "variables": variables }, context_value={ 'request': request })
 
         errors = result[1]["errors"]
 
@@ -152,7 +152,7 @@ class DeleteEntityTestCase(FastTenantTestCase):
         request = HttpRequest()
         request.user = self.anonymousUser
 
-        result = graphql_sync(schema, {"query": mutation, "variables": variables }, context_value=request)
+        result = graphql_sync(schema, {"query": mutation, "variables": variables }, context_value={ 'request': request })
 
         errors = result[1]["errors"]
 
@@ -181,7 +181,7 @@ class DeleteEntityTestCase(FastTenantTestCase):
         self.assertEqual(Question.objects.all().count(), 2)
         self.assertEqual(Group.objects.all().count(), 2)
 
-        result = graphql_sync(schema, {"query": mutation, "variables": variables }, context_value=request)
+        result = graphql_sync(schema, {"query": mutation, "variables": variables }, context_value={ 'request': request })
 
         data = result[1]["data"]
 
@@ -213,7 +213,7 @@ class DeleteEntityTestCase(FastTenantTestCase):
         self.assertEqual(Question.objects.all().count(), 2)
         self.assertEqual(Group.objects.all().count(), 2)
 
-        result = graphql_sync(schema, {"query": mutation, "variables": variables }, context_value=request)
+        result = graphql_sync(schema, {"query": mutation, "variables": variables }, context_value={ 'request': request })
 
         data = result[1]["data"]
 
@@ -241,7 +241,7 @@ class DeleteEntityTestCase(FastTenantTestCase):
         request = HttpRequest()
         request.user = self.user2
 
-        result = graphql_sync(schema, {"query": mutation, "variables": variables }, context_value=request)
+        result = graphql_sync(schema, {"query": mutation, "variables": variables }, context_value={ 'request': request })
 
         errors = result[1]["errors"]
 
@@ -265,7 +265,7 @@ class DeleteEntityTestCase(FastTenantTestCase):
         request = HttpRequest()
         request.user = self.anonymousUser
 
-        result = graphql_sync(schema, {"query": mutation, "variables": variables }, context_value=request)
+        result = graphql_sync(schema, {"query": mutation, "variables": variables }, context_value={ 'request': request })
 
         errors = result[1]["errors"]
 

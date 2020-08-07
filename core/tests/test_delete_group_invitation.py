@@ -82,7 +82,7 @@ class DeleteGroupInvitationTestCase(FastTenantTestCase):
             'HTTP_HOST': 'test.test'
         }
 
-        result = graphql_sync(schema, {"query": mutation, "variables": variables}, context_value=request)
+        result = graphql_sync(schema, {"query": mutation, "variables": variables}, context_value={ 'request': request })
 
         self.assertTrue(result[0])
         data = result[1]["data"]
@@ -134,7 +134,7 @@ class DeleteGroupInvitationTestCase(FastTenantTestCase):
             'HTTP_HOST': 'test.test'
         }
 
-        result = graphql_sync(schema, {"query": mutation, "variables": variables}, context_value=request)
+        result = graphql_sync(schema, {"query": mutation, "variables": variables}, context_value={ 'request': request })
 
         self.assertTrue(result[0])
         data = result[1]["data"]
@@ -186,7 +186,7 @@ class DeleteGroupInvitationTestCase(FastTenantTestCase):
             'HTTP_HOST': 'test.test'
         }
 
-        result = graphql_sync(schema, {"query": mutation, "variables": variables}, context_value=request)
+        result = graphql_sync(schema, {"query": mutation, "variables": variables}, context_value={ 'request': request })
 
         self.assertTrue(result[0])
         errors = result[1]["errors"]
@@ -238,7 +238,7 @@ class DeleteGroupInvitationTestCase(FastTenantTestCase):
             'HTTP_HOST': 'test.test'
         }
 
-        result = graphql_sync(schema, {"query": mutation, "variables": variables}, context_value=request)
+        result = graphql_sync(schema, {"query": mutation, "variables": variables}, context_value={ 'request': request })
 
         self.assertTrue(result[0])
         errors = result[1]["errors"]
