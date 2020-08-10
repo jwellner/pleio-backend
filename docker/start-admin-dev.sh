@@ -7,5 +7,5 @@ python /app/manage.py collectstatic --noinput
 python /app/manage.py migrate_schemas
 
 # Start Gunicorn processes 
-echo Starting uwsgi with python autoreload
-uwsgi --http :8888 --wsgi-disable-file-wrapper --module backend2.wsgi --static-map /static=/app/static --enable-threads --python-autoreload 1
+echo Starting uwsgi
+uwsgi --ini /uwsgi-dev.ini
