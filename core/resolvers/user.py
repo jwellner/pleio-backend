@@ -7,7 +7,7 @@ from django.core.exceptions import ObjectDoesNotExist
 user = ObjectType("User")
 
 def is_user_or_admin(obj, info):
-    if info.context.user == obj or info.context.user.is_admin:
+    if info.context["request"].user == obj or info.context["request"].user.is_admin:
         return True
     return False
 
@@ -28,12 +28,12 @@ def resolve_profile(obj, info):
         field.value = ""
         field.read_access = []
         try:
-            qs = UserProfileField.objects.visible(info.context.user)
+            qs = UserProfileField.objects.visible(info.context["request"].user)
             field.value = qs.get(profile_field=field, user_profile=obj.profile).value
         except ObjectDoesNotExist:
             pass
         try:
-            qs = UserProfileField.objects.visible(info.context.user)
+            qs = UserProfileField.objects.visible(info.context["request"].user)
             field.read_access = qs.get(profile_field=field, user_profile=obj.profile).read_access
         except ObjectDoesNotExist:
             field.read_access = [ACCESS_TYPE.logged_in]
@@ -90,7 +90,7 @@ def resolve_can_edit(obj, info):
 
 @user.field("isAdmin")
 def resolve_is_admin(obj, info):
-    if not info.context.user.is_admin:
+    if not info.context["request"].user.is_admin:
         return None
     return obj.is_admin
 
@@ -118,7 +118,7 @@ def resolve_fields_in_overview(obj, info):
         field.value = ""
         field.label = field.name
         try:
-            qs = UserProfileField.objects.visible(info.context.user)
+            qs = UserProfileField.objects.visible(info.context["request"].user)
             field.value = qs.get(profile_field=field, user_profile=obj.profile).value
         except ObjectDoesNotExist:
             pass

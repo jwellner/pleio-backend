@@ -70,7 +70,7 @@ class EntityTestCase(FastTenantTestCase):
             "username": self.authenticatedUser.guid
         }
 
-        result = graphql_sync(schema, { "query": query, "variables": variables }, context_value=request)
+        result = graphql_sync(schema, { "query": query, "variables": variables }, context_value={ "request": request })
 
         self.assertTrue(result[0])
 
@@ -96,7 +96,7 @@ class EntityTestCase(FastTenantTestCase):
             "username": self.authenticatedUser.guid
         }
 
-        result = graphql_sync(schema, { "query": query, "variables": variables }, context_value=request)
+        result = graphql_sync(schema, { "query": query, "variables": variables }, context_value={ "request": request })
 
         self.assertTrue(result[0])
 
@@ -123,7 +123,7 @@ class EntityTestCase(FastTenantTestCase):
             "guid": self.authenticatedUser.guid
         }
 
-        result = graphql_sync(schema, { "query": query, "variables": variables }, context_value=request)
+        result = graphql_sync(schema, { "query": query, "variables": variables }, context_value={ "request": request })
 
         self.assertTrue(result[0])
 
@@ -150,7 +150,7 @@ class EntityTestCase(FastTenantTestCase):
             "guid": self.group.guid
         }
 
-        result = graphql_sync(schema, { "query": query, "variables": variables }, context_value=request)
+        result = graphql_sync(schema, { "query": query, "variables": variables }, context_value={ "request": request })
 
         self.assertTrue(result[0])
 
@@ -177,7 +177,7 @@ class EntityTestCase(FastTenantTestCase):
             "guid": self.file.guid
         }
 
-        result = graphql_sync(schema, { "query": query, "variables": variables }, context_value=request)
+        result = graphql_sync(schema, { "query": query, "variables": variables }, context_value={ "request": request })
 
         self.assertTrue(result[0])
 
@@ -208,7 +208,7 @@ class EntityTestCase(FastTenantTestCase):
             "guid": self.file.guid
         }
 
-        result = graphql_sync(schema, { "query": query, "variables": variables }, context_value=request)
+        result = graphql_sync(schema, { "query": query, "variables": variables }, context_value={ "request": request })
 
         self.assertTrue(result[0])
 

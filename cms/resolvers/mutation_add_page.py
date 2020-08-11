@@ -10,7 +10,7 @@ def resolve_add_page(_, info, input):
     # pylint: disable=too-many-statements
     # pylint: disable=too-many-branches
     # TODO: check if non admins can add page (roles)
-    user = info.context.user
+    user = info.context["request"].user
 
     clean_input = remove_none_from_dict(input)
 

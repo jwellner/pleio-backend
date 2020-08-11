@@ -69,7 +69,7 @@ class BookmarkTestCase(FastTenantTestCase):
             "limit": 1
         }
 
-        result = graphql_sync(schema, { "query": query , "variables": variables}, context_value=request)
+        result = graphql_sync(schema, { "query": query , "variables": variables}, context_value={ "request": request })
 
         self.assertTrue(result[0])
 
@@ -95,7 +95,7 @@ class BookmarkTestCase(FastTenantTestCase):
 
         variables = {}
 
-        result = graphql_sync(schema, { "query": query , "variables": variables}, context_value=request)
+        result = graphql_sync(schema, { "query": query , "variables": variables}, context_value={ "request": request })
 
         self.assertTrue(result[0])
 
@@ -125,7 +125,7 @@ class BookmarkTestCase(FastTenantTestCase):
             }
         }
 
-        result = graphql_sync(schema, { "query": query , "variables": variables}, context_value=request)
+        result = graphql_sync(schema, { "query": query , "variables": variables}, context_value={ "request": request })
 
         self.assertTrue(result[0])
 
@@ -148,7 +148,7 @@ class BookmarkTestCase(FastTenantTestCase):
 
         variables = {}
 
-        result = graphql_sync(schema, { "query": query , "variables": variables}, context_value=request)
+        result = graphql_sync(schema, { "query": query , "variables": variables}, context_value={ "request": request })
 
         self.assertTrue(result[0])
 

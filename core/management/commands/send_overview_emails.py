@@ -3,7 +3,7 @@ from django.db.models import Q
 from django.utils import timezone
 from django.utils.translation import ugettext_lazy
 from core import config
-from core.lib import send_mail_multi, get_default_email_context
+from core.lib import send_mail_multi
 from core.models import Entity, EntityView
 from datetime import datetime, timedelta
 from django.db import connection

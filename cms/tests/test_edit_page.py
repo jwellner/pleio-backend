@@ -67,7 +67,7 @@ class EditPageTestCase(FastTenantTestCase):
         request = HttpRequest()
         request.user = self.admin
 
-        result = graphql_sync(schema, {"query": mutation, "variables": variables }, context_value=request)
+        result = graphql_sync(schema, {"query": mutation, "variables": variables }, context_value={ "request": request })
 
         data = result[1]["data"]
 
@@ -122,7 +122,7 @@ class EditPageTestCase(FastTenantTestCase):
         request = HttpRequest()
         request.user = self.anonymousUser
 
-        result = graphql_sync(schema, {"query": mutation, "variables": variables }, context_value=request)
+        result = graphql_sync(schema, {"query": mutation, "variables": variables }, context_value={ "request": request })
 
         errors = result[1]["errors"]
 
@@ -171,7 +171,7 @@ class EditPageTestCase(FastTenantTestCase):
         request = HttpRequest()
         request.user = self.user
 
-        result = graphql_sync(schema, {"query": mutation, "variables": variables }, context_value=request)
+        result = graphql_sync(schema, {"query": mutation, "variables": variables }, context_value={ "request": request })
 
         errors = result[1]["errors"]
 

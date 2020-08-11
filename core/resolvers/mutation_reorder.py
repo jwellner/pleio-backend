@@ -9,7 +9,7 @@ from cms.utils import reorder_positions
 def resolve_reorder(_, info, input):
     # pylint: disable=redefined-builtin
 
-    user = info.context.user
+    user = info.context["request"].user
     clean_input = remove_none_from_dict(input)
 
     if not user.is_authenticated:

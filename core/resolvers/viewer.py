@@ -6,7 +6,7 @@ viewer = ObjectType("Viewer")
 
 @viewer.field('user')
 def resolve_user(_, info):
-    user = info.context.user
+    user = info.context["request"].user
 
     if user.is_authenticated:
         return user
@@ -17,7 +17,7 @@ def resolve_can_write_to_container(obj, info, containerGuid=None, subtype=None, 
     # pylint: disable=unused-argument
     # pylint: disable=redefined-builtin
 
-    user = info.context.user
+    user = info.context["request"].user
 
     # anonymous always return false
     if not user.is_authenticated:

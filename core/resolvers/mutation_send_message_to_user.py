@@ -9,7 +9,7 @@ from core.lib import remove_none_from_dict, send_mail_multi, get_default_email_c
 def resolve_send_message_to_user(_, info, input):
     # pylint: disable=redefined-builtin
 
-    user = info.context.user
+    user = info.context["request"].user
     clean_input = remove_none_from_dict(input)
 
     if not user.is_authenticated:
@@ -20,7 +20,7 @@ def resolve_send_message_to_user(_, info, input):
     except ObjectDoesNotExist:
         raise GraphQLError(COULD_NOT_FIND)
 
-    context = get_default_email_context(info.context)
+    context = get_default_email_context(info.context['request'])
     context['message'] = format_html(clean_input.get('message'))
 
     subject = ugettext_lazy("Message from {0}: {1}").format(user.name, clean_input.get('subject'))

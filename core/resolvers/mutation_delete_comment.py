@@ -5,7 +5,7 @@ from core.models import Comment
 
 def resolve_delete_comment(_, info, input):
     # pylint: disable=redefined-builtin
-    user = info.context.user
+    user = info.context["request"].user
 
     if not user.is_authenticated:
         raise GraphQLError(NOT_LOGGED_IN)

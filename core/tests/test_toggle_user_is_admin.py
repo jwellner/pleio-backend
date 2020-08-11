@@ -45,7 +45,7 @@ class ToggleUserIsAdminTestCase(FastTenantTestCase):
         request = HttpRequest()
         request.user = self.anonymousUser
 
-        result = graphql_sync(schema, {"query": mutation, "variables": variables}, context_value=request)
+        result = graphql_sync(schema, {"query": mutation, "variables": variables}, context_value={ "request": request })
 
         errors = result[1]["errors"]
 
@@ -69,7 +69,7 @@ class ToggleUserIsAdminTestCase(FastTenantTestCase):
         request = HttpRequest()
         request.user = self.user1
 
-        result = graphql_sync(schema, {"query": mutation, "variables": variables}, context_value=request)
+        result = graphql_sync(schema, {"query": mutation, "variables": variables}, context_value={ "request": request })
 
         errors = result[1]["errors"]
 
@@ -102,14 +102,14 @@ class ToggleUserIsAdminTestCase(FastTenantTestCase):
         user_url = 'https://test.test' + self.user1.url
         admin_email_adresses = [self.admin.email, self.admin2.email]
 
-        result = graphql_sync(schema, {"query": mutation, "variables": variables}, context_value=request)
+        result = graphql_sync(schema, {"query": mutation, "variables": variables}, context_value={ "request": request })
 
         data = result[1]["data"]
         self.assertEqual(data["toggleUserIsAdmin"]["success"], True)
 
         self.assertEqual(mocked_send_mail_multi.call_count, 2)
 
-        result = graphql_sync(schema, {"query": mutation, "variables": variables}, context_value=request)
+        result = graphql_sync(schema, {"query": mutation, "variables": variables}, context_value={ "request": request })
         data = result[1]["data"]
         self.assertEqual(data["toggleUserIsAdmin"]["success"], True)
 

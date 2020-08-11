@@ -87,7 +87,7 @@ class WikiTestCase(FastTenantTestCase):
             "guid": self.wikiPublic.guid
         }
 
-        result = graphql_sync(schema, { "query": self.query , "variables": variables}, context_value=request)
+        result = graphql_sync(schema, { "query": self.query , "variables": variables}, context_value={ "request": request })
 
         self.assertTrue(result[0])
 
@@ -112,7 +112,7 @@ class WikiTestCase(FastTenantTestCase):
             "guid": self.wikiPrivate.guid
         }
 
-        result = graphql_sync(schema, { "query": self.query , "variables": variables}, context_value=request)
+        result = graphql_sync(schema, { "query": self.query , "variables": variables}, context_value={ "request": request })
 
         self.assertTrue(result[0])
 
@@ -128,7 +128,7 @@ class WikiTestCase(FastTenantTestCase):
             "guid": self.wikiPrivate.guid
         }
 
-        result = graphql_sync(schema, { "query": self.query , "variables": variables}, context_value=request)
+        result = graphql_sync(schema, { "query": self.query , "variables": variables}, context_value={ "request": request })
 
         self.assertTrue(result[0])
 

@@ -100,12 +100,12 @@ def resolve_activities(
     if orderDirection == 'desc':
         order_by = '-%s' % (order_by)
 
-    qs = Entity.objects.visible(info.context.user)
+    qs = Entity.objects.visible(info.context["request"].user)
     qs = qs.filter(conditional_subtypes_filter(subtypes) &
                    conditional_tags_filter(tags) &
                    conditional_tag_lists_filter(tagLists) &
                    conditional_group_filter(containerGuid) &
-                   conditional_groups_filter(groupFilter, info.context.user))
+                   conditional_groups_filter(groupFilter, info.context["request"].user))
     qs = qs.order_by(order_by).select_subclasses()
     total = qs.count()
 

@@ -174,7 +174,7 @@ class EditFileFolderTestCase(FastTenantTestCase):
         request = HttpRequest()
         request.user = self.authenticatedUser
 
-        result = graphql_sync(schema, { "query": self.mutation, "variables": variables }, context_value=request)
+        result = graphql_sync(schema, { "query": self.mutation, "variables": variables }, context_value={ "request": request })
 
         data = result[1]["data"]
 
@@ -217,7 +217,7 @@ class EditFileFolderTestCase(FastTenantTestCase):
             }
         }
 
-        result = graphql_sync(schema, { "query": mutation, "variables": variables }, context_value=request)
+        result = graphql_sync(schema, { "query": mutation, "variables": variables }, context_value={ "request": request })
 
         self.assertTrue(result[0])
 
@@ -254,7 +254,7 @@ class EditFileFolderTestCase(FastTenantTestCase):
             "filter": "folders"
         }
 
-        result = graphql_sync(schema, { "query": query, "variables": variables }, context_value=request)
+        result = graphql_sync(schema, { "query": query, "variables": variables }, context_value={ "request": request })
 
         self.assertTrue(result[0])
 
@@ -270,7 +270,7 @@ class EditFileFolderTestCase(FastTenantTestCase):
             "limit": 1
         }
 
-        result = graphql_sync(schema, { "query": query, "variables": variables }, context_value=request)
+        result = graphql_sync(schema, { "query": query, "variables": variables }, context_value={ "request": request })
 
         self.assertTrue(result[0])
 
@@ -311,7 +311,7 @@ class EditFileFolderTestCase(FastTenantTestCase):
             }
         }
 
-        result = graphql_sync(schema, { "query": mutation, "variables": variables }, context_value=request)
+        result = graphql_sync(schema, { "query": mutation, "variables": variables }, context_value={ "request": request })
 
         self.assertTrue(result[0])
 
@@ -347,7 +347,7 @@ class EditFileFolderTestCase(FastTenantTestCase):
             "filter": "folders"
         }
 
-        result = graphql_sync(schema, { "query": query, "variables": variables }, context_value=request)
+        result = graphql_sync(schema, { "query": query, "variables": variables }, context_value={ "request": request })
 
         self.assertTrue(result[0])
 
@@ -362,7 +362,7 @@ class EditFileFolderTestCase(FastTenantTestCase):
             "filter": "files"
         }
 
-        result = graphql_sync(schema, { "query": query, "variables": variables }, context_value=request)
+        result = graphql_sync(schema, { "query": query, "variables": variables }, context_value={ "request": request })
 
         self.assertTrue(result[0])
 
@@ -402,7 +402,7 @@ class EditFileFolderTestCase(FastTenantTestCase):
             }
         }
 
-        result = graphql_sync(schema, { "query": mutation, "variables": variables }, context_value=request)
+        result = graphql_sync(schema, { "query": mutation, "variables": variables }, context_value={ "request": request })
 
         self.assertTrue(result[0])
 
@@ -438,7 +438,7 @@ class EditFileFolderTestCase(FastTenantTestCase):
             "filter": "folders"
         }
 
-        result = graphql_sync(schema, { "query": query, "variables": variables }, context_value=request)
+        result = graphql_sync(schema, { "query": query, "variables": variables }, context_value={ "request": request })
 
         self.assertTrue(result[0])
 
@@ -453,7 +453,7 @@ class EditFileFolderTestCase(FastTenantTestCase):
             "filter": "files"
         }
 
-        result = graphql_sync(schema, { "query": query, "variables": variables }, context_value=request)
+        result = graphql_sync(schema, { "query": query, "variables": variables }, context_value={ "request": request })
 
         self.assertTrue(result[0])
 
@@ -494,7 +494,7 @@ class EditFileFolderTestCase(FastTenantTestCase):
             }
         }
 
-        result = graphql_sync(schema, { "query": mutation, "variables": variables }, context_value=request)
+        result = graphql_sync(schema, { "query": mutation, "variables": variables }, context_value={ "request": request })
 
         self.assertTrue(result[0])
 
@@ -530,7 +530,7 @@ class EditFileFolderTestCase(FastTenantTestCase):
             "filter": "folders"
         }
 
-        result = graphql_sync(schema, { "query": query, "variables": variables }, context_value=request)
+        result = graphql_sync(schema, { "query": query, "variables": variables }, context_value={ "request": request })
 
         self.assertTrue(result[0])
 
@@ -545,7 +545,7 @@ class EditFileFolderTestCase(FastTenantTestCase):
             "filter": "files"
         }
 
-        result = graphql_sync(schema, { "query": query, "variables": variables }, context_value=request)
+        result = graphql_sync(schema, { "query": query, "variables": variables }, context_value={ "request": request })
 
         self.assertTrue(result[0])
 
@@ -586,7 +586,7 @@ class EditFileFolderTestCase(FastTenantTestCase):
             }
         }
 
-        result = graphql_sync(schema, { "query": mutation, "variables": variables }, context_value=request)
+        result = graphql_sync(schema, { "query": mutation, "variables": variables }, context_value={ "request": request })
 
         self.assertTrue(result[0])
 
@@ -622,7 +622,7 @@ class EditFileFolderTestCase(FastTenantTestCase):
             "filter": "files"
         }
 
-        result = graphql_sync(schema, { "query": query, "variables": variables }, context_value=request)
+        result = graphql_sync(schema, { "query": query, "variables": variables }, context_value={ "request": request })
 
         self.assertTrue(result[0])
 

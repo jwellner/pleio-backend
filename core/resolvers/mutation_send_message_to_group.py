@@ -12,7 +12,7 @@ from datetime import datetime, timedelta
 def resolve_send_message_to_group(_, info, input):
     # pylint: disable=redefined-builtin
 
-    user = info.context.user
+    user = info.context["request"].user
     clean_input = remove_none_from_dict(input)
 
     if not user.is_authenticated:
@@ -47,7 +47,7 @@ def resolve_send_message_to_group(_, info, input):
 
             email_addresses.append(receiving_user.email)
 
-    context = get_default_email_context(info.context)
+    context = get_default_email_context(info.context['request'])
     context['message'] = format_html(clean_input.get('message'))
 
     subject = ugettext_lazy("Message from group {0}: {1}").format(group.name, clean_input.get('subject'))

@@ -14,7 +14,7 @@ def resolve_url(obj, info):
 def resolve_has_votes(obj, info):
     # pylint: disable=unused-argument
     for choice in obj.choices.all():
-        if choice.has_voted(info.context.user):
+        if choice.has_voted(info.context["request"].user):
             return True
     return False
 

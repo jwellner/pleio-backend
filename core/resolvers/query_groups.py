@@ -25,7 +25,7 @@ def resolve_groups(
     # pylint: disable=too-many-arguments
     # pylint: disable=redefined-builtin
 
-    user = info.context.user
+    user = info.context["request"].user
 
     groups = Group.objects.visible(user)
     if q:

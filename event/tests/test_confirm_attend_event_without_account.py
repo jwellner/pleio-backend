@@ -62,7 +62,7 @@ class ConfirmAttendEventWithoutAccountTestCase(FastTenantTestCase):
             'HTTP_HOST': 'test.test'
         }
 
-        result = graphql_sync(schema, { "query": mutation, "variables": variables }, context_value=request)
+        result = graphql_sync(schema, { "query": mutation, "variables": variables }, context_value={ "request": request })
 
         data = result[1]["data"]
 
@@ -106,7 +106,7 @@ class ConfirmAttendEventWithoutAccountTestCase(FastTenantTestCase):
         request.META = {
             'HTTP_HOST': 'test.test'
         }
-        result = graphql_sync(schema, { "query": mutation, "variables": variables }, context_value=request)
+        result = graphql_sync(schema, { "query": mutation, "variables": variables }, context_value={ "request": request })
         errors = result[1]["errors"]
 
         self.assertEqual(errors[0]["message"], "event_is_full")
@@ -139,8 +139,8 @@ class ConfirmAttendEventWithoutAccountTestCase(FastTenantTestCase):
         request.META = {
             'HTTP_HOST': 'test.test'
         }
-        result = graphql_sync(schema, { "query": mutation, "variables": variables }, context_value=request)
-        result = graphql_sync(schema, { "query": mutation, "variables": variables }, context_value=request)
+        result = graphql_sync(schema, { "query": mutation, "variables": variables }, context_value={ "request": request })
+        result = graphql_sync(schema, { "query": mutation, "variables": variables }, context_value={ "request": request })
 
         errors = result[1]["errors"]
 

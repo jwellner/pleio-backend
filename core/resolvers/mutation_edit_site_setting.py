@@ -35,7 +35,7 @@ def resolve_edit_site_setting(_, info, input):
     # pylint: disable=too-many-branches
     # pylint: disable=too-many-locals
 
-    user = info.context.user
+    user = info.context["request"].user
     clean_input = remove_none_from_dict(input)
 
     if not user.is_authenticated:

@@ -18,7 +18,7 @@ def resolve_edit_entity(_, info, input):
 
     clean_input = remove_none_from_dict(input)
 
-    if not info.context.user.is_authenticated:
+    if not info.context["request"].user.is_authenticated:
         raise GraphQLError(NOT_LOGGED_IN)
 
     try:

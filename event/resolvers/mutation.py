@@ -19,7 +19,7 @@ mutation.set_field("confirmAttendEventWithoutAccount", resolve_confirm_attend_ev
 def resolve_attend_event(_, info, input):
     # pylint: disable=redefined-builtin
 
-    user = info.context.user
+    user = info.context["request"].user
     clean_input = remove_none_from_dict(input)
 
     if not user.is_authenticated:
@@ -58,7 +58,7 @@ def resolve_attend_event(_, info, input):
 def resolve_add_event(_, info, input):
     # pylint: disable=redefined-builtin
 
-    user = info.context.user
+    user = info.context["request"].user
 
     clean_input = remove_none_from_dict(input)
 
@@ -147,11 +147,11 @@ def resolve_edit_event(_, info, input):
     # pylint: disable=redefined-builtin
     # pylint: disable=too-many-branches
 
-    user = info.context.user
+    user = info.context["request"].user
 
     clean_input = remove_none_from_dict(input)
 
-    if not info.context.user.is_authenticated:
+    if not info.context["request"].user.is_authenticated:
         raise GraphQLError(NOT_LOGGED_IN)
 
     try:

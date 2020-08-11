@@ -79,7 +79,7 @@ def resolve_max_attendees(obj, info):
 @event.field("isAttending")
 def resolve_is_attending(obj, info):
     # pylint: disable=unused-argument
-    attendee = obj.get_attendee(info.context.user)
+    attendee = obj.get_attendee(info.context["request"].user)
 
     if attendee:
         return attendee.state
@@ -90,7 +90,7 @@ def resolve_is_attending(obj, info):
 def resolve_attendees(obj, info, limit=20, offset=0, state=None):
     # pylint: disable=unused-argument
 
-    user = info.context.user
+    user = info.context["request"].user
     if not user.is_authenticated:
         return {
             "total": 0,
@@ -117,7 +117,7 @@ def resolve_attendees(obj, info, limit=20, offset=0, state=None):
 @event.field("attendeesWithoutAccount")
 def resolve_attendees_without_account(obj, info):
     # pylint: disable=unused-argument
-    user = info.context.user
+    user = info.context["request"].user
     if not user.is_authenticated:
         return 0
 

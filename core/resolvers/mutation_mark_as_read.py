@@ -8,7 +8,7 @@ def resolve_mark_as_read(_, info, input):
     # TODO: do we wnat a mapper for notification?
     # pylint: disable=redefined-builtin
 
-    user = info.context.user
+    user = info.context["request"].user
     clean_input = remove_none_from_dict(input)
 
     if not user.is_authenticated:
@@ -33,7 +33,7 @@ def resolve_mark_all_as_read(_, info, input):
     # pylint: disable=redefined-builtin
     # pylint: disable=unused-argument
 
-    user = info.context.user
+    user = info.context["request"].user
 
     if not user.is_authenticated:
         raise GraphQLError(NOT_LOGGED_IN)

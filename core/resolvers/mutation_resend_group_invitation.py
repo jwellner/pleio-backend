@@ -7,7 +7,7 @@ from core.lib import remove_none_from_dict, send_mail_multi, get_base_url, get_d
 
 def resolve_resend_group_invitation(_, info, input):
     # pylint: disable=redefined-builtin
-    user = info.context.user
+    user = info.context["request"].user
     clean_input = remove_none_from_dict(input)
 
     if not user.is_authenticated:
@@ -23,10 +23,10 @@ def resolve_resend_group_invitation(_, info, input):
         raise GraphQLError(COULD_NOT_INVITE)
 
     subject = ugettext_lazy("Reminder to become a member of the %(group_name)s group") % {'group_name': group.name}
-    link = get_base_url(info.context) + '/groups/invitations/?invitecode=' + invitation.code
+    link = get_base_url(info.context['request']) + '/groups/invitations/?invitecode=' + invitation.code
 
     try:
-        context = get_default_email_context(info.context)
+        context = get_default_email_context(info.context['request'])
         context['link'] = link
         context['group_name'] = group.name
 

@@ -8,7 +8,7 @@ def resolve_bookmark(_, info, input):
     # pylint: disable=redefined-builtin
     # TODO: what is isFirstbookmark can we delete it?
 
-    user = info.context.user
+    user = info.context["request"].user
 
     clean_input = remove_none_from_dict(input)
 

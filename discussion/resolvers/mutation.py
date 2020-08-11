@@ -8,7 +8,7 @@ from ..models import Discussion
 def resolve_add_discussion(_, info, input):
     # pylint: disable=redefined-builtin
 
-    user = info.context.user
+    user = info.context["request"].user
 
     clean_input = remove_none_from_dict(input)
 
@@ -53,11 +53,11 @@ def resolve_add_discussion(_, info, input):
 def resolve_edit_discussion(_, info, input):
     # pylint: disable=redefined-builtin
 
-    user = info.context.user
+    user = info.context["request"].user
 
     clean_input = remove_none_from_dict(input)
 
-    if not info.context.user.is_authenticated:
+    if not info.context["request"].user.is_authenticated:
         raise GraphQLError(NOT_LOGGED_IN)
 
     try:

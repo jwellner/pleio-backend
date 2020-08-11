@@ -9,7 +9,7 @@ from ..models import Task
 def resolve_add_task(_, info, input):
     # pylint: disable=redefined-builtin
 
-    user = info.context.user
+    user = info.context["request"].user
 
     clean_input = remove_none_from_dict(input)
 
@@ -52,11 +52,11 @@ def resolve_add_task(_, info, input):
 def resolve_edit_task(_, info, input):
     # pylint: disable=redefined-builtin
 
-    user = info.context.user
+    user = info.context["request"].user
 
     clean_input = remove_none_from_dict(input)
 
-    if not info.context.user.is_authenticated:
+    if not info.context["request"].user.is_authenticated:
         raise GraphQLError(NOT_LOGGED_IN)
 
     try:
@@ -91,11 +91,11 @@ def resolve_edit_task(_, info, input):
 def resolve_edit_task_state(_, info, input):
     # pylint: disable=redefined-builtin
 
-    user = info.context.user
+    user = info.context["request"].user
 
     clean_input = remove_none_from_dict(input)
 
-    if not info.context.user.is_authenticated:
+    if not info.context["request"].user.is_authenticated:
         raise GraphQLError(NOT_LOGGED_IN)
 
     try:

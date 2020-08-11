@@ -52,7 +52,7 @@ class AddSubgroupTestCase(FastTenantTestCase):
         request = HttpRequest()
         request.user = self.user1
 
-        result = graphql_sync(schema, { "query": mutation, "variables": variables }, context_value=request)
+        result = graphql_sync(schema, { "query": mutation, "variables": variables }, context_value={ "request": request })
 
         data = result[1]["data"]
 
@@ -82,7 +82,7 @@ class AddSubgroupTestCase(FastTenantTestCase):
         request = HttpRequest()
         request.user = self.user1
 
-        result = graphql_sync(schema, { "query": mutation, "variables": variables }, context_value=request)
+        result = graphql_sync(schema, { "query": mutation, "variables": variables }, context_value={ "request": request })
 
         data = result[1]["data"]
 
@@ -112,7 +112,7 @@ class AddSubgroupTestCase(FastTenantTestCase):
         request = HttpRequest()
         request.user = self.user2
 
-        result = graphql_sync(schema, {"query": mutation, "variables": variables }, context_value=request)
+        result = graphql_sync(schema, {"query": mutation, "variables": variables }, context_value={ "request": request })
 
         errors = result[1]["errors"]
 
@@ -140,7 +140,7 @@ class AddSubgroupTestCase(FastTenantTestCase):
         request = HttpRequest()
         request.user = self.anonymousUser
 
-        result = graphql_sync(schema, {"query": mutation, "variables": variables }, context_value=request)
+        result = graphql_sync(schema, {"query": mutation, "variables": variables }, context_value={ "request": request })
 
         errors = result[1]["errors"]
 
@@ -168,7 +168,7 @@ class AddSubgroupTestCase(FastTenantTestCase):
         request = HttpRequest()
         request.user = self.user1
 
-        result = graphql_sync(schema, { "query": mutation, "variables": variables }, context_value=request)
+        result = graphql_sync(schema, { "query": mutation, "variables": variables }, context_value={ "request": request })
 
         errors = result[1]["errors"]
 

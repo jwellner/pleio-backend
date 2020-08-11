@@ -163,7 +163,7 @@ class SiteSettingsTestCase(FastTenantTestCase):
         variables = {
         }
 
-        result = graphql_sync(schema, {"query": self.query, "variables": variables}, context_value=request)
+        result = graphql_sync(schema, {"query": self.query, "variables": variables}, context_value={ "request": request })
 
         self.assertTrue(result[0])
         data = result[1]["data"]
@@ -275,7 +275,7 @@ class SiteSettingsTestCase(FastTenantTestCase):
                 }
             }
         """
-        result = graphql_sync(schema, {"query": self.query, "variables": variables}, context_value=request)
+        result = graphql_sync(schema, {"query": self.query, "variables": variables}, context_value={ "request": request })
 
         self.assertTrue(result[0])
 
@@ -299,7 +299,7 @@ class SiteSettingsTestCase(FastTenantTestCase):
                 }
             }
         """
-        result = graphql_sync(schema, {"query": self.query, "variables": variables}, context_value=request)
+        result = graphql_sync(schema, {"query": self.query, "variables": variables}, context_value={ "request": request })
 
         self.assertTrue(result[0])
 

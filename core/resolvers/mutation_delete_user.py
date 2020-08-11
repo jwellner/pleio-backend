@@ -8,7 +8,7 @@ from user.models import User
 
 def resolve_delete_user(_, info, input):
     # pylint: disable=redefined-builtin
-    performing_user = info.context.user
+    performing_user = info.context["request"].user
     clean_input = remove_none_from_dict(input)
 
     if not performing_user.is_authenticated:
@@ -28,7 +28,7 @@ def resolve_delete_user(_, info, input):
     user.delete()
 
     # Send email to user which is deleted
-    context = get_default_email_context(info.context)
+    context = get_default_email_context(info.context['request'])
     context['name_deleted_user'] = name_deleted_user
     subject = ugettext_lazy("Account of %(name_deleted_user)s removed") % {'name_deleted_user': name_deleted_user}
 
@@ -37,7 +37,7 @@ def resolve_delete_user(_, info, input):
 
     # Send email to admins if user which is deleted is also an admin
     if is_deleted_user_admin:
-        context = get_default_email_context(info.context)
+        context = get_default_email_context(info.context['request'])
         context['name_deleted_user'] = performing_user.name
         subject = ugettext_lazy("A site administrator was removed from %(site_name)s") % {'site_name': context["site_name"]}
 

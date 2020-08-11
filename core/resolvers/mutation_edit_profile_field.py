@@ -28,7 +28,7 @@ def validate_profile_field(string, field):
 def resolve_edit_profile_field(_, info, input):
     # pylint: disable=redefined-builtin
 
-    user = info.context.user
+    user = info.context["request"].user
     clean_input = remove_none_from_dict(input)
 
     if not user.is_authenticated:

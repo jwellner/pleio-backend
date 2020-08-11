@@ -8,7 +8,7 @@ from core.lib import remove_none_from_dict, send_mail_multi, get_default_email_c
 
 def resolve_reject_membership_request(_, info, input):
     # pylint: disable=redefined-builtin
-    user = info.context.user
+    user = info.context["request"].user
     clean_input = remove_none_from_dict(input)
 
     if not user.is_authenticated:
@@ -36,7 +36,7 @@ def resolve_reject_membership_request(_, info, input):
 
     subject = ugettext_lazy("Request for access to the %(group_name)s group has been refused") % {'group_name': group.name}
 
-    context = get_default_email_context(info.context)
+    context = get_default_email_context(info.context['request'])
     context['group_name'] = group.name
 
     email = send_mail_multi(subject, 'email/reject_membership_request.html', context, [requesting_user.email])

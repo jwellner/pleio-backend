@@ -10,7 +10,7 @@ def resolve_edit_group(_, info, input):
     # pylint: disable=too-many-branches
 
 
-    user = info.context.user
+    user = info.context["request"].user
     clean_input = remove_none_from_dict(input)
 
     if not user.is_authenticated:

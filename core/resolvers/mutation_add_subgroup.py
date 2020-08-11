@@ -8,7 +8,7 @@ from core.lib import remove_none_from_dict
 def resolve_add_subgroup(_, info, input):
     # pylint: disable=redefined-builtin
     # TODO: alter graphql schema to make groupGuid and name required
-    user = info.context.user
+    user = info.context["request"].user
     clean_input = remove_none_from_dict(input)
 
     if not user.is_authenticated:

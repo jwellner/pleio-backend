@@ -1,0 +1,40 @@
+version: '3'
+
+services:
+  api:
+    environment:
+      APM_ENABLED: 'True'
+      APM_SERVICE_NAME: 'api-dev'
+      APM_TOKEN: ''
+      APM_SERVER_URL: http://apm-server:8200
+  admin:
+    environment:
+      APM_ENABLED: 'True'
+      APM_SERVICE_NAME: 'admin-dev'
+      APM_TOKEN: ''
+      APM_SERVER_URL: http://apm-server:8200
+  apm-server:
+    image: docker.elastic.co/apm/apm-server:7.8.1
+    cap_add: ["CHOWN", "DAC_OVERRIDE", "SETGID", "SETUID"]
+    cap_drop: ["ALL"]
+    ports: ['8200:8200']
+    command: >
+       apm-server -e
+         -E apm-server.rum.enabled=true
+         -E setup.kibana.host=kibana:5601
+         -E setup.template.settings.index.number_of_replicas=0
+         -E apm-server.kibana.enabled=true
+         -E apm-server.kibana.host=kibana:5601
+         -E output.elasticsearch.hosts=["elasticsearch:9200"]
+    depends_on: ['elasticsearch', 'kibana']
+  kibana:
+    image: docker.elastic.co/kibana/kibana:7.8.1
+    environment:
+      ELASTICSEARCH_URL: http://elasticsearch:9200
+      ELASTICSEARCH_HOSTS: http://elasticsearch:9200
+    ports: ['5601:5601']
+    depends_on: ['elasticsearch']
+    healthcheck:
+      interval: 10s
+      retries: 20
+      test: curl --write-out 'HTTP %{http_code}' --fail --silent --output /dev/null http://localhost:5601/api/status

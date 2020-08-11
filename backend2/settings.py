@@ -11,6 +11,9 @@ https://docs.djangoproject.com/en/1.10/ref/settings/
 """
 
 import os
+from elasticapm.contrib.opentracing import Tracer
+from opentracing import set_global_tracer
+
 from .config import *  # pylint: disable=unused-wildcard-import
 
 APM_ENABLED = os.getenv('APM_ENABLED') == 'True'
@@ -112,9 +115,6 @@ if not RUN_AS_ADMIN_APP:
 if LOCAL_MIDDLEWARE:
     MIDDLEWARE += LOCAL_MIDDLEWARE
 
-if APM_ENABLED:
-    MIDDLEWARE = ['elasticapm.contrib.django.middleware.TracingMiddleware'] + MIDDLEWARE
-
 ROOT_URLCONF = 'backend2.urls'
 PUBLIC_SCHEMA_URLCONF = 'backend2.urls_public'
 
@@ -160,23 +160,31 @@ LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
     'handlers': {
+        'elasticapm': {
+            'level': 'WARNING',
+            'class': 'elasticapm.contrib.django.handlers.LoggingHandler',
+        },
         'console': {
+            'level': 'DEBUG',
             'class': 'logging.StreamHandler',
         },
     },
-    'root': {
-        'handlers': ['console'],
-        'level': 'WARNING',
-    },
     'loggers': {
-        'django': {
+        'django.db.backends': {
+            'level': 'ERROR',
             'handlers': ['console'],
-            'level': os.getenv('DJANGO_LOG_LEVEL', 'INFO'),
+            'propagate': False,
         },
         'mozilla_django_oidc': {
             'handlers': ['console'],
             'level': 'WARNING'
-        }
+        },
+        # Log errors from the Elastic APM module to the console (recommended)
+        'elasticapm.errors': {
+            'level': 'ERROR',
+            'handlers': ['console'],
+            'propagate': False,
+        },
     }
 }
 
@@ -213,6 +221,7 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'static/')
 STATICFILES_DIRS = [
     ("frontend", os.path.join(BASE_DIR, 'static-frontend')),
 ]
+
 STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.ManifestStaticFilesStorage'
 
 PASSWORD_RESET_TIMEOUT_DAYS = 1
@@ -234,18 +243,6 @@ if SWIFT_ENABLED:
 
 if S3_ENABLED:
     DEFAULT_FILE_STORAGE = 'core.backends.tenant_s3_storage.TenantS3Boto3Storage'
-
-#if os.getenv('DEBUG'):
-
-#    ELASTIC_APM = {
-    # Set required service name. Allowed characters:
-    # a-z, A-Z, 0-9, -, _, and space
-#        'SERVICE_NAME': 'apm-server',
-
-    # Set custom APM Server URL (default: http://localhost:8200)
-#        'SERVER_URL': 'http://apm-server:8200',
-#        'DEBUG': True
-#    }
 
 ELASTICSEARCH_DSL_SIGNAL_PROCESSOR = 'core.elasticsearch.CustomSignalProcessor'
 DATABASE_ROUTERS = (
@@ -282,5 +279,7 @@ if APM_ENABLED:
         'SERVICE_NAME': os.getenv('APM_SERVICE_NAME'),
         'SECRET_TOKEN': os.getenv('APM_TOKEN'),
         'SERVER_URL': os.getenv('APM_SERVER_URL'),
-        'VERIFY_SERVER_CERT': False
+        'VERIFY_SERVER_CERT': False,
+        'DEBUG': True,
     }
+    set_global_tracer(Tracer(config=ELASTIC_APM))

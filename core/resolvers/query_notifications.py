@@ -4,7 +4,7 @@ def resolve_notifications(_, info, offset=0, limit=20, unread=None):
     # pylint: disable=too-many-arguments
     # pylint: disable=redefined-builtin
 
-    user = info.context.user
+    user = info.context["request"].user
 
     if not user.is_authenticated:
         return {

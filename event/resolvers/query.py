@@ -31,7 +31,7 @@ def resolve_events(obj, info, filter=None, containerGuid=None, offset=0, limit=2
     # pylint: disable=too-many-arguments
     # pylint: disable=redefined-builtin
 
-    events = Event.objects.visible(info.context.user)
+    events = Event.objects.visible(info.context["request"].user)
 
     events = events.filter(
         conditional_date_filter(filter) & 

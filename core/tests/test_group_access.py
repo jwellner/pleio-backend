@@ -58,7 +58,7 @@ class TestGroupAccess(FastTenantTestCase):
             "guid": self.blog1.guid
         }
 
-        result = graphql_sync(schema, {"query": query, "variables": variables }, context_value=request)
+        result = graphql_sync(schema, {"query": query, "variables": variables }, context_value={ "request": request })
 
         self.assertTrue(result[0])
 
@@ -91,7 +91,7 @@ class TestGroupAccess(FastTenantTestCase):
             "guid": self.blog1.guid
         }
 
-        result = graphql_sync(schema, {"query": query, "variables": variables }, context_value=request)
+        result = graphql_sync(schema, {"query": query, "variables": variables }, context_value={ "request": request })
 
         errors = result[1]["errors"]
 
@@ -100,7 +100,7 @@ class TestGroupAccess(FastTenantTestCase):
         # user2 is not in group and should not be able to read blog
         request.user = self.user2
 
-        result = graphql_sync(schema, {"query": query, "variables": variables }, context_value=request)
+        result = graphql_sync(schema, {"query": query, "variables": variables }, context_value={ "request": request })
 
         errors = result[1]["errors"]
 
@@ -109,7 +109,7 @@ class TestGroupAccess(FastTenantTestCase):
         # user1 is in group and should be able to read blog
         request.user = self.user1
 
-        result = graphql_sync(schema, {"query": query, "variables": variables }, context_value=request)
+        result = graphql_sync(schema, {"query": query, "variables": variables }, context_value={ "request": request })
 
         self.assertTrue(result[0])
 
@@ -120,7 +120,7 @@ class TestGroupAccess(FastTenantTestCase):
         # user3 is admin and should be able to read blog
         request.user = self.user3
 
-        result = graphql_sync(schema, {"query": query, "variables": variables }, context_value=request)
+        result = graphql_sync(schema, {"query": query, "variables": variables }, context_value={ "request": request })
 
         self.assertTrue(result[0])
 
@@ -159,7 +159,7 @@ class TestGroupAccess(FastTenantTestCase):
         request = HttpRequest()
         request.user = self.user1
 
-        result = graphql_sync(schema, { "query": mutation, "variables": data }, context_value=request)
+        result = graphql_sync(schema, { "query": mutation, "variables": data }, context_value={ "request": request })
 
         errors = result[1]["errors"]
 

@@ -8,7 +8,7 @@ from core.lib import remove_none_from_dict, send_mail_multi, get_base_url, get_d
 
 def resolve_accept_membership_request(_, info, input):
     # pylint: disable=redefined-builtin
-    user = info.context.user
+    user = info.context["request"].user
     clean_input = remove_none_from_dict(input)
 
     if not user.is_authenticated:
@@ -34,9 +34,9 @@ def resolve_accept_membership_request(_, info, input):
 
     group.join(requesting_user, 'member')
     subject = ugettext_lazy("Request for access to the %(group_name)s group has been approved") % {'group_name': group.name}
-    link = get_base_url(info.context) + group.url
+    link = get_base_url(info.context['request']) + group.url
 
-    context = get_default_email_context(info.context)
+    context = get_default_email_context(info.context['request'])
     context['group_name'] = group.name
     context['link'] = link
 

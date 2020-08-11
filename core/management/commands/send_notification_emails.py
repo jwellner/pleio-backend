@@ -3,7 +3,7 @@ from django.utils import timezone
 from django.utils.text import Truncator
 from django.utils.translation import ugettext_lazy
 from django.db import connection
-from core.lib import send_mail_multi, get_default_email_context
+from core.lib import send_mail_multi
 from user.models import User
 from core import config
 from datetime import datetime, timedelta

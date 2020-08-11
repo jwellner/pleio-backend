@@ -74,7 +74,7 @@ class EditProfileFieldTestCase(FastTenantTestCase):
         request = HttpRequest()
         request.user = self.user
 
-        result = graphql_sync(schema, { "query": mutation, "variables": variables }, context_value=request)
+        result = graphql_sync(schema, { "query": mutation, "variables": variables }, context_value={ "request": request })
 
         data = result[1]["data"]
 
@@ -119,7 +119,7 @@ class EditProfileFieldTestCase(FastTenantTestCase):
         request = HttpRequest()
         request.user = self.admin
 
-        result = graphql_sync(schema, { "query": mutation, "variables": variables }, context_value=request)
+        result = graphql_sync(schema, { "query": mutation, "variables": variables }, context_value={ "request": request })
 
         data = result[1]["data"]
 
@@ -164,7 +164,7 @@ class EditProfileFieldTestCase(FastTenantTestCase):
         request = HttpRequest()
         request.user = self.other
 
-        result = graphql_sync(schema, { "query": mutation, "variables": variables }, context_value=request)
+        result = graphql_sync(schema, { "query": mutation, "variables": variables }, context_value={ "request": request })
 
         data = result[1]["data"]
 
@@ -207,7 +207,7 @@ class EditProfileFieldTestCase(FastTenantTestCase):
         request = HttpRequest()
         request.user = self.anonymousUser
 
-        result = graphql_sync(schema, { "query": mutation, "variables": variables }, context_value=request)
+        result = graphql_sync(schema, { "query": mutation, "variables": variables }, context_value={ "request": request })
 
         errors = result[1]["errors"]
 
@@ -248,7 +248,7 @@ class EditProfileFieldTestCase(FastTenantTestCase):
         request = HttpRequest()
         request.user = self.user
 
-        result = graphql_sync(schema, { "query": mutation, "variables": variables }, context_value=request)
+        result = graphql_sync(schema, { "query": mutation, "variables": variables }, context_value={ "request": request })
 
         errors = result[1]["errors"]
 
@@ -289,7 +289,7 @@ class EditProfileFieldTestCase(FastTenantTestCase):
         request = HttpRequest()
         request.user = self.user
 
-        result = graphql_sync(schema, { "query": mutation, "variables": variables }, context_value=request)
+        result = graphql_sync(schema, { "query": mutation, "variables": variables }, context_value={ "request": request })
 
         errors = result[1]["errors"]
 
@@ -330,7 +330,7 @@ class EditProfileFieldTestCase(FastTenantTestCase):
         request = HttpRequest()
         request.user = self.user
 
-        result = graphql_sync(schema, { "query": mutation, "variables": variables }, context_value=request)
+        result = graphql_sync(schema, { "query": mutation, "variables": variables }, context_value={ "request": request })
         data = result[1]["data"]
 
         self.assertEqual(data["editProfileField"]["user"]["guid"], self.user.guid)
@@ -373,7 +373,7 @@ class EditProfileFieldTestCase(FastTenantTestCase):
         request = HttpRequest()
         request.user = self.user
 
-        result = graphql_sync(schema, { "query": mutation, "variables": variables }, context_value=request)
+        result = graphql_sync(schema, { "query": mutation, "variables": variables }, context_value={ "request": request })
 
         data = result[1]["data"]
 
@@ -418,7 +418,7 @@ class EditProfileFieldTestCase(FastTenantTestCase):
         request = HttpRequest()
         request.user = self.user
 
-        result = graphql_sync(schema, { "query": mutation, "variables": variables }, context_value=request)
+        result = graphql_sync(schema, { "query": mutation, "variables": variables }, context_value={ "request": request })
 
         errors = result[1]["errors"]
 
@@ -459,7 +459,7 @@ class EditProfileFieldTestCase(FastTenantTestCase):
         request = HttpRequest()
         request.user = self.user
 
-        result = graphql_sync(schema, { "query": mutation, "variables": variables }, context_value=request)
+        result = graphql_sync(schema, { "query": mutation, "variables": variables }, context_value={ "request": request })
 
         errors = result[1]["errors"]
 
@@ -500,7 +500,7 @@ class EditProfileFieldTestCase(FastTenantTestCase):
         request = HttpRequest()
         request.user = self.user
 
-        result = graphql_sync(schema, { "query": mutation, "variables": variables }, context_value=request)
+        result = graphql_sync(schema, { "query": mutation, "variables": variables }, context_value={ "request": request })
 
         data = result[1]["data"]
 
@@ -519,7 +519,7 @@ class EditProfileFieldTestCase(FastTenantTestCase):
             }
         }
 
-        result = graphql_sync(schema, { "query": mutation, "variables": variables }, context_value=request)
+        result = graphql_sync(schema, { "query": mutation, "variables": variables }, context_value={ "request": request })
 
         data = result[1]["data"]
         self.assertEqual(data["editProfileField"]["user"]["profile"][4]["value"], 'select_value_1,select_value_2')

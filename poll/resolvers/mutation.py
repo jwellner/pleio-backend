@@ -7,7 +7,7 @@ from ..models import Poll, PollChoice
 def resolve_add_poll(_, info, input):
     # pylint: disable=redefined-builtin
 
-    user = info.context.user
+    user = info.context["request"].user
 
     clean_input = remove_none_from_dict(input)
 
@@ -36,7 +36,7 @@ def resolve_add_poll(_, info, input):
 def resolve_edit_poll(_, info, input):
     # pylint: disable=redefined-builtin
 
-    user = info.context.user
+    user = info.context["request"].user
 
     clean_input = remove_none_from_dict(input)
 
@@ -71,7 +71,7 @@ def resolve_edit_poll(_, info, input):
 def resolve_vote_on_poll(_, info, input):
     # pylint: disable=redefined-builtin
 
-    user = info.context.user
+    user = info.context["request"].user
 
     clean_input = remove_none_from_dict(input)
 

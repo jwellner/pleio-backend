@@ -9,7 +9,7 @@ from core.lib import remove_none_from_dict, get_base_url, get_default_email_cont
 def resolve_join_group(_, info, input):
     # pylint: disable=redefined-builtin
 
-    user = info.context.user
+    user = info.context["request"].user
     clean_input = remove_none_from_dict(input)
 
     if not user.is_authenticated:
@@ -28,8 +28,8 @@ def resolve_join_group(_, info, input):
     else:
         group.join(user, 'pending')
         subject = ugettext_lazy("Access request for the %(group_name)s group") % {'group_name': group.name}
-        context = get_default_email_context(info.context)
-        link = get_base_url(info.context) + group.url
+        context = get_default_email_context(info.context['request'])
+        link = get_base_url(info.context['request']) + group.url
         context['link'] = link
         context['group_name'] = group.name
         context['user_obfuscated_email'] = obfuscate_email(user.email)

@@ -207,18 +207,18 @@ def is_valid_json(string):
     return True
 
 
-def get_base_url(context):
-    return 'https://' + context.get_host()
+def get_base_url(request):
+    return 'https://' + request.get_host()
 
 
-def get_default_email_context(context):
+def get_default_email_context(request):
     user_name = ""
-    site_url = get_base_url(context)
+    site_url = get_base_url(request)
     user_url = site_url
-    if hasattr(context.user, 'url'):
-        user_url = site_url + context.user.url
-    if hasattr(context.user, 'name'):
-        user_name = context.user.name
+    if hasattr(request.user, 'url'):
+        user_url = site_url + request.user.url
+    if hasattr(request.user, 'name'):
+        user_name = request.user.name
     site_name = config.NAME
     primary_color = config.COLOR_PRIMARY
     return {'user_name': user_name, 'user_url': user_url, 'site_url': site_url, 'site_name': site_name, 'primary_color': primary_color}

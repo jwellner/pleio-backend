@@ -27,7 +27,7 @@ def resolve_attend_event_without_account(_, info, input):
     except ValidationError:
         raise GraphQLError(INVALID_EMAIL)
 
-    url = get_base_url(info.context) + '/events/confirm/' + event.guid + '?email=' + email + '&code='
+    url = get_base_url(info.context['request']) + '/events/confirm/' + event.guid + '?email=' + email + '&code='
     subject = ugettext_lazy("Confirmation of registration %s" % event.title)
 
     code = ""
@@ -45,7 +45,7 @@ def resolve_attend_event_without_account(_, info, input):
 
     link = url + code
 
-    context = get_default_email_context(info.context)
+    context = get_default_email_context(info.context['request'])
     context['link'] = link
     context['title'] = event.title
     context['location'] = event.location
