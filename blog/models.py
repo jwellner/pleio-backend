@@ -2,6 +2,7 @@ from django.db import models
 from django.utils.text import slugify
 from core.models import Entity, VoteMixin, CommentMixin, BookmarkMixin, FollowMixin
 from file.models import FileFolder
+from django.urls import reverse
 
 class Blog(Entity, VoteMixin, BookmarkMixin, FollowMixin, CommentMixin):
     """
@@ -45,3 +46,9 @@ class Blog(Entity, VoteMixin, BookmarkMixin, FollowMixin, CommentMixin):
         return '{}/blog/view/{}/{}'.format(
             prefix, self.guid, slugify(self.title)
         ).lower()
+
+    @property
+    def featured_image_url(self):
+        if self.featured_image:
+            return '%s?cache=%i' % (reverse('featured', args=[self.id]), int(self.featured_image.updated_at.timestamp()))
+        return None

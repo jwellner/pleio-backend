@@ -9,8 +9,8 @@ from django.db.models.signals import pre_save
 from django.dispatch import receiver
 from django.utils.text import slugify
 from django.utils import timezone
+from django.urls import reverse
 from core.lib import ACCESS_TYPE
-
 
 class GroupManager(models.Manager):
     def visible(self, user):
@@ -150,6 +150,12 @@ class Group(models.Model):
     @property
     def type_to_string(self):
         return 'group'
+
+    @property
+    def featured_image_url(self):
+        if self.featured_image:
+            return '%s?cache=%i' % (reverse('featured', args=[self.id]), int(self.featured_image.updated_at.timestamp()))
+        return None
 
     def search_read_access(self):
         return [ACCESS_TYPE.public]

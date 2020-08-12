@@ -3,6 +3,7 @@ import zipfile
 from django.core.exceptions import ObjectDoesNotExist
 from django.http import Http404, FileResponse, StreamingHttpResponse
 from django.views.decorators.cache import cache_control
+from core.models import Entity
 from file.models import FileFolder
 from file.helpers import add_folders_to_zip
 from file.helpers import generate_thumbnail
@@ -46,7 +47,6 @@ def embed(request, file_id=None, file_name=None):
 
         response = StreamingHttpResponse(streaming_content=entity.upload.open(), content_type=entity.mime_type)
         response['Content-Length'] = entity.upload.size
-        response['Content-Disposition'] = "attachment; filename=%s" % path.basename(entity.upload.name)
         return response
 
     except ObjectDoesNotExist:
@@ -54,6 +54,24 @@ def embed(request, file_id=None, file_name=None):
 
     raise Http404("File not found")
 
+@cache_control(public=True, max_age=15724800)
+def featured(request, entity_guid=None):
+    if not entity_guid:
+        raise Http404("File not found")
+
+    try:
+        # don't check user access on featured images because they are also user in email
+        entity = Entity.objects.get_subclass(id=entity_guid)
+
+        if hasattr(entity, 'featured_image') and entity.featured_image:
+            response = StreamingHttpResponse(streaming_content=entity.featured_image.upload.open(), content_type=entity.featured_image.mime_type)
+            response['Content-Length'] = entity.featured_image.upload.size
+            return response
+
+    except ObjectDoesNotExist:
+        raise Http404("File not found")
+
+    raise Http404("File not found")
 
 def bulk_download(request):
     user = request.user

@@ -27,6 +27,7 @@ urlpatterns = [
     path('file/download/<uuid:file_id>/<str:file_name>', file_views.download, name='download'),
     path('file/embed/<uuid:file_id>/<str:file_name>', file_views.embed, name='embed'),
     path('file/thumbnail/<uuid:file_id>', file_views.thumbnail, name='thumbnail'),
+    path('file/featured/<uuid:entity_guid>', file_views.featured, name='featured'),
     path('bulk_download', file_views.bulk_download, name='bulk_download'),
 
     path('exporting/event/<uuid:event_id>', event_views.export, name='event_export'),
