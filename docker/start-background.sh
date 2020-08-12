@@ -1,4 +1,4 @@
 #!/usr/bin/env bash
 
 echo "[i] Starting celery..."
-celery -B -A backend2 worker -l info -s "/tmp/celerybeat-schedule"
+celery -A backend2.celery worker -B -E -O fair -s "/tmp/celerybeat-schedule" --loglevel=info
