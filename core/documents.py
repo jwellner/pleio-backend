@@ -1,7 +1,7 @@
 from django_elasticsearch_dsl import Document, fields
 from django_elasticsearch_dsl.registries import registry
 from django_tenants.utils import parse_tenant_config_path
-from elasticsearch_dsl import analysis, analyzer, tokenizer
+from elasticsearch_dsl import analysis, analyzer
 from .models.user import UserProfile, UserProfileField
 from .models.group import Group
 from user.models import User
@@ -10,20 +10,12 @@ from user.models import User
 custom_stop_filter = analysis.token_filter(
     "custom_stop_filter",
     type="stop",
-    stopwords=['_dutch_'],
-    ignore_case=True
+    stopwords=['_dutch_']
 )
 
-
-ngram_analyzer = analyzer(
-    'ngram_analyzer',
-    tokenizer=tokenizer(
-        'description_ngram',
-        type='ngram',
-        min_gram=3,
-        max_gram=3,
-        token_chars=["letter", "digit", "punctuation", "symbol"]
-    ),
+custom_analyzer = analyzer(
+    'custom_analyzer',
+    tokenizer='standard',
     filter=['lowercase', custom_stop_filter]
 )
 
@@ -42,7 +34,7 @@ class UserDocument(DefaultDocument):
     read_access = fields.ListField(fields.TextField(attr="search_read_access"))
     is_active = fields.BooleanField()
     name = fields.TextField(
-        analyzer=ngram_analyzer
+        analyzer=custom_analyzer
     )
 
     _profile = fields.NestedField(properties={
@@ -84,13 +76,13 @@ class GroupDocument(DefaultDocument):
     type = fields.KeywordField(attr="type_to_string")
     read_access = fields.ListField(fields.TextField(attr="search_read_access"))
     name = fields.TextField(
-        analyzer=ngram_analyzer
+        analyzer=custom_analyzer
     )
     description = fields.TextField(
-        analyzer=ngram_analyzer
+        analyzer=custom_analyzer
     )
     introduction = fields.TextField(
-        analyzer=ngram_analyzer
+        analyzer=custom_analyzer
     )
 
     class Index:
