@@ -43,10 +43,14 @@ def resolve_search(_, info, q=None, containerGuid=None, type=None, subtype=None,
     s = Search(index='_all').query(
             Q('multi_match', query=q, fields=['title^2', 'name^2', 'description', 'tags', 'file_contents', 'introduction']) |
             Q('nested', path='_profile', ignore_unmapped=True, query=Q('bool', must=[
-                    Q('exists', field='_profile') &
                     Q('match', _profile__user_profile_fields__value=q) &
                     Q('terms', _profile__user_profile_fields__read_access=list(get_acl(user)))
-                    ]
+                    ],
+                    filter={
+                        'term': {
+                            '_index': 'users'
+                        }
+                    }
                 )
             )
         ).filter(

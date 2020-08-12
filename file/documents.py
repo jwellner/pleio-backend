@@ -6,7 +6,7 @@ import textract
 from django_elasticsearch_dsl import fields
 from django_elasticsearch_dsl.registries import registry
 from .models import FileFolder
-from core.documents import DefaultDocument, ngram_analyzer
+from core.documents import DefaultDocument, custom_analyzer
 
 logger = logging.getLogger(__name__)
 
@@ -17,7 +17,7 @@ class FileDocument(DefaultDocument):
     read_access = fields.ListField(fields.KeywordField())
     type = fields.KeywordField(attr="type_to_string")
     title = fields.TextField(
-        analyzer=ngram_analyzer
+        analyzer=custom_analyzer
     )
     file_contents = fields.ListField(fields.TextField())
 

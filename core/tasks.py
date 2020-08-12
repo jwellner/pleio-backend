@@ -56,6 +56,28 @@ def send_overview(self, schema_name, period):
     management.execute_from_command_line(['manage.py', 'tenant_command', 'send_overview_emails', '--schema', schema_name, '--interval', period])
 
 @shared_task(bind=True, ignore_result=True)
+def elasticsearch_rebuild_all(self):
+    # pylint: disable=unused-argument
+    # pylint: disable=protected-access
+    '''
+    Delete indexes and rebuild all tenants
+    '''
+
+    models = registry.get_models()
+
+    # delete indexes
+    for index in registry.get_indices(models):
+        try:
+            index.delete()
+            logger.info('deleted index %s', index._name)
+        except Exception:
+            logger.info('index %s does not exist', index._name)
+
+    for client in Client.objects.exclude(schema_name='public'):
+        elasticsearch_rebuild.delay(client.schema_name)
+
+
+@shared_task(bind=True, ignore_result=True)
 def elasticsearch_rebuild(self, schema_name):
     # pylint: disable=unused-argument
     '''
