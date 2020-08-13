@@ -1,4 +1,4 @@
-{% extends "email/base.html" %}
+{% extends "email/base_notification.html" %}
 {% load i18n %}
 
 {% block title %}{{subject}}{% endblock %}
@@ -8,27 +8,28 @@
 {% endblock %}
 
 {% block body %}
+    {% for notification in notifications  %}
+        <hr style="border:none;border-bottom:1px solid #ececec;margin:1.5rem 0;width:100%">
+        {% if notification.entity.type_to_string == 'blog' %}
+            {% include "email/notifications/blog.html" %}
+        {% endif %}
+        {% if notification.entity.type_to_string == 'discussion' %}
+            {% include "email/notifications/discussion.html" %}
+        {% endif %}
+        {% if notification.entity.type_to_string == 'event' %}
+            {% include "email/notifications/event.html" %}
+        {% endif %}
+        {% if notification.entity.type_to_string == 'question' %}
+            {% include "email/notifications/question.html" %}
+        {% endif %}    
+        {% if notification.entity.type_to_string == 'wiki' %}
+            {% include "email/notifications/wiki.html" %}
+        {% endif %}
+        {% if notification.entity.type_to_string == 'thewire' %}
+            {% include "email/notifications/update.html" %}
+        {% endif %}    
+    {% endfor %}
 
-{% for notification in notifications  %}
-    {% if notification.entity.type_to_string == 'blog' %}
-        {% include "email/notifications/blog.html" %}
-    {% endif %}
-    {% if notification.entity.type_to_string == 'discussion' %}
-        {% include "email/notifications/discussion.html" %}
-    {% endif %}
-    {% if notification.entity.type_to_string == 'event' %}
-        {% include "email/notifications/event.html" %}
-    {% endif %}
-    {% if notification.entity.type_to_string == 'question' %}
-        {% include "email/notifications/question.html" %}
-    {% endif %}    
-    {% if notification.entity.type_to_string == 'wiki' %}
-        {% include "email/notifications/wiki.html" %}
-    {% endif %}
-    {% if notification.entity.type_to_string == 'thewire' %}
-        {% include "email/notifications/update.html" %}
-    {% endif %}    
-  {% endfor %}
 {% endblock %}
 
 
