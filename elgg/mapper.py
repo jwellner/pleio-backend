@@ -51,6 +51,7 @@ class Mapper():
     def get_user_profile(self, elgg_user: ElggUsersEntity):
         last_online = datetime.fromtimestamp(elgg_user.last_action) if elgg_user.last_action > 0 else None
         interval_private = elgg_user.entity.private.filter(name__startswith="email_overview_").first()
+        last_received_private = elgg_user.entity.private.filter(name__startswith="latest_email_overview_").first()
         receive_notification_metadata = elgg_user.entity.metadata.filter(name__string="notification:method:email").first()
         receive_notification_email = receive_notification_metadata.value.string == "1" if receive_notification_metadata else False
 
@@ -59,7 +60,8 @@ class Mapper():
         user_profile = UserProfile()
         user_profile.last_online = last_online
         user_profile.overview_email_interval = interval_private.value if interval_private else 'weekly' # TODO: should get default for site
-        user_profile.overview_email_tags = [] # Not implemented uet
+        user_profile.overview_email_tags = self.helpers.get_list_values(elgg_user.entity.get_metadata_value_by_name("editEmailOverviewTags"))
+        user_profile.overview_email_last_received = datetime.fromtimestamp(int(last_received_private.value)) if last_received_private else None
         user_profile.receive_newsletter = receive_newsletter
         user_profile.receive_notification_email = receive_notification_email
         return user_profile
@@ -445,6 +447,7 @@ class Mapper():
             notification.verb = elgg_notification.action
             notification.actor_content_type = ContentType.objects.get(app_label='user', model='user')
             notification.timestamp = datetime.fromtimestamp(elgg_notification.time_created)
+            notification.emailed = True # make sure no imported notifications are mailed again
 
             return notification
         except ObjectDoesNotExist:
