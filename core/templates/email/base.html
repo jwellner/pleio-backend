@@ -98,40 +98,17 @@
                                     </td>
                                 </tr>
                                 <!-- Header -->
-                                {% block header %}{% endblock %}
+                                {% block header %}
+                                <tr>
+                                    <td class="header" style="color:#ffffff; font-family:Arial,sans-serif; font-size:26px; line-height:30px; text-align:left; padding:15px 50px; font-weight:bold" bgcolor="{{primary_color}}">
+                                        <a href="{{site_url}}" target="_blank" class="link-white" style="color:#ffffff; text-decoration:none"><span class="link-white" style="color:#ffffff; text-decoration:none">{% if title %} {{title}} {% else %} {{ site_name }} {% endif %} </span></a>
+                                    </td>
+                                </tr>
+                                {% endblock %}
                                 <!-- END Header -->
                             </table>
                             <!-- END Pre header -->
-                            <table width="100%" border="0" cellspacing="0" cellpadding="0">
-                                <tr>
-                                    <td class="article">
-                                        <!-- Content -->
-                                        <table width="100%" border="0" cellspacing="0" cellpadding="0">
-                                            <tr>
-                                                <td>
-                                                    <table width="100%" border="0" cellspacing="0" cellpadding="0">
-                                                        <tr>
-                                                            <td class="article-body" style="padding:26px 66px 29px 46px; background:#ffffff">
-                                                                <table width="100%" border="0" cellspacing="0" cellpadding="0">
-                                                                    <tr>
-                                                                        <td class="text" style="color:#000000; font-family:Arial,sans-serif; font-size:16px; line-height:20px; text-align:left">
-                                                                            {% block notification %}{% endblock %}
-                                                                            {% block notification_overview %}{% endblock %}
-                                                                            {% block periodical_overview %}{% endblock %}
-                                                                        </td>
-
-                                                                    </tr>
-                                                                </table>
-                                                            </td>
-                                                        </tr>
-                                                    </table>
-                                                </td>
-                                            </tr>
-                                        </table>
-                                        <!-- END Content -->
-                                    </td>
-                                </tr>
-                            </table>
+                            {% block content %}{% endblock %}
                         </td>
                     </tr>
 
@@ -177,7 +154,3 @@
     </table>
 </body>
 </html>
-
-
-
-

@@ -1,8 +1,7 @@
-{% extends "email/default.html" %}
-{% autoescape off %}  
+{% extends "email/base_notification.html" %}
 {% load i18n %}
 
-{% block content %}
+{% block body %}
     {% blocktrans %}
         This is confirmation of your registration for {{ title }}.<br />
         Location: {{ location }}

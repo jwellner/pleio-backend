@@ -1,7 +1,7 @@
 
-{% extends "email/default.html" %}
+{% extends "email/base_notification.html" %}
 {% load i18n %}
 
-{% block content %}
+{% block body %}
     {% blocktrans %}The administrator {{ user_name }} has rejected your request to join the {{ group_name }} group. Contact the administrator for more information. {% endblocktrans %}
 {% endblock %}

@@ -3,13 +3,13 @@
 <table width="100%" border="0" cellspacing="0" cellpadding="0">
     <tr>
         <td class="article" style="padding:16px 0 3px 0">
-                {% if entity.featured_image_url %}
-                    <table width="100%" border="0" cellspacing="0" cellpadding="0">
-                        <tr>
-                            <td class="fluid-img" style="font-size:0pt; line-height:0pt; text-align:left"><img src="{{ site_url }}{{ entity.featured_image_url }}" border="0" width="600" alt="{{ entity.title }}" /></td>
-                        </tr>
-                    </table>
-                {% endif %}
+            {% if entity.featured_image_url %}
+                <table width="100%" border="0" cellspacing="0" cellpadding="0">
+                    <tr>
+                        <td class="fluid-img" style="font-size:0pt; line-height:0pt; text-align:left"><img src="{{ site_url }}{{ entity.featured_image_url }}" border="0" width="600" alt="{{ entity.title }}" /></td>
+                    </tr>
+                </table>
+            {% endif %}
             <table width="100%" border="0" cellspacing="0" cellpadding="0">
                 <tr>
                     <td class="article-body2" style="padding:26px 66px 29px 50px; background:#ffffff">
@@ -30,7 +30,7 @@
                             </tr>
                             <tr>
                                 <td class="text" style="color:#000001; font-family:Arial,sans-serif; font-size:14px; line-height:20px; text-align:left">
-                                    {{ entity.description }}
+                                    {{ entity.description|truncatewords:26 }}
                                 </td>
                             </tr>
                         </table>

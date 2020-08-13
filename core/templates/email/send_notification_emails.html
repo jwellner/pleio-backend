@@ -7,11 +7,7 @@
     a { color:{{primary_color}}; text-decoration:underline }
 {% endblock %}
 
-{% block header %}
-    {% include "email/header.html" %}
-{% endblock %}
-
-{% block notification_overview %}
+{% block body %}
 
 {% for notification in notifications  %}
     {% if notification.entity.type_to_string == 'blog' %}

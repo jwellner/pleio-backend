@@ -232,7 +232,7 @@ docker-compose exec background celery -A backend2.celery call {taskname} --args=
 
 Possible tasknames and arguments:
 
-- core.tasks.dispatch_cron, ["{period}"]
+- core.tasks.dispatch_crons, ["{period}"]
 - core.tasks.dispatch_task, ["{task_name}", **"{arguments}"]
 - core.tasks.send_notifications, ["{schema_name}"]
 - core.tasks.send_overview, ["{schema_name}", "{overview}"]
@@ -245,7 +245,7 @@ Some example commands:
 #### Run the daily cron on all tenants:
 
 ```bash
-docker-compose exec background celery -A backend2.celery call background.dispatch_cron --args='["daily"]'
+docker-compose exec background celery -A backend2.celery call core.tasks.dispatch_crons --args='["daily"]'
 ```
 
 ## Elastic APM
