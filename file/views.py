@@ -60,7 +60,7 @@ def featured(request, entity_guid=None):
         raise Http404("File not found")
 
     try:
-        # don't check user access on featured images because they are also user in email
+        # don't check user access on featured images because they are also used in email
         entity = Entity.objects.get_subclass(id=entity_guid)
 
         if hasattr(entity, 'featured_image') and entity.featured_image:
