@@ -11,14 +11,17 @@ class NewsDocument(DefaultDocument):
     read_access = fields.ListField(fields.KeywordField())
     type = fields.KeywordField(attr="type_to_string")
     title = fields.TextField(
-        analyzer=custom_analyzer
+        analyzer=custom_analyzer,
+        search_analyzer="standard",
+        boost=2
     )
     description = fields.TextField(
-        analyzer=custom_analyzer
+        analyzer=custom_analyzer,
+        search_analyzer="standard"
     )
 
     class Index:
-        name = 'entities'
+        name = 'news'
 
     class Django:
         model = News

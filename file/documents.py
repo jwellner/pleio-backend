@@ -17,9 +17,14 @@ class FileDocument(DefaultDocument):
     read_access = fields.ListField(fields.KeywordField())
     type = fields.KeywordField(attr="type_to_string")
     title = fields.TextField(
-        analyzer=custom_analyzer
+        analyzer=custom_analyzer,
+        search_analyzer="standard",
+        boost=2
     )
-    file_contents = fields.ListField(fields.TextField())
+    file_contents = fields.TextField(
+        analyzer=custom_analyzer,
+        search_analyzer="standard"
+    )
 
     def prepare_file_contents(self, instance):
         # pylint: disable=unused-argument
@@ -34,7 +39,7 @@ class FileDocument(DefaultDocument):
                             for line in f:
                                 temp.write(line)
                             temp.close()
-                            file_contents = re.findall(r"[\w']+", str(textract.process(temp.name, encoding='utf8')))
+                            file_contents = re.sub(r"\s+", " ", textract.process(temp.name, encoding='utf8').decode("utf-8"))
                             os.unlink(temp.name)
 
             return file_contents
@@ -43,7 +48,7 @@ class FileDocument(DefaultDocument):
             return file_contents
 
     class Index:
-        name = 'entities'
+        name = 'file'
 
     class Django:
         model = FileFolder

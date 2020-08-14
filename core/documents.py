@@ -7,16 +7,24 @@ from .models.group import Group
 from user.models import User
 
 
-custom_stop_filter = analysis.token_filter(
-    "custom_stop_filter",
-    type="stop",
-    stopwords=['_dutch_']
+custom_asciifolding_filter = analysis.token_filter(
+    "custom_asciifolding_filter",
+    type="asciifolding",
+    preserve_original=True
+)
+
+custom_edge_ngram_filter = analysis.token_filter(
+    "custom_edge_ngram_filter",
+    type="edge_ngram",
+    min_gram=1,
+    max_gram=30
 )
 
 custom_analyzer = analyzer(
     'custom_analyzer',
     tokenizer='standard',
-    filter=['lowercase', custom_stop_filter]
+    type='custom',
+    filter=['lowercase', custom_asciifolding_filter, custom_edge_ngram_filter]
 )
 
 class DefaultDocument(Document):
@@ -34,11 +42,13 @@ class UserDocument(DefaultDocument):
     read_access = fields.ListField(fields.TextField(attr="search_read_access"))
     is_active = fields.BooleanField()
     name = fields.TextField(
-        analyzer=custom_analyzer
+        analyzer=custom_analyzer,
+        search_analyzer="standard",
+        boost=5
     )
 
-    _profile = fields.NestedField(properties={
-        'user_profile_fields': fields.ObjectField(properties={
+    _profile = fields.ObjectField(properties={
+        'user_profile_fields': fields.NestedField(properties={
             'value': fields.KeywordField(),
             'name': fields.KeywordField(),
             'key': fields.KeywordField(),
@@ -47,7 +57,7 @@ class UserDocument(DefaultDocument):
     })
 
     class Index:
-        name = 'users'
+        name = 'user'
 
     class Django:
         model = User
@@ -76,17 +86,21 @@ class GroupDocument(DefaultDocument):
     type = fields.KeywordField(attr="type_to_string")
     read_access = fields.ListField(fields.TextField(attr="search_read_access"))
     name = fields.TextField(
-        analyzer=custom_analyzer
+        analyzer=custom_analyzer,
+        search_analyzer="standard",
+        boost=2
     )
     description = fields.TextField(
-        analyzer=custom_analyzer
+        analyzer=custom_analyzer,
+        search_analyzer="standard"
     )
     introduction = fields.TextField(
-        analyzer=custom_analyzer
+        analyzer=custom_analyzer,
+        search_analyzer="standard"
     )
 
     class Index:
-        name = 'groups'
+        name = 'group'
 
     class Django:
         model = Group

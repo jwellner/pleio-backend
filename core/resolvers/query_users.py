@@ -20,9 +20,9 @@ def resolve_users(_, info, q="", filters=None, offset=0, limit=20):
         raise GraphQLError(NOT_LOGGED_IN)
 
     if q:
-        s = Search(index='users').query(
-            Q('multi_match', query=q, fields=['name^2', ]) |
-            Q('nested', path='_profile', query=Q('bool', must=[
+        s = Search(index='user').query(
+            Q('query_string', query=q, fields=['name', 'email']) |
+            Q('nested', path='_profile.user_profile_fields', query=Q('bool', must=[
                     Q('match', _profile__user_profile_fields__value=q) &
                     Q('terms', _profile__user_profile_fields__read_access=list(get_acl(user)))
                     ]
@@ -37,7 +37,7 @@ def resolve_users(_, info, q="", filters=None, offset=0, limit=20):
         )
 
     else:
-        s = Search(index='users').filter(
+        s = Search(index='user').filter(
             'terms', read_access=list(get_acl(user))
         ).filter(
             'match', tenant_name=tenant_name
@@ -48,7 +48,7 @@ def resolve_users(_, info, q="", filters=None, offset=0, limit=20):
     if filters:
         for f in filters:
             s = s.filter(
-                Q('nested', path='_profile', query=Q('bool', must=[
+                Q('nested', path='_profile.user_profile_fields', query=Q('bool', must=[
                         Q('match', _profile__user_profile_fields__key=f['name']) &
                         Q('terms', _profile__user_profile_fields__value=f['values'])
                         ]
