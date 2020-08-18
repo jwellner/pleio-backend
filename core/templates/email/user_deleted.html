@@ -1,8 +1,8 @@
 
-{% extends "email/default.html" %}
+{% extends "email/base_notification.html" %}
 {% load i18n %}
 
-{% block content %}
+{% block body %}
 {% blocktrans %}
 
 Dear {{ name_deleted_user }},<br><br> Your membership of <a href="{{ site_url }}">{{ site_url }}</a> has been cancelled by the administrator.<br>

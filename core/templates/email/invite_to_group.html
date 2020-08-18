@@ -1,7 +1,7 @@
     
-{% extends "email/default.html" %}
+{% extends "email/base_notification.html" %}
 {% load i18n %}
 
-{% block content %}
+{% block body %}
 {% blocktrans %}You have been invited by {{ user_name }} to join the {{ group_name }} group. Follow the link below to become a member of the group: <br /><a href="{{ link }}">{{ link }}</a> {% endblocktrans %}
 {% endblock %}

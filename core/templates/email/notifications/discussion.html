@@ -2,12 +2,12 @@
 {% if notification.action == 'created' %}
     <strong>{{ notification.performer.name }}</strong>{% blocktrans %} has begun a new Discussion: {% endblocktrans %}<strong><a href="{{ site_url }}{{ notification.entity.url }}">{{ notification.entity.title }}</a></strong>{% if notification.entity.group %} in <strong><a href="{{ site_url }}{{ notification.entity.group.url }}">{{ notification.entity.group.name }}</a></strong>{% endif %}. <br><br>
     {% if show_excerpt %}
-        <div style="margin:0;padding:0 0 6px 0;">{{ notification.entity.description|truncatewords:26 }}</div><br><br>
+        <div style="margin:0;padding:8px 0 0 0;">{{ notification.entity.description|truncatewords:26 }}</div><br><br>
     {% endif %}
 {% endif %}
 {% if notification.action == 'commented' %}
     <strong>{{ notification.performer.name }}</strong>{% blocktrans %} has responded at: {% endblocktrans %}<strong><a href="{{ site_url }}{{ notification.entity.url }}">{{ notification.entity.title }}</a></strong>{% if notification.entity.group %} in <strong><a href="{{ site_url }}{{ notification.entity.group.url }}">{{ notification.entity.group.name }}</a></strong>{% endif %}. <br><br>
     {% if show_excerpt %}
-        <div style="margin:0;padding:0 0 6px 0;">{{ notification.entity.description|truncatewords:26 }}</div><br><br>
+        <div style="margin:0;padding:8px 0 0 0;">{{ notification.entity.description|truncatewords:26 }}</div><br><br>
     {% endif %}
 {% endif %}

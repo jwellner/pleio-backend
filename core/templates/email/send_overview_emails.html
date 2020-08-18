@@ -8,7 +8,7 @@
 {% endblock %}
 
 {% block header %}
-    {% include "email/header.html" %}
+    {{ block.super }}
     {% if intro_text %}
         <tr>
             <td class="intro" style="font-family:Arial,sans-serif; font-size:14px; line-height:22px; text-align:left; padding:27px 50px" bgcolor="#ffffff">
@@ -19,10 +19,7 @@
 {% endblock %}
 
 
-
-
-{% block periodical_overview %}
-
+{% block content %}
 
 {% if featured_enabled and featured %}
 
@@ -70,10 +67,6 @@
         {% include "email/entities/wiki.html" %}
     {% endif %}
 {% endfor %}
-
-{% if entities %}
-<hr>
-{% endif %}
 
 <!-- goto button -->
 <table width="100%" border="0" cellspacing="0" cellpadding="0" style="padding:16px 0 3px 0;">

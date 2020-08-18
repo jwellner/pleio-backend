@@ -3,7 +3,6 @@ from core.models import EntityViewCount
 from django.utils.text import Truncator
 from django.core.exceptions import ObjectDoesNotExist
 
-
 def resolve_entity_access_id(obj, info):
     # pylint: disable=unused-argument 
     if obj.group and obj.group.subgroups:
@@ -37,13 +36,8 @@ def resolve_entity_can_edit(obj, info):
 def resolve_entity_featured(obj, info):
     # pylint: disable=unused-argument
 
-    if obj.featured_image:
-        image = obj.featured_image.embed_url
-    else:
-        image = None
-
     return {
-        'image': image,
+        'image': obj.featured_image_url,
         'video': obj.featured_video,
         'positionY': obj.featured_position_y
     }

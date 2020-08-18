@@ -1,7 +1,7 @@
 
-{% extends "email/default.html" %}
+{% extends "email/base_notification.html" %}
 {% load i18n %}
 
-{% block content %}
+{% block body %}
 {% blocktrans %}The user {{ user_name }} ({{ user_obfuscated_email }}) has requested access to the group {{ group_name }}. Follow the link below to become a member of the group: <br /><a href="{{ link }}">{{ link }}</a> {% endblocktrans %}
 {% endblock %}

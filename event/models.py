@@ -4,6 +4,7 @@ from user.models import User
 from django.core.exceptions import ObjectDoesNotExist
 from django.utils.text import slugify
 from django.utils import timezone
+from django.urls import reverse
 from file.models import FileFolder
 
 class Event(Entity, CommentMixin, BookmarkMixin):
@@ -65,6 +66,12 @@ class Event(Entity, CommentMixin, BookmarkMixin):
         return '{}/events/view/{}/{}'.format(
             prefix, self.guid, slugify(self.title)
         ).lower()
+
+    @property
+    def featured_image_url(self):
+        if self.featured_image:
+            return '%s?cache=%i' % (reverse('featured', args=[self.id]), int(self.featured_image.updated_at.timestamp()))
+        return None
 
 
 class EventAttendee(models.Model):

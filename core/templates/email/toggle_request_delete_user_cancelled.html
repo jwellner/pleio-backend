@@ -1,7 +1,7 @@
     
-{% extends "email/default.html" %}
+{% extends "email/base_notification.html" %}
 {% load i18n %}
 
-{% block content %}
+{% block body %}
     {% blocktrans %}You, as <strong> {{ user_name }} </strong> user, have cancelled your request to remove your account. {% endblocktrans %}
 {% endblock %}

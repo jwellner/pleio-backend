@@ -1,7 +1,7 @@
 from django.contrib.admin import AdminSite as BaseAdminSite, ModelAdmin
 
 from core import config
-from core.models import Group, GroupMembership, Comment, Setting, Annotation, ProfileField
+from core.models import Group, GroupMembership, Comment, Setting, Annotation, ProfileField, UserProfile
 from user.models import User
 from file.models import FileFolder
 
@@ -30,6 +30,8 @@ class UserAdmin(ModelAdmin):
             del actions['delete_selected']
         return actions
 
+class UserProfileAdmin(ModelAdmin):
+    pass
 
 class ProfileFieldAdmin(ModelAdmin):
     pass
@@ -55,6 +57,7 @@ class SettingAdmin(ModelAdmin):
 
 
 site.register(User, UserAdmin)
+site.register(UserProfile, UserProfileAdmin)
 site.register(ProfileField, ProfileFieldAdmin)
 site.register(Group, GroupAdmin)
 site.register(GroupMembership, GroupMembershipAdmin)
