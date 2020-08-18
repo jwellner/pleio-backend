@@ -86,7 +86,7 @@ if LOCAL_APPS:
 
 INSTALLED_APPS = list(SHARED_APPS) + [app for app in TENANT_APPS if app not in SHARED_APPS]
 
-if os.getenv('APM_ENABLED'):
+if APM_ENABLED:
     INSTALLED_APPS += ['elasticapm.contrib.django']
 
 

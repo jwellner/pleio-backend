@@ -65,6 +65,7 @@ build:
   tags:
     - shell
   only:
+    - dev
     - master
   script:
     - docker build -t registry.gitlab.com/pleio/backend2:${CI_COMMIT_SHA:0:8} .
@@ -74,13 +75,25 @@ build:
     - docker push registry.gitlab.com/pleio/backend2:${CI_COMMIT_SHA:0:8}
     - docker push registry.gitlab.com/pleio/backend2:latest
 
-deploy-master-aws:
+deploy-dev-aws:
+  stage: deploy
+  tags:
+    - control-aws
+  only:
+    - dev
+  script:
+    - /usr/local/bin/kubectl -n pleio2 set image deployment/api-test api-test=registry.gitlab.com/pleio/backend2:${CI_COMMIT_SHA:0:8}
+    - /usr/local/bin/kubectl -n pleio2 set image deployment/admin-test admin-test=registry.gitlab.com/pleio/backend2:${CI_COMMIT_SHA:0:8}
+    - /usr/local/bin/kubectl -n pleio2 set image deployment/background-test background-test=registry.gitlab.com/pleio/backend2:${CI_COMMIT_SHA:0:8}
+
+deploy-dev-master:
   stage: deploy
   tags:
     - control-aws
   only:
     - master
+  when: manual
   script:
-    - /usr/local/bin/kubectl -n pleio2 set image deployment/api-test api-test=registry.gitlab.com/pleio/backend2:${CI_COMMIT_SHA:0:8}
-    - /usr/local/bin/kubectl -n pleio2 set image deployment/api-admin-test api-admin-test=registry.gitlab.com/pleio/backend2:${CI_COMMIT_SHA:0:8}
-    - /usr/local/bin/kubectl -n pleio2 set image deployment/background-test background-test=registry.gitlab.com/pleio/backend2:${CI_COMMIT_SHA:0:8}
+    - /usr/local/bin/kubectl -n pleio2 set image deployment/api api=registry.gitlab.com/pleio/backend2:${CI_COMMIT_SHA:0:8}
+    - /usr/local/bin/kubectl -n pleio2 set image deployment/admin admin=registry.gitlab.com/pleio/backend2:${CI_COMMIT_SHA:0:8}
+    - /usr/local/bin/kubectl -n pleio2 set image deployment/background background=registry.gitlab.com/pleio/backend2:${CI_COMMIT_SHA:0:8}
