@@ -11,8 +11,6 @@ https://docs.djangoproject.com/en/1.10/ref/settings/
 """
 
 import os
-from elasticapm.contrib.opentracing import Tracer
-from opentracing import set_global_tracer
 
 from .config import *  # pylint: disable=unused-wildcard-import
 
@@ -282,4 +280,3 @@ if APM_ENABLED:
         'VERIFY_SERVER_CERT': False,
         'DEBUG': True,
     }
-    set_global_tracer(Tracer(config=ELASTIC_APM))

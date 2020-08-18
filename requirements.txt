@@ -26,4 +26,3 @@ python-memcached
 django-ses==1.0.2
 python-magic==0.4.18
 textract==1.6.3
-opentracing==2.3.0
