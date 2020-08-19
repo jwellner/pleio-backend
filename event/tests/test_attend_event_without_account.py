@@ -30,7 +30,7 @@ class AttendEventWithoutAccountTestCase(FastTenantTestCase):
 
     @override_settings(ALLOWED_HOSTS=['test.test'])
     @mock.patch('event.resolvers.mutation_attend_event_without_account.generate_code', return_value='6df8cdad5582833eeab4')
-    @mock.patch('event.resolvers.mutation_attend_event_without_account.send_mail_multi')
+    @mock.patch('event.resolvers.mutation_attend_event_without_account.send_mail_multi.delay')
     def test_attend_event_without_account(self, mocked_send_mail_multi, mocked_generate_code):
         mutation = """
             mutation RequestAttendance($input: attendEventWithoutAccountInput!) {
@@ -77,7 +77,7 @@ class AttendEventWithoutAccountTestCase(FastTenantTestCase):
 
     @override_settings(ALLOWED_HOSTS=['test.test'])
     @mock.patch('event.resolvers.mutation_attend_event_without_account.generate_code', return_value='6df8cdad5582833eeab4')
-    @mock.patch('event.resolvers.mutation_attend_event_without_account.send_mail_multi')
+    @mock.patch('event.resolvers.mutation_attend_event_without_account.send_mail_multi.delay')
     def test_attend_event_without_account_resend(self, mocked_send_mail_multi, mocked_generate_code):
         mutation = """
             mutation RequestAttendance($input: attendEventWithoutAccountInput!) {

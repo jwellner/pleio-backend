@@ -29,7 +29,7 @@ class SendOverviewEmailsTestCase(FastTenantTestCase):
         self.user1.delete()
         self.user2.delete()
 
-    @mock.patch('core.management.commands.send_overview_emails.send_mail_multi')
+    @mock.patch('core.management.commands.send_overview_emails.send_mail_multi.delay')
     def test_command_send_overview_5_entities(self, mocked_send_mail_multi):
 
         blogs = mixer.cycle(3).blend(
@@ -51,14 +51,14 @@ class SendOverviewEmailsTestCase(FastTenantTestCase):
         args, kwargs = mocked_send_mail_multi.call_args
 
         self.assertEqual(mocked_send_mail_multi.call_count, 1)
-        self.assertEqual(args[0], "Periodiek overzicht van %s" % config.NAME)
-        self.assertEqual(args[1], 'email/send_overview_emails.html')
-        self.assertEqual(len(args[2]['entities']), 5)
-        self.assertEqual(args[2]['intro_text'], '')
-        self.assertEqual(args[2]['title'], 'Pleio 2.0')
-        self.assertEqual(args[3], [self.user2.email])
+        self.assertEqual(args[1], "Periodiek overzicht van %s" % config.NAME)
+        self.assertEqual(args[2], 'email/send_overview_emails.html')
+        self.assertEqual(len(args[3]['entities']), 5)
+        self.assertEqual(args[3]['intro_text'], '')
+        self.assertEqual(args[3]['title'], 'Pleio 2.0')
+        self.assertEqual(args[4], self.user2.email)
 
-    @mock.patch('core.management.commands.send_overview_emails.send_mail_multi')
+    @mock.patch('core.management.commands.send_overview_emails.send_mail_multi.delay')
     def test_command_send_overview_do_not_send_entities_twice(self, mocked_send_mail_multi):
 
         blogs = mixer.cycle(3).blend(
@@ -82,13 +82,13 @@ class SendOverviewEmailsTestCase(FastTenantTestCase):
         subject = ugettext_lazy("Periodiek overzicht van %s" % config.NAME)
 
         self.assertEqual(mocked_send_mail_multi.call_count, 1)
-        self.assertEqual(args[0], subject)
-        self.assertEqual(args[1], 'email/send_overview_emails.html')
-        self.assertEqual(len(args[2]['entities']), 5)
-        self.assertEqual(args[3], [self.user2.email])
+        self.assertEqual(args[1], subject)
+        self.assertEqual(args[2], 'email/send_overview_emails.html')
+        #self.assertEqual(args[3]['entities'][0]['fields']['title'], "adfSDF")
+        self.assertEqual(args[4], self.user2.email)
 
 
-    @mock.patch('core.management.commands.send_overview_emails.send_mail_multi')
+    @mock.patch('core.management.commands.send_overview_emails.send_mail_multi.delay')
     def test_command_send_overview_to_users_with_daily_monthly_interval(self, mocked_send_mail_multi):
 
         user3 = mixer.blend(User)
@@ -119,10 +119,10 @@ class SendOverviewEmailsTestCase(FastTenantTestCase):
         subject = ugettext_lazy("Periodiek overzicht van %s" % config.NAME)
 
         self.assertEqual(mocked_send_mail_multi.call_count, 1)
-        self.assertEqual(args[0], subject)
-        self.assertEqual(args[1], 'email/send_overview_emails.html')
-        self.assertEqual(len(args[2]['entities']), 5)
-        self.assertEqual(args[3], [user3.email])
+        self.assertEqual(args[1], subject)
+        self.assertEqual(args[2], 'email/send_overview_emails.html')
+        self.assertEqual(len(args[3]['entities']), 5)
+        self.assertEqual(args[4], user3.email)
 
         call_command('send_overview_emails', interval='monthly')
 
@@ -130,16 +130,16 @@ class SendOverviewEmailsTestCase(FastTenantTestCase):
         subject = ugettext_lazy("Periodiek overzicht van %s" % config.NAME)
 
         self.assertEqual(mocked_send_mail_multi.call_count, 2)
-        self.assertEqual(args[0], subject)
-        self.assertEqual(args[1], 'email/send_overview_emails.html')
-        self.assertEqual(len(args[2]['entities']), 5)
-        self.assertEqual(args[3], [user4.email])
+        self.assertEqual(args[1], subject)
+        self.assertEqual(args[2], 'email/send_overview_emails.html')
+        self.assertEqual(len(args[3]['entities']), 5)
+        self.assertEqual(args[4], user4.email)
 
         user3.delete()
         user4.delete()
 
 
-    @mock.patch('core.management.commands.send_overview_emails.send_mail_multi')
+    @mock.patch('core.management.commands.send_overview_emails.send_mail_multi.delay')
     def test_command_send_overview_default_email_frequency(self, mocked_send_mail_multi):
 
         cache.set("%s%s" % (connection.schema_name, 'EMAIL_OVERVIEW_DEFAULT_FREQUENCY'), 'daily')
@@ -169,19 +169,19 @@ class SendOverviewEmailsTestCase(FastTenantTestCase):
         subject = ugettext_lazy("Periodiek overzicht van %s" % config.NAME)
 
         self.assertEqual(mocked_send_mail_multi.call_count, 1)
-        self.assertEqual(args[0], 'test other subject')
-        self.assertEqual(args[1], 'email/send_overview_emails.html')
-        self.assertEqual(len(args[2]['entities']), 5)
-        self.assertEqual(args[2]['intro_text'], 'introduction text')
-        self.assertEqual(args[2]['title'], 'title text')
-        self.assertEqual(args[2]['featured_enabled'], True)
-        self.assertEqual(args[2]['featured_title'], 'By the editors')
-        self.assertEqual(args[3], [self.user2.email])
+        self.assertEqual(args[1], 'test other subject')
+        self.assertEqual(args[2], 'email/send_overview_emails.html')
+        self.assertEqual(len(args[3]['entities']), 5)
+        self.assertEqual(args[3]['intro_text'], 'introduction text')
+        self.assertEqual(args[3]['title'], 'title text')
+        self.assertEqual(args[3]['featured_enabled'], True)
+        self.assertEqual(args[3]['featured_title'], 'By the editors')
+        self.assertEqual(args[4], self.user2.email)
 
         cache.clear()
 
 
-    @mock.patch('core.management.commands.send_overview_emails.send_mail_multi')
+    @mock.patch('core.management.commands.send_overview_emails.send_mail_multi.delay')
     def test_command_send_overview_5_entities_one_featured(self, mocked_send_mail_multi):
 
         cache.set("%s%s" % (connection.schema_name, 'EMAIL_OVERVIEW_ENABLE_FEATURED'), True)
@@ -213,17 +213,17 @@ class SendOverviewEmailsTestCase(FastTenantTestCase):
         subject = ugettext_lazy("Periodiek overzicht van %s" % config.NAME)
 
         self.assertEqual(mocked_send_mail_multi.call_count, 1)
-        self.assertEqual(args[0], subject)
-        self.assertEqual(args[1], 'email/send_overview_emails.html')
-        self.assertEqual(len(args[2]['entities']), 5)
-        self.assertNotIn(featuredBlog.guid, [d.guid for d in args[2]['entities']])
-        self.assertEqual(len(args[2]['featured']), 1)
-        self.assertEqual(args[2]['featured'][0].guid, featuredBlog.guid)
-        self.assertEqual(args[3], [self.user2.email])
+        self.assertEqual(args[1], subject)
+        self.assertEqual(args[2], 'email/send_overview_emails.html')
+        self.assertEqual(len(args[3]['entities']), 5)
+        self.assertNotIn(featuredBlog.title, [d['title'] for d in args[3]['entities']])
+        self.assertEqual(len(args[3]['featured']), 1)
+        self.assertEqual(args[3]['featured'][0]['title'], featuredBlog.title)
+        self.assertEqual(args[4], self.user2.email)
 
         cache.clear()
 
-    @mock.patch('core.management.commands.send_overview_emails.send_mail_multi')
+    @mock.patch('core.management.commands.send_overview_emails.send_mail_multi.delay')
     def test_command_not_send_viewed_entities(self, mocked_send_mail_multi):
 
         cache.set("%s%s" % (connection.schema_name, 'EMAIL_OVERVIEW_ENABLE_FEATURED'), True)
@@ -262,17 +262,17 @@ class SendOverviewEmailsTestCase(FastTenantTestCase):
         subject = ugettext_lazy("Periodiek overzicht van %s" % config.NAME)
 
         self.assertEqual(mocked_send_mail_multi.call_count, 1)
-        self.assertEqual(args[0], subject)
-        self.assertEqual(args[1], 'email/send_overview_emails.html')
-        self.assertEqual(len(args[2]['entities']), 1)
-        self.assertEqual(args[2]['entities'][0].guid, blog2.guid)
+        self.assertEqual(args[1], subject)
+        self.assertEqual(args[2], 'email/send_overview_emails.html')
+        self.assertEqual(len(args[3]['entities']), 1)
+        self.assertEqual(args[3]['entities'][0]['title'], blog2.title)
         # viewed featured entities are sent, also if already viewed
-        self.assertEqual(len(args[2]['featured']), 2)
-        self.assertEqual(args[3], [self.user2.email])
+        self.assertEqual(len(args[3]['featured']), 2)
+        self.assertEqual(args[4], self.user2.email)
 
         cache.clear()
 
-    @mock.patch('core.management.commands.send_overview_emails.send_mail_multi')
+    @mock.patch('core.management.commands.send_overview_emails.send_mail_multi.delay')
     def test_command_send_overview_5_entities_with_tag_preference(self, mocked_send_mail_multi):
 
         blogs = mixer.cycle(6).blend(
@@ -302,8 +302,8 @@ class SendOverviewEmailsTestCase(FastTenantTestCase):
         subject = ugettext_lazy("Periodiek overzicht van %s" % config.NAME)
 
         self.assertEqual(mocked_send_mail_multi.call_count, 1)
-        self.assertEqual(args[0], subject)
-        self.assertEqual(args[1], 'email/send_overview_emails.html')
-        self.assertEqual(len(args[2]['entities']), 5)
-        self.assertEqual(args[2]['entities'][0].guid, blog1.guid)
-        self.assertEqual(args[3], [self.user2.email])
+        self.assertEqual(args[1], subject)
+        self.assertEqual(args[2], 'email/send_overview_emails.html')
+        self.assertEqual(len(args[3]['entities']), 5)
+        self.assertEqual(args[3]['entities'][0]['title'], blog1.title)
+        self.assertEqual(args[4], self.user2.email)

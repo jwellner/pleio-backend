@@ -40,7 +40,7 @@ class ChangeGroupRoleTestCase(FastTenantTestCase):
         self.user1.delete()
 
     @override_settings(ALLOWED_HOSTS=['test.test'])
-    @mock.patch('core.resolvers.mutation_change_group_role.send_mail_multi')
+    @mock.patch('core.resolvers.mutation_change_group_role.send_mail_multi.delay')
     def test_change_group_role_to_owner_by_group_owner(self, mocked_send_mail_multi):
         mutation = """
             mutation MemberItem($input: changeGroupRoleInput!) {
@@ -83,7 +83,7 @@ class ChangeGroupRoleTestCase(FastTenantTestCase):
         mocked_send_mail_multi.assert_called_once()
 
     @override_settings(ALLOWED_HOSTS=['test.test'])
-    @mock.patch('core.resolvers.mutation_change_group_role.send_mail_multi')
+    @mock.patch('core.resolvers.mutation_change_group_role.send_mail_multi.delay')
     def test_change_group_role_to_member_by_group_owner(self, mocked_send_mail_multi):
         mutation = """
             mutation MemberItem($input: changeGroupRoleInput!) {
@@ -135,7 +135,7 @@ class ChangeGroupRoleTestCase(FastTenantTestCase):
 
 
     @override_settings(ALLOWED_HOSTS=['test.test'])
-    @mock.patch('core.resolvers.mutation_change_group_role.send_mail_multi')
+    @mock.patch('core.resolvers.mutation_change_group_role.send_mail_multi.delay')
     def test_change_group_role_to_removed_by_group_owner(self, mocked_send_mail_multi):
         mutation = """
             mutation MemberItem($input: changeGroupRoleInput!) {
@@ -188,7 +188,7 @@ class ChangeGroupRoleTestCase(FastTenantTestCase):
 
 
     @override_settings(ALLOWED_HOSTS=['test.test'])
-    @mock.patch('core.resolvers.mutation_change_group_role.send_mail_multi')
+    @mock.patch('core.resolvers.mutation_change_group_role.send_mail_multi.delay')
     def test_change_group_role_to_admin_by_group_owner(self, mocked_send_mail_multi):
         mutation = """
             mutation MemberItem($input: changeGroupRoleInput!) {
@@ -237,7 +237,7 @@ class ChangeGroupRoleTestCase(FastTenantTestCase):
         assert not mocked_send_mail_multi.called
 
     @override_settings(ALLOWED_HOSTS=['test.test'])
-    @mock.patch('core.resolvers.mutation_change_group_role.send_mail_multi')
+    @mock.patch('core.resolvers.mutation_change_group_role.send_mail_multi.delay')
     def test_change_group_role_to_owner_by_admin(self, mocked_send_mail_multi):
         mutation = """
             mutation MemberItem($input: changeGroupRoleInput!) {
@@ -280,7 +280,7 @@ class ChangeGroupRoleTestCase(FastTenantTestCase):
         mocked_send_mail_multi.assert_called_once()
 
     @override_settings(ALLOWED_HOSTS=['test.test'])
-    @mock.patch('core.resolvers.mutation_change_group_role.send_mail_multi')
+    @mock.patch('core.resolvers.mutation_change_group_role.send_mail_multi.delay')
     def test_change_group_role_to_owner_by_other_user(self, mocked_send_mail_multi):
         mutation = """
             mutation MemberItem($input: changeGroupRoleInput!) {
@@ -320,7 +320,7 @@ class ChangeGroupRoleTestCase(FastTenantTestCase):
         assert not mocked_send_mail_multi.called
 
     @override_settings(ALLOWED_HOSTS=['test.test'])
-    @mock.patch('core.resolvers.mutation_change_group_role.send_mail_multi')
+    @mock.patch('core.resolvers.mutation_change_group_role.send_mail_multi.delay')
     def test_change_group_role_to_owner_by_anonymous(self, mocked_send_mail_multi):
         mutation = """
             mutation MemberItem($input: changeGroupRoleInput!) {

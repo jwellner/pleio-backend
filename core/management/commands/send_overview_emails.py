@@ -3,12 +3,45 @@ from django.db.models import Q
 from django.utils import timezone
 from django.utils.translation import ugettext_lazy
 from core import config
-from core.lib import send_mail_multi
 from core.models import Entity, EntityView
 from datetime import datetime, timedelta
 from django.db import connection
 from tenants.models import Client
 from user.models import User
+from core.tasks import send_mail_multi
+from django.core.serializers import serialize
+from django.core.serializers.json import DjangoJSONEncoder
+
+
+def get_serializable_entities(entities):
+    serializable_entities = []
+
+    for entity in entities:
+        try:
+            featured_image_url = entity.featured_image_url
+        except Exception:
+            featured_image_url = None
+        entity_group = False
+        entity_group_name = ""
+        entity_group_url = ""
+        if entity.group:
+            entity_group = True
+            entity_group_name = entity.group.name
+            entity_group_url = entity.group.url
+
+        serializable_entity = {
+            'type_to_string': entity.type_to_string,
+            'featured_image_url': featured_image_url,
+            'title': entity.title,
+            'description': entity.description,
+            'owner_name': entity.owner.name,
+            'url': entity.url,
+            'group': entity_group,
+            'group_name': entity_group_name,
+            'group_url': entity_group_url,
+        }
+        serializable_entities.append(serializable_entity)
+    return serializable_entities
 
 
 class Command(BaseCommand):
@@ -25,11 +58,14 @@ class Command(BaseCommand):
             site_name = config.NAME
             user_url = site_url + '/user/' + user.guid + '/settings'
             primary_color = config.COLOR_PRIMARY
+
+            entities = get_serializable_entities(entities)
+            featured_entities = get_serializable_entities(featured_entities)
+
             context = {'user_url': user_url, 'site_name': site_name, 'site_url': site_url, 'primary_color': primary_color,
                        'entities': entities, 'featured': featured_entities, 'intro_text': config.EMAIL_OVERVIEW_INTRO, 'title': config.EMAIL_OVERVIEW_TITLE,
                        'featured_enabled': config.EMAIL_OVERVIEW_ENABLE_FEATURED, 'featured_title': config.EMAIL_OVERVIEW_FEATURED_TITLE}
-            email = send_mail_multi(subject, 'email/send_overview_emails.html', context, [user.email])
-            email.send()
+            send_mail_multi.delay(connection.schema_name, subject, 'email/send_overview_emails.html', context, user.email)
             user.profile.overview_email_last_received = datetime.now()
             user.profile.save()
 

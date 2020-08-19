@@ -112,7 +112,7 @@ class JoinGroupTestCase(FastTenantTestCase):
         self.assertEqual(self.user2.memberships.filter(group=self.group, type="member").count(), 1)
 
     @override_settings(ALLOWED_HOSTS=['test.test'])
-    @mock.patch('core.resolvers.mutation_join_group.send_mail_multi')
+    @mock.patch('core.resolvers.mutation_join_group.send_mail_multi.delay')
     def test_join_group_on_request(self, mocked_send_mail_multi):
         mutation = """
             mutation ($group: joinGroupInput!) {

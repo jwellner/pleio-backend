@@ -4,7 +4,9 @@ from django.utils.translation import ugettext_lazy
 from core.models import Group, GroupInvitation
 from user.models import User
 from core.constances import NOT_LOGGED_IN, COULD_NOT_FIND, COULD_NOT_INVITE, USER_NOT_SITE_ADMIN
-from core.lib import remove_none_from_dict, send_mail_multi, get_base_url, generate_code, get_default_email_context
+from core.lib import remove_none_from_dict, get_base_url, generate_code, get_default_email_context
+from core.tasks import send_mail_multi
+from django_tenants.utils import parse_tenant_config_path
 
 def resolve_invite_to_group(_, info, input):
     # pylint: disable=redefined-builtin
@@ -61,12 +63,12 @@ def resolve_invite_to_group(_, info, input):
                 GroupInvitation.objects.create(code=code, invited_user=receiving_user, group=group)
 
             try:
+                schema_name = parse_tenant_config_path("")
                 context = get_default_email_context(info.context['request'])
                 link = url + code
                 context['link'] = link
                 context['group_name'] = group.name
-                email = send_mail_multi(subject, 'email/invite_to_group.html', context, [receiving_user.email])
-                email.send()
+                send_mail_multi.delay(schema_name, subject, 'email/invite_to_group.html', context, receiving_user.email)
             except Exception:
                 # TODO: logging
                 pass

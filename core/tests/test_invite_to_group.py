@@ -36,7 +36,7 @@ class InviteToGroupTestCase(FastTenantTestCase):
 
     @override_settings(ALLOWED_HOSTS=['test.test'])
     @mock.patch('core.resolvers.mutation_invite_to_group.generate_code', return_value='6df8cdad5582833eeab4')
-    @mock.patch('core.resolvers.mutation_invite_to_group.send_mail_multi')
+    @mock.patch('core.resolvers.mutation_invite_to_group.send_mail_multi.delay')
     def test_invite_to_group_by_group_owner(self, mocked_send_mail_multi, mocked_generate_code):
         mutation = """
             mutation InviteItem($input: inviteToGroupInput!) {
@@ -80,7 +80,7 @@ class InviteToGroupTestCase(FastTenantTestCase):
         mocked_send_mail_multi.assert_called_once()
 
     @override_settings(ALLOWED_HOSTS=['test.test'])
-    @mock.patch('core.resolvers.mutation_invite_to_group.send_mail_multi')
+    @mock.patch('core.resolvers.mutation_invite_to_group.send_mail_multi.delay')
     def test_add_all_users_to_group_by_admin(self, mocked_send_mail_multi):
         mutation = """
             mutation InviteItem($input: inviteToGroupInput!) {
@@ -122,7 +122,7 @@ class InviteToGroupTestCase(FastTenantTestCase):
         assert not mocked_send_mail_multi.called
 
     @override_settings(ALLOWED_HOSTS=['test.test'])
-    @mock.patch('core.resolvers.mutation_accept_membership_request.send_mail_multi')
+    @mock.patch('core.resolvers.mutation_accept_membership_request.send_mail_multi.delay')
     def test_add_all_users_to_group_by_group_owner(self, mocked_send_mail_multi):
         mutation = """
             mutation InviteItem($input: inviteToGroupInput!) {
@@ -163,7 +163,7 @@ class InviteToGroupTestCase(FastTenantTestCase):
         assert not mocked_send_mail_multi.called
 
     @override_settings(ALLOWED_HOSTS=['test.test'])
-    @mock.patch('core.resolvers.mutation_accept_membership_request.send_mail_multi')
+    @mock.patch('core.resolvers.mutation_accept_membership_request.send_mail_multi.delay')
     def test_direct_add_users_to_group_by_group_owner(self, mocked_send_mail_multi):
         mutation = """
             mutation InviteItem($input: inviteToGroupInput!) {
@@ -204,7 +204,7 @@ class InviteToGroupTestCase(FastTenantTestCase):
         assert not mocked_send_mail_multi.called
 
     @override_settings(ALLOWED_HOSTS=['test.test'])
-    @mock.patch('core.resolvers.mutation_accept_membership_request.send_mail_multi')
+    @mock.patch('core.resolvers.mutation_accept_membership_request.send_mail_multi.delay')
     def test_direct_add_users_to_group_by_admin(self, mocked_send_mail_multi):
         mutation = """
             mutation InviteItem($input: inviteToGroupInput!) {

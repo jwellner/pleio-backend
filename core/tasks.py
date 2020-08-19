@@ -9,6 +9,12 @@ from tenants.models import Client
 from django_tenants.utils import schema_context
 from django_elasticsearch_dsl.registries import registry
 from elasticsearch_dsl import Search
+from core import config
+from django.core.mail import EmailMultiAlternatives
+from django.template.loader import get_template
+from django.utils import translation
+from django.utils.html import strip_tags
+from django.conf import settings
 
 from file.models import FileFolder
 
@@ -25,7 +31,7 @@ def dispatch_crons(self, period):
 
         if period == 'hourly':
             send_notifications.delay(client.schema_name)
-        
+
         if period in ['daily', 'weekly', 'monthly']:
             send_overview.delay(client.schema_name, period)
 
@@ -126,3 +132,25 @@ def elasticsearch_index_file(self, schema_name, file_guid):
 
         except Exception as e:
             logger.error('elasticsearch_update %s %s: %s', schema_name, file_guid, e)
+
+
+@shared_task(bind=True, ignore_result=True)
+def send_mail_multi(self, schema_name, subject, html_template, context, email_address, reply_to=None):
+    # pylint: disable=unused-argument
+    # pylint: disable=too-many-arguments
+    '''
+    send email
+    '''
+    with schema_context(schema_name):
+        if config.LANGUAGE:
+            translation.activate(config.LANGUAGE)
+        html_template = get_template(html_template)
+        html_content = html_template.render(context)
+        text_content = strip_tags(html_content)
+
+        try:
+            email = EmailMultiAlternatives(subject, text_content, settings.FROM_EMAIL, to=[email_address], reply_to=reply_to)
+            email.attach_alternative(html_content, "text/html")
+            email.send()
+        except Exception as e:
+            logger.error('email sent to %s failed. Error: %s', email_address, e)

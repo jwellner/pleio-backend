@@ -30,7 +30,7 @@ class DeleteUserTestCase(FastTenantTestCase):
 
 
     @override_settings(ALLOWED_HOSTS=['test.test'])
-    @mock.patch('core.resolvers.mutation_delete_user.send_mail_multi')
+    @mock.patch('core.resolvers.mutation_delete_user.send_mail_multi.delay')
     def test_delete_admin_by_admin(self, mocked_send_mail_multi):
 
         mutation = """
@@ -57,11 +57,11 @@ class DeleteUserTestCase(FastTenantTestCase):
         data = result[1]["data"]
 
         self.assertEqual(data["deleteUser"]["success"], True)
-        self.assertEqual(mocked_send_mail_multi.call_count, 2)
+        self.assertEqual(mocked_send_mail_multi.call_count, 3)
 
 
     @override_settings(ALLOWED_HOSTS=['test.test'])
-    @mock.patch('core.resolvers.mutation_delete_user.send_mail_multi')
+    @mock.patch('core.resolvers.mutation_delete_user.send_mail_multi.delay')
     def test_delete_user_by_admin(self, mocked_send_mail_multi):
 
         mutation = """

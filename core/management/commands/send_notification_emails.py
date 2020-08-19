@@ -3,26 +3,38 @@ from django.utils import timezone
 from django.utils.text import Truncator
 from django.utils.translation import ugettext_lazy
 from django.db import connection
-from core.lib import send_mail_multi
 from user.models import User
 from core import config
 from datetime import datetime, timedelta
 from core.resolvers.notification import get_notification_action_entity
 from tenants.models import Client
 from django.utils import translation
+from core.tasks import send_mail_multi
 
 
 def get_notification(notification):
     """ get a mapped notification """
     entity = get_notification_action_entity(notification)
     performer = User.objects.get(id=notification.actor_object_id)
+    entity_group = False
+    entity_group_name = ""
+    entity_group_url = ""
+    if entity.group:
+        entity_group = True
+        entity_group_name = entity.group.name
+        entity_group_url = entity.group.url
 
     return {
         'id': notification.id,
         'action': notification.verb,
-        'performer': performer,
-        'entity': entity,
-        'container': entity.group,
+        'performer_name': performer.name,
+        'entity_title': entity.title,
+        'entity_description': entity.description,
+        'entity_group': entity_group,
+        'entity_group_name': entity_group_name,
+        'entity_group_url': entity_group_url,
+        'entity_url': entity.url,
+        'type_to_string': entity.type_to_string,
         'timeCreated': notification.timestamp,
         'isUnread': notification.unread
     }
@@ -49,8 +61,7 @@ class Command(BaseCommand):
             context = {'user_url': user_url, 'site_name': site_name, 'site_url': site_url, 'primary_color': primary_color,
                        'notifications': mapped_notifications, 'show_excerpt': show_excerpt}
 
-            email = send_mail_multi(subject, 'email/send_notification_emails.html', context, [user.email])
-            email.send()
+            send_mail_multi.delay(connection.schema_name, subject, 'email/send_notification_emails.html', context, user.email)
             user.notifications.mark_as_sent()
 
     def handle(self, *args, **options):

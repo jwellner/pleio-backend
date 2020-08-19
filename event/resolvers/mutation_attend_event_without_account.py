@@ -4,8 +4,10 @@ from django.core.validators import validate_email
 from django.core.exceptions import ValidationError
 from django.utils.translation import ugettext_lazy
 from core.constances import COULD_NOT_FIND, INVALID_EMAIL, EMAIL_ALREADY_USED, EVENT_IS_FULL
-from core.lib import remove_none_from_dict, send_mail_multi, get_base_url, generate_code, get_default_email_context
+from core.lib import remove_none_from_dict, get_base_url, generate_code, get_default_email_context
 from event.models import Event, EventAttendeeRequest
+from core.tasks import send_mail_multi
+from django_tenants.utils import parse_tenant_config_path
 
 def resolve_attend_event_without_account(_, info, input):
     # pylint: disable=redefined-builtin
@@ -45,14 +47,14 @@ def resolve_attend_event_without_account(_, info, input):
 
     link = url + code
 
+    schema_name = parse_tenant_config_path("")
     context = get_default_email_context(info.context['request'])
     context['link'] = link
     context['title'] = event.title
     context['location'] = event.location
     context['start_date'] = event.start_date
 
-    email = send_mail_multi(subject, 'email/attend_event_without_account.html', context, [email])
-    email.send()
+    send_mail_multi.delay(schema_name, subject, 'email/attend_event_without_account.html', context, email)
 
     return {
         "entity": event
