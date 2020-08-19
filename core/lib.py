@@ -4,11 +4,7 @@ import secrets
 from core.constances import ACCESS_TYPE, COULD_NOT_SAVE
 from core import config
 from django.conf import settings
-from django.core.mail import EmailMultiAlternatives
 from django.apps import apps
-from django.template.loader import get_template
-from django.utils import translation
-from django.utils.html import strip_tags
 from django.utils.text import slugify
 from graphql import GraphQLError
 from enum import Enum
@@ -174,17 +170,6 @@ def generate_object_filename(obj, filename):
     name = filename.split('.')[0]
     filename = "%s.%s" % (slugify(name), ext)
     return os.path.join(str(obj.id), filename)
-
-
-def send_mail_multi(subject, html_template, context, email_addresses, reply_to=None):
-    if config.LANGUAGE:
-        translation.activate(config.LANGUAGE)
-    html_template = get_template(html_template)
-    html_content = html_template.render(context)
-    text_content = strip_tags(html_content)
-    email = EmailMultiAlternatives(subject, text_content, settings.FROM_EMAIL, bcc=email_addresses, reply_to=reply_to)
-    email.attach_alternative(html_content, "text/html")
-    return email
 
 
 def get_field_type(field_type):

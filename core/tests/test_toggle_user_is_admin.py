@@ -77,7 +77,7 @@ class ToggleUserIsAdminTestCase(FastTenantTestCase):
 
 
     @override_settings(ALLOWED_HOSTS=['test.test'])
-    @mock.patch('core.resolvers.mutation_toggle_user_is_admin.send_mail_multi')
+    @mock.patch('core.resolvers.mutation_toggle_user_is_admin.send_mail_multi.delay')
     def test_toggle_is_admin_by_admin(self, mocked_send_mail_multi):
         mutation = """
             mutation toggleUserIsAdmin($input: toggleUserIsAdminInput!) {
@@ -98,19 +98,15 @@ class ToggleUserIsAdminTestCase(FastTenantTestCase):
             'HTTP_HOST': 'test.test'
         }
 
-        admin_user_url = 'https://test.test' + self.admin.url
-        user_url = 'https://test.test' + self.user1.url
-        admin_email_adresses = [self.admin.email, self.admin2.email]
-
         result = graphql_sync(schema, {"query": mutation, "variables": variables}, context_value={ "request": request })
 
         data = result[1]["data"]
         self.assertEqual(data["toggleUserIsAdmin"]["success"], True)
 
-        self.assertEqual(mocked_send_mail_multi.call_count, 2)
+        self.assertEqual(mocked_send_mail_multi.call_count, 3)
 
         result = graphql_sync(schema, {"query": mutation, "variables": variables}, context_value={ "request": request })
         data = result[1]["data"]
         self.assertEqual(data["toggleUserIsAdmin"]["success"], True)
 
-        self.assertEqual(mocked_send_mail_multi.call_count, 4)
+        self.assertEqual(mocked_send_mail_multi.call_count, 6)

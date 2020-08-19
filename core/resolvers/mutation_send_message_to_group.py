@@ -5,9 +5,10 @@ from user.models import User
 from django.utils.translation import ugettext_lazy
 from django.utils.html import format_html
 from core.constances import NOT_LOGGED_IN, COULD_NOT_FIND, COULD_NOT_SAVE
-from core.lib import remove_none_from_dict, send_mail_multi, get_default_email_context
+from core.lib import remove_none_from_dict, get_default_email_context
 from datetime import datetime, timedelta
-
+from core.tasks import send_mail_multi
+from django_tenants.utils import parse_tenant_config_path
 
 def resolve_send_message_to_group(_, info, input):
     # pylint: disable=redefined-builtin
@@ -48,12 +49,12 @@ def resolve_send_message_to_group(_, info, input):
             email_addresses.append(receiving_user.email)
 
     context = get_default_email_context(info.context['request'])
+    schema_name = parse_tenant_config_path("")
     context['message'] = format_html(clean_input.get('message'))
 
     subject = ugettext_lazy("Message from group {0}: {1}").format(group.name, clean_input.get('subject'))
-
-    email = send_mail_multi(subject, 'email/send_message_to_group.html', context, email_addresses)
-    email.send()
+    for email_address in email_addresses:
+        send_mail_multi.delay(schema_name, subject, 'email/send_message_to_group.html', context, email_address)
 
     return {
           'group': group

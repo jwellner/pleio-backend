@@ -1,13 +1,13 @@
 {% load i18n %}
 {% if notification.action == 'created' %}
-    <strong>{{ notification.performer.name }}</strong>{% blocktrans %} has posted a Question: {% endblocktrans %}<strong><a href="{{ site_url }}{{ notification.entity.url }}">{{ notification.entity.title }}</a></strong>{% if notification.entity.group %} in <strong><a href="{{ site_url }}{{ notification.entity.group.url }}">{{ notification.entity.group.name }}</a></strong>{% endif %}. <br><br>
+    <strong>{{ notification.performer_name }}</strong>{% blocktrans %} has posted a Question: {% endblocktrans %}<strong><a href="{{ site_url }}{{ notification.entity_url }}">{{ notification.entity_title }}</a></strong>{% if notification.entity_group %} in <strong><a href="{{ site_url }}{{ notification.entity_group_url }}">{{ notification.entity_group_name }}</a></strong>{% endif %}. <br><br>
     {% if show_excerpt %}
-        <div style="margin:0;padding:8px 0 0 0;">{{ notification.entity.description|truncatewords:26 }}</div><br><br>
+        <div style="margin:0;padding:8px 0 0 0;">{{ notification.entity_description|truncatewords:26 }}</div><br><br>
     {% endif %}
 {% endif %}
 {% if notification.action == 'commented' %}
-    <strong>{{ notification.performer.name }}</strong>{% blocktrans %} has responded at: {% endblocktrans %}<strong><a href="{{ site_url }}{{ notification.entity.url }}">{{ notification.entity.title }}</a></strong>{% if notification.entity.group %} in <strong><a href="{{ site_url }}{{ notification.entity.group.url }}">{{ notification.entity.group.name }}</a></strong>{% endif %}. <br><br>
+    <strong>{{ notification.performer_name }}</strong>{% blocktrans %} has responded at: {% endblocktrans %}<strong><a href="{{ site_url }}{{ notification.entity_url }}">{{ notification.entity_title }}</a></strong>{% if notification.entity_group %} in <strong><a href="{{ site_url }}{{ notification.entity_group_url }}">{{ notification.entity_group_name }}</a></strong>{% endif %}. <br><br>
     {% if show_excerpt %}
-        <div style="margin:0;padding:8px 0 0 0;">{{ notification.entity.description|truncatewords:26 }}</div><br><br>
+        <div style="margin:0;padding:8px 0 0 0;">{{ notification.entity_description|truncatewords:26 }}</div><br><br>
     {% endif %}
 {% endif %}
