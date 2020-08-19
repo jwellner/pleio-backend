@@ -63,7 +63,7 @@ class ConfirmAttendEventWithoutAccountTestCase(FastTenantTestCase):
         }
 
         result = graphql_sync(schema, { "query": mutation, "variables": variables }, context_value={ "request": request })
-        print(result)
+
         data = result[1]["data"]
 
         link = 'https://test.test/events/view/{}/{}'.format(self.event.guid, slugify(self.event.title)).lower()
