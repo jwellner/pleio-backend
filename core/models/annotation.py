@@ -3,11 +3,11 @@ from django.db import models
 from django.db.models import Sum, IntegerField
 from django.db.models.functions import Cast
 from django.contrib.postgres.fields.jsonb import KeyTextTransform
-from django.contrib.contenttypes.fields import GenericForeignKey
+from django.contrib.contenttypes.fields import GenericForeignKey, GenericRelation
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.postgres.fields import JSONField
 from django.utils import timezone
-
+from notifications.models import Notification
 
 class AnnotationManager(models.Manager):
     def get_for(self, user, content_object, key, **kwargs):
@@ -210,3 +210,16 @@ class FollowMixin(models.Model):
 
             if vote:
                 vote.delete()
+
+class NotificationMixin(models.Model):
+    """
+    NotificationMixin add to model to implement notification on 'created'
+    """
+    class Meta:
+        abstract = True
+
+    _notification_action = GenericRelation(
+        Notification,
+        content_type_field='action_object_content_type',
+        object_id_field='action_object_object_id'
+    )

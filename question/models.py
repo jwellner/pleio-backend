@@ -1,8 +1,8 @@
 from django.db import models
 from django.utils.text import slugify
-from core.models import Entity, VoteMixin, CommentMixin, BookmarkMixin, FollowMixin, Comment
+from core.models import Entity, VoteMixin, CommentMixin, BookmarkMixin, FollowMixin, Comment, NotificationMixin
 
-class Question(Entity, VoteMixin, BookmarkMixin, FollowMixin, CommentMixin):
+class Question(Entity, VoteMixin, BookmarkMixin, FollowMixin, CommentMixin, NotificationMixin):
     """
     Question
     """

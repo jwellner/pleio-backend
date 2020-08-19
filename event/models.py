@@ -1,5 +1,5 @@
 from django.db import models
-from core.models import Entity, CommentMixin, BookmarkMixin
+from core.models import Entity, CommentMixin, BookmarkMixin, NotificationMixin
 from user.models import User
 from django.core.exceptions import ObjectDoesNotExist
 from django.utils.text import slugify
@@ -7,7 +7,7 @@ from django.utils import timezone
 from django.urls import reverse
 from file.models import FileFolder
 
-class Event(Entity, CommentMixin, BookmarkMixin):
+class Event(Entity, CommentMixin, BookmarkMixin, NotificationMixin):
     class Meta:
         ordering = ['-created_at']
 

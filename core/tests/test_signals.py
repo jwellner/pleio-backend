@@ -11,7 +11,7 @@ from blog.models import Blog
 from mixer.backend.django import mixer
 from core.constances import ACCESS_TYPE
 from core.lib import get_acl, access_id_to_acl
-from core.signals import comment_handler, user_handler, entity_handler
+from core.signals import comment_handler, user_handler, notification_handler
 from django.utils.text import slugify
 from django.db.models.signals import post_save
 from unittest import mock
@@ -65,6 +65,6 @@ class SignalsTestCase(FastTenantTestCase):
         # mocked_send.assert_called_once_with(self.user1, recipient=self.user2, verb='commented', action_object=self.blog1)
 
     @mock.patch('notifications.signals.notify.send')
-    def test_entity_handler(self, mocked_send):
-        entity_handler(self.user1, self.blog2, True, action_object=self.blog2)
+    def test_notification_handler(self, mocked_send):
+        notification_handler(self.user1, self.blog2, True, action_object=self.blog2)
         mocked_send.assert_called_once_with(self.user1, recipient=self.user2, verb='created', action_object=self.blog2)
