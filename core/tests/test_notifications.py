@@ -209,3 +209,43 @@ class NotificationsTestCase(FastTenantTestCase):
         self.assertEqual(data["notifications"]["total"], 0)
         self.assertEqual(data["notifications"]["totalUnread"], 0)
         self.assertEqual(data["notifications"]["edges"], list())
+
+
+    def test_notifications_content_deleted(self):
+
+        blog3 = Blog.objects.create(
+            title="Blog3",
+            owner=self.user1,
+            read_access=[ACCESS_TYPE.public],
+            write_access=[ACCESS_TYPE.user.format(self.user1.id)],
+            group=self.group
+        )
+
+        request = HttpRequest()
+        request.user = self.user2
+
+        variables = {}
+
+        result = graphql_sync(schema, {"query": self.query, "variables": variables}, context_value={ "request": request })
+
+        self.assertTrue(result[0])
+        data = result[1]["data"]
+        self.assertEqual(data["notifications"]["total"], 3)
+        self.assertEqual(data["notifications"]["totalUnread"], 3)
+        self.assertEqual(data["notifications"]["edges"][0]["performer"]["guid"], str(self.user1.id))
+        self.assertEqual(data["notifications"]["edges"][0]["entity"]["guid"], str(blog3.id))
+        self.assertEqual(data["notifications"]["edges"][0]["isUnread"], True)
+        self.assertEqual(data["notifications"]["edges"][0]["action"], "created")
+
+        blog3.delete()
+
+        result = graphql_sync(schema, {"query": self.query, "variables": variables}, context_value={ "request": request })
+
+        self.assertTrue(result[0])
+        data = result[1]["data"]
+        self.assertEqual(data["notifications"]["total"], 2)
+        self.assertEqual(data["notifications"]["totalUnread"], 2)
+        self.assertEqual(data["notifications"]["edges"][0]["performer"]["guid"], str(self.user1.id))
+        self.assertEqual(data["notifications"]["edges"][0]["entity"]["guid"], str(self.blog2.id))
+        self.assertEqual(data["notifications"]["edges"][0]["isUnread"], True)
+        self.assertEqual(data["notifications"]["edges"][0]["action"], "created")

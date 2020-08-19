@@ -1,8 +1,8 @@
 from django.db import models
 from django.utils.text import slugify
-from core.models import Entity, VoteMixin, CommentMixin, BookmarkMixin, FollowMixin
+from core.models import Entity, VoteMixin, CommentMixin, BookmarkMixin, FollowMixin, NotificationMixin
 
-class StatusUpdate(Entity, VoteMixin, CommentMixin, BookmarkMixin, FollowMixin):
+class StatusUpdate(Entity, VoteMixin, CommentMixin, BookmarkMixin, FollowMixin, NotificationMixin):
     class Meta:
         ordering = ['-created_at']
 

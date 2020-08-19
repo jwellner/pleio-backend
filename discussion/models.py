@@ -1,9 +1,9 @@
 from django.db import models
 from django.utils.text import slugify
-from core.models import Entity, VoteMixin, CommentMixin, BookmarkMixin, FollowMixin
+from core.models import Entity, VoteMixin, CommentMixin, BookmarkMixin, FollowMixin, NotificationMixin
 
 
-class Discussion(Entity, VoteMixin, BookmarkMixin, FollowMixin, CommentMixin):
+class Discussion(Entity, VoteMixin, BookmarkMixin, FollowMixin, CommentMixin, NotificationMixin):
     class Meta:
         ordering = ['-created_at']
 

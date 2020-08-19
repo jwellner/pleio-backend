@@ -1,10 +1,10 @@
 from django.db import models
 from django.utils.text import slugify
-from core.models import Entity, VoteMixin, CommentMixin, BookmarkMixin, FollowMixin
+from core.models import Entity, VoteMixin, CommentMixin, BookmarkMixin, FollowMixin, NotificationMixin
 from file.models import FileFolder
 from django.urls import reverse
 
-class Blog(Entity, VoteMixin, BookmarkMixin, FollowMixin, CommentMixin):
+class Blog(Entity, VoteMixin, BookmarkMixin, FollowMixin, CommentMixin, NotificationMixin):
     """
     Blog
     """
