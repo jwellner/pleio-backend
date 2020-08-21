@@ -36,7 +36,8 @@ class EditQuestionTestCase(FastTenantTestCase):
                 "richDescription": "richDescription",
                 "accessId": 0,
                 "writeAccessId": 0,
-                "tags": ["tag1", "tag2"]
+                "tags": ["tag1", "tag2"],
+                "isFeatured": True
             }
         }
         self.mutation = """
@@ -56,6 +57,7 @@ class EditQuestionTestCase(FastTenantTestCase):
                     guid
                 }
                 isClosed
+                isFeatured
             }
             mutation ($input: editEntityInput!) {
                 editEntity(input: $input) {
@@ -84,6 +86,7 @@ class EditQuestionTestCase(FastTenantTestCase):
         self.assertEqual(data["editEntity"]["entity"]["richDescription"], variables["input"]["richDescription"])
         self.assertEqual(data["editEntity"]["entity"]["tags"], variables["input"]["tags"])
         self.assertEqual(data["editEntity"]["entity"]["isClosed"], False)
+        self.assertEqual(data["editEntity"]["entity"]["isFeatured"], False) # only with editor role
 
         self.question.refresh_from_db()
 
@@ -92,3 +95,4 @@ class EditQuestionTestCase(FastTenantTestCase):
         self.assertEqual(data["editEntity"]["entity"]["richDescription"], self.question.rich_description)
         self.assertEqual(data["editEntity"]["entity"]["tags"], self.question.tags)
         self.assertEqual(data["editEntity"]["entity"]["isClosed"], self.question.is_closed)
+        self.assertEqual(data["editEntity"]["entity"]["isFeatured"], False)

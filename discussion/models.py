@@ -11,6 +11,8 @@ class Discussion(Entity, VoteMixin, BookmarkMixin, FollowMixin, CommentMixin, No
     description = models.TextField()
     rich_description = models.TextField(null=True, blank=True)
 
+    is_featured = models.BooleanField(default=False)
+
     def __str__(self):
         return self.title
 

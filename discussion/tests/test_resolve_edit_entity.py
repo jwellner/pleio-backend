@@ -18,6 +18,7 @@ class EditEventTestCase(FastTenantTestCase):
     def setUp(self):
         self.anonymousUser = AnonymousUser()
         self.authenticatedUser = mixer.blend(User)
+        self.editorUser = mixer.blend(User, is_admin=True) # TODO: update with roles
 
         self.discussionPublic = Discussion.objects.create(
             title="Test public event",
@@ -25,7 +26,8 @@ class EditEventTestCase(FastTenantTestCase):
             rich_description="JSON to string",
             read_access=[ACCESS_TYPE.public],
             write_access=[ACCESS_TYPE.user.format(self.authenticatedUser.id)],
-            owner=self.authenticatedUser
+            owner=self.authenticatedUser,
+            is_featured=False
         )
 
         self.data = {
@@ -36,7 +38,8 @@ class EditEventTestCase(FastTenantTestCase):
                 "richDescription": "richDescription",
                 "accessId": 0,
                 "writeAccessId": 0,
-                "tags": ["tag1", "tag2"]
+                "tags": ["tag1", "tag2"],
+                "isFeatured": True
             }
         }
         self.mutation = """
@@ -55,6 +58,7 @@ class EditEventTestCase(FastTenantTestCase):
                 group {
                     guid
                 }
+                isFeatured
             }
             mutation ($input: editEntityInput!) {
                 editEntity(input: $input) {
@@ -81,9 +85,34 @@ class EditEventTestCase(FastTenantTestCase):
         self.assertEqual(data["editEntity"]["entity"]["title"], variables["input"]["title"])
         self.assertEqual(data["editEntity"]["entity"]["description"], variables["input"]["description"])
         self.assertEqual(data["editEntity"]["entity"]["richDescription"], variables["input"]["richDescription"])
+        self.assertEqual(data["editEntity"]["entity"]["isFeatured"], False)
 
         self.discussionPublic.refresh_from_db()
 
         self.assertEqual(data["editEntity"]["entity"]["title"], self.discussionPublic.title)
         self.assertEqual(data["editEntity"]["entity"]["description"], self.discussionPublic.description)
         self.assertEqual(data["editEntity"]["entity"]["richDescription"], self.discussionPublic.rich_description)
+        self.assertEqual(data["editEntity"]["entity"]["isFeatured"], False)
+
+    def test_edit_event_editor(self):
+
+        variables = self.data
+
+        request = HttpRequest()
+        request.user = self.editorUser
+
+        result = graphql_sync(schema, { "query": self.mutation, "variables": variables }, context_value={ "request": request })
+
+        data = result[1]["data"]
+
+        self.assertEqual(data["editEntity"]["entity"]["title"], variables["input"]["title"])
+        self.assertEqual(data["editEntity"]["entity"]["description"], variables["input"]["description"])
+        self.assertEqual(data["editEntity"]["entity"]["richDescription"], variables["input"]["richDescription"])
+        self.assertEqual(data["editEntity"]["entity"]["isFeatured"], variables["input"]["isFeatured"])
+
+        self.discussionPublic.refresh_from_db()
+
+        self.assertEqual(data["editEntity"]["entity"]["title"], self.discussionPublic.title)
+        self.assertEqual(data["editEntity"]["entity"]["description"], self.discussionPublic.description)
+        self.assertEqual(data["editEntity"]["entity"]["richDescription"], self.discussionPublic.rich_description)
+        self.assertEqual(data["editEntity"]["entity"]["isFeatured"], self.discussionPublic.is_featured)

@@ -18,6 +18,7 @@ class AddEventTestCase(FastTenantTestCase):
     def setUp(self):
         self.anonymousUser = AnonymousUser()
         self.authenticatedUser = mixer.blend(User)
+        self.editorUser = mixer.blend(User, is_admin=True) # TODO: update with roles
         self.group = mixer.blend(Group, owner=self.authenticatedUser, is_membership_on_request=False)
         self.group.join(self.authenticatedUser, 'owner')
 
@@ -30,7 +31,8 @@ class AddEventTestCase(FastTenantTestCase):
                 "richDescription": "richDescription",
                 "accessId": 0,
                 "writeAccessId": 0,
-                "tags": ["tag1", "tag2"]
+                "tags": ["tag1", "tag2"],
+                "isFeatured": True
             }
         }
         self.mutation = """
@@ -49,6 +51,7 @@ class AddEventTestCase(FastTenantTestCase):
                 group {
                     guid
                 }
+                isFeatured
             }
             mutation ($input: addEntityInput!) {
                 addEntity(input: $input) {
@@ -75,6 +78,23 @@ class AddEventTestCase(FastTenantTestCase):
         self.assertEqual(data["addEntity"]["entity"]["title"], variables["input"]["title"])
         self.assertEqual(data["addEntity"]["entity"]["description"], variables["input"]["description"])
         self.assertEqual(data["addEntity"]["entity"]["richDescription"], variables["input"]["richDescription"])
+        self.assertEqual(data["addEntity"]["entity"]["isFeatured"], False) # only admin can set
+
+    def test_add_discussion_editor(self):
+
+        variables = self.data
+
+        request = HttpRequest()
+        request.user = self.editorUser
+
+        result = graphql_sync(schema, { "query": self.mutation, "variables": variables }, context_value={ "request": request })
+
+        data = result[1]["data"]
+
+        self.assertEqual(data["addEntity"]["entity"]["title"], variables["input"]["title"])
+        self.assertEqual(data["addEntity"]["entity"]["description"], variables["input"]["description"])
+        self.assertEqual(data["addEntity"]["entity"]["richDescription"], variables["input"]["richDescription"])
+        self.assertEqual(data["addEntity"]["entity"]["isFeatured"], True) 
 
     def test_add_discussion_to_group(self):
 
