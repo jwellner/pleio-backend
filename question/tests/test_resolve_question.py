@@ -36,7 +36,8 @@ class QuestionTestCase(FastTenantTestCase):
             read_access=[ACCESS_TYPE.user.format(self.authenticatedUser.id)],
             write_access=[ACCESS_TYPE.user.format(self.authenticatedUser.id)],
             owner=self.authenticatedUser,
-            is_closed=False
+            is_closed=False,
+            is_featured=True
         )
 
     def tearDown(self):
@@ -66,6 +67,7 @@ class QuestionTestCase(FastTenantTestCase):
                 hasVoted
                 isBookmarked
                 isFollowing
+                isFeatured
                 isClosed
                 canBookmark
                 canComment
@@ -121,6 +123,7 @@ class QuestionTestCase(FastTenantTestCase):
         self.assertEqual(data["entity"]["hasVoted"], False)
         self.assertEqual(data["entity"]["isBookmarked"], False)
         self.assertEqual(data["entity"]["isFollowing"], False)
+        self.assertEqual(data["entity"]["isFeatured"], False)
         self.assertEqual(data["entity"]["canBookmark"], False)
         self.assertEqual(data["entity"]["canEdit"], False)
         self.assertEqual(data["entity"]["canComment"], False)
@@ -162,6 +165,7 @@ class QuestionTestCase(FastTenantTestCase):
                 hasVoted
                 isBookmarked
                 isFollowing
+                isFeatured
                 isClosed
                 canBookmark
                 canComment
@@ -217,6 +221,7 @@ class QuestionTestCase(FastTenantTestCase):
         self.assertEqual(data["entity"]["hasVoted"], False)
         self.assertEqual(data["entity"]["isBookmarked"], False)
         self.assertEqual(data["entity"]["isFollowing"], False)
+        self.assertEqual(data["entity"]["isFeatured"], True)
         self.assertEqual(data["entity"]["canBookmark"], True)
         self.assertEqual(data["entity"]["canEdit"], True)
         self.assertEqual(data["entity"]["canComment"], True)

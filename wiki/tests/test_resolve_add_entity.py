@@ -49,7 +49,8 @@ class AddWikiCase(FastTenantTestCase):
                 "containerGuid": None,
                 "accessId": 0,
                 "writeAccessId": 0,
-                "tags": ["tag1", "tag2"]
+                "tags": ["tag1", "tag2"],
+                "isFeatured": True
             }
         }
         self.mutation = """
@@ -77,6 +78,7 @@ class AddWikiCase(FastTenantTestCase):
                 parent {
                     guid
                 }
+                isFeatured
             }
             mutation ($input: addEntityInput!) {
                 addEntity(input: $input) {
@@ -104,6 +106,7 @@ class AddWikiCase(FastTenantTestCase):
         self.assertEqual(data["addEntity"]["entity"]["description"], variables["input"]["description"])
         self.assertEqual(data["addEntity"]["entity"]["richDescription"], variables["input"]["richDescription"])
         self.assertEqual(data["addEntity"]["entity"]["hasChildren"], False)
+        self.assertEqual(data["addEntity"]["entity"]["isFeatured"], False) # only with editor role
 
     def test_add_wiki_to_parent(self):
 

@@ -35,7 +35,8 @@ class WikiTestCase(FastTenantTestCase):
             read_access=[ACCESS_TYPE.user.format(self.authenticatedUser.id)],
             write_access=[ACCESS_TYPE.user.format(self.authenticatedUser.id)],
             owner=self.authenticatedUser,
-            parent=self.wikiPublic
+            parent=self.wikiPublic,
+            is_featured=True
         )
 
         self.query = """
@@ -63,6 +64,7 @@ class WikiTestCase(FastTenantTestCase):
                 parent {
                     guid
                 }
+                isFeatured
             }
             query GetWiki($guid: String!) {
                 entity(guid: $guid) {
@@ -101,6 +103,7 @@ class WikiTestCase(FastTenantTestCase):
         self.assertEqual(data["entity"]["timeCreated"], str(self.wikiPublic.created_at))
         self.assertEqual(data["entity"]["tags"], [])
         self.assertEqual(data["entity"]["isBookmarked"], False)
+        self.assertEqual(data["entity"]["isFeatured"], False)
         self.assertEqual(data["entity"]["canBookmark"], False)
         self.assertEqual(data["entity"]["canEdit"], False)
         self.assertEqual(data["entity"]["url"], "/wiki/view/{}/{}".format(self.wikiPublic.guid, slugify(self.wikiPublic.title)))
@@ -142,6 +145,7 @@ class WikiTestCase(FastTenantTestCase):
         self.assertEqual(data["entity"]["timeCreated"], str(self.wikiPrivate.created_at))
         self.assertEqual(data["entity"]["tags"], [])
         self.assertEqual(data["entity"]["isBookmarked"], False)
+        self.assertEqual(data["entity"]["isFeatured"], True)
         self.assertEqual(data["entity"]["canBookmark"], True)
         self.assertEqual(data["entity"]["canEdit"], True)
         self.assertEqual(data["entity"]["url"], "/wiki/view/{}/{}".format(self.wikiPrivate.guid, slugify(self.wikiPrivate.title)))

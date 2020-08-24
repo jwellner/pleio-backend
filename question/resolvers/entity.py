@@ -21,8 +21,7 @@ def resolve_group(obj, info):
 @question.field("isFeatured")
 def resolve_is_featured(obj, info):
     # pylint: disable=unused-argument
-    """Deprecated: only used by news"""
-    return False
+    return obj.is_featured
 
 @question.field("isHighlighted")
 def resolve_is_highlighted(obj, info):
