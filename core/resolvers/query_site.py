@@ -5,7 +5,7 @@ from django.templatetags.static import static
 from cms.models import Page
 from core import config
 from core.constances import NOT_LOGGED_IN, USER_NOT_SITE_ADMIN
-from core.lib import get_access_ids, get_activity_filters
+from core.lib import get_access_ids, get_activity_filters, get_exportable_user_fields
 from core.models import UserProfile, ProfileField
 from graphql import GraphQLError
 
@@ -184,6 +184,8 @@ def get_site_settings():
         'emailOverviewEnableFeatured': config.EMAIL_OVERVIEW_ENABLE_FEATURED,
         'emailOverviewFeaturedTitle': config.EMAIL_OVERVIEW_FEATURED_TITLE,
         'emailNotificationShowExcerpt': config.EMAIL_NOTIFICATION_SHOW_EXCERPT,
+
+        'exportableUserFields': get_exportable_user_fields(),
 
         'showLoginRegister': config.SHOW_LOGIN_REGISTER,
         'customTagsAllowed': config.CUSTOM_TAGS_ENABLED,

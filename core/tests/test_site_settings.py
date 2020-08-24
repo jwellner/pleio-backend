@@ -1,7 +1,7 @@
 from django.db import connection
 from django_tenants.test.cases import FastTenantTestCase
 from django.test import override_settings
-from core.models import Group, Comment
+from core.models import Group, Comment, ProfileField
 from user.models import User
 from blog.models import Blog
 from cms.models import Page
@@ -23,6 +23,7 @@ class SiteSettingsTestCase(FastTenantTestCase):
         self.anonymousUser = AnonymousUser()
         self.cmsPage1 = mixer.blend(Page, title="Z title")
         self.cmsPage2 = mixer.blend(Page, title="A title")
+        self.profileField1 = ProfileField.objects.create(key='text_key', name='text_name', field_type='text_field')
 
         self.query = """
             query SiteGeneralSettings {
@@ -129,6 +130,12 @@ class SiteSettingsTestCase(FastTenantTestCase):
                     emailOverviewTitle
                     emailOverviewIntro
                     emailNotificationShowExcerpt
+
+                    exportableUserFields {
+                        field_type
+                        field
+                        label
+                    }
 
                     showLoginRegister
                     customTagsAllowed
@@ -242,6 +249,13 @@ class SiteSettingsTestCase(FastTenantTestCase):
         self.assertEqual(data["siteSettings"]["emailOverviewTitle"], "Pleio 2.0")
         self.assertEqual(data["siteSettings"]["emailOverviewIntro"], "")
         self.assertEqual(data["siteSettings"]["emailNotificationShowExcerpt"], False)
+
+        self.assertEqual(data["siteSettings"]["exportableUserFields"][0]["field_type"], "userField")
+        self.assertEqual(data["siteSettings"]["exportableUserFields"][0]["field"], "guid")
+        self.assertEqual(data["siteSettings"]["exportableUserFields"][0]["label"], "guid")
+        self.assertEqual(data["siteSettings"]["exportableUserFields"][6]["field_type"], "userField")
+        self.assertEqual(data["siteSettings"]["exportableUserFields"][6]["field"], "banned")
+        self.assertEqual(data["siteSettings"]["exportableUserFields"][6]["label"], "banned")
 
         self.assertEqual(data["siteSettings"]["showLoginRegister"], True)
         self.assertEqual(data["siteSettings"]["customTagsAllowed"], True)

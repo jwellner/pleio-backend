@@ -43,7 +43,7 @@ class EditProfileFieldTestCase(FastTenantTestCase):
     def test_edit_profile_field_by_user(self):
 
         mutation = """
-            mutation editProfileField($input: editProfileFieldInput!) {
+            mutation leditProfileField($input: editProfileFieldInput!) {
                 editProfileField(input: $input) {
                     user {
                     guid
