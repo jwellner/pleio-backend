@@ -11,6 +11,7 @@ from core import views as core_views
 from file import views as file_views
 from event import views as event_views
 from elgg import views as elgg_views
+from user import views as user_views
 
 
 urlpatterns = [
@@ -30,6 +31,7 @@ urlpatterns = [
     path('bulk_download', file_views.bulk_download, name='bulk_download'),
 
     path('exporting/event/<uuid:event_id>', event_views.export, name='event_export'),
+    path('exporting/users', user_views.export, name='users_export'),
 
     path('robots.txt', core_views.robots_txt),
     path('sitemap.xml', cache_page(3600)(sitemap), {'sitemaps': sitemaps}, name='sitemap'),

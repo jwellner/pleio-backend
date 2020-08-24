@@ -76,3 +76,13 @@ extend type ProfileItem {
   isMandatory: Boolean
   isHidden: Boolean
 }
+
+type ExportableField {
+  field_type: String!
+  field: String!
+  label: String!
+}
+
+extend type SiteSettings {
+  exportableUserFields: [ExportableField]
+}
