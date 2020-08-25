@@ -64,6 +64,7 @@ DEFAULT_SITE_CONFIG = {
     ], 'Menu'),
 
     'PROFILE': ([], 'Profile'),
+    'PROFILE_SECTIONS': ([], 'Profile sections'),
 
     'TAG_CATEGORIES': ([], 'Tag categories'),
     'SHOW_TAGS_IN_FEED': (False, 'Show tags in feed'),

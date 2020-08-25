@@ -22,9 +22,13 @@ def resolve_profile(obj, info):
     user_profile_fields = []
 
     # only get configured profile fields
-    profile_setting_keys = [d['key'] for d in config.PROFILE if 'key' in d]
+    profile_section_guids = []
 
-    for field in ProfileField.objects.filter(key__in=profile_setting_keys):
+    for section in config.PROFILE_SECTIONS:
+        profile_section_guids.extend(section['profileFieldGuids'])
+
+    for guid in profile_section_guids:
+        field = ProfileField.objects.get(id=guid)
         field.value = ""
         field.read_access = []
         try:
@@ -112,9 +116,12 @@ def resolve_fields_in_overview(obj, info):
     user_profile_fields = []
 
     # only get configured profile fields
-    profile_setting_keys = [d['key'] for d in config.PROFILE if 'key' in d and ('isInOverview' in d and d['isInOverview'])]
+    profile_section_guids = []
 
-    for field in ProfileField.objects.filter(key__in=profile_setting_keys):
+    for section in config.PROFILE_SECTIONS:
+        profile_section_guids.extend(section['profileFieldGuids'])
+
+    for field in ProfileField.objects.filter(id__in=profile_section_guids, is_in_overview=True):
         field.value = ""
         field.label = field.name
         try:

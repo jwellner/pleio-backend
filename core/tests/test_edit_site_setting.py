@@ -8,7 +8,7 @@ import json
 from django.core.cache import cache
 from django.contrib.auth.models import AnonymousUser
 from django.http import HttpRequest
-from core.models import Group, Widget, Setting
+from core.models import Group, Widget, Setting, ProfileField
 from user.models import User
 from mixer.backend.django import mixer
 from graphql import GraphQLError
@@ -20,9 +20,18 @@ class EditSiteSettingTestCase(FastTenantTestCase):
         self.anonymousUser = AnonymousUser()
         self.user = mixer.blend(User)
         self.admin = mixer.blend(User, is_admin=True)
+        self.profileField1 = ProfileField.objects.create(key='text_key1', name='text_name', field_type='text_field')
+        self.profileField2 = ProfileField.objects.create(key='text_key2', name='text_name', field_type='text_field')
+        self.profileField3 = ProfileField.objects.create(key='text_key3', name='text_name', field_type='text_field')
+        self.profileField4 = ProfileField.objects.create(key='text_key4', name='text_name', field_type='text_field')
+
 
     def tearDown(self):
         self.admin.delete()
+        self.profileField1.delete()
+        self.profileField2.delete()
+        self.profileField3.delete()
+        self.profileField4.delete()
         self.user.delete()
 
         Setting.objects.all().delete()
@@ -100,6 +109,11 @@ class EditSiteSettingTestCase(FastTenantTestCase):
                             name
                             isFilter
                             isInOverview
+                        }
+
+                        profileSections {
+                            name
+                            profileFieldGuids
                         }
 
                         tagCategories {
@@ -182,6 +196,10 @@ class EditSiteSettingTestCase(FastTenantTestCase):
                 "profile": [{"isFilter": False, "isInOverview": False, "key": "key1", "name": "name1"},
                             {"isFilter": False, "isInOverview": False, "key": "key2", "name": "name2"},
                             {"isFilter": True, "isInOverview": True, "key": "key3", "name": "name3"}],
+
+                "profileSections": [{"name": "section_one", "profileFieldGuids": [str(self.profileField1.id), str(self.profileField3.id)]},
+                                    {"name": "section_two", "profileFieldGuids": [str(self.profileField4.id)]},
+                                    {"name": "section_three", "profileFieldGuids": []}],
 
                 "tagCategories": [{"name": "cat1", "values": ["tag1", "tag2"]},
                                   {"name": "cat2", "values": ["tag3", "tag4"]}],
@@ -267,6 +285,10 @@ class EditSiteSettingTestCase(FastTenantTestCase):
         self.assertEqual(data["editSiteSetting"]["siteSettings"]["profile"], [{"isFilter": False, "isInOverview": False, "key": "key1", "name": "name1"},
                                                                               {"isFilter": False, "isInOverview": False, "key": "key2", "name": "name2"},
                                                                               {"isFilter": True, "isInOverview": True, "key": "key3", "name": "name3"}])
+
+        self.assertEqual(data["editSiteSetting"]["siteSettings"]["profileSections"], [{"name": "section_one", "profileFieldGuids": [str(self.profileField1.id), str(self.profileField3.id)]},
+                                                                                      {"name": "section_two", "profileFieldGuids": [str(self.profileField4.id)]},
+                                                                                      {"name": "section_three", "profileFieldGuids": []}])
 
         self.assertEqual(data["editSiteSetting"]["siteSettings"]["tagCategories"], [{"name": "cat1", "values": ["tag1", "tag2"]},
                                                                                     {"name": "cat2", "values": ["tag3", "tag4"]}])

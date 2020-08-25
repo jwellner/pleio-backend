@@ -84,6 +84,8 @@ def resolve_edit_site_setting(_, info, input):
         'directLinks': 'DIRECT_LINKS',
         'footer': 'FOOTER',
 
+        'profileSections': 'PROFILE_SECTIONS',
+
         'tagCategories': 'TAG_CATEGORIES',
         'showTagsInFeed': 'SHOW_TAGS_IN_FEED',
         'showTagsInDetail': 'SHOW_TAGS_IN_DETAIL',

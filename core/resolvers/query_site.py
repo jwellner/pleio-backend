@@ -49,6 +49,7 @@ def get_site():
         'theme': config.THEME,
         'menu': config.MENU,
         'profile': config.PROFILE,
+        'profileSections': config.PROFILE_SECTIONS,
         'footer': config.FOOTER,
         'directLinks': config.DIRECT_LINKS,
         'accessIds': get_access_ids(),
@@ -166,6 +167,8 @@ def get_site_settings():
         'footer': config.FOOTER,
 
         'profile': get_profile(),
+        'profileSections': config.PROFILE_SECTIONS,
+        'profileFields': ProfileField.objects.all(),
 
         'tagCategories': config.TAG_CATEGORIES,
         'showTagsInFeed': config.SHOW_TAGS_IN_FEED,

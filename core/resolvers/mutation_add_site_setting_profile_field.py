@@ -29,9 +29,6 @@ def resolve_add_site_setting_profile_field(_, info, input):
     if 'name' in clean_input:
         profile_field.name = clean_input["name"]
 
-    if 'category' in clean_input:
-        profile_field.category = clean_input["category"]
-
     if 'isEditable' in clean_input:
         profile_field.is_editable_by_user = clean_input["isEditable"]
 
@@ -52,9 +49,6 @@ def resolve_add_site_setting_profile_field(_, info, input):
 
     if 'isMandatory' in clean_input:
         profile_field.is_mandatory = clean_input["isMandatory"]
-
-    if 'isHidden' in clean_input:
-        profile_field.is_hidden = clean_input["isHidden"]
 
     profile_field.save()
 

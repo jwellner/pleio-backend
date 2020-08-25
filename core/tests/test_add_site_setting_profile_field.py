@@ -98,7 +98,6 @@ class AddSiteSettingProfileFieldTestCase(FastTenantTestCase):
                         fieldOptions
                         isInOnboarding
                         isMandatory
-                        isHidden
                     }
                 }
             }
@@ -107,15 +106,13 @@ class AddSiteSettingProfileFieldTestCase(FastTenantTestCase):
             "input": {
                 "key": "text_key",
                 "name": "new_name_1",
-                "category": "category_1",
                 "isEditable": False,
                 "isFilter": True,
                 "isInOverview": True,
                 "fieldType": "date_field",
                 "fieldOptions": ["option1", "option2"],
                 "isInOnboarding": True,
-                "isMandatory": True,
-                "isHidden": True
+                "isMandatory": True
 
             }
         }
@@ -128,7 +125,6 @@ class AddSiteSettingProfileFieldTestCase(FastTenantTestCase):
 
         self.assertEqual(data["addSiteSettingProfileField"]["profileItem"]["key"], "text_key")
         self.assertEqual(data["addSiteSettingProfileField"]["profileItem"]["name"], "new_name_1")
-        self.assertEqual(data["addSiteSettingProfileField"]["profileItem"]["category"], "category_1")
         self.assertEqual(data["addSiteSettingProfileField"]["profileItem"]["isEditable"], False)
         self.assertEqual(data["addSiteSettingProfileField"]["profileItem"]["isFilter"], True)
         self.assertEqual(data["addSiteSettingProfileField"]["profileItem"]["isInOverview"], True)
@@ -136,7 +132,6 @@ class AddSiteSettingProfileFieldTestCase(FastTenantTestCase):
         self.assertEqual(data["addSiteSettingProfileField"]["profileItem"]["fieldOptions"], ["option1", "option2"])
         self.assertEqual(data["addSiteSettingProfileField"]["profileItem"]["isInOnboarding"], True)
         self.assertEqual(data["addSiteSettingProfileField"]["profileItem"]["isMandatory"], True)
-        self.assertEqual(data["addSiteSettingProfileField"]["profileItem"]["isHidden"], True)
 
 
     def test_add_profile_field_duplicate_key_by_admin(self):
