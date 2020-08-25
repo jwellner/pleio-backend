@@ -4,6 +4,11 @@ from core.lib import get_access_id, get_field_type
 
 profile_item = ObjectType("ProfileItem")
 
+@profile_item.field("guid")
+def resolve_guid(obj, info):
+    # pylint: disable=unused-argument
+    return obj.id
+
 @profile_item.field("key")
 def resolve_key(obj, info):
     # pylint: disable=unused-argument
@@ -68,8 +73,3 @@ def resolve_is_in_onboarding(obj, info):
 def resolve_is_mandatory(obj, info):
     # pylint: disable=unused-argument
     return obj.is_mandatory
-
-@profile_item.field("isHidden")
-def resolve_is_hidden(obj, info):
-    # pylint: disable=unused-argument
-    return obj.is_hidden

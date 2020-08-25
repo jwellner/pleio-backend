@@ -23,7 +23,8 @@ class SiteSettingsTestCase(FastTenantTestCase):
         self.anonymousUser = AnonymousUser()
         self.cmsPage1 = mixer.blend(Page, title="Z title")
         self.cmsPage2 = mixer.blend(Page, title="A title")
-        self.profileField1 = ProfileField.objects.create(key='text_key', name='text_name', field_type='text_field')
+        self.profileField1 = ProfileField.objects.create(key='text_key1', name='text_name', field_type='text_field')
+        self.profileField2 = ProfileField.objects.create(key='text_key2', name='text_name', field_type='text_field')
 
         self.query = """
             query SiteGeneralSettings {
@@ -114,6 +115,10 @@ class SiteSettingsTestCase(FastTenantTestCase):
                         isFilter
                     }
 
+                    profileFields {
+                        key
+                    }
+
                     tagCategories {
                         name
                         values
@@ -159,6 +164,8 @@ class SiteSettingsTestCase(FastTenantTestCase):
     def tearDown(self):
             self.cmsPage1.delete()
             self.cmsPage2.delete()
+            self.profileField1.delete()
+            self.profileField2.delete()
             self.admin.delete()
             self.user.delete()
 
@@ -233,6 +240,7 @@ class SiteSettingsTestCase(FastTenantTestCase):
         self.assertEqual(data["siteSettings"]["footer"], [])
 
         self.assertEqual(data["siteSettings"]["profile"], [])
+        self.assertEqual(data["siteSettings"]["profileFields"], [{"key": self.profileField1.key}, {"key": self.profileField2.key}])
 
         self.assertEqual(data["siteSettings"]["tagCategories"], [])
         self.assertEqual(data["siteSettings"]["showTagsInFeed"], False)

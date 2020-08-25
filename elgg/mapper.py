@@ -82,7 +82,6 @@ class Mapper():
         profile_field = ProfileField()
         profile_field.key = pleio_template_profile_item.get("key")
         profile_field.name = pleio_template_profile_item.get("name")
-        profile_field.category = self.helpers.get_profile_category(pleio_template_profile_item.get("key"))
         profile_field.field_type = self.helpers.get_profile_field_type(pleio_template_profile_item.get("key"))
         profile_field.field_options = self.helpers.get_profile_options(pleio_template_profile_item.get("key"))
         profile_field.is_editable_by_user = self.helpers.get_profile_is_editable(pleio_template_profile_item.get("key"))

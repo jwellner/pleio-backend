@@ -24,6 +24,7 @@ extend type Mutation {
   toggleUserIsAdmin(input: toggleUserIsAdminInput!): toggleUserIsAdminPayload
   addSiteSettingProfileField(input: addSiteSettingProfileFieldInput!): addSiteSettingProfileFieldPayload
   editSiteSettingProfileField(input: editSiteSettingProfileFieldInput!): editSiteSettingProfileFieldPayload
+  deleteSiteSettingProfileField(input: deleteSiteSettingProfileFieldInput!): deleteSiteSettingProfileFieldPayload
 }
 
 extend type Query {
@@ -38,7 +39,6 @@ extend type User {
 input addSiteSettingProfileFieldInput {
   key: String!
   name: String!
-  category: String
   isEditable: Boolean
   isFilter: Boolean
   isInOverview: Boolean
@@ -46,7 +46,6 @@ input addSiteSettingProfileFieldInput {
   fieldOptions: [String]
   isInOnboarding: Boolean
   isMandatory: Boolean
-  isHidden: Boolean
 }
 
 type addSiteSettingProfileFieldPayload {
@@ -54,9 +53,8 @@ type addSiteSettingProfileFieldPayload {
 }
 
 input editSiteSettingProfileFieldInput {
-  key: String!
+  guid: String!
   name: String
-  category: String
   isEditable: Boolean
   isFilter: Boolean
   isInOverview: Boolean
@@ -64,25 +62,51 @@ input editSiteSettingProfileFieldInput {
   fieldOptions: [String]
   isInOnboarding: Boolean
   isMandatory: Boolean
-  isHidden: Boolean
 }
 
 type editSiteSettingProfileFieldPayload {
   profileItem: ProfileItem
 }
 
-extend type ProfileItem {
-  isInOnboarding: Boolean
-  isMandatory: Boolean
-  isHidden: Boolean
+input deleteSiteSettingProfileFieldInput {
+  guid: String!
 }
 
+type deleteSiteSettingProfileFieldPayload {
+    success: Boolean
+}
+
+extend type ProfileItem {
+  guid: String!
+  isInOnboarding: Boolean
+  isMandatory: Boolean
+}
+
+type ProfileSection {
+  name: String!
+  profileFieldGuids: [String]
+}
+
+extend input editSiteSettingInput {
+  profileSections: [ProfileSectionInput]
+}
+
+input ProfileSectionInput {
+  name: String!
+  profileFieldGuids: [String]
+}
 type ExportableField {
   field_type: String!
   field: String!
   label: String!
 }
 
+extend type Site {
+  profileSections: [ProfileSection]
+}
+
 extend type SiteSettings {
+  profileSections: [ProfileSection]
   exportableUserFields: [ExportableField]
+  profileFields: [ProfileItem]
 }

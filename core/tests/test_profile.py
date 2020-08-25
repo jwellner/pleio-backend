@@ -31,7 +31,7 @@ class ProfileTestCase(FastTenantTestCase):
         self.profile_field2 = ProfileField.objects.create(
             key="profile_field2",
             name="profile_field2_name",
-            category="profile_field2_category",
+            #category="profile_field2_category",
             field_type="text_field",
             is_editable_by_user=False,
             is_filter=True
@@ -45,7 +45,7 @@ class ProfileTestCase(FastTenantTestCase):
         self.profile_field3 = ProfileField.objects.create(
             key="profile_field3",
             name="profile_field3_name",
-            category="profile_field3_category",
+            #category="profile_field3_category",
             field_type="multi_select_field",
             field_options=['option1', 'option2', 'option3'],
             is_in_overview=True
@@ -56,10 +56,23 @@ class ProfileTestCase(FastTenantTestCase):
             value="option1, option2",
             read_access=[ACCESS_TYPE.user.format(self.user1.id)]
         )
-        Setting.objects.create(key='PROFILE', value=[{"key": "profile_field1", "name": "profile_field1_name", "isFilter": False, "isInOverview": False},
-                                                     {"key": "profile_field2", "name": "profile_field2_name", "isFilter": False, "isInOverview": False},
-                                                     {"key": "profile_field3", "name": "profile_field3_name", "isFilter": False, "isInOverview": True}])
 
+        self.profile_field4 = ProfileField.objects.create(
+            key="profile_field4",
+            name="profile_field4_name"
+        )
+
+        self.profile_field5 = ProfileField.objects.create(
+            key="profile_field5",
+            name="profile_field5_name"
+        )
+
+        Setting.objects.create(key='PROFILE_SECTIONS', value=[
+            {"name": "", "profileFieldGuids": [str(self.profile_field1.id), str(self.profile_field5.id)]},
+            {"name": "section_one", "profileFieldGuids": [str(self.profile_field3.id)]},
+            {"name": "section_two", "profileFieldGuids": [str(self.profile_field2.id)]}
+            ]
+        )
 
         self.query = """
             query Profile($username: String!) {
@@ -102,6 +115,8 @@ class ProfileTestCase(FastTenantTestCase):
         self.profile_field1.delete()
         self.profile_field2.delete()
         self.profile_field3.delete()
+        self.profile_field4.delete()
+        self.profile_field5.delete()
         self.user2.delete()
         self.user1.delete()
         Setting.objects.all().delete()
@@ -121,30 +136,31 @@ class ProfileTestCase(FastTenantTestCase):
 
         data = result[1]["data"]
 
-        self.assertEqual(len(data["entity"]["profile"]), 3)
+        self.assertEqual(len(data["entity"]["profile"]), 4)
         self.assertEqual(data["entity"]["profile"][0]["key"], "profile_field1")
         self.assertEqual(data["entity"]["profile"][0]["name"], "profile_field1_name")
         self.assertEqual(data["entity"]["profile"][0]["value"], "user_profile_field1_value")
-        self.assertEqual(data["entity"]["profile"][0]["category"], None)
+        self.assertEqual(data["entity"]["profile"][0]["category"], "")
         self.assertEqual(data["entity"]["profile"][0]["accessId"], 2)
         self.assertEqual(data["entity"]["profile"][0]["fieldType"], "textField")
         self.assertEqual(data["entity"]["profile"][0]["isEditable"], True)
         self.assertEqual(data["entity"]["profile"][0]["fieldOptions"], [])
         self.assertEqual(data["entity"]["profile"][0]["isFilterable"], False)
 
-        self.assertEqual(data["entity"]["profile"][1]["key"], "profile_field2")
-        self.assertEqual(data["entity"]["profile"][1]["name"], "profile_field2_name")
-        self.assertEqual(data["entity"]["profile"][1]["value"], "user_profile_field2_value")
-        self.assertEqual(data["entity"]["profile"][1]["category"], "profile_field2_category")
-        self.assertEqual(data["entity"]["profile"][1]["accessId"], 1)
-        self.assertEqual(data["entity"]["profile"][1]["fieldType"], "textField")
-        self.assertEqual(data["entity"]["profile"][1]["isEditable"], False)
-        self.assertEqual(data["entity"]["profile"][1]["fieldOptions"], [])
-        self.assertEqual(data["entity"]["profile"][1]["isFilterable"], True)
+        self.assertEqual(data["entity"]["profile"][3]["key"], "profile_field2")
+        self.assertEqual(data["entity"]["profile"][3]["name"], "profile_field2_name")
+        self.assertEqual(data["entity"]["profile"][3]["value"], "user_profile_field2_value")
+        self.assertEqual(data["entity"]["profile"][3]["category"], "section_two")
+        self.assertEqual(data["entity"]["profile"][3]["accessId"], 1)
+        self.assertEqual(data["entity"]["profile"][3]["fieldType"], "textField")
+        self.assertEqual(data["entity"]["profile"][3]["isEditable"], False)
+        self.assertEqual(data["entity"]["profile"][3]["fieldOptions"], [])
+        self.assertEqual(data["entity"]["profile"][3]["isFilterable"], True)
 
         self.assertEqual(data["entity"]["profile"][2]["key"], "profile_field3")
         self.assertEqual(data["entity"]["profile"][2]["name"], "profile_field3_name")
         self.assertEqual(data["entity"]["profile"][2]["value"], "option1, option2")
+        self.assertEqual(data["entity"]["profile"][2]["category"], "section_one")
         self.assertEqual(data["entity"]["profile"][2]["accessId"], 0)
         self.assertEqual(data["entity"]["profile"][2]["fieldType"], "multiSelectField")
         self.assertEqual(data["entity"]["profile"][2]["fieldOptions"], ["option1", "option2", "option3"])
@@ -166,31 +182,31 @@ class ProfileTestCase(FastTenantTestCase):
 
         data = result[1]["data"]
 
-        self.assertEqual(len(data["entity"]["profile"]), 3)
+        self.assertEqual(len(data["entity"]["profile"]), 4)
         self.assertEqual(data["entity"]["profile"][0]["key"], "profile_field1")
         self.assertEqual(data["entity"]["profile"][0]["name"], "profile_field1_name")
         self.assertEqual(data["entity"]["profile"][0]["value"], "user_profile_field1_value")
-        self.assertEqual(data["entity"]["profile"][0]["category"], None)
+        self.assertEqual(data["entity"]["profile"][0]["category"], "")
         self.assertEqual(data["entity"]["profile"][0]["accessId"], 2)
         self.assertEqual(data["entity"]["profile"][0]["fieldType"], "textField")
         self.assertEqual(data["entity"]["profile"][0]["isEditable"], True)
         self.assertEqual(data["entity"]["profile"][0]["fieldOptions"], [])
         self.assertEqual(data["entity"]["profile"][0]["isFilterable"], False)
 
-        self.assertEqual(data["entity"]["profile"][1]["key"], "profile_field2")
-        self.assertEqual(data["entity"]["profile"][1]["name"], "profile_field2_name")
-        self.assertEqual(data["entity"]["profile"][1]["value"], "user_profile_field2_value")
-        self.assertEqual(data["entity"]["profile"][1]["category"], "profile_field2_category")
-        self.assertEqual(data["entity"]["profile"][1]["accessId"], 1)
-        self.assertEqual(data["entity"]["profile"][1]["fieldType"], "textField")
-        self.assertEqual(data["entity"]["profile"][1]["isEditable"], False)
-        self.assertEqual(data["entity"]["profile"][1]["fieldOptions"], [])
-        self.assertEqual(data["entity"]["profile"][1]["isFilterable"], True)
+        self.assertEqual(data["entity"]["profile"][3]["key"], "profile_field2")
+        self.assertEqual(data["entity"]["profile"][3]["name"], "profile_field2_name")
+        self.assertEqual(data["entity"]["profile"][3]["value"], "user_profile_field2_value")
+        self.assertEqual(data["entity"]["profile"][3]["category"], "section_two")
+        self.assertEqual(data["entity"]["profile"][3]["accessId"], 1)
+        self.assertEqual(data["entity"]["profile"][3]["fieldType"], "textField")
+        self.assertEqual(data["entity"]["profile"][3]["isEditable"], False)
+        self.assertEqual(data["entity"]["profile"][3]["fieldOptions"], [])
+        self.assertEqual(data["entity"]["profile"][3]["isFilterable"], True)
 
         self.assertEqual(data["entity"]["profile"][2]["key"], "profile_field3")
         self.assertEqual(data["entity"]["profile"][2]["name"], "profile_field3_name")
         self.assertEqual(data["entity"]["profile"][2]["value"], "")
-        self.assertEqual(data["entity"]["profile"][2]["category"], "profile_field3_category")
+        self.assertEqual(data["entity"]["profile"][2]["category"], "section_one")
         self.assertEqual(data["entity"]["profile"][2]["accessId"], 1)
         self.assertEqual(data["entity"]["profile"][2]["fieldType"], "multiSelectField")
         self.assertEqual(data["entity"]["profile"][2]["isEditable"], True)
