@@ -11,7 +11,7 @@ from core.lib import ACCESS_TYPE, access_id_to_acl
 from elgg.models import (
     ElggEntities, ElggObjectsEntity, ElggPrivateSettings, ElggConfig, GuidMap, ElggEntityViews, ElggEntityViewsLog
 )
-from core.models import EntityView, EntityViewCount
+from core.models import EntityView, EntityViewCount, ProfileField
 
 
 class ElggHelpers():
@@ -128,6 +128,25 @@ class ElggHelpers():
             menu.append(item)
 
         return menu
+
+    def get_profile_sections(self, profile):
+        sections = [""]
+        profile_sections = []
+        for item in profile:
+            category = self.get_profile_category(item['key'])
+            if category and category not in sections:
+                sections.append(category)
+        for section in sections:
+            profile_field_guids = []
+            for item in profile:
+                category = self.get_profile_category(item['key'])
+                if not category:
+                    category = ""
+                if category == section:
+                    profile_field_guids.append(str(ProfileField.objects.get(key=item['key']).id))
+            profile_sections.append({"name": section, "profileFieldGuids": profile_field_guids})
+
+        return profile_sections
 
     def save_best_answer(self, question, comment, elgg_entity):
         if elgg_entity.relation.filter(relationship="correctAnswer", left__guid=elgg_entity.guid).first():

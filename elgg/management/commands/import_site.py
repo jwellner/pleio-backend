@@ -162,8 +162,6 @@ class Command(InteractiveTenantOption, BaseCommand):
         config.ACTIVITY_FEED_FILTERS_ENABLED = self.helpers.get_plugin_setting("show_extra_homepage_filters") == "yes"
         config.MENU = self.helpers.get_menu(json.loads(html.unescape(self.helpers.get_plugin_setting("menu")))) \
             if self.helpers.get_plugin_setting("menu") else []
-        config.PROFILE = self.helpers.get_menu(json.loads(html.unescape(self.helpers.get_plugin_setting("profile")))) \
-            if self.helpers.get_plugin_setting("profile") else []
         config.FOOTER = json.loads(html.unescape(self.helpers.get_plugin_setting("footer"))) \
             if self.helpers.get_plugin_setting("footer") else []
         config.DIRECT_LINKS = json.loads(html.unescape(self.helpers.get_plugin_setting("directLinks"))) \
@@ -317,6 +315,8 @@ class Command(InteractiveTenantOption, BaseCommand):
                 profile_fields.append(profile_field)
 
                 self.stdout.write(".", ending="")
+
+            config.PROFILE_SECTIONS = self.helpers.get_profile_sections(json.loads(html.unescape(profile)))
 
         # Import users
         elgg_users = ElggUsersEntity.objects.using(self.import_id)
