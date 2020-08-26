@@ -1,5 +1,6 @@
 from ariadne import ObjectType
 from django.core.exceptions import ObjectDoesNotExist
+from django.db.models import Case, When, IntegerField
 from core.constances import MEMBERSHIP
 from core.lib import get_access_ids
 from core.models import GroupInvitation, Subgroup
@@ -175,6 +176,9 @@ def resolve_group_members(group, info, q=None, offset=0, limit=5, inSubgroupId=N
 
     if q:
         members = members.filter(user__name__icontains=q)
+
+    members = members.annotate(order_type=Case(When(type='owner', then=0), When(type='admin', then=1), default=2,
+                                               output_field=IntegerField())).order_by('order_type', 'user__name')
 
     edges = members[offset:offset+limit]
 

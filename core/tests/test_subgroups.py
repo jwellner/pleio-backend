@@ -241,7 +241,7 @@ class SubgroupsTestCase(FastTenantTestCase):
         request = HttpRequest()
         request.user = self.user2
 
-        variables = { 
+        variables = {
             "guid": self.blog.guid
         }
 
@@ -250,7 +250,7 @@ class SubgroupsTestCase(FastTenantTestCase):
         self.assertTrue(result[0])
 
         data = result[1]["data"]
-       
+
         self.assertEqual(data["entity"]["guid"], self.blog.guid)
         self.assertEqual(data["entity"]["accessId"], 10001)
 
@@ -278,7 +278,7 @@ class SubgroupsTestCase(FastTenantTestCase):
         request = HttpRequest()
         request.user = self.user5
 
-        variables = { 
+        variables = {
             "guid": self.blog.guid
         }
 
@@ -315,7 +315,7 @@ class SubgroupsTestCase(FastTenantTestCase):
         request = HttpRequest()
         request.user = self.user6
 
-        variables = { 
+        variables = {
             "guid": self.blog.guid
         }
 
