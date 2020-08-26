@@ -52,6 +52,9 @@ class FileFolder(Entity):
                 prefix = '/groups/view/{}/{}'.format(
                     self.group.guid, slugify(self.group.name)
                 )
+            else: # personal file browser url
+                prefix = '/user/{}'.format(self.owner.guid)
+
             return '{}/files/{}'.format(
                 prefix, self.guid
             ).lower()
