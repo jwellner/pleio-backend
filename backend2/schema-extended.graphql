@@ -109,4 +109,9 @@ extend type SiteSettings {
   profileSections: [ProfileSection]
   exportableUserFields: [ExportableField]
   profileFields: [ProfileItem]
+  limitedGroupAdd: Boolean!
+}
+
+extend input editSiteSettingInput {
+  limitedGroupAdd: Boolean
 }
