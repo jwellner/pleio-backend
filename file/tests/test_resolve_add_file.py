@@ -82,3 +82,30 @@ class AddFileTestCase(FastTenantTestCase):
         self.assertEqual(data["addFile"]["entity"]["group"]["guid"], self.group.guid)
         self.assertEqual(data["addFile"]["entity"]["tags"][0], "tag_one")
         self.assertEqual(data["addFile"]["entity"]["tags"][1], "tag_two")
+
+
+    @patch("file.models.get_mimetype")
+    @patch("{}.open".format(settings.DEFAULT_FILE_STORAGE))
+    def test_add_personal_file(self, mock_open, mock_mimetype):
+        file_mock = MagicMock(spec=File)
+        file_mock.name = 'test.gif'
+        file_mock.content_type = 'image/gif'
+
+        mock_open.return_value = file_mock
+        mock_mimetype.return_value = file_mock.content_type
+
+        variables = self.data
+        variables["input"]["containerGuid"] = self.authenticatedUser.guid
+
+        request = HttpRequest()
+        request.user = self.authenticatedUser
+
+        result = graphql_sync(schema, { "query": self.mutation, "variables": variables }, context_value={ "request": request })
+
+        data = result[1]["data"]
+
+        self.assertEqual(data["addFile"]["entity"]["title"], file_mock.name)
+        self.assertEqual(data["addFile"]["entity"]["mimeType"], file_mock.content_type)
+        self.assertEqual(data["addFile"]["entity"]["group"], None)
+        self.assertEqual(data["addFile"]["entity"]["tags"][0], "tag_one")
+        self.assertEqual(data["addFile"]["entity"]["tags"][1], "tag_two")
