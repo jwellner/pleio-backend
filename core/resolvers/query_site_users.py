@@ -3,7 +3,7 @@ from core.constances import NOT_LOGGED_IN, USER_NOT_SITE_ADMIN
 from graphql import GraphQLError
 
 
-def resolve_site_users(_, info, q=None, isAdmin=None, isDeleteRequested=None, offset=0, limit=20):
+def resolve_site_users(_, info, q=None, isAdmin=None, isDeleteRequested=None, isBanned=False, offset=0, limit=20):
     # pylint: disable=unused-argument
     # pylint: disable=too-many-arguments
 
@@ -16,6 +16,11 @@ def resolve_site_users(_, info, q=None, isAdmin=None, isDeleteRequested=None, of
         raise GraphQLError(USER_NOT_SITE_ADMIN)
 
     users = User.objects.all()
+
+    if isBanned:
+        users = users.filter(is_active=False)
+    else:
+        users = users.filter(is_active=True)
 
     if q:
         users = users.filter(name__icontains=q)

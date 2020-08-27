@@ -87,6 +87,7 @@ class User(AbstractBaseUser):
     is_government = models.BooleanField(default=False)
     has_2fa_enabled = models.BooleanField(default=False)
     is_delete_requested = models.BooleanField(default=False)
+    ban_reason = models.CharField(max_length=100, default="")
 
     created_at = models.DateTimeField(default=timezone.now)
     updated_at = models.DateTimeField(default=timezone.now)
@@ -152,7 +153,7 @@ class User(AbstractBaseUser):
         self.picture = None
         self.is_government = False
         self.has_2fa_enabled = False
-
+        self.ban_reason = "Deleted"
         # delete user profile data
         try:
             self._profile.delete()

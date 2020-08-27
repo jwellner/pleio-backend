@@ -21,14 +21,15 @@ class SiteUsersTestCase(FastTenantTestCase):
         self.user1 = mixer.blend(User)
         self.user2 = mixer.blend(User, name="specific_user_name_1")
         self.user3 = mixer.blend(User, is_delete_requested=True)
+        self.user4 = mixer.blend(User, is_active=False)
         self.admin1 = mixer.blend(User, is_admin=True)
         self.admin2 = mixer.blend(User, is_admin=True)
         self.anonymousUser = AnonymousUser()
 
         self.query = """
-            query UsersQuery($offset: Int, $limit: Int, $q: String, $isAdmin: Boolean, $isDeleteRequested: Boolean) {
+            query UsersQuery($offset: Int, $limit: Int, $q: String, $isAdmin: Boolean, $isDeleteRequested: Boolean, $isBanned: Boolean) {
 
-                siteUsers(offset: $offset, limit: $limit, q: $q, isAdmin: $isAdmin, isDeleteRequested: $isDeleteRequested) {
+                siteUsers(offset: $offset, limit: $limit, q: $q, isAdmin: $isAdmin, isDeleteRequested: $isDeleteRequested, isBanned: $isBanned) {
                     edges {
                         guid
                         name
@@ -48,6 +49,7 @@ class SiteUsersTestCase(FastTenantTestCase):
             self.user1.delete()
             self.user2.delete()
             self.user3.delete()
+            self.user4.delete()
 
     def test_site_users_get_all_by_admin(self):
 
@@ -149,3 +151,22 @@ class SiteUsersTestCase(FastTenantTestCase):
         errors = result[1]["errors"]
 
         self.assertEqual(errors[0]["message"], "user_not_site_admin")
+
+
+    def test_site_users_get_all_banned_by_admin(self):
+
+        request = HttpRequest()
+        request.user = self.admin1
+
+        variables = {
+            "isBanned": True
+        }
+
+        result = graphql_sync(schema, {"query": self.query, "variables": variables}, context_value={ "request": request })
+
+        self.assertTrue(result[0])
+        data = result[1]["data"]
+
+        self.assertEqual(data["siteUsers"]["total"], 1)
+        self.assertEqual(len(data["siteUsers"]["edges"]), 1)
+        self.assertEqual(data["siteUsers"]["edges"][0]['guid'], self.user4.guid)
