@@ -45,6 +45,8 @@ class Mapper():
         user.created_at = datetime.fromtimestamp(elgg_user.entity.time_created)
         user.updated_at = datetime.fromtimestamp(elgg_user.entity.time_updated)
         user.is_active = elgg_user.banned == "no"
+        user.ban_reason = elgg_user.entity.get_metadata_value_by_name("ban_reason") \
+            if elgg_user.entity.get_metadata_value_by_name("ban_reason") and not elgg_user.banned == "no" else ""
         user.is_admin = elgg_user.admin == "yes"
         return user
 

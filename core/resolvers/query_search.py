@@ -52,18 +52,20 @@ def resolve_search(_, info, q=None, containerGuid=None, type=None, subtype=None,
                         }
                     }
                 )
-            )
+              )
         ).filter(
             'terms', read_access=list(get_acl(user))
         ).filter(
             'term', tenant_name=tenant_name
         ).filter(
             'range', created_at={'gte': date_from, 'lte': date_to}
+        ).exclude(
+            'term', is_active=False
         )
 
     a = A('terms', field='type')
     s.aggs.bucket('type_terms', a)
-    
+
     s = s[offset:offset+limit]
     response = s.execute()
 

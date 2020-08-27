@@ -6,11 +6,19 @@ input toggleUserIsAdminInput {
   guid: String!
 }
 
+input toggleUserIsBannedInput {
+  guid: String!
+}
+
 type deleteUserPayload {
   success: Boolean
 }
 
 type toggleUserIsAdminPayload {
+  success: Boolean
+}
+
+type toggleUserIsBannedPayload {
   success: Boolean
 }
 
@@ -22,13 +30,14 @@ type SiteUserList {
 extend type Mutation {
   deleteUser(input: deleteUserInput!): deleteUserPayload
   toggleUserIsAdmin(input: toggleUserIsAdminInput!): toggleUserIsAdminPayload
+  toggleUserIsBanned(input: toggleUserIsBannedInput!): toggleUserIsBannedPayload
   addSiteSettingProfileField(input: addSiteSettingProfileFieldInput!): addSiteSettingProfileFieldPayload
   editSiteSettingProfileField(input: editSiteSettingProfileFieldInput!): editSiteSettingProfileFieldPayload
   deleteSiteSettingProfileField(input: deleteSiteSettingProfileFieldInput!): deleteSiteSettingProfileFieldPayload
 }
 
 extend type Query {
-  siteUsers(q: String, offset: Int, limit: Int, isAdmin: Boolean, isDeleteRequested: Boolean): SiteUserList
+  siteUsers(q: String, offset: Int, limit: Int, isAdmin: Boolean, isDeleteRequested: Boolean, isBanned: Boolean): SiteUserList
 }
 
 extend type User {
