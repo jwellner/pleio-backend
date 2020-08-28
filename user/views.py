@@ -33,7 +33,7 @@ def get_fields(user, user_fields, profile_field_guids):
         elif user_field == 'updated_at':
             fields.append(get_user_field(user, 'updated_at'))
         elif user_field == 'last_online':
-            fields.append(get_user_field(user, 'last_online'))
+            fields.append(user.profile.last_online)
         elif user_field == 'banned':
             fields.append(get_user_field(user, 'is_active'))
         # ban reason not implemented yet
@@ -43,7 +43,7 @@ def get_fields(user, user_fields, profile_field_guids):
             group_memberships = list(GroupMembership.objects.filter(user=user, type__in=['owner', 'admin', 'member']).values_list("group__name", flat=True))
             fields.append(",".join(group_memberships))
         elif user_field == 'receive_newsletter':
-            fields.append(get_user_field(user, 'receive_newsletter'))
+            fields.append(user.profile.receive_newsletter)
         else:
             raise Http404("Error retreiving field of user")
 
