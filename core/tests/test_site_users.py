@@ -18,12 +18,12 @@ from notifications.signals import notify
 class SiteUsersTestCase(FastTenantTestCase):
 
     def setUp(self):
-        self.user1 = mixer.blend(User)
-        self.user2 = mixer.blend(User, name="specific_user_name_1")
-        self.user3 = mixer.blend(User, is_delete_requested=True)
-        self.user4 = mixer.blend(User, is_active=False)
-        self.admin1 = mixer.blend(User, is_admin=True)
-        self.admin2 = mixer.blend(User, is_admin=True)
+        self.user1 = mixer.blend(User, name="Tt")
+        self.user2 = mixer.blend(User, name="Specific_user_name_1")
+        self.user3 = mixer.blend(User, is_delete_requested=True, name="Zz")
+        self.user4 = mixer.blend(User, is_active=False, name='Xx')
+        self.admin1 = mixer.blend(User, is_admin=True, name='Yy')
+        self.admin2 = mixer.blend(User, is_admin=True, name='Uu')
         self.anonymousUser = AnonymousUser()
 
         self.query = """
@@ -44,12 +44,12 @@ class SiteUsersTestCase(FastTenantTestCase):
         """
 
     def tearDown(self):
-            self.admin1.delete()
-            self.admin2.delete()
-            self.user1.delete()
-            self.user2.delete()
-            self.user3.delete()
-            self.user4.delete()
+        self.admin1.delete()
+        self.admin2.delete()
+        self.user1.delete()
+        self.user2.delete()
+        self.user3.delete()
+        self.user4.delete()
 
     def test_site_users_get_all_by_admin(self):
 
@@ -65,6 +65,7 @@ class SiteUsersTestCase(FastTenantTestCase):
         data = result[1]["data"]
 
         self.assertEqual(data["siteUsers"]["total"], 5)
+        self.assertEqual(data["siteUsers"]["edges"][0]["name"], self.user2.name)
         self.assertEqual(len(data["siteUsers"]["edges"]), 5)
 
     def test_site_users_filter_admins_by_admin(self):
