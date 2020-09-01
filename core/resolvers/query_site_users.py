@@ -15,7 +15,7 @@ def resolve_site_users(_, info, q=None, isAdmin=None, isDeleteRequested=None, is
     if not user.is_admin:
         raise GraphQLError(USER_NOT_SITE_ADMIN)
 
-    users = User.objects.all()
+    users = User.objects.all().order_by('name')
 
     if isBanned:
         users = users.filter(is_active=False)
