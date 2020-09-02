@@ -41,7 +41,7 @@ def resolve_add_discussion(_, info, input):
     entity.description = clean_input.get("description")
     entity.rich_description = clean_input.get("richDescription")
 
-    if user.is_admin: #TODO: implement roles
+    if user.is_admin and 'isFeatured' in clean_input: #TODO: implement roles
         entity.is_featured = clean_input.get("isFeatured")
 
     entity.save()
