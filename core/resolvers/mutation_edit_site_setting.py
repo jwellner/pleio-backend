@@ -115,6 +115,10 @@ def resolve_edit_site_setting(_, info, input):
         'groupMemberExport': 'GROUP_MEMBER_EXPORT',
         'limitedGroupAdd': 'LIMITED_GROUP_ADD',
 
+        'onboardingEnabled': 'ONBOARDING_ENABLED',
+        'onboardingForceExistingUsers': 'ONBOARDING_FORCE_EXISTING_USERS',
+        'onboardingIntro': 'ONBOARDING_INTRO',
+
     }
 
     for k, v in setting_keys.items():
