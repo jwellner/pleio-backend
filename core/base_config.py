@@ -100,6 +100,10 @@ DEFAULT_SITE_CONFIG = {
     'INITIATOR_LINK': ('', 'Initiator link'),
     'MAIL_REPLY_TO': ('noreply@pleio.nl', 'default reply-to mail address'),
     'ENABLE_SEARCH_ENGINE_INDEXING': (False, 'Enable indexing by search engines'),
+
+    'ONBOARDING_ENABLED': (False, 'Onboarding enabled'),
+    'ONBOARDING_FORCE_EXISTING_USERS': (False, 'Onboarding force existing users'),
+    'ONBOARDING_INTRO': ("", 'Onboarding intro'),
 }
 """
 Default site configuration

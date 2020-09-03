@@ -92,6 +92,10 @@ def get_site():
         'cancelMembershipEnabled': config.CANCEL_MEMBERSHIP_ENABLED,
         'newsletter': config.NEWSLETTER,
         'showLoginRegister': config.SHOW_LOGIN_REGISTER,
+
+        'onboardingEnabled': config.ONBOARDING_ENABLED,
+        'onboardingForceExistingUsers': config.ONBOARDING_FORCE_EXISTING_USERS,
+        'onboardingIntro': config.ONBOARDING_INTRO,
     }
 
     return site
@@ -215,6 +219,10 @@ def get_site_settings():
 
         'usersOnline': get_online_users(),
         'achievementsEnabled': config.ACHIEVEMENTS_ENABLED,
+
+        'onboardingEnabled': config.ONBOARDING_ENABLED,
+        'onboardingForceExistingUsers': config.ONBOARDING_FORCE_EXISTING_USERS,
+        'onboardingIntro': config.ONBOARDING_INTRO,
     }
 
     return site_settings

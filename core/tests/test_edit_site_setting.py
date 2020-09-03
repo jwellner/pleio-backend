@@ -144,6 +144,10 @@ class EditSiteSettingTestCase(FastTenantTestCase):
                         statusUpdateGroups
                         subgroups
                         groupMemberExport
+
+                        onboardingEnabled
+                        onboardingForceExistingUsers
+                        onboardingIntro
                     }
                 }
             }
@@ -227,6 +231,11 @@ class EditSiteSettingTestCase(FastTenantTestCase):
                 'statusUpdateGroups': False,
                 'subgroups': True,
                 'groupMemberExport': True,
+
+                'onboardingEnabled': True,
+                'onboardingForceExistingUsers': True,
+                'onboardingIntro': 'Welcome onboarding',
+
             }
         }
 
@@ -317,6 +326,9 @@ class EditSiteSettingTestCase(FastTenantTestCase):
         self.assertEqual(data["editSiteSetting"]["siteSettings"]["subgroups"], True)
         self.assertEqual(data["editSiteSetting"]["siteSettings"]["groupMemberExport"], True)
 
+        self.assertEqual(data["editSiteSetting"]["siteSettings"]["onboardingEnabled"], True)
+        self.assertEqual(data["editSiteSetting"]["siteSettings"]["onboardingForceExistingUsers"], True)
+        self.assertEqual(data["editSiteSetting"]["siteSettings"]["onboardingIntro"], "Welcome onboarding")
 
     @patch("file.models.get_mimetype")
     @patch("{}.open".format(settings.DEFAULT_FILE_STORAGE))

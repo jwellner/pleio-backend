@@ -157,6 +157,10 @@ class SiteSettingsTestCase(FastTenantTestCase):
                     statusUpdateGroups
                     subgroups
                     groupMemberExport
+
+                    onboardingEnabled
+                    onboardingForceExistingUsers
+                    onboardingIntro
                 }
             }
         """
@@ -257,6 +261,10 @@ class SiteSettingsTestCase(FastTenantTestCase):
         self.assertEqual(data["siteSettings"]["emailOverviewTitle"], "Pleio 2.0")
         self.assertEqual(data["siteSettings"]["emailOverviewIntro"], "")
         self.assertEqual(data["siteSettings"]["emailNotificationShowExcerpt"], False)
+
+        self.assertEqual(data["siteSettings"]["onboardingEnabled"], False)
+        self.assertEqual(data["siteSettings"]["onboardingForceExistingUsers"], False)
+        self.assertEqual(data["siteSettings"]["onboardingIntro"], "")
 
         self.assertEqual(data["siteSettings"]["exportableUserFields"][0]["field_type"], "userField")
         self.assertEqual(data["siteSettings"]["exportableUserFields"][0]["field"], "guid")
