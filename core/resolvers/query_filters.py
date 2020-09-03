@@ -1,3 +1,4 @@
+from core import config
 from core.lib import get_acl
 from core.models import ProfileField
 from core.constances import NOT_LOGGED_IN
@@ -35,7 +36,14 @@ def resolve_filters(_, info):
     user_filters = []
 
     user = info.context["request"].user
-    profile_fields = ProfileField.objects.all()
+
+    # only get configured profile fields
+    profile_section_guids = []
+
+    for section in config.PROFILE_SECTIONS:
+        profile_section_guids.extend(section['profileFieldGuids'])
+
+    profile_fields = ProfileField.objects.filter(id__in=profile_section_guids)
 
     for field in profile_fields:
         if field.is_filter and field.is_filterable:

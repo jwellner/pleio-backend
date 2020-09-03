@@ -1,4 +1,5 @@
 from core.lib import get_acl
+from core import config
 from user.models import User
 from core.models import ProfileField
 from core.constances import NOT_LOGGED_IN
@@ -65,7 +66,14 @@ def resolve_users(_, info, q="", filters=None, offset=0, limit=20):
     edges = users[offset:offset+limit]
 
     fields_in_overview = []
-    for item in ProfileField.objects.filter(is_in_overview=True).all():
+
+    # only get configured profile fields
+    profile_section_guids = []
+
+    for section in config.PROFILE_SECTIONS:
+        profile_section_guids.extend(section['profileFieldGuids'])
+
+    for item in ProfileField.objects.filter(is_in_overview=True, id__in=profile_section_guids):
         fields_in_overview.append({ 'key': item.key, 'label': item.name })
 
     return {
