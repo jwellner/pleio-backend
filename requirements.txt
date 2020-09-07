@@ -18,7 +18,7 @@ elastic-apm==5.8.1
 django-notifications-hq==1.6.0
 django-tenants==3.2.1
 mysqlclient==1.4.6
-django-storages==1.9.1
+django-storages==1.10
 boto3==1.14.56
 docutils==0.15
 phpserialize==1.3
