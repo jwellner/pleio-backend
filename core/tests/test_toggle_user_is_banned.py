@@ -125,7 +125,7 @@ class ToggleUserIsBannedTestCase(FastTenantTestCase):
         request.user = self.admin
 
         result = graphql_sync(schema, {"query": mutation, "variables": variables}, context_value={ "request": request })
-        print(result)
+
         errors = result[1]["errors"]
 
         self.assertEqual(errors[0]["message"], "could_not_save")
