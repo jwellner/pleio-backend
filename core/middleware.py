@@ -1,3 +1,4 @@
+import re
 from django.conf import settings
 from django.conf.urls.i18n import is_language_prefix_patterns_used
 from django.http import HttpResponseRedirect
@@ -5,6 +6,8 @@ from django.urls import get_script_prefix, is_valid_path
 from django.utils import timezone, translation
 from django.utils.cache import patch_vary_headers
 from django.utils.deprecation import MiddlewareMixin
+
+from django.template.response import TemplateResponse
 
 from core import config
 
@@ -77,4 +80,37 @@ class CustomLocaleMiddleware(MiddlewareMixin):
         if not (i18n_patterns_used and language_from_path):
             patch_vary_headers(response, ('Accept-Language',))
         response.setdefault('Content-Language', language)
+        return response
+
+
+class WalledGardenMiddleware:
+    """
+    Site can be closed for not logged in users, if config.IS_CLOSED is True,
+    requests will be redirected to a static login page
+    """
+
+    def __init__(self, get_response):
+        self.get_response = get_response
+
+    def is_public_url(self, url):
+        public_urls = ()
+        public_urls += (r"^{}.+$".format('/static'),)
+        public_urls += (r"^{}.+$".format("/oidc"),)
+        public_urls += (r"^{}.+$".format("/file/featured"),)
+        public_urls += ("/login",)
+        public_urls += ("/robots.txt",)
+        public_urls += ("/sitemap.xml",)
+        public_urls = [re.compile(v) for v in public_urls]
+
+        return any(public_url.match(url) for public_url in public_urls)
+
+    def __call__(self, request):
+        if (
+            config.IS_CLOSED
+            and not request.user.is_authenticated
+            and not self.is_public_url(request.path_info)
+        ):
+            response = TemplateResponse(request, 'registration/login.html', {}).render()
+            return response
+        response = self.get_response(request)
         return response

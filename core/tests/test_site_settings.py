@@ -1,6 +1,7 @@
 from django.db import connection
-from django_tenants.test.cases import FastTenantTestCase
-from django.test import override_settings
+from django_tenants.test.cases import FastTenantTestCase, TenantTestCase
+from django_tenants.test.client import TenantClient
+from django.test import override_settings, Client
 from core.models import Group, Comment, ProfileField
 from user.models import User
 from blog.models import Blog
@@ -11,6 +12,8 @@ from ariadne import graphql_sync
 import json
 from django.contrib.auth.models import AnonymousUser
 from django.http import HttpRequest
+from django.core.cache import cache
+from django.template.loader import render_to_string
 from mixer.backend.django import mixer
 from notifications.signals import notify
 
@@ -18,6 +21,7 @@ from notifications.signals import notify
 class SiteSettingsTestCase(FastTenantTestCase):
 
     def setUp(self):
+        super().setUp()
         self.user = mixer.blend(User)
         self.admin = mixer.blend(User, is_admin=True)
         self.anonymousUser = AnonymousUser()
@@ -166,12 +170,12 @@ class SiteSettingsTestCase(FastTenantTestCase):
         """
 
     def tearDown(self):
-            self.cmsPage1.delete()
-            self.cmsPage2.delete()
-            self.profileField1.delete()
-            self.profileField2.delete()
-            self.admin.delete()
-            self.user.delete()
+        self.cmsPage1.delete()
+        self.cmsPage2.delete()
+        self.profileField1.delete()
+        self.profileField2.delete()
+        self.admin.delete()
+        self.user.delete()
 
     def test_site_settings_by_admin(self):
 
@@ -336,3 +340,45 @@ class SiteSettingsTestCase(FastTenantTestCase):
         errors = result[1]["errors"]
 
         self.assertEqual(errors[0]["message"], "user_not_site_admin")
+
+
+class SiteSettingsIsClosedTestCase(TenantTestCase):
+    def setUp(self):
+        super().setUp()
+        self.c = TenantClient(self.tenant)
+        cache.set("%s%s" % (connection.schema_name, 'IS_CLOSED'), True)
+
+    def tearDown(self):
+        cache.clear()
+
+    def test_site_settings_is_closed_random(self):
+        response = self.c.get("/981random3")
+        self.assertTemplateUsed(response, 'registration/login.html')
+
+    def test_site_settings_is_closed_graphql(self):
+        response = self.c.get("/graphql")
+        self.assertTemplateUsed(response, 'registration/login.html')
+
+    def test_site_settings_is_closed_robots(self):
+        response = self.c.get("/robots.txt")
+        self.assertTemplateNotUsed(response, 'registration/login.html')
+
+    def test_site_settings_is_closed_sitemap(self):
+        response = self.c.get("/sitemap.xml")
+        self.assertTemplateNotUsed(response, 'registration/login.html')
+
+    def test_site_settings_is_closed_oidc(self):
+        response = self.c.get("/oidc/test")
+        self.assertTemplateNotUsed(response, 'registration/login.html')
+
+    def test_site_settings_is_closed_login(self):
+        response = self.c.get("/login")
+        self.assertTemplateNotUsed(response, 'registration/login.html')
+
+    def test_site_settings_is_closed_static(self):
+        response = self.c.get("/static/favicon.ico")
+        self.assertTemplateNotUsed(response, 'registration/login.html')
+
+    def test_site_settings_is_closed_featured_file(self):
+        response = self.c.get("/file/featured/test.txt")
+        self.assertTemplateNotUsed(response, 'registration/login.html')
