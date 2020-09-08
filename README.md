@@ -278,3 +278,11 @@ You can also run AMP in locally with docker-compose:
 ```bash
 docker-compose -f docker-compose.yml -f docker-compose.apm.yml up
 ```
+
+## DISABLE EMAIL
+
+Settings for disabling email configured with setting following environment variable
+
+#### EMAIL_DISABLED
+
+- True/False
