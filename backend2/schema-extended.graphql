@@ -22,6 +22,38 @@ type toggleUserIsBannedPayload {
   success: Boolean
 }
 
+input inviteToSiteInput {
+
+  """A list of email addresses to invite to site."""
+  emailAddresses: [String!]
+
+  """Message in email sent with invite"""
+  message: String
+}
+
+type inviteToSitePayload {
+  success: Boolean
+}
+
+input revokeInviteToSiteInput {
+
+  """A list of email addresses to revoke invite for."""
+  emailAddresses: [String!]
+}
+
+type revokeInviteToSitePayload {
+  success: Boolean
+}
+
+type SiteInvite {
+  email: String
+}
+
+type SiteInviteList {
+  edges: [SiteInvite]
+}
+
+
 type SiteUserList {
   total: Int!
   edges: [User]
@@ -34,6 +66,11 @@ extend type Mutation {
   addSiteSettingProfileField(input: addSiteSettingProfileFieldInput!): addSiteSettingProfileFieldPayload
   editSiteSettingProfileField(input: editSiteSettingProfileFieldInput!): editSiteSettingProfileFieldPayload
   deleteSiteSettingProfileField(input: deleteSiteSettingProfileFieldInput!): deleteSiteSettingProfileFieldPayload
+  """Create and send invitation by email to join a site."""
+  inviteToSite(input: inviteToSiteInput!): inviteToSitePayload
+  """Remove and send invitation by email to join a site."""
+  revokeInviteToSite(input: revokeInviteToSiteInput!): revokeInviteToSitePayload
+
 }
 
 extend type Query {
@@ -127,6 +164,7 @@ extend type SiteSettings {
   onboardingEnabled: Boolean!
   onboardingForceExistingUsers: Boolean!
   onboardingIntro: String
+  siteInvites: SiteInviteList
 }
 
 extend input editSiteSettingInput {

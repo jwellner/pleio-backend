@@ -1,7 +1,6 @@
 from graphql import GraphQLError
-from django.core.exceptions import ObjectDoesNotExist
+from django.core.exceptions import ObjectDoesNotExist, ValidationError
 from django.core.validators import validate_email
-from django.core.exceptions import ValidationError
 from django.utils.translation import ugettext_lazy
 from core.constances import COULD_NOT_FIND, INVALID_EMAIL, EMAIL_ALREADY_USED, EVENT_IS_FULL
 from core.lib import remove_none_from_dict, get_base_url, generate_code, get_default_email_context
