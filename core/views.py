@@ -79,6 +79,8 @@ def logout(request):
     return redirect(settings.OIDC_OP_LOGOUT_ENDPOINT)
 
 def login(request):
+    if request.GET.get('invitecode'):
+        request.session['invitecode'] = request.GET.get('invitecode')
     return redirect('oidc_authentication_init')
 
 def oidc_failure(request):

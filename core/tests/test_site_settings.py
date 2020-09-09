@@ -3,6 +3,9 @@ from django_tenants.test.cases import FastTenantTestCase, TenantTestCase
 from django_tenants.test.client import TenantClient
 from django.test import override_settings, Client
 from core.models import Group, Comment, ProfileField
+from django_tenants.test.cases import FastTenantTestCase
+from django.test import override_settings
+from core.models import Group, Comment, ProfileField, SiteInvitation
 from user.models import User
 from blog.models import Blog
 from cms.models import Page
@@ -29,6 +32,7 @@ class SiteSettingsTestCase(FastTenantTestCase):
         self.cmsPage2 = mixer.blend(Page, title="A title")
         self.profileField1 = ProfileField.objects.create(key='text_key1', name='text_name', field_type='text_field')
         self.profileField2 = ProfileField.objects.create(key='text_key2', name='text_name', field_type='text_field')
+        self.siteInvitation = mixer.blend(SiteInvitation, email='a@a.nl')
 
         self.query = """
             query SiteGeneralSettings {
@@ -165,17 +169,24 @@ class SiteSettingsTestCase(FastTenantTestCase):
                     onboardingEnabled
                     onboardingForceExistingUsers
                     onboardingIntro
+                    siteInvites {
+                        edges {
+                            email
+                        }
+                    }
                 }
             }
         """
 
     def tearDown(self):
+        self.siteInvitation.delete()
         self.cmsPage1.delete()
         self.cmsPage2.delete()
         self.profileField1.delete()
         self.profileField2.delete()
         self.admin.delete()
         self.user.delete()
+
 
     def test_site_settings_by_admin(self):
 
@@ -293,6 +304,7 @@ class SiteSettingsTestCase(FastTenantTestCase):
         self.assertEqual(data["siteSettings"]["subgroups"], False)
         self.assertEqual(data["siteSettings"]["groupMemberExport"], False)
 
+        self.assertEqual(data["siteSettings"]["siteInvites"]["edges"][0]['email'], 'a@a.nl')
 
     def test_site_settings_by_anonymous(self):
 

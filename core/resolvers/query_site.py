@@ -6,7 +6,7 @@ from cms.models import Page
 from core import config
 from core.constances import NOT_LOGGED_IN, USER_NOT_SITE_ADMIN
 from core.lib import get_access_ids, get_activity_filters, get_exportable_user_fields
-from core.models import UserProfile, ProfileField
+from core.models import UserProfile, ProfileField, SiteInvitation
 from graphql import GraphQLError
 
 
@@ -223,6 +223,9 @@ def get_site_settings():
         'onboardingEnabled': config.ONBOARDING_ENABLED,
         'onboardingForceExistingUsers': config.ONBOARDING_FORCE_EXISTING_USERS,
         'onboardingIntro': config.ONBOARDING_INTRO,
+        'siteInvites': {
+            'edges': SiteInvitation.objects.all()
+        }
     }
 
     return site_settings
