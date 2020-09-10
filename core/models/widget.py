@@ -1,7 +1,7 @@
 
 import uuid
 from django.db import models
-from django.contrib.postgres.fields import ArrayField, JSONField
+from django.contrib.postgres.fields import ArrayField
 
 
 class Widget(models.Model):
@@ -13,7 +13,7 @@ class Widget(models.Model):
         null=True,
         related_name='widgets'
     )
-    settings = ArrayField(JSONField(help_text="Please provide valid JSON data"), blank=True, default=list)
+    settings = ArrayField(models.JSONField(help_text="Please provide valid JSON data"), blank=True, default=list)
     position = models.IntegerField(null=False)
     type = models.CharField(max_length=64)
     page = models.ForeignKey(
