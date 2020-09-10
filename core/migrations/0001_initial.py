@@ -24,7 +24,7 @@ class Migration(migrations.Migration):
                 ('id', models.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False)),
                 ('object_id', models.UUIDField(default=uuid.uuid4)),
                 ('key', models.CharField(choices=[('bookmarked', 'Bookmarked'), ('voted', 'Voted'), ('followed', 'Followed')], default='bookmarked', max_length=16)),
-                ('data', django.contrib.postgres.fields.jsonb.JSONField(blank=True, null=True)),
+                ('data', models.JSONField(blank=True, null=True)),
                 ('created_at', models.DateTimeField(default=django.utils.timezone.now)),
             ],
             options={
@@ -81,7 +81,7 @@ class Migration(migrations.Migration):
                 ('id', models.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False)),
                 ('name', models.CharField(max_length=200)),
                 ('description', models.TextField()),
-                ('rich_description', django.contrib.postgres.fields.jsonb.JSONField(blank=True, null=True)),
+                ('rich_description', models.JSONField(blank=True, null=True)),
                 ('introduction', models.TextField(default='')),
                 ('welcome_message', models.TextField(default='')),
                 ('created_at', models.DateTimeField(default=django.utils.timezone.now)),
@@ -140,7 +140,7 @@ class Migration(migrations.Migration):
             fields=[
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('key', models.CharField(max_length=255)),
-                ('value', django.contrib.postgres.fields.jsonb.JSONField(blank=True, help_text='Please provide valid JSON data', null=True)),
+                ('value', models.JSONField(blank=True, help_text='Please provide valid JSON data', null=True)),
             ],
         ),
         migrations.CreateModel(
@@ -175,7 +175,7 @@ class Migration(migrations.Migration):
             name='Widget',
             fields=[
                 ('id', models.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False)),
-                ('settings', django.contrib.postgres.fields.ArrayField(base_field=django.contrib.postgres.fields.jsonb.JSONField(help_text='Please provide valid JSON data'), blank=True, default=list, size=None)),
+                ('settings', django.contrib.postgres.fields.ArrayField(base_field=models.JSONField(help_text='Please provide valid JSON data'), blank=True, default=list, size=None)),
                 ('position', models.IntegerField()),
                 ('type', models.CharField(max_length=64)),
                 ('column', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, related_name='widgets', to='cms.Column')),

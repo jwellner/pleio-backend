@@ -1,7 +1,7 @@
 import uuid
 from django.apps import apps
 from django.conf import settings
-from django.contrib.postgres.fields import ArrayField, JSONField
+from django.contrib.postgres.fields import ArrayField
 from django.core.exceptions import ObjectDoesNotExist
 from django.db import models
 from django.db.models import Q
@@ -31,7 +31,7 @@ class Group(models.Model):
     name = models.CharField(max_length=200)
 
     description = models.TextField()
-    rich_description = JSONField(null=True, blank=True)
+    rich_description = models.JSONField(null=True, blank=True)
 
     introduction = models.TextField(default='')
     welcome_message = models.TextField(default='')
@@ -249,7 +249,7 @@ def update_entity_access(sender, instance, **kwargs):
         filters = Q()
         filters.add(Q(group__id=instance.id), Q.AND)
         filters.add(Q(read_access__overlap=list([ACCESS_TYPE.public, ACCESS_TYPE.logged_in])), Q.AND)
-        
+
         entities = Entity.objects.filter(filters)
         for entity in entities:
             if ACCESS_TYPE.public in entity.read_access:

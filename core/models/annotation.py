@@ -5,7 +5,6 @@ from django.db.models.functions import Cast
 from django.contrib.postgres.fields.jsonb import KeyTextTransform
 from django.contrib.contenttypes.fields import GenericForeignKey, GenericRelation
 from django.contrib.contenttypes.models import ContentType
-from django.contrib.postgres.fields import JSONField
 from django.utils import timezone
 from notifications.models import Notification
 
@@ -47,7 +46,7 @@ class Annotation(models.Model):
         default='bookmarked'
     )
 
-    data = JSONField(null=True, blank=True)
+    data = models.JSONField(null=True, blank=True)
 
     user = models.ForeignKey('user.User', on_delete=models.CASCADE)
 
