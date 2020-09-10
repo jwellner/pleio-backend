@@ -83,7 +83,7 @@ extend type User {
 
 
 input addSiteSettingProfileFieldInput {
-  key: String!
+  key: String
   name: String!
   isEditable: Boolean
   isFilter: Boolean
