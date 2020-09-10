@@ -1,7 +1,16 @@
 from graphql import GraphQLError
+from django.db import IntegrityError
 from core.models import ProfileField
-from core.constances import NOT_LOGGED_IN, USER_NOT_SITE_ADMIN, COULD_NOT_SAVE
-from core.lib import remove_none_from_dict
+from core.constances import NOT_LOGGED_IN, USER_NOT_SITE_ADMIN
+from core.lib import remove_none_from_dict, generate_code
+
+def create_profile_field():
+    key = generate_code()
+    try:
+        return ProfileField.objects.create(key=key)
+    except IntegrityError:
+        create_profile_field()
+
 
 def resolve_add_site_setting_profile_field(_, info, input):
     # pylint: disable=redefined-builtin
@@ -18,13 +27,7 @@ def resolve_add_site_setting_profile_field(_, info, input):
     if not user.is_admin:
         raise GraphQLError(USER_NOT_SITE_ADMIN)
 
-    profile_field, created = ProfileField.objects.get_or_create(key=clean_input['key'])
-
-    if not created:
-        raise GraphQLError(COULD_NOT_SAVE)
-
-    if 'key' in clean_input:
-        profile_field.key = clean_input["key"]
+    profile_field = create_profile_field()
 
     if 'name' in clean_input:
         profile_field.name = clean_input["name"]
