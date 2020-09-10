@@ -1,9 +1,36 @@
 from django.db.models import Q
 from core.constances import ORDER_DIRECTION, ORDER_BY, INVALID_SUBTYPE
 from core.models import Entity
-from core.lib import get_model_by_subtype
 from graphql import GraphQLError
 
+
+def conditional_subtypes_filter(subtypes):
+    """
+    Filter multiple subtypes
+    """
+    q_objects = Q()
+    if subtypes:
+        for object_type in subtypes:
+            if object_type == 'news':
+                q_objects.add(~Q(news__isnull = True), Q.OR)
+            elif object_type == 'blog':
+                q_objects.add(~Q(blog__isnull = True), Q.OR)
+            elif object_type == 'event':
+                q_objects.add(~Q(event__isnull = True), Q.OR)
+            elif object_type == 'discussion':
+                q_objects.add(~Q(discussion__isnull = True), Q.OR)
+            elif object_type == 'statusupdate':
+                q_objects.add(~Q(statusupdate__isnull = True), Q.OR)
+            elif object_type == 'question':
+                q_objects.add(~Q(question__isnull = True), Q.OR)
+            elif object_type == 'poll':
+                q_objects.add(~Q(poll__isnull = True), Q.OR)
+            elif object_type == 'wiki':
+                q_objects.add(~Q(wiki__isnull = True), Q.OR)
+            elif object_type == 'page':
+                q_objects.add(~Q(page__isnull = True), Q.OR)
+
+    return q_objects
 
 def conditional_group_filter(subtype, container_guid):
     """
@@ -18,14 +45,20 @@ def conditional_group_filter(subtype, container_guid):
 
     return Q()
 
-def conditional_is_featured_filter(subtype, is_featured):
+def conditional_is_featured_filter(is_featured):
     """
     Only filter is_featured on news list
     """
-    if subtype == "news" and is_featured:
-        return Q(is_featured=is_featured)
+    q_objects = Q()
+    if is_featured:
+        q_objects.add(Q(blog__is_featured = True), Q.OR)
+        q_objects.add(Q(news__is_featured = True), Q.OR)
+        q_objects.add(Q(event__is_featured = True), Q.OR)
+        q_objects.add(Q(question__is_featured = True), Q.OR)
+        q_objects.add(Q(discussion__is_featured = True), Q.OR)
+        q_objects.add(Q(wiki__is_featured = True), Q.OR)
 
-    return Q()
+    return q_objects
 
 def conditional_tags_filter(tags):
     if tags:
@@ -57,17 +90,19 @@ def resolve_entities(
     tagLists=None,
     orderBy=ORDER_BY.timeCreated,
     orderDirection=ORDER_DIRECTION.desc,
-    isFeatured=False
+    isFeatured=None
 ):
     # pylint: disable=unused-argument
     # pylint: disable=too-many-arguments
     # pylint: disable=redefined-builtin
-    # TODO: exclude page objects of subtype not is page?
 
-    if not subtype or subtype == 'all':
-        Model = Entity
-    else:
-        Model = get_model_by_subtype(subtype)
+    # merge all in subtypes list
+    if not subtypes and subtype:
+        subtypes = [subtype]
+    elif not subtypes and not subtype:
+        subtypes = []
+
+    Model = Entity
 
     if not Model:
         raise GraphQLError(INVALID_SUBTYPE)
@@ -86,10 +121,13 @@ def resolve_entities(
     entities = entities.filter(conditional_group_filter(subtype, containerGuid) &
                                conditional_tags_filter(tags) &
                                conditional_tag_lists_filter(tagLists) &
-                               conditional_is_featured_filter(subtype, isFeatured))
+                               conditional_subtypes_filter(subtypes) &
+                               conditional_is_featured_filter(isFeatured))
+
+    # when page is selected change sorting and only return pages without parent 
     if subtype and subtype == 'page':
-        entities = entities.filter(parent=None)
-        order_by = 'title'
+        entities = entities.filter(page__parent=None)
+        order_by = 'page__title'
 
     entities = entities.order_by(order_by).select_subclasses()
     entities = entities[offset:offset+limit]

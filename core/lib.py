@@ -23,9 +23,12 @@ class TypeModels(Enum):
     blog = "blog.Blog"
     group = "core.Group"
     user = "user.User"
-    status_update = "activity.StatusUpdate"
+    statusupdate = "activity.StatusUpdate"
     thewire = "activity.StatusUpdate"
     task = "task.Task"
+    comment = "core.Comment"
+    file = "file.FileFolder"
+    folder = "file.FileFolder"
 
 
 def get_model_by_subtype(subtype):

@@ -4,6 +4,7 @@ from core.models import Group
 from user.models import User
 from blog.models import Blog
 from cms.models import Page
+from news.models import News
 from core.constances import ACCESS_TYPE
 from backend2.schema import schema
 from ariadne import graphql_sync
@@ -45,7 +46,15 @@ class EntitiesTestCase(FastTenantTestCase):
             read_access=[ACCESS_TYPE.public],
             write_access=[ACCESS_TYPE.user.format(self.authenticatedUser.id)],
             group=self.group,
-            tags=["tag_four", "tag_three"]
+            tags=["tag_four", "tag_three"],
+            is_featured=True
+        )
+        self.news1 = News.objects.create(
+            title="News1",
+            owner=self.authenticatedUser,
+            read_access=[ACCESS_TYPE.public],
+            write_access=[ACCESS_TYPE.user.format(self.authenticatedUser.id)],
+            is_featured=True
         )
         self.page1 = mixer.blend(Page,
                                  owner=self.admin,
@@ -68,17 +77,25 @@ class EntitiesTestCase(FastTenantTestCase):
                                  )
 
         self.query = """
-            query getEntities($subtype: String, $containerGuid: String, $tags: [String!], $tagLists: [[String]]) {
-                entities(subtype: $subtype, containerGuid: $containerGuid, tags: $tags, tagLists: $tagLists) {
+            query getEntities($subtype: String, $containerGuid: String, $tags: [String!], $tagLists: [[String]], $isFeatured: Boolean) {
+                entities(subtype: $subtype, containerGuid: $containerGuid, tags: $tags, tagLists: $tagLists, isFeatured: $isFeatured) {
                     total
                     edges {
                         guid
                         ...BlogListFragment
+                        ...PageListFragment
+                        ...NewsListFragment
                         __typename
                     }
                 }
             }
             fragment BlogListFragment on Blog {
+                title
+            }
+            fragment PageListFragment on Page {
+                title
+            }
+            fragment NewsListFragment on News {
                 title
             }
         """
@@ -108,7 +125,7 @@ class EntitiesTestCase(FastTenantTestCase):
 
         data = result[1]["data"]
 
-        self.assertEqual(data["entities"]["total"], 7)
+        self.assertEqual(data["entities"]["total"], 8)
 
     def test_entities_site(self):
         request = HttpRequest()
@@ -124,7 +141,7 @@ class EntitiesTestCase(FastTenantTestCase):
 
         data = result[1]["data"]
 
-        self.assertEqual(data["entities"]["total"], 5)
+        self.assertEqual(data["entities"]["total"], 6)
 
     def test_entities_group(self):
         request = HttpRequest()
@@ -211,6 +228,46 @@ class EntitiesTestCase(FastTenantTestCase):
         request.user = self.authenticatedUser
 
         variables = {"tagLists": [["tag_four", "tag_three"], ["tag_one"]]}
+
+        result = graphql_sync(schema, { "query": self.query, "variables": variables }, context_value={ "request": request })
+
+        self.assertTrue(result[0])
+
+        data = result[1]["data"]
+        self.assertEqual(data["entities"]["total"], 2)
+
+
+    def test_entities_filtered_is_featured(self):
+        request = HttpRequest()
+        request.user = self.authenticatedUser
+
+        variables = {"isFeatured": True}
+
+        result = graphql_sync(schema, { "query": self.query, "variables": variables }, context_value={ "request": request })
+
+        self.assertTrue(result[0])
+
+        data = result[1]["data"]
+        self.assertEqual(data["entities"]["total"], 2)
+
+    def test_entities_single_filtered_is_featured(self):
+        request = HttpRequest()
+        request.user = self.authenticatedUser
+
+        variables = {"isFeatured": True, "subtype": "blog"}
+
+        result = graphql_sync(schema, { "query": self.query, "variables": variables }, context_value={ "request": request })
+
+        self.assertTrue(result[0])
+
+        data = result[1]["data"]
+        self.assertEqual(data["entities"]["total"], 1)
+
+    def test_entities_multiple_filtered_is_featured(self):
+        request = HttpRequest()
+        request.user = self.authenticatedUser
+
+        variables = {"isFeatured": True, "subtypes": ["blog", "news"]}
 
         result = graphql_sync(schema, { "query": self.query, "variables": variables }, context_value={ "request": request })
 
