@@ -1,7 +1,7 @@
 from graphql import GraphQLError
 from django.core.exceptions import ObjectDoesNotExist
 from ariadne import ObjectType
-from core.constances import ACCESS_TYPE, NOT_LOGGED_IN, COULD_NOT_FIND, COULD_NOT_FIND_GROUP, COULD_NOT_SAVE
+from core.constances import ACCESS_TYPE, NOT_LOGGED_IN, COULD_NOT_FIND, COULD_NOT_SAVE
 from core.lib import remove_none_from_dict, access_id_to_acl
 from core.models import Group
 from ..models import FileFolder
@@ -44,7 +44,8 @@ def resolve_add_file(_, info, input):
             try:
                 parent = FileFolder.objects.get_subclass(id=clean_input.get("containerGuid"))
             except ObjectDoesNotExist:
-                raise GraphQLError(COULD_NOT_FIND_GROUP)
+                if not clean_input.get("containerGuid") == user.guid:
+                    raise GraphQLError("INVALID_CONTAINER_GUID")
 
     # get parent group
     if parent and parent.group:
@@ -102,7 +103,8 @@ def resolve_add_folder(_, info, input):
             try:
                 parent = FileFolder.objects.get_subclass(id=clean_input.get("containerGuid"))
             except ObjectDoesNotExist:
-                raise GraphQLError(COULD_NOT_FIND_GROUP)
+                if not clean_input.get("containerGuid") == user.guid:
+                    raise GraphQLError("INVALID_CONTAINER_GUID")
 
     # get parent group
     if parent and parent.group:
@@ -206,7 +208,8 @@ def resolve_move_file_folder(_, info, input):
         try:
             parent = FileFolder.objects.get_subclass(id=clean_input.get("containerGuid"))
         except ObjectDoesNotExist:
-            raise GraphQLError("invalid_new_container")
+            if not clean_input.get("containerGuid") == user.guid:
+                raise GraphQLError("INVALID_CONTAINER_GUID")
 
     if group:
         entity.group = group

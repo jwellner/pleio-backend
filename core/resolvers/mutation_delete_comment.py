@@ -17,7 +17,7 @@ def resolve_delete_comment(_, info, input):
 
     if not comment.can_write(user):
         raise GraphQLError(COULD_NOT_SAVE)
-    
+
     comment.delete()
 
     return {

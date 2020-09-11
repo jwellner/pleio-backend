@@ -17,6 +17,8 @@ class Wiki(Entity, BookmarkMixin):
 
     parent = models.ForeignKey('self', blank=True, null=True, related_name='children', on_delete=models.CASCADE)
 
+    is_featured = models.BooleanField(default=False)
+
     def has_children(self):
         if self.children.count() > 0:
             return True

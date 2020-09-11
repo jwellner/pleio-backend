@@ -37,7 +37,7 @@ class ResendGroupInvitationTestCase(FastTenantTestCase):
         self.user1.delete()
 
     @override_settings(ALLOWED_HOSTS=['test.test'])
-    @mock.patch('core.resolvers.mutation_resend_group_invitation.send_mail_multi')
+    @mock.patch('core.resolvers.mutation_resend_group_invitation.send_mail_multi.delay')
     def test_resend_group_invitation_by_group_owner(self, mocked_send_mail_multi):
         mutation = """
             mutation InvitedList($input: resendGroupInvitationInput!) {
@@ -94,7 +94,7 @@ class ResendGroupInvitationTestCase(FastTenantTestCase):
         mocked_send_mail_multi.assert_called_once()
 
     @override_settings(ALLOWED_HOSTS=['test.test'])
-    @mock.patch('core.resolvers.mutation_resend_group_invitation.send_mail_multi')
+    @mock.patch('core.resolvers.mutation_resend_group_invitation.send_mail_multi.delay')
     def test_resend_group_invitation_by_admin(self, mocked_send_mail_multi):
         mutation = """
             mutation InvitedList($input: resendGroupInvitationInput!) {
@@ -151,7 +151,7 @@ class ResendGroupInvitationTestCase(FastTenantTestCase):
         mocked_send_mail_multi.assert_called_once()
 
     @override_settings(ALLOWED_HOSTS=['test.test'])
-    @mock.patch('core.resolvers.mutation_resend_group_invitation.send_mail_multi')
+    @mock.patch('core.resolvers.mutation_resend_group_invitation.send_mail_multi.delay')
     def test_resend_group_invitation_by_non_group_member(self, mocked_send_mail_multi):
         mutation = """
             mutation InvitedList($input: resendGroupInvitationInput!) {
@@ -204,7 +204,7 @@ class ResendGroupInvitationTestCase(FastTenantTestCase):
         self.assertEqual(errors[0]["message"], "could_not_invite")
 
     @override_settings(ALLOWED_HOSTS=['test.test'])
-    @mock.patch('core.resolvers.mutation_resend_group_invitation.send_mail_multi')
+    @mock.patch('core.resolvers.mutation_resend_group_invitation.send_mail_multi.delay')
     def test_resend_group_invitation_by_anonymous_user(self, mocked_send_mail_multi):
         mutation = """
             mutation InvitedList($input: resendGroupInvitationInput!) {

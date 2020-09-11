@@ -34,7 +34,7 @@ class ConfirmAttendEventWithoutAccountTestCase(FastTenantTestCase):
         self.authenticatedUser.delete()
 
     @override_settings(ALLOWED_HOSTS=['test.test'])
-    @mock.patch('event.resolvers.mutation_confirm_attend_event_without_account.send_mail_multi')
+    @mock.patch('event.resolvers.mutation_confirm_attend_event_without_account.send_mail_multi.delay')
     def test_confirm_attend_event_without_account(self, mocked_send_mail_multi):
         mutation = """
             mutation confirmAttendEventWithoutAccount($input: confirmAttendEventWithoutAccountInput!) {

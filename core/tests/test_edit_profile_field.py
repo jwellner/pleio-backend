@@ -21,17 +21,19 @@ class EditProfileFieldTestCase(FastTenantTestCase):
         self.admin = mixer.blend(User)
         self.admin.is_admin = True
         self.admin.save()
-        ProfileField.objects.create(key='text_key', name='text_name', field_type='text_field')
-        ProfileField.objects.create(key='html_key', name='html_name', field_type='html_field')
-        ProfileField.objects.create(key='select_key', name='select_name', field_type='select_field', field_options=['select_value', 'select_value_2'])
-        ProfileField.objects.create(key='date_key', name='date_name', field_type='date_field')
-        ProfileField.objects.create(key='multi_key', name='multi_name', field_type='multi_select_field',
+        self.profile_field1 = ProfileField.objects.create(key='text_key', name='text_name', field_type='text_field')
+        self.profile_field2 = ProfileField.objects.create(key='html_key', name='html_name', field_type='html_field')
+        self.profile_field3 = ProfileField.objects.create(key='select_key', name='select_name', field_type='select_field', field_options=['select_value', 'select_value_2'])
+        self.profile_field4 = ProfileField.objects.create(key='date_key', name='date_name', field_type='date_field')
+        self.profile_field5 = ProfileField.objects.create(key='multi_key', name='multi_name', field_type='multi_select_field',
                                     field_options=['select_value_1', 'select_value_2', 'select_value_3'])
-        Setting.objects.create(key='PROFILE', value=[{"key": "text_key", "name": "text_name", "isFilter": False},
-                                {"key": "html_key", "name": "html_name", "isFilter": False},
-                                {"key": "select_key", "name": "select_name", "isFilter": False},
-                                {"key": "date_key", "name": "date_name", "isFilter": False},
-                                {"key": "multi_key", "name": "multi_name", "isFilter": False}])
+        Setting.objects.create(key='PROFILE_SECTIONS', value=[{
+            "name": "",
+            "profileFieldGuids": [
+                str(self.profile_field1.id), str(self.profile_field2.id), str(self.profile_field3.id),
+                str(self.profile_field4.id), str(self.profile_field5.id)
+            ]
+        }])
 
     def tearDown(self):
         self.admin.delete()
@@ -43,7 +45,7 @@ class EditProfileFieldTestCase(FastTenantTestCase):
     def test_edit_profile_field_by_user(self):
 
         mutation = """
-            mutation editProfileField($input: editProfileFieldInput!) {
+            mutation leditProfileField($input: editProfileFieldInput!) {
                 editProfileField(input: $input) {
                     user {
                     guid
@@ -331,6 +333,7 @@ class EditProfileFieldTestCase(FastTenantTestCase):
         request.user = self.user
 
         result = graphql_sync(schema, { "query": mutation, "variables": variables }, context_value={ "request": request })
+
         data = result[1]["data"]
 
         self.assertEqual(data["editProfileField"]["user"]["guid"], self.user.guid)

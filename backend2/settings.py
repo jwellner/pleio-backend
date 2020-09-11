@@ -11,12 +11,11 @@ https://docs.djangoproject.com/en/1.10/ref/settings/
 """
 
 import os
-from elasticapm.contrib.opentracing import Tracer
-from opentracing import set_global_tracer
 
 from .config import *  # pylint: disable=unused-wildcard-import
 
 APM_ENABLED = os.getenv('APM_ENABLED') == 'True'
+EMAIL_DISABLED = os.getenv('EMAIL_DISABLED') == 'True'
 
 FROM_EMAIL = os.getenv('FROM_EMAIL')
 EMAIL_HOST = os.getenv('EMAIL_HOST')
@@ -41,6 +40,9 @@ if DEBUG:
     EMAIL_HOST_PASSWORD = ''
     EMAIL_PORT = 1025
     EMAIL_USE_TLS = False
+
+if EMAIL_DISABLED:
+    EMAIL_BACKEND = 'django.core.mail.backends.dummy.EmailBackend'
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -106,7 +108,8 @@ MIDDLEWARE = [
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
-    'django.middleware.clickjacking.XFrameOptionsMiddleware'
+    'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'core.middleware.WalledGardenMiddleware'
 ]
 
 if not RUN_AS_ADMIN_APP:
@@ -129,6 +132,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'core.context_processor.config_processor',
             ],
         },
     },
@@ -177,7 +181,7 @@ LOGGING = {
         },
         'mozilla_django_oidc': {
             'handlers': ['console'],
-            'level': 'WARNING'
+            'level': 'INFO'
         },
         # Log errors from the Elastic APM module to the console (recommended)
         'elasticapm.errors': {
@@ -282,4 +286,3 @@ if APM_ENABLED:
         'VERIFY_SERVER_CERT': False,
         'DEBUG': True,
     }
-    set_global_tracer(Tracer(config=ELASTIC_APM))

@@ -23,8 +23,7 @@ def default(request, exception=None):
     context = {
         'webpack_dev_server': settings.WEBPACK_DEV_SERVER,
         'json_settings': json.dumps(get_settings()),
-        'metadata': metadata,
-        'config': config
+        'metadata': metadata
     }
 
     return render(request, 'react.html', context)
@@ -66,8 +65,7 @@ def entity_view(request, entity_id=None, entity_title=None):
     context = {
         'webpack_dev_server': settings.WEBPACK_DEV_SERVER,
         'json_settings': json.dumps(get_settings()),
-        'metadata': metadata,
-        'config': config
+        'metadata': metadata
     }
 
     return render(request, 'react.html', context, status=status_code)
@@ -79,6 +77,8 @@ def logout(request):
     return redirect(settings.OIDC_OP_LOGOUT_ENDPOINT)
 
 def login(request):
+    if request.GET.get('invitecode'):
+        request.session['invitecode'] = request.GET.get('invitecode')
     return redirect('oidc_authentication_init')
 
 def oidc_failure(request):

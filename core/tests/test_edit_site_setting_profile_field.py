@@ -22,6 +22,7 @@ class EditSiteSettingProfileFieldTestCase(FastTenantTestCase):
 
     def tearDown(self):
         self.admin.delete()
+        self.profileField1.delete()
         self.user.delete()
         cache.clear()
 
@@ -32,14 +33,14 @@ class EditSiteSettingProfileFieldTestCase(FastTenantTestCase):
             mutation editSiteSettingProfileField($input: editSiteSettingProfileFieldInput!) {
                 editSiteSettingProfileField(input: $input) {
                     profileItem {
-                        key
+                        guid
                     }
                 }
             }
         """
         variables = {
             "input": {
-                "key": "text_key"
+                "guid": str(self.profileField1.id)
             }
         }
 
@@ -59,14 +60,14 @@ class EditSiteSettingProfileFieldTestCase(FastTenantTestCase):
             mutation editSiteSettingProfileField($input: editSiteSettingProfileFieldInput!) {
                 editSiteSettingProfileField(input: $input) {
                     profileItem {
-                        key
+                        guid
                     }
                 }
             }
         """
         variables = {
             "input": {
-                "key": "text_key"
+                "guid": str(self.profileField1.id)
             }
         }
         request = HttpRequest()
@@ -85,7 +86,7 @@ class EditSiteSettingProfileFieldTestCase(FastTenantTestCase):
             mutation editSiteSettingProfileField($input: editSiteSettingProfileFieldInput!) {
                 editSiteSettingProfileField(input: $input) {
                     profileItem {
-                        key
+                        guid
                         name
                         category
                         isEditable
@@ -95,24 +96,21 @@ class EditSiteSettingProfileFieldTestCase(FastTenantTestCase):
                         fieldOptions
                         isInOnboarding
                         isMandatory
-                        isHidden
                     }
                 }
             }
         """
         variables = {
             "input": {
-                "key": "text_key",
+                "guid": str(self.profileField1.id),
                 "name": "new_name_1",
-                "category": "category_1",
                 "isEditable": False,
                 "isFilter": True,
                 "isInOverview": True,
                 "fieldType": "date_field",
                 "fieldOptions": ["option1", "option2"],
                 "isInOnboarding": True,
-                "isMandatory": True,
-                "isHidden": True
+                "isMandatory": True
 
             }
         }
@@ -123,9 +121,8 @@ class EditSiteSettingProfileFieldTestCase(FastTenantTestCase):
 
         data = result[1]["data"]
 
-        self.assertEqual(data["editSiteSettingProfileField"]["profileItem"]["key"], "text_key")
+        self.assertEqual(data["editSiteSettingProfileField"]["profileItem"]["guid"], str(self.profileField1.id))
         self.assertEqual(data["editSiteSettingProfileField"]["profileItem"]["name"], "new_name_1")
-        self.assertEqual(data["editSiteSettingProfileField"]["profileItem"]["category"], "category_1")
         self.assertEqual(data["editSiteSettingProfileField"]["profileItem"]["isEditable"], False)
         self.assertEqual(data["editSiteSettingProfileField"]["profileItem"]["isFilter"], True)
         self.assertEqual(data["editSiteSettingProfileField"]["profileItem"]["isInOverview"], True)
@@ -133,4 +130,3 @@ class EditSiteSettingProfileFieldTestCase(FastTenantTestCase):
         self.assertEqual(data["editSiteSettingProfileField"]["profileItem"]["fieldOptions"], ["option1", "option2"])
         self.assertEqual(data["editSiteSettingProfileField"]["profileItem"]["isInOnboarding"], True)
         self.assertEqual(data["editSiteSettingProfileField"]["profileItem"]["isMandatory"], True)
-        self.assertEqual(data["editSiteSettingProfileField"]["profileItem"]["isHidden"], True)

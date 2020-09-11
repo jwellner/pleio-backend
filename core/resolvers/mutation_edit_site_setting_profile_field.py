@@ -20,15 +20,12 @@ def resolve_edit_site_setting_profile_field(_, info, input):
         raise GraphQLError(USER_NOT_SITE_ADMIN)
 
     try:
-        profile_field = ProfileField.objects.get(key=clean_input.get('key'))
+        profile_field = ProfileField.objects.get(id=clean_input.get('guid'))
     except ObjectDoesNotExist:
         raise GraphQLError(COULD_NOT_FIND)
 
     if 'name' in clean_input:
         profile_field.name = clean_input["name"]
-
-    if 'category' in clean_input:
-        profile_field.category = clean_input["category"]
 
     if 'isEditable' in clean_input:
         profile_field.is_editable_by_user = clean_input["isEditable"]
@@ -50,9 +47,6 @@ def resolve_edit_site_setting_profile_field(_, info, input):
 
     if 'isMandatory' in clean_input:
         profile_field.is_mandatory = clean_input["isMandatory"]
-
-    if 'isHidden' in clean_input:
-        profile_field.is_hidden = clean_input["isHidden"]
 
     profile_field.save()
 

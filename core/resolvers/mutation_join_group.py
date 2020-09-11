@@ -3,8 +3,9 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.utils.translation import ugettext_lazy
 from core.models import Group
 from core.constances import NOT_LOGGED_IN, COULD_NOT_FIND, ALREADY_MEMBER_OF_GROUP
-from core.lib import remove_none_from_dict, get_base_url, get_default_email_context, send_mail_multi, obfuscate_email
-
+from core.lib import remove_none_from_dict, get_base_url, get_default_email_context, obfuscate_email
+from core.tasks import send_mail_multi
+from django_tenants.utils import parse_tenant_config_path
 
 def resolve_join_group(_, info, input):
     # pylint: disable=redefined-builtin
@@ -26,6 +27,7 @@ def resolve_join_group(_, info, input):
     if (not group.is_closed and not group.is_membership_on_request) or group.can_write(user):
         group.join(user, 'member')
     else:
+        schema_name = parse_tenant_config_path("")
         group.join(user, 'pending')
         subject = ugettext_lazy("Access request for the %(group_name)s group") % {'group_name': group.name}
         context = get_default_email_context(info.context['request'])
@@ -33,8 +35,7 @@ def resolve_join_group(_, info, input):
         context['link'] = link
         context['group_name'] = group.name
         context['user_obfuscated_email'] = obfuscate_email(user.email)
-        email = send_mail_multi(subject, 'email/join_group.html', context, [group.owner.email])
-        email.send()
+        send_mail_multi.delay(schema_name, subject, 'email/join_group.html', context, group.owner.email)
 
     return {
         "group": group

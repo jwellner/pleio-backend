@@ -16,12 +16,12 @@ class JoinGroupTestCase(FastTenantTestCase):
 
     def setUp(self):
         self.anonymousUser = AnonymousUser()
-        self.user1 = mixer.blend(User)
+        self.user1 = mixer.blend(User, name="b")
         self.group_auto = mixer.blend(Group, owner=self.user1, is_membership_on_request=False, is_auto_membership_enabled=True)
 
-        self.user2 = mixer.blend(User) # auto joined to group_auto
-        self.user3 = mixer.blend(User) # auto joined to group_auto
-        self.user4 = mixer.blend(User)
+        self.user2 = mixer.blend(User, name="b") # auto joined to group_auto
+        self.user3 = mixer.blend(User, name="c") # auto joined to group_auto
+        self.user4 = mixer.blend(User, name="d")
         self.group = mixer.blend(Group, owner=self.user1, is_membership_on_request=False)
         self.group2 = mixer.blend(Group, owner=self.user1, is_membership_on_request=False)
         self.group_on_request = mixer.blend(Group, owner=self.user1, is_membership_on_request=True)
@@ -112,7 +112,7 @@ class JoinGroupTestCase(FastTenantTestCase):
         self.assertEqual(self.user2.memberships.filter(group=self.group, type="member").count(), 1)
 
     @override_settings(ALLOWED_HOSTS=['test.test'])
-    @mock.patch('core.resolvers.mutation_join_group.send_mail_multi')
+    @mock.patch('core.resolvers.mutation_join_group.send_mail_multi.delay')
     def test_join_group_on_request(self, mocked_send_mail_multi):
         mutation = """
             mutation ($group: joinGroupInput!) {

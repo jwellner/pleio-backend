@@ -4,11 +4,7 @@ import secrets
 from core.constances import ACCESS_TYPE, COULD_NOT_SAVE
 from core import config
 from django.conf import settings
-from django.core.mail import EmailMultiAlternatives
 from django.apps import apps
-from django.template.loader import get_template
-from django.utils import translation
-from django.utils.html import strip_tags
 from django.utils.text import slugify
 from graphql import GraphQLError
 from enum import Enum
@@ -27,9 +23,12 @@ class TypeModels(Enum):
     blog = "blog.Blog"
     group = "core.Group"
     user = "user.User"
-    status_update = "activity.StatusUpdate"
+    statusupdate = "activity.StatusUpdate"
     thewire = "activity.StatusUpdate"
     task = "task.Task"
+    comment = "core.Comment"
+    file = "file.FileFolder"
+    folder = "file.FileFolder"
 
 
 def get_model_by_subtype(subtype):
@@ -176,17 +175,6 @@ def generate_object_filename(obj, filename):
     return os.path.join(str(obj.id), filename)
 
 
-def send_mail_multi(subject, html_template, context, email_addresses, reply_to=None):
-    if config.LANGUAGE:
-        translation.activate(config.LANGUAGE)
-    html_template = get_template(html_template)
-    html_content = html_template.render(context)
-    text_content = strip_tags(html_content)
-    email = EmailMultiAlternatives(subject, text_content, settings.FROM_EMAIL, bcc=email_addresses, reply_to=reply_to)
-    email.attach_alternative(html_content, "text/html")
-    return email
-
-
 def get_field_type(field_type):
     if field_type == 'select_field':
         return 'selectField'
@@ -237,3 +225,18 @@ def obfuscate_email(email):
 
 def generate_code():
     return secrets.token_hex(10)
+
+
+def get_exportable_user_fields():
+    return [
+        {'field_type': 'userField', 'field': 'guid', 'label': 'guid'},
+        {'field_type': 'userField', 'field': 'name', 'label': 'name'},
+        {'field_type': 'userField', 'field': 'email', 'label': 'email'},
+        {'field_type': 'userField', 'field': 'created_at', 'label': 'created_at'},
+        {'field_type': 'userField', 'field': 'updated_at', 'label': 'updated_at'},
+        {'field_type': 'userField', 'field': 'last_online', 'label': 'last_online'},
+        {'field_type': 'userField', 'field': 'banned', 'label': 'banned'},
+        {'field_type': 'userField', 'field': 'ban_reason', 'label': 'ban_reason'},
+        {'field_type': 'userField', 'field': 'group_memberships', 'label': 'group_memberships'},
+        {'field_type': 'userField', 'field': 'receive_newsletter', 'label': 'receive_newsletter'}
+    ]

@@ -1,7 +1,11 @@
 from django.db import connection
+from django_tenants.test.cases import FastTenantTestCase, TenantTestCase
+from django_tenants.test.client import TenantClient
+from django.test import override_settings, Client
+from core.models import Group, Comment, ProfileField
 from django_tenants.test.cases import FastTenantTestCase
 from django.test import override_settings
-from core.models import Group, Comment
+from core.models import Group, Comment, ProfileField, SiteInvitation
 from user.models import User
 from blog.models import Blog
 from cms.models import Page
@@ -11,6 +15,8 @@ from ariadne import graphql_sync
 import json
 from django.contrib.auth.models import AnonymousUser
 from django.http import HttpRequest
+from django.core.cache import cache
+from django.template.loader import render_to_string
 from mixer.backend.django import mixer
 from notifications.signals import notify
 
@@ -18,11 +24,15 @@ from notifications.signals import notify
 class SiteSettingsTestCase(FastTenantTestCase):
 
     def setUp(self):
+        super().setUp()
         self.user = mixer.blend(User)
         self.admin = mixer.blend(User, is_admin=True)
         self.anonymousUser = AnonymousUser()
         self.cmsPage1 = mixer.blend(Page, title="Z title")
         self.cmsPage2 = mixer.blend(Page, title="A title")
+        self.profileField1 = ProfileField.objects.create(key='text_key1', name='text_name', field_type='text_field')
+        self.profileField2 = ProfileField.objects.create(key='text_key2', name='text_name', field_type='text_field')
+        self.siteInvitation = mixer.blend(SiteInvitation, email='a@a.nl')
 
         self.query = """
             query SiteGeneralSettings {
@@ -113,6 +123,10 @@ class SiteSettingsTestCase(FastTenantTestCase):
                         isFilter
                     }
 
+                    profileFields {
+                        key
+                    }
+
                     tagCategories {
                         name
                         values
@@ -130,6 +144,12 @@ class SiteSettingsTestCase(FastTenantTestCase):
                     emailOverviewIntro
                     emailNotificationShowExcerpt
 
+                    exportableUserFields {
+                        field_type
+                        field
+                        label
+                    }
+
                     showLoginRegister
                     customTagsAllowed
                     showUpDownVoting
@@ -145,15 +165,28 @@ class SiteSettingsTestCase(FastTenantTestCase):
                     statusUpdateGroups
                     subgroups
                     groupMemberExport
+
+                    onboardingEnabled
+                    onboardingForceExistingUsers
+                    onboardingIntro
+                    siteInvites {
+                        edges {
+                            email
+                        }
+                    }
                 }
             }
         """
 
     def tearDown(self):
-            self.cmsPage1.delete()
-            self.cmsPage2.delete()
-            self.admin.delete()
-            self.user.delete()
+        self.siteInvitation.delete()
+        self.cmsPage1.delete()
+        self.cmsPage2.delete()
+        self.profileField1.delete()
+        self.profileField2.delete()
+        self.admin.delete()
+        self.user.delete()
+
 
     def test_site_settings_by_admin(self):
 
@@ -226,6 +259,7 @@ class SiteSettingsTestCase(FastTenantTestCase):
         self.assertEqual(data["siteSettings"]["footer"], [])
 
         self.assertEqual(data["siteSettings"]["profile"], [])
+        self.assertEqual(data["siteSettings"]["profileFields"], [{"key": self.profileField1.key}, {"key": self.profileField2.key}])
 
         self.assertEqual(data["siteSettings"]["tagCategories"], [])
         self.assertEqual(data["siteSettings"]["showTagsInFeed"], False)
@@ -243,6 +277,17 @@ class SiteSettingsTestCase(FastTenantTestCase):
         self.assertEqual(data["siteSettings"]["emailOverviewIntro"], "")
         self.assertEqual(data["siteSettings"]["emailNotificationShowExcerpt"], False)
 
+        self.assertEqual(data["siteSettings"]["onboardingEnabled"], False)
+        self.assertEqual(data["siteSettings"]["onboardingForceExistingUsers"], False)
+        self.assertEqual(data["siteSettings"]["onboardingIntro"], "")
+
+        self.assertEqual(data["siteSettings"]["exportableUserFields"][0]["field_type"], "userField")
+        self.assertEqual(data["siteSettings"]["exportableUserFields"][0]["field"], "guid")
+        self.assertEqual(data["siteSettings"]["exportableUserFields"][0]["label"], "guid")
+        self.assertEqual(data["siteSettings"]["exportableUserFields"][6]["field_type"], "userField")
+        self.assertEqual(data["siteSettings"]["exportableUserFields"][6]["field"], "banned")
+        self.assertEqual(data["siteSettings"]["exportableUserFields"][6]["label"], "banned")
+
         self.assertEqual(data["siteSettings"]["showLoginRegister"], True)
         self.assertEqual(data["siteSettings"]["customTagsAllowed"], True)
         self.assertEqual(data["siteSettings"]["showUpDownVoting"], True)
@@ -259,6 +304,7 @@ class SiteSettingsTestCase(FastTenantTestCase):
         self.assertEqual(data["siteSettings"]["subgroups"], False)
         self.assertEqual(data["siteSettings"]["groupMemberExport"], False)
 
+        self.assertEqual(data["siteSettings"]["siteInvites"]["edges"][0]['email'], 'a@a.nl')
 
     def test_site_settings_by_anonymous(self):
 
@@ -306,3 +352,45 @@ class SiteSettingsTestCase(FastTenantTestCase):
         errors = result[1]["errors"]
 
         self.assertEqual(errors[0]["message"], "user_not_site_admin")
+
+
+class SiteSettingsIsClosedTestCase(TenantTestCase):
+    def setUp(self):
+        super().setUp()
+        self.c = TenantClient(self.tenant)
+        cache.set("%s%s" % (connection.schema_name, 'IS_CLOSED'), True)
+
+    def tearDown(self):
+        cache.clear()
+
+    def test_site_settings_is_closed_random(self):
+        response = self.c.get("/981random3")
+        self.assertTemplateUsed(response, 'registration/login.html')
+
+    def test_site_settings_is_closed_graphql(self):
+        response = self.c.get("/graphql")
+        self.assertTemplateUsed(response, 'registration/login.html')
+
+    def test_site_settings_is_closed_robots(self):
+        response = self.c.get("/robots.txt")
+        self.assertTemplateNotUsed(response, 'registration/login.html')
+
+    def test_site_settings_is_closed_sitemap(self):
+        response = self.c.get("/sitemap.xml")
+        self.assertTemplateNotUsed(response, 'registration/login.html')
+
+    def test_site_settings_is_closed_oidc(self):
+        response = self.c.get("/oidc/test")
+        self.assertTemplateNotUsed(response, 'registration/login.html')
+
+    def test_site_settings_is_closed_login(self):
+        response = self.c.get("/login")
+        self.assertTemplateNotUsed(response, 'registration/login.html')
+
+    def test_site_settings_is_closed_static(self):
+        response = self.c.get("/static/favicon.ico")
+        self.assertTemplateNotUsed(response, 'registration/login.html')
+
+    def test_site_settings_is_closed_featured_file(self):
+        response = self.c.get("/file/featured/test.txt")
+        self.assertTemplateNotUsed(response, 'registration/login.html')

@@ -55,7 +55,7 @@ class SendMessageToGroupTestCase(FastTenantTestCase):
         self.user5.delete()
 
     @override_settings(ALLOWED_HOSTS=['test.test'])
-    @mock.patch('core.resolvers.mutation_send_message_to_group.send_mail_multi')
+    @mock.patch('core.resolvers.mutation_send_message_to_group.send_mail_multi.delay')
     def test_send_message_to_group_by_group_owner(self, mocked_send_mail_multi):
         mutation = """
             mutation SendMessageModal($input: sendMessageToGroupInput!) {
@@ -93,15 +93,15 @@ class SendMessageToGroupTestCase(FastTenantTestCase):
 
         subject = "Bericht van groep {0}: {1}".format(self.group1.name, 'testMessageSubject')
         user_url = 'https://test.test' + self.user1.url
-        mocked_send_mail_multi.assert_called_once_with(subject, 'email/send_message_to_group.html',
+        self.assertEqual(mocked_send_mail_multi.call_count, 2)
+
+        mocked_send_mail_multi.assert_any_call('fast_test', subject, 'email/send_message_to_group.html',
                                                        {'user_name': self.user1.name, 'user_url': user_url,
                                                         'site_url': 'https://test.test', 'site_name': 'Pleio 2.0', 'primary_color': '#0e2f56',
-                                                        'message': '<p>testMessageContent</p>'}, [self.user2.email, self.user3.email])
-
-
+                                                        'message': '<p>testMessageContent</p>'}, self.user3.email)
 
     @override_settings(ALLOWED_HOSTS=['test.test'])
-    @mock.patch('core.resolvers.mutation_send_message_to_group.send_mail_multi')
+    @mock.patch('core.resolvers.mutation_send_message_to_group.send_mail_multi.delay')
     def test_send_message_to_group_by_admin(self, mocked_send_mail_multi):
         mutation = """
             mutation SendMessageModal($input: sendMessageToGroupInput!) {
@@ -138,13 +138,14 @@ class SendMessageToGroupTestCase(FastTenantTestCase):
 
         subject = "Bericht van groep {0}: {1}".format(self.group1.name, 'testMessageSubject')
         user_url = 'https://test.test' + self.admin.url
-        mocked_send_mail_multi.assert_called_once_with(subject, 'email/send_message_to_group.html',
+
+        mocked_send_mail_multi.assert_any_call('fast_test', subject, 'email/send_message_to_group.html',
                                                        {'user_name': self.admin.name, 'user_url': user_url,
                                                         'site_url': 'https://test.test', 'site_name': 'Pleio 2.0', 'primary_color': '#0e2f56',
-                                                        'message': '<p>testMessageContent</p>'}, [self.user2.email, self.user3.email])
+                                                        'message': '<p>testMessageContent</p>'}, self.user2.email)
 
 
-    @mock.patch('core.resolvers.mutation_send_message_to_group.send_mail_multi')
+    @mock.patch('core.resolvers.mutation_send_message_to_group.send_mail_multi.delay')
     def test_send_message_to_group_by_group_member(self, mocked_send_mail_multi):
         mutation = """
             mutation SendMessageModal($input: sendMessageToGroupInput!) {
@@ -179,7 +180,7 @@ class SendMessageToGroupTestCase(FastTenantTestCase):
         self.assertEqual(errors[0]["message"], "could_not_save")
         assert not mocked_send_mail_multi.called
 
-    @mock.patch('core.resolvers.mutation_send_message_to_group.send_mail_multi')
+    @mock.patch('core.resolvers.mutation_send_message_to_group.send_mail_multi.delay')
     def test_send_message_to_group_by_other_user(self, mocked_send_mail_multi):
         mutation = """
             mutation SendMessageModal($input: sendMessageToGroupInput!) {
@@ -215,7 +216,7 @@ class SendMessageToGroupTestCase(FastTenantTestCase):
         assert not mocked_send_mail_multi.called
 
 
-    @mock.patch('core.resolvers.mutation_send_message_to_group.send_mail_multi')
+    @mock.patch('core.resolvers.mutation_send_message_to_group.send_mail_multi.delay')
     def test_send_message_to_group_by_anonymous(self, mocked_send_mail_multi):
         mutation = """
             mutation SendMessageModal($input: sendMessageToGroupInput!) {
@@ -252,7 +253,7 @@ class SendMessageToGroupTestCase(FastTenantTestCase):
 
 
     @override_settings(ALLOWED_HOSTS=['test.test'])
-    @mock.patch('core.resolvers.mutation_send_message_to_group.send_mail_multi')
+    @mock.patch('core.resolvers.mutation_send_message_to_group.send_mail_multi.delay')
     def test_send_message_as_test_by_group_owner(self, mocked_send_mail_multi):
         mutation = """
             mutation SendMessageModal($input: sendMessageToGroupInput!) {
@@ -290,14 +291,14 @@ class SendMessageToGroupTestCase(FastTenantTestCase):
 
         subject = "Bericht van groep {0}: {1}".format(self.group1.name, 'testMessageSubject')
         user_url = 'https://test.test' + self.user1.url
-        mocked_send_mail_multi.assert_called_once_with(subject, 'email/send_message_to_group.html',
+        mocked_send_mail_multi.assert_any_call('fast_test', subject, 'email/send_message_to_group.html',
                                                        {'user_name': self.user1.name, 'user_url': user_url,
                                                         'site_url': 'https://test.test', 'site_name': 'Pleio 2.0', 'primary_color': '#0e2f56',
-                                                        'message': '<p>testMessageContent</p>'}, [self.user1.email])
+                                                        'message': '<p>testMessageContent</p>'}, self.user1.email)
 
 
     @override_settings(ALLOWED_HOSTS=['test.test'])
-    @mock.patch('core.resolvers.mutation_send_message_to_group.send_mail_multi')
+    @mock.patch('core.resolvers.mutation_send_message_to_group.send_mail_multi.delay')
     def test_send_message_to_all_members_by_group_owner(self, mocked_send_mail_multi):
         mutation = """
             mutation SendMessageModal($input: sendMessageToGroupInput!) {
@@ -336,7 +337,7 @@ class SendMessageToGroupTestCase(FastTenantTestCase):
 
         subject = "Bericht van groep {0}: {1}".format(self.group1.name, 'testMessageSubject')
         user_url = 'https://test.test' + self.user1.url
-        mocked_send_mail_multi.assert_called_once_with(subject, 'email/send_message_to_group.html',
+        mocked_send_mail_multi.assert_any_call('fast_test', subject, 'email/send_message_to_group.html',
                                                        {'user_name': self.user1.name, 'user_url': user_url,
                                                         'site_url': 'https://test.test', 'site_name': 'Pleio 2.0', 'primary_color': '#0e2f56',
-                                                        'message': '<p>testMessageContent</p>'}, [self.user2.email, self.user3.email])
+                                                        'message': '<p>testMessageContent</p>'}, self.user3.email)

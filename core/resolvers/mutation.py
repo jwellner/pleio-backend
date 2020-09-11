@@ -21,6 +21,7 @@ from .mutation_edit_entity import resolve_edit_entity
 from .mutation_delete_entity import resolve_delete_entity
 from .mutation_delete_user import resolve_delete_user
 from .mutation_toggle_user_is_admin import resolve_toggle_user_is_admin
+from .mutation_toggle_user_is_banned import resolve_toggle_user_is_banned
 from .mutation_vote import resolve_vote
 from .mutation_bookmark import resolve_bookmark
 from .mutation_follow import resolve_follow
@@ -35,6 +36,9 @@ from .mutation_reorder import resolve_reorder
 from .mutation_edit_site_setting import resolve_edit_site_setting
 from .mutation_add_site_setting_profile_field import resolve_add_site_setting_profile_field
 from .mutation_edit_site_setting_profile_field import resolve_edit_site_setting_profile_field
+from .mutation_delete_site_setting_profile_field import resolve_delete_site_setting_profile_field
+from .mutation_invite_to_site import resolve_invite_to_site
+from .mutation_revoke_invite_to_site import resolve_revoke_invite_to_site
 
 mutation = ObjectType("Mutation")
 mutation.set_field("addGroup", resolve_add_group)
@@ -60,6 +64,7 @@ mutation.set_field("editEntity", resolve_edit_entity)
 mutation.set_field("deleteEntity", resolve_delete_entity)
 mutation.set_field("deleteUser", resolve_delete_user)
 mutation.set_field("toggleUserIsAdmin", resolve_toggle_user_is_admin)
+mutation.set_field("toggleUserIsBanned", resolve_toggle_user_is_banned)
 
 mutation.set_field("vote", resolve_vote)
 
@@ -83,3 +88,7 @@ mutation.set_field("reorder", resolve_reorder)
 mutation.set_field("editSiteSetting", resolve_edit_site_setting)
 mutation.set_field("editSiteSettingProfileField", resolve_edit_site_setting_profile_field)
 mutation.set_field("addSiteSettingProfileField", resolve_add_site_setting_profile_field)
+mutation.set_field("deleteSiteSettingProfileField", resolve_delete_site_setting_profile_field)
+
+mutation.set_field("inviteToSite", resolve_invite_to_site)
+mutation.set_field("revokeInviteToSite", resolve_revoke_invite_to_site)

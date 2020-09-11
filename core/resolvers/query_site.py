@@ -5,8 +5,8 @@ from django.templatetags.static import static
 from cms.models import Page
 from core import config
 from core.constances import NOT_LOGGED_IN, USER_NOT_SITE_ADMIN
-from core.lib import get_access_ids, get_activity_filters
-from core.models import UserProfile, ProfileField
+from core.lib import get_access_ids, get_activity_filters, get_exportable_user_fields
+from core.models import UserProfile, ProfileField, SiteInvitation
 from graphql import GraphQLError
 
 
@@ -49,6 +49,7 @@ def get_site():
         'theme': config.THEME,
         'menu': config.MENU,
         'profile': config.PROFILE,
+        'profileSections': config.PROFILE_SECTIONS,
         'footer': config.FOOTER,
         'directLinks': config.DIRECT_LINKS,
         'accessIds': get_access_ids(),
@@ -91,6 +92,10 @@ def get_site():
         'cancelMembershipEnabled': config.CANCEL_MEMBERSHIP_ENABLED,
         'newsletter': config.NEWSLETTER,
         'showLoginRegister': config.SHOW_LOGIN_REGISTER,
+
+        'onboardingEnabled': config.ONBOARDING_ENABLED,
+        'onboardingForceExistingUsers': config.ONBOARDING_FORCE_EXISTING_USERS,
+        'onboardingIntro': config.ONBOARDING_INTRO,
     }
 
     return site
@@ -166,6 +171,8 @@ def get_site_settings():
         'footer': config.FOOTER,
 
         'profile': get_profile(),
+        'profileSections': config.PROFILE_SECTIONS,
+        'profileFields': ProfileField.objects.all(),
 
         'tagCategories': config.TAG_CATEGORIES,
         'showTagsInFeed': config.SHOW_TAGS_IN_FEED,
@@ -184,6 +191,8 @@ def get_site_settings():
         'emailOverviewEnableFeatured': config.EMAIL_OVERVIEW_ENABLE_FEATURED,
         'emailOverviewFeaturedTitle': config.EMAIL_OVERVIEW_FEATURED_TITLE,
         'emailNotificationShowExcerpt': config.EMAIL_NOTIFICATION_SHOW_EXCERPT,
+
+        'exportableUserFields': get_exportable_user_fields(),
 
         'showLoginRegister': config.SHOW_LOGIN_REGISTER,
         'customTagsAllowed': config.CUSTOM_TAGS_ENABLED,
@@ -210,6 +219,13 @@ def get_site_settings():
 
         'usersOnline': get_online_users(),
         'achievementsEnabled': config.ACHIEVEMENTS_ENABLED,
+
+        'onboardingEnabled': config.ONBOARDING_ENABLED,
+        'onboardingForceExistingUsers': config.ONBOARDING_FORCE_EXISTING_USERS,
+        'onboardingIntro': config.ONBOARDING_INTRO,
+        'siteInvites': {
+            'edges': SiteInvitation.objects.all()
+        }
     }
 
     return site_settings

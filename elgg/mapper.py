@@ -45,6 +45,8 @@ class Mapper():
         user.created_at = datetime.fromtimestamp(elgg_user.entity.time_created)
         user.updated_at = datetime.fromtimestamp(elgg_user.entity.time_updated)
         user.is_active = elgg_user.banned == "no"
+        user.ban_reason = elgg_user.entity.get_metadata_value_by_name("ban_reason") \
+            if elgg_user.entity.get_metadata_value_by_name("ban_reason") and not elgg_user.banned == "no" else ""
         user.is_admin = elgg_user.admin == "yes"
         return user
 
@@ -82,7 +84,6 @@ class Mapper():
         profile_field = ProfileField()
         profile_field.key = pleio_template_profile_item.get("key")
         profile_field.name = pleio_template_profile_item.get("name")
-        profile_field.category = self.helpers.get_profile_category(pleio_template_profile_item.get("key"))
         profile_field.field_type = self.helpers.get_profile_field_type(pleio_template_profile_item.get("key"))
         profile_field.field_options = self.helpers.get_profile_options(pleio_template_profile_item.get("key"))
         profile_field.is_editable_by_user = self.helpers.get_profile_is_editable(pleio_template_profile_item.get("key"))

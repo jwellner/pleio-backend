@@ -35,7 +35,8 @@ class AddWikiCase(FastTenantTestCase):
                 "richDescription": "richDescription",
                 "accessId": 0,
                 "writeAccessId": 0,
-                "tags": ["tag1", "tag2"]
+                "tags": ["tag1", "tag2"],
+                "isFeatured": True
             }
         }
         self.mutation = """
@@ -63,6 +64,7 @@ class AddWikiCase(FastTenantTestCase):
                 parent {
                     guid
                 }
+                isFeatured
             }
             mutation ($input: editEntityInput!) {
                 editEntity(input: $input) {
@@ -90,6 +92,7 @@ class AddWikiCase(FastTenantTestCase):
         self.assertEqual(data["editEntity"]["entity"]["description"], variables["input"]["description"])
         self.assertEqual(data["editEntity"]["entity"]["richDescription"], variables["input"]["richDescription"])
         self.assertEqual(data["editEntity"]["entity"]["hasChildren"], False)
+        self.assertEqual(data["editEntity"]["entity"]["isFeatured"], False) # only with editor role
 
         self.wikiPublic.refresh_from_db()
 
@@ -97,3 +100,4 @@ class AddWikiCase(FastTenantTestCase):
         self.assertEqual(data["editEntity"]["entity"]["description"], self.wikiPublic.description)
         self.assertEqual(data["editEntity"]["entity"]["richDescription"], self.wikiPublic.rich_description)
         self.assertEqual(data["editEntity"]["entity"]["hasChildren"], self.wikiPublic.has_children())
+        self.assertEqual(data["editEntity"]["entity"]["isFeatured"], self.wikiPublic.is_featured)

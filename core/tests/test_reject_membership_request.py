@@ -38,7 +38,7 @@ class RejectMembershipRequestTestCase(FastTenantTestCase):
         self.user1.delete()
 
     @override_settings(ALLOWED_HOSTS=['test.test'])
-    @mock.patch('core.resolvers.mutation_reject_membership_request.send_mail_multi')
+    @mock.patch('core.resolvers.mutation_reject_membership_request.send_mail_multi.delay')
     def test_reject_group_access_request_by_group_owner(self, mocked_send_mail_multi):
         mutation = """
             mutation MembershipRequestsList($input: rejectMembershipRequestInput!) {
@@ -66,7 +66,7 @@ class RejectMembershipRequestTestCase(FastTenantTestCase):
 
         variables = {
             "input": {
-                "userGuid": self.user2.guid, 
+                "userGuid": self.user2.guid,
                 "groupGuid": self.group1.guid
                 }
             }
@@ -90,7 +90,7 @@ class RejectMembershipRequestTestCase(FastTenantTestCase):
         mocked_send_mail_multi.assert_called_once()
 
     @override_settings(ALLOWED_HOSTS=['test.test'])
-    @mock.patch('core.resolvers.mutation_reject_membership_request.send_mail_multi')
+    @mock.patch('core.resolvers.mutation_reject_membership_request.send_mail_multi.delay')
     def test_reject_group_access_request_by_admin(self, mocked_send_mail_multi):
         mutation = """
             mutation MembershipRequestsList($input: rejectMembershipRequestInput!) {
@@ -118,7 +118,7 @@ class RejectMembershipRequestTestCase(FastTenantTestCase):
 
         variables = {
             "input": {
-                "userGuid": self.user2.guid, 
+                "userGuid": self.user2.guid,
                 "groupGuid": self.group1.guid
                 }
             }
@@ -142,7 +142,7 @@ class RejectMembershipRequestTestCase(FastTenantTestCase):
         mocked_send_mail_multi.assert_called_once()
 
     @override_settings(ALLOWED_HOSTS=['test.test'])
-    @mock.patch('core.resolvers.mutation_reject_membership_request.send_mail_multi')
+    @mock.patch('core.resolvers.mutation_reject_membership_request.send_mail_multi.delay')
     def test_reject_group_access_request_by_other_user(self, mocked_send_mail_multi):
         mutation = """
             mutation MembershipRequestsList($input: rejectMembershipRequestInput!) {
@@ -170,7 +170,7 @@ class RejectMembershipRequestTestCase(FastTenantTestCase):
 
         variables = {
             "input": {
-                "userGuid": self.user2.guid, 
+                "userGuid": self.user2.guid,
                 "groupGuid": self.group1.guid
                 }
             }
@@ -190,7 +190,7 @@ class RejectMembershipRequestTestCase(FastTenantTestCase):
         assert not mocked_send_mail_multi.called
 
     @override_settings(ALLOWED_HOSTS=['test.test'])
-    @mock.patch('core.resolvers.mutation_reject_membership_request.send_mail_multi')
+    @mock.patch('core.resolvers.mutation_reject_membership_request.send_mail_multi.delay')
     def test_reject_group_access_request_by_anonymous(self, mocked_send_mail_multi):
         mutation = """
             mutation MembershipRequestsList($input: rejectMembershipRequestInput!) {
@@ -218,7 +218,7 @@ class RejectMembershipRequestTestCase(FastTenantTestCase):
 
         variables = {
             "input": {
-                "userGuid": self.user2.guid, 
+                "userGuid": self.user2.guid,
                 "groupGuid": self.group1.guid
                 }
             }

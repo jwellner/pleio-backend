@@ -135,7 +135,7 @@ class FileFolderTestCase(FastTenantTestCase):
         self.assertEqual(data["entity"]["timeCreated"], str(self.folder.created_at))
         self.assertEqual(data["entity"]["tags"], self.folder.tags)
         self.assertEqual(data["entity"]["canEdit"], True)
-        self.assertEqual(data["entity"]["url"], "/files/{}".format(self.folder.guid))
+        self.assertEqual(data["entity"]["url"], "/user/{}/files/{}".format(self.folder.owner.guid, self.folder.guid))
         self.assertEqual(data["entity"]["parentFolder"], None)
         self.assertEqual(data["entity"]["subtype"], "folder")
         #self.assertEqual(data["entity"]["hasChildren"], True)

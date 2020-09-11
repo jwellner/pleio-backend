@@ -36,6 +36,11 @@ def resolve_url(obj, info):
     # pylint: disable=unused-argument
     return obj.url
 
+@wiki.field("isFeatured")
+def resolve_is_featured(obj, info):
+    # pylint: disable=unused-argument
+    return obj.is_featured
+
 
 wiki.set_field("guid", shared.resolve_entity_guid)
 wiki.set_field("status", shared.resolve_entity_status)

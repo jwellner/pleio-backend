@@ -2,6 +2,7 @@ import uuid
 from django.db import models
 from django.contrib.postgres.fields import ArrayField
 from core.lib import get_acl
+from core import config
 from .shared import read_access_default, write_access_default
 
 
@@ -48,7 +49,6 @@ class ProfileField(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     key = models.CharField(max_length=255, unique=True)
     name = models.CharField(max_length=512)
-    category = models.CharField(max_length=512, blank=True, null=True)
     field_type = models.CharField(
         max_length=24,
         choices=FIELD_TYPES,
@@ -62,7 +62,6 @@ class ProfileField(models.Model):
     is_in_overview = models.BooleanField(default=False)
     is_in_onboarding = models.BooleanField(default=False)
     is_mandatory = models.BooleanField(default=False)
-    is_hidden = models.BooleanField(default=False)
 
     @property
     def is_filterable(self):
@@ -71,6 +70,15 @@ class ProfileField(models.Model):
         if self.field_type == 'text_field' and self.is_editable_by_user:
             return False
         return True
+
+    # TODO: look if possible to remove this
+    @property
+    def category(self):
+        for section in config.PROFILE_SECTIONS:
+            if str(self.id) in section['profileFieldGuids']:
+                return section['name']
+        return None
+
 
 
 class UserProfileFieldManager(models.Manager):

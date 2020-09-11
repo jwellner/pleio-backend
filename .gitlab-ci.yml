@@ -48,6 +48,7 @@ test:
     - curl "http://elasticsearch:9200/_cat/health"
     - pip install -r requirements.txt
     - mkdir -p static static-frontend
+    - touch static-frontend/web.css static-frontend/vendor.js static-frontend/web.js
     - python manage.py collectstatic --noinput
     - coverage run --source='.' manage.py test
     - coverage report

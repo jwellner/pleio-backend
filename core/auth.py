@@ -3,6 +3,8 @@ from mozilla_django_oidc.auth import OIDCAuthenticationBackend
 from mozilla_django_oidc.utils import absolutify
 from django.urls import reverse
 from django.conf import settings
+from core import config
+from core.models import SiteInvitation
 
 import logging
 
@@ -27,6 +29,18 @@ class OIDCAuthBackend(OIDCAuthenticationBackend):
             picture = claims.get('picture')
         else:
             picture = None
+
+        if not config.ALLOW_REGISTRATION:
+            if self.request.session.get('invitecode'):
+                try:
+                    invite = SiteInvitation.objects.get(code=self.request.session.get('invitecode'))
+                    invite.delete()
+                    del self.request.session['invitecode']
+                except Exception:
+                    raise Exception
+            else:
+                # TODO: redirect to request membership page
+                raise Exception
 
         user = User.objects.create_user(
             name=claims.get('name'),

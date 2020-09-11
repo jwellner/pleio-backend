@@ -2,13 +2,9 @@ from django.db.models.signals import post_save, pre_save
 from django.conf import settings
 from django.utils import timezone
 from notifications.signals import notify
-from core.models import Comment, Group, GroupInvitation, Entity, EntityViewCount
+from core.models import Comment, Group, GroupInvitation, Entity, EntityViewCount, NotificationMixin
 from user.models import User
-from event.models import Event, EventAttendee
-from blog.models import Blog
-from discussion.models import Discussion
-from question.models import Question
-from activity.models import StatusUpdate
+from event.models import EventAttendee
 
 
 def comment_handler(sender, instance, created, **kwargs):
@@ -37,7 +33,7 @@ def user_handler(sender, instance, created, **kwargs):
             group.join(instance)
 
 
-def entity_handler(sender, instance, created, **kwargs):
+def notification_handler(sender, instance, created, **kwargs):
     """ Adds notification for group members if entity in group is created
 
     If an entity is created in a group, a notification is added for all group
@@ -70,11 +66,10 @@ def updated_at_handler(sender, instance, **kwargs):
 # Notification handlers
 post_save.connect(comment_handler, sender=Comment)
 post_save.connect(user_handler, sender=User)
-post_save.connect(entity_handler, sender=Blog)
-post_save.connect(entity_handler, sender=Discussion)
-post_save.connect(entity_handler, sender=Event)
-post_save.connect(entity_handler, sender=Question)
-post_save.connect(entity_handler, sender=StatusUpdate)
+
+# connect Models that implemented NotificationMixin
+for subclass in NotificationMixin.__subclasses__():
+    post_save.connect(notification_handler, sender=subclass)
 
 # Set updated_at
 pre_save.connect(updated_at_handler, sender=Comment)

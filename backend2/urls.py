@@ -3,7 +3,6 @@ from django.urls import path, include, re_path
 from django.views.decorators.cache import cache_page
 
 from ariadne.contrib.django.views import GraphQLView
-from ariadne.contrib.tracing.opentracing import OpenTracingExtensionSync
 from .schema import schema
 
 from core.sitemaps import sitemaps
@@ -12,6 +11,7 @@ from core import views as core_views
 from file import views as file_views
 from event import views as event_views
 from elgg import views as elgg_views
+from user import views as user_views
 
 
 urlpatterns = [
@@ -22,7 +22,7 @@ urlpatterns = [
     path('oidc/', include('mozilla_django_oidc.urls')),
     path('admin/logout/', core_views.logout, name='logout'),
     path('admin/', core_admin.site.urls),
-    path('graphql', GraphQLView.as_view(schema=schema, extensions=[OpenTracingExtensionSync]), name='graphql'),
+    path('graphql', GraphQLView.as_view(schema=schema), name='graphql'),
 
     path('file/download/<uuid:file_id>/<str:file_name>', file_views.download, name='download'),
     path('file/embed/<uuid:file_id>/<str:file_name>', file_views.embed, name='embed'),
@@ -31,6 +31,7 @@ urlpatterns = [
     path('bulk_download', file_views.bulk_download, name='bulk_download'),
 
     path('exporting/event/<uuid:event_id>', event_views.export, name='event_export'),
+    path('exporting/users', user_views.export, name='users_export'),
 
     path('robots.txt', core_views.robots_txt),
     path('sitemap.xml', cache_page(3600)(sitemap), {'sitemaps': sitemaps}, name='sitemap'),

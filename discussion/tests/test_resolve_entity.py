@@ -37,6 +37,7 @@ class EventTestCase(FastTenantTestCase):
             read_access=[ACCESS_TYPE.user.format(self.authenticatedUser.id)],
             write_access=[ACCESS_TYPE.user.format(self.authenticatedUser.id)],
             owner=self.authenticatedUser,
+            is_featured=True
         )
 
         self.query = """
@@ -55,6 +56,7 @@ class EventTestCase(FastTenantTestCase):
                 group {
                     guid
                 }
+                isFeatured
             }
             query GetDiscussion($guid: String!) {
                 entity(guid: $guid) {
@@ -94,6 +96,7 @@ class EventTestCase(FastTenantTestCase):
         self.assertEqual(data["entity"]["tags"], [])
         self.assertEqual(data["entity"]["canEdit"], False)
         self.assertEqual(data["entity"]["url"], "/discussion/view/{}/{}".format(self.discussionPublic.guid, slugify(self.discussionPublic.title)))
+        self.assertEqual(data["entity"]["isFeatured"], self.discussionPublic.is_featured)
 
         variables = {
             "guid": self.discussionPrivate.guid
@@ -130,3 +133,4 @@ class EventTestCase(FastTenantTestCase):
         self.assertEqual(data["entity"]["tags"], [])
         self.assertEqual(data["entity"]["canEdit"], True)
         self.assertEqual(data["entity"]["url"], "/discussion/view/{}/{}".format(self.discussionPrivate.guid, slugify(self.discussionPrivate.title)))
+        self.assertEqual(data["entity"]["isFeatured"], self.discussionPrivate.is_featured)

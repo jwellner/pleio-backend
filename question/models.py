@@ -1,8 +1,8 @@
 from django.db import models
 from django.utils.text import slugify
-from core.models import Entity, VoteMixin, CommentMixin, BookmarkMixin, FollowMixin, Comment
+from core.models import Entity, VoteMixin, CommentMixin, BookmarkMixin, FollowMixin, Comment, NotificationMixin
 
-class Question(Entity, VoteMixin, BookmarkMixin, FollowMixin, CommentMixin):
+class Question(Entity, VoteMixin, BookmarkMixin, FollowMixin, CommentMixin, NotificationMixin):
     """
     Question
     """
@@ -13,6 +13,7 @@ class Question(Entity, VoteMixin, BookmarkMixin, FollowMixin, CommentMixin):
     description = models.TextField()
     rich_description = models.TextField(null=True, blank=True)
     is_closed = models.BooleanField(default=False)
+    is_featured = models.BooleanField(default=False)
 
     best_answer = models.ForeignKey(
         Comment,

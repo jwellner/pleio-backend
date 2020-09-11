@@ -30,7 +30,8 @@ class AddQuestionTestCase(FastTenantTestCase):
                 "richDescription": "richDescription",
                 "accessId": 0,
                 "writeAccessId": 0,
-                "tags": ["tag1", "tag2"]
+                "tags": ["tag1", "tag2"],
+                "isFeatured": True
             }
         }
         self.mutation = """
@@ -50,6 +51,7 @@ class AddQuestionTestCase(FastTenantTestCase):
                     guid
                 }
                 isClosed
+                isFeatured
             }
             mutation ($input: addEntityInput!) {
                 addEntity(input: $input) {
@@ -78,6 +80,7 @@ class AddQuestionTestCase(FastTenantTestCase):
         self.assertEqual(data["addEntity"]["entity"]["richDescription"], variables["input"]["richDescription"])
         self.assertEqual(data["addEntity"]["entity"]["tags"], variables["input"]["tags"])
         self.assertEqual(data["addEntity"]["entity"]["isClosed"], False)
+        self.assertEqual(data["addEntity"]["entity"]["isFeatured"], False) # only with editor role
 
     def test_add_question_to_group(self):
 

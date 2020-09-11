@@ -104,7 +104,7 @@ class SendMessageToUserTestCase(FastTenantTestCase):
         self.assertEqual(errors[0]["message"], "could_not_find")
 
     @override_settings(ALLOWED_HOSTS=['test.test'])
-    @mock.patch('core.resolvers.mutation_send_message_to_user.send_mail_multi')
+    @mock.patch('core.resolvers.mutation_send_message_to_user.send_mail_multi.delay')
     def test_call_send_email(self, mocked_send_mail_multi):
         mutation = """
             mutation SendMessageModal($input: sendMessageToUserInput!) {
@@ -130,7 +130,7 @@ class SendMessageToUserTestCase(FastTenantTestCase):
 
         subject = "Bericht van {0}: {1}".format(self.user1.name, 'testMessageSubject')
         user_url = 'https://test.test' + self.user1.url
-        mocked_send_mail_multi.assert_called_once_with(subject, 'email/send_message_to_user.html',
+        mocked_send_mail_multi.assert_called_once_with('fast_test', subject, 'email/send_message_to_user.html',
                                                        {'user_name': self.user1.name, 'user_url': user_url,
                                                         'site_url': 'https://test.test', 'site_name': 'Pleio 2.0', 'primary_color': '#0e2f56',
-                                                        'message': '<p>testMessageContent</p>'}, [self.user2.email], [self.user1.email])
+                                                        'message': '<p>testMessageContent</p>'}, self.user2.email)

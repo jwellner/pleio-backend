@@ -6,6 +6,10 @@ input toggleUserIsAdminInput {
   guid: String!
 }
 
+input toggleUserIsBannedInput {
+  guid: String!
+}
+
 type deleteUserPayload {
   success: Boolean
 }
@@ -13,6 +17,42 @@ type deleteUserPayload {
 type toggleUserIsAdminPayload {
   success: Boolean
 }
+
+type toggleUserIsBannedPayload {
+  success: Boolean
+}
+
+input inviteToSiteInput {
+
+  """A list of email addresses to invite to site."""
+  emailAddresses: [String!]
+
+  """Message in email sent with invite"""
+  message: String
+}
+
+type inviteToSitePayload {
+  success: Boolean
+}
+
+input revokeInviteToSiteInput {
+
+  """A list of email addresses to revoke invite for."""
+  emailAddresses: [String!]
+}
+
+type revokeInviteToSitePayload {
+  success: Boolean
+}
+
+type SiteInvite {
+  email: String
+}
+
+type SiteInviteList {
+  edges: [SiteInvite]
+}
+
 
 type SiteUserList {
   total: Int!
@@ -22,12 +62,19 @@ type SiteUserList {
 extend type Mutation {
   deleteUser(input: deleteUserInput!): deleteUserPayload
   toggleUserIsAdmin(input: toggleUserIsAdminInput!): toggleUserIsAdminPayload
+  toggleUserIsBanned(input: toggleUserIsBannedInput!): toggleUserIsBannedPayload
   addSiteSettingProfileField(input: addSiteSettingProfileFieldInput!): addSiteSettingProfileFieldPayload
   editSiteSettingProfileField(input: editSiteSettingProfileFieldInput!): editSiteSettingProfileFieldPayload
+  deleteSiteSettingProfileField(input: deleteSiteSettingProfileFieldInput!): deleteSiteSettingProfileFieldPayload
+  """Create and send invitation by email to join a site."""
+  inviteToSite(input: inviteToSiteInput!): inviteToSitePayload
+  """Remove and send invitation by email to join a site."""
+  revokeInviteToSite(input: revokeInviteToSiteInput!): revokeInviteToSitePayload
+
 }
 
 extend type Query {
-  siteUsers(q: String, offset: Int, limit: Int, isAdmin: Boolean, isDeleteRequested: Boolean): SiteUserList
+  siteUsers(q: String, offset: Int, limit: Int, isAdmin: Boolean, isDeleteRequested: Boolean, isBanned: Boolean): SiteUserList
 }
 
 extend type User {
@@ -36,9 +83,8 @@ extend type User {
 
 
 input addSiteSettingProfileFieldInput {
-  key: String!
+  key: String
   name: String!
-  category: String
   isEditable: Boolean
   isFilter: Boolean
   isInOverview: Boolean
@@ -46,7 +92,6 @@ input addSiteSettingProfileFieldInput {
   fieldOptions: [String]
   isInOnboarding: Boolean
   isMandatory: Boolean
-  isHidden: Boolean
 }
 
 type addSiteSettingProfileFieldPayload {
@@ -54,9 +99,8 @@ type addSiteSettingProfileFieldPayload {
 }
 
 input editSiteSettingProfileFieldInput {
-  key: String!
+  guid: String!
   name: String
-  category: String
   isEditable: Boolean
   isFilter: Boolean
   isInOverview: Boolean
@@ -64,15 +108,65 @@ input editSiteSettingProfileFieldInput {
   fieldOptions: [String]
   isInOnboarding: Boolean
   isMandatory: Boolean
-  isHidden: Boolean
 }
 
 type editSiteSettingProfileFieldPayload {
   profileItem: ProfileItem
 }
 
+input deleteSiteSettingProfileFieldInput {
+  guid: String!
+}
+
+type deleteSiteSettingProfileFieldPayload {
+    success: Boolean
+}
+
 extend type ProfileItem {
+  guid: String!
   isInOnboarding: Boolean
   isMandatory: Boolean
-  isHidden: Boolean
+}
+
+type ProfileSection {
+  name: String!
+  profileFieldGuids: [String]
+}
+
+extend input editSiteSettingInput {
+  profileSections: [ProfileSectionInput]
+  onboardingEnabled: Boolean
+  onboardingForceExistingUsers: Boolean
+  onboardingIntro: String
+}
+
+input ProfileSectionInput {
+  name: String!
+  profileFieldGuids: [String]
+}
+type ExportableField {
+  field_type: String!
+  field: String!
+  label: String!
+}
+
+extend type Site {
+  profileSections: [ProfileSection]
+  onboardingEnabled: Boolean!
+  onboardingIntro: String
+}
+
+extend type SiteSettings {
+  profileSections: [ProfileSection]
+  exportableUserFields: [ExportableField]
+  profileFields: [ProfileItem]
+  limitedGroupAdd: Boolean!
+  onboardingEnabled: Boolean!
+  onboardingForceExistingUsers: Boolean!
+  onboardingIntro: String
+  siteInvites: SiteInviteList
+}
+
+extend input editSiteSettingInput {
+  limitedGroupAdd: Boolean
 }

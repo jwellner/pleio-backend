@@ -407,6 +407,7 @@ type Discussion implements Entity {
   accessId: Int
   writeAccessId: Int
   isBookmarked: Boolean
+  isFeatured: Boolean
   isFollowing: Boolean
   canBookmark: Boolean
   hasVoted: Boolean
@@ -1823,6 +1824,7 @@ type Wiki implements Entity {
   accessId: Int
   writeAccessId: Int
   isBookmarked: Boolean
+  isFeatured: Boolean
   canBookmark: Boolean
   tags: [String]
   inGroup: Boolean

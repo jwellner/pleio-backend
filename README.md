@@ -215,7 +215,7 @@ docker-compose exec api python manage.py makemessages
 With this command, you will compile the translation files which the application will use
 
 ```bash
-docker-compose exec api python manage.py comilemessages
+docker-compose exec api python manage.py compilemessages
 ```
 
 ## Background
@@ -278,3 +278,11 @@ You can also run AMP in locally with docker-compose:
 ```bash
 docker-compose -f docker-compose.yml -f docker-compose.apm.yml up
 ```
+
+## DISABLE EMAIL
+
+Settings for disabling email configured with setting following environment variable
+
+#### EMAIL_DISABLED
+
+- True/False
