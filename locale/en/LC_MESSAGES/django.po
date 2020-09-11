@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-07-23 11:47+0200\n"
+"POT-Creation-Date: 2020-09-10 12:41+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -18,131 +18,136 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#: backend2/config.py:63 core/resolvers/query_site.py:116
+#: backend2/config.py:61 core/resolvers/query_site.py:122
 msgid "English"
 msgstr ""
 
-#: backend2/config.py:64 core/resolvers/query_site.py:116
+#: backend2/config.py:62 core/resolvers/query_site.py:122
 msgid "Dutch"
 msgstr ""
 
-#: core/management/commands/send_notification_emails.py:63
+#: core/management/commands/send_notification_emails.py:75
 #, python-format
 msgid "New notifications at %(site_name)s"
 msgstr ""
 
-#: core/management/commands/send_overview_emails.py:49
+#: core/management/commands/send_overview_emails.py:86
 #, python-format
 msgid "Regular overview of %(site_name)s"
 msgstr ""
 
-#: core/resolvers/mutation_accept_membership_request.py:36
+#: core/resolvers/mutation_accept_membership_request.py:38
 #, python-format
 msgid "Request for access to the %(group_name)s group has been approved"
 msgstr ""
 
-#: core/resolvers/mutation_change_group_role.py:38
+#: core/resolvers/mutation_change_group_role.py:41
 #, python-format
 msgid "Ownership of the %(group_name)s group has been transferred"
 msgstr ""
 
-#: core/resolvers/mutation_delete_user.py:33
+#: core/resolvers/mutation_delete_user.py:35
 #, python-format
 msgid "Account of %(name_deleted_user)s removed"
 msgstr ""
 
-#: core/resolvers/mutation_delete_user.py:42
-#: core/resolvers/mutation_toggle_user_is_admin.py:35
+#: core/resolvers/mutation_delete_user.py:43
+#: core/resolvers/mutation_toggle_user_is_admin.py:37
 #, python-format
 msgid "A site administrator was removed from %(site_name)s"
 msgstr ""
 
-#: core/resolvers/mutation_invite_to_group.py:40
+#: core/resolvers/mutation_invite_to_group.py:42
 #, python-format
 msgid "Invitation to become a member of the %(group_name)s group"
 msgstr ""
 
-#: core/resolvers/mutation_join_group.py:30
+#: core/resolvers/mutation_invite_to_site.py:51
+#, python-format
+msgid "You are invited to join site %(site_name)s"
+msgstr ""
+
+#: core/resolvers/mutation_join_group.py:32
 #, python-format
 msgid "Access request for the %(group_name)s group"
 msgstr ""
 
-#: core/resolvers/mutation_reject_membership_request.py:37
+#: core/resolvers/mutation_reject_membership_request.py:40
 #, python-format
 msgid "Request for access to the %(group_name)s group has been refused"
 msgstr ""
 
-#: core/resolvers/mutation_resend_group_invitation.py:25
+#: core/resolvers/mutation_resend_group_invitation.py:28
 #, python-format
 msgid "Reminder to become a member of the %(group_name)s group"
 msgstr ""
 
-#: core/resolvers/mutation_send_message_to_group.py:52
+#: core/resolvers/mutation_send_message_to_group.py:55
 #, python-brace-format
 msgid "Message from group {0}: {1}"
 msgstr ""
 
-#: core/resolvers/mutation_send_message_to_user.py:25
+#: core/resolvers/mutation_send_message_to_user.py:29
 #, python-brace-format
 msgid "Message from {0}: {1}"
 msgstr ""
 
-#: core/resolvers/mutation_toggle_request_delete_user.py:32
+#: core/resolvers/mutation_toggle_request_delete_user.py:34
 msgid "Request to remove account cancelled"
 msgstr ""
 
-#: core/resolvers/mutation_toggle_request_delete_user.py:40
+#: core/resolvers/mutation_toggle_request_delete_user.py:42
 msgid "Request to remove account"
 msgstr ""
 
-#: core/resolvers/mutation_toggle_user_is_admin.py:41
+#: core/resolvers/mutation_toggle_user_is_admin.py:43
 #, python-format
 msgid "Your site administrator rights for %(site_name)s were removed"
 msgstr ""
 
-#: core/resolvers/mutation_toggle_user_is_admin.py:53
+#: core/resolvers/mutation_toggle_user_is_admin.py:54
 #, python-format
 msgid "A new site administrator was assigned for %(site_name)s"
 msgstr ""
 
-#: core/resolvers/mutation_toggle_user_is_admin.py:58
+#: core/resolvers/mutation_toggle_user_is_admin.py:59
 #, python-format
 msgid "You're granted site administrator right on %(site_name)s"
 msgstr ""
 
-#: core/resolvers/query_site.py:100
+#: core/resolvers/query_site.py:106
 msgid "Just me"
 msgstr ""
 
-#: core/resolvers/query_site.py:101
+#: core/resolvers/query_site.py:107
 msgid "Logged in users"
 msgstr ""
 
-#: core/resolvers/query_site.py:105
+#: core/resolvers/query_site.py:111
 msgid "Public"
 msgstr ""
 
-#: core/resolvers/query_site.py:142
+#: core/resolvers/query_site.py:148
 msgid "Activity stream"
 msgstr ""
 
-#: core/resolvers/query_site.py:142
+#: core/resolvers/query_site.py:148
 msgid "CMS page"
 msgstr ""
 
-#: core/resolvers/query_site.py:174
+#: core/resolvers/query_site.py:182
 msgid "Daily"
 msgstr ""
 
-#: core/resolvers/query_site.py:175
+#: core/resolvers/query_site.py:183
 msgid "Weekly"
 msgstr ""
 
-#: core/resolvers/query_site.py:176
+#: core/resolvers/query_site.py:184
 msgid "Monthly"
 msgstr ""
 
-#: core/resolvers/query_site.py:177
+#: core/resolvers/query_site.py:185
 msgid "Never"
 msgstr ""
 
@@ -162,12 +167,10 @@ msgid ""
 msgstr ""
 
 #: core/templates/admin/oidc_login.html:43
-#: core/templates/registration/login.html:43
 msgid "Please click on the button to login."
 msgstr ""
 
 #: core/templates/admin/oidc_login.html:47
-#: core/templates/registration/login.html:44
 msgid "Log in"
 msgstr ""
 
@@ -189,7 +192,7 @@ msgid ""
 "%(user_name)s.\n"
 msgstr ""
 
-#: core/templates/email/attend_event_without_account.html:6
+#: core/templates/email/attend_event_without_account.html:5
 #, python-format
 msgid ""
 "\n"
@@ -202,7 +205,7 @@ msgid ""
 "    "
 msgstr ""
 
-#: core/templates/email/confirm_attend_event_without_account.html:6
+#: core/templates/email/confirm_attend_event_without_account.html:5
 #, python-format
 msgid ""
 "\n"
@@ -256,6 +259,14 @@ msgstr ""
 msgid ""
 "You have been invited by %(user_name)s to join the %(group_name)s group. "
 "Follow the link below to become a member of the group: <br /><a href="
+"\"%(link)s\">%(link)s</a> "
+msgstr ""
+
+#: core/templates/email/invite_to_site.html:6
+#, python-format
+msgid ""
+"You have been invited by %(user_name)s to join the site %(site_name)s. "
+"Follow the link below to become a member of the site: <br /><a href="
 "\"%(link)s\">%(link)s</a> "
 msgstr ""
 
@@ -323,8 +334,8 @@ msgid ""
 "href=\"%(user_url)s\">%(user_name)s</a>"
 msgstr ""
 
-#: core/templates/email/send_notification_emails.html:40
-#: core/templates/email/send_overview_emails.html:121
+#: core/templates/email/send_notification_emails.html:37
+#: core/templates/email/send_overview_emails.html:114
 #, python-format
 msgid ""
 " You have received this e-mail because you registered to receive "
@@ -332,7 +343,7 @@ msgid ""
 "settings."
 msgstr ""
 
-#: core/templates/email/send_overview_emails.html:32
+#: core/templates/email/send_overview_emails.html:29
 #, python-format
 msgid "%(featured_title)s"
 msgstr ""
@@ -432,10 +443,26 @@ msgid ""
 "\n"
 msgstr ""
 
+#: core/templates/registration/login.html:11
+msgid "This site is closed. Log in to get access."
+msgstr ""
+
+#: core/templates/registration/login.html:18
+msgid "Login using Pleio account"
+msgstr ""
+
+#: core/templates/registration/login.html:21
+msgid "Don't have an account?"
+msgstr ""
+
+#: core/templates/registration/login.html:21
+msgid "Register"
+msgstr ""
+
 #: core/tests/test_accept_membership_request.py:85
-#: core/tests/test_accept_membership_request.py:139
+#: core/tests/test_accept_membership_request.py:140
 #, python-format
-msgid "Request for access to the %s group has been approved"
+msgid "Toegangsaanvraag voor de groep %s goedgekeurd"
 msgstr ""
 
 #: core/tests/test_change_group_role.py:80
@@ -465,10 +492,10 @@ msgid "Reminder to become a member of the %s group"
 msgstr ""
 
 #: core/tests/test_send_notification_emails.py:41
-#: core/tests/test_send_notification_emails.py:85
-#: core/tests/test_send_notification_emails.py:106
+#: core/tests/test_send_notification_emails.py:86
+#: core/tests/test_send_notification_emails.py:107
 #, python-format
-msgid "New notifications at %s"
+msgid "Nieuwe notificaties op %s"
 msgstr ""
 
 #: core/tests/test_send_overview_emails.py:82
@@ -479,17 +506,17 @@ msgstr ""
 #: core/tests/test_send_overview_emails.py:262
 #: core/tests/test_send_overview_emails.py:302
 #, python-format
-msgid "Regular overview of %s"
+msgid "Periodiek overzicht van %s"
 msgstr ""
 
-#: event/resolvers/mutation_attend_event_without_account.py:31
+#: event/resolvers/mutation_attend_event_without_account.py:32
 #: event/tests/test_attend_event_without_account.py:70
 #: event/tests/test_attend_event_without_account.py:127
 #, python-format
 msgid "Confirmation of registration %s"
 msgstr ""
 
-#: event/resolvers/mutation_confirm_attend_event_without_account.py:49
+#: event/resolvers/mutation_confirm_attend_event_without_account.py:51
 #: event/tests/test_confirm_attend_event_without_account.py:70
 #, python-format
 msgid "Confirmation of registration for %s"

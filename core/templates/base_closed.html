@@ -1,0 +1,89 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="{{ config.LANGUAGE }}">
+	<head>
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<meta charset="utf-8">
+        <title>{{ config.NAME }}</title>
+        
+        <link rel="apple-touch-icon" sizes="180x180" href="{% static 'apple-touch-icon.png' %}">
+        <link rel="icon" type="image/png" sizes="32x32" href="{% static 'favicon-32x32.png' %}">
+        <link rel="icon" type="image/png" sizes="16x16" href="{% static 'favicon-16x16.png' %}">
+        <link rel="manifest" href="{% static 'site.webmanifest' %}">
+        <meta name="msapplication-TileColor" content="#da532c">
+        {% if config.COLOR_HEADER %}
+            <meta name="theme-color" content="{{ config.COLOR_HEADER }}">
+        {% else %}
+            <meta name="theme-color" content="{{ config.COLOR_PRIMARY }}">
+        {% endif %}
+
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+        <meta name="version" content="1.0.0">
+        <meta name="relative-path" content="">
+
+        <link href="{% static 'legacy.css' %}" rel="stylesheet" type="text/css">
+
+        {% if webpack_dev_server %}
+        <link href="http://localhost:9001/web.css?v={{ version }}" rel="stylesheet" type="text/css">
+        {% else %}
+        <link href="{% static 'frontend/web.css' %}" rel="stylesheet" type="text/css">
+        {% endif %}
+
+        {% if config.GOOGLE_SITE_VERIFICATION %}
+        <meta name="google-site-verification" content="{{ config.GOOGLE_SITE_VERIFICATION }}">
+        {% endif %}
+    
+        {% if config.FONT %}
+            {% if config.FONT == "Roboto" %}
+                <link href="https://fonts.googleapis.com/css?family=Roboto:400,500,700&display=swap" rel="stylesheet">
+            {% elif config.FONT == "Merriweather" %}
+                <link href="https://fonts.googleapis.com/css?family=Merriweather:400,700&display=swap" rel="stylesheet">
+            {% elif config.FONT == "Source Sans Pro" %}
+                <link href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,600,700&display=swap" rel="stylesheet">
+            {% elif config.FONT == "Open Sans" %}
+                <link href="https://fonts.googleapis.com/css?family=Open+Sans:400,600,700&display=swap" rel="stylesheet">
+            {% endif %}
+        {% endif %}
+    </head>
+	<body class="___{{ config.THEME }}" style="background:white;">
+		<div class="page-layout">
+			<header class="page-layout__header walled-garden_header">
+				<div class="walled-garden_header-top">
+					<svg width="35px" height="35px" viewBox="0 0 35 35" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+						<g id="Walled-garden" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+							<g id="Nav-group-Copy-2" transform="translate(-40.000000, -32.000000)">
+								<g id="logo" transform="translate(40.000000, 32.000000)">
+									<g id="background" fill="#1565C0">
+										<path d="M29.4,0 C32.5,0 35,2.5 35,5.6 L35,29.4 C35,32.5 32.5,35 29.4,35 L5.6,35 C2.5,35 0,32.5 0,29.4 L0,5.6 C0,2.5 2.5,0 5.6,0" id="Shape"></path>
+									</g>
+									<g id="lines" transform="translate(6.000000, 6.000000)" fill="#FFFFFF">
+										<path d="M3,3 C4.2,1.8 6.1,1.8 7.2,3 L14,9.8 L15.3,8.5 L8.5,1.7 C6.6,-0.2 3.6,-0.2 1.7,1.7 C-0.2,3.6 -0.2,6.6 1.7,8.5 L3,9.9 L4.3,8.6 L3,7.2 C1.8,6 1.8,4.1 3,3" id="Shape"></path>
+										<path d="M20,20 C18.8,21.2 16.9,21.2 15.8,20 L9,13.2 L7.7,14.5 L14.5,21.3 C16.4,23.2 19.4,23.2 21.3,21.3 C23.2,19.4 23.2,16.4 21.3,14.5 L20,13.1 L18.7,14.4 L20.1,15.8 C21.2,17 21.2,18.9 20,20" id="Shape"></path>
+										<path d="M20,3 C21.2,4.2 21.2,6.1 20,7.2 L13.2,14 L14.5,15.3 L21.3,8.5 C23.2,6.6 23.2,3.6 21.3,1.7 C19.4,-0.2 16.4,-0.2 14.5,1.7 L13.1,3 L14.4,4.3 L15.8,3 C17,1.8 18.9,1.8 20,3" id="Shape"></path>
+										<path d="M3,20 C1.8,18.8 1.8,16.9 3,15.8 L9.8,9 L8.5,7.7 L1.7,14.5 C-0.2,16.4 -0.2,19.4 1.7,21.3 C3.6,23.2 6.6,23.2 8.5,21.3 L9.9,19.9 L8.6,18.6 L7.2,20 C6,21.2 4.1,21.2 3,20" id="Shape"></path>
+									</g>
+								</g>
+							</g>
+						</g>
+					</svg>
+					<a href="https://www.pleio.nl/" target="_blank" class="walled-garden_pleio-link">
+						www.pleio.nl
+					</a>
+				</div>
+			</header>
+			<main class="page-layout__main walled-garden_main">
+				<div class="walled-garden_content">
+					{% block content %}{% endblock %}
+				</div>
+			</main>
+			<footer class="walled-garden_footer">
+				<div class="content">
+					{% block footer %}{% endblock %}
+				</div>
+				<a href="https://www.pleio.nl/" target="_blank" class="walled-garden_pleio-link">
+					www.pleio.nl
+				</a>
+			</footer>
+		</div>
+	</body>
+</html>

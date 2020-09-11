@@ -110,7 +110,10 @@ class WalledGardenMiddleware:
             and not request.user.is_authenticated
             and not self.is_public_url(request.path_info)
         ):
-            response = TemplateResponse(request, 'registration/login.html', {}).render()
-            return response
-        response = self.get_response(request)
-        return response
+            context = {
+                'next': request.path_info
+            }
+
+            return TemplateResponse(request, 'registration/login.html', context).render()
+
+        return self.get_response(request)
