@@ -44,7 +44,7 @@ services:
     image: registry.gitlab.com/pleio/frontend:B2-latest
     volumes:
       - frontend-build:/shared
-    command: "cp -Rp /usr/share/nginx/html/. /shared"
+    command: bash -c "cp -Rp /usr/share/nginx/html/. /shared && chown -R www-data:www-data /shared"
   admin:
     build: .
     restart: on-failure
