@@ -2,9 +2,10 @@ from graphql import GraphQLError
 from django.core.exceptions import ObjectDoesNotExist
 from ariadne import ObjectType
 from core.constances import NOT_LOGGED_IN, COULD_NOT_FIND, EVENT_IS_FULL, EVENT_INVALID_STATE, COULD_NOT_FIND_GROUP, INVALID_DATE, COULD_NOT_SAVE
-from core.lib import remove_none_from_dict, access_id_to_acl
+from core.lib import remove_none_from_dict, access_id_to_acl, tenant_schema
 from core.models import Group
 from file.models import FileFolder
+from file.tasks import resize_featured
 from django.utils import dateparse
 from ..models import Event, EventAttendee
 from event.resolvers.mutation_attend_event_without_account import resolve_attend_event_without_account
@@ -105,6 +106,8 @@ def resolve_add_event(_, info, input):
                 write_access=entity.write_access
             )
 
+            resize_featured.delay(tenant_schema(), imageFile.guid)
+
             entity.featured_image = imageFile
 
         entity.featured_position_y = clean_input.get("featured").get("positionY", 0)
@@ -146,6 +149,7 @@ def resolve_add_event(_, info, input):
 def resolve_edit_event(_, info, input):
     # pylint: disable=redefined-builtin
     # pylint: disable=too-many-branches
+    # pylint: disable=too-many-statements
 
     user = info.context["request"].user
 
@@ -183,12 +187,18 @@ def resolve_edit_event(_, info, input):
             entity.featured_image = None
         elif clean_input.get("featured").get("image"):
 
-            imageFile = FileFolder.objects.create(
-                owner=entity.owner,
-                upload=clean_input.get("featured").get("image"),
-                read_access=entity.read_access,
-                write_access=entity.write_access
-            )
+            if entity.featured_image:
+                imageFile = entity.featured_image
+            else:
+                imageFile = FileFolder()
+
+            imageFile.owner = entity.owner
+            imageFile.read_access = entity.read_access
+            imageFile.write_access = entity.write_access
+            imageFile.upload = clean_input.get("featured").get("image")
+            imageFile.save()
+
+            resize_featured.delay(tenant_schema(), imageFile.guid)
 
             entity.featured_image = imageFile
 

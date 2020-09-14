@@ -3,8 +3,9 @@ import os
 import secrets
 from core.constances import ACCESS_TYPE, COULD_NOT_SAVE
 from core import config
-from django.conf import settings
 from django.apps import apps
+from django.conf import settings
+from django.db import connection
 from django.utils.text import slugify
 from graphql import GraphQLError
 from enum import Enum
@@ -240,3 +241,6 @@ def get_exportable_user_fields():
         {'field_type': 'userField', 'field': 'group_memberships', 'label': 'group_memberships'},
         {'field_type': 'userField', 'field': 'receive_newsletter', 'label': 'receive_newsletter'}
     ]
+
+def tenant_schema():
+    return connection.get_schema()
