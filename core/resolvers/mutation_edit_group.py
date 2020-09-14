@@ -2,15 +2,17 @@ from graphql import GraphQLError
 from django.core.exceptions import ObjectDoesNotExist
 from core.models import Group
 from core.constances import NOT_LOGGED_IN, COULD_NOT_SAVE, COULD_NOT_FIND
-from core.lib import remove_none_from_dict, ACCESS_TYPE
+from core.lib import remove_none_from_dict, ACCESS_TYPE, tenant_schema
 from file.models import FileFolder
+from file.tasks import resize_featured
 
 def resolve_edit_group(_, info, input):
     # pylint: disable=redefined-builtin
     # pylint: disable=too-many-branches
-
+    # pylint: disable=too-many-statements
 
     user = info.context["request"].user
+
     clean_input = remove_none_from_dict(input)
 
     if not user.is_authenticated:
@@ -44,12 +46,18 @@ def resolve_edit_group(_, info, input):
             group.featured_image = None
         elif clean_input.get("featured").get("image"):
 
-            imageFile = FileFolder.objects.create(
-                owner=group.owner,
-                upload=clean_input.get("featured").get("image"),
-                read_access=[ACCESS_TYPE.public],
-                write_access=[ACCESS_TYPE.user.format(user.id)]
-            )
+            if group.featured_image:
+                imageFile = group.featured_image
+            else:
+                imageFile = FileFolder()
+
+            imageFile.owner = group.owner
+            imageFile.read_access = [ACCESS_TYPE.public]
+            imageFile.write_access = [ACCESS_TYPE.user.format(user.id)]
+            imageFile.upload = clean_input.get("featured").get("image")
+            imageFile.save()
+
+            resize_featured.delay(tenant_schema(), imageFile.guid)
 
             group.featured_image = imageFile
 

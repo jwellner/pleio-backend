@@ -1,11 +1,11 @@
 from graphql import GraphQLError
 from django.core.exceptions import ObjectDoesNotExist
 from blog.models import Blog
-from core.lib import remove_none_from_dict, access_id_to_acl
+from core.lib import remove_none_from_dict, access_id_to_acl, tenant_schema
 from core.constances import NOT_LOGGED_IN, COULD_NOT_FIND_GROUP, COULD_NOT_FIND, COULD_NOT_SAVE
 from core.models import Group
 from file.models import FileFolder
-
+from file.tasks import resize_featured
 
 def resolve_add_blog(_, info, input):
     # pylint: disable=redefined-builtin
@@ -59,6 +59,8 @@ def resolve_add_blog(_, info, input):
                 read_access=entity.read_access,
                 write_access=entity.write_access
             )
+
+            resize_featured.delay(tenant_schema(), imageFile.guid)
 
             entity.featured_image = imageFile
 
@@ -123,12 +125,18 @@ def resolve_edit_blog(_, info, input):
             entity.featured_image = None
         elif clean_input.get("featured").get("image"):
 
-            imageFile = FileFolder.objects.create(
-                owner=entity.owner,
-                upload=clean_input.get("featured").get("image"),
-                read_access=entity.read_access,
-                write_access=entity.write_access
-            )
+            if entity.featured_image:
+                imageFile = entity.featured_image
+            else:
+                imageFile = FileFolder()
+
+            imageFile.owner = entity.owner
+            imageFile.read_access = entity.read_access
+            imageFile.write_access = entity.write_access
+            imageFile.upload = clean_input.get("featured").get("image")
+            imageFile.save()
+
+            resize_featured.delay(tenant_schema(), imageFile.guid)
 
             entity.featured_image = imageFile
 
