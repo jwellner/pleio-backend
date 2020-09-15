@@ -8,7 +8,7 @@ uwsgi==2.0.19.1
 mozilla-django-oidc==1.2.3
 Sphinx==3.2.1
 sphinx-autobuild==0.7.1
-coverage==5.2.1
+coverage==5.3
 prospector==1.2.0
 ariadne==0.12.0
 django-model-utils==4.0.0
