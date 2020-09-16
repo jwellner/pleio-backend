@@ -46,6 +46,7 @@ class UserDocument(DefaultDocument):
         search_analyzer="standard",
         boost=5
     )
+    external_id = fields.KeywordField()
 
     _profile = fields.ObjectField(properties={
         'user_profile_fields': fields.NestedField(properties={
@@ -55,6 +56,11 @@ class UserDocument(DefaultDocument):
             'read_access': fields.ListField(fields.TextField(attr="read_access"))
         })
     })
+
+    last_online = fields.DateField()
+
+    def prepare_last_online(self, instance):
+        return instance.profile.last_online
 
     class Index:
         name = 'user'
