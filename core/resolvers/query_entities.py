@@ -37,7 +37,7 @@ def conditional_group_filter(subtype, container_guid):
     Filter only items in group
     """
     if container_guid == "1" and subtype == "wiki":
-        return Q(group=None) & Q(parent=None)
+        return Q(group=None) & Q(wiki__parent=None)
     if container_guid == "1":
         return Q(group=None)
     if container_guid:
@@ -124,7 +124,7 @@ def resolve_entities(
                                conditional_subtypes_filter(subtypes) &
                                conditional_is_featured_filter(isFeatured))
 
-    # when page is selected change sorting and only return pages without parent 
+    # when page is selected change sorting and only return pages without parent
     if subtype and subtype == 'page':
         entities = entities.filter(page__parent=None)
         order_by = 'page__title'
