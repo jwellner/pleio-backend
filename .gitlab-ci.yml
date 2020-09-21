@@ -87,7 +87,7 @@ deploy-dev-aws:
     - /usr/local/bin/kubectl -n pleio2 set image deployment/admin-test admin-test=registry.gitlab.com/pleio/backend2:${CI_COMMIT_SHA:0:8}
     - /usr/local/bin/kubectl -n pleio2 set image deployment/background-test background-test=registry.gitlab.com/pleio/backend2:${CI_COMMIT_SHA:0:8}
 
-deploy-dev-master:
+deploy-master-aws:
   stage: deploy
   tags:
     - control-aws
