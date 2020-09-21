@@ -14,6 +14,7 @@ from .subgroup_list import subgroup_list
 from .subgroup import subgroup
 from .email_overview import email_overview
 from .notification import notification
+from .site import site
 
 resolvers = [query, mutation, viewer, entity, user, group, member, comment, profile_item, widget, invite, subgroup_list, subgroup, email_overview,
-             notification]
+             notification, site]

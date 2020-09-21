@@ -14,12 +14,33 @@ def get_online_users():
     ten_minutes_ago = timezone.now() - timezone.timedelta(minutes=10)
     return UserProfile.objects.filter(last_online__gte=ten_minutes_ago).count()
 
+def get_profile():
+    profile_fields = []
+    for field in config.PROFILE:
+        try:
+            profile_fields.append(ProfileField.objects.get(key=field['key']))
+        except Exception:
+            continue
+    return profile_fields
 
 def get_settings():
     """Temporary helper to build window.__SETTINGS__"""
 
     return {
-        "site": get_site(),
+        "site": {
+            "language": config.LANGUAGE,
+            "name": config.NAME,
+            "theme": config.THEME,
+            "startPage": config.STARTPAGE,
+            "startPageCms": config.STARTPAGE_CMS,
+            "accessIds": get_access_ids(),
+            "defaultAccessId": config.DEFAULT_ACCESS_ID,
+            "likeIcon": config.LIKE_ICON,
+            "limitedGroupAdd": config.LIMITED_GROUP_ADD,
+            "cookieConsent": config.COOKIE_CONSENT,
+            "isClosed": config.IS_CLOSED,
+            "newsletter": config.NEWSLETTER,
+        },
         "backendVersion": config.BACKEND_VERSION,
         "env": settings.ENV,
         "odtEnabled": False,
@@ -41,67 +62,7 @@ def get_settings():
     }
 
 
-def get_site():
-
-    site = {
-        'guid': 1,
-        'name': config.NAME,
-        'theme': config.THEME,
-        'menu': config.MENU,
-        'profile': config.PROFILE,
-        'profileSections': config.PROFILE_SECTIONS,
-        'footer': config.FOOTER,
-        'directLinks': config.DIRECT_LINKS,
-        'accessIds': get_access_ids(),
-        # TODO: implement isClosed when functionality is available
-        'isClosed': False,
-        'defaultAccessId': config.DEFAULT_ACCESS_ID,
-        'language': config.LANGUAGE,
-        'logo': config.LOGO,
-        'logoAlt': config.LOGO_ALT,
-        'likeIcon': config.LIKE_ICON,
-        'icon': config.ICON if config.ICON else static('icon.svg'),
-        'iconAlt': config.ICON_ALT,
-        'showIcon': config.ICON_ENABLED,
-        'startPage': config.STARTPAGE,
-        'startPageCms': config.STARTPAGE_CMS,
-        'showLeader': config.LEADER_ENABLED,
-        'showLeaderButtons': config.LEADER_BUTTONS_ENABLED,
-        'subtitle': config.SUBTITLE,
-        'leaderImage': config.LEADER_IMAGE,
-        'showInitiative': config.INITIATIVE_ENABLED,
-        'initiativeTitle': config.INITIATIVE_TITLE,
-        'inititativeImageAlt': config.INITIATIVE_IMAGE_ALT,
-        'inititativeDescription': config.INITIATIVE_DESCRIPTION,
-        'initiatorLink': config.INITIATOR_LINK,
-        'style': {
-            'font': config.FONT,
-            'colorPrimary': config.COLOR_PRIMARY,
-            'colorSecondary': config.COLOR_SECONDARY,
-            'colorHeader': get_color_header(),
-        },
-        'customTagsAllowed': config.CUSTOM_TAGS_ENABLED,
-        'tagCategories': config.TAG_CATEGORIES,
-        'showTagsInFeed': config.SHOW_TAGS_IN_FEED,
-        'showTagsInDetail': config.SHOW_TAGS_IN_DETAIL,
-        'activityFilter': get_activity_filters(),
-        'showExtraHomepageFilters': config.ACTIVITY_FEED_FILTERS_ENABLED,
-        'usersOnline': get_online_users(),
-        'achievementsEnabled': config.ACHIEVEMENTS_ENABLED,
-        'limitedGroupAdd': config.LIMITED_GROUP_ADD,
-        'cancelMembershipEnabled': config.CANCEL_MEMBERSHIP_ENABLED,
-        'newsletter': config.NEWSLETTER,
-        'showLoginRegister': config.SHOW_LOGIN_REGISTER,
-
-        'onboardingEnabled': config.ONBOARDING_ENABLED,
-        'onboardingForceExistingUsers': config.ONBOARDING_FORCE_EXISTING_USERS,
-        'onboardingIntro': config.ONBOARDING_INTRO,
-    }
-
-    return site
-
 def get_site_settings():
-
     defaultAccessIdOptions = [
             {"value": 0, "label": ugettext_lazy("Just me")},
             {"value": 1, "label": ugettext_lazy("Logged in users")}
@@ -133,7 +94,7 @@ def get_site_settings():
         'font': config.FONT,
         'colorPrimary': config.COLOR_PRIMARY,
         'colorSecondary': config.COLOR_SECONDARY,
-        'colorHeader': get_color_header(),
+        'colorHeader': config.COLOR_HEADER if config.COLOR_HEADER else config.COLOR_PRIMARY,
         'theme': config.THEME,
         'themeOptions': config.THEME_OPTIONS,
         'fontOptions': [
@@ -230,22 +191,8 @@ def get_site_settings():
 
     return site_settings
 
-def get_color_header():
-    if not config.COLOR_HEADER:
-        return config.COLOR_PRIMARY
-    return config.COLOR_HEADER
-
-def get_profile():
-    profile_fields = []
-    for field in config.PROFILE:
-        try:
-            profile_fields.append(ProfileField.objects.get(key=field['key']))
-        except Exception:
-            continue
-    return profile_fields
-
 def resolve_site(*_):
-    return get_site()
+    return { 'guid': 1 }
 
 
 def resolve_site_settings(_, info):
