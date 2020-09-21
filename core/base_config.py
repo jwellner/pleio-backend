@@ -104,6 +104,8 @@ DEFAULT_SITE_CONFIG = {
     'ONBOARDING_ENABLED': (False, 'Onboarding enabled'),
     'ONBOARDING_FORCE_EXISTING_USERS': (False, 'Onboarding force existing users'),
     'ONBOARDING_INTRO': ("", 'Onboarding intro'),
+
+    'COOKIE_CONSENT': (False, 'Cookie consent enabled'),
 }
 """
 Default site configuration
@@ -120,6 +122,7 @@ Valid JSONFields types:
 class ConfigBackend():
     def __init__(self):
         self._model = apps.get_model('core.Setting')
+        self.init()
 
     def get(self, key):
         value = cache.get("%s%s" % (connection.schema_name, key))
@@ -146,6 +149,16 @@ class ConfigBackend():
             setting.save()
 
         cache.set("%s%s" % (connection.schema_name, key), value)
+
+    def init(self):
+        # fill cache on init
+        try: 
+            for setting in self._model.objects.all():
+                if len(DEFAULT_SITE_CONFIG[setting.key]) in (2, 3):
+                    cache.set("%s%s" % (connection.schema_name, setting.key), setting.value)
+        except ProgrammingError:
+            pass
+
 
 
 class Config():
