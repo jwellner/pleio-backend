@@ -165,8 +165,10 @@ extend type SiteSettings {
   onboardingForceExistingUsers: Boolean!
   onboardingIntro: String
   siteInvites: SiteInviteList
+  cookieConsent: Boolean!
 }
 
 extend input editSiteSettingInput {
   limitedGroupAdd: Boolean
+  cookieConsent: Boolean
 }

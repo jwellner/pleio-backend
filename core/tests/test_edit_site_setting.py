@@ -148,6 +148,7 @@ class EditSiteSettingTestCase(FastTenantTestCase):
                         onboardingEnabled
                         onboardingForceExistingUsers
                         onboardingIntro
+                        cookieConsent
                     }
                 }
             }
@@ -235,6 +236,8 @@ class EditSiteSettingTestCase(FastTenantTestCase):
                 'onboardingEnabled': True,
                 'onboardingForceExistingUsers': True,
                 'onboardingIntro': 'Welcome onboarding',
+
+                'cookieConsent': True
 
             }
         }
@@ -329,6 +332,7 @@ class EditSiteSettingTestCase(FastTenantTestCase):
         self.assertEqual(data["editSiteSetting"]["siteSettings"]["onboardingEnabled"], True)
         self.assertEqual(data["editSiteSetting"]["siteSettings"]["onboardingForceExistingUsers"], True)
         self.assertEqual(data["editSiteSetting"]["siteSettings"]["onboardingIntro"], "Welcome onboarding")
+        self.assertEqual(data["editSiteSetting"]["siteSettings"]["cookieConsent"], True)
 
     @patch("file.models.get_mimetype")
     @patch("{}.open".format(settings.DEFAULT_FILE_STORAGE))

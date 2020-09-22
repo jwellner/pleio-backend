@@ -186,7 +186,8 @@ def get_site_settings():
         'onboardingIntro': config.ONBOARDING_INTRO,
         'siteInvites': {
             'edges': SiteInvitation.objects.all()
-        }
+        },
+        'cookieConsent': config.COOKIE_CONSENT
     }
 
     return site_settings

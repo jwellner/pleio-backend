@@ -174,6 +174,7 @@ class SiteSettingsTestCase(FastTenantTestCase):
                             email
                         }
                     }
+                    cookieConsent
                 }
             }
         """
@@ -305,6 +306,8 @@ class SiteSettingsTestCase(FastTenantTestCase):
         self.assertEqual(data["siteSettings"]["groupMemberExport"], False)
 
         self.assertEqual(data["siteSettings"]["siteInvites"]["edges"][0]['email'], 'a@a.nl')
+
+        self.assertEqual(data["siteSettings"]["cookieConsent"], False)
 
     def test_site_settings_by_anonymous(self):
 
