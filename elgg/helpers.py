@@ -57,22 +57,22 @@ class ElggHelpers():
             metadata__name__string="metadata_name").first()
 
         if not profile_field_entity:
-            return 'textField'
+            return 'text_field'
 
         metadata_type = profile_field_entity.metadata.filter(name__string="metadata_type").first()
 
         elgg_type = metadata_type.value.string if metadata_type else None
 
         if elgg_type in ['dropdown', 'radio', 'pm_rating']:
-            field_type = 'selectField'
+            field_type = 'select_field'
         elif elgg_type in ['date', 'birthday', 'calendar', 'pm_datepicker']:
-            field_type = 'dateField'
+            field_type = 'date_field'
         elif elgg_type in ['longtext']:
-            field_type = 'htmlField'
+            field_type = 'html_field'
         elif elgg_type in ['multiselect']:
-            field_type = 'multiSelectField'
+            field_type = 'multi_select_field'
         else:
-            field_type = 'textField'
+            field_type = 'text_field'
 
         return field_type
 
