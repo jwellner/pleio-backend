@@ -6,7 +6,7 @@ question = ObjectType("Question")
 @question.field("subtype")
 def resolve_excerpt(obj, info):
     # pylint: disable=unused-argument
-    return "blog"
+    return obj.type_to_string
 
 @question.field("inGroup")
 def resolve_in_group(obj, info):

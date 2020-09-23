@@ -6,7 +6,7 @@ news = ObjectType("News")
 @news.field("subtype")
 def resolve_excerpt(obj, info):
     # pylint: disable=unused-argument
-    return "news"
+    return obj.type_to_string
 
 @news.field("startDate")
 def resolve_start_date(obj, info):
