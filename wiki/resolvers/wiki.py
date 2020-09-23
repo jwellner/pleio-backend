@@ -3,6 +3,11 @@ from core.resolvers import shared
 
 wiki = ObjectType("Wiki")
 
+@wiki.field("subtype")
+def resolve_excerpt(obj, info):
+    # pylint: disable=unused-argument
+    return obj.type_to_string
+
 @wiki.field("hasChildren")
 def resolve_has_children(obj, info):
     # pylint: disable=unused-argument

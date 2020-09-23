@@ -1810,6 +1810,7 @@ input WidgetSettingInput {
 type Wiki implements Entity {
   guid: String!
   status: Int
+  subtype: String
   canEdit: Boolean!
   title: String
   description: String
