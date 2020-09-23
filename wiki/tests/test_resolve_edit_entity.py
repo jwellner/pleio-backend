@@ -65,6 +65,7 @@ class AddWikiCase(FastTenantTestCase):
                     guid
                 }
                 isFeatured
+                subtype
             }
             mutation ($input: editEntityInput!) {
                 editEntity(input: $input) {
@@ -93,6 +94,7 @@ class AddWikiCase(FastTenantTestCase):
         self.assertEqual(data["editEntity"]["entity"]["richDescription"], variables["input"]["richDescription"])
         self.assertEqual(data["editEntity"]["entity"]["hasChildren"], False)
         self.assertEqual(data["editEntity"]["entity"]["isFeatured"], False) # only with editor role
+        self.assertEqual(data["editEntity"]["entity"]["subtype"], "wiki")
 
         self.wikiPublic.refresh_from_db()
 
