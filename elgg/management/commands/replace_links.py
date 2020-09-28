@@ -1,4 +1,5 @@
 import re
+import json
 
 from django.core import management
 from django.core.management.base import BaseCommand, CommandError
@@ -128,7 +129,7 @@ class Command(InteractiveTenantOption, BaseCommand):
 
         for entity in entities:
             if hasattr(entity, 'rich_description'):
-                rich_description = self._replace_links(entity.rich_description)
+                rich_description = self._replace_rich_description_json(entity.rich_description)
                 description = self._replace_links(entity.description)
 
                 if rich_description != entity.rich_description or description != entity.description:
@@ -144,7 +145,7 @@ class Command(InteractiveTenantOption, BaseCommand):
         self.stdout.write("\n>> Replace Group.(rich_)description (%i) " % groups.count(), ending="")
 
         for group in groups:
-            rich_description = self._replace_links(group.rich_description)
+            rich_description = self._replace_rich_description_json(group.rich_description)
             description = self._replace_links(group.description)
 
             if rich_description != group.rich_description or description != group.description:
@@ -160,7 +161,7 @@ class Command(InteractiveTenantOption, BaseCommand):
         self.stdout.write("\n>> Replace Comment.(rich_)description (%i) " % comments.count(), ending="")
 
         for comment in comments:
-            rich_description = self._replace_links(comment.rich_description)
+            rich_description = self._replace_rich_description_json(comment.rich_description)
             description = self._replace_links(comment.rich_description)
 
             if rich_description != comment.rich_description or description != comment.description:
@@ -190,6 +191,20 @@ class Command(InteractiveTenantOption, BaseCommand):
                 self.stdout.write("*", ending="")
             else:
                 self.stdout.write(".", ending="")
+
+    def _replace_rich_description_json(self, rich_description):
+        if rich_description:
+            data = json.loads(rich_description)
+            for idx in data["entityMap"]:
+                if data["entityMap"][idx]["type"] == "IMAGE":
+                    data["entityMap"][idx]["data"]["src"] = self._replace_links(data["entityMap"][idx]["data"]["src"])
+                if data["entityMap"][idx]["type"] == "LINK":
+                    if "url" in data["entityMap"][idx]["data"]:
+                        data["entityMap"][idx]["data"]["url"] = self._replace_links(data["entityMap"][idx]["data"]["url"])
+                    if "href" in data["entityMap"][idx]["data"]:
+                        data["entityMap"][idx]["data"]["href"] = self._replace_links(data["entityMap"][idx]["data"]["href"])
+            return json.dumps(data)
+        return rich_description
 
     def _replace_links(self, text):
         # Testing: https://regex101.com/r/13zeJW/2
