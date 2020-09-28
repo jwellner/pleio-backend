@@ -173,7 +173,7 @@ class Command(InteractiveTenantOption, BaseCommand):
             if elgg_site.description else ""
         config.IS_CLOSED = self.helpers.get_site_config('walled_garden')
         config.ALLOW_REGISTRATION = self.helpers.get_site_config('allow_registration')
-        config.GOOGLE_ANALYTICS_URL = html.unescape(self.helpers.get_plugin_setting("google_analytics")) \
+        config.GOOGLE_ANALYTICS_ID = html.unescape(self.helpers.get_plugin_setting("google_analytics")) \
             if self.helpers.get_plugin_setting("google_analytics") else ""
         config.GOOGLE_SITE_VERIFICATION = html.unescape(self.helpers.get_plugin_setting("google_site_verification")) \
             if self.helpers.get_plugin_setting("google_site_verification") else ""

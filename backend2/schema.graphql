@@ -604,7 +604,7 @@ input editSiteSettingInput {
   isClosed: Boolean
   allowRegistration: Boolean
   defaultAccessId: Int
-  googleAnalyticsUrl: String
+  googleAnalyticsId: String
   googleSiteVerification: String
   piwikUrl: String
   piwikId: String
@@ -1498,7 +1498,7 @@ type SiteSettings {
   allowRegistration: Boolean!
   defaultAccessId: Int!
   defaultAccessIdOptions: [OptionInteger]
-  googleAnalyticsUrl: String
+  googleAnalyticsId: String
   googleSiteVerification: String
   piwikUrl: String
   piwikId: String

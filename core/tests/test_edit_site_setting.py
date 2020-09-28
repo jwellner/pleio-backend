@@ -52,7 +52,7 @@ class EditSiteSettingTestCase(FastTenantTestCase):
                             value
                             label
                         }
-                        googleAnalyticsUrl
+                        googleAnalyticsId
                         googleSiteVerification
 
                         piwikUrl
@@ -161,7 +161,7 @@ class EditSiteSettingTestCase(FastTenantTestCase):
                 "isClosed": True,
                 "allowRegistration": False,
                 "defaultAccessId": 0,
-                "googleAnalyticsUrl": "url2",
+                "googleAnalyticsId": "123",
                 "googleSiteVerification": "code1",
 
                 "piwikUrl": "url3",
@@ -255,7 +255,7 @@ class EditSiteSettingTestCase(FastTenantTestCase):
         self.assertEqual(data["editSiteSetting"]["siteSettings"]["allowRegistration"], False)
         self.assertEqual(data["editSiteSetting"]["siteSettings"]["defaultAccessId"], 0)
         self.assertEqual(data["editSiteSetting"]["siteSettings"]["defaultAccessIdOptions"], [{'value': 0, 'label': 'Alleen mijzelf'}, {'value': 1, 'label': 'Ingelogde gebruikers'}])
-        self.assertEqual(data["editSiteSetting"]["siteSettings"]["googleAnalyticsUrl"], "url2")
+        self.assertEqual(data["editSiteSetting"]["siteSettings"]["googleAnalyticsId"], "123")
         self.assertEqual(data["editSiteSetting"]["siteSettings"]["googleSiteVerification"], "code1")
 
         self.assertEqual(data["editSiteSetting"]["siteSettings"]["piwikUrl"], "url3")

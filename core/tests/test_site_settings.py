@@ -51,7 +51,7 @@ class SiteSettingsTestCase(FastTenantTestCase):
                         label
                     }
                     defaultAccessId
-                    googleAnalyticsUrl
+                    googleAnalyticsId
                     googleSiteVerification
                     piwikUrl
                     piwikId
@@ -210,9 +210,9 @@ class SiteSettingsTestCase(FastTenantTestCase):
         self.assertEqual(data["siteSettings"]["allowRegistration"], True)
         self.assertEqual(data["siteSettings"]["defaultAccessIdOptions"], [{'value': 0, 'label': 'Alleen mijzelf'}, {'value': 1, 'label': 'Ingelogde gebruikers'}, {'value': 2, 'label': 'Iedereen publiek zichtbaar'}])
         self.assertEqual(data["siteSettings"]["defaultAccessId"], 1)
-        self.assertEqual(data["siteSettings"]["googleAnalyticsUrl"], "")
+        self.assertEqual(data["siteSettings"]["googleAnalyticsId"], "")
         self.assertEqual(data["siteSettings"]["googleSiteVerification"], "")
-        self.assertEqual(data["siteSettings"]["piwikUrl"], "")
+        self.assertEqual(data["siteSettings"]["piwikUrl"], "https://stats.pleio.nl/")
         self.assertEqual(data["siteSettings"]["piwikId"], "")
 
         self.assertEqual(data["siteSettings"]["themeOptions"], [{"value": 'leraar', 'label': 'Standaard'}, {'value': 'rijkshuisstijl', 'label': 'Rijkshuisstijl'}])
