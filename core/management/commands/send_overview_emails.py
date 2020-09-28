@@ -1,7 +1,8 @@
 from django.core.management.base import BaseCommand
 from django.db.models import Q
-from django.utils import timezone
+from django.utils import timezone, dateformat, formats
 from django.utils.translation import ugettext_lazy
+from django.conf import settings
 from core import config
 from core.models import Entity, EntityView
 from datetime import datetime, timedelta
@@ -39,6 +40,7 @@ def get_serializable_entities(entities):
             'group': entity_group,
             'group_name': entity_group_name,
             'group_url': entity_group_url,
+            'created_at': entity.created_at.strftime("%e-%m-%Y")  # formatting done here because it's not a date object anymore after serialization
         }
         serializable_entities.append(serializable_entity)
     return serializable_entities
@@ -64,7 +66,8 @@ class Command(BaseCommand):
 
             context = {'user_url': user_url, 'site_name': site_name, 'site_url': site_url, 'primary_color': primary_color,
                        'entities': entities, 'featured': featured_entities, 'intro_text': config.EMAIL_OVERVIEW_INTRO, 'title': config.EMAIL_OVERVIEW_TITLE,
-                       'featured_enabled': config.EMAIL_OVERVIEW_ENABLE_FEATURED, 'featured_title': config.EMAIL_OVERVIEW_FEATURED_TITLE}
+                       'featured_enabled': config.EMAIL_OVERVIEW_ENABLE_FEATURED, 'featured_title': config.EMAIL_OVERVIEW_FEATURED_TITLE, 'subject': subject}
+
             send_mail_multi.delay(connection.schema_name, subject, 'email/send_overview_emails.html', context, user.email)
             user.profile.overview_email_last_received = datetime.now()
             user.profile.save()

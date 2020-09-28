@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-09-10 12:41+0200\n"
+"POT-Creation-Date: 2020-09-28 12:07+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -18,11 +18,11 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#: backend2/config.py:61 core/resolvers/query_site.py:122
+#: backend2/config.py:61 core/resolvers/query_site.py:83
 msgid "English"
 msgstr "Engels"
 
-#: backend2/config.py:62 core/resolvers/query_site.py:122
+#: backend2/config.py:62 core/resolvers/query_site.py:83
 msgid "Dutch"
 msgstr "Nederlands"
 
@@ -31,7 +31,7 @@ msgstr "Nederlands"
 msgid "New notifications at %(site_name)s"
 msgstr "Nieuwe notificaties op %(site_name)s"
 
-#: core/management/commands/send_overview_emails.py:86
+#: core/management/commands/send_overview_emails.py:89
 #, python-format
 msgid "Regular overview of %(site_name)s"
 msgstr "Periodiek overzicht van %(site_name)s"
@@ -116,39 +116,39 @@ msgstr "Een nieuwe site beheerder is toegewezen aan %(site_name)s"
 msgid "You're granted site administrator right on %(site_name)s"
 msgstr "U bent aangewezen als site beheerder van %(site_name)s"
 
-#: core/resolvers/query_site.py:106
+#: core/resolvers/query_site.py:67
 msgid "Just me"
 msgstr "Alleen mijzelf"
 
-#: core/resolvers/query_site.py:107
+#: core/resolvers/query_site.py:68
 msgid "Logged in users"
 msgstr "Ingelogde gebruikers"
 
-#: core/resolvers/query_site.py:111
+#: core/resolvers/query_site.py:72
 msgid "Public"
 msgstr "Iedereen publiek zichtbaar"
 
-#: core/resolvers/query_site.py:148
+#: core/resolvers/query_site.py:109
 msgid "Activity stream"
 msgstr "Activiteitenstroom"
 
-#: core/resolvers/query_site.py:148
+#: core/resolvers/query_site.py:109
 msgid "CMS page"
 msgstr "CMS pagina"
 
-#: core/resolvers/query_site.py:182
+#: core/resolvers/query_site.py:143
 msgid "Daily"
 msgstr "Dagelijks"
 
-#: core/resolvers/query_site.py:183
+#: core/resolvers/query_site.py:144
 msgid "Weekly"
 msgstr "Wekelijks"
 
-#: core/resolvers/query_site.py:184
+#: core/resolvers/query_site.py:145
 msgid "Monthly"
 msgstr "Maandelijks"
 
-#: core/resolvers/query_site.py:185
+#: core/resolvers/query_site.py:146
 msgid "Never"
 msgstr "Nooit"
 
@@ -385,7 +385,6 @@ msgstr ""
 "<a href=\"%(user_url)s\">%(user_name)s</a>"
 
 #: core/templates/email/send_notification_emails.html:37
-#: core/templates/email/send_overview_emails.html:114
 #, python-format
 msgid ""
 " You have received this e-mail because you registered to receive "
@@ -399,6 +398,26 @@ msgstr ""
 #, python-format
 msgid "%(featured_title)s"
 msgstr ""
+
+#: core/templates/email/send_overview_emails.html:78
+#, python-format
+msgid "For all new messages visit %(site_name)s"
+msgstr "Voor alle nieuwe berichten bekijk %(site_name)s"
+
+#: core/templates/email/send_overview_emails.html:93
+#, python-format
+msgid "Go to %(site_name)s"
+msgstr "Ga naar %(site_name)s"
+
+#: core/templates/email/send_overview_emails.html:114
+#, python-format
+msgid ""
+"You have received this e-mail because you registered to receive "
+"notifications.<br /> Click <a href=\"%(user_url)s\">here</a> to change your "
+"settings."
+msgstr ""
+"Je ontvangt deze e-mail omdat je aangemeld bent voor de notificaties.<br /> "
+"Klik <a href=\"%(user_url)s\">hier</a> om je instellingen aan te passen."
 
 #: core/templates/email/toggle_request_delete_user_cancelled.html:6
 #, python-format

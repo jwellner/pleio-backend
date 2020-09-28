@@ -75,7 +75,7 @@
             <table width="100%" border="0" cellspacing="0" cellpadding="0">
                 <tr>
                     <td class="footer-title" style="font-family:Arial,sans-serif; font-size:24px; line-height:28px; text-align:left; font-weight:bold; padding-bottom:17px">
-                        For all new messages visit {{ site_name }}
+                        {% blocktrans %}For all new messages visit {{ site_name }}{% endblocktrans %}
                     </td>
                 </tr>
                 <tr>
@@ -90,7 +90,7 @@
                                                     <tr>
                                                         <td class="text-button2" style="color:#ffffff; font-family:Arial,sans-serif; font-size:16px; line-height:20px; text-align:center; padding:11px 18px">
                                                             <a href="{{ site_url }}?utm_medium=email&utm_campaign=overview" target="_blank" class="link-white" style="color:#ffffff; text-decoration:none"><span class="link-white" style="color:#ffffff; text-decoration:none">
-                                                                Go to {{ site_name }}
+                                                                {% blocktrans %}Go to {{ site_name }}{% endblocktrans %}
                                                             </span></a>
                                                         </td>
                                                     </tr>
@@ -111,5 +111,5 @@
 {% endblock %}
 
 {% block footer_settings %}
-    {% blocktrans %} You have received this e-mail because you registered to receive notifications.<br /> Click <a href="{{user_url}}">here</a> to change your settings.{% endblocktrans %}
+    {% blocktrans %}You have received this e-mail because you registered to receive notifications.<br /> Click <a href="{{user_url}}">here</a> to change your settings.{% endblocktrans %}
 {% endblock %}
