@@ -209,7 +209,7 @@ docker-compose exec api python manage.py tenant_command search_index --populate 
 With this command, you will create and edit .po files. The files will be filled with strings added in de code as msgid's
 
 ```bash
-docker-compose exec api python manage.py makemessages
+docker-compose exec api python manage.py makemessages -a
 ```
 
 With this command, you will compile the translation files which the application will use
