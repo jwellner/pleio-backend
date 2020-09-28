@@ -11,11 +11,10 @@ DEFAULT_SITE_CONFIG = {
     'IS_CLOSED': (False, 'Is site closed'),
     'ALLOW_REGISTRATION': (True, 'Allow registrations'),
     'DEFAULT_ACCESS_ID': (1, 'Default accessId'),
-
-    'GOOGLE_ANALYTICS_URL': ('', 'Google analytics url'),
+    'GOOGLE_ANALYTICS_ID': ('', 'Google analytics ID'),
     'GOOGLE_SITE_VERIFICATION': ('', 'Google site verification code'),
-    'PIWIK_URL': ('', 'Piwik url'),
-    'PIWIK_ID': ('', 'Piwik id'),
+    'PIWIK_URL': ('https://stats.pleio.nl/', 'Piwik url'),
+    'PIWIK_ID': ('', 'Piwik ID'),
 
     'THEME_OPTIONS': (
         [{"value": 'leraar', 'label': 'Standaard'}, {'value': 'rijkshuisstijl', 'label': 'Rijkshuisstijl'}],
@@ -154,7 +153,7 @@ class ConfigBackend():
         # fill cache on init
         try: 
             for setting in self._model.objects.all():
-                if len(DEFAULT_SITE_CONFIG[setting.key]) in (2, 3):
+                if setting.key in DEFAULT_SITE_CONFIG:
                     cache.set("%s%s" % (connection.schema_name, setting.key), setting.value)
         except ProgrammingError:
             pass

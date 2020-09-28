@@ -86,7 +86,7 @@ def get_site_settings():
         'defaultAccessId': config.DEFAULT_ACCESS_ID,
         'defaultAccessIdOptions': defaultAccessIdOptions,
 
-        'googleAnalyticsUrl': config.GOOGLE_ANALYTICS_URL,
+        'googleAnalyticsId': config.GOOGLE_ANALYTICS_ID,
         'googleSiteVerification': config.GOOGLE_SITE_VERIFICATION,
         'piwikUrl': config.PIWIK_URL,
         'piwikId': config.PIWIK_ID,
