@@ -77,8 +77,8 @@ class EntitiesTestCase(FastTenantTestCase):
                                  )
 
         self.query = """
-            query getEntities($subtype: String, $containerGuid: String, $tags: [String!], $tagLists: [[String]], $isFeatured: Boolean) {
-                entities(subtype: $subtype, containerGuid: $containerGuid, tags: $tags, tagLists: $tagLists, isFeatured: $isFeatured) {
+            query getEntities($subtype: String, $containerGuid: String, $tags: [String!], $tagLists: [[String]], $isFeatured: Boolean, $limit: Int, $offset: Int) {
+                entities(subtype: $subtype, containerGuid: $containerGuid, tags: $tags, tagLists: $tagLists, isFeatured: $isFeatured, limit: $limit, offset: $offset) {
                     total
                     edges {
                         guid
@@ -275,3 +275,18 @@ class EntitiesTestCase(FastTenantTestCase):
 
         data = result[1]["data"]
         self.assertEqual(data["entities"]["total"], 2)
+
+    def test_entities_limit(self):
+        request = HttpRequest()
+        request.user = self.authenticatedUser
+
+        variables = { "limit": 5 }
+
+        result = graphql_sync(schema, { "query": self.query, "variables": variables }, context_value={ "request": request })
+
+        self.assertTrue(result[0])
+
+        data = result[1]["data"]
+
+        self.assertEqual(len(data["entities"]["edges"]), 5)
+        self.assertEqual(data["entities"]["total"], 8)

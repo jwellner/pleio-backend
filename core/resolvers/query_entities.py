@@ -95,6 +95,7 @@ def resolve_entities(
     # pylint: disable=unused-argument
     # pylint: disable=too-many-arguments
     # pylint: disable=redefined-builtin
+    # pylint: disable=too-many-locals
 
     # merge all in subtypes list
     if not subtypes and subtype:
@@ -130,9 +131,9 @@ def resolve_entities(
         order_by = 'page__title'
 
     entities = entities.order_by(order_by).select_subclasses()
-    entities = entities[offset:offset+limit]
+    edges = entities[offset:offset+limit]
 
     return {
         'total': entities.count(),
-        'edges': entities,
+        'edges': edges,
     }
