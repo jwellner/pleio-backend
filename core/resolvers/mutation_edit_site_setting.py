@@ -105,7 +105,6 @@ def resolve_edit_site_setting(_, info, input):
         'showViewsCount': 'SHOW_VIEW_COUNT',
         'newsletter': 'NEWSLETTER',
         'cancelMembershipEnabled': 'CANCEL_MEMBERSHIP_ENABLED',
-        'advancedPermissions': 'ADVANCED_PERMISSIONS_ENABLED',
         'showExcerptInNewsCard': 'SHOW_EXCERPT_IN_NEWS_CARD',
         'commentsOnNews': 'COMMENT_ON_NEWS',
         'eventExport': 'EVENT_EXPORT',

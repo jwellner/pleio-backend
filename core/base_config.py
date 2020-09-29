@@ -84,7 +84,6 @@ DEFAULT_SITE_CONFIG = {
     'SHOW_VIEW_COUNT': (True, 'Show view count'),
     'NEWSLETTER': (False, 'Newsletter'),
     'CANCEL_MEMBERSHIP_ENABLED': (True, 'Cancel membership enabled'),
-    'ADVANCED_PERMISSIONS_ENABLED': (False, 'Advanced permissions'),
     'SHOW_EXCERPT_IN_NEWS_CARD': (False, 'Show excerpt in news card'),
     'COMMENT_ON_NEWS': (False, 'Comment on news'),
     'EVENT_EXPORT': (False, 'Event Export'),
