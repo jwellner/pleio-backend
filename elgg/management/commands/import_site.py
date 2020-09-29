@@ -167,7 +167,6 @@ class Command(InteractiveTenantOption, BaseCommand):
         config.DIRECT_LINKS = json.loads(html.unescape(self.helpers.get_plugin_setting("directLinks"))) \
             if self.helpers.get_plugin_setting("directLinks") else []
         config.SHOW_LOGIN_REGISTER = self.helpers.get_plugin_setting("show_login_register") == "yes"
-        config.ADVANCED_PERMISSIONS_ENABLED = self.helpers.get_plugin_setting("advanced_permissions") == "yes"
         config.SUBGROUPS = self.helpers.get_plugin_setting("subgroups") == "yes"
         config.DESCRIPTION = html.unescape(elgg_site.description) \
             if elgg_site.description else ""

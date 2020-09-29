@@ -47,7 +47,6 @@ def get_settings():
         "enableSharing": config.ENABLE_SHARING,
         "showUpDownVoting": config.SHOW_UP_DOWN_VOTING,
         "externalLogin": True,
-        "advancedPermissions": config.ADVANCED_PERMISSIONS_ENABLED,
         "groupMemberExport": config.GROUP_MEMBER_EXPORT,
         "showExcerptInNewsCard": config.SHOW_EXCERPT_IN_NEWS_CARD,
         "numberOfFeaturedItems": config.NUMBER_OF_FEATURED_ITEMS,
@@ -57,7 +56,7 @@ def get_settings():
         "subgroups":  config.SUBGROUPS,
         "statusUpdateGroups": config.STATUS_UPDATE_GROUPS,
         "showExtraHomepageFilters": config.ACTIVITY_FEED_FILTERS_ENABLED,
-        "showViewsCount": config.ADVANCED_PERMISSIONS_ENABLED,
+        "showViewsCount": config.SHOW_VIEW_COUNT,
         "showLoginRegister": config.SHOW_LOGIN_REGISTER,
     }
 
@@ -162,7 +161,6 @@ def get_site_settings():
         'showViewsCount': config.SHOW_VIEW_COUNT,
         'newsletter': config.NEWSLETTER,
         'cancelMembershipEnabled': config.CANCEL_MEMBERSHIP_ENABLED,
-        'advancedPermissions': config.ADVANCED_PERMISSIONS_ENABLED,
         'showExcerptInNewsCard': config.SHOW_EXCERPT_IN_NEWS_CARD,
         'commentsOnNews': config.COMMENT_ON_NEWS,
         'eventExport': config.EVENT_EXPORT,

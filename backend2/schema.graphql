@@ -656,7 +656,6 @@ input editSiteSettingInput {
   showViewsCount: Boolean
   newsletter: Boolean
   cancelMembershipEnabled: Boolean
-  advancedPermissions: Boolean
   showExcerptInNewsCard: Boolean
   commentsOnNews: Boolean
   eventExport: Boolean
@@ -1553,7 +1552,6 @@ type SiteSettings {
   showViewsCount: Boolean!
   newsletter: Boolean!
   cancelMembershipEnabled: Boolean!
-  advancedPermissions: Boolean!
   showExcerptInNewsCard: Boolean!
   commentsOnNews: Boolean!
   eventExport: Boolean!

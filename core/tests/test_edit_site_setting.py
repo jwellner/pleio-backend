@@ -136,7 +136,6 @@ class EditSiteSettingTestCase(FastTenantTestCase):
                         showViewsCount
                         newsletter
                         cancelMembershipEnabled
-                        advancedPermissions
                         showExcerptInNewsCard
                         commentsOnNews
                         eventExport
@@ -224,7 +223,6 @@ class EditSiteSettingTestCase(FastTenantTestCase):
                 'showViewsCount': False,
                 'newsletter': True,
                 'cancelMembershipEnabled': False,
-                'advancedPermissions': True,
                 'showExcerptInNewsCard': True,
                 'commentsOnNews': True,
                 'eventExport': True,
@@ -320,7 +318,6 @@ class EditSiteSettingTestCase(FastTenantTestCase):
         self.assertEqual(data["editSiteSetting"]["siteSettings"]["showViewsCount"], False)
         self.assertEqual(data["editSiteSetting"]["siteSettings"]["newsletter"], True)
         self.assertEqual(data["editSiteSetting"]["siteSettings"]["cancelMembershipEnabled"], False)
-        self.assertEqual(data["editSiteSetting"]["siteSettings"]["advancedPermissions"], True)
         self.assertEqual(data["editSiteSetting"]["siteSettings"]["showExcerptInNewsCard"], True)
         self.assertEqual(data["editSiteSetting"]["siteSettings"]["commentsOnNews"], True)
         self.assertEqual(data["editSiteSetting"]["siteSettings"]["eventExport"], True)

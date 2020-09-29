@@ -157,7 +157,6 @@ class SiteSettingsTestCase(FastTenantTestCase):
                     showViewsCount
                     newsletter
                     cancelMembershipEnabled
-                    advancedPermissions
                     showExcerptInNewsCard
                     commentsOnNews
                     eventExport
@@ -296,7 +295,6 @@ class SiteSettingsTestCase(FastTenantTestCase):
         self.assertEqual(data["siteSettings"]["showViewsCount"], True)
         self.assertEqual(data["siteSettings"]["newsletter"], False)
         self.assertEqual(data["siteSettings"]["cancelMembershipEnabled"], True)
-        self.assertEqual(data["siteSettings"]["advancedPermissions"], False)
         self.assertEqual(data["siteSettings"]["showExcerptInNewsCard"], False)
         self.assertEqual(data["siteSettings"]["commentsOnNews"], False)
         self.assertEqual(data["siteSettings"]["eventExport"], False)
