@@ -1292,7 +1292,7 @@ type ProfileOverviewItem {
 type Query {
   viewer: Viewer
   entity(guid: String, username: String): Entity
-  search(q: String!, containerGuid: String, type: Type, subtype: String, dateFrom: String, dateTo: String, offset: Int, limit: Int): SearchList
+  search(q: String!, containerGuid: String, type: Type, subtype: String, dateFrom: String, dateTo: String, offset: Int, limit: Int, orderBy: SearchOrderBy, orderDirection: OrderDirection): SearchList
   recommended(offset: Int, limit: Int): EntityList
   trending: [TrendingList]
   top: [TopItem]
@@ -1400,6 +1400,14 @@ type SearchList {
   total: Int!
   totals: [SearchTotal]
   edges: [Entity]
+}
+
+"""
+Configure the way the search results are ordered. When not provided, sorting is done on search score (most relevant first).
+"""
+enum SearchOrderBy {
+  title
+  timeCreated
 }
 
 type SearchTotal {
