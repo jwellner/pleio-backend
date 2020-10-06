@@ -19,7 +19,8 @@ class FileDocument(DefaultDocument):
     title = fields.TextField(
         analyzer=custom_analyzer,
         search_analyzer="standard",
-        boost=2
+        boost=2,
+        fields={'raw': fields.KeywordField()}
     )
     file_contents = fields.TextField(
         analyzer=custom_analyzer,

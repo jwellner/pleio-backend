@@ -1,5 +1,5 @@
 from core.lib import get_acl
-from core.constances import INVALID_SUBTYPE, INVALID_DATE
+from core.constances import INVALID_SUBTYPE, INVALID_DATE, ORDER_DIRECTION, SEARCH_ORDER_BY
 from core.models import Entity, Group
 from user.models import User
 from elasticsearch_dsl import Search
@@ -10,7 +10,8 @@ from django_tenants.utils import parse_tenant_config_path
 from django.utils import dateparse
 
 
-def resolve_search(_, info, q=None, containerGuid=None, type=None, subtype=None, dateFrom=None, dateTo=None, offset=0, limit=20):
+def resolve_search(_, info, q=None, containerGuid=None, type=None, subtype=None, dateFrom=None, dateTo=None, offset=0, limit=20,
+                    orderBy=None, orderDirection=ORDER_DIRECTION.asc):
     # pylint: disable=unused-argument
     # pylint: disable=too-many-arguments
     # pylint: disable=redefined-builtin
@@ -62,6 +63,11 @@ def resolve_search(_, info, q=None, containerGuid=None, type=None, subtype=None,
         ).exclude(
             'term', is_active=False
         )
+
+    if orderBy == SEARCH_ORDER_BY.title:
+        s = s.sort({'title.raw': {'order': orderDirection}})
+    elif orderBy == SEARCH_ORDER_BY.timeCreated:
+        s = s.sort({'created_at': {'order': orderDirection}})
 
     a = A('terms', field='type')
     s.aggs.bucket('type_terms', a)

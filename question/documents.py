@@ -13,7 +13,8 @@ class QuestionDocument(DefaultDocument):
     title = fields.TextField(
         analyzer=custom_analyzer,
         search_analyzer="standard",
-        boost=2
+        boost=2,
+        fields={'raw': fields.KeywordField()}
     )
     description = fields.TextField(
         analyzer=custom_analyzer,

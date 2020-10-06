@@ -54,6 +54,10 @@ class ORDER_BY:
     timeUpdated = 'timeUpdated'
     lastAction = 'lastAction'
 
+class SEARCH_ORDER_BY:
+    timeCreated = 'timeCreated'
+    title = 'title'
+
 class ACCESS_TYPE:
     logged_in = 'logged_in'
     public = 'public'
