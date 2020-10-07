@@ -95,7 +95,6 @@ def remove_none_from_dict(values):
 
     return {k:v for k,v in values.items() if v is not None}
 
-
 def webpack_dev_server_is_available():
     """Return true when webpack developer server is available"""
     # pylint: disable=import-outside-toplevel
@@ -103,13 +102,17 @@ def webpack_dev_server_is_available():
     if settings.ENV == 'prod':
         return False
 
-    import socket
-    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-        try:
-            s.settimeout(1.0)
-            return s.connect_ex(('host.docker.internal', 9001)) == 0
-        except Exception:
-            return False
+    docker_host = os.environ.get('DOCKER_LOCAL_MACHINE', None)
+
+    if docker_host:
+        import socket
+        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+            try:
+                s.settimeout(1.0)
+                return s.connect_ex((docker_host, 9001)) == 0
+            except Exception:
+                return False
+    return False
 
 def get_access_id(obj):
     if ACCESS_TYPE.public in obj.read_access:
