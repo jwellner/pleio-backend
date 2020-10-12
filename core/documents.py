@@ -29,10 +29,17 @@ custom_analyzer = analyzer(
 
 class DefaultDocument(Document):
     tenant_name = fields.KeywordField()
+    container_guid = fields.KeywordField()
 
     def prepare_tenant_name(self, instance):
         # pylint: disable=unused-argument
         return parse_tenant_config_path("")
+
+    def prepare_container_guid(self, instance):
+        if hasattr(instance, 'group') and instance.group:
+            return instance.group.id
+
+        return ""
 
 
 @registry.register_document

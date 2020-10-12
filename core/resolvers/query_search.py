@@ -64,6 +64,10 @@ def resolve_search(_, info, q=None, containerGuid=None, type=None, subtype=None,
             'term', is_active=False
         )
 
+    # Filter on container_guid (group.guid)
+    if containerGuid:
+        s = s.filter('term', container_guid=containerGuid)
+
     if orderBy == SEARCH_ORDER_BY.title:
         s = s.sort({'title.raw': {'order': orderDirection}})
     elif orderBy == SEARCH_ORDER_BY.timeCreated:
