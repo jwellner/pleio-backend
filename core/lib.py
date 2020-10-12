@@ -9,6 +9,7 @@ from django.db import connection
 from django.utils.text import slugify
 from graphql import GraphQLError
 from enum import Enum
+import html2text
 
 
 class TypeModels(Enum):
@@ -247,3 +248,11 @@ def get_exportable_user_fields():
 
 def tenant_schema():
     return connection.get_schema()
+
+def html_to_text(html):
+    h = html2text.HTML2Text()
+
+    h.ignore_links = True
+    h.ignore_tables = True
+    h.ignore_images = True
+    return h.handle(html)
