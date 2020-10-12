@@ -286,9 +286,9 @@ class SubgroupsTestCase(FastTenantTestCase):
 
         self.assertTrue(result[0])
 
-        errors = result[1]["errors"]
+        data = result[1]["data"]
 
-        self.assertEqual(errors[0]["message"], "could_not_find")
+        self.assertEqual(data["entity"], None)
 
 
     def test_blog_in_subgroup_by_subgroup_member_which_left_group(self):
@@ -323,9 +323,9 @@ class SubgroupsTestCase(FastTenantTestCase):
 
         self.assertTrue(result[0])
 
-        errors = result[1]["errors"]
+        data = result[1]["data"]
 
-        self.assertEqual(errors[0]["message"], "could_not_find")
+        self.assertEqual(data["entity"], None)
 
 
     def test_query_subgroups_memberlist_with_filter(self):

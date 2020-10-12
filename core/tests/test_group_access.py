@@ -93,18 +93,18 @@ class TestGroupAccess(FastTenantTestCase):
 
         result = graphql_sync(schema, {"query": query, "variables": variables }, context_value={ "request": request })
 
-        errors = result[1]["errors"]
+        data = result[1]["data"]
 
-        self.assertEqual(errors[0]["message"], "could_not_find")
+        self.assertEqual(data["entity"], None)
 
         # user2 is not in group and should not be able to read blog
         request.user = self.user2
 
         result = graphql_sync(schema, {"query": query, "variables": variables }, context_value={ "request": request })
 
-        errors = result[1]["errors"]
+        data = result[1]["data"]
 
-        self.assertEqual(errors[0]["message"], "could_not_find")
+        self.assertEqual(data["entity"], None)
 
         # user1 is in group and should be able to read blog
         request.user = self.user1
