@@ -10,10 +10,10 @@ from django_tenants.utils import schema_context
 from django_elasticsearch_dsl.registries import registry
 from elasticsearch_dsl import Search
 from core import config
+from core.lib import html_to_text
 from django.core.mail import EmailMultiAlternatives
 from django.template.loader import get_template
 from django.utils import translation
-from django.utils.html import strip_tags
 from django.conf import settings
 
 from file.models import FileFolder
@@ -146,10 +146,11 @@ def send_mail_multi(self, schema_name, subject, html_template, context, email_ad
             translation.activate(config.LANGUAGE)
         html_template = get_template(html_template)
         html_content = html_template.render(context)
-        text_content = strip_tags(html_content)
+        text_content = html_to_text(html_content)
+        from_mail = f"{config.NAME} <{settings.FROM_EMAIL}>"
 
         try:
-            email = EmailMultiAlternatives(subject, text_content, settings.FROM_EMAIL, to=[email_address], reply_to=reply_to)
+            email = EmailMultiAlternatives(subject, text_content, from_mail, to=[email_address], reply_to=reply_to)
             email.attach_alternative(html_content, "text/html")
             email.send()
         except Exception as e:
