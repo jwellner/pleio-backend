@@ -171,6 +171,8 @@ class Command(InteractiveTenantOption, BaseCommand):
         config.DESCRIPTION = html.unescape(elgg_site.description) \
             if elgg_site.description else ""
         config.IS_CLOSED = self.helpers.get_site_config('walled_garden')
+        config.LOGIN_INTRO = self.helpers.get_plugin_setting("walled_garden_description", "pleio") \
+            if self.helpers.get_plugin_setting("walled_garden_description", "pleio") else ""
         config.ALLOW_REGISTRATION = self.helpers.get_site_config('allow_registration')
         config.GOOGLE_ANALYTICS_ID = html.unescape(self.helpers.get_plugin_setting("google_analytics")) \
             if self.helpers.get_plugin_setting("google_analytics") else ""

@@ -138,6 +138,9 @@ extend input editSiteSettingInput {
   onboardingEnabled: Boolean
   onboardingForceExistingUsers: Boolean
   onboardingIntro: String
+  limitedGroupAdd: Boolean
+  cookieConsent: Boolean
+  loginIntro: String
 }
 
 input ProfileSectionInput {
@@ -166,9 +169,5 @@ extend type SiteSettings {
   onboardingIntro: String
   siteInvites: SiteInviteList
   cookieConsent: Boolean!
-}
-
-extend input editSiteSettingInput {
-  limitedGroupAdd: Boolean
-  cookieConsent: Boolean
+  loginIntro: String
 }

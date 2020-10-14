@@ -1,6 +1,7 @@
 {% extends "base_closed.html" %}
 
 {% load i18n %}
+{% load custom_tags %}
 
 {% block content %}
 <div class="walled-garden_titles">
@@ -8,7 +9,11 @@
 	<h2 class="walled-garden_subtitle">{{ config.DESCIPTION }}</h2>
 </div>
 <div class="content">
-	<p>{% blocktrans %}This site is closed. Log in to get access.{% endblocktrans %}</p>
+	{% if config.LOGIN_INTRO %}
+		{% draft_to_html config.LOGIN_INTRO %}
+	{% else %}
+		<p>{% blocktrans %}This site is closed. Log in to get access.{% endblocktrans %}</p>
+	{% endif %}
 </div>
 <div class="elgg-module  elgg-module-walledgarden-login">
 	<div class="elgg-body">
