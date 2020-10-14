@@ -104,6 +104,7 @@ DEFAULT_SITE_CONFIG = {
     'ONBOARDING_INTRO': ("", 'Onboarding intro'),
 
     'COOKIE_CONSENT': (False, 'Cookie consent enabled'),
+    'LOGIN_INTRO': ('', 'Login intro text')
 }
 """
 Default site configuration

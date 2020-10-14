@@ -10,6 +10,10 @@ from django.utils.text import slugify
 from graphql import GraphQLError
 from enum import Enum
 import html2text
+from draftjs_exporter.dom import DOM
+from draftjs_exporter.html import HTML
+from draftjs_exporter.defaults import BLOCK_MAP, STYLE_MAP
+from draftjs_exporter.constants import ENTITY_TYPES, BLOCK_TYPES
 
 
 class TypeModels(Enum):
@@ -256,3 +260,51 @@ def html_to_text(html):
     h.ignore_tables = True
     h.ignore_images = True
     return h.handle(html)
+
+def draft_to_html(draft_string):
+    if not is_valid_json(draft_string):
+        return draft_string
+
+    def image(props):
+        return DOM.create_element('img', {
+            'src': props.get('src'),
+            'alt': props.get('alt'),
+        })
+
+    def link(props):
+        return DOM.create_element("a", {
+            "href": props["url"]
+        }, props["children"])
+
+    def block_fallback(props):
+        # pylint: disable=unused-argument
+        return None
+
+    def entity_fallback(props):
+        # pylint: disable=unused-argument
+        return None
+
+    config = {
+        'block_map': dict(BLOCK_MAP, **{
+            BLOCK_TYPES.FALLBACK: block_fallback
+        }),
+        'style_map': dict(STYLE_MAP, **{
+        }),
+        'entity_decorators': {
+            # Map entities to components so they can be rendered with their data.
+            ENTITY_TYPES.IMAGE: image,
+            ENTITY_TYPES.LINK: link,
+            # Lambdas work too.
+            ENTITY_TYPES.HORIZONTAL_RULE: lambda props: DOM.create_element('hr'),
+            # Discard those entities.
+            ENTITY_TYPES.EMBED: None,
+            # Provide a fallback component (advanced).
+            ENTITY_TYPES.FALLBACK: entity_fallback,
+        }
+    }
+
+    exporter = HTML(config)
+
+    html = exporter.render(json.loads(draft_string))
+
+    return html

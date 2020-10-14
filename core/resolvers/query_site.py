@@ -185,7 +185,8 @@ def get_site_settings():
         'siteInvites': {
             'edges': SiteInvitation.objects.all()
         },
-        'cookieConsent': config.COOKIE_CONSENT
+        'cookieConsent': config.COOKIE_CONSENT,
+        'loginIntro': config.LOGIN_INTRO
     }
 
     return site_settings
