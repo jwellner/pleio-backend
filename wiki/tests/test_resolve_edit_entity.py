@@ -93,7 +93,7 @@ class AddWikiCase(FastTenantTestCase):
         self.assertEqual(data["editEntity"]["entity"]["description"], variables["input"]["description"])
         self.assertEqual(data["editEntity"]["entity"]["richDescription"], variables["input"]["richDescription"])
         self.assertEqual(data["editEntity"]["entity"]["hasChildren"], False)
-        self.assertEqual(data["editEntity"]["entity"]["isFeatured"], False) # only with editor role
+        self.assertEqual(data["editEntity"]["entity"]["isFeatured"], False) # nly with editor or admin role
         self.assertEqual(data["editEntity"]["entity"]["subtype"], "wiki")
 
         self.wikiPublic.refresh_from_db()

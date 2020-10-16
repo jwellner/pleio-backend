@@ -10,7 +10,7 @@ def resolve_add_column(_, info, input):
     # pylint: disable=redefined-builtin
     # pylint: disable=too-many-statements
     # pylint: disable=too-many-branches
-    # TODO: check if non admins can add page (roles)
+
     user = info.context["request"].user
 
     clean_input = remove_none_from_dict(input)

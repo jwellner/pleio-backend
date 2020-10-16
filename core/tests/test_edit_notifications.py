@@ -20,7 +20,7 @@ class EditNotificationsTestCase(FastTenantTestCase):
         self.user1 = mixer.blend(User)
         self.user2 = mixer.blend(User)
         self.admin = mixer.blend(User)
-        self.admin.is_admin = True
+        self.admin.roles = ['ADMIN']
         self.admin.save()
 
 

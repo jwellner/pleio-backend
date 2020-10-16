@@ -1,7 +1,7 @@
 from graphql import GraphQLError
 from django.core.exceptions import ObjectDoesNotExist
 from core.lib import remove_none_from_dict, access_id_to_acl, tenant_schema
-from core.constances import NOT_LOGGED_IN, COULD_NOT_FIND_GROUP, COULD_NOT_ADD, USER_NOT_MEMBER_OF_GROUP, COULD_NOT_FIND, COULD_NOT_SAVE
+from core.constances import NOT_LOGGED_IN, COULD_NOT_FIND_GROUP, COULD_NOT_ADD, USER_NOT_MEMBER_OF_GROUP, COULD_NOT_FIND, COULD_NOT_SAVE, USER_ROLES
 from core.models import Group
 from news.models import News
 from file.models import FileFolder
@@ -11,7 +11,6 @@ def resolve_add_news(_, info, input):
     # pylint: disable=redefined-builtin
     # pylint: disable=too-many-statements
     # pylint: disable=too-many-branches
-    # TODO: check if non admins can add news (roles)
 
     user = info.context["request"].user
 
@@ -20,7 +19,7 @@ def resolve_add_news(_, info, input):
     if not user.is_authenticated:
         raise GraphQLError(NOT_LOGGED_IN)
 
-    if not user.is_admin:
+    if not (user.has_role(USER_ROLES.ADMIN) or user.has_role(USER_ROLES.EDITOR)):
         raise GraphQLError(COULD_NOT_ADD)
 
     group = None
@@ -31,7 +30,7 @@ def resolve_add_news(_, info, input):
         except ObjectDoesNotExist:
             raise GraphQLError(COULD_NOT_FIND_GROUP)
 
-    if group and not group.is_full_member(user) and not user.is_admin:
+    if group and not group.is_full_member(user) and not user.has_role(USER_ROLES.ADMIN):
         raise GraphQLError(USER_NOT_MEMBER_OF_GROUP)
 
     entity = News()
@@ -72,7 +71,9 @@ def resolve_add_news(_, info, input):
         entity.featured_position_y = 0
         entity.featured_video = None
 
-    entity.is_featured = clean_input.get("isFeatured", False)
+    if user.has_role(USER_ROLES.ADMIN) or user.has_role(USER_ROLES.EDITOR):
+        entity.is_featured = clean_input.get("isFeatured")
+
     entity.source = clean_input.get("source", "")
 
     entity.save()
@@ -148,8 +149,11 @@ def resolve_edit_news(_, info, input):
         entity.featured_position_y = 0
         entity.featured_video = None
 
-    if 'isFeatured' in clean_input:
-        entity.is_featured = clean_input.get("isFeatured")
+
+    if user.has_role(USER_ROLES.ADMIN) or user.has_role(USER_ROLES.EDITOR):
+        if 'isFeatured' in clean_input:
+            entity.is_featured = clean_input.get("isFeatured")
+
     if 'source' in clean_input:
         entity.source = clean_input.get("source")
 

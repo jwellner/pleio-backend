@@ -19,7 +19,7 @@ class EditSiteSettingTestCase(FastTenantTestCase):
     def setUp(self):
         self.anonymousUser = AnonymousUser()
         self.user = mixer.blend(User)
-        self.admin = mixer.blend(User, is_admin=True)
+        self.admin = mixer.blend(User, roles=['ADMIN'])
         self.profileField1 = ProfileField.objects.create(key='text_key1', name='text_name', field_type='text_field')
         self.profileField2 = ProfileField.objects.create(key='text_key2', name='text_name', field_type='text_field')
         self.profileField3 = ProfileField.objects.create(key='text_key3', name='text_name', field_type='text_field')

@@ -5,7 +5,7 @@ from django.utils.html import format_html
 from django.utils.translation import ugettext_lazy
 from core.models import SiteInvitation
 from core import config
-from core.constances import NOT_LOGGED_IN, INVALID_EMAIL, USER_NOT_SITE_ADMIN
+from core.constances import NOT_LOGGED_IN, INVALID_EMAIL, USER_NOT_SITE_ADMIN, USER_ROLES
 from core.lib import remove_none_from_dict, get_base_url, generate_code, get_default_email_context
 from core.tasks import send_mail_multi
 from django_tenants.utils import parse_tenant_config_path
@@ -29,7 +29,7 @@ def resolve_invite_to_site(_, info, input):
     if not user.is_authenticated:
         raise GraphQLError(NOT_LOGGED_IN)
 
-    if not user.is_admin:
+    if not user.has_role(USER_ROLES.ADMIN):
         raise GraphQLError(USER_NOT_SITE_ADMIN)
 
     email_addresses = clean_input.get("emailAddresses")

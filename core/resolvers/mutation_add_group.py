@@ -1,7 +1,7 @@
 from graphql import GraphQLError
 from core import config
 from core.models import Group
-from core.constances import NOT_LOGGED_IN, COULD_NOT_SAVE
+from core.constances import NOT_LOGGED_IN, COULD_NOT_SAVE, USER_ROLES
 from core.lib import remove_none_from_dict, ACCESS_TYPE
 from file.models import FileFolder
 
@@ -13,7 +13,7 @@ def resolve_add_group(_, info, input):
     if not user.is_authenticated:
         raise GraphQLError(NOT_LOGGED_IN)
 
-    if config.LIMITED_GROUP_ADD and not user.is_admin:
+    if config.LIMITED_GROUP_ADD and not user.has_role(USER_ROLES.ADMIN):
         raise GraphQLError(COULD_NOT_SAVE)
 
     clean_input = remove_none_from_dict(input)
@@ -63,7 +63,7 @@ def resolve_add_group(_, info, input):
     group.is_membership_on_request = clean_input.get("isMembershipOnRequest", False)
     group.auto_notification = clean_input.get("autoNotification", False)
 
-    if user.is_admin:
+    if user.has_role(USER_ROLES.ADMIN):
         group.is_featured = clean_input.get("isFeatured", False)
         group.is_leaving_group_disabled = clean_input.get("isLeavingGroupDisabled", False)
         group.is_auto_membership_enabled = clean_input.get("isAutoMembershipEnabled", False)

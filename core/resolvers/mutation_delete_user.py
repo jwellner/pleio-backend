@@ -1,11 +1,11 @@
 from graphql import GraphQLError
 from django.core.exceptions import ObjectDoesNotExist
 from django.utils.translation import ugettext_lazy
-from core.constances import NOT_LOGGED_IN, COULD_NOT_DELETE, COULD_NOT_FIND
+from core.constances import NOT_LOGGED_IN, COULD_NOT_DELETE, COULD_NOT_FIND, USER_ROLES
 from core.lib import remove_none_from_dict, get_default_email_context
-from user.models import User
 from core.tasks import send_mail_multi
 from django_tenants.utils import parse_tenant_config_path
+from user.models import User
 
 def resolve_delete_user(_, info, input):
     # pylint: disable=redefined-builtin
@@ -15,7 +15,7 @@ def resolve_delete_user(_, info, input):
     if not performing_user.is_authenticated:
         raise GraphQLError(NOT_LOGGED_IN)
 
-    if not performing_user.is_admin:
+    if not performing_user.has_role(USER_ROLES.ADMIN):
         raise GraphQLError(COULD_NOT_DELETE)
 
     try:
@@ -24,7 +24,7 @@ def resolve_delete_user(_, info, input):
         raise GraphQLError(COULD_NOT_FIND)
 
     schema_name = parse_tenant_config_path("")
-    is_deleted_user_admin = user.is_admin
+    is_deleted_user_admin = user.has_role(USER_ROLES.ADMIN)
     email_deleted_user = user.email
     name_deleted_user = user.name
     user.delete()
@@ -42,7 +42,7 @@ def resolve_delete_user(_, info, input):
         context['name_deleted_user'] = performing_user.name
         subject = ugettext_lazy("A site administrator was removed from %(site_name)s") % {'site_name': context["site_name"]}
 
-        admin_email_addresses = User.objects.filter(is_admin=True).values_list('email', flat=True)
+        admin_email_addresses = User.objects.filter(roles__contains=['ADMIN']).values_list('email', flat=True)
         for email_address in admin_email_addresses:
             send_mail_multi.delay(schema_name, subject, 'email/admin_user_deleted.html', context, email_address)
 

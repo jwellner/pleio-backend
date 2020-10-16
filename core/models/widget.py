@@ -35,10 +35,13 @@ class Widget(models.Model):
         return str(self.id)
 
     def can_write(self, user):
-        if user.is_authenticated and user.is_admin:
-            return True
+        if self.group:
+            return self.group.can_write(user)
 
-        return self.group.can_write(user)
+        if self.page:
+            return self.page.can_write(user)
+
+        return False
 
     @property
     def type_to_string(self):

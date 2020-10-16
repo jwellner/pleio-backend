@@ -321,7 +321,7 @@ class ElggHelpers():
             if default_storage.exists(file_path):
                 entity = FileFolder()
 
-                entity.owner = User.objects.filter(is_admin=True).first()
+                entity.owner = User.objects.filter(roles__contains=['ADMIN']).first()
 
                 entity.upload.name = file_path
                 entity.mime_type = mime_type

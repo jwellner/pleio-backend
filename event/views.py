@@ -2,6 +2,7 @@ import csv
 from django.core.exceptions import ObjectDoesNotExist
 from django.http import Http404, StreamingHttpResponse
 from event.models import Event
+from core.constances import USER_ROLES
 
 class Echo:
     """An object that implements just the write method of the file-like
@@ -30,7 +31,7 @@ def export(request, event_id=None):
     headers = ['guid', 'name', 'email (only for admins)', 'status', 'datetime']
     rows = [headers]
     for attendee in event.attendees.all():
-        if user.is_admin:
+        if user.has_role(USER_ROLES.ADMIN):
             if attendee.user:
                 email = attendee.user.email
             else:

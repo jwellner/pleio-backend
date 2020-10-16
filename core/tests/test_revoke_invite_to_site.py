@@ -21,7 +21,7 @@ class RevokeInviteToSiteTestCase(FastTenantTestCase):
         self.anonymousUser = AnonymousUser()
         self.user1 = mixer.blend(User)
         self.user2 = mixer.blend(User)
-        self.admin = mixer.blend(User, is_admin=True)
+        self.admin = mixer.blend(User, roles=['ADMIN'])
 
 
     def tearDown(self):

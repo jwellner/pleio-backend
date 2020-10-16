@@ -1,7 +1,7 @@
 from graphql import GraphQLError
 from django.core.exceptions import ObjectDoesNotExist
 from core.lib import remove_none_from_dict
-from core.constances import NOT_LOGGED_IN, COULD_NOT_FIND
+from core.constances import NOT_LOGGED_IN, COULD_NOT_FIND, USER_ROLES
 from core.models import Comment, Entity
 
 
@@ -20,7 +20,7 @@ def resolve_add_comment(_, info, input):
         except ObjectDoesNotExist:
             raise GraphQLError(COULD_NOT_FIND)
 
-        if entity.group and not entity.group.is_full_member(user) and not user.is_admin:
+        if entity.group and not entity.group.is_full_member(user) and not user.has_role(USER_ROLES.ADMIN):
             raise GraphQLError("NOT_GROUP_MEMBER")
     else:
         raise GraphQLError("NO_CONTAINER_GUID")

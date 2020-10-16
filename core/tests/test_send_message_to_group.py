@@ -37,7 +37,7 @@ class SendMessageToGroupTestCase(FastTenantTestCase):
         self.user6.profile.last_online = datetime.now() - timedelta(days=200)
         self.user6.profile.save()
         self.admin = mixer.blend(User)
-        self.admin.is_admin = True
+        self.admin.roles = ['ADMIN']
         self.admin.save()
         self.group1 = mixer.blend(Group, owner=self.user1)
         self.group1.join(self.user2, 'member')

@@ -80,7 +80,7 @@ class AddQuestionTestCase(FastTenantTestCase):
         self.assertEqual(data["addEntity"]["entity"]["richDescription"], variables["input"]["richDescription"])
         self.assertEqual(data["addEntity"]["entity"]["tags"], variables["input"]["tags"])
         self.assertEqual(data["addEntity"]["entity"]["isClosed"], False)
-        self.assertEqual(data["addEntity"]["entity"]["isFeatured"], False) # only with editor role
+        self.assertEqual(data["addEntity"]["entity"]["isFeatured"], False) # only with editor or admin role
 
     def test_add_question_to_group(self):
 

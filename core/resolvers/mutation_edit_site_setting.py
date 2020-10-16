@@ -1,13 +1,12 @@
 from graphql import GraphQLError
 from core import config
 from core.models import Setting, ProfileField
-from core.constances import NOT_LOGGED_IN, USER_NOT_SITE_ADMIN
+from core.constances import NOT_LOGGED_IN, USER_NOT_SITE_ADMIN, USER_ROLES
 from core.lib import remove_none_from_dict, access_id_to_acl
 from core.resolvers.query_site import get_site_settings
 from django.db import connection
 from django.core.cache import cache
 from file.models import FileFolder
-
 
 def save_setting(key, value):
     # pylint: disable=unused-variable
@@ -41,7 +40,7 @@ def resolve_edit_site_setting(_, info, input):
     if not user.is_authenticated:
         raise GraphQLError(NOT_LOGGED_IN)
 
-    if not user.is_admin:
+    if not user.has_role(USER_ROLES.ADMIN):
         raise GraphQLError(USER_NOT_SITE_ADMIN)
 
     setting_keys = {

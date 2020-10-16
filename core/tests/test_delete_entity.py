@@ -22,7 +22,7 @@ class DeleteEntityTestCase(FastTenantTestCase):
         self.anonymousUser = AnonymousUser()
         self.user1 = mixer.blend(User)
         self.user2 = mixer.blend(User)
-        self.admin = mixer.blend(User, is_admin=True)
+        self.admin = mixer.blend(User, roles=['ADMIN'])
 
         self.group1 = mixer.blend(Group, owner=self.user1)
         self.group2 = mixer.blend(Group, owner=self.user1)

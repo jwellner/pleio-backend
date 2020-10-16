@@ -9,15 +9,17 @@ from core.models import Group, Comment
 from user.models import User
 from question.models import Question
 from mixer.backend.django import mixer
-from core.constances import ACCESS_TYPE
+from core.constances import ACCESS_TYPE, USER_ROLES
 from core.lib import get_acl, access_id_to_acl
 from django.utils.text import slugify
 
-class ToggleIsClosedTestCase(FastTenantTestCase):
+class ToggleBestAnswerTestCase(FastTenantTestCase):
 
     def setUp(self):
         self.anonymousUser = AnonymousUser()
         self.authenticatedUser = mixer.blend(User)
+        self.admin = mixer.blend(User, roles=[USER_ROLES.ADMIN])
+        self.question_manager = mixer.blend(User, roles=[USER_ROLES.QUESTION_MANAGER])
 
         self.question = Question.objects.create(
             title="Test1",
@@ -40,7 +42,7 @@ class ToggleIsClosedTestCase(FastTenantTestCase):
         self.question.delete()
         self.authenticatedUser.delete()
     
-    def test_toggle_best_answer(self):
+    def test_toggle_best_answer_owner(self):
 
         query = """
             mutation ($input: toggleBestAnswerInput!) {
@@ -57,6 +59,118 @@ class ToggleIsClosedTestCase(FastTenantTestCase):
 
         request = HttpRequest()
         request.user = self.authenticatedUser
+
+        variables = {
+            "input": {
+                "guid": self.answer.guid,
+            }
+        }
+
+        result = graphql_sync(schema, { "query": query , "variables": variables}, context_value={ "request": request })
+
+        self.assertTrue(result[0])
+
+        data = result[1]["data"]
+       
+        self.assertEqual(data["toggleBestAnswer"]["entity"]["guid"], self.question.guid)
+        self.assertTrue(data["toggleBestAnswer"]["entity"]["comments"][0]["isBestAnswer"])
+
+        self.question.refresh_from_db()
+
+        self.assertEqual(self.question.best_answer, self.answer)
+
+        variables = {
+            "input": {
+                "guid": self.answer.guid,
+            }
+        }
+
+        result = graphql_sync(schema, { "query": query , "variables": variables}, context_value={ "request": request })
+
+        self.assertTrue(result[0])
+
+        data = result[1]["data"]
+       
+        self.assertEqual(data["toggleBestAnswer"]["entity"]["guid"], self.question.guid)
+        self.assertFalse(data["toggleBestAnswer"]["entity"]["comments"][0]["isBestAnswer"])
+
+        self.question.refresh_from_db()
+
+        self.assertIsNone(self.question.best_answer)
+
+    def test_toggle_best_answer_admin(self):
+
+        query = """
+            mutation ($input: toggleBestAnswerInput!) {
+                toggleBestAnswer(input: $input) {
+                    entity {
+                        guid
+                        comments {
+                            isBestAnswer
+                        }
+                    }
+                }
+            }
+        """
+
+        request = HttpRequest()
+        request.user = self.admin
+
+        variables = {
+            "input": {
+                "guid": self.answer.guid,
+            }
+        }
+
+        result = graphql_sync(schema, { "query": query , "variables": variables}, context_value={ "request": request })
+
+        self.assertTrue(result[0])
+
+        data = result[1]["data"]
+       
+        self.assertEqual(data["toggleBestAnswer"]["entity"]["guid"], self.question.guid)
+        self.assertTrue(data["toggleBestAnswer"]["entity"]["comments"][0]["isBestAnswer"])
+
+        self.question.refresh_from_db()
+
+        self.assertEqual(self.question.best_answer, self.answer)
+
+        variables = {
+            "input": {
+                "guid": self.answer.guid,
+            }
+        }
+
+        result = graphql_sync(schema, { "query": query , "variables": variables}, context_value={ "request": request })
+
+        self.assertTrue(result[0])
+
+        data = result[1]["data"]
+       
+        self.assertEqual(data["toggleBestAnswer"]["entity"]["guid"], self.question.guid)
+        self.assertFalse(data["toggleBestAnswer"]["entity"]["comments"][0]["isBestAnswer"])
+
+        self.question.refresh_from_db()
+
+        self.assertIsNone(self.question.best_answer)
+
+    def test_toggle_best_answer_question_manager(self):
+
+        query = """
+            mutation ($input: toggleBestAnswerInput!) {
+                toggleBestAnswer(input: $input) {
+                    entity {
+                        guid
+                        comments {
+                            isBestAnswer
+                        }
+                    }
+                }
+            }
+        """
+
+        request = HttpRequest()
+        request.user = self.question_manager
 
         variables = {
             "input": {

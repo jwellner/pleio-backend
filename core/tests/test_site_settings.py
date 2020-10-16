@@ -26,7 +26,7 @@ class SiteSettingsTestCase(FastTenantTestCase):
     def setUp(self):
         super().setUp()
         self.user = mixer.blend(User)
-        self.admin = mixer.blend(User, is_admin=True)
+        self.admin = mixer.blend(User, roles=['ADMIN'])
         self.anonymousUser = AnonymousUser()
         self.cmsPage1 = mixer.blend(Page, title="Z title")
         self.cmsPage2 = mixer.blend(Page, title="A title")

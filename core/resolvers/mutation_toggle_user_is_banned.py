@@ -1,9 +1,8 @@
 from graphql import GraphQLError
 from django.core.exceptions import ObjectDoesNotExist
 from user.models import User
-from core.constances import NOT_LOGGED_IN, COULD_NOT_FIND, COULD_NOT_SAVE
+from core.constances import NOT_LOGGED_IN, COULD_NOT_FIND, COULD_NOT_SAVE, USER_ROLES
 from core.lib import remove_none_from_dict
-
 
 def resolve_toggle_user_is_banned(_, info, input):
     # pylint: disable=redefined-builtin
@@ -14,7 +13,7 @@ def resolve_toggle_user_is_banned(_, info, input):
     if not performing_user.is_authenticated:
         raise GraphQLError(NOT_LOGGED_IN)
 
-    if not performing_user.is_admin:
+    if not performing_user.has_role(USER_ROLES.ADMIN):
         raise GraphQLError(COULD_NOT_SAVE)
 
     try:

@@ -16,7 +16,7 @@ class EditGroupWidgetTestCase(FastTenantTestCase):
         self.anonymousUser = AnonymousUser()
         self.user1 = mixer.blend(User)
         self.admin = mixer.blend(User)
-        self.admin.is_admin = True
+        self.admin.roles = ['ADMIN']
         self.admin.save()
         self.group = mixer.blend(Group, owner=self.user1)
         self.widget1 = Widget.objects.create(group=self.group, position=0,

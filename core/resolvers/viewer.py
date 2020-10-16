@@ -1,6 +1,6 @@
 from ariadne import ObjectType
 from core.lib import get_acl
-from core.constances import ACCESS_TYPE
+from core.constances import ACCESS_TYPE, USER_ROLES
 
 viewer = ObjectType("Viewer")
 
@@ -25,12 +25,16 @@ def resolve_can_write_to_container(obj, info, containerGuid=None, subtype=None, 
 
     # check site access
     if not containerGuid and user.is_authenticated:
-        if subtype not in ['news', 'page'] or user.is_admin:
+        if user.has_role(USER_ROLES.ADMIN):
+            return True
+        if subtype not in ['news', 'page']:
+            return True
+        if subtype in ['news', 'page'] and user.has_role(USER_ROLES.EDITOR):
             return True
         return False
 
     # check group access (is containerGuid always group?)
-    if (containerGuid and ACCESS_TYPE.group.format(containerGuid) in get_acl(user)) or user.is_admin:
+    if (containerGuid and ACCESS_TYPE.group.format(containerGuid) in get_acl(user)) or user.has_role(USER_ROLES.ADMIN):
         return True
 
     return False

@@ -3,6 +3,7 @@ from django.http import Http404, StreamingHttpResponse
 from core.lib import get_exportable_user_fields
 from core.models.group import GroupMembership
 from core.models.user import UserProfileField, ProfileField
+from core.constances import USER_ROLES
 from user.models import User
 
 
@@ -64,7 +65,7 @@ def export(request):
     if not user.is_authenticated:
         raise Http404("Not logged in")
 
-    if not user.is_admin:
+    if not user.has_role(USER_ROLES.ADMIN):
         raise Http404("Not admin")
 
     user_fields = request.GET.getlist('user_fields[]')

@@ -24,6 +24,8 @@ from elgg.helpers import ElggHelpers
 from django.conf import settings
 from django.contrib.contenttypes.models import ContentType
 from django.db.models import ObjectDoesNotExist
+from core.constances import USER_ROLES
+
 
 class Mapper():
 
@@ -47,7 +49,8 @@ class Mapper():
         user.is_active = elgg_user.banned == "no"
         user.ban_reason = elgg_user.entity.get_metadata_value_by_name("ban_reason") \
             if elgg_user.entity.get_metadata_value_by_name("ban_reason") and not elgg_user.banned == "no" else ""
-        user.is_admin = elgg_user.admin == "yes"
+        if elgg_user.admin == "yes":
+            user.roles.append(USER_ROLES.ADMIN)
         return user
 
     def get_user_profile(self, elgg_user: ElggUsersEntity):

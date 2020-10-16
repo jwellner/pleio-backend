@@ -70,3 +70,8 @@ class MEMBERSHIP:
     requested = 'requested'
     invited = 'invited'
     joined = 'joined'
+
+class USER_ROLES:
+    ADMIN = "ADMIN"
+    EDITOR = "EDITOR"
+    QUESTION_MANAGER = "QUESTION_MANAGER"

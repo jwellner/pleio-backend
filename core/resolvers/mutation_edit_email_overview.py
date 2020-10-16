@@ -1,8 +1,9 @@
 from graphql import GraphQLError
 from django.core.exceptions import ObjectDoesNotExist
-from core.constances import NOT_LOGGED_IN, COULD_NOT_FIND, COULD_NOT_SAVE
-from user.models import User
+from core.constances import NOT_LOGGED_IN, COULD_NOT_FIND, COULD_NOT_SAVE, USER_ROLES
 from core.lib import remove_none_from_dict
+from user.models import User
+
 
 def resolve_edit_email_overview(_, info, input):
     # pylint: disable=redefined-builtin
@@ -18,7 +19,7 @@ def resolve_edit_email_overview(_, info, input):
     except ObjectDoesNotExist:
         raise GraphQLError(COULD_NOT_FIND)
 
-    if not requested_user == user and not user.is_admin:
+    if not requested_user == user and not user.has_role(USER_ROLES.ADMIN):
         raise GraphQLError(COULD_NOT_SAVE)
 
     if 'frequency' in clean_input:

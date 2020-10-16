@@ -16,7 +16,7 @@ class SubgroupsTestCase(FastTenantTestCase):
 
     def setUp(self):
         self.anonymousUser = AnonymousUser()
-        self.admin = mixer.blend(User, is_admin=True)
+        self.admin = mixer.blend(User, roles=['ADMIN'])
         self.user1 = mixer.blend(User)
         self.user2 = mixer.blend(User, name='test_na')
         self.user3 = mixer.blend(User)

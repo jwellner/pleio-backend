@@ -1,3 +1,5 @@
+from core.constances import USER_ROLES
+
 def resolve_viewer(_, info):
     user = info.context["request"].user
     banned = False
@@ -22,8 +24,8 @@ def resolve_viewer(_, info):
     return {
         'guid': 'viewer:{}'.format(user.id),
         'loggedIn': True,
-        'isSubEditor': user.is_admin,
-        'isAdmin': user.is_admin,
+        'isSubEditor': user.has_role(USER_ROLES.ADMIN),
+        'isAdmin': user.has_role(USER_ROLES.ADMIN),
         'isBanned': banned,
         'tags': []
     }

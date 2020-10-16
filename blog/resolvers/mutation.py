@@ -2,7 +2,7 @@ from graphql import GraphQLError
 from django.core.exceptions import ObjectDoesNotExist
 from blog.models import Blog
 from core.lib import remove_none_from_dict, access_id_to_acl, tenant_schema
-from core.constances import NOT_LOGGED_IN, COULD_NOT_FIND_GROUP, COULD_NOT_FIND, COULD_NOT_SAVE
+from core.constances import NOT_LOGGED_IN, COULD_NOT_FIND_GROUP, COULD_NOT_FIND, COULD_NOT_SAVE, USER_ROLES
 from core.models import Group
 from file.models import FileFolder
 from file.tasks import resize_featured
@@ -27,7 +27,7 @@ def resolve_add_blog(_, info, input):
         except ObjectDoesNotExist:
             raise GraphQLError(COULD_NOT_FIND_GROUP)
 
-    if group and not group.is_full_member(user) and not user.is_admin:
+    if group and not group.is_full_member(user) and not user.has_role(USER_ROLES.ADMIN):
         raise GraphQLError("NOT_GROUP_MEMBER")
 
     # default fields for all entities
@@ -70,8 +70,7 @@ def resolve_add_blog(_, info, input):
         entity.featured_position_y = 0
         entity.featured_video = None
 
-    # TODO: subeditor may also set recommended
-    if user.is_admin:
+    if user.has_role(USER_ROLES.ADMIN) or user.has_role(USER_ROLES.EDITOR):
         entity.is_recommended = clean_input.get("isRecommended")
 
     entity.save()
@@ -146,9 +145,9 @@ def resolve_edit_blog(_, info, input):
         entity.featured_position_y = 0
         entity.featured_video = None
 
-    # TODO: subeditor may also set recommended
-    if user.is_admin and 'isRecommended' in clean_input:
-        entity.is_recommended = clean_input.get("isRecommended")
+    if user.has_role(USER_ROLES.ADMIN) or user.has_role(USER_ROLES.EDITOR):
+        if 'isRecommended' in clean_input:
+            entity.is_recommended = clean_input.get("isRecommended")
 
     entity.save()
 

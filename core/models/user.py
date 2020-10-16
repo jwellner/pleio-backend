@@ -2,6 +2,7 @@ import uuid
 from django.db import models
 from django.contrib.postgres.fields import ArrayField
 from core.lib import get_acl
+from core.constances import USER_ROLES
 from core import config
 from .shared import read_access_default, write_access_default
 
@@ -84,7 +85,7 @@ class ProfileField(models.Model):
 class UserProfileFieldManager(models.Manager):
     def visible(self, user):
         qs = self.get_queryset()
-        if user.is_authenticated and user.is_admin:
+        if user.is_authenticated and user.has_role(USER_ROLES.ADMIN):
             return qs
         return qs.filter(read_access__overlap=list(get_acl(user)))
 

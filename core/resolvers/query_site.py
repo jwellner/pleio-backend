@@ -4,11 +4,10 @@ from django.utils.translation import ugettext_lazy
 from django.templatetags.static import static
 from cms.models import Page
 from core import config
-from core.constances import NOT_LOGGED_IN, USER_NOT_SITE_ADMIN
+from core.constances import NOT_LOGGED_IN, USER_NOT_SITE_ADMIN, USER_ROLES
 from core.lib import get_access_ids, get_activity_filters, get_exportable_user_fields
 from core.models import UserProfile, ProfileField, SiteInvitation
 from graphql import GraphQLError
-
 
 def get_online_users():
     ten_minutes_ago = timezone.now() - timezone.timedelta(minutes=10)
@@ -201,7 +200,7 @@ def resolve_site_settings(_, info):
     if not user.is_authenticated:
         raise GraphQLError(NOT_LOGGED_IN)
 
-    if not user.is_admin:
+    if not user.has_role(USER_ROLES.ADMIN):
         raise GraphQLError(USER_NOT_SITE_ADMIN)
 
     return get_site_settings()
