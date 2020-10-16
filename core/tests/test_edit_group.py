@@ -19,7 +19,7 @@ class EditGroupCase(FastTenantTestCase):
     def setUp(self):
         self.anonymousUser = AnonymousUser()
         self.user = mixer.blend(User)
-        self.admin = mixer.blend(User, is_admin=True)
+        self.admin = mixer.blend(User, roles=['ADMIN'])
         self.group = mixer.blend(Group, owner=self.user)
 
     def test_edit_group_anon(self):

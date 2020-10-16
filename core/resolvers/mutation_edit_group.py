@@ -1,7 +1,7 @@
 from graphql import GraphQLError
 from django.core.exceptions import ObjectDoesNotExist
 from core.models import Group
-from core.constances import NOT_LOGGED_IN, COULD_NOT_SAVE, COULD_NOT_FIND
+from core.constances import NOT_LOGGED_IN, COULD_NOT_SAVE, COULD_NOT_FIND, USER_ROLES
 from core.lib import remove_none_from_dict, ACCESS_TYPE, tenant_schema
 from file.models import FileFolder
 from file.tasks import resize_featured
@@ -83,7 +83,7 @@ def resolve_edit_group(_, info, input):
     if 'autoNotification' in clean_input:
         group.auto_notification = clean_input.get("autoNotification")
 
-    if user.is_admin:
+    if user.has_role(USER_ROLES.ADMIN):
         if 'isFeatured' in clean_input:
             group.is_featured = clean_input.get("isFeatured")
         if 'isLeavingGroupDisabled' in clean_input:

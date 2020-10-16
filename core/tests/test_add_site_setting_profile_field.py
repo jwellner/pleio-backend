@@ -17,7 +17,7 @@ class AddSiteSettingProfileFieldTestCase(FastTenantTestCase):
     def setUp(self):
         self.anonymousUser = AnonymousUser()
         self.user = mixer.blend(User)
-        self.admin = mixer.blend(User, is_admin=True)
+        self.admin = mixer.blend(User, roles=['ADMIN'])
 
     def tearDown(self):
         self.admin.delete()

@@ -4,6 +4,7 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.http import Http404, FileResponse, StreamingHttpResponse
 from django.views.decorators.cache import cache_control
 from core.models import Entity
+from core.constances import USER_ROLES
 from file.models import FileFolder
 from file.helpers import add_folders_to_zip
 from file.helpers import generate_thumbnail
@@ -19,7 +20,7 @@ def download(request, file_id=None, file_name=None):
     try:
         entity = FileFolder.objects.visible(user).get(id=file_id)
 
-        if entity.group and entity.group.is_closed and not entity.group.is_full_member(user) and not user.is_admin:
+        if entity.group and entity.group.is_closed and not entity.group.is_full_member(user) and not user.has_role(USER_ROLES.ADMIN):
             raise Http404("File not found")
 
         response = StreamingHttpResponse(streaming_content=entity.upload.open(), content_type=entity.mime_type)
@@ -42,7 +43,7 @@ def embed(request, file_id=None, file_name=None):
     try:
         entity = FileFolder.objects.visible(user).get(id=file_id)
 
-        if entity.group and entity.group.is_closed and not entity.group.is_full_member(user) and not user.is_admin:
+        if entity.group and entity.group.is_closed and not entity.group.is_full_member(user) and not user.has_role(USER_ROLES.ADMIN):
             raise Http404("File not found")
 
         response = StreamingHttpResponse(streaming_content=entity.upload.open(), content_type=entity.mime_type)
@@ -90,7 +91,7 @@ def bulk_download(request):
     # Add selected files to zip
     files = FileFolder.objects.visible(user).filter(id__in=file_ids, is_folder=False)
     for f in files:
-        if f.group and f.group.is_closed and not f.group.is_full_member(user) and not user.is_admin:
+        if f.group and f.group.is_closed and not f.group.is_full_member(user) and not user.has_role(USER_ROLES.ADMIN):
             continue
         zipf.writestr(path.basename(f.upload.name), f.upload.read())
 

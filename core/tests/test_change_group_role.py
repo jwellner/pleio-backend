@@ -25,7 +25,7 @@ class ChangeGroupRoleTestCase(FastTenantTestCase):
         self.user3 = mixer.blend(User)
         self.user4 = mixer.blend(User)
         self.admin = mixer.blend(User)
-        self.admin.is_admin = True
+        self.admin.roles = ['ADMIN']
         self.admin.save()
         self.group1 = mixer.blend(Group, owner=self.user1)
         self.group1.join(self.user2, 'member')

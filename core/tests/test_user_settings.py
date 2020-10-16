@@ -25,7 +25,7 @@ class UserSettingsTestCase(FastTenantTestCase):
 
         self.group1.set_member_notification(self.user1, True)
 
-        self.admin.is_admin = True
+        self.admin.roles = ['ADMIN']
         self.admin.save()
 
         self.query = """

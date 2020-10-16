@@ -19,7 +19,7 @@ class EditProfileFieldTestCase(FastTenantTestCase):
         self.user = mixer.blend(User)
         self.other = mixer.blend(User)
         self.admin = mixer.blend(User)
-        self.admin.is_admin = True
+        self.admin.roles = ['ADMIN']
         self.admin.save()
         self.profile_field1 = ProfileField.objects.create(key='text_key', name='text_name', field_type='text_field')
         self.profile_field2 = ProfileField.objects.create(key='html_key', name='html_name', field_type='html_field')

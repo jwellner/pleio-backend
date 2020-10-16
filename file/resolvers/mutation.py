@@ -1,7 +1,7 @@
 from graphql import GraphQLError
 from django.core.exceptions import ObjectDoesNotExist
 from ariadne import ObjectType
-from core.constances import ACCESS_TYPE, NOT_LOGGED_IN, COULD_NOT_FIND, COULD_NOT_SAVE
+from core.constances import ACCESS_TYPE, NOT_LOGGED_IN, COULD_NOT_FIND, COULD_NOT_SAVE, USER_ROLES
 from core.lib import remove_none_from_dict, access_id_to_acl
 from core.models import Group
 from ..models import FileFolder
@@ -51,7 +51,7 @@ def resolve_add_file(_, info, input):
     if parent and parent.group:
         group = parent.group
 
-    if group and not group.is_full_member(user) and not user.is_admin:
+    if group and not group.is_full_member(user) and not user.has_role(USER_ROLES.ADMIN):
         raise GraphQLError("NOT_GROUP_MEMBER")
 
     entity = FileFolder()
@@ -110,7 +110,7 @@ def resolve_add_folder(_, info, input):
     if parent and parent.group:
         group = parent.group
 
-    if group and not group.is_full_member(user) and not user.is_admin:
+    if group and not group.is_full_member(user) and not user.has_role(USER_ROLES.ADMIN):
         raise GraphQLError("NOT_GROUP_MEMBER")
 
     entity = FileFolder()

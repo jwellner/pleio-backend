@@ -17,7 +17,7 @@ class TestGroupAccess(FastTenantTestCase):
         self.anonymousUser = AnonymousUser()
         self.user1 = mixer.blend(User)
         self.user2 = mixer.blend(User)
-        self.user3 = mixer.blend(User, is_admin=True)
+        self.user3 = mixer.blend(User, roles=['ADMIN'])
         self.group = mixer.blend(Group, owner=self.user1, is_closed=False, is_membership_on_request=False)
         self.group.join(self.user1, 'member')
 

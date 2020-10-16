@@ -17,7 +17,7 @@ class EntitiesTestCase(FastTenantTestCase):
 
     def setUp(self):
         self.authenticatedUser = mixer.blend(User)
-        self.admin = mixer.blend(User, is_admin=True)
+        self.admin = mixer.blend(User, roles=['ADMIN'])
         self.group = mixer.blend(Group, owner=self.authenticatedUser)
         self.blog1 = Blog.objects.create(
             title="Blog1",

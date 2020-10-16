@@ -4,6 +4,7 @@ from django.contrib.contenttypes.fields import GenericForeignKey, GenericRelatio
 from django.contrib.contenttypes.models import ContentType
 from django.utils import timezone
 from .annotation import VoteMixin
+from core.constances import USER_ROLES
 
 class CommentManager(models.Manager):
     def visible(self):
@@ -34,7 +35,7 @@ class Comment(VoteMixin):
         if not user.is_authenticated:
             return False
 
-        if user.is_admin:
+        if user.has_role(USER_ROLES.ADMIN):
             return True
 
         return (user == self.owner)

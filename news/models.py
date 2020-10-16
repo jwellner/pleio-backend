@@ -3,6 +3,8 @@ from django.utils.text import slugify
 from django.urls import reverse
 from core.models import Entity, VoteMixin, CommentMixin, BookmarkMixin, FollowMixin
 from file.models import FileFolder
+from core.constances import USER_ROLES
+from core.lib import get_acl
 
 
 class News(Entity, VoteMixin, BookmarkMixin, FollowMixin, CommentMixin):
@@ -47,3 +49,9 @@ class News(Entity, VoteMixin, BookmarkMixin, FollowMixin, CommentMixin):
         if self.featured_image:
             return '%s?cache=%i' % (reverse('featured', args=[self.id]), int(self.featured_image.updated_at.timestamp()))
         return None
+
+    def can_write(self, user):
+        if user.is_authenticated and (user.has_role(USER_ROLES.ADMIN) or user.has_role(USER_ROLES.EDITOR)):
+            return True
+
+        return len(get_acl(user) & set(self.write_access)) > 0

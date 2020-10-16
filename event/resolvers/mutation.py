@@ -1,7 +1,7 @@
 from graphql import GraphQLError
 from django.core.exceptions import ObjectDoesNotExist
 from ariadne import ObjectType
-from core.constances import NOT_LOGGED_IN, COULD_NOT_FIND, EVENT_IS_FULL, EVENT_INVALID_STATE, COULD_NOT_FIND_GROUP, INVALID_DATE, COULD_NOT_SAVE
+from core.constances import NOT_LOGGED_IN, COULD_NOT_FIND, EVENT_IS_FULL, EVENT_INVALID_STATE, COULD_NOT_FIND_GROUP, INVALID_DATE, COULD_NOT_SAVE, USER_ROLES
 from core.lib import remove_none_from_dict, access_id_to_acl, tenant_schema
 from core.models import Group
 from file.models import FileFolder
@@ -74,7 +74,7 @@ def resolve_add_event(_, info, input):
         except ObjectDoesNotExist:
             raise GraphQLError(COULD_NOT_FIND_GROUP)
 
-    if group and not group.is_full_member(user) and not user.is_admin:
+    if group and not group.is_full_member(user) and not user.has_role(USER_ROLES.ADMIN):
         raise GraphQLError("NOT_GROUP_MEMBER")
 
     entity = Event()
@@ -116,7 +116,8 @@ def resolve_add_event(_, info, input):
         entity.featured_position_y = 0
         entity.featured_video = None
 
-    entity.is_featured = clean_input.get("isFeatured", False)
+    if user.has_role(USER_ROLES.ADMIN) or user.has_role(USER_ROLES.EDITOR):
+        entity.is_featured = clean_input.get("isFeatured")
 
     if not clean_input.get("startDate", None) or not clean_input.get("endDate", None):
         raise GraphQLError(INVALID_DATE)
@@ -208,8 +209,9 @@ def resolve_edit_event(_, info, input):
         entity.featured_position_y = 0
         entity.featured_video = None
 
-    if 'isFeatured' in clean_input:
-        entity.is_featured = clean_input.get("isFeatured")
+    if user.has_role(USER_ROLES.ADMIN) or user.has_role(USER_ROLES.EDITOR):
+        if 'isFeatured' in clean_input:
+            entity.is_featured = clean_input.get("isFeatured")
 
     if not clean_input.get("startDate", None) or not clean_input.get("endDate", None):
         raise GraphQLError(INVALID_DATE)

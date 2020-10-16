@@ -1,8 +1,10 @@
 import uuid
 from django.db import models
 from core.models import Entity
+from core.constances import USER_ROLES
 from django.contrib.postgres.fields import ArrayField
 from django.utils.text import slugify
+
 
 class Page(Entity):
     """
@@ -32,7 +34,7 @@ class Page(Entity):
         return False
 
     def can_write(self, user):
-        if user.is_authenticated and user.is_admin:
+        if user.is_authenticated and (user.has_role(USER_ROLES.ADMIN) or user.has_role(USER_ROLES.EDITOR)):
             return True
         return False
 

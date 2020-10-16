@@ -1,13 +1,13 @@
 from ariadne import ObjectType
 from core import config
-from core.constances import ACCESS_TYPE
+from core.constances import ACCESS_TYPE, USER_ROLES
 from core.models import ProfileField, UserProfileField
 from django.core.exceptions import ObjectDoesNotExist
 
 user = ObjectType("User")
 
 def is_user_or_admin(obj, info):
-    if info.context["request"].user == obj or info.context["request"].user.is_admin:
+    if info.context["request"].user == obj or info.context["request"].user.has_role(USER_ROLES.ADMIN):
         return True
     return False
 
@@ -94,9 +94,9 @@ def resolve_can_edit(obj, info):
 
 @user.field("isAdmin")
 def resolve_is_admin(obj, info):
-    if not info.context["request"].user.is_admin:
+    if not info.context["request"].user.has_role(USER_ROLES.ADMIN):
         return None
-    return obj.is_admin
+    return obj.has_role(USER_ROLES.ADMIN)
 
 @user.field("username")
 def resolve_username(obj, info):

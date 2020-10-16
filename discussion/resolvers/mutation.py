@@ -1,7 +1,7 @@
 from graphql import GraphQLError
 from django.core.exceptions import ObjectDoesNotExist
 from core.lib import remove_none_from_dict, access_id_to_acl
-from core.constances import NOT_LOGGED_IN, COULD_NOT_SAVE, COULD_NOT_FIND, COULD_NOT_FIND_GROUP
+from core.constances import NOT_LOGGED_IN, COULD_NOT_SAVE, COULD_NOT_FIND, COULD_NOT_FIND_GROUP, USER_ROLES
 from core.models import Group
 from ..models import Discussion
 
@@ -23,7 +23,7 @@ def resolve_add_discussion(_, info, input):
         except ObjectDoesNotExist:
             raise GraphQLError(COULD_NOT_FIND_GROUP)
 
-    if group and not group.is_full_member(user) and not user.is_admin:
+    if group and not group.is_full_member(user) and not user.has_role(USER_ROLES.ADMIN):
         raise GraphQLError("NOT_GROUP_MEMBER")
 
     entity = Discussion()
@@ -41,7 +41,7 @@ def resolve_add_discussion(_, info, input):
     entity.description = clean_input.get("description")
     entity.rich_description = clean_input.get("richDescription")
 
-    if user.is_admin and 'isFeatured' in clean_input: #TODO: implement roles
+    if user.has_role(USER_ROLES.ADMIN) or user.has_role(USER_ROLES.EDITOR):
         entity.is_featured = clean_input.get("isFeatured")
 
     entity.save()
@@ -84,8 +84,9 @@ def resolve_edit_discussion(_, info, input):
     if 'writeAccessId' in clean_input:
         entity.write_access = access_id_to_acl(entity, clean_input.get("writeAccessId"))
 
-    if user.is_admin and 'isFeatured' in clean_input: #TODO: implement roles
-        entity.is_featured = clean_input.get("isFeatured")
+    if user.has_role(USER_ROLES.ADMIN) or user.has_role(USER_ROLES.EDITOR):
+        if 'isFeatured' in clean_input:
+            entity.is_featured = clean_input.get("isFeatured")
 
     entity.save()
 

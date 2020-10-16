@@ -1,7 +1,7 @@
 from graphql import GraphQLError
 from django.db import IntegrityError
 from core.models import ProfileField
-from core.constances import NOT_LOGGED_IN, USER_NOT_SITE_ADMIN
+from core.constances import NOT_LOGGED_IN, USER_NOT_SITE_ADMIN, USER_ROLES
 from core.lib import remove_none_from_dict, generate_code
 
 def create_profile_field():
@@ -24,7 +24,7 @@ def resolve_add_site_setting_profile_field(_, info, input):
     if not user.is_authenticated:
         raise GraphQLError(NOT_LOGGED_IN)
 
-    if not user.is_admin:
+    if not user.has_role(USER_ROLES.ADMIN):
         raise GraphQLError(USER_NOT_SITE_ADMIN)
 
     profile_field = create_profile_field()

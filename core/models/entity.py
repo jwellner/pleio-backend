@@ -4,12 +4,13 @@ from django.contrib.postgres.fields import ArrayField
 from django.utils import timezone
 from model_utils.managers import InheritanceManager
 from core.lib import get_acl
+from core.constances import USER_ROLES
 from .shared import read_access_default, write_access_default
 
 class EntityManager(InheritanceManager):
     def visible(self, user):
         qs = self.get_queryset()
-        if user.is_authenticated and user.is_admin:
+        if user.is_authenticated and user.has_role(USER_ROLES.ADMIN):
             return qs
 
         return qs.filter(read_access__overlap=list(get_acl(user)))
@@ -43,13 +44,13 @@ class Entity(models.Model):
                       blank=True, default=list)
 
     def can_read(self, user):
-        if user.is_authenticated and user.is_admin:
+        if user.is_authenticated and user.has_role(USER_ROLES.ADMIN):
             return True
 
         return len(get_acl(user) & set(self.read_access)) > 0
 
     def can_write(self, user):
-        if user.is_authenticated and user.is_admin:
+        if user.is_authenticated and user.has_role(USER_ROLES.ADMIN):
             return True
 
         return len(get_acl(user) & set(self.write_access)) > 0

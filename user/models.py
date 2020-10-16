@@ -2,6 +2,7 @@ import uuid
 from core.models import UserProfile
 from django.db.models.signals import post_save
 from django.db import models
+from django.contrib.postgres.fields import ArrayField
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
 from django.core.mail import send_mail
 from django.conf import settings
@@ -61,7 +62,7 @@ class Manager(BaseUserManager):
             password=password
         )
 
-        user.is_admin = True
+        user.is_superadmin = True
         user.is_active = True
         user.save(using=self._db)
 
@@ -76,7 +77,8 @@ class User(AbstractBaseUser):
     email = models.EmailField(max_length=255, unique=True)
     name = models.CharField(max_length=100)
     is_active = models.BooleanField(default=True)
-    is_admin = models.BooleanField(default=False)
+    is_superadmin = models.BooleanField(default=False)
+
     external_id = models.CharField(
         max_length=50,
         unique=True,
@@ -87,7 +89,9 @@ class User(AbstractBaseUser):
     is_government = models.BooleanField(default=False)
     has_2fa_enabled = models.BooleanField(default=False)
     is_delete_requested = models.BooleanField(default=False)
-    ban_reason = models.CharField(max_length=100, default="")
+    ban_reason = models.CharField(max_length=100, default="", blank=True)
+
+    roles = ArrayField(models.CharField(max_length=256), blank=True, default=list)
 
     created_at = models.DateTimeField(default=timezone.now)
     updated_at = models.DateTimeField(default=timezone.now)
@@ -111,15 +115,22 @@ class User(AbstractBaseUser):
 
     @property
     def is_staff(self):
-        return self.is_admin
+        return self.is_superadmin
+
+    def has_role(self, role):
+        # pylint: disable=unused-argument
+        if self.is_superadmin:
+            return True
+
+        return role in list(self.roles)
 
     def has_perm(self, perm, obj=None):
         # pylint: disable=unused-argument
-        return True
+        return self.is_superadmin
 
     def has_module_perms(self, app_label):
         # pylint: disable=unused-argument
-        return True
+        return self.is_superadmin
 
     def get_full_name(self):
         return self.name

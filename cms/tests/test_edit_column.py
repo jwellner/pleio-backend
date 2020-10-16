@@ -7,7 +7,7 @@ from django.contrib.auth.models import AnonymousUser
 from django.http import HttpRequest
 from core.models import Group
 from user.models import User
-from core.constances import ACCESS_TYPE
+from core.constances import ACCESS_TYPE, USER_ROLES
 from mixer.backend.django import mixer
 from graphql import GraphQLError
 from cms.models import Page, Row, Column
@@ -17,7 +17,8 @@ class EditColumnTestCase(FastTenantTestCase):
     def setUp(self):
         self.anonymousUser = AnonymousUser()
         self.user = mixer.blend(User)
-        self.admin = mixer.blend(User, is_admin=True)
+        self.admin = mixer.blend(User, roles=[USER_ROLES.ADMIN])
+        self.editor = mixer.blend(User, roles=[USER_ROLES.EDITOR])
         self.user2 = mixer.blend(User)
         self.page = mixer.blend(Page,
                                 owner=self.user,
@@ -53,6 +54,38 @@ class EditColumnTestCase(FastTenantTestCase):
 
         request = HttpRequest()
         request.user = self.admin
+
+        result = graphql_sync(schema, {"query": mutation, "variables": variables }, context_value={ "request": request })
+
+        data = result[1]["data"]
+
+        self.assertEqual(data["editColumn"]["column"]["position"], 3)
+        self.assertEqual(Column.objects.get(id=self.column1.id).position, 0)
+        self.assertEqual(Column.objects.get(id=self.column3.id).position, 1)
+        self.assertEqual(Column.objects.get(id=self.column4.id).position, 2)
+        self.assertEqual(Column.objects.get(id=self.column5.id).position, 4)
+
+    def test_edit_column_move_up_positions_by_editor(self):
+
+        mutation = """
+            mutation EditColumn($input: editColumnInput!) {
+                editColumn(input: $input) {
+                    column {
+                        guid
+                        position
+                    }
+                }
+            }
+        """
+        variables = {
+            "input": {
+                "guid": self.column2.guid,
+                "position": 3
+            }
+        }
+
+        request = HttpRequest()
+        request.user = self.editor
 
         result = graphql_sync(schema, {"query": mutation, "variables": variables }, context_value={ "request": request })
 

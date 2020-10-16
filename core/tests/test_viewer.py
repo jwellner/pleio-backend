@@ -8,6 +8,7 @@ import json
 from django.contrib.auth.models import AnonymousUser
 from django.http import HttpRequest
 from mixer.backend.django import mixer
+from core.constances import USER_ROLES
 
 class ViewerTestCase(FastTenantTestCase):
 
@@ -15,7 +16,7 @@ class ViewerTestCase(FastTenantTestCase):
         self.anonymousUser = AnonymousUser()
         self.authenticatedUser = mixer.blend(User)
         self.groupUser = mixer.blend(User)
-        self.authenticatedAdminUser = mixer.blend(User, is_admin = True)
+        self.authenticatedAdminUser = mixer.blend(User, roles = ['ADMIN'])
         self.group = mixer.blend(Group, owner=self.groupUser)
         self.group.join(self.groupUser, 'member')
 
@@ -83,8 +84,8 @@ class ViewerTestCase(FastTenantTestCase):
 
         self.assertEqual(data["viewer"]["guid"], "viewer:{}".format(self.authenticatedUser.id))
         self.assertEqual(data["viewer"]["loggedIn"], True)
-        self.assertEqual(data["viewer"]["isSubEditor"], self.authenticatedUser.is_admin)
-        self.assertEqual(data["viewer"]["isAdmin"], self.authenticatedUser.is_admin)
+        self.assertEqual(data["viewer"]["isSubEditor"], self.authenticatedUser.has_role(USER_ROLES.ADMIN))
+        self.assertEqual(data["viewer"]["isAdmin"], self.authenticatedUser.has_role(USER_ROLES.ADMIN))
         self.assertEqual(data["viewer"]["user"]["guid"], self.authenticatedUser.guid)
         self.assertEqual(data["viewer"]["user"]["email"], self.authenticatedUser.email)
 
@@ -116,8 +117,8 @@ class ViewerTestCase(FastTenantTestCase):
 
         self.assertEqual(data["viewer"]["guid"], "viewer:{}".format(self.authenticatedAdminUser.id))
         self.assertEqual(data["viewer"]["loggedIn"], True)
-        self.assertEqual(data["viewer"]["isSubEditor"], self.authenticatedAdminUser.is_admin)
-        self.assertEqual(data["viewer"]["isAdmin"], self.authenticatedAdminUser.is_admin)
+        self.assertEqual(data["viewer"]["isSubEditor"], self.authenticatedAdminUser.has_role(USER_ROLES.ADMIN))
+        self.assertEqual(data["viewer"]["isAdmin"], self.authenticatedAdminUser.has_role(USER_ROLES.ADMIN))
         self.assertEqual(data["viewer"]["isBanned"], False)
         self.assertEqual(data["viewer"]["user"]["name"], self.authenticatedAdminUser.name)
         self.assertEqual(data["viewer"]["user"]["guid"], self.authenticatedAdminUser.guid)

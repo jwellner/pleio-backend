@@ -7,7 +7,7 @@ from django.contrib.auth.models import AnonymousUser
 from django.http import HttpRequest
 from core.models import Group
 from user.models import User
-from core.constances import ACCESS_TYPE
+from core.constances import ACCESS_TYPE, USER_ROLES
 from mixer.backend.django import mixer
 from graphql import GraphQLError
 from cms.models import Page, Row
@@ -17,7 +17,8 @@ class EditRowTestCase(FastTenantTestCase):
     def setUp(self):
         self.anonymousUser = AnonymousUser()
         self.user = mixer.blend(User)
-        self.admin = mixer.blend(User, is_admin=True)
+        self.admin = mixer.blend(User, roles=[USER_ROLES.ADMIN])
+        self.editor = mixer.blend(User, roles=[USER_ROLES.EDITOR])
         self.user2 = mixer.blend(User)
         self.page = mixer.blend(Page,
                                 owner=self.user,
@@ -94,6 +95,69 @@ class EditRowTestCase(FastTenantTestCase):
         self.assertEqual(Row.objects.get(id=self.row3.id).position, 3)
         self.assertEqual(Row.objects.get(id=self.row5.id).position, 4)
 
+    def test_edit_row_move_up_positions_by_editor(self):
+
+        mutation = """
+            mutation EditRow($input: editRowInput!) {
+                editRow(input: $input) {
+                    row {
+                        guid
+                        position
+                    }
+                }
+            }
+        """
+        variables = {
+            "input": {
+                "guid": self.row2.guid,
+                "position": 3
+            }
+        }
+
+        request = HttpRequest()
+        request.user = self.editor
+
+        result = graphql_sync(schema, {"query": mutation, "variables": variables }, context_value={ "request": request })
+
+        data = result[1]["data"]
+
+        self.assertEqual(data["editRow"]["row"]["position"], 3)
+        self.assertEqual(Row.objects.get(id=self.row1.id).position, 0)
+        self.assertEqual(Row.objects.get(id=self.row3.id).position, 1)
+        self.assertEqual(Row.objects.get(id=self.row4.id).position, 2)
+        self.assertEqual(Row.objects.get(id=self.row5.id).position, 4)
+
+    def test_edit_row_move_down_positions_by_editor(self):
+
+        mutation = """
+            mutation EditRow($input: editRowInput!) {
+                editRow(input: $input) {
+                    row {
+                        guid
+                        position
+                    }
+                }
+            }
+        """
+        variables = {
+            "input": {
+                "guid": self.row4.guid,
+                "position": 1
+            }
+        }
+
+        request = HttpRequest()
+        request.user = self.editor
+
+        result = graphql_sync(schema, {"query": mutation, "variables": variables }, context_value={ "request": request })
+
+        data = result[1]["data"]
+
+        self.assertEqual(data["editRow"]["row"]["position"], 1)
+        self.assertEqual(Row.objects.get(id=self.row1.id).position, 0)
+        self.assertEqual(Row.objects.get(id=self.row2.id).position, 2)
+        self.assertEqual(Row.objects.get(id=self.row3.id).position, 3)
+        self.assertEqual(Row.objects.get(id=self.row5.id).position, 4)
 
     def test_edit_row_move_up_positions_by_anonymous(self):
 

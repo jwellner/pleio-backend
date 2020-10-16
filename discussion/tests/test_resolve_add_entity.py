@@ -8,17 +8,17 @@ from django.http import HttpRequest
 from core.models import Group
 from user.models import User
 from discussion.models import Discussion
-from core.constances import ACCESS_TYPE
+from core.constances import ACCESS_TYPE, USER_ROLES
 from mixer.backend.django import mixer
 from graphql import GraphQLError
 from datetime import datetime
 
-class AddEventTestCase(FastTenantTestCase):
+class AddDiscussionTestCase(FastTenantTestCase):
 
     def setUp(self):
         self.anonymousUser = AnonymousUser()
         self.authenticatedUser = mixer.blend(User)
-        self.editorUser = mixer.blend(User, is_admin=True) # TODO: update with roles
+        self.editorUser = mixer.blend(User, roles=[USER_ROLES.EDITOR])
         self.group = mixer.blend(Group, owner=self.authenticatedUser, is_membership_on_request=False)
         self.group.join(self.authenticatedUser, 'owner')
 
@@ -78,7 +78,7 @@ class AddEventTestCase(FastTenantTestCase):
         self.assertEqual(data["addEntity"]["entity"]["title"], variables["input"]["title"])
         self.assertEqual(data["addEntity"]["entity"]["description"], variables["input"]["description"])
         self.assertEqual(data["addEntity"]["entity"]["richDescription"], variables["input"]["richDescription"])
-        self.assertEqual(data["addEntity"]["entity"]["isFeatured"], False) # only admin can set
+        self.assertEqual(data["addEntity"]["entity"]["isFeatured"], False) # only editor or admin can set
 
     def test_add_discussion_editor(self):
 

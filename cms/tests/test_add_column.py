@@ -6,6 +6,7 @@ import json
 from django.contrib.auth.models import AnonymousUser
 from django.http import HttpRequest
 from core.models import Group
+from core.constances import USER_ROLES
 from user.models import User
 from mixer.backend.django import mixer
 from graphql import GraphQLError
@@ -15,7 +16,8 @@ class AddColumnTestCase(FastTenantTestCase):
 
     def setUp(self):
         self.anonymousUser = AnonymousUser()
-        self.admin = mixer.blend(User, is_admin=True)
+        self.admin = mixer.blend(User, roles=[USER_ROLES.ADMIN])
+        self.editor = mixer.blend(User, roles=[USER_ROLES.EDITOR])
         self.user = mixer.blend(User)
         self.page = mixer.blend(Page)
         self.row1 = mixer.blend(Row, position=0, page=self.page)
@@ -50,6 +52,46 @@ class AddColumnTestCase(FastTenantTestCase):
 
         request = HttpRequest()
         request.user = self.admin
+
+        result = graphql_sync(schema, {"query": mutation, "variables": variables }, context_value={ "request": request })
+
+        data = result[1]["data"]
+
+        self.assertEqual(data["addColumn"]["column"]["position"], 1)
+        self.assertEqual(data["addColumn"]["column"]["containerGuid"], self.page.guid)
+        self.assertEqual(data["addColumn"]["column"]["parentGuid"], self.row1.guid)
+        self.assertEqual(data["addColumn"]["column"]["canEdit"], True)
+        self.assertEqual(data["addColumn"]["column"]["width"][0], 6)
+
+    def test_add_column_to_row_by_editor(self):
+
+        mutation = """
+            mutation AddColumn($columnInput: addColumnInput!) {
+                addColumn(input: $columnInput) {
+                    column {
+                        guid
+                        position
+                        containerGuid
+                        parentGuid
+                        canEdit
+                        width
+                        __typename
+                    }
+                    __typename
+                }
+            }
+        """
+        variables = {
+            "columnInput": {
+                "containerGuid": self.page.guid,
+                "parentGuid": self.row1.guid,
+                "position": 1,
+                "width": [6]
+            }
+        }
+
+        request = HttpRequest()
+        request.user = self.editor
 
         result = graphql_sync(schema, {"query": mutation, "variables": variables }, context_value={ "request": request })
 

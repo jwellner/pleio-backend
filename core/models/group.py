@@ -11,6 +11,7 @@ from django.utils.text import slugify
 from django.utils import timezone
 from django.urls import reverse
 from core.lib import ACCESS_TYPE
+from core.constances import USER_ROLES
 
 class GroupManager(models.Manager):
     def visible(self, user):
@@ -104,7 +105,7 @@ class Group(models.Model):
         if not user.is_authenticated:
             return False
 
-        if user.is_admin:
+        if user.has_role(USER_ROLES.ADMIN):
             return True
 
         if user == self.owner:

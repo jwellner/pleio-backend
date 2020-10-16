@@ -86,7 +86,7 @@ class EditQuestionTestCase(FastTenantTestCase):
         self.assertEqual(data["editEntity"]["entity"]["richDescription"], variables["input"]["richDescription"])
         self.assertEqual(data["editEntity"]["entity"]["tags"], variables["input"]["tags"])
         self.assertEqual(data["editEntity"]["entity"]["isClosed"], False)
-        self.assertEqual(data["editEntity"]["entity"]["isFeatured"], False) # only with editor role
+        self.assertEqual(data["editEntity"]["entity"]["isFeatured"], False) # nly with editor or admin role
 
         self.question.refresh_from_db()
 

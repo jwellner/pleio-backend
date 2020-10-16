@@ -3,7 +3,7 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.utils.translation import ugettext_lazy
 from core.models import Group, GroupInvitation
 from user.models import User
-from core.constances import NOT_LOGGED_IN, COULD_NOT_FIND, COULD_NOT_INVITE, USER_NOT_SITE_ADMIN
+from core.constances import NOT_LOGGED_IN, COULD_NOT_FIND, COULD_NOT_INVITE, USER_NOT_SITE_ADMIN, USER_ROLES
 from core.lib import remove_none_from_dict, get_base_url, generate_code, get_default_email_context
 from core.tasks import send_mail_multi
 from django_tenants.utils import parse_tenant_config_path
@@ -25,10 +25,10 @@ def resolve_invite_to_group(_, info, input):
     if not group.can_write(user):
         raise GraphQLError(COULD_NOT_INVITE)
 
-    if clean_input.get("directAdd") and not user.is_admin:
+    if clean_input.get("directAdd") and not user.has_role(USER_ROLES.ADMIN):
         raise GraphQLError(USER_NOT_SITE_ADMIN)
 
-    if clean_input.get("addAllUsers") and not user.is_admin:
+    if clean_input.get("addAllUsers") and not user.has_role(USER_ROLES.ADMIN):
         raise GraphQLError(USER_NOT_SITE_ADMIN)
 
     # Add all users without sending email

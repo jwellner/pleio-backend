@@ -8,16 +8,17 @@ from django.http import HttpRequest
 from core.models import Group
 from user.models import User
 from news.models import News
-from core.constances import ACCESS_TYPE
+from core.constances import ACCESS_TYPE, USER_ROLES
 from mixer.backend.django import mixer
 from graphql import GraphQLError
 from datetime import datetime
 
-class EditBlogTestCase(FastTenantTestCase):
+class EditNewsTestCase(FastTenantTestCase):
 
     def setUp(self):
         self.anonymousUser = AnonymousUser()
         self.authenticatedUser = mixer.blend(User)
+        self.editorUser = mixer.blend(User, roles=[USER_ROLES.EDITOR])
 
         self.news = News.objects.create(
             title="Test public news",
@@ -83,7 +84,36 @@ class EditBlogTestCase(FastTenantTestCase):
         self.assertEqual(data["editEntity"]["entity"]["description"], variables["input"]["description"])
         self.assertEqual(data["editEntity"]["entity"]["richDescription"], variables["input"]["richDescription"])
         self.assertEqual(data["editEntity"]["entity"]["tags"], variables["input"]["tags"])
-        self.assertEqual(data["editEntity"]["entity"]["isFeatured"], variables["input"]["isFeatured"])
+        self.assertEqual(data["editEntity"]["entity"]["isFeatured"], False) # Only editor or admin can set isFeatured
+        self.assertEqual(data["editEntity"]["entity"]["source"], variables["input"]["source"])
+
+        self.news.refresh_from_db()
+
+        self.assertEqual(data["editEntity"]["entity"]["title"], self.news.title)
+        self.assertEqual(data["editEntity"]["entity"]["description"], self.news.description)
+        self.assertEqual(data["editEntity"]["entity"]["richDescription"], self.news.rich_description)
+        self.assertEqual(data["editEntity"]["entity"]["tags"], self.news.tags)
+        self.assertEqual(data["editEntity"]["entity"]["isFeatured"], self.news.is_featured)
+        self.assertEqual(data["editEntity"]["entity"]["source"], self.news.source)
+
+    def test_edit_news_editor(self):
+
+        variables = self.data
+        variables["input"]["title"] = "Update door editor"
+        variables["input"]["description"] = "Update door editor"
+
+        request = HttpRequest()
+        request.user = self.editorUser
+
+        result = graphql_sync(schema, { "query": self.mutation, "variables": variables }, context_value={ "request": request })
+
+        data = result[1]["data"]
+
+        self.assertEqual(data["editEntity"]["entity"]["title"], variables["input"]["title"])
+        self.assertEqual(data["editEntity"]["entity"]["description"], variables["input"]["description"])
+        self.assertEqual(data["editEntity"]["entity"]["richDescription"], variables["input"]["richDescription"])
+        self.assertEqual(data["editEntity"]["entity"]["tags"], variables["input"]["tags"])
+        self.assertEqual(data["editEntity"]["entity"]["isFeatured"], True)
         self.assertEqual(data["editEntity"]["entity"]["source"], variables["input"]["source"])
 
         self.news.refresh_from_db()

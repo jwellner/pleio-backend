@@ -1,6 +1,8 @@
 from django.db import models
 from django.utils.text import slugify
 from core.models import Entity, VoteMixin, CommentMixin, BookmarkMixin, FollowMixin, Comment, NotificationMixin
+from core.constances import USER_ROLES
+
 
 class Question(Entity, VoteMixin, BookmarkMixin, FollowMixin, CommentMixin, NotificationMixin):
     """
@@ -26,7 +28,7 @@ class Question(Entity, VoteMixin, BookmarkMixin, FollowMixin, CommentMixin, Noti
         if not user.is_authenticated:
             return False
 
-        if user.is_admin or user == self.owner: # TODO: add question expert role
+        if user.has_role(USER_ROLES.ADMIN) or user.has_role(USER_ROLES.QUESTION_MANAGER) or user == self.owner:
             return True
 
         return False
@@ -39,7 +41,7 @@ class Question(Entity, VoteMixin, BookmarkMixin, FollowMixin, CommentMixin, Noti
         if self.is_closed:
             return False
 
-        if user.is_admin or user == self.owner:  # TODO: add question expert role
+        if user.has_role(USER_ROLES.ADMIN) or user.has_role(USER_ROLES.QUESTION_MANAGER) or user == self.owner:
             return True
 
         return False

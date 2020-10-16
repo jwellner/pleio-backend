@@ -24,8 +24,8 @@ class SiteUsersTestCase(FastTenantTestCase):
         self.user4 = mixer.blend(User, is_active=False, name='Xx')
         self.user5 = mixer.blend(User)
         self.user5.delete()
-        self.admin1 = mixer.blend(User, is_admin=True, name='Yy')
-        self.admin2 = mixer.blend(User, is_admin=True, name='Uu')
+        self.admin1 = mixer.blend(User, roles=['ADMIN'], name='Yy')
+        self.admin2 = mixer.blend(User, roles=['ADMIN'], name='Uu')
         self.anonymousUser = AnonymousUser()
 
         self.query = """

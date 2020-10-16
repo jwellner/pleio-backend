@@ -19,8 +19,8 @@ class ToggleUserIsAdminTestCase(FastTenantTestCase):
     def setUp(self):
         self.anonymousUser = AnonymousUser()
         self.user1 = mixer.blend(User)
-        self.admin = mixer.blend(User, is_admin=True)
-        self.admin2 = mixer.blend(User, is_admin=True)
+        self.admin = mixer.blend(User, roles=['ADMIN'])
+        self.admin2 = mixer.blend(User, roles=['ADMIN'])
 
     def tearDown(self):
         self.user1.delete()

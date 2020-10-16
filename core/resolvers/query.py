@@ -16,7 +16,7 @@ from .query_trending import resolve_trending
 from .query_notifications import resolve_notifications
 from .query_recommended import resolve_recommended
 from .query_top import resolve_top
-from core.constances import USER_NOT_MEMBER_OF_GROUP
+from core.constances import USER_NOT_MEMBER_OF_GROUP, USER_ROLES
 
 query = ObjectType("Query")
 
@@ -54,7 +54,7 @@ def resolve_entity(
     try:
         entity = Entity.objects.visible(user).get_subclass(id=guid)
 
-        if entity.group and entity.group.is_closed and not entity.group.is_full_member(user) and not user.is_admin:
+        if entity.group and entity.group.is_closed and not entity.group.is_full_member(user) and not user.has_role(USER_ROLES.ADMIN):
             raise GraphQLError(USER_NOT_MEMBER_OF_GROUP)
 
     except ObjectDoesNotExist:

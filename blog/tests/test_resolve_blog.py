@@ -18,7 +18,7 @@ class BlogTestCase(FastTenantTestCase):
     def setUp(self):
         self.anonymousUser = AnonymousUser()
         self.authenticatedUser = mixer.blend(User)
-        self.authenticatedAdminUser = mixer.blend(User, is_admin = True)
+        self.authenticatedAdminUser = mixer.blend(User, roles = ['ADMIN'])
 
         self.blogPublic = Blog.objects.create(
             title="Test public blog",

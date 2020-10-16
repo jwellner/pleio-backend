@@ -18,7 +18,7 @@ class AddBlogTestCase(FastTenantTestCase):
     def setUp(self):
         self.anonymousUser = AnonymousUser()
         self.authenticatedUser = mixer.blend(User)
-        self.adminUser = mixer.blend(User, is_admin=True)
+        self.adminUser = mixer.blend(User, roles=['ADMIN'])
         self.group = mixer.blend(Group, owner=self.authenticatedUser, is_membership_on_request=False)
         self.group.join(self.authenticatedUser, 'owner')
 
