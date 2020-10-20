@@ -69,9 +69,11 @@ class OIDCAuthBackend(OIDCAuthenticationBackend):
         user.is_government = claims.get('is_government')
         user.has_2fa_enabled = claims.get('has_2fa_enabled')
 
-        # Only update if user is not admin and claim says it is a superuser
-        if claims.get('is_admin') and not user.is_superadmin:
+        # Get and set superadmin
+        if claims.get('is_admin'):
             user.is_superadmin = True
+        else:
+            user.is_superadmin = False
 
         user.save()
 

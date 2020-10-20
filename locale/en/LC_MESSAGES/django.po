@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-09-28 12:07+0200\n"
+"POT-Creation-Date: 2020-10-16 14:48+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -18,11 +18,11 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#: backend2/config.py:61 core/resolvers/query_site.py:83
+#: backend2/config.py:61 core/resolvers/query_site.py:81
 msgid "English"
 msgstr ""
 
-#: backend2/config.py:62 core/resolvers/query_site.py:83
+#: backend2/config.py:62 core/resolvers/query_site.py:81
 msgid "Dutch"
 msgstr ""
 
@@ -52,7 +52,7 @@ msgid "Account of %(name_deleted_user)s removed"
 msgstr ""
 
 #: core/resolvers/mutation_delete_user.py:43
-#: core/resolvers/mutation_toggle_user_is_admin.py:37
+#: core/resolvers/mutation_toggle_user_role.py:44
 #, python-format
 msgid "A site administrator was removed from %(site_name)s"
 msgstr ""
@@ -100,55 +100,67 @@ msgstr ""
 msgid "Request to remove account"
 msgstr ""
 
-#: core/resolvers/mutation_toggle_user_is_admin.py:43
+#: core/resolvers/mutation_toggle_user_role.py:50
 #, python-format
 msgid "Your site administrator rights for %(site_name)s were removed"
 msgstr ""
 
-#: core/resolvers/mutation_toggle_user_is_admin.py:54
+#: core/resolvers/mutation_toggle_user_role.py:62
 #, python-format
 msgid "A new site administrator was assigned for %(site_name)s"
 msgstr ""
 
-#: core/resolvers/mutation_toggle_user_is_admin.py:59
+#: core/resolvers/mutation_toggle_user_role.py:67
 #, python-format
 msgid "You're granted site administrator right on %(site_name)s"
 msgstr ""
 
-#: core/resolvers/query_site.py:67
+#: core/resolvers/query_site.py:65
 msgid "Just me"
 msgstr ""
 
-#: core/resolvers/query_site.py:68
+#: core/resolvers/query_site.py:66
 msgid "Logged in users"
 msgstr ""
 
-#: core/resolvers/query_site.py:72
+#: core/resolvers/query_site.py:70
 msgid "Public"
 msgstr ""
 
-#: core/resolvers/query_site.py:109
+#: core/resolvers/query_site.py:107
 msgid "Activity stream"
 msgstr ""
 
-#: core/resolvers/query_site.py:109
+#: core/resolvers/query_site.py:107
 msgid "CMS page"
 msgstr ""
 
-#: core/resolvers/query_site.py:143
+#: core/resolvers/query_site.py:141
 msgid "Daily"
 msgstr ""
 
-#: core/resolvers/query_site.py:144
+#: core/resolvers/query_site.py:142
 msgid "Weekly"
 msgstr ""
 
-#: core/resolvers/query_site.py:145
+#: core/resolvers/query_site.py:143
 msgid "Monthly"
 msgstr ""
 
-#: core/resolvers/query_site.py:146
+#: core/resolvers/query_site.py:144
 msgid "Never"
+msgstr ""
+
+#: core/resolvers/query_site.py:190
+msgid "Administrator"
+msgstr ""
+
+#: core/resolvers/query_site.py:191
+msgid "Editor"
+msgstr ""
+
+#: core/resolvers/query_site.py:192
+msgid "Question expert"
 msgstr ""
 
 #: core/templates/admin/oidc_login.html:21
@@ -460,19 +472,19 @@ msgid ""
 "\n"
 msgstr ""
 
-#: core/templates/registration/login.html:11
+#: core/templates/registration/login.html:15
 msgid "This site is closed. Log in to get access."
 msgstr ""
 
-#: core/templates/registration/login.html:18
+#: core/templates/registration/login.html:23
 msgid "Login using Pleio account"
 msgstr ""
 
-#: core/templates/registration/login.html:21
+#: core/templates/registration/login.html:26
 msgid "Don't have an account?"
 msgstr ""
 
-#: core/templates/registration/login.html:21
+#: core/templates/registration/login.html:26
 msgid "Register"
 msgstr ""
 

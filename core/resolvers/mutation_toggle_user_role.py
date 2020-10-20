@@ -7,7 +7,7 @@ from core.lib import remove_none_from_dict, get_default_email_context
 from core.tasks import send_mail_multi
 from django_tenants.utils import parse_tenant_config_path
 
-def resolve_toggle_user_is_admin(_, info, input):
+def resolve_toggle_user_role(_, info, input):
     # pylint: disable=redefined-builtin
 
     performing_user = info.context["request"].user
@@ -24,16 +24,21 @@ def resolve_toggle_user_is_admin(_, info, input):
     except ObjectDoesNotExist:
         raise GraphQLError(COULD_NOT_FIND)
 
+    if hasattr(USER_ROLES, clean_input.get('role').upper()):
+        toggle_role = getattr(USER_ROLES, clean_input.get('role').upper())
+    else:
+        raise GraphQLError(COULD_NOT_SAVE)
+
     schema_name = parse_tenant_config_path("")
     context = get_default_email_context(info.context['request'])
     context['name_of_user_admin_role_changed'] = user.name
     context['link'] = context['site_url'] + user.url
 
-    if not user.is_superadmin:
-        if USER_ROLES.ADMIN in user.roles:
-            user.roles.remove(USER_ROLES.ADMIN)
-            user.save()
+    if toggle_role in user.roles:
+        user.roles.remove(toggle_role)
+        user.save()
 
+        if toggle_role == USER_ROLES.ADMIN:
             admin_email_addresses = list(User.objects.filter(roles__contains=['ADMIN']).values_list('email', flat=True))
             subject = ugettext_lazy("A site administrator was removed from %(site_name)s") % {'site_name': context["site_name"]}
 
@@ -46,12 +51,13 @@ def resolve_toggle_user_is_admin(_, info, input):
             # mail to user to notify about removed rigths
             send_mail_multi.delay(schema_name, subject, 'email/user_role_admin_removed_for_user.html', context, user.email)
 
-        else:
-            admin_email_addresses = list(User.objects.filter(roles__contains=['ADMIN']).values_list('email', flat=True))
+    else:
+        admin_email_addresses = list(User.objects.filter(roles__contains=['ADMIN']).values_list('email', flat=True))
 
-            user.roles.append(USER_ROLES.ADMIN)
-            user.save()
+        user.roles.append(toggle_role)
+        user.save()
 
+        if toggle_role == USER_ROLES.ADMIN:
             subject = ugettext_lazy("A new site administrator was assigned for %(site_name)s") % {'site_name': context["site_name"]}
             # mail to admins to notify about added admin
             for admin_email_address in admin_email_addresses:

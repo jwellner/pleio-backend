@@ -2,7 +2,7 @@ from user.models import User
 from core.constances import NOT_LOGGED_IN, USER_NOT_SITE_ADMIN, USER_ROLES
 from graphql import GraphQLError
 
-def resolve_site_users(_, info, q=None, isAdmin=None, isDeleteRequested=None, isBanned=False, offset=0, limit=20):
+def resolve_site_users(_, info, q=None, role=None, isDeleteRequested=None, isBanned=False, offset=0, limit=20):
     # pylint: disable=unused-argument
     # pylint: disable=too-many-arguments
 
@@ -24,11 +24,9 @@ def resolve_site_users(_, info, q=None, isAdmin=None, isDeleteRequested=None, is
     if q:
         users = users.filter(name__icontains=q)
 
-    if isAdmin is not None:
-        if isAdmin:
-            users = users.filter(roles__contains=[USER_ROLES.ADMIN])
-        else:
-            users = users.exclude(roles__contains=[USER_ROLES.ADMIN])
+    if role is not None and hasattr(USER_ROLES, role.upper()):
+        ROLE_FILTER = getattr(USER_ROLES, role.upper())
+        users = users.filter(roles__contains=[ROLE_FILTER])
 
     if isDeleteRequested is not None:
         users = users.filter(is_delete_requested=isDeleteRequested)

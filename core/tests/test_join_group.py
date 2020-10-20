@@ -16,7 +16,7 @@ class JoinGroupTestCase(FastTenantTestCase):
 
     def setUp(self):
         self.anonymousUser = AnonymousUser()
-        self.user1 = mixer.blend(User, name="b")
+        self.user1 = mixer.blend(User, name="a")
         self.group_auto = mixer.blend(Group, owner=self.user1, is_membership_on_request=False, is_auto_membership_enabled=True)
 
         self.user2 = mixer.blend(User, name="b") # auto joined to group_auto

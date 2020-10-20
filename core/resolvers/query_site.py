@@ -185,7 +185,12 @@ def get_site_settings():
             'edges': SiteInvitation.objects.all()
         },
         'cookieConsent': config.COOKIE_CONSENT,
-        'loginIntro': config.LOGIN_INTRO
+        'loginIntro': config.LOGIN_INTRO,
+        'roleOptions': [
+            {'value': USER_ROLES.ADMIN, 'label': ugettext_lazy('Administrator')}, 
+            {'value': USER_ROLES.EDITOR, 'label': ugettext_lazy('Editor')},
+            {'value': USER_ROLES.QUESTION_MANAGER, 'label': ugettext_lazy('Question expert')},
+        ]
     }
 
     return site_settings
