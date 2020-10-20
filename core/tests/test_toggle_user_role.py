@@ -14,7 +14,7 @@ from graphql import GraphQLError
 from unittest import mock
 
 
-class ToggleUserIsAdminTestCase(FastTenantTestCase):
+class ToggleUserRoleTestCase(FastTenantTestCase):
 
     def setUp(self):
         self.anonymousUser = AnonymousUser()
@@ -26,7 +26,7 @@ class ToggleUserIsAdminTestCase(FastTenantTestCase):
         self.user1.delete()
         self.admin.delete()
 
-    def test_toggle_is_admin_by_anonymous(self):
+    def test_toggle_request_delete_user_by_anonymous(self):
         mutation = """
             mutation toggleRequestDeleteUser($input: toggleRequestDeleteUserInput!) {
                 toggleRequestDeleteUser(input: $input) {
@@ -52,17 +52,18 @@ class ToggleUserIsAdminTestCase(FastTenantTestCase):
         self.assertEqual(errors[0]["message"], "not_logged_in")
 
 
-    def test_toggle_is_admin_by_user(self):
+    def test_toggle_user_role_by_user(self):
         mutation = """
-            mutation toggleUserIsAdmin($input: toggleUserIsAdminInput!) {
-                toggleUserIsAdmin(input: $input) {
+            mutation toggleUserRole($input: toggleUserRoleInput!) {
+                toggleUserRole(input: $input) {
                     success
                 }
             }
         """
         variables = {
             "input": {
-                "guid": self.user1.guid
+                "guid": self.user1.guid,
+                "role": "admin"
             }
         }
 
@@ -77,18 +78,19 @@ class ToggleUserIsAdminTestCase(FastTenantTestCase):
 
 
     @override_settings(ALLOWED_HOSTS=['test.test'])
-    @mock.patch('core.resolvers.mutation_toggle_user_is_admin.send_mail_multi.delay')
-    def test_toggle_is_admin_by_admin(self, mocked_send_mail_multi):
+    @mock.patch('core.resolvers.mutation_toggle_user_role.send_mail_multi.delay')
+    def test_toggle_user_role_by_admin(self, mocked_send_mail_multi):
         mutation = """
-            mutation toggleUserIsAdmin($input: toggleUserIsAdminInput!) {
-                toggleUserIsAdmin(input: $input) {
+            mutation toggleUserRole($input: toggleUserRoleInput!) {
+                toggleUserRole(input: $input) {
                     success
                 }
             }
         """
         variables = {
             "input": {
-                "guid": self.user1.guid
+                "guid": self.user1.guid,
+                "role": "admin"
             }
         }
 
@@ -101,12 +103,12 @@ class ToggleUserIsAdminTestCase(FastTenantTestCase):
         result = graphql_sync(schema, {"query": mutation, "variables": variables}, context_value={ "request": request })
 
         data = result[1]["data"]
-        self.assertEqual(data["toggleUserIsAdmin"]["success"], True)
+        self.assertEqual(data["toggleUserRole"]["success"], True)
 
         self.assertEqual(mocked_send_mail_multi.call_count, 3)
 
         result = graphql_sync(schema, {"query": mutation, "variables": variables}, context_value={ "request": request })
         data = result[1]["data"]
-        self.assertEqual(data["toggleUserIsAdmin"]["success"], True)
+        self.assertEqual(data["toggleUserRole"]["success"], True)
 
         self.assertEqual(mocked_send_mail_multi.call_count, 6)

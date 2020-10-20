@@ -174,6 +174,10 @@ class SiteSettingsTestCase(FastTenantTestCase):
                         }
                     }
                     cookieConsent
+                    roleOptions {
+                        value
+                        label
+                    }
                 }
             }
         """
@@ -302,10 +306,9 @@ class SiteSettingsTestCase(FastTenantTestCase):
         self.assertEqual(data["siteSettings"]["statusUpdateGroups"], True)
         self.assertEqual(data["siteSettings"]["subgroups"], False)
         self.assertEqual(data["siteSettings"]["groupMemberExport"], False)
-
         self.assertEqual(data["siteSettings"]["siteInvites"]["edges"][0]['email'], 'a@a.nl')
-
         self.assertEqual(data["siteSettings"]["cookieConsent"], False)
+        self.assertEqual(data["siteSettings"]["roleOptions"], [{'value': 'ADMIN', 'label': 'Beheerder'}, {'value': 'EDITOR', 'label': 'Redacteur'}, {'value': 'QUESTION_MANAGER', 'label': 'Vraagexpert'}])
 
     def test_site_settings_by_anonymous(self):
 

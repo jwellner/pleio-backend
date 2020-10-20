@@ -16,7 +16,7 @@ class ViewerTestCase(FastTenantTestCase):
         self.anonymousUser = AnonymousUser()
         self.authenticatedUser = mixer.blend(User)
         self.groupUser = mixer.blend(User)
-        self.authenticatedAdminUser = mixer.blend(User, roles = ['ADMIN'])
+        self.authenticatedAdminUser = mixer.blend(User, roles = [USER_ROLES.ADMIN])
         self.group = mixer.blend(Group, owner=self.groupUser)
         self.group.join(self.groupUser, 'member')
 
@@ -117,7 +117,7 @@ class ViewerTestCase(FastTenantTestCase):
 
         self.assertEqual(data["viewer"]["guid"], "viewer:{}".format(self.authenticatedAdminUser.id))
         self.assertEqual(data["viewer"]["loggedIn"], True)
-        self.assertEqual(data["viewer"]["isSubEditor"], self.authenticatedAdminUser.has_role(USER_ROLES.ADMIN))
+        self.assertEqual(data["viewer"]["isSubEditor"], self.authenticatedAdminUser.has_role(USER_ROLES.EDITOR))
         self.assertEqual(data["viewer"]["isAdmin"], self.authenticatedAdminUser.has_role(USER_ROLES.ADMIN))
         self.assertEqual(data["viewer"]["isBanned"], False)
         self.assertEqual(data["viewer"]["user"]["name"], self.authenticatedAdminUser.name)

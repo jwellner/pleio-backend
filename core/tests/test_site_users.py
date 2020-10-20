@@ -5,7 +5,7 @@ from core.models import Group, Comment
 from user.models import User
 from blog.models import Blog
 from cms.models import Page
-from core.constances import ACCESS_TYPE
+from core.constances import ACCESS_TYPE, USER_ROLES
 from backend2.schema import schema
 from ariadne import graphql_sync
 import json
@@ -24,20 +24,21 @@ class SiteUsersTestCase(FastTenantTestCase):
         self.user4 = mixer.blend(User, is_active=False, name='Xx')
         self.user5 = mixer.blend(User)
         self.user5.delete()
-        self.admin1 = mixer.blend(User, roles=['ADMIN'], name='Yy')
-        self.admin2 = mixer.blend(User, roles=['ADMIN'], name='Uu')
+        self.admin1 = mixer.blend(User, roles=[USER_ROLES.ADMIN], name='Yy')
+        self.admin2 = mixer.blend(User, roles=[USER_ROLES.ADMIN], name='Uu')
+        self.editor1 = mixer.blend(User, roles=[USER_ROLES.EDITOR], name='Vv')
         self.anonymousUser = AnonymousUser()
 
         self.query = """
-            query UsersQuery($offset: Int, $limit: Int, $q: String, $isAdmin: Boolean, $isDeleteRequested: Boolean, $isBanned: Boolean) {
+            query UsersQuery($offset: Int, $limit: Int, $q: String, $role: String, $isDeleteRequested: Boolean, $isBanned: Boolean) {
 
-                siteUsers(offset: $offset, limit: $limit, q: $q, isAdmin: $isAdmin, isDeleteRequested: $isDeleteRequested, isBanned: $isBanned) {
+                siteUsers(offset: $offset, limit: $limit, q: $q, role: $role, isDeleteRequested: $isDeleteRequested, isBanned: $isBanned) {
                     edges {
                         guid
                         name
                         url
                         icon
-                        isAdmin
+                        roles
                         requestDelete
                     }
                     total
@@ -66,9 +67,9 @@ class SiteUsersTestCase(FastTenantTestCase):
         self.assertTrue(result[0])
         data = result[1]["data"]
 
-        self.assertEqual(data["siteUsers"]["total"], 5)
+        self.assertEqual(data["siteUsers"]["total"], 6)
         self.assertEqual(data["siteUsers"]["edges"][0]["name"], self.user2.name)
-        self.assertEqual(len(data["siteUsers"]["edges"]), 5)
+        self.assertEqual(len(data["siteUsers"]["edges"]), 6)
 
     def test_site_users_filter_admins_by_admin(self):
 
@@ -76,7 +77,7 @@ class SiteUsersTestCase(FastTenantTestCase):
         request.user = self.admin1
 
         variables = {
-            "isAdmin": True
+            "role": "admin"
         }
 
         result = graphql_sync(schema, {"query": self.query, "variables": variables}, context_value={ "request": request })
@@ -86,6 +87,25 @@ class SiteUsersTestCase(FastTenantTestCase):
 
         self.assertEqual(data["siteUsers"]["total"], 2)
         self.assertEqual(len(data["siteUsers"]["edges"]), 2)
+
+    def test_site_users_filter_editors_by_admin(self):
+
+        request = HttpRequest()
+        request.user = self.admin1
+
+        variables = {
+            "role": "editor"
+        }
+
+        result = graphql_sync(schema, {"query": self.query, "variables": variables}, context_value={ "request": request })
+
+        self.assertTrue(result[0])
+        data = result[1]["data"]
+
+        self.assertEqual(data["siteUsers"]["total"], 1)
+        self.assertEqual(len(data["siteUsers"]["edges"]), 1)
+        self.assertEqual(data["siteUsers"]["edges"][0]["guid"], self.editor1.guid)
+        self.assertEqual(data["siteUsers"]["edges"][0]["roles"], self.editor1.roles)
 
     def test_site_users_filter_delete_requested_by_admin(self):
 

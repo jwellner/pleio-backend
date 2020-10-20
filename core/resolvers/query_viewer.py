@@ -24,7 +24,7 @@ def resolve_viewer(_, info):
     return {
         'guid': 'viewer:{}'.format(user.id),
         'loggedIn': True,
-        'isSubEditor': user.has_role(USER_ROLES.ADMIN),
+        'isSubEditor': user.has_role(USER_ROLES.EDITOR),
         'isAdmin': user.has_role(USER_ROLES.ADMIN),
         'isBanned': banned,
         'tags': []

@@ -92,11 +92,12 @@ def resolve_can_edit(obj, info):
         return True
     return False
 
-@user.field("isAdmin")
-def resolve_is_admin(obj, info):
+@user.field("roles")
+def resolve_roles(obj, info):
     if not info.context["request"].user.has_role(USER_ROLES.ADMIN):
         return None
-    return obj.has_role(USER_ROLES.ADMIN)
+
+    return obj.roles
 
 @user.field("username")
 def resolve_username(obj, info):
