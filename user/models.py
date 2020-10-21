@@ -1,5 +1,6 @@
 import uuid
-from core.models import UserProfile
+from core.models import UserProfile, ProfileField, UserProfileField
+from core import config
 from django.db.models.signals import post_save
 from django.db import models
 from django.contrib.postgres.fields import ArrayField
@@ -7,6 +8,7 @@ from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
 from django.core.mail import send_mail
 from django.conf import settings
 from django.dispatch import receiver
+from django.core.exceptions import ObjectDoesNotExist
 from django.utils import timezone
 
 
@@ -51,6 +53,7 @@ class Manager(BaseUserManager):
         if has_2fa_enabled:
             user.has_2fa_enabled = has_2fa_enabled
 
+        user.login_count = None
         user.save(using=self._db)
 
         return user
@@ -92,6 +95,8 @@ class User(AbstractBaseUser):
     ban_reason = models.CharField(max_length=100, default="", blank=True)
 
     roles = ArrayField(models.CharField(max_length=256), blank=True, default=list)
+
+    login_count = models.IntegerField(null=True, blank=True, default=1)
 
     created_at = models.DateTimeField(default=timezone.now)
     updated_at = models.DateTimeField(default=timezone.now)
@@ -155,6 +160,28 @@ class User(AbstractBaseUser):
                 return UserProfile.objects.create(
                     user=self,
                 )
+
+    @property
+    def is_profile_complete(self):
+        # only get configured profile fields
+        profile_section_guids = []
+
+        for section in config.PROFILE_SECTIONS:
+            profile_section_guids.extend(section['profileFieldGuids'])
+
+        fields = ProfileField.objects.filter(id__in=profile_section_guids, is_mandatory=True).all()
+
+        incomplete = 0
+
+        for field in fields:
+            try:
+                user_profile_field = UserProfileField.objects.get(profile_field=field, user_profile=self.profile)
+                if user_profile_field.value == '':
+                    incomplete += 1
+            except ObjectDoesNotExist:
+                incomplete += 1
+        
+        return incomplete == 0
 
     def delete(self, using='', keep_parents=False):
         self.is_active = False

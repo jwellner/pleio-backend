@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-10-16 14:48+0200\n"
+"POT-Creation-Date: 2020-10-21 12:41+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -52,7 +52,7 @@ msgid "Account of %(name_deleted_user)s removed"
 msgstr "Account verwijderd van %(name_deleted_user)s"
 
 #: core/resolvers/mutation_delete_user.py:43
-#: core/resolvers/mutation_toggle_user_role.py:44
+#: core/resolvers/mutation_toggle_user_role.py:43
 #, python-format
 msgid "A site administrator was removed from %(site_name)s"
 msgstr "Een site beheerder is verwijderd van %(site_name)s"
@@ -101,17 +101,17 @@ msgstr "Verzoek om account te verwijderen geannuleerd"
 msgid "Request to remove account"
 msgstr "Verzoek om account te verwijderen"
 
-#: core/resolvers/mutation_toggle_user_role.py:50
+#: core/resolvers/mutation_toggle_user_role.py:49
 #, python-format
 msgid "Your site administrator rights for %(site_name)s were removed"
 msgstr "U bent niet langer site beheerder van %(site_name)s"
 
-#: core/resolvers/mutation_toggle_user_role.py:62
+#: core/resolvers/mutation_toggle_user_role.py:61
 #, python-format
 msgid "A new site administrator was assigned for %(site_name)s"
 msgstr "Een nieuwe site beheerder is toegewezen aan %(site_name)s"
 
-#: core/resolvers/mutation_toggle_user_role.py:67
+#: core/resolvers/mutation_toggle_user_role.py:66
 #, python-format
 msgid "You're granted site administrator right on %(site_name)s"
 msgstr "U bent aangewezen als site beheerder van %(site_name)s"
@@ -586,6 +586,16 @@ msgstr ""
 "Indien deze wijziging ongewenst is, kunt u contact opnemen met een van de "
 "andere site beheerders.\",\n"
 "\n"
+
+#: core/templates/onboarding.html:12
+msgid ""
+"Your profile is missing some mandatory fields. We kindly ask you to fill in "
+"these details."
+msgstr "In je profiel ontbreken een aantal verplichte velden. We vragen je vriendelijk deze velden in te vullen."
+
+#: core/templates/onboarding.html:56
+msgid "Save"
+msgstr "Opslaan"
 
 #: core/templates/registration/login.html:15
 msgid "This site is closed. Log in to get access."

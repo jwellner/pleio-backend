@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-10-16 14:48+0200\n"
+"POT-Creation-Date: 2020-10-21 12:41+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -52,7 +52,7 @@ msgid "Account of %(name_deleted_user)s removed"
 msgstr ""
 
 #: core/resolvers/mutation_delete_user.py:43
-#: core/resolvers/mutation_toggle_user_role.py:44
+#: core/resolvers/mutation_toggle_user_role.py:43
 #, python-format
 msgid "A site administrator was removed from %(site_name)s"
 msgstr ""
@@ -100,17 +100,17 @@ msgstr ""
 msgid "Request to remove account"
 msgstr ""
 
-#: core/resolvers/mutation_toggle_user_role.py:50
+#: core/resolvers/mutation_toggle_user_role.py:49
 #, python-format
 msgid "Your site administrator rights for %(site_name)s were removed"
 msgstr ""
 
-#: core/resolvers/mutation_toggle_user_role.py:62
+#: core/resolvers/mutation_toggle_user_role.py:61
 #, python-format
 msgid "A new site administrator was assigned for %(site_name)s"
 msgstr ""
 
-#: core/resolvers/mutation_toggle_user_role.py:67
+#: core/resolvers/mutation_toggle_user_role.py:66
 #, python-format
 msgid "You're granted site administrator right on %(site_name)s"
 msgstr ""
@@ -470,6 +470,16 @@ msgid ""
 "If you believe this was done in error, please contact one of the other site "
 "administrators.\",\n"
 "\n"
+msgstr ""
+
+#: core/templates/onboarding.html:12
+msgid ""
+"Your profile is missing some mandatory fields. We kindly ask you to fill in "
+"these details."
+msgstr ""
+
+#: core/templates/onboarding.html:56
+msgid "Save"
 msgstr ""
 
 #: core/templates/registration/login.html:15

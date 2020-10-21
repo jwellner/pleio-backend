@@ -81,7 +81,6 @@ class ProfileField(models.Model):
         return None
 
 
-
 class UserProfileFieldManager(models.Manager):
     def visible(self, user):
         qs = self.get_queryset()

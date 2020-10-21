@@ -54,6 +54,9 @@ def access_id_to_acl(obj, access_id):
     else:
         acl = [ACCESS_TYPE.user.format(obj.owner.id)]
 
+    if isinstance(access_id, str):
+        access_id = int(access_id)
+
     in_closed_group = False
     if hasattr(obj, 'group') and obj.group:
         in_closed_group = obj.group.is_closed
