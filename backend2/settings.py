@@ -61,7 +61,7 @@ SHARED_APPS = [
     'django.contrib.auth',
     'django.contrib.sessions',
     'django.contrib.messages',
-
+    'widget_tweaks',
     'user',
 ]
 
@@ -109,7 +109,8 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'core.middleware.WalledGardenMiddleware'
+    'core.middleware.WalledGardenMiddleware',
+    'core.middleware.OnboardingMiddleware'
 ]
 
 if not RUN_AS_ADMIN_APP:

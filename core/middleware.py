@@ -6,6 +6,7 @@ from django.urls import get_script_prefix, is_valid_path
 from django.utils import timezone, translation
 from django.utils.cache import patch_vary_headers
 from django.utils.deprecation import MiddlewareMixin
+from django.shortcuts import redirect
 
 from django.template.response import TemplateResponse
 
@@ -32,7 +33,6 @@ class UserLastOnlineMiddleware:
             user.profile.save()
         except Exception:
             pass
-
 
         return response
 
@@ -115,5 +115,41 @@ class WalledGardenMiddleware:
             }
 
             return TemplateResponse(request, 'registration/login.html', context).render()
+
+        return self.get_response(request)
+
+class OnboardingMiddleware:
+    """
+    Show onboarding on first login or when user has to complete mandatory fields
+
+    Newly created users can be detected by login_count is not set.
+    """
+    def __init__(self, get_response):
+        self.get_response = get_response
+
+    def is_public_url(self, url):
+        public_urls = ()
+        public_urls += (r"^{}.+$".format('/static'),)
+        public_urls += (r"^{}.+$".format("/oidc"),)
+        public_urls += (r"^{}.+$".format("/file/featured"),)
+        public_urls += ("/login",)
+        public_urls += ("/robots.txt",)
+        public_urls += ("/sitemap.xml",)
+        public_urls += ("/onboarding",)
+        public_urls += ("/admin2",)
+        public_urls += ("/graphql",)
+        public_urls = [re.compile(v) for v in public_urls]
+
+        return any(public_url.match(url) for public_url in public_urls)
+
+    def __call__(self, request):
+
+        user = request.user
+
+        if not self.is_public_url(request.path_info) and user.is_authenticated and config.ONBOARDING_ENABLED:
+            if (config.ONBOARDING_FORCE_EXISTING_USERS and not user.is_profile_complete) or not user.login_count:
+                return redirect('onboarding')
+
+            return self.get_response(request)
 
         return self.get_response(request)

@@ -32,13 +32,9 @@ def resolve_profile(obj, info):
         field.value = ""
         field.read_access = []
         try:
-            qs = UserProfileField.objects.visible(info.context["request"].user)
-            field.value = qs.get(profile_field=field, user_profile=obj.profile).value
-        except ObjectDoesNotExist:
-            pass
-        try:
-            qs = UserProfileField.objects.visible(info.context["request"].user)
-            field.read_access = qs.get(profile_field=field, user_profile=obj.profile).read_access
+            user_profile_field = UserProfileField.objects.visible(info.context["request"].user).get(profile_field=field, user_profile=obj.profile)
+            field.value = user_profile_field.value
+            field.read_access = user_profile_field.read_access
         except ObjectDoesNotExist:
             field.read_access = [ACCESS_TYPE.logged_in]
         user_profile_fields.append(field)

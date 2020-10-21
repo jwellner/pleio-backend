@@ -33,6 +33,8 @@ urlpatterns = [
     path('exporting/event/<uuid:event_id>', event_views.export, name='event_export'),
     path('exporting/users', user_views.export, name='users_export'),
 
+    path('onboarding', core_views.onboarding, name='onboarding'),
+
     path('robots.txt', core_views.robots_txt),
     path('sitemap.xml', cache_page(3600)(sitemap), {'sitemaps': sitemaps}, name='sitemap'),
 

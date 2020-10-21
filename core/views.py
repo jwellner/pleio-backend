@@ -1,7 +1,9 @@
 import json
 from core.resolvers.query_site import get_settings
 from core import config
-from core.models import Entity
+from core.models import Entity, UserProfileField
+from core.lib import access_id_to_acl
+from core.forms import OnboardingForm
 from django.contrib.auth.views import LogoutView
 from django.shortcuts import redirect, render
 from django.conf import settings
@@ -10,6 +12,8 @@ from django.utils.text import Truncator
 from django.urls import reverse
 from django.views.decorators.http import require_GET
 from django.http import HttpResponse
+from django.contrib.auth.decorators import login_required
+from django.http import HttpResponseRedirect
 
 def default(request, exception=None):
     # pylint: disable=unused-argument
@@ -83,6 +87,62 @@ def login(request):
 
 def oidc_failure(request):
     return redirect(settings.OIDC_OP_LOGOUT_ENDPOINT)
+
+@login_required
+def onboarding(request):
+    user = request.user
+
+    if request.POST:
+        form = OnboardingForm(request.POST, user=user)
+        if form.is_valid():
+            data = form.cleaned_data
+            
+            for profile_field in form.profile_fields:
+                if profile_field.field_type == 'multi_select_field':
+                    if data[profile_field.name]:
+                        value = ",".join(data[profile_field.name])
+                    else:
+                        value = ''
+                elif profile_field.field_type == 'date_field':
+                    if data[profile_field.name]:
+                        value = data[profile_field.name].strftime('%Y-%m-%d')
+                    else:
+                        value = ''
+                else:
+                    if data[profile_field.name]:
+                        value = data[profile_field.name]
+                    else:
+                        value = ''
+
+                try:
+                    user_profile_field = UserProfileField.objects.get(user_profile=user.profile, profile_field=profile_field)
+                    user_profile_field.value = value
+                    user_profile_field.save()
+                except ObjectDoesNotExist:
+                    user_profile_field = UserProfileField.objects.create(
+                        user_profile=user.profile,
+                        profile_field=profile_field,
+                        value=value,
+                        read_access=access_id_to_acl(user, config.DEFAULT_ACCESS_ID)
+                    )
+
+            # Don't show onboarding again for new users:
+            if not user.login_count:
+                user.login_count = 1
+                user.save()
+
+            return HttpResponseRedirect('/')
+
+    else:
+        form = OnboardingForm(user=user)
+
+    context = {
+        'is_new_user': bool(not user.login_count),
+        'is_profile_complete': user.is_profile_complete,
+        'form': form,
+    }
+
+    return render(request, 'onboarding.html', context)
 
 @require_GET
 def robots_txt(request):

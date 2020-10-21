@@ -12,7 +12,6 @@ from user.models import User
 
 LOGGER = logging.getLogger(__name__)
 
-
 class OIDCAuthBackend(OIDCAuthenticationBackend):
     # TODO: is there a more upgrade friendly way for overriding methods?
     def filter_users_by_claims(self, claims):
@@ -68,6 +67,7 @@ class OIDCAuthBackend(OIDCAuthenticationBackend):
             user.picture = None
         user.is_government = claims.get('is_government')
         user.has_2fa_enabled = claims.get('has_2fa_enabled')
+        user.login_count = user.login_count + 1 if user.login_count else 1
 
         # Get and set superadmin
         if claims.get('is_admin'):
