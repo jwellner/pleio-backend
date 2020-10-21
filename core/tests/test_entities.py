@@ -33,7 +33,7 @@ class EntitiesTestCase(FastTenantTestCase):
             tags=["tag_one", "tag_four"]
         )
         self.blog3 = Blog.objects.create(
-            title="Blog3",
+            title="Blog4",
             owner=self.authenticatedUser,
             read_access=[ACCESS_TYPE.public],
             write_access=[ACCESS_TYPE.user.format(self.authenticatedUser.id)],
@@ -41,7 +41,7 @@ class EntitiesTestCase(FastTenantTestCase):
             tags=["tag_two", "tag_one", "tag_four"]
         )
         self.blog4 = Blog.objects.create(
-            title="Blog4",
+            title="Blog3",
             owner=self.authenticatedUser,
             read_access=[ACCESS_TYPE.public],
             write_access=[ACCESS_TYPE.user.format(self.authenticatedUser.id)],
@@ -77,8 +77,8 @@ class EntitiesTestCase(FastTenantTestCase):
                                  )
 
         self.query = """
-            query getEntities($subtype: String, $containerGuid: String, $tags: [String!], $tagLists: [[String]], $isFeatured: Boolean, $limit: Int, $offset: Int) {
-                entities(subtype: $subtype, containerGuid: $containerGuid, tags: $tags, tagLists: $tagLists, isFeatured: $isFeatured, limit: $limit, offset: $offset) {
+            query getEntities($subtype: String, $containerGuid: String, $tags: [String!], $tagLists: [[String]], $isFeatured: Boolean, $limit: Int, $offset: Int, $orderBy: OrderBy, $orderDirection: OrderDirection) {
+                entities(subtype: $subtype, containerGuid: $containerGuid, tags: $tags, tagLists: $tagLists, isFeatured: $isFeatured, limit: $limit, offset: $offset, orderBy: $orderBy, orderDirection: $orderDirection) {
                     total
                     edges {
                         guid
@@ -290,3 +290,40 @@ class EntitiesTestCase(FastTenantTestCase):
 
         self.assertEqual(len(data["entities"]["edges"]), 5)
         self.assertEqual(data["entities"]["total"], 8)
+
+    def test_entities_all_order_by_title_asc(self):
+        request = HttpRequest()
+        request.user = self.authenticatedUser
+
+        variables = {
+            "containerGuid": None,
+            "orderBy": "title",
+            "orderDirection": "asc"
+        }
+
+        result = graphql_sync(schema, { "query": self.query, "variables": variables }, context_value={ "request": request })
+
+        self.assertTrue(result[0])
+
+        data = result[1]["data"]
+
+        self.assertEqual(data["entities"]["edges"][2]["guid"], self.blog4.guid)
+
+    def test_entities_blogs_order_by_title_desc(self):
+        request = HttpRequest()
+        request.user = self.authenticatedUser
+
+        variables = {
+            "containerGuid": None,
+            "orderBy": "title",
+            "orderDirection": "desc",
+            "subtype": "blog"
+        }
+
+        result = graphql_sync(schema, { "query": self.query, "variables": variables }, context_value={ "request": request })
+
+        self.assertTrue(result[0])
+
+        data = result[1]["data"]
+
+        self.assertEqual(data["entities"]["edges"][0]["guid"], self.blog3.guid)

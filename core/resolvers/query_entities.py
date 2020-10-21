@@ -1,4 +1,5 @@
 from django.db.models import Q
+from django.db.models.functions import Coalesce
 from core.constances import ORDER_DIRECTION, ORDER_BY, INVALID_SUBTYPE
 from core.models import Entity
 from graphql import GraphQLError
@@ -112,6 +113,8 @@ def resolve_entities(
         order_by = 'updated_at'
     elif orderBy == ORDER_BY.lastAction:
         order_by = 'updated_at'
+    elif orderBy == ORDER_BY.title:
+        order_by = 'title'
     else:
         order_by = 'created_at'
 
@@ -130,7 +133,15 @@ def resolve_entities(
         entities = entities.filter(page__parent=None)
         order_by = 'page__title'
 
-    entities = entities.order_by(order_by).select_subclasses()
+    if order_by == '-title':
+        entities = entities.order_by(Coalesce('news__title', 'blog__title', 'poll__title', 'statusupdate__title', 'wiki__title',
+                                              'page__title', 'question__title', 'discussion__title', 'event__title').desc()).select_subclasses()
+    elif order_by == 'title':
+        entities = entities.order_by(Coalesce('news__title', 'blog__title', 'poll__title', 'statusupdate__title', 'wiki__title',
+                                              'page__title', 'question__title', 'discussion__title', 'event__title').asc()).select_subclasses()
+    else:
+        entities = entities.order_by(order_by).select_subclasses()
+
     edges = entities[offset:offset+limit]
 
     return {

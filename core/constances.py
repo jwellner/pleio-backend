@@ -53,6 +53,7 @@ class ORDER_BY:
     timeCreated = 'timeCreated'
     timeUpdated = 'timeUpdated'
     lastAction = 'lastAction'
+    title = 'title'
 
 class SEARCH_ORDER_BY:
     timeCreated = 'timeCreated'
