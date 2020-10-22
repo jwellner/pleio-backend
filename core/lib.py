@@ -1,6 +1,7 @@
 import json
 import os
 import secrets
+import tempfile
 from core.constances import ACCESS_TYPE, COULD_NOT_SAVE
 from core import config
 from django.apps import apps
@@ -258,7 +259,6 @@ def tenant_schema():
 
 def html_to_text(html):
     h = html2text.HTML2Text()
-
     h.ignore_links = True
     h.ignore_tables = True
     h.ignore_images = True
@@ -311,3 +311,13 @@ def draft_to_html(draft_string):
     html = exporter.render(json.loads(draft_string))
 
     return html
+
+def get_tmp_file_path(user, suffix= ""):
+    folder = os.path.join(tempfile.gettempdir(), tenant_schema(), str(user.id))
+    try:
+        os.makedirs(folder)
+    except FileExistsError:
+        pass
+    _, temp_file_path = tempfile.mkstemp(dir=folder, suffix=suffix)
+
+    return temp_file_path
