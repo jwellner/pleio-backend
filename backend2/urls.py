@@ -20,7 +20,7 @@ urlpatterns = [
     path('login', core_views.login, name='login'),
     path('login/request', core_views.request_access, name='request_access'),
     path('login/requested', core_views.access_requested, name='access_requested'),
-    path('oidc/failure/', core_views.oidc_failure, name='oidc_failure'),
+    path('oidc/failure/', core_views.logout, name='oidc_failure'),
     path('oidc/', include('mozilla_django_oidc.urls')),
     path('admin/logout/', core_views.logout, name='logout'),
     path('admin/', core_admin.site.urls),

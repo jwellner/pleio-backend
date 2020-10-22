@@ -7,6 +7,7 @@ from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist
 from django.db.models import Q
 from django.shortcuts import redirect
+from django.utils.http import urlencode
 from core import config
 from core.models import SiteInvitation
 
@@ -155,5 +156,7 @@ class OIDCAuthBackend(OIDCAuthenticationBackend):
 
         return None
 
-def oidc_provider_logout(request):
-    return settings.OIDC_OP_LOGOUT_ENDPOINT
+def oidc_provider_logout_url(request):
+    return_url = request.build_absolute_uri('/')
+    query_params = urlencode({'post_logout_redirect_uri': return_url})
+    return f"{settings.OIDC_OP_LOGOUT_ENDPOINT}?{query_params}"

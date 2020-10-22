@@ -289,3 +289,5 @@ if APM_ENABLED:
         'VERIFY_SERVER_CERT': False,
         'DEBUG': True,
     }
+
+SECURE_REFERRER_POLICY = 'origin-when-cross-origin'

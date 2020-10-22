@@ -8,6 +8,7 @@ from core.constances import USER_ROLES
 from user.models import User
 from core.tasks import send_mail_multi
 from django.utils.translation import ugettext_lazy
+from core.auth import oidc_provider_logout_url
 from django.contrib.auth.views import LogoutView
 from django.shortcuts import redirect, render
 from django.conf import settings
@@ -82,7 +83,7 @@ def logout(request):
     # should find out how we can make this better. OIDC logout only allows POST
     LogoutView.as_view()(request)
 
-    return redirect(settings.OIDC_OP_LOGOUT_ENDPOINT)
+    return redirect(oidc_provider_logout_url(request))
 
 def login(request):
     if request.GET.get('invitecode', None):
