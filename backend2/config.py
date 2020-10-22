@@ -74,7 +74,7 @@ PROFILE_PICTURE_URL = os.getenv('PROFILE_PICTURE_URL')
 OIDC_OP_LOGOUT_URL_METHOD = 'core.auth.oidc_provider_logout'
 
 # SWIFT FILE STORAGE
-SWIFT_ENABLED = os.getenv('SWIFT_ENABLED')
+SWIFT_ENABLED = os.getenv('SWIFT_ENABLED') == 'True'
 SWIFT_AUTH_URL = os.getenv('SWIFT_AUTH_URL')
 SWIFT_USERNAME = os.getenv('SWIFT_USERNAME')
 SWIFT_KEY = os.getenv('SWIFT_KEY')
@@ -85,7 +85,7 @@ SWIFT_AUTO_BASE_URL = False
 SWIFT_BASE_URL = "/file/download/"
 
 # AWS s3 Storage
-S3_ENABLED = os.getenv('S3_ENABLED')
+S3_ENABLED = os.getenv('S3_ENABLED') == 'True'
 AWS_ACCESS_KEY_ID = os.getenv('AWS_ACCESS_KEY_ID')
 AWS_SECRET_ACCESS_KEY = os.getenv('AWS_SECRET_ACCESS_KEY')
 AWS_STORAGE_BUCKET_NAME = os.getenv('AWS_STORAGE_BUCKET_NAME')
