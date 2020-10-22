@@ -1,8 +1,8 @@
-import tempfile
 import zipfile
 from django.core.exceptions import ObjectDoesNotExist
 from django.http import Http404, FileResponse, StreamingHttpResponse
 from django.views.decorators.cache import cache_control
+from core.lib import get_tmp_file_path
 from core.models import Entity
 from core.constances import USER_ROLES
 from file.models import FileFolder
@@ -83,10 +83,8 @@ def bulk_download(request):
     if not file_ids and not folder_ids:
         raise Http404("File not found")
 
-    _, temp_file_path = tempfile.mkstemp()
-
-    zip_path = temp_file_path + '.zip'
-    zipf = zipfile.ZipFile(zip_path, 'w', zipfile.ZIP_DEFLATED)
+    temp_file_path = get_tmp_file_path(user, ".zip")
+    zipf = zipfile.ZipFile(temp_file_path, 'w', zipfile.ZIP_DEFLATED)
 
     # Add selected files to zip
     files = FileFolder.objects.visible(user).filter(id__in=file_ids, is_folder=False)
@@ -101,7 +99,7 @@ def bulk_download(request):
 
     zipf.close()
 
-    response = FileResponse(open(zip_path, 'rb'))
+    response = FileResponse(open(temp_file_path, 'rb'))
     response['Content-Disposition'] = "attachment; filename=file_contents.zip"
 
     return response
