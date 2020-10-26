@@ -8,6 +8,7 @@ from backend2.schema import schema
 from ariadne import graphql_sync
 from django.http import HttpRequest
 from unittest import mock
+from django.test import override_settings
 
 
 class HandleSiteAccessRequestTestCase(FastTenantTestCase):
@@ -30,6 +31,7 @@ class HandleSiteAccessRequestTestCase(FastTenantTestCase):
         self.admin.delete()
         self.user.delete()
 
+    @override_settings(ALLOWED_HOSTS=['test.test'])
     @mock.patch('core.resolvers.mutation_handle_site_access_request.send_mail_multi.delay')
     def test_handle_access_request_by_admin(self, mocked_send_mail_multi):
 
@@ -57,6 +59,7 @@ class HandleSiteAccessRequestTestCase(FastTenantTestCase):
 
         mocked_send_mail_multi.assert_called_once()
 
+    @override_settings(ALLOWED_HOSTS=['test.test'])
     @mock.patch('core.resolvers.mutation_handle_site_access_request.send_mail_multi.delay')
     def test_handle_access_request_deny_by_admin(self, mocked_send_mail_multi):
 
@@ -84,6 +87,7 @@ class HandleSiteAccessRequestTestCase(FastTenantTestCase):
         
         mocked_send_mail_multi.assert_called_once()
 
+    @override_settings(ALLOWED_HOSTS=['test.test'])
     @mock.patch('core.resolvers.mutation_handle_site_access_request.send_mail_multi.delay')
     def test_handle_access_request_deny_silent_by_admin(self, mocked_send_mail_multi):
 
