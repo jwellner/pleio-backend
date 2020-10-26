@@ -98,6 +98,8 @@ class WalledGardenMiddleware:
         public_urls += (r"^{}.+$".format("/oidc"),)
         public_urls += (r"^{}.+$".format("/file/featured"),)
         public_urls += ("/login",)
+        public_urls += ("/login/request",)
+        public_urls += ("/logout",)
         public_urls += ("/robots.txt",)
         public_urls += ("/sitemap.xml",)
         public_urls = [re.compile(v) for v in public_urls]

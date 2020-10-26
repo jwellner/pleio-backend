@@ -1,0 +1,13 @@
+{% extends "email/base_notification.html" %}
+{% load i18n %}
+
+{% block body %}
+    {% blocktrans %}<p>Hello {{ admin_name }},</p>
+
+    <p>Somebody with the name {{ request_name }} has performed an access request to {{ site_name }} .</p>
+
+    <p>To review the request please visit:</p>
+
+    <p><a href="{{ site_admin_url }}">{{ site_admin_url }}</a></p>
+    {% endblocktrans %}
+{% endblock %}

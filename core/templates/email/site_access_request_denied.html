@@ -1,0 +1,8 @@
+{% extends "email/base_notification.html" %}
+{% load i18n %}
+
+{% block body %}
+    {% blocktrans %}Hello {{ request_name }}, <br><br>
+
+    Unfortunately the site administrator of {{ site_name }} decided to decline your membership request. Please contact the administrator if you think this is a mistake.{% endblocktrans %}
+{% endblock %}

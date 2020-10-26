@@ -1,3 +1,24 @@
+type SiteAccessRequest {
+  name: String!
+  email: String!
+}
+
+type SiteAccessRequestList {
+  edges: [SiteAccessRequest]
+}
+
+input handleSiteAccessRequestInput {
+  email: String!
+  """Set false to accept or false to deny."""
+  accept: Boolean!
+  """Silently deny or accept (don't send email)."""
+  silent: Boolean
+}
+
+type handleSiteAccessRequestPayload {
+  success: Boolean
+}
+
 input deleteUserInput {
   guid: String!
 }
@@ -54,7 +75,6 @@ type SiteInviteList {
   edges: [SiteInvite]
 }
 
-
 type SiteUserList {
   total: Int!
   edges: [User]
@@ -69,9 +89,10 @@ extend type Mutation {
   deleteSiteSettingProfileField(input: deleteSiteSettingProfileFieldInput!): deleteSiteSettingProfileFieldPayload
   """Create and send invitation by email to join a site."""
   inviteToSite(input: inviteToSiteInput!): inviteToSitePayload
-  """Remove and send invitation by email to join a site."""
+  """Remove invitation to join a site."""
   revokeInviteToSite(input: revokeInviteToSiteInput!): revokeInviteToSitePayload
-
+  """Handle access request"""
+  handleSiteAccessRequest(input: handleSiteAccessRequestInput!): handleSiteAccessRequestPayload
 }
 
 extend type Query {
@@ -169,6 +190,7 @@ extend type SiteSettings {
   onboardingForceExistingUsers: Boolean!
   onboardingIntro: String
   siteInvites: SiteInviteList
+  siteAccessRequests: SiteAccessRequestList
   cookieConsent: Boolean!
   loginIntro: String
   roleOptions: [Option]

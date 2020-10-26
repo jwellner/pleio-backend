@@ -6,7 +6,7 @@ from cms.models import Page
 from core import config
 from core.constances import NOT_LOGGED_IN, USER_NOT_SITE_ADMIN, USER_ROLES
 from core.lib import get_access_ids, get_activity_filters, get_exportable_user_fields
-from core.models import UserProfile, ProfileField, SiteInvitation
+from core.models import UserProfile, ProfileField, SiteInvitation, SiteAccessRequest
 from graphql import GraphQLError
 
 def get_online_users():
@@ -190,7 +190,10 @@ def get_site_settings():
             {'value': USER_ROLES.ADMIN, 'label': ugettext_lazy('Administrator')}, 
             {'value': USER_ROLES.EDITOR, 'label': ugettext_lazy('Editor')},
             {'value': USER_ROLES.QUESTION_MANAGER, 'label': ugettext_lazy('Question expert')},
-        ]
+        ],
+        'siteAccessRequests': {
+            'edges': SiteAccessRequest.objects.all()
+        }
     }
 
     return site_settings

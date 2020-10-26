@@ -5,7 +5,7 @@ from django.test import override_settings, Client
 from core.models import Group, Comment, ProfileField
 from django_tenants.test.cases import FastTenantTestCase
 from django.test import override_settings
-from core.models import Group, Comment, ProfileField, SiteInvitation
+from core.models import Group, Comment, ProfileField, SiteInvitation, SiteAccessRequest
 from user.models import User
 from blog.models import Blog
 from cms.models import Page
@@ -33,6 +33,7 @@ class SiteSettingsTestCase(FastTenantTestCase):
         self.profileField1 = ProfileField.objects.create(key='text_key1', name='text_name', field_type='text_field')
         self.profileField2 = ProfileField.objects.create(key='text_key2', name='text_name', field_type='text_field')
         self.siteInvitation = mixer.blend(SiteInvitation, email='a@a.nl')
+        self.siteAccessRequest = mixer.blend(SiteAccessRequest, email='b@b.nl', name='b')
 
         self.query = """
             query SiteGeneralSettings {
@@ -178,6 +179,12 @@ class SiteSettingsTestCase(FastTenantTestCase):
                         value
                         label
                     }
+                    siteAccessRequests {
+                        edges {
+                            email
+                            name
+                        }
+                    }
                 }
             }
         """
@@ -309,6 +316,7 @@ class SiteSettingsTestCase(FastTenantTestCase):
         self.assertEqual(data["siteSettings"]["siteInvites"]["edges"][0]['email'], 'a@a.nl')
         self.assertEqual(data["siteSettings"]["cookieConsent"], False)
         self.assertEqual(data["siteSettings"]["roleOptions"], [{'value': 'ADMIN', 'label': 'Beheerder'}, {'value': 'EDITOR', 'label': 'Redacteur'}, {'value': 'QUESTION_MANAGER', 'label': 'Vraagexpert'}])
+        self.assertEqual(data["siteSettings"]["siteAccessRequests"]["edges"][0]['email'], 'b@b.nl')
 
     def test_site_settings_by_anonymous(self):
 

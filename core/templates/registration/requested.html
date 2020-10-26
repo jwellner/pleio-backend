@@ -1,0 +1,22 @@
+{% extends "base_closed.html" %}
+
+{% load i18n %}
+{% load custom_tags %}
+
+{% block content %}
+<div class="elgg-module  elgg-module-walledgarden-login">
+	<div class="elgg-body">
+        <fieldset>
+
+            <h2>{% blocktrans %}Requested access{% endblocktrans %}</h2>
+
+            <p>{% blocktrans %}Access is requested. You will receive an e-mail when the request is accepted.{% endblocktrans %}</p>
+
+            <div class="buttons ___space-between">
+                <p></p>
+                <a class="button ___link" href="/logout" rel="nofollow">{% blocktrans %}Logout{% endblocktrans %}</a>
+            </div>
+        </fieldset>
+	</div>
+</div>
+{% endblock %}
