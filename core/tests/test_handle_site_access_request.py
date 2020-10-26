@@ -30,7 +30,7 @@ class HandleSiteAccessRequestTestCase(FastTenantTestCase):
         self.admin.delete()
         self.user.delete()
 
-    @mock.patch('core.resolvers.mutation_resend_group_invitation.send_mail_multi.delay')
+    @mock.patch('core.resolvers.mutation_handle_site_access_request.send_mail_multi.delay')
     def test_handle_access_request_by_admin(self, mocked_send_mail_multi):
 
         variables = {
@@ -57,7 +57,7 @@ class HandleSiteAccessRequestTestCase(FastTenantTestCase):
 
         mocked_send_mail_multi.assert_called_once()
 
-    @mock.patch('core.resolvers.mutation_resend_group_invitation.send_mail_multi.delay')
+    @mock.patch('core.resolvers.mutation_handle_site_access_request.send_mail_multi.delay')
     def test_handle_access_request_deny_by_admin(self, mocked_send_mail_multi):
 
         variables = {
@@ -84,7 +84,7 @@ class HandleSiteAccessRequestTestCase(FastTenantTestCase):
         
         mocked_send_mail_multi.assert_called_once()
 
-    @mock.patch('core.resolvers.mutation_resend_group_invitation.send_mail_multi.delay')
+    @mock.patch('core.resolvers.mutation_handle_site_access_request.send_mail_multi.delay')
     def test_handle_access_request_deny_silent_by_admin(self, mocked_send_mail_multi):
 
         variables = {
