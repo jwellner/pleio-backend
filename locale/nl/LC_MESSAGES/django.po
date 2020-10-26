@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-10-21 12:41+0200\n"
+"POT-Creation-Date: 2020-10-26 20:26+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -56,6 +56,17 @@ msgstr "Account verwijderd van %(name_deleted_user)s"
 #, python-format
 msgid "A site administrator was removed from %(site_name)s"
 msgstr "Een site beheerder is verwijderd van %(site_name)s"
+
+#: core/resolvers/mutation_handle_site_access_request.py:53
+#, python-format
+msgid "You are now member of: %(site_name)s"
+msgstr "Je hebt nu toegang tot: %(site_name)s"
+
+#: core/resolvers/mutation_handle_site_access_request.py:56
+#, fuzzy, python-format
+#| msgid "New access request for %(site_name)s"
+msgid "Membership request declined for: %(site_name)s"
+msgstr "Nieuwe toegangsaanvraag voor %(group_name)s"
 
 #: core/resolvers/mutation_invite_to_group.py:42
 #, python-format
@@ -431,6 +442,63 @@ msgstr ""
 "Je ontvangt deze e-mail omdat je aangemeld bent voor de notificaties.<br /> "
 "Klik <a href=\"%(user_url)s\">hier</a> om je instellingen aan te passen."
 
+#: core/templates/email/site_access_request.html:5
+#, python-format
+msgid ""
+"<p>Hello %(admin_name)s,</p>\n"
+"\n"
+"    <p>Somebody with the name %(request_name)s has performed an access "
+"request to %(site_name)s .</p>\n"
+"\n"
+"    <p>To review the request please visit:</p>\n"
+"\n"
+"    <p><a href=\"%(site_admin_url)s\">%(site_admin_url)s</a></p>\n"
+"    "
+msgstr ""
+"<p>Beste %(admin_name)s,</p>\n"
+"\n"
+"    <p>%(request_name)s heeft toegang aangevraagd tot %(site_name)s .</p>\n"
+"\n"
+"    <p>Ga naar de volgende link om de aanvraag af te handelen:</p>\n"
+"\n"
+"    <p><a href=\"%(site_admin_url)s\">%(site_admin_url)s</a></p>\n"
+"    "
+
+#: core/templates/email/site_access_request_accepted.html:6
+#, python-format
+msgid ""
+"Hello %(request_name)s, <br><br>\n"
+"\n"
+"    The administrator approved your access request to %(site_name)s . Go to "
+"this link to get access to the site:<br><br>\n"
+"\n"
+"    %(site_url)s<br>\n"
+"    "
+msgstr ""
+"Beste %(request_name)s, <br><br>\n"
+"\n"
+"      De beheerder heeft het verzoek tot lidmaatschap goedgekeurd. Je hebt "
+"nu toegang tot %(site_name)s .Volg de onderstaande link om direct naar de "
+"site te gaan:<br><br>\n"
+"\n"
+"    %(site_url)s<br>\n"
+"    "
+
+#: core/templates/email/site_access_request_denied.html:5
+#, python-format
+msgid ""
+"Hello %(request_name)s, <br><br>\n"
+"\n"
+"    Unfortunately the site administrator of %(site_name)s decided to decline "
+"your membership request. Please contact the administrator if you think this "
+"is a mistake."
+msgstr ""
+"Beste %(request_name)s, <br><br>\n"
+"\n"
+"    Helaas heeft de site-beheerder van %(site_name)s je lidmaatschapsverzoek "
+"afgewezen.Indien je denkt dat dit een vergissing is neem dan contact op met "
+"de site-beheerder. "
+
 #: core/templates/email/toggle_request_delete_user_cancelled.html:6
 #, python-format
 msgid ""
@@ -587,13 +655,15 @@ msgstr ""
 "andere site beheerders.\",\n"
 "\n"
 
-#: core/templates/onboarding.html:12
+#: core/templates/onboarding.html:14
 msgid ""
 "Your profile is missing some mandatory fields. We kindly ask you to fill in "
 "these details."
-msgstr "In je profiel ontbreken een aantal verplichte velden. We vragen je vriendelijk deze velden in te vullen."
+msgstr ""
+"In je profiel ontbreken een aantal verplichte velden. We vragen je "
+"vriendelijk deze velden in te vullen."
 
-#: core/templates/onboarding.html:56
+#: core/templates/onboarding.html:58
 msgid "Save"
 msgstr "Opslaan"
 
@@ -612,6 +682,46 @@ msgstr "Nog geen account?"
 #: core/templates/registration/login.html:26
 msgid "Register"
 msgstr "Registreer"
+
+#: core/templates/registration/request.html:18
+msgid "Request access"
+msgstr "Toegang aanvragen"
+
+#: core/templates/registration/request.html:20
+msgid ""
+"To enter this site, you must request access from the admin. Click the button "
+"to request access."
+msgstr ""
+"Om toegang tot deze site te krijgen dient u toestemming te hebben van de "
+"beheerder.Vraag toestemming aan door op de knop hieronder te drukken."
+
+#: core/templates/registration/request.html:23
+msgid "Name"
+msgstr "Naam"
+
+#: core/templates/registration/request.html:27
+msgid "Emailaddress"
+msgstr "E-mailadres"
+
+#: core/templates/registration/request.html:32
+msgid "Request Access"
+msgstr "Toegang aanvragen"
+
+#: core/templates/registration/request.html:33
+#: core/templates/registration/requested.html:17
+msgid "Logout"
+msgstr "Uitloggen"
+
+#: core/templates/registration/requested.html:11
+msgid "Requested access"
+msgstr "Toegang aangevraagd"
+
+#: core/templates/registration/requested.html:13
+msgid ""
+"Access is requested. You will receive an e-mail when the request is accepted."
+msgstr ""
+"De toegang is aangevraagd. Je ontvangt een e-mail wanneer de toegang door de "
+"beheerder wordt toegewezen."
 
 #: core/tests/test_accept_membership_request.py:85
 #: core/tests/test_accept_membership_request.py:140
@@ -663,6 +773,11 @@ msgstr "Nieuwe notificaties op %s"
 #, python-format
 msgid "Periodiek overzicht van %s"
 msgstr ""
+
+#: core/views.py:127
+#, python-format
+msgid "New access request for %(site_name)s"
+msgstr "Nieuwe toegangsaanvraag voor %(site_name)s"
 
 #: event/resolvers/mutation_attend_event_without_account.py:32
 #: event/tests/test_attend_event_without_account.py:70

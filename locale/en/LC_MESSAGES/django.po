@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-10-21 12:41+0200\n"
+"POT-Creation-Date: 2020-10-26 20:26+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -55,6 +55,16 @@ msgstr ""
 #: core/resolvers/mutation_toggle_user_role.py:43
 #, python-format
 msgid "A site administrator was removed from %(site_name)s"
+msgstr ""
+
+#: core/resolvers/mutation_handle_site_access_request.py:53
+#, python-format
+msgid "You are now member of: %(site_name)s"
+msgstr ""
+
+#: core/resolvers/mutation_handle_site_access_request.py:56
+#, python-format
+msgid "Membership request declined for: %(site_name)s"
 msgstr ""
 
 #: core/resolvers/mutation_invite_to_group.py:42
@@ -377,6 +387,42 @@ msgid ""
 "settings."
 msgstr ""
 
+#: core/templates/email/site_access_request.html:5
+#, python-format
+msgid ""
+"<p>Hello %(admin_name)s,</p>\n"
+"\n"
+"    <p>Somebody with the name %(request_name)s has performed an access "
+"request to %(site_name)s .</p>\n"
+"\n"
+"    <p>To review the request please visit:</p>\n"
+"\n"
+"    <p><a href=\"%(site_admin_url)s\">%(site_admin_url)s</a></p>\n"
+"    "
+msgstr ""
+
+#: core/templates/email/site_access_request_accepted.html:6
+#, python-format
+msgid ""
+"Hello %(request_name)s, <br><br>\n"
+"\n"
+"    The administrator approved your access request to %(site_name)s . Go to "
+"this link to get access to the site:<br><br>\n"
+"\n"
+"    %(site_url)s<br>\n"
+"    "
+msgstr ""
+
+#: core/templates/email/site_access_request_denied.html:5
+#, python-format
+msgid ""
+"Hello %(request_name)s, <br><br>\n"
+"\n"
+"    Unfortunately the site administrator of %(site_name)s decided to decline "
+"your membership request. Please contact the administrator if you think this "
+"is a mistake."
+msgstr ""
+
 #: core/templates/email/toggle_request_delete_user_cancelled.html:6
 #, python-format
 msgid ""
@@ -472,13 +518,13 @@ msgid ""
 "\n"
 msgstr ""
 
-#: core/templates/onboarding.html:12
+#: core/templates/onboarding.html:14
 msgid ""
 "Your profile is missing some mandatory fields. We kindly ask you to fill in "
 "these details."
 msgstr ""
 
-#: core/templates/onboarding.html:56
+#: core/templates/onboarding.html:58
 msgid "Save"
 msgstr ""
 
@@ -496,6 +542,42 @@ msgstr ""
 
 #: core/templates/registration/login.html:26
 msgid "Register"
+msgstr ""
+
+#: core/templates/registration/request.html:18
+msgid "Request access"
+msgstr ""
+
+#: core/templates/registration/request.html:20
+msgid ""
+"To enter this site, you must request access from the admin. Click the button "
+"to request access."
+msgstr ""
+
+#: core/templates/registration/request.html:23
+msgid "Name"
+msgstr ""
+
+#: core/templates/registration/request.html:27
+msgid "Emailaddress"
+msgstr ""
+
+#: core/templates/registration/request.html:32
+msgid "Request Access"
+msgstr ""
+
+#: core/templates/registration/request.html:33
+#: core/templates/registration/requested.html:17
+msgid "Logout"
+msgstr ""
+
+#: core/templates/registration/requested.html:11
+msgid "Requested access"
+msgstr ""
+
+#: core/templates/registration/requested.html:13
+msgid ""
+"Access is requested. You will receive an e-mail when the request is accepted."
 msgstr ""
 
 #: core/tests/test_accept_membership_request.py:85
@@ -546,6 +628,11 @@ msgstr ""
 #: core/tests/test_send_overview_emails.py:302
 #, python-format
 msgid "Periodiek overzicht van %s"
+msgstr ""
+
+#: core/views.py:127
+#, python-format
+msgid "New access request for %(site_name)s"
 msgstr ""
 
 #: event/resolvers/mutation_attend_event_without_account.py:32
