@@ -80,6 +80,10 @@ class ProfileField(models.Model):
                 return section['name']
         return None
 
+    @property
+    def guid(self):
+        return str(self.id)
+
 
 class UserProfileFieldManager(models.Manager):
     def visible(self, user):
