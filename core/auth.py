@@ -5,6 +5,7 @@ from mozilla_django_oidc.utils import absolutify
 from django.urls import reverse
 from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist
+from django.db.models import Q
 from django.shortcuts import redirect
 from core import config
 from core.models import SiteInvitation
@@ -32,14 +33,15 @@ class OIDCAuthCallbackView(OIDCAuthenticationCallbackView):
             return redirect(reverse('request_access'))
 
 class OIDCAuthBackend(OIDCAuthenticationBackend):
-    # TODO: is there a more upgrade friendly way for overriding methods?
-    def filter_users_by_claims(self, claims):
-        sub = claims.get('sub')
 
-        if not sub:
+    def filter_users_by_claims(self, claims):
+        external_id = claims.get('sub')
+        email = claims.get('email')
+
+        if not external_id or not email:
             return User.objects.none()
 
-        return User.objects.filter(external_id__iexact=sub)
+        return User.objects.filter(Q(external_id__iexact=external_id) | Q(email__iexact=email))
 
     def create_user(self, claims):
 
@@ -79,6 +81,7 @@ class OIDCAuthBackend(OIDCAuthenticationBackend):
 
     def update_user(self, user, claims):
 
+        user.external_id = claims.get('sub')
         user.name = claims.get('name')
         user.email = claims.get('email')
         if claims.get('picture'):
