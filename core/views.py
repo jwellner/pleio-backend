@@ -99,18 +99,18 @@ def onboarding(request):
             
             for profile_field in form.profile_fields:
                 if profile_field.field_type == 'multi_select_field':
-                    if data[profile_field.name]:
-                        value = ",".join(data[profile_field.name])
+                    if data[profile_field.guid]:
+                        value = ",".join(data[profile_field.guid])
                     else:
                         value = ''
                 elif profile_field.field_type == 'date_field':
-                    if data[profile_field.name]:
-                        value = data[profile_field.name].strftime('%Y-%m-%d')
+                    if data[profile_field.guid]:
+                        value = data[profile_field.guid].strftime('%Y-%m-%d')
                     else:
                         value = ''
                 else:
-                    if data[profile_field.name]:
-                        value = data[profile_field.name]
+                    if data[profile_field.guid]:
+                        value = data[profile_field.guid]
                     else:
                         value = ''
 
