@@ -84,7 +84,7 @@ class ViewerTestCase(FastTenantTestCase):
 
         self.assertEqual(data["viewer"]["guid"], "viewer:{}".format(self.authenticatedUser.id))
         self.assertEqual(data["viewer"]["loggedIn"], True)
-        self.assertEqual(data["viewer"]["isSubEditor"], self.authenticatedUser.has_role(USER_ROLES.ADMIN))
+        self.assertEqual(data["viewer"]["isSubEditor"], self.authenticatedUser.has_role(USER_ROLES.EDITOR) or self.authenticatedUser.has_role(USER_ROLES.ADMIN))
         self.assertEqual(data["viewer"]["isAdmin"], self.authenticatedUser.has_role(USER_ROLES.ADMIN))
         self.assertEqual(data["viewer"]["user"]["guid"], self.authenticatedUser.guid)
         self.assertEqual(data["viewer"]["user"]["email"], self.authenticatedUser.email)
@@ -117,7 +117,7 @@ class ViewerTestCase(FastTenantTestCase):
 
         self.assertEqual(data["viewer"]["guid"], "viewer:{}".format(self.authenticatedAdminUser.id))
         self.assertEqual(data["viewer"]["loggedIn"], True)
-        self.assertEqual(data["viewer"]["isSubEditor"], self.authenticatedAdminUser.has_role(USER_ROLES.EDITOR))
+        self.assertEqual(data["viewer"]["isSubEditor"], self.authenticatedAdminUser.has_role(USER_ROLES.EDITOR) or self.authenticatedAdminUser.has_role(USER_ROLES.ADMIN))
         self.assertEqual(data["viewer"]["isAdmin"], self.authenticatedAdminUser.has_role(USER_ROLES.ADMIN))
         self.assertEqual(data["viewer"]["isBanned"], False)
         self.assertEqual(data["viewer"]["user"]["name"], self.authenticatedAdminUser.name)
