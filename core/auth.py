@@ -18,8 +18,13 @@ LOGGER = logging.getLogger(__name__)
 class RequestAccessException(Exception):
     pass
 
+class RequestAccessInvalidCodeException(RequestAccessException):
+    pass
+
 class OIDCAuthCallbackView(OIDCAuthenticationCallbackView):
     def get(self, request):
+
+        # TODO: catch RequestAccessInvalidCodeException ?
 
         try:
             return super(OIDCAuthCallbackView, self).get(request)
@@ -38,31 +43,28 @@ class OIDCAuthBackend(OIDCAuthenticationBackend):
 
     def create_user(self, claims):
 
-        if claims.get('picture'):
-            picture = claims.get('picture')
-        else:
-            picture = None
+        if not config.ALLOW_REGISTRATION and not claims.get('is_admin', False):
 
-        invite_accepted = False
+            if self.request.session.get('invitecode'):
+                try:
+                    invite = SiteInvitation.objects.get(
+                        code=self.request.session.get('invitecode')
+                    )
+                    invite.delete()
+                    del self.request.session['invitecode']
 
-        if self.request.session.get('invitecode'):
-            try:
-                invite = SiteInvitation.objects.get(code=self.request.session.get('invitecode'))
-                invite.delete()
-                invite_accepted = True
-                del self.request.session['invitecode']
-            except ObjectDoesNotExist:
-                pass
-
-        if not config.ALLOW_REGISTRATION and not claims.get('is_admin', False) and not invite_accepted:
-            # store claims in sessions
-            self.request.session['request_access_claims'] = claims
-            raise RequestAccessException
+                    # Als delete accessRequests if they exist for this user.
+                except ObjectDoesNotExist:
+                    raise RequestAccessInvalidCodeException
+            else:
+                # store claims in sessions
+                self.request.session['request_access_claims'] = claims
+                raise RequestAccessException
 
         user = User.objects.create_user(
             name=claims.get('name'),
             email=claims.get('email'),
-            picture=picture,
+            picture=claims.get('picture', None),
             is_government=claims.get('is_government'),
             has_2fa_enabled=claims.get('has_2fa_enabled'),
             password=None,
