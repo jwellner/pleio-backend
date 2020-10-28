@@ -5,7 +5,6 @@ from django.db.models.signals import post_save
 from django.db import models
 from django.contrib.postgres.fields import ArrayField
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
-from django.core.mail import send_mail
 from django.conf import settings
 from django.dispatch import receiver
 from django.core.exceptions import ObjectDoesNotExist
@@ -146,10 +145,6 @@ class User(AbstractBaseUser):
     @property
     def guid(self):
         return str(self.id)
-
-    def email_user(self, subject, message, from_email=None, **kwargs):
-        send_mail(subject, message, from_email or settings.FROM_EMAIL, [
-                  self.email], **kwargs)
 
     @property
     def profile(self):

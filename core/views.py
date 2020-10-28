@@ -1,9 +1,13 @@
 import json
 from core.resolvers.query_site import get_settings
 from core import config
-from core.models import Entity, UserProfileField
-from core.lib import access_id_to_acl
-from core.forms import OnboardingForm
+from core.models import Entity, UserProfileField, SiteAccessRequest
+from core.lib import access_id_to_acl, get_default_email_context, tenant_schema
+from core.forms import OnboardingForm, RequestAccessForm
+from core.constances import USER_ROLES
+from user.models import User
+from core.tasks import send_mail_multi
+from django.utils.translation import ugettext_lazy
 from django.contrib.auth.views import LogoutView
 from django.shortcuts import redirect, render
 from django.conf import settings
@@ -81,12 +85,65 @@ def logout(request):
     return redirect(settings.OIDC_OP_LOGOUT_ENDPOINT)
 
 def login(request):
-    if request.GET.get('invitecode'):
+    if request.GET.get('invitecode', None):
         request.session['invitecode'] = request.GET.get('invitecode')
+
     return redirect('oidc_authentication_init')
 
 def oidc_failure(request):
     return redirect(settings.OIDC_OP_LOGOUT_ENDPOINT)
+
+def request_access(request):
+    # pylint: disable=too-many-nested-blocks
+    claims = request.session.get('request_access_claims', None)
+
+    if not claims:
+        return redirect('/')
+
+    if request.POST:
+        form = RequestAccessForm(request.POST)
+
+        if form.is_valid():
+            send_notification = False
+
+            try:
+                access_request = SiteAccessRequest.objects.get(email=claims.get('email'))
+            except ObjectDoesNotExist:
+                access_request = SiteAccessRequest(
+                    email=claims.get('email'),
+                    name=claims.get('name'),
+                    claims=claims
+                )
+                access_request.save()
+                send_notification = True
+
+                # Only send admin mail on first request.
+                admins = User.objects.filter(roles__contains=[USER_ROLES.ADMIN])
+
+            if send_notification:
+                context = get_default_email_context(request)
+                context['request_name'] = claims.get('name')
+                context['site_admin_url'] = context['site_url'] + '/admin2'
+                subject = ugettext_lazy("New access request for %(site_name)s") % {'site_name': context["site_name"]}
+
+                for admin in admins:
+                    context['admin_name'] = admin.name
+                    send_mail_multi.delay(tenant_schema(), subject, 'email/site_access_request.html', context, admin.email)
+
+            return redirect('access_requested')
+        
+    form = RequestAccessForm(initial={'request_access': True})    
+
+    context = {
+        'name': claims.get('name'),
+        'email': claims.get('email'),
+        'form': form
+    }
+
+    return render(request, 'registration/request.html', context)
+
+def access_requested(request):
+    return render(request, 'registration/requested.html')
 
 @login_required
 def onboarding(request):

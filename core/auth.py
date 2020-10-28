@@ -1,8 +1,11 @@
 from django.core.exceptions import SuspiciousOperation
 from mozilla_django_oidc.auth import OIDCAuthenticationBackend
+from mozilla_django_oidc.views import OIDCAuthenticationCallbackView
 from mozilla_django_oidc.utils import absolutify
 from django.urls import reverse
 from django.conf import settings
+from django.core.exceptions import ObjectDoesNotExist
+from django.shortcuts import redirect
 from core import config
 from core.models import SiteInvitation
 
@@ -11,6 +14,22 @@ import logging
 from user.models import User
 
 LOGGER = logging.getLogger(__name__)
+
+class RequestAccessException(Exception):
+    pass
+
+class RequestAccessInvalidCodeException(RequestAccessException):
+    pass
+
+class OIDCAuthCallbackView(OIDCAuthenticationCallbackView):
+    def get(self, request):
+
+        # TODO: catch RequestAccessInvalidCodeException ?
+
+        try:
+            return super(OIDCAuthCallbackView, self).get(request)
+        except RequestAccessException:
+            return redirect(reverse('request_access'))
 
 class OIDCAuthBackend(OIDCAuthenticationBackend):
     # TODO: is there a more upgrade friendly way for overriding methods?
@@ -24,27 +43,28 @@ class OIDCAuthBackend(OIDCAuthenticationBackend):
 
     def create_user(self, claims):
 
-        if claims.get('picture'):
-            picture = claims.get('picture')
-        else:
-            picture = None
+        if not config.ALLOW_REGISTRATION and not claims.get('is_admin', False):
 
-        if not config.ALLOW_REGISTRATION:
             if self.request.session.get('invitecode'):
                 try:
-                    invite = SiteInvitation.objects.get(code=self.request.session.get('invitecode'))
+                    invite = SiteInvitation.objects.get(
+                        code=self.request.session.get('invitecode')
+                    )
                     invite.delete()
                     del self.request.session['invitecode']
-                except Exception:
-                    raise Exception
+
+                    # Als delete accessRequests if they exist for this user.
+                except ObjectDoesNotExist:
+                    raise RequestAccessInvalidCodeException
             else:
-                # TODO: redirect to request membership page
-                raise Exception
+                # store claims in sessions
+                self.request.session['request_access_claims'] = claims
+                raise RequestAccessException
 
         user = User.objects.create_user(
             name=claims.get('name'),
             email=claims.get('email'),
-            picture=picture,
+            picture=claims.get('picture', None),
             is_government=claims.get('is_government'),
             has_2fa_enabled=claims.get('has_2fa_enabled'),
             password=None,
@@ -126,8 +146,8 @@ class OIDCAuthBackend(OIDCAuthenticationBackend):
                 elif 'pleio_user_is_banned' in request.session:
                     del request.session['pleio_user_is_banned']
                 return user
-            except SuspiciousOperation as exc:
-                LOGGER.warning('failed to get or create user: %s', exc)
+            except SuspiciousOperation as e:
+                LOGGER.warning('failed to get or create user: %s', e)
                 return None
 
         return None

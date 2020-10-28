@@ -39,6 +39,7 @@ from .mutation_edit_site_setting_profile_field import resolve_edit_site_setting_
 from .mutation_delete_site_setting_profile_field import resolve_delete_site_setting_profile_field
 from .mutation_invite_to_site import resolve_invite_to_site
 from .mutation_revoke_invite_to_site import resolve_revoke_invite_to_site
+from .mutation_handle_site_access_request import resolve_handle_site_access_request
 
 mutation = ObjectType("Mutation")
 mutation.set_field("addGroup", resolve_add_group)
@@ -92,3 +93,5 @@ mutation.set_field("deleteSiteSettingProfileField", resolve_delete_site_setting_
 
 mutation.set_field("inviteToSite", resolve_invite_to_site)
 mutation.set_field("revokeInviteToSite", resolve_revoke_invite_to_site)
+
+mutation.set_field("handleSiteAccessRequest", resolve_handle_site_access_request)

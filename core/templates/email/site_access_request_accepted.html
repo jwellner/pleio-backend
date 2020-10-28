@@ -1,0 +1,12 @@
+
+{% extends "email/base_notification.html" %}
+{% load i18n %}
+
+{% block body %}
+    {% blocktrans %}Hello {{ request_name }}, <br><br>
+
+    The administrator approved your access request to {{ site_name }} . Go to this link to get access to the site:<br><br>
+
+    {{ site_url }}<br>
+    {% endblocktrans %}
+{% endblock %}

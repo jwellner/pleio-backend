@@ -84,3 +84,8 @@ class OnboardingForm(forms.Form):
     @property
     def profile_fields(self):
         return self._profile_fields
+
+
+class RequestAccessForm(forms.Form):
+
+    request_access = forms.BooleanField(widget=forms.HiddenInput())

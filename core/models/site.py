@@ -9,3 +9,14 @@ class SiteInvitation(models.Model):
 
     created_at = models.DateTimeField(default=timezone.now)
     updated_at = models.DateTimeField(default=timezone.now)
+
+
+class SiteAccessRequest(models.Model):
+
+    email = models.EmailField(max_length=255, unique=True)
+    name = models.CharField(max_length=100)
+
+    claims = models.JSONField(null=True, blank=True)
+
+    created_at = models.DateTimeField(default=timezone.now)
+    updated_at = models.DateTimeField(default=timezone.now)
