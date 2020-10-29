@@ -74,7 +74,7 @@ class ToggleRequestDeleteUserTestCase(FastTenantTestCase):
 
         data = result[1]["data"]
 
-        self.assertEqual(data["toggleRequestDeleteUser"]["viewer"], None)
+        self.assertEqual(data["toggleRequestDeleteUser"]["viewer"]["guid"], self.user1.guid)
 
     @override_settings(ALLOWED_HOSTS=['test.test'])
     @mock.patch('core.resolvers.mutation_toggle_request_delete_user.send_mail_multi.delay')

@@ -187,6 +187,7 @@ class User(AbstractBaseUser):
         self.is_government = False
         self.has_2fa_enabled = False
         self.ban_reason = "Deleted"
+        self.is_delete_requested = False
         # delete user profile data
         try:
             self._profile.delete()
