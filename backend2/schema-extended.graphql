@@ -7,15 +7,29 @@ type SiteAccessRequestList {
   edges: [SiteAccessRequest]
 }
 
+type DeleteAccountRequestList {
+  edges: [User]
+}
+
 input handleSiteAccessRequestInput {
   email: String!
-  """Set false to accept or false to deny."""
+  """Set true to accept or false to deny."""
   accept: Boolean!
-  """Silently deny or accept (don't send email)."""
+  """Silently deny or accept. When set to true no email will be send to the user."""
   silent: Boolean
 }
 
 type handleSiteAccessRequestPayload {
+  success: Boolean
+}
+
+input handleDeleteAccountRequestInput {
+  guid: String!
+  """Set true to accept or false to deny."""
+  accept: Boolean!
+}
+
+type handleDeleteAccountRequestPayload {
   success: Boolean
 }
 
@@ -93,6 +107,8 @@ extend type Mutation {
   revokeInviteToSite(input: revokeInviteToSiteInput!): revokeInviteToSitePayload
   """Handle access request"""
   handleSiteAccessRequest(input: handleSiteAccessRequestInput!): handleSiteAccessRequestPayload
+  """Handle delete account request"""
+  handleDeleteAccountRequest(input: handleDeleteAccountRequestInput!): handleDeleteAccountRequestPayload
 }
 
 extend type Query {
@@ -102,7 +118,6 @@ extend type Query {
 extend type User {
   roles: [String]
 }
-
 
 input addSiteSettingProfileFieldInput {
   key: String
@@ -194,4 +209,5 @@ extend type SiteSettings {
   cookieConsent: Boolean!
   loginIntro: String
   roleOptions: [Option]
+  deleteAccountRequests: DeleteAccountRequestList
 }

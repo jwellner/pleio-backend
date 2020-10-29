@@ -25,8 +25,9 @@ class SiteSettingsTestCase(FastTenantTestCase):
 
     def setUp(self):
         super().setUp()
-        self.user = mixer.blend(User)
-        self.admin = mixer.blend(User, roles=['ADMIN'])
+        self.user = mixer.blend(User, is_delete_requested=False)
+        self.admin = mixer.blend(User, roles=['ADMIN'], is_delete_requested=False)
+        self.delete_user = mixer.blend(User, is_delete_requested=True)
         self.anonymousUser = AnonymousUser()
         self.cmsPage1 = mixer.blend(Page, title="Z title")
         self.cmsPage2 = mixer.blend(Page, title="A title")
@@ -185,6 +186,11 @@ class SiteSettingsTestCase(FastTenantTestCase):
                             name
                         }
                     }
+                    deleteAccountRequests {
+                        edges {
+                            guid
+                        }
+                    }
                 }
             }
         """
@@ -317,6 +323,7 @@ class SiteSettingsTestCase(FastTenantTestCase):
         self.assertEqual(data["siteSettings"]["cookieConsent"], False)
         self.assertEqual(data["siteSettings"]["roleOptions"], [{'value': 'ADMIN', 'label': 'Beheerder'}, {'value': 'EDITOR', 'label': 'Redacteur'}, {'value': 'QUESTION_MANAGER', 'label': 'Vraagexpert'}])
         self.assertEqual(data["siteSettings"]["siteAccessRequests"]["edges"][0]['email'], 'b@b.nl')
+        self.assertEqual(data["siteSettings"]["deleteAccountRequests"]["edges"][0]['guid'], self.delete_user.guid)
 
     def test_site_settings_by_anonymous(self):
 
