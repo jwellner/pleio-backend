@@ -58,6 +58,8 @@ def resolve_attend_event(_, info, input):
 
 def resolve_add_event(_, info, input):
     # pylint: disable=redefined-builtin
+    # pylint: disable=too-many-branches
+
 
     user = info.context["request"].user
 
@@ -117,7 +119,8 @@ def resolve_add_event(_, info, input):
         entity.featured_video = None
 
     if user.has_role(USER_ROLES.ADMIN) or user.has_role(USER_ROLES.EDITOR):
-        entity.is_featured = clean_input.get("isFeatured")
+        if 'isFeatured' in clean_input:
+            entity.is_featured = clean_input.get("isFeatured")
 
     if not clean_input.get("startDate", None) or not clean_input.get("endDate", None):
         raise GraphQLError(INVALID_DATE)

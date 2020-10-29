@@ -72,7 +72,8 @@ def resolve_add_news(_, info, input):
         entity.featured_video = None
 
     if user.has_role(USER_ROLES.ADMIN) or user.has_role(USER_ROLES.EDITOR):
-        entity.is_featured = clean_input.get("isFeatured")
+        if 'isFeatured' in clean_input:
+            entity.is_featured = clean_input.get("isFeatured")
 
     entity.source = clean_input.get("source", "")
 

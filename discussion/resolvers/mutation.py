@@ -42,7 +42,8 @@ def resolve_add_discussion(_, info, input):
     entity.rich_description = clean_input.get("richDescription")
 
     if user.has_role(USER_ROLES.ADMIN) or user.has_role(USER_ROLES.EDITOR):
-        entity.is_featured = clean_input.get("isFeatured")
+        if 'isFeatured' in clean_input:
+            entity.is_featured = clean_input.get("isFeatured")
 
     entity.save()
 
