@@ -178,6 +178,7 @@ extend input editSiteSettingInput {
   limitedGroupAdd: Boolean
   cookieConsent: Boolean
   loginIntro: String
+  customCss: String
 }
 
 input ProfileSectionInput {
@@ -210,4 +211,5 @@ extend type SiteSettings {
   loginIntro: String
   roleOptions: [Option]
   deleteAccountRequests: DeleteAccountRequestList
+  customCss: String
 }

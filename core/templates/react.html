@@ -42,6 +42,10 @@
             <link href="https://fonts.googleapis.com/css?family=Open+Sans:400,600,700&display=swap" rel="stylesheet">
         {% endif %}
     {% endif %}
+
+    {% if config.CUSTOM_CSS %}
+        <style>{{ config.CUSTOM_CSS }}</style>
+    {% endif %}
 </head>
 
 <body class="___{{ config.THEME }}">

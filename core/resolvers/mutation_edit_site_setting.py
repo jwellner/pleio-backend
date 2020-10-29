@@ -118,7 +118,8 @@ def resolve_edit_site_setting(_, info, input):
         'onboardingIntro': 'ONBOARDING_INTRO',
 
         'cookieConsent': 'COOKIE_CONSENT',
-        'loginIntro': 'LOGIN_INTRO'
+        'loginIntro': 'LOGIN_INTRO',
+        'customCss': 'CUSTOM_CSS'
     }
 
     for k, v in setting_keys.items():
