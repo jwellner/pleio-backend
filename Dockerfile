@@ -10,7 +10,7 @@ RUN python -m venv /app-tmp/venv && /app-tmp/venv/bin/pip install --upgrade pip
 
 WORKDIR /app-tmp
 COPY requirements.txt /app-tmp
-RUN /app-tmp/venv/bin/pip3 install -r requirements.txt
+RUN /app-tmp/venv/bin/pip3 install -r requirements.txt --use-feature=2020-resolver
 
 
 FROM python:3.8-slim
