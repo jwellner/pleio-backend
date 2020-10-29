@@ -73,6 +73,10 @@ def resolve_add_blog(_, info, input):
     if user.has_role(USER_ROLES.ADMIN) or user.has_role(USER_ROLES.EDITOR):
         entity.is_recommended = clean_input.get("isRecommended")
 
+    if user.has_role(USER_ROLES.ADMIN) or user.has_role(USER_ROLES.EDITOR):
+        if 'isFeatured' in clean_input:
+            entity.is_featured = clean_input.get("isFeatured")
+
     entity.save()
 
     entity.add_follow(user)
@@ -148,6 +152,10 @@ def resolve_edit_blog(_, info, input):
     if user.has_role(USER_ROLES.ADMIN) or user.has_role(USER_ROLES.EDITOR):
         if 'isRecommended' in clean_input:
             entity.is_recommended = clean_input.get("isRecommended")
+
+    if user.has_role(USER_ROLES.ADMIN) or user.has_role(USER_ROLES.EDITOR):
+        if 'isFeatured' in clean_input:
+            entity.is_featured = clean_input.get("isFeatured")
 
     entity.save()
 
