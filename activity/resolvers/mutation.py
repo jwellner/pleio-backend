@@ -1,9 +1,17 @@
 from graphql import GraphQLError
 from django.core.exceptions import ObjectDoesNotExist
+from core import config
 from core.constances import NOT_LOGGED_IN, COULD_NOT_FIND, COULD_NOT_FIND_GROUP, COULD_NOT_SAVE, USER_ROLES
 from core.lib import remove_none_from_dict, access_id_to_acl
 from core.models import Group
 from ..models import StatusUpdate
+
+# TODO: remove after fixed in frontend
+def get_group_default_access_id(group):
+    if group.is_closed:
+        return 4
+
+    return config.DEFAULT_ACCESS_ID
 
 
 def resolve_add_status_update(_, info, input):
@@ -35,7 +43,16 @@ def resolve_add_status_update(_, info, input):
     if group:
         entity.group = group
 
-    entity.read_access = access_id_to_acl(entity, clean_input.get("accessId"))
+
+    # TODO: remove this bugfix and fix it in frontend
+    if 'accessId' in clean_input:
+        entity.read_access = access_id_to_acl(entity, clean_input.get("accessId"))
+    else:
+        if group:
+            entity.read_access = access_id_to_acl(entity, get_group_default_access_id(group))
+        else:
+            entity.read_access = access_id_to_acl(entity, config.DEFAULT_ACCESS_ID)
+
     entity.write_access = access_id_to_acl(entity, clean_input.get("writeAccessId"))
 
     entity.title = clean_input.get("title", "")
