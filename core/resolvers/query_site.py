@@ -97,6 +97,9 @@ def get_site_settings():
         'theme': config.THEME,
         'themeOptions': config.THEME_OPTIONS,
         'fontOptions': [
+            {"value": "Arial", "label": "Arial"},
+            {"value": "Open Sans", "label": "Open Sans"},
+            {"value": "PT Sans", "label": "PT Sans"},
             {"value": "Rijksoverheid Sans", "label": "Rijksoverheid Sans"},
             {"value": "Roboto", "label": "Roboto"},
             {"value": "Source Sans Pro", "label": "Source Sans Pro"}
@@ -188,7 +191,7 @@ def get_site_settings():
         'cookieConsent': config.COOKIE_CONSENT,
         'loginIntro': config.LOGIN_INTRO,
         'roleOptions': [
-            {'value': USER_ROLES.ADMIN, 'label': ugettext_lazy('Administrator')}, 
+            {'value': USER_ROLES.ADMIN, 'label': ugettext_lazy('Administrator')},
             {'value': USER_ROLES.EDITOR, 'label': ugettext_lazy('Editor')},
             {'value': USER_ROLES.QUESTION_MANAGER, 'label': ugettext_lazy('Question expert')},
         ],

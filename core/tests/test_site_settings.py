@@ -232,7 +232,16 @@ class SiteSettingsTestCase(FastTenantTestCase):
         self.assertEqual(data["siteSettings"]["piwikId"], "")
 
         self.assertEqual(data["siteSettings"]["themeOptions"], [{"value": 'leraar', 'label': 'Standaard'}, {'value': 'rijkshuisstijl', 'label': 'Rijkshuisstijl'}])
-        self.assertEqual(data["siteSettings"]["fontOptions"], [{"value": "Rijksoverheid Sans", "label": "Rijksoverheid Sans"},{"value": "Roboto", "label": "Roboto"},{"value": "Source Sans Pro", "label": "Source Sans Pro"}])
+        self.assertEqual(data["siteSettings"]["fontOptions"], [
+            {"value": "Arial", "label": "Arial"},
+            {"value": "Open Sans", "label": "Open Sans"},
+            {"value": "PT Sans", "label": "PT Sans"},
+            {"value": "Rijksoverheid Sans", "label": "Rijksoverheid Sans"},
+            {"value": "Roboto", "label": "Roboto"},
+            {"value": "Source Sans Pro", "label": "Source Sans Pro"}
+            ]
+        )
+
         self.assertEqual(data["siteSettings"]["font"], "Rijksoverheid Sans")
         self.assertEqual(data["siteSettings"]["colorHeader"], "#0e2f56")
         self.assertEqual(data["siteSettings"]["colorPrimary"], "#0e2f56")
