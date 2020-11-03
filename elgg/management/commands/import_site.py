@@ -2,7 +2,6 @@ from django.core import management
 from django.core.management.base import BaseCommand, CommandError
 from django.utils import timezone
 from core import config
-from core.lib import ACCESS_TYPE, access_id_to_acl
 from core.models import ProfileField, UserProfile, UserProfileField, Group, Entity, Comment, Widget
 from backend2 import settings
 from elgg.models import (

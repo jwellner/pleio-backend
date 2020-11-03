@@ -239,7 +239,7 @@ class ElggHelpers():
             entity.is_folder = False
 
             entity.write_access = [ACCESS_TYPE.user.format(entity.owner.guid)]
-            entity.read_access = access_id_to_acl(entity.owner, elgg_entity.entity.access_id)
+            entity.read_access = self.elgg_access_id_to_acl(entity, elgg_entity.entity.access_id)
 
             entity.created_at = datetime.fromtimestamp(elgg_entity.entity.time_created)
             entity.updated_at = datetime.fromtimestamp(elgg_entity.entity.time_updated)
@@ -280,7 +280,7 @@ class ElggHelpers():
             entity.is_folder = False
 
             entity.write_access = [ACCESS_TYPE.user.format(entity.owner.guid)]
-            entity.read_access = access_id_to_acl(entity.owner, elgg_entity.entity.access_id)
+            entity.read_access = self.elgg_access_id_to_acl(entity, elgg_entity.entity.access_id)
 
             entity.created_at = datetime.fromtimestamp(elgg_entity.entity.time_created)
             entity.updated_at = datetime.fromtimestamp(elgg_entity.entity.time_updated)
@@ -327,8 +327,8 @@ class ElggHelpers():
                 entity.mime_type = mime_type
                 entity.title = filename
 
-                entity.read_access = access_id_to_acl(entity, 2)
-                entity.write_access = access_id_to_acl(entity, 0)
+                entity.read_access = self.elgg_access_id_to_acl(entity, 2)
+                entity.write_access = self.elgg_access_id_to_acl(entity, 0)
 
                 entity.save()
 
@@ -368,3 +368,15 @@ class ElggHelpers():
             if users:
                 for user in users:
                     EntityView.objects.create(entity=entity, viewer=user)
+
+    def elgg_access_id_to_acl(self, obj, access_id):
+        """
+        Overwritten from core.lib because elgg uses access_id >= 3 for groups
+
+        TODO: how to fix subgroups?
+        """
+        access_id = int(access_id)
+        if access_id >= 3:
+            access_id = 4
+
+        return access_id_to_acl(obj, access_id)
