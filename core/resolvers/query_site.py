@@ -200,7 +200,8 @@ def get_site_settings():
         },
         'deleteAccountRequests': {
             'edges': User.objects.filter(is_delete_requested=True).all()
-        }
+        },
+        'customCss': config.CUSTOM_CSS
     }
 
     return site_settings

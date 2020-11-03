@@ -104,7 +104,9 @@ DEFAULT_SITE_CONFIG = {
     'ONBOARDING_INTRO': ("", 'Onboarding intro'),
 
     'COOKIE_CONSENT': (False, 'Cookie consent enabled'),
-    'LOGIN_INTRO': ('', 'Login intro text')
+    'LOGIN_INTRO': ('', 'Login intro text'),
+
+    'CUSTOM_CSS': ("", 'Custom Css'),
 }
 """
 Default site configuration
@@ -151,7 +153,7 @@ class ConfigBackend():
 
     def init(self):
         # fill cache on init
-        try: 
+        try:
             for setting in self._model.objects.all():
                 if setting.key in DEFAULT_SITE_CONFIG:
                     cache.set("%s%s" % (connection.schema_name, setting.key), setting.value)

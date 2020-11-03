@@ -191,6 +191,7 @@ class SiteSettingsTestCase(FastTenantTestCase):
                             guid
                         }
                     }
+                    customCss
                 }
             }
         """
@@ -333,6 +334,7 @@ class SiteSettingsTestCase(FastTenantTestCase):
         self.assertEqual(data["siteSettings"]["roleOptions"], [{'value': 'ADMIN', 'label': 'Beheerder'}, {'value': 'EDITOR', 'label': 'Redacteur'}, {'value': 'QUESTION_MANAGER', 'label': 'Vraagexpert'}])
         self.assertEqual(data["siteSettings"]["siteAccessRequests"]["edges"][0]['email'], 'b@b.nl')
         self.assertEqual(data["siteSettings"]["deleteAccountRequests"]["edges"][0]['guid'], self.delete_user.guid)
+        self.assertEqual(data["siteSettings"]["customCss"], "")
 
     def test_site_settings_by_anonymous(self):
 

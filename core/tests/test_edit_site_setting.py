@@ -149,6 +149,8 @@ class EditSiteSettingTestCase(FastTenantTestCase):
                         onboardingIntro
                         cookieConsent
                         loginIntro
+
+                        customCss
                     }
                 }
             }
@@ -237,7 +239,9 @@ class EditSiteSettingTestCase(FastTenantTestCase):
                 'onboardingIntro': 'Welcome onboarding',
 
                 'cookieConsent': True,
-                'loginIntro': 'test'
+                'loginIntro': 'test',
+
+                'customCss': 'h1 {color: maroon;margin-left: 40px;}'
             }
         }
 
@@ -333,6 +337,7 @@ class EditSiteSettingTestCase(FastTenantTestCase):
         self.assertEqual(data["editSiteSetting"]["siteSettings"]["cookieConsent"], True)
 
         self.assertEqual(data["editSiteSetting"]["siteSettings"]["loginIntro"], 'test')
+        self.assertEqual(data["editSiteSetting"]["siteSettings"]["customCss"], 'h1 {color: maroon;margin-left: 40px;}')
 
     @patch("file.models.get_mimetype")
     @patch("{}.open".format(settings.DEFAULT_FILE_STORAGE))
