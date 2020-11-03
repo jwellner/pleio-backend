@@ -224,7 +224,6 @@ class Subgroup(models.Model):
     """
     A group of users within a group
     """
-    #TODO: access_id is same as id, now it conflicts with some of core access_ids, ie 0,1,2,4. Solution needed
 
     name = models.CharField(max_length=512)
     members = models.ManyToManyField('user.User', related_name='subgroups')
