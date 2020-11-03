@@ -6,7 +6,7 @@ class StatusUpdate(Entity, VoteMixin, CommentMixin, BookmarkMixin, FollowMixin, 
     class Meta:
         ordering = ['-created_at']
 
-    title = models.CharField(max_length=256)
+    title = models.CharField(max_length=256, blank=True)
     description = models.TextField()
     rich_description = models.TextField(null=True, blank=True)
 
