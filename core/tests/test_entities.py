@@ -56,25 +56,31 @@ class EntitiesTestCase(FastTenantTestCase):
             write_access=[ACCESS_TYPE.user.format(self.authenticatedUser.id)],
             is_featured=True
         )
-        self.page1 = mixer.blend(Page,
-                                 owner=self.admin,
-                                 read_access=[ACCESS_TYPE.public],
-                                 write_access=[ACCESS_TYPE.user.format(self.admin.id)]
-                                 )
-        self.page2 = mixer.blend(Page,
-                                 position=0,
-                                 owner=self.admin,
-                                 read_access=[ACCESS_TYPE.public],
-                                 write_access=[ACCESS_TYPE.user.format(self.admin.id)],
-                                 parent=self.page1
-                                 )
-        self.page3 = mixer.blend(Page,
-                                 position=1,
-                                 parent=self.page1,
-                                 owner=self.admin,
-                                 read_access=[ACCESS_TYPE.public],
-                                 write_access=[ACCESS_TYPE.user.format(self.admin.id)]
-                                 )
+        self.page1 = mixer.blend(
+            Page,
+            title="Page1",
+            owner=self.admin,
+            read_access=[ACCESS_TYPE.public],
+            write_access=[ACCESS_TYPE.user.format(self.admin.id)]
+        )
+        self.page2 = mixer.blend(
+            Page,
+            title="Page2",
+            position=0,
+            owner=self.admin,
+            read_access=[ACCESS_TYPE.public],
+            write_access=[ACCESS_TYPE.user.format(self.admin.id)],
+            parent=self.page1
+        )
+        self.page3 = mixer.blend(
+            Page,
+            title="Page3",
+            position=1,
+            parent=self.page1,
+            owner=self.admin,
+            read_access=[ACCESS_TYPE.public],
+            write_access=[ACCESS_TYPE.user.format(self.admin.id)]
+        )
 
         self.query = """
             query getEntities($subtype: String, $containerGuid: String, $tags: [String!], $tagLists: [[String]], $isFeatured: Boolean, $limit: Int, $offset: Int, $orderBy: OrderBy, $orderDirection: OrderDirection) {

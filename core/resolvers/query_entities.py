@@ -33,12 +33,10 @@ def conditional_subtypes_filter(subtypes):
 
     return q_objects
 
-def conditional_group_filter(subtype, container_guid):
+def conditional_group_filter(container_guid):
     """
     Filter only items in group
     """
-    if container_guid == "1" and subtype == "wiki":
-        return Q(group=None) & Q(wiki__parent=None)
     if container_guid == "1":
         return Q(group=None)
     if container_guid:
@@ -122,7 +120,7 @@ def resolve_entities(
         order_by = '-%s' % (order_by)
 
     entities = Model.objects.visible(info.context["request"].user)
-    entities = entities.filter(conditional_group_filter(subtype, containerGuid) &
+    entities = entities.filter(conditional_group_filter(containerGuid) &
                                conditional_tags_filter(tags) &
                                conditional_tag_lists_filter(tagLists) &
                                conditional_subtypes_filter(subtypes) &
@@ -132,6 +130,10 @@ def resolve_entities(
     if subtype and subtype == 'page':
         entities = entities.filter(page__parent=None)
         order_by = 'page__title'
+
+    # only return wiki's without parent
+    if subtype and subtype == 'wiki':
+        entities = entities.filter(wiki__parent=None)
 
     if order_by == '-title':
         entities = entities.order_by(Coalesce('news__title', 'blog__title', 'poll__title', 'statusupdate__title', 'wiki__title',
