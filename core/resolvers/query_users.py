@@ -12,7 +12,6 @@ from django_tenants.utils import parse_tenant_config_path
 def resolve_users(_, info, q="", filters=None, offset=0, limit=20):
     # pylint: disable=unused-argument
     # pylint: disable=too-many-locals
-    ids = []
 
     user = info.context["request"].user
     tenant_name = parse_tenant_config_path("")
@@ -58,13 +57,21 @@ def resolve_users(_, info, q="", filters=None, offset=0, limit=20):
             )
 
     total = s.count()
+    # order by name
+
+    s = s.sort({'name.raw': {'order': 'asc'}})
     s = s[offset:offset+limit]
     response = s.execute()
 
+    ids = []
     for hit in response:
         ids.append(hit['id'])
 
-    edges = User.objects.filter(id__in=ids)
+    objects = User.objects.filter(id__in=ids)
+
+    # use elasticsearch ordering on objects
+    id_dict = {str(d.id): d for d in objects}
+    sorted_objects = [id_dict[id] for id in ids]
 
     fields_in_overview = []
 
@@ -79,7 +86,7 @@ def resolve_users(_, info, q="", filters=None, offset=0, limit=20):
 
     return {
         'total': total,
-        'edges': edges,
+        'edges': sorted_objects,
         'filterCount': [],
         'fieldsInOverview': fields_in_overview
     }
