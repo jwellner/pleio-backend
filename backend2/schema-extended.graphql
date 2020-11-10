@@ -94,6 +94,42 @@ type SiteUserList {
   edges: [User]
 }
 
+input importUsersStep1Input {
+
+  """A list of email addresses to revoke invite for."""
+  usersCsv: Upload!
+}
+
+type importUsersStep1Payload {
+  """
+    - csvColumns, columns of the uploaded csv
+    - userFields, fields of users
+    - accessIds, integers of access level for field
+  """
+  importId: String!
+  csvColumns: [String]
+  userFields: [Option]
+  accessIdOptions: [OptionInteger]
+}
+
+input importUsersStep2Input {
+
+  """Start a background process for creating/updating users"""
+  importId: String!
+  fields: [ImportUserFieldInput!]
+}
+
+type importUsersStep2Payload {
+  success: Boolean
+}
+
+input ImportUserFieldInput {
+  csvColumn: String!
+  userField: String!
+  accessId: Int
+  forceAccess: Boolean
+}
+
 extend type Mutation {
   deleteUser(input: deleteUserInput!): deleteUserPayload
   toggleUserRole(input: toggleUserRoleInput!): toggleUserRolePayload
@@ -109,6 +145,10 @@ extend type Mutation {
   handleSiteAccessRequest(input: handleSiteAccessRequestInput!): handleSiteAccessRequestPayload
   """Handle delete account request"""
   handleDeleteAccountRequest(input: handleDeleteAccountRequestInput!): handleDeleteAccountRequestPayload
+  """User import step 1"""
+  importUsersStep1(input: importUsersStep1Input!): importUsersStep1Payload
+  """User import step 2, will be scheduled in background, performer will receive a mail with import results. """
+  importUsersStep2(input: importUsersStep2Input!): importUsersStep2Payload
 }
 
 extend type Query {

@@ -1,0 +1,17 @@
+
+{% extends "email/base_notification.html" %}
+{% load i18n %}
+
+{% block body %}
+{% blocktrans %}
+<p>Dear {{ user_name }},</p>
+
+<p>The import of users succeeded. Here are the stats:</p>
+
+<ul>
+    <li>{{ stats_created }} users added</li>
+    <li>{{ stats_updated }} users updated</li>
+    <li>{{ stats_error }} users failed</li>
+</ul>
+{% endblocktrans %}
+{% endblock %}
