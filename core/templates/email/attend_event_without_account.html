@@ -2,13 +2,14 @@
 {% load i18n %}
 
 {% block body %}
-    {% blocktrans %}
-    
-        Confirm your registration for {{ title }}.<br />
-        Location: {{ location }}
-        Date: {{ start_date }}<br />
-        Click on the link below to conirm. <br />
-        <a href="{{ link }}">{{ link }}</a>
-    {% endblocktrans %}
+{% blocktrans %}
+Confirm your registration for {{ title }}.<br><br>
+
+Location: {{ location }}<br>
+Date: {{ start_date }}<br><br>
+
+Click on the link below to confirm.<br><br>
+<a href="{{ link }}">{{ link }}</a>
+{% endblocktrans %}
 {% endblock %}
 

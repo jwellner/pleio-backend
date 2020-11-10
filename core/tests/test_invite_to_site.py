@@ -5,7 +5,6 @@ from django_tenants.test.cases import FastTenantTestCase
 from backend2.schema import schema
 from ariadne import graphql_sync
 import json
-from django.utils.translation import ugettext_lazy
 from django.contrib.auth.models import AnonymousUser
 from django.http import HttpRequest
 from core.models import Group
@@ -59,9 +58,6 @@ class InviteToSiteTestCase(FastTenantTestCase):
 
         self.assertTrue(result[0])
         data = result[1]["data"]
-
-        #link = "https://test.test/groups/invitations/?invitecode=6df8cdad5582833eeab4"
-        #subject = ugettext_lazy("Invitation to become a member of the %s group" % self.group1.name)
 
         self.assertEqual(data["inviteToSite"]["success"], True)
         self.assertEqual(mocked_send_mail_multi.call_count, 3)

@@ -3,16 +3,10 @@
 {% load i18n %}
 
 {% block body %}
-{% blocktrans %}
+{% blocktrans %}Hi {{ name_of_user_admin_role_changed }},<br><br>
 
-Hi {{ name_of_user_admin_role_changed }},
+Your site administrator role was removed by {{ user_name }}.<br><br>
 
-Your site administrator role was removed by {{ user_name }}.
-
-If you believe this was done in error, please contact one of the other site administrators.",
-
+If you believe this was done in error, please contact one of the other site administrators.
 {% endblocktrans %}
 {% endblock %}
-
-
-

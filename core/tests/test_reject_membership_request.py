@@ -6,7 +6,6 @@ from django_tenants.test.cases import FastTenantTestCase
 from backend2.schema import schema
 from ariadne import graphql_sync
 import json
-from django.utils.translation import ugettext_lazy
 from django.contrib.auth.models import AnonymousUser
 from django.http import HttpRequest
 from core.models import Group, GroupInvitation
@@ -83,8 +82,6 @@ class RejectMembershipRequestTestCase(FastTenantTestCase):
         data = result[1]["data"]
 
         self.assertEqual(data["rejectMembershipRequest"]["group"]["guid"], self.group1.guid)
-        link = "https://test.test" + "/groups/view/{}/{}".format(self.group1.guid, slugify(self.group1.name))
-        subject = ugettext_lazy("Request for access to the %s group has been refused" % self.group1.name)
 
         self.assertEqual(data["rejectMembershipRequest"]["group"]["guid"], self.group1.guid)
         mocked_send_mail_multi.assert_called_once()
@@ -133,10 +130,6 @@ class RejectMembershipRequestTestCase(FastTenantTestCase):
 
         self.assertTrue(result[0])
         data = result[1]["data"]
-
-        self.assertEqual(data["rejectMembershipRequest"]["group"]["guid"], self.group1.guid)
-        link = "https://test.test" + "/groups/view/{}/{}".format(self.group1.guid, slugify(self.group1.name))
-        subject = ugettext_lazy("Request for access to the %s group has been refused" % self.group1.name)
 
         self.assertEqual(data["rejectMembershipRequest"]["group"]["guid"], self.group1.guid)
         mocked_send_mail_multi.assert_called_once()
