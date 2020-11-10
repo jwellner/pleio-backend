@@ -1,0 +1,13 @@
+
+{% extends "email/base_notification.html" %}
+{% load i18n %}
+
+{% block body %}
+{% blocktrans %}
+<p>Dear {{ user_name }},</p>
+
+<p>The import of users failed. Here is the error message of the server:</p>
+
+<p>{{ error_message }}</p>
+{% endblocktrans %}
+{% endblock %}

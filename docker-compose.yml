@@ -16,6 +16,7 @@ services:
     volumes:
       - .:/app
       - frontend-build:/app/static-frontend
+      - shared-tmp:/tmp
     ports:
       - "8000:8000"
     depends_on:
@@ -36,6 +37,7 @@ services:
     command: ["/start-background.sh"]
     volumes:
       - .:/app
+      - shared-tmp:/tmp
     depends_on:
       - db
       - localstack
@@ -125,6 +127,7 @@ services:
 
 volumes:
   frontend-build:
+  shared-tmp:
   postgres_data:
   esdata01:
     driver: local

@@ -1,6 +1,9 @@
 # Create your tasks here
 from __future__ import absolute_import, unicode_literals
 
+import csv
+import os
+
 from celery import shared_task
 from celery.utils.log import get_task_logger
 
@@ -10,11 +13,14 @@ from django_tenants.utils import schema_context
 from django_elasticsearch_dsl.registries import registry
 from elasticsearch_dsl import Search
 from core import config
-from core.lib import html_to_text
+from core.lib import html_to_text, access_id_to_acl
+from core.models import ProfileField, UserProfileField
 from django.core.mail import EmailMultiAlternatives
 from django.template.loader import get_template
 from django.utils import translation
 from django.conf import settings
+from user.models import User
+from django.utils.translation import ugettext_lazy
 
 from file.models import FileFolder
 
@@ -155,3 +161,115 @@ def send_mail_multi(self, schema_name, subject, html_template, context, email_ad
             email.send()
         except Exception as e:
             logger.error('email sent to %s failed. Error: %s', email_address, e)
+
+
+def get_import_users_data(fields, row):
+    data = {}
+    for field in fields:
+        field['value'] = row[field['csvColumn']]
+        data[field['userField']] = field
+    return data
+
+
+def get_import_users_user(data):
+
+    if 'id' in data:
+        try:
+            return User.objects.get(id=data['id']['value'])
+        except Exception:
+            pass
+    if 'email' in data:
+        try:
+            return User.objects.get(email=data['email']['value'])
+        except Exception:
+            pass
+
+    return False
+
+@shared_task(bind=True, ignore_result=True)
+def import_users(self, schema_name, fields, csv_location, performing_user_guid):
+    # pylint: disable=unused-argument
+    # pylint: disable=too-many-locals
+    '''
+    Import users
+    '''
+    with schema_context(schema_name):
+
+        performing_user = User.objects.get(id=performing_user_guid)
+
+        stats = {
+            'created': 0,
+            'updated': 0,
+            'error': 0
+        }
+
+        logger.info("Start import on tenant %s by user", performing_user.email)
+
+        success = False
+        error_message = ''
+
+        try:
+            with open(csv_location) as csvfile:
+                reader = csv.DictReader(csvfile, delimiter=';')
+                for row in reader:
+                    data = get_import_users_data(fields, row)
+                    user = get_import_users_user(data)
+
+                    if not user:
+                        if 'name' in data and 'email' in data:
+                            try:
+                                user = User.objects.create(email=data['email']['value'], name=data['name']['value'])
+                                stats['created'] += 1
+                            except Exception:
+                                stats['error'] += 1
+                        else:
+                            stats['error'] += 1
+                    else:
+                        stats['updated'] += 1
+
+                    if user:
+                        # create profile fields
+                        for field, values in {d: data[d] for d in data if d not in ['id', 'email', 'name']}.items():
+
+                            profile_field = ProfileField.objects.get(id=field)
+
+                            if profile_field:
+                                user_profile_field, created = UserProfileField.objects.get_or_create(
+                                    profile_field=profile_field,
+                                    user_profile=user.profile
+                                )
+
+                                user_profile_field.value = values['value']
+
+                                if created:
+                                    user_profile_field.read_access = access_id_to_acl(user, values['accessId'])
+                                elif values['forceAccess']:
+                                    user_profile_field.read_access = access_id_to_acl(user, values['accessId'])
+
+                                user_profile_field.save()
+
+            success = True
+
+            os.remove(csv_location)
+
+            logger.info("Import done with stats: %s ", stats)
+        except Exception as e:
+            error_message = "Import failed with message %s" % e
+            logger.error(error_message)
+
+        subject = ugettext_lazy("Import was a success") if success else ugettext_lazy("Import failed")
+        template = "email/user_import_success.html" if success else "email/user_import_failed.html"
+
+        tenant = Client.objects.get(schema_name=schema_name)
+        context = {
+            'site_name': config.NAME,
+            'site_url': 'https://' + tenant.domains.first().domain,
+            'primary_color': config.COLOR_PRIMARY,
+            'user_name': performing_user.name,
+            'stats_created': stats.get('created', 0),
+            'stats_updated': stats.get('updated', 0),
+            'stats_error': stats.get('error', 0),
+            'error_message': error_message
+        }
+
+        send_mail_multi.delay(schema_name, subject, template, context, performing_user.email)

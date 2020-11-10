@@ -73,7 +73,6 @@ def access_id_to_acl(obj, access_id):
         acl.append(ACCESS_TYPE.group.format(obj.group.id))
     elif access_id and access_id >= 10000 and obj.group:
         acl.append(ACCESS_TYPE.subgroup.format(access_id))
-
     return acl
 
 

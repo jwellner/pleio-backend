@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-10-27 11:44+0100\n"
+"POT-Creation-Date: 2020-11-03 15:43+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -18,11 +18,11 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#: backend2/config.py:61 core/resolvers/query_site.py:81
+#: backend2/config.py:61 core/resolvers/query_site.py:82
 msgid "English"
 msgstr ""
 
-#: backend2/config.py:62 core/resolvers/query_site.py:81
+#: backend2/config.py:62 core/resolvers/query_site.py:82
 msgid "Dutch"
 msgstr ""
 
@@ -47,11 +47,13 @@ msgid "Ownership of the %(group_name)s group has been transferred"
 msgstr ""
 
 #: core/resolvers/mutation_delete_user.py:35
+#: core/resolvers/mutation_handle_delete_account_request.py:38
 #, python-format
 msgid "Account of %(name_deleted_user)s removed"
 msgstr ""
 
 #: core/resolvers/mutation_delete_user.py:43
+#: core/resolvers/mutation_handle_delete_account_request.py:46
 #: core/resolvers/mutation_toggle_user_role.py:43
 #, python-format
 msgid "A site administrator was removed from %(site_name)s"
@@ -65,6 +67,26 @@ msgstr ""
 #: core/resolvers/mutation_handle_site_access_request.py:56
 #, python-format
 msgid "Membership request declined for: %(site_name)s"
+msgstr ""
+
+#: core/resolvers/mutation_import_users.py:17
+msgid "email"
+msgstr ""
+
+#: core/resolvers/mutation_import_users.py:18
+msgid "name"
+msgstr ""
+
+#: core/resolvers/mutation_import_users.py:30 core/resolvers/query_site.py:66
+msgid "Just me"
+msgstr ""
+
+#: core/resolvers/mutation_import_users.py:31 core/resolvers/query_site.py:67
+msgid "Logged in users"
+msgstr ""
+
+#: core/resolvers/mutation_import_users.py:34 core/resolvers/query_site.py:71
+msgid "Public"
 msgstr ""
 
 #: core/resolvers/mutation_invite_to_group.py:42
@@ -102,11 +124,11 @@ msgstr ""
 msgid "Message from {0}: {1}"
 msgstr ""
 
-#: core/resolvers/mutation_toggle_request_delete_user.py:34
+#: core/resolvers/mutation_toggle_request_delete_user.py:32
 msgid "Request to remove account cancelled"
 msgstr ""
 
-#: core/resolvers/mutation_toggle_request_delete_user.py:42
+#: core/resolvers/mutation_toggle_request_delete_user.py:40
 msgid "Request to remove account"
 msgstr ""
 
@@ -125,52 +147,48 @@ msgstr ""
 msgid "You're granted site administrator right on %(site_name)s"
 msgstr ""
 
-#: core/resolvers/query_site.py:65
-msgid "Just me"
-msgstr ""
-
-#: core/resolvers/query_site.py:66
-msgid "Logged in users"
-msgstr ""
-
-#: core/resolvers/query_site.py:70
-msgid "Public"
-msgstr ""
-
-#: core/resolvers/query_site.py:107
+#: core/resolvers/query_site.py:111
 msgid "Activity stream"
 msgstr ""
 
-#: core/resolvers/query_site.py:107
+#: core/resolvers/query_site.py:111
 msgid "CMS page"
 msgstr ""
 
-#: core/resolvers/query_site.py:141
+#: core/resolvers/query_site.py:145
 msgid "Daily"
 msgstr ""
 
-#: core/resolvers/query_site.py:142
+#: core/resolvers/query_site.py:146
 msgid "Weekly"
 msgstr ""
 
-#: core/resolvers/query_site.py:143
+#: core/resolvers/query_site.py:147
 msgid "Monthly"
 msgstr ""
 
-#: core/resolvers/query_site.py:144
+#: core/resolvers/query_site.py:148
 msgid "Never"
 msgstr ""
 
-#: core/resolvers/query_site.py:190
+#: core/resolvers/query_site.py:194
 msgid "Administrator"
 msgstr ""
 
-#: core/resolvers/query_site.py:191
+#: core/resolvers/query_site.py:195
 msgid "Editor"
 msgstr ""
 
-#: core/resolvers/query_site.py:192
+#: core/resolvers/query_site.py:196
 msgid "Question expert"
+msgstr ""
+
+#: core/tasks.py:257
+msgid "Import was a success"
+msgstr ""
+
+#: core/tasks.py:257
+msgid "Import failed"
 msgstr ""
 
 #: core/templates/admin/oidc_login.html:21
@@ -455,6 +473,32 @@ msgid ""
 "\n"
 msgstr ""
 
+#: core/templates/email/user_import_failed.html:6
+#, python-format
+msgid ""
+"\n"
+"<p>Dear %(user_name)s,</p>\n"
+"\n"
+"<p>The import of users failed. Here is the error message of the server:</p>\n"
+"\n"
+"<p>%(error_message)s</p>\n"
+msgstr ""
+
+#: core/templates/email/user_import_success.html:6
+#, python-format
+msgid ""
+"\n"
+"<p>Dear %(user_name)s,</p>\n"
+"\n"
+"<p>The import of users succeeded. Here are the stats:</p>\n"
+"\n"
+"<ul>\n"
+"    <li>%(stats['created'])s users added</li>\n"
+"    <li>%(stats['updated'])s users updated</li>\n"
+"    <li>%(stats['error'])s users failed</li>\n"
+"</ul>\n"
+msgstr ""
+
 #: core/templates/email/user_role_admin_assigned_for_admins.html:6
 #, python-format
 msgid ""
@@ -630,7 +674,7 @@ msgstr ""
 msgid "Periodiek overzicht van %s"
 msgstr ""
 
-#: core/views.py:127
+#: core/views.py:128
 #, python-format
 msgid "New access request for %(site_name)s"
 msgstr ""
