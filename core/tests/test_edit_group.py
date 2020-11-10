@@ -71,6 +71,7 @@ class EditGroupCase(FastTenantTestCase):
                         excerpt
                         richDescription
                         introduction
+                        isIntroductionPublic
                         welcomeMessage
                         isClosed
                         isMembershipOnRequest
@@ -91,6 +92,7 @@ class EditGroupCase(FastTenantTestCase):
                 "description": "description",
                 "richDescription": "<p>richDescription</p>",
                 "introduction": "introdcution",
+                "isIntroductionPublic": True,
                 "welcomeMessage": "welcomeMessage",
                 "isClosed": True,
                 "isMembershipOnRequest": True,
@@ -116,6 +118,7 @@ class EditGroupCase(FastTenantTestCase):
         self.assertEqual(data["editGroup"]["group"]["excerpt"], variables["group"]["description"])
         self.assertEqual(data["editGroup"]["group"]["richDescription"], variables["group"]["richDescription"])
         self.assertEqual(data["editGroup"]["group"]["introduction"], variables["group"]["introduction"])
+        self.assertEqual(data["editGroup"]["group"]["isIntroductionPublic"], variables["group"]["isIntroductionPublic"])
         self.assertEqual(data["editGroup"]["group"]["welcomeMessage"], variables["group"]["welcomeMessage"])
         self.assertEqual(data["editGroup"]["group"]["isClosed"], variables["group"]["isClosed"])
         self.assertEqual(data["editGroup"]["group"]["isMembershipOnRequest"], variables["group"]["isMembershipOnRequest"])

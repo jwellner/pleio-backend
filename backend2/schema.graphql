@@ -113,6 +113,7 @@ input addGroupInput {
   description: String
   richDescription: String
   introduction: String
+  isIntroductionPublic: Boolean
   welcomeMessage: String
   tags: [String]
   plugins: [Plugins]
@@ -512,6 +513,7 @@ input editGroupInput {
   description: String
   richDescription: String
   introduction: String
+  isIntroductionPublic: Boolean
   welcomeMessage: String
   tags: [String]
   plugins: [Plugins]
@@ -863,6 +865,7 @@ type Group implements Entity {
   richDescription: String
   excerpt: String
   introduction: String
+  isIntroductionPublic: Boolean
   icon: String
   featured: Featured
   url: String

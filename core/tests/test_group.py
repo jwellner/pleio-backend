@@ -22,7 +22,7 @@ class GroupTestCase(FastTenantTestCase):
         self.user4 = mixer.blend(User, name="xx")
         self.user5 = mixer.blend(User, name="yyy")
         self.user6 = mixer.blend(User, name="zz")
-        self.group = mixer.blend(Group, owner=self.authenticatedUser)
+        self.group = mixer.blend(Group, owner=self.authenticatedUser, introduction='introductionMessage')
         self.group.join(self.authenticatedUser, 'owner')
         self.group.join(self.user2, 'member')
         self.group.join(self.user3, 'pending')
@@ -272,3 +272,29 @@ class GroupTestCase(FastTenantTestCase):
         self.assertEqual(data["entity"]["members"]["edges"][0]["role"], "owner")
         self.assertEqual(data["entity"]["members"]["edges"][1]["role"], "admin")
 
+
+    def test_group_hidden_introduction(self):
+        query = """
+            query Group($guid: String!) {
+                entity(guid: $guid) {
+                    ... on Group {
+                        introduction
+                    }
+                }
+            }
+
+        """
+        request = HttpRequest()
+        request.user = self.user5
+
+        variables = {
+            "guid": self.group.guid
+        }
+
+        result = graphql_sync(schema, { "query": query, "variables": variables }, context_value={ "request": request })
+
+        self.assertTrue(result[0])
+
+        data = result[1]["data"]
+
+        self.assertEqual(data["entity"]["introduction"], "")

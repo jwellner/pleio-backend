@@ -53,10 +53,11 @@ def resolve_add_group(_, info, input):
         group.featured_image = None
         group.featured_position_y = 0
         group.featured_video = None
-        
+
     group.description = clean_input.get("description", "")
     group.rich_description = clean_input.get("richDescription", "")
     group.introduction = clean_input.get("introduction", "")
+    group.is_introduction_public = clean_input.get("isIntroductionPublic", False)
     group.welcome_message = clean_input.get("welcomeMessage", "")
 
     group.is_closed = clean_input.get("isClosed", False)

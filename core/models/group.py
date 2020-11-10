@@ -35,6 +35,7 @@ class Group(models.Model):
     rich_description = models.JSONField(null=True, blank=True)
 
     introduction = models.TextField(default='')
+    is_introduction_public = models.BooleanField(default=False)
     welcome_message = models.TextField(default='')
 
     icon = models.ForeignKey(
@@ -100,6 +101,15 @@ class Group(models.Model):
             return False
 
         return self.members.filter(user=user, type='pending').exists()
+
+    def member_since(self, user):
+        try:
+            return self.members.get(
+                user=user,
+                type__in=['admin', 'owner', 'member']
+            ).created_at
+        except ObjectDoesNotExist:
+            return False
 
     def can_write(self, user):
         if not user.is_authenticated:
