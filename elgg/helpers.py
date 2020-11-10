@@ -9,7 +9,7 @@ from file.models import FileFolder
 from wiki.models import Wiki
 from core.lib import ACCESS_TYPE, access_id_to_acl
 from elgg.models import (
-    ElggEntities, ElggObjectsEntity, ElggPrivateSettings, ElggConfig, GuidMap, ElggEntityViews, ElggEntityViewsLog
+    ElggEntities, ElggObjectsEntity, ElggPrivateSettings, ElggConfig, GuidMap, ElggEntityViews, ElggEntityViewsLog, ElggAccessCollections
 )
 from core.models import EntityView, EntityViewCount, ProfileField
 
@@ -371,12 +371,29 @@ class ElggHelpers():
 
     def elgg_access_id_to_acl(self, obj, access_id):
         """
-        Overwritten from core.lib because elgg uses access_id >= 3 for groups
-
-        TODO: how to fix subgroups?
+        Overwritten from core.lib because elgg uses access_id >= 3 for groups and we have to detect subgroups
         """
         access_id = int(access_id)
         if access_id >= 3:
-            access_id = 4
+
+            if obj.group:
+                access_collection = ElggAccessCollections.objects.using(self.database).filter(id=access_id).first()
+                if access_collection and not access_collection.name[:6] in ['Groep:', 'Group:']:
+                    subgroup = obj.group.subgroups.filter(name=access_collection.name).first()
+                    if subgroup:
+                        # subgroup found use Subgroup.access_id
+                        access_id = subgroup.access_id
+                    else:
+                        # subgroup does not exist anymore?
+                        access_id = 0
+                elif access_collection:
+                    # access_collection is group
+                    access_id = 4
+                else:
+                    # access_collection does not exist?
+                    access_id = 0
+            else:
+                # if not in group there are also no subgroups
+                access_id = 0
 
         return access_id_to_acl(obj, access_id)
