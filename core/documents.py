@@ -51,7 +51,8 @@ class UserDocument(DefaultDocument):
     name = fields.TextField(
         analyzer=custom_analyzer,
         search_analyzer="standard",
-        boost=5
+        boost=5,
+        fields={'raw': fields.KeywordField()}
     )
     external_id = fields.KeywordField()
 
