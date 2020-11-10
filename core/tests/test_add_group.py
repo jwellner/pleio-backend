@@ -29,7 +29,8 @@ class AddGroupCase(FastTenantTestCase):
                 "icon": "icon.png",
                 "description": "description",
                 "richDescription": "<p>richDescription</p>",
-                "introduction": "introdcution",
+                "introduction": "introductionMessage",
+                "isIntroductionPublic": False,
                 "welcomeMessage": "welcomeMessage",
                 "isClosed": True,
                 "isMembershipOnRequest": True,
@@ -100,6 +101,7 @@ class AddGroupCase(FastTenantTestCase):
                         description
                         richDescription
                         introduction
+                        isIntroductionPublic
                         welcomeMessage
                         isClosed
                         isMembershipOnRequest
@@ -126,6 +128,7 @@ class AddGroupCase(FastTenantTestCase):
         self.assertEqual(data["addGroup"]["group"]["description"], variables["group"]["description"])
         self.assertEqual(data["addGroup"]["group"]["richDescription"], variables["group"]["richDescription"])
         self.assertEqual(data["addGroup"]["group"]["introduction"], variables["group"]["introduction"])
+        self.assertEqual(data["addGroup"]["group"]["isIntroductionPublic"], variables["group"]["isIntroductionPublic"])
         self.assertEqual(data["addGroup"]["group"]["welcomeMessage"], variables["group"]["welcomeMessage"])
         self.assertEqual(data["addGroup"]["group"]["isClosed"], variables["group"]["isClosed"])
         self.assertEqual(data["addGroup"]["group"]["isMembershipOnRequest"], variables["group"]["isMembershipOnRequest"])

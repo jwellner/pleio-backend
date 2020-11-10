@@ -1,7 +1,7 @@
 from ariadne import ObjectType
 from django.core.exceptions import ObjectDoesNotExist
 from django.db.models import Case, When, IntegerField
-from core.constances import MEMBERSHIP
+from core.constances import MEMBERSHIP, USER_ROLES
 from core.lib import get_access_ids
 from core.models import GroupInvitation, Subgroup
 from user.models import User
@@ -30,6 +30,19 @@ def resolve_group_description(obj, info):
 def resolve_welcome_message(obj, info):
     # pylint: disable=unused-argument
     return obj.welcome_message
+
+@group.field("introduction")
+def resolve_introduction(obj, info):
+    # pylint: disable=unused-argument
+    user = info.context["request"].user
+    if obj.is_full_member(user) or user.has_role(USER_ROLES.ADMIN) or obj.is_introduction_public:
+        return obj.introduction
+    return ""
+
+@group.field("isIntroductionPublic")
+def resolve_is_introduction_public(obj, info):
+    # pylint: disable=unused-argument
+    return obj.is_introduction_public
 
 @group.field("url")
 def resolve_group_url(obj, info):

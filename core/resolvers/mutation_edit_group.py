@@ -73,6 +73,8 @@ def resolve_edit_group(_, info, input):
         group.rich_description = clean_input.get("richDescription")
     if 'introduction' in clean_input:
         group.introduction = clean_input.get("introduction")
+    if 'isIntroductionPublic' in clean_input:
+        group.is_introduction_public = clean_input.get("isIntroductionPublic")
     if 'welcomeMessage' in clean_input:
         group.welcome_message = clean_input.get("welcomeMessage")
 
