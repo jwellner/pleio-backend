@@ -32,6 +32,7 @@ urlpatterns = [
     path('file/featured/<uuid:entity_guid>', file_views.featured, name='featured'),
     path('bulk_download', file_views.bulk_download, name='bulk_download'),
 
+    path('exporting/group/<uuid:group_id>', core_views.export_group_members, name='group_members_export'),
     path('exporting/event/<uuid:event_id>', event_views.export, name='event_export'),
     path('exporting/users', user_views.export, name='users_export'),
 

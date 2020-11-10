@@ -1,7 +1,8 @@
+import csv
 import json
 from core.resolvers.query_site import get_settings
 from core import config
-from core.models import Entity, UserProfileField, SiteAccessRequest
+from core.models import Entity, Group, UserProfileField, SiteAccessRequest
 from core.lib import access_id_to_acl, get_default_email_context, tenant_schema
 from core.forms import OnboardingForm, RequestAccessForm
 from core.constances import USER_ROLES
@@ -16,9 +17,8 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.utils.text import Truncator
 from django.urls import reverse
 from django.views.decorators.http import require_GET
-from django.http import HttpResponse
+from django.http import Http404, HttpResponse, HttpResponseRedirect, StreamingHttpResponse
 from django.contrib.auth.decorators import login_required
-from django.http import HttpResponseRedirect
 
 def default(request, exception=None):
     # pylint: disable=unused-argument
@@ -132,8 +132,8 @@ def request_access(request):
                     send_mail_multi.delay(tenant_schema(), subject, 'email/site_access_request.html', context, admin.email)
 
             return redirect('access_requested')
-        
-    form = RequestAccessForm(initial={'request_access': True})    
+
+    form = RequestAccessForm(initial={'request_access': True})
 
     context = {
         'name': claims.get('name'),
@@ -154,7 +154,7 @@ def onboarding(request):
         form = OnboardingForm(request.POST, user=user)
         if form.is_valid():
             data = form.cleaned_data
-            
+
             for profile_field in form.profile_fields:
                 if profile_field.field_type == 'multi_select_field':
                     if data[profile_field.guid]:
@@ -221,3 +221,70 @@ def robots_txt(request):
         ]
 
     return HttpResponse("\n".join(lines), content_type="text/plain")
+
+
+class Echo:
+    """An object that implements just the write method of the file-like
+    interface.
+    """
+    def write(self, value):
+        """Write the value by returning it, instead of storing in a buffer."""
+        return value
+
+
+def export_group_members(request, group_id=None):
+    # pylint: disable=too-many-locals
+    # TODO: add tests
+    user = request.user
+
+    if not user.is_authenticated:
+        raise Http404("User not authenticated")
+
+    if not config.GROUP_MEMBER_EXPORT:
+        raise Http404("Export could not be performed")
+
+    try:
+        group = Group.objects.get(id=group_id)
+    except ObjectDoesNotExist:
+        raise Http404("Group not found")
+
+    if not group.can_write(user):
+        raise Http404("Group not found")
+
+    headers = ['guid', 'name', 'email (only for admins)', 'member since', 'last login']
+
+    subgroups = group.subgroups.all()
+    subgroup_names = subgroups.values_list('name', flat=True)
+    headers.extend(subgroup_names)
+
+    rows = [headers]
+
+    for membership in group.members.filter(type__in=['admin', 'owner', 'member']):
+        member = membership.user
+        if not member.is_active:
+            continue
+
+        email = ""
+        if user.has_role(USER_ROLES.ADMIN):
+            email = member.email
+
+        member_subgroups = member.subgroups.all()
+        subgroup_memberships = []
+
+        for subgroup in subgroups:
+            if subgroup in member_subgroups:
+                subgroup_memberships.append(True)
+            else:
+                subgroup_memberships.append(False)
+        row = [str(member.id), member.name, email, membership.created_at, member.last_login]
+        row.extend(subgroup_memberships)
+        rows.append(row)
+
+    pseudo_buffer = Echo()
+    writer = csv.writer(pseudo_buffer, delimiter=';', quotechar='"')
+    writer.writerow(headers)
+    response = StreamingHttpResponse((writer.writerow(row) for row in rows),
+                                     content_type="text/csv")
+    response['Content-Disposition'] = 'attachment; filename="' + group.name + '.csv"'
+
+    return response
