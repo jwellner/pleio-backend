@@ -22,6 +22,9 @@ def order_positions(parent):
     if parent.type_to_string == 'group':
         children = Widget.objects.filter(group=parent)
 
+    if parent.type_to_string == 'wiki':
+        children = Wiki.objects.filter(parent=parent)
+
     if not children:
         return
 

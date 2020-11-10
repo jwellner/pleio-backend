@@ -4,7 +4,7 @@ from django.db.models import Q
 from core.models import Entity
 from core.constances import NOT_LOGGED_IN, COULD_NOT_FIND, COULD_NOT_SAVE
 from core.lib import remove_none_from_dict
-from cms.utils import reorder_positions
+from cms.utils import order_positions, reorder_positions
 
 def resolve_reorder(_, info, input):
     # pylint: disable=redefined-builtin
@@ -43,6 +43,7 @@ def resolve_reorder(_, info, input):
         entity.save()
 
         reorder_positions(entity, old_position, new_position)
+        order_positions(entity.parent)
 
     return {
         "container": entity.parent

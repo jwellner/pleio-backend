@@ -57,13 +57,14 @@ def resolve_users(_, info, q="", filters=None, offset=0, limit=20):
                 )
             )
 
+    total = s.count()
+    s = s[offset:offset+limit]
     response = s.execute()
 
     for hit in response:
         ids.append(hit['id'])
 
-    users = User.objects.filter(id__in=ids)
-    edges = users[offset:offset+limit]
+    edges = User.objects.filter(id__in=ids)
 
     fields_in_overview = []
 
@@ -77,7 +78,7 @@ def resolve_users(_, info, q="", filters=None, offset=0, limit=20):
         fields_in_overview.append({ 'key': item.key, 'label': item.name })
 
     return {
-        'total': users.count(),
+        'total': total,
         'edges': edges,
         'filterCount': [],
         'fieldsInOverview': fields_in_overview
