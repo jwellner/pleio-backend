@@ -198,6 +198,7 @@ class GroupMembership(models.Model):
             self.group.name
         )
 
+    created_at = models.DateTimeField(default=timezone.now)
 
 class GroupInvitation(models.Model):
     class Meta:
