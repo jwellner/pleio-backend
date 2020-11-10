@@ -3,18 +3,12 @@
 {% load i18n %}
 
 {% block body %}
-{% blocktrans %}
+{% blocktrans %}Hi {{ name_of_user_admin_role_changed }},<br><br>
 
-Hi {{ name_of_user_admin_role_changed }},
+You've been assigned as a new site administrator by {{ user_name }}.<br><br>
 
-You've been assigned as a new site administrator by {{ user_name }}.
-
-Enjoy your new found rights by logging in here {{ site_url }}.
+Enjoy your new found rights by logging in here {{ site_url }}.<br><br>
 
 If you believe this was done in error, please contact one of the other site administrators.
-
 {% endblocktrans %}
 {% endblock %}
-
-
-

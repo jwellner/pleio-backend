@@ -5,7 +5,6 @@ from backend2.schema import schema
 from ariadne import graphql_sync
 import json
 from django.contrib.auth.models import AnonymousUser
-from django.utils.translation import ugettext_lazy
 from django.http import HttpRequest
 from core.models import Group
 from user.models import User
@@ -67,7 +66,7 @@ class AttendEventWithoutAccountTestCase(FastTenantTestCase):
         data = result[1]["data"]
 
         link = "https://test.test/events/confirm/" + self.event.guid + "?email=pete@test.test&code=6df8cdad5582833eeab4"
-        subject = ugettext_lazy("Confirmation of registration %s" % self.event.title)
+        subject = "Confirmation of registration %s" % self.event.title
         context = {'link': link, 'title': self.event.title, 'location': self.event.location, 'start_date': self.event.start_date}
         self.assertEqual(data["attendEventWithoutAccount"]["entity"]["guid"], self.event.guid)
         self.assertEqual(data["attendEventWithoutAccount"]["entity"]["title"], self.event.title)
@@ -124,7 +123,7 @@ class AttendEventWithoutAccountTestCase(FastTenantTestCase):
         data = result[1]["data"]
 
         link = "https://test.test/events/confirm/" + self.event.guid + "?email=pete@test.test&code=6df8cdad5582833eeab4"
-        subject = ugettext_lazy("Confirmation of registration %s" % self.event.title)
+        subject = "Confirmation of registration %s" % self.event.title
 
         self.assertEqual(data["attendEventWithoutAccount"]["entity"]["guid"], self.event.guid)
         self.assertEqual(data["attendEventWithoutAccount"]["entity"]["title"], self.event.title)

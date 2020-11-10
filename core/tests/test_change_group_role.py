@@ -6,7 +6,6 @@ from backend2.schema import schema
 from ariadne import graphql_sync
 import json
 from django.utils.text import slugify
-from django.utils.translation import ugettext_lazy
 from django.contrib.auth.models import AnonymousUser
 from django.http import HttpRequest
 from core.models import Group, GroupMembership
@@ -76,9 +75,6 @@ class ChangeGroupRoleTestCase(FastTenantTestCase):
         self.assertTrue(result[0])
         data = result[1]["data"]
 
-        link = "https://test.test" + "/groups/view/{}/{}".format(self.group1.guid, slugify(self.group1.name))
-        subject = ugettext_lazy("Ownership of the %s group has been transferred" % self.group1.name)
-
         self.assertEqual(data["changeGroupRole"]["group"]["guid"], self.group1.guid)
         mocked_send_mail_multi.assert_called_once()
 
@@ -124,9 +120,6 @@ class ChangeGroupRoleTestCase(FastTenantTestCase):
 
         self.assertTrue(result[0])
         data = result[1]["data"]
-
-        link = "https://test.test" + "/groups/view/{}/{}".format(self.group1.guid, slugify(self.group1.name))
-        subject = ugettext_lazy("Ownership of the %s group has been transferred" % self.group1.name)
 
         self.assertEqual(data["changeGroupRole"]["group"]["guid"], self.group1.guid)
         self.assertEqual(data["changeGroupRole"]["group"]["members"]["total"], 2)
@@ -177,14 +170,9 @@ class ChangeGroupRoleTestCase(FastTenantTestCase):
         self.assertTrue(result[0])
         data = result[1]["data"]
 
-        link = "https://test.test" + "/groups/view/{}/{}".format(self.group1.guid, slugify(self.group1.name))
-        subject = ugettext_lazy("Ownership of the %s group has been transferred" % self.group1.name)
-
         self.assertEqual(data["changeGroupRole"]["group"]["guid"], self.group1.guid)
         self.assertEqual(data["changeGroupRole"]["group"]["members"]["total"], 1)
         assert not mocked_send_mail_multi.called
-
-
 
 
     @override_settings(ALLOWED_HOSTS=['test.test'])
@@ -229,9 +217,6 @@ class ChangeGroupRoleTestCase(FastTenantTestCase):
         self.assertTrue(result[0])
         data = result[1]["data"]
 
-        link = "https://test.test" + "/groups/view/{}/{}".format(self.group1.guid, slugify(self.group1.name))
-        subject = ugettext_lazy("Ownership of the %s group has been transferred" % self.group1.name)
-
         self.assertEqual(data["changeGroupRole"]["group"]["guid"], self.group1.guid)
         self.assertEqual(data["changeGroupRole"]["group"]["members"]["edges"][0]["role"], "admin")
         assert not mocked_send_mail_multi.called
@@ -272,9 +257,6 @@ class ChangeGroupRoleTestCase(FastTenantTestCase):
 
         self.assertTrue(result[0])
         data = result[1]["data"]
-
-        subject = ugettext_lazy("Ownership of the %s group has been transferred" % self.group1.name)
-        link = "https://test.test" + "/groups/view/{}/{}".format(self.group1.guid, slugify(self.group1.name))
 
         self.assertEqual(data["changeGroupRole"]["group"]["guid"], self.group1.guid)
         mocked_send_mail_multi.assert_called_once()

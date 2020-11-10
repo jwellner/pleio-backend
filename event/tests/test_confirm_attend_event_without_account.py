@@ -6,7 +6,6 @@ from backend2.schema import schema
 from ariadne import graphql_sync
 import json
 from django.contrib.auth.models import AnonymousUser
-from django.utils.translation import ugettext_lazy
 from django.http import HttpRequest
 from core.models import Group
 from user.models import User
@@ -65,9 +64,6 @@ class ConfirmAttendEventWithoutAccountTestCase(FastTenantTestCase):
         result = graphql_sync(schema, { "query": mutation, "variables": variables }, context_value={ "request": request })
 
         data = result[1]["data"]
-
-        link = 'https://test.test/events/view/{}/{}'.format(self.event.guid, slugify(self.event.title)).lower()
-        subject = ugettext_lazy("Confirmation of registration for %s" % self.event.title)
 
         self.assertEqual(data["confirmAttendEventWithoutAccount"]["entity"]["guid"], self.event.guid)
 

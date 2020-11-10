@@ -2,12 +2,12 @@
 {% load i18n %}
 
 {% block body %}
-    {% blocktrans %}<p>Hello {{ admin_name }},</p>
+{% blocktrans %}Hello {{ admin_name }},<br><br>
 
-    <p>Somebody with the name {{ request_name }} has performed an access request to {{ site_name }} .</p>
+Somebody with the name {{ request_name }} has performed an access request to {{ site_name }} .<br><br>
 
-    <p>To review the request please visit:</p>
+To review the request please visit:<br><br>
 
-    <p><a href="{{ site_admin_url }}">{{ site_admin_url }}</a></p>
-    {% endblocktrans %}
+<a href="{{ site_admin_url }}">{{ site_admin_url }}</a>
+{% endblocktrans %}
 {% endblock %}

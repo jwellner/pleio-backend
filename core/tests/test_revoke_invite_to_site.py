@@ -5,7 +5,6 @@ from django_tenants.test.cases import FastTenantTestCase
 from backend2.schema import schema
 from ariadne import graphql_sync
 import json
-from django.utils.translation import ugettext_lazy
 from django.contrib.auth.models import AnonymousUser
 from django.http import HttpRequest
 from core.models import Group

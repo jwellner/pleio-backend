@@ -3,7 +3,6 @@ from core.models import Group, Comment
 from user.models import User
 from blog.models import Blog
 from core.constances import ACCESS_TYPE
-from django.utils.translation import ugettext_lazy
 from django.http import HttpRequest
 from mixer.backend.django import mixer
 from notifications.signals import notify
@@ -38,7 +37,7 @@ class SendNotificationEmailsTestCase(FastTenantTestCase):
         call_command('send_notification_emails')
 
         args, kwargs = mocked_send_mail_multi.call_args
-        subject = ugettext_lazy("Nieuwe notificaties op %s" % config.NAME)
+        subject = "Nieuwe notificaties op %s" % config.NAME
 
         self.assertEqual(mocked_send_mail_multi.call_count, 1)
         self.assertEqual(args[0], 'fast_test')
@@ -83,7 +82,7 @@ class SendNotificationEmailsTestCase(FastTenantTestCase):
         call_command('send_notification_emails')
 
         args, kwargs = mocked_send_mail_multi.call_args
-        subject = ugettext_lazy("Nieuwe notificaties op %s" % config.NAME)
+        subject = "Nieuwe notificaties op %s" % config.NAME
 
         self.assertEqual(mocked_send_mail_multi.call_count, 1)
         self.assertEqual(args[3]['notifications'][0]['action'], 'commented')
@@ -104,7 +103,7 @@ class SendNotificationEmailsTestCase(FastTenantTestCase):
         call_command('send_notification_emails')
 
         args, kwargs = mocked_send_mail_multi.call_args
-        subject = ugettext_lazy("Nieuwe notificaties op %s" % config.NAME)
+        subject = "Nieuwe notificaties op %s" % config.NAME
 
         self.assertEqual(mocked_send_mail_multi.call_count, 1)
         self.assertEqual(args[3]['notifications'][0]['action'], 'created')

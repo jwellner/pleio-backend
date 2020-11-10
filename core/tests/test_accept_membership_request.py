@@ -2,7 +2,6 @@ from django.conf import settings
 from django.db import connection
 from django.test import override_settings
 from django.utils.text import slugify
-from django.utils.translation import ugettext_lazy
 from django_tenants.test.cases import FastTenantTestCase
 from backend2.schema import schema
 from ariadne import graphql_sync
@@ -82,7 +81,7 @@ class AcceptMembershipRequestTestCase(FastTenantTestCase):
         data = result[1]["data"]
 
         link = "https://test.test" + "/groups/view/{}/{}".format(self.group1.guid, slugify(self.group1.name))
-        subject = ugettext_lazy("Toegangsaanvraag voor de groep %s goedgekeurd" % self.group1.name)
+        subject = f"Toegangsaanvraag voor de groep {self.group1.name} goedgekeurd"
         user_url = 'https://test.test' + self.user1.url
 
         self.assertEqual(data["acceptMembershipRequest"]["group"]["guid"], self.group1.guid)
@@ -137,7 +136,7 @@ class AcceptMembershipRequestTestCase(FastTenantTestCase):
         data = result[1]["data"]
 
         link = "https://test.test" + "/groups/view/{}/{}".format(self.group1.guid, slugify(self.group1.name))
-        subject = ugettext_lazy("Toegangsaanvraag voor de groep %s goedgekeurd" % self.group1.name)
+        subject = f"Toegangsaanvraag voor de groep {self.group1.name} goedgekeurd"
         user_url = 'https://test.test' + self.admin.url
 
         self.assertEqual(data["acceptMembershipRequest"]["group"]["guid"], self.group1.guid)
