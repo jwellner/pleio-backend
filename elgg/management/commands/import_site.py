@@ -207,7 +207,6 @@ class Command(InteractiveTenantOption, BaseCommand):
         config.EVENT_EXPORT = self.helpers.get_plugin_setting("event_export") == "yes"
         config.QUESTIONER_CAN_CHOOSE_BEST_ANSWER = self.helpers.get_plugin_setting("questioner_can_choose_best_answer") == "yes"
         config.STATUS_UPDATE_GROUPS = self.helpers.get_plugin_setting("status_update_groups") == "yes"
-        config.SUBGROUPS = self.helpers.get_plugin_setting("subgroups") == "yes"
         config.GROUP_MEMBER_EXPORT = self.helpers.get_plugin_setting("member_export") == "yes"
         config.LIMITED_GROUP_ADD = self.helpers.get_plugin_setting("limited_groups", "groups") == "yes"
         config.ENABLE_SEARCH_ENGINE_INDEXING = self.helpers.get_site_config('enable_frontpage_indexing') \
@@ -218,10 +217,6 @@ class Command(InteractiveTenantOption, BaseCommand):
     def _import_groups(self):
         # Groups
         elgg_groups = ElggGroupsEntity.objects.using(self.import_id)
-
-
-        #TODO: What is this for? profile plugin and subgroups?
-        subgroups_enabled = True if self.helpers.get_plugin_setting("profile") == "yes" else False
 
         self.stdout.write("\n>> Groups (%i) " % elgg_groups.count(), ending="")
 
@@ -285,9 +280,8 @@ class Command(InteractiveTenantOption, BaseCommand):
                 }
             )
 
-            # TODO: subgroups
-            subgroups = ElggAccessCollections.objects.using(self.import_id).filter(owner_guid=elgg_group.entity.guid)
-            for item in subgroups:
+            access_collections = ElggAccessCollections.objects.using(self.import_id).filter(owner_guid=elgg_group.entity.guid)
+            for item in access_collections:
                 if not item.name[:6] in ['Groep:', 'Group:']:
                     self.mapper.save_subgroup(item, group)
 

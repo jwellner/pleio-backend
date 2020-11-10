@@ -136,6 +136,7 @@ class Mapper():
         users = User.objects.filter(id__in=user_guids)
         subgroup.save()
         subgroup.members.set(users)
+        return subgroup
 
     def get_blog(self, elgg_entity: ElggObjectsEntity):
         entity = Blog()
