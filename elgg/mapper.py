@@ -122,7 +122,7 @@ class Mapper():
         group.tags = self.helpers.get_list_values(elgg_group.entity.get_metadata_value_by_name("tags"))
         group.plugins = self.helpers.get_list_values(elgg_group.entity.get_metadata_value_by_name("plugins"))
 
-        group.owner = User.objects.get(id=GuidMap.objects.get(id=elgg_group.entity.owner_guid).guid)
+        group.owner = self.helpers.get_user_or_admin(elgg_group.entity.owner_guid)
 
         return group
 
@@ -153,7 +153,7 @@ class Mapper():
         entity.featured_position_y = int(elgg_entity.entity.get_metadata_value_by_name("featuredPositionY")) \
             if elgg_entity.entity.get_metadata_value_by_name("featuredPositionY") else 0
         entity.tags = self.helpers.get_list_values(elgg_entity.entity.get_metadata_value_by_name("tags"))
-        entity.owner = User.objects.get(id=GuidMap.objects.get(id=elgg_entity.entity.owner_guid).guid)
+        entity.owner = self.helpers.get_user_or_admin(elgg_entity.entity.owner_guid)
 
         in_group = GuidMap.objects.filter(id=elgg_entity.entity.container_guid, object_type="group").first()
         if in_group:
@@ -179,7 +179,7 @@ class Mapper():
         entity.tags = self.helpers.get_list_values(elgg_entity.entity.get_metadata_value_by_name("tags"))
         entity.source = elgg_entity.entity.get_metadata_value_by_name("source") \
             if elgg_entity.entity.get_metadata_value_by_name("source") else ""
-        entity.owner = User.objects.get(id=GuidMap.objects.get(id=elgg_entity.entity.owner_guid).guid)
+        entity.owner = self.helpers.get_user_or_admin(elgg_entity.entity.owner_guid)
 
         in_group = GuidMap.objects.filter(id=elgg_entity.entity.container_guid, object_type="group").first()
         if in_group:
@@ -213,7 +213,7 @@ class Mapper():
         entity.rsvp = elgg_entity.entity.get_metadata_value_by_name("rsvp") == "1"
         entity.attend_event_without_account = elgg_entity.entity.get_metadata_value_by_name("attend_event_without_account") == "1"
 
-        entity.owner = User.objects.get(id=GuidMap.objects.get(id=elgg_entity.entity.owner_guid).guid)
+        entity.owner = self.helpers.get_user_or_admin(elgg_entity.entity.owner_guid)
 
         in_group = GuidMap.objects.filter(id=elgg_entity.entity.container_guid, object_type="group").first()
         if in_group:
@@ -231,7 +231,7 @@ class Mapper():
         entity.rich_description = elgg_entity.entity.get_metadata_value_by_name("richDescription")
         entity.tags = self.helpers.get_list_values(elgg_entity.entity.get_metadata_value_by_name("tags"))
 
-        entity.owner = User.objects.get(id=GuidMap.objects.get(id=elgg_entity.entity.owner_guid).guid)
+        entity.owner = self.helpers.get_user_or_admin(elgg_entity.entity.owner_guid)
 
         in_group = GuidMap.objects.filter(id=elgg_entity.entity.container_guid, object_type="group").first()
         if in_group:
@@ -254,7 +254,7 @@ class Mapper():
 
         entity.tags = self.helpers.get_list_values(elgg_entity.entity.get_metadata_value_by_name("tags"))
 
-        entity.owner = User.objects.get(id=GuidMap.objects.get(id=elgg_entity.entity.owner_guid).guid)
+        entity.owner = self.helpers.get_user_or_admin(elgg_entity.entity.owner_guid)
 
         in_group = GuidMap.objects.filter(id=elgg_entity.entity.container_guid, object_type="group").first()
         if in_group:
@@ -277,7 +277,7 @@ class Mapper():
 
         entity.tags = self.helpers.get_list_values(elgg_entity.entity.get_metadata_value_by_name("tags"))
 
-        entity.owner = User.objects.get(id=GuidMap.objects.get(id=elgg_entity.entity.owner_guid).guid)
+        entity.owner = self.helpers.get_user_or_admin(elgg_entity.entity.owner_guid)
 
         in_group = GuidMap.objects.filter(id=elgg_entity.entity.container_guid, object_type="group").first()
         if in_group:
@@ -302,7 +302,7 @@ class Mapper():
             if elgg_entity.entity.get_metadata_value_by_name("position") else 0
         entity.tags = self.helpers.get_list_values(elgg_entity.entity.get_metadata_value_by_name("tags"))
 
-        entity.owner = User.objects.get(id=GuidMap.objects.get(id=elgg_entity.entity.owner_guid).guid)
+        entity.owner = self.helpers.get_user_or_admin(elgg_entity.entity.owner_guid)
 
         entity.write_access = [ACCESS_TYPE.user.format(entity.owner.guid)]
         entity.read_access = self.helpers.elgg_access_id_to_acl(entity, elgg_entity.entity.access_id)
@@ -377,7 +377,7 @@ class Mapper():
         entity.rich_description = elgg_entity.entity.get_metadata_value_by_name("richDescription")
         entity.tags = self.helpers.get_list_values(elgg_entity.entity.get_metadata_value_by_name("tags"))
 
-        entity.owner = User.objects.get(id=GuidMap.objects.get(id=elgg_entity.entity.owner_guid).guid)
+        entity.owner = self.helpers.get_user_or_admin(elgg_entity.entity.owner_guid)
 
         in_group = GuidMap.objects.filter(id=elgg_entity.entity.container_guid, object_type="group").first()
         if in_group:
@@ -395,7 +395,7 @@ class Mapper():
         entity = Comment()
         entity.description = elgg_entity.description.replace("&amp;", "&")
         entity.rich_description = elgg_entity.entity.get_metadata_value_by_name("richDescription")
-        entity.owner = User.objects.get(id=GuidMap.objects.get(id=elgg_entity.entity.owner_guid).guid)
+        entity.owner = self.helpers.get_user_or_admin(elgg_entity.entity.owner_guid)
         entity.created_at = datetime.fromtimestamp(elgg_entity.entity.time_created)
         entity.updated_at = datetime.fromtimestamp(elgg_entity.entity.time_updated)
 
@@ -407,7 +407,7 @@ class Mapper():
         entity.description = elgg_entity.description.replace("&amp;", "&")
         entity.tags = self.helpers.get_list_values(elgg_entity.entity.get_metadata_value_by_name("tags"))
 
-        entity.owner = User.objects.get(id=GuidMap.objects.get(id=elgg_entity.entity.owner_guid).guid)
+        entity.owner = self.helpers.get_user_or_admin(elgg_entity.entity.owner_guid)
 
         in_group = GuidMap.objects.filter(id=elgg_entity.entity.container_guid, object_type="group").first()
         if in_group:
@@ -465,7 +465,7 @@ class Mapper():
         entity.title = elgg_entity.title
         entity.tags = self.helpers.get_list_values(elgg_entity.entity.get_metadata_value_by_name("tags"))
 
-        entity.owner = User.objects.get(id=GuidMap.objects.get(id=elgg_entity.entity.owner_guid).guid)
+        entity.owner = self.helpers.get_user_or_admin(elgg_entity.entity.owner_guid)
 
         entity.is_folder = True
 
@@ -499,7 +499,7 @@ class Mapper():
             entity.mime_type = str(elgg_entity.entity.get_metadata_value_by_name("mimetype"))
             entity.upload.name = self.helpers.get_elgg_file_path(elgg_entity)
 
-            entity.owner = User.objects.get(id=GuidMap.objects.get(id=elgg_entity.entity.owner_guid).guid)
+            entity.owner = self.helpers.get_user_or_admin(elgg_entity.entity.owner_guid)
 
             entity.is_folder = False
 
@@ -530,7 +530,7 @@ class Mapper():
         entity.description = elgg_entity.description.replace("&amp;", "&")
         entity.rich_description = elgg_entity.entity.get_metadata_value_by_name("richDescription")
         entity.tags = self.helpers.get_list_values(elgg_entity.entity.get_metadata_value_by_name("tags"))
-        entity.owner = User.objects.get(id=GuidMap.objects.get(id=elgg_entity.entity.owner_guid).guid)
+        entity.owner = self.helpers.get_user_or_admin(elgg_entity.entity.owner_guid)
         entity.position = int(elgg_entity.entity.get_metadata_value_by_name("position")) \
             if elgg_entity.entity.get_metadata_value_by_name("position") else 0
 
