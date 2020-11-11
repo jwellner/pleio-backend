@@ -234,7 +234,7 @@ class ElggHelpers():
             entity.title = filename
             entity.upload.name = file_path
 
-            entity.owner = User.objects.get(id=GuidMap.objects.get(id=elgg_entity.entity.owner_guid).guid)
+            entity.owner = self.get_user_or_admin(elgg_entity.entity.owner_guid)
 
             entity.is_folder = False
 
@@ -397,3 +397,14 @@ class ElggHelpers():
                 access_id = 0
 
         return access_id_to_acl(obj, access_id)
+
+    def get_user_or_admin(self, entity_guid):
+        """
+        Try to get owner, if it doesnt exist return first admin user.
+        """
+        try:
+            owner = User.objects.get(id=GuidMap.objects.get(id=entity_guid, type='user').guid)
+        except Exception:
+            owner = User.objects.filter(roles__contains=['ADMIN']).first()
+
+        return owner
