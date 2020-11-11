@@ -103,6 +103,18 @@ def resolve_group_can_edit(obj, info):
     # pylint: disable=unused-argument
     return obj.can_write(info.context["request"].user)
 
+@group.field("canChangeOwnership")
+def resolve_group_can_change_ownership(obj, info):
+    # pylint: disable=unused-argument
+    user = info.context["request"].user
+    if not user.is_authenticated:
+        return False
+
+    if user == obj.owner or user.has_role(USER_ROLES.ADMIN):
+        return True
+
+    return False
+
 @group.field("getsNotifications")
 def resolve_group_getsNotifications(obj, info):
     # pylint: disable=unused-argument

@@ -22,6 +22,7 @@ class GroupTestCase(FastTenantTestCase):
         self.user4 = mixer.blend(User, name="xx")
         self.user5 = mixer.blend(User, name="yyy")
         self.user6 = mixer.blend(User, name="zz")
+        self.userAdmin = mixer.blend(User, roles=["ADMIN"])
         self.group = mixer.blend(Group, owner=self.authenticatedUser, introduction='introductionMessage')
         self.group.join(self.authenticatedUser, 'owner')
         self.group.join(self.user2, 'member')
@@ -138,8 +139,8 @@ class GroupTestCase(FastTenantTestCase):
 
         self.assertEqual(data["entity"]["guid"], self.group.guid)
         self.assertEqual(data["entity"]["__typename"], "Group")
-        self.assertEqual(data["entity"]["invite"]["total"], 2)
-        self.assertEqual(len(data["entity"]["invite"]["edges"]), 2)
+        self.assertEqual(data["entity"]["invite"]["total"], 3)
+        self.assertEqual(len(data["entity"]["invite"]["edges"]), 3)
 
     def test_entity_group_invite_list_empty(self):
         query = """
@@ -272,7 +273,6 @@ class GroupTestCase(FastTenantTestCase):
         self.assertEqual(data["entity"]["members"]["edges"][0]["role"], "owner")
         self.assertEqual(data["entity"]["members"]["edges"][1]["role"], "admin")
 
-
     def test_group_hidden_introduction(self):
         query = """
             query Group($guid: String!) {
@@ -298,3 +298,81 @@ class GroupTestCase(FastTenantTestCase):
         data = result[1]["data"]
 
         self.assertEqual(data["entity"]["introduction"], "")
+
+    def test_group_can_change_ownership_member_owner(self):
+        query = """
+            query Group($guid: String!) {
+                entity(guid: $guid) {
+                    ... on Group {
+                        canChangeOwnership
+                    }
+                }
+            }
+
+        """
+        request = HttpRequest()
+        request.user = self.authenticatedUser
+
+        variables = {
+            "guid": self.group.guid
+        }
+
+        result = graphql_sync(schema, { "query": query, "variables": variables }, context_value={ "request": request })
+
+        self.assertTrue(result[0])
+
+        data = result[1]["data"]
+
+        self.assertEqual(data["entity"]["canChangeOwnership"], True)
+
+    def test_group_can_change_ownership_member_admin(self):
+        query = """
+            query Group($guid: String!) {
+                entity(guid: $guid) {
+                    ... on Group {
+                        canChangeOwnership
+                    }
+                }
+            }
+
+        """
+        request = HttpRequest()
+        request.user = self.user4
+
+        variables = {
+            "guid": self.group.guid
+        }
+
+        result = graphql_sync(schema, { "query": query, "variables": variables }, context_value={ "request": request })
+
+        self.assertTrue(result[0])
+
+        data = result[1]["data"]
+
+        self.assertEqual(data["entity"]["canChangeOwnership"], False)
+
+    def test_group_can_change_ownership_site_admin(self):
+        query = """
+            query Group($guid: String!) {
+                entity(guid: $guid) {
+                    ... on Group {
+                        canChangeOwnership
+                    }
+                }
+            }
+
+        """
+        request = HttpRequest()
+        request.user = self.userAdmin
+
+        variables = {
+            "guid": self.group.guid
+        }
+
+        result = graphql_sync(schema, { "query": query, "variables": variables }, context_value={ "request": request })
+
+        self.assertTrue(result[0])
+
+        data = result[1]["data"]
+
+        self.assertEqual(data["entity"]["canChangeOwnership"], True)
