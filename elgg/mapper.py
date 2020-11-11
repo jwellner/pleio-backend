@@ -104,6 +104,7 @@ class Mapper():
         group.rich_description = elgg_group.entity.get_metadata_value_by_name("richDescription")
         group.introduction = elgg_group.entity.get_metadata_value_by_name("introduction") \
             if elgg_group.entity.get_metadata_value_by_name("introduction") else ""
+        group.is_introduction_public = elgg_group.entity.get_metadata_value_by_name("isIntroductionPublic") == "1"
         group.welcome_message = elgg_group.entity.get_private_value_by_name("group_tools:welcome_message") \
             if elgg_group.entity.get_private_value_by_name("group_tools:welcome_message") else ""
         group.icon = self.helpers.save_and_get_group_icon(elgg_group)
