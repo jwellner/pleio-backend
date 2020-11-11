@@ -35,8 +35,13 @@ def resolve_welcome_message(obj, info):
 def resolve_introduction(obj, info):
     # pylint: disable=unused-argument
     user = info.context["request"].user
-    if obj.is_full_member(user) or user.has_role(USER_ROLES.ADMIN) or obj.is_introduction_public:
+
+    if obj.is_introduction_public:
         return obj.introduction
+
+    if user.is_authenticated and (obj.is_full_member(user) or user.has_role(USER_ROLES.ADMIN)):
+        return obj.introduction
+
     return ""
 
 @group.field("isIntroductionPublic")
