@@ -65,7 +65,7 @@ class Mapper():
         user_profile = UserProfile()
         user_profile.last_online = last_online
         user_profile.overview_email_interval = interval_private.value if interval_private else 'weekly' # TODO: should get default for site
-        user_profile.overview_email_tags = self.helpers.get_list_values(elgg_user.entity.get_metadata_value_by_name("editEmailOverviewTags"))
+        user_profile.overview_email_tags = elgg_user.entity.get_metadata_values_by_name("editEmailOverviewTags")
         user_profile.overview_email_last_received = datetime.fromtimestamp(int(last_received_private.value)) if last_received_private else None
         user_profile.receive_newsletter = receive_newsletter
         user_profile.receive_notification_email = receive_notification_email
@@ -119,8 +119,8 @@ class Mapper():
         group.is_auto_membership_enabled = elgg_group.entity.get_metadata_value_by_name("isAutoMembershipEnabled") == "1"
         group.is_leaving_group_disabled = elgg_group.entity.get_metadata_value_by_name("isLeavingGroupDisabled") == "1"
         group.auto_notification = elgg_group.entity.get_metadata_value_by_name("autoNotification:") == "1"
-        group.tags = self.helpers.get_list_values(elgg_group.entity.get_metadata_value_by_name("tags"))
-        group.plugins = self.helpers.get_list_values(elgg_group.entity.get_metadata_value_by_name("plugins"))
+        group.tags = elgg_group.entity.get_metadata_values_by_name("tags")
+        group.plugins = elgg_group.entity.get_metadata_values_by_name("plugins")
 
         group.owner = self.helpers.get_user_or_admin(elgg_group.entity.owner_guid)
 
@@ -152,7 +152,7 @@ class Mapper():
         entity.featured_video = elgg_entity.entity.get_metadata_value_by_name("featuredVideo")
         entity.featured_position_y = int(elgg_entity.entity.get_metadata_value_by_name("featuredPositionY")) \
             if elgg_entity.entity.get_metadata_value_by_name("featuredPositionY") else 0
-        entity.tags = self.helpers.get_list_values(elgg_entity.entity.get_metadata_value_by_name("tags"))
+        entity.tags = elgg_entity.entity.get_metadata_values_by_name("tags")
         entity.owner = self.helpers.get_user_or_admin(elgg_entity.entity.owner_guid)
 
         in_group = GuidMap.objects.filter(id=elgg_entity.entity.container_guid, object_type="group").first()
@@ -176,7 +176,7 @@ class Mapper():
         entity.featured_video = elgg_entity.entity.get_metadata_value_by_name("featuredVideo")
         entity.featured_position_y = int(elgg_entity.entity.get_metadata_value_by_name("featuredPositionY")) \
             if elgg_entity.entity.get_metadata_value_by_name("featuredPositionY") else 0
-        entity.tags = self.helpers.get_list_values(elgg_entity.entity.get_metadata_value_by_name("tags"))
+        entity.tags = elgg_entity.entity.get_metadata_values_by_name("tags")
         entity.source = elgg_entity.entity.get_metadata_value_by_name("source") \
             if elgg_entity.entity.get_metadata_value_by_name("source") else ""
         entity.owner = self.helpers.get_user_or_admin(elgg_entity.entity.owner_guid)
@@ -202,7 +202,7 @@ class Mapper():
         entity.featured_video = elgg_entity.entity.get_metadata_value_by_name("featuredVideo")
         entity.featured_position_y = int(elgg_entity.entity.get_metadata_value_by_name("featuredPositionY")) \
             if elgg_entity.entity.get_metadata_value_by_name("featuredPositionY") else 0
-        entity.tags = self.helpers.get_list_values(elgg_entity.entity.get_metadata_value_by_name("tags"))
+        entity.tags = elgg_entity.entity.get_metadata_values_by_name("tags")
 
         entity.start_date = datetime.fromtimestamp(int(elgg_entity.entity.get_metadata_value_by_name("start_day")))
         entity.end_date = datetime.fromtimestamp(int(elgg_entity.entity.get_metadata_value_by_name("end_ts")))
@@ -229,7 +229,7 @@ class Mapper():
         entity.title = elgg_entity.title
         entity.description = elgg_entity.description.replace("&amp;", "&")
         entity.rich_description = elgg_entity.entity.get_metadata_value_by_name("richDescription")
-        entity.tags = self.helpers.get_list_values(elgg_entity.entity.get_metadata_value_by_name("tags"))
+        entity.tags = elgg_entity.entity.get_metadata_values_by_name("tags")
 
         entity.owner = self.helpers.get_user_or_admin(elgg_entity.entity.owner_guid)
 
@@ -252,7 +252,7 @@ class Mapper():
         entity.rich_description = elgg_entity.entity.get_metadata_value_by_name("richDescription")
         entity.is_closed = elgg_entity.entity.get_metadata_value_by_name("isClosed") == "1"
 
-        entity.tags = self.helpers.get_list_values(elgg_entity.entity.get_metadata_value_by_name("tags"))
+        entity.tags = elgg_entity.entity.get_metadata_values_by_name("tags")
 
         entity.owner = self.helpers.get_user_or_admin(elgg_entity.entity.owner_guid)
 
@@ -275,7 +275,7 @@ class Mapper():
         entity.rich_description = elgg_entity.entity.get_metadata_value_by_name("richDescription")
         entity.state = elgg_entity.entity.get_metadata_value_by_name("state")
 
-        entity.tags = self.helpers.get_list_values(elgg_entity.entity.get_metadata_value_by_name("tags"))
+        entity.tags = elgg_entity.entity.get_metadata_values_by_name("tags")
 
         entity.owner = self.helpers.get_user_or_admin(elgg_entity.entity.owner_guid)
 
@@ -300,7 +300,7 @@ class Mapper():
 
         entity.position = int(elgg_entity.entity.get_metadata_value_by_name("position")) \
             if elgg_entity.entity.get_metadata_value_by_name("position") else 0
-        entity.tags = self.helpers.get_list_values(elgg_entity.entity.get_metadata_value_by_name("tags"))
+        entity.tags = elgg_entity.entity.get_metadata_values_by_name("tags")
 
         entity.owner = self.helpers.get_user_or_admin(elgg_entity.entity.owner_guid)
 
@@ -375,7 +375,7 @@ class Mapper():
         entity.title = elgg_entity.title
         entity.description = elgg_entity.description.replace("&amp;", "&")
         entity.rich_description = elgg_entity.entity.get_metadata_value_by_name("richDescription")
-        entity.tags = self.helpers.get_list_values(elgg_entity.entity.get_metadata_value_by_name("tags"))
+        entity.tags = elgg_entity.entity.get_metadata_values_by_name("tags")
 
         entity.owner = self.helpers.get_user_or_admin(elgg_entity.entity.owner_guid)
 
@@ -405,7 +405,7 @@ class Mapper():
         entity = Poll()
         entity.title = elgg_entity.title
         entity.description = elgg_entity.description.replace("&amp;", "&")
-        entity.tags = self.helpers.get_list_values(elgg_entity.entity.get_metadata_value_by_name("tags"))
+        entity.tags = elgg_entity.entity.get_metadata_values_by_name("tags")
 
         entity.owner = self.helpers.get_user_or_admin(elgg_entity.entity.owner_guid)
 
@@ -463,7 +463,7 @@ class Mapper():
     def get_folder(self, elgg_entity: ElggObjectsEntity):
         entity = FileFolder()
         entity.title = elgg_entity.title
-        entity.tags = self.helpers.get_list_values(elgg_entity.entity.get_metadata_value_by_name("tags"))
+        entity.tags = elgg_entity.entity.get_metadata_values_by_name("tags")
 
         entity.owner = self.helpers.get_user_or_admin(elgg_entity.entity.owner_guid)
 
@@ -489,7 +489,7 @@ class Mapper():
         try:
             entity = FileFolder()
             entity.title = elgg_entity.title
-            entity.tags = self.helpers.get_list_values(elgg_entity.entity.get_metadata_value_by_name("tags"))
+            entity.tags = elgg_entity.entity.get_metadata_values_by_name("tags")
 
             folder_relation = elgg_entity.entity.relation_inverse.filter(relationship="folder_of", right__guid=elgg_entity.entity.guid).first()
             if folder_relation:
@@ -529,7 +529,7 @@ class Mapper():
         entity.title = elgg_entity.title
         entity.description = elgg_entity.description.replace("&amp;", "&")
         entity.rich_description = elgg_entity.entity.get_metadata_value_by_name("richDescription")
-        entity.tags = self.helpers.get_list_values(elgg_entity.entity.get_metadata_value_by_name("tags"))
+        entity.tags = elgg_entity.entity.get_metadata_values_by_name("tags")
         entity.owner = self.helpers.get_user_or_admin(elgg_entity.entity.owner_guid)
         entity.position = int(elgg_entity.entity.get_metadata_value_by_name("position")) \
             if elgg_entity.entity.get_metadata_value_by_name("position") else 0

@@ -123,16 +123,26 @@ class ElggEntities(models.Model):
     enabled = models.CharField(max_length=3)
 
     def get_metadata_value_by_name(self, name):
+        """
+        Return single metadata value if exists or None if not
+        """
+        item = self.metadata.filter(name__string=name).first()
+
+        if item:
+            return item.value
+
+        return None
+
+    def get_metadata_values_by_name(self, name):
+        """
+        Return array with metadata values
+        """
         items = self.metadata.filter(name__string=name).all()
 
-        data = None
+        data = []
 
-        if items.count() > 1:
-            data = []
-            for item in items:
-                data.append(item.value.string)
-        elif items.count() == 1:
-            data = items[0].value.string
+        for item in items:
+            data.append(item.value.string)
 
         return data
 
