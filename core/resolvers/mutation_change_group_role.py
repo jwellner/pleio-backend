@@ -48,10 +48,11 @@ def resolve_change_group_role(_, info, input):
         changing_user_membership = GroupMembership.objects.get(group=group, user=changing_user)
         changing_user_membership.type = 'owner'
         changing_user_membership.save()
+        previous_owner = group.owner
         group.owner = changing_user
         group.save()
         try:
-            user_membership = GroupMembership.objects.get(group=group, user=user)
+            user_membership = GroupMembership.objects.get(group=group, user=previous_owner)
             user_membership.type = 'admin'
             user_membership.save()
         except ObjectDoesNotExist:
