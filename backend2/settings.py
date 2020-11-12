@@ -286,7 +286,7 @@ if APM_ENABLED:
         'SERVICE_NAME': os.getenv('APM_SERVICE_NAME'),
         'SECRET_TOKEN': os.getenv('APM_TOKEN'),
         'SERVER_URL': os.getenv('APM_SERVER_URL'),
-        'VERIFY_SERVER_CERT': False,
+        'VERIFY_SERVER_CERT': os.getenv('APM_VERIFY_SERVER_CERT') != "False",
         'DEBUG': True,
     }
 

@@ -13,6 +13,7 @@ services:
       APM_SERVICE_NAME: 'admin-dev'
       APM_TOKEN: ''
       APM_SERVER_URL: http://apm-server:8200
+      APM_VERIFY_SERVER_CERT: 'False'
   apm-server:
     image: docker.elastic.co/apm/apm-server:7.8.1
     cap_add: ["CHOWN", "DAC_OVERRIDE", "SETGID", "SETUID"]
