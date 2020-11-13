@@ -403,7 +403,7 @@ class ElggHelpers():
         Try to get owner, if it doesnt exist return first admin user.
         """
         try:
-            owner = User.objects.get(id=GuidMap.objects.get(id=entity_guid, type='user').guid)
+            owner = User.objects.get(id=GuidMap.objects.get(id=entity_guid, object_type='user').guid)
         except Exception:
             owner = User.objects.filter(roles__contains=['ADMIN']).first()
 
