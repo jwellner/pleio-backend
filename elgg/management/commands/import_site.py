@@ -651,7 +651,9 @@ class Command(InteractiveTenantOption, BaseCommand):
                     poll_choice.save()
 
                     # import the votes
-                    elgg_poll_entity = ElggEntities.objects.using(self.import_id).get(guid=GuidMap.objects.get(guid=poll_choice.poll.guid, object_type="poll").id)
+                    elgg_poll_entity = ElggEntities.objects.using(self.import_id).get(
+                        guid=GuidMap.objects.get(guid=poll_choice.poll.guid, object_type="poll").id
+                    )
                     name_id = ElggMetastrings.objects.using(self.import_id).filter(string="vote").first().id
                     value_id = ElggMetastrings.objects.using(self.import_id).filter(string=poll_choice.text).first().id
 
