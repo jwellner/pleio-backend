@@ -129,7 +129,7 @@ class ElggEntities(models.Model):
         item = self.metadata.filter(name__string=name).first()
 
         if item:
-            return item.value
+            return item.value.string
 
         return None
 
