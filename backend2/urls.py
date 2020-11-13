@@ -34,6 +34,7 @@ urlpatterns = [
 
     path('exporting/group/<uuid:group_id>', core_views.export_group_members, name='group_members_export'),
     path('exporting/event/<uuid:event_id>', event_views.export, name='event_export'),
+    path('exporting/calendar/', event_views.export_calendar, name='event_calendar_export'),
     path('exporting/users', user_views.export, name='users_export'),
 
     path('onboarding', core_views.onboarding, name='onboarding'),
