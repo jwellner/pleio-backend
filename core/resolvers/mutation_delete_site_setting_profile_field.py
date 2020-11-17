@@ -4,6 +4,7 @@ from core.constances import NOT_LOGGED_IN, USER_NOT_SITE_ADMIN, COULD_NOT_FIND, 
 from core.lib import remove_none_from_dict
 from django.core.exceptions import ObjectDoesNotExist
 
+
 def resolve_delete_site_setting_profile_field(_, info, input):
     # pylint: disable=redefined-builtin
     # pylint: disable=unused-variable
