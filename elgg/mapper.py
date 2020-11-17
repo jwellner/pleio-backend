@@ -51,6 +51,11 @@ class Mapper():
             if elgg_user.entity.get_metadata_value_by_name("ban_reason") and not elgg_user.banned == "no" else ""
         if elgg_user.admin == "yes":
             user.roles.append(USER_ROLES.ADMIN)
+        if elgg_user.entity.relation.filter(relationship='is_subeditor').first():
+            user.roles.append(USER_ROLES.EDITOR)
+        if elgg_user.entity.relation.filter(relationship='questions_expert').first():
+            user.roles.append(USER_ROLES.QUESTION_MANAGER)
+
         return user
 
     def get_user_profile(self, elgg_user: ElggUsersEntity):
