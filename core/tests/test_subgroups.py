@@ -54,6 +54,17 @@ class SubgroupsTestCase(FastTenantTestCase):
             is_recommended=False
         )
 
+        self.blog2 = Blog.objects.create(
+            title="Test subgroup blog",
+            description="Description",
+            rich_description="JSON to string",
+            read_access=[ACCESS_TYPE.user.format(self.user1.id), ACCESS_TYPE.subgroup.format(self.subgroup1.access_id)],
+            write_access=[ACCESS_TYPE.user.format(self.user1.id), ACCESS_TYPE.subgroup.format(self.subgroup1.access_id)],
+            owner=self.user1,
+            group=self.group,
+            is_recommended=False
+        )
+
 
     def tearDown(self):
         self.blog.delete()
@@ -216,13 +227,13 @@ class SubgroupsTestCase(FastTenantTestCase):
         self.assertEqual(data["entity"]["defaultAccessId"], 1)
         self.assertEqual(data["entity"]["accessIds"][2]["id"], 10001)
 
-
     def test_blog_in_subgroup_by_subgroup_member(self):
 
         query = """
             fragment BlogParts on Blog {
                 title
                 accessId
+                writeAccessId
                 owner {
                     guid
                 }
@@ -253,6 +264,149 @@ class SubgroupsTestCase(FastTenantTestCase):
 
         self.assertEqual(data["entity"]["guid"], self.blog.guid)
         self.assertEqual(data["entity"]["accessId"], 10001)
+        self.assertEqual(data["entity"]["writeAccessId"], 0)
+
+    def test_blog2_in_subgroup_by_subgroup_member(self):
+
+        query = """
+            fragment BlogParts on Blog {
+                title
+                accessId
+                writeAccessId
+                owner {
+                    guid
+                }
+                group {
+                    guid
+                }
+            }
+            query GetBlog($guid: String!) {
+                entity(guid: $guid) {
+                    guid
+                    status
+                    ...BlogParts
+                }
+            }
+        """
+        request = HttpRequest()
+        request.user = self.user2
+
+        variables = {
+            "guid": self.blog2.guid
+        }
+
+        result = graphql_sync(schema, { "query": query , "variables": variables}, context_value={ "request": request })
+
+        self.assertTrue(result[0])
+
+        data = result[1]["data"]
+
+        self.assertEqual(data["entity"]["guid"], self.blog2.guid)
+        self.assertEqual(data["entity"]["accessId"], 10001)
+        self.assertEqual(data["entity"]["writeAccessId"], 10001)
+
+    def test_edit_blog_in_subgroup_by_subgroup_member(self):
+
+        data = {
+            "input": {
+                "guid": self.blog2.guid,
+                "title": "Update blog title",
+                "description": "Update blog description"
+            }
+        }
+        mutation = """
+            fragment BlogParts on Blog {
+                title
+                description
+                richDescription
+                timeCreated
+                timeUpdated
+                accessId
+                writeAccessId
+                canEdit
+                tags
+                url
+                inGroup
+                group {
+                    guid
+                }
+                isRecommended
+            }
+            mutation ($input: editEntityInput!) {
+                editEntity(input: $input) {
+                    entity {
+                    guid
+                    status
+                    ...BlogParts
+                    }
+                }
+            }
+        """
+        request = HttpRequest()
+        request.user = self.user2
+
+        result = graphql_sync(schema, { "query": mutation , "variables": data}, context_value={ "request": request })
+
+        self.assertTrue(result[0])
+
+        data = result[1]["data"]
+
+        self.assertEqual(data["editEntity"]["entity"]["guid"], self.blog2.guid)
+        self.assertEqual(data["editEntity"]["entity"]["title"], "Update blog title")
+        self.assertEqual(data["editEntity"]["entity"]["description"], "Update blog description")
+        self.assertEqual(data["editEntity"]["entity"]["accessId"], 10001)
+        self.assertEqual(data["editEntity"]["entity"]["writeAccessId"], 10001)
+
+    def test_edit_blog_in_subgroup_by_non_subgroup_member(self):
+
+        data = {
+            "input": {
+                "guid": self.blog2.guid,
+                "title": "Update blog title",
+                "description": "Update blog description"
+            }
+        }
+        mutation = """
+            fragment BlogParts on Blog {
+                title
+                description
+                richDescription
+                timeCreated
+                timeUpdated
+                accessId
+                writeAccessId
+                canEdit
+                tags
+                url
+                inGroup
+                group {
+                    guid
+                }
+                isRecommended
+            }
+            mutation ($input: editEntityInput!) {
+                editEntity(input: $input) {
+                    entity {
+                    guid
+                    status
+                    ...BlogParts
+                    }
+                }
+            }
+        """
+        request = HttpRequest()
+        request.user = self.user5
+
+        result = graphql_sync(schema, { "query": mutation , "variables": data}, context_value={ "request": request })
+
+        self.assertTrue(result[0])
+
+        data = result[1]["data"]
+        errors = result[1]["errors"]
+
+        self.assertEqual(data["editEntity"], None)
+        self.assertEqual(errors[0]["message"], "could_not_save")
+
 
     def test_blog_in_subgroup_by_non_subgroup_member(self):
 
@@ -260,6 +414,7 @@ class SubgroupsTestCase(FastTenantTestCase):
             fragment BlogParts on Blog {
                 title
                 accessId
+                writeAccessId
                 owner {
                     guid
                 }
@@ -279,7 +434,7 @@ class SubgroupsTestCase(FastTenantTestCase):
         request.user = self.user5
 
         variables = {
-            "guid": self.blog.guid
+            "guid": self.blog2.guid
         }
 
         result = graphql_sync(schema, { "query": query , "variables": variables}, context_value={ "request": request })
@@ -403,3 +558,4 @@ class SubgroupsTestCase(FastTenantTestCase):
         self.assertEqual(data["inSubgroup"]["members"]["total"], 1)
         self.assertEqual(data["notInSubgroup"]["guid"], self.group.guid)
         self.assertEqual(data["notInSubgroup"]["members"]["total"], 0)
+
