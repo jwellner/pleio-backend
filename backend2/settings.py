@@ -16,6 +16,7 @@ from .config import *  # pylint: disable=unused-wildcard-import
 
 APM_ENABLED = os.getenv('APM_ENABLED') == 'True'
 EMAIL_DISABLED = os.getenv('EMAIL_DISABLED') == 'True'
+MAILCATCHER_ENABLED = os.getenv('MAILCATCHER_ENABLED') == 'True'
 
 FROM_EMAIL = os.getenv('FROM_EMAIL')
 EMAIL_HOST = os.getenv('EMAIL_HOST')
@@ -34,7 +35,7 @@ if os.getenv('AWS_SES_ACCESS_KEY_ID'):
 RUN_AS_ADMIN_APP = os.getenv('RUN_AS_ADMIN_APP') == "True"
 
 # For local development
-if DEBUG:
+if DEBUG or MAILCATCHER_ENABLED:
     EMAIL_HOST = 'mailcatcher'
     EMAIL_HOST_USER = ''
     EMAIL_HOST_PASSWORD = ''
