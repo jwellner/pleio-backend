@@ -5,39 +5,11 @@ from django.utils.translation import ugettext_lazy
 from django.db import connection
 from user.models import User
 from core import config
+from core.models import Entity
 from datetime import datetime, timedelta
-from core.resolvers.notification import get_notification_action_entity
 from tenants.models import Client
 from django.utils import translation
-from core.tasks import send_mail_multi
-
-
-def get_notification(notification):
-    """ get a mapped notification """
-    entity = get_notification_action_entity(notification)
-    performer = User.objects.get(id=notification.actor_object_id)
-    entity_group = False
-    entity_group_name = ""
-    entity_group_url = ""
-    if entity.group:
-        entity_group = True
-        entity_group_name = entity.group.name
-        entity_group_url = entity.group.url
-
-    return {
-        'id': notification.id,
-        'action': notification.verb,
-        'performer_name': performer.name,
-        'entity_title': entity.title,
-        'entity_description': entity.description,
-        'entity_group': entity_group,
-        'entity_group_name': entity_group_name,
-        'entity_group_url': entity_group_url,
-        'entity_url': entity.url,
-        'type_to_string': entity.type_to_string,
-        'timeCreated': notification.timestamp,
-        'isUnread': notification.unread
-    }
+from core.tasks import send_mail_multi, get_notification
 
 
 class Command(BaseCommand):

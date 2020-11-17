@@ -1,17 +1,6 @@
 from ariadne import ObjectType
-from core.models import Entity
+from core.tasks import get_notification_action_entity
 from user.models import User
-
-
-def get_notification_action_entity(notification):
-    """ get entity from actoin_object_object_id """
-    try:
-        entity = Entity.objects.get_subclass(id=notification.action_object_object_id)
-    except Exception:
-        entity = User.objects.get(id=notification.actor_object_id)
-        entity.group = None
-
-    return entity
 
 
 notification = ObjectType("Notification")

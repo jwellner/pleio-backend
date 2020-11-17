@@ -51,8 +51,8 @@ def resolve_group_notifications(obj, info):
     if is_user_or_admin(obj, info):
         groups = []
         for membership in obj.memberships.filter(type__in=['admin', 'owner', 'member']):
-            groups.append({"guid": membership.group.guid, "name": membership.group.name, "getsNotifications": membership.enable_notification})
-
+            groups.append({"guid": membership.group.guid, "name": membership.group.name, "getsNotifications": membership.enable_notification,
+                           "notificationMode": membership.notification_mode})
         return groups
     return []
 

@@ -38,7 +38,11 @@ class SignalsTestCase(FastTenantTestCase):
             group=self.group
         )
         self.follow1 = self.blog1.add_follow(self.user2)
-        self.comment1 = mixer.blend(Comment, is_closed=False, owner=self.user1, container=self.blog1)
+        self.comment1 = Comment.objects.create(
+            description='commenDescription1',
+            owner=self.user1,
+            container=self.blog1
+        )
 
     def tearDown(self):
         self.blog1.delete()
@@ -57,14 +61,12 @@ class SignalsTestCase(FastTenantTestCase):
         user_handler(self.user1, self.user1, False)
         assert not mocked_send.called
 
-    @mock.patch('notifications.signals.notify.send')
-    def test_comment_handler(self, mocked_send):
+    @mock.patch('core.tasks.create_notification.delay')
+    def test_comment_handler(self, mocked_create_notification):
         comment_handler(self.user1, self.comment1, True, action_object=self.blog1)
-        mocked_send.assert_called_once()
-        # TODO: how to mock queryset
-        # mocked_send.assert_called_once_with(self.user1, recipient=self.user2, verb='commented', action_object=self.blog1)
+        mocked_create_notification.assert_called_once_with(connection.schema_name, 'commented', self.blog1.id, self.comment1.owner.id, [self.user2.id])
 
-    @mock.patch('notifications.signals.notify.send')
-    def test_notification_handler(self, mocked_send):
+    @mock.patch('core.tasks.create_notification.delay')
+    def test_notification_handler(self, mocked_create_notification):
         notification_handler(self.user1, self.blog2, True, action_object=self.blog2)
-        mocked_send.assert_called_once_with(self.user1, recipient=self.user2, verb='created', action_object=self.blog2)
+        mocked_create_notification.assert_called_once_with(connection.schema_name, 'created', self.blog2.id, self.blog2.owner.id, [self.user2.id])
