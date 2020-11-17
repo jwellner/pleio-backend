@@ -16,10 +16,12 @@ from .config import *  # pylint: disable=unused-wildcard-import
 
 APM_ENABLED = os.getenv('APM_ENABLED') == 'True'
 EMAIL_DISABLED = os.getenv('EMAIL_DISABLED') == 'True'
-MAILCATCHER_ENABLED = os.getenv('MAILCATCHER_ENABLED') == 'True'
 
 FROM_EMAIL = os.getenv('FROM_EMAIL')
 EMAIL_HOST = os.getenv('EMAIL_HOST')
+
+if os.getenv('EMAIL_PORT'):
+    EMAIL_PORT = os.getenv('EMAIL_PORT')
 
 if os.getenv('AWS_SES_ACCESS_KEY_ID'):
     EMAIL_BACKEND = 'django_ses.SESBackend'
@@ -29,13 +31,11 @@ if os.getenv('AWS_SES_ACCESS_KEY_ID'):
     AWS_SES_ACCESS_KEY_ID = os.getenv('AWS_SES_ACCESS_KEY_ID')
     AWS_SES_SECRET_ACCESS_KEY = os.getenv('AWS_SES_SECRET_ACCESS_KEY')
 
-
-
 # Set to true if to run the public variant
 RUN_AS_ADMIN_APP = os.getenv('RUN_AS_ADMIN_APP') == "True"
 
 # For local development
-if DEBUG or MAILCATCHER_ENABLED:
+if DEBUG:
     EMAIL_HOST = 'mailcatcher'
     EMAIL_HOST_USER = ''
     EMAIL_HOST_PASSWORD = ''
