@@ -2,7 +2,9 @@ from django.db.models.signals import post_save, pre_save
 from django.conf import settings
 from django.utils import timezone
 from notifications.signals import notify
+from core.lib import tenant_schema
 from core.models import Comment, Group, GroupInvitation, Entity, EntityViewCount, NotificationMixin
+from core.tasks import create_notification
 from user.models import User
 from event.models import EventAttendee
 
@@ -13,8 +15,16 @@ def comment_handler(sender, instance, created, **kwargs):
     if not settings.IMPORTING:
         if not created:
             return
-        users = User.objects.filter(annotation__key='followed', annotation__object_id=instance.object_id).exclude(id=instance.owner.id)
-        notify.send(instance.owner, recipient=users, verb='commented', action_object=instance.container)
+        user_ids = []
+        followers = User.objects.filter(
+            annotation__key='followed',
+            annotation__object_id=instance.object_id).exclude(id=instance.owner.id)
+
+        for follower in followers:
+            if not instance.container.can_read(follower):
+                continue
+            user_ids.append(follower.id)
+        create_notification.delay(tenant_schema(), 'commented', instance.container.id, instance.owner.id, user_ids)
 
 
 def user_handler(sender, instance, created, **kwargs):
@@ -45,10 +55,16 @@ def notification_handler(sender, instance, created, **kwargs):
     if not settings.IMPORTING:
         if not instance.group or not created:
             return
+        user_ids = []
         for member in instance.group.members.filter(type__in=['admin', 'owner', 'member'], enable_notification=True):
-            if instance.owner == member.user:
+            user = member.user
+            if instance.owner == user:
                 continue
-            notify.send(instance.owner, recipient=member.user, verb='created', action_object=instance)
+            if not instance.can_read(user):
+                continue
+            user_ids.append(user.id)
+
+        create_notification.delay(tenant_schema(), 'created', instance.id, instance.owner.id, user_ids)
 
 
 def updated_at_handler(sender, instance, **kwargs):

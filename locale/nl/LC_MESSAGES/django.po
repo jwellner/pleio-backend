@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-11-10 15:50+0100\n"
+"POT-Creation-Date: 2020-11-12 15:45+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -26,7 +26,7 @@ msgstr "Engels"
 msgid "Dutch"
 msgstr "Nederlands"
 
-#: core/management/commands/send_notification_emails.py:75
+#: core/management/commands/send_notification_emails.py:47
 #, python-format
 msgid "New notifications at %(site_name)s"
 msgstr "Nieuwe notificaties op %(site_name)s"
@@ -183,13 +183,18 @@ msgstr "Redacteur"
 msgid "Question expert"
 msgstr "Vraagexpert"
 
-#: core/tasks.py:260
+#: core/tasks.py:262
 msgid "Import was a success"
 msgstr "Import afgerond"
 
-#: core/tasks.py:260
+#: core/tasks.py:262
 msgid "Import failed"
 msgstr "Import mislukt"
+
+#: core/tasks.py:340
+#, python-format
+msgid "New notification at %(site_name)s: "
+msgstr "Nieuwe notificatie op %(site_name)s"
 
 #: core/templates/admin/oidc_login.html:21
 msgid "Please correct the error below."

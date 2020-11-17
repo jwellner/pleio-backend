@@ -102,15 +102,6 @@ class Group(models.Model):
 
         return self.members.filter(user=user, type='pending').exists()
 
-    def member_since(self, user):
-        try:
-            return self.members.get(
-                user=user,
-                type__in=['admin', 'owner', 'member']
-            ).created_at
-        except ObjectDoesNotExist:
-            return False
-
     def can_write(self, user):
         if not user.is_authenticated:
             return False
@@ -150,6 +141,14 @@ class Group(models.Model):
             return True
         return False
 
+    def set_member_notification_mode(self, user, notification_mode='overview'):
+        member = self.members.filter(user=user).first()
+        if member:
+            member.notification_mode = notification_mode
+            member.save()
+            return True
+        return False
+
     @property
     def guid(self):
         return str(self.id)
@@ -184,6 +183,11 @@ class GroupMembership(models.Model):
         ('pending', 'Pending')
     )
 
+    NOTIFICATION_MODES = (
+        ('overview', 'overview'),
+        ('direct', 'direct')
+    )
+
     user = models.ForeignKey(
         'user.User',
         related_name='memberships',
@@ -200,6 +204,11 @@ class GroupMembership(models.Model):
         on_delete=models.CASCADE
     )
     enable_notification = models.BooleanField(default=False)
+    notification_mode = models.CharField(
+        max_length=10,
+        choices=NOTIFICATION_MODES,
+        default='overview'
+    )
 
     def __str__(self):
         return "{} - {} - {}".format(

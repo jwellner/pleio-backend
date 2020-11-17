@@ -127,6 +127,19 @@ def resolve_group_getsNotifications(obj, info):
     except ObjectDoesNotExist:
         return False
 
+@group.field("notificationMode")
+def resolve_group_notification_mode(obj, info):
+    # pylint: disable=unused-argument
+    user = info.context["request"].user
+
+    if not user.is_authenticated:
+        return None
+
+    try:
+        return obj.members.get(user=user).notification_mode
+    except ObjectDoesNotExist:
+        return None
+
 @group.field("subgroups")
 def resolve_group_subgroups(obj, info):
     # pylint: disable=unused-argument
