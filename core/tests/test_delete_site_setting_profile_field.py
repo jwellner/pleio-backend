@@ -4,6 +4,7 @@ from backend2.schema import schema
 from ariadne import graphql_sync
 import json
 from django.core.cache import cache
+from core import config
 from core.lib import is_valid_json
 from django.contrib.auth.models import AnonymousUser
 from django.http import HttpRequest
@@ -107,3 +108,44 @@ class DeleteSiteSettingProfileFieldTestCase(FastTenantTestCase):
         self.assertEqual(data["deleteSiteSettingProfileField"]["success"], True)
         self.assertEqual(ProfileField.objects.all().count(), 1)
         self.assertEqual(UserProfileField.objects.all().count(), 1)
+
+
+    def test_profile_sections_after_delete_by_admin(self):
+
+        config.PROFILE_SECTIONS = [{"name": "section_one", "profileFieldGuids": [str(self.profileField1.id)]},
+                                   {"name": "section_two", "profileFieldGuids": [str(self.profileField2.id)]}]
+
+        mutation = """
+            mutation deleteSiteSettingProfileField($input: deleteSiteSettingProfileFieldInput!) {
+                deleteSiteSettingProfileField(input: $input) {
+                    success
+                }
+            }
+        """
+
+        query = """
+            query SiteGeneralSettings {
+                siteSettings {
+                    profileSections {
+                        name
+                        profileFieldGuids
+                    }
+                }
+            }
+        """
+
+        variables = {
+            "input": {
+                "guid": str(self.profileField1.id)
+            }
+        }
+
+        request = HttpRequest()
+        request.user = self.admin
+
+        graphql_sync(schema, { "query": mutation, "variables": variables }, context_value={ "request": request })
+        result = graphql_sync(schema, { "query": query, "variables": variables }, context_value={ "request": request })
+        data = result[1]["data"]
+
+        self.assertEqual(data["siteSettings"]["profileSections"], [{"name": "section_one", "profileFieldGuids": []},
+                                                                   {"name": "section_two", "profileFieldGuids": [str(self.profileField2.id)]}])

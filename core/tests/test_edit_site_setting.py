@@ -206,7 +206,7 @@ class EditSiteSettingTestCase(FastTenantTestCase):
 
                 "profileSections": [{"name": "section_one", "profileFieldGuids": [str(self.profileField1.id), str(self.profileField3.id)]},
                                     {"name": "section_two", "profileFieldGuids": [str(self.profileField4.id)]},
-                                    {"name": "section_three", "profileFieldGuids": []}],
+                                    {"name": "section_three", "profileFieldGuids": ['notrealid']}],
 
                 "tagCategories": [{"name": "cat1", "values": ["tag1", "tag2"]},
                                   {"name": "cat2", "values": ["tag3", "tag4"]}],

@@ -1,5 +1,7 @@
 import uuid
 from django.db import models
+from django.db.models.signals import post_delete
+from django.dispatch import receiver
 from django.contrib.postgres.fields import ArrayField
 from core.lib import get_acl
 from core.constances import USER_ROLES
@@ -93,6 +95,19 @@ class UserProfileFieldManager(models.Manager):
         return qs.filter(read_access__overlap=list(get_acl(user)))
 
 
+def validate_profile_sections(sections):
+    profile_sections = []
+    for section in sections:
+        guids = []
+        for guid in section['profileFieldGuids']:
+            try:
+                guids.append(ProfileField.objects.get(id=guid).guid)
+            except Exception:
+                continue
+        profile_sections.append({'name': section['name'], 'profileFieldGuids': guids})
+    return profile_sections
+
+
 class UserProfileField(models.Model):
 
     class META:
@@ -122,3 +137,9 @@ class UserProfileField(models.Model):
     @property
     def key(self):
         return str(self.profile_field.key)
+
+
+@receiver(post_delete, sender=ProfileField)
+def validate_config_profile_sections(sender, instance, **kwargs):
+    # pylint: disable=unused-argument
+    config.PROFILE_SECTIONS = validate_profile_sections(config.PROFILE_SECTIONS)

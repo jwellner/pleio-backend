@@ -1,6 +1,7 @@
 from graphql import GraphQLError
 from core import config
 from core.models import Setting, ProfileField
+from core.models.user import validate_profile_sections
 from core.constances import NOT_LOGGED_IN, USER_NOT_SITE_ADMIN, USER_ROLES
 from core.lib import remove_none_from_dict, access_id_to_acl
 from core.resolvers.query_site import get_site_settings
@@ -82,8 +83,6 @@ def resolve_edit_site_setting(_, info, input):
         'initiativeLink': 'INITIATIVE_LINK',
         'directLinks': 'DIRECT_LINKS',
         'footer': 'FOOTER',
-
-        'profileSections': 'PROFILE_SECTIONS',
 
         'tagCategories': 'TAG_CATEGORIES',
         'showTagsInFeed': 'SHOW_TAGS_IN_FEED',
@@ -190,6 +189,10 @@ def resolve_edit_site_setting(_, info, input):
         except Exception:
             pass
         save_setting('ICON', "")
+
+
+    if 'profileSections' in clean_input:
+        save_setting('PROFILE_SECTIONS', validate_profile_sections(clean_input.get('profileSections')))
 
     return {
         "siteSettings": get_site_settings()
