@@ -103,7 +103,7 @@ class UserProfileField(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     user_profile = models.ForeignKey('core.UserProfile', on_delete=models.CASCADE, related_name="user_profile_fields")
     profile_field = models.ForeignKey('core.ProfileField', on_delete=models.CASCADE, related_name="profile_fields")
-    value = models.CharField(max_length=4096)
+    value = models.TextField()
     read_access = ArrayField(
         models.CharField(max_length=64),
         blank=True,
