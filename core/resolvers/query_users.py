@@ -21,9 +21,9 @@ def resolve_users(_, info, q="", filters=None, offset=0, limit=20):
 
     if q:
         s = Search(index='user').query(
-            Q('query_string', query=q, fields=['name', 'email']) |
+            Q('simple_query_string', query=q, fields=['name', 'email']) |
             Q('nested', path='_profile.user_profile_fields', query=Q('bool', must=[
-                    Q('match', _profile__user_profile_fields__value=q) &
+                    Q('match', _profile__user_profile_fields__value=q),
                     Q('terms', _profile__user_profile_fields__read_access=list(get_acl(user)))
                     ]
                 )

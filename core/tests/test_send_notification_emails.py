@@ -1,5 +1,7 @@
 from django_tenants.test.cases import FastTenantTestCase
+from django.db import connection
 from core.models import Group, Comment
+from core.tasks import create_notification
 from user.models import User
 from blog.models import Blog
 from core.constances import ACCESS_TYPE
@@ -11,6 +13,7 @@ from io import StringIO
 from unittest import mock
 from core import config
 from datetime import datetime, timedelta
+from contextlib import contextmanager
 
 
 class SendNotificationEmailsTestCase(FastTenantTestCase):
@@ -30,10 +33,17 @@ class SendNotificationEmailsTestCase(FastTenantTestCase):
 
     def tearDown(self):
         self.blog1.delete()
+        self.user1.delete()
+        self.user2.delete()
+        self.group.delete()
 
     @mock.patch('core.management.commands.send_notification_emails.send_mail_multi.delay')
     def test_command_send_5_notifications(self, mocked_send_mail_multi):
-        comments = mixer.cycle(5).blend(Comment, is_closed=False, owner=self.user1, container=self.blog1)
+        i = 0
+        while i < 5:
+            create_notification.s(connection.schema_name, 'created', self.blog1.id, self.user1.id, [self.user2.id]).apply()
+            i = i + 1
+
         call_command('send_notification_emails')
 
         args, kwargs = mocked_send_mail_multi.call_args
@@ -53,7 +63,10 @@ class SendNotificationEmailsTestCase(FastTenantTestCase):
         assert not mocked_send_mail_multi.called
 
     def test_notifications_marked_as_sent(self):
-        comments = mixer.cycle(10).blend(Comment, is_closed=False, owner=self.user1, container=self.blog1)
+        i = 0
+        while i < 10:
+            create_notification.s(connection.schema_name, 'created', self.blog1.id, self.user1.id, [self.user2.id]).apply()
+            i = i + 1
         call_command('send_notification_emails')
 
         self.assertEqual(len(self.user2.notifications.filter(emailed=False)), 0)
@@ -78,7 +91,7 @@ class SendNotificationEmailsTestCase(FastTenantTestCase):
 
     @mock.patch('core.management.commands.send_notification_emails.send_mail_multi.delay')
     def test_template_context_of_commented_notification(self, mocked_send_mail_multi):
-        comment1 = mixer.blend(Comment, is_closed=False, owner=self.user1, container=self.blog1)
+        create_notification.s(connection.schema_name, 'commented', self.blog1.id, self.user1.id, [self.user2.id]).apply()
         call_command('send_notification_emails')
 
         args, kwargs = mocked_send_mail_multi.call_args
@@ -100,6 +113,8 @@ class SendNotificationEmailsTestCase(FastTenantTestCase):
             write_access=[ACCESS_TYPE.user.format(self.user1.id)],
             group=self.group
         )
+        create_notification.s(connection.schema_name, 'created', blog2.id, self.user1.id, [self.user2.id]).apply()
+
         call_command('send_notification_emails')
 
         args, kwargs = mocked_send_mail_multi.call_args

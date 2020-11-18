@@ -8,6 +8,8 @@ from user.models import User
 def resolve_edit_group_notifications(_, info, input):
     # pylint: disable=redefined-builtin
 
+    # TODO: refactor this to user_settings mutation
+
     user = info.context["request"].user
     clean_input = remove_none_from_dict(input)
 
@@ -30,10 +32,13 @@ def resolve_edit_group_notifications(_, info, input):
     if not requested_user == user and not user.has_role(USER_ROLES.ADMIN):
         raise GraphQLError(COULD_NOT_SAVE)
 
-    group.getsNotifications = None
     if 'getsNotifications' in clean_input:
         group.set_member_notification(requested_user, clean_input['getsNotifications'])
-        group.getsNotifications = clean_input['getsNotifications']
+
+    if 'notificationMode' in clean_input:
+        if clean_input['notificationMode'] not in ['overview', 'direct']:
+            raise GraphQLError(COULD_NOT_SAVE)
+        group.set_member_notification_mode(requested_user, clean_input['notificationMode'])
 
     return {
         "group": group

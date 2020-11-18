@@ -1,6 +1,7 @@
 import csv
+import io
 from django.core.exceptions import ObjectDoesNotExist
-from django.http import Http404, StreamingHttpResponse
+from django.http import Http404, HttpResponse, StreamingHttpResponse
 from event.models import Event
 from core.constances import USER_ROLES
 
@@ -51,4 +52,24 @@ def export(request, event_id=None):
     response = StreamingHttpResponse((writer.writerow(row) for row in rows),
                                      content_type="text/csv")
     response['Content-Disposition'] = 'attachment; filename="' + event.title + '.csv"'
+    return response
+
+
+def export_calendar(request):
+    output = io.StringIO()
+    output.write('BEGIN:VCALENDAR\n')
+    output.write('VERSION:2.0\n')
+    output.write('BEGIN:VEVENT\n')
+    output.write('DTSTART:' + request.GET.get("startDate") + '\n')
+    output.write('DTEND:' + request.GET.get("endDate") + '\n')
+    output.write('SUMMARY:' + request.GET.get("text") + '\n')
+    output.write('URL:' + request.GET.get("url") + '\n')
+    output.write('DESCRIPTION:' + request.GET.get("details") + '\n')
+    output.write('LOCATION:' + request.GET.get("location") + '\n')
+    output.write('END:VEVENT\n')
+    output.write('END:VCALENDAR\n')
+
+    response = HttpResponse(output.getvalue(), content_type="text/calendar; charset=utf-8")
+    output.close()
+    response['Content-Disposition'] = 'attachment; filename="event.ics"'
     return response

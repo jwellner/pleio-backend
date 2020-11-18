@@ -48,6 +48,7 @@ class UserSettingsTestCase(FastTenantTestCase):
                             guid
                             name
                             getsNotifications
+                            notificationMode
                             __typename
                         }
                         __typename
@@ -88,6 +89,7 @@ class UserSettingsTestCase(FastTenantTestCase):
         self.assertEqual(data["entity"]["groupNotifications"][0]["getsNotifications"], True)
         self.assertEqual(data["entity"]["groupNotifications"][1]["guid"], self.group2.guid)
         self.assertEqual(data["entity"]["groupNotifications"][1]["getsNotifications"], False)
+        self.assertEqual(data["entity"]["groupNotifications"][1]["notificationMode"], 'overview')
 
 
     def test_get_user_settings_by_admin(self):

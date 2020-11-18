@@ -159,6 +159,19 @@ extend type User {
   roles: [String]
 }
 
+extend type GroupNotificationItem {
+  """ If notification for group for user is enabled, the notification mode is used sending the notification by email. 'overview': notification in overview. 'direct': every notification a direct email """
+  notificationMode: String
+}
+
+extend type Group {
+  notificationMode: String
+}
+
+extend input editGroupNotificationsInput {
+  notificationMode: String
+}
+
 input addSiteSettingProfileFieldInput {
   key: String
   name: String!

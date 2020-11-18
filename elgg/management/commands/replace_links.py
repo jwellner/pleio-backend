@@ -194,16 +194,19 @@ class Command(InteractiveTenantOption, BaseCommand):
 
     def _replace_rich_description_json(self, rich_description):
         if rich_description:
-            data = json.loads(rich_description)
-            for idx in data["entityMap"]:
-                if data["entityMap"][idx]["type"] == "IMAGE":
-                    data["entityMap"][idx]["data"]["src"] = self._replace_links(data["entityMap"][idx]["data"]["src"])
-                if data["entityMap"][idx]["type"] == "LINK":
-                    if "url" in data["entityMap"][idx]["data"]:
-                        data["entityMap"][idx]["data"]["url"] = self._replace_links(data["entityMap"][idx]["data"]["url"])
-                    if "href" in data["entityMap"][idx]["data"]:
-                        data["entityMap"][idx]["data"]["href"] = self._replace_links(data["entityMap"][idx]["data"]["href"])
-            return json.dumps(data)
+            try:
+                data = json.loads(rich_description)
+                for idx in data["entityMap"]:
+                    if data["entityMap"][idx]["type"] == "IMAGE":
+                        data["entityMap"][idx]["data"]["src"] = self._replace_links(data["entityMap"][idx]["data"]["src"])
+                    if data["entityMap"][idx]["type"] == "LINK":
+                        if "url" in data["entityMap"][idx]["data"]:
+                            data["entityMap"][idx]["data"]["url"] = self._replace_links(data["entityMap"][idx]["data"]["url"])
+                        if "href" in data["entityMap"][idx]["data"]:
+                            data["entityMap"][idx]["data"]["href"] = self._replace_links(data["entityMap"][idx]["data"]["href"])
+                return json.dumps(data)
+            except Exception:
+                pass
         return rich_description
 
     def _replace_links(self, text):

@@ -6,7 +6,7 @@ from core.models import ProfileField, UserProfile, UserProfileField, Group, Enti
 from backend2 import settings
 from elgg.models import (
     Instances, ElggUsersEntity, GuidMap, ElggSitesEntity, ElggGroupsEntity, ElggObjectsEntity, ElggNotifications,
-    ElggAnnotations, ElggMetastrings, ElggAccessCollections
+    ElggAnnotations, ElggMetastrings, ElggAccessCollections, ElggEntities
 )
 from elgg.helpers import ElggHelpers
 from elgg.mapper import Mapper
@@ -651,11 +651,13 @@ class Command(InteractiveTenantOption, BaseCommand):
                     poll_choice.save()
 
                     # import the votes
-                    poll_id = GuidMap.objects.get(guid=poll_choice.poll.guid, object_type="poll").id
+                    elgg_poll_entity = ElggEntities.objects.using(self.import_id).get(
+                        guid=GuidMap.objects.get(guid=poll_choice.poll.guid, object_type="poll").id
+                    )
                     name_id = ElggMetastrings.objects.using(self.import_id).filter(string="vote").first().id
                     value_id = ElggMetastrings.objects.using(self.import_id).filter(string=poll_choice.text).first().id
 
-                    for vote in ElggAnnotations.objects.using(self.import_id).filter(entity_guid=poll_id, name_id=name_id, value_id=value_id):
+                    for vote in ElggAnnotations.objects.using(self.import_id).filter(entity=elgg_poll_entity, name_id=name_id, value_id=value_id):
                         user = User.objects.get(id=GuidMap.objects.get(id=vote.owner_guid, object_type="user").guid)
                         poll_choice.add_vote(user, 1)
 

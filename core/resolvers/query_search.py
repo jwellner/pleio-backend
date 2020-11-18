@@ -42,16 +42,10 @@ def resolve_search(_, info, q=None, containerGuid=None, type=None, subtype=None,
         raise GraphQLError(INVALID_DATE)
 
     s = Search(index='_all').query(
-            Q('query_string', query=q, fields=['title', 'name', 'email', 'description', 'tags', 'file_contents', 'introduction']) |
+            Q('simple_query_string', query=q, fields=['title', 'name', 'email', 'description', 'tags', 'file_contents', 'introduction']) |
             Q('nested', path='_profile.user_profile_fields', ignore_unmapped=True, query=Q('bool', must=[
-                    Q('match', _profile__user_profile_fields__value=q) &
-                    Q('terms', _profile__user_profile_fields__read_access=list(get_acl(user)))
-                    ],
-                    filter={
-                        'term': {
-                            '_index': 'users'
-                        }
-                    }
+                    Q('match', _profile__user_profile_fields__value=q), Q('terms', _profile__user_profile_fields__read_access=list(get_acl(user)))
+                    ]
                 )
               )
         ).filter(

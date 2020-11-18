@@ -14,11 +14,13 @@ from django_elasticsearch_dsl.registries import registry
 from elasticsearch_dsl import Search
 from core import config
 from core.lib import html_to_text, access_id_to_acl
-from core.models import ProfileField, UserProfileField
+# from core.management.commands.send_notification_emails import get_notification
+from core.models import ProfileField, UserProfileField, Entity, GroupMembership
 from django.core.mail import EmailMultiAlternatives
 from django.template.loader import get_template
 from django.utils import translation
 from django.conf import settings
+from notifications.signals import notify
 from user.models import User
 from django.utils.translation import ugettext_lazy
 
@@ -273,3 +275,86 @@ def import_users(self, schema_name, fields, csv_location, performing_user_guid):
         }
 
         send_mail_multi.delay(schema_name, subject, template, context, performing_user.email)
+
+def get_notification_action_entity(notification):
+    """ get entity from actoin_object_object_id """
+    try:
+        entity = Entity.objects.get_subclass(id=notification.action_object_object_id)
+    except Exception:
+        entity = User.objects.get(id=notification.actor_object_id)
+        entity.group = None
+
+    return entity
+
+
+def get_notification(notification):
+    """ get a mapped notification """
+    entity = get_notification_action_entity(notification)
+    performer = User.objects.get(id=notification.actor_object_id)
+    entity_group = False
+    entity_group_name = ""
+    entity_group_url = ""
+    if entity.group:
+        entity_group = True
+        entity_group_name = entity.group.name
+        entity_group_url = entity.group.url
+
+    return {
+        'id': notification.id,
+        'action': notification.verb,
+        'performer_name': performer.name,
+        'entity_title': entity.title,
+        'entity_description': entity.description,
+        'entity_group': entity_group,
+        'entity_group_name': entity_group_name,
+        'entity_group_url': entity_group_url,
+        'entity_url': entity.url,
+        'type_to_string': entity.type_to_string,
+        'timeCreated': notification.timestamp,
+        'isUnread': notification.unread
+    }
+
+
+@shared_task(bind=True, ignore_result=True)
+def create_notification(self, schema_name, verb, entity_id, sender_id, recipient_ids):
+    # pylint: disable=unused-argument
+    # pylint: disable=too-many-arguments
+    # pylint: disable=too-many-locals
+    '''
+    task for creating a notification. If the content of the notification is in a group and the recipient has configured direct notifications
+    for this group. An email task wil be triggered with this notification
+    '''
+    with schema_context(schema_name):
+        instance = Entity.objects.get_subclass(id=entity_id)
+        sender = User.objects.get(id=sender_id)
+        recipients = User.objects.filter(id__in=recipient_ids)
+
+        # tuple with list is returned, get the notification created
+        notifications = notify.send(sender, recipient=recipients, verb=verb, action_object=instance)[0][1]
+
+        # only send direct notification for content in groups
+        if instance.group:
+            subject = ugettext_lazy("New notification at %(site_name)s: ") % {'site_name': config.NAME}
+            tenant = Client.objects.get(schema_name=schema_name)
+            site_url = "https://" + tenant.domains.first().domain
+            site_name = config.NAME
+            primary_color = config.COLOR_PRIMARY
+
+            for notification in notifications:
+                recipient = User.objects.get(id=notification.recipient_id)
+                direct = False
+                # get direct setting
+                try:
+                    direct = GroupMembership.objects.get(user=recipient, group=instance.group).notification_mode == 'direct'
+                except Exception:
+                    continue
+
+                # send email direct and mark emailed as True
+                if direct:
+                    mapped_notifications = [get_notification(notification)]
+                    user_url = site_url + '/user/' + recipient.guid + '/settings'
+                    context = {'user_url': user_url, 'site_name': site_name, 'site_url': site_url, 'primary_color': primary_color,
+                                'notifications': mapped_notifications, 'show_excerpt': False}
+                    send_mail_multi.delay(schema_name, subject, 'email/send_notification_emails.html', context, recipient.email)
+                    notification.emailed = True
+                    notification.save()

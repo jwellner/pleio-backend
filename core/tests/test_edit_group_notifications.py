@@ -40,6 +40,7 @@ class EditGroupNotificationsTestCase(FastTenantTestCase):
                     group {
                         guid
                         getsNotifications
+                        notificationMode
                         __typename
                     }
                     __typename
@@ -50,6 +51,7 @@ class EditGroupNotificationsTestCase(FastTenantTestCase):
         variables = {
             "input": {
                 "getsNotifications": True,
+                "notificationMode": 'direct',
                 "guid": self.group1.guid,
                 "userGuid": self.user1.guid
                 }
@@ -65,6 +67,7 @@ class EditGroupNotificationsTestCase(FastTenantTestCase):
 
         self.assertEqual(data["editGroupNotifications"]["group"]["guid"], self.group1.guid)
         self.assertEqual(data["editGroupNotifications"]["group"]["getsNotifications"], True)
+        self.assertEqual(data["editGroupNotifications"]["group"]["notificationMode"], 'direct')
 
 
     def test_edit_group_notifications_by_admin(self):

@@ -19,6 +19,10 @@ def resolve_entity_access_id(obj, info):
 
 def resolve_entity_write_access_id(obj, info):
     # pylint: disable=unused-argument
+    if obj.group and obj.group.subgroups:
+        for subgroup in obj.group.subgroups.all():
+            if ACCESS_TYPE.subgroup.format(subgroup.access_id) in obj.write_access:
+                return subgroup.access_id
     if obj.group and ACCESS_TYPE.group.format(obj.group.id) in obj.write_access:
         return 4
     if ACCESS_TYPE.public in obj.write_access:

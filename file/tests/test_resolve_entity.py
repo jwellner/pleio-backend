@@ -186,3 +186,68 @@ class FileFolderTestCase(FastTenantTestCase):
         self.assertEqual(data["entity"]["mimeType"], file_mock.content_type)
 
         mock_save.assert_called_once()
+
+    @patch("file.models.get_mimetype")
+    @patch("{}.save".format(settings.DEFAULT_FILE_STORAGE))
+    def test_file_access(self, mock_save, mock_mimetype):
+        file_mock = MagicMock(spec=File)
+        file_mock.name = 'test.gif'
+        file_mock.content_type = 'image/gif'
+
+        mock_save.return_value = 'test.gif'
+        mock_mimetype.return_value = file_mock.content_type
+
+        self.file = FileFolder.objects.create(
+            read_access=[ACCESS_TYPE.logged_in],
+            write_access=[ACCESS_TYPE.logged_in],
+            owner=self.authenticatedUser,
+            tags=["tag1", "tag2"],
+            upload=file_mock
+        )
+
+        request = HttpRequest()
+        request.user = self.authenticatedUser
+
+        variables = {
+            "guid": self.file.guid
+        }
+
+        result = graphql_sync(schema, { "query": self.query , "variables": variables}, context_value={ "request": request })
+
+        self.assertTrue(result[0])
+
+        data = result[1]["data"]
+
+        self.assertEqual(data["entity"]["guid"], self.file.guid)
+        self.assertEqual(data["entity"]["title"], file_mock.name)
+        self.assertEqual(data["entity"]["accessId"], 1)
+        self.assertEqual(data["entity"]["writeAccessId"], 1)
+
+        mock_save.assert_called_once()
+
+    def test_folder_access(self):
+        request = HttpRequest()
+        request.user = self.authenticatedUser
+
+        folder = FileFolder.objects.create(
+            read_access=[ACCESS_TYPE.public],
+            write_access=[ACCESS_TYPE.logged_in],
+            owner=self.authenticatedUser,
+            tags=["tag1", "tag2"],
+            is_folder=True
+        )
+
+        variables = {
+            "guid": folder.guid
+        }
+
+        result = graphql_sync(schema, { "query": self.query , "variables": variables}, context_value={ "request": request })
+
+        self.assertTrue(result[0])
+
+        data = result[1]["data"]
+
+        self.assertEqual(data["entity"]["guid"], folder.guid)
+        self.assertEqual(data["entity"]["title"], folder.title)
+        self.assertEqual(data["entity"]["accessId"], 2)
+        self.assertEqual(data["entity"]["writeAccessId"], 1)
