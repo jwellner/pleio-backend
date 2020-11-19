@@ -1,5 +1,6 @@
 import csv
 import json
+import logging
 from core.resolvers.query_site import get_settings
 from core import config
 from core.models import Entity, Group, UserProfileField, SiteAccessRequest
@@ -18,7 +19,10 @@ from django.utils.text import Truncator
 from django.urls import reverse
 from django.views.decorators.http import require_GET
 from django.http import Http404, HttpResponse, HttpResponseRedirect, StreamingHttpResponse
-from django.contrib.auth.decorators import login_required
+from django.contrib.auth import login as auth_login
+from datetime import datetime
+
+logger = logging.getLogger(__name__)
 
 def default(request, exception=None):
     # pylint: disable=unused-argument
@@ -146,14 +150,36 @@ def request_access(request):
 def access_requested(request):
     return render(request, 'registration/requested.html')
 
-@login_required
 def onboarding(request):
+    # pylint: disable=too-many-branches
+
     user = request.user
+    claims = request.session.get('onboarding_claims', None)
+
+    if not request.user.is_authenticated and not claims:
+        return HttpResponseRedirect('/')
 
     if request.POST:
-        form = OnboardingForm(request.POST, user=user)
+        form = OnboardingForm(request.POST)
         if form.is_valid():
             data = form.cleaned_data
+
+            if not user.is_authenticated and claims:
+                user = User.objects.create_user(
+                    name=claims.get('name'),
+                    email=claims.get('email'),
+                    picture=claims.get('picture', None),
+                    is_government=claims.get('is_government'),
+                    has_2fa_enabled=claims.get('has_2fa_enabled'),
+                    password=None,
+                    external_id=claims.get('sub'),
+                    is_superadmin=claims.get('is_admin', False)
+                )
+
+                logger.info("Onboarding is valid, new user %s created", user.email)
+
+                auth_login(request, user, backend=settings.AUTHENTICATION_BACKENDS[0])
+                del request.session['onboarding_claims']
 
             for profile_field in form.profile_fields:
                 if profile_field.field_type == 'multi_select_field':
@@ -184,19 +210,29 @@ def onboarding(request):
                         read_access=access_id_to_acl(user, config.DEFAULT_ACCESS_ID)
                     )
 
-            # Don't show onboarding again for new users:
-            if not user.login_count:
-                user.login_count = 1
-                user.save()
-
             return HttpResponseRedirect('/')
 
     else:
-        form = OnboardingForm(user=user)
+        initial_values = {}
+
+        if user.is_authenticated:
+            # get initial values from user
+            user_profile_fields = UserProfileField.objects.filter(user_profile=user.profile).all()
+            for user_profile_field in user_profile_fields:
+                if user_profile_field.profile_field.field_type == "multi_select_field":
+                    value = user_profile_field.value.split(',')
+                elif user_profile_field.profile_field.field_type == "date_field":
+                    # date is stored in format YYYY-mm-dd
+                    date = datetime.strptime(user_profile_field.value, '%Y-%m-%d')
+                    value = date.strftime('%d-%m-%Y')
+                else:
+                    value = user_profile_field.value
+
+                initial_values[user_profile_field.profile_field.guid] = value
+
+        form = OnboardingForm(initial=initial_values)
 
     context = {
-        'is_new_user': bool(not user.login_count),
-        'is_profile_complete': user.is_profile_complete,
         'form': form,
     }
 

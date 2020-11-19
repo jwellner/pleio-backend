@@ -24,6 +24,7 @@ class Manager(BaseUserManager):
             password=None,
             external_id=None,
             is_active=False,
+            is_superadmin=False,
             picture=None,
             is_government=False,
             has_2fa_enabled=False):
@@ -51,8 +52,10 @@ class Manager(BaseUserManager):
 
         if has_2fa_enabled:
             user.has_2fa_enabled = has_2fa_enabled
+        
+        if is_superadmin:
+            user.is_superadmin = True
 
-        user.login_count = None
         user.save(using=self._db)
 
         return user
@@ -94,8 +97,6 @@ class User(AbstractBaseUser):
     ban_reason = models.CharField(max_length=100, default="", blank=True)
 
     roles = ArrayField(models.CharField(max_length=256), blank=True, default=list)
-
-    login_count = models.IntegerField(null=True, blank=True, default=1)
 
     created_at = models.DateTimeField(default=timezone.now)
     updated_at = models.DateTimeField(default=timezone.now)

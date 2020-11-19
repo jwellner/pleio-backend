@@ -122,9 +122,9 @@ class WalledGardenMiddleware:
 
 class OnboardingMiddleware:
     """
-    Show onboarding on first login or when user has to complete mandatory fields
+    Show onboarding when user has to complete mandatory fields
 
-    Newly created users can be detected by login_count is not set.
+    Note: new user onboaring is routed in authentication layer
     """
     def __init__(self, get_response):
         self.get_response = get_response
@@ -147,11 +147,13 @@ class OnboardingMiddleware:
     def __call__(self, request):
 
         user = request.user
-
-        if not self.is_public_url(request.path_info) and user.is_authenticated and config.ONBOARDING_ENABLED:
-            if (config.ONBOARDING_FORCE_EXISTING_USERS and not user.is_profile_complete) or not user.login_count:
-                return redirect('onboarding')
-
-            return self.get_response(request)
+        if (
+            not self.is_public_url(request.path_info) 
+            and user.is_authenticated 
+            and config.ONBOARDING_ENABLED
+            and config.ONBOARDING_FORCE_EXISTING_USERS 
+            and not user.is_profile_complete
+        ):
+            return redirect('onboarding')
 
         return self.get_response(request)
