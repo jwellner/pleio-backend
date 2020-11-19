@@ -2,13 +2,12 @@ import json
 import os
 import secrets
 import tempfile
-from core.constances import ACCESS_TYPE, COULD_NOT_SAVE
+from core.constances import ACCESS_TYPE
 from core import config
 from django.apps import apps
 from django.conf import settings
 from django.db import connection
 from django.utils.text import slugify
-from graphql import GraphQLError
 from enum import Enum
 import html2text
 from draftjs_exporter.dom import DOM
@@ -62,8 +61,9 @@ def access_id_to_acl(obj, access_id):
     if hasattr(obj, 'group') and obj.group:
         in_closed_group = obj.group.is_closed
 
+    # object is in close group, convert public to group access
     if in_closed_group and access_id in (1, 2):
-        raise GraphQLError(COULD_NOT_SAVE)
+        access_id = 4
 
     if access_id == 1 and not in_closed_group:
         acl.append(ACCESS_TYPE.logged_in)

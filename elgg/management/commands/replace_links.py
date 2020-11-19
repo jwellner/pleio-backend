@@ -162,7 +162,7 @@ class Command(InteractiveTenantOption, BaseCommand):
 
         for comment in comments:
             rich_description = self._replace_rich_description_json(comment.rich_description)
-            description = self._replace_links(comment.rich_description)
+            description = self._replace_links(comment.description)
 
             if rich_description != comment.rich_description or description != comment.description:
                 comment.rich_description = rich_description
@@ -211,6 +211,8 @@ class Command(InteractiveTenantOption, BaseCommand):
 
     def _replace_links(self, text):
         # Testing: https://regex101.com/r/13zeJW/2
+        if not text:
+            return ""
 
         matches = re.findall(rf'(((https:\/\/{re.escape(self.elgg_domain)})|(^|(?<=[ \"\n]))\/)[\w\-\/]*\/(view|download)\/([0-9]+)[\w\-\.\/\?\%]*)', text)
 

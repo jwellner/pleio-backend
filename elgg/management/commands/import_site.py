@@ -14,7 +14,7 @@ from user.models import User
 from datetime import datetime
 from django_tenants.management.commands import InteractiveTenantOption
 
-from django.db import connections, connection
+from django.db import connections, connection, close_old_connections
 from django.db import IntegrityError
 
 import json
@@ -116,9 +116,8 @@ class Command(InteractiveTenantOption, BaseCommand):
         self.stdout.write("\n>> Done!")
 
     def _import_settings(self):
-
         self.stdout.write("\n>> Settings (x) ", ending="")
-
+        close_old_connections()
         elgg_site = ElggSitesEntity.objects.using(self.import_id).first()
 
         config.NAME = html.unescape(elgg_site.name)
@@ -215,7 +214,7 @@ class Command(InteractiveTenantOption, BaseCommand):
         self.stdout.write(".", ending="")
 
     def _import_groups(self):
-        # Groups
+        close_old_connections()
         elgg_groups = ElggGroupsEntity.objects.using(self.import_id)
 
         self.stdout.write("\n>> Groups (%i) " % elgg_groups.count(), ending="")
@@ -293,6 +292,7 @@ class Command(InteractiveTenantOption, BaseCommand):
             self.stdout.write(".", ending="")
 
     def _import_users(self):
+        close_old_connections()
         # Load site entity
         site = ElggSitesEntity.objects.using(self.import_id).first()
 
@@ -344,6 +344,7 @@ class Command(InteractiveTenantOption, BaseCommand):
                 pass
 
     def _import_blogs(self):
+        close_old_connections()
         elgg_blogs = ElggObjectsEntity.objects.using(self.import_id).filter(entity__subtype__subtype='blog')
 
         self.stdout.write("\n>> Blogs (%i) " % elgg_blogs.count(), ending="")
@@ -364,6 +365,7 @@ class Command(InteractiveTenantOption, BaseCommand):
                 pass
 
     def _import_news(self):
+        close_old_connections()
         elgg_news_items = ElggObjectsEntity.objects.using(self.import_id).filter(entity__subtype__subtype='news')
 
         self.stdout.write("\n>> News (%i) " % elgg_news_items.count(), ending="")
@@ -384,6 +386,7 @@ class Command(InteractiveTenantOption, BaseCommand):
                 pass
 
     def _import_events(self):
+        close_old_connections()
         elgg_event_items = ElggObjectsEntity.objects.using(self.import_id).filter(entity__subtype__subtype='event')
 
         self.stdout.write("\n>> Events (%i) " % elgg_event_items.count(), ending="")
@@ -455,6 +458,7 @@ class Command(InteractiveTenantOption, BaseCommand):
                 pass
 
     def _import_discussions(self):
+        close_old_connections()
         elgg_discussion_items = ElggObjectsEntity.objects.using(self.import_id).filter(entity__subtype__subtype='discussion')
 
         self.stdout.write("\n>> Discussions (%i) " % elgg_discussion_items.count(), ending="")
@@ -475,6 +479,7 @@ class Command(InteractiveTenantOption, BaseCommand):
                 pass
 
     def _import_questions(self):
+        close_old_connections()
         elgg_question_items = ElggObjectsEntity.objects.using(self.import_id).filter(entity__subtype__subtype='question')
 
         self.stdout.write("\n>> Questions (%i) " % elgg_question_items.count(), ending="")
@@ -497,6 +502,7 @@ class Command(InteractiveTenantOption, BaseCommand):
                 pass
 
     def _import_tasks(self):
+        close_old_connections()
         elgg_task_items = ElggObjectsEntity.objects.using(self.import_id).filter(entity__subtype__subtype='task')
 
         self.stdout.write("\n>> Tasks (%i) " % elgg_task_items.count(), ending="")
@@ -516,8 +522,8 @@ class Command(InteractiveTenantOption, BaseCommand):
                 self.stdout.write(self.style.WARNING("Error: %s\n" % str(e)))
                 pass
 
-
     def _import_pages(self):
+        close_old_connections()
         elgg_page_items = ElggObjectsEntity.objects.using(self.import_id).filter(entity__subtype__subtype='page')
 
         self.stdout.write("\n>> Pages (%i) " % elgg_page_items.count(), ending="")
@@ -536,6 +542,9 @@ class Command(InteractiveTenantOption, BaseCommand):
                 pass
 
         # add parent pages
+        close_old_connections()
+        elgg_page_items = ElggObjectsEntity.objects.using(self.import_id).filter(entity__subtype__subtype='page')
+
         for elgg_page in elgg_page_items:
             self.helpers.save_parent_page(elgg_page)
 
@@ -546,6 +555,7 @@ class Command(InteractiveTenantOption, BaseCommand):
             config.STARTPAGE_CMS = str(cms_page_guid)
 
     def _import_rows(self):
+        close_old_connections()
         elgg_row_items = ElggObjectsEntity.objects.using(self.import_id).filter(entity__subtype__subtype='row')
 
         self.stdout.write("\n>> Rows (%i) " % elgg_row_items.count(), ending="")
@@ -564,6 +574,7 @@ class Command(InteractiveTenantOption, BaseCommand):
                 pass
 
     def _import_columns(self):
+        close_old_connections()
         elgg_column_items = ElggObjectsEntity.objects.using(self.import_id).filter(entity__subtype__subtype='column')
 
         self.stdout.write("\n>> Columns (%i) " % elgg_column_items.count(), ending="")
@@ -582,6 +593,7 @@ class Command(InteractiveTenantOption, BaseCommand):
                 pass
 
     def _import_widgets(self):
+        close_old_connections()
         elgg_widget_items = ElggObjectsEntity.objects.using(self.import_id).filter(entity__subtype__subtype='page_widget')
 
         self.stdout.write("\n>> Widgets (%i) " % elgg_widget_items.count(), ending="")
@@ -600,6 +612,7 @@ class Command(InteractiveTenantOption, BaseCommand):
                 pass
 
     def _import_status_updates(self):
+        close_old_connections()
         elgg_status_update_items = ElggObjectsEntity.objects.using(self.import_id).filter(entity__subtype__subtype='thewire')
 
         self.stdout.write("\n>> StatusUpdates (%i) " % elgg_status_update_items.count(), ending="")
@@ -621,6 +634,7 @@ class Command(InteractiveTenantOption, BaseCommand):
                 pass
 
     def _import_polls(self):
+        close_old_connections()
         elgg_poll_items = ElggObjectsEntity.objects.using(self.import_id).filter(entity__subtype__subtype='poll')
 
         self.stdout.write("\n>> Polls (%i) " % elgg_poll_items.count(), ending="")
@@ -639,6 +653,7 @@ class Command(InteractiveTenantOption, BaseCommand):
                 pass
 
     def _import_poll_choices(self):
+        close_old_connections()
         elgg_poll_choice_items = ElggObjectsEntity.objects.using(self.import_id).filter(entity__subtype__subtype='poll_choice')
 
         self.stdout.write("\n>> Poll choices (%i) " % elgg_poll_choice_items.count(), ending="")
@@ -669,7 +684,8 @@ class Command(InteractiveTenantOption, BaseCommand):
                 pass
 
     def _import_notifications(self):
-        elgg_notification_items = ElggNotifications.objects.using(self.import_id).all()
+        close_old_connections()
+        elgg_notification_items = ElggNotifications.objects.using(self.import_id)
 
         self.stdout.write("\n>> Notifications (%i) " % elgg_notification_items.count(), ending="")
 
@@ -687,6 +703,7 @@ class Command(InteractiveTenantOption, BaseCommand):
                 pass
 
     def _import_file_folders(self):
+        close_old_connections()
         elgg_folder_items = ElggObjectsEntity.objects.using(self.import_id).filter(entity__subtype__subtype='folder')
 
         self.stdout.write("\n>> File folders (%i) " % elgg_folder_items.count(), ending="")
@@ -707,6 +724,9 @@ class Command(InteractiveTenantOption, BaseCommand):
             except IntegrityError as e:
                 self.stdout.write(self.style.WARNING("Error: %s\n" % str(e)))
                 pass
+        
+        close_old_connections()
+        elgg_folder_items = ElggObjectsEntity.objects.using(self.import_id).filter(entity__subtype__subtype='folder')
 
         for elgg_folder in elgg_folder_items:
 
@@ -719,6 +739,7 @@ class Command(InteractiveTenantOption, BaseCommand):
                 pass
 
     def _import_files(self):
+        close_old_connections()
         elgg_file_items = ElggObjectsEntity.objects.using(self.import_id).filter(entity__subtype__subtype='file')
 
         self.stdout.write("\n>> Files (%i) " % elgg_file_items.count(), ending="")
@@ -740,6 +761,7 @@ class Command(InteractiveTenantOption, BaseCommand):
                 pass
 
     def _import_comments_for(self, entity: Entity, elgg_guid, elgg_entity=None):
+        close_old_connections()
         elgg_comment_items = ElggObjectsEntity.objects.using(self.import_id).filter(entity__subtype__subtype='comment', entity__container_guid=elgg_guid)
 
         for elgg_comment in elgg_comment_items:
@@ -761,6 +783,7 @@ class Command(InteractiveTenantOption, BaseCommand):
                 self.helpers.save_best_answer(entity, comment, elgg_entity)
 
     def _import_wikis(self):
+        close_old_connections()
         elgg_wiki_items = ElggObjectsEntity.objects.using(self.import_id).filter(entity__subtype__subtype='wiki')
 
         self.stdout.write("\n>> Wikis (%i) " % elgg_wiki_items.count(), ending="")
@@ -779,6 +802,9 @@ class Command(InteractiveTenantOption, BaseCommand):
                 pass
 
         # add parent wikis
+        close_old_connections()
+        elgg_wiki_items = ElggObjectsEntity.objects.using(self.import_id).filter(entity__subtype__subtype='wiki')
+
         for elgg_wiki in elgg_wiki_items:
             self.helpers.save_parent_wiki(elgg_wiki)
 

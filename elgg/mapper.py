@@ -209,8 +209,11 @@ class Mapper():
             if elgg_entity.entity.get_metadata_value_by_name("featuredPositionY") else 0
         entity.tags = elgg_entity.entity.get_metadata_values_by_name("tags")
 
-        entity.start_date = datetime.fromtimestamp(int(elgg_entity.entity.get_metadata_value_by_name("start_day")))
-        entity.end_date = datetime.fromtimestamp(int(elgg_entity.entity.get_metadata_value_by_name("end_ts")))
+        if elgg_entity.entity.get_metadata_value_by_name("start_day"):
+            entity.start_date = datetime.fromtimestamp(int(elgg_entity.entity.get_metadata_value_by_name("start_day")))
+        if elgg_entity.entity.get_metadata_value_by_name("end_ts"):
+            entity.end_date = datetime.fromtimestamp(int(elgg_entity.entity.get_metadata_value_by_name("end_ts")))
+
         entity.location = elgg_entity.entity.get_metadata_value_by_name("location") if elgg_entity.entity.get_metadata_value_by_name("location") else ""
         entity.external_link = elgg_entity.entity.get_metadata_value_by_name("source") if elgg_entity.entity.get_metadata_value_by_name("source") else ""
         entity.max_attendees = int(elgg_entity.entity.get_metadata_value_by_name("maxAttendees")) \
@@ -301,7 +304,8 @@ class Mapper():
         entity.title = elgg_entity.title
         entity.description = elgg_entity.description.replace("&amp;", "&")
         entity.rich_description = elgg_entity.entity.get_metadata_value_by_name("richDescription")
-        entity.page_type = elgg_entity.entity.get_metadata_value_by_name("pageType")
+        entity.page_type = elgg_entity.entity.get_metadata_value_by_name("pageType") \
+            if elgg_entity.entity.get_metadata_value_by_name("pageType") else "text"
 
         entity.position = int(elgg_entity.entity.get_metadata_value_by_name("position")) \
             if elgg_entity.entity.get_metadata_value_by_name("position") else 0
@@ -476,7 +480,8 @@ class Mapper():
 
         in_group = GuidMap.objects.filter(id=elgg_entity.entity.container_guid, object_type="group").first()
 
-        entity.group = Group.objects.get(id=in_group.guid)
+        if in_group:
+            entity.group = Group.objects.get(id=in_group.guid)
 
         write_access_id = int(elgg_entity.entity.get_metadata_value_by_name("write_access_id")) \
             if elgg_entity.entity.get_metadata_value_by_name("write_access_id") else 0
