@@ -47,6 +47,7 @@ class EditSiteSettingTestCase(FastTenantTestCase):
                         description
                         isClosed
                         allowRegistration
+                        directRegistrationDomains
                         defaultAccessId
                         defaultAccessIdOptions {
                             value
@@ -162,6 +163,7 @@ class EditSiteSettingTestCase(FastTenantTestCase):
                 "description": "description2",
                 "isClosed": True,
                 "allowRegistration": False,
+                "directRegistrationDomains": ['a.nl', 'b.nl'],
                 "defaultAccessId": 0,
                 "googleAnalyticsId": "123",
                 "googleSiteVerification": "code1",
@@ -256,6 +258,7 @@ class EditSiteSettingTestCase(FastTenantTestCase):
         self.assertEqual(data["editSiteSetting"]["siteSettings"]["description"], "description2")
         self.assertEqual(data["editSiteSetting"]["siteSettings"]["isClosed"], True)
         self.assertEqual(data["editSiteSetting"]["siteSettings"]["allowRegistration"], False)
+        self.assertEqual(data["editSiteSetting"]["siteSettings"]["directRegistrationDomains"], ['a.nl', 'b.nl'])
         self.assertEqual(data["editSiteSetting"]["siteSettings"]["defaultAccessId"], 0)
         self.assertEqual(data["editSiteSetting"]["siteSettings"]["defaultAccessIdOptions"], [{'value': 0, 'label': 'Alleen mijzelf'}, {'value': 1, 'label': 'Ingelogde gebruikers'}])
         self.assertEqual(data["editSiteSetting"]["siteSettings"]["googleAnalyticsId"], "123")
@@ -431,3 +434,31 @@ class EditSiteSettingTestCase(FastTenantTestCase):
         errors = result[1]["errors"]
 
         self.assertEqual(errors[0]["message"], "user_not_site_admin")
+
+
+    def test_edit_site_setting_invalid_domain(self):
+        mutation = """
+            mutation EditSiteSetting($input: editSiteSettingInput!) {
+                editSiteSetting(input: $input) {
+                    siteSettings {
+                        directRegistrationDomains
+                    }
+                }
+            }
+        """
+
+        variables = {
+            "input": {
+                "directRegistrationDomains": ['invaliddomain']
+            }
+        }
+
+        request = HttpRequest()
+        request.user = self.admin
+        result = graphql_sync(schema, { "query": mutation, "variables": variables}, context_value={ "request": request })
+
+        self.assertTrue(result[0])
+
+        errors = result[1]["errors"]
+
+        self.assertEqual(errors[0]["message"], "invalid_value")

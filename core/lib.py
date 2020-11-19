@@ -1,5 +1,6 @@
 import json
 import os
+import re
 import secrets
 import tempfile
 from core.constances import ACCESS_TYPE
@@ -320,3 +321,15 @@ def get_tmp_file_path(user, suffix= ""):
     _, temp_file_path = tempfile.mkstemp(dir=folder, suffix=suffix)
 
     return temp_file_path
+
+def is_valid_domain(domain):
+    pattern = re.compile(
+        r'^(?:[a-zA-Z0-9]'  # First character of the domain
+        r'(?:[a-zA-Z0-9-_]{0,61}[A-Za-z0-9])?\.)'  # Sub domain + hostname
+        r'+[A-Za-z0-9][A-Za-z0-9-_]{0,61}'  # First 61 characters of the gTLD
+        r'[A-Za-z]$'  # Last character of the gTLD
+    )
+    try:
+        return pattern.match(domain)
+    except (UnicodeError, AttributeError):
+        return None

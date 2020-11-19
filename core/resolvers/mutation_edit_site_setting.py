@@ -2,8 +2,8 @@ from graphql import GraphQLError
 from core import config
 from core.models import Setting, ProfileField
 from core.models.user import validate_profile_sections
-from core.constances import NOT_LOGGED_IN, USER_NOT_SITE_ADMIN, USER_ROLES
-from core.lib import remove_none_from_dict, access_id_to_acl
+from core.constances import NOT_LOGGED_IN, USER_NOT_SITE_ADMIN, USER_ROLES, INVALID_VALUE
+from core.lib import remove_none_from_dict, access_id_to_acl, is_valid_domain
 from core.resolvers.query_site import get_site_settings
 from django.db import connection
 from django.core.cache import cache
@@ -190,6 +190,11 @@ def resolve_edit_site_setting(_, info, input):
             pass
         save_setting('ICON', "")
 
+    if 'directRegistrationDomains' in clean_input:
+        for domain in clean_input.get('directRegistrationDomains'):
+            if not is_valid_domain(domain):
+                raise GraphQLError(INVALID_VALUE)
+        save_setting('DIRECT_REGISTRATION_DOMAINS', clean_input.get('directRegistrationDomains'))
 
     if 'profileSections' in clean_input:
         save_setting('PROFILE_SECTIONS', validate_profile_sections(clean_input.get('profileSections')))
