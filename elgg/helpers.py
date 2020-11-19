@@ -376,7 +376,7 @@ class ElggHelpers():
         access_id = int(access_id)
         if access_id >= 3:
 
-            if obj.group:
+            if hasattr(obj, 'group'):
                 access_collection = ElggAccessCollections.objects.using(self.database).filter(id=access_id).first()
                 if access_collection and not access_collection.name[:6] in ['Groep:', 'Group:']:
                     subgroup = obj.group.subgroups.filter(name=access_collection.name).first()

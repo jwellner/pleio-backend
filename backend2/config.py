@@ -29,7 +29,7 @@ if os.getenv('ELGG_DB_HOST'):
         'HOST': os.getenv('ELGG_DB_HOST'),
         'USER': os.getenv('ELGG_DB_USER'),
         'PASSWORD': os.getenv('ELGG_DB_PASSWORD'),
-        'NAME': os.getenv('ELGG_DB_NAME'),
+        'NAME': os.getenv('ELGG_DB_NAME')
     }
 
 TIME_ZONE = 'UTC'
