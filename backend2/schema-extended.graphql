@@ -224,6 +224,8 @@ type ProfileSection {
 }
 
 extend input editSiteSettingInput {
+  """users with email adress in domain of directRegistrationDomains, can register even when allowRegistration is False"""
+  directRegistrationDomains: [String]
   profileSections: [ProfileSectionInput]
   onboardingEnabled: Boolean
   onboardingForceExistingUsers: Boolean
@@ -251,6 +253,7 @@ extend type Site {
 }
 
 extend type SiteSettings {
+  directRegistrationDomains: [String]
   profileSections: [ProfileSection]
   exportableUserFields: [ExportableField]
   profileFields: [ProfileItem]

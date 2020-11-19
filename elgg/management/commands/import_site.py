@@ -2,6 +2,7 @@ from django.core import management
 from django.core.management.base import BaseCommand, CommandError
 from django.utils import timezone
 from core import config
+from core.lib import is_valid_domain
 from core.models import ProfileField, UserProfile, UserProfileField, Group, Entity, Comment, Widget
 from backend2 import settings
 from elgg.models import (
@@ -120,6 +121,12 @@ class Command(InteractiveTenantOption, BaseCommand):
         close_old_connections()
         elgg_site = ElggSitesEntity.objects.using(self.import_id).first()
 
+        whitelisted_domains = []
+        if self.helpers.get_plugin_setting("domain_whitelist", "pleio"):
+            for domain in self.helpers.get_plugin_setting("domain_whitelist", "pleio").split(','):
+                if is_valid_domain(domain.strip()):
+                    whitelisted_domains.append(domain.strip())
+
         config.NAME = html.unescape(elgg_site.name)
         config.SUBTITLE = html.unescape(elgg_site.description)
         config.THEME = self.helpers.get_plugin_setting("theme")
@@ -172,6 +179,7 @@ class Command(InteractiveTenantOption, BaseCommand):
         config.LOGIN_INTRO = self.helpers.get_plugin_setting("walled_garden_description", "pleio") \
             if self.helpers.get_plugin_setting("walled_garden_description", "pleio") else ""
         config.ALLOW_REGISTRATION = self.helpers.get_site_config('allow_registration')
+        config.DIRECT_REGISTRATION_DOMAINS = whitelisted_domains
         config.GOOGLE_ANALYTICS_ID = html.unescape(self.helpers.get_plugin_setting("google_analytics")) \
             if self.helpers.get_plugin_setting("google_analytics") else ""
         config.GOOGLE_SITE_VERIFICATION = html.unescape(self.helpers.get_plugin_setting("google_site_verification")) \
@@ -210,6 +218,8 @@ class Command(InteractiveTenantOption, BaseCommand):
         config.LIMITED_GROUP_ADD = self.helpers.get_plugin_setting("limited_groups", "groups") == "yes"
         config.ENABLE_SEARCH_ENGINE_INDEXING = self.helpers.get_site_config('enable_frontpage_indexing') \
             if self.helpers.get_site_config('enable_frontpage_indexing') else False
+        config.CUSTOM_CSS = self.helpers.get_plugin_setting("custom_css", "custom_css") \
+            if self.helpers.get_plugin_setting("custom_css", "custom_css") else ""
 
         self.stdout.write(".", ending="")
 

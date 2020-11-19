@@ -50,8 +50,8 @@ class OIDCAuthBackend(OIDCAuthenticationBackend):
         return User.objects.filter(Q(external_id__iexact=external_id) | Q(email__iexact=email))
 
     def create_user(self, claims):
-
-        if not config.ALLOW_REGISTRATION and not claims.get('is_admin', False):
+        if not config.ALLOW_REGISTRATION and not claims.get('is_admin', False) \
+            and not claims.get('email').split('@')[1] in config.DIRECT_REGISTRATION_DOMAINS:
 
             if self.request.session.get('invitecode'):
                 try:

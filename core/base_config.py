@@ -10,6 +10,7 @@ DEFAULT_SITE_CONFIG = {
     'LANGUAGE': ('nl', 'Language'),
     'IS_CLOSED': (False, 'Is site closed'),
     'ALLOW_REGISTRATION': (True, 'Allow registrations'),
+    'DIRECT_REGISTRATION_DOMAINS': ([], 'Direct registration domains'),
     'DEFAULT_ACCESS_ID': (1, 'Default accessId'),
     'GOOGLE_ANALYTICS_ID': ('', 'Google analytics ID'),
     'GOOGLE_SITE_VERIFICATION': ('', 'Google site verification code'),

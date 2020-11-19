@@ -82,6 +82,7 @@ def get_site_settings():
         'languageOptions': [{'value': 'nl', 'label': ugettext_lazy('Dutch')}, {'value': 'en', 'label': ugettext_lazy('English')}],
         'isClosed': config.IS_CLOSED,
         'allowRegistration': config.ALLOW_REGISTRATION,
+        'directRegistrationDomains': config.DIRECT_REGISTRATION_DOMAINS,
         'defaultAccessId': config.DEFAULT_ACCESS_ID,
         'defaultAccessIdOptions': defaultAccessIdOptions,
 
