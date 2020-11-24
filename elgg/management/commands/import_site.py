@@ -12,11 +12,13 @@ from elgg.models import (
 from elgg.helpers import ElggHelpers
 from elgg.mapper import Mapper
 from user.models import User
+from file.models import FileFolder
 from datetime import datetime
 from django_tenants.management.commands import InteractiveTenantOption
 
 from django.db import connections, connection, close_old_connections
 from django.db import IntegrityError
+from django.db.models import ObjectDoesNotExist
 
 import json
 import html
@@ -237,7 +239,10 @@ class Command(InteractiveTenantOption, BaseCommand):
             # first add members
             relations = elgg_group.entity.relation_inverse.filter(relationship="member", left__type='user')
             for relation in relations:
-                user = User.objects.get(id=GuidMap.objects.get(id=relation.left.guid).guid)
+                try:
+                    user = User.objects.get(id=GuidMap.objects.get(id=relation.left.guid).guid)
+                except ObjectDoesNotExist:
+                    continue
 
                 # check if user has notifications enabled
                 enabled_notifications = True if elgg_group.entity.relation_inverse.filter(
@@ -258,7 +263,10 @@ class Command(InteractiveTenantOption, BaseCommand):
             # then update or add admins
             relations = elgg_group.entity.relation_inverse.filter(relationship="group_admin", left__type='user')
             for relation in relations:
-                user = User.objects.get(id=GuidMap.objects.get(id=relation.left.guid).guid)
+                try:
+                    user = User.objects.get(id=GuidMap.objects.get(id=relation.left.guid).guid)
+                except ObjectDoesNotExist:
+                    continue
 
                 # check if user has notifications enabled
                 enabled_notifications = True if elgg_group.entity.relation_inverse.filter(
@@ -572,16 +580,18 @@ class Command(InteractiveTenantOption, BaseCommand):
 
         for elgg_row in elgg_row_items:
             row = self.mapper.get_row(elgg_row)
+            if row:
+                try:
+                    row.save()
 
-            try:
-                row.save()
+                    GuidMap.objects.create(id=elgg_row.entity.guid, guid=row.guid, object_type='row')
 
-                GuidMap.objects.create(id=elgg_row.entity.guid, guid=row.guid, object_type='row')
-
-                self.stdout.write(".", ending="")
-            except IntegrityError as e:
-                self.stdout.write(self.style.WARNING("Error: %s\n" % str(e)))
-                pass
+                    self.stdout.write(".", ending="")
+                except IntegrityError as e:
+                    self.stdout.write(self.style.WARNING("Error: %s\n" % str(e)))
+                    pass
+            else:
+                self.stdout.write("x", ending="")
 
     def _import_columns(self):
         close_old_connections()
@@ -591,16 +601,18 @@ class Command(InteractiveTenantOption, BaseCommand):
 
         for elgg_column in elgg_column_items:
             column = self.mapper.get_column(elgg_column)
+            if column:
+                try:
+                    column.save()
 
-            try:
-                column.save()
+                    GuidMap.objects.create(id=elgg_column.entity.guid, guid=column.guid, object_type='column')
 
-                GuidMap.objects.create(id=elgg_column.entity.guid, guid=column.guid, object_type='column')
-
-                self.stdout.write(".", ending="")
-            except IntegrityError as e:
-                self.stdout.write(self.style.WARNING("Error: %s\n" % str(e)))
-                pass
+                    self.stdout.write(".", ending="")
+                except IntegrityError as e:
+                    self.stdout.write(self.style.WARNING("Error: %s\n" % str(e)))
+                    pass
+            else:
+                self.stdout.write("x", ending="")
 
     def _import_widgets(self):
         close_old_connections()
@@ -734,19 +746,21 @@ class Command(InteractiveTenantOption, BaseCommand):
             except IntegrityError as e:
                 self.stdout.write(self.style.WARNING("Error: %s\n" % str(e)))
                 pass
-        
+
         close_old_connections()
-        elgg_folder_items = ElggObjectsEntity.objects.using(self.import_id).filter(entity__subtype__subtype='folder')
 
-        for elgg_folder in elgg_folder_items:
-
+        for folder in FileFolder.objects.all():
             try:
-                self.helpers.save_parent_folder(elgg_folder)
-
-                self.stdout.write(".", ending="")
-            except IntegrityError as e:
-                self.stdout.write(self.style.WARNING("Error: saving parent of folder %s\n" % str(e)))
-                pass
+                elgg_folder_id = GuidMap.objects.get(guid=folder.guid, object_type='folder').id
+                elgg_folder = ElggObjectsEntity.objects.using(self.import_id).filter(entity__guid=elgg_folder_id, entity__subtype__subtype='folder').first()
+                parent_id = elgg_folder.entity.get_metadata_value_by_name("parent_guid")
+                if parent_id and int(parent_id) > 0:
+                    guid_map_parent = GuidMap.objects.get(id=parent_id, object_type='folder')
+                    parent_folder = FileFolder.objects.get(id=guid_map_parent.guid)
+                    folder.parent = parent_folder
+                    folder.save()
+            except ObjectDoesNotExist:
+                self.stdout.write("x", ending="")
 
     def _import_files(self):
         close_old_connections()
@@ -758,6 +772,7 @@ class Command(InteractiveTenantOption, BaseCommand):
             file = self.mapper.get_file(elgg_file)
 
             if not file:
+                self.stdout.write("x", ending="")
                 continue
 
             try:
