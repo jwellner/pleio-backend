@@ -75,7 +75,7 @@ def updated_at_handler(sender, instance, **kwargs):
 
     # pylint: disable=unused-argument
     # pylint: disable=protected-access
-    if not instance._state.adding:
+    if not instance._state.adding and not settings.IMPORTING:
         instance.updated_at = timezone.now()
 
 
