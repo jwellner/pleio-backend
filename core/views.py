@@ -27,6 +27,9 @@ logger = logging.getLogger(__name__)
 def default(request, exception=None):
     # pylint: disable=unused-argument
 
+    if tenant_schema() == 'public':
+        return HttpResponse('Site does not exist', status=400)
+
     metadata = {
         "description" : config.DESCRIPTION,
         "og:title" : config.NAME,

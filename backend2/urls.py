@@ -1,6 +1,7 @@
 from django.contrib.sitemaps.views import sitemap
 from django.urls import path, include, re_path
 from django.views.decorators.cache import cache_page
+from django.shortcuts import render
 
 from ariadne.contrib.django.views import GraphQLView
 from .schema import schema
@@ -51,3 +52,8 @@ urlpatterns = [
 ]
 
 handler404 = 'core.views.default'
+
+def handler500(request):
+    response = render(request, '500.html', {})
+    response.status_code = 500
+    return response
