@@ -31,16 +31,21 @@ def resolve_events(obj, info, filter=None, containerGuid=None, offset=0, limit=2
     # pylint: disable=too-many-arguments
     # pylint: disable=redefined-builtin
 
-    events = Event.objects.visible(info.context["request"].user)
+    qs = Event.objects.visible(info.context["request"].user)
 
-    events = events.filter(
+    qs = qs.filter(
         conditional_date_filter(filter) & 
         conditional_group_filter(containerGuid)
     )
 
-    edges = events[offset:offset+limit]
+    if filter == 'previous':
+        qs = qs.order_by('-start_date')
+    else:
+        qs = qs.order_by('start_date')
+
+    edges = qs[offset:offset+limit]
 
     return {
-        'total': events.count(),
+        'total': qs.count(),
         'edges': edges
     }
