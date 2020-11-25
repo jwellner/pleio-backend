@@ -22,8 +22,8 @@ urlpatterns = [
     path('login/requested', core_views.access_requested, name='access_requested'),
     path('oidc/failure/', core_views.logout, name='oidc_failure'),
     path('oidc/', include('mozilla_django_oidc.urls')),
-    path('admin/logout/', core_views.logout, name='logout'),
-    path('admin/', core_admin.site.urls),
+    path('superadmin/logout/', core_views.logout, name='logout'),
+    path('superadmin/', core_admin.site.urls),
     path('graphql', GraphQLView.as_view(schema=schema), name='graphql'),
 
     path('file/download/<uuid:file_id>/<str:file_name>', file_views.download, name='download'),
