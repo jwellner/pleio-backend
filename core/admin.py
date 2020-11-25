@@ -1,7 +1,11 @@
+from django.contrib import messages
 from django.contrib.admin import AdminSite as BaseAdminSite, ModelAdmin
+from django.shortcuts import render
 
 from core import config
+from core.lib import tenant_schema
 from core.models import Group, GroupMembership, Comment, Setting, Annotation, ProfileField, UserProfile
+from core.tasks import elasticsearch_rebuild
 from user.models import User
 from file.models import FileFolder
 
@@ -9,8 +13,25 @@ class AdminSite(BaseAdminSite):
     site_header = 'Backend2'
     login_template = 'admin/oidc_login.html'
 
+    def get_urls(self):
+        # pylint: disable=import-outside-toplevel
+        from django.urls import path
+        urls = super().get_urls()
+        urls += [
+            path('tasks/', self.admin_view(self.task_view))
+        ]
+        return urls
+
+    def task_view(self, request):
+        context = {}
+        if request.method == 'POST':
+            messages.add_message(request, messages.INFO, 'Search index rebuild is started in the background.')
+            elasticsearch_rebuild.delay(tenant_schema())
+        return render(request, 'admin/tasks.html', context)
+
 
 site = AdminSite(name='admin')
+
 
 def remove_user_data(self, request, queryset):
     # pylint: disable=unused-argument
