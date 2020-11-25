@@ -42,11 +42,17 @@ def resolve_invite_to_group(_, info, input):
         subject = ugettext_lazy("Invitation to become a member of the %(group_name)s group") % {'group_name': group.name}
         url = get_base_url(info.context['request']) + '/groups/invitations/?invitecode='
 
-        for user_guid in clean_input.get("users"):
-            try:
-                receiving_user = User.objects.get(id=user_guid['guid'])
-            except ObjectDoesNotExist:
-                pass
+        for user_input in clean_input.get("users"):
+            if 'guid' in user_input:
+                try:
+                    receiving_user = User.objects.get(id=user_input['guid'])
+                except ObjectDoesNotExist:
+                    raise GraphQLError(COULD_NOT_FIND)
+            elif 'email' in user_input:
+                try:
+                    receiving_user = User.objects.get(email=user_input['email'])
+                except ObjectDoesNotExist:
+                    raise GraphQLError(COULD_NOT_FIND)
 
             if clean_input.get("directAdd"):
                 if not group.is_full_member(receiving_user):

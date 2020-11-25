@@ -161,6 +161,9 @@ class TestGroupAccess(FastTenantTestCase):
 
         result = graphql_sync(schema, { "query": mutation, "variables": data }, context_value={ "request": request })
 
-        errors = result[1]["errors"]
+        self.assertTrue(result[0])
 
-        self.assertEqual(errors[0]["message"], "could_not_save")
+        data = result[1]["data"]
+
+        # Public access not possible, it will be save with group accessId
+        self.assertEqual(data["editEntity"]["entity"]["accessId"], 4)

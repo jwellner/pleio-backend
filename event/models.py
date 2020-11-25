@@ -23,14 +23,14 @@ class Event(Entity, CommentMixin, BookmarkMixin, NotificationMixin):
         blank=True,
         null=True
     )
-    featured_video = models.CharField(max_length=256, null=True, blank=True)
+    featured_video = models.TextField(null=True, blank=True)
     featured_position_y = models.IntegerField(default=0, null=False)
 
     start_date = models.DateTimeField(null=True, blank=True)
     end_date = models.DateTimeField(null=True, blank=True)
 
     location = models.CharField(max_length=256, default="")
-    external_link = models.CharField(max_length=256, default="")
+    external_link = models.TextField(default="")
 
     max_attendees = models.PositiveIntegerField(null=True, blank=True)
     rsvp = models.BooleanField(default=False)

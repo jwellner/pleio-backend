@@ -93,12 +93,10 @@ if APM_ENABLED:
     INSTALLED_APPS += ['elasticapm.contrib.django']
 
 
-AUTHENTICATION_BACKENDS = [
-    'django.contrib.auth.backends.ModelBackend',
-]
+AUTHENTICATION_BACKENDS = ['core.auth.OIDCAuthBackend']
 
-if not RUN_AS_ADMIN_APP:
-    AUTHENTICATION_BACKENDS.append('core.auth.OIDCAuthBackend')
+if RUN_AS_ADMIN_APP:
+    AUTHENTICATION_BACKENDS = ['django.contrib.auth.backends.ModelBackend']
 
 MIDDLEWARE = [
     'django_tenants.middleware.main.TenantMainMiddleware',

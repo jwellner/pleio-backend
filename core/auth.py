@@ -23,6 +23,9 @@ class RequestAccessException(Exception):
 class RequestAccessInvalidCodeException(RequestAccessException):
     pass
 
+class OnboardingException(Exception):
+    pass
+
 class OIDCAuthCallbackView(OIDCAuthenticationCallbackView):
     def get(self, request):
 
@@ -32,6 +35,8 @@ class OIDCAuthCallbackView(OIDCAuthenticationCallbackView):
             return super(OIDCAuthCallbackView, self).get(request)
         except RequestAccessException:
             return redirect(reverse('request_access'))
+        except OnboardingException:
+            return redirect(reverse('onboarding'))
 
 class OIDCAuthBackend(OIDCAuthenticationBackend):
 
@@ -45,8 +50,8 @@ class OIDCAuthBackend(OIDCAuthenticationBackend):
         return User.objects.filter(Q(external_id__iexact=external_id) | Q(email__iexact=email))
 
     def create_user(self, claims):
-
-        if not config.ALLOW_REGISTRATION and not claims.get('is_admin', False):
+        if not config.ALLOW_REGISTRATION and not claims.get('is_admin', False) \
+            and not claims.get('email').split('@')[1] in config.DIRECT_REGISTRATION_DOMAINS:
 
             if self.request.session.get('invitecode'):
                 try:
@@ -64,6 +69,11 @@ class OIDCAuthBackend(OIDCAuthenticationBackend):
                 self.request.session['request_access_claims'] = claims
                 raise RequestAccessException
 
+        # create user should be done after onboarding
+        if config.ONBOARDING_ENABLED:
+            self.request.session['onboarding_claims'] = claims
+            raise OnboardingException
+
         user = User.objects.create_user(
             name=claims.get('name'),
             email=claims.get('email'),
@@ -71,12 +81,9 @@ class OIDCAuthBackend(OIDCAuthenticationBackend):
             is_government=claims.get('is_government'),
             has_2fa_enabled=claims.get('has_2fa_enabled'),
             password=None,
-            external_id=claims.get('sub')
+            external_id=claims.get('sub'),
+            is_superadmin=claims.get('is_admin', False)
         )
-
-        if claims.get('is_admin'):
-            user.is_superadmin = True
-            user.save()
 
         return user
 
@@ -91,7 +98,6 @@ class OIDCAuthBackend(OIDCAuthenticationBackend):
             user.picture = None
         user.is_government = claims.get('is_government')
         user.has_2fa_enabled = claims.get('has_2fa_enabled')
-        user.login_count = user.login_count + 1 if user.login_count else 1
 
         # Get and set superadmin
         if claims.get('is_admin'):

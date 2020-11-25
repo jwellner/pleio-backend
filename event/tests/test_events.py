@@ -223,7 +223,9 @@ class EventsTestCase(FastTenantTestCase):
             "filter": "upcoming"
         }
 
-        mixer.cycle(2).blend(EventAttendee, event=self.eventFuture2, state='accept')
+        # this is the first in upcoming list because it is still today.
+        mixer.cycle(2).blend(EventAttendee, event=self.eventOneHourAgo, state='accept')
+
         result = graphql_sync(schema, { "query": self.query , "variables": variables}, context_value={ "request": request })
 
         self.assertTrue(result[0])

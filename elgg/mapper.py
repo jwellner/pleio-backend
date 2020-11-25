@@ -209,8 +209,11 @@ class Mapper():
             if elgg_entity.entity.get_metadata_value_by_name("featuredPositionY") else 0
         entity.tags = elgg_entity.entity.get_metadata_values_by_name("tags")
 
-        entity.start_date = datetime.fromtimestamp(int(elgg_entity.entity.get_metadata_value_by_name("start_day")))
-        entity.end_date = datetime.fromtimestamp(int(elgg_entity.entity.get_metadata_value_by_name("end_ts")))
+        if elgg_entity.entity.get_metadata_value_by_name("start_day"):
+            entity.start_date = datetime.fromtimestamp(int(elgg_entity.entity.get_metadata_value_by_name("start_day")))
+        if elgg_entity.entity.get_metadata_value_by_name("end_ts"):
+            entity.end_date = datetime.fromtimestamp(int(elgg_entity.entity.get_metadata_value_by_name("end_ts")))
+
         entity.location = elgg_entity.entity.get_metadata_value_by_name("location") if elgg_entity.entity.get_metadata_value_by_name("location") else ""
         entity.external_link = elgg_entity.entity.get_metadata_value_by_name("source") if elgg_entity.entity.get_metadata_value_by_name("source") else ""
         entity.max_attendees = int(elgg_entity.entity.get_metadata_value_by_name("maxAttendees")) \
@@ -301,7 +304,8 @@ class Mapper():
         entity.title = elgg_entity.title
         entity.description = elgg_entity.description.replace("&amp;", "&")
         entity.rich_description = elgg_entity.entity.get_metadata_value_by_name("richDescription")
-        entity.page_type = elgg_entity.entity.get_metadata_value_by_name("pageType")
+        entity.page_type = elgg_entity.entity.get_metadata_value_by_name("pageType") \
+            if elgg_entity.entity.get_metadata_value_by_name("pageType") else "text"
 
         entity.position = int(elgg_entity.entity.get_metadata_value_by_name("position")) \
             if elgg_entity.entity.get_metadata_value_by_name("position") else 0
@@ -323,11 +327,14 @@ class Mapper():
             if elgg_entity.entity.get_metadata_value_by_name("position") else 0
         entity.is_full_width = elgg_entity.entity.get_metadata_value_by_name("is_full_width") == "1"
 
-        # get the parent page
-        parent_guid = elgg_entity.entity.get_metadata_value_by_name("parent_guid")
-        guid_map_page = GuidMap.objects.get(id=parent_guid, object_type='page')
-        entity.page = Page.objects.get(id=guid_map_page.guid)
-
+        # get the parent page, return None if not exist
+        try:
+            parent_guid = elgg_entity.entity.get_metadata_value_by_name("parent_guid")
+            guid_map_page = GuidMap.objects.get(id=parent_guid, object_type='page')
+            entity.page = Page.objects.get(id=guid_map_page.guid)
+        except Exception:
+            return None
+ 
         return entity
 
     def get_column(self, elgg_entity: ElggObjectsEntity):
@@ -336,14 +343,20 @@ class Mapper():
             if elgg_entity.entity.get_metadata_value_by_name("position") else 0
         entity.width = [int(elgg_entity.entity.get_metadata_value_by_name("width"))]
 
-        # get the parent page
-        guid_map_page = GuidMap.objects.get(id=elgg_entity.entity.container_guid, object_type='page')
-        entity.page = Page.objects.get(id=guid_map_page.guid)
+        # get the parent page, return None if not exist
+        try:
+            guid_map_page = GuidMap.objects.get(id=elgg_entity.entity.container_guid, object_type='page')
+            entity.page = Page.objects.get(id=guid_map_page.guid)
+        except Exception:
+            return None
 
-        # get the parent row
-        parent_guid = elgg_entity.entity.get_metadata_value_by_name("parent_guid")
-        guid_map_page = GuidMap.objects.get(id=parent_guid, object_type='row')
-        entity.row = Row.objects.get(id=guid_map_page.guid)
+        # get the parent row, return None if not exist
+        try:
+            parent_guid = elgg_entity.entity.get_metadata_value_by_name("parent_guid")
+            guid_map_page = GuidMap.objects.get(id=parent_guid, object_type='row')
+            entity.row = Row.objects.get(id=guid_map_page.guid)
+        except Exception:
+            return None
 
         return entity
 
@@ -476,7 +489,8 @@ class Mapper():
 
         in_group = GuidMap.objects.filter(id=elgg_entity.entity.container_guid, object_type="group").first()
 
-        entity.group = Group.objects.get(id=in_group.guid)
+        if in_group:
+            entity.group = Group.objects.get(id=in_group.guid)
 
         write_access_id = int(elgg_entity.entity.get_metadata_value_by_name("write_access_id")) \
             if elgg_entity.entity.get_metadata_value_by_name("write_access_id") else 0
@@ -486,6 +500,13 @@ class Mapper():
 
         entity.created_at = datetime.fromtimestamp(elgg_entity.entity.time_created)
         entity.updated_at = datetime.fromtimestamp(elgg_entity.entity.time_updated)
+
+        # Test if parent folder still exists
+        parent_id = elgg_entity.entity.get_metadata_value_by_name("parent_guid")
+        if parent_id and int(parent_id) > 0:
+            parent = ElggObjectsEntity.objects.using(self.db).filter(entity__subtype__subtype='folder', entity__guid=parent_id).first()
+            if not parent:
+                return None
 
         return entity
 
@@ -498,8 +519,10 @@ class Mapper():
 
             folder_relation = elgg_entity.entity.relation_inverse.filter(relationship="folder_of", right__guid=elgg_entity.entity.guid).first()
             if folder_relation:
-                parent_guid = GuidMap.objects.get(id=folder_relation.left.guid, object_type='folder').guid
-                entity.parent = FileFolder.objects.get(id=parent_guid, is_folder=True)
+                is_group = GuidMap.objects.filter(id=folder_relation.left.guid, object_type="group").first()
+                if not is_group:
+                    parent_guid = GuidMap.objects.get(id=folder_relation.left.guid, object_type='folder').guid
+                    entity.parent = FileFolder.objects.get(id=parent_guid, is_folder=True)
 
             entity.mime_type = str(elgg_entity.entity.get_metadata_value_by_name("mimetype"))
             entity.upload.name = self.helpers.get_elgg_file_path(elgg_entity)
