@@ -9,7 +9,8 @@ from file.models import FileFolder
 from wiki.models import Wiki
 from core.lib import ACCESS_TYPE, access_id_to_acl
 from elgg.models import (
-    ElggEntities, ElggObjectsEntity, ElggPrivateSettings, ElggConfig, GuidMap, ElggEntityViews, ElggEntityViewsLog, ElggAccessCollections
+    ElggEntities, ElggObjectsEntity, ElggPrivateSettings, ElggConfig, GuidMap, ElggEntityViews,
+    ElggEntityViewsLog, ElggAccessCollections, ElggEntityRelationships
 )
 from core.models import EntityView, EntityViewCount, ProfileField
 
@@ -39,6 +40,21 @@ class ElggHelpers():
             return None
 
         return setting.value
+
+    def is_plugin_active(self, plugin_name):
+        try:
+            plugin = ElggObjectsEntity.objects.using(self.database).get(entity__subtype__subtype='plugin', title=plugin_name)
+        except Exception:
+            print(f"Plugin {plugin} not found")
+            return None
+
+        try:
+            ElggEntityRelationships.objects.using(self.database).get(left=plugin.entity.guid, relationship='active_plugin')
+            return True
+        except Exception:
+            # plugin not active
+            return False
+
 
     def get_site_config(self, name):
         try:

@@ -190,7 +190,10 @@ class Command(InteractiveTenantOption, BaseCommand):
             if self.helpers.get_plugin_setting("piwik_url") else ""
         config.PIWIK_ID = html.unescape(self.helpers.get_plugin_setting("piwik")) \
             if self.helpers.get_plugin_setting("piwik") else ""
-        config.LIKE_ICON = self.helpers.get_plugin_setting("like_icon") == "yes"
+
+        config.LIKE_ICON = self.helpers.get_plugin_setting("like_icon") \
+            if self.helpers.get_plugin_setting("like_icon") == "thumbs" else "heart"
+
         config.NUMBER_OF_FEATURED_ITEMS = self.helpers.get_plugin_setting("number_of_featured_items")
         config.ENABLE_FEED_SORTING = self.helpers.get_plugin_setting("enable_feed_sorting") == "yes"
         config.SUBTITLE = html.unescape(self.helpers.get_plugin_setting("subtitle")) \
@@ -222,6 +225,8 @@ class Command(InteractiveTenantOption, BaseCommand):
             if self.helpers.get_site_config('enable_frontpage_indexing') else False
         config.CUSTOM_CSS = self.helpers.get_plugin_setting("custom_css", "custom_css") \
             if self.helpers.get_plugin_setting("custom_css", "custom_css") else ""
+        config.COOKIE_CONSENT = self.helpers.is_plugin_active('cookie_consent')
+        config.SHOW_EXCERPT_IN_NEWS_CARD = self.helpers.get_plugin_setting("show_excerpt_in_news_card") == "yes"
 
         self.stdout.write(".", ending="")
 
