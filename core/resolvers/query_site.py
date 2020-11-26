@@ -202,7 +202,9 @@ def get_site_settings():
         'deleteAccountRequests': {
             'edges': User.objects.filter(is_delete_requested=True).all()
         },
-        'customCss': config.CUSTOM_CSS
+        'customCss': config.CUSTOM_CSS,
+        'siteMembershipAcceptedIntro': config.SITE_MEMBERSHIP_ACCEPTED_INTRO,
+        'siteMembershipDeniedIntro': config.SITE_MEMBERSHIP_DENIED_INTRO
     }
 
     return site_settings

@@ -152,6 +152,9 @@ class EditSiteSettingTestCase(FastTenantTestCase):
                         loginIntro
 
                         customCss
+
+                        siteMembershipAcceptedIntro
+                        siteMembershipDeniedIntro
                     }
                 }
             }
@@ -243,7 +246,9 @@ class EditSiteSettingTestCase(FastTenantTestCase):
                 'cookieConsent': True,
                 'loginIntro': 'test',
 
-                'customCss': 'h1 {color: maroon;margin-left: 40px;}'
+                'customCss': 'h1 {color: maroon;margin-left: 40px;}',
+                'siteMembershipAcceptedIntro': 'You request is accepted',
+                'siteMembershipDeniedIntro': 'Your request is not accepted'
             }
         }
 
@@ -341,6 +346,8 @@ class EditSiteSettingTestCase(FastTenantTestCase):
 
         self.assertEqual(data["editSiteSetting"]["siteSettings"]["loginIntro"], 'test')
         self.assertEqual(data["editSiteSetting"]["siteSettings"]["customCss"], 'h1 {color: maroon;margin-left: 40px;}')
+        self.assertEqual(data["editSiteSetting"]["siteSettings"]["siteMembershipAcceptedIntro"], 'You request is accepted')
+        self.assertEqual(data["editSiteSetting"]["siteSettings"]["siteMembershipDeniedIntro"], 'Your request is not accepted')
 
     @patch("file.models.get_mimetype")
     @patch("{}.open".format(settings.DEFAULT_FILE_STORAGE))
