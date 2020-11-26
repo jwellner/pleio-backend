@@ -193,6 +193,8 @@ class SiteSettingsTestCase(FastTenantTestCase):
                         }
                     }
                     customCss
+                    siteMembershipAcceptedIntro
+                    siteMembershipDeniedIntro
                 }
             }
         """
@@ -337,6 +339,8 @@ class SiteSettingsTestCase(FastTenantTestCase):
         self.assertEqual(data["siteSettings"]["siteAccessRequests"]["edges"][0]['email'], 'b@b.nl')
         self.assertEqual(data["siteSettings"]["deleteAccountRequests"]["edges"][0]['guid'], self.delete_user.guid)
         self.assertEqual(data["siteSettings"]["customCss"], "")
+        self.assertEqual(data["siteSettings"]["siteMembershipAcceptedIntro"], "")
+        self.assertEqual(data["siteSettings"]["siteMembershipDeniedIntro"], "")
 
     def test_site_settings_by_anonymous(self):
 

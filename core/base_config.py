@@ -108,6 +108,8 @@ DEFAULT_SITE_CONFIG = {
     'LOGIN_INTRO': ('', 'Login intro text'),
 
     'CUSTOM_CSS': ("", 'Custom Css'),
+    'SITE_MEMBERSHIP_ACCEPTED_INTRO': ("", 'Site membership accepted intro'),
+    'SITE_MEMBERSHIP_DENIED_INTRO': ("", 'Site membership denied intro')
 }
 """
 Default site configuration

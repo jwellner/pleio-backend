@@ -234,6 +234,8 @@ extend input editSiteSettingInput {
   cookieConsent: Boolean
   loginIntro: String
   customCss: String
+  siteMembershipAcceptedIntro: String
+  siteMembershipDeniedIntro: String
 }
 
 input ProfileSectionInput {
@@ -268,4 +270,6 @@ extend type SiteSettings {
   roleOptions: [Option]
   deleteAccountRequests: DeleteAccountRequestList
   customCss: String
+  siteMembershipAcceptedIntro: String
+  siteMembershipDeniedIntro: String
 }
