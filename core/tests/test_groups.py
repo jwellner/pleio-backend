@@ -51,11 +51,13 @@ class GroupsNotEmptyTestCase(FastTenantTestCase):
         self.group1 = mixer.blend(Group, tags=["tag_one"])
         self.group1.join(self.user, 'member')
         self.groups = mixer.cycle(5).blend(Group, is_closed=False)
+        self.group2 = mixer.blend(Group, is_featured=True)
 
     def tearDown(self):
         for group in self.groups:
             group.delete()
         self.group1.delete()
+        self.group2.delete()
         self.user.delete()
 
     def test_groups_default(self):
@@ -84,7 +86,8 @@ class GroupsNotEmptyTestCase(FastTenantTestCase):
 
         data = result[1]["data"]
 
-        self.assertEqual(data["groups"]["total"], 6)
+        self.assertEqual(data["groups"]["total"], 7)
+        self.assertEqual(data["groups"]["edges"][0]["guid"], self.group2.guid)
 
     def test_groups_limit(self):
 
@@ -112,7 +115,7 @@ class GroupsNotEmptyTestCase(FastTenantTestCase):
 
         data = result[1]["data"]
 
-        self.assertEqual(data["groups"]["total"], 6)
+        self.assertEqual(data["groups"]["total"], 7)
 
     def test_groups_mine(self):
 
