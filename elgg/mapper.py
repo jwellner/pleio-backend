@@ -77,7 +77,7 @@ class Mapper():
         return user_profile
 
     def get_user_profile_field(self, elgg_user: ElggUsersEntity, user_profile: UserProfile, profile_field: ProfileField, user: User):
-        metadata = elgg_user.entity.metadata.filter(name__string=profile_field.key).first()
+        metadata = elgg_user.entity.metadata.filter(name__string__iexact=profile_field.key).first()
         if metadata:
             user_profile_field = UserProfileField()
             user_profile_field.profile_field = profile_field

@@ -66,11 +66,20 @@ class ElggHelpers():
         value = bytes(config.value.encode())
         return unserialize(value, decode_strings=True)
 
+    def get_profile_field(self, name):
+        profile_field_entities = ElggEntities.objects.using(self.database).filter(
+            subtype__subtype="custom_profile_field"
+        )
+
+        for item in profile_field_entities:
+            if item.get_metadata_value_by_name('metadata_name') == name:
+                return item
+
+        return None
+
     def get_profile_field_type(self, name):
-        profile_field_entity = ElggEntities.objects.using(self.database).filter(
-            subtype__subtype="custom_profile_field",
-            metadata__value__string=name,
-            metadata__name__string="metadata_name").first()
+
+        profile_field_entity= self.get_profile_field(name)
 
         if not profile_field_entity:
             return 'text_field'
@@ -93,10 +102,7 @@ class ElggHelpers():
         return field_type
 
     def get_profile_category(self, name):
-        profile_field_entity = ElggEntities.objects.using(self.database).filter(
-            subtype__subtype="custom_profile_field",
-            metadata__value__string=name,
-            metadata__name__string="metadata_name").first()
+        profile_field_entity= self.get_profile_field(name)
 
         if not profile_field_entity:
             return None
@@ -107,10 +113,7 @@ class ElggHelpers():
         return category
 
     def get_profile_options(self, name):
-        profile_field_entity = ElggEntities.objects.using(self.database).filter(
-            subtype__subtype="custom_profile_field",
-            metadata__value__string=name,
-            metadata__name__string="metadata_name").first()
+        profile_field_entity= self.get_profile_field(name)
 
         if not profile_field_entity:
             return []
@@ -121,10 +124,7 @@ class ElggHelpers():
         return options
 
     def get_profile_is_editable(self, name):
-        profile_field_entity = ElggEntities.objects.using(self.database).filter(
-            subtype__subtype="custom_profile_field",
-            metadata__value__string=name,
-            metadata__name__string="metadata_name").first()
+        profile_field_entity= self.get_profile_field(name)
 
         if not profile_field_entity:
             return True
