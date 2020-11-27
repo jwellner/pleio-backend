@@ -307,8 +307,8 @@ class Mapper():
         entity.page_type = elgg_entity.entity.get_metadata_value_by_name("pageType") \
             if elgg_entity.entity.get_metadata_value_by_name("pageType") else "text"
 
-        entity.position = int(elgg_entity.entity.get_metadata_value_by_name("position")) \
-            if elgg_entity.entity.get_metadata_value_by_name("position") else 0
+        entity.position = int(elgg_entity.entity.get_metadata_value_by_name("order")) \
+            if elgg_entity.entity.get_metadata_value_by_name("order") else 0
         entity.tags = elgg_entity.entity.get_metadata_values_by_name("tags")
 
         entity.owner = self.helpers.get_user_or_admin(elgg_entity.entity.owner_guid)
@@ -559,8 +559,8 @@ class Mapper():
         entity.rich_description = elgg_entity.entity.get_metadata_value_by_name("richDescription")
         entity.tags = elgg_entity.entity.get_metadata_values_by_name("tags")
         entity.owner = self.helpers.get_user_or_admin(elgg_entity.entity.owner_guid)
-        entity.position = int(elgg_entity.entity.get_metadata_value_by_name("position")) \
-            if elgg_entity.entity.get_metadata_value_by_name("position") else 0
+        entity.position = int(elgg_entity.entity.get_metadata_value_by_name("order")) \
+            if elgg_entity.entity.get_metadata_value_by_name("order") else 0
 
         in_group = GuidMap.objects.filter(id=elgg_entity.entity.container_guid, object_type="group").first()
         if in_group:
