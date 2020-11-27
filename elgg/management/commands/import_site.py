@@ -3,12 +3,16 @@ from django.core.management.base import BaseCommand, CommandError
 from django.utils import timezone
 from core import config
 from core.lib import is_valid_domain
-from core.models import ProfileField, UserProfile, UserProfileField, Group, Entity, Comment, Widget
+from core.models import (
+    ProfileField, UserProfile, UserProfileField, Group, Entity, Comment, Widget, SiteAccessRequest,
+    SiteInvitation, GroupInvitation
+)
 from backend2 import settings
 from elgg.models import (
     Instances, ElggUsersEntity, GuidMap, ElggSitesEntity, ElggGroupsEntity, ElggObjectsEntity, ElggNotifications,
-    ElggAnnotations, ElggMetastrings, ElggAccessCollections, ElggEntities
+    ElggAnnotations, ElggMetastrings, ElggAccessCollections, ElggEntities, PleioRequestAccess
 )
+from phpserialize import unserialize
 from elgg.helpers import ElggHelpers
 from elgg.mapper import Mapper
 from user.models import User
@@ -114,6 +118,9 @@ class Command(InteractiveTenantOption, BaseCommand):
         self._import_notifications()
         self._import_polls()
         self._import_poll_choices()
+        self._import_site_access_requests()
+        self._import_site_invitations()
+        self._import_group_invitations()
 
         # All done!
         self.stdout.write("\n>> Done!")
@@ -304,6 +311,22 @@ class Command(InteractiveTenantOption, BaseCommand):
                     'created_at': datetime.fromtimestamp(elgg_group.entity.time_created)
                 }
             )
+
+            relations = elgg_group.entity.relation_inverse.filter(relationship="membership_request")
+            for relation in relations:
+                try:
+                    user = User.objects.get(id=GuidMap.objects.get(id=relation.left.guid).guid)
+                except ObjectDoesNotExist:
+                    continue
+                # try creating pending member, if already exists, then continue
+                try:
+                    group.members.create(
+                        user=user,
+                        type='pending',
+                        created_at=datetime.fromtimestamp(relation.time_created)
+                    )
+                except Exception:
+                    continue
 
             access_collections = ElggAccessCollections.objects.using(self.import_id).filter(owner_guid=elgg_group.entity.guid)
             for item in access_collections:
@@ -843,6 +866,78 @@ class Command(InteractiveTenantOption, BaseCommand):
 
         for elgg_wiki in elgg_wiki_items:
             self.helpers.save_parent_wiki(elgg_wiki)
+
+    def _import_site_access_requests(self):
+        close_old_connections()
+        elgg_site_access_requests = PleioRequestAccess.objects.using(self.import_id).all()
+
+        self.stdout.write("\n>> Site access requests (%i) " % elgg_site_access_requests.count(), ending="")
+
+        for request in elgg_site_access_requests:
+            value = bytes(request.user.encode())
+            user = unserialize(value, decode_strings=True)
+            try:
+                sub = user['guid']
+                email = user['email']
+                name = user['name']
+                claims = {"sub": sub, "email": email, "name": name}
+                SiteAccessRequest.objects.create(
+                    name=name,
+                    email=email,
+                    claims=claims
+                )
+                self.stdout.write(".", ending="")
+            except Exception:
+                self.stdout.write("x", ending="")
+
+    def _import_site_invitations(self):
+        close_old_connections()
+
+        try:
+            name_id = ElggMetastrings.objects.using(self.import_id).filter(string="site_invitation").first().id
+            elgg_site_invitations = ElggAnnotations.objects.using(self.import_id).filter(name_id=name_id)
+        except Exception:
+            elgg_site_invitations = []
+
+        self.stdout.write("\n>> Site invitations (%i) " % elgg_site_invitations.count(), ending="")
+
+        for invite in elgg_site_invitations:
+            try:
+                value = ElggMetastrings.objects.using(self.import_id).filter(id=invite.value_id).first().string
+                values = value.split("|")
+                SiteInvitation.objects.create(
+                    email=values[1],
+                    code=values[0]
+                )
+                self.stdout.write(".", ending="")
+            except Exception:
+                self.stdout.write("x", ending="")
+
+    def _import_group_invitations(self):
+        close_old_connections()
+
+        try:
+            name_id = ElggMetastrings.objects.using(self.import_id).filter(string="email_invitation").first().id
+            elgg_group_invitations = ElggAnnotations.objects.using(self.import_id).filter(name_id=name_id)
+        except Exception:
+            elgg_group_invitations = []
+
+        self.stdout.write("\n>> Group invitations (%i) " % elgg_group_invitations.count(), ending="")
+
+        for invite in elgg_group_invitations:
+            try:
+                value = ElggMetastrings.objects.using(self.import_id).filter(id=invite.value_id).first().string
+                values = value.split("|")
+                group = Group.objects.get(id=GuidMap.objects.get(id=invite.entity.guid).guid)
+                user = User.objects.get(email=values[1])
+                GroupInvitation.objects.create(
+                    group=group,
+                    invited_user=user,
+                    code=values[0]
+                )
+                self.stdout.write(".", ending="")
+            except Exception:
+                self.stdout.write("x", ending="")
 
     def debug_model(self, model):
         self.stdout.write(', '.join("%s: %s" % item for item in vars(model).items() if not item[0].startswith('_')))
