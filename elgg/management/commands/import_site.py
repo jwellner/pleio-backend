@@ -338,6 +338,12 @@ class Command(InteractiveTenantOption, BaseCommand):
 
             config.PROFILE_SECTIONS = self.helpers.get_profile_sections(json.loads(html.unescape(profile)))
 
+            # if one of the profile_fields is_mandatory enable onboarding form
+            mandatory_fields = ProfileField.objects.filter(is_mandatory=True).first()
+            if mandatory_fields:
+                config.ONBOARDING_ENABLED = True
+                config.ONBOARDING_FORCE_EXISTING_USERS = True
+
         # Import users
         elgg_users = ElggUsersEntity.objects.using(self.import_id)
 

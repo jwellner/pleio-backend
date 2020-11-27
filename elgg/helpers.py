@@ -134,6 +134,26 @@ class ElggHelpers():
         editable = metadata_type.value.string == 'yes' if metadata_type else True # default True
         return editable
 
+    def get_profile_is_mandatory(self, name):
+        profile_field_entity= self.get_profile_field(name)
+
+        if not profile_field_entity:
+            return True
+
+        metadata_type = profile_field_entity.metadata.filter(name__string="mandatory").first()
+
+        return metadata_type.value.string == 'yes' if metadata_type else False # default False
+
+    def get_profile_is_in_onboarding(self, name):
+        profile_field_entity= self.get_profile_field(name)
+
+        if not profile_field_entity:
+            return True
+
+        metadata_type = profile_field_entity.metadata.filter(name__string="show_on_register").first()
+
+        return metadata_type.value.string == 'yes' if metadata_type else False # default False
+
     def get_menu(self, menu_input):
 
         menu = []
