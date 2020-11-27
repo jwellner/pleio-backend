@@ -26,10 +26,10 @@ class News(Entity, VoteMixin, BookmarkMixin, FollowMixin, CommentMixin):
         blank=True,
         null=True
     )
-    featured_video = models.CharField(max_length=256, null=True, blank=True)
+    featured_video = models.TextField(null=True, blank=True)
     featured_position_y = models.IntegerField(default=0, null=False)
 
-    source = models.CharField(max_length=256, default="")
+    source = models.TextField(default="")
 
     def __str__(self):
         return self.title
