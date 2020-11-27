@@ -138,7 +138,7 @@ class ElggHelpers():
         profile_field_entity= self.get_profile_field(name)
 
         if not profile_field_entity:
-            return True
+            return False
 
         metadata_type = profile_field_entity.metadata.filter(name__string="mandatory").first()
 
@@ -148,7 +148,7 @@ class ElggHelpers():
         profile_field_entity= self.get_profile_field(name)
 
         if not profile_field_entity:
-            return True
+            return False
 
         metadata_type = profile_field_entity.metadata.filter(name__string="show_on_register").first()
 
