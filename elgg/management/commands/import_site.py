@@ -129,10 +129,6 @@ class Command(InteractiveTenantOption, BaseCommand):
                 if is_valid_domain(domain.strip()):
                     whitelisted_domains.append(domain.strip())
 
-        initiative_image = self.helpers.get_plugin_setting("initiative_image")
-        if not initiative_image:
-            initiative_image = self.helpers.save_and_get_site_logo_or_icon(elgg_site, 'logo')
-
         config.NAME = html.unescape(elgg_site.name)
         config.SUBTITLE = html.unescape(elgg_site.description)
         config.THEME = self.helpers.get_plugin_setting("theme")
@@ -154,12 +150,12 @@ class Command(InteractiveTenantOption, BaseCommand):
         config.INITIATIVE_ENABLED = self.helpers.get_plugin_setting("show_initiative") == "yes"
         config.INITIATIVE_TITLE = html.unescape(self.helpers.get_plugin_setting("initiative_title")) \
             if self.helpers.get_plugin_setting("initiative_title") else ""
-        config.INITIATIVE_IMAGE = initiative_image
+        config.INITIATIVE_IMAGE = self.helpers.get_plugin_setting("initiative_image")
         config.INITIATIVE_IMAGE_ALT = html.unescape(self.helpers.get_plugin_setting("initiative_image_alt")) \
             if self.helpers.get_plugin_setting("initiative_image_alt") else ""
         config.INITIATIVE_DESCRIPTION = html.unescape(self.helpers.get_plugin_setting("initiative_description")) \
             if self.helpers.get_plugin_setting("initiative_description") else ""
-        config.INITIATIVE_LINK = self.helpers.get_plugin_setting("initiator_link")
+        config.INITIATOR_LINK = self.helpers.get_plugin_setting("initiator_link")
 
         config.FONT = self.helpers.get_plugin_setting("font")
         config.COLOR_PRIMARY = self.helpers.get_plugin_setting("color_primary")

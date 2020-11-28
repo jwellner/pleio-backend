@@ -122,11 +122,6 @@ def resolve_initiative_title(obj, info):
     # pylint: disable=unused-argument
     return config.INITIATIVE_TITLE
 
-@site.field("initiativeImage")
-def resolve_initiative_image(obj, info):
-    # pylint: disable=unused-argument
-    return config.INITIATIVE_IMAGE
-
 @site.field("initiativeImageAlt")
 def resolve_initiative_image_alt(obj, info):
     # pylint: disable=unused-argument
@@ -140,7 +135,7 @@ def resolve_initiative_description(obj, info):
 @site.field("initiatorLink")
 def resolve_initiator_link(obj, info):
     # pylint: disable=unused-argument
-    return config.INITIATIVE_LINK
+    return config.INITIATOR_LINK
 
 @site.field("style")
 def resolve_style(obj, info):
