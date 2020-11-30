@@ -96,7 +96,6 @@ DEFAULT_SITE_CONFIG = {
 
 
     'ACHIEVEMENTS_ENABLED': (True, 'Achievements enabled'),
-    'INITIATOR_LINK': ('', 'Initiator link'),
     'MAIL_REPLY_TO': ('noreply@pleio.nl', 'default reply-to mail address'),
     'ENABLE_SEARCH_ENGINE_INDEXING': (False, 'Enable indexing by search engines'),
 

@@ -176,7 +176,7 @@ def get_site_settings():
 
         'accessIds': get_access_ids(),
         'startpage': config.STARTPAGE,
-        'initiatorLink': config.INITIATOR_LINK,
+        'initiatorLink': config.INITIATIVE_LINK,
 
         'activityFilter': get_activity_filters(),
 
