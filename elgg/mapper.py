@@ -47,6 +47,7 @@ class Mapper():
         user.created_at = datetime.fromtimestamp(elgg_user.entity.time_created)
         user.updated_at = datetime.fromtimestamp(elgg_user.entity.time_updated)
         user.is_active = elgg_user.banned == "no"
+        user.is_delete_requested = bool(elgg_user.entity.get_metadata_value_by_name("requestDelete"))
         user.ban_reason = elgg_user.entity.get_metadata_value_by_name("ban_reason") \
             if elgg_user.entity.get_metadata_value_by_name("ban_reason") and not elgg_user.banned == "no" else ""
         if elgg_user.admin == "yes":
@@ -338,7 +339,7 @@ class Mapper():
             entity.page = Page.objects.get(id=guid_map_page.guid)
         except Exception:
             return None
- 
+
         return entity
 
     def get_column(self, elgg_entity: ElggObjectsEntity):
