@@ -1,10 +1,11 @@
+import html2text
 from core.constances import ACCESS_TYPE
 from core.models import EntityViewCount
 from django.utils.text import Truncator
 from django.core.exceptions import ObjectDoesNotExist
 
 def resolve_entity_access_id(obj, info):
-    # pylint: disable=unused-argument 
+    # pylint: disable=unused-argument
     if obj.group and obj.group.subgroups:
         for subgroup in obj.group.subgroups.all():
             if ACCESS_TYPE.subgroup.format(subgroup.access_id) in obj.read_access:
@@ -68,7 +69,7 @@ def resolve_entity_rich_description(obj, info):
 
 def resolve_entity_excerpt(obj, info):
     # pylint: disable=unused-argument
-    return Truncator(obj.description).words(26)
+    return Truncator(html2text.HTML2Text().handle(obj.description)).words(26)
 
 def resolve_entity_tags(obj, info):
     # pylint: disable=unused-argument
