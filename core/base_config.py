@@ -96,7 +96,6 @@ DEFAULT_SITE_CONFIG = {
 
 
     'ACHIEVEMENTS_ENABLED': (True, 'Achievements enabled'),
-    'INITIATOR_LINK': ('', 'Initiator link'),
     'MAIL_REPLY_TO': ('noreply@pleio.nl', 'default reply-to mail address'),
     'ENABLE_SEARCH_ENGINE_INDEXING': (False, 'Enable indexing by search engines'),
 
@@ -108,6 +107,8 @@ DEFAULT_SITE_CONFIG = {
     'LOGIN_INTRO': ('', 'Login intro text'),
 
     'CUSTOM_CSS': ("", 'Custom Css'),
+    'SITE_MEMBERSHIP_ACCEPTED_INTRO': ("", 'Site membership accepted intro'),
+    'SITE_MEMBERSHIP_DENIED_INTRO': ("", 'Site membership denied intro')
 }
 """
 Default site configuration

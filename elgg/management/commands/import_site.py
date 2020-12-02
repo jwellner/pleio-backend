@@ -3,12 +3,16 @@ from django.core.management.base import BaseCommand, CommandError
 from django.utils import timezone
 from core import config
 from core.lib import is_valid_domain
-from core.models import ProfileField, UserProfile, UserProfileField, Group, Entity, Comment, Widget
+from core.models import (
+    ProfileField, UserProfile, UserProfileField, Group, Entity, Comment, Widget, SiteAccessRequest,
+    SiteInvitation, GroupInvitation
+)
 from backend2 import settings
 from elgg.models import (
     Instances, ElggUsersEntity, GuidMap, ElggSitesEntity, ElggGroupsEntity, ElggObjectsEntity, ElggNotifications,
-    ElggAnnotations, ElggMetastrings, ElggAccessCollections, ElggEntities
+    ElggAnnotations, ElggMetastrings, ElggAccessCollections, ElggEntities, PleioRequestAccess
 )
+from phpserialize import unserialize
 from elgg.helpers import ElggHelpers
 from elgg.mapper import Mapper
 from user.models import User
@@ -114,6 +118,9 @@ class Command(InteractiveTenantOption, BaseCommand):
         self._import_notifications()
         self._import_polls()
         self._import_poll_choices()
+        self._import_site_access_requests()
+        self._import_site_invitations()
+        self._import_group_invitations()
 
         # All done!
         self.stdout.write("\n>> Done!")
@@ -128,6 +135,10 @@ class Command(InteractiveTenantOption, BaseCommand):
             for domain in self.helpers.get_plugin_setting("domain_whitelist", "pleio").split(','):
                 if is_valid_domain(domain.strip()):
                     whitelisted_domains.append(domain.strip())
+
+        initiative_image = self.helpers.get_plugin_setting("initiative_image")
+        if not initiative_image:
+            initiative_image = self.helpers.save_and_get_site_logo_or_icon(elgg_site, 'logo')
 
         config.NAME = html.unescape(elgg_site.name)
         config.SUBTITLE = html.unescape(elgg_site.description)
@@ -150,12 +161,12 @@ class Command(InteractiveTenantOption, BaseCommand):
         config.INITIATIVE_ENABLED = self.helpers.get_plugin_setting("show_initiative") == "yes"
         config.INITIATIVE_TITLE = html.unescape(self.helpers.get_plugin_setting("initiative_title")) \
             if self.helpers.get_plugin_setting("initiative_title") else ""
-        config.INITIATIVE_IMAGE = self.helpers.get_plugin_setting("initiative_image")
+        config.INITIATIVE_IMAGE = initiative_image
         config.INITIATIVE_IMAGE_ALT = html.unescape(self.helpers.get_plugin_setting("initiative_image_alt")) \
             if self.helpers.get_plugin_setting("initiative_image_alt") else ""
         config.INITIATIVE_DESCRIPTION = html.unescape(self.helpers.get_plugin_setting("initiative_description")) \
             if self.helpers.get_plugin_setting("initiative_description") else ""
-        config.INITIATOR_LINK = self.helpers.get_plugin_setting("initiator_link")
+        config.INITIATIVE_LINK = self.helpers.get_plugin_setting("initiator_link")
 
         config.FONT = self.helpers.get_plugin_setting("font")
         config.COLOR_PRIMARY = self.helpers.get_plugin_setting("color_primary")
@@ -190,7 +201,10 @@ class Command(InteractiveTenantOption, BaseCommand):
             if self.helpers.get_plugin_setting("piwik_url") else ""
         config.PIWIK_ID = html.unescape(self.helpers.get_plugin_setting("piwik")) \
             if self.helpers.get_plugin_setting("piwik") else ""
-        config.LIKE_ICON = self.helpers.get_plugin_setting("like_icon") == "yes"
+
+        config.LIKE_ICON = self.helpers.get_plugin_setting("like_icon") \
+            if self.helpers.get_plugin_setting("like_icon") == "thumbs" else "heart"
+
         config.NUMBER_OF_FEATURED_ITEMS = self.helpers.get_plugin_setting("number_of_featured_items")
         config.ENABLE_FEED_SORTING = self.helpers.get_plugin_setting("enable_feed_sorting") == "yes"
         config.SUBTITLE = html.unescape(self.helpers.get_plugin_setting("subtitle")) \
@@ -222,6 +236,8 @@ class Command(InteractiveTenantOption, BaseCommand):
             if self.helpers.get_site_config('enable_frontpage_indexing') else False
         config.CUSTOM_CSS = self.helpers.get_plugin_setting("custom_css", "custom_css") \
             if self.helpers.get_plugin_setting("custom_css", "custom_css") else ""
+        config.COOKIE_CONSENT = self.helpers.is_plugin_active('cookie_consent')
+        config.SHOW_EXCERPT_IN_NEWS_CARD = self.helpers.get_plugin_setting("show_excerpt_in_news_card") == "yes"
 
         self.stdout.write(".", ending="")
 
@@ -300,6 +316,22 @@ class Command(InteractiveTenantOption, BaseCommand):
                 }
             )
 
+            relations = elgg_group.entity.relation_inverse.filter(relationship="membership_request")
+            for relation in relations:
+                try:
+                    user = User.objects.get(id=GuidMap.objects.get(id=relation.left.guid).guid)
+                except ObjectDoesNotExist:
+                    continue
+                # try creating pending member, if already exists, then continue
+                try:
+                    group.members.create(
+                        user=user,
+                        type='pending',
+                        created_at=datetime.fromtimestamp(relation.time_created)
+                    )
+                except Exception:
+                    continue
+
             access_collections = ElggAccessCollections.objects.using(self.import_id).filter(owner_guid=elgg_group.entity.guid)
             for item in access_collections:
                 if not item.name[:6] in ['Groep:', 'Group:']:
@@ -332,6 +364,12 @@ class Command(InteractiveTenantOption, BaseCommand):
                 self.stdout.write(".", ending="")
 
             config.PROFILE_SECTIONS = self.helpers.get_profile_sections(json.loads(html.unescape(profile)))
+
+            # if one of the profile_fields is_mandatory enable onboarding form
+            mandatory_fields = ProfileField.objects.filter(is_mandatory=True).first()
+            if mandatory_fields:
+                config.ONBOARDING_ENABLED = True
+                config.ONBOARDING_FORCE_EXISTING_USERS = True
 
         # Import users
         elgg_users = ElggUsersEntity.objects.using(self.import_id)
@@ -832,6 +870,78 @@ class Command(InteractiveTenantOption, BaseCommand):
 
         for elgg_wiki in elgg_wiki_items:
             self.helpers.save_parent_wiki(elgg_wiki)
+
+    def _import_site_access_requests(self):
+        close_old_connections()
+        elgg_site_access_requests = PleioRequestAccess.objects.using(self.import_id).all()
+
+        self.stdout.write("\n>> Site access requests (%i) " % elgg_site_access_requests.count(), ending="")
+
+        for request in elgg_site_access_requests:
+            value = bytes(request.user.encode())
+            user = unserialize(value, decode_strings=True)
+            try:
+                sub = user['guid']
+                email = user['email']
+                name = user['name']
+                claims = {"sub": sub, "email": email, "name": name}
+                SiteAccessRequest.objects.create(
+                    name=name,
+                    email=email,
+                    claims=claims
+                )
+                self.stdout.write(".", ending="")
+            except Exception:
+                self.stdout.write("x", ending="")
+
+    def _import_site_invitations(self):
+        close_old_connections()
+
+        try:
+            name_id = ElggMetastrings.objects.using(self.import_id).filter(string="site_invitation").first().id
+            elgg_site_invitations = ElggAnnotations.objects.using(self.import_id).filter(name_id=name_id)
+        except Exception:
+            elgg_site_invitations = []
+
+        self.stdout.write("\n>> Site invitations (%i) " % elgg_site_invitations.count(), ending="")
+
+        for invite in elgg_site_invitations:
+            try:
+                value = ElggMetastrings.objects.using(self.import_id).filter(id=invite.value_id).first().string
+                values = value.split("|")
+                SiteInvitation.objects.create(
+                    email=values[1],
+                    code=values[0]
+                )
+                self.stdout.write(".", ending="")
+            except Exception:
+                self.stdout.write("x", ending="")
+
+    def _import_group_invitations(self):
+        close_old_connections()
+
+        try:
+            name_id = ElggMetastrings.objects.using(self.import_id).filter(string="email_invitation").first().id
+            elgg_group_invitations = ElggAnnotations.objects.using(self.import_id).filter(name_id=name_id)
+        except Exception:
+            elgg_group_invitations = []
+
+        self.stdout.write("\n>> Group invitations (%i) " % elgg_group_invitations.count(), ending="")
+
+        for invite in elgg_group_invitations:
+            try:
+                value = ElggMetastrings.objects.using(self.import_id).filter(id=invite.value_id).first().string
+                values = value.split("|")
+                group = Group.objects.get(id=GuidMap.objects.get(id=invite.entity.guid).guid)
+                user = User.objects.get(email=values[1])
+                GroupInvitation.objects.create(
+                    group=group,
+                    invited_user=user,
+                    code=values[0]
+                )
+                self.stdout.write(".", ending="")
+            except Exception:
+                self.stdout.write("x", ending="")
 
     def debug_model(self, model):
         self.stdout.write(', '.join("%s: %s" % item for item in vars(model).items() if not item[0].startswith('_')))

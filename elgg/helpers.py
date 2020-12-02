@@ -9,7 +9,8 @@ from file.models import FileFolder
 from wiki.models import Wiki
 from core.lib import ACCESS_TYPE, access_id_to_acl
 from elgg.models import (
-    ElggEntities, ElggObjectsEntity, ElggPrivateSettings, ElggConfig, GuidMap, ElggEntityViews, ElggEntityViewsLog, ElggAccessCollections
+    ElggEntities, ElggObjectsEntity, ElggPrivateSettings, ElggConfig, GuidMap, ElggEntityViews,
+    ElggEntityViewsLog, ElggAccessCollections, ElggEntityRelationships
 )
 from core.models import EntityView, EntityViewCount, ProfileField
 
@@ -40,6 +41,21 @@ class ElggHelpers():
 
         return setting.value
 
+    def is_plugin_active(self, plugin_name):
+        try:
+            plugin = ElggObjectsEntity.objects.using(self.database).get(entity__subtype__subtype='plugin', title=plugin_name)
+        except Exception:
+            print(f"Plugin {plugin} not found")
+            return None
+
+        try:
+            ElggEntityRelationships.objects.using(self.database).get(left=plugin.entity.guid, relationship='active_plugin')
+            return True
+        except Exception:
+            # plugin not active
+            return False
+
+
     def get_site_config(self, name):
         try:
             config = ElggConfig.objects.using(self.database).get(name=name)
@@ -50,11 +66,20 @@ class ElggHelpers():
         value = bytes(config.value.encode())
         return unserialize(value, decode_strings=True)
 
+    def get_profile_field(self, name):
+        profile_field_entities = ElggEntities.objects.using(self.database).filter(
+            subtype__subtype="custom_profile_field"
+        )
+
+        for item in profile_field_entities:
+            if item.get_metadata_value_by_name('metadata_name') == name:
+                return item
+
+        return None
+
     def get_profile_field_type(self, name):
-        profile_field_entity = ElggEntities.objects.using(self.database).filter(
-            subtype__subtype="custom_profile_field",
-            metadata__value__string=name,
-            metadata__name__string="metadata_name").first()
+
+        profile_field_entity= self.get_profile_field(name)
 
         if not profile_field_entity:
             return 'text_field'
@@ -77,10 +102,7 @@ class ElggHelpers():
         return field_type
 
     def get_profile_category(self, name):
-        profile_field_entity = ElggEntities.objects.using(self.database).filter(
-            subtype__subtype="custom_profile_field",
-            metadata__value__string=name,
-            metadata__name__string="metadata_name").first()
+        profile_field_entity= self.get_profile_field(name)
 
         if not profile_field_entity:
             return None
@@ -91,10 +113,7 @@ class ElggHelpers():
         return category
 
     def get_profile_options(self, name):
-        profile_field_entity = ElggEntities.objects.using(self.database).filter(
-            subtype__subtype="custom_profile_field",
-            metadata__value__string=name,
-            metadata__name__string="metadata_name").first()
+        profile_field_entity= self.get_profile_field(name)
 
         if not profile_field_entity:
             return []
@@ -105,10 +124,7 @@ class ElggHelpers():
         return options
 
     def get_profile_is_editable(self, name):
-        profile_field_entity = ElggEntities.objects.using(self.database).filter(
-            subtype__subtype="custom_profile_field",
-            metadata__value__string=name,
-            metadata__name__string="metadata_name").first()
+        profile_field_entity= self.get_profile_field(name)
 
         if not profile_field_entity:
             return True
@@ -117,6 +133,26 @@ class ElggHelpers():
 
         editable = metadata_type.value.string == 'yes' if metadata_type else True # default True
         return editable
+
+    def get_profile_is_mandatory(self, name):
+        profile_field_entity= self.get_profile_field(name)
+
+        if not profile_field_entity:
+            return False
+
+        metadata_type = profile_field_entity.metadata.filter(name__string="mandatory").first()
+
+        return metadata_type.value.string == 'yes' if metadata_type else False # default False
+
+    def get_profile_is_in_onboarding(self, name):
+        profile_field_entity= self.get_profile_field(name)
+
+        if not profile_field_entity:
+            return False
+
+        metadata_type = profile_field_entity.metadata.filter(name__string="show_on_register").first()
+
+        return metadata_type.value.string == 'yes' if metadata_type else False # default False
 
     def get_menu(self, menu_input):
 

@@ -47,6 +47,7 @@ class Mapper():
         user.created_at = datetime.fromtimestamp(elgg_user.entity.time_created)
         user.updated_at = datetime.fromtimestamp(elgg_user.entity.time_updated)
         user.is_active = elgg_user.banned == "no"
+        user.is_delete_requested = bool(elgg_user.entity.get_metadata_value_by_name("requestDelete"))
         user.ban_reason = elgg_user.entity.get_metadata_value_by_name("ban_reason") \
             if elgg_user.entity.get_metadata_value_by_name("ban_reason") and not elgg_user.banned == "no" else ""
         if elgg_user.admin == "yes":
@@ -77,7 +78,7 @@ class Mapper():
         return user_profile
 
     def get_user_profile_field(self, elgg_user: ElggUsersEntity, user_profile: UserProfile, profile_field: ProfileField, user: User):
-        metadata = elgg_user.entity.metadata.filter(name__string=profile_field.key).first()
+        metadata = elgg_user.entity.metadata.filter(name__string__iexact=profile_field.key).first()
         if metadata:
             user_profile_field = UserProfileField()
             user_profile_field.profile_field = profile_field
@@ -97,6 +98,10 @@ class Mapper():
         profile_field.is_editable_by_user = self.helpers.get_profile_is_editable(pleio_template_profile_item.get("key"))
         profile_field.is_filter = bool(pleio_template_profile_item.get("isFilter"))
         profile_field.is_in_overview = bool(pleio_template_profile_item.get("isInOverview"))
+
+        profile_field.is_in_onboarding = self.helpers.get_profile_is_in_onboarding(pleio_template_profile_item.get("key"))
+        profile_field.is_mandatory = self.helpers.get_profile_is_mandatory(pleio_template_profile_item.get("key"))
+
         return profile_field
 
     def get_group(self, elgg_group: ElggGroupsEntity):
@@ -307,8 +312,8 @@ class Mapper():
         entity.page_type = elgg_entity.entity.get_metadata_value_by_name("pageType") \
             if elgg_entity.entity.get_metadata_value_by_name("pageType") else "text"
 
-        entity.position = int(elgg_entity.entity.get_metadata_value_by_name("position")) \
-            if elgg_entity.entity.get_metadata_value_by_name("position") else 0
+        entity.position = int(elgg_entity.entity.get_metadata_value_by_name("order")) \
+            if elgg_entity.entity.get_metadata_value_by_name("order") else 0
         entity.tags = elgg_entity.entity.get_metadata_values_by_name("tags")
 
         entity.owner = self.helpers.get_user_or_admin(elgg_entity.entity.owner_guid)
@@ -334,7 +339,7 @@ class Mapper():
             entity.page = Page.objects.get(id=guid_map_page.guid)
         except Exception:
             return None
- 
+
         return entity
 
     def get_column(self, elgg_entity: ElggObjectsEntity):
@@ -559,8 +564,8 @@ class Mapper():
         entity.rich_description = elgg_entity.entity.get_metadata_value_by_name("richDescription")
         entity.tags = elgg_entity.entity.get_metadata_values_by_name("tags")
         entity.owner = self.helpers.get_user_or_admin(elgg_entity.entity.owner_guid)
-        entity.position = int(elgg_entity.entity.get_metadata_value_by_name("position")) \
-            if elgg_entity.entity.get_metadata_value_by_name("position") else 0
+        entity.position = int(elgg_entity.entity.get_metadata_value_by_name("order")) \
+            if elgg_entity.entity.get_metadata_value_by_name("order") else 0
 
         in_group = GuidMap.objects.filter(id=elgg_entity.entity.container_guid, object_type="group").first()
         if in_group:

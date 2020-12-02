@@ -84,7 +84,7 @@ class HandleSiteAccessRequestTestCase(FastTenantTestCase):
 
         self.assertEqual(data["handleSiteAccessRequest"]["success"], True)
         self.assertFalse(User.objects.filter(email=self.request1.email).exists())
-        
+
         mocked_send_mail_multi.assert_called_once()
 
     @override_settings(ALLOWED_HOSTS=['test.test'])
@@ -113,7 +113,7 @@ class HandleSiteAccessRequestTestCase(FastTenantTestCase):
 
         self.assertEqual(data["handleSiteAccessRequest"]["success"], True)
         self.assertFalse(User.objects.filter(email=self.request1.email).exists())
-        
+
         mocked_send_mail_multi.assert_not_called()
 
     def test_handle_access_request_by_user(self):
@@ -144,7 +144,7 @@ class HandleSiteAccessRequestTestCase(FastTenantTestCase):
 
         variables = {
             "input": {
-                    "email": "test1@pleio.nl", 
+                    "email": "test1@pleio.nl",
                     "accept": True
                 }
             }

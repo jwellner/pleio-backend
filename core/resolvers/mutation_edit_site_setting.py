@@ -118,7 +118,9 @@ def resolve_edit_site_setting(_, info, input):
 
         'cookieConsent': 'COOKIE_CONSENT',
         'loginIntro': 'LOGIN_INTRO',
-        'customCss': 'CUSTOM_CSS'
+        'customCss': 'CUSTOM_CSS',
+        'siteMembershipAcceptedIntro': 'SITE_MEMBERSHIP_ACCEPTED_INTRO',
+        'siteMembershipDeniedIntro': 'SITE_MEMBERSHIP_DENIED_INTRO'
     }
 
     for k, v in setting_keys.items():

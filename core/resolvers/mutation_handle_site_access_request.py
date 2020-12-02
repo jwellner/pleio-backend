@@ -51,9 +51,11 @@ def resolve_handle_site_access_request(_, info, input):
 
         if accepted:
             subject = ugettext_lazy("You are now member of: %(site_name)s" % {'site_name': config.NAME })
+            context['intro'] = config.SITE_MEMBERSHIP_ACCEPTED_INTRO
             send_mail_multi.delay(tenant_schema(), subject, 'email/site_access_request_accepted.html', context, access_request.claims.get('email'))
         else:
             subject = ugettext_lazy("Membership request declined for: %(site_name)s" % {'site_name': config.NAME })
+            context['intro'] = config.SITE_MEMBERSHIP_DENIED_INTRO
             send_mail_multi.delay(tenant_schema(), subject, 'email/site_access_request_denied.html', context, access_request.claims.get('email'))
 
     access_request.delete()

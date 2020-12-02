@@ -38,7 +38,7 @@ def resolve_groups(
     if tags:
         groups = groups.filter(conditional_tags_filter(tags))
 
-    edges = groups[offset:offset+limit]
+    edges = groups.order_by('-is_featured', 'name')[offset:offset+limit]
 
     return {
         'total': groups.count(),
