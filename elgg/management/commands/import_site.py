@@ -901,7 +901,7 @@ class Command(InteractiveTenantOption, BaseCommand):
             name_id = ElggMetastrings.objects.using(self.import_id).filter(string="site_invitation").first().id
             elgg_site_invitations = ElggAnnotations.objects.using(self.import_id).filter(name_id=name_id)
         except Exception:
-            elgg_site_invitations = []
+            elgg_site_invitations = ElggAnnotations.objects.none()
 
         self.stdout.write("\n>> Site invitations (%i) " % elgg_site_invitations.count(), ending="")
 
@@ -924,7 +924,7 @@ class Command(InteractiveTenantOption, BaseCommand):
             name_id = ElggMetastrings.objects.using(self.import_id).filter(string="email_invitation").first().id
             elgg_group_invitations = ElggAnnotations.objects.using(self.import_id).filter(name_id=name_id)
         except Exception:
-            elgg_group_invitations = []
+            elgg_group_invitations = ElggAnnotations.objects.none()
 
         self.stdout.write("\n>> Group invitations (%i) " % elgg_group_invitations.count(), ending="")
 
