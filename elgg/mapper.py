@@ -518,8 +518,12 @@ class Mapper():
     def get_file(self, elgg_entity: ElggObjectsEntity):
 
         try:
+            file_path = self.helpers.get_elgg_file_path(elgg_entity)
+            if not file_path:
+                return None
+
             entity = FileFolder()
-            entity.title = elgg_entity.title
+            entity.title = elgg_entity.title[:256]
             entity.tags = elgg_entity.entity.get_metadata_values_by_name("tags")
 
             folder_relation = elgg_entity.entity.relation_inverse.filter(relationship="folder_of", right__guid=elgg_entity.entity.guid).first()
@@ -530,7 +534,8 @@ class Mapper():
                     entity.parent = FileFolder.objects.get(id=parent_guid, is_folder=True)
 
             entity.mime_type = str(elgg_entity.entity.get_metadata_value_by_name("mimetype"))
-            entity.upload.name = self.helpers.get_elgg_file_path(elgg_entity)
+
+            entity.upload.name = file_path
 
             entity.owner = self.helpers.get_user_or_admin(elgg_entity.entity.owner_guid)
 

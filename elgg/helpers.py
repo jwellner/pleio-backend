@@ -233,6 +233,8 @@ class ElggHelpers():
 
     def get_elgg_file_path(self, elgg_file):
         filename = elgg_file.entity.get_metadata_value_by_name("filename")
+        if not filename:
+            return None
 
         user_guid = GuidMap.objects.get(id=elgg_file.entity.owner_guid, object_type='user').guid
         user = User.objects.get(id=user_guid)
@@ -412,7 +414,8 @@ class ElggHelpers():
         access_id = int(access_id)
         if access_id >= 3:
 
-            if hasattr(obj, 'group'):
+            # test if object has attr group and group is not None
+            if hasattr(obj, 'group') and obj.group:
                 access_collection = ElggAccessCollections.objects.using(self.database).filter(id=access_id).first()
                 if access_collection and not access_collection.name[:6] in ['Groep:', 'Group:']:
                     subgroup = obj.group.subgroups.filter(name=access_collection.name).first()
