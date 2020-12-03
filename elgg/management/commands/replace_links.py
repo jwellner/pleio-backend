@@ -100,6 +100,7 @@ class Command(InteractiveTenantOption, BaseCommand):
         self.stdout.write(f"Found elgg domain {self.elgg_domain} and tenant domain {self.tenant_domain}")
 
         self._replace_menu()
+        self._replace_direct_links()
         self._replace_entity_description()
         self._replace_group_description()
         self._replace_comment_description()
@@ -121,6 +122,18 @@ class Command(InteractiveTenantOption, BaseCommand):
                     child['link'] = self._replace_links(child['link'])
 
         config.MENU = menu_items
+        self.stdout.write(".", ending="")
+
+    def _replace_direct_links(self):
+        self.stdout.write("\n>> Replace DIRECT links (1) ", ending="")
+
+        direct_links = config.DIRECT_LINKS
+        for item in direct_links:
+            if 'link' in item and item['link']:
+                item['link'] = self._replace_links(item['link'])
+
+
+        config.DIRECT_LINKS = direct_links
         self.stdout.write(".", ending="")
 
     def _replace_entity_description(self):
@@ -185,7 +198,7 @@ class Command(InteractiveTenantOption, BaseCommand):
                         if new_value != setting.get('value'):
                             setting['value'] = new_value
                             changed = True
-                        
+
             if changed:
                 widget.save()
                 self.stdout.write("*", ending="")
@@ -214,7 +227,8 @@ class Command(InteractiveTenantOption, BaseCommand):
         if not text:
             return ""
 
-        matches = re.findall(rf'(((https:\/\/{re.escape(self.elgg_domain)})|(^|(?<=[ \"\n]))\/)[\w\-\/]*\/(view|download)\/([0-9]+)[\w\-\.\/\?\%]*)', text)
+        # match links where old ID has to be replaced
+        matches = re.findall(rf'(((https:\/\/{re.escape(self.elgg_domain)})|(^|(?<=[ \"\n])))[\w\-\/]*\/(view|download)\/([0-9]+)[\w\-\.\/\?\%]*)', text)
 
         for match in matches:
             link = match[0]
@@ -228,7 +242,7 @@ class Command(InteractiveTenantOption, BaseCommand):
             if link != new_link:
                 text = text.replace(link, new_link)
 
-        # make all local links relative
-        text = text.replace(f"https://{self.elgg_domain}/", "/")
+        # replace elgg domain with tenant domain
+        text = text.replace(f"https://{self.elgg_domain}", f"https://{self.tenant_domain}")
 
         return text
