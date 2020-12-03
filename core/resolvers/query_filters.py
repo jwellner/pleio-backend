@@ -14,21 +14,19 @@ def get_filter_options(key, user):
     if not user.is_authenticated:
         raise GraphQLError(NOT_LOGGED_IN)
 
-    s = Search(index='users').filter(
+    s = Search(index='user').filter(
         'terms', read_access=list(get_acl(user))
     ).filter(
         'match', tenant_name=tenant_name
     )
 
     response = s.execute()
-
     for hit in response:
         for field in hit['_profile']['user_profile_fields']:
             if field['key'] == key:
                 options.append(field['value'])
 
     return list(set(options))
-
 
 
 def resolve_filters(_, info):
@@ -47,7 +45,7 @@ def resolve_filters(_, info):
 
     for field in profile_fields:
         if field.is_filter and field.is_filterable:
-            if field.field_type == 'multi_select_field':
+            if field.field_type in ['multi_select_field', 'select_field']:
                 options = field.field_options
             else:
                 options = get_filter_options(field.key, user)
@@ -58,6 +56,7 @@ def resolve_filters(_, info):
                     "label": field.name,
                     "keys": options
                 })
+
     return {
         'users': user_filters
     }
