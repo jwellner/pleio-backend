@@ -426,7 +426,7 @@ class Mapper():
 
     def get_poll(self, elgg_entity: ElggObjectsEntity):
         entity = Poll()
-        entity.title = elgg_entity.title
+        entity.title = elgg_entity.title[:256]
         entity.description = elgg_entity.description.replace("&amp;", "&")
         entity.tags = elgg_entity.entity.get_metadata_values_by_name("tags")
 
@@ -456,7 +456,10 @@ class Mapper():
             poll_guid = GuidMap.objects.get(id=elgg_poll_relation.right.guid, object_type="poll").guid
             entity.poll = Poll.objects.get(id=poll_guid)
 
-            entity.text = elgg_entity.entity.get_metadata_value_by_name("text")
+            if elgg_entity.entity.get_metadata_value_by_name("text"):
+                entity.text = elgg_entity.entity.get_metadata_value_by_name("text")[:256]
+            else:
+                entity.text = ""
 
             return entity
         except ObjectDoesNotExist:
