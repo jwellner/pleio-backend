@@ -26,6 +26,7 @@ from django.db.models import ObjectDoesNotExist
 
 import json
 import html
+import pydash
 
 
 class Command(InteractiveTenantOption, BaseCommand):
@@ -341,35 +342,61 @@ class Command(InteractiveTenantOption, BaseCommand):
 
             self.stdout.write(".", ending="")
 
-    def _import_users(self):
+    def _import_profile_fields(self):
         close_old_connections()
-        # Load site entity
-        site = ElggSitesEntity.objects.using(self.import_id).first()
 
         # Import site profile settings
-        profile = self.helpers.get_plugin_setting("profile")
+        pleio_template_profile = self.helpers.get_plugin_setting("profile")
 
         # Store fields for later use
         profile_fields = []
 
-        if profile:
-            profile_items = json.loads(profile)
-            self.stdout.write("\n>> ProfileItems (%i) " % len(profile_items), ending="")
-            for item in profile_items:
+        if pleio_template_profile:
+            profile_items = json.loads(pleio_template_profile)
+        else:
+            profile_items = []
 
-                profile_field = self.mapper.get_profile_field(item)
-                profile_field.save()
-                profile_fields.append(profile_field)
+        # merge with "hidden" profile items
+        profile_field_entities = ElggEntities.objects.using(self.import_id).filter(
+            subtype__subtype="custom_profile_field"
+        )
+        
+        # check if profiel field is already in profile_items else add
+        for item in profile_field_entities:
+            key = item.get_metadata_value_by_name('metadata_name')
+            name = item.get_metadata_value_by_name('metadata_label')
+            found = pydash.find(profile_items, lambda o: o.get('key', False) == key)
+            if not found:
+                profile_items.append({
+                    'key': key,
+                    'name': name
+                })
 
-                self.stdout.write(".", ending="")
+        self.stdout.write("\n>> ProfileItems (%i) " % len(profile_items), ending="")
+        for item in profile_items:
 
-            config.PROFILE_SECTIONS = self.helpers.get_profile_sections(json.loads(html.unescape(profile)))
+            profile_field = self.mapper.get_profile_field(item)
+            profile_field.save()
+            profile_fields.append(profile_field)
 
-            # if one of the profile_fields is_mandatory enable onboarding form
-            mandatory_fields = ProfileField.objects.filter(is_mandatory=True).first()
-            if mandatory_fields:
-                config.ONBOARDING_ENABLED = True
-                config.ONBOARDING_FORCE_EXISTING_USERS = True
+            self.stdout.write(".", ending="")
+
+        if pleio_template_profile:
+            config.PROFILE_SECTIONS = self.helpers.get_profile_sections(json.loads(html.unescape(pleio_template_profile)))
+
+        # if one of the profile_fields is_mandatory enable onboarding form
+        mandatory_fields = ProfileField.objects.filter(is_mandatory=True).first()
+        if mandatory_fields:
+            config.ONBOARDING_ENABLED = True
+            config.ONBOARDING_FORCE_EXISTING_USERS = True
+        
+        return profile_fields
+
+    def _import_users(self):
+        close_old_connections()
+
+        # get profile fields
+        profile_fields = self._import_profile_fields()
 
         # Import users
         elgg_users = ElggUsersEntity.objects.using(self.import_id)
