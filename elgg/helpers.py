@@ -7,7 +7,7 @@ from cms.models import Page
 from user.models import User
 from file.models import FileFolder
 from wiki.models import Wiki
-from core.lib import ACCESS_TYPE, access_id_to_acl
+from core.lib import access_id_to_acl
 from elgg.models import (
     ElggEntities, ElggObjectsEntity, ElggPrivateSettings, ElggConfig, GuidMap, ElggEntityViews,
     ElggEntityViewsLog, ElggAccessCollections, ElggEntityRelationships
@@ -276,8 +276,8 @@ class ElggHelpers():
 
             entity.is_folder = False
 
-            entity.write_access = [ACCESS_TYPE.user.format(entity.owner.guid)]
-            entity.read_access = self.elgg_access_id_to_acl(entity, elgg_entity.entity.access_id)
+            entity.read_access = self.elgg_access_id_to_acl(entity, 2)
+            entity.write_access = self.elgg_access_id_to_acl(entity, 0)
 
             entity.created_at = datetime.fromtimestamp(elgg_entity.entity.time_created)
             entity.updated_at = datetime.fromtimestamp(elgg_entity.entity.time_updated)
@@ -317,8 +317,8 @@ class ElggHelpers():
 
             entity.is_folder = False
 
-            entity.write_access = [ACCESS_TYPE.user.format(entity.owner.guid)]
-            entity.read_access = self.elgg_access_id_to_acl(entity, elgg_entity.entity.access_id)
+            entity.read_access = self.elgg_access_id_to_acl(entity, 2)
+            entity.write_access = self.elgg_access_id_to_acl(entity, 0)
 
             entity.created_at = datetime.fromtimestamp(elgg_entity.entity.time_created)
             entity.updated_at = datetime.fromtimestamp(elgg_entity.entity.time_updated)
