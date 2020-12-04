@@ -92,7 +92,6 @@ class Command(InteractiveTenantOption, BaseCommand):
 
         self.helpers = ElggHelpers(self.import_id)
         self.mapper = Mapper(self.import_id)
-        self.profile_fields = []
 
         if GuidMap.objects.count() > 0:
             self.stdout.write(f"Import already run on tenant {tenant.schema_name}. Exiting.")
@@ -344,6 +343,8 @@ class Command(InteractiveTenantOption, BaseCommand):
             self.stdout.write(".", ending="")
 
     def _import_profile_fields(self):
+        close_old_connections()
+
         # Import site profile settings
         pleio_template_profile = self.helpers.get_plugin_setting("profile")
 
