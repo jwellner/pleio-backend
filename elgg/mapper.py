@@ -92,12 +92,12 @@ class Mapper():
     def get_profile_field(self, pleio_template_profile_item):
         profile_field = ProfileField()
         profile_field.key = pleio_template_profile_item.get("key")
-        profile_field.name = pleio_template_profile_item.get("name")
+        profile_field.name = pleio_template_profile_item.get("name") if pleio_template_profile_item.get("name") else pleio_template_profile_item.get("key")
         profile_field.field_type = self.helpers.get_profile_field_type(pleio_template_profile_item.get("key"))
         profile_field.field_options = self.helpers.get_profile_options(pleio_template_profile_item.get("key"))
         profile_field.is_editable_by_user = self.helpers.get_profile_is_editable(pleio_template_profile_item.get("key"))
-        profile_field.is_filter = bool(pleio_template_profile_item.get("isFilter"))
-        profile_field.is_in_overview = bool(pleio_template_profile_item.get("isInOverview"))
+        profile_field.is_filter = bool(pleio_template_profile_item.get("isFilter", False))
+        profile_field.is_in_overview = bool(pleio_template_profile_item.get("isInOverview", False))
 
         profile_field.is_in_onboarding = self.helpers.get_profile_is_in_onboarding(pleio_template_profile_item.get("key"))
         profile_field.is_mandatory = self.helpers.get_profile_is_mandatory(pleio_template_profile_item.get("key"))
@@ -426,7 +426,7 @@ class Mapper():
 
     def get_poll(self, elgg_entity: ElggObjectsEntity):
         entity = Poll()
-        entity.title = elgg_entity.title
+        entity.title = elgg_entity.title[:256]
         entity.description = elgg_entity.description.replace("&amp;", "&")
         entity.tags = elgg_entity.entity.get_metadata_values_by_name("tags")
 
@@ -456,7 +456,10 @@ class Mapper():
             poll_guid = GuidMap.objects.get(id=elgg_poll_relation.right.guid, object_type="poll").guid
             entity.poll = Poll.objects.get(id=poll_guid)
 
-            entity.text = elgg_entity.entity.get_metadata_value_by_name("text")
+            if elgg_entity.entity.get_metadata_value_by_name("text"):
+                entity.text = elgg_entity.entity.get_metadata_value_by_name("text")[:256]
+            else:
+                entity.text = ""
 
             return entity
         except ObjectDoesNotExist:
@@ -518,8 +521,12 @@ class Mapper():
     def get_file(self, elgg_entity: ElggObjectsEntity):
 
         try:
+            file_path = self.helpers.get_elgg_file_path(elgg_entity)
+            if not file_path:
+                return None
+
             entity = FileFolder()
-            entity.title = elgg_entity.title
+            entity.title = elgg_entity.title[:256]
             entity.tags = elgg_entity.entity.get_metadata_values_by_name("tags")
 
             folder_relation = elgg_entity.entity.relation_inverse.filter(relationship="folder_of", right__guid=elgg_entity.entity.guid).first()
@@ -530,7 +537,8 @@ class Mapper():
                     entity.parent = FileFolder.objects.get(id=parent_guid, is_folder=True)
 
             entity.mime_type = str(elgg_entity.entity.get_metadata_value_by_name("mimetype"))
-            entity.upload.name = self.helpers.get_elgg_file_path(elgg_entity)
+
+            entity.upload.name = file_path
 
             entity.owner = self.helpers.get_user_or_admin(elgg_entity.entity.owner_guid)
 

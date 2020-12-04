@@ -7,7 +7,7 @@ from cms.models import Page
 from user.models import User
 from file.models import FileFolder
 from wiki.models import Wiki
-from core.lib import ACCESS_TYPE, access_id_to_acl
+from core.lib import access_id_to_acl
 from elgg.models import (
     ElggEntities, ElggObjectsEntity, ElggPrivateSettings, ElggConfig, GuidMap, ElggEntityViews,
     ElggEntityViewsLog, ElggAccessCollections, ElggEntityRelationships
@@ -233,6 +233,8 @@ class ElggHelpers():
 
     def get_elgg_file_path(self, elgg_file):
         filename = elgg_file.entity.get_metadata_value_by_name("filename")
+        if not filename:
+            return None
 
         user_guid = GuidMap.objects.get(id=elgg_file.entity.owner_guid, object_type='user').guid
         user = User.objects.get(id=user_guid)
@@ -274,8 +276,8 @@ class ElggHelpers():
 
             entity.is_folder = False
 
-            entity.write_access = [ACCESS_TYPE.user.format(entity.owner.guid)]
-            entity.read_access = self.elgg_access_id_to_acl(entity, elgg_entity.entity.access_id)
+            entity.read_access = self.elgg_access_id_to_acl(entity, 2)
+            entity.write_access = self.elgg_access_id_to_acl(entity, 0)
 
             entity.created_at = datetime.fromtimestamp(elgg_entity.entity.time_created)
             entity.updated_at = datetime.fromtimestamp(elgg_entity.entity.time_updated)
@@ -315,8 +317,8 @@ class ElggHelpers():
 
             entity.is_folder = False
 
-            entity.write_access = [ACCESS_TYPE.user.format(entity.owner.guid)]
-            entity.read_access = self.elgg_access_id_to_acl(entity, elgg_entity.entity.access_id)
+            entity.read_access = self.elgg_access_id_to_acl(entity, 2)
+            entity.write_access = self.elgg_access_id_to_acl(entity, 0)
 
             entity.created_at = datetime.fromtimestamp(elgg_entity.entity.time_created)
             entity.updated_at = datetime.fromtimestamp(elgg_entity.entity.time_updated)
@@ -412,7 +414,8 @@ class ElggHelpers():
         access_id = int(access_id)
         if access_id >= 3:
 
-            if hasattr(obj, 'group'):
+            # test if object has attr group and group is not None
+            if hasattr(obj, 'group') and obj.group:
                 access_collection = ElggAccessCollections.objects.using(self.database).filter(id=access_id).first()
                 if access_collection and not access_collection.name[:6] in ['Groep:', 'Group:']:
                     subgroup = obj.group.subgroups.filter(name=access_collection.name).first()
