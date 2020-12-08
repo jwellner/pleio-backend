@@ -3,6 +3,9 @@ from __future__ import absolute_import, unicode_literals
 
 import csv
 import os
+import json
+import re
+import signal_disabler
 
 from celery import shared_task
 from celery.utils.log import get_task_logger
@@ -15,7 +18,7 @@ from elasticsearch_dsl import Search
 from core import config
 from core.lib import html_to_text, access_id_to_acl
 # from core.management.commands.send_notification_emails import get_notification
-from core.models import ProfileField, UserProfileField, Entity, GroupMembership
+from core.models import ProfileField, UserProfileField, Entity, GroupMembership, Comment, Widget, Group
 from django.core.mail import EmailMultiAlternatives
 from django.template.loader import get_template
 from django.utils import translation
@@ -23,7 +26,7 @@ from django.conf import settings
 from notifications.signals import notify
 from user.models import User
 from django.utils.translation import ugettext_lazy
-
+from elgg.models import GuidMap
 from file.models import FileFolder
 
 logger = get_task_logger(__name__)
@@ -358,3 +361,137 @@ def create_notification(self, schema_name, verb, entity_id, sender_id, recipient
                     send_mail_multi.delay(schema_name, subject, 'email/send_notification_emails.html', context, recipient.email)
                     notification.emailed = True
                     notification.save()
+
+
+@shared_task(bind=True, ignore_result=True)
+@signal_disabler.disable()
+def replace_domain_links(self, schema_name, replace_domain, replace_elgg_id=False):
+    # pylint: disable=unused-argument
+    # pylint: disable=too-many-locals
+    # pylint: disable=too-many-statements
+    # pylint: disable=too-many-branches
+
+
+    '''
+    Replace all links with old domain to new
+    '''
+    with schema_context(schema_name):
+        # TODO: Disable updated_at
+
+        tenant = Client.objects.get(schema_name=schema_name)
+        tenant_domain = tenant.get_primary_domain().domain
+
+        def _replace_links(text):
+            if replace_elgg_id:
+                # match links where old ID has to be replaced
+                matches = re.findall(rf'(((https:\/\/{re.escape(replace_domain)})|(^|(?<=[ \"\n])))[\w\-\/]*\/(view|download)\/([0-9]+)[\w\-\.\/\?\%]*)', text)
+
+                for match in matches:
+                    link = match[0]
+                    new_link = link
+                    ids = re.findall(r'\/([0-9]+)', link)
+                    for guid in ids:
+                        map_entity = GuidMap.objects.filter(id=guid).first()
+                        if map_entity:
+                            new_link = new_link.replace(str(guid), str(map_entity.guid))
+
+                    if link != new_link:
+                        text = text.replace(link, new_link)
+
+            return text.replace(f"https://{replace_domain}", f"https://{tenant_domain}")
+
+        def _replace_rich_description_json(rich_description):
+            if rich_description:
+                try:
+                    data = json.loads(rich_description)
+                    for idx in data["entityMap"]:
+                        if data["entityMap"][idx]["type"] == "IMAGE":
+                            data["entityMap"][idx]["data"]["src"] = _replace_links(data["entityMap"][idx]["data"]["src"])
+                        if data["entityMap"][idx]["type"] in ["LINK", "DOCUMENT"]:
+                            if "url" in data["entityMap"][idx]["data"]:
+                                data["entityMap"][idx]["data"]["url"] = _replace_links(data["entityMap"][idx]["data"]["url"])
+                            if "href" in data["entityMap"][idx]["data"]:
+                                data["entityMap"][idx]["data"]["href"] = _replace_links(data["entityMap"][idx]["data"]["href"])
+                    return json.dumps(data)
+                except Exception:
+                    pass
+            return rich_description
+
+        logger.info("Start replace links on %s from %s to %s", tenant, replace_domain, tenant_domain)
+
+        # -- Replace MENU items
+        menu_items = config.MENU
+        for item in menu_items:
+            if 'link' in item and item['link']:
+                item['link'] = _replace_links(item['link'])
+
+            for child in item.get("children", []):
+                if 'link' in child and child['link']:
+                    child['link'] = _replace_links(child['link'])
+
+        config.MENU = menu_items
+
+        # -- Replace DIRECT_LINKS
+        direct_links = config.DIRECT_LINKS
+        for item in direct_links:
+            if 'link' in item and item['link']:
+                item['link'] = _replace_links(item['link'])
+
+        config.DIRECT_LINKS = direct_links
+
+        # -- Replace entity descriptions
+        entities = Entity.objects.all().select_subclasses()
+
+        for entity in entities:
+            if hasattr(entity, 'rich_description'):
+                rich_description = _replace_rich_description_json(entity.rich_description)
+
+                description = _replace_links(entity.description)
+
+                if rich_description != entity.rich_description or description != entity.description:
+                    entity.rich_description = rich_description
+                    entity.description = description
+                    entity.save()
+
+        # -- Replace group description
+        groups = Group.objects.all()
+
+        for group in groups:
+            rich_description = _replace_rich_description_json(group.rich_description)
+            description = _replace_links(group.description)
+
+            if rich_description != group.rich_description or description != group.description:
+                group.rich_description = rich_description
+                group.description = description
+                group.save()
+
+        # -- Replace comment description
+        comments = Comment.objects.all()
+
+        for comment in comments:
+            rich_description = _replace_rich_description_json(comment.rich_description)
+            description = _replace_links(comment.description)
+
+            if rich_description != comment.rich_description or description != comment.description:
+                comment.rich_description = rich_description
+                comment.description = description
+                comment.save()
+
+        # -- Replace widget settings
+        widgets = Widget.objects.all()
+
+        for widget in widgets:
+            changed = False
+            if widget.settings:
+                for setting in widget.settings:
+                    if 'value' in setting and isinstance(setting.get('value'), str):
+                        new_value = _replace_links(setting.get('value'))
+                        if new_value != setting.get('value'):
+                            setting['value'] = new_value
+                            changed = True
+
+            if changed:
+                widget.save()
+
+    logger.info("Done replacing links")
+    return True

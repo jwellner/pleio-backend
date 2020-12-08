@@ -52,6 +52,7 @@ services:
     restart: on-failure
     environment:
       RUN_AS_ADMIN_APP: 'True'
+      CELERY_BROKER_URL: 'amqp://rabbitmq'
     env_file:
       - ./.env
     stdin_open: true
