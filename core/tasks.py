@@ -398,7 +398,12 @@ def replace_domain_links(self, schema_name, replace_domain, replace_elgg_id=Fals
                     if link != new_link:
                         text = text.replace(link, new_link)
 
-            return text.replace(f"https://{replace_domain}", f"https://{tenant_domain}")
+            # make absolute links relative
+            text = text.replace(f"https://{replace_domain}/", f"/")
+
+            # replace link without path
+            text = text.replace(f"https://{replace_domain}", f"https://{tenant_domain}")
+            return text
 
         def _replace_rich_description_json(rich_description):
             if rich_description:
