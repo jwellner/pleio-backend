@@ -7,7 +7,7 @@ from ariadne.contrib.django.views import GraphQLView
 from .schema import schema
 
 from core.sitemaps import sitemaps
-from core import admin as core_admin
+from core import superadmin_views as core_superadmin
 from core import views as core_views
 from file import views as file_views
 from event import views as event_views
@@ -23,8 +23,9 @@ urlpatterns = [
     path('login/requested', core_views.access_requested, name='access_requested'),
     path('oidc/failure/', core_views.logout, name='oidc_failure'),
     path('oidc/', include('mozilla_django_oidc.urls')),
-    path('superadmin/logout/', core_views.logout, name='logout'),
-    path('superadmin/', core_admin.site.urls),
+    path('superadmin', core_superadmin.home),
+    path('superadmin/', core_superadmin.home),
+    path('superadmin/tasks', core_superadmin.tasks),
     path('graphql', GraphQLView.as_view(schema=schema), name='graphql'),
 
     path('file/download/<uuid:file_id>/<str:file_name>', file_views.download, name='download'),
