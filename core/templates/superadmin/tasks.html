@@ -1,0 +1,46 @@
+{% extends "superadmin/base.html" %}
+
+{% load i18n %}
+
+{% block content %}
+
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+    <h1 class="h2">Tasks</h1>
+</div>
+
+<div class="card">
+    <h5 class="card-header">Elasticsearch</h5>
+    <div class="card-body">
+        <form method="post">
+            {% csrf_token %}
+            <input type="hidden" name="task" value="elasticsearch_rebuild">
+            <p>This task will rebuild the complete search index for this site.</p>
+            <button type="submit" class="btn btn-primary">Execute rebuild elasticsearch</button>
+        </form>
+    </div>
+  </div>
+
+
+  <div class="card mt-4">
+    <h5 class="card-header">Links</h5>
+    <div class="card-body">
+        <form method="post">
+            {% csrf_token %}
+            <input type="hidden" name="task" value="replace_links">
+            <p>This task will replace links to a old domain with the current domain.</p>
+            <div class="mb-3">
+                <label for="replace_domain" class="form-label">Old domain</label>
+                <input type="text" name="replace_domain"  class="form-control" id="replace_domain" aria-describedby="replaceDomainHelp">
+                <div id="replaceDomainHelp" class="form-text">Insert the old domain name to be replaced (format: support.pleio.nl). You can leave this field empty if you only want to replace ELGG id's on the current domain.</div>
+            </div>
+            <div class="mb-3 form-check">
+                <input type="checkbox" id="replace_elgg_id" name="replace_elgg_id" class="form-check-input" aria-describedby="replaceElggHelp" value="1">
+                <label class="form-check-label" for="replace_elgg_id">Replace ELGG id's</label>
+                <div id="replaceElggHelp" class="form-text">Replace ELGG id's</div>
+            </div>
+            <button type="submit" class="btn btn-primary">Execute replace links</button>
+        </form>
+    </div>
+  </div>
+
+{% endblock %}
