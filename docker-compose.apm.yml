@@ -5,7 +5,6 @@ services:
     environment:
       APM_ENABLED: 'True'
       APM_SERVICE_NAME: 'api'
-      APM_ENVIRONMENT: 'dev'
       APM_TOKEN: ''
       APM_SERVER_URL: http://apm-server:8200
       APM_VERIFY_SERVER_CERT: 'False'
@@ -13,7 +12,6 @@ services:
     environment:
       APM_ENABLED: 'True'
       APM_SERVICE_NAME: 'admin'
-      APM_ENVIRONMENT: 'dev'
       APM_TOKEN: ''
       APM_SERVER_URL: http://apm-server:8200
       APM_VERIFY_SERVER_CERT: 'False'
@@ -21,7 +19,6 @@ services:
     environment:
       APM_ENABLED: 'True'
       APM_SERVICE_NAME: 'background'
-      APM_ENVIRONMENT: 'dev'
       APM_TOKEN: ''
       APM_SERVER_URL: http://apm-server:8200
       APM_VERIFY_SERVER_CERT: 'False'
