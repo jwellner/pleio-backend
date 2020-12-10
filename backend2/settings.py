@@ -71,7 +71,6 @@ TENANT_APPS = [
     'django.contrib.contenttypes',
 
     # Optional
-    'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.sessions',
     'django.contrib.messages',

@@ -1,6 +1,5 @@
 import uuid
 from core.models import UserProfile, ProfileField, UserProfileField
-from core import config
 from django.db.models.signals import post_save
 from django.db import models
 from django.contrib.postgres.fields import ArrayField
@@ -159,13 +158,7 @@ class User(AbstractBaseUser):
 
     @property
     def is_profile_complete(self):
-        # only get configured profile fields
-        profile_section_guids = []
-
-        for section in config.PROFILE_SECTIONS:
-            profile_section_guids.extend(section['profileFieldGuids'])
-
-        fields = ProfileField.objects.filter(id__in=profile_section_guids, is_mandatory=True).all()
+        fields = ProfileField.objects.filter(is_mandatory=True).all()
 
         incomplete = 0
 

@@ -1,9 +1,0 @@
-{% extends "admin/base_site.html" %}
-
-{% block content %}
-<form action="/superadmin/tasks/" method="post">
-    {% csrf_token %}
-    <button type="submit" name='el-reb' value="el-rebuild">Rebuild elasticsearch index</button>
-</form>
-<ul class="messages"></ul>
-{% endblock %}
