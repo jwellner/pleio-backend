@@ -370,7 +370,7 @@ class ElggHelpers():
 
                 entity.save()
 
-                return "/file/embed/%s" % (str(entity.id))
+                return entity.embed_url
             return ""
         except Exception:
             return ""
