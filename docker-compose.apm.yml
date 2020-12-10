@@ -4,18 +4,29 @@ services:
   api:
     environment:
       APM_ENABLED: 'True'
-      APM_SERVICE_NAME: 'api-dev'
+      APM_SERVICE_NAME: 'api'
+      APM_ENVIRONMENT: 'dev'
       APM_TOKEN: ''
       APM_SERVER_URL: http://apm-server:8200
+      APM_VERIFY_SERVER_CERT: 'False'
   admin:
     environment:
       APM_ENABLED: 'True'
-      APM_SERVICE_NAME: 'admin-dev'
+      APM_SERVICE_NAME: 'admin'
+      APM_ENVIRONMENT: 'dev'
+      APM_TOKEN: ''
+      APM_SERVER_URL: http://apm-server:8200
+      APM_VERIFY_SERVER_CERT: 'False'
+  background:
+    environment:
+      APM_ENABLED: 'True'
+      APM_SERVICE_NAME: 'background'
+      APM_ENVIRONMENT: 'dev'
       APM_TOKEN: ''
       APM_SERVER_URL: http://apm-server:8200
       APM_VERIFY_SERVER_CERT: 'False'
   apm-server:
-    image: docker.elastic.co/apm/apm-server:7.8.1
+    image: docker.elastic.co/apm/apm-server:7.9.3
     cap_add: ["CHOWN", "DAC_OVERRIDE", "SETGID", "SETUID"]
     cap_drop: ["ALL"]
     ports: ['8200:8200']
@@ -29,7 +40,7 @@ services:
          -E output.elasticsearch.hosts=["elasticsearch:9200"]
     depends_on: ['elasticsearch', 'kibana']
   kibana:
-    image: docker.elastic.co/kibana/kibana:7.8.1
+    image: docker.elastic.co/kibana/kibana:7.9.3
     environment:
       ELASTICSEARCH_URL: http://elasticsearch:9200
       ELASTICSEARCH_HOSTS: http://elasticsearch:9200
