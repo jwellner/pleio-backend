@@ -261,7 +261,8 @@ class ElggHelpers():
 
     def save_and_get_featured_image(self, elgg_entity):
 
-        if not elgg_entity.entity.get_metadata_value_by_name("featuredIcontime"):
+        if not elgg_entity.entity.get_metadata_value_by_name("featuredIcontime") \
+            or int(elgg_entity.entity.get_metadata_value_by_name("featuredIcontime")) == 0:
             return None
 
         try:
@@ -300,7 +301,8 @@ class ElggHelpers():
 
     def save_and_get_group_icon(self, elgg_entity):
 
-        if not elgg_entity.entity.get_metadata_value_by_name("icontime"):
+        if not elgg_entity.entity.get_metadata_value_by_name("icontime") \
+            or int(elgg_entity.entity.get_metadata_value_by_name("icontime")) == 0:
             return None
 
         try:
