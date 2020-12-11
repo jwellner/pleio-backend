@@ -11,6 +11,8 @@ https://docs.djangoproject.com/en/1.10/ref/settings/
 """
 
 import os
+from elasticapm.contrib.opentracing import Tracer
+from opentracing import set_global_tracer
 
 from .config import *  # pylint: disable=unused-wildcard-import
 
@@ -282,10 +284,12 @@ CELERY_TIMEZONE = 'Europe/Amsterdam'
 if APM_ENABLED:
     ELASTIC_APM = {
         'SERVICE_NAME': os.getenv('APM_SERVICE_NAME'),
+        'ENVIRONMENT': ENV,
         'SECRET_TOKEN': os.getenv('APM_TOKEN'),
         'SERVER_URL': os.getenv('APM_SERVER_URL'),
         'VERIFY_SERVER_CERT': os.getenv('APM_VERIFY_SERVER_CERT') != "False",
         'DEBUG': True,
     }
+    set_global_tracer(Tracer(config=ELASTIC_APM))
 
 SECURE_REFERRER_POLICY = 'origin-when-cross-origin'
