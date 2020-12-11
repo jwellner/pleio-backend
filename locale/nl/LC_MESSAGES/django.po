@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-11-12 15:45+0100\n"
+"POT-Creation-Date: 2020-12-11 15:18+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -64,7 +64,7 @@ msgstr "Een site beheerder is verwijderd van %(site_name)s"
 msgid "You are now member of: %(site_name)s"
 msgstr "Je hebt nu toegang tot: %(site_name)s"
 
-#: core/resolvers/mutation_handle_site_access_request.py:56
+#: core/resolvers/mutation_handle_site_access_request.py:57
 #, python-format
 msgid "Membership request declined for: %(site_name)s"
 msgstr "Lidmaatschapsverzoek afgewezen voor: %(site_name)s"
@@ -147,47 +147,47 @@ msgstr "Een nieuwe site beheerder is toegewezen aan %(site_name)s"
 msgid "You're granted site administrator right on %(site_name)s"
 msgstr "U bent aangewezen als site beheerder van %(site_name)s"
 
-#: core/resolvers/query_site.py:111
+#: core/resolvers/query_site.py:112
 msgid "Activity stream"
 msgstr "Activiteitenstroom"
 
-#: core/resolvers/query_site.py:111
+#: core/resolvers/query_site.py:112
 msgid "CMS page"
 msgstr "CMS pagina"
 
-#: core/resolvers/query_site.py:145
+#: core/resolvers/query_site.py:146
 msgid "Daily"
 msgstr "Dagelijks"
 
-#: core/resolvers/query_site.py:146
+#: core/resolvers/query_site.py:147
 msgid "Weekly"
 msgstr "Wekelijks"
 
-#: core/resolvers/query_site.py:147
+#: core/resolvers/query_site.py:148
 msgid "Monthly"
 msgstr "Maandelijks"
 
-#: core/resolvers/query_site.py:148
+#: core/resolvers/query_site.py:149
 msgid "Never"
 msgstr "Nooit"
 
-#: core/resolvers/query_site.py:194
+#: core/resolvers/query_site.py:195
 msgid "Administrator"
 msgstr "Beheerder"
 
-#: core/resolvers/query_site.py:195
+#: core/resolvers/query_site.py:196
 msgid "Editor"
 msgstr "Redacteur"
 
-#: core/resolvers/query_site.py:196
+#: core/resolvers/query_site.py:197
 msgid "Question expert"
 msgstr "Vraagexpert"
 
-#: core/tasks.py:262
+#: core/tasks.py:265
 msgid "Import was a success"
 msgstr "Import afgerond"
 
-#: core/tasks.py:262
+#: core/tasks.py:265
 msgid "Import failed"
 msgstr "Import mislukt"
 
@@ -195,31 +195,6 @@ msgstr "Import mislukt"
 #, python-format
 msgid "New notification at %(site_name)s: "
 msgstr "Nieuwe notificatie op %(site_name)s"
-
-#: core/templates/admin/oidc_login.html:21
-msgid "Please correct the error below."
-msgstr "Corrigeer de onderstaande fout."
-
-#: core/templates/admin/oidc_login.html:21
-msgid "Please correct the errors below."
-msgstr "Corrigeer de onderstaande fouten."
-
-#: core/templates/admin/oidc_login.html:36
-#, python-format
-msgid ""
-"You are authenticated as %(username)s, but are not authorized to access this "
-"page."
-msgstr ""
-"U bent geauthenticeerd als %(username) s, maar bent niet gemachtigd om "
-"toegang te krijgen tot deze pagina."
-
-#: core/templates/admin/oidc_login.html:43
-msgid "Please click on the button to login."
-msgstr "Klik op de knop om in te loggen."
-
-#: core/templates/admin/oidc_login.html:47
-msgid "Log in"
-msgstr "Inloggen"
 
 #: core/templates/email/accept_membership_request.html:6
 #, python-format
@@ -481,7 +456,7 @@ msgstr ""
 "\n"
 "<a href=\"%(site_admin_url)s\">%(site_admin_url)s</a>\n"
 
-#: core/templates/email/site_access_request_accepted.html:6
+#: core/templates/email/site_access_request_accepted.html:7
 #, python-format
 msgid ""
 "Hello %(request_name)s, <br><br>\n"
@@ -501,7 +476,7 @@ msgstr ""
 "    %(site_url)s<br>\n"
 "    "
 
-#: core/templates/email/site_access_request_denied.html:5
+#: core/templates/email/site_access_request_denied.html:6
 #, python-format
 msgid ""
 "Hello %(request_name)s, <br><br>\n"
@@ -736,7 +711,7 @@ msgstr ""
 "De toegang is aangevraagd. Je ontvangt een e-mail wanneer de toegang door de "
 "beheerder wordt toegewezen."
 
-#: core/views.py:128
+#: core/views.py:136
 #, python-format
 msgid "New access request for %(site_name)s"
 msgstr "Nieuwe toegangsaanvraag voor %(site_name)s"
@@ -750,3 +725,22 @@ msgstr "Bevestiging aanmelding %s"
 #, python-format
 msgid "Confirmation of registration for %s"
 msgstr "Bevestiging aanmelding voor %s"
+
+#~ msgid "Please correct the error below."
+#~ msgstr "Corrigeer de onderstaande fout."
+
+#~ msgid "Please correct the errors below."
+#~ msgstr "Corrigeer de onderstaande fouten."
+
+#~ msgid ""
+#~ "You are authenticated as %(username)s, but are not authorized to access "
+#~ "this page."
+#~ msgstr ""
+#~ "U bent geauthenticeerd als %(username) s, maar bent niet gemachtigd om "
+#~ "toegang te krijgen tot deze pagina."
+
+#~ msgid "Please click on the button to login."
+#~ msgstr "Klik op de knop om in te loggen."
+
+#~ msgid "Log in"
+#~ msgstr "Inloggen"
