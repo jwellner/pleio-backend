@@ -388,7 +388,8 @@ class Command(InteractiveTenantOption, BaseCommand):
         mandatory_fields = ProfileField.objects.filter(is_mandatory=True).first()
         if mandatory_fields:
             config.ONBOARDING_ENABLED = True
-            config.ONBOARDING_FORCE_EXISTING_USERS = True
+            # Only enforce when plugin setting enforce_completion_mandatory_fields is yes
+            config.ONBOARDING_FORCE_EXISTING_USERS = self.helpers.get_plugin_setting('enforce_completion_mandatory_fields', 'profile_manager') == 'yes'
         
         return profile_fields
 

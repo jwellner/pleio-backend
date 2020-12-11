@@ -47,7 +47,7 @@ def dispatch_crons(self, period):
             send_overview.delay(client.schema_name, period)
 
 @shared_task(bind=True)
-def dispatch_task(self, task, **kwargs):
+def dispatch_task(self, task, *kwargs):
     # pylint: disable=unused-argument
     '''
     Dispatch task for all tenants

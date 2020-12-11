@@ -107,10 +107,21 @@ class ElggHelpers():
         if not profile_field_entity:
             return None
 
-        metadata_type = profile_field_entity.metadata.filter(name__string="metadata_label").first()
+        category_guid = profile_field_entity.get_metadata_value_by_name('category_guid')
 
-        category = metadata_type.value.string if metadata_type else None
-        return category
+        if category_guid:
+            category_entity = ElggEntities.objects.using(self.database).filter(
+                subtype__subtype="custom_profile_field_category",
+                guid=category_guid
+            ).first()
+
+            if category_entity:
+                if category_entity.get_metadata_value_by_name('metadata_label'):
+                    return category_entity.get_metadata_value_by_name('metadata_label')
+                if category_entity.get_metadata_value_by_name('metadata_name'):
+                    return category_entity.get_metadata_value_by_name('metadata_name')
+
+        return None 
 
     def get_profile_options(self, name):
         profile_field_entity= self.get_profile_field(name)
@@ -250,7 +261,8 @@ class ElggHelpers():
 
     def save_and_get_featured_image(self, elgg_entity):
 
-        if not elgg_entity.entity.get_metadata_value_by_name("featuredIcontime"):
+        if not elgg_entity.entity.get_metadata_value_by_name("featuredIcontime") \
+            or int(elgg_entity.entity.get_metadata_value_by_name("featuredIcontime")) == 0:
             return None
 
         try:
@@ -289,7 +301,8 @@ class ElggHelpers():
 
     def save_and_get_group_icon(self, elgg_entity):
 
-        if not elgg_entity.entity.get_metadata_value_by_name("icontime"):
+        if not elgg_entity.entity.get_metadata_value_by_name("icontime") \
+            or int(elgg_entity.entity.get_metadata_value_by_name("icontime")) == 0:
             return None
 
         try:
@@ -370,7 +383,7 @@ class ElggHelpers():
 
                 entity.save()
 
-                return "/file/embed/%s" % (str(entity.id))
+                return entity.embed_url
             return ""
         except Exception:
             return ""
