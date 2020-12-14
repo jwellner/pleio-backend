@@ -8,10 +8,10 @@
 
     The administrator approved your access request to {{ site_name }} . Go to this link to get access to the site:<br><br>
 
-    {{ site_url }}<br><br>
+    {{ site_url }}<br>
+    {% endblocktrans %}
 
-    {{ intro|linebreaks }}
+    <br>{{ intro|linebreaks }}
     <br><br>
 
-    {% endblocktrans %}
 {% endblock %}
