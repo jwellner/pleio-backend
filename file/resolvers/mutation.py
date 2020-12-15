@@ -1,6 +1,7 @@
 from graphql import GraphQLError
 from django.core.exceptions import ObjectDoesNotExist
 from ariadne import ObjectType
+from core import config
 from core.constances import ACCESS_TYPE, NOT_LOGGED_IN, COULD_NOT_FIND, COULD_NOT_SAVE, USER_ROLES
 from core.lib import remove_none_from_dict, access_id_to_acl
 from core.models import Group
@@ -70,7 +71,7 @@ def resolve_add_file(_, info, input):
     if group:
         entity.group = group
 
-    entity.read_access = access_id_to_acl(entity, clean_input.get("accessId"))
+    entity.read_access =  access_id_to_acl(entity, clean_input.get("accessId", config.DEFAULT_ACCESS_ID))
     entity.write_access = access_id_to_acl(entity, clean_input.get("writeAccessId"))
 
     entity.save()
@@ -243,6 +244,7 @@ def resolve_add_image(_, info, input):
         raise GraphQLError("NO_FILE")
 
     entity.read_access = [ACCESS_TYPE.public]
+    entity.write_access = access_id_to_acl(entity, 0)
 
     entity.upload = clean_input.get("image")
 
