@@ -69,7 +69,7 @@ class Command(InteractiveTenantOption, BaseCommand):
         self.import_id = "import_%s" % elgg_instance.name
 
         # Change connection to elgg site database
-        elgg_database_settings = settings.DATABASES["elgg_control"]
+        elgg_database_settings = settings.DATABASES["elgg_control"].copy()
         elgg_database_settings["id"] = self.import_id
         elgg_database_settings["NAME"] = elgg_instance.name
         connections.databases[self.import_id] = elgg_database_settings

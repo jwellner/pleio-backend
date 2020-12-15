@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-11-12 15:45+0100\n"
+"POT-Creation-Date: 2020-12-11 15:18+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -64,7 +64,7 @@ msgstr ""
 msgid "You are now member of: %(site_name)s"
 msgstr ""
 
-#: core/resolvers/mutation_handle_site_access_request.py:56
+#: core/resolvers/mutation_handle_site_access_request.py:57
 #, python-format
 msgid "Membership request declined for: %(site_name)s"
 msgstr ""
@@ -147,76 +147,53 @@ msgstr ""
 msgid "You're granted site administrator right on %(site_name)s"
 msgstr ""
 
-#: core/resolvers/query_site.py:111
+#: core/resolvers/query_site.py:112
 msgid "Activity stream"
 msgstr ""
 
-#: core/resolvers/query_site.py:111
+#: core/resolvers/query_site.py:112
 msgid "CMS page"
 msgstr ""
 
-#: core/resolvers/query_site.py:145
+#: core/resolvers/query_site.py:146
 msgid "Daily"
 msgstr ""
 
-#: core/resolvers/query_site.py:146
+#: core/resolvers/query_site.py:147
 msgid "Weekly"
 msgstr ""
 
-#: core/resolvers/query_site.py:147
+#: core/resolvers/query_site.py:148
 msgid "Monthly"
 msgstr ""
 
-#: core/resolvers/query_site.py:148
+#: core/resolvers/query_site.py:149
 msgid "Never"
 msgstr ""
 
-#: core/resolvers/query_site.py:194
+#: core/resolvers/query_site.py:195
 msgid "Administrator"
 msgstr ""
 
-#: core/resolvers/query_site.py:195
+#: core/resolvers/query_site.py:196
 msgid "Editor"
 msgstr ""
 
-#: core/resolvers/query_site.py:196
+#: core/resolvers/query_site.py:197
 msgid "Question expert"
 msgstr ""
 
-#: core/tasks.py:262
+#: core/tasks.py:265
 msgid "Import was a success"
 msgstr ""
 
-#: core/tasks.py:262
+#: core/tasks.py:265
 msgid "Import failed"
 msgstr ""
 
 #: core/tasks.py:340
 #, python-format
 msgid "New notification at %(site_name)s: "
-msgstr ""
-
-#: core/templates/admin/oidc_login.html:21
-msgid "Please correct the error below."
-msgstr ""
-
-#: core/templates/admin/oidc_login.html:21
-msgid "Please correct the errors below."
-msgstr ""
-
-#: core/templates/admin/oidc_login.html:36
-#, python-format
-msgid ""
-"You are authenticated as %(username)s, but are not authorized to access this "
-"page."
-msgstr ""
-
-#: core/templates/admin/oidc_login.html:43
-msgid "Please click on the button to login."
-msgstr ""
-
-#: core/templates/admin/oidc_login.html:47
-msgid "Log in"
 msgstr ""
 
 #: core/templates/email/accept_membership_request.html:6
@@ -424,7 +401,7 @@ msgid ""
 "<a href=\"%(site_admin_url)s\">%(site_admin_url)s</a>\n"
 msgstr ""
 
-#: core/templates/email/site_access_request_accepted.html:6
+#: core/templates/email/site_access_request_accepted.html:7
 #, python-format
 msgid ""
 "Hello %(request_name)s, <br><br>\n"
@@ -436,7 +413,7 @@ msgid ""
 "    "
 msgstr ""
 
-#: core/templates/email/site_access_request_denied.html:5
+#: core/templates/email/site_access_request_denied.html:6
 #, python-format
 msgid ""
 "Hello %(request_name)s, <br><br>\n"
@@ -614,7 +591,7 @@ msgid ""
 "Access is requested. You will receive an e-mail when the request is accepted."
 msgstr ""
 
-#: core/views.py:128
+#: core/views.py:136
 #, python-format
 msgid "New access request for %(site_name)s"
 msgstr ""

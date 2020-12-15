@@ -4,6 +4,7 @@ from django.views.decorators.cache import cache_page
 from django.shortcuts import render
 
 from ariadne.contrib.django.views import GraphQLView
+from ariadne.contrib.tracing.opentracing import OpenTracingExtensionSync
 from .schema import schema
 
 from core.sitemaps import sitemaps
@@ -26,7 +27,7 @@ urlpatterns = [
     path('superadmin', core_superadmin.home),
     path('superadmin/', core_superadmin.home),
     path('superadmin/tasks', core_superadmin.tasks),
-    path('graphql', GraphQLView.as_view(schema=schema), name='graphql'),
+    path('graphql', GraphQLView.as_view(schema=schema, extensions=[OpenTracingExtensionSync]), name='graphql'),
 
     path('file/download/<uuid:file_id>/<str:file_name>', file_views.download, name='download'),
     path('file/embed/<uuid:file_id>/<str:file_name>', file_views.embed, name='embed'),

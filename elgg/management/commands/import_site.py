@@ -17,6 +17,7 @@ from elgg.helpers import ElggHelpers
 from elgg.mapper import Mapper
 from user.models import User
 from file.models import FileFolder
+from wiki.models import Wiki
 from datetime import datetime
 from django_tenants.management.commands import InteractiveTenantOption
 
@@ -82,7 +83,7 @@ class Command(InteractiveTenantOption, BaseCommand):
         self.import_id = "import_%s" % elgg_instance.name
 
         # Change connection to elgg site database
-        elgg_database_settings = settings.DATABASES["elgg_control"]
+        elgg_database_settings = settings.DATABASES["elgg_control"].copy()
         elgg_database_settings["id"] = self.import_id
         elgg_database_settings["NAME"] = elgg_instance.name
         connections.databases[self.import_id] = elgg_database_settings
@@ -96,6 +97,9 @@ class Command(InteractiveTenantOption, BaseCommand):
         if GuidMap.objects.count() > 0:
             self.stdout.write(f"Import already run on tenant {tenant.schema_name}. Exiting.")
             return False
+
+        tenant.elgg_database = elgg_instance.name
+        tenant.save()
 
         self._import_users()
         self._import_settings()
@@ -852,7 +856,6 @@ class Command(InteractiveTenantOption, BaseCommand):
                 pass
 
     def _import_comments_for(self, entity: Entity, elgg_guid, elgg_entity=None):
-        close_old_connections()
         elgg_comment_items = ElggObjectsEntity.objects.using(self.import_id).filter(entity__subtype__subtype='comment', entity__container_guid=elgg_guid)
 
         for elgg_comment in elgg_comment_items:
@@ -898,6 +901,11 @@ class Command(InteractiveTenantOption, BaseCommand):
 
         for elgg_wiki in elgg_wiki_items:
             self.helpers.save_parent_wiki(elgg_wiki)
+
+        # Fix wiki children group + ACL
+        wikis = Wiki.objects.filter(parent=None).exclude(group=None)
+        for wiki in wikis:
+            self.helpers.update_wiki_children_acl(wiki)
 
     def _import_site_access_requests(self):
         close_old_connections()
