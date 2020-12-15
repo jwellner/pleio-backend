@@ -39,7 +39,11 @@ class Command(BaseCommand):
 
         files = FileFolder.objects.filter(parent=None, group=None, is_folder=False)
         access_id = config.DEFAULT_ACCESS_ID
-        self.stdout.write("\n>> Alter " + str(len(files)) + " files in content.")
+        i = 0
         for f in files:
-           f.read_access = access_id_to_acl(f, access_id)
-           f.save()
+            if f.read_access == ['user:' + str(f.owner.id)]:
+                f.read_access = access_id_to_acl(f, access_id)
+                f.save()
+                i = i + 1
+
+        self.stdout.write("\n>> Altered " + str(i) + " files in content.")
