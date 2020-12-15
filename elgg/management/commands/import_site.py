@@ -98,6 +98,9 @@ class Command(InteractiveTenantOption, BaseCommand):
             self.stdout.write(f"Import already run on tenant {tenant.schema_name}. Exiting.")
             return False
 
+        tenant.elgg_database = elgg_instance.name
+        tenant.save()
+
         self._import_users()
         self._import_settings()
         self._import_groups()

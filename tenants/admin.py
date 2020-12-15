@@ -10,7 +10,7 @@ class DomainInline(admin.TabularInline):
 @admin.register(Client)
 class ClientAdmin(admin.ModelAdmin):
     inlines = [DomainInline]
-    list_display = ('schema_name', 'name')
+    list_display = ('schema_name', 'primary_domain', 'elgg_database')
 
 
 @admin.register(User)
