@@ -227,6 +227,29 @@ class ElggHelpers():
         except Exception:
             pass
 
+    def update_wiki_children_acl(self, wiki):
+        for child in wiki.children.all():
+            # set Group
+            if child.group != wiki.group:
+                child.group = wiki.group
+
+            # check elgg ACL if exists
+            in_guid_map = GuidMap.objects.filter(guid=child.guid).first()
+            if in_guid_map:
+                elgg_entity = ElggObjectsEntity.objects.using(self.database).filter(entity__guid=in_guid_map.id).first()
+                if elgg_entity:
+                    write_access_id = int(elgg_entity.entity.get_metadata_value_by_name("write_access_id")) \
+                        if elgg_entity.entity.get_metadata_value_by_name("write_access_id") else 0
+
+                    child.write_access = self.elgg_access_id_to_acl(child, write_access_id)
+                    child.read_access = self.elgg_access_id_to_acl(child, elgg_entity.entity.access_id)
+                    child.save()
+
+            child.save()
+
+            # recursive
+            self.update_wiki_children_acl(child)
+
     def save_parent_folder(self, elgg_folder):
         guid_map_folder = GuidMap.objects.get(id=elgg_folder.entity.guid, object_type='folder')
         folder = FileFolder.objects.get(id=guid_map_folder.guid)
