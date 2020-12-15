@@ -28,12 +28,7 @@ class Command(BaseCommand):
         if not all_elgg_sites:
             raise CommandError("""There are no elgg sites in the control database check config""")
 
-        elgg_database = tenant.elgg_database
-
-        if elgg_database not in [s.name for s in all_elgg_sites]:
-            return None
-
-        return Instances.objects.using("elgg_control").get(name=elgg_database)
+        return Instances.objects.using("elgg_control").filter(name=tenant.elgg_database).first()
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -63,7 +58,7 @@ class Command(BaseCommand):
         self.import_id = "import_%s" % elgg_instance.name
 
         # Change connection to elgg site database
-        elgg_database_settings = settings.DATABASES["elgg_control"]
+        elgg_database_settings = settings.DATABASES["elgg_control"].copy()
         elgg_database_settings["id"] = self.import_id
         elgg_database_settings["NAME"] = elgg_instance.name
         connections.databases[self.import_id] = elgg_database_settings
