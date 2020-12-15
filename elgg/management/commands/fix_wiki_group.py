@@ -3,63 +3,62 @@ import json
 
 from django.core import management
 from django.core.management.base import BaseCommand, CommandError
+from django.db import connections
 from core import config
+from core.lib import tenant_schema
+from tenants.models import Client
 from wiki.models import Wiki
 from backend2 import settings
 from elgg.models import (
-    Instances, GuidMap, ElggSitesEntity, ElggObjectsEntity
+    Instances, GuidMap
 )
 from elgg.helpers import ElggHelpers
-from django_tenants.management.commands import InteractiveTenantOption
-
-from django.db import connections, connection
-from django.db import IntegrityError
 
 
-class Command(InteractiveTenantOption, BaseCommand):
-    help = 'Fix access rights after migration'
+class Command(BaseCommand):
+    help = 'Fix wiki access rights after migration'
     import_id = None
     helpers = None
     elgg_domain = None
     tenant_domain = None
 
-    def get_elgg_from_options_or_interactive(self, **options):
+    def get_elgg_instance(self, tenant):
         all_elgg_sites = Instances.objects.using("elgg_control").all()
 
         if not all_elgg_sites:
             raise CommandError("""There are no elgg sites in the control database check config""")
 
-        if options.get('elgg'):
-            elgg_database = options['elgg']
-        else:
-            while True:
-                elgg_database = input("Enter elgg database ('?' to list databases): ")
-                if elgg_database == '?':
-                    print('\n'.join(["%s" % s.name for s in all_elgg_sites]))
-                else:
-                    break
+        elgg_database = tenant.elgg_database
 
         if elgg_database not in [s.name for s in all_elgg_sites]:
-            raise CommandError("Invalid database, '%s'" % (elgg_database,))
+            return None
 
         return Instances.objects.using("elgg_control").get(name=elgg_database)
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-    def add_arguments(self, parser):
-        super().add_arguments(parser)
-        parser.add_argument('--elgg', help='elgg database')
 
     def handle(self, *args, **options):
         if not settings.RUN_AS_ADMIN_APP:
             self.stdout.write("Only run this command from admin instance.")
             return
 
-        elgg_instance = self.get_elgg_from_options_or_interactive(**options)
-        tenant = self.get_tenant_from_options_or_interactive(**options)
+        # check if command is run with tenant
+        schema = tenant_schema()
 
-        self.stdout.write("Fix access elgg database '%s' to tenant '%s'\n" % (elgg_instance.name, tenant.schema_name))
+        if schema == 'public':
+            self.stdout.write("Don't run on public schema\n")
+            return
+        
+        tenant = Client.objects.get(schema_name=schema)
+
+        elgg_instance = self.get_elgg_instance(tenant)
+        if not elgg_instance:
+            self.stdout.write("No elgg database for schema %s\n" % schema)
+            return
+
+        self.stdout.write("Fix wiki group ACL, elgg database '%s' tenant '%s'\n" % (elgg_instance.name, tenant.schema_name))
 
         self.import_id = "import_%s" % elgg_instance.name
 
@@ -68,9 +67,6 @@ class Command(InteractiveTenantOption, BaseCommand):
         elgg_database_settings["id"] = self.import_id
         elgg_database_settings["NAME"] = elgg_instance.name
         connections.databases[self.import_id] = elgg_database_settings
-
-        # Change default connection to tenant
-        connection.set_tenant(tenant)
 
         self.helpers = ElggHelpers(self.import_id)
 

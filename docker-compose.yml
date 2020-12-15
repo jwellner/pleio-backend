@@ -63,7 +63,7 @@ services:
     depends_on:
       - db
     ports:
-      - "8888:8888"
+      - "8888:8000"
 
   db:
     image: postgres:12
