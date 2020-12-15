@@ -33,13 +33,13 @@ class Command(BaseCommand):
         self._fix_access()
 
         # All done!
-        self.stdout.write("\n>> Done!")
+        self.stdout.write(">> Done!\n\n")
 
     def _fix_access(self):
 
         files = FileFolder.objects.filter(parent=None, group=None, is_folder=False)
         access_id = config.DEFAULT_ACCESS_ID
-
+        self.stdout.write("\n>> Alter " + str(len(files)) + " files in content.")
         for f in files:
            f.read_access = access_id_to_acl(f, access_id)
            f.save()
