@@ -19,7 +19,7 @@ beat_schedule = {
     },
     'weekly': {
         'task': 'core.tasks.dispatch_crons',
-        'schedule': crontab(minute=0, hour=21, day_of_week='sunday'),
+        'schedule': crontab(minute=0, hour=4, day_of_week='monday'),
         'args': ['weekly']
     },
     'monthly': {
