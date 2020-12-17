@@ -53,6 +53,9 @@ class Entity(models.Model):
         if user.is_authenticated and user.has_role(USER_ROLES.ADMIN):
             return True
 
+        if user.is_authenticated and self.group and self.group.members.filter(user=user, type__in=['admin', 'owner']).exists():
+            return True
+
         return len(get_acl(user) & set(self.write_access)) > 0
 
     @property
