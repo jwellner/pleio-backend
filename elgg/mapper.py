@@ -70,7 +70,7 @@ class Mapper():
 
         user_profile = UserProfile()
         user_profile.last_online = last_online
-        user_profile.overview_email_interval = interval_private.value if interval_private else 'weekly' # TODO: should get default for site
+        user_profile.overview_email_interval = interval_private.value if interval_private else 'never' # TODO: should get default for site
         user_profile.overview_email_tags = elgg_user.entity.get_metadata_values_by_name("editEmailOverviewTags")
         user_profile.overview_email_last_received = datetime.fromtimestamp(int(last_received_private.value)) if last_received_private else None
         user_profile.receive_newsletter = receive_newsletter
