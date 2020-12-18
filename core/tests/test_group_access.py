@@ -1,6 +1,7 @@
 from django.db import connection
 from django_tenants.test.cases import FastTenantTestCase
 from core.models import Group
+from core.lib import access_id_to_acl
 from user.models import User
 from blog.models import Blog
 from core.constances import ACCESS_TYPE
@@ -15,25 +16,34 @@ class TestGroupAccess(FastTenantTestCase):
 
     def setUp(self):
         self.anonymousUser = AnonymousUser()
-        self.user1 = mixer.blend(User)
-        self.user2 = mixer.blend(User)
-        self.user3 = mixer.blend(User, roles=['ADMIN'])
-        self.group = mixer.blend(Group, owner=self.user1, is_closed=False, is_membership_on_request=False)
-        self.group.join(self.user1, 'member')
+        self.site_user = mixer.blend(User)
+        self.group_owner = mixer.blend(User)
+        self.group_admin = mixer.blend(User)
+        self.group_user_blog_owner = mixer.blend(User)
+        self.group_user = mixer.blend(User)
+        self.site_admin = mixer.blend(User, roles=['ADMIN'])
+        self.group = mixer.blend(Group, owner=self.group_owner, is_closed=False, is_membership_on_request=False)
+        self.group.join(self.group_owner, 'owner')
+        self.group.join(self.group_admin, 'admin')
+        self.group.join(self.group_user_blog_owner, 'member')
+        self.group.join(self.group_user, 'member')
 
         self.blog1 = Blog.objects.create(
             title="Blog1",
-            owner=self.user1,
+            owner=self.group_user_blog_owner,
             read_access=[ACCESS_TYPE.public],
-            write_access=[ACCESS_TYPE.user.format(self.user1.id)],
+            write_access=[ACCESS_TYPE.user.format(self.group_user_blog_owner.id)],
             group=self.group
         )
 
     def tearDown(self):
         self.blog1.delete()
-        self.user1.delete()
-        self.user2.delete()
-        self.user3.delete()
+        self.site_user.delete()
+        self.group_owner.delete()
+        self.group_admin.delete()
+        self.group_user.delete()
+        self.group_user_blog_owner.delete()
+        self.site_admin.delete()
 
     def test_open_group(self):
 
@@ -97,8 +107,8 @@ class TestGroupAccess(FastTenantTestCase):
 
         self.assertEqual(data["entity"], None)
 
-        # user2 is not in group and should not be able to read blog
-        request.user = self.user2
+        # site_user is not in group and should not be able to read blog
+        request.user = self.site_user
 
         result = graphql_sync(schema, {"query": query, "variables": variables }, context_value={ "request": request })
 
@@ -106,8 +116,8 @@ class TestGroupAccess(FastTenantTestCase):
 
         self.assertEqual(data["entity"], None)
 
-        # user1 is in group and should be able to read blog
-        request.user = self.user1
+        # group_user is in group and should be able to read blog
+        request.user = self.group_user
 
         result = graphql_sync(schema, {"query": query, "variables": variables }, context_value={ "request": request })
 
@@ -117,8 +127,8 @@ class TestGroupAccess(FastTenantTestCase):
 
         self.assertEqual(data["entity"]["accessId"], 4)
 
-        # user3 is admin and should be able to read blog
-        request.user = self.user3
+        # site_admin is admin and should be able to read blog
+        request.user = self.site_admin
 
         result = graphql_sync(schema, {"query": query, "variables": variables }, context_value={ "request": request })
 
@@ -157,7 +167,7 @@ class TestGroupAccess(FastTenantTestCase):
         """
 
         request = HttpRequest()
-        request.user = self.user1
+        request.user = self.group_user_blog_owner
 
         result = graphql_sync(schema, { "query": mutation, "variables": data }, context_value={ "request": request })
 
@@ -167,3 +177,123 @@ class TestGroupAccess(FastTenantTestCase):
 
         # Public access not possible, it will be save with group accessId
         self.assertEqual(data["editEntity"]["entity"]["accessId"], 4)
+
+    def test_group_owner_can_edit_content(self):
+        self.group.is_closed = True
+        self.group.save()
+
+
+        data = {
+            "input": {
+                "guid": self.blog1.guid,
+                "title": "Update by admin",
+                "description": "123"
+            }
+        }
+        mutation = """
+            fragment BlogParts on Blog {
+                title
+                description
+            }
+            mutation ($input: editEntityInput!) {
+                editEntity(input: $input) {
+                    entity {
+                        guid
+                        status
+                        ...BlogParts
+                    }
+                }
+            }
+        """
+
+        request = HttpRequest()
+        request.user = self.group_owner
+
+        result = graphql_sync(schema, { "query": mutation, "variables": data }, context_value={ "request": request })
+
+        self.assertTrue(result[0])
+
+        data = result[1]["data"]
+
+        self.assertEqual(data["editEntity"]["entity"]["title"], "Update by admin")
+        self.assertEqual(data["editEntity"]["entity"]["description"], "123")
+
+    def test_group_admin_can_edit_content(self):
+        self.group.is_closed = True
+        self.group.save()
+
+
+        data = {
+            "input": {
+                "guid": self.blog1.guid,
+                "title": "Update by admin",
+                "description": "123"
+            }
+        }
+        mutation = """
+            fragment BlogParts on Blog {
+                title
+                description
+            }
+            mutation ($input: editEntityInput!) {
+                editEntity(input: $input) {
+                    entity {
+                        guid
+                        status
+                        ...BlogParts
+                    }
+                }
+            }
+        """
+
+        request = HttpRequest()
+        request.user = self.group_admin
+
+        result = graphql_sync(schema, { "query": mutation, "variables": data }, context_value={ "request": request })
+
+        self.assertTrue(result[0])
+
+        data = result[1]["data"]
+
+        self.assertEqual(data["editEntity"]["entity"]["title"], "Update by admin")
+        self.assertEqual(data["editEntity"]["entity"]["description"], "123")
+
+    def test_site_admin_can_edit_content(self):
+        self.group.is_closed = True
+        self.group.save()
+
+
+        data = {
+            "input": {
+                "guid": self.blog1.guid,
+                "title": "Update by admin",
+                "description": "123"
+            }
+        }
+        mutation = """
+            fragment BlogParts on Blog {
+                title
+                description
+            }
+            mutation ($input: editEntityInput!) {
+                editEntity(input: $input) {
+                    entity {
+                        guid
+                        status
+                        ...BlogParts
+                    }
+                }
+            }
+        """
+
+        request = HttpRequest()
+        request.user = self.site_admin
+
+        result = graphql_sync(schema, { "query": mutation, "variables": data }, context_value={ "request": request })
+
+        self.assertTrue(result[0])
+
+        data = result[1]["data"]
+
+        self.assertEqual(data["editEntity"]["entity"]["title"], "Update by admin")
+        self.assertEqual(data["editEntity"]["entity"]["description"], "123")
