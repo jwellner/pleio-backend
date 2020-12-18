@@ -34,14 +34,14 @@ def resolve_events(obj, info, filter=None, containerGuid=None, offset=0, limit=2
     qs = Event.objects.visible(info.context["request"].user)
 
     qs = qs.filter(
-        conditional_date_filter(filter) & 
+        conditional_date_filter(filter) &
         conditional_group_filter(containerGuid)
     )
 
     if filter == 'previous':
-        qs = qs.order_by('-start_date')
+        qs = qs.order_by('-start_date', 'title')
     else:
-        qs = qs.order_by('start_date')
+        qs = qs.order_by('start_date', 'title')
 
     edges = qs[offset:offset+limit]
 
