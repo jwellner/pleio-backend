@@ -364,7 +364,7 @@ class Command(InteractiveTenantOption, BaseCommand):
         profile_field_entities = ElggEntities.objects.using(self.import_id).filter(
             subtype__subtype="custom_profile_field"
         )
-        
+
         # check if profiel field is already in profile_items else add
         for item in profile_field_entities:
             key = item.get_metadata_value_by_name('metadata_name')
@@ -394,7 +394,7 @@ class Command(InteractiveTenantOption, BaseCommand):
             config.ONBOARDING_ENABLED = True
             # Only enforce when plugin setting enforce_completion_mandatory_fields is yes
             config.ONBOARDING_FORCE_EXISTING_USERS = self.helpers.get_plugin_setting('enforce_completion_mandatory_fields', 'profile_manager') == 'yes'
-        
+
         return profile_fields
 
     def _import_users(self):
