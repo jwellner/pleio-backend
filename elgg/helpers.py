@@ -121,7 +121,7 @@ class ElggHelpers():
                 if category_entity.get_metadata_value_by_name('metadata_name'):
                     return category_entity.get_metadata_value_by_name('metadata_name')
 
-        return None 
+        return None
 
     def get_profile_options(self, name):
         profile_field_entity= self.get_profile_field(name)
@@ -417,31 +417,44 @@ class ElggHelpers():
         if "vote" in annotation_types:
             annotations = elgg_entity.entity.annotation.filter(name__string="vote", value__string="1")
             for vote in annotations:
-                user = User.objects.get(id=GuidMap.objects.get(id=vote.owner_guid, object_type="user").guid)
-                entity.add_vote(user, 1)
+                try:
+                    user = User.objects.get(id=GuidMap.objects.get(id=vote.owner_guid, object_type="user").guid)
+                    entity.add_vote(user, 1)
+                except Exception:
+                    print("Annotation vote, user not found")
         if "bookmark" in annotation_types:
             bookmarks = elgg_entity.entity.relation_inverse.filter(relationship="bookmarked", right__guid=elgg_entity.entity.guid)
             for bookmark in bookmarks:
-                user = User.objects.get(id=GuidMap.objects.get(id=bookmark.left.guid, object_type="user").guid)
-                entity.add_bookmark(user)
+                try:
+                    user = User.objects.get(id=GuidMap.objects.get(id=bookmark.left.guid, object_type="user").guid)
+                    entity.add_bookmark(user)
+                except Exception:
+                    print("Annotation bookmark, user not found")
         if "follow" in annotation_types:
             follows = elgg_entity.entity.relation_inverse.filter(relationship="content_subscription", right__guid=elgg_entity.entity.guid)
             for follow in follows:
-                user = User.objects.get(id=GuidMap.objects.get(id=follow.left.guid, object_type="user").guid)
-                entity.add_follow(user)
+                try:
+                    user = User.objects.get(id=GuidMap.objects.get(id=follow.left.guid, object_type="user").guid)
+                    entity.add_follow(user)
+                except Exception:
+                    print("Annotation follow, user not found")
+
         if "view_count" in annotation_types:
             view_count = ElggEntityViews.objects.using(self.database).filter(guid=elgg_entity.entity.guid).first()
             if view_count:
                 EntityViewCount.objects.create(entity=entity, views=view_count.views)
         if "views" in annotation_types:
-            user_ids = list(ElggEntityViewsLog.objects.using(self.database).filter(
-                entity_guid=elgg_entity.entity.guid).values_list('performed_by_guid', flat=True)
-            )
-            user_guids = list(GuidMap.objects.filter(id__in=user_ids, object_type="user").values_list('guid', flat=True))
-            users = User.objects.filter(id__in=user_guids)
-            if users:
-                for user in users:
-                    EntityView.objects.create(entity=entity, viewer=user)
+            try:
+                user_ids = list(ElggEntityViewsLog.objects.using(self.database).filter(
+                    entity_guid=elgg_entity.entity.guid).values_list('performed_by_guid', flat=True)
+                )
+                user_guids = list(GuidMap.objects.filter(id__in=user_ids, object_type="user").values_list('guid', flat=True))
+                users = User.objects.filter(id__in=user_guids)
+                if users:
+                    for user in users:
+                        EntityView.objects.create(entity=entity, viewer=user)
+            except Exception:
+                print("Annotation views, not saved")
 
     def elgg_access_id_to_acl(self, obj, access_id):
         """
