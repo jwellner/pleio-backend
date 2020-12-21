@@ -231,8 +231,11 @@ class GroupInvitation(models.Model):
     invited_user = models.ForeignKey(
         'user.User',
         related_name='invitation',
-        on_delete=models.CASCADE
+        on_delete=models.CASCADE,
+        blank=True,
+        null=True
     )
+    email = models.EmailField(max_length=255, blank=True, null=True)
 
     code = models.CharField(max_length=36)
 
