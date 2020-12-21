@@ -100,7 +100,8 @@ class FilesCase(FastTenantTestCase):
         data = result[1]["data"]
 
         self.assertEqual(data["files"]["total"], 2)
-        self.assertEqual(data["files"]["edges"][0]["title"], "file1")
+        self.assertEqual(data["files"]["edges"][0]["title"], "images")
+        self.assertEqual(data["files"]["edges"][1]["title"], "file1")
 
 
     def test_folder_container(self):
