@@ -13,6 +13,7 @@ from django.contrib.auth.models import AnonymousUser
 from django.http import HttpRequest
 from mixer.backend.django import mixer
 from notifications.signals import notify
+from django.utils import dateparse
 
 
 class SiteUsersTestCase(FastTenantTestCase):
@@ -29,10 +30,17 @@ class SiteUsersTestCase(FastTenantTestCase):
         self.editor1 = mixer.blend(User, roles=[USER_ROLES.EDITOR], name='Vv')
         self.anonymousUser = AnonymousUser()
 
-        self.query = """
-            query UsersQuery($offset: Int, $limit: Int, $q: String, $role: String, $isDeleteRequested: Boolean, $isBanned: Boolean) {
+        self.user1.profile.last_online = dateparse.parse_datetime("2018-12-10T23:00:00.000Z")
+        self.user1.profile.save()
+        self.user3.profile.last_online = "2020-12-10T23:00:00.000Z"
+        self.user3.profile.save()
+        self.user4.profile.last_online = "2020-12-10T23:00:00.000Z"
+        self.user4.profile.save()
 
-                siteUsers(offset: $offset, limit: $limit, q: $q, role: $role, isDeleteRequested: $isDeleteRequested, isBanned: $isBanned) {
+        self.query = """
+            query UsersQuery($offset: Int, $limit: Int, $q: String, $role: String, $isDeleteRequested: Boolean, $isBanned: Boolean, $lastOnlineBefore: String) {
+
+                siteUsers(offset: $offset, limit: $limit, q: $q, role: $role, isDeleteRequested: $isDeleteRequested, isBanned: $isBanned, lastOnlineBefore: $lastOnlineBefore) {
                     edges {
                         guid
                         name
@@ -193,3 +201,22 @@ class SiteUsersTestCase(FastTenantTestCase):
         self.assertEqual(data["siteUsers"]["total"], 1)
         self.assertEqual(len(data["siteUsers"]["edges"]), 1)
         self.assertEqual(data["siteUsers"]["edges"][0]['guid'], self.user4.guid)
+
+
+    def test_site_users_get_lastonline_before_by_admin(self):
+
+        request = HttpRequest()
+        request.user = self.admin1
+
+        variables = {
+            "lastOnlineBefore": "2019-12-10T23:00:00.000Z"
+        }
+
+        result = graphql_sync(schema, {"query": self.query, "variables": variables}, context_value={ "request": request })
+
+        self.assertTrue(result[0])
+        data = result[1]["data"]
+
+        self.assertEqual(data["siteUsers"]["total"], 1)
+        self.assertEqual(data["siteUsers"]["edges"][0]["name"], self.user1.name)
+        self.assertEqual(len(data["siteUsers"]["edges"]), 1)

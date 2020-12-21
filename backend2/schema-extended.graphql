@@ -152,7 +152,7 @@ extend type Mutation {
 }
 
 extend type Query {
-  siteUsers(q: String, role: String, isDeleteRequested: Boolean, isBanned: Boolean, offset: Int, limit: Int): SiteUserList
+  siteUsers(q: String, role: String, isDeleteRequested: Boolean, isBanned: Boolean, offset: Int, limit: Int, lastOnlineBefore: String): SiteUserList
 }
 
 extend type User {
