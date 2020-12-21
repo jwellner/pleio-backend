@@ -221,7 +221,7 @@ class Mapper():
 
         entity.location = elgg_entity.entity.get_metadata_value_by_name("location") if elgg_entity.entity.get_metadata_value_by_name("location") else ""
         entity.external_link = elgg_entity.entity.get_metadata_value_by_name("source") if elgg_entity.entity.get_metadata_value_by_name("source") else ""
-        entity.max_attendees = int(elgg_entity.entity.get_metadata_value_by_name("maxAttendees")) \
+        entity.max_attendees = int(float(elgg_entity.entity.get_metadata_value_by_name("maxAttendees"))) \
             if elgg_entity.entity.get_metadata_value_by_name("maxAttendees") else None
         entity.rsvp = elgg_entity.entity.get_metadata_value_by_name("rsvp") == "1"
         entity.attend_event_without_account = elgg_entity.entity.get_metadata_value_by_name("attend_event_without_account") == "1"
