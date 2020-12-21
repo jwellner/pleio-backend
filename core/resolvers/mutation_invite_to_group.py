@@ -11,6 +11,7 @@ from django_tenants.utils import parse_tenant_config_path
 def resolve_invite_to_group(_, info, input):
     # pylint: disable=redefined-builtin
     # pylint: disable=too-many-branches
+    # pylint: disable=too-many-locals
     user = info.context["request"].user
     clean_input = remove_none_from_dict(input)
 
@@ -46,27 +47,36 @@ def resolve_invite_to_group(_, info, input):
             if 'guid' in user_input:
                 try:
                     receiving_user = User.objects.get(id=user_input['guid'])
+                    email = receiving_user.email
                 except ObjectDoesNotExist:
                     raise GraphQLError(COULD_NOT_FIND)
             elif 'email' in user_input:
                 try:
                     receiving_user = User.objects.get(email=user_input['email'])
-                except ObjectDoesNotExist:
-                    raise GraphQLError(COULD_NOT_FIND)
+                    email = receiving_user.email
+                except Exception:
+                    receiving_user = None
+                    email = user_input['email']
 
             if clean_input.get("directAdd"):
                 if not group.is_full_member(receiving_user):
                     group.join(receiving_user, 'member')
                 continue
 
-            code = ""
+            code = None
             try:
                 code = GroupInvitation.objects.get(invited_user=receiving_user, group=group).code
             except ObjectDoesNotExist:
                 pass
+
+            try:
+                code = GroupInvitation.objects.get(email=email, group=group).code
+            except ObjectDoesNotExist:
+                pass
+
             if not code:
                 code = generate_code()
-                GroupInvitation.objects.create(code=code, invited_user=receiving_user, group=group)
+                GroupInvitation.objects.create(code=code, invited_user=receiving_user, group=group, email=email)
 
             try:
                 schema_name = parse_tenant_config_path("")
@@ -74,7 +84,7 @@ def resolve_invite_to_group(_, info, input):
                 link = url + code
                 context['link'] = link
                 context['group_name'] = group.name
-                send_mail_multi.delay(schema_name, subject, 'email/invite_to_group.html', context, receiving_user.email)
+                send_mail_multi.delay(schema_name, subject, 'email/invite_to_group.html', context, email)
             except Exception:
                 # TODO: logging
                 pass
