@@ -77,7 +77,7 @@ def resolve_files(
 
     qs = FileFolder.objects.visible(info.context["request"].user)
     qs = qs.filter(conditional_group_folder_user_container_filter(containerGuid, is_folder, is_user) & conditional_filter_subtype(filter))
-    qs = qs.order_by(order_by)
+    qs = qs.order_by('-is_folder', order_by)
 
     edges = qs[offset:offset+limit]
 
