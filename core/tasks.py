@@ -499,4 +499,21 @@ def replace_domain_links(self, schema_name, replace_domain, replace_elgg_id=Fals
                 widget.save()
 
     logger.info("Done replacing links")
-    return True
+
+@shared_task(bind=True)
+def control_get_sites(self):
+    # pylint: disable=unused-argument
+    '''
+    Used to sync sites to control
+    '''
+    clients = Client.objects.exclude(schema_name='public')
+
+    sites = []
+    for client in clients:
+        sites.append({
+            'id': client.id,
+            'name': client.schema_name,
+            'domain': client.get_primary_domain().domain
+        })
+
+    return sites
