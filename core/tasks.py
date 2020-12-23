@@ -6,6 +6,7 @@ import os
 import json
 import re
 import signal_disabler
+from email.utils import formataddr
 
 from celery import shared_task
 from celery.utils.log import get_task_logger
@@ -158,7 +159,8 @@ def send_mail_multi(self, schema_name, subject, html_template, context, email_ad
         html_template = get_template(html_template)
         html_content = html_template.render(context)
         text_content = html_to_text(html_content)
-        from_mail = f"{config.NAME} <{settings.FROM_EMAIL}>"
+
+        from_mail = formataddr((config.NAME, settings.FROM_EMAIL))
 
         try:
             email = EmailMultiAlternatives(subject, text_content, from_mail, to=[email_address], reply_to=reply_to)
@@ -463,11 +465,19 @@ def replace_domain_links(self, schema_name, replace_domain, replace_elgg_id=Fals
 
         for group in groups:
             rich_description = _replace_rich_description_json(group.rich_description)
+            introduction = _replace_rich_description_json(group.introduction)
+            welcome_message = _replace_rich_description_json(group.welcome_message)
             description = _replace_links(group.description)
 
-            if rich_description != group.rich_description or description != group.description:
+            if rich_description != group.rich_description or \
+                description != group.description or \
+                introduction != group.introduction or \
+                welcome_message != group.welcome_message:
+
                 group.rich_description = rich_description
                 group.description = description
+                group.introduction = introduction
+                group.welcome_message = welcome_message
                 group.save()
 
         # -- Replace comment description

@@ -1,6 +1,11 @@
+import logging
 from ariadne import ObjectType
+from django.core.exceptions import ValidationError
+from core.models import Entity
 from core.lib import get_acl
 from core.constances import ACCESS_TYPE, USER_ROLES
+
+logger = logging.getLogger(__name__)
 
 viewer = ObjectType("Viewer")
 
@@ -33,7 +38,16 @@ def resolve_can_write_to_container(obj, info, containerGuid=None, subtype=None, 
             return True
         return False
 
-    # check group access (is containerGuid always group?)
+    # check if containerGuid is Entity (only used for wiki / files?)
+    try:
+        entity = Entity.objects.filter(id=containerGuid).first()
+        if entity:
+            return entity.can_write(user)
+    except ValidationError as e:
+        logger.error("Catched error %s", e)
+        return False
+
+    # else container should be group, members can add all content to group
     if (containerGuid and ACCESS_TYPE.group.format(containerGuid) in get_acl(user)) or user.has_role(USER_ROLES.ADMIN):
         return True
 
