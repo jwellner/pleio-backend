@@ -28,4 +28,8 @@ def resolve_invite_user(obj, info):
 @invite.field("email")
 def resolve_invite_email(obj, info):
     # pylint: disable=unused-argument
-    return obj.invited_user.email
+
+    if obj.invited_user:
+        return obj.invited_user.email
+
+    return obj.email
