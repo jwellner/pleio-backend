@@ -6,6 +6,7 @@ import os
 import json
 import re
 import signal_disabler
+from email.utils import formataddr
 
 from celery import shared_task
 from celery.utils.log import get_task_logger
@@ -158,7 +159,8 @@ def send_mail_multi(self, schema_name, subject, html_template, context, email_ad
         html_template = get_template(html_template)
         html_content = html_template.render(context)
         text_content = html_to_text(html_content)
-        from_mail = f"{config.NAME} <{settings.FROM_EMAIL}>"
+
+        from_mail = formataddr((config.NAME, settings.FROM_EMAIL))
 
         try:
             email = EmailMultiAlternatives(subject, text_content, from_mail, to=[email_address], reply_to=reply_to)
