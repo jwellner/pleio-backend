@@ -47,7 +47,7 @@ class Command(BaseCommand):
             if hasattr(e, 'description'):
                 description = html.unescape(e.description)
                 if description != e.description:
-                    e.description = title
+                    e.description = description
                     changed = True
 
             if changed:
