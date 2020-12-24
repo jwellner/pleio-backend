@@ -367,7 +367,7 @@ def create_notification(self, schema_name, verb, entity_id, sender_id, recipient
 
 @shared_task(bind=True, ignore_result=True)
 @signal_disabler.disable()
-def replace_domain_links(self, schema_name, replace_domain, replace_elgg_id=False):
+def replace_domain_links(self, schema_name, replace_domain=None, replace_elgg_id=False):
     # pylint: disable=unused-argument
     # pylint: disable=too-many-locals
     # pylint: disable=too-many-statements
@@ -382,6 +382,9 @@ def replace_domain_links(self, schema_name, replace_domain, replace_elgg_id=Fals
 
         tenant = Client.objects.get(schema_name=schema_name)
         tenant_domain = tenant.get_primary_domain().domain
+
+        if not replace_domain:
+            replace_domain = tenant_domain
 
         def _replace_links(text):
             if replace_elgg_id:
