@@ -17,6 +17,7 @@ from opentracing import set_global_tracer
 from .config import *  # pylint: disable=unused-wildcard-import
 
 APM_ENABLED = os.getenv('APM_ENABLED') == 'True'
+APM_OPENTRACING_ENABLED = os.getenv('APM_OPENTRACING_ENABLED') == 'True'
 EMAIL_DISABLED = os.getenv('EMAIL_DISABLED') == 'True'
 
 FROM_EMAIL = os.getenv('FROM_EMAIL')
@@ -290,6 +291,7 @@ if APM_ENABLED:
         'VERIFY_SERVER_CERT': os.getenv('APM_VERIFY_SERVER_CERT') != "False",
         'DEBUG': True,
     }
-    set_global_tracer(Tracer(config=ELASTIC_APM))
+    if APM_OPENTRACING_ENABLED:
+        set_global_tracer(Tracer(config=ELASTIC_APM))
 
 SECURE_REFERRER_POLICY = 'origin-when-cross-origin'
