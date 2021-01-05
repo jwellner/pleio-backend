@@ -4,6 +4,7 @@ services:
   api:
     environment:
       APM_ENABLED: 'True'
+      APM_OPENTRACING_ENABLED: 'True'
       APM_SERVICE_NAME: 'api'
       APM_TOKEN: ''
       APM_SERVER_URL: http://apm-server:8200
@@ -11,6 +12,7 @@ services:
   admin:
     environment:
       APM_ENABLED: 'True'
+      APM_OPENTRACING_ENABLED: 'True'
       APM_SERVICE_NAME: 'admin'
       APM_TOKEN: ''
       APM_SERVER_URL: http://apm-server:8200
@@ -18,6 +20,7 @@ services:
   background:
     environment:
       APM_ENABLED: 'True'
+      APM_OPENTRACING_ENABLED: 'True'
       APM_SERVICE_NAME: 'background'
       APM_TOKEN: ''
       APM_SERVER_URL: http://apm-server:8200
