@@ -156,6 +156,7 @@ def access_requested(request):
 
 def onboarding(request):
     # pylint: disable=too-many-branches
+    # pylint: disable=too-many-nested-blocks
 
     user = request.user
     claims = request.session.get('onboarding_claims', None)
@@ -223,16 +224,22 @@ def onboarding(request):
             # get initial values from user
             user_profile_fields = UserProfileField.objects.filter(user_profile=user.profile).all()
             for user_profile_field in user_profile_fields:
-                if user_profile_field.profile_field.field_type == "multi_select_field":
-                    value = user_profile_field.value.split(',')
-                elif user_profile_field.profile_field.field_type == "date_field":
-                    # date is stored in format YYYY-mm-dd
-                    date = datetime.strptime(user_profile_field.value, '%Y-%m-%d')
-                    value = date.strftime('%d-%m-%Y')
-                else:
-                    value = user_profile_field.value
+                # only set initial value if it is not null
+                if user_profile_field.value:
+                    if user_profile_field.profile_field.field_type == "multi_select_field":
+                        value = user_profile_field.value.split(',')
+                    elif user_profile_field.profile_field.field_type == "date_field":
+                        # date is stored in format YYYY-mm-dd
+                        try:
+                            date = datetime.strptime(user_profile_field.value, '%Y-%m-%d')
+                            value = date.strftime('%d-%m-%Y')
+                        except ValueError as e:
+                            logger.error('Unable to parse profile field date: %s', e)
+                            value = ""
+                    else:
+                        value = user_profile_field.value
 
-                initial_values[user_profile_field.profile_field.guid] = value
+                    initial_values[user_profile_field.profile_field.guid] = value
 
         form = OnboardingForm(initial=initial_values)
 
