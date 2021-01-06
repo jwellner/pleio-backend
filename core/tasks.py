@@ -12,7 +12,7 @@ from celery import shared_task
 from celery.utils.log import get_task_logger
 
 from django.core import management
-from tenants.models import Client
+from tenants.models import Client, Domain
 from django_tenants.utils import schema_context
 from django_elasticsearch_dsl.registries import registry
 from elasticsearch_dsl import Search
@@ -530,3 +530,41 @@ def control_get_sites(self):
         })
 
     return sites
+
+@shared_task(bind=True)
+def control_add_site(self, schema_name, domain):
+    # pylint: disable=unused-argument
+    '''
+    Create site from control
+    '''
+    with schema_context('public'):
+        try:
+            tenant = Client(schema_name=schema_name, name=schema_name)
+            tenant.save()
+
+            d = Domain()
+            d.domain = domain
+            d.tenant = tenant
+            d.is_primary = True
+            d.save()
+        except Exception as e:
+            raise Exception(e)
+
+        return tenant.id
+
+@shared_task(bind=True)
+def control_delete_site(self, site_id):
+    # pylint: disable=unused-argument
+    '''
+    Delete site from control
+    '''
+    with schema_context('public'):
+        try:
+            tenant = Client.objects.get(id=site_id)
+            # tenant.auto_drop_schema = True 
+            tenant.delete()
+        except Exception as e:
+            # raise general exception because remote doenst have Client exception
+            raise Exception(e)
+
+    return True
