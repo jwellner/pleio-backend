@@ -22,11 +22,19 @@ class SendOverviewEmailsTestCase(FastTenantTestCase):
         self.user1 = mixer.blend(User, is_active=False)
         self.user2 = mixer.blend(User)
         self.user2.profile.overview_email_tags = ['tagged']
+        self.user2.profile.receive_notification_email = True
+        self.user2.profile.overview_email_interval = 'weekly'
         self.user2.profile.save()
+
+        self.user3 = mixer.blend(User)
+        self.user3.profile.receive_notification_email = False
+        self.user3.profile.overview_email_interval = 'weekly'
+        self.user3.profile.save()
 
     def tearDown(self):
         self.user1.delete()
         self.user2.delete()
+        self.user3.delete()
 
     @mock.patch('core.management.commands.send_overview_emails.send_mail_multi.delay')
     def test_command_send_overview_5_entities(self, mocked_send_mail_multi):
@@ -91,10 +99,12 @@ class SendOverviewEmailsTestCase(FastTenantTestCase):
     def test_command_send_overview_to_users_with_daily_monthly_interval(self, mocked_send_mail_multi):
 
         user3 = mixer.blend(User)
+        user3.profile.receive_notification_email = True
         user3.profile.overview_email_interval = 'daily'
         user3.profile.save()
 
         user4 = mixer.blend(User)
+        user4.profile.receive_notification_email = True
         user4.profile.overview_email_interval = 'monthly'
         user4.profile.save()
 
@@ -139,9 +149,8 @@ class SendOverviewEmailsTestCase(FastTenantTestCase):
 
 
     @mock.patch('core.management.commands.send_overview_emails.send_mail_multi.delay')
-    def test_command_send_overview_default_email_frequency(self, mocked_send_mail_multi):
+    def test_command_send_overview_custom_settings(self, mocked_send_mail_multi):
 
-        cache.set("%s%s" % (connection.schema_name, 'EMAIL_OVERVIEW_DEFAULT_FREQUENCY'), 'daily')
         cache.set("%s%s" % (connection.schema_name, 'EMAIL_OVERVIEW_SUBJECT'), 'test other subject')
         cache.set("%s%s" % (connection.schema_name, 'EMAIL_OVERVIEW_TITLE'), 'title text')
         cache.set("%s%s" % (connection.schema_name, 'EMAIL_OVERVIEW_INTRO'), 'introduction text')
@@ -162,7 +171,7 @@ class SendOverviewEmailsTestCase(FastTenantTestCase):
             write_access=[ACCESS_TYPE.user.format(self.user1.id)]
         )
 
-        call_command('send_overview_emails', interval='daily')
+        call_command('send_overview_emails', interval='weekly')
 
         args, kwargs = mocked_send_mail_multi.call_args
 
@@ -177,7 +186,6 @@ class SendOverviewEmailsTestCase(FastTenantTestCase):
         self.assertEqual(args[4], self.user2.email)
 
         cache.clear()
-
 
     @mock.patch('core.management.commands.send_overview_emails.send_mail_multi.delay')
     def test_command_send_overview_5_entities_one_featured(self, mocked_send_mail_multi):

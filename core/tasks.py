@@ -356,11 +356,13 @@ def create_notification(self, schema_name, verb, entity_id, sender_id, recipient
 
                 # send email direct and mark emailed as True
                 if direct:
-                    mapped_notifications = [get_notification(notification)]
-                    user_url = site_url + '/user/' + recipient.guid + '/settings'
-                    context = {'user_url': user_url, 'site_name': site_name, 'site_url': site_url, 'primary_color': primary_color,
-                                'notifications': mapped_notifications, 'show_excerpt': False}
-                    send_mail_multi.delay(schema_name, subject, 'email/send_notification_emails.html', context, recipient.email)
+                    # do not send mail when notifications are disabled, but mark as send (so when enabled you dont receive old notifications!)
+                    if recipient.profile.receive_notification_email:
+                        mapped_notifications = [get_notification(notification)]
+                        user_url = site_url + '/user/' + recipient.guid + '/settings'
+                        context = {'user_url': user_url, 'site_name': site_name, 'site_url': site_url, 'primary_color': primary_color,
+                                    'notifications': mapped_notifications, 'show_excerpt': False}
+                        send_mail_multi.delay(schema_name, subject, 'email/send_notification_emails.html', context, recipient.email)
                     notification.emailed = True
                     notification.save()
 

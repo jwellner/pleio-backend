@@ -153,7 +153,7 @@ class User(AbstractBaseUser):
         except UserProfile.DoesNotExist:
             if not settings.RUN_AS_ADMIN_APP:
                 return UserProfile.objects.create(
-                    user=self,
+                    user=self
                 )
 
     @property
