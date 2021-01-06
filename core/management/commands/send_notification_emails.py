@@ -34,6 +34,7 @@ class Command(BaseCommand):
                        'notifications': mapped_notifications, 'show_excerpt': show_excerpt}
 
             send_mail_multi.delay(connection.schema_name, subject, 'email/send_notification_emails.html', context, user.email)
+
             user.notifications.mark_as_sent()
 
     def handle(self, *args, **options):
@@ -41,19 +42,15 @@ class Command(BaseCommand):
 
         site_url = 'https://' + tenant.domains.first().domain
 
-        users = User.objects.filter(is_active=True)
+        users = User.objects.filter(is_active=True, _profile__receive_notification_email=True)
 
         show_excerpt = config.EMAIL_NOTIFICATION_SHOW_EXCERPT
         subject = ugettext_lazy("New notifications at %(site_name)s") % {'site_name': config.NAME}
 
         for user in users:
 
-            # do not send mail to disabled users
-            if not user.is_active:
-                continue
-
             # do not send mail to users that not logged in for 6 months
-            if user.profile and user.profile.last_online and (user.profile.last_online < (datetime.now() - timedelta(hours=4460))):
+            if user.profile.last_online and (user.profile.last_online < (datetime.now() - timedelta(hours=4460))):
                 continue
 
             notifications = user.notifications.filter(emailed=False, verb__in=['created', 'commented'])[:5]

@@ -21,8 +21,14 @@ class SendNotificationEmailsTestCase(FastTenantTestCase):
     def setUp(self):
         self.user1 = mixer.blend(User)
         self.user2 = mixer.blend(User)
+        self.user2.profile.receive_notification_email = True
+        self.user2.profile.save()
+        self.user3 = mixer.blend(User)
+        self.user3.profile.receive_notification_email = False
+        self.user3.profile.save()
         self.group = mixer.blend(Group, owner=self.user1, auto_notification=True)
         self.group.join(self.user2, 'member')
+        self.group.join(self.user3, 'member')
         self.blog1 = Blog.objects.create(
             title='Blog1',
             owner=self.user1,
@@ -30,11 +36,13 @@ class SendNotificationEmailsTestCase(FastTenantTestCase):
             write_access=[ACCESS_TYPE.user.format(self.user1.id)]
         )
         self.follow1 = self.blog1.add_follow(self.user2)
+        self.follow2 = self.blog1.add_follow(self.user3)
 
     def tearDown(self):
         self.blog1.delete()
         self.user1.delete()
         self.user2.delete()
+        self.user3.delete()
         self.group.delete()
 
     @mock.patch('core.management.commands.send_notification_emails.send_mail_multi.delay')
@@ -133,3 +141,14 @@ class SendNotificationEmailsTestCase(FastTenantTestCase):
         self.assertEqual(args[3]['notifications'][0]['isUnread'], True)
 
         blog2.delete()
+
+    @mock.patch('core.management.commands.send_notification_emails.send_mail_multi.delay')
+    def test_command_notifications_disabled(self, mocked_send_mail_multi):
+        i = 0
+        while i < 5:
+            create_notification.s(connection.schema_name, 'created', self.blog1.id, self.user1.id, [self.user3.id]).apply()
+            i = i + 1
+
+        call_command('send_notification_emails')
+
+        self.assertEqual(mocked_send_mail_multi.call_count, 0)

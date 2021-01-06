@@ -79,9 +79,7 @@ class Command(BaseCommand):
 
         interval = options['interval']
 
-        default_interval = config.EMAIL_OVERVIEW_DEFAULT_FREQUENCY
-
-        users = User.objects.filter(is_active=True)
+        users = User.objects.filter(is_active=True, _profile__receive_notification_email=True)
 
         if config.EMAIL_OVERVIEW_SUBJECT:
             subject = config.EMAIL_OVERVIEW_SUBJECT
@@ -97,14 +95,8 @@ class Command(BaseCommand):
             else:
                 lower_bound = time_threshold
 
-
             # determine interval
-            if not user.profile.overview_email_interval:
-                overview_email_interval = default_interval
-            else:
-                overview_email_interval = user.profile.overview_email_interval
-
-            if interval != overview_email_interval:
+            if interval != user.profile.overview_email_interval:
                 continue
 
             # do not send mail to users that not logged in for 6 months
@@ -114,7 +106,7 @@ class Command(BaseCommand):
             featured_entities = Entity.objects.none()
 
             # do not sent featured items if interval is monthly
-            if overview_email_interval != 'monthly' and config.EMAIL_OVERVIEW_ENABLE_FEATURED:
+            if interval != 'monthly' and config.EMAIL_OVERVIEW_ENABLE_FEATURED:
                 # get featured entities
                 featured_entities = Entity.objects.visible(user)
                 featured_entities = featured_entities.filter(Q(blog__is_recommended=True) | Q(blog__is_featured=True) | Q(news__is_featured=True))
