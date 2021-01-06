@@ -12,7 +12,7 @@ from celery import shared_task
 from celery.utils.log import get_task_logger
 
 from django.core import management
-from tenants.models import Client
+from tenants.models import Client, Domain
 from django_tenants.utils import schema_context
 from django_elasticsearch_dsl.registries import registry
 from elasticsearch_dsl import Search
@@ -356,11 +356,13 @@ def create_notification(self, schema_name, verb, entity_id, sender_id, recipient
 
                 # send email direct and mark emailed as True
                 if direct:
-                    mapped_notifications = [get_notification(notification)]
-                    user_url = site_url + '/user/' + recipient.guid + '/settings'
-                    context = {'user_url': user_url, 'site_name': site_name, 'site_url': site_url, 'primary_color': primary_color,
-                                'notifications': mapped_notifications, 'show_excerpt': False}
-                    send_mail_multi.delay(schema_name, subject, 'email/send_notification_emails.html', context, recipient.email)
+                    # do not send mail when notifications are disabled, but mark as send (so when enabled you dont receive old notifications!)
+                    if recipient.profile.receive_notification_email:
+                        mapped_notifications = [get_notification(notification)]
+                        user_url = site_url + '/user/' + recipient.guid + '/settings'
+                        context = {'user_url': user_url, 'site_name': site_name, 'site_url': site_url, 'primary_color': primary_color,
+                                    'notifications': mapped_notifications, 'show_excerpt': False}
+                        send_mail_multi.delay(schema_name, subject, 'email/send_notification_emails.html', context, recipient.email)
                     notification.emailed = True
                     notification.save()
 
@@ -530,3 +532,41 @@ def control_get_sites(self):
         })
 
     return sites
+
+@shared_task(bind=True)
+def control_add_site(self, schema_name, domain):
+    # pylint: disable=unused-argument
+    '''
+    Create site from control
+    '''
+    with schema_context('public'):
+        try:
+            tenant = Client(schema_name=schema_name, name=schema_name)
+            tenant.save()
+
+            d = Domain()
+            d.domain = domain
+            d.tenant = tenant
+            d.is_primary = True
+            d.save()
+        except Exception as e:
+            raise Exception(e)
+
+        return tenant.id
+
+@shared_task(bind=True)
+def control_delete_site(self, site_id):
+    # pylint: disable=unused-argument
+    '''
+    Delete site from control
+    '''
+    with schema_context('public'):
+        try:
+            tenant = Client.objects.get(id=site_id)
+            # tenant.auto_drop_schema = True 
+            tenant.delete()
+        except Exception as e:
+            # raise general exception because remote doenst have Client exception
+            raise Exception(e)
+
+    return True

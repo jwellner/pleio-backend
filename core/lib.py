@@ -146,7 +146,8 @@ def get_access_ids(obj=None):
         pass
     else:
         accessIds.append({ 'id': 1, 'description': 'Gebruikers van deze site'})
-        accessIds.append({ 'id': 2, 'description': 'Iedereen (publiek zichtbaar)'})
+        if not config.IS_CLOSED:
+            accessIds.append({ 'id': 2, 'description': 'Iedereen (publiek zichtbaar)'})
 
     return accessIds
 

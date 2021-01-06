@@ -8,6 +8,8 @@ from core.constances import USER_ROLES
 from core import config
 from .shared import read_access_default, write_access_default
 
+def get_overview_email_interval_default():
+    return config.EMAIL_OVERVIEW_DEFAULT_FREQUENCY
 
 class UserProfile(models.Model):
     """
@@ -27,7 +29,7 @@ class UserProfile(models.Model):
     overview_email_interval = models.CharField(
         max_length=10,
         choices=INTERVALS,
-        default=None,
+        default=get_overview_email_interval_default,
         blank=True,
         null=True
     )
