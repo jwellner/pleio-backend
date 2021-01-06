@@ -6,7 +6,8 @@ from ariadne import graphql_sync
 from mixer.backend.django import mixer
 from django.contrib.auth.models import AnonymousUser
 from django.http import HttpRequest
-
+from django.core.cache import cache
+from django.db import connection
 
 class SiteTestCase(FastTenantTestCase):
 
@@ -104,6 +105,8 @@ class SiteTestCase(FastTenantTestCase):
         variables = {
         }
 
+        cache.set("%s%s" % (connection.schema_name, 'IS_CLOSED'), False)
+
         result = graphql_sync(schema, {"query": self.query, "variables": variables}, context_value={ "request": request })
 
         self.assertTrue(result[0])
@@ -118,4 +121,28 @@ class SiteTestCase(FastTenantTestCase):
         self.assertEqual(data["site"]["style"]["colorSecondary"], config.COLOR_SECONDARY)
         self.assertEqual(data["site"]["showTagsInFeed"], config.SHOW_TAGS_IN_FEED)
         self.assertEqual(data["site"]["showTagsInDetail"], config.SHOW_TAGS_IN_DETAIL)
+        self.assertEqual(data["site"]["accessIds"], [
+            {'id': 0, 'description': 'Alleen eigenaar'},
+            {'id': 1, 'description': 'Gebruikers van deze site'},
+            {'id': 2, 'description': 'Iedereen (publiek zichtbaar)'},
+        ])
 
+    def test_site_closed(self):
+
+        request = HttpRequest()
+        request.user = self.user
+
+        variables = {
+        }
+
+        cache.set("%s%s" % (connection.schema_name, 'IS_CLOSED'), True)
+
+        result = graphql_sync(schema, {"query": self.query, "variables": variables}, context_value={ "request": request })
+
+        self.assertTrue(result[0])
+        data = result[1]["data"]
+
+        self.assertEqual(data["site"]["accessIds"], [
+            {'id': 0, 'description': 'Alleen eigenaar'},
+            {'id': 1, 'description': 'Gebruikers van deze site'},
+        ])
