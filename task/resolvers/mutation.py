@@ -1,8 +1,10 @@
 from graphql import GraphQLError
 from django.core.exceptions import ObjectDoesNotExist
-from core.constances import NOT_LOGGED_IN, COULD_NOT_FIND, COULD_NOT_FIND_GROUP, COULD_NOT_SAVE, USER_ROLES
+from django.utils import dateparse
+from core.constances import NOT_LOGGED_IN, COULD_NOT_FIND, COULD_NOT_FIND_GROUP, COULD_NOT_SAVE, USER_ROLES, INVALID_DATE
 from core.lib import remove_none_from_dict, access_id_to_acl
 from core.models import Group
+from user.models import User
 from ..models import Task
 
 
@@ -51,6 +53,8 @@ def resolve_add_task(_, info, input):
 
 def resolve_edit_task(_, info, input):
     # pylint: disable=redefined-builtin
+    # pylint: disable=too-many-branches
+    # pylint: disable=too-many-statements
 
     user = info.context["request"].user
 
@@ -80,6 +84,32 @@ def resolve_edit_task(_, info, input):
         entity.read_access = access_id_to_acl(entity, clean_input.get("accessId"))
     if 'writeAccessId' in clean_input:
         entity.write_access = access_id_to_acl(entity, clean_input.get("writeAccessId"))
+
+    # only admins can edit these fields
+    if user.has_role(USER_ROLES.ADMIN):
+        if 'groupGuid' in input:
+            if input.get("groupGuid") is None:
+                entity.group = None
+            else:
+                try:
+                    group = Group.objects.get(id=clean_input.get("groupGuid"))
+                    entity.group = group
+                except ObjectDoesNotExist:
+                    raise GraphQLError(COULD_NOT_FIND)
+
+        if 'ownerGuid' in clean_input:
+            try:
+                owner = User.objects.get(id=clean_input.get("ownerGuid"))
+                entity.owner = owner
+            except ObjectDoesNotExist:
+                raise GraphQLError(COULD_NOT_FIND)
+
+        if 'timeCreated' in clean_input:
+            try:
+                created_at = dateparse.parse_datetime(clean_input.get("timeCreated"))
+                entity.created_at = created_at
+            except ObjectDoesNotExist:
+                raise GraphQLError(INVALID_DATE)
 
     entity.save()
 

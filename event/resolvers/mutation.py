@@ -1,12 +1,14 @@
-from graphql import GraphQLError
-from django.core.exceptions import ObjectDoesNotExist
 from ariadne import ObjectType
+from django.core.exceptions import ObjectDoesNotExist
+from django.utils import dateparse
+from graphql import GraphQLError
 from core.constances import NOT_LOGGED_IN, COULD_NOT_FIND, EVENT_IS_FULL, EVENT_INVALID_STATE, COULD_NOT_FIND_GROUP, INVALID_DATE, COULD_NOT_SAVE, USER_ROLES
 from core.lib import remove_none_from_dict, access_id_to_acl, tenant_schema
 from core.models import Group
 from file.models import FileFolder
 from file.tasks import resize_featured
-from django.utils import dateparse
+from user.models import User
+
 from ..models import Event, EventAttendee
 from event.resolvers.mutation_attend_event_without_account import resolve_attend_event_without_account
 from event.resolvers.mutation_confirm_attend_event_without_account import resolve_confirm_attend_event_without_account
@@ -242,6 +244,32 @@ def resolve_edit_event(_, info, input):
         entity.rsvp = clean_input.get("rsvp")
     if 'attendEventWithoutAccount' in clean_input:
         entity.attend_event_without_account = clean_input.get("attendEventWithoutAccount")
+
+    # only admins can edit these fields
+    if user.has_role(USER_ROLES.ADMIN):
+        if 'groupGuid' in input:
+            if input.get("groupGuid") is None:
+                entity.group = None
+            else:
+                try:
+                    group = Group.objects.get(id=clean_input.get("groupGuid"))
+                    entity.group = group
+                except ObjectDoesNotExist:
+                    raise GraphQLError(COULD_NOT_FIND)
+
+        if 'ownerGuid' in clean_input:
+            try:
+                owner = User.objects.get(id=clean_input.get("ownerGuid"))
+                entity.owner = owner
+            except ObjectDoesNotExist:
+                raise GraphQLError(COULD_NOT_FIND)
+
+        if 'timeCreated' in clean_input:
+            try:
+                created_at = dateparse.parse_datetime(clean_input.get("timeCreated"))
+                entity.created_at = created_at
+            except ObjectDoesNotExist:
+                raise GraphQLError(INVALID_DATE)
 
     entity.save()
 
