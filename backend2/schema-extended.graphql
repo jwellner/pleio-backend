@@ -248,6 +248,16 @@ type ExportableField {
   label: String!
 }
 
+extend input editEntityInput {
+  timeCreated: String
+  groupGuid: String
+  ownerGuid: String
+}
+
+extend type Wiki {
+  owner: User
+}
+
 extend type Site {
   profileSections: [ProfileSection]
   onboardingEnabled: Boolean!
