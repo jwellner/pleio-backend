@@ -1,8 +1,11 @@
 from graphql import GraphQLError
 from django.core.exceptions import ObjectDoesNotExist
+from django.utils import dateparse
 from core.lib import remove_none_from_dict, access_id_to_acl, tenant_schema
-from core.constances import NOT_LOGGED_IN, COULD_NOT_FIND_GROUP, COULD_NOT_ADD, USER_NOT_MEMBER_OF_GROUP, COULD_NOT_FIND, COULD_NOT_SAVE, USER_ROLES
+from core.constances import NOT_LOGGED_IN, COULD_NOT_FIND_GROUP, COULD_NOT_ADD, USER_NOT_MEMBER_OF_GROUP, \
+    COULD_NOT_FIND, COULD_NOT_SAVE, USER_ROLES, INVALID_DATE
 from core.models import Group
+from user.models import User
 from news.models import News
 from file.models import FileFolder
 from file.tasks import resize_featured
@@ -157,6 +160,22 @@ def resolve_edit_news(_, info, input):
 
     if 'source' in clean_input:
         entity.source = clean_input.get("source")
+
+    # only admins can edit these fields
+    if user.has_role(USER_ROLES.ADMIN):
+        if 'ownerGuid' in clean_input:
+            try:
+                owner = User.objects.get(id=clean_input.get("ownerGuid"))
+                entity.owner = owner
+            except ObjectDoesNotExist:
+                raise GraphQLError(COULD_NOT_FIND)
+
+        if 'timeCreated' in clean_input:
+            try:
+                created_at = dateparse.parse_datetime(clean_input.get("timeCreated"))
+                entity.created_at = created_at
+            except ObjectDoesNotExist:
+                raise GraphQLError(INVALID_DATE)
 
     entity.save()
 
