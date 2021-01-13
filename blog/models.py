@@ -26,6 +26,7 @@ class Blog(Entity, VoteMixin, BookmarkMixin, FollowMixin, CommentMixin, Notifica
     )
     featured_video = models.TextField(null=True, blank=True)
     featured_position_y = models.IntegerField(default=0, null=False)
+    featured_alt = models.CharField(max_length=256, default="")
 
     def __str__(self):
         return self.title

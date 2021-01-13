@@ -283,3 +283,11 @@ extend type SiteSettings {
   siteMembershipAcceptedIntro: String
   siteMembershipDeniedIntro: String
 }
+
+extend type Featured {
+  alt: String
+}
+
+extend input FeaturedInput {
+  alt: String
+}
