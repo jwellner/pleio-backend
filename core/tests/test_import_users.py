@@ -20,10 +20,13 @@ from unittest.mock import patch, MagicMock, mock_open, ANY
 from django.core.files.uploadedfile import SimpleUploadedFile
 import io
 import os
+from django.core.cache import cache
 
 class ImportUsersTestCase(FastTenantTestCase):
 
     def setUp(self):
+        cache.set("%s%s" % (connection.schema_name, 'IS_CLOSED'), False) # or we can not test access id 2
+
         self.csv_bytes = (
             b'column1;column2;column3;column4;column5\n'
             b'row-1-1;row-1-2@example.com;row-1-3;row-1-4;row-1-5\n'

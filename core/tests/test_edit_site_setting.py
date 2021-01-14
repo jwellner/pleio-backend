@@ -469,3 +469,47 @@ class EditSiteSettingTestCase(FastTenantTestCase):
         errors = result[1]["errors"]
 
         self.assertEqual(errors[0]["message"], "invalid_value")
+
+    def test_edit_site_setting_is_closed_default_access(self):
+        mutation = """
+            mutation EditSiteSetting($input: editSiteSettingInput!) {
+                editSiteSetting(input: $input) {
+                    siteSettings {
+                        isClosed
+                        defaultAccessId
+                    }
+                }
+            }
+        """
+
+        variables = {
+            "input": {
+                "isClosed": False,
+                "defaultAccessId": 2
+            }
+        }
+
+        request = HttpRequest()
+        request.user = self.admin
+        result = graphql_sync(schema, { "query": mutation, "variables": variables}, context_value={ "request": request })
+
+        data = result[1]["data"]
+
+        self.assertEqual(data["editSiteSetting"]["siteSettings"]["isClosed"], False)
+        self.assertEqual(data["editSiteSetting"]["siteSettings"]["defaultAccessId"], 2)
+
+        variables = {
+            "input": {
+                "isClosed": True
+            }
+        }
+
+        request = HttpRequest()
+        request.user = self.admin
+        result = graphql_sync(schema, { "query": mutation, "variables": variables}, context_value={ "request": request })
+
+        data = result[1]["data"]
+
+        self.assertEqual(data["editSiteSetting"]["siteSettings"]["isClosed"], True)
+        self.assertEqual(data["editSiteSetting"]["siteSettings"]["defaultAccessId"], 1)
+

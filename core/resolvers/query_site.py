@@ -69,6 +69,10 @@ def get_site_settings():
 
     if not config.IS_CLOSED:
         defaultAccessIdOptions.append({"value": 2, "label": ugettext_lazy("Public")})
+    else:
+        # Reset default access ID when site is closed!
+        if config.DEFAULT_ACCESS_ID == 2:
+            config.DEFAULT_ACCESS_ID = 1
 
     start_page_cms_options = []
     for page in Page.objects.all().order_by('title'):

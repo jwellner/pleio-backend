@@ -27,6 +27,8 @@ class OnboardingTestCase(FastTenantTestCase):
             {"name": "", "profileFieldGuids": [str(self.profile_field1.id)]}
         ])
 
+        cache.set("%s%s" % (connection.schema_name, 'IS_CLOSED'), True)
+
         self.client = TenantClient(self.tenant)
 
     @override_settings(AUTHENTICATION_BACKENDS=['django.contrib.auth.backends.ModelBackend'])
@@ -80,7 +82,7 @@ class OnboardingTestCase(FastTenantTestCase):
 
         response = self.client.get('/onboarding', follow=True)
 
-        self.assertTemplateUsed(response, 'react.html')
+        self.assertTemplateUsed(response, 'base_closed.html')
 
     @override_settings(AUTHENTICATION_BACKENDS=['django.contrib.auth.backends.ModelBackend'])
     def test_onboarding_redirect_existing_off(self):
