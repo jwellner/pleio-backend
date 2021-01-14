@@ -3,11 +3,15 @@ from django_tenants.test.cases import FastTenantTestCase
 from django.test import override_settings
 from user.models import User
 from mixer.backend.django import mixer
+from django.core.cache import cache
+from django.db import connection
 
 class SuperadminTestCase(FastTenantTestCase):
 
     def setUp(self):
         super().setUp()
+
+        cache.set("%s%s" % (connection.schema_name, 'IS_CLOSED'), False)
 
         self.user = mixer.blend(User, is_active=True)
         self.user_admin = mixer.blend(User, is_active=True, roles=['ADMIN'])

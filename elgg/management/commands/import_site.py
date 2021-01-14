@@ -150,7 +150,12 @@ class Command(InteractiveTenantOption, BaseCommand):
         config.THEME = self.helpers.get_plugin_setting("theme")
         config.ACHIEVEMENTS_ENABLED = self.helpers.get_plugin_setting("achievements_enabled") == "yes"
         config.CANCEL_MEMBERSHIP_ENABLED = self.helpers.get_plugin_setting("cancel_membership_enabled") == "yes"
-        config.DEFAULT_ACCESS_ID = self.helpers.get_site_config('default_access')
+        try:
+            config.DEFAULT_ACCESS_ID = int(self.helpers.get_site_config('default_access'))
+            if config.DEFAULT_ACCESS_ID not in [0,1,2]:
+                config.DEFAULT_ACCESS_ID = 1
+        except ValueError:
+            config.DEFAULT_ACCESS_ID = 1
         config.LANGUAGE = self.helpers.get_site_config('language') if self.helpers.get_site_config('language') else "nl"
         config.LOGO = self.helpers.save_and_get_site_logo_or_icon(elgg_site, 'logo')
         config.LOGO_ALT = html.unescape(self.helpers.get_plugin_setting("logo_alt")) \
