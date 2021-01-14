@@ -25,6 +25,9 @@ class SiteSettingsTestCase(FastTenantTestCase):
 
     def setUp(self):
         super().setUp()
+
+        cache.set("%s%s" % (connection.schema_name, 'IS_CLOSED'), False)
+
         self.user = mixer.blend(User, is_delete_requested=False)
         self.admin = mixer.blend(User, roles=['ADMIN'], is_delete_requested=False)
         self.delete_user = mixer.blend(User, is_delete_requested=True)

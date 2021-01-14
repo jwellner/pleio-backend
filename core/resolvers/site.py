@@ -55,6 +55,11 @@ def resolve_access_ids(obj, info):
 @site.field("defaultAccessId")
 def resolve_default_access_id(obj, info):
     # pylint: disable=unused-argument
+    
+    # Never return default access id 2 when site is closed!
+    if config.IS_CLOSED and config.DEFAULT_ACCESS_ID == 2:
+        config.DEFAULT_ACCESS_ID = 1
+
     return config.DEFAULT_ACCESS_ID
 
 @site.field("language")
