@@ -254,10 +254,6 @@ extend input editEntityInput {
   ownerGuid: String
 }
 
-extend type Wiki {
-  owner: User
-}
-
 extend type Site {
   profileSections: [ProfileSection]
   onboardingEnabled: Boolean!
