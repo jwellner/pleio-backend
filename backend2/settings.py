@@ -110,12 +110,12 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'core.middleware.WalledGardenMiddleware',
-    'core.middleware.OnboardingMiddleware'
 ]
 
 if not RUN_AS_ADMIN_APP:
     MIDDLEWARE.append('mozilla_django_oidc.middleware.SessionRefresh')
+    MIDDLEWARE.append('core.middleware.WalledGardenMiddleware')
+    MIDDLEWARE.append('core.middleware.OnboardingMiddleware')
 
 if LOCAL_MIDDLEWARE:
     MIDDLEWARE += LOCAL_MIDDLEWARE
