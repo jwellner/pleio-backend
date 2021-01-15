@@ -3,10 +3,11 @@ from django.db import models
 from django.db.models.signals import post_delete
 from django.dispatch import receiver
 from django.contrib.postgres.fields import ArrayField
-from core.lib import get_acl
+from core.lib import get_acl, draft_to_text
 from core.constances import USER_ROLES
 from core import config
 from .shared import read_access_default, write_access_default
+
 
 def get_overview_email_interval_default():
     return config.EMAIL_OVERVIEW_DEFAULT_FREQUENCY
@@ -139,6 +140,14 @@ class UserProfileField(models.Model):
     @property
     def key(self):
         return str(self.profile_field.key)
+
+    @property
+    def value_field_indexing(self):
+        """Format value according to type"""
+        if self.profile_field.field_type == "html_field":
+            return draft_to_text(self.value)
+
+        return self.value
 
 
 @receiver(post_delete, sender=ProfileField)

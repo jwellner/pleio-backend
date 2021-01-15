@@ -268,6 +268,19 @@ def html_to_text(html):
     h.ignore_images = True
     return h.handle(html)
 
+def draft_to_text(draft_string):
+    if not is_valid_json(draft_string):
+        return ""
+
+    draft = json.loads(draft_string)
+
+    plain_text = ""
+
+    for block in draft["blocks"]:
+        plain_text += f"{block['text']}\n"
+
+    return plain_text
+
 def draft_to_html(draft_string):
     if not is_valid_json(draft_string):
         return draft_string
