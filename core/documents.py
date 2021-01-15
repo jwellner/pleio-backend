@@ -58,7 +58,10 @@ class UserDocument(DefaultDocument):
 
     _profile = fields.ObjectField(properties={
         'user_profile_fields': fields.NestedField(properties={
-            'value': fields.KeywordField(),
+            'value': fields.TextField(
+                attr='value_field_indexing',
+                fields={'raw': fields.KeywordField()}
+            ),
             'name': fields.KeywordField(),
             'key': fields.KeywordField(),
             'read_access': fields.ListField(fields.TextField(attr="read_access"))
