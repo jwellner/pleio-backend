@@ -25,6 +25,7 @@ class Event(Entity, CommentMixin, BookmarkMixin, NotificationMixin):
     )
     featured_video = models.TextField(null=True, blank=True)
     featured_position_y = models.IntegerField(default=0, null=False)
+    featured_alt = models.CharField(max_length=256, default="")
 
     start_date = models.DateTimeField(null=True, blank=True)
     end_date = models.DateTimeField(null=True, blank=True)

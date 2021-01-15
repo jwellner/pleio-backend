@@ -34,6 +34,7 @@ def resolve_add_group(_, info, input):
 
     if 'featured' in clean_input:
         group.featured_position_y = clean_input.get("featured").get("positionY", 0)
+        group.featured_alt = clean_input.get("featured").get("alt", None)
         group.featured_video = clean_input.get("featured").get("video", None)
         if group.featured_video:
             group.featured_image = None
@@ -48,11 +49,11 @@ def resolve_add_group(_, info, input):
 
             group.featured_image = image_file
 
-        group.featured_position_y = clean_input.get("featured").get("positionY", 0)
     else:
         group.featured_image = None
         group.featured_position_y = 0
         group.featured_video = None
+        group.featured_alt = ""
 
     group.description = clean_input.get("description", "")
     group.rich_description = clean_input.get("richDescription", "")

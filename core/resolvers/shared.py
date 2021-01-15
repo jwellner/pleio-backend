@@ -44,7 +44,8 @@ def resolve_entity_featured(obj, info):
     return {
         'image': obj.featured_image_url,
         'video': obj.featured_video,
-        'positionY': obj.featured_position_y
+        'positionY': obj.featured_position_y,
+        'alt': obj.featured_alt
     }
 
 def resolve_entity_guid(obj, info):

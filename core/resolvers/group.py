@@ -80,7 +80,8 @@ def resolve_group_featured(obj, info):
     return {
         'image': image,
         'video': obj.featured_video,
-        'positionY': obj.featured_position_y
+        'positionY': obj.featured_position_y,
+        'alt': obj.featured_alt
     }
 
 @group.field("isFeatured")

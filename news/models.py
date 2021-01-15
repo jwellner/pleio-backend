@@ -17,7 +17,7 @@ class News(Entity, VoteMixin, BookmarkMixin, FollowMixin, CommentMixin):
     title = models.CharField(max_length=256)
     description = models.TextField()
     rich_description = models.TextField(null=True, blank=True)
-    
+
     is_featured = models.BooleanField(default=False)
 
     featured_image = models.ForeignKey(
@@ -28,6 +28,7 @@ class News(Entity, VoteMixin, BookmarkMixin, FollowMixin, CommentMixin):
     )
     featured_video = models.TextField(null=True, blank=True)
     featured_position_y = models.IntegerField(default=0, null=False)
+    featured_alt = models.CharField(max_length=256, default="")
 
     source = models.TextField(default="")
 
