@@ -73,6 +73,7 @@ OIDC_OP_LOGOUT_ENDPOINT = os.getenv('OIDC_OP_LOGOUT_ENDPOINT')
 PROFILE_PICTURE_URL = os.getenv('PROFILE_PICTURE_URL')
 OIDC_OP_LOGOUT_URL_METHOD = 'core.auth.oidc_provider_logout'
 OIDC_CALLBACK_CLASS = 'core.auth.OIDCAuthCallbackView'
+OIDC_AUTHENTICATE_CLASS = 'core.auth.OIDCAuthenticateView'
 
 # SWIFT FILE STORAGE
 SWIFT_ENABLED = os.getenv('SWIFT_ENABLED') == 'True'

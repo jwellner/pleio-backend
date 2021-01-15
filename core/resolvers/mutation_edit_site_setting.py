@@ -120,7 +120,9 @@ def resolve_edit_site_setting(_, info, input):
         'loginIntro': 'LOGIN_INTRO',
         'customCss': 'CUSTOM_CSS',
         'siteMembershipAcceptedIntro': 'SITE_MEMBERSHIP_ACCEPTED_INTRO',
-        'siteMembershipDeniedIntro': 'SITE_MEMBERSHIP_DENIED_INTRO'
+        'siteMembershipDeniedIntro': 'SITE_MEMBERSHIP_DENIED_INTRO',
+        'idpId': 'IDP_ID',
+        'idpName': 'IDP_NAME'
     }
 
     for k, v in setting_keys.items():
