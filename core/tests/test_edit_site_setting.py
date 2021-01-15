@@ -155,6 +155,8 @@ class EditSiteSettingTestCase(FastTenantTestCase):
 
                         siteMembershipAcceptedIntro
                         siteMembershipDeniedIntro
+                        idpId
+                        idpName
                     }
                 }
             }
@@ -248,7 +250,9 @@ class EditSiteSettingTestCase(FastTenantTestCase):
 
                 'customCss': 'h1 {color: maroon;margin-left: 40px;}',
                 'siteMembershipAcceptedIntro': 'You request is accepted',
-                'siteMembershipDeniedIntro': 'Your request is not accepted'
+                'siteMembershipDeniedIntro': 'Your request is not accepted',
+                "idpId": "idp_id",
+                "idpName": "idp_name"
             }
         }
 
@@ -348,6 +352,8 @@ class EditSiteSettingTestCase(FastTenantTestCase):
         self.assertEqual(data["editSiteSetting"]["siteSettings"]["customCss"], 'h1 {color: maroon;margin-left: 40px;}')
         self.assertEqual(data["editSiteSetting"]["siteSettings"]["siteMembershipAcceptedIntro"], 'You request is accepted')
         self.assertEqual(data["editSiteSetting"]["siteSettings"]["siteMembershipDeniedIntro"], 'Your request is not accepted')
+        self.assertEqual(data["editSiteSetting"]["siteSettings"]["idpId"], 'idp_id')
+        self.assertEqual(data["editSiteSetting"]["siteSettings"]["idpName"], 'idp_name')
 
     @patch("file.models.get_mimetype")
     @patch("{}.open".format(settings.DEFAULT_FILE_STORAGE))

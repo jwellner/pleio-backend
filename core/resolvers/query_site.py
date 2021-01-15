@@ -208,7 +208,9 @@ def get_site_settings():
         },
         'customCss': config.CUSTOM_CSS,
         'siteMembershipAcceptedIntro': config.SITE_MEMBERSHIP_ACCEPTED_INTRO,
-        'siteMembershipDeniedIntro': config.SITE_MEMBERSHIP_DENIED_INTRO
+        'siteMembershipDeniedIntro': config.SITE_MEMBERSHIP_DENIED_INTRO,
+        'idpId': config.IDP_ID,
+        'idpName': config.IDP_NAME
     }
 
     return site_settings

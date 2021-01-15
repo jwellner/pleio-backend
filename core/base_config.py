@@ -108,7 +108,9 @@ DEFAULT_SITE_CONFIG = {
 
     'CUSTOM_CSS': ("", 'Custom Css'),
     'SITE_MEMBERSHIP_ACCEPTED_INTRO': ("", 'Site membership accepted intro'),
-    'SITE_MEMBERSHIP_DENIED_INTRO': ("", 'Site membership denied intro')
+    'SITE_MEMBERSHIP_DENIED_INTRO': ("", 'Site membership denied intro'),
+    'IDP_ID': ("", 'Identity provider ID'),
+    'IDP_NAME': ("", 'Identity provider name'),
 }
 """
 Default site configuration

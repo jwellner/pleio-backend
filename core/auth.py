@@ -1,6 +1,6 @@
 from django.core.exceptions import SuspiciousOperation
 from mozilla_django_oidc.auth import OIDCAuthenticationBackend
-from mozilla_django_oidc.views import OIDCAuthenticationCallbackView
+from mozilla_django_oidc.views import OIDCAuthenticationCallbackView, OIDCAuthenticationRequestView
 from mozilla_django_oidc.utils import absolutify
 from django.urls import reverse
 from django.conf import settings
@@ -37,6 +37,16 @@ class OIDCAuthCallbackView(OIDCAuthenticationCallbackView):
             return redirect(reverse('request_access'))
         except OnboardingException:
             return redirect(reverse('onboarding'))
+
+
+class OIDCAuthenticateView(OIDCAuthenticationRequestView):
+    def get_extra_params(self, request):
+        idp = self.request.GET.get('idp')
+        extra_params = self.get_settings('OIDC_AUTH_REQUEST_EXTRA_PARAMS', {})
+        if idp:
+            extra_params.update({'idp': idp})
+        return extra_params
+
 
 class OIDCAuthBackend(OIDCAuthenticationBackend):
 
