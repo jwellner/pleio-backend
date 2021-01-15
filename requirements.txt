@@ -32,3 +32,4 @@ draftjs_exporter==v4.1.1
 django-widget-tweaks==1.4.8
 pydash==4.9.0
 django-signal-disabler==0.1.1
+colour==0.1.5

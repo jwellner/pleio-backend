@@ -3,6 +3,7 @@ import os
 import re
 import secrets
 import tempfile
+from colour import Color
 from core.constances import ACCESS_TYPE
 from core import config
 from django.apps import apps
@@ -334,3 +335,16 @@ def is_valid_domain(domain):
         return pattern.match(domain)
     except (UnicodeError, AttributeError):
         return None
+
+def hex_color_tint(hex_color, weight = 0.5):
+    try:
+        color = Color(hex_color)
+    except AttributeError:
+        # Add some logging?
+        return hex_color
+
+    newR = color.rgb[0] + (1 - color.rgb[0]) * weight
+    newG = color.rgb[1] + (1 - color.rgb[1]) * weight
+    newB = color.rgb[2] + (1 - color.rgb[2]) * weight
+    new = Color(rgb=(newR, newG, newB))
+    return new.hex
