@@ -105,10 +105,10 @@ class ToggleRequestDeleteUserTestCase(FastTenantTestCase):
         user_url = 'https://test.test' + self.user1.url
         mocked_send_mail_multi.assert_called_once_with("fast_test", "Verzoek om account te verwijderen", 'email/toggle_request_delete_user_requested.html',
                                                        {'user_name': self.user1.name, 'user_url': user_url, 'site_url': 'https://test.test', 'site_name': 'Pleio 2.0',
-                                                        'primary_color': '#0e2f56'}, self.user1.email)
+                                                        'primary_color': '#0e2f56', 'header_color': '#0e2f56'}, self.user1.email)
 
         result2 = graphql_sync(schema, {"query": mutation, "variables": variables}, context_value={ "request": request })
 
         mocked_send_mail_multi.assert_called_with("fast_test", "Verzoek om account te verwijderen geannuleerd", 'email/toggle_request_delete_user_cancelled.html',
                                                   {'user_name': self.user1.name, 'user_url': user_url, 'site_url': 'https://test.test', 'site_name': 'Pleio 2.0',
-                                                   'primary_color': '#0e2f56'}, self.user1.email)
+                                                   'primary_color': '#0e2f56', 'header_color': '#0e2f56'}, self.user1.email)

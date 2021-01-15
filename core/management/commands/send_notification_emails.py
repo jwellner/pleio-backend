@@ -30,8 +30,9 @@ class Command(BaseCommand):
             site_name = config.NAME
             user_url = site_url + '/user/' + user.guid + '/settings'
             primary_color = config.COLOR_PRIMARY
+            header_color = config.COLOR_HEADER if config.COLOR_HEADER else config.COLOR_PRIMARY
             context = {'user_url': user_url, 'site_name': site_name, 'site_url': site_url, 'primary_color': primary_color,
-                       'notifications': mapped_notifications, 'show_excerpt': show_excerpt}
+                       'header_color': header_color, 'notifications': mapped_notifications, 'show_excerpt': show_excerpt}
 
             send_mail_multi.delay(connection.schema_name, subject, 'email/send_notification_emails.html', context, user.email)
 

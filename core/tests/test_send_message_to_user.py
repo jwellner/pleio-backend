@@ -133,4 +133,4 @@ class SendMessageToUserTestCase(FastTenantTestCase):
         mocked_send_mail_multi.assert_called_once_with('fast_test', subject, 'email/send_message_to_user.html',
                                                        {'user_name': self.user1.name, 'user_url': user_url,
                                                         'site_url': 'https://test.test', 'site_name': 'Pleio 2.0', 'primary_color': '#0e2f56',
-                                                        'message': '<p>testMessageContent</p>'}, self.user2.email)
+                                                        'header_color': '#0e2f56', 'message': '<p>testMessageContent</p>'}, self.user2.email)

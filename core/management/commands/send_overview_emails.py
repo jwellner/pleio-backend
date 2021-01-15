@@ -60,11 +60,12 @@ class Command(BaseCommand):
             site_name = config.NAME
             user_url = site_url + '/user/' + user.guid + '/settings'
             primary_color = config.COLOR_PRIMARY
+            header_color = config.COLOR_HEADER if config.COLOR_HEADER else config.COLOR_PRIMARY
 
             entities = get_serializable_entities(entities)
             featured_entities = get_serializable_entities(featured_entities)
 
-            context = {'user_url': user_url, 'site_name': site_name, 'site_url': site_url, 'primary_color': primary_color,
+            context = {'user_url': user_url, 'site_name': site_name, 'site_url': site_url, 'primary_color': primary_color, 'header_color': header_color,
                        'entities': entities, 'featured': featured_entities, 'intro_text': config.EMAIL_OVERVIEW_INTRO, 'title': config.EMAIL_OVERVIEW_TITLE,
                        'featured_enabled': config.EMAIL_OVERVIEW_ENABLE_FEATURED, 'featured_title': config.EMAIL_OVERVIEW_FEATURED_TITLE, 'subject': subject}
 

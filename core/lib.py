@@ -223,7 +223,9 @@ def get_default_email_context(request):
         user_name = request.user.name
     site_name = config.NAME
     primary_color = config.COLOR_PRIMARY
-    return {'user_name': user_name, 'user_url': user_url, 'site_url': site_url, 'site_name': site_name, 'primary_color': primary_color}
+    header_color = config.COLOR_HEADER if config.COLOR_HEADER else config.COLOR_PRIMARY
+    return {'user_name': user_name, 'user_url': user_url, 'site_url': site_url, 'site_name': site_name, 'primary_color': primary_color,
+            'header_color': header_color}
 
 
 def obfuscate_email(email):
