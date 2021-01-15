@@ -272,6 +272,7 @@ def import_users(self, schema_name, fields, csv_location, performing_user_guid):
             'site_name': config.NAME,
             'site_url': 'https://' + tenant.domains.first().domain,
             'primary_color': config.COLOR_PRIMARY,
+            'header_color': config.COLOR_HEADER if config.COLOR_HEADER else config.COLOR_PRIMARY,
             'user_name': performing_user.name,
             'stats_created': stats.get('created', 0),
             'stats_updated': stats.get('updated', 0),
@@ -344,6 +345,7 @@ def create_notification(self, schema_name, verb, entity_id, sender_id, recipient
             site_url = "https://" + tenant.domains.first().domain
             site_name = config.NAME
             primary_color = config.COLOR_PRIMARY
+            header_color = config.COLOR_HEADER if config.COLOR_HEADER else config.COLOR_PRIMARY
 
             for notification in notifications:
                 recipient = User.objects.get(id=notification.recipient_id)
@@ -361,7 +363,7 @@ def create_notification(self, schema_name, verb, entity_id, sender_id, recipient
                         mapped_notifications = [get_notification(notification)]
                         user_url = site_url + '/user/' + recipient.guid + '/settings'
                         context = {'user_url': user_url, 'site_name': site_name, 'site_url': site_url, 'primary_color': primary_color,
-                                    'notifications': mapped_notifications, 'show_excerpt': False}
+                                    'header_color': header_color, 'notifications': mapped_notifications, 'show_excerpt': False}
                         send_mail_multi.delay(schema_name, subject, 'email/send_notification_emails.html', context, recipient.email)
                     notification.emailed = True
                     notification.save()
