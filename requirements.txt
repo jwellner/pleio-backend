@@ -14,7 +14,7 @@ ariadne==0.12.0
 django-model-utils==4.1.1
 mixer==6.1.3
 django-storage-swift==1.2.19
-elastic-apm==5.9.0
+elastic-apm==5.10.0
 opentracing==2.4.0
 django-notifications-hq==1.6.0
 django-tenants==3.2.1
