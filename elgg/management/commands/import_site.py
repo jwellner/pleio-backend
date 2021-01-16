@@ -248,6 +248,10 @@ class Command(InteractiveTenantOption, BaseCommand):
             if self.helpers.get_plugin_setting("custom_css", "custom_css") else ""
         config.COOKIE_CONSENT = self.helpers.is_plugin_active('cookie_consent')
         config.SHOW_EXCERPT_IN_NEWS_CARD = self.helpers.get_plugin_setting("show_excerpt_in_news_card") == "yes"
+        config.IDP_ID = self.helpers.get_plugin_setting("idp", "pleio") \
+            if self.helpers.get_plugin_setting("idp", "pleio") else ""
+        config.IDP_NAME = self.helpers.get_plugin_setting("idp_name", "pleio") \
+            if self.helpers.get_plugin_setting("idp_name", "pleio") else ""
 
         self.stdout.write(".", ending="")
 
