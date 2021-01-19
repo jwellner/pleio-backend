@@ -17,6 +17,7 @@ from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist
 from django.utils.text import Truncator
 from django.urls import reverse
+from django.views.decorators.cache import cache_control
 from django.views.decorators.http import require_GET
 from django.http import Http404, HttpResponse, HttpResponseRedirect, StreamingHttpResponse
 from django.contrib.auth import login as auth_login
@@ -250,6 +251,7 @@ def onboarding(request):
     return render(request, 'onboarding.html', context)
 
 
+@cache_control(public=True, max_age=15724800)
 def custom_css(request):
     return HttpResponse(config.CUSTOM_CSS, content_type="text/css")
 
