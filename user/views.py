@@ -1,5 +1,7 @@
 import csv
 from django.http import Http404, StreamingHttpResponse
+from django.db import models
+from django.utils.dateformat import format as dateformat
 from core.lib import get_exportable_user_fields
 from core.models.group import GroupMembership
 from core.models.user import UserProfileField, ProfileField
@@ -17,10 +19,16 @@ class Echo:
 
 def get_user_field(user, field):
     field_object = User._meta.get_field(field)
-    return field_object.value_from_object(user)
+    value = field_object.value_from_object(user)
 
+    # if value is set and field is DateTimeField or DateField, convert to unixtimestamp
+    if value and isinstance(field_object, (models.DateTimeField, models.DateField)):
+        value = dateformat(value, 'U')
+
+    return value
 
 def get_fields(user, user_fields, profile_field_guids):
+    # pylint: disable=too-many-branches
     fields = []
     for user_field in user_fields:
         if user_field == 'guid':
@@ -34,7 +42,11 @@ def get_fields(user, user_fields, profile_field_guids):
         elif user_field == 'updated_at':
             fields.append(get_user_field(user, 'updated_at'))
         elif user_field == 'last_online':
-            fields.append(user.profile.last_online)
+            # if value is set convert to unixtimestamp
+            if user.profile.last_online:
+                fields.append(dateformat(user.profile.last_online, 'U'))
+            else:
+                fields.append("")
         elif user_field == 'banned':
             fields.append(get_user_field(user, 'is_active'))
         # ban reason not implemented yet
