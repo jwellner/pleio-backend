@@ -249,6 +249,11 @@ def onboarding(request):
 
     return render(request, 'onboarding.html', context)
 
+
+def custom_css(request):
+    return HttpResponse(config.CUSTOM_CSS, content_type="text/css")
+
+
 @require_GET
 def robots_txt(request):
     if config.ENABLE_SEARCH_ENGINE_INDEXING:

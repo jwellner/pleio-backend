@@ -46,7 +46,7 @@
     {% endif %}
 
     {% if config.CUSTOM_CSS %}
-        <style>{{ config.CUSTOM_CSS }}</style>
+        <link href="/custom.css?v={{ config.CUSTOM_CSS_TIMESTAMP }}" rel="stylesheet" type="text/css" media="screen">
     {% endif %}
 </head>
 
