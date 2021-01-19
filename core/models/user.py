@@ -3,6 +3,7 @@ from django.db import models
 from django.db.models.signals import post_delete
 from django.dispatch import receiver
 from django.contrib.postgres.fields import ArrayField
+from django.utils import timezone
 from core.lib import get_acl, draft_to_text
 from core.constances import USER_ROLES
 from core import config
@@ -44,6 +45,9 @@ class ProfileField(models.Model):
     """
     Profile field types
     """
+    class Meta:
+        ordering = ['created_at', 'id']
+
     FIELD_TYPES = (
         ('select_field', 'SelectField'),
         ('date_field', 'DateField'),
@@ -68,6 +72,8 @@ class ProfileField(models.Model):
     is_in_overview = models.BooleanField(default=False)
     is_in_onboarding = models.BooleanField(default=False)
     is_mandatory = models.BooleanField(default=False)
+
+    created_at = models.DateTimeField(default=timezone.now)
 
     @property
     def is_filterable(self):
