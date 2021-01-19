@@ -11,17 +11,19 @@ def validate_profile_field(string, field):
         return False
     if field.field_type == 'html_field' and not is_valid_json(string):
         return False
-    if field.field_type == 'select_field' and string not in field.field_options:
-        return False
-    if field.field_type == 'date_field':
-        try:
-            datetime.strptime(string, "%Y-%m-%d")
-        except Exception:
+    
+    if not string == "":
+        if field.field_type == 'select_field' and string not in field.field_options:
             return False
-    if field.field_type == 'multi_select_field':
-        for selected in string.split(","):
-            if selected not in field.field_options:
+        if field.field_type == 'date_field':
+            try:
+                datetime.strptime(string, "%Y-%m-%d")
+            except Exception:
                 return False
+        if field.field_type == 'multi_select_field':
+            for selected in string.split(","):
+                if selected not in field.field_options:
+                    return False
     return True
 
 
