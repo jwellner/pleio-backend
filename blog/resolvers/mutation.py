@@ -51,7 +51,7 @@ def resolve_add_blog(_, info, input):
     if 'featured' in clean_input:
         entity.featured_position_y = clean_input.get("featured").get("positionY", 0)
         entity.featured_video = clean_input.get("featured").get("video", None)
-        entity.featured_alt = clean_input.get("featured").get("alt", None)
+        entity.featured_alt = clean_input.get("featured").get("alt", "")
         if entity.featured_video:
             entity.featured_image = None
         elif clean_input.get("featured").get("image"):
@@ -125,8 +125,8 @@ def resolve_edit_blog(_, info, input):
 
     if 'featured' in clean_input:
         entity.featured_position_y = clean_input.get("featured").get("positionY", 0)
-        entity.featured_alt = clean_input.get("featured").get("alt", None)
-        entity.featured_video = clean_input.get("featured").get("video", None)
+        entity.featured_video = clean_input.get("featured").get("video", "")
+        entity.featured_alt = clean_input.get("featured").get("alt", "")
         if entity.featured_video:
             entity.featured_image = None
         elif clean_input.get("featured").get("image"):
