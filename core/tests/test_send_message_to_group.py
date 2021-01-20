@@ -98,7 +98,7 @@ class SendMessageToGroupTestCase(FastTenantTestCase):
         mocked_send_mail_multi.assert_any_call('fast_test', subject, 'email/send_message_to_group.html',
                                                        {'user_name': self.user1.name, 'user_url': user_url,
                                                         'site_url': 'https://test.test', 'site_name': 'Pleio 2.0', 'primary_color': '#0e2f56',
-                                                        'message': '<p>testMessageContent</p>'}, self.user3.email)
+                                                        'header_color': '#0e2f56', 'message': '<p>testMessageContent</p>'}, self.user3.email)
 
     @override_settings(ALLOWED_HOSTS=['test.test'])
     @mock.patch('core.resolvers.mutation_send_message_to_group.send_mail_multi.delay')
@@ -142,7 +142,7 @@ class SendMessageToGroupTestCase(FastTenantTestCase):
         mocked_send_mail_multi.assert_any_call('fast_test', subject, 'email/send_message_to_group.html',
                                                        {'user_name': self.admin.name, 'user_url': user_url,
                                                         'site_url': 'https://test.test', 'site_name': 'Pleio 2.0', 'primary_color': '#0e2f56',
-                                                        'message': '<p>testMessageContent</p>'}, self.user2.email)
+                                                        'header_color': '#0e2f56', 'message': '<p>testMessageContent</p>'}, self.user2.email)
 
 
     @mock.patch('core.resolvers.mutation_send_message_to_group.send_mail_multi.delay')
@@ -294,7 +294,7 @@ class SendMessageToGroupTestCase(FastTenantTestCase):
         mocked_send_mail_multi.assert_any_call('fast_test', subject, 'email/send_message_to_group.html',
                                                        {'user_name': self.user1.name, 'user_url': user_url,
                                                         'site_url': 'https://test.test', 'site_name': 'Pleio 2.0', 'primary_color': '#0e2f56',
-                                                        'message': '<p>testMessageContent</p>'}, self.user1.email)
+                                                        'header_color': '#0e2f56', 'message': '<p>testMessageContent</p>'}, self.user1.email)
 
 
     @override_settings(ALLOWED_HOSTS=['test.test'])
@@ -340,4 +340,4 @@ class SendMessageToGroupTestCase(FastTenantTestCase):
         mocked_send_mail_multi.assert_any_call('fast_test', subject, 'email/send_message_to_group.html',
                                                        {'user_name': self.user1.name, 'user_url': user_url,
                                                         'site_url': 'https://test.test', 'site_name': 'Pleio 2.0', 'primary_color': '#0e2f56',
-                                                        'message': '<p>testMessageContent</p>'}, self.user3.email)
+                                                        'header_color': '#0e2f56', 'message': '<p>testMessageContent</p>'}, self.user3.email)

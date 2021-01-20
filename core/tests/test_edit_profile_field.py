@@ -297,6 +297,49 @@ class EditProfileFieldTestCase(FastTenantTestCase):
 
         self.assertEqual(errors[0]["message"], "invalid_value")
 
+    def test_edit_profile_select_field_empty_by_user(self):
+
+        mutation = """
+            mutation editProfileField($input: editProfileFieldInput!) {
+                editProfileField(input: $input) {
+                    user {
+                    guid
+                    name
+                    profile {
+                        key
+                        name
+                        value
+                        category
+                        accessId
+                        __typename
+                    }
+                    __typename
+                    }
+                    __typename
+                }
+            }
+        """
+        variables = {
+            "input": {
+                "accessId": 2,
+                "guid": self.user.guid,
+                "key": "select_key",
+                "value": ""
+            }
+        }
+
+        request = HttpRequest()
+        request.user = self.user
+
+        result = graphql_sync(schema, { "query": mutation, "variables": variables }, context_value={ "request": request })
+
+        data = result[1]["data"]
+
+        self.assertEqual(data["editProfileField"]["user"]["guid"], self.user.guid)
+        self.assertEqual(data["editProfileField"]["user"]["profile"][2]["key"], 'select_key')
+        self.assertEqual(data["editProfileField"]["user"]["profile"][2]["name"], 'select_name')
+        self.assertEqual(data["editProfileField"]["user"]["profile"][2]["value"], '')
+        self.assertEqual(data["editProfileField"]["user"]["profile"][2]["accessId"], 2)
 
     def test_edit_profile_select_field_in_options_by_user(self):
 
@@ -341,6 +384,50 @@ class EditProfileFieldTestCase(FastTenantTestCase):
         self.assertEqual(data["editProfileField"]["user"]["profile"][2]["name"], 'select_name')
         self.assertEqual(data["editProfileField"]["user"]["profile"][2]["value"], 'select_value_2')
         self.assertEqual(data["editProfileField"]["user"]["profile"][2]["accessId"], 0)
+
+    def test_edit_profile_date_field_empty_by_user(self):
+
+        mutation = """
+            mutation editProfileField($input: editProfileFieldInput!) {
+                editProfileField(input: $input) {
+                    user {
+                    guid
+                    name
+                    profile {
+                        key
+                        name
+                        value
+                        category
+                        accessId
+                        __typename
+                    }
+                    __typename
+                    }
+                    __typename
+                }
+            }
+        """
+        variables = {
+            "input": {
+                "accessId": 1,
+                "guid": self.user.guid,
+                "key": "date_key",
+                "value": ""
+            }
+        }
+
+        request = HttpRequest()
+        request.user = self.user
+
+        result = graphql_sync(schema, { "query": mutation, "variables": variables }, context_value={ "request": request })
+
+        data = result[1]["data"]
+
+        self.assertEqual(data["editProfileField"]["user"]["guid"], self.user.guid)
+        self.assertEqual(data["editProfileField"]["user"]["profile"][3]["key"], 'date_key')
+        self.assertEqual(data["editProfileField"]["user"]["profile"][3]["name"], 'date_name')
+        self.assertEqual(data["editProfileField"]["user"]["profile"][3]["value"], '')
+        self.assertEqual(data["editProfileField"]["user"]["profile"][3]["accessId"], 1)
 
     def test_edit_profile_date_field_by_user(self):
 
@@ -468,6 +555,44 @@ class EditProfileFieldTestCase(FastTenantTestCase):
 
         self.assertEqual(errors[0]["message"], "invalid_value")
 
+    def test_edit_profile_multi_select_field_fields_empty_by_user(self):
+
+        mutation = """
+            mutation editProfileField($input: editProfileFieldInput!) {
+                editProfileField(input: $input) {
+                    user {
+                    guid
+                    name
+                    profile {
+                        key
+                        name
+                        value
+                        category
+                        accessId
+                        __typename
+                    }
+                    __typename
+                    }
+                    __typename
+                }
+            }
+        """
+        variables = {
+            "input": {
+                "accessId": 2,
+                "guid": self.user.guid,
+                "key": "multi_key",
+                "value": ""
+            }
+        }
+
+        request = HttpRequest()
+        request.user = self.user
+
+        result = graphql_sync(schema, { "query": mutation, "variables": variables }, context_value={ "request": request })
+
+        data = result[1]["data"]
+        self.assertEqual(data["editProfileField"]["user"]["profile"][4]["value"], "")
 
     def test_edit_profile_multi_select_field_by_user(self):
 

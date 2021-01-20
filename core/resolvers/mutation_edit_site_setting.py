@@ -1,3 +1,4 @@
+import datetime
 from graphql import GraphQLError
 from core import config
 from core.models import Setting, ProfileField
@@ -8,6 +9,7 @@ from core.resolvers.query_site import get_site_settings
 from django.db import connection
 from django.core.cache import cache
 from file.models import FileFolder
+
 
 def save_setting(key, value):
     # pylint: disable=unused-variable
@@ -34,6 +36,7 @@ def resolve_edit_site_setting(_, info, input):
     # pylint: disable=unused-variable
     # pylint: disable=too-many-branches
     # pylint: disable=too-many-locals
+    # pylint: disable=too-many-statements
 
     user = info.context["request"].user
     clean_input = remove_none_from_dict(input)
@@ -118,9 +121,10 @@ def resolve_edit_site_setting(_, info, input):
 
         'cookieConsent': 'COOKIE_CONSENT',
         'loginIntro': 'LOGIN_INTRO',
-        'customCss': 'CUSTOM_CSS',
         'siteMembershipAcceptedIntro': 'SITE_MEMBERSHIP_ACCEPTED_INTRO',
-        'siteMembershipDeniedIntro': 'SITE_MEMBERSHIP_DENIED_INTRO'
+        'siteMembershipDeniedIntro': 'SITE_MEMBERSHIP_DENIED_INTRO',
+        'idpId': 'IDP_ID',
+        'idpName': 'IDP_NAME'
     }
 
     for k, v in setting_keys.items():
@@ -200,6 +204,10 @@ def resolve_edit_site_setting(_, info, input):
 
     if 'profileSections' in clean_input:
         save_setting('PROFILE_SECTIONS', validate_profile_sections(clean_input.get('profileSections')))
+
+    if 'customCss' in clean_input:
+        save_setting('CUSTOM_CSS', clean_input.get('customCss'))
+        save_setting('CUSTOM_CSS_TIMESTAMP', int(datetime.datetime.now().timestamp()))
 
     return {
         "siteSettings": get_site_settings()

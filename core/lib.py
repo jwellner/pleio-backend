@@ -3,6 +3,7 @@ import os
 import re
 import secrets
 import tempfile
+from colour import Color
 from core.constances import ACCESS_TYPE
 from core import config
 from django.apps import apps
@@ -223,7 +224,9 @@ def get_default_email_context(request):
         user_name = request.user.name
     site_name = config.NAME
     primary_color = config.COLOR_PRIMARY
-    return {'user_name': user_name, 'user_url': user_url, 'site_url': site_url, 'site_name': site_name, 'primary_color': primary_color}
+    header_color = config.COLOR_HEADER if config.COLOR_HEADER else config.COLOR_PRIMARY
+    return {'user_name': user_name, 'user_url': user_url, 'site_url': site_url, 'site_name': site_name, 'primary_color': primary_color,
+            'header_color': header_color}
 
 
 def obfuscate_email(email):
@@ -264,6 +267,19 @@ def html_to_text(html):
     h.ignore_tables = True
     h.ignore_images = True
     return h.handle(html)
+
+def draft_to_text(draft_string):
+    if not is_valid_json(draft_string):
+        return ""
+
+    draft = json.loads(draft_string)
+
+    plain_text = ""
+
+    for block in draft["blocks"]:
+        plain_text += f"{block['text']}\n"
+
+    return plain_text
 
 def draft_to_html(draft_string):
     if not is_valid_json(draft_string):
@@ -334,3 +350,16 @@ def is_valid_domain(domain):
         return pattern.match(domain)
     except (UnicodeError, AttributeError):
         return None
+
+def hex_color_tint(hex_color, weight = 0.5):
+    try:
+        color = Color(hex_color)
+    except AttributeError:
+        # Add some logging?
+        return hex_color
+
+    newR = color.rgb[0] + (1 - color.rgb[0]) * weight
+    newG = color.rgb[1] + (1 - color.rgb[1]) * weight
+    newB = color.rgb[2] + (1 - color.rgb[2]) * weight
+    new = Color(rgb=(newR, newG, newB))
+    return new.hex

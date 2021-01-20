@@ -198,6 +198,8 @@ class SiteSettingsTestCase(FastTenantTestCase):
                     customCss
                     siteMembershipAcceptedIntro
                     siteMembershipDeniedIntro
+                    idpId
+                    idpName
                 }
             }
         """
@@ -344,6 +346,8 @@ class SiteSettingsTestCase(FastTenantTestCase):
         self.assertEqual(data["siteSettings"]["customCss"], "")
         self.assertEqual(data["siteSettings"]["siteMembershipAcceptedIntro"], "")
         self.assertEqual(data["siteSettings"]["siteMembershipDeniedIntro"], "")
+        self.assertEqual(data["siteSettings"]["idpId"], "")
+        self.assertEqual(data["siteSettings"]["idpName"], "")
 
     def test_site_settings_by_anonymous(self):
 

@@ -236,6 +236,8 @@ extend input editSiteSettingInput {
   customCss: String
   siteMembershipAcceptedIntro: String
   siteMembershipDeniedIntro: String
+  idpId: String
+  idpName: String
 }
 
 input ProfileSectionInput {
@@ -278,4 +280,14 @@ extend type SiteSettings {
   customCss: String
   siteMembershipAcceptedIntro: String
   siteMembershipDeniedIntro: String
+  idpId: String
+  idpName: String
+}
+
+extend type Featured {
+  alt: String
+}
+
+extend input FeaturedInput {
+  alt: String
 }

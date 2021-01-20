@@ -59,6 +59,7 @@ class Group(models.Model):
     )
     featured_video = models.TextField(null=True, blank=True)
     featured_position_y = models.IntegerField(null=True)
+    featured_alt = models.CharField(max_length=256, default="")
 
     is_closed = models.BooleanField(default=False)
     is_membership_on_request = models.BooleanField(default=False)

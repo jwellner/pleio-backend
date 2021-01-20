@@ -1,5 +1,7 @@
 import csv
 from django.http import Http404, StreamingHttpResponse
+from django.db import models
+from django.utils.dateformat import format as dateformat
 from core.lib import get_exportable_user_fields
 from core.models.group import GroupMembership
 from core.models.user import UserProfileField, ProfileField
@@ -17,10 +19,16 @@ class Echo:
 
 def get_user_field(user, field):
     field_object = User._meta.get_field(field)
-    return field_object.value_from_object(user)
+    value = field_object.value_from_object(user)
 
+    # if value is set and field is DateTimeField or DateField, convert to unixtimestamp
+    if value and isinstance(field_object, (models.DateTimeField, models.DateField)):
+        value = dateformat(value, 'U')
+
+    return value
 
 def get_fields(user, user_fields, profile_field_guids):
+    # pylint: disable=too-many-branches
     fields = []
     for user_field in user_fields:
         if user_field == 'guid':
@@ -34,7 +42,11 @@ def get_fields(user, user_fields, profile_field_guids):
         elif user_field == 'updated_at':
             fields.append(get_user_field(user, 'updated_at'))
         elif user_field == 'last_online':
-            fields.append(user.profile.last_online)
+            # if value is set convert to unixtimestamp
+            if user.profile.last_online:
+                fields.append(dateformat(user.profile.last_online, 'U'))
+            else:
+                fields.append("")
         elif user_field == 'banned':
             fields.append(get_user_field(user, 'is_active'))
         # ban reason not implemented yet
@@ -56,6 +68,25 @@ def get_fields(user, user_fields, profile_field_guids):
 
     return fields
 
+def get_headers(user_fields, profile_field_guids):
+    profile_field_names = []
+    for guid in profile_field_guids:
+        try:
+            profile_field_names.append(ProfileField.objects.get(id=guid).name)
+        except Exception:
+            raise Http404("Profile field can not be exported")
+
+    return user_fields + profile_field_names
+
+def get_data(user, user_fields, profile_field_guids):
+    return get_fields(user, user_fields, profile_field_guids)
+
+def iter_items(items, pseudo_buffer, user_fields, profile_field_guids):
+    writer = csv.writer(pseudo_buffer, delimiter=';', quotechar='"')
+    yield writer.writerow(get_headers(user_fields, profile_field_guids))
+
+    for item in items:
+        yield writer.writerow(get_data(item, user_fields, profile_field_guids))
 
 def export(request):
     # TODO: add check if setting for exporting is set
@@ -80,24 +111,11 @@ def export(request):
         if user_field not in exportable_user_fields:
             raise Http404("User field " + user_field + " can not be exported")
 
-    profile_field_names = []
-    for guid in profile_field_guids:
-        try:
-            profile_field_names.append(ProfileField.objects.get(id=guid).name)
-        except Exception:
-            raise Http404("Profile field can not be exported")
+    response = StreamingHttpResponse(
+        streaming_content=(iter_items(User.objects.all(), Echo(), user_fields, profile_field_guids)),
+        content_type='text/csv',
+    )
 
-    headers = user_fields + profile_field_names
+    response['Content-Disposition'] = 'attachment;filename=exported_users.csv'
 
-    rows = [headers]
-    for user in User.objects.all():
-        fields = get_fields(user, user_fields, profile_field_guids)
-        rows.append(fields)
-
-    pseudo_buffer = Echo()
-    writer = csv.writer(pseudo_buffer, delimiter=';', quotechar='"')
-    writer.writerow(headers)
-    response = StreamingHttpResponse((writer.writerow(row) for row in rows),
-                                     content_type="text/csv")
-    response['Content-Disposition'] = 'attachment; filename=exported_users.csv'
     return response

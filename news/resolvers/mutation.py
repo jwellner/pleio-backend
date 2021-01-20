@@ -53,6 +53,7 @@ def resolve_add_news(_, info, input):
     if 'featured' in clean_input:
         entity.featured_position_y = clean_input.get("featured").get("positionY", 0)
         entity.featured_video = clean_input.get("featured").get("video", None)
+        entity.featured_alt = clean_input.get("featured").get("alt", "")
         if entity.featured_video:
             entity.featured_image = None
         elif clean_input.get("featured").get("image"):
@@ -67,12 +68,11 @@ def resolve_add_news(_, info, input):
             resize_featured.delay(tenant_schema(), imageFile.guid)
 
             entity.featured_image = imageFile
-
-        entity.featured_position_y = clean_input.get("featured").get("positionY", 0)
     else:
         entity.featured_image = None
         entity.featured_position_y = 0
         entity.featured_video = None
+        entity.featured_alt = ""
 
     if user.has_role(USER_ROLES.ADMIN) or user.has_role(USER_ROLES.EDITOR):
         if 'isFeatured' in clean_input:
@@ -128,6 +128,7 @@ def resolve_edit_news(_, info, input):
     if 'featured' in clean_input:
         entity.featured_position_y = clean_input.get("featured").get("positionY", 0)
         entity.featured_video = clean_input.get("featured").get("video", None)
+        entity.featured_alt = clean_input.get("featured").get("alt", "")
         if entity.featured_video:
             entity.featured_image = None
         elif clean_input.get("featured").get("image"):
@@ -152,6 +153,7 @@ def resolve_edit_news(_, info, input):
         entity.featured_image = None
         entity.featured_position_y = 0
         entity.featured_video = None
+        entity.featured_alt = ""
 
 
     if user.has_role(USER_ROLES.ADMIN) or user.has_role(USER_ROLES.EDITOR):

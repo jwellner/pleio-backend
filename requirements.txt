@@ -11,16 +11,16 @@ sphinx-autobuild==2020.9.1
 coverage==5.3.1
 prospector==1.2.0
 ariadne==0.12.0
-django-model-utils==4.0.0
-mixer==6.1.3
+django-model-utils==4.1.1
+mixer==6.3.0
 django-storage-swift==1.2.19
-elastic-apm==5.9.0
+elastic-apm==5.10.0
 opentracing==2.4.0
 django-notifications-hq==1.6.0
 django-tenants==3.2.1
 mysqlclient==2.0.3
 django-storages==1.10.1
-boto3==1.15.16
+boto3==1.16.56
 docutils==0.15
 phpserialize==1.3
 python-memcached==1.59
@@ -32,3 +32,4 @@ draftjs_exporter==v4.1.1
 django-widget-tweaks==1.4.8
 pydash==4.9.0
 django-signal-disabler==0.1.1
+colour==0.1.5

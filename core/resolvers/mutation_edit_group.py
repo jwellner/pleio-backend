@@ -42,6 +42,7 @@ def resolve_edit_group(_, info, input):
     if 'featured' in clean_input:
         group.featured_position_y = clean_input.get("featured").get("positionY", 0)
         group.featured_video = clean_input.get("featured").get("video", None)
+        group.featured_alt = clean_input.get("featured").get("alt", "")
         if group.featured_video:
             group.featured_image = None
         elif clean_input.get("featured").get("image"):
@@ -60,12 +61,11 @@ def resolve_edit_group(_, info, input):
             resize_featured.delay(tenant_schema(), imageFile.guid)
 
             group.featured_image = imageFile
-
-        group.featured_position_y = clean_input.get("featured").get("positionY", 0)
     else:
         group.featured_image = None
         group.featured_position_y = 0
         group.featured_video = None
+        group.featured_alt = ""
 
     if 'description' in clean_input:
         group.description = clean_input.get("description")
