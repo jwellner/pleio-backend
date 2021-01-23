@@ -86,6 +86,9 @@ AWS Test:
     - /usr/local/bin/kubectl -n pleio2 set image deployment/api-test api-test=registry.gitlab.com/pleio/backend2:${CI_COMMIT_SHA:0:8}
     - /usr/local/bin/kubectl -n pleio2 set image deployment/admin-test admin-test=registry.gitlab.com/pleio/backend2:${CI_COMMIT_SHA:0:8}
     - /usr/local/bin/kubectl -n pleio2 set image deployment/background-test background-test=registry.gitlab.com/pleio/backend2:${CI_COMMIT_SHA:0:8}
+    - sleep 30
+    - /usr/local/bin/kubectl -n pleio2 patch deployment memcache-test -p "{\"spec\":{\"template\":{\"metadata\":{\"labels\":{\"date\":\"`date +'%s'`\"}}}}}"
+
 
 ODCN Test:
   stage: deploy
@@ -111,3 +114,5 @@ AWS Prod:
     - /usr/local/bin/kubectl -n pleio2 set image deployment/api api=registry.gitlab.com/pleio/backend2:${CI_COMMIT_SHA:0:8}
     - /usr/local/bin/kubectl -n pleio2 set image deployment/admin admin=registry.gitlab.com/pleio/backend2:${CI_COMMIT_SHA:0:8}
     - /usr/local/bin/kubectl -n pleio2 set image deployment/background background=registry.gitlab.com/pleio/backend2:${CI_COMMIT_SHA:0:8}
+    - sleep 30
+    - echo 'flush_all' | nc $AWS_MEMCACHED2_HOST 11211
