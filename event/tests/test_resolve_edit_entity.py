@@ -8,6 +8,7 @@ from django.http import HttpRequest
 from core.models import Group
 from user.models import User
 from event.models import Event
+from core.lib import datetime_isoformat
 from core.constances import ACCESS_TYPE, USER_ROLES
 from mixer.backend.django import mixer
 from graphql import GraphQLError
@@ -42,8 +43,8 @@ class EditEventTestCase(FastTenantTestCase):
                 "accessId": 0,
                 "writeAccessId": 0,
                 "tags": ["tag1", "tag2"],
-                "startDate": "2019-10-02 09:38:33.976000",
-                "endDate": "2019-10-02 09:38:33.976000",
+                "startDate": "2019-10-02 09:00:00",
+                "endDate": "2019-10-02 10:00:00",
                 "maxAttendees": "10",
                 "location": "Utrecht",
                 "source": "https://www.pleio.nl",
@@ -103,8 +104,8 @@ class EditEventTestCase(FastTenantTestCase):
         self.assertEqual(data["editEntity"]["entity"]["title"], variables["input"]["title"])
         self.assertEqual(data["editEntity"]["entity"]["description"], variables["input"]["description"])
         self.assertEqual(data["editEntity"]["entity"]["richDescription"], variables["input"]["richDescription"])
-        self.assertEqual(data["editEntity"]["entity"]["startDate"], variables["input"]["startDate"])
-        self.assertEqual(data["editEntity"]["entity"]["endDate"], variables["input"]["endDate"])
+        self.assertEqual(data["editEntity"]["entity"]["startDate"], "2019-10-02T09:00:00+02:00")
+        self.assertEqual(data["editEntity"]["entity"]["endDate"], "2019-10-02T10:00:00+02:00")
         self.assertEqual(data["editEntity"]["entity"]["maxAttendees"], variables["input"]["maxAttendees"])
         self.assertEqual(data["editEntity"]["entity"]["location"], variables["input"]["location"])
         self.assertEqual(data["editEntity"]["entity"]["source"], variables["input"]["source"])
@@ -116,8 +117,8 @@ class EditEventTestCase(FastTenantTestCase):
         self.assertEqual(data["editEntity"]["entity"]["title"], self.eventPublic.title)
         self.assertEqual(data["editEntity"]["entity"]["description"], self.eventPublic.description)
         self.assertEqual(data["editEntity"]["entity"]["richDescription"], self.eventPublic.rich_description)
-        self.assertEqual(data["editEntity"]["entity"]["startDate"], str(self.eventPublic.start_date))
-        self.assertEqual(data["editEntity"]["entity"]["endDate"], str(self.eventPublic.end_date))
+        self.assertEqual(data["editEntity"]["entity"]["startDate"], str(datetime_isoformat(self.eventPublic.start_date)))
+        self.assertEqual(data["editEntity"]["entity"]["endDate"], str(datetime_isoformat(self.eventPublic.end_date)))
         self.assertEqual(data["editEntity"]["entity"]["maxAttendees"], str(self.eventPublic.max_attendees))
         self.assertEqual(data["editEntity"]["entity"]["location"], self.eventPublic.location)
         self.assertEqual(data["editEntity"]["entity"]["source"], self.eventPublic.external_link)
@@ -146,8 +147,8 @@ class EditEventTestCase(FastTenantTestCase):
         self.assertEqual(data["editEntity"]["entity"]["title"], variables["input"]["title"])
         self.assertEqual(data["editEntity"]["entity"]["description"], variables["input"]["description"])
         self.assertEqual(data["editEntity"]["entity"]["richDescription"], variables["input"]["richDescription"])
-        self.assertEqual(data["editEntity"]["entity"]["startDate"], variables["input"]["startDate"])
-        self.assertEqual(data["editEntity"]["entity"]["endDate"], variables["input"]["endDate"])
+        self.assertEqual(data["editEntity"]["entity"]["startDate"], "2019-10-02T09:00:00+02:00")
+        self.assertEqual(data["editEntity"]["entity"]["endDate"], "2019-10-02T10:00:00+02:00")
         self.assertEqual(data["editEntity"]["entity"]["maxAttendees"], variables["input"]["maxAttendees"])
         self.assertEqual(data["editEntity"]["entity"]["location"], variables["input"]["location"])
         self.assertEqual(data["editEntity"]["entity"]["source"], variables["input"]["source"])
@@ -163,8 +164,8 @@ class EditEventTestCase(FastTenantTestCase):
         self.assertEqual(data["editEntity"]["entity"]["title"], self.eventPublic.title)
         self.assertEqual(data["editEntity"]["entity"]["description"], self.eventPublic.description)
         self.assertEqual(data["editEntity"]["entity"]["richDescription"], self.eventPublic.rich_description)
-        self.assertEqual(data["editEntity"]["entity"]["startDate"], str(self.eventPublic.start_date))
-        self.assertEqual(data["editEntity"]["entity"]["endDate"], str(self.eventPublic.end_date))
+        self.assertEqual(data["editEntity"]["entity"]["startDate"], str(datetime_isoformat(self.eventPublic.start_date)))
+        self.assertEqual(data["editEntity"]["entity"]["endDate"], str(datetime_isoformat(self.eventPublic.end_date)))
         self.assertEqual(data["editEntity"]["entity"]["maxAttendees"], str(self.eventPublic.max_attendees))
         self.assertEqual(data["editEntity"]["entity"]["location"], self.eventPublic.location)
         self.assertEqual(data["editEntity"]["entity"]["source"], self.eventPublic.external_link)
