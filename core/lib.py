@@ -3,6 +3,7 @@ import os
 import re
 import secrets
 import tempfile
+from pytz import timezone
 from colour import Color
 from core.constances import ACCESS_TYPE
 from core import config
@@ -363,3 +364,8 @@ def hex_color_tint(hex_color, weight = 0.5):
     newB = color.rgb[2] + (1 - color.rgb[2]) * weight
     new = Color(rgb=(newR, newG, newB))
     return new.hex
+
+def datetime_isoformat(obj):
+    if obj:
+        return obj.astimezone(timezone(settings.TIME_ZONE)).isoformat()
+    return None

@@ -9,6 +9,7 @@ from core.models import Group
 from user.models import User
 from event.models import Event
 from core.constances import ACCESS_TYPE
+from core.lib import datetime_isoformat
 from mixer.backend.django import mixer
 from graphql import GraphQLError
 from datetime import datetime
@@ -31,8 +32,8 @@ class AddEventTestCase(FastTenantTestCase):
                 "accessId": 0,
                 "writeAccessId": 0,
                 "tags": ["tag1", "tag2"],
-                "startDate": "2019-10-02 09:38:33.976000+00:00",
-                "endDate": "2019-10-02 09:38:33.976000+00:00",
+                "startDate": "2019-10-02 09:00:00",
+                "endDate": "2019-10-02 10:00:00",
                 "maxAttendees": "10",
                 "location": "Utrecht",
                 "source": "https://www.pleio.nl",
@@ -92,8 +93,8 @@ class AddEventTestCase(FastTenantTestCase):
         self.assertEqual(data["addEntity"]["entity"]["location"], variables["input"]["location"])
         self.assertEqual(data["addEntity"]["entity"]["rsvp"], variables["input"]["rsvp"])
         self.assertEqual(data["addEntity"]["entity"]["source"], variables["input"]["source"])
-        self.assertEqual(data["addEntity"]["entity"]["startDate"], variables["input"]["startDate"])
-        self.assertEqual(data["addEntity"]["entity"]["endDate"], variables["input"]["endDate"])
+        self.assertEqual(data["addEntity"]["entity"]["startDate"], "2019-10-02T09:00:00+02:00")
+        self.assertEqual(data["addEntity"]["entity"]["endDate"], "2019-10-02T10:00:00+02:00")
         self.assertEqual(data["addEntity"]["entity"]["attendEventWithoutAccount"], variables["input"]["attendEventWithoutAccount"])
         self.assertEqual(data["addEntity"]["entity"]["maxAttendees"], variables["input"]["maxAttendees"])
 

@@ -1,6 +1,7 @@
 from ariadne import ObjectType
 from core.resolvers import shared
 from django.db.models import Q
+from core.lib import datetime_isoformat
 
 
 def conditional_state_filter(state):
@@ -52,12 +53,12 @@ def resolve_url(obj, info):
 @event.field("startDate")
 def resolve_start_date(obj, info):
     # pylint: disable=unused-argument
-    return obj.start_date
+    return datetime_isoformat(obj.start_date)
 
 @event.field("endDate")
 def resolve_end_date(obj, info):
     # pylint: disable=unused-argument
-    return obj.end_date
+    return datetime_isoformat(obj.end_date)
 
 @event.field("source")
 def resolve_source(obj, info):
