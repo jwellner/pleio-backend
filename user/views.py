@@ -1,6 +1,5 @@
 import csv
 from django.http import Http404, StreamingHttpResponse
-from django.db import models
 from django.utils.dateformat import format as dateformat
 from core.lib import get_exportable_user_fields
 from core.models.group import GroupMembership
@@ -20,11 +19,6 @@ class Echo:
 def get_user_field(user, field):
     field_object = User._meta.get_field(field)
     value = field_object.value_from_object(user)
-
-    # if value is set and field is DateTimeField or DateField, convert to unixtimestamp
-    if value and isinstance(field_object, (models.DateTimeField, models.DateField)):
-        value = dateformat(value, 'U')
-
     return value
 
 def get_fields(user, user_fields, profile_field_guids):
@@ -39,10 +33,20 @@ def get_fields(user, user_fields, profile_field_guids):
             fields.append(get_user_field(user, 'email'))
         elif user_field == 'created_at':
             fields.append(get_user_field(user, 'created_at'))
+        elif user_field == 'created_at_unix':
+            timestamp = dateformat(get_user_field(user, 'created_at'), 'U')
+            fields.append(timestamp)
         elif user_field == 'updated_at':
             fields.append(get_user_field(user, 'updated_at'))
+        elif user_field == 'updated_at_unix':
+            timestamp = dateformat(get_user_field(user, 'updated_at'), 'U')
+            fields.append(timestamp)
         elif user_field == 'last_online':
-            # if value is set convert to unixtimestamp
+            if user.profile.last_online:
+                fields.append(user.profile.last_online)
+            else:
+                fields.append("")
+        elif user_field == 'last_online_unix':
             if user.profile.last_online:
                 fields.append(dateformat(user.profile.last_online, 'U'))
             else:
@@ -89,8 +93,6 @@ def iter_items(items, pseudo_buffer, user_fields, profile_field_guids):
         yield writer.writerow(get_data(item, user_fields, profile_field_guids))
 
 def export(request):
-    # TODO: add check if setting for exporting is set
-    # TODO: add tests
     user = request.user
 
     if not user.is_authenticated:
