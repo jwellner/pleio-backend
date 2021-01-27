@@ -256,7 +256,10 @@ def get_exportable_user_fields():
         {'field_type': 'userField', 'field': 'banned', 'label': 'banned'},
         {'field_type': 'userField', 'field': 'ban_reason', 'label': 'ban_reason'},
         {'field_type': 'userField', 'field': 'group_memberships', 'label': 'group_memberships'},
-        {'field_type': 'userField', 'field': 'receive_newsletter', 'label': 'receive_newsletter'}
+        {'field_type': 'userField', 'field': 'receive_newsletter', 'label': 'receive_newsletter'},
+        {'field_type': 'userField', 'field': 'created_at_unix', 'label': 'created_at (U)'},
+        {'field_type': 'userField', 'field': 'updated_at_unix', 'label': 'updated_at (U)'},
+        {'field_type': 'userField', 'field': 'last_online_unix', 'label': 'last_online (U)'},
     ]
 
 def tenant_schema():
