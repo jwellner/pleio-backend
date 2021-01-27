@@ -3,6 +3,7 @@ import os
 import re
 import secrets
 import tempfile
+from pytz import timezone
 from colour import Color
 from core.constances import ACCESS_TYPE
 from core import config
@@ -255,7 +256,10 @@ def get_exportable_user_fields():
         {'field_type': 'userField', 'field': 'banned', 'label': 'banned'},
         {'field_type': 'userField', 'field': 'ban_reason', 'label': 'ban_reason'},
         {'field_type': 'userField', 'field': 'group_memberships', 'label': 'group_memberships'},
-        {'field_type': 'userField', 'field': 'receive_newsletter', 'label': 'receive_newsletter'}
+        {'field_type': 'userField', 'field': 'receive_newsletter', 'label': 'receive_newsletter'},
+        {'field_type': 'userField', 'field': 'created_at_unix', 'label': 'created_at (U)'},
+        {'field_type': 'userField', 'field': 'updated_at_unix', 'label': 'updated_at (U)'},
+        {'field_type': 'userField', 'field': 'last_online_unix', 'label': 'last_online (U)'},
     ]
 
 def tenant_schema():
@@ -363,3 +367,8 @@ def hex_color_tint(hex_color, weight = 0.5):
     newB = color.rgb[2] + (1 - color.rgb[2]) * weight
     new = Color(rgb=(newR, newG, newB))
     return new.hex
+
+def datetime_isoformat(obj):
+    if obj:
+        return obj.astimezone(timezone(settings.TIME_ZONE)).isoformat()
+    return None

@@ -11,7 +11,7 @@ from user.models import User
 from event.models import Event
 from mixer.backend.django import mixer
 from core.constances import ACCESS_TYPE
-from core.lib import get_acl, access_id_to_acl
+from core.lib import get_acl, access_id_to_acl, datetime_isoformat
 from django.utils.text import slugify
 
 
@@ -113,7 +113,7 @@ class EventTestCase(FastTenantTestCase):
         self.assertEqual(data["entity"]["tags"], [])
         self.assertEqual(data["entity"]["canEdit"], False)
         self.assertEqual(data["entity"]["url"], "/events/view/{}/{}".format(self.eventPublic.guid, slugify(self.eventPublic.title)))
-        self.assertEqual(data["entity"]["startDate"], str(self.eventPublic.start_date))
+        self.assertEqual(data["entity"]["startDate"], str(datetime_isoformat(self.eventPublic.start_date)))
         self.assertEqual(data["entity"]["endDate"], None)
         self.assertEqual(data["entity"]["source"], self.eventPublic.external_link)
         self.assertEqual(data["entity"]["location"], self.eventPublic.location)
@@ -155,8 +155,8 @@ class EventTestCase(FastTenantTestCase):
         self.assertEqual(data["entity"]["tags"], [])
         self.assertEqual(data["entity"]["canEdit"], True)
         self.assertEqual(data["entity"]["url"], "/events/view/{}/{}".format(self.eventPrivate.guid, slugify(self.eventPrivate.title)))
-        self.assertEqual(data["entity"]["startDate"], str(self.eventPrivate.start_date))
-        self.assertEqual(data["entity"]["endDate"], str(self.eventPrivate.end_date))
+        self.assertEqual(data["entity"]["startDate"], str(datetime_isoformat(self.eventPrivate.start_date)))
+        self.assertEqual(data["entity"]["endDate"], str(datetime_isoformat(self.eventPrivate.end_date)))
         self.assertEqual(data["entity"]["source"], self.eventPrivate.external_link)
         self.assertEqual(data["entity"]["location"], self.eventPrivate.location)
         self.assertEqual(data["entity"]["rsvp"], self.eventPrivate.rsvp)
