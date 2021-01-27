@@ -29,8 +29,12 @@ urlpatterns = [
     path('superadmin/tasks', core_superadmin.tasks),
     path('graphql', GraphQLView.as_view(schema=schema, extensions=[OpenTracingExtensionSync]), name='graphql'),
 
+    path('file/download/<uuid:file_id>', file_views.download, name='download'),
     path('file/download/<uuid:file_id>/<str:file_name>', file_views.download, name='download'),
+
+    path('file/embed/<uuid:file_id>', file_views.embed, name='embed'),
     path('file/embed/<uuid:file_id>/<str:file_name>', file_views.embed, name='embed'),
+    
     path('file/thumbnail/<uuid:file_id>', file_views.thumbnail, name='thumbnail'),
     path('file/featured/<uuid:entity_guid>', file_views.featured, name='featured'),
     path('bulk_download', file_views.bulk_download, name='bulk_download'),

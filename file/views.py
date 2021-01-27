@@ -12,9 +12,10 @@ from os import path
 
 
 def download(request, file_id=None, file_name=None):
+    # pylint: disable=unused-argument
     user = request.user
 
-    if not file_id or not file_name:
+    if not file_id:
         raise Http404("File not found")
 
     try:
@@ -35,9 +36,10 @@ def download(request, file_id=None, file_name=None):
 
 @cache_control(public=True, max_age=15724800)
 def embed(request, file_id=None, file_name=None):
+    # pylint: disable=unused-argument
     user = request.user
 
-    if not file_id or not file_name:
+    if not file_id:
         raise Http404("File not found")
 
     try:
