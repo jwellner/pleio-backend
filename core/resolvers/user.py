@@ -7,7 +7,9 @@ from django.core.exceptions import ObjectDoesNotExist
 user = ObjectType("User")
 
 def is_user_or_admin(obj, info):
-    if info.context["request"].user == obj or info.context["request"].user.has_role(USER_ROLES.ADMIN):
+    request_user = info.context["request"].user
+
+    if request_user.is_authenticated and (request_user == obj or request_user.has_role(USER_ROLES.ADMIN)):
         return True
     return False
 
@@ -90,10 +92,9 @@ def resolve_can_edit(obj, info):
 
 @user.field("roles")
 def resolve_roles(obj, info):
-    if not info.context["request"].user.has_role(USER_ROLES.ADMIN):
-        return None
-
-    return obj.roles
+    if is_user_or_admin(obj, info):
+        return obj.roles
+    return None
 
 @user.field("username")
 def resolve_username(obj, info):
@@ -129,3 +130,10 @@ def resolve_fields_in_overview(obj, info):
 
         user_profile_fields.append(field)
     return user_profile_fields
+
+@user.field("email")
+def resolve_email(obj, info):
+    # pylint: disable=unused-argument
+    if is_user_or_admin(obj, info):
+        return obj.email
+    return None

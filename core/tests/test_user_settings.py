@@ -154,4 +154,9 @@ class UserSettingsTestCase(FastTenantTestCase):
 
         data = result[1]["data"]
 
-        self.assertIsNone(data["entity"])
+        self.assertEqual(data["entity"]["canEdit"], False)
+        self.assertEqual(data["entity"]["username"], self.user1.guid)
+        self.assertEqual(data["entity"]["emailNotifications"], None)
+        self.assertEqual(data["entity"]["getsNewsletter"], None)
+        self.assertEqual(data["entity"]["emailOverview"], None)
+        self.assertEqual(data["entity"]["groupNotifications"], [])
