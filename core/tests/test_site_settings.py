@@ -349,6 +349,7 @@ class SiteSettingsTestCase(FastTenantTestCase):
         self.assertEqual(data["siteSettings"]["idpId"], "")
         self.assertEqual(data["siteSettings"]["idpName"], "")
 
+
     def test_site_settings_by_anonymous(self):
 
         request = HttpRequest()
