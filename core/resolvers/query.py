@@ -11,6 +11,7 @@ from .query_groups import resolve_groups
 from .query_bookmarks import resolve_bookmarks
 from .query_search import resolve_search
 from .query_users import resolve_users
+from .query_users_by_birth_date import resolve_users_by_birth_date
 from .query_filters import resolve_filters
 from .query_trending import resolve_trending
 from .query_notifications import resolve_notifications
@@ -29,6 +30,7 @@ query.set_field("groups", resolve_groups)
 query.set_field("bookmarks", resolve_bookmarks)
 query.set_field("search", resolve_search)
 query.set_field("users", resolve_users)
+query.set_field("usersByBirthDate", resolve_users_by_birth_date)
 query.set_field("notifications", resolve_notifications)
 query.set_field("trending", resolve_trending)
 query.set_field("recommended", resolve_recommended)

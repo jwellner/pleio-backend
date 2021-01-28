@@ -153,6 +153,7 @@ extend type Mutation {
 
 extend type Query {
   siteUsers(q: String, role: String, isDeleteRequested: Boolean, isBanned: Boolean, offset: Int, limit: Int, lastOnlineBefore: String): SiteUserList
+  usersByBirthDate(profileFieldGuid: String!, futureDays: Int, offset: Int, limit: Int): SiteUserList
 }
 
 extend type User {
@@ -259,6 +260,7 @@ extend input editEntityInput {
 
 extend type Site {
   profileSections: [ProfileSection]
+  profileFields: [ProfileItem]
   onboardingEnabled: Boolean!
   onboardingIntro: String
 }

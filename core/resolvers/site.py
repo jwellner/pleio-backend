@@ -2,7 +2,7 @@ from ariadne import ObjectType
 from django.utils import timezone
 from django.templatetags.static import static
 from core import config
-from core.models import UserProfile
+from core.models import UserProfile, ProfileField
 from core.lib import get_access_ids, get_activity_filters
 
 site = ObjectType("Site")
@@ -202,3 +202,8 @@ def resolve_achievements_enabled(obj, info):
 def resolve_cancel_membership(obj, info):
     # pylint: disable=unused-argument
     return config.CANCEL_MEMBERSHIP_ENABLED
+
+@site.field("profileFields")
+def resolve_profile_fields(obj, info):
+    # pylint: disable=unused-argument
+    return ProfileField.objects.all()

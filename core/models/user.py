@@ -1,14 +1,17 @@
 import uuid
+import logging
 from django.db import models
-from django.db.models.signals import post_delete
+from django.db.models.signals import post_delete, pre_save
 from django.dispatch import receiver
 from django.contrib.postgres.fields import ArrayField
 from django.utils import timezone
+from datetime import datetime
 from core.lib import get_acl, draft_to_text
 from core.constances import USER_ROLES
 from core import config
 from .shared import read_access_default, write_access_default
 
+logger = logging.getLogger(__name__)
 
 def get_overview_email_interval_default():
     return config.EMAIL_OVERVIEW_DEFAULT_FREQUENCY
@@ -128,6 +131,7 @@ class UserProfileField(models.Model):
     user_profile = models.ForeignKey('core.UserProfile', on_delete=models.CASCADE, related_name="user_profile_fields")
     profile_field = models.ForeignKey('core.ProfileField', on_delete=models.CASCADE, related_name="profile_fields")
     value = models.TextField()
+    value_date = models.DateField(default=None, blank=True, null=True)
     read_access = ArrayField(
         models.CharField(max_length=64),
         blank=True,
@@ -155,6 +159,14 @@ class UserProfileField(models.Model):
 
         return self.value
 
+@receiver(pre_save, sender=UserProfileField)
+def set_date_field_value(sender, instance, **kwargs):
+    # pylint: disable=unused-argument
+    if instance.profile_field.field_type == "date_field":
+        try:
+            instance.value_date = datetime.strptime(instance.value, '%Y-%m-%d')
+        except Exception:
+            instance.date_value = None
 
 @receiver(post_delete, sender=ProfileField)
 def validate_config_profile_sections(sender, instance, **kwargs):
