@@ -12,8 +12,10 @@ from django.utils import timezone
 
 class Manager(BaseUserManager):
     def visible(self, user):
-        if not user.is_authenticated:
-            return self.get_queryset().none()
+        # pylint: disable=unused-argument
+        """
+        User is always visible. User property access is handled in user resolver.
+        """
         return self.get_queryset()
 
     def create_user(
