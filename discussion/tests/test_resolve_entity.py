@@ -51,6 +51,12 @@ class EventTestCase(FastTenantTestCase):
                 writeAccessId
                 canEdit
                 tags
+                featured {
+                    image
+                    video
+                    positionY
+                    alt
+                }
                 url
                 inGroup
                 group {

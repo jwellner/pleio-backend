@@ -1,7 +1,9 @@
 from django.db import models
 from django.utils.text import slugify
+from django.urls import reverse
 from core.models import Entity, VoteMixin, CommentMixin, BookmarkMixin, FollowMixin, Comment, NotificationMixin
 from core.constances import USER_ROLES
+from file.models import FileFolder
 
 
 class Question(Entity, VoteMixin, BookmarkMixin, FollowMixin, CommentMixin, NotificationMixin):
@@ -16,6 +18,16 @@ class Question(Entity, VoteMixin, BookmarkMixin, FollowMixin, CommentMixin, Noti
     rich_description = models.TextField(null=True, blank=True)
     is_closed = models.BooleanField(default=False)
     is_featured = models.BooleanField(default=False)
+
+    featured_image = models.ForeignKey(
+        FileFolder,
+        on_delete=models.PROTECT,
+        blank=True,
+        null=True
+    )
+    featured_video = models.TextField(null=True, blank=True)
+    featured_position_y = models.IntegerField(default=0, null=False)
+    featured_alt = models.CharField(max_length=256, default="")
 
     best_answer = models.ForeignKey(
         Comment,
@@ -65,3 +77,9 @@ class Question(Entity, VoteMixin, BookmarkMixin, FollowMixin, CommentMixin, Noti
     @property
     def type_to_string(self):
         return 'question'
+
+    @property
+    def featured_image_url(self):
+        if self.featured_image:
+            return '%s?cache=%i' % (reverse('featured', args=[self.id]), int(self.featured_image.updated_at.timestamp()))
+        return None

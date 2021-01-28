@@ -284,10 +284,6 @@ extend type SiteSettings {
   idpName: String
 }
 
-extend type Featured {
-  alt: String
-}
-
 extend input FeaturedInput {
   alt: String
 }
