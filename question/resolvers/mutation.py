@@ -1,10 +1,12 @@
 from graphql import GraphQLError
 from django.core.exceptions import ObjectDoesNotExist
 from django.utils import dateparse
-from core.lib import remove_none_from_dict, access_id_to_acl
+from core.lib import remove_none_from_dict, access_id_to_acl, tenant_schema
 from core.models import Comment, Group
 from core.constances import NOT_LOGGED_IN, COULD_NOT_FIND, COULD_NOT_SAVE, COULD_NOT_FIND_GROUP, \
     USER_NOT_MEMBER_OF_GROUP, USER_ROLES, INVALID_DATE
+from file.models import FileFolder
+from file.tasks import resize_featured
 from question.models import Question
 from user.models import User
 
@@ -97,6 +99,30 @@ def resolve_add_question(_, info, input):
     entity.description = clean_input.get("description")
     entity.rich_description = clean_input.get("richDescription")
 
+    if 'featured' in clean_input:
+        entity.featured_position_y = clean_input.get("featured").get("positionY", 0)
+        entity.featured_video = clean_input.get("featured").get("video", None)
+        entity.featured_alt = clean_input.get("featured").get("alt", "")
+        if entity.featured_video:
+            entity.featured_image = None
+        elif clean_input.get("featured").get("image"):
+
+            imageFile = FileFolder.objects.create(
+                owner=entity.owner,
+                upload=clean_input.get("featured").get("image"),
+                read_access=entity.read_access,
+                write_access=entity.write_access
+            )
+
+            resize_featured.delay(tenant_schema(), imageFile.guid)
+
+            entity.featured_image = imageFile
+    else:
+        entity.featured_image = None
+        entity.featured_position_y = 0
+        entity.featured_video = None
+        entity.featured_alt = ""
+
     if user.has_role(USER_ROLES.ADMIN) or user.has_role(USER_ROLES.EDITOR):
         if 'isFeatured' in clean_input:
             entity.is_featured = clean_input.get("isFeatured")
@@ -144,6 +170,34 @@ def resolve_edit_question(_, info, input):
         entity.description = clean_input.get("description")
     if 'richDescription' in clean_input:
         entity.rich_description = clean_input.get("richDescription")
+
+    if 'featured' in clean_input:
+        entity.featured_position_y = clean_input.get("featured").get("positionY", 0)
+        entity.featured_video = clean_input.get("featured").get("video", "")
+        entity.featured_alt = clean_input.get("featured").get("alt", "")
+        if entity.featured_video:
+            entity.featured_image = None
+        elif clean_input.get("featured").get("image"):
+
+            if entity.featured_image:
+                imageFile = entity.featured_image
+            else:
+                imageFile = FileFolder()
+
+            imageFile.owner = entity.owner
+            imageFile.read_access = entity.read_access
+            imageFile.write_access = entity.write_access
+            imageFile.upload = clean_input.get("featured").get("image")
+            imageFile.save()
+
+            resize_featured.delay(tenant_schema(), imageFile.guid)
+
+            entity.featured_image = imageFile
+    else:
+        entity.featured_image = None
+        entity.featured_position_y = 0
+        entity.featured_video = None
+        entity.featured_alt = ""
 
     if user.has_role(USER_ROLES.ADMIN) or user.has_role(USER_ROLES.EDITOR):
         if 'isFeatured' in clean_input:

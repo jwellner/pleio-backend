@@ -288,10 +288,6 @@ extend type SiteSettings {
   enableSearchEngineIndexing: Boolean!
 }
 
-extend type Featured {
-  alt: String
-}
-
 extend input FeaturedInput {
   alt: String
 }

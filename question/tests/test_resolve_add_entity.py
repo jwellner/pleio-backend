@@ -31,7 +31,12 @@ class AddQuestionTestCase(FastTenantTestCase):
                 "accessId": 0,
                 "writeAccessId": 0,
                 "tags": ["tag1", "tag2"],
-                "isFeatured": True
+                "isFeatured": True,
+                "featured": {
+                    "positionY": 10,
+                    "video": "testVideo",
+                    "alt": "testAlt"
+                }
             }
         }
         self.mutation = """
@@ -47,6 +52,12 @@ class AddQuestionTestCase(FastTenantTestCase):
                 tags
                 url
                 inGroup
+                featured {
+                    image
+                    video
+                    positionY
+                    alt
+                }
                 group {
                     guid
                 }
@@ -81,6 +92,9 @@ class AddQuestionTestCase(FastTenantTestCase):
         self.assertEqual(data["addEntity"]["entity"]["tags"], variables["input"]["tags"])
         self.assertEqual(data["addEntity"]["entity"]["isClosed"], False)
         self.assertEqual(data["addEntity"]["entity"]["isFeatured"], False) # only with editor or admin role
+        self.assertEqual(data["addEntity"]["entity"]["featured"]["positionY"], 10)
+        self.assertEqual(data["addEntity"]["entity"]["featured"]["video"], "testVideo")
+        self.assertEqual(data["addEntity"]["entity"]["featured"]["alt"], "testAlt")
 
     def test_add_question_to_group(self):
 

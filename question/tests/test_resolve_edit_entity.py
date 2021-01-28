@@ -40,7 +40,12 @@ class EditQuestionTestCase(FastTenantTestCase):
                 "accessId": 0,
                 "writeAccessId": 0,
                 "tags": ["tag1", "tag2"],
-                "isFeatured": True
+                "isFeatured": True,
+                "featured": {
+                    "positionY": 2,
+                    "video": "testVideo2",
+                    "alt": "testAlt2"
+                }
             }
         }
         self.mutation = """
@@ -56,6 +61,12 @@ class EditQuestionTestCase(FastTenantTestCase):
                 tags
                 url
                 inGroup
+                featured {
+                    image
+                    video
+                    positionY
+                    alt
+                }
                 group {
                     guid
                 }
@@ -93,6 +104,9 @@ class EditQuestionTestCase(FastTenantTestCase):
         self.assertEqual(data["editEntity"]["entity"]["tags"], variables["input"]["tags"])
         self.assertEqual(data["editEntity"]["entity"]["isClosed"], False)
         self.assertEqual(data["editEntity"]["entity"]["isFeatured"], False) # nly with editor or admin role
+        self.assertEqual(data["editEntity"]["entity"]["featured"]["positionY"], 2)
+        self.assertEqual(data["editEntity"]["entity"]["featured"]["video"], "testVideo2")
+        self.assertEqual(data["editEntity"]["entity"]["featured"]["alt"], "testAlt2")
 
         self.question.refresh_from_db()
 
