@@ -228,6 +228,7 @@ extend input editSiteSettingInput {
   directRegistrationDomains: [String]
   profileSections: [ProfileSectionInput]
   onboardingEnabled: Boolean
+  enableSearchEngineIndexing: Boolean
   onboardingForceExistingUsers: Boolean
   onboardingIntro: String
   limitedGroupAdd: Boolean
@@ -282,6 +283,7 @@ extend type SiteSettings {
   siteMembershipDeniedIntro: String
   idpId: String
   idpName: String
+  enableSearchEngineIndexing: Boolean!
 }
 
 extend type Featured {

@@ -55,6 +55,7 @@ class EditSiteSettingTestCase(FastTenantTestCase):
                         }
                         googleAnalyticsId
                         googleSiteVerification
+                        enableSearchEngineIndexing
 
                         piwikUrl
                         piwikId
@@ -172,6 +173,7 @@ class EditSiteSettingTestCase(FastTenantTestCase):
                 "defaultAccessId": 0,
                 "googleAnalyticsId": "123",
                 "googleSiteVerification": "code1",
+                "enableSearchEngineIndexing": True,
 
                 "piwikUrl": "url3",
                 "piwikId": "id1",
@@ -272,6 +274,7 @@ class EditSiteSettingTestCase(FastTenantTestCase):
         self.assertEqual(data["editSiteSetting"]["siteSettings"]["defaultAccessIdOptions"], [{'value': 0, 'label': 'Alleen mijzelf'}, {'value': 1, 'label': 'Ingelogde gebruikers'}])
         self.assertEqual(data["editSiteSetting"]["siteSettings"]["googleAnalyticsId"], "123")
         self.assertEqual(data["editSiteSetting"]["siteSettings"]["googleSiteVerification"], "code1")
+        self.assertEqual(data["editSiteSetting"]["siteSettings"]["enableSearchEngineIndexing"], True)
 
         self.assertEqual(data["editSiteSetting"]["siteSettings"]["piwikUrl"], "url3")
         self.assertEqual(data["editSiteSetting"]["siteSettings"]["piwikId"], "id1")

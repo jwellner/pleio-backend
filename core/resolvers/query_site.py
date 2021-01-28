@@ -92,6 +92,7 @@ def get_site_settings():
 
         'googleAnalyticsId': config.GOOGLE_ANALYTICS_ID,
         'googleSiteVerification': config.GOOGLE_SITE_VERIFICATION,
+        'enableSearchEngineIndexing' : config.ENABLE_SEARCH_ENGINE_INDEXING,
         'piwikUrl': config.PIWIK_URL,
         'piwikId': config.PIWIK_ID,
 

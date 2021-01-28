@@ -56,6 +56,7 @@ def resolve_edit_site_setting(_, info, input):
         'defaultAccessId': 'DEFAULT_ACCESS_ID',
         'googleAnalyticsId': 'GOOGLE_ANALYTICS_ID',
         'googleSiteVerification': 'GOOGLE_SITE_VERIFICATION',
+        'enableSearchEngineIndexing': 'ENABLE_SEARCH_ENGINE_INDEXING',
         'piwikUrl': 'PIWIK_URL',
         'piwikId': 'PIWIK_ID',
 
