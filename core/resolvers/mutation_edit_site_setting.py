@@ -4,8 +4,8 @@ from graphql import GraphQLError
 from core import config
 from core.models import Setting, ProfileField
 from core.models.user import validate_profile_sections
-from core.constances import NOT_LOGGED_IN, USER_NOT_SITE_ADMIN, USER_ROLES, INVALID_VALUE
-from core.lib import remove_none_from_dict, access_id_to_acl, is_valid_domain
+from core.constances import NOT_LOGGED_IN, USER_NOT_SITE_ADMIN, USER_ROLES, INVALID_VALUE, REDIRECTS_HAS_LOOP, REDIRECTS_HAS_DUPLICATE_SOURCE
+from core.lib import remove_none_from_dict, access_id_to_acl, is_valid_domain, is_valid_url_or_path
 from core.resolvers.query_site import get_site_settings
 from django.db import connection
 from django.core.cache import cache
@@ -31,6 +31,34 @@ def get_menu_children(menu, item_id, depth=0):
             children.append({"title": item["title"], "link": item["link"], "children": get_menu_children(menu, item["id"], depth)})
     return children
 
+
+def validate_redirects(redirects):
+    sources = []
+    destinations = []
+    redirects_dict = {}
+
+    # check no more than 2000 redirects
+    if len(redirects) > 2000:
+        raise GraphQLError(INVALID_VALUE)
+
+    for redirect in redirects:
+        source = redirect['source']
+        destination = redirect['destination']
+        sources.append(source)
+        destinations.append(destination)
+        if not is_valid_url_or_path(source) or not is_valid_url_or_path(destination):
+            raise GraphQLError(INVALID_VALUE)
+
+        # save redirects as dict, because source can not be duplicate
+        try:
+            redirects_dict[source] = destination
+        except Exception:
+            raise GraphQLError(REDIRECTS_HAS_DUPLICATE_SOURCE)
+
+    # check if loop can occur
+    if any(x in sources for x in destinations):
+        raise GraphQLError(REDIRECTS_HAS_LOOP)
+    return redirects_dict
 
 def resolve_edit_site_setting(_, info, input):
     # pylint: disable=redefined-builtin
@@ -149,6 +177,10 @@ def resolve_edit_site_setting(_, info, input):
             profile_field.save()
 
         save_setting('PROFILE', clean_input.get('profile'))
+
+    if 'redirects' in clean_input:
+        redirects = validate_redirects(clean_input.get('redirects'))
+        save_setting('REDIRECTS', redirects)
 
     if 'logo' in clean_input:
         if not clean_input.get("logo"):

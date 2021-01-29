@@ -138,6 +138,7 @@ def get_site_settings():
         'initiativeLink': config.INITIATIVE_LINK,
         'directLinks': config.DIRECT_LINKS,
         'footer': config.FOOTER,
+        'redirects': [{'source': k, 'destination': v} for k, v in config.REDIRECTS.items()],
 
         'profile': get_profile(),
         'profileSections': config.PROFILE_SECTIONS,

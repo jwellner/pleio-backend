@@ -122,7 +122,10 @@ class SiteSettingsTestCase(FastTenantTestCase):
                         title
                         link
                     }
-
+                    redirects {
+                        source
+                        destination
+                    }
                     profile {
                         key
                         name
@@ -296,6 +299,7 @@ class SiteSettingsTestCase(FastTenantTestCase):
         self.assertEqual(data["siteSettings"]["initiativeLink"], "")
         self.assertEqual(data["siteSettings"]["directLinks"], [])
         self.assertEqual(data["siteSettings"]["footer"], [])
+        self.assertEqual(data["siteSettings"]["redirects"], [])
 
         self.assertEqual(data["siteSettings"]["profile"], [])
         self.assertEqual(data["siteSettings"]["profileFields"], [{"key": self.profileField1.key}, {"key": self.profileField2.key}])

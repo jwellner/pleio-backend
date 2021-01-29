@@ -7,7 +7,7 @@ from cms.models import Page
 from user.models import User
 from file.models import FileFolder
 from wiki.models import Wiki
-from core.lib import access_id_to_acl
+from core.lib import access_id_to_acl, is_valid_url_or_path
 from elgg.models import (
     ElggEntities, ElggObjectsEntity, ElggPrivateSettings, ElggConfig, GuidMap, ElggEntityViews,
     ElggEntityViewsLog, ElggAccessCollections, ElggEntityRelationships
@@ -65,6 +65,37 @@ class ElggHelpers():
 
         value = bytes(config.value.encode())
         return unserialize(value, decode_strings=True)
+
+    def get_rewrites(self):
+        # pylint: disable=unused-variable
+        rewrites_serialized = self.get_plugin_setting("rewrites", "rewrite")
+
+        if rewrites_serialized:
+            value = unserialize(bytes(rewrites_serialized.encode()), decode_strings=True)
+            rewrites = {}
+            rewrites_count = 0
+
+            for k, v in value.items():
+                source = v['source']
+                if not source.startswith('/'):
+                    source = '/' + source
+                destination = v['destination']
+                if not destination.startswith('/') and not destination.startswith('http'):
+                    destination = '/' + destination
+
+                if not is_valid_url_or_path(source) or is_valid_url_or_path(destination):
+                    continue
+
+                # skip if rewrite source already exists
+                try:
+                    rewrites[source] = destination
+                    rewrites_count = rewrites_count + 1
+                except Exception:
+                    pass
+            print(f"{rewrites_count} rewrites saved")
+            return rewrites
+        return {}
+
 
     def get_profile_field(self, name):
         profile_field_entities = ElggEntities.objects.using(self.database).filter(

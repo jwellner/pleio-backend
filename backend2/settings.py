@@ -116,6 +116,7 @@ if not RUN_AS_ADMIN_APP:
     MIDDLEWARE.append('mozilla_django_oidc.middleware.SessionRefresh')
     MIDDLEWARE.append('core.middleware.WalledGardenMiddleware')
     MIDDLEWARE.append('core.middleware.OnboardingMiddleware')
+    MIDDLEWARE.append('core.middleware.RedirectMiddleware')
 
 if LOCAL_MIDDLEWARE:
     MIDDLEWARE += LOCAL_MIDDLEWARE

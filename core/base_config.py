@@ -54,6 +54,7 @@ DEFAULT_SITE_CONFIG = {
     'INITIATIVE_LINK': ('', 'Initiative link'),
     'DIRECT_LINKS': ([], 'Direct links'),
     'FOOTER': ([], 'Footer'),
+    'REDIRECTS': ({}, 'Redirects'),
 
     'MENU': ([
         {"link": "/blog", "title": "Blog", "children": []},

@@ -3,7 +3,7 @@ import re
 from django.conf import settings
 from django.conf.urls.i18n import is_language_prefix_patterns_used
 from django.http import HttpResponseRedirect
-from django.urls import get_script_prefix, is_valid_path
+from django.urls import get_script_prefix, is_valid_path, resolve
 from django.utils import timezone, translation
 from django.utils.cache import patch_vary_headers
 from django.utils.deprecation import MiddlewareMixin
@@ -25,7 +25,6 @@ def is_ip_whitelisted(request):
         except Exception:
             pass
     return False
-
 
 class UserLastOnlineMiddleware:
     def __init__(self, get_response):
@@ -173,3 +172,22 @@ class OnboardingMiddleware:
             return redirect('onboarding')
 
         return self.get_response(request)
+
+
+class RedirectMiddleware:
+    """
+    Show onboarding when user has to complete mandatory fields
+
+    Note: new user onboaring is routed in authentication layer
+    """
+    def __init__(self, get_response):
+        self.get_response = get_response
+
+    def __call__(self, request):
+        response = self.get_response(request)
+
+        # ignore graphql first (more efficiency for all graphql queries)
+        if not request.path == '/graphql' and request.path in config.REDIRECTS and resolve(request.path).url_name in ["entity_view", "default"]:
+            return redirect(config.REDIRECTS[request.path])
+
+        return response

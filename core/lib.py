@@ -9,6 +9,7 @@ from core.constances import ACCESS_TYPE
 from core import config
 from django.apps import apps
 from django.conf import settings
+from django.core.validators import URLValidator
 from django.db import connection
 from django.utils.text import slugify
 from enum import Enum
@@ -17,7 +18,6 @@ from draftjs_exporter.dom import DOM
 from draftjs_exporter.html import HTML
 from draftjs_exporter.defaults import BLOCK_MAP, STYLE_MAP
 from draftjs_exporter.constants import ENTITY_TYPES, BLOCK_TYPES
-
 
 class TypeModels(Enum):
     """Can be used to convert GraphQL types to Django models"""
@@ -380,3 +380,13 @@ def get_client_ip(request):
     else:
         ip = request.META.get('REMOTE_ADDR')
     return ip
+
+def is_valid_url_or_path(url):
+    validate = URLValidator()
+    if not url.startswith('http'):
+        url = 'https://test.nl' + url
+    try:
+        validate(url)
+        return True
+    except Exception:
+        return False

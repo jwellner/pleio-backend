@@ -453,6 +453,15 @@ def replace_domain_links(self, schema_name, replace_domain=None, replace_elgg_id
 
         config.DIRECT_LINKS = direct_links
 
+        # -- Replace REDIRECTS items
+        redirects = {}
+        for k, v in config.REDIRECTS.items():
+            if k in redirects:
+                continue
+            redirects[_replace_links(k)] = _replace_links(v)
+
+        config.REDIRECTS = redirects
+
         # -- Replace entity descriptions
         entities = Entity.objects.all().select_subclasses()
 
@@ -565,7 +574,7 @@ def control_delete_site(self, site_id):
     with schema_context('public'):
         try:
             tenant = Client.objects.get(id=site_id)
-            # tenant.auto_drop_schema = True 
+            # tenant.auto_drop_schema = True
             tenant.delete()
         except Exception as e:
             # raise general exception because remote doenst have Client exception
