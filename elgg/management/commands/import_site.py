@@ -145,6 +145,7 @@ class Command(InteractiveTenantOption, BaseCommand):
         if not initiative_image:
             initiative_image = self.helpers.save_and_get_site_logo_or_icon(elgg_site, 'logo')
 
+        config.REDIRECTS = self.helpers.get_rewrites()
         config.NAME = html.unescape(elgg_site.name)
         config.SUBTITLE = html.unescape(elgg_site.description)
         config.THEME = self.helpers.get_plugin_setting("theme")

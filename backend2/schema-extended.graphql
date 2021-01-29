@@ -225,6 +225,7 @@ type ProfileSection {
 }
 
 extend input editSiteSettingInput {
+  redirects: [RedirectInput]
   """users with email adress in domain of directRegistrationDomains, can register even when allowRegistration is False"""
   directRegistrationDomains: [String]
   profileSections: [ProfileSectionInput]
@@ -266,7 +267,19 @@ extend type Site {
   onboardingIntro: String
 }
 
+type Redirect {
+  source: String!
+  destination: String!
+}
+
+"""source and destination must start with /"""
+input RedirectInput {
+  source: String!
+  destination: String!
+}
+
 extend type SiteSettings {
+  redirects: [Redirect]
   directRegistrationDomains: [String]
   profileSections: [ProfileSection]
   exportableUserFields: [ExportableField]
