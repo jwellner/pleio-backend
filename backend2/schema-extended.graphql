@@ -236,6 +236,7 @@ extend input editSiteSettingInput {
   cookieConsent: Boolean
   loginIntro: String
   customCss: String
+  whitelistedIpRanges: [String]
   siteMembershipAcceptedIntro: String
   siteMembershipDeniedIntro: String
   idpId: String
@@ -281,6 +282,7 @@ extend type SiteSettings {
   roleOptions: [Option]
   deleteAccountRequests: DeleteAccountRequestList
   customCss: String
+  whitelistedIpRanges: [String]
   siteMembershipAcceptedIntro: String
   siteMembershipDeniedIntro: String
   idpId: String

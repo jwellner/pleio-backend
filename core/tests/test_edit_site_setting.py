@@ -153,6 +153,7 @@ class EditSiteSettingTestCase(FastTenantTestCase):
                         loginIntro
 
                         customCss
+                        whitelistedIpRanges
 
                         siteMembershipAcceptedIntro
                         siteMembershipDeniedIntro
@@ -251,6 +252,7 @@ class EditSiteSettingTestCase(FastTenantTestCase):
                 'loginIntro': 'test',
 
                 'customCss': 'h1 {color: maroon;margin-left: 40px;}',
+                'whitelistedIpRanges': ['192.168.0.1/32', '192.168.0.0/24'],
                 'siteMembershipAcceptedIntro': 'You request is accepted',
                 'siteMembershipDeniedIntro': 'Your request is not accepted',
                 "idpId": "idp_id",
@@ -353,6 +355,7 @@ class EditSiteSettingTestCase(FastTenantTestCase):
 
         self.assertEqual(data["editSiteSetting"]["siteSettings"]["loginIntro"], 'test')
         self.assertEqual(data["editSiteSetting"]["siteSettings"]["customCss"], 'h1 {color: maroon;margin-left: 40px;}')
+        self.assertEqual(data["editSiteSetting"]["siteSettings"]["whitelistedIpRanges"], ['192.168.0.1/32', '192.168.0.0/24'])
         self.assertEqual(data["editSiteSetting"]["siteSettings"]["siteMembershipAcceptedIntro"], 'You request is accepted')
         self.assertEqual(data["editSiteSetting"]["siteSettings"]["siteMembershipDeniedIntro"], 'Your request is not accepted')
         self.assertEqual(data["editSiteSetting"]["siteSettings"]["idpId"], 'idp_id')
@@ -522,3 +525,29 @@ class EditSiteSettingTestCase(FastTenantTestCase):
         self.assertEqual(data["editSiteSetting"]["siteSettings"]["isClosed"], True)
         self.assertEqual(data["editSiteSetting"]["siteSettings"]["defaultAccessId"], 1)
 
+    def test_edit_site_setting_wrong_whitelisted_ip_range(self):
+        mutation = """
+            mutation EditSiteSetting($input: editSiteSettingInput!) {
+                editSiteSetting(input: $input) {
+                    siteSettings {
+                        whitelistedIpRanges
+                    }
+                }
+            }
+        """
+
+        variables = {
+            "input": {
+                "whitelistedIpRanges": ["10.10.266.3"]
+            }
+        }
+
+        request = HttpRequest()
+        request.user = self.admin
+        result = graphql_sync(schema, { "query": mutation, "variables": variables}, context_value={ "request": request })
+
+        self.assertTrue(result[0])
+
+        errors = result[1]["errors"]
+
+        self.assertEqual(errors[0]["message"], "invalid_value")

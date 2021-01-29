@@ -197,6 +197,7 @@ class SiteSettingsTestCase(FastTenantTestCase):
                         }
                     }
                     customCss
+                    whitelistedIpRanges
                     siteMembershipAcceptedIntro
                     siteMembershipDeniedIntro
                     idpId
@@ -346,6 +347,7 @@ class SiteSettingsTestCase(FastTenantTestCase):
         self.assertEqual(data["siteSettings"]["siteAccessRequests"]["edges"][0]['email'], 'b@b.nl')
         self.assertEqual(data["siteSettings"]["deleteAccountRequests"]["edges"][0]['guid'], self.delete_user.guid)
         self.assertEqual(data["siteSettings"]["customCss"], "")
+        self.assertEqual(data["siteSettings"]["whitelistedIpRanges"], [])
         self.assertEqual(data["siteSettings"]["siteMembershipAcceptedIntro"], "")
         self.assertEqual(data["siteSettings"]["siteMembershipDeniedIntro"], "")
         self.assertEqual(data["siteSettings"]["idpId"], "")
@@ -440,3 +442,31 @@ class SiteSettingsIsClosedTestCase(TenantTestCase):
     def test_site_settings_is_closed_featured_file(self):
         response = self.c.get("/file/featured/test.txt")
         self.assertTemplateNotUsed(response, 'registration/login.html')
+
+    def test_site_settings_is_closed_but_whitelisted(self):
+        cache.set("%s%s" % (connection.schema_name, 'WHITELISTED_IP_RANGES'), ['10.10.10.10'])
+
+        response = self.c.get("/981random3", REMOTE_ADDR='10.10.10.10')
+
+        self.assertTemplateNotUsed(response, 'registration/login.html')
+
+    def test_site_settings_is_closed_but_whitelisted_different_ip(self):
+        cache.set("%s%s" % (connection.schema_name, 'WHITELISTED_IP_RANGES'), ['10.10.10.11/32'])
+
+        response = self.c.get("/981random3", REMOTE_ADDR='10.10.10.10')
+
+        self.assertTemplateUsed(response, 'registration/login.html')
+
+    def test_site_settings_is_closed_but_whitelisted_large_network(self):
+        cache.set("%s%s" % (connection.schema_name, 'WHITELISTED_IP_RANGES'), ['10.10.10.0/24'])
+
+        response = self.c.get("/981random3", HTTP_X_FORWARDED_FOR='10.10.10.108')
+
+        self.assertTemplateNotUsed(response, 'registration/login.html')
+
+    def test_site_settings_is_closed_but_whitelisted_large_network_different_range(self):
+        cache.set("%s%s" % (connection.schema_name, 'WHITELISTED_IP_RANGES'), ['10.10.11.0/24'])
+
+        response = self.c.get("/981random3", HTTP_X_FORWARDED_FOR='10.10.10.108')
+
+        self.assertTemplateUsed(response, 'registration/login.html')
