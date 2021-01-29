@@ -1,3 +1,4 @@
+import ipaddress
 import re
 from django.conf import settings
 from django.conf.urls.i18n import is_language_prefix_patterns_used
@@ -11,6 +12,19 @@ from django.shortcuts import redirect
 from django.template.response import TemplateResponse
 
 from core import config
+from core.lib import get_client_ip
+
+
+def is_ip_whitelisted(request):
+    if config.WHITELISTED_IP_RANGES:
+        try:
+            ip_address_network = ipaddress.ip_network(get_client_ip(request))
+            for ip_range in config.WHITELISTED_IP_RANGES:
+                if ip_address_network.subnet_of(ipaddress.ip_network(ip_range)):
+                    return True
+        except Exception:
+            pass
+    return False
 
 
 class UserLastOnlineMiddleware:
@@ -112,6 +126,7 @@ class WalledGardenMiddleware:
             config.IS_CLOSED
             and not request.user.is_authenticated
             and not self.is_public_url(request.path_info)
+            and not is_ip_whitelisted(request)
         ):
             context = {
                 'next': request.path_info
@@ -149,10 +164,10 @@ class OnboardingMiddleware:
 
         user = request.user
         if (
-            not self.is_public_url(request.path_info) 
-            and user.is_authenticated 
+            not self.is_public_url(request.path_info)
+            and user.is_authenticated
             and config.ONBOARDING_ENABLED
-            and config.ONBOARDING_FORCE_EXISTING_USERS 
+            and config.ONBOARDING_FORCE_EXISTING_USERS
             and not user.is_profile_complete
         ):
             return redirect('onboarding')

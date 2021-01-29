@@ -246,12 +246,18 @@ class Command(InteractiveTenantOption, BaseCommand):
             if self.helpers.get_site_config('enable_frontpage_indexing') else False
         config.CUSTOM_CSS = self.helpers.get_plugin_setting("custom_css", "custom_css") \
             if self.helpers.get_plugin_setting("custom_css", "custom_css") else ""
+        config.WHITELISTED_IP_RANGES = self.helpers.get_plugin_setting("allowed_ip", "walled_garden_by_ip").split('\r\n') \
+            if self.helpers.get_plugin_setting("allowed_ip", "walled_garden_by_ip") else []
         config.COOKIE_CONSENT = self.helpers.is_plugin_active('cookie_consent')
         config.SHOW_EXCERPT_IN_NEWS_CARD = self.helpers.get_plugin_setting("show_excerpt_in_news_card") == "yes"
         config.IDP_ID = self.helpers.get_plugin_setting("idp", "pleio") \
             if self.helpers.get_plugin_setting("idp", "pleio") else ""
         config.IDP_NAME = self.helpers.get_plugin_setting("idp_name", "pleio") \
             if self.helpers.get_plugin_setting("idp_name", "pleio") else ""
+
+        # if plugin walled_garde_by_ip is active, the site is closed
+        if self.helpers.is_plugin_active('walled_garden_by_ip'):
+            config.IS_CLOSED = True
 
         self.stdout.write(".", ending="")
 

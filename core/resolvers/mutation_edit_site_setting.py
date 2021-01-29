@@ -1,4 +1,5 @@
 import datetime
+import ipaddress
 from graphql import GraphQLError
 from core import config
 from core.models import Setting, ProfileField
@@ -209,6 +210,14 @@ def resolve_edit_site_setting(_, info, input):
     if 'customCss' in clean_input:
         save_setting('CUSTOM_CSS', clean_input.get('customCss'))
         save_setting('CUSTOM_CSS_TIMESTAMP', int(datetime.datetime.now().timestamp()))
+
+    if 'whitelistedIpRanges' in clean_input:
+        for ip_range in clean_input.get('whitelistedIpRanges'):
+            try:
+                ip_addr = ipaddress.ip_network(ip_range)
+            except ValueError:
+                raise GraphQLError(INVALID_VALUE)
+        save_setting('WHITELISTED_IP_RANGES', clean_input.get('whitelistedIpRanges'))
 
     return {
         "siteSettings": get_site_settings()
