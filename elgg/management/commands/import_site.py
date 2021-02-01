@@ -504,7 +504,10 @@ class Command(InteractiveTenantOption, BaseCommand):
                 # attending
                 relations = elgg_event.entity.relation.filter(relationship="event_attending", right__type='user')
                 for relation in relations:
-                    user = User.objects.get(id=GuidMap.objects.get(id=relation.right.guid).guid)
+                    try:
+                        user = User.objects.get(id=GuidMap.objects.get(id=relation.right.guid).guid)
+                    except ObjectDoesNotExist:
+                        continue
 
                     event.attendees.update_or_create(
                         user=user,
@@ -516,7 +519,10 @@ class Command(InteractiveTenantOption, BaseCommand):
                 # maybe
                 relations = elgg_event.entity.relation.filter(relationship="event_maybe", right__type='user')
                 for relation in relations:
-                    user = User.objects.get(id=GuidMap.objects.get(id=relation.right.guid).guid)
+                    try:
+                        user = User.objects.get(id=GuidMap.objects.get(id=relation.right.guid).guid)
+                    except ObjectDoesNotExist:
+                        continue
 
                     event.attendees.update_or_create(
                         user=user,
@@ -528,7 +534,10 @@ class Command(InteractiveTenantOption, BaseCommand):
                 # reject
                 relations = elgg_event.entity.relation.filter(relationship="event_reject", right__type='user')
                 for relation in relations:
-                    user = User.objects.get(id=GuidMap.objects.get(id=relation.right.guid).guid)
+                    try:
+                        user = User.objects.get(id=GuidMap.objects.get(id=relation.right.guid).guid)
+                    except ObjectDoesNotExist:
+                        continue
 
                     event.attendees.update_or_create(
                         user=user,
