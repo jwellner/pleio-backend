@@ -72,6 +72,7 @@ class ElggHelpers():
 
         if rewrites_serialized:
             value = unserialize(bytes(rewrites_serialized.encode()), decode_strings=True)
+
             rewrites = {}
             rewrites_count = 0
 
@@ -83,7 +84,8 @@ class ElggHelpers():
                 if not destination.startswith('/') and not destination.startswith('http'):
                     destination = '/' + destination
 
-                if not is_valid_url_or_path(source) or is_valid_url_or_path(destination):
+                if not is_valid_url_or_path(source) or not is_valid_url_or_path(destination):
+                    print(f"invalid source {source} or destination {destination} url")
                     continue
 
                 # skip if rewrite source already exists

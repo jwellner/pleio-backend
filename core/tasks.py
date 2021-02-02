@@ -456,9 +456,7 @@ def replace_domain_links(self, schema_name, replace_domain=None, replace_elgg_id
         # -- Replace REDIRECTS items
         redirects = {}
         for k, v in config.REDIRECTS.items():
-            if k in redirects:
-                continue
-            redirects[_replace_links(k)] = _replace_links(v)
+            redirects[k] = _replace_links(v)
 
         config.REDIRECTS = redirects
 
