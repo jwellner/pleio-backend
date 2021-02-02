@@ -128,7 +128,11 @@ def elasticsearch_rebuild(self, schema_name):
                 doc.django.model.__name__
             )
             qs = doc().get_indexing_queryset()
-            doc().update(qs, parallel=False)
+
+            if doc.django.model.__name__ == 'FileFolder':
+                doc().update(qs, parallel=False, chunk_size=10)
+            else:
+                doc().update(qs, parallel=False, chunk_size=500)
 
 @shared_task(bind=True, ignore_result=True)
 def elasticsearch_index_file(self, schema_name, file_guid):
