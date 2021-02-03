@@ -32,7 +32,12 @@ class AddDiscussionTestCase(FastTenantTestCase):
                 "accessId": 0,
                 "writeAccessId": 0,
                 "tags": ["tag1", "tag2"],
-                "isFeatured": True
+                "isFeatured": True,
+                "featured": {
+                    "positionY": 10,
+                    "video": "testVideo",
+                    "alt": "testAlt"
+                }
             }
         }
         self.mutation = """
@@ -44,6 +49,12 @@ class AddDiscussionTestCase(FastTenantTestCase):
                 timeUpdated
                 accessId
                 writeAccessId
+                featured {
+                    image
+                    video
+                    positionY
+                    alt
+                }
                 canEdit
                 tags
                 url
@@ -79,6 +90,10 @@ class AddDiscussionTestCase(FastTenantTestCase):
         self.assertEqual(data["addEntity"]["entity"]["description"], variables["input"]["description"])
         self.assertEqual(data["addEntity"]["entity"]["richDescription"], variables["input"]["richDescription"])
         self.assertEqual(data["addEntity"]["entity"]["isFeatured"], False) # only editor or admin can set
+        self.assertEqual(data["addEntity"]["entity"]["featured"]["positionY"], 10)
+        self.assertEqual(data["addEntity"]["entity"]["featured"]["video"], "testVideo")
+        self.assertEqual(data["addEntity"]["entity"]["featured"]["alt"], "testAlt")
+
 
     def test_add_discussion_editor(self):
 
@@ -94,7 +109,7 @@ class AddDiscussionTestCase(FastTenantTestCase):
         self.assertEqual(data["addEntity"]["entity"]["title"], variables["input"]["title"])
         self.assertEqual(data["addEntity"]["entity"]["description"], variables["input"]["description"])
         self.assertEqual(data["addEntity"]["entity"]["richDescription"], variables["input"]["richDescription"])
-        self.assertEqual(data["addEntity"]["entity"]["isFeatured"], True) 
+        self.assertEqual(data["addEntity"]["entity"]["isFeatured"], True)
 
     def test_add_discussion_to_group(self):
 

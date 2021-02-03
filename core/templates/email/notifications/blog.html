@@ -6,7 +6,7 @@
     {% endif %}
 {% endif %}
 {% if notification.action == 'commented' %}
-    <strong>{{ notification.performer.name }}</strong>{% blocktrans %} has responded at: {% endblocktrans %}<strong><a href="{{ site_url }}{{ notification.entity_url }}?utm_medium=email&utm_campaign=notification_overview">{{ notification.entity_title }}</a></strong>{% if notification.entity_group %} in <strong><a href="{{ site_url }}{{ notification.entity_group_url }}?utm_medium=email&utm_campaign=notification_overview">{{ notification.entity_group_name }}</a></strong>{% endif %}.
+    <strong>{{ notification.performer_name }}</strong>{% blocktrans %} has responded at: {% endblocktrans %}<strong><a href="{{ site_url }}{{ notification.entity_url }}?utm_medium=email&utm_campaign=notification_overview">{{ notification.entity_title }}</a></strong>{% if notification.entity_group %} in <strong><a href="{{ site_url }}{{ notification.entity_group_url }}?utm_medium=email&utm_campaign=notification_overview">{{ notification.entity_group_name }}</a></strong>{% endif %}.
     {% if show_excerpt %}
         <div style="margin:0;padding:8px 0 0 0;">{{ notification.entity_description|truncatewords:26 }}</div>
     {% endif %}

@@ -41,7 +41,12 @@ class EditDiscussionTestCase(FastTenantTestCase):
                 "accessId": 0,
                 "writeAccessId": 0,
                 "tags": ["tag1", "tag2"],
-                "isFeatured": True
+                "isFeatured": True,
+                "featured": {
+                    "positionY": 2,
+                    "video": "testVideo2",
+                    "alt": "testAlt2"
+                }
             }
         }
 
@@ -58,6 +63,12 @@ class EditDiscussionTestCase(FastTenantTestCase):
                 tags
                 url
                 inGroup
+                featured {
+                    image
+                    video
+                    positionY
+                    alt
+                }
                 group {
                     guid
                 }
@@ -102,6 +113,9 @@ class EditDiscussionTestCase(FastTenantTestCase):
         self.assertEqual(data["editEntity"]["entity"]["group"], None)
         self.assertEqual(data["editEntity"]["entity"]["owner"]["guid"], self.authenticatedUser.guid)
         self.assertEqual(data["editEntity"]["entity"]["timeCreated"], str(self.discussionPublic.created_at))
+        self.assertEqual(data["editEntity"]["entity"]["featured"]["positionY"], 2)
+        self.assertEqual(data["editEntity"]["entity"]["featured"]["video"], "testVideo2")
+        self.assertEqual(data["editEntity"]["entity"]["featured"]["alt"], "testAlt2")
 
 
     def test_edit_discussion_by_admin(self):

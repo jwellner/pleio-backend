@@ -55,6 +55,7 @@ class EditSiteSettingTestCase(FastTenantTestCase):
                         }
                         googleAnalyticsId
                         googleSiteVerification
+                        enableSearchEngineIndexing
 
                         piwikUrl
                         piwikId
@@ -104,6 +105,10 @@ class EditSiteSettingTestCase(FastTenantTestCase):
                             title
                             link
                         }
+                        redirects {
+                            source
+                            destination
+                        }
 
                         profile {
                             key
@@ -152,6 +157,7 @@ class EditSiteSettingTestCase(FastTenantTestCase):
                         loginIntro
 
                         customCss
+                        whitelistedIpRanges
 
                         siteMembershipAcceptedIntro
                         siteMembershipDeniedIntro
@@ -172,6 +178,7 @@ class EditSiteSettingTestCase(FastTenantTestCase):
                 "defaultAccessId": 0,
                 "googleAnalyticsId": "123",
                 "googleSiteVerification": "code1",
+                "enableSearchEngineIndexing": True,
 
                 "piwikUrl": "url3",
                 "piwikId": "id1",
@@ -206,6 +213,10 @@ class EditSiteSettingTestCase(FastTenantTestCase):
 
                 "directLinks": [{"title":"extern","link":"https://nos.nl"},{"title":"intern","link":"/news"},{"title":"intern lang","link":"https://nieuw-template.pleio-test.nl/news"}],
                 "footer": [{"link":"https://www.nieuw.nl","title":"Nieuwe link"},{"link":"https://wnas.nl","title":"wnas"}],
+
+                "redirects": [{"source": "/path1", "destination": "/path2"},
+                              {"source": "/path3", "destination": "/path4"},
+                              {"source": "/path5", "destination": "/path6"}],
 
                 "profile": [{"isFilter": False, "isInOverview": False, "key": "key1", "name": "name1"},
                             {"isFilter": False, "isInOverview": False, "key": "key2", "name": "name2"},
@@ -249,6 +260,7 @@ class EditSiteSettingTestCase(FastTenantTestCase):
                 'loginIntro': 'test',
 
                 'customCss': 'h1 {color: maroon;margin-left: 40px;}',
+                'whitelistedIpRanges': ['192.168.0.1/32', '192.168.0.0/24'],
                 'siteMembershipAcceptedIntro': 'You request is accepted',
                 'siteMembershipDeniedIntro': 'Your request is not accepted',
                 "idpId": "idp_id",
@@ -272,6 +284,7 @@ class EditSiteSettingTestCase(FastTenantTestCase):
         self.assertEqual(data["editSiteSetting"]["siteSettings"]["defaultAccessIdOptions"], [{'value': 0, 'label': 'Alleen mijzelf'}, {'value': 1, 'label': 'Ingelogde gebruikers'}])
         self.assertEqual(data["editSiteSetting"]["siteSettings"]["googleAnalyticsId"], "123")
         self.assertEqual(data["editSiteSetting"]["siteSettings"]["googleSiteVerification"], "code1")
+        self.assertEqual(data["editSiteSetting"]["siteSettings"]["enableSearchEngineIndexing"], True)
 
         self.assertEqual(data["editSiteSetting"]["siteSettings"]["piwikUrl"], "url3")
         self.assertEqual(data["editSiteSetting"]["siteSettings"]["piwikId"], "id1")
@@ -308,6 +321,9 @@ class EditSiteSettingTestCase(FastTenantTestCase):
         self.assertEqual(data["editSiteSetting"]["siteSettings"]["initiativeLink"], "https://link.nl")
         self.assertEqual(data["editSiteSetting"]["siteSettings"]["directLinks"], [{"title":"extern","link":"https://nos.nl"},{"title":"intern","link":"/news"},{"title":"intern lang","link":"https://nieuw-template.pleio-test.nl/news"}])
         self.assertEqual(data["editSiteSetting"]["siteSettings"]["footer"], [{"title":"Nieuwe link","link":"https://www.nieuw.nl"},{"title":"wnas","link":"https://wnas.nl"}])
+        self.assertEqual(data["editSiteSetting"]["siteSettings"]["redirects"], [{"source": "/path1", "destination": "/path2"},
+                                                                                {"source": "/path3", "destination": "/path4"},
+                                                                                {"source": "/path5", "destination": "/path6"}])
 
         self.assertEqual(data["editSiteSetting"]["siteSettings"]["profile"], [{"isFilter": False, "isInOverview": False, "key": "key1", "name": "name1"},
                                                                               {"isFilter": False, "isInOverview": False, "key": "key2", "name": "name2"},
@@ -350,6 +366,7 @@ class EditSiteSettingTestCase(FastTenantTestCase):
 
         self.assertEqual(data["editSiteSetting"]["siteSettings"]["loginIntro"], 'test')
         self.assertEqual(data["editSiteSetting"]["siteSettings"]["customCss"], 'h1 {color: maroon;margin-left: 40px;}')
+        self.assertEqual(data["editSiteSetting"]["siteSettings"]["whitelistedIpRanges"], ['192.168.0.1/32', '192.168.0.0/24'])
         self.assertEqual(data["editSiteSetting"]["siteSettings"]["siteMembershipAcceptedIntro"], 'You request is accepted')
         self.assertEqual(data["editSiteSetting"]["siteSettings"]["siteMembershipDeniedIntro"], 'Your request is not accepted')
         self.assertEqual(data["editSiteSetting"]["siteSettings"]["idpId"], 'idp_id')
@@ -519,3 +536,94 @@ class EditSiteSettingTestCase(FastTenantTestCase):
         self.assertEqual(data["editSiteSetting"]["siteSettings"]["isClosed"], True)
         self.assertEqual(data["editSiteSetting"]["siteSettings"]["defaultAccessId"], 1)
 
+    def test_edit_site_setting_wrong_whitelisted_ip_range(self):
+        mutation = """
+            mutation EditSiteSetting($input: editSiteSettingInput!) {
+                editSiteSetting(input: $input) {
+                    siteSettings {
+                        whitelistedIpRanges
+                    }
+                }
+            }
+        """
+
+        variables = {
+            "input": {
+                "whitelistedIpRanges": ["10.10.266.3"]
+            }
+        }
+
+        request = HttpRequest()
+        request.user = self.admin
+        result = graphql_sync(schema, { "query": mutation, "variables": variables}, context_value={ "request": request })
+
+        self.assertTrue(result[0])
+
+        errors = result[1]["errors"]
+
+        self.assertEqual(errors[0]["message"], "invalid_value")
+
+
+    def test_edit_site_setting_redirects_loop(self):
+        mutation = """
+            mutation EditSiteSetting($input: editSiteSettingInput!) {
+                editSiteSetting(input: $input) {
+                    siteSettings {
+                        redirects {
+                            source
+                            destination
+                        }
+                    }
+                }
+            }
+        """
+
+        variables = {
+            "input": {
+                "redirects":  [{"source": "/path1", "destination": "/path2"},
+                              {"source": "/path2/", "destination": "/path3"},
+                              {"source": "/path3", "destination": "/path6"}]
+            }
+        }
+
+        request = HttpRequest()
+        request.user = self.admin
+        result = graphql_sync(schema, { "query": mutation, "variables": variables}, context_value={ "request": request })
+
+        self.assertTrue(result[0])
+
+        errors = result[1]["errors"]
+
+        self.assertEqual(errors[0]["message"], "redirects_has_loop")
+
+    def test_edit_site_setting_redirects_invalid_url(self):
+        mutation = """
+            mutation EditSiteSetting($input: editSiteSettingInput!) {
+                editSiteSetting(input: $input) {
+                    siteSettings {
+                        redirects {
+                            source
+                            destination
+                        }
+                    }
+                }
+            }
+        """
+
+        variables = {
+            "input": {
+                "redirects":  [{"source": "/pat  /", "destination": "/path2"},
+                              {"source": "/path3/", "destination": "/path4"},
+                              {"source": "/path5", "destination": "http://test.nl/path6/"}]
+            }
+        }
+
+        request = HttpRequest()
+        request.user = self.admin
+        result = graphql_sync(schema, { "query": mutation, "variables": variables}, context_value={ "request": request })
+
+        self.assertTrue(result[0])
+
+        errors = result[1]["errors"]
+
+        self.assertEqual(errors[0]["message"], "invalid_value")

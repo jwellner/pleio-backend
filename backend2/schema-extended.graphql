@@ -153,6 +153,7 @@ extend type Mutation {
 
 extend type Query {
   siteUsers(q: String, role: String, isDeleteRequested: Boolean, isBanned: Boolean, offset: Int, limit: Int, lastOnlineBefore: String): SiteUserList
+  usersByBirthDate(profileFieldGuid: String!, futureDays: Int, offset: Int, limit: Int): SiteUserList
 }
 
 extend type User {
@@ -224,16 +225,19 @@ type ProfileSection {
 }
 
 extend input editSiteSettingInput {
+  redirects: [RedirectInput]
   """users with email adress in domain of directRegistrationDomains, can register even when allowRegistration is False"""
   directRegistrationDomains: [String]
   profileSections: [ProfileSectionInput]
   onboardingEnabled: Boolean
+  enableSearchEngineIndexing: Boolean
   onboardingForceExistingUsers: Boolean
   onboardingIntro: String
   limitedGroupAdd: Boolean
   cookieConsent: Boolean
   loginIntro: String
   customCss: String
+  whitelistedIpRanges: [String]
   siteMembershipAcceptedIntro: String
   siteMembershipDeniedIntro: String
   idpId: String
@@ -258,11 +262,24 @@ extend input editEntityInput {
 
 extend type Site {
   profileSections: [ProfileSection]
+  profileFields: [ProfileItem]
   onboardingEnabled: Boolean!
   onboardingIntro: String
 }
 
+type Redirect {
+  source: String!
+  destination: String!
+}
+
+"""source and destination must start with /"""
+input RedirectInput {
+  source: String!
+  destination: String!
+}
+
 extend type SiteSettings {
+  redirects: [Redirect]
   directRegistrationDomains: [String]
   profileSections: [ProfileSection]
   exportableUserFields: [ExportableField]
@@ -278,14 +295,12 @@ extend type SiteSettings {
   roleOptions: [Option]
   deleteAccountRequests: DeleteAccountRequestList
   customCss: String
+  whitelistedIpRanges: [String]
   siteMembershipAcceptedIntro: String
   siteMembershipDeniedIntro: String
   idpId: String
   idpName: String
-}
-
-extend type Featured {
-  alt: String
+  enableSearchEngineIndexing: Boolean!
 }
 
 extend input FeaturedInput {

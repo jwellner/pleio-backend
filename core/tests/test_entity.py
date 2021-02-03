@@ -59,6 +59,9 @@ class EntityTestCase(FastTenantTestCase):
                 entity(username: $username) {
                     guid
                     status
+                    ... on User {
+                        email
+                    }
                     __typename
                 }
             }
@@ -76,7 +79,9 @@ class EntityTestCase(FastTenantTestCase):
 
         data = result[1]["data"]
         
-        self.assertIsNone(data["entity"])
+        self.assertEqual(data["entity"]["guid"], self.authenticatedUser.guid)
+        self.assertEqual(data["entity"]["email"], None)
+        self.assertEqual(data["entity"]["__typename"], "User")
 
     def test_entity_user_by_username(self):
 
@@ -85,6 +90,9 @@ class EntityTestCase(FastTenantTestCase):
                 entity(username: $username) {
                     guid
                     status
+                    ... on User {
+                        email
+                    }
                     __typename
                 }
             }
@@ -103,6 +111,7 @@ class EntityTestCase(FastTenantTestCase):
         data = result[1]["data"]
         
         self.assertEqual(data["entity"]["guid"], self.authenticatedUser.guid)
+        self.assertEqual(data["entity"]["email"], self.authenticatedUser.email)
         self.assertEqual(data["entity"]["__typename"], "User")
 
     def test_entity_user_by_guid(self):

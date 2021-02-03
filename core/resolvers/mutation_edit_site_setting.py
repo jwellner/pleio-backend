@@ -1,10 +1,11 @@
 import datetime
+import ipaddress
 from graphql import GraphQLError
 from core import config
 from core.models import Setting, ProfileField
 from core.models.user import validate_profile_sections
-from core.constances import NOT_LOGGED_IN, USER_NOT_SITE_ADMIN, USER_ROLES, INVALID_VALUE
-from core.lib import remove_none_from_dict, access_id_to_acl, is_valid_domain
+from core.constances import NOT_LOGGED_IN, USER_NOT_SITE_ADMIN, USER_ROLES, INVALID_VALUE, REDIRECTS_HAS_LOOP, REDIRECTS_HAS_DUPLICATE_SOURCE
+from core.lib import remove_none_from_dict, access_id_to_acl, is_valid_domain, is_valid_url_or_path
 from core.resolvers.query_site import get_site_settings
 from django.db import connection
 from django.core.cache import cache
@@ -31,6 +32,34 @@ def get_menu_children(menu, item_id, depth=0):
     return children
 
 
+def validate_redirects(redirects):
+    sources = []
+    destinations = []
+    redirects_dict = {}
+
+    # check no more than 2000 redirects
+    if len(redirects) > 2000:
+        raise GraphQLError(INVALID_VALUE)
+
+    for redirect in redirects:
+        source = redirect['source']
+        destination = redirect['destination']
+        sources.append(source)
+        destinations.append(destination)
+        if not is_valid_url_or_path(source) or not is_valid_url_or_path(destination):
+            raise GraphQLError(INVALID_VALUE)
+
+        # save redirects as dict, because source can not be duplicate
+        try:
+            redirects_dict[source] = destination
+        except Exception:
+            raise GraphQLError(REDIRECTS_HAS_DUPLICATE_SOURCE)
+
+    # check if loop can occur
+    if any(x in sources for x in destinations):
+        raise GraphQLError(REDIRECTS_HAS_LOOP)
+    return redirects_dict
+
 def resolve_edit_site_setting(_, info, input):
     # pylint: disable=redefined-builtin
     # pylint: disable=unused-variable
@@ -56,6 +85,7 @@ def resolve_edit_site_setting(_, info, input):
         'defaultAccessId': 'DEFAULT_ACCESS_ID',
         'googleAnalyticsId': 'GOOGLE_ANALYTICS_ID',
         'googleSiteVerification': 'GOOGLE_SITE_VERIFICATION',
+        'enableSearchEngineIndexing': 'ENABLE_SEARCH_ENGINE_INDEXING',
         'piwikUrl': 'PIWIK_URL',
         'piwikId': 'PIWIK_ID',
 
@@ -148,6 +178,10 @@ def resolve_edit_site_setting(_, info, input):
 
         save_setting('PROFILE', clean_input.get('profile'))
 
+    if 'redirects' in clean_input:
+        redirects = validate_redirects(clean_input.get('redirects'))
+        save_setting('REDIRECTS', redirects)
+
     if 'logo' in clean_input:
         if not clean_input.get("logo"):
             raise GraphQLError("NO_FILE")
@@ -208,6 +242,14 @@ def resolve_edit_site_setting(_, info, input):
     if 'customCss' in clean_input:
         save_setting('CUSTOM_CSS', clean_input.get('customCss'))
         save_setting('CUSTOM_CSS_TIMESTAMP', int(datetime.datetime.now().timestamp()))
+
+    if 'whitelistedIpRanges' in clean_input:
+        for ip_range in clean_input.get('whitelistedIpRanges'):
+            try:
+                ip_addr = ipaddress.ip_network(ip_range)
+            except ValueError:
+                raise GraphQLError(INVALID_VALUE)
+        save_setting('WHITELISTED_IP_RANGES', clean_input.get('whitelistedIpRanges'))
 
     return {
         "siteSettings": get_site_settings()

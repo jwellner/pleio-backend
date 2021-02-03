@@ -1,6 +1,7 @@
 from django_tenants.test.cases import FastTenantTestCase
 from core import config
 from user.models import User
+from core.models import ProfileField
 from backend2.schema import schema
 from ariadne import graphql_sync
 from mixer.backend.django import mixer
@@ -15,6 +16,9 @@ class SiteTestCase(FastTenantTestCase):
         super().setUp()
         self.user = mixer.blend(User)
         self.anonymousUser = AnonymousUser()
+
+        self.profileField1 = ProfileField.objects.create(key='text_key1', name='text_name', field_type='text_field')
+        self.profileField2 = ProfileField.objects.create(key='text_key2', name='text_name', field_type='date_field')
 
         self.query = """
             query testSite {
@@ -89,6 +93,13 @@ class SiteTestCase(FastTenantTestCase):
                     showTagsInFeed
                     showTagsInDetail
                     usersOnline
+                    profileFields {
+                        key
+                        name
+                        value
+                        category
+                        fieldType
+                    }
                 }
             }
         """
@@ -96,6 +107,8 @@ class SiteTestCase(FastTenantTestCase):
     def tearDown(self):
         self.user.delete()
 
+        self.profileField1.delete()
+        self.profileField2.delete()
 
     def test_site(self):
 
@@ -126,6 +139,9 @@ class SiteTestCase(FastTenantTestCase):
             {'id': 1, 'description': 'Gebruikers van deze site'},
             {'id': 2, 'description': 'Iedereen (publiek zichtbaar)'},
         ])
+
+        self.assertEqual(data["site"]["profileFields"][0]["key"], self.profileField1.key)
+        self.assertEqual(data["site"]["profileFields"][1]["fieldType"], "dateField")
 
     def test_site_closed(self):
 

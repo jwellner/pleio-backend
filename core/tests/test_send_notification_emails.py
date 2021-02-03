@@ -68,7 +68,7 @@ class SendNotificationEmailsTestCase(FastTenantTestCase):
     def test_command_do_not_send_welcome_notification(self, mocked_send_mail_multi):
         """ Welcome notification is created on user creation, this should not be send """
         call_command('send_notification_emails')
-        assert not mocked_send_mail_multi.called
+        self.assertEqual(mocked_send_mail_multi.call_count, 0)
 
     def test_notifications_marked_as_sent(self):
         i = 0
@@ -81,21 +81,21 @@ class SendNotificationEmailsTestCase(FastTenantTestCase):
 
     @mock.patch('core.management.commands.send_notification_emails.send_mail_multi.delay')
     def test_notifications_not_sent_to_banned_users(self, mocked_send_mail_multi):
-        comment1 = mixer.blend(Comment, is_closed=False, owner=self.user1, container=self.blog1)
+        create_notification.s(connection.schema_name, 'commented', self.blog1.id, self.user1.id, [self.user2.id]).apply()
         self.user2.is_active = False
         self.user2.save()
         call_command('send_notification_emails')
-        assert not mocked_send_mail_multi.called
+        self.assertEqual(mocked_send_mail_multi.call_count, 0)
 
     @mock.patch('core.management.commands.send_notification_emails.send_mail_multi.delay')
-    def test_notifications_not_sent_to_users_with_last_login_more_6_months_ago(self, mocked_send_mail_multi):
-        comment1 = mixer.blend(Comment, is_closed=False, owner=self.user1, container=self.blog1)
-        nr_months_ago_6 = datetime.now() - timedelta(hours=4464)
-        self.user2.profile.last_online = nr_months_ago_6
+    def test_notifications_not_sent_notifications_off(self, mocked_send_mail_multi):
+        create_notification.s(connection.schema_name, 'commented', self.blog1.id, self.user1.id, [self.user2.id]).apply()
+        self.user2.profile.receive_notification_email = False
         self.user2.profile.save()
+        self.user2.is_active = True
         self.user2.save()
         call_command('send_notification_emails')
-        assert not mocked_send_mail_multi.called
+        self.assertEqual(mocked_send_mail_multi.call_count, 0)
 
     @mock.patch('core.management.commands.send_notification_emails.send_mail_multi.delay')
     def test_template_context_of_commented_notification(self, mocked_send_mail_multi):

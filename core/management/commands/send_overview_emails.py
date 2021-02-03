@@ -100,10 +100,6 @@ class Command(BaseCommand):
             if interval != user.profile.overview_email_interval:
                 continue
 
-            # do not send mail to users that not logged in for 6 months
-            if user.profile and user.profile.last_online and (user.profile.last_online < (datetime.now() - timedelta(hours=4460))):
-                continue
-
             featured_entities = Entity.objects.none()
 
             # do not sent featured items if interval is monthly

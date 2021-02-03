@@ -92,6 +92,7 @@ def get_site_settings():
 
         'googleAnalyticsId': config.GOOGLE_ANALYTICS_ID,
         'googleSiteVerification': config.GOOGLE_SITE_VERIFICATION,
+        'enableSearchEngineIndexing' : config.ENABLE_SEARCH_ENGINE_INDEXING,
         'piwikUrl': config.PIWIK_URL,
         'piwikId': config.PIWIK_ID,
 
@@ -137,6 +138,7 @@ def get_site_settings():
         'initiativeLink': config.INITIATIVE_LINK,
         'directLinks': config.DIRECT_LINKS,
         'footer': config.FOOTER,
+        'redirects': [{'source': k, 'destination': v} for k, v in config.REDIRECTS.items()],
 
         'profile': get_profile(),
         'profileSections': config.PROFILE_SECTIONS,
@@ -207,6 +209,7 @@ def get_site_settings():
             'edges': User.objects.filter(is_delete_requested=True).all()
         },
         'customCss': config.CUSTOM_CSS,
+        'whitelistedIpRanges': config.WHITELISTED_IP_RANGES,
         'siteMembershipAcceptedIntro': config.SITE_MEMBERSHIP_ACCEPTED_INTRO,
         'siteMembershipDeniedIntro': config.SITE_MEMBERSHIP_DENIED_INTRO,
         'idpId': config.IDP_ID,

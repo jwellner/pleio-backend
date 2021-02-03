@@ -128,7 +128,11 @@ def elasticsearch_rebuild(self, schema_name):
                 doc.django.model.__name__
             )
             qs = doc().get_indexing_queryset()
-            doc().update(qs, parallel=False)
+
+            if doc.django.model.__name__ == 'FileFolder':
+                doc().update(qs, parallel=False, chunk_size=10)
+            else:
+                doc().update(qs, parallel=False, chunk_size=500)
 
 @shared_task(bind=True, ignore_result=True)
 def elasticsearch_index_file(self, schema_name, file_guid):
@@ -453,6 +457,13 @@ def replace_domain_links(self, schema_name, replace_domain=None, replace_elgg_id
 
         config.DIRECT_LINKS = direct_links
 
+        # -- Replace REDIRECTS items
+        redirects = {}
+        for k, v in config.REDIRECTS.items():
+            redirects[k] = _replace_links(v)
+
+        config.REDIRECTS = redirects
+
         # -- Replace entity descriptions
         entities = Entity.objects.all().select_subclasses()
 
@@ -565,7 +576,7 @@ def control_delete_site(self, site_id):
     with schema_context('public'):
         try:
             tenant = Client.objects.get(id=site_id)
-            # tenant.auto_drop_schema = True 
+            # tenant.auto_drop_schema = True
             tenant.delete()
         except Exception as e:
             # raise general exception because remote doenst have Client exception

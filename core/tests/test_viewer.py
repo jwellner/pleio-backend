@@ -241,7 +241,7 @@ class ViewerTestCase(FastTenantTestCase):
         self.assertTrue(result[0])
 
         data = result[1]["data"]
-        
+
         self.assertEqual(data["viewer"]["canWriteToContainer"], False)
 
     def test_viewer_can_write_to_container_group_member(self):
@@ -264,7 +264,7 @@ class ViewerTestCase(FastTenantTestCase):
         self.assertTrue(result[0])
 
         data = result[1]["data"]
-        
+
         self.assertEqual(data["viewer"]["canWriteToContainer"], True)
 
     def test_viewer_can_write_to_container_wiki_group_user(self):
@@ -287,7 +287,7 @@ class ViewerTestCase(FastTenantTestCase):
         self.assertTrue(result[0])
 
         data = result[1]["data"]
-        
+
         self.assertEqual(data["viewer"]["canWriteToContainer"], False)
 
     def test_viewer_can_write_to_container_wiki_group_owner(self):
@@ -310,7 +310,7 @@ class ViewerTestCase(FastTenantTestCase):
         self.assertTrue(result[0])
 
         data = result[1]["data"]
-        
+
         self.assertEqual(data["viewer"]["canWriteToContainer"], True)
 
     def test_viewer_can_write_to_container_wiki_group_admin(self):
@@ -333,5 +333,5 @@ class ViewerTestCase(FastTenantTestCase):
         self.assertTrue(result[0])
 
         data = result[1]["data"]
-        
+
         self.assertEqual(data["viewer"]["canWriteToContainer"], True)

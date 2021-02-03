@@ -45,7 +45,7 @@ class BlogTestCase(FastTenantTestCase):
         self.blogPrivate.delete()
         self.authenticatedUser.delete()
         self.authenticatedAdminUser.delete()
-    
+
     def test_blog_anonymous(self):
 
         query = """
@@ -88,7 +88,7 @@ class BlogTestCase(FastTenantTestCase):
         request = HttpRequest()
         request.user = self.anonymousUser
 
-        variables = { 
+        variables = {
             "guid": self.blogPublic.guid
         }
 
@@ -97,7 +97,7 @@ class BlogTestCase(FastTenantTestCase):
         self.assertTrue(result[0])
 
         data = result[1]["data"]
-       
+
         self.assertEqual(data["entity"]["guid"], self.blogPublic.guid)
         self.assertEqual(data["entity"]["title"], self.blogPublic.title)
         self.assertEqual(data["entity"]["description"], self.blogPublic.description)
@@ -116,7 +116,7 @@ class BlogTestCase(FastTenantTestCase):
         self.assertEqual(data["entity"]["owner"]["guid"], self.blogPublic.owner.guid)
         self.assertEqual(data["entity"]["url"], "/blog/view/{}/{}".format(self.blogPublic.guid, slugify(self.blogPublic.title)))
 
-        variables = { 
+        variables = {
             "guid": self.blogPrivate.guid
         }
 
@@ -125,5 +125,5 @@ class BlogTestCase(FastTenantTestCase):
         self.assertTrue(result[0])
 
         data = result[1]["data"]
-       
+
         self.assertEqual(data["entity"], None)

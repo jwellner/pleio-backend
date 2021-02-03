@@ -98,6 +98,10 @@ def login(request):
     if request.GET.get('invitecode', None):
         request.session['invitecode'] = request.GET.get('invitecode')
 
+    if config.IDP_ID and not request.GET.get('login_credentials'):
+        url = reverse('oidc_authentication_init') + '?idp=' + config.IDP_ID
+        return redirect(url)
+
     return redirect('oidc_authentication_init')
 
 def oidc_failure(request):
