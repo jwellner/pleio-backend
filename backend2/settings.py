@@ -292,6 +292,7 @@ if APM_ENABLED:
         'VERIFY_SERVER_CERT': os.getenv('APM_VERIFY_SERVER_CERT') != "False",
         'DEBUG': True,
     }
+
     if APM_OPENTRACING_ENABLED:
         set_global_tracer(Tracer(config=ELASTIC_APM))
 

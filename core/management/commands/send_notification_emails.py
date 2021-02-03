@@ -50,10 +50,6 @@ class Command(BaseCommand):
 
         for user in users:
 
-            # do not send mail to users that not logged in for 6 months
-            if user.profile.last_online and (user.profile.last_online < (datetime.now() - timedelta(hours=4460))):
-                continue
-
             notifications = user.notifications.filter(emailed=False, verb__in=['created', 'commented'])[:5]
             # do not send mail when there are now new notifications
             if not notifications:
