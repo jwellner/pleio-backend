@@ -150,4 +150,21 @@ class Command(InteractiveTenantOption, BaseCommand):
                         entity.description = description
                         entity.save()
 
+            # -- Replace widget settings
+            widgets = Widget.objects.all()
+
+            for widget in widgets:
+                changed = False
+                if widget.settings:
+                    for setting in widget.settings:
+                        if 'value' in setting and isinstance(setting.get('value'), str):
+                            new_value = _replace_user_profile_links(setting.get('value'))
+                            if new_value != setting.get('value'):
+                                setting['value'] = new_value
+                                changed = True
+
+                if changed:
+                    widget.save()
+
+
             self.stdout.write(f"Done replacing user profile links, {self.replaced_profile_link_count} links replaced")
