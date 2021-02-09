@@ -170,6 +170,7 @@ class SiteSettingsTestCase(FastTenantTestCase):
                     showExcerptInNewsCard
                     commentsOnNews
                     eventExport
+                    eventTiles
                     questionerCanChooseBestAnswer
                     statusUpdateGroups
                     subgroups
@@ -341,6 +342,7 @@ class SiteSettingsTestCase(FastTenantTestCase):
         self.assertEqual(data["siteSettings"]["showExcerptInNewsCard"], False)
         self.assertEqual(data["siteSettings"]["commentsOnNews"], False)
         self.assertEqual(data["siteSettings"]["eventExport"], False)
+        self.assertEqual(data["siteSettings"]["eventTiles"], False)
         self.assertEqual(data["siteSettings"]["questionerCanChooseBestAnswer"], False)
         self.assertEqual(data["siteSettings"]["statusUpdateGroups"], True)
         self.assertEqual(data["siteSettings"]["subgroups"], False)
