@@ -78,7 +78,12 @@ def entity_view(request, entity_id=None, entity_title=None):
         metadata["article:published_time"] = entity.created_at.strftime("%Y-%m-%d %H:%M")
         metadata["article:modified_time"] = entity.updated_at.strftime("%Y-%m-%d %H:%M")
     else:
-        status_code = 404
+        try:
+            entity = Group.objects.visible(user).get(id=entity_id)
+            status_code = 200
+        except ObjectDoesNotExist:
+            status_code = 404
+
 
     context = {
         'webpack_dev_server': settings.WEBPACK_DEV_SERVER,
