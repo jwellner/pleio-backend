@@ -147,14 +147,12 @@ class ConfigBackend():
 
     def set(self, key, value):
         try:
-            setting = self._model.objects.get(key=key)
+            setting, created = self._model.objects.get_or_create(key=key)
+            if created or setting.value != value:
+                setting.value = value
+                setting.save()
         except (OperationalError, ProgrammingError):
             return
-        except self._model.DoesNotExist:
-            setting = self._model.objects.create(key=key, value=value)
-        else:
-            setting.value = value
-            setting.save()
 
         cache.set("%s%s" % (connection.schema_name, key), value)
 
