@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-12-11 15:18+0100\n"
+"POT-Creation-Date: 2021-02-10 17:30+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -18,20 +18,20 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#: backend2/config.py:61 core/resolvers/query_site.py:82
+#: backend2/config.py:61 core/resolvers/query_site.py:86
 msgid "English"
 msgstr ""
 
-#: backend2/config.py:62 core/resolvers/query_site.py:82
+#: backend2/config.py:62 core/resolvers/query_site.py:86
 msgid "Dutch"
 msgstr ""
 
-#: core/management/commands/send_notification_emails.py:47
+#: core/management/commands/send_notification_emails.py:49
 #, python-format
 msgid "New notifications at %(site_name)s"
 msgstr ""
 
-#: core/management/commands/send_overview_emails.py:89
+#: core/management/commands/send_overview_emails.py:88
 #, python-format
 msgid "Regular overview of %(site_name)s"
 msgstr ""
@@ -89,7 +89,7 @@ msgstr ""
 msgid "Public"
 msgstr ""
 
-#: core/resolvers/mutation_invite_to_group.py:42
+#: core/resolvers/mutation_invite_to_group.py:43
 #, python-format
 msgid "Invitation to become a member of the %(group_name)s group"
 msgstr ""
@@ -124,6 +124,11 @@ msgstr ""
 msgid "Message from {0}: {1}"
 msgstr ""
 
+#: core/resolvers/mutation_send_message_to_user.py:34
+#, python-brace-format
+msgid "Copy: Message from {0}: {1}"
+msgstr ""
+
 #: core/resolvers/mutation_toggle_request_delete_user.py:32
 msgid "Request to remove account cancelled"
 msgstr ""
@@ -147,51 +152,51 @@ msgstr ""
 msgid "You're granted site administrator right on %(site_name)s"
 msgstr ""
 
-#: core/resolvers/query_site.py:112
+#: core/resolvers/query_site.py:117
 msgid "Activity stream"
 msgstr ""
 
-#: core/resolvers/query_site.py:112
+#: core/resolvers/query_site.py:117
 msgid "CMS page"
 msgstr ""
 
-#: core/resolvers/query_site.py:146
+#: core/resolvers/query_site.py:152
 msgid "Daily"
 msgstr ""
 
-#: core/resolvers/query_site.py:147
+#: core/resolvers/query_site.py:153
 msgid "Weekly"
 msgstr ""
 
-#: core/resolvers/query_site.py:148
+#: core/resolvers/query_site.py:154
 msgid "Monthly"
 msgstr ""
 
-#: core/resolvers/query_site.py:149
+#: core/resolvers/query_site.py:155
 msgid "Never"
 msgstr ""
 
-#: core/resolvers/query_site.py:195
+#: core/resolvers/query_site.py:201
 msgid "Administrator"
 msgstr ""
 
-#: core/resolvers/query_site.py:196
+#: core/resolvers/query_site.py:202
 msgid "Editor"
 msgstr ""
 
-#: core/resolvers/query_site.py:197
+#: core/resolvers/query_site.py:203
 msgid "Question expert"
 msgstr ""
 
-#: core/tasks.py:265
+#: core/tasks.py:271
 msgid "Import was a success"
 msgstr ""
 
-#: core/tasks.py:265
+#: core/tasks.py:271
 msgid "Import failed"
 msgstr ""
 
-#: core/tasks.py:340
+#: core/tasks.py:347
 #, python-format
 msgid "New notification at %(site_name)s: "
 msgstr ""
@@ -543,15 +548,19 @@ msgstr ""
 msgid "This site is closed. Log in to get access."
 msgstr ""
 
-#: core/templates/registration/login.html:23
+#: core/templates/registration/login.html:25
+msgid "or"
+msgstr ""
+
+#: core/templates/registration/login.html:27
 msgid "Login using Pleio account"
 msgstr ""
 
-#: core/templates/registration/login.html:26
+#: core/templates/registration/login.html:30
 msgid "Don't have an account?"
 msgstr ""
 
-#: core/templates/registration/login.html:26
+#: core/templates/registration/login.html:30
 msgid "Register"
 msgstr ""
 
@@ -591,7 +600,7 @@ msgid ""
 "Access is requested. You will receive an e-mail when the request is accepted."
 msgstr ""
 
-#: core/views.py:136
+#: core/views.py:146
 #, python-format
 msgid "New access request for %(site_name)s"
 msgstr ""

@@ -30,6 +30,10 @@ def resolve_send_message_to_user(_, info, input):
 
     send_mail_multi.delay(schema_name, subject, 'email/send_message_to_user.html', context, receiving_user.email)
 
+    if clean_input.get('sendCopyToSender', False):
+        subject = ugettext_lazy("Copy: Message from {0}: {1}").format(user.name, clean_input.get('subject'))
+        send_mail_multi.delay(schema_name, subject, 'email/send_message_to_user.html', context, user.email)
+
     return {
           "success": True
     }

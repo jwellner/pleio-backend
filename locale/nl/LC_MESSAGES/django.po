@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-12-11 15:18+0100\n"
+"POT-Creation-Date: 2021-02-10 17:30+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -18,20 +18,20 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#: backend2/config.py:61 core/resolvers/query_site.py:82
+#: backend2/config.py:61 core/resolvers/query_site.py:86
 msgid "English"
 msgstr "Engels"
 
-#: backend2/config.py:62 core/resolvers/query_site.py:82
+#: backend2/config.py:62 core/resolvers/query_site.py:86
 msgid "Dutch"
 msgstr "Nederlands"
 
-#: core/management/commands/send_notification_emails.py:47
+#: core/management/commands/send_notification_emails.py:49
 #, python-format
 msgid "New notifications at %(site_name)s"
 msgstr "Nieuwe notificaties op %(site_name)s"
 
-#: core/management/commands/send_overview_emails.py:89
+#: core/management/commands/send_overview_emails.py:88
 #, python-format
 msgid "Regular overview of %(site_name)s"
 msgstr "Periodiek overzicht van %(site_name)s"
@@ -89,7 +89,7 @@ msgstr "Ingelogde gebruikers"
 msgid "Public"
 msgstr "Iedereen publiek zichtbaar"
 
-#: core/resolvers/mutation_invite_to_group.py:42
+#: core/resolvers/mutation_invite_to_group.py:43
 #, python-format
 msgid "Invitation to become a member of the %(group_name)s group"
 msgstr "Uitnodiging om lid te worden van de groep %(group_name)s"
@@ -124,6 +124,11 @@ msgstr "Bericht van groep {0}: {1}"
 msgid "Message from {0}: {1}"
 msgstr "Bericht van {0}: {1}"
 
+#: core/resolvers/mutation_send_message_to_user.py:34
+#| msgid "Message from {0}: {1}"
+msgid "Copy: Message from {0}: {1}"
+msgstr "Kopie: Bericht van {0}: {1}"
+
 #: core/resolvers/mutation_toggle_request_delete_user.py:32
 msgid "Request to remove account cancelled"
 msgstr "Verzoek om account te verwijderen geannuleerd"
@@ -147,51 +152,51 @@ msgstr "Een nieuwe site beheerder is toegewezen aan %(site_name)s"
 msgid "You're granted site administrator right on %(site_name)s"
 msgstr "U bent aangewezen als site beheerder van %(site_name)s"
 
-#: core/resolvers/query_site.py:112
+#: core/resolvers/query_site.py:117
 msgid "Activity stream"
 msgstr "Activiteitenstroom"
 
-#: core/resolvers/query_site.py:112
+#: core/resolvers/query_site.py:117
 msgid "CMS page"
 msgstr "CMS pagina"
 
-#: core/resolvers/query_site.py:146
+#: core/resolvers/query_site.py:152
 msgid "Daily"
 msgstr "Dagelijks"
 
-#: core/resolvers/query_site.py:147
+#: core/resolvers/query_site.py:153
 msgid "Weekly"
 msgstr "Wekelijks"
 
-#: core/resolvers/query_site.py:148
+#: core/resolvers/query_site.py:154
 msgid "Monthly"
 msgstr "Maandelijks"
 
-#: core/resolvers/query_site.py:149
+#: core/resolvers/query_site.py:155
 msgid "Never"
 msgstr "Nooit"
 
-#: core/resolvers/query_site.py:195
+#: core/resolvers/query_site.py:201
 msgid "Administrator"
 msgstr "Beheerder"
 
-#: core/resolvers/query_site.py:196
+#: core/resolvers/query_site.py:202
 msgid "Editor"
 msgstr "Redacteur"
 
-#: core/resolvers/query_site.py:197
+#: core/resolvers/query_site.py:203
 msgid "Question expert"
 msgstr "Vraagexpert"
 
-#: core/tasks.py:265
+#: core/tasks.py:271
 msgid "Import was a success"
 msgstr "Import afgerond"
 
-#: core/tasks.py:265
+#: core/tasks.py:271
 msgid "Import failed"
 msgstr "Import mislukt"
 
-#: core/tasks.py:340
+#: core/tasks.py:347
 #, python-format
 msgid "New notification at %(site_name)s: "
 msgstr "Nieuwe notificatie op %(site_name)s"
@@ -659,15 +664,19 @@ msgstr "Opslaan"
 msgid "This site is closed. Log in to get access."
 msgstr "Deze site is besloten. Log in om toegang te krijgen."
 
-#: core/templates/registration/login.html:23
+#: core/templates/registration/login.html:25
+msgid "or"
+msgstr ""
+
+#: core/templates/registration/login.html:27
 msgid "Login using Pleio account"
 msgstr "Log in met Pleio account"
 
-#: core/templates/registration/login.html:26
+#: core/templates/registration/login.html:30
 msgid "Don't have an account?"
 msgstr "Nog geen account?"
 
-#: core/templates/registration/login.html:26
+#: core/templates/registration/login.html:30
 msgid "Register"
 msgstr "Registreer"
 
@@ -711,7 +720,7 @@ msgstr ""
 "De toegang is aangevraagd. Je ontvangt een e-mail wanneer de toegang door de "
 "beheerder wordt toegewezen."
 
-#: core/views.py:136
+#: core/views.py:146
 #, python-format
 msgid "New access request for %(site_name)s"
 msgstr "Nieuwe toegangsaanvraag voor %(site_name)s"
