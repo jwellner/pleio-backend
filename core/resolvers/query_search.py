@@ -11,7 +11,7 @@ from django.utils import dateparse
 
 
 def resolve_search(_, info, q=None, containerGuid=None, type=None, subtype=None, dateFrom=None, dateTo=None, offset=0, limit=20,
-                    orderBy=None, orderDirection=ORDER_DIRECTION.asc):
+                    tagLists=None, orderBy=None, orderDirection=ORDER_DIRECTION.asc):
     # pylint: disable=unused-argument
     # pylint: disable=too-many-arguments
     # pylint: disable=redefined-builtin
@@ -61,6 +61,12 @@ def resolve_search(_, info, q=None, containerGuid=None, type=None, subtype=None,
     # Filter on container_guid (group.guid)
     if containerGuid:
         s = s.filter('term', container_guid=containerGuid)
+
+    if tagLists:
+        for tagList in tagLists:
+            s = s.filter(
+                'terms', tags=tagList
+            )
 
     if orderBy == SEARCH_ORDER_BY.title:
         s = s.sort({'title.raw': {'order': orderDirection}})
