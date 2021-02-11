@@ -308,3 +308,7 @@ extend type SiteSettings {
 extend input FeaturedInput {
   alt: String
 }
+
+extend input sendMessageToUserInput {
+  sendCopyToSender: Boolean
+}
