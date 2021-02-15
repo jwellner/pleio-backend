@@ -31,7 +31,7 @@ def resolve_users(_, info, q="", filters=None, offset=0, limit=20):
         ).filter(
             'terms', read_access=list(get_acl(user))
         ).filter(
-            'match', tenant_name=tenant_name
+            'term', tenant_name=tenant_name
         ).filter(
             'term', is_active=True
         )
@@ -40,7 +40,7 @@ def resolve_users(_, info, q="", filters=None, offset=0, limit=20):
         s = Search(index='user').filter(
             'terms', read_access=list(get_acl(user))
         ).filter(
-            'match', tenant_name=tenant_name
+            'term', tenant_name=tenant_name
         ).filter(
             'term', is_active=True
         )
