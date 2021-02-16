@@ -1,4 +1,5 @@
 import uuid
+from auditlog.registry import auditlog
 from django.db import models
 from django.contrib.contenttypes.fields import GenericForeignKey, GenericRelation
 from django.contrib.contenttypes.models import ContentType
@@ -44,6 +45,9 @@ class Comment(VoteMixin):
     def guid(self):
         return str(self.id)
 
+    def __str__(self):
+        return f"Comment[{self.guid}]"
+
 
 class CommentMixin(models.Model):
     comments = GenericRelation(Comment)
@@ -56,3 +60,6 @@ class CommentMixin(models.Model):
 
     class Meta:
         abstract = True
+
+
+auditlog.register(Comment)

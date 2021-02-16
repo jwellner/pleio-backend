@@ -1,5 +1,6 @@
 
 import uuid
+from auditlog.registry import auditlog
 from django.db import models
 from django.contrib.postgres.fields import ArrayField
 
@@ -46,3 +47,9 @@ class Widget(models.Model):
     @property
     def type_to_string(self):
         return 'widget'
+
+    def __str__(self):
+        return f"Widget[{self.guid}]"
+
+
+auditlog.register(Widget)

@@ -1,4 +1,5 @@
 import uuid
+from auditlog.registry import auditlog
 from django.db import models
 from core.models import Entity
 from core.constances import USER_ROLES
@@ -39,7 +40,7 @@ class Page(Entity):
         return False
 
     def __str__(self):
-        return self.title
+        return f"Page[{self.title}]"
 
     @property
     def url(self):
@@ -50,7 +51,6 @@ class Page(Entity):
     @property
     def type_to_string(self):
         return 'page'
-
 
 
 class Row(models.Model):
@@ -71,6 +71,9 @@ class Row(models.Model):
     @property
     def type_to_string(self):
         return 'row'
+
+    def __str__(self):
+        return f"Row[{self.guid}]"
 
 class Column(models.Model):
     """
@@ -96,3 +99,11 @@ class Column(models.Model):
     @property
     def type_to_string(self):
         return 'column'
+
+    def __str__(self):
+        return f"Column[{self.guid}]"
+
+
+auditlog.register(Page)
+auditlog.register(Row)
+auditlog.register(Column)

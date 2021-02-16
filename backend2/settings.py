@@ -84,6 +84,7 @@ TENANT_APPS = [
     'ariadne.contrib.django',
     'django_elasticsearch_dsl',
     'notifications',
+    'auditlog',
 ]
 
 if LOCAL_APPS:
@@ -116,6 +117,7 @@ if not RUN_AS_ADMIN_APP:
     MIDDLEWARE.append('core.middleware.WalledGardenMiddleware')
     MIDDLEWARE.append('core.middleware.OnboardingMiddleware')
     MIDDLEWARE.append('core.middleware.RedirectMiddleware')
+    MIDDLEWARE.append('auditlog.middleware.AuditlogMiddleware')
 
 if LOCAL_MIDDLEWARE:
     MIDDLEWARE += LOCAL_MIDDLEWARE

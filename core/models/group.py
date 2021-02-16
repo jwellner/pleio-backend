@@ -1,4 +1,5 @@
 import uuid
+from auditlog.registry import auditlog
 from django.apps import apps
 from django.conf import settings
 from django.contrib.postgres.fields import ArrayField
@@ -74,7 +75,7 @@ class Group(models.Model):
         max_length=256), blank=True, default=list)
 
     def __str__(self):
-        return self.name
+        return f"Group[{self.name}]"
 
     def is_member(self, user):
         if not user.is_authenticated:
@@ -212,7 +213,7 @@ class GroupMembership(models.Model):
     )
 
     def __str__(self):
-        return "{} - {} - {}".format(
+        return "GroupMembership[{}:{}:{}]".format(
             self.user.name,
             self.type,
             self.group.name
@@ -243,6 +244,9 @@ class GroupInvitation(models.Model):
     created_at = models.DateTimeField(default=timezone.now)
     updated_at = models.DateTimeField(default=timezone.now)
 
+    def __str__(self):
+        return f"GroupInvitation[]"
+
 
 class Subgroup(models.Model):
     """
@@ -256,6 +260,9 @@ class Subgroup(models.Model):
     @property
     def access_id(self):
         return 10000 + self.id
+
+    def __str__(self):
+        return f"Subgroup[{self.name}]"
 
 @receiver([pre_save], sender=Group)
 def update_entity_access(sender, instance, **kwargs):
@@ -283,3 +290,8 @@ def update_entity_access(sender, instance, **kwargs):
             if not ACCESS_TYPE.group.format(instance.id) in entity.read_access:
                 entity.read_access.append(ACCESS_TYPE.group.format(instance.id))
             entity.save()
+
+
+auditlog.register(Group)
+auditlog.register(GroupMembership)
+auditlog.register(Subgroup)
