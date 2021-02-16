@@ -107,7 +107,7 @@ class Mapper():
     def get_group(self, elgg_group: ElggGroupsEntity):
 
         group = Group()
-        group.name = html.unescape(elgg_group.name)
+        group.name = html.unescape(elgg_group.name[:200])
         group.created_at = datetime.fromtimestamp(elgg_group.entity.time_created)
         group.updated_at = datetime.fromtimestamp(elgg_group.entity.time_updated)
         group.description = html.unescape(elgg_group.description)
