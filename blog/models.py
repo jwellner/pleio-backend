@@ -1,3 +1,4 @@
+from auditlog.registry import auditlog
 from django.db import models
 from django.utils.text import slugify
 from core.models import Entity, VoteMixin, CommentMixin, BookmarkMixin, FollowMixin, NotificationMixin
@@ -29,7 +30,7 @@ class Blog(Entity, VoteMixin, BookmarkMixin, FollowMixin, CommentMixin, Notifica
     featured_alt = models.CharField(max_length=256, default="")
 
     def __str__(self):
-        return self.title
+        return f"Blog[{self.title}]"
 
     @property
     def type_to_string(self):
@@ -53,3 +54,6 @@ class Blog(Entity, VoteMixin, BookmarkMixin, FollowMixin, CommentMixin, Notifica
         if self.featured_image:
             return '%s?cache=%i' % (reverse('featured', args=[self.id]), int(self.featured_image.updated_at.timestamp()))
         return None
+
+
+auditlog.register(Blog)

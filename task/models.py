@@ -1,3 +1,4 @@
+from auditlog.registry import auditlog
 from django.db import models
 from core.models import Entity
 from django.utils.text import slugify
@@ -26,7 +27,7 @@ class Task(Entity):
     )
 
     def __str__(self):
-        return self.title
+        return f"Task[{self.title}]"
 
     @property
     def type_to_string(self):
@@ -44,3 +45,6 @@ class Task(Entity):
         return '{}/task/view/{}/{}'.format(
             prefix, self.guid, slugify(self.title)
         ).lower()
+
+
+auditlog.register(Task)

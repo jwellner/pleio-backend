@@ -1,5 +1,6 @@
 import os
 import magic
+from auditlog.registry import auditlog
 from django.urls import reverse
 from django.conf import settings
 from django.db import models
@@ -36,6 +37,9 @@ class FileFolder(Entity):
     thumbnail = models.FileField(upload_to='thumbnails/', blank=True, null=True)
 
     mime_type = models.CharField(null=True, blank=True, max_length=100)
+
+    def __str__(self):
+        return f"FileFolder[{self.title}]"
 
     @property
     def type_to_string(self):
@@ -111,3 +115,6 @@ def update_parent_timestamps(sender, instance, **kwargs):
             set_parent_folders_updated_at(old_instance)
     except ObjectDoesNotExist:
         pass
+
+
+auditlog.register(FileFolder)

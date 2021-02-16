@@ -1,4 +1,5 @@
 
+from auditlog.registry import auditlog
 from django.db import models
 
 
@@ -7,4 +8,7 @@ class Setting(models.Model):
     value = models.JSONField(null=True, blank=True, help_text="Please provide valid JSON data")
 
     def __str__(self):
-        return self.key
+        return f"Setting[{self.key}]"
+
+
+auditlog.register(Setting)

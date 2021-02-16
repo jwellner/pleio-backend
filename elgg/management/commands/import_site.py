@@ -1,3 +1,4 @@
+from auditlog.registry import auditlog
 from django.core import management
 from django.core.management.base import BaseCommand, CommandError
 from django.utils import timezone
@@ -97,6 +98,10 @@ class Command(InteractiveTenantOption, BaseCommand):
         if GuidMap.objects.count() > 0:
             self.stdout.write(f"Import already run on tenant {tenant.schema_name}. Exiting.")
             return False
+
+        # disable auditlog
+        for model in auditlog.get_models():
+            auditlog.unregister(model)
 
         tenant.elgg_database = elgg_instance.name
         tenant.save()

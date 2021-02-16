@@ -34,3 +34,4 @@ pydash==4.9.2
 django-signal-disabler==0.1.1
 colour==0.1.5
 pytz==2020.5
+django-auditlog==1.0a1
