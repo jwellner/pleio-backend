@@ -41,6 +41,9 @@ def resolve_search(_, info, q=None, containerGuid=None, type=None, subtype=None,
     except ValueError:
         raise GraphQLError(INVALID_DATE)
 
+    if (tagLists or dateFrom or dateTo) and not q:
+        q = '*'
+
     s = Search(index='_all').query(
             Q('simple_query_string', query=q, fields=['title', 'name', 'email', 'description', 'tags', 'file_contents', 'introduction']) |
             Q('nested', path='_profile.user_profile_fields', ignore_unmapped=True, query=Q('bool', must=[
