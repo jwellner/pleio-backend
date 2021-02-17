@@ -67,6 +67,7 @@ def resolve_search(_, info, q=None, containerGuid=None, type=None, subtype=None,
 
     if tagLists:
         for tagList in tagLists:
+            tagList = [x.lower() for x in tagList]
             s = s.filter(
                 'terms', tags=tagList
             )
