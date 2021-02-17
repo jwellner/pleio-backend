@@ -1,3 +1,4 @@
+from auditlog.registry import auditlog
 from django.db import models
 from core.models import Entity, CommentMixin, BookmarkMixin, NotificationMixin
 from user.models import User
@@ -49,7 +50,7 @@ class Event(Entity, CommentMixin, BookmarkMixin, NotificationMixin):
         return attendee
 
     def __str__(self):
-        return self.title
+        return f"Event[{self.title}]"
 
     @property
     def type_to_string(self):
@@ -102,6 +103,9 @@ class EventAttendee(models.Model):
     created_at = models.DateTimeField(default=timezone.now)
     updated_at = models.DateTimeField(default=timezone.now)
 
+    def __str__(self):
+        return f"EventAttendee[{self.name}]"
+
 class EventAttendeeRequest(models.Model):
 
     event = models.ForeignKey(
@@ -114,3 +118,11 @@ class EventAttendeeRequest(models.Model):
     code = models.CharField(max_length=36)
 
     created_at = models.DateTimeField(default=timezone.now)
+
+    def __str__(self):
+        return f"EventAttendeeRequest[{self.name}]"
+
+
+auditlog.register(Event)
+auditlog.register(EventAttendee)
+auditlog.register(EventAttendeeRequest)

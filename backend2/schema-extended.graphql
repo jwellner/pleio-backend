@@ -235,6 +235,7 @@ extend input editSiteSettingInput {
   onboardingIntro: String
   limitedGroupAdd: Boolean
   cookieConsent: Boolean
+  eventTiles: Boolean
   loginIntro: String
   customCss: String
   whitelistedIpRanges: [String]
@@ -291,6 +292,7 @@ extend type SiteSettings {
   siteInvites: SiteInviteList
   siteAccessRequests: SiteAccessRequestList
   cookieConsent: Boolean!
+  eventTiles: Boolean!
   loginIntro: String
   roleOptions: [Option]
   deleteAccountRequests: DeleteAccountRequestList
@@ -305,4 +307,8 @@ extend type SiteSettings {
 
 extend input FeaturedInput {
   alt: String
+}
+
+extend input sendMessageToUserInput {
+  sendCopyToSender: Boolean
 }

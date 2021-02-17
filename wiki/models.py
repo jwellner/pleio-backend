@@ -1,3 +1,4 @@
+from auditlog.registry import auditlog
 from django.db import models
 from core.models import Entity, BookmarkMixin
 from django.utils.text import slugify
@@ -25,7 +26,7 @@ class Wiki(Entity, BookmarkMixin):
         return False
 
     def __str__(self):
-        return self.title
+        return f"Wiki[{self.title}]"
 
     @property
     def type_to_string(self):
@@ -43,3 +44,6 @@ class Wiki(Entity, BookmarkMixin):
         return '{}/wiki/view/{}/{}'.format(
             prefix, self.guid, slugify(self.title)
         ).lower()
+
+
+auditlog.register(Wiki)

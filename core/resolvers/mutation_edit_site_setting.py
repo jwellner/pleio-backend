@@ -139,6 +139,7 @@ def resolve_edit_site_setting(_, info, input):
         'showExcerptInNewsCard': 'SHOW_EXCERPT_IN_NEWS_CARD',
         'commentsOnNews': 'COMMENT_ON_NEWS',
         'eventExport': 'EVENT_EXPORT',
+        'eventTiles': 'EVENT_TILES',
         'questionerCanChooseBestAnswer': 'QUESTIONER_CAN_CHOOSE_BEST_ANSWER',
         'statusUpdateGroups': 'STATUS_UPDATE_GROUPS',
         'subgroups': 'SUBGROUPS',

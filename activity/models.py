@@ -1,3 +1,4 @@
+from auditlog.registry import auditlog
 from django.db import models
 from django.utils.text import slugify
 from core.models import Entity, VoteMixin, CommentMixin, BookmarkMixin, FollowMixin, NotificationMixin
@@ -11,7 +12,7 @@ class StatusUpdate(Entity, VoteMixin, CommentMixin, BookmarkMixin, FollowMixin, 
     rich_description = models.TextField(null=True, blank=True)
 
     def __str__(self):
-        return self.title
+        return f"StatusUpdate[{self.guid}]"
 
     @property
     def type_to_string(self):
@@ -29,3 +30,6 @@ class StatusUpdate(Entity, VoteMixin, CommentMixin, BookmarkMixin, FollowMixin, 
         return '{}#{}'.format(
             prefix, self.guid
         ).lower()
+
+
+auditlog.register(StatusUpdate)

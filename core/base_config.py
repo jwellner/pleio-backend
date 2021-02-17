@@ -89,6 +89,7 @@ DEFAULT_SITE_CONFIG = {
     'SHOW_EXCERPT_IN_NEWS_CARD': (False, 'Show excerpt in news card'),
     'COMMENT_ON_NEWS': (False, 'Comment on news'),
     'EVENT_EXPORT': (False, 'Event Export'),
+    'EVENT_TILES': (False, 'Event Tiles'),
     'QUESTIONER_CAN_CHOOSE_BEST_ANSWER': (False, 'Questioner can choose best answer'),
     'STATUS_UPDATE_GROUPS': (True, 'Status update groups'),
     'SUBGROUPS': (False, 'Subgroups'),

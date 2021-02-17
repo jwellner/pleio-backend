@@ -11,7 +11,7 @@ from django.utils import dateparse
 
 
 def resolve_search(_, info, q=None, containerGuid=None, type=None, subtype=None, dateFrom=None, dateTo=None, offset=0, limit=20,
-                    orderBy=None, orderDirection=ORDER_DIRECTION.asc):
+                    tagLists=None, orderBy=None, orderDirection=ORDER_DIRECTION.asc):
     # pylint: disable=unused-argument
     # pylint: disable=too-many-arguments
     # pylint: disable=redefined-builtin
@@ -41,6 +41,9 @@ def resolve_search(_, info, q=None, containerGuid=None, type=None, subtype=None,
     except ValueError:
         raise GraphQLError(INVALID_DATE)
 
+    if (tagLists or dateFrom or dateTo) and not q:
+        q = '*'
+
     s = Search(index='_all').query(
             Q('simple_query_string', query=q, fields=['title', 'name', 'email', 'description', 'tags', 'file_contents', 'introduction']) |
             Q('nested', path='_profile.user_profile_fields', ignore_unmapped=True, query=Q('bool', must=[
@@ -61,6 +64,14 @@ def resolve_search(_, info, q=None, containerGuid=None, type=None, subtype=None,
     # Filter on container_guid (group.guid)
     if containerGuid:
         s = s.filter('term', container_guid=containerGuid)
+
+    if tagLists:
+        for tagList in tagLists:
+            # TODO: remove after improving tags, to lowecase tags
+            tagList = [x.lower() for x in tagList]
+            s = s.filter(
+                'terms', tags=tagList
+            )
 
     if orderBy == SEARCH_ORDER_BY.title:
         s = s.sort({'title.raw': {'order': orderDirection}})

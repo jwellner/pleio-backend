@@ -1,3 +1,4 @@
+import ipaddress
 import json
 import os
 import re
@@ -375,6 +376,14 @@ def datetime_isoformat(obj):
 
 def get_client_ip(request):
     x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
+
+    try:
+        ipv4_version = ipaddress.IPv6Address(x_forwarded_for).ipv4_mapped
+        if ipv4_version:
+            x_forwarded_for = str(ipv4_version)
+    except Exception:
+        pass
+
     if x_forwarded_for:
         ip = x_forwarded_for.split(',')[0]
     else:

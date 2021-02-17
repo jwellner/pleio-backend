@@ -1,5 +1,6 @@
 import uuid
 import logging
+from auditlog.registry import auditlog
 from django.db import models
 from django.db.models.signals import post_delete, pre_save
 from django.dispatch import receiver
@@ -42,7 +43,9 @@ class UserProfile(models.Model):
                                      blank=True, default=list)
     overview_email_last_received = models.DateTimeField(blank=True, null=True)
     receive_newsletter = models.BooleanField(default=False)
-
+    
+    def __str__(self):
+        return f"UserProfile[{self.user.name}]"
 
 class ProfileField(models.Model):
     """
@@ -98,6 +101,8 @@ class ProfileField(models.Model):
     def guid(self):
         return str(self.id)
 
+    def __str__(self):
+        return f"ProfileField[{self.name}]"
 
 class UserProfileFieldManager(models.Manager):
     def visible(self, user):
@@ -159,6 +164,10 @@ class UserProfileField(models.Model):
 
         return self.value
 
+    def __str__(self):
+        return f"UserProfileField[{self.profile_field.name}]"
+
+
 @receiver(pre_save, sender=UserProfileField)
 def set_date_field_value(sender, instance, **kwargs):
     # pylint: disable=unused-argument
@@ -172,3 +181,8 @@ def set_date_field_value(sender, instance, **kwargs):
 def validate_config_profile_sections(sender, instance, **kwargs):
     # pylint: disable=unused-argument
     config.PROFILE_SECTIONS = validate_profile_sections(config.PROFILE_SECTIONS)
+
+
+auditlog.register(UserProfile, exclude_fields=['last_online'])
+auditlog.register(ProfileField)
+auditlog.register(UserProfileField)

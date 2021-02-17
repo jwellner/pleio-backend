@@ -20,8 +20,11 @@ def is_ip_whitelisted(request):
         try:
             ip_address_network = ipaddress.ip_network(get_client_ip(request))
             for ip_range in config.WHITELISTED_IP_RANGES:
-                if ip_address_network.subnet_of(ipaddress.ip_network(ip_range)):
-                    return True
+                try:
+                    if ip_address_network.subnet_of(ipaddress.ip_network(ip_range)):
+                        return True
+                except Exception:
+                    pass
         except Exception:
             pass
     return False

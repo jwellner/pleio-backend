@@ -1,3 +1,4 @@
+from auditlog.registry import auditlog
 from django.db import models
 from core.models import Entity, VoteMixin
 from django.utils.text import slugify
@@ -11,7 +12,7 @@ class Poll(Entity):
     description = models.TextField()
 
     def __str__(self):
-        return self.title
+        return f"Poll[{self.title}]"
 
     @property
     def type_to_string(self):
@@ -34,8 +35,12 @@ class PollChoice(VoteMixin):
     text = models.CharField(max_length=256)
 
     def __str__(self):
-        return self.text
+        return f"PollChoice[{self.text}]"
 
     @property
     def guid(self):
         return str(self.id)
+
+
+auditlog.register(Poll)
+auditlog.register(PollChoice)

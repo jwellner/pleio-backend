@@ -1,3 +1,4 @@
+from auditlog.registry import auditlog
 from django.db import models
 from django.utils.text import slugify
 from django.urls import reverse
@@ -59,7 +60,7 @@ class Question(Entity, VoteMixin, BookmarkMixin, FollowMixin, CommentMixin, Noti
         return False
 
     def __str__(self):
-        return self.title
+        return f"Question[{self.title}]"
 
     @property
     def url(self):
@@ -83,3 +84,6 @@ class Question(Entity, VoteMixin, BookmarkMixin, FollowMixin, CommentMixin, Noti
         if self.featured_image:
             return '%s?cache=%i' % (reverse('featured', args=[self.id]), int(self.featured_image.updated_at.timestamp()))
         return None
+
+
+auditlog.register(Question)

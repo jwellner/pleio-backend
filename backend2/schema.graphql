@@ -1298,7 +1298,7 @@ type ProfileOverviewItem {
 type Query {
   viewer: Viewer
   entity(guid: String, username: String): Entity
-  search(q: String!, containerGuid: String, type: Type, subtype: String, dateFrom: String, dateTo: String, offset: Int, limit: Int, orderBy: SearchOrderBy, orderDirection: OrderDirection): SearchList
+  search(q: String!, containerGuid: String, type: Type, subtype: String, dateFrom: String, dateTo: String, offset: Int, limit: Int, tagLists: [[String]], orderBy: SearchOrderBy, orderDirection: OrderDirection): SearchList
   recommended(offset: Int, limit: Int): EntityList
   trending: [TrendingList]
   top: [TopItem]

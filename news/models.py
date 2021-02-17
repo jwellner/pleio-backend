@@ -1,3 +1,4 @@
+from auditlog.registry import auditlog
 from django.db import models
 from django.utils.text import slugify
 from django.urls import reverse
@@ -33,7 +34,7 @@ class News(Entity, VoteMixin, BookmarkMixin, FollowMixin, CommentMixin):
     source = models.TextField(default="")
 
     def __str__(self):
-        return self.title
+        return f"News[{self.title}]"
 
     @property
     def type_to_string(self):
@@ -56,3 +57,6 @@ class News(Entity, VoteMixin, BookmarkMixin, FollowMixin, CommentMixin):
             return True
 
         return len(get_acl(user) & set(self.write_access)) > 0
+
+
+auditlog.register(News)
