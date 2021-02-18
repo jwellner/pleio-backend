@@ -244,6 +244,13 @@ def resolve_edit_site_setting(_, info, input):
         save_setting('CUSTOM_CSS', clean_input.get('customCss'))
         save_setting('CUSTOM_CSS_TIMESTAMP', int(datetime.datetime.now().timestamp()))
 
+    if 'walledGardenByIpEnabled' in clean_input:
+        save_setting('WALLED_GARDEN_BY_IP_ENABLED', clean_input.get('walledGardenByIpEnabled'))
+
+        # if walled garden by ip is enabled, turn of indexing
+        if clean_input.get('walledGardenByIpEnabled'):
+            save_setting('ENABLE_SEARCH_ENGINE_INDEXING', False)
+
     if 'whitelistedIpRanges' in clean_input:
         for ip_range in clean_input.get('whitelistedIpRanges'):
             try:

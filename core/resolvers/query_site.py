@@ -212,6 +212,7 @@ def get_site_settings():
             'edges': User.objects.filter(is_delete_requested=True).all()
         },
         'customCss': config.CUSTOM_CSS,
+        'walledGardenByIpEnabled': config.WALLED_GARDEN_BY_IP_ENABLED,
         'whitelistedIpRanges': config.WHITELISTED_IP_RANGES,
         'siteMembershipAcceptedIntro': config.SITE_MEMBERSHIP_ACCEPTED_INTRO,
         'siteMembershipDeniedIntro': config.SITE_MEMBERSHIP_DENIED_INTRO,

@@ -128,6 +128,8 @@ class WalledGardenMiddleware:
             config.IS_CLOSED
             and not request.user.is_authenticated
             and not self.is_public_url(request.path_info)
+        ) or (
+            config.WALLED_GARDEN_BY_IP_ENABLED
             and not is_ip_whitelisted(request)
         ):
             context = {
