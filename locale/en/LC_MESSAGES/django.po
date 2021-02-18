@@ -26,6 +26,10 @@ msgstr ""
 msgid "Dutch"
 msgstr ""
 
+#: core/forms.py:67
+msgid "Provide a valid value."
+msgstr ""
+
 #: core/management/commands/send_notification_emails.py:49
 #, python-format
 msgid "New notifications at %(site_name)s"
@@ -160,31 +164,31 @@ msgstr ""
 msgid "CMS page"
 msgstr ""
 
-#: core/resolvers/query_site.py:152
+#: core/resolvers/query_site.py:153
 msgid "Daily"
 msgstr ""
 
-#: core/resolvers/query_site.py:153
+#: core/resolvers/query_site.py:154
 msgid "Weekly"
 msgstr ""
 
-#: core/resolvers/query_site.py:154
+#: core/resolvers/query_site.py:155
 msgid "Monthly"
 msgstr ""
 
-#: core/resolvers/query_site.py:155
+#: core/resolvers/query_site.py:156
 msgid "Never"
 msgstr ""
 
-#: core/resolvers/query_site.py:201
+#: core/resolvers/query_site.py:202
 msgid "Administrator"
 msgstr ""
 
-#: core/resolvers/query_site.py:202
+#: core/resolvers/query_site.py:203
 msgid "Editor"
 msgstr ""
 
-#: core/resolvers/query_site.py:203
+#: core/resolvers/query_site.py:204
 msgid "Question expert"
 msgstr ""
 
@@ -600,7 +604,7 @@ msgid ""
 "Access is requested. You will receive an e-mail when the request is accepted."
 msgstr ""
 
-#: core/views.py:146
+#: core/views.py:141
 #, python-format
 msgid "New access request for %(site_name)s"
 msgstr ""

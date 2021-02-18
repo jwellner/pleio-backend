@@ -26,6 +26,10 @@ msgstr "Engels"
 msgid "Dutch"
 msgstr "Nederlands"
 
+#: core/forms.py:67
+msgid "Provide a valid value."
+msgstr "Voer een geldige waarde in."
+
 #: core/management/commands/send_notification_emails.py:49
 #, python-format
 msgid "New notifications at %(site_name)s"
@@ -160,31 +164,31 @@ msgstr "Activiteitenstroom"
 msgid "CMS page"
 msgstr "CMS pagina"
 
-#: core/resolvers/query_site.py:152
+#: core/resolvers/query_site.py:153
 msgid "Daily"
 msgstr "Dagelijks"
 
-#: core/resolvers/query_site.py:153
+#: core/resolvers/query_site.py:154
 msgid "Weekly"
 msgstr "Wekelijks"
 
-#: core/resolvers/query_site.py:154
+#: core/resolvers/query_site.py:155
 msgid "Monthly"
 msgstr "Maandelijks"
 
-#: core/resolvers/query_site.py:155
+#: core/resolvers/query_site.py:156
 msgid "Never"
 msgstr "Nooit"
 
-#: core/resolvers/query_site.py:201
+#: core/resolvers/query_site.py:202
 msgid "Administrator"
 msgstr "Beheerder"
 
-#: core/resolvers/query_site.py:202
+#: core/resolvers/query_site.py:203
 msgid "Editor"
 msgstr "Redacteur"
 
-#: core/resolvers/query_site.py:203
+#: core/resolvers/query_site.py:204
 msgid "Question expert"
 msgstr "Vraagexpert"
 
@@ -663,10 +667,9 @@ msgstr "Opslaan"
 #: core/templates/registration/login.html:15
 msgid "This site is closed. Log in to get access."
 msgstr "Deze site is besloten. Log in om toegang te krijgen."
-
 #: core/templates/registration/login.html:25
 msgid "or"
-msgstr ""
+msgstr "of"
 
 #: core/templates/registration/login.html:27
 msgid "Login using Pleio account"
@@ -720,7 +723,7 @@ msgstr ""
 "De toegang is aangevraagd. Je ontvangt een e-mail wanneer de toegang door de "
 "beheerder wordt toegewezen."
 
-#: core/views.py:146
+#: core/views.py:141
 #, python-format
 msgid "New access request for %(site_name)s"
 msgstr "Nieuwe toegangsaanvraag voor %(site_name)s"

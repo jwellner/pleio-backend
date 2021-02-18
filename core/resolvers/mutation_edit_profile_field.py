@@ -24,6 +24,11 @@ def validate_profile_field(string, field):
             for selected in string.split(","):
                 if selected not in field.field_options:
                     return False
+
+    # run trough field validators
+    if not field.validate(string):
+        return False
+
     return True
 
 
@@ -51,21 +56,20 @@ def resolve_edit_profile_field(_, info, input):
 
     try:
         read_access = access_id_to_acl(requested_user, clean_input.get('accessId'))
+        write_access = access_id_to_acl(requested_user, 0)
     except Exception:
         raise GraphQLError(COULD_NOT_FIND)
 
     if not validate_profile_field(clean_input.get('value'), profile_field):
         raise GraphQLError(INVALID_VALUE)
 
-    try:
-        user_profile_field = UserProfileField.objects.get(user_profile=requested_user.profile, profile_field=profile_field)
-        user_profile_field.read_access = read_access
-        user_profile_field.value = clean_input.get('value')
-        user_profile_field.save()
-    except ObjectDoesNotExist:
-        user_profile_field = UserProfileField.objects.create(user_profile=requested_user.profile, profile_field=profile_field, value=clean_input.get('value'),
-                                                             read_access=read_access)
-
+    user_profile_field, created = UserProfileField.objects.get_or_create(user_profile=requested_user.profile, profile_field=profile_field)
+    user_profile_field.read_access = read_access
+    if created:
+        user_profile_field.write_access = write_access
+    user_profile_field.value = clean_input.get('value')
+    user_profile_field.save()
+    
     return {
         "user": requested_user
     }

@@ -1,8 +1,9 @@
 from graphql import GraphQLError
 from django.db import IntegrityError
-from core.models import ProfileField
-from core.constances import NOT_LOGGED_IN, USER_NOT_SITE_ADMIN, USER_ROLES
+from core.models import ProfileField, ProfileFieldValidator
+from core.constances import NOT_LOGGED_IN, USER_NOT_SITE_ADMIN, USER_ROLES, COULD_NOT_FIND
 from core.lib import remove_none_from_dict, generate_code
+from django.core.exceptions import ObjectDoesNotExist
 
 def create_profile_field():
     key = generate_code()
@@ -52,6 +53,13 @@ def resolve_add_site_setting_profile_field(_, info, input):
 
     if 'isMandatory' in clean_input:
         profile_field.is_mandatory = clean_input["isMandatory"]
+
+    if 'profileFieldValidatorId' in clean_input:
+        try:
+            validator = ProfileFieldValidator.objects.get(id=clean_input.get('profileFieldValidatorId'))
+            profile_field.validators.add(validator)
+        except ObjectDoesNotExist:
+            raise GraphQLError(COULD_NOT_FIND)
 
     profile_field.save()
 

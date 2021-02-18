@@ -7,7 +7,7 @@ from django.core.cache import cache
 from core.lib import is_valid_json
 from django.contrib.auth.models import AnonymousUser
 from django.http import HttpRequest
-from core.models import Group, ProfileField, Setting
+from core.models import Group, ProfileField, Setting, ProfileFieldValidator
 from user.models import User
 from mixer.backend.django import mixer
 from graphql import GraphQLError
@@ -21,7 +21,13 @@ class EditProfileFieldTestCase(FastTenantTestCase):
         self.admin = mixer.blend(User)
         self.admin.roles = ['ADMIN']
         self.admin.save()
+
+        self.profile_field_validator = ProfileFieldValidator.objects.create(validator_type='inList', validator_data=['aap', 'noot', 'mies', 'text_value'])
+
         self.profile_field1 = ProfileField.objects.create(key='text_key', name='text_name', field_type='text_field')
+        self.profile_field1.validators.add(self.profile_field_validator)
+        self.profile_field1.save()
+
         self.profile_field2 = ProfileField.objects.create(key='html_key', name='html_name', field_type='html_field')
         self.profile_field3 = ProfileField.objects.create(key='select_key', name='select_name', field_type='select_field', field_options=['select_value', 'select_value_2'])
         self.profile_field4 = ProfileField.objects.create(key='date_key', name='date_name', field_type='date_field')
@@ -85,7 +91,6 @@ class EditProfileFieldTestCase(FastTenantTestCase):
         self.assertEqual(data["editProfileField"]["user"]["profile"][0]["name"], 'text_name')
         self.assertEqual(data["editProfileField"]["user"]["profile"][0]["value"], 'text_value')
         self.assertEqual(data["editProfileField"]["user"]["profile"][0]["accessId"], 2)
-
 
     def test_edit_profile_field_by_admin(self):
 
@@ -651,3 +656,62 @@ class EditProfileFieldTestCase(FastTenantTestCase):
 
         data = result[1]["data"]
         self.assertEqual(data["editProfileField"]["user"]["profile"][4]["value"], 'select_value_1,select_value_2')
+
+    def test_edit_profile_field_with_validator_by_user(self):
+
+        mutation = """
+            mutation leditProfileField($input: editProfileFieldInput!) {
+                editProfileField(input: $input) {
+                    user {
+                    guid
+                    name
+                    profile {
+                        key
+                        name
+                        value
+                        category
+                        accessId
+                        __typename
+                    }
+                    __typename
+                    }
+                    __typename
+                }
+            }
+        """
+        variables = {
+            "input": {
+                "accessId": 2,
+                "guid": self.user.guid,
+                "key": "text_key",
+                "value": "boom"
+            }
+        }
+
+        request = HttpRequest()
+        request.user = self.user
+
+        result = graphql_sync(schema, { "query": mutation, "variables": variables }, context_value={ "request": request })
+
+        errors = result[1]["errors"]
+
+        self.assertEqual(errors[0]["message"], "invalid_value")
+
+        variables = {
+            "input": {
+                "accessId": 2,
+                "guid": self.user.guid,
+                "key": "text_key",
+                "value": "aap"
+            }
+        }
+
+        result = graphql_sync(schema, { "query": mutation, "variables": variables }, context_value={ "request": request })
+
+        data = result[1]["data"]
+
+        self.assertEqual(data["editProfileField"]["user"]["guid"], self.user.guid)
+        self.assertEqual(data["editProfileField"]["user"]["profile"][0]["key"], 'text_key')
+        self.assertEqual(data["editProfileField"]["user"]["profile"][0]["name"], 'text_name')
+        self.assertEqual(data["editProfileField"]["user"]["profile"][0]["value"], 'aap')
+        self.assertEqual(data["editProfileField"]["user"]["profile"][0]["accessId"], 2)
