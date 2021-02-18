@@ -1,3 +1,4 @@
+from django.db.models import Q
 from django.utils import dateparse
 from user.models import User
 from core.constances import NOT_LOGGED_IN, USER_NOT_SITE_ADMIN, USER_ROLES, INVALID_DATE
@@ -30,7 +31,11 @@ def resolve_site_users(_, info, q=None, role=None, isDeleteRequested=None, isBan
         users = users.filter(is_active=True)
 
     if q:
-        users = users.filter(name__icontains=q)
+        users = users.filter(
+            Q(name__icontains=q) |
+            Q(email__icontains=q) |
+            Q(id__iexact=q)
+        )
 
     if last_online_before:
         users = users.filter(_profile__last_online__lt=last_online_before)
