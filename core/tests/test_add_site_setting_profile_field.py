@@ -7,7 +7,7 @@ from django.core.cache import cache
 from core.lib import is_valid_json
 from django.contrib.auth.models import AnonymousUser
 from django.http import HttpRequest
-from core.models import Group, ProfileField, Setting
+from core.models import Group, ProfileField, Setting, ProfileFieldValidator, ProfileFieldValidator
 from user.models import User
 from mixer.backend.django import mixer
 from graphql import GraphQLError
@@ -18,6 +18,13 @@ class AddSiteSettingProfileFieldTestCase(FastTenantTestCase):
         self.anonymousUser = AnonymousUser()
         self.user = mixer.blend(User)
         self.admin = mixer.blend(User, roles=['ADMIN'])
+
+        self.profileFieldValidator1 = ProfileFieldValidator.objects.create(
+            name="123",
+            validator_type='inList',
+            validator_data=['aap', 'noot', 'mies']
+        )
+
 
     def tearDown(self):
         self.admin.delete()
@@ -96,6 +103,9 @@ class AddSiteSettingProfileFieldTestCase(FastTenantTestCase):
                         fieldOptions
                         isInOnboarding
                         isMandatory
+                        profileFieldValidator {
+                            name
+                        }
                     }
                 }
             }
@@ -109,8 +119,8 @@ class AddSiteSettingProfileFieldTestCase(FastTenantTestCase):
                 "fieldType": "date_field",
                 "fieldOptions": ["option1", "option2"],
                 "isInOnboarding": True,
-                "isMandatory": True
-
+                "isMandatory": True,
+                "profileFieldValidatorId": str(self.profileFieldValidator1.id)
             }
         }
         request = HttpRequest()
@@ -129,3 +139,4 @@ class AddSiteSettingProfileFieldTestCase(FastTenantTestCase):
         self.assertEqual(data["addSiteSettingProfileField"]["profileItem"]["fieldOptions"], ["option1", "option2"])
         self.assertEqual(data["addSiteSettingProfileField"]["profileItem"]["isInOnboarding"], True)
         self.assertEqual(data["addSiteSettingProfileField"]["profileItem"]["isMandatory"], True)
+        self.assertEqual(data["addSiteSettingProfileField"]["profileItem"]["profileFieldValidator"]["name"], self.profileFieldValidator1.name)

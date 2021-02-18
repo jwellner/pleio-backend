@@ -73,3 +73,8 @@ def resolve_is_in_onboarding(obj, info):
 def resolve_is_mandatory(obj, info):
     # pylint: disable=unused-argument
     return obj.is_mandatory
+
+@profile_item.field("profileFieldValidator")
+def resolve_profile_field_validator(obj, info):
+    # pylint: disable=unused-argument
+    return obj.validators.first()

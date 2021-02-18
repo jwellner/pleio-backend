@@ -3,7 +3,9 @@ from __future__ import unicode_literals
 
 from django.db.models import Q
 from django import forms
+from django.utils.translation import ugettext_lazy
 from core.models import ProfileField
+
 
 class OnboardingForm(forms.Form):
 
@@ -56,6 +58,13 @@ class OnboardingForm(forms.Form):
                 )
             
             self._profile_fields.append(profile_field)
+
+    def clean(self):
+        cleaned_data = super().clean()
+        for field in self._profile_fields:
+            value = cleaned_data.get(field.guid)
+            if not field.validate(value):
+                self.add_error(field.guid, ugettext_lazy('Provide a valid value.'))
 
     @property
     def profile_fields(self):

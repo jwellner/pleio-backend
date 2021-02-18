@@ -47,6 +47,38 @@ class UserProfile(models.Model):
     def __str__(self):
         return f"UserProfile[{self.user.name}]"
 
+class ProfileFieldValidator(models.Model):
+    """
+    Profile field validator
+    """
+    class Meta:
+        ordering = ['created_at', 'id']
+
+    VALIDATOR_TYPES = (
+        ('inList', 'inList'),
+    )
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+
+    name = models.CharField(max_length=255)
+
+    validator_data = models.JSONField(null=True, blank=True, help_text="Please provide valid JSON data")
+
+    validator_type = models.CharField(
+        max_length=24,
+        choices=VALIDATOR_TYPES,
+        blank=False
+    )
+
+    created_at = models.DateTimeField(default=timezone.now)
+
+    def validate(self, value):
+        if self.validator_type == 'inList':
+            if value in self.validator_data:
+                return True
+        return False
+
+
 class ProfileField(models.Model):
     """
     Profile field types
@@ -55,11 +87,11 @@ class ProfileField(models.Model):
         ordering = ['created_at', 'id']
 
     FIELD_TYPES = (
-        ('select_field', 'SelectField'),
-        ('date_field', 'DateField'),
-        ('html_field', 'HTMLField'),
-        ('multi_select_field', 'MultiSelectField'),
-        ('text_field', 'TextField'),
+        ('select_field', 'select_field'),
+        ('date_field', 'date_field'),
+        ('html_field', 'html_field'),
+        ('multi_select_field', 'multi_select_field'),
+        ('text_field', 'text_field'),
     )
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
@@ -78,6 +110,8 @@ class ProfileField(models.Model):
     is_in_overview = models.BooleanField(default=False)
     is_in_onboarding = models.BooleanField(default=False)
     is_mandatory = models.BooleanField(default=False)
+
+    validators = models.ManyToManyField('core.ProfileFieldValidator', related_name="profile_fields")
 
     created_at = models.DateTimeField(default=timezone.now)
 
@@ -103,6 +137,14 @@ class ProfileField(models.Model):
 
     def __str__(self):
         return f"ProfileField[{self.name}]"
+
+    def validate(self, value):
+        if value:
+            for validator in self.validators.all():
+                if not validator.validate(value):
+                    return False
+        return True
+
 
 class UserProfileFieldManager(models.Manager):
     def visible(self, user):
