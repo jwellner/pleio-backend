@@ -20,7 +20,7 @@ class SiteUsersTestCase(FastTenantTestCase):
 
     def setUp(self):
         self.user1 = mixer.blend(User, name="Tt")
-        self.user2 = mixer.blend(User, name="Specific_user_name_1")
+        self.user2 = mixer.blend(User, name="Specific_user_name_1", email='specific@test.nl')
         self.user3 = mixer.blend(User, is_delete_requested=True, name="Zz")
         self.user4 = mixer.blend(User, is_active=False, name='Xx')
         self.user5 = mixer.blend(User)
@@ -45,6 +45,7 @@ class SiteUsersTestCase(FastTenantTestCase):
                         guid
                         name
                         url
+                        email
                         icon
                         roles
                         requestDelete
@@ -149,6 +150,56 @@ class SiteUsersTestCase(FastTenantTestCase):
 
         self.assertEqual(data["siteUsers"]["total"], 1)
         self.assertEqual(data["siteUsers"]["edges"][0]["guid"], self.user2.guid)
+
+
+    def test_site_users_filter_email_guid_by_admin(self):
+
+        request = HttpRequest()
+        request.user = self.admin1
+
+        variables = {
+            "q": "specific@test.nl"
+        }
+
+        result = graphql_sync(schema, {"query": self.query, "variables": variables}, context_value={ "request": request })
+
+        self.assertTrue(result[0])
+        data = result[1]["data"]
+
+        self.assertEqual(data["siteUsers"]["total"], 1)
+        self.assertEqual(data["siteUsers"]["edges"][0]["guid"], self.user2.guid)
+        self.assertEqual(data["siteUsers"]["edges"][0]["email"], self.user2.email)
+
+
+        variables = {
+            "q": "cific@test.nl"
+        }
+
+        result = graphql_sync(schema, {"query": self.query, "variables": variables}, context_value={ "request": request })
+
+        self.assertTrue(result[0])
+        data = result[1]["data"]
+
+        self.assertEqual(data["siteUsers"]["total"], 1)
+        self.assertEqual(data["siteUsers"]["edges"][0]["guid"], self.user2.guid)
+        self.assertEqual(data["siteUsers"]["edges"][0]["email"], self.user2.email)
+
+
+        variables = {
+            "q": self.user2.guid
+        }
+
+        result = graphql_sync(schema, {"query": self.query, "variables": variables}, context_value={ "request": request })
+
+        self.assertTrue(result[0])
+        data = result[1]["data"]
+
+        self.assertEqual(data["siteUsers"]["total"], 1)
+        self.assertEqual(data["siteUsers"]["edges"][0]["guid"], self.user2.guid)
+        self.assertEqual(data["siteUsers"]["edges"][0]["email"], self.user2.email)
+
+
+
 
     def test_site_users_by_anonymous(self):
 
