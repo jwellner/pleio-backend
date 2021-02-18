@@ -238,6 +238,7 @@ extend input editSiteSettingInput {
   eventTiles: Boolean
   loginIntro: String
   customCss: String
+  walledGardenByIpEnabled: Boolean
   whitelistedIpRanges: [String]
   siteMembershipAcceptedIntro: String
   siteMembershipDeniedIntro: String
@@ -297,6 +298,7 @@ extend type SiteSettings {
   roleOptions: [Option]
   deleteAccountRequests: DeleteAccountRequestList
   customCss: String
+  walledGardenByIpEnabled: Boolean!
   whitelistedIpRanges: [String]
   siteMembershipAcceptedIntro: String
   siteMembershipDeniedIntro: String
