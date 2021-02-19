@@ -124,9 +124,10 @@ class WalledGardenMiddleware:
         return any(public_url.match(url) for public_url in public_urls)
 
     def __call__(self, request):
-        if (
+        if request.user.is_authenticated:
+            pass
+        elif (
             config.IS_CLOSED
-            and not request.user.is_authenticated
             and not self.is_public_url(request.path_info)
         ) or (
             config.WALLED_GARDEN_BY_IP_ENABLED
