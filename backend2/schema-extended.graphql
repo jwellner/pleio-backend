@@ -149,6 +149,12 @@ extend type Mutation {
   importUsersStep1(input: importUsersStep1Input!): importUsersStep1Payload
   """User import step 2, will be scheduled in background, performer will receive a mail with import results. """
   importUsersStep2(input: importUsersStep2Input!): importUsersStep2Payload
+  """Add profileFieldValidator"""
+  addSiteSettingProfileFieldValidator(input: addSiteSettingProfileFieldValidatorInput!): addSiteSettingProfileFieldValidatorPayload
+  """Edit profileFieldValidator"""
+  editSiteSettingProfileFieldValidator(input: editSiteSettingProfileFieldValidatorInput!): editSiteSettingProfileFieldValidatorPayload
+  """Delete profileFieldValidator"""
+  deleteSiteSettingProfileFieldValidator(input: deleteSiteSettingProfileFieldValidatorInput!): deleteSiteSettingProfileFieldValidatorPayload
 }
 
 extend type Query {
@@ -183,6 +189,7 @@ input addSiteSettingProfileFieldInput {
   fieldOptions: [String]
   isInOnboarding: Boolean
   isMandatory: Boolean
+  profileFieldValidatorId: String
 }
 
 type addSiteSettingProfileFieldPayload {
@@ -199,6 +206,7 @@ input editSiteSettingProfileFieldInput {
   fieldOptions: [String]
   isInOnboarding: Boolean
   isMandatory: Boolean
+  profileFieldValidatorId: String
 }
 
 type editSiteSettingProfileFieldPayload {
@@ -217,6 +225,7 @@ extend type ProfileItem {
   guid: String!
   isInOnboarding: Boolean
   isMandatory: Boolean
+  profileFieldValidator: ProfileFieldValidator
 }
 
 type ProfileSection {
@@ -238,6 +247,7 @@ extend input editSiteSettingInput {
   eventTiles: Boolean
   loginIntro: String
   customCss: String
+  walledGardenByIpEnabled: Boolean
   whitelistedIpRanges: [String]
   siteMembershipAcceptedIntro: String
   siteMembershipDeniedIntro: String
@@ -297,12 +307,14 @@ extend type SiteSettings {
   roleOptions: [Option]
   deleteAccountRequests: DeleteAccountRequestList
   customCss: String
+  walledGardenByIpEnabled: Boolean!
   whitelistedIpRanges: [String]
   siteMembershipAcceptedIntro: String
   siteMembershipDeniedIntro: String
   idpId: String
   idpName: String
   enableSearchEngineIndexing: Boolean!
+  profileFieldValidators: [ProfileFieldValidator]
 }
 
 extend input FeaturedInput {
@@ -311,4 +323,53 @@ extend input FeaturedInput {
 
 extend input sendMessageToUserInput {
   sendCopyToSender: Boolean
+}
+
+input ProfileFieldValidatorInput {
+  type: ProfileFieldValidatorType!
+  name: String!
+  validationString: String
+  validationListFile: Upload
+}
+
+type ProfileFieldValidator {
+  id: String!
+  type: ProfileFieldValidatorType!
+  name: String!
+  validationString: String
+  validationList: [String]
+}
+
+enum ProfileFieldValidatorType {
+  inList
+}
+
+input addSiteSettingProfileFieldValidatorInput {
+  type: ProfileFieldValidatorType!
+  name: String!
+  validationString: String
+  validationListFile: Upload
+}
+
+input editSiteSettingProfileFieldValidatorInput {
+  id: String!
+  name: String
+  validationString: String
+  validationListFile: Upload
+}
+
+input deleteSiteSettingProfileFieldValidatorInput {
+  id: String!
+}
+
+type addSiteSettingProfileFieldValidatorPayload {
+  profileFieldValidator: ProfileFieldValidator
+}
+
+type editSiteSettingProfileFieldValidatorPayload {
+  profileFieldValidator: ProfileFieldValidator
+}
+
+type deleteSiteSettingProfileFieldValidatorPayload {
+  success: Boolean!
 }

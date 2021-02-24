@@ -158,6 +158,7 @@ class EditSiteSettingTestCase(FastTenantTestCase):
                         loginIntro
 
                         customCss
+                        walledGardenByIpEnabled
                         whitelistedIpRanges
 
                         siteMembershipAcceptedIntro
@@ -262,6 +263,7 @@ class EditSiteSettingTestCase(FastTenantTestCase):
                 'loginIntro': 'test',
 
                 'customCss': 'h1 {color: maroon;margin-left: 40px;}',
+                'walledGardenByIpEnabled': False,
                 'whitelistedIpRanges': ['192.168.0.1/32', '192.168.0.0/24'],
                 'siteMembershipAcceptedIntro': 'You request is accepted',
                 'siteMembershipDeniedIntro': 'Your request is not accepted',
@@ -369,6 +371,7 @@ class EditSiteSettingTestCase(FastTenantTestCase):
 
         self.assertEqual(data["editSiteSetting"]["siteSettings"]["loginIntro"], 'test')
         self.assertEqual(data["editSiteSetting"]["siteSettings"]["customCss"], 'h1 {color: maroon;margin-left: 40px;}')
+        self.assertEqual(data["editSiteSetting"]["siteSettings"]["walledGardenByIpEnabled"], False)
         self.assertEqual(data["editSiteSetting"]["siteSettings"]["whitelistedIpRanges"], ['192.168.0.1/32', '192.168.0.0/24'])
         self.assertEqual(data["editSiteSetting"]["siteSettings"]["siteMembershipAcceptedIntro"], 'You request is accepted')
         self.assertEqual(data["editSiteSetting"]["siteSettings"]["siteMembershipDeniedIntro"], 'Your request is not accepted')
@@ -630,3 +633,35 @@ class EditSiteSettingTestCase(FastTenantTestCase):
         errors = result[1]["errors"]
 
         self.assertEqual(errors[0]["message"], "invalid_value")
+
+
+    def test_edit_site_setting_walled_garden_by_ip(self):
+        cache.set("%s%s" % (connection.schema_name, 'ENABLE_SEARCH_ENGINE_INDEXING'), True)
+
+        mutation = """
+            mutation EditSiteSetting($input: editSiteSettingInput!) {
+                editSiteSetting(input: $input) {
+                    siteSettings {
+                        walledGardenByIpEnabled
+                        enableSearchEngineIndexing
+                    }
+                }
+            }
+        """
+
+        variables = {
+            "input": {
+                "walledGardenByIpEnabled": True
+            }
+        }
+
+        request = HttpRequest()
+        request.user = self.admin
+        result = graphql_sync(schema, { "query": mutation, "variables": variables}, context_value={ "request": request })
+
+        self.assertTrue(result[0])
+
+        data = result[1]["data"]
+
+        self.assertEqual(data["editSiteSetting"]["siteSettings"]["walledGardenByIpEnabled"], True)
+        self.assertEqual(data["editSiteSetting"]["siteSettings"]["enableSearchEngineIndexing"], False)

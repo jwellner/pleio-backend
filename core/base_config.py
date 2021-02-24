@@ -111,6 +111,7 @@ DEFAULT_SITE_CONFIG = {
     'CUSTOM_CSS': ("", 'Custom Css'),
     'CUSTOM_CSS_TIMESTAMP': ("", 'Custom Css timestamp'),
     'WHITELISTED_IP_RANGES': ([], 'Whitelisted ip ranges'),
+    'WALLED_GARDEN_BY_IP_ENABLED': (False, 'Walled garden by ip enabled'),
     'SITE_MEMBERSHIP_ACCEPTED_INTRO': ("", 'Site membership accepted intro'),
     'SITE_MEMBERSHIP_DENIED_INTRO': ("", 'Site membership denied intro'),
     'IDP_ID': ("", 'Identity provider ID'),

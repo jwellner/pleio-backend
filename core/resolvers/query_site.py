@@ -6,7 +6,7 @@ from cms.models import Page
 from core import config
 from core.constances import NOT_LOGGED_IN, USER_NOT_SITE_ADMIN, USER_ROLES
 from core.lib import get_access_ids, get_activity_filters, get_exportable_user_fields
-from core.models import UserProfile, ProfileField, SiteInvitation, SiteAccessRequest
+from core.models import UserProfile, ProfileField, SiteInvitation, SiteAccessRequest, ProfileFieldValidator
 from user.models import User
 from graphql import GraphQLError
 
@@ -144,6 +144,7 @@ def get_site_settings():
         'profile': get_profile(),
         'profileSections': config.PROFILE_SECTIONS,
         'profileFields': ProfileField.objects.all(),
+        'profileFieldValidators': ProfileFieldValidator.objects.all(),
 
         'tagCategories': config.TAG_CATEGORIES,
         'showTagsInFeed': config.SHOW_TAGS_IN_FEED,
@@ -211,6 +212,7 @@ def get_site_settings():
             'edges': User.objects.filter(is_delete_requested=True).all()
         },
         'customCss': config.CUSTOM_CSS,
+        'walledGardenByIpEnabled': config.WALLED_GARDEN_BY_IP_ENABLED,
         'whitelistedIpRanges': config.WHITELISTED_IP_RANGES,
         'siteMembershipAcceptedIntro': config.SITE_MEMBERSHIP_ACCEPTED_INTRO,
         'siteMembershipDeniedIntro': config.SITE_MEMBERSHIP_DENIED_INTRO,
