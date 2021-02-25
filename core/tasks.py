@@ -583,3 +583,27 @@ def control_delete_site(self, site_id):
             raise Exception(e)
 
     return True
+
+@shared_task(bind=True)
+def remote_get_sites_admin(self):
+    # pylint: disable=unused-argument
+    '''
+    Get all site administrators
+    '''
+    clients = Client.objects.exclude(schema_name='public')
+
+    admins = []
+    for client in clients:
+
+        with schema_context(client.schema_name):
+
+            users = User.objects.filter(roles__contains=['ADMIN'], is_active=True)
+            for user in users:
+                admins.append({
+                    'name': user.name,
+                    'email': user.email,
+                    'client_id': client.id,
+                    'client_domain': client.get_primary_domain().domain
+                })
+
+    return admins
