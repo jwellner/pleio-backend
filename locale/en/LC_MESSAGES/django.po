@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-02-10 17:30+0100\n"
+"POT-Creation-Date: 2021-02-23 09:58+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -18,11 +18,11 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#: backend2/config.py:61 core/resolvers/query_site.py:86
+#: backend2/config.py:61 core/resolvers/query_site.py:87
 msgid "English"
 msgstr ""
 
-#: backend2/config.py:62 core/resolvers/query_site.py:86
+#: backend2/config.py:62 core/resolvers/query_site.py:87
 msgid "Dutch"
 msgstr ""
 
@@ -81,15 +81,15 @@ msgstr ""
 msgid "name"
 msgstr ""
 
-#: core/resolvers/mutation_import_users.py:30 core/resolvers/query_site.py:66
+#: core/resolvers/mutation_import_users.py:30 core/resolvers/query_site.py:67
 msgid "Just me"
 msgstr ""
 
-#: core/resolvers/mutation_import_users.py:31 core/resolvers/query_site.py:67
+#: core/resolvers/mutation_import_users.py:31 core/resolvers/query_site.py:68
 msgid "Logged in users"
 msgstr ""
 
-#: core/resolvers/mutation_import_users.py:34 core/resolvers/query_site.py:71
+#: core/resolvers/mutation_import_users.py:34 core/resolvers/query_site.py:72
 msgid "Public"
 msgstr ""
 
@@ -128,7 +128,7 @@ msgstr ""
 msgid "Message from {0}: {1}"
 msgstr ""
 
-#: core/resolvers/mutation_send_message_to_user.py:34
+#: core/resolvers/mutation_send_message_to_user.py:35
 #, python-brace-format
 msgid "Copy: Message from {0}: {1}"
 msgstr ""
@@ -156,39 +156,39 @@ msgstr ""
 msgid "You're granted site administrator right on %(site_name)s"
 msgstr ""
 
-#: core/resolvers/query_site.py:117
+#: core/resolvers/query_site.py:118
 msgid "Activity stream"
 msgstr ""
 
-#: core/resolvers/query_site.py:117
+#: core/resolvers/query_site.py:118
 msgid "CMS page"
 msgstr ""
 
-#: core/resolvers/query_site.py:153
+#: core/resolvers/query_site.py:154
 msgid "Daily"
 msgstr ""
 
-#: core/resolvers/query_site.py:154
+#: core/resolvers/query_site.py:155
 msgid "Weekly"
 msgstr ""
 
-#: core/resolvers/query_site.py:155
+#: core/resolvers/query_site.py:156
 msgid "Monthly"
 msgstr ""
 
-#: core/resolvers/query_site.py:156
+#: core/resolvers/query_site.py:157
 msgid "Never"
 msgstr ""
 
-#: core/resolvers/query_site.py:202
+#: core/resolvers/query_site.py:204
 msgid "Administrator"
 msgstr ""
 
-#: core/resolvers/query_site.py:203
+#: core/resolvers/query_site.py:205
 msgid "Editor"
 msgstr ""
 
-#: core/resolvers/query_site.py:204
+#: core/resolvers/query_site.py:206
 msgid "Question expert"
 msgstr ""
 
@@ -364,6 +364,13 @@ msgstr ""
 msgid ""
 "This message is sent from <a href=\"%(site_url)s\">%(site_url)s</a> by <a "
 "href=\"%(user_url)s\">%(user_name)s</a>"
+msgstr ""
+
+#: core/templates/email/send_message_to_user.html:8
+#, python-format
+msgid ""
+"Respond by clicking <a href=\"%(user_url)s/reply?subject=%(subject)s\">here</"
+"a>"
 msgstr ""
 
 #: core/templates/email/send_notification_emails.html:37
@@ -604,7 +611,7 @@ msgid ""
 "Access is requested. You will receive an e-mail when the request is accepted."
 msgstr ""
 
-#: core/views.py:141
+#: core/views.py:146
 #, python-format
 msgid "New access request for %(site_name)s"
 msgstr ""

@@ -27,6 +27,7 @@ def resolve_send_message_to_user(_, info, input):
     schema_name = parse_tenant_config_path("")
 
     subject = ugettext_lazy("Message from {0}: {1}").format(user.name, clean_input.get('subject'))
+    context['subject'] = subject
 
     send_mail_multi.delay(schema_name, subject, 'email/send_message_to_user.html', context, receiving_user.email)
 
