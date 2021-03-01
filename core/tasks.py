@@ -6,6 +6,8 @@ import os
 import json
 import re
 import signal_disabler
+import tempfile
+import shutil
 from email.utils import formataddr
 
 from celery import shared_task
@@ -24,6 +26,7 @@ from django.core.mail import EmailMultiAlternatives
 from django.template.loader import get_template
 from django.utils import translation
 from django.conf import settings
+from django.db import connection
 from notifications.signals import notify
 from user.models import User
 from django.utils.translation import ugettext_lazy
@@ -576,8 +579,15 @@ def control_delete_site(self, site_id):
     with schema_context('public'):
         try:
             tenant = Client.objects.get(id=site_id)
-            # tenant.auto_drop_schema = True
+            tenant.auto_drop_schema = True
+
+            file_path = os.path.join(settings.MEDIA_ROOT, tenant.schema_name)
             tenant.delete()
+
+            # delete files
+            if os.path.exists(file_path):
+                shutil.rmtree(file_path)
+
         except Exception as e:
             # raise general exception because remote doenst have Client exception
             raise Exception(e)
@@ -585,7 +595,7 @@ def control_delete_site(self, site_id):
     return True
 
 @shared_task(bind=True)
-def remote_get_sites_admin(self):
+def control_get_sites_admin(self):
     # pylint: disable=unused-argument
     '''
     Get all site administrators
@@ -607,3 +617,91 @@ def remote_get_sites_admin(self):
                 })
 
     return admins
+
+@shared_task(bind=True)
+def control_copy_site(self, copy_site_id, schema_name, domain):
+    # pylint: disable=unused-argument
+    # pylint: disable=too-many-locals
+    '''
+    Copy site to new schema
+    '''
+    with schema_context('public'):
+        try:
+            # does copy_site_id exist?
+            copy_site = Client.objects.get(id=copy_site_id)
+
+            # is schema_name available ?
+            if Client.objects.filter(schema_name=schema_name).first():
+                raise Exception("Target schema already exists!")
+
+            # is domain available ?
+            if Domain.objects.filter(domain=domain).first():
+                raise Exception("Target domain already exists!")
+
+            # test if media folder exists
+            if os.path.exists(os.path.join(settings.MEDIA_ROOT, schema_name)):
+                raise Exception("Target file path already exists, please clean up first.")
+
+        except Exception as e:
+            raise Exception(e)
+
+    export_folder = os.path.join(tempfile.gettempdir(), f"dump_{copy_site.schema_name}")
+    # remove folder if exists
+    if os.path.exists(export_folder):
+        shutil.rmtree(export_folder)
+
+    os.makedirs(export_folder)
+
+    skip_tables = ("auth_permission", "django_content_type", "django_migrations", "django_session")
+
+    with connection.connection.cursor() as cursor:
+        cursor.execute( "SELECT table_name FROM information_schema.tables " +
+                        "WHERE ( table_schema = %s AND table_name NOT IN %s ) " +
+                        "ORDER BY table_name;", (copy_site.schema_name, skip_tables))
+        tables = cursor.fetchall()
+
+    # dump data for all tables
+    for row in tables:
+        table = f"{copy_site.schema_name}.{row[0]}"
+        file_path = f"{export_folder}/{row[0]}.csv"
+        f = open(file_path, 'wb+')
+
+        with connection.connection.cursor() as cursor:
+            cursor.copy_to(f, table)
+        logger.info("Copy %s data to %s", table, file_path)
+
+    # create new tenant
+    with schema_context('public'):
+        tenant = Client(schema_name=schema_name, name=schema_name)
+        tenant.save()
+
+        d = Domain()
+        d.domain = domain
+        d.tenant = tenant
+        d.is_primary = True
+        d.save()
+
+    # read data from dumped tables
+    for row in tables:
+
+        table = f"{tenant.schema_name}.{row[0]}"
+        file_path = f"{export_folder}/{row[0]}.csv"
+        f = open(file_path, 'r')
+
+        with connection.connection.cursor() as cursor:
+            cursor.execute('BEGIN;')
+            cursor.execute(f"ALTER TABLE {table} DISABLE TRIGGER ALL;")
+            cursor.copy_from(f, table)
+            cursor.execute(f"ALTER TABLE {table} ENABLE TRIGGER ALL;")
+            cursor.execute('COMMIT;')
+
+        logger.info("Read %s to %s", file_path, table)
+
+    # copy files
+    if os.path.exists(os.path.join(settings.MEDIA_ROOT, copy_site.schema_name)):
+        shutil.copytree(os.path.join(settings.MEDIA_ROOT, copy_site.schema_name), os.path.join(settings.MEDIA_ROOT, tenant.schema_name))
+
+    # cleanup dump folder
+    shutil.rmtree(export_folder)
+
+    return tenant.id
