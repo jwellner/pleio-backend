@@ -682,17 +682,20 @@ def control_copy_site(self, copy_site_id, schema_name, domain):
         d.save()
 
     # read data from dumped tables
-    for row in tables:
+    with connection.connection.cursor() as cursor:
+        cursor.execute('COMMIT;')
+        for row in tables:
 
-        table = f"{tenant.schema_name}.{row[0]}"
-        file_path = f"{export_folder}/{row[0]}.csv"
-        f = open(file_path, 'r')
+            table = f"{tenant.schema_name}.{row[0]}"
+            file_path = f"{export_folder}/{row[0]}.csv"
+            f = open(file_path, 'r')
 
-        with connection.connection.cursor() as cursor:
             cursor.execute('BEGIN;')
-            cursor.execute(f"ALTER TABLE {table} DISABLE TRIGGER ALL;")
+            #cursor.execute(f"ALTER TABLE {table} DISABLE TRIGGER USER;")
+            cursor.execute("SET session_replication_role = replica;")
             cursor.copy_from(f, table)
-            cursor.execute(f"ALTER TABLE {table} ENABLE TRIGGER ALL;")
+            #cursor.execute(f"ALTER TABLE {table} ENABLE TRIGGER USER;")
+            cursor.execute("SET session_replication_role = DEFAULT;")
             cursor.execute('COMMIT;')
 
         logger.info("Read %s to %s", file_path, table)
