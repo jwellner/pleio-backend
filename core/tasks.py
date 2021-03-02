@@ -681,24 +681,78 @@ def control_copy_site(self, copy_site_id, schema_name, domain):
         d.is_primary = True
         d.save()
 
+    # get psycopg2 cursor
+    cursor = connection.connection.cursor()
+
+    cursor.execute(f"SET search_path TO {tenant.schema_name};")
+
+    # temporary remove foreign key constraints
+    sql_drop_key_contraints = """create table if not exists dropped_foreign_keys (
+    seq bigserial primary key,
+    sql text
+);
+
+do $$ declare t record;
+begin
+for t in select conrelid::regclass::varchar table_name, conname constraint_name,
+        pg_catalog.pg_get_constraintdef(r.oid, true) constraint_definition
+        from pg_catalog.pg_constraint r
+        where r.contype = 'f'
+        -- current schema only:
+        and r.connamespace = (select n.oid from pg_namespace n where n.nspname = current_schema())
+    loop
+
+    insert into dropped_foreign_keys (sql) values (
+        format('alter table %s add constraint %s %s',
+            quote_ident(t.table_name), quote_ident(t.constraint_name), t.constraint_definition));
+
+    execute format('alter table %s drop constraint %s', quote_ident(t.table_name), quote_ident(t.constraint_name));
+
+end loop;
+end $$;"""
+
+    cursor.execute(sql_drop_key_contraints)
+
     # read data from dumped tables
-    with connection.connection.cursor() as cursor:
-        cursor.execute('COMMIT;')
-        for row in tables:
+    for row in tables:
 
-            table = f"{tenant.schema_name}.{row[0]}"
-            file_path = f"{export_folder}/{row[0]}.csv"
-            f = open(file_path, 'r')
+        table = f"{tenant.schema_name}.{row[0]}"
+        file_path = f"{export_folder}/{row[0]}.csv"
+        f = open(file_path, 'r')
 
-            cursor.execute('BEGIN;')
-            #cursor.execute(f"ALTER TABLE {table} DISABLE TRIGGER USER;")
-            cursor.execute("SET session_replication_role = replica;")
-            cursor.copy_from(f, table)
-            #cursor.execute(f"ALTER TABLE {table} ENABLE TRIGGER USER;")
-            cursor.execute("SET session_replication_role = DEFAULT;")
-            cursor.execute('COMMIT;')
+        cursor.copy_from(f, table)
 
-        logger.info("Read %s to %s", file_path, table)
+        logger.info("read %s to %s", file_path, table)
+
+    # restore foreign key constraints
+    sql_restore_key_constraints = """do $$ declare t record;
+begin
+-- order by seq for easier troubleshooting when data does not satisfy FKs
+for t in select * from dropped_foreign_keys order by seq loop
+execute t.sql;
+delete from dropped_foreign_keys where seq = t.seq;
+end loop;
+end $$;"""
+    cursor.execute(sql_restore_key_constraints)
+
+    # reset sql sequences (needed after reading data with copy_from)
+    sql_reset_sql_sequences = """do $$ declare rec record;
+begin
+for rec in SELECT 'SELECT SETVAL(' ||quote_literal(S.relname)|| ', MAX(' ||quote_ident(C.attname)|| ') ) FROM ' ||quote_ident(T.relname)|| ';' as sql
+    FROM pg_class AS S, pg_depend AS D, pg_class AS T, pg_attribute AS C, pg_tables AS PGT
+    WHERE S.relkind = 'S'
+        AND S.oid = D.objid
+        AND D.refobjid = T.oid
+        AND D.refobjid = C.attrelid
+        AND D.refobjsubid = C.attnum
+        AND T.relname = PGT.tablename
+        AND PGT.schemaname = current_schema()
+    ORDER BY S.relname loop
+        execute rec.sql;
+    end loop;
+end $$;"""
+
+    cursor.execute(sql_reset_sql_sequences)
 
     # copy files
     if os.path.exists(os.path.join(settings.MEDIA_ROOT, copy_site.schema_name)):
