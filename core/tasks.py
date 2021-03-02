@@ -646,6 +646,7 @@ def control_copy_site(self, copy_site_id, schema_name, domain):
             raise Exception(e)
 
     export_folder = os.path.join(tempfile.gettempdir(), f"dump_{copy_site.schema_name}")
+
     # remove folder if exists
     if os.path.exists(export_folder):
         shutil.rmtree(export_folder)
@@ -759,6 +760,6 @@ end $$;"""
         shutil.copytree(os.path.join(settings.MEDIA_ROOT, copy_site.schema_name), os.path.join(settings.MEDIA_ROOT, tenant.schema_name))
 
     # cleanup dump folder
-    shutil.rmtree(export_folder)
+    shutil.rmtree(export_folder, ignore_errors=True)
 
     return tenant.id
