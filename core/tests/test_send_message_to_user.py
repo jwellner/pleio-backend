@@ -133,7 +133,7 @@ class SendMessageToUserTestCase(FastTenantTestCase):
         mocked_send_mail_multi.assert_called_once_with('fast_test', subject, 'email/send_message_to_user.html',
                                                        {'user_name': self.user1.name, 'user_url': user_url,
                                                         'site_url': 'https://test.test', 'site_name': 'Pleio 2.0', 'primary_color': '#0e2f56',
-                                                        'header_color': '#0e2f56', 'message': '<p>testMessageContent</p>'}, self.user2.email)
+                                                        'header_color': '#0e2f56', 'message': '<p>testMessageContent</p>', 'subject': subject}, self.user2.email)
 
     @override_settings(ALLOWED_HOSTS=['test.test'])
     @mock.patch('core.resolvers.mutation_send_message_to_user.send_mail_multi.delay')
@@ -166,13 +166,13 @@ class SendMessageToUserTestCase(FastTenantTestCase):
         mocked_send_mail_multi.assert_any_call('fast_test', subject, 'email/send_message_to_user.html',
                                                        {'user_name': self.user1.name, 'user_url': user_url,
                                                         'site_url': 'https://test.test', 'site_name': 'Pleio 2.0', 'primary_color': '#0e2f56',
-                                                        'header_color': '#0e2f56', 'message': '<p>testMessageContent</p>'}, self.user2.email)
+                                                        'header_color': '#0e2f56', 'message': '<p>testMessageContent</p>', 'subject': subject}, self.user2.email)
 
-        subject = 'Kopie: ' + subject
-        mocked_send_mail_multi.assert_any_call('fast_test', subject, 'email/send_message_to_user.html',
+        subject_copy = 'Kopie: ' + subject
+        mocked_send_mail_multi.assert_any_call('fast_test', subject_copy, 'email/send_message_to_user.html',
                                                        {'user_name': self.user1.name, 'user_url': user_url,
                                                         'site_url': 'https://test.test', 'site_name': 'Pleio 2.0', 'primary_color': '#0e2f56',
-                                                        'header_color': '#0e2f56', 'message': '<p>testMessageContent</p>'}, self.user1.email)
+                                                        'header_color': '#0e2f56', 'message': '<p>testMessageContent</p>', 'subject': subject}, self.user1.email)
 
     @override_settings(ALLOWED_HOSTS=['test.test'])
     @mock.patch('core.resolvers.mutation_send_message_to_user.send_mail_multi.delay')
@@ -205,4 +205,4 @@ class SendMessageToUserTestCase(FastTenantTestCase):
         mocked_send_mail_multi.assert_called_once_with('fast_test', subject, 'email/send_message_to_user.html',
                                                        {'user_name': self.user1.name, 'user_url': user_url,
                                                         'site_url': 'https://test.test', 'site_name': 'Pleio 2.0', 'primary_color': '#0e2f56',
-                                                        'header_color': '#0e2f56', 'message': '<p>testMessageContent</p>'}, self.user2.email)
+                                                        'header_color': '#0e2f56', 'message': '<p>testMessageContent</p>', 'subject': subject}, self.user2.email)

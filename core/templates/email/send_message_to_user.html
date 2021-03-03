@@ -3,6 +3,9 @@
 
 {% block body %}
     <div>{{message|safe}}</div> <br><br>--<br>
-    {% blocktrans %}This message is sent from <a href="{{site_url}}">{{site_url}}</a> by <a href="{{user_url}}">{{user_name}}</a>{% endblocktrans %}
+    {% blocktrans %}This message is sent from <a href="{{site_url}}">{{site_url}}</a> by <a href="{{user_url}}">{{user_name}}</a>{% endblocktrans %}<br><br>
+
+    {% blocktrans %}Respond by clicking <a href="{{user_url}}/reply?subject={{subject}}">here</a>{% endblocktrans %}<br><br>
+
 {% endblock %}
 

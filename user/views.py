@@ -104,7 +104,7 @@ def export(request):
     user_fields = request.GET.getlist('user_fields[]')
     profile_field_guids = request.GET.getlist('profile_field_guids[]')
 
-    if not user_fields and profile_field_guids:
+    if not user_fields and not profile_field_guids:
         raise Http404("No fields passed")
 
     exportable_user_fields = [d['field'] for d in get_exportable_user_fields()]
