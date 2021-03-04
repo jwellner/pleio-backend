@@ -285,7 +285,7 @@ class EditSiteSettingTestCase(FastTenantTestCase):
         self.assertEqual(data["editSiteSetting"]["siteSettings"]["allowRegistration"], False)
         self.assertEqual(data["editSiteSetting"]["siteSettings"]["directRegistrationDomains"], ['a.nl', 'b.nl'])
         self.assertEqual(data["editSiteSetting"]["siteSettings"]["defaultAccessId"], 0)
-        self.assertEqual(data["editSiteSetting"]["siteSettings"]["defaultAccessIdOptions"], [{'value': 0, 'label': 'Alleen mijzelf'}, {'value': 1, 'label': 'Ingelogde gebruikers'}])
+        self.assertEqual(data["editSiteSetting"]["siteSettings"]["defaultAccessIdOptions"], [{'value': 0, 'label': 'Alleen eigenaar'}, {'value': 1, 'label': 'Ingelogde gebruikers'}])
         self.assertEqual(data["editSiteSetting"]["siteSettings"]["googleAnalyticsId"], "123")
         self.assertEqual(data["editSiteSetting"]["siteSettings"]["googleSiteVerification"], "code1")
         self.assertEqual(data["editSiteSetting"]["siteSettings"]["enableSearchEngineIndexing"], True)

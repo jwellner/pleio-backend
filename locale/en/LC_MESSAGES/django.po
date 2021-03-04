@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-02-23 09:58+0100\n"
+"POT-Creation-Date: 2021-03-04 10:52+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -28,6 +28,31 @@ msgstr ""
 
 #: core/forms.py:67
 msgid "Provide a valid value."
+msgstr ""
+
+#: core/lib.py:141 core/resolvers/mutation_import_users.py:30
+#: core/resolvers/query_site.py:67
+msgid "Just me"
+msgstr ""
+
+#: core/lib.py:144
+#, python-format
+msgid "Group: %(group_name)s"
+msgstr ""
+
+#: core/lib.py:147
+#, python-format
+msgid "Subgroup: %(subgroup_name)s"
+msgstr ""
+
+#: core/lib.py:152 core/resolvers/mutation_import_users.py:31
+#: core/resolvers/query_site.py:68
+msgid "Logged in users"
+msgstr ""
+
+#: core/lib.py:154 core/resolvers/mutation_import_users.py:34
+#: core/resolvers/query_site.py:72
+msgid "Public"
 msgstr ""
 
 #: core/management/commands/send_notification_emails.py:49
@@ -79,18 +104,6 @@ msgstr ""
 
 #: core/resolvers/mutation_import_users.py:18
 msgid "name"
-msgstr ""
-
-#: core/resolvers/mutation_import_users.py:30 core/resolvers/query_site.py:67
-msgid "Just me"
-msgstr ""
-
-#: core/resolvers/mutation_import_users.py:31 core/resolvers/query_site.py:68
-msgid "Logged in users"
-msgstr ""
-
-#: core/resolvers/mutation_import_users.py:34 core/resolvers/query_site.py:72
-msgid "Public"
 msgstr ""
 
 #: core/resolvers/mutation_invite_to_group.py:43
@@ -192,15 +205,15 @@ msgstr ""
 msgid "Question expert"
 msgstr ""
 
-#: core/tasks.py:271
+#: core/tasks.py:274
 msgid "Import was a success"
 msgstr ""
 
-#: core/tasks.py:271
+#: core/tasks.py:274
 msgid "Import failed"
 msgstr ""
 
-#: core/tasks.py:347
+#: core/tasks.py:350
 #, python-format
 msgid "New notification at %(site_name)s: "
 msgstr ""
