@@ -241,7 +241,7 @@ class SiteSettingsTestCase(FastTenantTestCase):
         self.assertEqual(data["siteSettings"]["isClosed"], False)
         self.assertEqual(data["siteSettings"]["allowRegistration"], True)
         self.assertEqual(data["siteSettings"]["directRegistrationDomains"], [])
-        self.assertEqual(data["siteSettings"]["defaultAccessIdOptions"], [{'value': 0, 'label': 'Alleen mijzelf'}, {'value': 1, 'label': 'Ingelogde gebruikers'}, {'value': 2, 'label': 'Iedereen publiek zichtbaar'}])
+        self.assertEqual(data["siteSettings"]["defaultAccessIdOptions"], [{'value': 0, 'label': 'Alleen eigenaar'}, {'value': 1, 'label': 'Ingelogde gebruikers'}, {'value': 2, 'label': 'Iedereen (publiek zichtbaar)'}])
         self.assertEqual(data["siteSettings"]["defaultAccessId"], 1)
         self.assertEqual(data["siteSettings"]["googleAnalyticsId"], "")
         self.assertEqual(data["siteSettings"]["googleSiteVerification"], "")
