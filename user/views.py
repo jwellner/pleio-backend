@@ -52,10 +52,10 @@ def get_fields(user, user_fields, profile_field_guids):
             else:
                 fields.append("")
         elif user_field == 'banned':
-            fields.append(get_user_field(user, 'is_active'))
-        # ban reason not implemented yet
+            banned = not get_user_field(user, 'is_active')
+            fields.append(banned)
         elif user_field == 'ban_reason':
-            fields.append("")
+            fields.append(get_user_field(user, 'ban_reason'))
         elif user_field == 'group_memberships':
             group_memberships = list(GroupMembership.objects.filter(user=user, type__in=['owner', 'admin', 'member']).values_list("group__name", flat=True))
             fields.append(",".join(group_memberships))
