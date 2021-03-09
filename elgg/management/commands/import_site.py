@@ -261,6 +261,20 @@ class Command(InteractiveTenantOption, BaseCommand):
             if self.helpers.get_plugin_setting("idp", "pleio") else ""
         config.IDP_NAME = self.helpers.get_plugin_setting("idp_name", "pleio") \
             if self.helpers.get_plugin_setting("idp_name", "pleio") else ""
+        config.FLOW_ENABLED = self.helpers.is_plugin_active('flow')
+        config.FLOW_SUBTYPES = self.helpers.get_flow_subtypes(self.helpers.get_plugin_setting("subtypes", "flow")) \
+            if self.helpers.get_plugin_setting("subtypes", "flow") else []
+        config.FLOW_APP_URL = self.helpers.get_plugin_setting("url", "flow") \
+            if self.helpers.get_plugin_setting("url", "flow") else ""
+        config.FLOW_TOKEN = self.helpers.get_plugin_setting("token", "flow") \
+            if self.helpers.get_plugin_setting("token", "flow") else ""
+        config.FLOW_CASE_ID = int(self.helpers.get_plugin_setting("casetype", "flow")) \
+            if self.helpers.get_plugin_setting("casetype", "flow") else None
+        try:
+            config.FLOW_USER_GUID = str(GuidMap.objects.get(id=self.helpers.get_plugin_setting("user_guid", "flow"), object_type='user').guid) \
+                if self.helpers.get_plugin_setting("user_guid", "flow") else ""
+        except Exception:
+            pass
 
         self.stdout.write(".", ending="")
 
@@ -465,6 +479,8 @@ class Command(InteractiveTenantOption, BaseCommand):
 
                 GuidMap.objects.create(id=elgg_blog.entity.guid, guid=blog.guid, object_type='blog')
 
+                self.helpers.save_flow_id(elgg_blog, blog)
+
                 self.stdout.write(".", ending="")
             except IntegrityError as e:
                 self.stdout.write(self.style.WARNING("Error: %s\n" % str(e)))
@@ -485,6 +501,8 @@ class Command(InteractiveTenantOption, BaseCommand):
                 self._import_comments_for(news, elgg_news.entity.guid)
 
                 GuidMap.objects.create(id=elgg_news.entity.guid, guid=news.guid, object_type='news')
+
+                self.helpers.save_flow_id(elgg_news, news)
 
                 self.stdout.write(".", ending="")
             except IntegrityError as e:
@@ -588,6 +606,8 @@ class Command(InteractiveTenantOption, BaseCommand):
 
                 GuidMap.objects.create(id=elgg_discussion.entity.guid, guid=discussion.guid, object_type='discussion')
 
+                self.helpers.save_flow_id(elgg_discussion, discussion)
+
                 self.stdout.write(".", ending="")
             except IntegrityError as e:
                 self.stdout.write(self.style.WARNING("Error: %s\n" % str(e)))
@@ -610,6 +630,8 @@ class Command(InteractiveTenantOption, BaseCommand):
                 self._import_comments_for(question, elgg_question.entity.guid, elgg_question.entity)
 
                 GuidMap.objects.create(id=elgg_question.entity.guid, guid=question.guid, object_type='question')
+
+                self.helpers.save_flow_id(elgg_question, question)
 
                 self.stdout.write(".", ending="")
             except IntegrityError as e:

@@ -207,6 +207,13 @@ class SiteSettingsTestCase(FastTenantTestCase):
                     siteMembershipDeniedIntro
                     idpId
                     idpName
+
+                    flowEnabled
+                    flowSubtypes
+                    flowAppUrl
+                    flowToken
+                    flowCaseId
+                    flowUserGuid
                 }
             }
         """
@@ -277,7 +284,7 @@ class SiteSettingsTestCase(FastTenantTestCase):
         ])
         self.assertEqual(data["siteSettings"]["startPageCms"], "")
         self.assertEqual(data["siteSettings"]["showIcon"], False)
-        self.assertIn("/static/icon", data["siteSettings"]["icon"]) # show default
+        self.assertIn("/static/icon", data["siteSettings"]["icon"]) # show default'':
         self.assertEqual(data["siteSettings"]["menu"], [
             {"link": "/blog", "title": "Blog", "children": []},
             {"link": "/news", "title": "Nieuws", "children": []},
@@ -360,6 +367,13 @@ class SiteSettingsTestCase(FastTenantTestCase):
         self.assertEqual(data["siteSettings"]["siteMembershipDeniedIntro"], "")
         self.assertEqual(data["siteSettings"]["idpId"], "")
         self.assertEqual(data["siteSettings"]["idpName"], "")
+        # TODO: remove after flow connects to general api
+        self.assertEqual(data["siteSettings"]["flowEnabled"], False)
+        self.assertEqual(data["siteSettings"]["flowSubtypes"], [])
+        self.assertEqual(data["siteSettings"]["flowAppUrl"], "")
+        self.assertEqual(data["siteSettings"]["flowToken"], "")
+        self.assertEqual(data["siteSettings"]["flowCaseId"], None)
+        self.assertEqual(data["siteSettings"]["flowUserGuid"], "")
 
 
     def test_site_settings_by_anonymous(self):

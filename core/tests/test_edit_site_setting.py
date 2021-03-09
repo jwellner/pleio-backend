@@ -165,6 +165,13 @@ class EditSiteSettingTestCase(FastTenantTestCase):
                         siteMembershipDeniedIntro
                         idpId
                         idpName
+
+                        flowEnabled
+                        flowSubtypes
+                        flowAppUrl
+                        flowToken
+                        flowCaseId
+                        flowUserGuid
                     }
                 }
             }
@@ -268,7 +275,17 @@ class EditSiteSettingTestCase(FastTenantTestCase):
                 'siteMembershipAcceptedIntro': 'You request is accepted',
                 'siteMembershipDeniedIntro': 'Your request is not accepted',
                 "idpId": "idp_id",
-                "idpName": "idp_name"
+                "idpName": "idp_name",
+
+                # TODO: remove after flow connects to general api
+                "flowEnabled": True,
+                "flowSubtypes": ['blog', 'question'],
+                "flowAppUrl": "https://flow.test",
+                "flowToken": "1234567890qwertyuiop",
+                "flowCaseId": 1,
+                "flowUserGuid": self.admin.guid
+
+
             }
         }
 
@@ -377,6 +394,14 @@ class EditSiteSettingTestCase(FastTenantTestCase):
         self.assertEqual(data["editSiteSetting"]["siteSettings"]["siteMembershipDeniedIntro"], 'Your request is not accepted')
         self.assertEqual(data["editSiteSetting"]["siteSettings"]["idpId"], 'idp_id')
         self.assertEqual(data["editSiteSetting"]["siteSettings"]["idpName"], 'idp_name')
+
+        # TODO: remove after flow connects to general api
+        self.assertEqual(data["editSiteSetting"]["siteSettings"]["flowEnabled"], True)
+        self.assertEqual(data["editSiteSetting"]["siteSettings"]["flowSubtypes"], ['blog', 'question'])
+        self.assertEqual(data["editSiteSetting"]["siteSettings"]["flowAppUrl"], "https://flow.test")
+        self.assertEqual(data["editSiteSetting"]["siteSettings"]["flowToken"], "1234567890qwertyuiop")
+        self.assertEqual(data["editSiteSetting"]["siteSettings"]["flowCaseId"], 1)
+        self.assertEqual(data["editSiteSetting"]["siteSettings"]["flowUserGuid"], self.admin.guid)
 
     @patch("file.models.get_mimetype")
     @patch("{}.open".format(settings.DEFAULT_FILE_STORAGE))
