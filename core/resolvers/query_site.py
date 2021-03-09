@@ -217,7 +217,14 @@ def get_site_settings():
         'siteMembershipAcceptedIntro': config.SITE_MEMBERSHIP_ACCEPTED_INTRO,
         'siteMembershipDeniedIntro': config.SITE_MEMBERSHIP_DENIED_INTRO,
         'idpId': config.IDP_ID,
-        'idpName': config.IDP_NAME
+        'idpName': config.IDP_NAME,
+        # TODO: remove after flow connects to general api
+        'flowEnabled': config.FLOW_ENABLED,
+        'flowSubtypes': config.FLOW_SUBTYPES,
+        'flowAppUrl': config.FLOW_APP_URL,
+        'flowToken': config.FLOW_TOKEN,
+        'flowCaseId': config.FLOW_CASE_ID,
+        'flowUserGuid': config.FLOW_USER_GUID
     }
 
     return site_settings

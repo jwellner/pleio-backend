@@ -6,6 +6,7 @@ from phpserialize import unserialize
 from cms.models import Page
 from user.models import User
 from file.models import FileFolder
+from flow.models import FlowId
 from wiki.models import Wiki
 from core.lib import access_id_to_acl, is_valid_url_or_path
 from elgg.models import (
@@ -529,3 +530,21 @@ class ElggHelpers():
             owner = User.objects.filter(roles__contains=['ADMIN']).first()
 
         return owner
+
+    def get_flow_subtypes(self, subtypes):
+        flow_subtypes = []
+        available_subtypes = ['blog', 'discussion', 'question', 'news']
+
+        for subtype in available_subtypes:
+            if subtype in subtypes:
+                flow_subtypes.append(subtype)
+        return flow_subtypes
+
+    def save_flow_id(self, elgg_entity, entity):
+        flow_id = elgg_entity.entity.get_metadata_value_by_name('flow_id')
+
+        if flow_id:
+            try:
+                FlowId.objects.create(flow_id=flow_id, object_id=entity.id)
+            except Exception as e:
+                print("Flow_id, not saved. Error: %s\n" % str(e))

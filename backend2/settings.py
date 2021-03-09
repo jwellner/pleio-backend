@@ -85,6 +85,7 @@ TENANT_APPS = [
     'django_elasticsearch_dsl',
     'notifications',
     'auditlog',
+    'flow'
 ]
 
 if LOCAL_APPS:

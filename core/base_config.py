@@ -116,6 +116,12 @@ DEFAULT_SITE_CONFIG = {
     'SITE_MEMBERSHIP_DENIED_INTRO': ("", 'Site membership denied intro'),
     'IDP_ID': ("", 'Identity provider ID'),
     'IDP_NAME': ("", 'Identity provider name'),
+    'FLOW_ENABLED': (False, 'Flow enabled'),
+    'FLOW_SUBTYPES': ([], 'Flow subtypes'),
+    'FLOW_APP_URL': ("", 'Flow app url'),
+    'FLOW_TOKEN': ("", 'Flow token'),
+    'FLOW_CASE_ID': (None, 'Flow case id'),
+    'FLOW_USER_GUID': ("", 'Flow user guid'),
 }
 """
 Default site configuration

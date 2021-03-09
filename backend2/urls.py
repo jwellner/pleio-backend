@@ -15,6 +15,8 @@ from event import views as event_views
 from elgg import views as elgg_views
 from user import views as user_views
 
+from flow import views as flow_views
+
 
 urlpatterns = [
     path('logout', core_views.logout, name='logout'),
@@ -34,7 +36,7 @@ urlpatterns = [
 
     path('file/embed/<uuid:file_id>', file_views.embed, name='embed'),
     path('file/embed/<uuid:file_id>/<str:file_name>', file_views.embed, name='embed'),
-    
+
     path('file/thumbnail/<uuid:file_id>', file_views.thumbnail, name='thumbnail'),
     path('file/featured/<uuid:entity_guid>', file_views.featured, name='featured'),
     path('bulk_download', file_views.bulk_download, name='bulk_download'),
@@ -49,6 +51,9 @@ urlpatterns = [
     path('custom.css', core_views.custom_css),
     path('robots.txt', core_views.robots_txt),
     path('sitemap.xml', cache_page(3600)(sitemap), {'sitemaps': sitemaps}, name='sitemap'),
+
+    path('flow/comments/add', flow_views.add_comment),
+
 
     # Match old ID's and try to redirect
     re_path(r'view\/(?P<entity_id>[0-9]+)\/(?:.+)$', elgg_views.entity_redirect, name='entity_redirect'),

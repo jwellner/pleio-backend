@@ -253,6 +253,12 @@ extend input editSiteSettingInput {
   siteMembershipDeniedIntro: String
   idpId: String
   idpName: String
+  flowEnabled: Boolean
+  flowSubtypes: [String]
+  flowAppUrl: String
+  flowToken: String
+  flowCaseId: Int
+  flowUserGuid: String
 }
 
 input ProfileSectionInput {
@@ -315,6 +321,12 @@ extend type SiteSettings {
   idpName: String
   enableSearchEngineIndexing: Boolean!
   profileFieldValidators: [ProfileFieldValidator]
+  flowEnabled: Boolean!
+  flowSubtypes: [String]
+  flowAppUrl: String
+  flowToken: String
+  flowCaseId: Int
+  flowUserGuid: String
 }
 
 extend input FeaturedInput {
