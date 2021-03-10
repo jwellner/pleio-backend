@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-02-23 09:58+0100\n"
+"POT-Creation-Date: 2021-03-04 10:52+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -29,6 +29,31 @@ msgstr "Nederlands"
 #: core/forms.py:67
 msgid "Provide a valid value."
 msgstr "Voer een geldige waarde in."
+
+#: core/lib.py:141 core/resolvers/mutation_import_users.py:30
+#: core/resolvers/query_site.py:67
+msgid "Just me"
+msgstr "Alleen eigenaar"
+
+#: core/lib.py:144
+#, python-format
+msgid "Group: %(group_name)s"
+msgstr "Groep: %(group_name)s"
+
+#: core/lib.py:147
+#, python-format
+msgid "Subgroup: %(subgroup_name)s"
+msgstr "Subgroep: %(subgroup_name)s"
+
+#: core/lib.py:152 core/resolvers/mutation_import_users.py:31
+#: core/resolvers/query_site.py:68
+msgid "Logged in users"
+msgstr "Ingelogde gebruikers"
+
+#: core/lib.py:154 core/resolvers/mutation_import_users.py:34
+#: core/resolvers/query_site.py:72
+msgid "Public"
+msgstr "Iedereen (publiek zichtbaar)"
 
 #: core/management/commands/send_notification_emails.py:49
 #, python-format
@@ -80,18 +105,6 @@ msgstr "e-mail"
 #: core/resolvers/mutation_import_users.py:18
 msgid "name"
 msgstr "naam"
-
-#: core/resolvers/mutation_import_users.py:30 core/resolvers/query_site.py:67
-msgid "Just me"
-msgstr "Alleen mijzelf"
-
-#: core/resolvers/mutation_import_users.py:31 core/resolvers/query_site.py:68
-msgid "Logged in users"
-msgstr "Ingelogde gebruikers"
-
-#: core/resolvers/mutation_import_users.py:34 core/resolvers/query_site.py:72
-msgid "Public"
-msgstr "Iedereen publiek zichtbaar"
 
 #: core/resolvers/mutation_invite_to_group.py:43
 #, python-format
@@ -192,15 +205,15 @@ msgstr "Redacteur"
 msgid "Question expert"
 msgstr "Vraagexpert"
 
-#: core/tasks.py:271
+#: core/tasks.py:274
 msgid "Import was a success"
 msgstr "Import afgerond"
 
-#: core/tasks.py:271
+#: core/tasks.py:274
 msgid "Import failed"
 msgstr "Import mislukt"
 
-#: core/tasks.py:347
+#: core/tasks.py:350
 #, python-format
 msgid "New notification at %(site_name)s: "
 msgstr "Nieuwe notificatie op %(site_name)s"

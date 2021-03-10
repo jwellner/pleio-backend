@@ -153,7 +153,7 @@ class Mapper():
         entity = Blog()
         entity.created_at = datetime.fromtimestamp(elgg_entity.entity.time_created)
         entity.updated_at = datetime.fromtimestamp(elgg_entity.entity.time_updated)
-        entity.title = html.unescape(elgg_entity.title)
+        entity.title = html.unescape(elgg_entity.title[:256])
         entity.description = html.unescape(elgg_entity.description)
         entity.rich_description = elgg_entity.entity.get_metadata_value_by_name("richDescription")
         entity.is_recommended = elgg_entity.entity.get_metadata_value_by_name("isRecommended") == "1"
@@ -178,7 +178,7 @@ class Mapper():
         entity = News()
         entity.created_at = datetime.fromtimestamp(elgg_entity.entity.time_created)
         entity.updated_at = datetime.fromtimestamp(elgg_entity.entity.time_updated)
-        entity.title = html.unescape(elgg_entity.title)
+        entity.title = html.unescape(elgg_entity.title[:256])
         entity.description = html.unescape(elgg_entity.description)
         entity.rich_description = elgg_entity.entity.get_metadata_value_by_name("richDescription")
         entity.is_featured = elgg_entity.entity.get_metadata_value_by_name("isFeatured") == "1"
@@ -204,7 +204,7 @@ class Mapper():
         entity = Event()
         entity.created_at = datetime.fromtimestamp(elgg_entity.entity.time_created)
         entity.updated_at = datetime.fromtimestamp(elgg_entity.entity.time_updated)
-        entity.title = html.unescape(elgg_entity.title)
+        entity.title = html.unescape(elgg_entity.title[:256])
         entity.description = html.unescape(elgg_entity.description)
         entity.rich_description = elgg_entity.entity.get_metadata_value_by_name("richDescription")
         entity.is_featured = elgg_entity.entity.get_metadata_value_by_name("isFeatured") == "1"
@@ -239,7 +239,7 @@ class Mapper():
 
     def get_discussion(self, elgg_entity: ElggObjectsEntity):
         entity = Discussion()
-        entity.title = html.unescape(elgg_entity.title)
+        entity.title = html.unescape(elgg_entity.title[:256])
         entity.description = html.unescape(elgg_entity.description)
         entity.rich_description = elgg_entity.entity.get_metadata_value_by_name("richDescription")
         entity.tags = elgg_entity.entity.get_metadata_values_by_name("tags")
@@ -260,7 +260,7 @@ class Mapper():
 
     def get_question(self, elgg_entity: ElggObjectsEntity):
         entity = Question()
-        entity.title = html.unescape(elgg_entity.title)
+        entity.title = html.unescape(elgg_entity.title[:256])
         entity.description = html.unescape(elgg_entity.description)
         entity.rich_description = elgg_entity.entity.get_metadata_value_by_name("richDescription")
         entity.is_closed = elgg_entity.entity.get_metadata_value_by_name("isClosed") == "1"
@@ -283,7 +283,7 @@ class Mapper():
 
     def get_task(self, elgg_entity: ElggObjectsEntity):
         entity = Question()
-        entity.title = html.unescape(elgg_entity.title)
+        entity.title = html.unescape(elgg_entity.title[:256])
         entity.description = html.unescape(elgg_entity.description)
         entity.rich_description = elgg_entity.entity.get_metadata_value_by_name("richDescription")
         entity.state = elgg_entity.entity.get_metadata_value_by_name("state")
@@ -306,7 +306,7 @@ class Mapper():
 
     def get_page(self, elgg_entity: ElggObjectsEntity):
         entity = Page()
-        entity.title = html.unescape(elgg_entity.title)
+        entity.title = html.unescape(elgg_entity.title[:256])
         entity.description = html.unescape(elgg_entity.description)
         entity.rich_description = elgg_entity.entity.get_metadata_value_by_name("richDescription")
         entity.page_type = elgg_entity.entity.get_metadata_value_by_name("pageType") \
@@ -395,7 +395,7 @@ class Mapper():
 
     def get_status_update(self, elgg_entity: ElggObjectsEntity):
         entity = StatusUpdate()
-        entity.title = html.unescape(elgg_entity.title)
+        entity.title = html.unescape(elgg_entity.title[:256])
         entity.description = html.unescape(elgg_entity.description)
         entity.rich_description = elgg_entity.entity.get_metadata_value_by_name("richDescription")
         entity.tags = elgg_entity.entity.get_metadata_values_by_name("tags")
@@ -488,7 +488,7 @@ class Mapper():
 
     def get_folder(self, elgg_entity: ElggObjectsEntity):
         entity = FileFolder()
-        entity.title = html.unescape(elgg_entity.title)
+        entity.title = html.unescape(elgg_entity.title[:256])
         entity.tags = elgg_entity.entity.get_metadata_values_by_name("tags")
 
         entity.owner = self.helpers.get_user_or_admin(elgg_entity.entity.owner_guid)
@@ -567,7 +567,7 @@ class Mapper():
         entity = Wiki()
         entity.created_at = datetime.fromtimestamp(elgg_entity.entity.time_created)
         entity.updated_at = datetime.fromtimestamp(elgg_entity.entity.time_updated)
-        entity.title = html.unescape(elgg_entity.title)
+        entity.title = html.unescape(elgg_entity.title[:256])
         entity.description = html.unescape(elgg_entity.description)
         entity.rich_description = elgg_entity.entity.get_metadata_value_by_name("richDescription")
         entity.tags = elgg_entity.entity.get_metadata_values_by_name("tags")

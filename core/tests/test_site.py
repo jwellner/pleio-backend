@@ -136,7 +136,7 @@ class SiteTestCase(FastTenantTestCase):
         self.assertEqual(data["site"]["showTagsInDetail"], config.SHOW_TAGS_IN_DETAIL)
         self.assertEqual(data["site"]["accessIds"], [
             {'id': 0, 'description': 'Alleen eigenaar'},
-            {'id': 1, 'description': 'Gebruikers van deze site'},
+            {'id': 1, 'description': 'Ingelogde gebruikers'},
             {'id': 2, 'description': 'Iedereen (publiek zichtbaar)'},
         ])
 
@@ -160,5 +160,5 @@ class SiteTestCase(FastTenantTestCase):
 
         self.assertEqual(data["site"]["accessIds"], [
             {'id': 0, 'description': 'Alleen eigenaar'},
-            {'id': 1, 'description': 'Gebruikers van deze site'},
+            {'id': 1, 'description': 'Ingelogde gebruikers'},
         ])

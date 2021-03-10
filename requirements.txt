@@ -1,7 +1,7 @@
 Django==3.1.7
 psycopg2-binary==2.8.6
 django-filter==2.4.0
-Pillow==8.1.0
+Pillow==8.1.2
 django-elasticsearch-dsl==7.1.4
 Celery==5.0.5
 uwsgi==2.0.19.1
@@ -20,12 +20,12 @@ django-notifications-hq==1.6.0
 django-tenants==3.2.1
 mysqlclient==2.0.3
 django-storages==1.11.1
-boto3==1.17.17
+boto3==1.17.22
 docutils==0.15
 phpserialize==1.3
 python-memcached==1.59
 django-ses==1.0.3
-python-magic==0.4.20
+python-magic==0.4.22
 textract==1.6.3
 html2text==2020.1.16
 draftjs_exporter==v4.1.1
@@ -35,3 +35,4 @@ django-signal-disabler==0.1.1
 colour==0.1.5
 pytz==2020.5
 django-auditlog==1.0a1
+requests==2.25.1

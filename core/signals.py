@@ -1,3 +1,4 @@
+import logging
 from django.db.models.signals import post_save, pre_save
 from django.conf import settings
 from django.utils import timezone
@@ -7,7 +8,9 @@ from core.models import Comment, Group, GroupInvitation, Entity, EntityViewCount
 from core.tasks import create_notification
 from user.models import User
 from event.models import EventAttendee
+from notifications.models import Notification
 
+logger = logging.getLogger(__name__)
 
 def comment_handler(sender, instance, created, **kwargs):
     """ if comment is added to content, create a notification for all users following the content """
@@ -24,6 +27,7 @@ def comment_handler(sender, instance, created, **kwargs):
             if not instance.container.can_read(follower):
                 continue
             user_ids.append(follower.id)
+
         create_notification.delay(tenant_schema(), 'commented', instance.container.id, instance.owner.id, user_ids)
 
 
@@ -55,6 +59,7 @@ def notification_handler(sender, instance, created, **kwargs):
     if not settings.IMPORTING:
         if not instance.group or not created:
             return
+
         user_ids = []
         for member in instance.group.members.filter(type__in=['admin', 'owner', 'member'], enable_notification=True):
             user = member.user
@@ -66,6 +71,21 @@ def notification_handler(sender, instance, created, **kwargs):
 
         create_notification.delay(tenant_schema(), 'created', instance.id, instance.owner.id, user_ids)
 
+def notification_update_handler(sender, instance, **kwargs):
+    """ Delete notifications when read_access changed and user can not read entity """
+
+    # pylint: disable=unused-argument
+    # pylint: disable=protected-access
+    if not settings.IMPORTING:
+        if not instance.group or instance._state.adding:
+            return
+
+        entity = Entity.objects.get(id=instance.id)
+
+        if entity.read_access != instance.read_access:
+            for notification in Notification.objects.filter(action_object_object_id=instance.id):
+                if not instance.can_read(notification.recipient):
+                    notification.delete()
 
 def updated_at_handler(sender, instance, **kwargs):
     """ This adds the current date/time to updated_at only when the instance is updated
@@ -86,6 +106,7 @@ post_save.connect(user_handler, sender=User)
 # connect Models that implemented NotificationMixin
 for subclass in NotificationMixin.__subclasses__():
     post_save.connect(notification_handler, sender=subclass)
+    pre_save.connect(notification_update_handler, sender=subclass)
 
 # Set updated_at
 pre_save.connect(updated_at_handler, sender=Comment)

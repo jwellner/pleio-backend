@@ -13,6 +13,7 @@ from django.conf import settings
 from django.core.validators import URLValidator
 from django.db import connection
 from django.utils.text import slugify
+from django.utils.translation import ugettext
 from enum import Enum
 import html2text
 from draftjs_exporter.dom import DOM
@@ -137,20 +138,20 @@ def get_access_id(obj):
 def get_access_ids(obj=None):
     """Return the available accessId's"""
     accessIds = []
-    accessIds.append({ 'id': 0, 'description': 'Alleen eigenaar'})
+    accessIds.append({ 'id': 0, 'description': ugettext("Just me") })
 
     if isinstance(obj, apps.get_model('core.Group')):
-        accessIds.append({ 'id': 4, 'description': "Group: {}".format(obj.name)})
+        accessIds.append({ 'id': 4, 'description': ugettext("Group: %(group_name)s") % {'group_name': obj.name} })
         if obj.subgroups:
             for subgroup in obj.subgroups.all():
-                accessIds.append({ 'id': subgroup.access_id, 'description': "Subgroup: {}".format(subgroup.name)})
+                accessIds.append({ 'id': subgroup.access_id, 'description': ugettext("Subgroup: %(subgroup_name)s") % {'subgroup_name': subgroup.name} })
 
     if isinstance(obj, apps.get_model('core.Group')) and obj.is_closed:
         pass
     else:
-        accessIds.append({ 'id': 1, 'description': 'Gebruikers van deze site'})
+        accessIds.append({ 'id': 1, 'description': ugettext("Logged in users")})
         if not config.IS_CLOSED:
-            accessIds.append({ 'id': 2, 'description': 'Iedereen (publiek zichtbaar)'})
+            accessIds.append({ 'id': 2, 'description': ugettext("Public")})
 
     return accessIds
 

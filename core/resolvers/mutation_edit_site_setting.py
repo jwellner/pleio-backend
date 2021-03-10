@@ -155,7 +155,14 @@ def resolve_edit_site_setting(_, info, input):
         'siteMembershipAcceptedIntro': 'SITE_MEMBERSHIP_ACCEPTED_INTRO',
         'siteMembershipDeniedIntro': 'SITE_MEMBERSHIP_DENIED_INTRO',
         'idpId': 'IDP_ID',
-        'idpName': 'IDP_NAME'
+        'idpName': 'IDP_NAME',
+
+        'flowEnabled': 'FLOW_ENABLED',
+        'flowSubtypes': 'FLOW_SUBTYPES',
+        'flowAppUrl': 'FLOW_APP_URL',
+        'flowToken': 'FLOW_TOKEN',
+        'flowCaseId': 'FLOW_CASE_ID',
+        'flowUserGuid': 'FLOW_USER_GUID'
     }
 
     for k, v in setting_keys.items():
