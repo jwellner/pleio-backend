@@ -282,9 +282,11 @@ def draft_to_text(draft_string):
 
     plain_text = ""
 
-    if 'blocks' in draft:
+    try:
         for block in draft["blocks"]:
             plain_text += f"{block['text']}\n"
+    except Exception:
+        pass
 
     return plain_text
 
