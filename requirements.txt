@@ -30,7 +30,7 @@ textract==1.6.3
 html2text==2020.1.16
 draftjs_exporter==v4.1.1
 django-widget-tweaks==1.4.8
-pydash==4.9.2
+pydash==4.9.3
 django-signal-disabler==0.1.1
 colour==0.1.5
 pytz==2020.5
