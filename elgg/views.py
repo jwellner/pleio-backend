@@ -1,10 +1,14 @@
+import logging
 from django.shortcuts import redirect
 from django.core.exceptions import ObjectDoesNotExist
 from core.models import Entity, Group
 from core.views import entity_view
+from file.models import FileFolder
 from elgg.models import GuidMap
 
-def entity_redirect(request, entity_id):
+logger = logging.getLogger(__name__)
+
+def redirect_view(request, entity_id):
     user = request.user
 
     entity = None
@@ -23,5 +27,22 @@ def entity_redirect(request, entity_id):
 
     if entity and hasattr(entity, 'url'):
         return redirect(entity.url, permanent=True)
+
+    return entity_view(request)
+
+def redirect_download(request, file_id):
+    user = request.user
+
+    file = None
+
+    if file_id:
+        try:
+            mapper = GuidMap.objects.filter(object_type='file').get(id=int(file_id))
+            file = FileFolder.objects.visible(user).get(id=mapper.guid)
+
+            return redirect(file.download_url, permanent=True)
+
+        except ObjectDoesNotExist:
+            pass
 
     return entity_view(request)
