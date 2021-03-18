@@ -120,6 +120,10 @@ class InviteToGroupTestCase(FastTenantTestCase):
     @override_settings(ALLOWED_HOSTS=['test.test'])
     @mock.patch('core.resolvers.mutation_invite_to_group.send_mail_multi.delay')
     def test_add_all_users_to_group_by_admin(self, mocked_send_mail_multi):
+
+        user = mixer.blend(User)
+        user.delete()
+
         mutation = """
             mutation InviteItem($input: inviteToGroupInput!) {
                 inviteToGroup(input: $input) {
