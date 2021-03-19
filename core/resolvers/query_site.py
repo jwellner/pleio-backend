@@ -211,6 +211,8 @@ def get_site_settings():
         'deleteAccountRequests': {
             'edges': User.objects.filter(is_delete_requested=True).all()
         },
+        'profileSyncEnabled': config.PROFILE_SYNC_ENABLED,
+        'profileSyncToken': config.PROFILE_SYNC_TOKEN,
         'customCss': config.CUSTOM_CSS,
         'walledGardenByIpEnabled': config.WALLED_GARDEN_BY_IP_ENABLED,
         'whitelistedIpRanges': config.WHITELISTED_IP_RANGES,

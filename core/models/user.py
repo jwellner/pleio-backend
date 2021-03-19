@@ -43,7 +43,15 @@ class UserProfile(models.Model):
                                      blank=True, default=list)
     overview_email_last_received = models.DateTimeField(blank=True, null=True)
     receive_newsletter = models.BooleanField(default=False)
-    
+
+    picture_file = models.ForeignKey(
+        'file.FileFolder',
+        on_delete=models.CASCADE,
+        blank=True,
+        null=True,
+        related_name='picture_file'
+    )
+
     def __str__(self):
         return f"UserProfile[{self.user.name}]"
 

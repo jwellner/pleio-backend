@@ -82,6 +82,8 @@ def resolve_gets_newsletter(obj, info):
 @user.field("icon")
 def resolve_icon(obj, info):
     # pylint: disable=unused-argument
+    if obj.profile.picture_file:
+        return obj.profile.picture_file.thumbnail_url
     return obj.picture
 
 @user.field("canEdit")
