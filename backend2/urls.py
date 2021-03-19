@@ -53,6 +53,7 @@ urlpatterns = [
     path('sitemap.xml', cache_page(3600)(sitemap), {'sitemaps': sitemaps}, name='sitemap'),
 
     path('flow/comments/add', flow_views.add_comment),
+    path('profile_sync_api/', include('profile_sync.urls')),
 
     # Match old ID's and try to redirect
     re_path(r'view\/(?P<entity_id>[0-9]+)\/(?:[^\/.]+)$', elgg_views.redirect_view, name='redirect_view'),

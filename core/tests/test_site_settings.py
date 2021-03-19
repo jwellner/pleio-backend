@@ -200,6 +200,10 @@ class SiteSettingsTestCase(FastTenantTestCase):
                             guid
                         }
                     }
+
+                    profileSyncEnabled
+                    profileSyncToken
+
                     customCss
                     walledGardenByIpEnabled
                     whitelistedIpRanges
@@ -360,6 +364,8 @@ class SiteSettingsTestCase(FastTenantTestCase):
         self.assertEqual(data["siteSettings"]["roleOptions"], [{'value': 'ADMIN', 'label': 'Beheerder'}, {'value': 'EDITOR', 'label': 'Redacteur'}, {'value': 'QUESTION_MANAGER', 'label': 'Vraagexpert'}])
         self.assertEqual(data["siteSettings"]["siteAccessRequests"]["edges"][0]['email'], 'b@b.nl')
         self.assertEqual(data["siteSettings"]["deleteAccountRequests"]["edges"][0]['guid'], self.delete_user.guid)
+        self.assertEqual(data["siteSettings"]["profileSyncEnabled"], False)
+        self.assertEqual(data["siteSettings"]["profileSyncToken"], "")
         self.assertEqual(data["siteSettings"]["customCss"], "")
         self.assertEqual(data["siteSettings"]["whitelistedIpRanges"], [])
         self.assertEqual(data["siteSettings"]["walledGardenByIpEnabled"], False)

@@ -108,6 +108,9 @@ DEFAULT_SITE_CONFIG = {
     'COOKIE_CONSENT': (False, 'Cookie consent enabled'),
     'LOGIN_INTRO': ('', 'Login intro text'),
 
+    'PROFILE_SYNC_ENABLED': (False, 'Profile sync api enabled'),
+    'PROFILE_SYNC_TOKEN': ("", 'Profile sync api token'),
+
     'CUSTOM_CSS': ("", 'Custom Css'),
     'CUSTOM_CSS_TIMESTAMP': ("", 'Custom Css timestamp'),
     'WHITELISTED_IP_RANGES': ([], 'Whitelisted ip ranges'),

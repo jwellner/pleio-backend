@@ -157,6 +157,9 @@ class EditSiteSettingTestCase(FastTenantTestCase):
                         cookieConsent
                         loginIntro
 
+                        profileSyncEnabled
+                        profileSyncToken
+
                         customCss
                         walledGardenByIpEnabled
                         whitelistedIpRanges
@@ -268,6 +271,9 @@ class EditSiteSettingTestCase(FastTenantTestCase):
 
                 'cookieConsent': True,
                 'loginIntro': 'test',
+
+                'profileSyncEnabled': True,
+                'profileSyncToken': "124928374810983affdddffd",
 
                 'customCss': 'h1 {color: maroon;margin-left: 40px;}',
                 'walledGardenByIpEnabled': False,
@@ -385,6 +391,9 @@ class EditSiteSettingTestCase(FastTenantTestCase):
         self.assertEqual(data["editSiteSetting"]["siteSettings"]["onboardingForceExistingUsers"], True)
         self.assertEqual(data["editSiteSetting"]["siteSettings"]["onboardingIntro"], "Welcome onboarding")
         self.assertEqual(data["editSiteSetting"]["siteSettings"]["cookieConsent"], True)
+
+        self.assertEqual(data["editSiteSetting"]["siteSettings"]["profileSyncEnabled"], True)
+        self.assertEqual(data["editSiteSetting"]["siteSettings"]["profileSyncToken"], '124928374810983affdddffd')
 
         self.assertEqual(data["editSiteSetting"]["siteSettings"]["loginIntro"], 'test')
         self.assertEqual(data["editSiteSetting"]["siteSettings"]["customCss"], 'h1 {color: maroon;margin-left: 40px;}')

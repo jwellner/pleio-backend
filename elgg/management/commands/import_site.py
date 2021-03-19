@@ -250,6 +250,9 @@ class Command(InteractiveTenantOption, BaseCommand):
         config.LIMITED_GROUP_ADD = self.helpers.get_plugin_setting("limited_groups", "groups") == "yes"
         config.ENABLE_SEARCH_ENGINE_INDEXING = self.helpers.get_site_config('enable_frontpage_indexing') \
             if self.helpers.get_site_config('enable_frontpage_indexing') else False
+        config.PROFILE_SYNC_ENABLED = self.helpers.is_plugin_active('profile_sync_api')
+        config.PROFILE_SYNC_TOKEN = self.helpers.get_plugin_setting("secret", "profile_sync_api") \
+            if self.helpers.get_plugin_setting("secret", "profile_sync_api") else ""
         config.CUSTOM_CSS = self.helpers.get_plugin_setting("custom_css", "custom_css") \
             if self.helpers.get_plugin_setting("custom_css", "custom_css") else ""
         config.WALLED_GARDEN_BY_IP_ENABLED = self.helpers.is_plugin_active('walled_garden_by_ip')
