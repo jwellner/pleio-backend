@@ -57,6 +57,8 @@ class Command(BaseCommand):
         for wiki in wikis:
             if wiki.description:
                 new_description = re.sub(r'<p>(.*?)</p>', r'<div>\1</div>', wiki.description)
+                new_description = re.sub(r'(?<!<br />)</div>([\s]*?)<h2', r'</div><div><br /></div><h2', new_description)
+
                 if wiki.description != new_description:
                     wiki.description = new_description
                     wiki.save()
