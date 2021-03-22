@@ -33,6 +33,7 @@ def export(request, event_id=None):
     headers = ['guid', 'name', 'email (only for admins)', 'status', 'datetime']
     rows = [headers]
     for attendee in event.attendees.all():
+        email = ''
         if user.has_role(USER_ROLES.ADMIN):
             if attendee.user:
                 email = attendee.user.email
