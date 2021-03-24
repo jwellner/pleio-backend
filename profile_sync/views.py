@@ -89,7 +89,8 @@ def users(request):
                 )
 
         serialized_users = []
-        users = User.objects.filter(created_at__gt=created_at)[:limit]
+
+        users = User.objects.filter(created_at__gt=created_at).exclude(name="Verwijderde gebruiker")[:limit]
 
         for user in users:
             serialized_users.append(serialize_user(user))
@@ -99,7 +100,7 @@ def users(request):
         data = json.loads(request.body)
 
         external_id = None
-        if 'external_id' in data:
+        if 'external_id' in data and data['external_id']:
             external_id = data['external_id'].strip()
         email = data['email'].strip()
 
@@ -175,7 +176,7 @@ def users(request):
                     status=400
                 )
 
-        if 'groups' in data:
+        if 'groups' in data and data['groups']:
             for group_guid in data["groups"].split(sep=','):
                 try:
                     group = Group.objects.get(id=group_guid)
@@ -184,7 +185,7 @@ def users(request):
                 except Exception:
                     continue
 
-        if 'profile' in data:
+        if 'profile' in data and data['profile']:
             for key, value in data['profile'].items():
                 try:
                     profile_field = ProfileField.objects.get(key=key)
@@ -340,14 +341,17 @@ def avatar_user(request, user_id):
             read_access=[ACCESS_TYPE.public],
             write_access=[ACCESS_TYPE.user.format(user.id)]
         )
+
         if user.profile.picture_file:
+            if user.profile.picture_file.upload:
+                user.profile.picture_file.upload.delete()
+            if user.profile.picture_file.thumbnail:
+                user.profile.picture_file.thumbnail.delete()
             user.profile.picture_file.delete()
 
         user.profile.picture_file = avatar_file
-        user.picture = avatar_file.thumbnail_url
-
         user.profile.save()
-        user.save()
+
     except Exception:
         return JsonResponse({
             "status": 404,
