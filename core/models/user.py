@@ -46,7 +46,7 @@ class UserProfile(models.Model):
 
     picture_file = models.ForeignKey(
         'file.FileFolder',
-        on_delete=models.CASCADE,
+        on_delete=models.SET_NULL,
         blank=True,
         null=True,
         related_name='picture_file'
