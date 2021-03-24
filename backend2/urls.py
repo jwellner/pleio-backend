@@ -12,7 +12,6 @@ from core import superadmin_views as core_superadmin
 from core import views as core_views
 from file import views as file_views
 from event import views as event_views
-from elgg import views as elgg_views
 from user import views as user_views
 
 from flow import views as flow_views
@@ -55,9 +54,8 @@ urlpatterns = [
     path('flow/comments/add', flow_views.add_comment),
     path('profile_sync_api/', include('profile_sync.urls')),
 
-    # Match old ID's and try to redirect
-    re_path(r'view\/(?P<entity_id>[0-9]+)\/(?:[^\/.]+)$', elgg_views.redirect_view, name='redirect_view'),
-    re_path(r'file\/download\/(?P<file_id>[0-9]+)', elgg_views.redirect_download, name='redirect_download'),
+    # Include elgg url's for redirects
+    path('', include('elgg.urls')),
 
     # Default catch all URL's
     re_path(r'view\/(?P<entity_id>[0-9A-Fa-f-]+)\/(?:[^\/.]+)$', core_views.entity_view, name='entity_view'),
