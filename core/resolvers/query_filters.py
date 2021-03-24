@@ -2,7 +2,7 @@ from core import config
 from core.lib import get_acl
 from core.models import ProfileField
 from core.constances import NOT_LOGGED_IN
-from elasticsearch_dsl import Search
+from elasticsearch_dsl import Search, Q
 from graphql import GraphQLError
 from django_tenants.utils import parse_tenant_config_path
 
@@ -14,19 +14,27 @@ def get_filter_options(key, user):
     if not user.is_authenticated:
         raise GraphQLError(NOT_LOGGED_IN)
 
-    s = Search(index='user').filter(
-        'terms', read_access=list(get_acl(user))
+    user_acl = list(get_acl(user))
+
+    s = Search(index='user').query(
+        Q('nested', path='_profile.user_profile_fields', query=Q('bool', must=[
+                Q('terms', _profile__user_profile_fields__read_access=user_acl)
+                ]
+            )
+        )
     ).filter(
-        'match', tenant_name=tenant_name
+        'term', tenant_name=tenant_name
+    ).exclude(
+        'term', is_active=False
     )
 
-    response = s.execute()
-    for hit in response:
+    # TODO: use aggregations
+    for hit in s.scan():
         for field in hit['_profile']['user_profile_fields']:
-            if field['key'] == key:
+            if field['key'] == key and not set(user_acl).isdisjoint(set(field['read_access'])):
                 options.append(field['value'])
 
-    return list(set(options))
+    return sorted(list(set(options)))
 
 
 def resolve_filters(_, info):
