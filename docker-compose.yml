@@ -7,6 +7,7 @@ services:
     environment:
       DEBUG: 'True'
       CELERY_BROKER_URL: 'amqp://rabbitmq'
+      CELERY_RESULT_BACKEND: 'redis://redis:6379/0'
       MEMCACHE_HOST_PORT: memcached:11211
     env_file:
       - ./.env
@@ -23,13 +24,13 @@ services:
       - db
       - frontend
       - admin
-      - localstack
       - rabbitmq
   background:
     build: .
     restart: on-failure
     environment:
       CELERY_BROKER_URL: 'amqp://rabbitmq'
+      CELERY_RESULT_BACKEND: 'redis://redis:6379/0'
       MEMCACHE_HOST_PORT: memcached:11211
     env_file:
       - ./.env
@@ -40,7 +41,6 @@ services:
       - shared-tmp:/tmp
     depends_on:
       - db
-      - localstack
       - rabbitmq
   frontend:
     image: registry.gitlab.com/pleio/frontend:B2-latest
@@ -53,6 +53,7 @@ services:
     environment:
       RUN_AS_ADMIN_APP: 'True'
       CELERY_BROKER_URL: 'amqp://rabbitmq'
+      CELERY_RESULT_BACKEND: 'redis://redis:6379/0'
     env_file:
       - ./.env
     stdin_open: true
@@ -101,17 +102,6 @@ services:
     ports:
     - "1080:1080"
     - "1025:1025"
-  localstack:
-    image: localstack/localstack:latest
-    ports:
-      - "4563-4599:4563-4599"
-      - "8055:8080"
-    environment:
-      - SERVICES=s3
-      - DATA_DIR=/tmp/localstack/data
-    volumes:
-      - "./.localstack:/tmp/localstack"
-      - "/var/run/docker.sock:/var/run/docker.sock"
   memcached:
     image: memcached
     ports:
@@ -126,6 +116,10 @@ services:
       AMQP_URL: 'amqp://localhost?connection_attempts=5&retry_delay=5'
       RABBITMQ_DEFAULT_USER: "guest"
       RABBITMQ_DEFAULT_PASS: "guest"
+  redis:
+    image: 'redis:6.2'
+    ports:
+      - '6379:6379'
 
 volumes:
   frontend-build:
