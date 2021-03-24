@@ -522,7 +522,7 @@ input editGroupInput {
 
 input editGroupNotificationsInput {
   guid: String!
-  getsNotifications: Boolean!
+  getsNotifications: Boolean
   userGuid: String
 }
 

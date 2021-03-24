@@ -19,8 +19,6 @@ app.config_from_object('django.conf:settings', namespace='CELERY')
 app.logger = logger
 
 app.conf.beat_schedule = beat_schedule
-app.conf.result_backend = 'rpc://'
-app.conf.result_persistent = False
 
 # Load task modules from all registered Django app configs.
 app.autodiscover_tasks()

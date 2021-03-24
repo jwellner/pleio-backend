@@ -399,7 +399,7 @@ def replace_domain_links(self, schema_name, replace_domain=None, replace_elgg_id
 
         def _replace_links(text):
             if replace_elgg_id:
-                # match links where old ID has to be replaced
+                # match links where old ID has to be simply replaced
                 matches = re.findall(rf'(((https:\/\/{re.escape(replace_domain)})|(^|(?<=[ \"\n])))[\w\-\/]*\/(view|download)\/([0-9]+)[\w\-\.\/\?\%]*)', text)
 
                 for match in matches:
@@ -413,6 +413,68 @@ def replace_domain_links(self, schema_name, replace_domain=None, replace_elgg_id
 
                     if link != new_link:
                         text = text.replace(link, new_link)
+
+                # match thumbnail links and replace with file download link
+                matches = re.findall(
+                    rf'(((https:\/\/{re.escape(replace_domain)})|(^|(?<=[ \"\n])))\/mod\/file\/thumbnail.php\?file_guid=([0-9]+)[^\"^ ]*)',
+                    text
+                )
+
+                for match in matches:
+                    link = match[0]
+                    file_id = match[4]
+                    has_file = GuidMap.objects.filter(id=file_id, object_type="file").first()
+                    if has_file:
+                        try:
+                            file_entity = FileFolder.objects.get(id=has_file.guid)
+                            text = text.replace(link, file_entity.download_url)
+                        except Exception:
+                            pass
+
+                # match group profile links and replace new link
+                matches = re.findall(
+                    rf'(((https:\/\/{re.escape(replace_domain)})|(^|(?<=[ \"\n])))\/groups\/profile\/([0-9]+)\/[^\"^ ]*)',
+                    text
+                )
+
+                for match in matches:
+                    link = match[0]
+                    group_id = match[4]
+                    has_group = GuidMap.objects.filter(id=group_id, object_type="group").first()
+
+                    if has_group:
+                        try:
+                            group_entity = Group.objects.get(id=has_group.guid)
+                            text = text.replace(link, group_entity.url)
+                        except Exception:
+                            pass
+
+                # match and replace folder links
+                matches = re.findall(
+                    rf'(((https:\/\/{re.escape(replace_domain)})|(^|(?<=[ \"\n])))\/file\/group\/([0-9]+)\/all(#([0-9]+))?[^\"^ ]*)',
+                    text
+                )
+
+                for match in matches:
+                    link = match[0]
+                    group_id = match[4]
+                    folder_id = match[6]
+                    has_folder = GuidMap.objects.filter(id=folder_id, object_type="folder").first() if folder_id else False
+                    has_group = GuidMap.objects.filter(id=group_id, object_type="group").first()
+
+
+                    if has_folder:
+                        try:
+                            folder_entity = FileFolder.objects.get(id=has_folder.guid)
+                            text = text.replace(link, folder_entity.url)
+                        except Exception:
+                            pass
+                    elif has_group:
+                        try:
+                            group_entity = Group.objects.get(id=has_group.guid)
+                            text = text.replace(link, group_entity.url + "/files")
+                        except Exception:
+                            pass
 
             # make absolute links relative
             text = text.replace(f"https://{replace_domain}/", f"/")
@@ -486,9 +548,21 @@ def replace_domain_links(self, schema_name, replace_domain=None, replace_elgg_id
 
         for group in groups:
             rich_description = _replace_rich_description_json(group.rich_description)
-            introduction = _replace_rich_description_json(group.introduction)
-            welcome_message = _replace_rich_description_json(group.welcome_message)
             description = _replace_links(group.description)
+
+            try:
+                introduction = json.loads(group.introduction)
+                introduction = _replace_rich_description_json(group.introduction)
+            except Exception:
+                # old elgg sites dont have draftjs json
+                introduction = _replace_links(group.description)
+
+            try:
+                welcome_message = json.loads(group.welcome_message)
+                welcome_message = _replace_rich_description_json(group.welcome_message)
+            except Exception:
+                # old elgg sites dont have draftjs json
+                welcome_message = _replace_links(group.welcome_message)
 
             if rich_description != group.rich_description or \
                 description != group.description or \

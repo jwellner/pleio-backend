@@ -85,7 +85,9 @@ TENANT_APPS = [
     'django_elasticsearch_dsl',
     'notifications',
     'auditlog',
-    'flow'
+    'flow',
+    'profile_sync'
+
 ]
 
 if LOCAL_APPS:
@@ -268,6 +270,8 @@ IMPORTING = False
 
 # Celery
 CELERY_BROKER_URL = os.getenv('CELERY_BROKER_URL')
+CELERY_RESULT_BACKEND = os.getenv('CELERY_RESULT_BACKEND')
+
 # Added because of: https://github.com/celery/celery/issues/4296
 CELERY_BROKER_TRANSPORT_OPTIONS = {
     'max_retries': 3,
@@ -276,6 +280,7 @@ CELERY_BROKER_TRANSPORT_OPTIONS = {
     'interval_max': 0.2,
 }
 CELERY_TASK_ALWAYS_EAGER = os.getenv('CELERY_TASK_ALWAYS_EAGER') == 'True'
+CELERY_TASK_TRACK_STARTED = True
 CELERY_TASK_PUBLISH_RETRY = True
 CELERY_TASK_PUBLISH_RETRY_POLICY = {
     'max_retries': 3,

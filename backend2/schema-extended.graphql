@@ -246,6 +246,8 @@ extend input editSiteSettingInput {
   cookieConsent: Boolean
   eventTiles: Boolean
   loginIntro: String
+  profileSyncEnabled: Boolean
+  profileSyncToken: String
   customCss: String
   walledGardenByIpEnabled: Boolean
   whitelistedIpRanges: [String]
@@ -312,6 +314,8 @@ extend type SiteSettings {
   loginIntro: String
   roleOptions: [Option]
   deleteAccountRequests: DeleteAccountRequestList
+  profileSyncEnabled: Boolean!
+  profileSyncToken: String
   customCss: String
   walledGardenByIpEnabled: Boolean!
   whitelistedIpRanges: [String]

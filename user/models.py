@@ -53,7 +53,7 @@ class Manager(BaseUserManager):
 
         if has_2fa_enabled:
             user.has_2fa_enabled = has_2fa_enabled
-        
+
         if is_superadmin:
             user.is_superadmin = True
 
@@ -171,7 +171,7 @@ class User(AbstractBaseUser):
                     incomplete += 1
             except ObjectDoesNotExist:
                 incomplete += 1
-        
+
         return incomplete == 0
 
     def delete(self, using='', keep_parents=False):

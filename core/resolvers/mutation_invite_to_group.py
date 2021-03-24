@@ -34,7 +34,7 @@ def resolve_invite_to_group(_, info, input):
 
     # Add all users without sending email
     if clean_input.get("addAllUsers"):
-        users = User.objects.all()
+        users = User.objects.filter(is_active=True)
         for u in users:
             if not group.is_full_member(u):
                 group.join(u, 'member')

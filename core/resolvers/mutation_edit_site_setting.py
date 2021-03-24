@@ -150,6 +150,9 @@ def resolve_edit_site_setting(_, info, input):
         'onboardingForceExistingUsers': 'ONBOARDING_FORCE_EXISTING_USERS',
         'onboardingIntro': 'ONBOARDING_INTRO',
 
+        'profileSyncEnabled': 'PROFILE_SYNC_ENABLED',
+        'profileSyncToken': 'PROFILE_SYNC_TOKEN',
+
         'cookieConsent': 'COOKIE_CONSENT',
         'loginIntro': 'LOGIN_INTRO',
         'siteMembershipAcceptedIntro': 'SITE_MEMBERSHIP_ACCEPTED_INTRO',
