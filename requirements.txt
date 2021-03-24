@@ -36,3 +36,4 @@ colour==0.1.5
 pytz==2020.5
 django-auditlog==1.0a1
 requests==2.25.1
+redis==3.5.3
