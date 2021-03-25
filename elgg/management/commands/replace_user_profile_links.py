@@ -98,11 +98,16 @@ class Command(InteractiveTenantOption, BaseCommand):
 
             def _replace_user_profile_links(text):
                 # match links where old username is replaced with guid
-                matches = re.findall(rf'\/user\/[\w\.-]+\/profile', text)
+                matches1 = re.findall(r'((^|(?<=[ \"\n]))\/user\/([\w\.-]+)\/profile)', text)
+                matches2 = re.findall(r'((^|(?<=[ \"\n]))\/profile\/([\w\.-]+))', text)
+
+                matches = matches1 + matches2
+
                 for match in matches:
-                    link = match
+                    link = match[0]
                     new_link = link
-                    username = re.findall(r'\/user\/([\w\.-]+)\/profile', link)[0]
+                    username = match[2]
+
                     if username not in usernames:
                         continue
                     guid = usernames[username]
@@ -110,7 +115,7 @@ class Command(InteractiveTenantOption, BaseCommand):
                     map_entity = GuidMap.objects.filter(id=guid).first()
 
                     if map_entity:
-                        new_link = new_link.replace(str(username), str(map_entity.guid))
+                        new_link = f'/user/{str(map_entity.guid)}/profile'
                         if link != new_link:
                             text = text.replace(link, new_link)
                             self.replaced_profile_link_count = self.replaced_profile_link_count + 1
@@ -142,13 +147,44 @@ class Command(InteractiveTenantOption, BaseCommand):
             for entity in entities:
                 if hasattr(entity, 'rich_description'):
                     rich_description = _replace_rich_description_json(entity.rich_description)
-
                     description = _replace_user_profile_links(entity.description)
 
                     if rich_description != entity.rich_description or description != entity.description:
                         entity.rich_description = rich_description
                         entity.description = description
                         entity.save()
+
+            # -- Replace group descriptions
+            groups = Group.objects.all()
+
+            for group in groups:
+                rich_description = _replace_rich_description_json(group.rich_description)
+                description = _replace_user_profile_links(group.description)
+
+                try:
+                    introduction = json.loads(group.introduction)
+                    introduction = _replace_rich_description_json(group.introduction)
+                except Exception:
+                    # old elgg sites dont have draftjs json
+                    introduction = _replace_user_profile_links(group.description)
+
+                try:
+                    welcome_message = json.loads(group.welcome_message)
+                    welcome_message = _replace_rich_description_json(group.welcome_message)
+                except Exception:
+                    # old elgg sites dont have draftjs json
+                    welcome_message = _replace_user_profile_links(group.welcome_message)
+
+                if rich_description != group.rich_description or \
+                    description != group.description or \
+                    introduction != group.introduction or \
+                    welcome_message != group.welcome_message:
+
+                    group.rich_description = rich_description
+                    group.description = description
+                    group.introduction = introduction
+                    group.welcome_message = welcome_message
+                    group.save()
 
             # -- Replace widget settings
             widgets = Widget.objects.all()
