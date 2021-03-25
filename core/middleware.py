@@ -8,6 +8,7 @@ from django.utils import timezone, translation
 from django.utils.cache import patch_vary_headers
 from django.utils.deprecation import MiddlewareMixin
 from django.shortcuts import redirect
+from django.contrib.auth import logout
 
 from django.template.response import TemplateResponse
 
@@ -37,6 +38,10 @@ class UserLastOnlineMiddleware:
         response = self.get_response(request)
         user = request.user
         if not user.is_authenticated:
+            return response
+
+        if not user.is_active:
+            logout(request)
             return response
 
         ten_minutes_ago = timezone.now() - timezone.timedelta(minutes=10)
