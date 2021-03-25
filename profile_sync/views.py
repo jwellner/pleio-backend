@@ -94,6 +94,7 @@ def users(request):
 
         for user in users:
             serialized_users.append(serialize_user(user))
+
         return JsonResponse({"users": serialized_users}, status=200)
 
     if request.method == 'POST':
@@ -112,7 +113,7 @@ def users(request):
                 user.email = email
             elif (
                 User.objects.filter(email__iexact=email).count() == 1
-                and User.objects.filter(email__iexact=email).first() !=user
+                and User.objects.filter(email__iexact=email).first() != user
             ):
                 return JsonResponse({
                     "status": 400,
