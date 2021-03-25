@@ -2,9 +2,9 @@ import logging
 from django.shortcuts import redirect
 from django.core.exceptions import ObjectDoesNotExist
 from core.models import Entity, Group
-from core.views import entity_view
+from core.views import default, entity_view
 from file.models import FileFolder
-from elgg.models import GuidMap
+from elgg.models import FriendlyUrlMap, GuidMap
 
 logger = logging.getLogger(__name__)
 
@@ -46,3 +46,16 @@ def redirect_download(request, file_id):
             pass
 
     return entity_view(request)
+
+def redirect_friendly_url(request, friendly_url):
+    user = request.user
+    if friendly_url:
+        try:
+            object_id = FriendlyUrlMap.objects.get(url=friendly_url).object_id
+            entity = Entity.objects.visible(user).get_subclass(id=object_id)
+
+            return redirect(entity.url, permanent=True)
+        except Exception:
+            pass
+
+    return default(request)
