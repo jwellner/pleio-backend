@@ -30,6 +30,8 @@ def conditional_subtypes_filter(subtypes):
                 q_objects.add(~Q(wiki__isnull = True), Q.OR)
             elif object_type == 'page':
                 q_objects.add(~Q(page__isnull = True), Q.OR)
+            elif object_type == 'file':
+                q_objects.add(~Q(filefolder__isnull = True), Q.OR)
 
     return q_objects
 
@@ -136,10 +138,10 @@ def resolve_entities(
         entities = entities.filter(wiki__parent=None)
 
     if order_by == '-title':
-        entities = entities.order_by(Coalesce('news__title', 'blog__title', 'poll__title', 'statusupdate__title', 'wiki__title',
+        entities = entities.order_by(Coalesce('news__title', 'blog__title', 'filefolder__title', 'poll__title', 'statusupdate__title', 'wiki__title',
                                               'page__title', 'question__title', 'discussion__title', 'event__title').desc()).select_subclasses()
     elif order_by == 'title':
-        entities = entities.order_by(Coalesce('news__title', 'blog__title', 'poll__title', 'statusupdate__title', 'wiki__title',
+        entities = entities.order_by(Coalesce('news__title', 'blog__title', 'filefolder__title', 'poll__title', 'statusupdate__title', 'wiki__title',
                                               'page__title', 'question__title', 'discussion__title', 'event__title').asc()).select_subclasses()
     else:
         entities = entities.order_by(order_by).select_subclasses()
