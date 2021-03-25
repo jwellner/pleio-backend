@@ -6,6 +6,13 @@ class GuidMap(models.Model):
     guid = models.UUIDField(unique=True)
     object_type = models.CharField(max_length=32)
 
+
+# Migration helper models
+class FriendlyUrlMap(models.Model):
+    id = models.BigAutoField(primary_key=True)
+    object_id = models.UUIDField()
+    url = models.URLField(max_length=1024, unique=True)
+
 # Elgg Models
 class Instances(models.Model):
     host = models.CharField(unique=True, max_length=255, blank=True, null=True)

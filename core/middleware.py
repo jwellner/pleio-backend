@@ -196,7 +196,11 @@ class RedirectMiddleware:
         response = self.get_response(request)
 
         # ignore graphql first (more efficiency for all graphql queries)
-        if not request.path == '/graphql' and request.path in config.REDIRECTS and resolve(request.path).url_name in ["entity_view", "default"]:
+        if (
+            not request.path == '/graphql'
+            and request.path in config.REDIRECTS
+            and resolve(request.path).url_name in ["entity_view", "default", "redirect_friendly_url"]
+        ):
             return redirect(config.REDIRECTS[request.path])
 
         return response
