@@ -399,6 +399,10 @@ def replace_domain_links(self, schema_name, replace_domain=None, replace_elgg_id
 
         def _replace_links(text):
             if replace_elgg_id:
+                # replace file/view links
+                # TODO: maybe it is better to get Entity.url / Entity.download_url in matching below....
+                text = text.replace(f"/file/view/", "/files/view/")
+
                 # match links where old ID has to be simply replaced
                 matches = re.findall(rf'(((https:\/\/{re.escape(replace_domain)})|(^|(?<=[ \"\n])))[\w\-\/]*\/(view|download)\/([0-9]+)[\w\-\.\/\?\%]*)', text)
 
@@ -475,6 +479,7 @@ def replace_domain_links(self, schema_name, replace_domain=None, replace_elgg_id
                             text = text.replace(link, group_entity.url + "/files")
                         except Exception:
                             pass
+
 
             # make absolute links relative
             text = text.replace(f"https://{replace_domain}/", f"/")
