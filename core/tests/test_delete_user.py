@@ -57,7 +57,7 @@ class DeleteUserTestCase(FastTenantTestCase):
         data = result[1]["data"]
 
         self.assertEqual(data["deleteUser"]["success"], True)
-        self.assertEqual(mocked_send_mail_multi.call_count, 3)
+        self.assertEqual(mocked_send_mail_multi.call_count, 2)
 
 
     @override_settings(ALLOWED_HOSTS=['test.test'])

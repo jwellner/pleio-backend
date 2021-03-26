@@ -8,6 +8,7 @@ from django.utils import timezone, translation
 from django.utils.cache import patch_vary_headers
 from django.utils.deprecation import MiddlewareMixin
 from django.shortcuts import redirect
+from django.contrib.auth import logout
 
 from django.template.response import TemplateResponse
 
@@ -37,6 +38,10 @@ class UserLastOnlineMiddleware:
         response = self.get_response(request)
         user = request.user
         if not user.is_authenticated:
+            return response
+
+        if not user.is_active:
+            logout(request)
             return response
 
         ten_minutes_ago = timezone.now() - timezone.timedelta(minutes=10)
@@ -196,7 +201,11 @@ class RedirectMiddleware:
         response = self.get_response(request)
 
         # ignore graphql first (more efficiency for all graphql queries)
-        if not request.path == '/graphql' and request.path in config.REDIRECTS and resolve(request.path).url_name in ["entity_view", "default"]:
+        if (
+            not request.path == '/graphql'
+            and request.path in config.REDIRECTS
+            and resolve(request.path).url_name in ["entity_view", "default", "redirect_friendly_url"]
+        ):
             return redirect(config.REDIRECTS[request.path])
 
         return response

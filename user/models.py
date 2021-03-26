@@ -99,6 +99,14 @@ class User(AbstractBaseUser):
 
     roles = ArrayField(models.CharField(max_length=256), blank=True, default=list)
 
+    # for profile sync matching
+    custom_id = models.CharField(
+        max_length=200,
+        unique=True,
+        blank=True,
+        null=True
+    )
+
     created_at = models.DateTimeField(default=timezone.now)
     updated_at = models.DateTimeField(default=timezone.now)
 
@@ -184,6 +192,9 @@ class User(AbstractBaseUser):
         self.has_2fa_enabled = False
         self.ban_reason = "Deleted"
         self.is_delete_requested = False
+        self.is_superadmin = False
+        self.roles = []
+
         # delete user profile data
         try:
             self._profile.delete()

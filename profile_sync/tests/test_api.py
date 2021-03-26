@@ -26,8 +26,8 @@ class ProfileSyncApiTests(TenantTestCase):
 
         self.user1 = mixer.blend(User)
         self.user2 = mixer.blend(User, email='user1@pleio.test')
-        self.user3 = mixer.blend(User, external_id='pl-109')
-        self.user4 = mixer.blend(User, email='email@notavailable.nl', external_id='notavailable_id')
+        self.user3 = mixer.blend(User, custom_id='pl-109')
+        self.user4 = mixer.blend(User, email='email@notavailable.nl', custom_id='notavailable_id')
         self.user5 = mixer.blend(User)
         self.group1 = mixer.blend(Group, owner=self.user3)
 
@@ -161,7 +161,7 @@ class ProfileSyncApiTests(TenantTestCase):
         new_user = User.objects.get(email='user7@pleio.test')
         self.assertEqual(new_user.name, 'User 7')
         self.assertEqual(new_user.email, 'user7@pleio.test')
-        self.assertEqual(new_user.external_id, 'pl-107')
+        self.assertEqual(new_user.custom_id, 'pl-107')
         self.assertEqual(new_user.memberships.all()[0].group, self.group1)
 
         new_field = UserProfileField.objects.filter(user_profile=new_user.profile, profile_field=self.profile_field1).first()
@@ -259,7 +259,7 @@ class ProfileSyncApiTests(TenantTestCase):
 
         self.assertEqual(self.user5.name, 'User 700')
         self.assertEqual(self.user5.email, 'user700@pleio.test')
-        self.assertEqual(self.user5.external_id, 'pl-10700')
+        self.assertEqual(self.user5.custom_id, 'pl-10700')
         self.assertEqual(self.user5.memberships.all()[0].group, self.group1)
 
         new_field = UserProfileField.objects.get(user_profile=self.user5.profile, profile_field=self.profile_field1)
@@ -368,7 +368,7 @@ class ProfileSyncApiTests(TenantTestCase):
             "status": 200,
             "user": {
                 "guid": self.user2.guid,
-                "external_id": self.user2.external_id,
+                "external_id": self.user2.custom_id,
                 "name": self.user2.name,
                 "email": self.user2.email,
                 "is_member": True,
@@ -415,7 +415,7 @@ class ProfileSyncApiTests(TenantTestCase):
             "status": 200,
             "user": {
                 "guid": user.guid,
-                "external_id": user.external_id,
+                "external_id": user.custom_id,
                 "name": user.name,
                 "email": user.email,
                 "is_member": True,
@@ -466,7 +466,7 @@ class ProfileSyncApiTests(TenantTestCase):
             "status": 200,
             "user": {
                 "guid": self.user3.guid,
-                "external_id": self.user3.external_id,
+                "external_id": self.user3.custom_id,
                 "name": self.user3.name,
                 "email": self.user3.email,
                 "is_member": True,

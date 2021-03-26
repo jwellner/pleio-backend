@@ -44,7 +44,7 @@ def serialize_user(user):
 
     return {
         "guid": user.guid,
-        "external_id": user.external_id,
+        "external_id": user.custom_id,
         "name": user.name,
         "email": user.email,
         "is_member": True,
@@ -90,10 +90,11 @@ def users(request):
 
         serialized_users = []
 
-        users = User.objects.filter(created_at__gt=created_at).exclude(name="Verwijderde gebruiker")[:limit]
+        users = User.objects.filter(created_at__gt=created_at).exclude(name="Verwijderde gebruiker").order_by('created_at')[:limit]
 
         for user in users:
             serialized_users.append(serialize_user(user))
+
         return JsonResponse({"users": serialized_users}, status=200)
 
     if request.method == 'POST':
@@ -112,7 +113,7 @@ def users(request):
                 user.email = email
             elif (
                 User.objects.filter(email__iexact=email).count() == 1
-                and User.objects.filter(email__iexact=email).first() !=user
+                and User.objects.filter(email__iexact=email).first() != user
             ):
                 return JsonResponse({
                     "status": 400,
@@ -124,11 +125,11 @@ def users(request):
                 )
 
             if external_id:
-                if User.objects.filter(external_id__iexact=external_id).count() == 0:
-                    user.external_id = external_id
+                if User.objects.filter(custom_id__iexact=external_id).count() == 0:
+                    user.custom_id = external_id
                 elif (
-                    User.objects.filter(external_id__iexact=external_id).count() == 1
-                    and User.objects.filter(external_id__iexact=external_id).first() != user
+                    User.objects.filter(custom_id__iexact=external_id).count() == 1
+                    and User.objects.filter(custom_id__iexact=external_id).first() != user
                 ):
                     return JsonResponse({
                         "status": 400,
@@ -150,7 +151,7 @@ def users(request):
                     status=400
                 )
 
-            if User.objects.filter(external_id__iexact=external_id).first():
+            if User.objects.filter(custom_id__iexact=external_id).first():
                 return JsonResponse({
                     "error": "could_not_create",
                     "pretty_error": "This external_id is already taken by another user.",
@@ -163,7 +164,7 @@ def users(request):
                 user = User.objects.create(
                     name=data['name'],
                     email=email,
-                    external_id=external_id
+                    custom_id=external_id
 
                 )
             except Exception as e:
