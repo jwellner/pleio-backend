@@ -99,6 +99,14 @@ class User(AbstractBaseUser):
 
     roles = ArrayField(models.CharField(max_length=256), blank=True, default=list)
 
+    # for profile sync matching
+    custom_id = models.CharField(
+        max_length=200,
+        unique=True,
+        blank=True,
+        null=True
+    )
+
     created_at = models.DateTimeField(default=timezone.now)
     updated_at = models.DateTimeField(default=timezone.now)
 
