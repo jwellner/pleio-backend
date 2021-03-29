@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-03-26 11:31+0100\n"
+"POT-Creation-Date: 2021-03-29 10:46+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -306,7 +306,7 @@ msgstr "Agenda-item gemaakt door"
 
 #: core/templates/email/entities/news.html:33
 msgid "News added on"
-msgstr "Nieuws geplaatst op"
+msgstr "Nieuws geplaatst door"
 
 #: core/templates/email/entities/question.html:19
 msgid "Question asked by"
