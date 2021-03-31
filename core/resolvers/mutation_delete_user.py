@@ -38,8 +38,6 @@ def resolve_delete_user(_, info, input):
 
     # Send email to admins if user which is deleted is also an admin
     if is_deleted_user_admin:
-        context = get_default_email_context(info.context['request'])
-        context['name_deleted_user'] = performing_user.name
         subject = ugettext_lazy("A site administrator was removed from %(site_name)s") % {'site_name': context["site_name"]}
 
         admin_email_addresses = User.objects.filter(roles__contains=['ADMIN']).values_list('email', flat=True)
