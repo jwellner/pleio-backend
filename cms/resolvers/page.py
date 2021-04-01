@@ -17,7 +17,7 @@ def resolve_has_children(obj, info):
 @page.field("children")
 def resolve_children(obj, info):
     # pylint: disable=unused-argument
-    return obj.children.all()
+    return obj.children.visible(info.context["request"].user)
 
 @page.field("parent")
 def resolve_parent(obj, info):

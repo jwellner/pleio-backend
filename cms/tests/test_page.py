@@ -18,6 +18,7 @@ class PageTestCase(FastTenantTestCase):
     def setUp(self):
         self.anonymousUser = AnonymousUser()
         self.user1 = mixer.blend(User)
+        self.user2 = mixer.blend(User)
         self.page_parent = Page.objects.create(owner=self.user1,
                                                read_access=[ACCESS_TYPE.public],
                                                write_access=[ACCESS_TYPE.user.format(self.user1.id)],
@@ -29,6 +30,14 @@ class PageTestCase(FastTenantTestCase):
                                               read_access=[ACCESS_TYPE.public],
                                               write_access=[ACCESS_TYPE.user.format(self.user1.id)],
                                               title="Test child page",
+                                              description="Description",
+                                              rich_description="JSON to string",
+                                              parent=self.page_parent
+                                              )
+        self.page_child2 = Page.objects.create(owner=self.user2,
+                                              read_access=[ACCESS_TYPE.user.format(self.user2.id)],
+                                              write_access=[ACCESS_TYPE.user.format(self.user2.id)],
+                                              title="Test child page other user",
                                               description="Description",
                                               rich_description="JSON to string",
                                               parent=self.page_parent
@@ -108,8 +117,10 @@ class PageTestCase(FastTenantTestCase):
         self.assertEqual(data["entity"]["parent"], None)
         self.assertEqual(data["entity"]["hasChildren"], True)
         self.assertEqual(data["entity"]["url"], "/cms/view/{}/{}".format(self.page_parent.guid, slugify(self.page_parent.title)))
+        self.assertEqual(len(data["entity"]["children"]), 1)
         self.assertEqual(data["entity"]["children"][0]["guid"], self.page_child.guid)
         self.assertEqual(data["entity"]["children"][0]["children"][0]["guid"], self.page_child_child.guid)
+
 
 
     def test_child_page_by_owner(self):
