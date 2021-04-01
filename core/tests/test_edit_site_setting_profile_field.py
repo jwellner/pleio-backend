@@ -19,6 +19,7 @@ class EditSiteSettingProfileFieldTestCase(FastTenantTestCase):
         self.user = mixer.blend(User)
         self.admin = mixer.blend(User, roles=['ADMIN'])
         self.profileField1 = ProfileField.objects.create(key='text_key', name='text_name', field_type='text_field')
+        self.profileField2 = ProfileField.objects.create(key='text_key2', name='text_name2', field_type='text_field2')
 
         self.profileFieldValidator1 = ProfileFieldValidator.objects.create(
             name="123",
@@ -95,6 +96,7 @@ class EditSiteSettingProfileFieldTestCase(FastTenantTestCase):
                     profileItem {
                         guid
                         name
+                        key
                         category
                         isEditable
                         isFilter
@@ -114,6 +116,7 @@ class EditSiteSettingProfileFieldTestCase(FastTenantTestCase):
             "input": {
                 "guid": str(self.profileField1.id),
                 "name": "new_name_1",
+                "key": "readable_key",
                 "isEditable": False,
                 "isFilter": True,
                 "isInOverview": True,
@@ -132,6 +135,7 @@ class EditSiteSettingProfileFieldTestCase(FastTenantTestCase):
 
         self.assertEqual(data["editSiteSettingProfileField"]["profileItem"]["guid"], str(self.profileField1.id))
         self.assertEqual(data["editSiteSettingProfileField"]["profileItem"]["name"], "new_name_1")
+        self.assertEqual(data["editSiteSettingProfileField"]["profileItem"]["key"], "readable_key")
         self.assertEqual(data["editSiteSettingProfileField"]["profileItem"]["isEditable"], False)
         self.assertEqual(data["editSiteSettingProfileField"]["profileItem"]["isFilter"], True)
         self.assertEqual(data["editSiteSettingProfileField"]["profileItem"]["isInOverview"], True)
@@ -158,3 +162,31 @@ class EditSiteSettingProfileFieldTestCase(FastTenantTestCase):
         self.assertEqual(data["editSiteSettingProfileField"]["profileItem"]["fieldType"], "dateField")
         self.assertEqual(data["editSiteSettingProfileField"]["profileItem"]["profileFieldValidator"], None) # validator only for text_field
 
+
+
+    def test_edit_profile_field_existing_key(self):
+
+        mutation = """
+            mutation editSiteSettingProfileField($input: editSiteSettingProfileFieldInput!) {
+                editSiteSettingProfileField(input: $input) {
+                    profileItem {
+                        key
+
+                    }
+                }
+            }
+        """
+        variables = {
+            "input": {
+                "guid": str(self.profileField2.id),
+                "key": "text_key"
+            }
+        }
+        request = HttpRequest()
+        request.user = self.admin
+
+        result = graphql_sync(schema, { "query": mutation, "variables": variables }, context_value={ "request": request })
+
+        errors = result[1]["errors"]
+
+        self.assertEqual(errors[0]["message"], "key_already_in_use")

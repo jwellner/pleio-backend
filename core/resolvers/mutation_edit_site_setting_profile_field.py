@@ -1,6 +1,6 @@
 from graphql import GraphQLError
 from core.models import ProfileField, ProfileFieldValidator
-from core.constances import NOT_LOGGED_IN, USER_NOT_SITE_ADMIN, COULD_NOT_FIND, USER_ROLES
+from core.constances import NOT_LOGGED_IN, USER_NOT_SITE_ADMIN, COULD_NOT_FIND, USER_ROLES, KEY_ALREADY_IN_USE
 from core.lib import remove_none_from_dict
 from django.core.exceptions import ObjectDoesNotExist
 
@@ -26,6 +26,12 @@ def resolve_edit_site_setting_profile_field(_, info, input):
 
     if 'name' in clean_input:
         profile_field.name = clean_input["name"]
+
+    if 'key' in clean_input:
+        key = clean_input["key"]
+        if profile_field.key != key and ProfileField.objects.filter(key=key).first():
+            raise GraphQLError(KEY_ALREADY_IN_USE)
+        profile_field.key = key
 
     if 'isEditable' in clean_input:
         profile_field.is_editable_by_user = clean_input["isEditable"]
