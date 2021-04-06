@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-04-21 12:46+0200\n"
+"POT-Creation-Date: 2021-04-28 17:39+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -136,12 +136,12 @@ msgstr "Account verwijderd van %(name_deleted_user)s"
 msgid "A site administrator was removed from %(site_name)s"
 msgstr "Een site beheerder is verwijderd van %(site_name)s"
 
-#: core/resolvers/mutation_handle_site_access_request.py:53
+#: core/resolvers/mutation_handle_site_access_request.py:38
 #, python-format
 msgid "You are now member of: %(site_name)s"
 msgstr "Je hebt nu toegang tot: %(site_name)s"
 
-#: core/resolvers/mutation_handle_site_access_request.py:57
+#: core/resolvers/mutation_handle_site_access_request.py:42
 #, python-format
 msgid "Membership request declined for: %(site_name)s"
 msgstr "Lidmaatschapsverzoek afgewezen voor: %(site_name)s"
@@ -217,51 +217,51 @@ msgstr "Een nieuwe site beheerder is toegewezen aan %(site_name)s"
 msgid "You're granted site administrator right on %(site_name)s"
 msgstr "U bent aangewezen als site beheerder van %(site_name)s"
 
-#: core/resolvers/query_site.py:118
+#: core/resolvers/query_site.py:120
 msgid "Activity stream"
 msgstr "Activiteitenstroom"
 
-#: core/resolvers/query_site.py:118
+#: core/resolvers/query_site.py:120
 msgid "CMS page"
 msgstr "CMS pagina"
 
-#: core/resolvers/query_site.py:154
+#: core/resolvers/query_site.py:156
 msgid "Daily"
 msgstr "Dagelijks"
 
-#: core/resolvers/query_site.py:155
+#: core/resolvers/query_site.py:157
 msgid "Weekly"
 msgstr "Wekelijks"
 
-#: core/resolvers/query_site.py:156
+#: core/resolvers/query_site.py:158
 msgid "Monthly"
 msgstr "Maandelijks"
 
-#: core/resolvers/query_site.py:157
+#: core/resolvers/query_site.py:159
 msgid "Never"
 msgstr "Nooit"
 
-#: core/resolvers/query_site.py:206
+#: core/resolvers/query_site.py:208
 msgid "Administrator"
 msgstr "Beheerder"
 
-#: core/resolvers/query_site.py:207
+#: core/resolvers/query_site.py:209
 msgid "Editor"
 msgstr "Redacteur"
 
-#: core/resolvers/query_site.py:208
+#: core/resolvers/query_site.py:210
 msgid "Question expert"
 msgstr "Vraagexpert"
 
-#: core/tasks.py:276
+#: core/tasks.py:277
 msgid "Import was a success"
 msgstr "Import afgerond"
 
-#: core/tasks.py:276
+#: core/tasks.py:277
 msgid "Import failed"
 msgstr "Import mislukt"
 
-#: core/tasks.py:352
+#: core/tasks.py:353
 #, python-format
 msgid "New notification at %(site_name)s: "
 msgstr "Nieuwe notificatie op %(site_name)s"
@@ -742,15 +742,16 @@ msgstr "Deze site is besloten. Log in om toegang te krijgen."
 msgid "or"
 msgstr "of"
 
-#: core/templates/registration/login.html:27
-msgid "Login using Pleio account"
-msgstr "Log in met Pleio account"
-
 #: core/templates/registration/login.html:30
+#, python-format
+msgid "Login using %(oidc_provider)s"
+msgstr ""
+
+#: core/templates/registration/login.html:36
 msgid "Don't have an account?"
 msgstr "Nog geen account?"
 
-#: core/templates/registration/login.html:30
+#: core/templates/registration/login.html:36
 msgid "Register"
 msgstr "Registreer"
 
@@ -794,7 +795,7 @@ msgstr ""
 "De toegang is aangevraagd. Je ontvangt een e-mail wanneer de toegang door de "
 "beheerder wordt toegewezen."
 
-#: core/views.py:148
+#: core/views.py:151
 #, python-format
 msgid "New access request for %(site_name)s"
 msgstr "Nieuwe toegangsaanvraag voor %(site_name)s"
@@ -808,6 +809,9 @@ msgstr "Bevestiging aanmelding %s"
 #, python-format
 msgid "Confirmation of registration for %s"
 msgstr "Bevestiging aanmelding voor %s"
+
+#~ msgid "Login using Pleio account"
+#~ msgstr "Log in met Pleio account"
 
 #~ msgid "Save"
 #~ msgstr "Opslaan"

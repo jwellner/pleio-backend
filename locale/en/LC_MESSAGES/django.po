@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-04-21 12:46+0200\n"
+"POT-Creation-Date: 2021-04-28 17:39+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -136,12 +136,12 @@ msgstr ""
 msgid "A site administrator was removed from %(site_name)s"
 msgstr ""
 
-#: core/resolvers/mutation_handle_site_access_request.py:53
+#: core/resolvers/mutation_handle_site_access_request.py:38
 #, python-format
 msgid "You are now member of: %(site_name)s"
 msgstr ""
 
-#: core/resolvers/mutation_handle_site_access_request.py:57
+#: core/resolvers/mutation_handle_site_access_request.py:42
 #, python-format
 msgid "Membership request declined for: %(site_name)s"
 msgstr ""
@@ -217,51 +217,51 @@ msgstr ""
 msgid "You're granted site administrator right on %(site_name)s"
 msgstr ""
 
-#: core/resolvers/query_site.py:118
+#: core/resolvers/query_site.py:120
 msgid "Activity stream"
 msgstr ""
 
-#: core/resolvers/query_site.py:118
+#: core/resolvers/query_site.py:120
 msgid "CMS page"
 msgstr ""
 
-#: core/resolvers/query_site.py:154
+#: core/resolvers/query_site.py:156
 msgid "Daily"
 msgstr ""
 
-#: core/resolvers/query_site.py:155
+#: core/resolvers/query_site.py:157
 msgid "Weekly"
 msgstr ""
 
-#: core/resolvers/query_site.py:156
+#: core/resolvers/query_site.py:158
 msgid "Monthly"
 msgstr ""
 
-#: core/resolvers/query_site.py:157
+#: core/resolvers/query_site.py:159
 msgid "Never"
 msgstr ""
 
-#: core/resolvers/query_site.py:206
+#: core/resolvers/query_site.py:208
 msgid "Administrator"
 msgstr ""
 
-#: core/resolvers/query_site.py:207
+#: core/resolvers/query_site.py:209
 msgid "Editor"
 msgstr ""
 
-#: core/resolvers/query_site.py:208
+#: core/resolvers/query_site.py:210
 msgid "Question expert"
 msgstr ""
 
-#: core/tasks.py:276
+#: core/tasks.py:277
 msgid "Import was a success"
 msgstr ""
 
-#: core/tasks.py:276
+#: core/tasks.py:277
 msgid "Import failed"
 msgstr ""
 
-#: core/tasks.py:352
+#: core/tasks.py:353
 #, python-format
 msgid "New notification at %(site_name)s: "
 msgstr ""
@@ -624,15 +624,16 @@ msgstr ""
 msgid "or"
 msgstr ""
 
-#: core/templates/registration/login.html:27
-msgid "Login using Pleio account"
+#: core/templates/registration/login.html:30
+#, python-format
+msgid "Login using %(oidc_provider)s"
 msgstr ""
 
-#: core/templates/registration/login.html:30
+#: core/templates/registration/login.html:36
 msgid "Don't have an account?"
 msgstr ""
 
-#: core/templates/registration/login.html:30
+#: core/templates/registration/login.html:36
 msgid "Register"
 msgstr ""
 
@@ -672,7 +673,7 @@ msgid ""
 "Access is requested. You will receive an e-mail when the request is accepted."
 msgstr ""
 
-#: core/views.py:148
+#: core/views.py:151
 #, python-format
 msgid "New access request for %(site_name)s"
 msgstr ""
