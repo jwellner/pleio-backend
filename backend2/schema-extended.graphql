@@ -199,6 +199,7 @@ type addSiteSettingProfileFieldPayload {
 input editSiteSettingProfileFieldInput {
   guid: String!
   name: String
+  key: String
   isEditable: Boolean
   isFilter: Boolean
   isInOverview: Boolean
