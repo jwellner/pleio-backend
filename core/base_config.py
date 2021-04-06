@@ -16,6 +16,11 @@ DEFAULT_SITE_CONFIG = {
     'GOOGLE_SITE_VERIFICATION': ('', 'Google site verification code'),
     'PIWIK_URL': ('https://stats.pleio.nl/', 'Piwik url'),
     'PIWIK_ID': ('', 'Piwik ID'),
+    'OIDC_PROVIDERS': (['pleio'], 'OIDC Providers'),
+    'OIDC_PROVIDER_OPTIONS': ([
+        {'value': 'pleio', 'label': 'Pleio account', 'isDefault': True},
+        {'value': 'fnv', 'label': 'Mijn FNV'},
+    ], 'Default OP options'),
 
     'THEME_OPTIONS': (
         [{"value": 'leraar', 'label': 'Standaard'}, {'value': 'rijkshuisstijl', 'label': 'Rijkshuisstijl'}],

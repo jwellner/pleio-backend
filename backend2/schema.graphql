@@ -611,6 +611,7 @@ input editSiteSettingInput {
   googleSiteVerification: String
   piwikUrl: String
   piwikId: String
+  oidcProviders: [String]
   font: String
   colorPrimary: String
   colorSecondary: String
@@ -1515,6 +1516,8 @@ type SiteSettings {
   googleSiteVerification: String
   piwikUrl: String
   piwikId: String
+  oidcProviders: [String]
+  oidcProviderOptions: [Option]
   font: String
   fontOptions: [Option]
   colorPrimary: String

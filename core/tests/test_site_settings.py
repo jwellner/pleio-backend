@@ -62,6 +62,11 @@ class SiteSettingsTestCase(FastTenantTestCase):
                     enableSearchEngineIndexing
                     piwikUrl
                     piwikId
+                    oidcProviders
+                    oidcProviderOptions {
+                        value
+                        label
+                    }
 
                     themeOptions {
                         value
@@ -264,6 +269,11 @@ class SiteSettingsTestCase(FastTenantTestCase):
         self.assertEqual(data["siteSettings"]["enableSearchEngineIndexing"], False)
         self.assertEqual(data["siteSettings"]["piwikUrl"], "https://stats.pleio.nl/")
         self.assertEqual(data["siteSettings"]["piwikId"], "")
+        self.assertEqual(data["siteSettings"]["oidcProviders"], ["pleio"])
+        self.assertEqual(data["siteSettings"]["oidcProviderOptions"], [
+            {'value': 'pleio', 'label': 'Pleio account'},
+            {'value': 'fnv', 'label': 'Mijn FNV'},
+        ])
 
         self.assertEqual(data["siteSettings"]["themeOptions"], [{"value": 'leraar', 'label': 'Standaard'}, {'value': 'rijkshuisstijl', 'label': 'Rijkshuisstijl'}])
         self.assertEqual(data["siteSettings"]["fontOptions"], [
