@@ -17,7 +17,7 @@ def resolve_has_children(obj, info):
 def resolve_children(obj, info):
     # pylint: disable=unused-argument
     try:
-        return obj.children.all()
+        return obj.children.visible(info.context["request"].user)
     except AttributeError:
         return []
 

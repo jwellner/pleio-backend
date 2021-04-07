@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-03-29 10:46+0200\n"
+"POT-Creation-Date: 2021-04-07 17:18+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -81,7 +81,7 @@ msgstr "Eigenaarschap van de groep %(group_name)s overgedragen"
 msgid "Account of %(name_deleted_user)s removed"
 msgstr "Account verwijderd van %(name_deleted_user)s"
 
-#: core/resolvers/mutation_delete_user.py:43
+#: core/resolvers/mutation_delete_user.py:41
 #: core/resolvers/mutation_handle_delete_account_request.py:46
 #: core/resolvers/mutation_toggle_user_role.py:43
 #, python-format
@@ -429,6 +429,8 @@ msgid ""
 "Respond by clicking <a href=\"%(user_url)s/reply?subject=%(subject)s\">here</"
 "a>"
 msgstr ""
+"Reageer door <a href=\"%(user_url)s/reply?subject=%(subject)s\">hier</a> te "
+"klikken"
 
 #: core/templates/email/send_notification_emails.html:37
 #, python-format
