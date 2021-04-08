@@ -399,10 +399,6 @@ def replace_domain_links(self, schema_name, replace_domain=None, replace_elgg_id
 
         def _replace_links(text):
             if replace_elgg_id:
-                # replace file/view links
-                # TODO: maybe it is better to get Entity.url / Entity.download_url in matching below....
-                text = text.replace(f"/file/view/", "/files/view/")
-
                 # match links where old ID has to be simply replaced
                 matches = re.findall(rf'(((https:\/\/{re.escape(replace_domain)})|(^|(?<=[ \"\n])))[\w\-\/]*\/(view|download)\/([0-9]+)[\w\-\.\/\?\%]*)', text)
 
@@ -434,6 +430,33 @@ def replace_domain_links(self, schema_name, replace_domain=None, replace_elgg_id
                             text = text.replace(link, file_entity.download_url)
                         except Exception:
                             pass
+
+
+                # match old /file/view links and replace with new /files/view link, only for migrates files
+                matches = re.findall(
+                    rf'(((https:\/\/{re.escape(replace_domain)})|(^|(?<=[ \"\n])))\/file\/view\/([\w\-]+)\/[\w\-\.\/\?\%]*)',
+                    text
+                )
+
+                for match in matches:
+                    link = match[0]
+                    file_id = match[4]
+                    try:
+                        has_file = GuidMap.objects.filter(id=file_id, object_type="file").first()
+                        if has_file:
+                           file_entity = FileFolder.objects.get(id=has_file.guid)
+                           text = text.replace(link, file_entity.url)
+                    except Exception:
+                        pass
+
+                    try:
+                        has_file = GuidMap.objects.filter(guid=file_id, object_type="file").first()
+                        if has_file:
+                           file_entity = FileFolder.objects.get(id=file_id)
+                           text = text.replace(link, file_entity.url)
+                           print(text)
+                    except Exception:
+                        pass
 
                 # match group profile links and replace new link
                 matches = re.findall(
