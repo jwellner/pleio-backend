@@ -3,7 +3,7 @@ import json
 import logging
 from core.resolvers.query_site import get_settings
 from core import config
-from core.models import Entity, Group, UserProfileField, SiteAccessRequest
+from core.models import Entity, Group, UserProfileField, SiteAccessRequest, ProfileField
 from core.lib import access_id_to_acl, get_default_email_context, tenant_schema
 from core.forms import OnboardingForm, RequestAccessForm
 from core.constances import USER_ROLES
@@ -172,6 +172,9 @@ def onboarding(request):
     claims = request.session.get('onboarding_claims', None)
 
     if not request.user.is_authenticated and not claims:
+        return HttpResponseRedirect('/')
+
+    if not config.ONBOARDING_INTRO and not ProfileField.objects.filter(is_in_onboarding=True).first():
         return HttpResponseRedirect('/')
 
     if request.POST:

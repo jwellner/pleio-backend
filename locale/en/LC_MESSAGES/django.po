@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-04-07 17:18+0200\n"
+"POT-Creation-Date: 2021-04-08 14:01+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -560,12 +560,12 @@ msgstr ""
 
 #: core/templates/onboarding.html:14
 msgid ""
-"Your profile is missing some mandatory fields. We kindly ask you to fill in "
-"these details."
+"Your profile is missing some fields. We kindly ask you to fill in these "
+"details."
 msgstr ""
 
 #: core/templates/onboarding.html:58
-msgid "Save"
+msgid "Continue"
 msgstr ""
 
 #: core/templates/registration/login.html:15
