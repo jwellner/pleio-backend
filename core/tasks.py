@@ -441,20 +441,22 @@ def replace_domain_links(self, schema_name, replace_domain=None, replace_elgg_id
                 for match in matches:
                     link = match[0]
                     file_id = match[4]
+
+                    # try old elgg id
                     try:
                         has_file = GuidMap.objects.filter(id=file_id, object_type="file").first()
                         if has_file:
-                           file_entity = FileFolder.objects.get(id=has_file.guid)
-                           text = text.replace(link, file_entity.url)
+                            file_entity = FileFolder.objects.get(id=has_file.guid)
+                            text = text.replace(link, file_entity.url)
                     except Exception:
                         pass
 
+                    # try new uuid
                     try:
                         has_file = GuidMap.objects.filter(guid=file_id, object_type="file").first()
                         if has_file:
-                           file_entity = FileFolder.objects.get(id=file_id)
-                           text = text.replace(link, file_entity.url)
-                           print(text)
+                            file_entity = FileFolder.objects.get(id=file_id)
+                            text = text.replace(link, file_entity.url)
                     except Exception:
                         pass
 
