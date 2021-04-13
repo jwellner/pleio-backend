@@ -548,3 +548,19 @@ class ElggHelpers():
                 FlowId.objects.create(flow_id=flow_id, object_id=entity.id)
             except Exception as e:
                 print("Flow_id, not saved. Error: %s\n" % str(e))
+
+
+    def get_event_start_date(self, event):
+        start_day = datetime.fromtimestamp(int(event.get_metadata_value_by_name("start_day")))
+        start_date_time = start_day
+        if event.get_metadata_value_by_name("start_time"):
+            start_time = datetime.fromtimestamp(int(event.get_metadata_value_by_name("start_time")))
+            start_date_time = datetime(
+                start_day.year,
+                start_day.month,
+                start_day.day,
+                start_time.hour,
+                start_time.minute,
+                start_time.second
+            )
+        return start_date_time
