@@ -47,6 +47,40 @@ class OnboardingTestCase(FastTenantTestCase):
         self.assertTemplateUsed(response, 'onboarding.html')
 
     @override_settings(AUTHENTICATION_BACKENDS=['django.contrib.auth.backends.ModelBackend'])
+    def test_onboarding_with_only_intro(self):
+        session = self.client.session
+        session['onboarding_claims'] = {
+            'email': 'test@pleio.nl',
+            'name': 'test user'
+        }
+        session.save()
+
+        cache.set("%s%s" % (connection.schema_name, 'ONBOARDING_ENABLED'), True)
+        cache.set("%s%s" % (connection.schema_name, 'ONBOARDING_INTRO'), "Ther is an intro")
+        self.profile_field1.delete()
+
+        response = self.client.get('/onboarding', follow=True)
+
+        self.assertTemplateUsed(response, 'onboarding.html')
+
+    @override_settings(AUTHENTICATION_BACKENDS=['django.contrib.auth.backends.ModelBackend'])
+    def test_onboarding_passed_if_no_intro_or_profile_fields(self):
+        session = self.client.session
+        session['onboarding_claims'] = {
+            'email': 'test@pleio.nl',
+            'name': 'test user'
+        }
+        session.save()
+        self.profile_field1.delete()
+
+        cache.set("%s%s" % (connection.schema_name, 'ONBOARDING_ENABLED'), True)
+
+        response = self.client.get('/onboarding', follow=True)
+
+        self.assertTemplateUsed(response, 'base_closed.html')
+
+
+    @override_settings(AUTHENTICATION_BACKENDS=['django.contrib.auth.backends.ModelBackend'])
     def test_onboarding_create_user(self):
         session = self.client.session
 
