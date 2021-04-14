@@ -6,8 +6,7 @@ from core.lib import get_tmp_file_path
 from core.models import Entity
 from core.constances import USER_ROLES
 from file.models import FileFolder
-from file.helpers import add_folders_to_zip
-from file.helpers import generate_thumbnail
+from file.helpers import add_folders_to_zip, generate_thumbnail, get_download_filename
 from os import path
 
 
@@ -26,7 +25,7 @@ def download(request, file_id=None, file_name=None):
 
         response = StreamingHttpResponse(streaming_content=entity.upload.open(), content_type=entity.mime_type)
         response['Content-Length'] = entity.upload.size
-        response['Content-Disposition'] = "attachment; filename=%s" % path.basename(entity.upload.name)
+        response['Content-Disposition'] = "attachment; filename=%s" % get_download_filename(entity)
         return response
 
     except ObjectDoesNotExist:
@@ -93,7 +92,7 @@ def bulk_download(request):
     for f in files:
         if f.group and f.group.is_closed and not f.group.is_full_member(user) and not user.has_role(USER_ROLES.ADMIN):
             continue
-        zipf.writestr(path.basename(f.upload.name), f.upload.read())
+        zipf.writestr(path.basename(get_download_filename(f)), f.upload.read())
 
     # Add selected folders to zip
     folders = FileFolder.objects.visible(user).filter(id__in=folder_ids, is_folder=True)

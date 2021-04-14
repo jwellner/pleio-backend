@@ -1,5 +1,5 @@
 import os
-import magic
+import mimetypes
 from auditlog.registry import auditlog
 from django.urls import reverse
 from django.conf import settings
@@ -23,7 +23,9 @@ def get_mimetype(file):
     """
     Get mimetype by reading the header of the file
     """
-    mime_type = magic.from_buffer(file.upload.open().read(2048), mime=True)
+    mime_type, _ = mimetypes.guess_type(file.upload.path)
+    if not mime_type:
+        return None
     return mime_type
 
 

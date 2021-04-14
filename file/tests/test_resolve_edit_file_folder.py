@@ -6,9 +6,12 @@ from backend2.schema import schema
 from ariadne import graphql_sync
 from ariadne.file_uploads import combine_multipart_data, upload_scalar
 import json
+import mimetypes
 from django.contrib.auth.models import AnonymousUser
+from django.core.files.uploadedfile import SimpleUploadedFile
 from django.http import HttpRequest
 from core.models import Group
+from file.helpers import get_download_filename
 from user.models import User
 from event.models import Event
 from core.constances import ACCESS_TYPE
@@ -208,7 +211,7 @@ class EditFileFolderTestCase(FastTenantTestCase):
         request = HttpRequest()
         request.user = self.authenticatedUser
 
-        variables = { 
+        variables = {
             "input": {
                 "guid": self.folder1.guid,
                 "accessId": 1,
@@ -222,7 +225,7 @@ class EditFileFolderTestCase(FastTenantTestCase):
         self.assertTrue(result[0])
 
         data = result[1]["data"]
-        
+
         self.assertEqual(data["editFileFolder"]["entity"]["guid"], self.folder1.guid)
         self.assertEqual(data["editFileFolder"]["entity"]["__typename"], "FileFolder")
 
@@ -303,7 +306,7 @@ class EditFileFolderTestCase(FastTenantTestCase):
         request = HttpRequest()
         request.user = self.authenticatedUser
 
-        variables = { 
+        variables = {
             "input": {
                 "guid": self.folder1.guid,
                 "accessId": 1,
@@ -316,7 +319,7 @@ class EditFileFolderTestCase(FastTenantTestCase):
         self.assertTrue(result[0])
 
         data = result[1]["data"]
-        
+
         self.assertEqual(data["editFileFolder"]["entity"]["guid"], self.folder1.guid)
         self.assertEqual(data["editFileFolder"]["entity"]["__typename"], "FileFolder")
 
@@ -394,7 +397,7 @@ class EditFileFolderTestCase(FastTenantTestCase):
         request = HttpRequest()
         request.user = self.authenticatedUser
 
-        variables = { 
+        variables = {
             "input": {
                 "guid": self.folder1.guid,
                 "writeAccessId": 1,
@@ -407,7 +410,7 @@ class EditFileFolderTestCase(FastTenantTestCase):
         self.assertTrue(result[0])
 
         data = result[1]["data"]
-        
+
         self.assertEqual(data["editFileFolder"]["entity"]["guid"], self.folder1.guid)
         self.assertEqual(data["editFileFolder"]["entity"]["__typename"], "FileFolder")
 
@@ -485,7 +488,7 @@ class EditFileFolderTestCase(FastTenantTestCase):
         request = HttpRequest()
         request.user = self.authenticatedUser
 
-        variables = { 
+        variables = {
             "input": {
                 "guid": self.folder1.guid,
                 "accessId": 1,
@@ -577,7 +580,7 @@ class EditFileFolderTestCase(FastTenantTestCase):
         request = HttpRequest()
         request.user = self.user1
 
-        variables = { 
+        variables = {
             "input": {
                 "guid": self.folder3.guid,
                 "accessId": 1,
@@ -631,3 +634,87 @@ class EditFileFolderTestCase(FastTenantTestCase):
         self.assertEqual(data["files"]["edges"][0]["guid"], self.file2.guid)
         self.assertEqual(data["files"]["edges"][0]["accessId"], 2)
         self.assertEqual(data["files"]["edges"][0]["writeAccessId"], 0)
+
+
+
+    @patch("file.models.get_mimetype")
+    @patch("{}.open".format(settings.DEFAULT_FILE_STORAGE))
+    def test_get_download_filename(self, mock_open, mock_mimetype):
+
+        file_mock = MagicMock(spec=File)
+        file_mock.name = 'icon-name.jpg'
+        file_mock.title = 'icon-name.jpg'
+        file_mock.content_type = 'image/jpeg'
+
+        mock_open.return_value = file_mock
+        mock_mimetype.return_value = file_mock.content_type
+
+        self.file = FileFolder.objects.create(
+            read_access=[ACCESS_TYPE.user.format(self.authenticatedUser.id)],
+            write_access=[ACCESS_TYPE.user.format(self.authenticatedUser.id)],
+            owner=self.authenticatedUser,
+            tags=["tag1", "tag2"],
+            upload=file_mock,
+            title=file_mock.title
+        )
+
+        self.assertEqual(get_download_filename(self.file), 'icon-name.jpg')
+
+        self.file.title = 'iconnewname'
+        self.file.save()
+
+        self.assertEqual(get_download_filename(self.file), 'iconnewname.jpg')
+
+
+        self.file.title = 'iconnewname.txt'
+        self.file.save()
+
+        self.assertEqual(get_download_filename(self.file), 'iconnewname.txt.jpg')
+
+
+    @patch("file.models.get_mimetype")
+    @patch("{}.open".format(settings.DEFAULT_FILE_STORAGE))
+    def test_get_download_filename_csv(self, mock_open, mock_mimetype):
+
+        file_mock = MagicMock(spec=File)
+        file_mock.name = 'localfile name'
+        file_mock.title = 'csv-name.csv'
+        file_mock.content_type = 'text/plain'
+
+        mock_open.return_value = file_mock
+        mock_mimetype.return_value = file_mock.content_type
+
+        self.file = FileFolder.objects.create(
+            read_access=[ACCESS_TYPE.user.format(self.authenticatedUser.id)],
+            write_access=[ACCESS_TYPE.user.format(self.authenticatedUser.id)],
+            owner=self.authenticatedUser,
+            tags=["tag1", "tag2"],
+            upload=file_mock,
+            title=file_mock.title
+        )
+
+        self.assertEqual(get_download_filename(self.file), 'csv-name.csv')
+
+
+    @patch("file.models.get_mimetype")
+    @patch("{}.open".format(settings.DEFAULT_FILE_STORAGE))
+    def test_get_download_filename_no_mimetype(self, mock_open, mock_mimetype):
+
+        file_mock = MagicMock(spec=File)
+        file_mock.name = 'localfile name'
+        file_mock.title = 'csv-name.weird'
+        file_mock.content_type = None
+
+        mock_open.return_value = file_mock
+        mock_mimetype.return_value = file_mock.content_type
+
+        self.file = FileFolder.objects.create(
+            read_access=[ACCESS_TYPE.user.format(self.authenticatedUser.id)],
+            write_access=[ACCESS_TYPE.user.format(self.authenticatedUser.id)],
+            owner=self.authenticatedUser,
+            tags=["tag1", "tag2"],
+            upload=file_mock,
+            title=file_mock.title
+        )
+
+        self.assertEqual(get_download_filename(self.file), 'csv-name.weird')
