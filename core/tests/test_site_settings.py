@@ -160,6 +160,11 @@ class SiteSettingsTestCase(FastTenantTestCase):
                         label
                     }
 
+                    exportableContentTypes {
+                        value
+                        label
+                    }
+
                     showLoginRegister
                     customTagsAllowed
                     showUpDownVoting
@@ -343,6 +348,20 @@ class SiteSettingsTestCase(FastTenantTestCase):
         self.assertEqual(data["siteSettings"]["exportableUserFields"][6]["field_type"], "userField")
         self.assertEqual(data["siteSettings"]["exportableUserFields"][6]["field"], "banned")
         self.assertEqual(data["siteSettings"]["exportableUserFields"][6]["label"], "banned")
+
+        self.assertEqual(data["siteSettings"]["exportableContentTypes"], [
+            {"value": "statusupdate", "label": "Updates"},
+            {"value": "blog", "label": "Blogs"},
+            {"value": "page", "label": "CMS pagina's"},
+            {"value": "discussion", "label": "Discussies"},
+            {"value": "event", "label": "Agenda-items"},
+            {"value": "file", "label": "Bestanden"},
+            {"value": "news", "label": "Nieuws"},
+            {"value": "poll", "label": "Polls"},
+            {"value": "question", "label": "Vragen"},
+            {"value": "task", "label": "Taken"},
+            {"value": "wiki", "label": "Wiki pagina's"}
+        ])
 
         self.assertEqual(data["siteSettings"]["showLoginRegister"], True)
         self.assertEqual(data["siteSettings"]["customTagsAllowed"], True)

@@ -160,7 +160,7 @@ def resolve_edit_file_folder(_, info, input):
     if 'tags' in clean_input:
         entity.tags = clean_input.get("tags")
 
-    if 'title' in clean_input:
+    if 'title' in clean_input and clean_input.get("title"):
         entity.title = clean_input.get("title")
 
     if 'file' in clean_input:

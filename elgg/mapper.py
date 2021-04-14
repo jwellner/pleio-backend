@@ -215,7 +215,7 @@ class Mapper():
         entity.tags = elgg_entity.entity.get_metadata_values_by_name("tags")
 
         if elgg_entity.entity.get_metadata_value_by_name("start_day"):
-            entity.start_date = datetime.fromtimestamp(int(elgg_entity.entity.get_metadata_value_by_name("start_day")))
+            entity.start_date = self.helpers.get_event_start_date(elgg_entity.entity)
         if elgg_entity.entity.get_metadata_value_by_name("end_ts"):
             entity.end_date = datetime.fromtimestamp(int(elgg_entity.entity.get_metadata_value_by_name("end_ts")))
 

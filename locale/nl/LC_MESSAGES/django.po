@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-04-07 17:18+0200\n"
+"POT-Creation-Date: 2021-04-08 15:05+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -54,6 +54,50 @@ msgstr "Ingelogde gebruikers"
 #: core/resolvers/query_site.py:72
 msgid "Public"
 msgstr "Iedereen (publiek zichtbaar)"
+
+#: core/lib.py:269
+msgid "Updates"
+msgstr ""
+
+#: core/lib.py:270
+msgid "Blogs"
+msgstr ""
+
+#: core/lib.py:271
+msgid "CMS pages"
+msgstr "CMS pagina's"
+
+#: core/lib.py:272
+msgid "Discussions"
+msgstr "Discussies"
+
+#: core/lib.py:273
+msgid "Events"
+msgstr "Agenda-items"
+
+#: core/lib.py:274
+msgid "Files"
+msgstr "Bestanden"
+
+#: core/lib.py:275
+msgid "News"
+msgstr "Nieuws"
+
+#: core/lib.py:276
+msgid "Polls"
+msgstr "Polls"
+
+#: core/lib.py:277
+msgid "Questions"
+msgstr "Vragen"
+
+#: core/lib.py:278
+msgid "Tasks"
+msgstr "Taken"
+
+#: core/lib.py:279
+msgid "Wiki pages"
+msgstr "Wiki pagina's"
 
 #: core/management/commands/send_notification_emails.py:49
 #, python-format
@@ -193,15 +237,15 @@ msgstr "Maandelijks"
 msgid "Never"
 msgstr "Nooit"
 
-#: core/resolvers/query_site.py:204
+#: core/resolvers/query_site.py:206
 msgid "Administrator"
 msgstr "Beheerder"
 
-#: core/resolvers/query_site.py:205
+#: core/resolvers/query_site.py:207
 msgid "Editor"
 msgstr "Redacteur"
 
-#: core/resolvers/query_site.py:206
+#: core/resolvers/query_site.py:208
 msgid "Question expert"
 msgstr "Vraagexpert"
 
@@ -676,15 +720,15 @@ msgstr ""
 
 #: core/templates/onboarding.html:14
 msgid ""
-"Your profile is missing some mandatory fields. We kindly ask you to fill in "
-"these details."
+"Your profile is missing some fields. We kindly ask you to fill in these "
+"details."
 msgstr ""
-"In je profiel ontbreken een aantal verplichte velden. We vragen je "
+"In je profiel ontbreken een aantal velden. We vragen je "
 "vriendelijk deze velden in te vullen."
 
 #: core/templates/onboarding.html:58
-msgid "Save"
-msgstr "Opslaan"
+msgid "Continue"
+msgstr "Ga verder"
 
 #: core/templates/registration/login.html:15
 msgid "This site is closed. Log in to get access."
@@ -746,7 +790,7 @@ msgstr ""
 "De toegang is aangevraagd. Je ontvangt een e-mail wanneer de toegang door de "
 "beheerder wordt toegewezen."
 
-#: core/views.py:146
+#: core/views.py:148
 #, python-format
 msgid "New access request for %(site_name)s"
 msgstr "Nieuwe toegangsaanvraag voor %(site_name)s"
@@ -760,6 +804,9 @@ msgstr "Bevestiging aanmelding %s"
 #, python-format
 msgid "Confirmation of registration for %s"
 msgstr "Bevestiging aanmelding voor %s"
+
+#~ msgid "Save"
+#~ msgstr "Opslaan"
 
 #~ msgid "Please correct the error below."
 #~ msgstr "Corrigeer de onderstaande fout."
