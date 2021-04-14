@@ -303,6 +303,7 @@ extend type SiteSettings {
   directRegistrationDomains: [String]
   profileSections: [ProfileSection]
   exportableUserFields: [ExportableField]
+  exportableContentTypes: [Option]
   profileFields: [ProfileItem]
   limitedGroupAdd: Boolean!
   onboardingEnabled: Boolean!

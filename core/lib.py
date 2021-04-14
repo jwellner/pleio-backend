@@ -13,7 +13,7 @@ from django.conf import settings
 from django.core.validators import URLValidator
 from django.db import connection
 from django.utils.text import slugify
-from django.utils.translation import ugettext
+from django.utils.translation import ugettext, ugettext_lazy
 from enum import Enum
 import html2text
 from draftjs_exporter.dom import DOM
@@ -262,6 +262,21 @@ def get_exportable_user_fields():
         {'field_type': 'userField', 'field': 'created_at_unix', 'label': 'created_at (U)'},
         {'field_type': 'userField', 'field': 'updated_at_unix', 'label': 'updated_at (U)'},
         {'field_type': 'userField', 'field': 'last_online_unix', 'label': 'last_online (U)'},
+    ]
+
+def get_exportable_content_types():
+    return [
+        {"value": "statusupdate", "label": ugettext_lazy("Updates")},
+        {"value": "blog", "label": ugettext_lazy("Blogs")},
+        {"value": "page", "label": ugettext_lazy("CMS pages")},
+        {"value": "discussion", "label": ugettext_lazy("Discussions")},
+        {"value": "event", "label": ugettext_lazy("Events")},
+        {"value": "file", "label": ugettext_lazy("Files")},
+        {"value": "news", "label": ugettext_lazy("News")},
+        {"value": "poll", "label": ugettext_lazy("Polls")},
+        {"value": "question", "label": ugettext_lazy("Questions")},
+        {"value": "task", "label": ugettext_lazy("Tasks")},
+        {"value": "wiki", "label": ugettext_lazy("Wiki pages")}
     ]
 
 def tenant_schema():

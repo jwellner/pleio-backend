@@ -4,17 +4,19 @@ import logging
 from core.resolvers.query_site import get_settings
 from core import config
 from core.models import Entity, Group, UserProfileField, SiteAccessRequest, ProfileField
-from core.lib import access_id_to_acl, get_default_email_context, tenant_schema
+from core.lib import access_id_to_acl, get_default_email_context, tenant_schema, get_exportable_content_types, get_model_by_subtype
 from core.forms import OnboardingForm, RequestAccessForm
 from core.constances import USER_ROLES
 from user.models import User
 from core.tasks import send_mail_multi
 from django.utils.translation import ugettext_lazy
 from core.auth import oidc_provider_logout_url
+from django.contrib.contenttypes.fields import GenericRelation
 from django.contrib.auth.views import LogoutView
 from django.shortcuts import redirect, render
 from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist
+from django.db import models
 from django.utils.text import Truncator
 from django.urls import reverse
 from django.views.decorators.cache import cache_control
@@ -352,5 +354,60 @@ def export_group_members(request, group_id=None):
     response = StreamingHttpResponse((writer.writerow(row) for row in rows),
                                      content_type="text/csv")
     response['Content-Disposition'] = 'attachment; filename="' + group.name + '.csv"'
+
+    return response
+
+
+
+def export_content(request, content_type=None):
+    user = request.user
+
+    if not user.is_authenticated:
+        raise Http404("Not logged in")
+
+    if not user.has_role(USER_ROLES.ADMIN):
+        raise Http404("Not admin")
+
+    if not content_type:
+        raise Http404("Not found")
+
+    exportable_content_types = [d['value'] for d in get_exportable_content_types()]
+
+    if content_type not in exportable_content_types:
+        raise Http404("Content type " + content_type + " can not be exported")
+
+    Model = get_model_by_subtype(content_type)
+    entities = Model.objects.all()
+
+    def stream(items, pseudo_buffer, Model):
+        # pylint: disable=unidiomatic-typecheck
+        fields = []
+        field_names = []
+        for field in Model._meta.get_fields():
+            if type(field) in [models.OneToOneRel, models.ForeignKey, models.ManyToOneRel, GenericRelation]:
+                continue
+            fields.append(field)
+            field_names.append(field.name)
+
+        writer = csv.writer(pseudo_buffer, delimiter=';', quotechar='"')
+        yield writer.writerow(field_names)
+
+        def get_data(entity, fields):
+            field_values = []
+            for field in fields:
+                field_values.append(field.value_from_object(entity))
+            return field_values
+
+        for item in items:
+            yield writer.writerow(get_data(item, fields))
+
+
+    response = StreamingHttpResponse(
+        streaming_content=(stream(entities, Echo(), Model)),
+        content_type='text/csv',
+    )
+
+    filename = content_type + '-export.csv'
+    response['Content-Disposition'] = 'attachment;filename=' + filename
 
     return response
