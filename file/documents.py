@@ -3,6 +3,7 @@ import re
 import tempfile
 import logging
 import textract
+from django.db import models
 from django_elasticsearch_dsl import fields
 from django_elasticsearch_dsl.registries import registry
 from .models import FileFolder
@@ -47,6 +48,16 @@ class FileDocument(DefaultDocument):
         except Exception as e:
             logger.error('Error occured while indexing file (%s): %s', instance.id, e)
             return file_contents
+
+    def update(self, thing, refresh=None, action='index', parallel=False, **kwargs):
+        if isinstance(thing, models.Model) and not thing.group and action == "index":
+            action = "delete"
+            kwargs = {**kwargs, 'raise_on_error': False}
+        return super(FileDocument, self).update(thing, refresh, action, **kwargs)
+
+    def get_queryset(self):
+        queryset = super(FileDocument, self).get_queryset()
+        return queryset.exclude(group=None)
 
     class Index:
         name = 'file'
