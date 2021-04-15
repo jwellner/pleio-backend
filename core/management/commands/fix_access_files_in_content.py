@@ -77,6 +77,7 @@ class Command(BaseCommand):
                 pass
 
             if write_access_removed:
+                write_access.append(group_access)
                 write_access = list(set(write_access))
 
             if (set(write_access) == set(file.write_access)) and (set(read_access) == set(file.read_access)):
