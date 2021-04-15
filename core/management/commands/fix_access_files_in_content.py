@@ -67,14 +67,15 @@ class Command(BaseCommand):
             write_access_removed = False
             try:
                 write_access.remove(ACCESS_TYPE.logged_in)
-                write_access = True
+                write_access_removed = True
             except Exception:
                 pass
             try:
                 write_access.remove(ACCESS_TYPE.public)
-                write_access = True
+                write_access_removed = True
             except Exception:
                 pass
+
             if write_access_removed:
                 write_access = list(set(write_access))
 
@@ -124,6 +125,7 @@ class Command(BaseCommand):
                                 _set_file_access(data["entityMap"][idx]["data"]["url"], entity)
                             if "href" in data["entityMap"][idx]["data"]:
                                 _set_file_access(data["entityMap"][idx]["data"]["href"], entity)
+
                 except Exception:
                     pass
 
