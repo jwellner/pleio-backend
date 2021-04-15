@@ -140,9 +140,9 @@ class Command(BaseCommand):
                         # only search in DOCUMENT
                         if data["entityMap"][idx]["type"] in ["DOCUMENT"]:
                             if "url" in data["entityMap"][idx]["data"]:
-                                data["entityMap"][idx]["data"]["url"] = _set_file_access(data["entityMap"][idx]["data"]["url"], entity)
+                                _set_file_access(data["entityMap"][idx]["data"]["url"], entity)
                             if "href" in data["entityMap"][idx]["data"]:
-                                data["entityMap"][idx]["data"]["href"] = _set_file_access(data["entityMap"][idx]["data"]["href"], entity)
+                                _set_file_access(data["entityMap"][idx]["data"]["href"], entity)
                 except Exception:
                     pass
 
