@@ -127,11 +127,6 @@ class Command(BaseCommand):
                                 _set_file_access(data["entityMap"][idx]["data"]["href"], entity)
                 except Exception:
                     pass
-            if hasattr(entity, 'description'):
-                try:
-                    _set_file_access(entity.description, entity)
-                except Exception:
-                    pass
 
         # -- fix access of files in content of closed groups
 
