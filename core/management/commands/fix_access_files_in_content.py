@@ -32,6 +32,12 @@ class Command(BaseCommand):
     @signal_disabler.disable()
     def handle(self, *args, **options):
 
+        if connection.schema_name == 'public':
+            return
+
+        tenant = Client.objects.get(schema_name=connection.schema_name)
+        tenant_domain = tenant.get_primary_domain().domain
+
         self.count_file_access_fixed = 0
 
         def _validate_access(file, group):
@@ -80,39 +86,16 @@ class Command(BaseCommand):
             file.write_access = write_access
             file.save()
             self.count_file_access_fixed += 1
+            self.stdout.write(file.guid)
 
         def _set_file_access(text, entity):
-                # match download file links
                 matches = re.findall(
-                    rf'^\/file\/download\/([\w\-]+)\/[\w\-\.\/\?\%]*',
+                    rf'(((https:\/\/{re.escape(tenant_domain)})|(^|(?<=[ \"\n])))\/file\/download\/([\w\-]+))',
                     text
                 )
 
-                for file_id in matches:
-                    file_entity = None
-                    # try old elgg id
-                    try:
-                        has_file = GuidMap.objects.filter(id=file_id, object_type="file").first()
-                        if has_file:
-                            file_entity = FileFolder.objects.get(id=has_file.guid)
-                    except Exception:
-                        pass
-
-                    # try new uuid
-                    try:
-                        file_entity = FileFolder.objects.get(id=file_id)
-                    except Exception:
-                        pass
-
-                    if file_entity:
-                        _validate_access(file_entity, entity.group)
-
-                matches = re.findall(
-                    rf'^\/file\/download\/([\w\-]+)$',
-                    text
-                )
-
-                for file_id in matches:
+                for match in matches:
+                    file_id = match[4]
                     file_entity = None
                     # try old elgg id
                     try:
@@ -132,10 +115,9 @@ class Command(BaseCommand):
                         _validate_access(file_entity, entity.group)
 
         def _set_file_access_rich_description_json(entity):
-            rich_description = entity.rich_description
-            if rich_description:
+            if hasattr(entity, 'rich_description'):
                 try:
-                    data = json.loads(rich_description)
+                    data = json.loads(entity.rich_description)
                     for idx in data["entityMap"]:
                         # only search in DOCUMENT
                         if data["entityMap"][idx]["type"] in ["DOCUMENT"]:
@@ -145,12 +127,17 @@ class Command(BaseCommand):
                                 _set_file_access(data["entityMap"][idx]["data"]["href"], entity)
                 except Exception:
                     pass
+            if hasattr(entity, 'description'):
+                try:
+                    _set_file_access(entity.description, entity)
+                except Exception:
+                    pass
 
         # -- fix access of files in content of closed groups
 
         entities = Entity.objects.filter(group__is_closed=True).select_subclasses()
 
-        self.stdout.write(f"start checking access of files in {entities.count()} content items")
+        self.stdout.write(f"start checking access of files in {entities.count()} groups")
 
         for entity in entities:
             if hasattr(entity, 'rich_description'):
