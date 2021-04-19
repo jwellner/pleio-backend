@@ -5,6 +5,7 @@ from ariadne import graphql_sync
 import json
 from django.contrib.auth.models import AnonymousUser
 from django.http import HttpRequest
+from django.core.cache import cache
 from core.models import Group, Comment
 from user.models import User
 from question.models import Question
@@ -38,10 +39,13 @@ class ToggleBestAnswerTestCase(FastTenantTestCase):
             container=self.question
         )
 
+        cache.set("%s%s" % (connection.schema_name, 'QUESTIONER_CAN_CHOOSE_BEST_ANSWER'), True)
+
     def tearDown(self):
         self.question.delete()
         self.authenticatedUser.delete()
-    
+        cache.clear()
+
     def test_toggle_best_answer_owner(self):
 
         query = """
@@ -71,7 +75,7 @@ class ToggleBestAnswerTestCase(FastTenantTestCase):
         self.assertTrue(result[0])
 
         data = result[1]["data"]
-       
+
         self.assertEqual(data["toggleBestAnswer"]["entity"]["guid"], self.question.guid)
         self.assertTrue(data["toggleBestAnswer"]["entity"]["comments"][0]["isBestAnswer"])
 
@@ -90,7 +94,7 @@ class ToggleBestAnswerTestCase(FastTenantTestCase):
         self.assertTrue(result[0])
 
         data = result[1]["data"]
-       
+
         self.assertEqual(data["toggleBestAnswer"]["entity"]["guid"], self.question.guid)
         self.assertFalse(data["toggleBestAnswer"]["entity"]["comments"][0]["isBestAnswer"])
 
@@ -127,7 +131,7 @@ class ToggleBestAnswerTestCase(FastTenantTestCase):
         self.assertTrue(result[0])
 
         data = result[1]["data"]
-       
+
         self.assertEqual(data["toggleBestAnswer"]["entity"]["guid"], self.question.guid)
         self.assertTrue(data["toggleBestAnswer"]["entity"]["comments"][0]["isBestAnswer"])
 
@@ -146,7 +150,7 @@ class ToggleBestAnswerTestCase(FastTenantTestCase):
         self.assertTrue(result[0])
 
         data = result[1]["data"]
-       
+
         self.assertEqual(data["toggleBestAnswer"]["entity"]["guid"], self.question.guid)
         self.assertFalse(data["toggleBestAnswer"]["entity"]["comments"][0]["isBestAnswer"])
 
@@ -183,7 +187,7 @@ class ToggleBestAnswerTestCase(FastTenantTestCase):
         self.assertTrue(result[0])
 
         data = result[1]["data"]
-       
+
         self.assertEqual(data["toggleBestAnswer"]["entity"]["guid"], self.question.guid)
         self.assertTrue(data["toggleBestAnswer"]["entity"]["comments"][0]["isBestAnswer"])
 
@@ -202,7 +206,7 @@ class ToggleBestAnswerTestCase(FastTenantTestCase):
         self.assertTrue(result[0])
 
         data = result[1]["data"]
-       
+
         self.assertEqual(data["toggleBestAnswer"]["entity"]["guid"], self.question.guid)
         self.assertFalse(data["toggleBestAnswer"]["entity"]["comments"][0]["isBestAnswer"])
 
