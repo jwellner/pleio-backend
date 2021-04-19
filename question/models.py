@@ -2,6 +2,7 @@ from auditlog.registry import auditlog
 from django.db import models
 from django.utils.text import slugify
 from django.urls import reverse
+from core import config
 from core.models import Entity, VoteMixin, CommentMixin, BookmarkMixin, FollowMixin, Comment, NotificationMixin
 from core.constances import USER_ROLES
 from file.models import FileFolder
@@ -54,7 +55,10 @@ class Question(Entity, VoteMixin, BookmarkMixin, FollowMixin, CommentMixin, Noti
         if self.is_closed:
             return False
 
-        if user.has_role(USER_ROLES.ADMIN) or user.has_role(USER_ROLES.QUESTION_MANAGER) or user == self.owner:
+        if (
+            (user.has_role(USER_ROLES.ADMIN) or user.has_role(USER_ROLES.QUESTION_MANAGER) or user == self.owner)
+            and config.QUESTIONER_CAN_CHOOSE_BEST_ANSWER
+        ):
             return True
 
         return False
