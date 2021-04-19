@@ -319,7 +319,7 @@ def export_group_members(request, group_id=None):
     if not group.can_write(user):
         raise Http404("Group not found")
 
-    headers = ['guid', 'name', 'email (only for admins)', 'member since', 'last login']
+    headers = ['guid', 'name', 'email', 'member since', 'last login']
 
     subgroups = group.subgroups.all()
     subgroup_names = subgroups.values_list('name', flat=True)
@@ -332,9 +332,7 @@ def export_group_members(request, group_id=None):
         if not member.is_active:
             continue
 
-        email = ""
-        if user.has_role(USER_ROLES.ADMIN):
-            email = member.email
+        email = member.email
 
         member_subgroups = member.subgroups.all()
         subgroup_memberships = []
