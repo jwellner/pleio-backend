@@ -46,8 +46,8 @@ class ElggHelpers():
         try:
             plugin = ElggObjectsEntity.objects.using(self.database).get(entity__subtype__subtype='plugin', title=plugin_name)
         except Exception:
-            print(f"Plugin {plugin} not found")
-            return None
+            print(f"Plugin {plugin_name} not found")
+            return False
 
         try:
             ElggEntityRelationships.objects.using(self.database).get(left=plugin.entity.guid, relationship='active_plugin')

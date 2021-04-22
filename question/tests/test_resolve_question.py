@@ -4,6 +4,7 @@ from backend2.schema import schema
 from ariadne import graphql_sync
 import json
 from django.contrib.auth.models import AnonymousUser
+from django.core.cache import cache
 from django.http import HttpRequest
 from core.models import Group
 from user.models import User
@@ -40,11 +41,15 @@ class QuestionTestCase(FastTenantTestCase):
             is_featured=True
         )
 
+        cache.set("%s%s" % (connection.schema_name, 'QUESTIONER_CAN_CHOOSE_BEST_ANSWER'), True)
+
+
     def tearDown(self):
         self.questionPublic.delete()
         self.questionPrivate.delete()
         self.authenticatedUser.delete()
-    
+        cache.clear()
+
     def test_question_anonymous(self):
 
         query = """
@@ -100,7 +105,7 @@ class QuestionTestCase(FastTenantTestCase):
         request = HttpRequest()
         request.user = self.anonymousUser
 
-        variables = { 
+        variables = {
             "guid": self.questionPublic.guid
         }
 
@@ -109,7 +114,7 @@ class QuestionTestCase(FastTenantTestCase):
         self.assertTrue(result[0])
 
         data = result[1]["data"]
-       
+
         self.assertEqual(data["entity"]["guid"], self.questionPublic.guid)
         self.assertEqual(data["entity"]["title"], self.questionPublic.title)
         self.assertEqual(data["entity"]["description"], self.questionPublic.description)
@@ -131,7 +136,7 @@ class QuestionTestCase(FastTenantTestCase):
         self.assertEqual(data["entity"]["owner"]["guid"], self.questionPublic.owner.guid)
         self.assertEqual(data["entity"]["url"], "/questions/view/{}/{}".format(self.questionPublic.guid, slugify(self.questionPublic.title)))
 
-        variables = { 
+        variables = {
             "guid": self.questionPrivate.guid
         }
 
@@ -140,9 +145,9 @@ class QuestionTestCase(FastTenantTestCase):
         self.assertTrue(result[0])
 
         data = result[1]["data"]
-       
+
         self.assertEqual(data["entity"], None)
-    
+
     def test_question_owner(self):
 
         query = """
@@ -198,7 +203,7 @@ class QuestionTestCase(FastTenantTestCase):
         request = HttpRequest()
         request.user = self.authenticatedUser
 
-        variables = { 
+        variables = {
             "guid": self.questionPrivate.guid
         }
 
@@ -207,7 +212,7 @@ class QuestionTestCase(FastTenantTestCase):
         self.assertTrue(result[0])
 
         data = result[1]["data"]
-       
+
         self.assertEqual(data["entity"]["guid"], self.questionPrivate.guid)
         self.assertEqual(data["entity"]["title"], self.questionPrivate.title)
         self.assertEqual(data["entity"]["description"], self.questionPrivate.description)

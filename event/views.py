@@ -4,7 +4,6 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.http import Http404, HttpResponse, StreamingHttpResponse
 from django.utils.text import slugify
 from event.models import Event
-from core.constances import USER_ROLES
 
 class Echo:
     """An object that implements just the write method of the file-like
@@ -30,15 +29,13 @@ def export(request, event_id=None):
     if not event.can_write(user):
         raise Http404("Event not found")
 
-    headers = ['guid', 'name', 'email (only for admins)', 'status', 'datetime']
+    headers = ['guid', 'name', 'email', 'status', 'datetime']
     rows = [headers]
     for attendee in event.attendees.all():
-        email = ''
-        if user.has_role(USER_ROLES.ADMIN):
-            if attendee.user:
-                email = attendee.user.email
-            else:
-                email = attendee.email
+        if attendee.user:
+            email = attendee.user.email
+        else:
+            email = attendee.email
         if attendee.user:
             guid = attendee.user.guid
             name = attendee.user.name

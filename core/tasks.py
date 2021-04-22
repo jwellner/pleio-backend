@@ -163,18 +163,20 @@ def send_mail_multi(self, schema_name, subject, html_template, context, email_ad
     with schema_context(schema_name):
         if config.LANGUAGE:
             translation.activate(config.LANGUAGE)
-        html_template = get_template(html_template)
-        html_content = html_template.render(context)
-        text_content = html_to_text(html_content)
 
-        from_mail = formataddr((config.NAME, settings.FROM_EMAIL))
+        if not User.objects.filter(is_active=False, email=email_address).first():
+            html_template = get_template(html_template)
+            html_content = html_template.render(context)
+            text_content = html_to_text(html_content)
 
-        try:
-            email = EmailMultiAlternatives(subject, text_content, from_mail, to=[email_address], reply_to=reply_to)
-            email.attach_alternative(html_content, "text/html")
-            email.send()
-        except Exception as e:
-            logger.error('email sent to %s failed. Error: %s', email_address, e)
+            from_mail = formataddr((config.NAME, settings.FROM_EMAIL))
+
+            try:
+                email = EmailMultiAlternatives(subject, text_content, from_mail, to=[email_address], reply_to=reply_to)
+                email.attach_alternative(html_content, "text/html")
+                email.send()
+            except Exception as e:
+                logger.error('email sent to %s failed. Error: %s', email_address, e)
 
 
 def get_import_users_data(fields, row):
