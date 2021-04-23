@@ -9,7 +9,7 @@ from django.db.models import Q
 from django.shortcuts import redirect
 from django.utils.http import urlencode
 from core import config
-from core.models import SiteInvitation
+from core.models import SiteInvitation, SiteAccessRequest
 
 import logging
 
@@ -60,9 +60,12 @@ class OIDCAuthBackend(OIDCAuthenticationBackend):
         return User.objects.filter(Q(external_id__iexact=external_id) | Q(email__iexact=email))
 
     def create_user(self, claims):
-        if not config.ALLOW_REGISTRATION and not claims.get('is_admin', False) \
-            and not claims.get('email').split('@')[1] in config.DIRECT_REGISTRATION_DOMAINS:
-
+        if (
+            not config.ALLOW_REGISTRATION
+            and not claims.get('is_admin', False)
+            and not claims.get('email').split('@')[1] in config.DIRECT_REGISTRATION_DOMAINS
+            and not SiteAccessRequest.objects.filter(email=claims.get('email'), accepted=True).first()
+        ):
             if self.request.session.get('invitecode'):
                 try:
                     invite = SiteInvitation.objects.get(

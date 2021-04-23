@@ -6,7 +6,6 @@ from core.constances import NOT_LOGGED_IN, USER_NOT_SITE_ADMIN, USER_ROLES
 from core.lib import remove_none_from_dict, tenant_schema, get_default_email_context
 from core.tasks import send_mail_multi
 from core import config
-from user.models import User
 
 def resolve_handle_site_access_request(_, info, input):
     # pylint: disable=redefined-builtin
@@ -31,20 +30,6 @@ def resolve_handle_site_access_request(_, info, input):
     accepted = clean_input.get("accept")
     silent = clean_input.get("silent", False)
 
-    if accepted:
-        user_exists = User.objects.filter(email=access_request.claims.get('email')).first()
-
-        if not user_exists:
-            user = User.objects.create_user(
-                name=access_request.claims.get('name'),
-                email=access_request.claims.get('email'),
-                picture=access_request.claims.get('picture', None),
-                is_government=access_request.claims.get('is_government', False),
-                has_2fa_enabled=access_request.claims.get('has_2fa_enabled', False),
-                password=None,
-                external_id=access_request.claims.get('sub')
-            )
-
     if not silent:
         context = get_default_email_context(info.context['request'])
         context['request_name'] = access_request.claims.get('name')
@@ -58,7 +43,11 @@ def resolve_handle_site_access_request(_, info, input):
             context['intro'] = config.SITE_MEMBERSHIP_DENIED_INTRO
             send_mail_multi.delay(tenant_schema(), subject, 'email/site_access_request_denied.html', context, access_request.claims.get('email'))
 
-    access_request.delete()
+    if accepted:
+        access_request.accepted=True
+        access_request.save()
+    else:
+        access_request.delete()
 
     return {
         "success": True

@@ -208,7 +208,7 @@ def get_site_settings():
             {'value': USER_ROLES.QUESTION_MANAGER, 'label': ugettext_lazy('Question expert')},
         ],
         'siteAccessRequests': {
-            'edges': SiteAccessRequest.objects.all()
+            'edges': SiteAccessRequest.objects.filter(accepted=False)
         },
         'deleteAccountRequests': {
             'edges': User.objects.filter(is_delete_requested=True).all()
