@@ -391,7 +391,7 @@ def hex_color_tint(hex_color, weight = 0.5):
 
 def datetime_isoformat(obj):
     if obj:
-        return obj.astimezone(timezone(settings.TIME_ZONE)).isoformat()
+        return obj.astimezone(timezone(settings.TIME_ZONE)).isoformat(timespec="seconds")
     return None
 
 def get_client_ip(request):
