@@ -250,6 +250,7 @@ WEBPACK_DEV_SERVER = False
 DEFAULT_FILE_STORAGE = "django_tenants.files.storage.TenantFileSystemStorage"
 
 MEDIA_ROOT = os.getenv("MEDIA_ROOT") if os.getenv("MEDIA_ROOT") else os.path.join(BASE_DIR, 'media/')
+BACKUP_PATH = os.getenv("BACKUP_PATH") if os.getenv("BACKUP_PATH") else os.path.join(BASE_DIR, 'media/backups')
 
 if SWIFT_ENABLED:
     DEFAULT_FILE_STORAGE = 'core.backends.tenant_swift_storage.TenantSwiftStorage'
