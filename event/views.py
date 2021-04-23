@@ -1,5 +1,6 @@
 import csv
 import io
+from core.lib import datetime_isoformat
 from django.core.exceptions import ObjectDoesNotExist
 from django.http import Http404, HttpResponse, StreamingHttpResponse
 from django.utils.text import slugify
@@ -43,7 +44,7 @@ def export(request, event_id=None):
             guid = ''
             name = attendee.name
 
-        rows.append([guid, name, email, attendee.state, attendee.updated_at])
+        rows.append([guid, name, email, attendee.state, datetime_isoformat(attendee.updated_at)])
 
     pseudo_buffer = Echo()
     writer = csv.writer(pseudo_buffer, delimiter=';', quotechar='"')

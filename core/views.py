@@ -4,7 +4,10 @@ import logging
 from core.resolvers.query_site import get_settings
 from core import config
 from core.models import Entity, Group, UserProfileField, SiteAccessRequest, ProfileField
-from core.lib import access_id_to_acl, get_default_email_context, tenant_schema, get_exportable_content_types, get_model_by_subtype
+from core.lib import (
+    access_id_to_acl, get_default_email_context, tenant_schema,
+    get_exportable_content_types, get_model_by_subtype, datetime_isoformat
+)
 from core.forms import OnboardingForm, RequestAccessForm
 from core.constances import USER_ROLES
 from user.models import User
@@ -395,7 +398,13 @@ def export_content(request, content_type=None):
         def get_data(entity, fields):
             field_values = []
             for field in fields:
-                field_values.append(field.value_from_object(entity))
+                field_value = field.value_from_object(entity)
+                if field.get_internal_type() == 'DateTimeField':
+                    try:
+                        field_value = datetime_isoformat(field_value)
+                    except Exception:
+                        pass
+                field_values.append(field_value)
 
             # if more fields needed, refactor
             url = ''
