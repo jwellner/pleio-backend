@@ -55,7 +55,8 @@ class HandleSiteAccessRequestTestCase(FastTenantTestCase):
         data = result[1]["data"]
 
         self.assertEqual(data["handleSiteAccessRequest"]["success"], True)
-        self.assertTrue(User.objects.filter(email=self.request1.email).exists())
+        self.assertTrue(SiteAccessRequest.objects.filter(email=self.request1.email, accepted=True).exists())
+        self.assertFalse(User.objects.filter(email=self.request1.email).exists())
 
         mocked_send_mail_multi.assert_called_once()
 

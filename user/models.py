@@ -1,5 +1,5 @@
 import uuid
-from core.models import UserProfile, ProfileField, UserProfileField
+from core.models import UserProfile, ProfileField, UserProfileField, SiteAccessRequest
 from django.db.models.signals import post_save
 from django.db import models
 from django.contrib.postgres.fields import ArrayField
@@ -58,6 +58,12 @@ class Manager(BaseUserManager):
             user.is_superadmin = True
 
         user.save(using=self._db)
+
+        # Site access request can only be used once
+        try:
+            SiteAccessRequest.objects.get(email=email).delete()
+        except Exception:
+            pass
 
         return user
 
