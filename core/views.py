@@ -11,7 +11,7 @@ from user.models import User
 from core.tasks import send_mail_multi
 from django.utils.translation import ugettext_lazy
 from core.auth import oidc_provider_logout_url
-from django.contrib.contenttypes.fields import GenericRelation
+from django.contrib.contenttypes.fields import GenericRelation, GenericForeignKey
 from django.contrib.auth.views import LogoutView
 from django.shortcuts import redirect, render
 from django.conf import settings
@@ -382,10 +382,12 @@ def export_content(request, content_type=None):
         fields = []
         field_names = []
         for field in Model._meta.get_fields():
-            if type(field) in [models.OneToOneRel, models.ForeignKey, models.ManyToOneRel, GenericRelation]:
+            if type(field) in [models.OneToOneRel, models.ForeignKey, models.ManyToOneRel, GenericRelation, GenericForeignKey]:
                 continue
             fields.append(field)
             field_names.append(field.name)
+        # if more fields needed, refactor
+        field_names.append('url')
 
         writer = csv.writer(pseudo_buffer, delimiter=';', quotechar='"')
         yield writer.writerow(field_names)
@@ -394,6 +396,15 @@ def export_content(request, content_type=None):
             field_values = []
             for field in fields:
                 field_values.append(field.value_from_object(entity))
+
+            # if more fields needed, refactor
+            url = ''
+            try:
+                url = entity.url
+            except Exception:
+                pass
+            field_values.append(url)
+
             return field_values
 
         for item in items:

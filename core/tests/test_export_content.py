@@ -7,6 +7,7 @@ from django.db import connection
 from django.test import TestCase
 from activity.models import StatusUpdate
 from blog.models import Blog
+from core.models import Comment
 from core import config
 from discussion.models import Discussion
 from cms.models import Page
@@ -39,6 +40,10 @@ class TestExportContentTestCase(TenantTestCase):
         self.question = mixer.blend(Question)
         self.task = mixer.blend(Task)
         self.wiki = mixer.blend(Wiki)
+        self.comment = Comment.objects.create(
+            owner=self.user,
+            container=self.blog
+        )
 
         cache.set("%s%s" % (connection.schema_name, 'IS_CLOSED'), False)
 
@@ -111,5 +116,11 @@ class TestExportContentTestCase(TenantTestCase):
     def test_export_content_task(self):
         self.c.force_login(self.admin)
         response = self.c.get("/exporting/content/task")
+        self.assertEqual(response.streaming, True)
+        self.assertEqual(len(list(response.streaming_content)), 2)
+
+    def test_export_content_comment(self):
+        self.c.force_login(self.admin)
+        response = self.c.get("/exporting/content/comment")
         self.assertEqual(response.streaming, True)
         self.assertEqual(len(list(response.streaming_content)), 2)

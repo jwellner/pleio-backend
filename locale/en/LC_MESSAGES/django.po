@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-04-08 15:05+0200\n"
+"POT-Creation-Date: 2021-04-21 12:46+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -97,6 +97,10 @@ msgstr ""
 
 #: core/lib.py:279
 msgid "Wiki pages"
+msgstr ""
+
+#: core/lib.py:280
+msgid "Comments"
 msgstr ""
 
 #: core/management/commands/send_notification_emails.py:49
@@ -249,15 +253,15 @@ msgstr ""
 msgid "Question expert"
 msgstr ""
 
-#: core/tasks.py:274
+#: core/tasks.py:276
 msgid "Import was a success"
 msgstr ""
 
-#: core/tasks.py:274
+#: core/tasks.py:276
 msgid "Import failed"
 msgstr ""
 
-#: core/tasks.py:350
+#: core/tasks.py:352
 #, python-format
 msgid "New notification at %(site_name)s: "
 msgstr ""
