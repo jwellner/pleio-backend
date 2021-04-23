@@ -276,7 +276,8 @@ def get_exportable_content_types():
         {"value": "poll", "label": ugettext_lazy("Polls")},
         {"value": "question", "label": ugettext_lazy("Questions")},
         {"value": "task", "label": ugettext_lazy("Tasks")},
-        {"value": "wiki", "label": ugettext_lazy("Wiki pages")}
+        {"value": "wiki", "label": ugettext_lazy("Wiki pages")},
+        {"value": "comment", "label": ugettext_lazy("Comments")}
     ]
 
 def tenant_schema():
