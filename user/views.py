@@ -1,7 +1,7 @@
 import csv
 from django.http import Http404, StreamingHttpResponse
 from django.utils.dateformat import format as dateformat
-from core.lib import get_exportable_user_fields
+from core.lib import get_exportable_user_fields, datetime_isoformat
 from core.models.group import GroupMembership
 from core.models.user import UserProfileField, ProfileField
 from core.constances import USER_ROLES
@@ -32,18 +32,18 @@ def get_fields(user, user_fields, profile_field_guids):
         elif user_field == 'email':
             fields.append(get_user_field(user, 'email'))
         elif user_field == 'created_at':
-            fields.append(get_user_field(user, 'created_at'))
+            fields.append(datetime_isoformat(get_user_field(user, 'created_at')))
         elif user_field == 'created_at_unix':
             timestamp = dateformat(get_user_field(user, 'created_at'), 'U')
             fields.append(timestamp)
         elif user_field == 'updated_at':
-            fields.append(get_user_field(user, 'updated_at'))
+            fields.append(datetime_isoformat(get_user_field(user, 'updated_at')))
         elif user_field == 'updated_at_unix':
             timestamp = dateformat(get_user_field(user, 'updated_at'), 'U')
             fields.append(timestamp)
         elif user_field == 'last_online':
             if user.profile.last_online:
-                fields.append(user.profile.last_online)
+                fields.append(datetime_isoformat(user.profile.last_online))
             else:
                 fields.append("")
         elif user_field == 'last_online_unix':

@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-04-08 15:05+0200\n"
+"POT-Creation-Date: 2021-04-21 12:46+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -98,6 +98,10 @@ msgstr "Taken"
 #: core/lib.py:279
 msgid "Wiki pages"
 msgstr "Wiki pagina's"
+
+#: core/lib.py:280
+msgid "Comments"
+msgstr "Reacties"
 
 #: core/management/commands/send_notification_emails.py:49
 #, python-format
@@ -249,15 +253,15 @@ msgstr "Redacteur"
 msgid "Question expert"
 msgstr "Vraagexpert"
 
-#: core/tasks.py:274
+#: core/tasks.py:276
 msgid "Import was a success"
 msgstr "Import afgerond"
 
-#: core/tasks.py:274
+#: core/tasks.py:276
 msgid "Import failed"
 msgstr "Import mislukt"
 
-#: core/tasks.py:350
+#: core/tasks.py:352
 #, python-format
 msgid "New notification at %(site_name)s: "
 msgstr "Nieuwe notificatie op %(site_name)s"
@@ -723,8 +727,8 @@ msgid ""
 "Your profile is missing some fields. We kindly ask you to fill in these "
 "details."
 msgstr ""
-"In je profiel ontbreken een aantal velden. We vragen je "
-"vriendelijk deze velden in te vullen."
+"In je profiel ontbreken een aantal velden. We vragen je vriendelijk deze "
+"velden in te vullen."
 
 #: core/templates/onboarding.html:58
 msgid "Continue"

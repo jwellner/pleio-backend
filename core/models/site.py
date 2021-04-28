@@ -18,5 +18,7 @@ class SiteAccessRequest(models.Model):
 
     claims = models.JSONField(null=True, blank=True)
 
+    accepted = models.BooleanField(default=False)
+
     created_at = models.DateTimeField(default=timezone.now)
     updated_at = models.DateTimeField(default=timezone.now)

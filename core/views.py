@@ -4,14 +4,17 @@ import logging
 from core.resolvers.query_site import get_settings
 from core import config
 from core.models import Entity, Group, UserProfileField, SiteAccessRequest, ProfileField
-from core.lib import access_id_to_acl, get_default_email_context, tenant_schema, get_exportable_content_types, get_model_by_subtype
+from core.lib import (
+    access_id_to_acl, get_default_email_context, tenant_schema,
+    get_exportable_content_types, get_model_by_subtype, datetime_isoformat
+)
 from core.forms import OnboardingForm, RequestAccessForm
 from core.constances import USER_ROLES
 from user.models import User
 from core.tasks import send_mail_multi
 from django.utils.translation import ugettext_lazy
 from core.auth import oidc_provider_logout_url
-from django.contrib.contenttypes.fields import GenericRelation
+from django.contrib.contenttypes.fields import GenericRelation, GenericForeignKey
 from django.contrib.auth.views import LogoutView
 from django.shortcuts import redirect, render
 from django.conf import settings
@@ -382,10 +385,12 @@ def export_content(request, content_type=None):
         fields = []
         field_names = []
         for field in Model._meta.get_fields():
-            if type(field) in [models.OneToOneRel, models.ForeignKey, models.ManyToOneRel, GenericRelation]:
+            if type(field) in [models.OneToOneRel, models.ForeignKey, models.ManyToOneRel, GenericRelation, GenericForeignKey]:
                 continue
             fields.append(field)
             field_names.append(field.name)
+        # if more fields needed, refactor
+        field_names.append('url')
 
         writer = csv.writer(pseudo_buffer, delimiter=';', quotechar='"')
         yield writer.writerow(field_names)
@@ -393,7 +398,22 @@ def export_content(request, content_type=None):
         def get_data(entity, fields):
             field_values = []
             for field in fields:
-                field_values.append(field.value_from_object(entity))
+                field_value = field.value_from_object(entity)
+                if field.get_internal_type() == 'DateTimeField':
+                    try:
+                        field_value = datetime_isoformat(field_value)
+                    except Exception:
+                        pass
+                field_values.append(field_value)
+
+            # if more fields needed, refactor
+            url = ''
+            try:
+                url = entity.url
+            except Exception:
+                pass
+            field_values.append(url)
+
             return field_values
 
         for item in items:

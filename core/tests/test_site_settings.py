@@ -360,7 +360,8 @@ class SiteSettingsTestCase(FastTenantTestCase):
             {"value": "poll", "label": "Polls"},
             {"value": "question", "label": "Vragen"},
             {"value": "task", "label": "Taken"},
-            {"value": "wiki", "label": "Wiki pagina's"}
+            {"value": "wiki", "label": "Wiki pagina's"},
+            {'value': 'comment', 'label': 'Reacties'}
         ])
 
         self.assertEqual(data["siteSettings"]["showLoginRegister"], True)
