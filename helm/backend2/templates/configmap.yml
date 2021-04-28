@@ -1,0 +1,22 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "backend2.name" . }}
+  labels:
+    {{- include "backend2.labels" . | nindent 4 }}
+data:
+  ENV: test
+  DEBUG: "True"
+  ALLOWED_HOST: "*"
+  OIDC_RP_SCOPES: openid profile email
+  OIDC_OP_AUTHORIZATION_ENDPOINT: {{ printf "%s/openid/authorize/" .Values.accountDomain }}
+  OIDC_OP_TOKEN_ENDPOINT: {{ printf "%s/openid/token/" .Values.accountDomain }}
+  OIDC_OP_USER_ENDPOINT: {{ printf "%s/openid/userinfo/" .Values.accountDomain }}
+  OIDC_OP_LOGOUT_ENDPOINT: {{ printf "%s/action/logout" .Values.accountDomain }}
+  PROFILE_PICTURE_URL: {{ printf "%s" .Values.accountDomain }}
+  FROM_EMAIL: noreply@mail.pleio.nl
+  MEDIA_ROOT: /app-data
+  SWIFT_ENABLED: "False"
+  S3_ENABLED: "False"
+  APM_ENABLED: "False"
+  MEMCACHE_ENABLED: "False"
