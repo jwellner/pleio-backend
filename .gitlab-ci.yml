@@ -76,6 +76,15 @@ build:
     - docker push registry.gitlab.com/pleio/backend2:${CI_COMMIT_SHA:0:8}
     - docker push registry.gitlab.com/pleio/backend2:latest
 
+AWS Review:
+  stage: deploy
+  tags:
+    - control-aws
+  only:
+    - dev
+  script:
+    - helm upgrade --install -n pleio2 -f helm/backend2/values.yml --set image.tag=${CI_COMMIT_SHA:0:8} backend2-review helm/backend2
+
 AWS Test:
   stage: deploy
   tags:
