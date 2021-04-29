@@ -90,6 +90,8 @@ def get_site_settings():
         'directRegistrationDomains': config.DIRECT_REGISTRATION_DOMAINS,
         'defaultAccessId': config.DEFAULT_ACCESS_ID,
         'defaultAccessIdOptions': defaultAccessIdOptions,
+        'oidcProviders': config.OIDC_PROVIDERS,
+        'oidcProviderOptions': config.OIDC_PROVIDER_OPTIONS,
 
         'googleAnalyticsId': config.GOOGLE_ANALYTICS_ID,
         'googleSiteVerification': config.GOOGLE_SITE_VERIFICATION,
