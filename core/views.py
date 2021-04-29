@@ -380,12 +380,20 @@ def export_content(request, content_type=None):
     Model = get_model_by_subtype(content_type)
     entities = Model.objects.all()
 
+    def is_included_related_field(field):
+        if field.name == 'owner':
+            return True
+        return False
+
     def stream(items, pseudo_buffer, Model):
         # pylint: disable=unidiomatic-typecheck
         fields = []
         field_names = []
         for field in Model._meta.get_fields():
-            if type(field) in [models.OneToOneRel, models.ForeignKey, models.ManyToOneRel, GenericRelation, GenericForeignKey]:
+            if (
+                type(field) in [models.OneToOneRel, models.ForeignKey, models.ManyToOneRel, GenericRelation, GenericForeignKey]
+                and not is_included_related_field(field)
+            ):
                 continue
             fields.append(field)
             field_names.append(field.name)
