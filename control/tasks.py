@@ -275,7 +275,7 @@ def backup_site(self, backup_site_id):
     backup_schema_folder = os.path.join(backup_base_path, "schema")
     os.makedirs(backup_schema_folder)
 
-    skip_tables = ("auth_permission", "django_content_type", "django_migrations", "django_session")
+    skip_tables = ("auth_permission", "django_content_type", "django_migrations", "django_session", "django_admin_log")
 
     with connection.connection.cursor() as cursor:
         cursor.execute( "SELECT table_name FROM information_schema.tables " +
@@ -382,6 +382,7 @@ end $$;"""
         file_path = os.path.join(restore_schema_path, file)
         f = open(file_path, 'r')
 
+        # check if table exists
         cursor.copy_from(f, table)
 
         logger.info("read %s to %s", file_path, table)
