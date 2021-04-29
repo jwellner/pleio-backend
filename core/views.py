@@ -21,6 +21,7 @@ from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist
 from django.db import models
 from django.utils.text import Truncator
+from django.utils.http import urlencode
 from django.urls import reverse
 from django.views.decorators.cache import cache_control
 from django.views.decorators.http import require_GET
@@ -108,11 +109,17 @@ def login(request):
     if request.GET.get('invitecode', None):
         request.session['invitecode'] = request.GET.get('invitecode')
 
-    if config.IDP_ID and not request.GET.get('login_credentials'):
-        url = reverse('oidc_authentication_init') + '?idp=' + config.IDP_ID
-        return redirect(url)
+    query_args = {}
 
-    return redirect('oidc_authentication_init')
+    if config.IDP_ID and not request.GET.get('login_credentials'):
+        query_args["idp"] = config.IDP_ID
+
+    if request.GET.get('next'):
+        query_args["next"] = request.GET.get('next')
+
+    redirect_url = reverse('oidc_authentication_init') + '?' +  urlencode(query_args)
+
+    return redirect(redirect_url)
 
 def oidc_failure(request):
     return redirect(settings.OIDC_OP_LOGOUT_ENDPOINT)
