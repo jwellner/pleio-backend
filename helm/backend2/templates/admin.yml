@@ -1,0 +1,51 @@
+{{ $labelData := dict "Values" .Values "Release" .Release "Chart" .Chart "Component" "admin" }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "backend2.adminName" . }}
+  labels:
+    {{- include "backend2.labels" $labelData | nindent 4 }}
+spec:
+  replicas: {{ .Values.admin.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "backend2.selectorLabels" $labelData | nindent 6 }}
+  strategy:
+    rollingUpdate:
+      maxSurge: {{ add .Values.admin.replicaCount 1 }}
+      maxUnavailable: 0
+    type: RollingUpdate
+  template:
+    metadata:
+      name: {{ include "backend2.adminName" . }}
+      labels:
+        {{- include "backend2.selectorLabels" $labelData | nindent 8 }}
+    spec:
+      containers:
+        - name: {{ include "backend2.adminName" . }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.imagePullPolicy }}
+          command:
+            - /start-admin.sh
+          ports:
+            - name: http
+              containerPort: 8000
+              protocol: TCP
+          volumeMounts:
+            - mountPath: /app-data
+              name: pleio-data
+              readOnly: true
+          envFrom:
+            - configMapRef:
+                name: {{ include "backend2.name" . }}
+            - secretRef:
+                name: {{ include "backend2.secretsName" . }}
+          env:
+            - name: RUN_AS_ADMIN_APP
+              value: "True"
+      volumes:
+        - name: pleio-data
+          persistentVolumeClaim:
+            claimName: {{ include "backend2.dataStorageName" . }}
+
+
