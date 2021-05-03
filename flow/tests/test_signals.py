@@ -53,7 +53,7 @@ class SignalsTestCase(FastTenantTestCase):
         url = 'https://flow.test/api/cases/'
         headers = {'Authorization': 'Token ' + config.FLOW_TOKEN, 'Accept': 'application/json'}
 
-        description = f"{self.blog1.description} <br /><br /><a href='{self.url_prefix}{self.blog1.url}'>{self.url_prefix}{self.blog1.url}</a>"
+        description = f"{self.blog1.description} <br /><br /><a href='{self.url_prefix}{self.blog1.url}'>{self.blog1.url}</a>"
         json_data = {
             'casetype': '1',
             'name': 'Blog1',
@@ -102,7 +102,7 @@ class SignalsTestCase(FastTenantTestCase):
         url = 'https://flow.test/api/cases/'
         headers = {'Authorization': 'Token ' + config.FLOW_TOKEN, 'Accept': 'application/json'}
 
-        description = f"{self.blog1.description} <br /><br /><a href='{self.url_prefix}{self.blog1.url}'>{self.url_prefix}{self.blog1.url}</a>"
+        description = f"{self.blog1.description} <br /><br /><a href='{self.url_prefix}{self.blog1.url}'>{self.blog1.url}</a>"
         json_data = {
             'casetype': '1',
             'name': 'Blog1',
