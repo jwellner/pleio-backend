@@ -261,3 +261,9 @@ small {
 #__bs_notify__ {
   display: none !important;
 }
+.invalid-feedback {
+  color: #EB0000;
+}
+.invalid-feedback svg {
+  vertical-align: text-top;
+}

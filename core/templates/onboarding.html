@@ -41,6 +41,7 @@
                     {% render_field field class="form-control is-invalid" %}
                     {% for error in field.errors %}
                         <div class="invalid-feedback">
+                            <svg width="18px" height="18px" viewBox="0 0 18 18" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"> <title>warn</title> <g id="warn" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd"> <path d="M9,0 C13.9705627,0 18,4.02943725 18,9 C18,13.9705627 13.9705627,18 9,18 C4.02943725,18 0,13.9705627 0,9 C0,4.02943725 4.02943725,0 9,0 Z M9,2 C5.13400675,2 2,5.13400675 2,9 C2,12.8659932 5.13400675,16 9,16 C12.8659932,16 16,12.8659932 16,9 C16,5.13400675 12.8659932,2 9,2 Z M10,12 L10,14 L8,14 L8,12 L10,12 Z M10,4 L10,10 L8,10 L8,4 L10,4 Z" id="Combined-Shape" fill="currentColor" fill-rule="nonzero"></path> </g> </svg>
                             {{ error }}
                         </div>
                     {% endfor %}
