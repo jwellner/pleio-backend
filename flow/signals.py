@@ -3,6 +3,8 @@ import requests
 from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist
 from django.db.models.signals import post_save
+from django.db import connection
+from tenants.models import Client
 from blog.models import Blog
 from core import config
 from core.models import Comment, Entity
@@ -30,8 +32,13 @@ def object_handler(sender, instance, created, **kwargs):
         }
         url = config.FLOW_APP_URL + 'api/cases/'
 
+        tenant = Client.objects.get(schema_name=connection.schema_name)
+        site_url = "https://" + tenant.domains.first().domain
+        instance_url = f"{site_url}{instance.url}"
+
         title = instance.title if instance.title else 'Geen titel gegeven'
-        description = f"{instance.description} <br /><br /><a href='{instance.url}'>{instance.url}</a>"
+        description = f"{instance.description} <br /><br /><a href='{instance_url}'>{instance_url}</a>"
+
         json = {
             'casetype': str(config.FLOW_CASE_ID),
             'name': title,
