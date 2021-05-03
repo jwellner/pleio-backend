@@ -33,11 +33,10 @@ def object_handler(sender, instance, created, **kwargs):
         url = config.FLOW_APP_URL + 'api/cases/'
 
         tenant = Client.objects.get(schema_name=connection.schema_name)
-        site_url = "https://" + tenant.domains.first().domain
-        instance_url = f"{site_url}{instance.url}"
+        url_prefix = "https://" + tenant.domains.first().domain
 
         title = instance.title if instance.title else 'Geen titel gegeven'
-        description = f"{instance.description} <br /><br /><a href='{instance_url}'>{instance_url}</a>"
+        description = f"{instance.description} <br /><br /><a href='{url_prefix}{instance.url}'>{instance.url}</a>"
 
         json = {
             'casetype': str(config.FLOW_CASE_ID),
