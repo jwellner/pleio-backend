@@ -3,7 +3,7 @@ import json
 import logging
 from core.resolvers.query_site import get_settings
 from core import config
-from core.models import Entity, Group, UserProfileField, SiteAccessRequest, ProfileField
+from core.models import Entity, Group, UserProfileField, SiteAccessRequest, ProfileField, EntityAttachment, GroupAttachment, CommentAttachment
 from core.lib import (
     access_id_to_acl, get_default_email_context, tenant_schema,
     get_exportable_content_types, get_model_by_subtype, datetime_isoformat
@@ -366,7 +366,6 @@ def export_group_members(request, group_id=None):
     return response
 
 
-
 def export_content(request, content_type=None):
     user = request.user
 
@@ -444,3 +443,33 @@ def export_content(request, content_type=None):
     response['Content-Disposition'] = 'attachment;filename=' + filename
 
     return response
+
+
+def attachment(request, attachment_type, attachment_id):
+    # pylint: disable=unused-argument
+    user = request.user
+
+    if attachment_type not in ['entity', 'comment', 'group']:
+        raise Http404("File not found")
+
+    try:
+        attachment = None
+        if attachment_type == 'entity':
+            attachment = EntityAttachment.objects.get(id=attachment_id)
+        if attachment_type == 'comment':
+            attachment = CommentAttachment.objects.get(id=attachment_id)
+        if attachment_type == 'group':
+            attachment = GroupAttachment.objects.get(id=attachment_id)
+
+        if not attachment or not attachment.can_read(user):
+            raise Http404("File not found")
+
+        response = StreamingHttpResponse(streaming_content=attachment.upload.open(), content_type=attachment.mime_type)
+        response['Content-Length'] = attachment.upload.size
+        response['Content-Disposition'] = "attachment; filename=%s" % attachment.name
+        return response
+
+    except ObjectDoesNotExist:
+        raise Http404("File not found")
+
+    raise Http404("File not found")

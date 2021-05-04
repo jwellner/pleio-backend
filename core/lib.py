@@ -4,6 +4,7 @@ import os
 import re
 import secrets
 import tempfile
+import mimetypes
 from pytz import timezone
 from colour import Color
 from core.constances import ACCESS_TYPE
@@ -191,7 +192,6 @@ def generate_object_filename(obj, filename):
     name = filename.split('.')[0]
     filename = "%s.%s" % (slugify(name), ext)
     return os.path.join(str(obj.id), filename)
-
 
 def get_field_type(field_type):
     if field_type == 'select_field':
@@ -419,3 +419,9 @@ def is_valid_url_or_path(url):
         return True
     except Exception:
         return False
+
+def get_mimetype(filepath):
+    mime_type, _ = mimetypes.guess_type(filepath)
+    if not mime_type:
+        return None
+    return mime_type

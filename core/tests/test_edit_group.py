@@ -49,7 +49,7 @@ class EditGroupCase(FastTenantTestCase):
 
         self.assertEqual(errors[0]["message"], "not_logged_in")
 
-    @patch("file.models.get_mimetype")
+    @patch("core.lib.get_mimetype")
     @patch("{}.open".format(settings.DEFAULT_FILE_STORAGE))
     def test_edit_group(self, mock_open, mock_mimetype):
 

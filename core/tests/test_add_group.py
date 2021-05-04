@@ -77,7 +77,7 @@ class AddGroupCase(FastTenantTestCase):
 
         self.assertEqual(errors[0]["message"], "not_logged_in")
 
-    @patch("file.models.get_mimetype")
+    @patch("core.lib.get_mimetype")
     @patch("{}.open".format(settings.DEFAULT_FILE_STORAGE))
     def test_add_group(self, mock_open, mock_mimetype):
 
@@ -175,7 +175,7 @@ class AddGroupCase(FastTenantTestCase):
 
         self.assertEqual(errors[0]["message"], "could_not_save")
 
-    @patch("file.models.get_mimetype")
+    @patch("core.lib.get_mimetype")
     @patch("{}.open".format(settings.DEFAULT_FILE_STORAGE))
     def test_add_group_by_admin(self, mock_open, mock_mimetype):
 
