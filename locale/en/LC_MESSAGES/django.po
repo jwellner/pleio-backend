@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-04-28 17:39+0200\n"
+"POT-Creation-Date: 2021-05-04 13:43+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -18,11 +18,11 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#: backend2/config.py:61 core/resolvers/query_site.py:87
+#: backend2/config.py:62 core/resolvers/query_site.py:87
 msgid "English"
 msgstr ""
 
-#: backend2/config.py:62 core/resolvers/query_site.py:87
+#: backend2/config.py:63 core/resolvers/query_site.py:87
 msgid "Dutch"
 msgstr ""
 
@@ -30,27 +30,27 @@ msgstr ""
 msgid "Provide a valid value."
 msgstr ""
 
-#: core/lib.py:141 core/resolvers/mutation_import_users.py:30
+#: core/lib.py:142 core/resolvers/mutation_import_users.py:30
 #: core/resolvers/query_site.py:67
 msgid "Just me"
 msgstr ""
 
-#: core/lib.py:144
+#: core/lib.py:145
 #, python-format
 msgid "Group: %(group_name)s"
 msgstr ""
 
-#: core/lib.py:147
+#: core/lib.py:148
 #, python-format
 msgid "Subgroup: %(subgroup_name)s"
 msgstr ""
 
-#: core/lib.py:152 core/resolvers/mutation_import_users.py:31
+#: core/lib.py:153 core/resolvers/mutation_import_users.py:31
 #: core/resolvers/query_site.py:68
 msgid "Logged in users"
 msgstr ""
 
-#: core/lib.py:154 core/resolvers/mutation_import_users.py:34
+#: core/lib.py:155 core/resolvers/mutation_import_users.py:34
 #: core/resolvers/query_site.py:72
 msgid "Public"
 msgstr ""
@@ -253,15 +253,15 @@ msgstr ""
 msgid "Question expert"
 msgstr ""
 
-#: core/tasks.py:277
+#: core/tasks.py:272
 msgid "Import was a success"
 msgstr ""
 
-#: core/tasks.py:277
+#: core/tasks.py:272
 msgid "Import failed"
 msgstr ""
 
-#: core/tasks.py:353
+#: core/tasks.py:348
 #, python-format
 msgid "New notification at %(site_name)s: "
 msgstr ""
@@ -328,8 +328,10 @@ msgid "Agenda item created by"
 msgstr ""
 
 #: core/templates/email/entities/news.html:33
-msgid "News added on"
-msgstr "News added by"
+#, fuzzy
+#| msgid "News added on"
+msgid "News added by"
+msgstr ""
 
 #: core/templates/email/entities/question.html:19
 msgid "Question asked by"
@@ -612,7 +614,7 @@ msgid ""
 "details."
 msgstr ""
 
-#: core/templates/onboarding.html:58
+#: core/templates/onboarding.html:59
 msgid "Continue"
 msgstr ""
 
@@ -673,7 +675,7 @@ msgid ""
 "Access is requested. You will receive an e-mail when the request is accepted."
 msgstr ""
 
-#: core/views.py:151
+#: core/views.py:158
 #, python-format
 msgid "New access request for %(site_name)s"
 msgstr ""
