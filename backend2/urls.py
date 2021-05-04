@@ -25,8 +25,8 @@ urlpatterns = [
     path('login/requested', core_views.access_requested, name='access_requested'),
     path('oidc/failure/', core_views.logout, name='oidc_failure'),
     path('oidc/', include('mozilla_django_oidc.urls')),
-    path('superadmin', core_superadmin.home),
-    path('superadmin/', core_superadmin.home),
+    path('superadmin', core_superadmin.Dashboard.as_view()),
+    path('superadmin/', core_superadmin.Dashboard.as_view()),
     path('superadmin/tasks', core_superadmin.tasks),
     path('graphql', GraphQLView.as_view(schema=schema, extensions=[OpenTracingExtensionSync]), name='graphql'),
 
