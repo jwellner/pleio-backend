@@ -1,10 +1,9 @@
 import os
-import mimetypes
 from auditlog.registry import auditlog
 from django.urls import reverse
 from django.conf import settings
 from django.db import models
-from core.lib import generate_object_filename
+from core.lib import generate_object_filename, get_mimetype
 from core.models import Entity
 from django.db.models import ObjectDoesNotExist
 from django.db.models.signals import pre_save, pre_delete
@@ -17,17 +16,6 @@ def read_access_default():
 
 def write_access_default():
     return []
-
-
-def get_mimetype(file):
-    """
-    Get mimetype by reading the header of the file
-    """
-    mime_type, _ = mimetypes.guess_type(file.upload.path)
-    if not mime_type:
-        return None
-    return mime_type
-
 
 class FileFolder(Entity):
 
@@ -99,7 +87,7 @@ def file_pre_save(sender, instance, **kwargs):
     if instance.upload and not instance.title:
         instance.title = instance.upload.file.name
     if instance.upload:
-        instance.mime_type = get_mimetype(instance)
+        instance.mime_type = get_mimetype(instance.upload.path)
 
 # update parent folders updated_at when adding, moving and deleting files
 @receiver([pre_save, pre_delete], sender=FileFolder)

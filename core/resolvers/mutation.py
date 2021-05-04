@@ -45,6 +45,7 @@ from .mutation_import_users import resolve_import_users_step_1, resolve_import_u
 from .mutation_add_site_setting_profile_field_validator import resolve_add_site_setting_profile_field_validator
 from .mutation_edit_site_setting_profile_field_validator import resolve_edit_site_setting_profile_field_validator
 from .mutation_delete_site_setting_profile_field_validator import resolve_delete_site_setting_profile_field_validator
+from .mutation_add_attachment import resolve_add_attachment
 
 mutation = ObjectType("Mutation")
 mutation.set_field("addGroup", resolve_add_group)
@@ -107,3 +108,5 @@ mutation.set_field("handleSiteAccessRequest", resolve_handle_site_access_request
 mutation.set_field("handleDeleteAccountRequest", resolve_handle_delete_account_request)
 mutation.set_field("importUsersStep1", resolve_import_users_step_1)
 mutation.set_field("importUsersStep2", resolve_import_users_step_2)
+
+mutation.set_field("addAttachment", resolve_add_attachment)

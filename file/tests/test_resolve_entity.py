@@ -68,7 +68,7 @@ class FileFolderTestCase(FastTenantTestCase):
         FileFolder.objects.all().delete()
         self.authenticatedUser.delete()
 
-    @patch("file.models.get_mimetype")
+    @patch("core.lib.get_mimetype")
     @patch("{}.save".format(settings.DEFAULT_FILE_STORAGE))
     def test_file(self, mock_save, mock_mimetype):
         file_mock = MagicMock(spec=File)
@@ -141,7 +141,7 @@ class FileFolderTestCase(FastTenantTestCase):
         #self.assertEqual(data["entity"]["hasChildren"], True)
         self.assertEqual(data["entity"]["mimeType"], None)
 
-    @patch("file.models.get_mimetype")
+    @patch("core.lib.get_mimetype")
     @patch("{}.save".format(settings.DEFAULT_FILE_STORAGE))
     def test_file_in_folder(self, mock_save, mock_mimetype):
         file_mock = MagicMock(spec=File)
@@ -187,7 +187,7 @@ class FileFolderTestCase(FastTenantTestCase):
 
         mock_save.assert_called_once()
 
-    @patch("file.models.get_mimetype")
+    @patch("core.lib.get_mimetype")
     @patch("{}.save".format(settings.DEFAULT_FILE_STORAGE))
     def test_file_access(self, mock_save, mock_mimetype):
         file_mock = MagicMock(spec=File)

@@ -38,6 +38,9 @@ urlpatterns = [
 
     path('file/thumbnail/<uuid:file_id>', file_views.thumbnail, name='thumbnail'),
     path('file/featured/<uuid:entity_guid>', file_views.featured, name='featured'),
+
+    path('attachment/<str:attachment_type>/<uuid:attachment_id>', core_views.attachment, name='attachment'),
+
     path('bulk_download', file_views.bulk_download, name='bulk_download'),
 
     path('exporting/content/<str:content_type>', core_views.export_content, name='content_export'),

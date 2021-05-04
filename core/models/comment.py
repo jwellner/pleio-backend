@@ -7,6 +7,7 @@ from django.utils import timezone
 from .annotation import VoteMixin
 from core.constances import USER_ROLES
 
+
 class CommentManager(models.Manager):
     def visible(self):
         queryset = self.get_queryset()
@@ -40,6 +41,11 @@ class Comment(VoteMixin):
             return True
 
         return (user == self.owner)
+
+    def can_read(self, user):
+        if self.container and hasattr(self.container, 'can_read'):
+            return self.container.can_read(user)
+        return False
 
     @property
     def guid(self):

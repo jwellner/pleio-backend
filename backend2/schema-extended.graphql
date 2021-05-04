@@ -155,6 +155,8 @@ extend type Mutation {
   editSiteSettingProfileFieldValidator(input: editSiteSettingProfileFieldValidatorInput!): editSiteSettingProfileFieldValidatorPayload
   """Delete profileFieldValidator"""
   deleteSiteSettingProfileFieldValidator(input: deleteSiteSettingProfileFieldValidatorInput!): deleteSiteSettingProfileFieldValidatorPayload
+  """Add attachment to content"""
+  addAttachment(input: addAttachmentInput!): addAttachmentPayload
 }
 
 extend type Query {
@@ -390,4 +392,20 @@ type editSiteSettingProfileFieldValidatorPayload {
 
 type deleteSiteSettingProfileFieldValidatorPayload {
   success: Boolean!
+}
+
+type Attachment {
+  id: String
+  mimeType: String
+  url: String
+  name: String 
+}
+
+input addAttachmentInput {
+  contentGuid: String!
+  file: Upload!
+}
+
+type addAttachmentPayload {
+  attachment: Attachment
 }
