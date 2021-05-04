@@ -88,7 +88,6 @@ def resolve_edit_site_setting(_, info, input):
         'enableSearchEngineIndexing': 'ENABLE_SEARCH_ENGINE_INDEXING',
         'piwikUrl': 'PIWIK_URL',
         'piwikId': 'PIWIK_ID',
-        'oidcProviders': 'OIDC_PROVIDERS',
 
         'theme': 'THEME',
         'logoAlt': 'LOGO_ALT',
