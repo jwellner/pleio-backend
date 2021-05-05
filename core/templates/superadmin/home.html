@@ -10,4 +10,22 @@
 
 <p>This is the superadmin for {{ config.NAME }}</p>
 
+<div class="card">
+    <h5 class="card-header">Login Options</h5>
+    <div class="card-body">
+        <form method="post">
+            {% csrf_token %}
+            {% for providerOption in config.OIDC_PROVIDER_OPTIONS %}
+            <div class="mb-2 form-check">
+                <input type="checkbox" name="oidc_providers" value="{{ providerOption.value }}"
+                    {% if providerOption.value in config.OIDC_PROVIDERS %} checked {% endif %} />
+                <label for="oidc_providers">{{ providerOption.label }}</label>
+            </div>
+            {% endfor %}
+            {{ form.errors.oidc_providers }}
+            <button type="submit" class="btn btn-primary">Submit</button>
+        </form>
+    </div>
+</div>
+
 {% endblock %}
