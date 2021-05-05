@@ -148,7 +148,7 @@ class EditFileFolderTestCase(FastTenantTestCase):
             }
         """
 
-    @patch("file.models.get_mimetype")
+    @patch("core.lib.get_mimetype")
     @patch("{}.save".format(settings.DEFAULT_FILE_STORAGE))
     @patch("{}.open".format(settings.DEFAULT_FILE_STORAGE))
     def test_edit_file_title(self, mock_open, mock_save, mock_mimetype):
@@ -637,7 +637,7 @@ class EditFileFolderTestCase(FastTenantTestCase):
 
 
 
-    @patch("file.models.get_mimetype")
+    @patch("core.lib.get_mimetype")
     @patch("{}.open".format(settings.DEFAULT_FILE_STORAGE))
     def test_get_download_filename(self, mock_open, mock_mimetype):
 
@@ -672,7 +672,7 @@ class EditFileFolderTestCase(FastTenantTestCase):
         self.assertEqual(get_download_filename(self.file), 'iconnewname.txt.jpg')
 
 
-    @patch("file.models.get_mimetype")
+    @patch("core.lib.get_mimetype")
     @patch("{}.open".format(settings.DEFAULT_FILE_STORAGE))
     def test_get_download_filename_csv(self, mock_open, mock_mimetype):
 
@@ -696,7 +696,7 @@ class EditFileFolderTestCase(FastTenantTestCase):
         self.assertEqual(get_download_filename(self.file), 'csv-name.csv')
 
 
-    @patch("file.models.get_mimetype")
+    @patch("core.lib.get_mimetype")
     @patch("{}.open".format(settings.DEFAULT_FILE_STORAGE))
     def test_get_download_filename_no_mimetype(self, mock_open, mock_mimetype):
 

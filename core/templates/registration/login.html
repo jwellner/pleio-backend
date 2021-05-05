@@ -24,7 +24,13 @@
 						<a href="{% url 'oidc_authentication_init' %}?idp={{ config.IDP_ID }}&next={{ next }}" class="button ___medium" rel="nofollow">{{ config.IDP_NAME }}</a>
 						<div class="walled-garden_buttons-or">{% blocktrans %}or{% endblocktrans %}</div>
 					{% endif %}
-					<a href="{% url 'oidc_authentication_init' %}?next={{ next }}" class="button ___medium {% if config.IDP_ID %}___line{% endif%}" rel="nofollow">{% blocktrans %}Login using Pleio account{% endblocktrans %}</a>
+					{% for providerOption in config.OIDC_PROVIDER_OPTIONS %}
+						{% if providerOption.value in config.OIDC_PROVIDERS %}
+							<a href="{% url 'oidc_authentication_init' %}?next={{ next }}&provider={{ providerOption.value }}" class="button ___medium {% if config.IDP_ID %}___line{% endif%}" rel="nofollow">
+								{% blocktrans with oidc_provider=providerOption.label %}Login using {{ oidc_provider }}{% endblocktrans %}
+							</a>
+						{% endif %}
+					{% endfor %}
 				</div>
 				<div class="walled-garden_register content">
 					{% blocktrans %}Don't have an account?{% endblocktrans %} <a href="/login?login_credentials=true&amp;method=register" class="" rel="nofollow">{% blocktrans %}Register{% endblocktrans %}</a>

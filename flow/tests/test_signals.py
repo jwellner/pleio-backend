@@ -33,6 +33,8 @@ class SignalsTestCase(FastTenantTestCase):
         cache.set("%s%s" % (connection.schema_name, 'FLOW_CASE_ID'), 1)
         cache.set("%s%s" % (connection.schema_name, 'FLOW_USER_GUID'), self.user1.guid)
 
+        self.url_prefix = "https://tenant.fast-test.com"
+
     def tearDown(self):
         cache.clear()
 
@@ -51,7 +53,7 @@ class SignalsTestCase(FastTenantTestCase):
         url = 'https://flow.test/api/cases/'
         headers = {'Authorization': 'Token ' + config.FLOW_TOKEN, 'Accept': 'application/json'}
 
-        description = f"{self.blog1.description} <br /><br /><a href='{self.blog1.url}'>{self.blog1.url}</a>"
+        description = f"{self.blog1.description} <br /><br /><a href='{self.url_prefix}{self.blog1.url}'>{self.blog1.url}</a>"
         json_data = {
             'casetype': '1',
             'name': 'Blog1',
@@ -100,7 +102,7 @@ class SignalsTestCase(FastTenantTestCase):
         url = 'https://flow.test/api/cases/'
         headers = {'Authorization': 'Token ' + config.FLOW_TOKEN, 'Accept': 'application/json'}
 
-        description = f"{self.blog1.description} <br /><br /><a href='{self.blog1.url}'>{self.blog1.url}</a>"
+        description = f"{self.blog1.description} <br /><br /><a href='{self.url_prefix}{self.blog1.url}'>{self.blog1.url}</a>"
         json_data = {
             'casetype': '1',
             'name': 'Blog1',

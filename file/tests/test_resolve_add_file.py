@@ -58,7 +58,7 @@ class AddFileTestCase(FastTenantTestCase):
             }
         """
 
-    @patch("file.models.get_mimetype")
+    @patch("core.lib.get_mimetype")
     @patch("{}.open".format(settings.DEFAULT_FILE_STORAGE))
     def test_add_file(self, mock_open, mock_mimetype):
         file_mock = MagicMock(spec=File)
@@ -84,7 +84,7 @@ class AddFileTestCase(FastTenantTestCase):
         self.assertEqual(data["addFile"]["entity"]["tags"][1], "tag_two")
 
 
-    @patch("file.models.get_mimetype")
+    @patch("core.lib.get_mimetype")
     @patch("{}.open".format(settings.DEFAULT_FILE_STORAGE))
     def test_add_personal_file(self, mock_open, mock_mimetype):
         file_mock = MagicMock(spec=File)

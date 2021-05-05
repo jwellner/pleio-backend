@@ -1,0 +1,16 @@
+{{ $labelData := dict "Values" .Values "Release" .Release "Chart" .Chart "Component" "api" }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "backend2.apiName" . }}
+  labels:
+    {{- include "backend2.labels" $labelData | nindent 4 }}
+spec:
+  type: ClusterIP
+  ports:
+    - port: 80
+      targetPort: http
+      protocol: TCP
+      name: http
+  selector:
+    {{- include "backend2.selectorLabels" $labelData | nindent 4 }}

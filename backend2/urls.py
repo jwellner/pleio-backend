@@ -25,8 +25,8 @@ urlpatterns = [
     path('login/requested', core_views.access_requested, name='access_requested'),
     path('oidc/failure/', core_views.logout, name='oidc_failure'),
     path('oidc/', include('mozilla_django_oidc.urls')),
-    path('superadmin', core_superadmin.home),
-    path('superadmin/', core_superadmin.home),
+    path('superadmin', core_superadmin.Dashboard.as_view()),
+    path('superadmin/', core_superadmin.Dashboard.as_view()),
     path('superadmin/tasks', core_superadmin.tasks),
     path('graphql', GraphQLView.as_view(schema=schema, extensions=[OpenTracingExtensionSync]), name='graphql'),
 
@@ -38,6 +38,9 @@ urlpatterns = [
 
     path('file/thumbnail/<uuid:file_id>', file_views.thumbnail, name='thumbnail'),
     path('file/featured/<uuid:entity_guid>', file_views.featured, name='featured'),
+
+    path('attachment/<str:attachment_type>/<uuid:attachment_id>', core_views.attachment, name='attachment'),
+
     path('bulk_download', file_views.bulk_download, name='bulk_download'),
 
     path('exporting/content/<str:content_type>', core_views.export_content, name='content_export'),

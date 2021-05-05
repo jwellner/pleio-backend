@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-04-21 12:46+0200\n"
+"POT-Creation-Date: 2021-05-04 13:43+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -18,11 +18,11 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#: backend2/config.py:61 core/resolvers/query_site.py:87
+#: backend2/config.py:62 core/resolvers/query_site.py:87
 msgid "English"
 msgstr ""
 
-#: backend2/config.py:62 core/resolvers/query_site.py:87
+#: backend2/config.py:63 core/resolvers/query_site.py:87
 msgid "Dutch"
 msgstr ""
 
@@ -30,27 +30,27 @@ msgstr ""
 msgid "Provide a valid value."
 msgstr ""
 
-#: core/lib.py:141 core/resolvers/mutation_import_users.py:30
+#: core/lib.py:142 core/resolvers/mutation_import_users.py:30
 #: core/resolvers/query_site.py:67
 msgid "Just me"
 msgstr ""
 
-#: core/lib.py:144
+#: core/lib.py:145
 #, python-format
 msgid "Group: %(group_name)s"
 msgstr ""
 
-#: core/lib.py:147
+#: core/lib.py:148
 #, python-format
 msgid "Subgroup: %(subgroup_name)s"
 msgstr ""
 
-#: core/lib.py:152 core/resolvers/mutation_import_users.py:31
+#: core/lib.py:153 core/resolvers/mutation_import_users.py:31
 #: core/resolvers/query_site.py:68
 msgid "Logged in users"
 msgstr ""
 
-#: core/lib.py:154 core/resolvers/mutation_import_users.py:34
+#: core/lib.py:155 core/resolvers/mutation_import_users.py:34
 #: core/resolvers/query_site.py:72
 msgid "Public"
 msgstr ""
@@ -136,12 +136,12 @@ msgstr ""
 msgid "A site administrator was removed from %(site_name)s"
 msgstr ""
 
-#: core/resolvers/mutation_handle_site_access_request.py:53
+#: core/resolvers/mutation_handle_site_access_request.py:38
 #, python-format
 msgid "You are now member of: %(site_name)s"
 msgstr ""
 
-#: core/resolvers/mutation_handle_site_access_request.py:57
+#: core/resolvers/mutation_handle_site_access_request.py:42
 #, python-format
 msgid "Membership request declined for: %(site_name)s"
 msgstr ""
@@ -217,51 +217,51 @@ msgstr ""
 msgid "You're granted site administrator right on %(site_name)s"
 msgstr ""
 
-#: core/resolvers/query_site.py:118
+#: core/resolvers/query_site.py:120
 msgid "Activity stream"
 msgstr ""
 
-#: core/resolvers/query_site.py:118
+#: core/resolvers/query_site.py:120
 msgid "CMS page"
 msgstr ""
 
-#: core/resolvers/query_site.py:154
+#: core/resolvers/query_site.py:156
 msgid "Daily"
 msgstr ""
 
-#: core/resolvers/query_site.py:155
+#: core/resolvers/query_site.py:157
 msgid "Weekly"
 msgstr ""
 
-#: core/resolvers/query_site.py:156
+#: core/resolvers/query_site.py:158
 msgid "Monthly"
 msgstr ""
 
-#: core/resolvers/query_site.py:157
+#: core/resolvers/query_site.py:159
 msgid "Never"
 msgstr ""
 
-#: core/resolvers/query_site.py:206
+#: core/resolvers/query_site.py:208
 msgid "Administrator"
 msgstr ""
 
-#: core/resolvers/query_site.py:207
+#: core/resolvers/query_site.py:209
 msgid "Editor"
 msgstr ""
 
-#: core/resolvers/query_site.py:208
+#: core/resolvers/query_site.py:210
 msgid "Question expert"
 msgstr ""
 
-#: core/tasks.py:276
+#: core/tasks.py:272
 msgid "Import was a success"
 msgstr ""
 
-#: core/tasks.py:276
+#: core/tasks.py:272
 msgid "Import failed"
 msgstr ""
 
-#: core/tasks.py:352
+#: core/tasks.py:348
 #, python-format
 msgid "New notification at %(site_name)s: "
 msgstr ""
@@ -328,8 +328,10 @@ msgid "Agenda item created by"
 msgstr ""
 
 #: core/templates/email/entities/news.html:33
-msgid "News added on"
-msgstr "News added by"
+#, fuzzy
+#| msgid "News added on"
+msgid "News added by"
+msgstr ""
 
 #: core/templates/email/entities/question.html:19
 msgid "Question asked by"
@@ -612,7 +614,7 @@ msgid ""
 "details."
 msgstr ""
 
-#: core/templates/onboarding.html:58
+#: core/templates/onboarding.html:59
 msgid "Continue"
 msgstr ""
 
@@ -624,15 +626,16 @@ msgstr ""
 msgid "or"
 msgstr ""
 
-#: core/templates/registration/login.html:27
-msgid "Login using Pleio account"
+#: core/templates/registration/login.html:30
+#, python-format
+msgid "Login using %(oidc_provider)s"
 msgstr ""
 
-#: core/templates/registration/login.html:30
+#: core/templates/registration/login.html:36
 msgid "Don't have an account?"
 msgstr ""
 
-#: core/templates/registration/login.html:30
+#: core/templates/registration/login.html:36
 msgid "Register"
 msgstr ""
 
@@ -672,7 +675,7 @@ msgid ""
 "Access is requested. You will receive an e-mail when the request is accepted."
 msgstr ""
 
-#: core/views.py:148
+#: core/views.py:158
 #, python-format
 msgid "New access request for %(site_name)s"
 msgstr ""

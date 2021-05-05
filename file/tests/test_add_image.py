@@ -40,7 +40,7 @@ class AddImageTestCase(FastTenantTestCase):
             }
         """
 
-    @patch("file.models.get_mimetype")
+    @patch("core.lib.get_mimetype")
     @patch("{}.open".format(settings.DEFAULT_FILE_STORAGE))
     def test_add_image(self, mock_open, mock_mimetype):
         file_mock = MagicMock(spec=File)

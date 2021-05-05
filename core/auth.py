@@ -45,6 +45,12 @@ class OIDCAuthenticateView(OIDCAuthenticationRequestView):
         extra_params = self.get_settings('OIDC_AUTH_REQUEST_EXTRA_PARAMS', {})
         if idp:
             extra_params.update({'idp': idp})
+
+        provider = self.request.GET.get('provider', None)
+        providerOption = next(filter(lambda option: option['value'] == provider, config.OIDC_PROVIDER_OPTIONS), None)
+        if providerOption and not providerOption.get('isDefault', False):
+            extra_params.update({'provider': provider})
+
         return extra_params
 
 

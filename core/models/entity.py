@@ -7,6 +7,7 @@ from core.lib import get_acl
 from core.constances import USER_ROLES
 from .shared import read_access_default, write_access_default
 
+
 class EntityManager(InheritanceManager):
     def visible(self, user):
         qs = self.get_queryset()
@@ -46,6 +47,9 @@ class Entity(models.Model):
     def can_read(self, user):
         if user.is_authenticated and user.has_role(USER_ROLES.ADMIN):
             return True
+
+        if self.group and self.group.is_closed and not self.group.is_full_member(user):
+            return False
 
         return len(get_acl(user) & set(self.read_access)) > 0
 

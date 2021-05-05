@@ -48,6 +48,7 @@ LOCAL_APPS = [
     'task',
     'file',
     'elgg',
+    'control',
 ]
 
 LOCAL_MIDDLEWARE = []

@@ -2,20 +2,39 @@ import logging
 from django.shortcuts import render
 from django.contrib import messages
 from django.contrib.auth.decorators import user_passes_test, login_required
+from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
+from django.shortcuts import redirect
+from django.views import View
 from core.tasks import elasticsearch_rebuild, replace_domain_links
 from core.lib import tenant_schema, is_valid_domain
+from core.superadmin.forms import LoginConfigForm
 
 logger = logging.getLogger(__name__)
 
-@login_required
-@user_passes_test(lambda u: u.is_superadmin, login_url='/', redirect_field_name=None)
-def home(request):
-    # pylint: disable=unused-argument
 
-    context = {
-    }
+class Dashboard(LoginRequiredMixin, UserPassesTestMixin, View):
+    http_method_names = ['post', 'get']
 
-    return render(request, 'superadmin/home.html', context)
+    def test_func(self):
+        return self.request.user.is_superadmin
+
+    def handle_no_permission(self):
+        return redirect('/')
+
+    def post(self, request):
+        form = LoginConfigForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect('/superadmin')
+
+        return render(request, 'superadmin/home.html', {'form': form})
+
+    def get(self, request):
+        context = {
+        }
+
+        return render(request, 'superadmin/home.html', context)
+
 
 @login_required
 @user_passes_test(lambda u: u.is_superadmin, login_url='/', redirect_field_name=None)

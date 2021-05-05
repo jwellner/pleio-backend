@@ -1,0 +1,32 @@
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  annotations:
+    {{- with .Values.ingress.annotations }}
+      {{ toYaml . | nindent 4 }}
+    {{- end }}
+  name: {{ include "backend2.name" . }}
+spec:
+  rules:
+  {{- $serviceName := ((include "backend2.apiName" .)) -}}
+  {{- range .Values.domains }}
+    - host: {{ . }}
+      http:
+        paths:
+          - backend:
+              serviceName: {{ $serviceName }}
+              servicePort: http
+  {{- end }}
+    - host: {{ .Values.adminDomain }}
+      http:
+        paths:
+          - backend:
+              serviceName: {{ include "backend2.adminName" . }}
+              servicePort: http
+  tls:
+    - hosts:
+      {{- range .Values.domains }}
+        - {{ . }}
+      {{- end }}
+        - {{ .Values.adminDomain }}
+      secretName: {{ include "backend2.tlsSecretName" . }}
