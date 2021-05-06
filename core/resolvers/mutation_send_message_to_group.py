@@ -53,6 +53,8 @@ def resolve_send_message_to_group(_, info, input):
     context['message'] = format_html(clean_input.get('message'))
 
     subject = ugettext_lazy("Message from group {0}: {1}").format(group.name, clean_input.get('subject'))
+    context['subject'] = subject
+
     for email_address in email_addresses:
         send_mail_multi.delay(schema_name, subject, 'email/send_message_to_group.html', context, email_address)
 
