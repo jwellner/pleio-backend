@@ -51,6 +51,12 @@ class Comment(VoteMixin):
     def guid(self):
         return str(self.id)
 
+    @property
+    def url(self):
+        if self.container and hasattr(self.container, 'url'):
+            return self.container.url
+        return False
+
     def __str__(self):
         return f"Comment[{self.guid}]"
 

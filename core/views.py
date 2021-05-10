@@ -403,8 +403,10 @@ def export_content(request, content_type=None):
                 continue
             fields.append(field)
             field_names.append(field.name)
+        
         # if more fields needed, refactor
         field_names.append('url')
+        field_names.append('owner_url')
 
         writer = csv.writer(pseudo_buffer, delimiter=';', quotechar='"')
         yield writer.writerow(field_names)
@@ -421,12 +423,13 @@ def export_content(request, content_type=None):
                 field_values.append(field_value)
 
             # if more fields needed, refactor
-            url = ''
-            try:
-                url = entity.url
-            except Exception:
-                pass
-            field_values.append(url)
+            domain = request.tenant.get_primary_domain().domain
+
+            url = entity.url if hasattr(entity, 'url') else ''
+            field_values.append(f"https://{domain}{url}")
+
+            owner_url = f"{entity.owner.url}" if hasattr(entity, 'owner') else ''
+            field_values.append(f"https://{domain}{owner_url}")
 
             return field_values
 
