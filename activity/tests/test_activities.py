@@ -56,12 +56,13 @@ class ActivitiesTestCase(FastTenantTestCase):
             title="Blog5",
             owner=self.user1,
             read_access=[ACCESS_TYPE.public],
-            write_access=[ACCESS_TYPE.user.format(self.user1.id)]
+            write_access=[ACCESS_TYPE.user.format(self.user1.id)],
+            is_pinned=True
         )
 
         self.query = """
-            query ActivityList($offset: Int!, $limit: Int!, $subtypes: [String!], $groupFilter: [String!], $tags: [String!], $tagLists: [[String]], $orderBy: OrderBy, $orderDirection: OrderDirection) {
-                activities(offset: $offset, limit: $limit, tags: $tags, tagLists: $tagLists, subtypes: $subtypes, groupFilter: $groupFilter, orderBy: $orderBy, orderDirection: $orderDirection) {
+            query ActivityList($offset: Int!, $limit: Int!, $subtypes: [String!], $groupFilter: [String!], $tags: [String!], $tagLists: [[String]], $orderBy: OrderBy, $orderDirection: OrderDirection, $sortPinned: Boolean) {
+                activities(offset: $offset, limit: $limit, tags: $tags, tagLists: $tagLists, subtypes: $subtypes, groupFilter: $groupFilter, orderBy: $orderBy, orderDirection: $orderDirection, sortPinned: $sortPinned) {
                     total
                     edges {
                     guid
@@ -215,3 +216,25 @@ class ActivitiesTestCase(FastTenantTestCase):
         data = result[1]["data"]
 
         self.assertEqual(data["activities"]["total"], 2)
+
+
+    def test_activities_show_pinned(self):
+        request = HttpRequest()
+        request.user = self.user2
+
+        variables = {
+            "limit": 20,
+            "offset": 0,
+            "subtypes": [],
+            "containerGuid": None,
+            "sortPinned": True
+        }
+
+        result = graphql_sync(schema, { "query": self.query, "variables": variables }, context_value={ "request": request })
+
+        self.assertTrue(result[0])
+
+        data = result[1]["data"]
+
+        self.assertEqual(data["activities"]["edges"][0]["entity"]["guid"], self.blog5.guid)
+

@@ -159,3 +159,9 @@ def resolve_entity_views(obj, info):
 def resolve_entity_owner(obj, info):
     # pylint: disable=unused-argument
     return obj.owner
+
+def resolve_entity_is_pinned(obj, info):
+    # pylint: disable=unused-argument
+    if hasattr(obj, "is_pinned"):
+        return obj.is_pinned
+    return False

@@ -91,7 +91,8 @@ def resolve_entities(
     tagLists=None,
     orderBy=ORDER_BY.timeCreated,
     orderDirection=ORDER_DIRECTION.desc,
-    isFeatured=None
+    isFeatured=None,
+    sortPinned=False
 ):
     # pylint: disable=unused-argument
     # pylint: disable=too-many-arguments
@@ -121,6 +122,13 @@ def resolve_entities(
     if orderDirection == ORDER_DIRECTION.desc:
         order_by = '-%s' % (order_by)
 
+    if order_by == '-title':
+        order_by = Coalesce('news__title', 'blog__title', 'filefolder__title', 'poll__title', 'statusupdate__title', 'wiki__title',
+                                              'page__title', 'question__title', 'discussion__title', 'event__title').desc()
+    elif order_by == 'title':
+        order_by = Coalesce('news__title', 'blog__title', 'filefolder__title', 'poll__title', 'statusupdate__title', 'wiki__title',
+                                              'page__title', 'question__title', 'discussion__title', 'event__title').asc()
+
     entities = Model.objects.visible(info.context["request"].user)
     entities = entities.filter(conditional_group_filter(containerGuid) &
                                conditional_tags_filter(tags) &
@@ -137,14 +145,12 @@ def resolve_entities(
     if subtype and subtype == 'wiki':
         entities = entities.filter(wiki__parent=None)
 
-    if order_by == '-title':
-        entities = entities.order_by(Coalesce('news__title', 'blog__title', 'filefolder__title', 'poll__title', 'statusupdate__title', 'wiki__title',
-                                              'page__title', 'question__title', 'discussion__title', 'event__title').desc()).select_subclasses()
-    elif order_by == 'title':
-        entities = entities.order_by(Coalesce('news__title', 'blog__title', 'filefolder__title', 'poll__title', 'statusupdate__title', 'wiki__title',
-                                              'page__title', 'question__title', 'discussion__title', 'event__title').asc()).select_subclasses()
-    else:
-        entities = entities.order_by(order_by).select_subclasses()
+    order = [order_by]
+
+    if sortPinned:
+        order = ["-is_pinned"] + order
+
+    entities = entities.order_by(*order).select_subclasses()
 
     edges = entities[offset:offset+limit]
 
