@@ -72,6 +72,7 @@ class EditSiteSettingTestCase(FastTenantTestCase):
                         startPageCms
                         showIcon
                         icon
+                        iconAlt
                         menu {
                             title
                             link
@@ -206,6 +207,7 @@ class EditSiteSettingTestCase(FastTenantTestCase):
                 "startPage": "cms",
                 "startPageCms": "123456",
                 "showIcon": True,
+                "iconAlt": "iconAlt",
                 # TODO: "icon": "",
                 "menu": [{"id": 1, "link": "/news", "parentId": None, "title": "Nieuws"}, {"id": 2, "link": "/blog", "parentId": 1, "title": "Blog"}],
 
@@ -328,6 +330,7 @@ class EditSiteSettingTestCase(FastTenantTestCase):
         self.assertEqual(data["editSiteSetting"]["siteSettings"]["startPage"], "cms")
         self.assertEqual(data["editSiteSetting"]["siteSettings"]["startPageCms"], "123456")
         self.assertEqual(data["editSiteSetting"]["siteSettings"]["showIcon"], True)
+        self.assertEqual(data["editSiteSetting"]["siteSettings"]["iconAlt"], "iconAlt")
         # TODO: self.assertEqual(data["editSiteSetting"]["siteSettings"]["icon"], "heart")
         self.assertEqual(data["editSiteSetting"]["siteSettings"]["menu"], [{"title": "Nieuws", "link": "/news", "children": [
             {"title": "Blog", "link": "/blog", "children": []}
