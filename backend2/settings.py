@@ -305,5 +305,3 @@ if APM_ENABLED:
         set_global_tracer(Tracer(config=ELASTIC_APM))
 
 SECURE_REFERRER_POLICY = 'origin-when-cross-origin'
-
-DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
