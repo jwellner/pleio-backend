@@ -270,7 +270,7 @@ class EventsTestCase(FastTenantTestCase):
 
         errors = result[1]["errors"]
 
-        self.assertEqual(errors[0]["message"], "Variable '$filter' got invalid value ''; Expected type EventFilter.")
+        self.assertEqual(errors[0]["message"], "Variable '$filter' got invalid value ''; Value '' does not exist in 'EventFilter' enum.")
 
     def test_events_in_group(self):
 
