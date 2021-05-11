@@ -121,6 +121,7 @@ def get_site_settings():
         'startPageCmsOptions': start_page_cms_options,
         'startPageCms': config.STARTPAGE_CMS,
         'icon': config.ICON if config.ICON else static('icon.svg'),
+        'iconAlt': config.ICON_ALT,
         'showIcon': config.ICON_ENABLED,
         'menu': config.MENU,
 

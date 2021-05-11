@@ -264,6 +264,7 @@ extend input editSiteSettingInput {
   flowToken: String
   flowCaseId: Int
   flowUserGuid: String
+  iconAlt: String
 }
 
 input ProfileSectionInput {
@@ -335,6 +336,7 @@ extend type SiteSettings {
   flowToken: String
   flowCaseId: Int
   flowUserGuid: String
+  iconAlt: String
 }
 
 extend input FeaturedInput {

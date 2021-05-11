@@ -100,6 +100,7 @@ def resolve_edit_site_setting(_, info, input):
         'startPage': 'STARTPAGE',
         'startPageCms': 'STARTPAGE_CMS',
         'showIcon': 'ICON_ENABLED',
+        'iconAlt': 'ICON_ALT',
 
         "numberOfFeaturedItems": 'NUMBER_OF_FEATURED_ITEMS',
         "enableFeedSorting": 'ENABLE_FEED_SORTING',
