@@ -157,6 +157,8 @@ extend type Mutation {
   deleteSiteSettingProfileFieldValidator(input: deleteSiteSettingProfileFieldValidatorInput!): deleteSiteSettingProfileFieldValidatorPayload
   """Add attachment to content"""
   addAttachment(input: addAttachmentInput!): addAttachmentPayload
+  """Toggle pinned on Entity"""
+  toggleEntityIsPinned(input: toggleEntityIsPinnedInput!): toggleEntityIsPinnedPayload
 }
 
 extend type Query {
@@ -408,4 +410,12 @@ input addAttachmentInput {
 
 type addAttachmentPayload {
   attachment: Attachment
+}
+
+input toggleEntityIsPinnedInput {
+  guid: String!
+}
+
+type toggleEntityIsPinnedPayload {
+  success: Boolean
 }

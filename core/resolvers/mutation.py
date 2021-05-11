@@ -46,6 +46,7 @@ from .mutation_add_site_setting_profile_field_validator import resolve_add_site_
 from .mutation_edit_site_setting_profile_field_validator import resolve_edit_site_setting_profile_field_validator
 from .mutation_delete_site_setting_profile_field_validator import resolve_delete_site_setting_profile_field_validator
 from .mutation_add_attachment import resolve_add_attachment
+from .mutation_toggle_entity_is_pinned import resolve_toggle_entity_is_pinned
 
 mutation = ObjectType("Mutation")
 mutation.set_field("addGroup", resolve_add_group)
@@ -110,3 +111,4 @@ mutation.set_field("importUsersStep1", resolve_import_users_step_1)
 mutation.set_field("importUsersStep2", resolve_import_users_step_2)
 
 mutation.set_field("addAttachment", resolve_add_attachment)
+mutation.set_field("toggleEntityIsPinned", resolve_toggle_entity_is_pinned)

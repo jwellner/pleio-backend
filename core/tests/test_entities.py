@@ -75,6 +75,7 @@ class EntitiesTestCase(FastTenantTestCase):
         self.page3 = mixer.blend(
             Page,
             title="Page3",
+            is_pinned=True,
             position=1,
             parent=self.page1,
             owner=self.admin,
@@ -333,3 +334,20 @@ class EntitiesTestCase(FastTenantTestCase):
         data = result[1]["data"]
 
         self.assertEqual(data["entities"]["edges"][0]["guid"], self.blog3.guid)
+
+    def test_entities_show_pinned(self):
+        request = HttpRequest()
+        request.user = self.authenticatedUser
+
+        variables = {
+            "containerGuid": None,
+            "showPinned": True
+        }
+
+        result = graphql_sync(schema, { "query": self.query, "variables": variables }, context_value={ "request": request })
+
+        self.assertTrue(result[0])
+
+        data = result[1]["data"]
+
+        self.assertEqual(data["entities"]["edges"][0]["guid"], self.page3.guid)
