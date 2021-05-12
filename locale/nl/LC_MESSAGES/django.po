@@ -747,8 +747,8 @@ msgstr "of"
 
 #: core/templates/registration/login.html:30
 #, python-format
-msgid "Login using %(oidc_provider)s"
-msgstr ""
+msgid "Log in using %(oidc_provider)s"
+msgstr "Log in met %(oidc_provider)s"
 
 #: core/templates/registration/login.html:36
 msgid "Don't have an account?"
@@ -813,8 +813,8 @@ msgstr "Bevestiging aanmelding %s"
 msgid "Confirmation of registration for %s"
 msgstr "Bevestiging aanmelding voor %s"
 
-#~ msgid "Login using Pleio account"
-#~ msgstr "Log in met Pleio account"
+#~ msgid "Log in using Pleio Account"
+#~ msgstr "Log in met Pleio Account"
 
 #~ msgid "Save"
 #~ msgstr "Opslaan"

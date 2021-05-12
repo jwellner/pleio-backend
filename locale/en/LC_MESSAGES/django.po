@@ -627,7 +627,7 @@ msgstr ""
 
 #: core/templates/registration/login.html:30
 #, python-format
-msgid "Login using %(oidc_provider)s"
+msgid "Log in using %(oidc_provider)s"
 msgstr ""
 
 #: core/templates/registration/login.html:36
