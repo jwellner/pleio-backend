@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-05-04 13:43+0200\n"
+"POT-Creation-Date: 2021-05-06 14:39+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -217,39 +217,39 @@ msgstr "Een nieuwe site beheerder is toegewezen aan %(site_name)s"
 msgid "You're granted site administrator right on %(site_name)s"
 msgstr "U bent aangewezen als site beheerder van %(site_name)s"
 
-#: core/resolvers/query_site.py:120
+#: core/resolvers/query_site.py:118
 msgid "Activity stream"
 msgstr "Activiteitenstroom"
 
-#: core/resolvers/query_site.py:120
+#: core/resolvers/query_site.py:118
 msgid "CMS page"
 msgstr "CMS pagina"
 
-#: core/resolvers/query_site.py:156
+#: core/resolvers/query_site.py:154
 msgid "Daily"
 msgstr "Dagelijks"
 
-#: core/resolvers/query_site.py:157
+#: core/resolvers/query_site.py:155
 msgid "Weekly"
 msgstr "Wekelijks"
 
-#: core/resolvers/query_site.py:158
+#: core/resolvers/query_site.py:156
 msgid "Monthly"
 msgstr "Maandelijks"
 
-#: core/resolvers/query_site.py:159
+#: core/resolvers/query_site.py:157
 msgid "Never"
 msgstr "Nooit"
 
-#: core/resolvers/query_site.py:208
+#: core/resolvers/query_site.py:206
 msgid "Administrator"
 msgstr "Beheerder"
 
-#: core/resolvers/query_site.py:209
+#: core/resolvers/query_site.py:207
 msgid "Editor"
 msgstr "Redacteur"
 
-#: core/resolvers/query_site.py:210
+#: core/resolvers/query_site.py:208
 msgid "Question expert"
 msgstr "Vraagexpert"
 
@@ -473,6 +473,7 @@ msgstr ""
 "Dit bericht is verstuurd van <a href=\"%(site_url)s\">%(site_url)s</a> door "
 "<a href=\"%(user_url)s\">%(user_name)s</a>"
 
+#: core/templates/email/send_message_to_group.html:8
 #: core/templates/email/send_message_to_user.html:8
 #, python-format
 msgid ""
@@ -746,8 +747,8 @@ msgstr "of"
 
 #: core/templates/registration/login.html:30
 #, python-format
-msgid "Login using %(oidc_provider)s"
-msgstr ""
+msgid "Log in using %(oidc_provider)s"
+msgstr "Log in met %(oidc_provider)s"
 
 #: core/templates/registration/login.html:36
 msgid "Don't have an account?"
@@ -812,8 +813,8 @@ msgstr "Bevestiging aanmelding %s"
 msgid "Confirmation of registration for %s"
 msgstr "Bevestiging aanmelding voor %s"
 
-#~ msgid "Login using Pleio account"
-#~ msgstr "Log in met Pleio account"
+#~ msgid "Log in using Pleio Account"
+#~ msgstr "Log in met Pleio Account"
 
 #~ msgid "Save"
 #~ msgstr "Opslaan"

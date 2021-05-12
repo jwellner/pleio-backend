@@ -56,6 +56,7 @@ class FileFolder(Entity):
         return '{}/files/view/{}/{}'.format(
             prefix, self.guid, os.path.basename(self.upload.name)
         ).lower()
+
     @property
     def download_url(self):
         return reverse('download', args=[self.id, os.path.basename(self.upload.name)])

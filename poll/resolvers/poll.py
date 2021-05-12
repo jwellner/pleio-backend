@@ -31,6 +31,7 @@ poll.set_field("timeCreated", shared.resolve_entity_time_created)
 poll.set_field("timeUpdated", shared.resolve_entity_time_updated)
 poll.set_field("canEdit", shared.resolve_entity_can_edit)
 poll.set_field("accessId", shared.resolve_entity_access_id)
+poll.set_field("isPinned", shared.resolve_entity_is_pinned)
 
 
 poll_choice = ObjectType("PollChoice")

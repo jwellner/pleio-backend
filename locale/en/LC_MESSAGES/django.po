@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-05-04 13:43+0200\n"
+"POT-Creation-Date: 2021-05-06 14:39+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -217,39 +217,39 @@ msgstr ""
 msgid "You're granted site administrator right on %(site_name)s"
 msgstr ""
 
-#: core/resolvers/query_site.py:120
+#: core/resolvers/query_site.py:118
 msgid "Activity stream"
 msgstr ""
 
-#: core/resolvers/query_site.py:120
+#: core/resolvers/query_site.py:118
 msgid "CMS page"
 msgstr ""
 
-#: core/resolvers/query_site.py:156
+#: core/resolvers/query_site.py:154
 msgid "Daily"
 msgstr ""
 
-#: core/resolvers/query_site.py:157
+#: core/resolvers/query_site.py:155
 msgid "Weekly"
 msgstr ""
 
-#: core/resolvers/query_site.py:158
+#: core/resolvers/query_site.py:156
 msgid "Monthly"
 msgstr ""
 
-#: core/resolvers/query_site.py:159
+#: core/resolvers/query_site.py:157
 msgid "Never"
 msgstr ""
 
-#: core/resolvers/query_site.py:208
+#: core/resolvers/query_site.py:206
 msgid "Administrator"
 msgstr ""
 
-#: core/resolvers/query_site.py:209
+#: core/resolvers/query_site.py:207
 msgid "Editor"
 msgstr ""
 
-#: core/resolvers/query_site.py:210
+#: core/resolvers/query_site.py:208
 msgid "Question expert"
 msgstr ""
 
@@ -328,8 +328,6 @@ msgid "Agenda item created by"
 msgstr ""
 
 #: core/templates/email/entities/news.html:33
-#, fuzzy
-#| msgid "News added on"
 msgid "News added by"
 msgstr ""
 
@@ -429,6 +427,7 @@ msgid ""
 "href=\"%(user_url)s\">%(user_name)s</a>"
 msgstr ""
 
+#: core/templates/email/send_message_to_group.html:8
 #: core/templates/email/send_message_to_user.html:8
 #, python-format
 msgid ""
@@ -628,7 +627,7 @@ msgstr ""
 
 #: core/templates/registration/login.html:30
 #, python-format
-msgid "Login using %(oidc_provider)s"
+msgid "Log in using %(oidc_provider)s"
 msgstr ""
 
 #: core/templates/registration/login.html:36

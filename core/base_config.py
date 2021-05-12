@@ -18,7 +18,7 @@ DEFAULT_SITE_CONFIG = {
     'PIWIK_ID': ('', 'Piwik ID'),
     'OIDC_PROVIDERS': (['pleio'], 'OIDC Providers'),
     'OIDC_PROVIDER_OPTIONS': ([
-        {'value': 'pleio', 'label': 'Pleio account', 'isDefault': True},
+        {'value': 'pleio', 'label': 'Pleio Account', 'isDefault': True},
         {'value': 'fnv', 'label': 'Mijn FNV'},
     ], 'Default OP options'),
 

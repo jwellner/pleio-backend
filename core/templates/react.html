@@ -70,7 +70,7 @@
     <div id="react-root" class="page-container">
         <div class="loading-pleio">
             {% if config.ICON_ENABLED and config.ICON %}
-                <img src="{{ config.ICON }}">
+                <img src="{{ config.ICON }}" alt="{{ config.ICON_ALT }}">
             {% else %}
                 <img src="{% static 'apple-touch-icon.png' %}">
             {% endif %}
