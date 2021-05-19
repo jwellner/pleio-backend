@@ -7,8 +7,16 @@ from user.models import User
 
 
 def validate_flow_token(request):
+    token = config.FLOW_TOKEN
+    if not token:
+        return False
     try:
-        if str(request.META['headers']['Authorization']) == str('Bearer ' + config.FLOW_TOKEN):
+        if str(request.META['HTTP_AUTHORIZATION']) == str('Bearer ' + token):
+            return True
+    except Exception:
+        pass
+    try:
+        if str(request.META['headers']['Authorization']) == str('Bearer ' + token):
             return True
     except Exception:
         pass
