@@ -1,5 +1,6 @@
 from django.core.exceptions import ObjectDoesNotExist
 from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
 from core import config
 from core.models import Comment, Entity
@@ -22,7 +23,7 @@ def validate_flow_token(request):
         pass
     return False
 
-
+@csrf_exempt
 @require_http_methods(["POST"])
 def add_comment(request):
     if not config.FLOW_ENABLED or not validate_flow_token(request):
