@@ -1,4 +1,4 @@
-FROM python:3.8-slim AS build
+FROM python:3.8.10-slim AS build
 
 RUN apt-get update && apt-get install --no-install-recommends -y \
     build-essential \
@@ -12,7 +12,7 @@ WORKDIR /app-tmp
 COPY requirements.txt /app-tmp
 RUN /app-tmp/venv/bin/pip3 install -r requirements.txt
 
-FROM python:3.8-slim
+FROM python:3.8.10-slim
 
 # Workaround for error with postgresql-client package
 RUN mkdir -p /usr/share/man/man1/ /usr/share/man/man3/ /usr/share/man/man7/
