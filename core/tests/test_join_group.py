@@ -22,9 +22,14 @@ class JoinGroupTestCase(FastTenantTestCase):
         self.user2 = mixer.blend(User, name="b") # auto joined to group_auto
         self.user3 = mixer.blend(User, name="c") # auto joined to group_auto
         self.user4 = mixer.blend(User, name="d")
+        self.groupAdmin1 = mixer.blend(User, name="e")
+        self.groupAdmin2 = mixer.blend(User, name="f")
         self.group = mixer.blend(Group, owner=self.user1, is_membership_on_request=False)
         self.group2 = mixer.blend(Group, owner=self.user1, is_membership_on_request=False)
         self.group_on_request = mixer.blend(Group, owner=self.user1, is_membership_on_request=True)
+        self.group_on_request.join(self.user1, member_type='owner')
+        self.group_on_request.join(self.groupAdmin1, member_type='admin')
+        self.group_on_request.join(self.groupAdmin2, member_type='admin')
         self.group2.join(self.user4, 'member')
 
     def tearDown(self):
@@ -147,17 +152,17 @@ class JoinGroupTestCase(FastTenantTestCase):
 
         data = result[1]["data"]
 
-        self.assertEqual(data["joinGroup"]["group"]["memberCount"], 0)
-        self.assertEqual(data["joinGroup"]["group"]["members"]["total"], 0)
-        mocked_send_mail_multi.assert_called_once()
+        self.assertEqual(data["joinGroup"]["group"]["memberCount"], 3)
+        self.assertEqual(data["joinGroup"]["group"]["members"]["total"], 3)
+        self.assertEqual(mocked_send_mail_multi.call_count, 3)
 
         request.user = self.user3
         result = graphql_sync(schema, { "query": mutation, "variables": variables }, context_value={ "request": request })
 
         data = result[1]["data"]
 
-        self.assertEqual(data["joinGroup"]["group"]["memberCount"], 0)
-        self.assertEqual(data["joinGroup"]["group"]["members"]["total"], 0)
+        self.assertEqual(data["joinGroup"]["group"]["memberCount"], 3)
+        self.assertEqual(data["joinGroup"]["group"]["members"]["total"], 3)
         self.assertEqual(self.user2.memberships.filter(group=self.group_on_request, type="pending").count(), 1)
         self.assertEqual(self.user3.memberships.filter(group=self.group_on_request, type="pending").count(), 1)
 
@@ -199,9 +204,9 @@ class JoinGroupTestCase(FastTenantTestCase):
         data = result[1]["data"]
 
         self.assertEqual(data["entity"]["guid"], self.group_auto.guid)
-        self.assertEqual(data["entity"]["memberCount"], 3) # to users should be added on create
-        self.assertEqual(data["entity"]["members"]["total"], 3) # to users should be added on create
-        self.assertEqual(len(data["entity"]["members"]["edges"]), 3)
+        self.assertEqual(data["entity"]["memberCount"], 5) # to users should be added on create
+        self.assertEqual(data["entity"]["members"]["total"], 5) # to users should be added on create
+        self.assertEqual(len(data["entity"]["members"]["edges"]), 5)
 
 
     def test_join_group_by_member_of_group(self):

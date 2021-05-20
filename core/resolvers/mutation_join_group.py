@@ -35,7 +35,10 @@ def resolve_join_group(_, info, input):
         context['link'] = link
         context['group_name'] = group.name
         context['user_obfuscated_email'] = obfuscate_email(user.email)
-        send_mail_multi.delay(schema_name, subject, 'email/join_group.html', context, group.owner.email)
+
+        receiving_members = group.members.filter(type__in=['admin', 'owner'])
+        for receiving_member in receiving_members:
+            send_mail_multi.delay(schema_name, subject, 'email/join_group.html', context, receiving_member.user.email)
 
     return {
         "group": group
