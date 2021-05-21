@@ -179,10 +179,9 @@ class Group(models.Model):
             context['welcome_message'] = context['welcome_message'].replace("[group_url]", f"{get_base_url()}{self.url}")
 
             subject = ugettext_lazy("Welcome to %(group_name)s") % {'group_name': self.name}
-            try:
-                celery.send_task('core.tasks.send_mail_multi', (tenant_schema(), subject, 'email/group_welcome.html', context, user.email))
-            except Exception as e:
-                logger.error("Error sending welcome message: %s", e)
+
+            from core.tasks import send_mail_multi
+            send_mail_multi.delay(tenant_schema(), subject, 'email/group_welcome.html', context, user.email)
 
     @property
     def guid(self):

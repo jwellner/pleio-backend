@@ -11,7 +11,6 @@ from user.models import User
 from mixer.backend.django import mixer
 from graphql import GraphQLError
 from unittest import mock
-from unittest.mock import Mock
 
 class JoinGroupTestCase(FastTenantTestCase):
 
@@ -237,10 +236,8 @@ class JoinGroupTestCase(FastTenantTestCase):
 
         self.assertEqual(errors[0]["message"], "already_member_of_group")
 
-    def test_welcome_message(self):
-        from celery import current_app as celery
-        prev = celery.send_task
-        celery.send_task = Mock()
+    @mock.patch('core.tasks.send_mail_multi.delay')
+    def test_welcome_message(self, mock_send_mail_multi):
         mutation = """
             mutation ($group: joinGroupInput!) {
                 joinGroup(input: $group) {
@@ -263,22 +260,17 @@ class JoinGroupTestCase(FastTenantTestCase):
                 "guid": self.group.guid
             }
         }
-        try:
-            request = HttpRequest()
-            request.user = self.user1
-            result = graphql_sync(schema, { "query": mutation, "variables": variables }, context_value={ "request": request })
 
-            data = result[1]["data"]
+        request = HttpRequest()
+        request.user = self.user1
+        result = graphql_sync(schema, { "query": mutation, "variables": variables }, context_value={ "request": request })
 
-            celery.send_task.assert_called_once()
-        finally:
-            celery.send_task = prev
+        data = result[1]["data"]
 
+        mock_send_mail_multi.assert_called_once()
 
-    def test_no_welcome_message(self):
-        from celery import current_app as celery
-        prev = celery.send_task
-        celery.send_task = Mock()
+    @mock.patch('core.tasks.send_mail_multi.delay')
+    def test_no_welcome_message(self, mock_send_mail_multi):
         mutation = """
             mutation ($group: joinGroupInput!) {
                 joinGroup(input: $group) {
@@ -301,13 +293,10 @@ class JoinGroupTestCase(FastTenantTestCase):
                 "guid": self.group2.guid
             }
         }
-        try:
-            request = HttpRequest()
-            request.user = self.user1
-            result = graphql_sync(schema, { "query": mutation, "variables": variables }, context_value={ "request": request })
+        request = HttpRequest()
+        request.user = self.user1
+        result = graphql_sync(schema, { "query": mutation, "variables": variables }, context_value={ "request": request })
 
-            data = result[1]["data"]
+        data = result[1]["data"]
 
-            celery.send_task.assert_not_called()
-        finally:
-            celery.send_task = prev
+        mock_send_mail_multi.assert_not_called()

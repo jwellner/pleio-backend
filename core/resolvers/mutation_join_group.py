@@ -37,7 +37,7 @@ def resolve_join_group(_, info, input):
 
         receiving_members = group.members.filter(type__in=['admin', 'owner'])
         for receiving_member in receiving_members:
-            send_mail_multi.delay(schema_name, subject, 'email/join_group.html', context, receiving_member.user.email)
+            send_mail_multi.delay(tenant_schema(), subject, 'email/join_group.html', context, receiving_member.user.email)
 
     return {
         "group": group
