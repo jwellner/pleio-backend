@@ -152,7 +152,7 @@ def request_access(request):
                 admins = User.objects.filter(roles__contains=[USER_ROLES.ADMIN])
 
             if send_notification:
-                context = get_default_email_context(request)
+                context = get_default_email_context()
                 context['request_name'] = claims.get('name')
                 context['site_admin_url'] = context['site_url'] + '/admin2/users/access-requests'
                 subject = ugettext_lazy("New access request for %(site_name)s") % {'site_name': context["site_name"]}

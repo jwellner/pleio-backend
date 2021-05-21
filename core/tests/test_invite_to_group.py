@@ -32,8 +32,6 @@ class InviteToGroupTestCase(FastTenantTestCase):
         self.user2.delete()
         self.user1.delete()
 
-
-    @override_settings(ALLOWED_HOSTS=['test.test'])
     @mock.patch('core.resolvers.mutation_invite_to_group.generate_code', return_value='6df8cdad5582833eeab4')
     @mock.patch('core.resolvers.mutation_invite_to_group.send_mail_multi.delay')
     def test_invite_to_group_by_guid_by_group_owner(self, mocked_send_mail_multi, mocked_generate_code):
@@ -63,9 +61,6 @@ class InviteToGroupTestCase(FastTenantTestCase):
 
         request = HttpRequest()
         request.user = self.user1
-        request.META = {
-            'HTTP_HOST': 'test.test'
-        }
 
         result = graphql_sync(schema, {"query": mutation, "variables": variables}, context_value={ "request": request })
 
@@ -75,7 +70,6 @@ class InviteToGroupTestCase(FastTenantTestCase):
         self.assertEqual(data["inviteToGroup"]["group"]["guid"], self.group1.guid)
         mocked_send_mail_multi.assert_called_once()
 
-    @override_settings(ALLOWED_HOSTS=['test.test'])
     @mock.patch('core.resolvers.mutation_invite_to_group.generate_code', return_value='6df8cdad5582833eeab4')
     @mock.patch('core.resolvers.mutation_invite_to_group.send_mail_multi.delay')
     def test_invite_to_group_by_email_by_group_owner(self, mocked_send_mail_multi, mocked_generate_code):
@@ -105,9 +99,6 @@ class InviteToGroupTestCase(FastTenantTestCase):
 
         request = HttpRequest()
         request.user = self.user1
-        request.META = {
-            'HTTP_HOST': 'test.test'
-        }
 
         result = graphql_sync(schema, {"query": mutation, "variables": variables}, context_value={ "request": request })
 
@@ -117,7 +108,6 @@ class InviteToGroupTestCase(FastTenantTestCase):
         self.assertEqual(data["inviteToGroup"]["group"]["guid"], self.group1.guid)
         mocked_send_mail_multi.assert_called_once()
 
-    @override_settings(ALLOWED_HOSTS=['test.test'])
     @mock.patch('core.resolvers.mutation_invite_to_group.send_mail_multi.delay')
     def test_add_all_users_to_group_by_admin(self, mocked_send_mail_multi):
 
@@ -150,9 +140,6 @@ class InviteToGroupTestCase(FastTenantTestCase):
 
         request = HttpRequest()
         request.user = self.admin
-        request.META = {
-            'HTTP_HOST': 'test.test'
-        }
 
         result = graphql_sync(schema, {"query": mutation, "variables": variables}, context_value={ "request": request })
 
@@ -163,7 +150,6 @@ class InviteToGroupTestCase(FastTenantTestCase):
         self.assertEqual(len(self.group1.members.all()), 3)
         assert not mocked_send_mail_multi.called
 
-    @override_settings(ALLOWED_HOSTS=['test.test'])
     @mock.patch('core.resolvers.mutation_accept_membership_request.send_mail_multi.delay')
     def test_add_all_users_to_group_by_group_owner(self, mocked_send_mail_multi):
         mutation = """
@@ -192,9 +178,6 @@ class InviteToGroupTestCase(FastTenantTestCase):
 
         request = HttpRequest()
         request.user = self.user1
-        request.META = {
-            'HTTP_HOST': 'test.test'
-        }
 
         result = graphql_sync(schema, {"query": mutation, "variables": variables}, context_value={ "request": request })
 
@@ -204,7 +187,6 @@ class InviteToGroupTestCase(FastTenantTestCase):
         self.assertEqual(errors[0]["message"], "user_not_site_admin")
         assert not mocked_send_mail_multi.called
 
-    @override_settings(ALLOWED_HOSTS=['test.test'])
     @mock.patch('core.resolvers.mutation_accept_membership_request.send_mail_multi.delay')
     def test_direct_add_users_to_group_by_group_owner(self, mocked_send_mail_multi):
         mutation = """
@@ -233,9 +215,6 @@ class InviteToGroupTestCase(FastTenantTestCase):
 
         request = HttpRequest()
         request.user = self.user1
-        request.META = {
-            'HTTP_HOST': 'test.test'
-        }
 
         result = graphql_sync(schema, {"query": mutation, "variables": variables}, context_value={ "request": request })
 
@@ -245,7 +224,6 @@ class InviteToGroupTestCase(FastTenantTestCase):
         self.assertEqual(errors[0]["message"], "user_not_site_admin")
         assert not mocked_send_mail_multi.called
 
-    @override_settings(ALLOWED_HOSTS=['test.test'])
     @mock.patch('core.resolvers.mutation_accept_membership_request.send_mail_multi.delay')
     def test_direct_add_users_to_group_by_admin(self, mocked_send_mail_multi):
         mutation = """
@@ -274,9 +252,6 @@ class InviteToGroupTestCase(FastTenantTestCase):
 
         request = HttpRequest()
         request.user = self.admin
-        request.META = {
-            'HTTP_HOST': 'test.test'
-        }
 
         result = graphql_sync(schema, {"query": mutation, "variables": variables}, context_value={ "request": request })
 
@@ -288,7 +263,6 @@ class InviteToGroupTestCase(FastTenantTestCase):
         assert not mocked_send_mail_multi.called
 
 
-    @override_settings(ALLOWED_HOSTS=['test.test'])
     @mock.patch('core.resolvers.mutation_invite_to_group.generate_code', return_value='6df8cdad5582833eeab4')
     @mock.patch('core.resolvers.mutation_invite_to_group.send_mail_multi.delay')
     def test_invite_non_site_member_to_group_by_guid_by_group_owner(self, mocked_send_mail_multi, mocked_generate_code):
@@ -318,9 +292,6 @@ class InviteToGroupTestCase(FastTenantTestCase):
 
         request = HttpRequest()
         request.user = self.user1
-        request.META = {
-            'HTTP_HOST': 'test.test'
-        }
 
         result = graphql_sync(schema, {"query": mutation, "variables": variables}, context_value={ "request": request })
 

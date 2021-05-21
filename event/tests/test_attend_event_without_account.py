@@ -27,7 +27,6 @@ class AttendEventWithoutAccountTestCase(FastTenantTestCase):
         self.event.delete()
         self.authenticatedUser.delete()
 
-    @override_settings(ALLOWED_HOSTS=['test.test'])
     @mock.patch('event.resolvers.mutation_attend_event_without_account.generate_code', return_value='6df8cdad5582833eeab4')
     @mock.patch('event.resolvers.mutation_attend_event_without_account.send_mail_multi.delay')
     def test_attend_event_without_account(self, mocked_send_mail_multi, mocked_generate_code):
@@ -51,21 +50,18 @@ class AttendEventWithoutAccountTestCase(FastTenantTestCase):
             "input": {
                 "guid": self.event.guid,
                 "name": "pete",
-                "email": "pete@test.test"
+                "email": "pete@tenant.fast-test.com"
             }
         }
 
         request = HttpRequest()
         request.user = self.anonymousUser
-        request.META = {
-            'HTTP_HOST': 'test.test'
-        }
 
         result = graphql_sync(schema, { "query": mutation, "variables": variables }, context_value={ "request": request })
 
         data = result[1]["data"]
 
-        link = "https://test.test/events/confirm/" + self.event.guid + "?email=pete@test.test&code=6df8cdad5582833eeab4"
+        link = "https://tenant.fast-test.com/events/confirm/" + self.event.guid + "?email=pete@tenant.fast-test.com&code=6df8cdad5582833eeab4"
         subject = "Confirmation of registration %s" % self.event.title
         context = {'link': link, 'title': self.event.title, 'location': self.event.location, 'start_date': self.event.start_date}
         self.assertEqual(data["attendEventWithoutAccount"]["entity"]["guid"], self.event.guid)
@@ -74,7 +70,6 @@ class AttendEventWithoutAccountTestCase(FastTenantTestCase):
         mocked_send_mail_multi.assert_called_once()
 
 
-    @override_settings(ALLOWED_HOSTS=['test.test'])
     @mock.patch('event.resolvers.mutation_attend_event_without_account.generate_code', return_value='6df8cdad5582833eeab4')
     @mock.patch('event.resolvers.mutation_attend_event_without_account.send_mail_multi.delay')
     def test_attend_event_without_account_resend(self, mocked_send_mail_multi, mocked_generate_code):
@@ -98,15 +93,12 @@ class AttendEventWithoutAccountTestCase(FastTenantTestCase):
             "input": {
                 "guid": self.event.guid,
                 "name": "pete",
-                "email": "pete@test.test"
+                "email": "pete@tenant.fast-test.com"
             }
         }
 
         request = HttpRequest()
         request.user = self.anonymousUser
-        request.META = {
-            'HTTP_HOST': 'test.test'
-        }
 
         result = graphql_sync(schema, { "query": mutation, "variables": variables }, context_value={ "request": request })
         mocked_send_mail_multi.assert_called_once()
@@ -114,7 +106,7 @@ class AttendEventWithoutAccountTestCase(FastTenantTestCase):
             "input": {
                 "guid": self.event.guid,
                 "name": "pete",
-                "email": "pete@test.test",
+                "email": "pete@tenant.fast-test.com",
                 "resend": True
             }
         }
@@ -122,13 +114,12 @@ class AttendEventWithoutAccountTestCase(FastTenantTestCase):
 
         data = result[1]["data"]
 
-        link = "https://test.test/events/confirm/" + self.event.guid + "?email=pete@test.test&code=6df8cdad5582833eeab4"
+        link = "https://tenant.fast-test.com/events/confirm/" + self.event.guid + "?email=pete@tenant.fast-test.com&code=6df8cdad5582833eeab4"
         subject = "Confirmation of registration %s" % self.event.title
 
         self.assertEqual(data["attendEventWithoutAccount"]["entity"]["guid"], self.event.guid)
         self.assertEqual(data["attendEventWithoutAccount"]["entity"]["title"], self.event.title)
 
-    @override_settings(ALLOWED_HOSTS=['test.test'])
     def test_attend_event_without_account_attend_twice(self):
         mutation = """
             mutation RequestAttendance($input: attendEventWithoutAccountInput!) {
@@ -150,15 +141,13 @@ class AttendEventWithoutAccountTestCase(FastTenantTestCase):
             "input": {
                 "guid": self.event.guid,
                 "name": "pete",
-                "email": "pete@test.test"
+                "email": "pete@tenant.fast-test.com"
             }
         }
 
         request = HttpRequest()
         request.user = self.anonymousUser
-        request.META = {
-            'HTTP_HOST': 'test.test'
-        }
+
         result = graphql_sync(schema, { "query": mutation, "variables": variables }, context_value={ "request": request })
         result = graphql_sync(schema, { "query": mutation, "variables": variables }, context_value={ "request": request })
 
@@ -166,7 +155,6 @@ class AttendEventWithoutAccountTestCase(FastTenantTestCase):
 
         self.assertEqual(errors[0]["message"], "email_already_used")
 
-    @override_settings(ALLOWED_HOSTS=['test.test'])
     def test_attend_event_is_full_without_account(self):
         mutation = """
             mutation RequestAttendance($input: attendEventWithoutAccountInput!) {
@@ -188,7 +176,7 @@ class AttendEventWithoutAccountTestCase(FastTenantTestCase):
             "input": {
                 "guid": self.event.guid,
                 "name": "pete",
-                "email": "pete@test.test"
+                "email": "pete@tenant.fast-test.com"
             }
         }
         EventAttendee.objects.create(
@@ -199,9 +187,7 @@ class AttendEventWithoutAccountTestCase(FastTenantTestCase):
 
         request = HttpRequest()
         request.user = self.anonymousUser
-        request.META = {
-            'HTTP_HOST': 'test.test'
-        }
+
         result = graphql_sync(schema, { "query": mutation, "variables": variables }, context_value={ "request": request })
         errors = result[1]["errors"]
 

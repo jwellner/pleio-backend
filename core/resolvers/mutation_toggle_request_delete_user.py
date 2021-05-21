@@ -23,7 +23,7 @@ def resolve_toggle_request_delete_user(_, info, input):
     if not requested_user == user:
         raise GraphQLError(COULD_NOT_SAVE)
 
-    context = get_default_email_context(info.context['request'])
+    context = get_default_email_context(user)
 
     if user.is_delete_requested:
         user.is_delete_requested = False
