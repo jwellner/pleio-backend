@@ -166,7 +166,7 @@ class Group(models.Model):
 
     def _send_welcome_message(self, user):
         # pylint: disable=cyclic-import
-        # pylint: import-outside-toplevel
+        # pylint: disable=import-outside-toplevel
         
         # strip tags and trim spaces 
         has_message = html_to_text(self.welcome_message)
