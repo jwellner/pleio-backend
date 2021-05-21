@@ -15,7 +15,6 @@ from django.urls import reverse
 from django.utils.translation import ugettext_lazy
 from core.lib import ACCESS_TYPE, tenant_schema, get_default_email_context, get_base_url, html_to_text
 from core.constances import USER_ROLES
-from celery import current_app as celery
 
 logger = logging.getLogger(__name__)
 
@@ -166,6 +165,9 @@ class Group(models.Model):
         return False
 
     def _send_welcome_message(self, user):
+        # pylint: disable=cyclic-import
+        # pylint: import-outside-toplevel
+        
         # strip tags and trim spaces 
         has_message = html_to_text(self.welcome_message)
         if has_message:
