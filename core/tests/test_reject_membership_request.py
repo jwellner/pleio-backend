@@ -36,7 +36,6 @@ class RejectMembershipRequestTestCase(FastTenantTestCase):
         self.user2.delete()
         self.user1.delete()
 
-    @override_settings(ALLOWED_HOSTS=['test.test'])
     @mock.patch('core.resolvers.mutation_reject_membership_request.send_mail_multi.delay')
     def test_reject_group_access_request_by_group_owner(self, mocked_send_mail_multi):
         mutation = """
@@ -72,9 +71,6 @@ class RejectMembershipRequestTestCase(FastTenantTestCase):
 
         request = HttpRequest()
         request.user = self.user1
-        request.META = {
-            'HTTP_HOST': 'test.test'
-        }
 
         result = graphql_sync(schema, {"query": mutation, "variables": variables}, context_value={ "request": request })
 
@@ -86,7 +82,6 @@ class RejectMembershipRequestTestCase(FastTenantTestCase):
         self.assertEqual(data["rejectMembershipRequest"]["group"]["guid"], self.group1.guid)
         mocked_send_mail_multi.assert_called_once()
 
-    @override_settings(ALLOWED_HOSTS=['test.test'])
     @mock.patch('core.resolvers.mutation_reject_membership_request.send_mail_multi.delay')
     def test_reject_group_access_request_by_admin(self, mocked_send_mail_multi):
         mutation = """
@@ -122,9 +117,6 @@ class RejectMembershipRequestTestCase(FastTenantTestCase):
 
         request = HttpRequest()
         request.user = self.admin
-        request.META = {
-            'HTTP_HOST': 'test.test'
-        }
 
         result = graphql_sync(schema, {"query": mutation, "variables": variables}, context_value={ "request": request })
 
@@ -134,7 +126,6 @@ class RejectMembershipRequestTestCase(FastTenantTestCase):
         self.assertEqual(data["rejectMembershipRequest"]["group"]["guid"], self.group1.guid)
         mocked_send_mail_multi.assert_called_once()
 
-    @override_settings(ALLOWED_HOSTS=['test.test'])
     @mock.patch('core.resolvers.mutation_reject_membership_request.send_mail_multi.delay')
     def test_reject_group_access_request_by_other_user(self, mocked_send_mail_multi):
         mutation = """
@@ -170,9 +161,6 @@ class RejectMembershipRequestTestCase(FastTenantTestCase):
 
         request = HttpRequest()
         request.user = self.user3
-        request.META = {
-            'HTTP_HOST': 'test.test'
-        }
 
         result = graphql_sync(schema, {"query": mutation, "variables": variables}, context_value={ "request": request })
 
@@ -182,7 +170,6 @@ class RejectMembershipRequestTestCase(FastTenantTestCase):
         self.assertEqual(errors[0]["message"], "could_not_save")
         assert not mocked_send_mail_multi.called
 
-    @override_settings(ALLOWED_HOSTS=['test.test'])
     @mock.patch('core.resolvers.mutation_reject_membership_request.send_mail_multi.delay')
     def test_reject_group_access_request_by_anonymous(self, mocked_send_mail_multi):
         mutation = """

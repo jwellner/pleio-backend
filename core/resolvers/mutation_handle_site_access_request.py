@@ -31,7 +31,7 @@ def resolve_handle_site_access_request(_, info, input):
     silent = clean_input.get("silent", False)
 
     if not silent:
-        context = get_default_email_context(info.context['request'])
+        context = get_default_email_context(user)
         context['request_name'] = access_request.claims.get('name')
 
         if accepted:

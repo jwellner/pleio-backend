@@ -36,7 +36,6 @@ class DeleteGroupInvitationTestCase(FastTenantTestCase):
         self.user1.delete()
 
 
-    @override_settings(ALLOWED_HOSTS=['test.test'])
     def test_delete_group_invitation_by_group_owner(self):
         mutation = """
             mutation InvitedList($input: deleteGroupInvitationInput!) {
@@ -77,9 +76,6 @@ class DeleteGroupInvitationTestCase(FastTenantTestCase):
 
         request = HttpRequest()
         request.user = self.user1
-        request.META = {
-            'HTTP_HOST': 'test.test'
-        }
 
         result = graphql_sync(schema, {"query": mutation, "variables": variables}, context_value={ "request": request })
 
@@ -88,7 +84,6 @@ class DeleteGroupInvitationTestCase(FastTenantTestCase):
 
         self.assertEqual(data["deleteGroupInvitation"]["group"]["guid"], self.group1.guid)
 
-    @override_settings(ALLOWED_HOSTS=['test.test'])
     def test_delete_group_invitation_by_admin(self):
         mutation = """
             mutation InvitedList($input: deleteGroupInvitationInput!) {
@@ -129,9 +124,6 @@ class DeleteGroupInvitationTestCase(FastTenantTestCase):
 
         request = HttpRequest()
         request.user = self.admin
-        request.META = {
-            'HTTP_HOST': 'test.test'
-        }
 
         result = graphql_sync(schema, {"query": mutation, "variables": variables}, context_value={ "request": request })
 
@@ -140,7 +132,6 @@ class DeleteGroupInvitationTestCase(FastTenantTestCase):
 
         self.assertEqual(data["deleteGroupInvitation"]["group"]["guid"], self.group1.guid)
 
-    @override_settings(ALLOWED_HOSTS=['test.test'])
     def test_delete_group_invitation_by_non_group_member(self):
         mutation = """
             mutation InvitedList($input: deleteGroupInvitationInput!) {
@@ -181,9 +172,6 @@ class DeleteGroupInvitationTestCase(FastTenantTestCase):
 
         request = HttpRequest()
         request.user = self.user3
-        request.META = {
-            'HTTP_HOST': 'test.test'
-        }
 
         result = graphql_sync(schema, {"query": mutation, "variables": variables}, context_value={ "request": request })
 
@@ -192,7 +180,6 @@ class DeleteGroupInvitationTestCase(FastTenantTestCase):
 
         self.assertEqual(errors[0]["message"], "could_not_invite")
 
-    @override_settings(ALLOWED_HOSTS=['test.test'])
     def test_delete_group_invitation_by_anonymous_user(self):
         mutation = """
             mutation InvitedList($input: deleteGroupInvitationInput!) {
@@ -233,9 +220,6 @@ class DeleteGroupInvitationTestCase(FastTenantTestCase):
 
         request = HttpRequest()
         request.user = self.anonymousUser
-        request.META = {
-            'HTTP_HOST': 'test.test'
-        }
 
         result = graphql_sync(schema, {"query": mutation, "variables": variables}, context_value={ "request": request })
 

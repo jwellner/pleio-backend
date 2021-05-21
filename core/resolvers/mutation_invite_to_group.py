@@ -41,7 +41,7 @@ def resolve_invite_to_group(_, info, input):
 
     if not clean_input.get("addAllUsers"):
         subject = ugettext_lazy("Invitation to become a member of the %(group_name)s group") % {'group_name': group.name}
-        url = get_base_url(info.context['request']) + '/groups/invitations/?invitecode='
+        url = get_base_url() + '/groups/invitations/?invitecode='
 
         for user_input in clean_input.get("users"):
             if 'guid' in user_input:
@@ -80,7 +80,7 @@ def resolve_invite_to_group(_, info, input):
 
             try:
                 schema_name = parse_tenant_config_path("")
-                context = get_default_email_context(info.context['request'])
+                context = get_default_email_context(user)
                 link = url + code
                 context['link'] = link
                 context['group_name'] = group.name

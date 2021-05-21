@@ -35,7 +35,6 @@ class AcceptMembershipRequestTestCase(FastTenantTestCase):
         self.user2.delete()
         self.user1.delete()
 
-    @override_settings(ALLOWED_HOSTS=['test.test'])
     @mock.patch('core.resolvers.mutation_accept_membership_request.send_mail_multi.delay')
     def test_accept_group_access_request_by_group_owner(self, mocked_send_mail_multi):
         mutation = """
@@ -71,26 +70,22 @@ class AcceptMembershipRequestTestCase(FastTenantTestCase):
 
         request = HttpRequest()
         request.user = self.user1
-        request.META = {
-            'HTTP_HOST': 'test.test'
-        }
 
         result = graphql_sync(schema, {"query": mutation, "variables": variables}, context_value={ "request": request })
 
         self.assertTrue(result[0])
         data = result[1]["data"]
 
-        link = "https://test.test" + "/groups/view/{}/{}".format(self.group1.guid, slugify(self.group1.name))
+        link = "https://tenant.fast-test.com" + "/groups/view/{}/{}".format(self.group1.guid, slugify(self.group1.name))
         subject = f"Toegangsaanvraag voor de groep {self.group1.name} goedgekeurd"
-        user_url = 'https://test.test' + self.user1.url
+        user_url = 'https://tenant.fast-test.com' + self.user1.url
 
         self.assertEqual(data["acceptMembershipRequest"]["group"]["guid"], self.group1.guid)
 
         mocked_send_mail_multi.called_with('fast_test', subject, 'email/accept_membership_request.html', {'user_name': self.user1.name, 'user_url': user_url,
-            'site_url': 'https://test.test', 'site_name': 'Pleio 2.0', 'primary_color': '#0e2f56', 'header_color': '#0e2f56', 'group_name': self.group1.name, 'link': link}, self.user2.email)
+            'site_url': 'https://tenant.fast-test.com', 'site_name': 'Pleio 2.0', 'primary_color': '#0e2f56', 'header_color': '#0e2f56', 'group_name': self.group1.name, 'link': link}, self.user2.email)
 
 
-    @override_settings(ALLOWED_HOSTS=['test.test'])
     @mock.patch('core.resolvers.mutation_accept_membership_request.send_mail_multi.delay')
     def test_accept_group_access_request_by_admin(self, mocked_send_mail_multi):
         mutation = """
@@ -126,24 +121,20 @@ class AcceptMembershipRequestTestCase(FastTenantTestCase):
 
         request = HttpRequest()
         request.user = self.admin
-        request.META = {
-            'HTTP_HOST': 'test.test'
-        }
 
         result = graphql_sync(schema, {"query": mutation, "variables": variables}, context_value={ "request": request })
 
         self.assertTrue(result[0])
         data = result[1]["data"]
 
-        link = "https://test.test" + "/groups/view/{}/{}".format(self.group1.guid, slugify(self.group1.name))
+        link = "https://tenant.fast-test.com" + "/groups/view/{}/{}".format(self.group1.guid, slugify(self.group1.name))
         subject = f"Toegangsaanvraag voor de groep {self.group1.name} goedgekeurd"
-        user_url = 'https://test.test' + self.admin.url
+        user_url = 'https://tenant.fast-test.com' + self.admin.url
 
         self.assertEqual(data["acceptMembershipRequest"]["group"]["guid"], self.group1.guid)
         mocked_send_mail_multi.called_with('fast_test', subject, 'email/accept_membership_request.html', {'user_name': self.admin.name, 'user_url': user_url,
-            'site_url': 'https://test.test', 'site_name': 'Pleio 2.0', 'primary_color': '#0e2f56', 'header_color': '#0e2f56', 'group_name': self.group1.name, 'link': link}, self.user2.email)
+            'site_url': 'https://tenant.fast-test.com', 'site_name': 'Pleio 2.0', 'primary_color': '#0e2f56', 'header_color': '#0e2f56', 'group_name': self.group1.name, 'link': link}, self.user2.email)
 
-    @override_settings(ALLOWED_HOSTS=['test.test'])
     @mock.patch('core.resolvers.mutation_accept_membership_request.send_mail_multi')
     def test_accept_group_access_request_by_other_user(self, mocked_send_mail_multi):
         mutation = """
@@ -179,9 +170,6 @@ class AcceptMembershipRequestTestCase(FastTenantTestCase):
 
         request = HttpRequest()
         request.user = self.user3
-        request.META = {
-            'HTTP_HOST': 'test.test'
-        }
 
         result = graphql_sync(schema, {"query": mutation, "variables": variables}, context_value={ "request": request })
 
@@ -191,7 +179,6 @@ class AcceptMembershipRequestTestCase(FastTenantTestCase):
         self.assertEqual(errors[0]["message"], "could_not_save")
         assert not mocked_send_mail_multi.called
 
-    @override_settings(ALLOWED_HOSTS=['test.test'])
     @mock.patch('core.resolvers.mutation_accept_membership_request.send_mail_multi')
     def test_accept_group_access_request_by_anonymous(self, mocked_send_mail_multi):
         mutation = """
@@ -227,9 +214,6 @@ class AcceptMembershipRequestTestCase(FastTenantTestCase):
 
         request = HttpRequest()
         request.user = self.anonymousUser
-        request.META = {
-            'HTTP_HOST': 'test.test'
-        }
 
         result = graphql_sync(schema, {"query": mutation, "variables": variables}, context_value={ "request": request })
 

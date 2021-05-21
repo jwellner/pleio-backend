@@ -26,10 +26,10 @@ def resolve_resend_group_invitation(_, info, input):
 
     schema_name = parse_tenant_config_path("")
     subject = ugettext_lazy("Reminder to become a member of the %(group_name)s group") % {'group_name': group.name}
-    link = get_base_url(info.context['request']) + '/groups/invitations/?invitecode=' + invitation.code
+    link = get_base_url() + '/groups/invitations/?invitecode=' + invitation.code
 
     try:
-        context = get_default_email_context(info.context['request'])
+        context = get_default_email_context(user)
         context['link'] = link
         context['group_name'] = group.name
 
