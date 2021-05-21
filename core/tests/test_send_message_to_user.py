@@ -50,7 +50,6 @@ class SendMessageToUserTestCase(FastTenantTestCase):
 
         self.assertEqual(errors[0]["message"], "not_logged_in")
 
-    @override_settings(ALLOWED_HOSTS=['test.test'])
     def test_send_message_to_user(self):
         mutation = """
             mutation SendMessageModal($input: sendMessageToUserInput!) {
@@ -69,9 +68,6 @@ class SendMessageToUserTestCase(FastTenantTestCase):
 
         request = HttpRequest()
         request.user = self.user1
-        request.META = {
-            'HTTP_HOST': 'test.test'
-        }
 
         result = graphql_sync(schema, {"query": mutation, "variables": variables}, context_value={ "request": request })
         data = result[1]["data"]
@@ -103,7 +99,6 @@ class SendMessageToUserTestCase(FastTenantTestCase):
 
         self.assertEqual(errors[0]["message"], "could_not_find")
 
-    @override_settings(ALLOWED_HOSTS=['test.test'])
     @mock.patch('core.resolvers.mutation_send_message_to_user.send_mail_multi.delay')
     def test_call_send_email(self, mocked_send_mail_multi):
         mutation = """
@@ -123,19 +118,16 @@ class SendMessageToUserTestCase(FastTenantTestCase):
 
         request = HttpRequest()
         request.user = self.user1
-        request.META = {
-            'HTTP_HOST': 'test.test'
-        }
+
         result = graphql_sync(schema, {"query": mutation, "variables": variables}, context_value={ "request": request })
 
         subject = "Bericht van {0}: {1}".format(self.user1.name, 'testMessageSubject')
-        user_url = 'https://test.test' + self.user1.url
+        user_url = 'https://tenant.fast-test.com' + self.user1.url
         mocked_send_mail_multi.assert_called_once_with('fast_test', subject, 'email/send_message_to_user.html',
                                                        {'user_name': self.user1.name, 'user_url': user_url,
-                                                        'site_url': 'https://test.test', 'site_name': 'Pleio 2.0', 'primary_color': '#0e2f56',
+                                                        'site_url': 'https://tenant.fast-test.com', 'site_name': 'Pleio 2.0', 'primary_color': '#0e2f56',
                                                         'header_color': '#0e2f56', 'message': '<p>testMessageContent</p>', 'subject': subject}, self.user2.email)
 
-    @override_settings(ALLOWED_HOSTS=['test.test'])
     @mock.patch('core.resolvers.mutation_send_message_to_user.send_mail_multi.delay')
     def test_call_send_email_with_copy_to_self(self, mocked_send_mail_multi):
         mutation = """
@@ -156,25 +148,22 @@ class SendMessageToUserTestCase(FastTenantTestCase):
 
         request = HttpRequest()
         request.user = self.user1
-        request.META = {
-            'HTTP_HOST': 'test.test'
-        }
+
         result = graphql_sync(schema, {"query": mutation, "variables": variables}, context_value={ "request": request })
 
         subject = "Bericht van {0}: {1}".format(self.user1.name, 'testMessageSubject')
-        user_url = 'https://test.test' + self.user1.url
+        user_url = 'https://tenant.fast-test.com' + self.user1.url
         mocked_send_mail_multi.assert_any_call('fast_test', subject, 'email/send_message_to_user.html',
                                                        {'user_name': self.user1.name, 'user_url': user_url,
-                                                        'site_url': 'https://test.test', 'site_name': 'Pleio 2.0', 'primary_color': '#0e2f56',
+                                                        'site_url': 'https://tenant.fast-test.com', 'site_name': 'Pleio 2.0', 'primary_color': '#0e2f56',
                                                         'header_color': '#0e2f56', 'message': '<p>testMessageContent</p>', 'subject': subject}, self.user2.email)
 
         subject_copy = 'Kopie: ' + subject
         mocked_send_mail_multi.assert_any_call('fast_test', subject_copy, 'email/send_message_to_user.html',
                                                        {'user_name': self.user1.name, 'user_url': user_url,
-                                                        'site_url': 'https://test.test', 'site_name': 'Pleio 2.0', 'primary_color': '#0e2f56',
+                                                        'site_url': 'https://tenant.fast-test.com', 'site_name': 'Pleio 2.0', 'primary_color': '#0e2f56',
                                                         'header_color': '#0e2f56', 'message': '<p>testMessageContent</p>', 'subject': subject}, self.user1.email)
 
-    @override_settings(ALLOWED_HOSTS=['test.test'])
     @mock.patch('core.resolvers.mutation_send_message_to_user.send_mail_multi.delay')
     def test_call_not_send_email_with_copy_to_self(self, mocked_send_mail_multi):
         mutation = """
@@ -195,14 +184,12 @@ class SendMessageToUserTestCase(FastTenantTestCase):
 
         request = HttpRequest()
         request.user = self.user1
-        request.META = {
-            'HTTP_HOST': 'test.test'
-        }
+
         result = graphql_sync(schema, {"query": mutation, "variables": variables}, context_value={ "request": request })
 
         subject = "Bericht van {0}: {1}".format(self.user1.name, 'testMessageSubject')
-        user_url = 'https://test.test' + self.user1.url
+        user_url = 'https://tenant.fast-test.com' + self.user1.url
         mocked_send_mail_multi.assert_called_once_with('fast_test', subject, 'email/send_message_to_user.html',
                                                        {'user_name': self.user1.name, 'user_url': user_url,
-                                                        'site_url': 'https://test.test', 'site_name': 'Pleio 2.0', 'primary_color': '#0e2f56',
+                                                        'site_url': 'https://tenant.fast-test.com', 'site_name': 'Pleio 2.0', 'primary_color': '#0e2f56',
                                                         'header_color': '#0e2f56', 'message': '<p>testMessageContent</p>', 'subject': subject}, self.user2.email)

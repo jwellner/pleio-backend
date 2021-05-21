@@ -77,7 +77,6 @@ class ToggleUserRoleTestCase(FastTenantTestCase):
         self.assertEqual(errors[0]["message"], "could_not_save")
 
 
-    @override_settings(ALLOWED_HOSTS=['test.test'])
     @mock.patch('core.resolvers.mutation_toggle_user_role.send_mail_multi.delay')
     def test_toggle_user_role_by_admin(self, mocked_send_mail_multi):
         mutation = """
@@ -96,9 +95,6 @@ class ToggleUserRoleTestCase(FastTenantTestCase):
 
         request = HttpRequest()
         request.user = self.admin
-        request.META = {
-            'HTTP_HOST': 'test.test'
-        }
 
         result = graphql_sync(schema, {"query": mutation, "variables": variables}, context_value={ "request": request })
 

@@ -11,6 +11,7 @@ from user.models import User
 from mixer.backend.django import mixer
 from graphql import GraphQLError
 from unittest import mock
+from unittest.mock import Mock
 
 class JoinGroupTestCase(FastTenantTestCase):
 
@@ -24,8 +25,9 @@ class JoinGroupTestCase(FastTenantTestCase):
         self.user4 = mixer.blend(User, name="d")
         self.groupAdmin1 = mixer.blend(User, name="e")
         self.groupAdmin2 = mixer.blend(User, name="f")
-        self.group = mixer.blend(Group, owner=self.user1, is_membership_on_request=False)
-        self.group2 = mixer.blend(Group, owner=self.user1, is_membership_on_request=False)
+        self.group = mixer.blend(Group, owner=self.user1, is_membership_on_request=False, welcome_message='welcome_message')
+        self.group2 = mixer.blend(Group, owner=self.user1, is_membership_on_request=False, welcome_message='<p> </p>  ')
+
         self.group_on_request = mixer.blend(Group, owner=self.user1, is_membership_on_request=True)
         self.group_on_request.join(self.user1, member_type='owner')
         self.group_on_request.join(self.groupAdmin1, member_type='admin')
@@ -67,7 +69,6 @@ class JoinGroupTestCase(FastTenantTestCase):
         errors = result[1]["errors"]
 
         self.assertEqual(errors[0]["message"], "not_logged_in")
-
 
     def test_join_group(self):
         mutation = """
@@ -116,7 +117,6 @@ class JoinGroupTestCase(FastTenantTestCase):
         self.assertEqual(self.user1.memberships.filter(group=self.group, type="member").count(), 1)
         self.assertEqual(self.user2.memberships.filter(group=self.group, type="member").count(), 1)
 
-    @override_settings(ALLOWED_HOSTS=['test.test'])
     @mock.patch('core.resolvers.mutation_join_group.send_mail_multi.delay')
     def test_join_group_on_request(self, mocked_send_mail_multi):
         mutation = """
@@ -144,9 +144,6 @@ class JoinGroupTestCase(FastTenantTestCase):
 
         request = HttpRequest()
         request.user = self.user2
-        request.META = {
-            'HTTP_HOST': 'test.test'
-        }
 
         result = graphql_sync(schema, { "query": mutation, "variables": variables }, context_value={ "request": request })
 
@@ -239,3 +236,78 @@ class JoinGroupTestCase(FastTenantTestCase):
         errors = result[1]["errors"]
 
         self.assertEqual(errors[0]["message"], "already_member_of_group")
+
+    def test_welcome_message(self):
+        from celery import current_app as celery
+        prev = celery.send_task
+        celery.send_task = Mock()
+        mutation = """
+            mutation ($group: joinGroupInput!) {
+                joinGroup(input: $group) {
+                    group {
+                        memberCount
+                        members {
+                            total
+                            edges {
+                                user {
+                                    guid
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        """
+        variables = {
+            "group": {
+                "guid": self.group.guid
+            }
+        }
+        try:
+            request = HttpRequest()
+            request.user = self.user1
+            result = graphql_sync(schema, { "query": mutation, "variables": variables }, context_value={ "request": request })
+
+            data = result[1]["data"]
+
+            celery.send_task.assert_called_once()
+        finally:
+            celery.send_task = prev
+
+
+    def test_no_welcome_message(self):
+        from celery import current_app as celery
+        prev = celery.send_task
+        celery.send_task = Mock()
+        mutation = """
+            mutation ($group: joinGroupInput!) {
+                joinGroup(input: $group) {
+                    group {
+                        memberCount
+                        members {
+                            total
+                            edges {
+                                user {
+                                    guid
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        """
+        variables = {
+            "group": {
+                "guid": self.group2.guid
+            }
+        }
+        try:
+            request = HttpRequest()
+            request.user = self.user1
+            result = graphql_sync(schema, { "query": mutation, "variables": variables }, context_value={ "request": request })
+
+            data = result[1]["data"]
+
+            celery.send_task.assert_not_called()
+        finally:
+            celery.send_task = prev

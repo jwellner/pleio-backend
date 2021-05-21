@@ -38,7 +38,6 @@ class ChangeGroupRoleTestCase(FastTenantTestCase):
         self.user2.delete()
         self.user1.delete()
 
-    @override_settings(ALLOWED_HOSTS=['test.test'])
     @mock.patch('core.resolvers.mutation_change_group_role.send_mail_multi.delay')
     def test_change_group_role_to_owner_by_group_owner(self, mocked_send_mail_multi):
         mutation = """
@@ -66,9 +65,6 @@ class ChangeGroupRoleTestCase(FastTenantTestCase):
 
         request = HttpRequest()
         request.user = self.user1
-        request.META = {
-            'HTTP_HOST': 'test.test'
-        }
 
         result = graphql_sync(schema, {"query": mutation, "variables": variables}, context_value={ "request": request })
 
@@ -78,7 +74,6 @@ class ChangeGroupRoleTestCase(FastTenantTestCase):
         self.assertEqual(data["changeGroupRole"]["group"]["guid"], self.group1.guid)
         mocked_send_mail_multi.assert_called_once()
 
-    @override_settings(ALLOWED_HOSTS=['test.test'])
     @mock.patch('core.resolvers.mutation_change_group_role.send_mail_multi.delay')
     def test_change_group_role_to_member_by_group_owner(self, mocked_send_mail_multi):
         mutation = """
@@ -112,9 +107,6 @@ class ChangeGroupRoleTestCase(FastTenantTestCase):
 
         request = HttpRequest()
         request.user = self.user1
-        request.META = {
-            'HTTP_HOST': 'test.test'
-        }
 
         result = graphql_sync(schema, {"query": mutation, "variables": variables}, context_value={ "request": request })
 
@@ -127,7 +119,6 @@ class ChangeGroupRoleTestCase(FastTenantTestCase):
         assert not mocked_send_mail_multi.called
 
 
-    @override_settings(ALLOWED_HOSTS=['test.test'])
     @mock.patch('core.resolvers.mutation_change_group_role.send_mail_multi.delay')
     def test_change_group_role_to_removed_by_group_owner(self, mocked_send_mail_multi):
         mutation = """
@@ -161,9 +152,6 @@ class ChangeGroupRoleTestCase(FastTenantTestCase):
 
         request = HttpRequest()
         request.user = self.user1
-        request.META = {
-            'HTTP_HOST': 'test.test'
-        }
 
         result = graphql_sync(schema, {"query": mutation, "variables": variables}, context_value={ "request": request })
 
@@ -175,7 +163,6 @@ class ChangeGroupRoleTestCase(FastTenantTestCase):
         assert not mocked_send_mail_multi.called
 
 
-    @override_settings(ALLOWED_HOSTS=['test.test'])
     @mock.patch('core.resolvers.mutation_change_group_role.send_mail_multi.delay')
     def test_change_group_role_to_admin_by_group_owner(self, mocked_send_mail_multi):
         mutation = """
@@ -208,9 +195,6 @@ class ChangeGroupRoleTestCase(FastTenantTestCase):
 
         request = HttpRequest()
         request.user = self.user1
-        request.META = {
-            'HTTP_HOST': 'test.test'
-        }
 
         result = graphql_sync(schema, {"query": mutation, "variables": variables}, context_value={ "request": request })
 
@@ -221,7 +205,6 @@ class ChangeGroupRoleTestCase(FastTenantTestCase):
         self.assertEqual(data["changeGroupRole"]["group"]["members"]["edges"][0]["role"], "admin")
         assert not mocked_send_mail_multi.called
 
-    @override_settings(ALLOWED_HOSTS=['test.test'])
     @mock.patch('core.resolvers.mutation_change_group_role.send_mail_multi.delay')
     def test_change_group_role_to_owner_by_admin(self, mocked_send_mail_multi):
         mutation = """
@@ -249,9 +232,6 @@ class ChangeGroupRoleTestCase(FastTenantTestCase):
 
         request = HttpRequest()
         request.user = self.admin
-        request.META = {
-            'HTTP_HOST': 'test.test'
-        }
 
         result = graphql_sync(schema, {"query": mutation, "variables": variables}, context_value={ "request": request })
 
@@ -261,7 +241,6 @@ class ChangeGroupRoleTestCase(FastTenantTestCase):
         self.assertEqual(data["changeGroupRole"]["group"]["guid"], self.group1.guid)
         mocked_send_mail_multi.assert_called_once()
 
-    @override_settings(ALLOWED_HOSTS=['test.test'])
     @mock.patch('core.resolvers.mutation_change_group_role.send_mail_multi.delay')
     def test_change_group_role_to_owner_by_other_user(self, mocked_send_mail_multi):
         mutation = """
@@ -289,9 +268,6 @@ class ChangeGroupRoleTestCase(FastTenantTestCase):
 
         request = HttpRequest()
         request.user = self.user3
-        request.META = {
-            'HTTP_HOST': 'test.test'
-        }
 
         result = graphql_sync(schema, {"query": mutation, "variables": variables}, context_value={ "request": request })
 
@@ -301,7 +277,6 @@ class ChangeGroupRoleTestCase(FastTenantTestCase):
         self.assertEqual(errors[0]["message"], "could_not_save")
         assert not mocked_send_mail_multi.called
 
-    @override_settings(ALLOWED_HOSTS=['test.test'])
     @mock.patch('core.resolvers.mutation_change_group_role.send_mail_multi.delay')
     def test_change_group_role_to_owner_by_anonymous(self, mocked_send_mail_multi):
         mutation = """
@@ -329,9 +304,6 @@ class ChangeGroupRoleTestCase(FastTenantTestCase):
 
         request = HttpRequest()
         request.user = self.anonymousUser
-        request.META = {
-            'HTTP_HOST': 'test.test'
-        }
 
         result = graphql_sync(schema, {"query": mutation, "variables": variables}, context_value={ "request": request })
 

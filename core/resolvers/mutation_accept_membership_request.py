@@ -36,9 +36,9 @@ def resolve_accept_membership_request(_, info, input):
     schema_name = parse_tenant_config_path("")
     group.join(requesting_user, 'member')
     subject = ugettext_lazy("Request for access to the %(group_name)s group has been approved") % {'group_name': group.name}
-    link = get_base_url(info.context['request']) + group.url
+    link = get_base_url() + group.url
 
-    context = get_default_email_context(info.context['request'])
+    context = get_default_email_context(user)
     context['group_name'] = group.name
     context['link'] = link
 

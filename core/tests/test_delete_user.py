@@ -29,7 +29,6 @@ class DeleteUserTestCase(FastTenantTestCase):
         self.admin2.delete()
 
 
-    @override_settings(ALLOWED_HOSTS=['test.test'])
     @mock.patch('core.resolvers.mutation_delete_user.send_mail_multi.delay')
     def test_delete_admin_by_admin(self, mocked_send_mail_multi):
 
@@ -48,9 +47,6 @@ class DeleteUserTestCase(FastTenantTestCase):
 
         request = HttpRequest()
         request.user = self.admin
-        request.META = {
-            'HTTP_HOST': 'test.test'
-        }
 
         result = graphql_sync(schema, {"query": mutation, "variables": variables }, context_value={ "request": request })
 
@@ -60,7 +56,6 @@ class DeleteUserTestCase(FastTenantTestCase):
         self.assertEqual(mocked_send_mail_multi.call_count, 2)
 
 
-    @override_settings(ALLOWED_HOSTS=['test.test'])
     @mock.patch('core.resolvers.mutation_delete_user.send_mail_multi.delay')
     def test_delete_user_by_admin(self, mocked_send_mail_multi):
 
@@ -79,9 +74,6 @@ class DeleteUserTestCase(FastTenantTestCase):
 
         request = HttpRequest()
         request.user = self.admin
-        request.META = {
-            'HTTP_HOST': 'test.test'
-        }
 
         result = graphql_sync(schema, {"query": mutation, "variables": variables }, context_value={ "request": request })
 

@@ -29,7 +29,6 @@ class InviteToSiteTestCase(FastTenantTestCase):
         self.user1.delete()
 
 
-    @override_settings(ALLOWED_HOSTS=['test.test'])
     @mock.patch('core.resolvers.mutation_invite_to_site.generate_code', return_value='6df8cdad5582833eeab4')
     @mock.patch('core.resolvers.mutation_invite_to_site.send_mail_multi.delay')
     def test_invite_to_site_by_admin(self, mocked_send_mail_multi, mocked_generate_code):
@@ -50,9 +49,6 @@ class InviteToSiteTestCase(FastTenantTestCase):
 
         request = HttpRequest()
         request.user = self.admin
-        request.META = {
-            'HTTP_HOST': 'test.test'
-        }
 
         result = graphql_sync(schema, {"query": mutation, "variables": variables}, context_value={ "request": request })
 

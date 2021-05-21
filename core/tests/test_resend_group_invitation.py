@@ -35,7 +35,6 @@ class ResendGroupInvitationTestCase(FastTenantTestCase):
         self.user2.delete()
         self.user1.delete()
 
-    @override_settings(ALLOWED_HOSTS=['test.test'])
     @mock.patch('core.resolvers.mutation_resend_group_invitation.send_mail_multi.delay')
     def test_resend_group_invitation_by_group_owner(self, mocked_send_mail_multi):
         mutation = """
@@ -77,9 +76,6 @@ class ResendGroupInvitationTestCase(FastTenantTestCase):
 
         request = HttpRequest()
         request.user = self.user1
-        request.META = {
-            'HTTP_HOST': 'test.test'
-        }
 
         result = graphql_sync(schema, {"query": mutation, "variables": variables}, context_value={ "request": request })
 
@@ -89,7 +85,6 @@ class ResendGroupInvitationTestCase(FastTenantTestCase):
         self.assertEqual(data["resendGroupInvitation"]["group"]["guid"], self.group1.guid)
         mocked_send_mail_multi.assert_called_once()
 
-    @override_settings(ALLOWED_HOSTS=['test.test'])
     @mock.patch('core.resolvers.mutation_resend_group_invitation.send_mail_multi.delay')
     def test_resend_group_invitation_by_admin(self, mocked_send_mail_multi):
         mutation = """
@@ -131,9 +126,6 @@ class ResendGroupInvitationTestCase(FastTenantTestCase):
 
         request = HttpRequest()
         request.user = self.admin
-        request.META = {
-            'HTTP_HOST': 'test.test'
-        }
 
         result = graphql_sync(schema, {"query": mutation, "variables": variables}, context_value={ "request": request })
 
@@ -143,7 +135,6 @@ class ResendGroupInvitationTestCase(FastTenantTestCase):
         self.assertEqual(data["resendGroupInvitation"]["group"]["guid"], self.group1.guid)
         mocked_send_mail_multi.assert_called_once()
 
-    @override_settings(ALLOWED_HOSTS=['test.test'])
     @mock.patch('core.resolvers.mutation_resend_group_invitation.send_mail_multi.delay')
     def test_resend_group_invitation_by_non_group_member(self, mocked_send_mail_multi):
         mutation = """
@@ -185,9 +176,6 @@ class ResendGroupInvitationTestCase(FastTenantTestCase):
 
         request = HttpRequest()
         request.user = self.user3
-        request.META = {
-            'HTTP_HOST': 'test.test'
-        }
 
         result = graphql_sync(schema, {"query": mutation, "variables": variables}, context_value={ "request": request })
 
@@ -196,7 +184,6 @@ class ResendGroupInvitationTestCase(FastTenantTestCase):
 
         self.assertEqual(errors[0]["message"], "could_not_invite")
 
-    @override_settings(ALLOWED_HOSTS=['test.test'])
     @mock.patch('core.resolvers.mutation_resend_group_invitation.send_mail_multi.delay')
     def test_resend_group_invitation_by_anonymous_user(self, mocked_send_mail_multi):
         mutation = """
@@ -238,9 +225,6 @@ class ResendGroupInvitationTestCase(FastTenantTestCase):
 
         request = HttpRequest()
         request.user = self.anonymousUser
-        request.META = {
-            'HTTP_HOST': 'test.test'
-        }
 
         result = graphql_sync(schema, {"query": mutation, "variables": variables}, context_value={ "request": request })
 

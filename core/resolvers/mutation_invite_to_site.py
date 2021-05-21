@@ -49,11 +49,11 @@ def resolve_invite_to_site(_, info, input):
             invite = SiteInvitation.objects.create(email=email, code=code)
 
         subject = ugettext_lazy("You are invited to join site %(site_name)s") % {'site_name': site_name}
-        url = get_base_url(info.context['request']) + '/login?invitecode='
+        url = get_base_url() + '/login?invitecode='
 
         try:
             schema_name = parse_tenant_config_path("")
-            context = get_default_email_context(info.context['request'])
+            context = get_default_email_context(user)
             link = url + code
             context['link'] = link
             context['message'] = ""
