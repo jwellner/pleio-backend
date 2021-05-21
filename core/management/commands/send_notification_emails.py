@@ -1,5 +1,5 @@
 from django.core.management.base import BaseCommand
-from django.utils import timezone
+from django.utils import timezone, translation
 from django.utils.text import Truncator
 from django.utils.translation import ugettext_lazy
 from django.db import connection
@@ -39,6 +39,9 @@ class Command(BaseCommand):
             user.notifications.mark_as_sent()
 
     def handle(self, *args, **options):
+        if config.LANGUAGE:
+            translation.activate(config.LANGUAGE)
+
         tenant = Client.objects.get(schema_name=connection.schema_name)
 
         site_url = 'https://' + tenant.domains.first().domain
