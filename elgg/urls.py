@@ -9,5 +9,5 @@ urlpatterns = [
     # Match old ID's and try to redirect
     re_path(r'view\/(?P<entity_id>[0-9]+)\/(?:[^\/.]+)$', redirect_view, name='redirect_view'),
     re_path(r'file\/download\/(?P<file_id>[0-9]+)', redirect_download, name='redirect_download'),
-    re_path(r'(?P<friendly_url>[\w-]+)', redirect_friendly_url, name='redirect_friendly_url')
+    re_path(r'^(?P<friendly_url>[\w-]+)$', redirect_friendly_url, name='redirect_friendly_url')
 ]
