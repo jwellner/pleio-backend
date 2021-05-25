@@ -1,30 +1,38 @@
 import mimetypes
+import logging
 from file.models import FileFolder
 from os import path
 from django.core.files.base import ContentFile
 from PIL import Image
 from io import BytesIO
+from core.lib import get_mimetype
 
+logger = logging.getLogger(__name__)
 
 def get_download_filename(f):
 
     filename = f.title
 
-    if f.mime_type:
-        _, ext = path.splitext(f.title)
-        guess_all_extensions = mimetypes.guess_all_extensions(f.mime_type)
+    mime_type = get_mimetype(f.upload.path)
 
-        # if more exemptions, make function
-        if ext == '.csv' and f.mime_type == 'text/plain':
-            guess_all_extensions.append('.csv')
+    if mime_type:
+        _, ext = path.splitext(f.title)
+
+        # guess_all_extensions does no init? -> https://github.com/python/cpython/blob/3.8/Lib/mimetypes.py#L160
+        mimetypes.init()
+        # bug in guess_all_extensions where they convert all input to lowercase, 
+        # but the mimetype uses camelcase macroEnabled -> https://github.com/python/cpython/blob/3.8/Lib/mimetypes.py#L171
+        mimetypes.add_type('application/vnd.ms-excel.sheet.macroenabled.12', '.xlsm')
+
+        guess_all_extensions = mimetypes.guess_all_extensions(mime_type)
 
         # return title if has valid extension
         if ext in guess_all_extensions:
             pass
 
         # try add extension based on mimetype, else return title as name
-        elif mimetypes.guess_extension(f.mime_type):
-            filename = f.title + mimetypes.guess_extension(f.mime_type)
+        elif mimetypes.guess_extension(mime_type):
+            filename = f.title + mimetypes.guess_extension(mime_type)
 
     return filename
 
