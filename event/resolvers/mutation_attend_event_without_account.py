@@ -28,7 +28,7 @@ def resolve_attend_event_without_account(_, info, input):
         raise GraphQLError(INVALID_EMAIL)
 
     url = get_base_url() + '/events/confirm/' + event.guid + '?email=' + email + '&code='
-    subject = ugettext_lazy("Confirmation of registration %s" % event.title)
+    subject = ugettext_lazy("Confirmation of registration %s") % event.title
 
     code = ""
     try:
