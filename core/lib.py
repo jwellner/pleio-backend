@@ -425,6 +425,7 @@ def is_valid_url_or_path(url):
         return False
 
 def get_mimetype(filepath):
+    mimetypes.init()
     mime_type, _ = mimetypes.guess_type(filepath)
     if not mime_type:
         return None
