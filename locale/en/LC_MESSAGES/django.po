@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-05-06 14:39+0200\n"
+"POT-Creation-Date: 2021-05-25 10:37+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -55,62 +55,67 @@ msgstr ""
 msgid "Public"
 msgstr ""
 
-#: core/lib.py:269
+#: core/lib.py:273
 msgid "Updates"
 msgstr ""
 
-#: core/lib.py:270
+#: core/lib.py:274
 msgid "Blogs"
 msgstr ""
 
-#: core/lib.py:271
+#: core/lib.py:275
 msgid "CMS pages"
 msgstr ""
 
-#: core/lib.py:272
+#: core/lib.py:276
 msgid "Discussions"
 msgstr ""
 
-#: core/lib.py:273
+#: core/lib.py:277
 msgid "Events"
 msgstr ""
 
-#: core/lib.py:274
+#: core/lib.py:278
 msgid "Files"
 msgstr ""
 
-#: core/lib.py:275
+#: core/lib.py:279
 msgid "News"
 msgstr ""
 
-#: core/lib.py:276
+#: core/lib.py:280
 msgid "Polls"
 msgstr ""
 
-#: core/lib.py:277
+#: core/lib.py:281
 msgid "Questions"
 msgstr ""
 
-#: core/lib.py:278
+#: core/lib.py:282
 msgid "Tasks"
 msgstr ""
 
-#: core/lib.py:279
+#: core/lib.py:283
 msgid "Wiki pages"
 msgstr ""
 
-#: core/lib.py:280
+#: core/lib.py:284
 msgid "Comments"
 msgstr ""
 
-#: core/management/commands/send_notification_emails.py:49
+#: core/management/commands/send_notification_emails.py:52
 #, python-format
 msgid "New notifications at %(site_name)s"
 msgstr ""
 
-#: core/management/commands/send_overview_emails.py:88
+#: core/management/commands/send_overview_emails.py:91
 #, python-format
 msgid "Regular overview of %(site_name)s"
+msgstr ""
+
+#: core/models/group.py:183
+#, python-format
+msgid "Welcome to %(group_name)s"
 msgstr ""
 
 #: core/resolvers/mutation_accept_membership_request.py:38
@@ -225,43 +230,43 @@ msgstr ""
 msgid "CMS page"
 msgstr ""
 
-#: core/resolvers/query_site.py:154
+#: core/resolvers/query_site.py:155
 msgid "Daily"
 msgstr ""
 
-#: core/resolvers/query_site.py:155
+#: core/resolvers/query_site.py:156
 msgid "Weekly"
 msgstr ""
 
-#: core/resolvers/query_site.py:156
+#: core/resolvers/query_site.py:157
 msgid "Monthly"
 msgstr ""
 
-#: core/resolvers/query_site.py:157
+#: core/resolvers/query_site.py:158
 msgid "Never"
 msgstr ""
 
-#: core/resolvers/query_site.py:206
+#: core/resolvers/query_site.py:207
 msgid "Administrator"
 msgstr ""
 
-#: core/resolvers/query_site.py:207
+#: core/resolvers/query_site.py:208
 msgid "Editor"
 msgstr ""
 
-#: core/resolvers/query_site.py:208
+#: core/resolvers/query_site.py:209
 msgid "Question expert"
 msgstr ""
 
-#: core/tasks.py:272
+#: core/tasks.py:274
 msgid "Import was a success"
 msgstr ""
 
-#: core/tasks.py:272
+#: core/tasks.py:274
 msgid "Import failed"
 msgstr ""
 
-#: core/tasks.py:348
+#: core/tasks.py:353
 #, python-format
 msgid "New notification at %(site_name)s: "
 msgstr ""
@@ -679,7 +684,7 @@ msgstr ""
 msgid "New access request for %(site_name)s"
 msgstr ""
 
-#: event/resolvers/mutation_attend_event_without_account.py:32
+#: event/resolvers/mutation_attend_event_without_account.py:31
 #, python-format
 msgid "Confirmation of registration %s"
 msgstr ""
