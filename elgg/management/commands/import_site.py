@@ -908,7 +908,9 @@ class Command(InteractiveTenantOption, BaseCommand):
                 pass
 
     def _import_comments_for(self, entity: Entity, elgg_guid, elgg_entity=None):
-        elgg_comment_items = ElggObjectsEntity.objects.using(self.import_id).filter(entity__subtype__subtype='comment', entity__container_guid=elgg_guid)
+        elgg_comment_items = ElggObjectsEntity.objects.using(self.import_id).filter(
+            entity__subtype__subtype__in=['comment', 'answer'], entity__container_guid=elgg_guid
+        )
 
         for elgg_comment in elgg_comment_items:
             comment = self.mapper.get_comment(elgg_comment)
