@@ -31,7 +31,6 @@ class HandleDeleteAccountRequestTestCase(FastTenantTestCase):
         self.admin.delete()
         self.user.delete()
 
-    @override_settings(ALLOWED_HOSTS=['test.test'])
     @mock.patch('core.resolvers.mutation_handle_delete_account_request.send_mail_multi.delay')
     def test_handle_delete_account_request_by_admin(self, mocked_send_mail_multi):
 
@@ -44,9 +43,6 @@ class HandleDeleteAccountRequestTestCase(FastTenantTestCase):
 
         request = HttpRequest()
         request.user = self.admin
-        request.META = {
-            'HTTP_HOST': 'test.test'
-        }
 
         result = graphql_sync(schema, {"query": self.mutation, "variables": variables}, context_value={ "request": request })
 
@@ -64,7 +60,6 @@ class HandleDeleteAccountRequestTestCase(FastTenantTestCase):
 
         mocked_send_mail_multi.assert_called_once()
 
-    @override_settings(ALLOWED_HOSTS=['test.test'])
     @mock.patch('core.resolvers.mutation_handle_delete_account_request.send_mail_multi.delay')
     def test_handle_delete_account_request_deny_by_admin(self, mocked_send_mail_multi):
 
@@ -77,9 +72,6 @@ class HandleDeleteAccountRequestTestCase(FastTenantTestCase):
 
         request = HttpRequest()
         request.user = self.admin
-        request.META = {
-            'HTTP_HOST': 'test.test'
-        }
 
         result = graphql_sync(schema, {"query": self.mutation, "variables": variables}, context_value={ "request": request })
 
@@ -107,9 +99,6 @@ class HandleDeleteAccountRequestTestCase(FastTenantTestCase):
 
         request = HttpRequest()
         request.user = self.user
-        request.META = {
-            'HTTP_HOST': 'test.test'
-        }
 
         result = graphql_sync(schema, {"query": self.mutation, "variables": variables}, context_value={ "request": request })
 
@@ -131,9 +120,6 @@ class HandleDeleteAccountRequestTestCase(FastTenantTestCase):
 
         request = HttpRequest()
         request.user = self.anonymousUser
-        request.META = {
-            'HTTP_HOST': 'test.test'
-        }
 
         result = graphql_sync(schema, {"query": self.mutation, "variables": variables}, context_value={ "request": request })
 

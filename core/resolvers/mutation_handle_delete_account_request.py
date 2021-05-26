@@ -33,7 +33,7 @@ def resolve_handle_delete_account_request(_, info, input):
         user_to_delete.delete()
 
         # Send email to user which is deleted
-        context = get_default_email_context(info.context['request'])
+        context = get_default_email_context(performing_user)
         context['name_deleted_user'] = name_deleted_user
         subject = ugettext_lazy("Account of %(name_deleted_user)s removed") % {'name_deleted_user': name_deleted_user}
 
@@ -41,7 +41,7 @@ def resolve_handle_delete_account_request(_, info, input):
 
         # Send email to admins if user which is deleted is also an admin
         if is_deleted_user_admin:
-            context = get_default_email_context(info.context['request'])
+            context = get_default_email_context(performing_user)
             context['name_deleted_user'] = performing_user.name
             subject = ugettext_lazy("A site administrator was removed from %(site_name)s") % {'site_name': context["site_name"]}
 

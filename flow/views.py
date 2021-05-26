@@ -1,5 +1,6 @@
 from django.core.exceptions import ObjectDoesNotExist
 from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
 from core import config
 from core.models import Comment, Entity
@@ -7,14 +8,22 @@ from user.models import User
 
 
 def validate_flow_token(request):
+    token = config.FLOW_TOKEN
+    if not token:
+        return False
     try:
-        if str(request.META['headers']['Authorization']) == str('Bearer ' + config.FLOW_TOKEN):
+        if str(request.META['HTTP_AUTHORIZATION']) == str('Bearer ' + token):
+            return True
+    except Exception:
+        pass
+    try:
+        if str(request.META['headers']['Authorization']) == str('Bearer ' + token):
             return True
     except Exception:
         pass
     return False
 
-
+@csrf_exempt
 @require_http_methods(["POST"])
 def add_comment(request):
     if not config.FLOW_ENABLED or not validate_flow_token(request):
@@ -27,7 +36,7 @@ def add_comment(request):
         return JsonResponse({"error": "Bad request"}, status=400)
 
     try:
-        entity = Entity.objects.get(id=object_id)
+        entity = Entity.objects.get_subclass(id=object_id)
     except ObjectDoesNotExist:
         return JsonResponse({"error": "Entity for flow comment does not exist"}, status=401)
 

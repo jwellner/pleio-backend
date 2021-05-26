@@ -1,6 +1,6 @@
 from django.core.management.base import BaseCommand
 from django.db.models import Q
-from django.utils import timezone, dateformat, formats
+from django.utils import timezone, dateformat, formats, translation
 from django.utils.translation import ugettext_lazy
 from django.conf import settings
 from core import config
@@ -74,6 +74,9 @@ class Command(BaseCommand):
             user.profile.save()
 
     def handle(self, *args, **options):
+        if config.LANGUAGE:
+            translation.activate(config.LANGUAGE)
+
         tenant = Client.objects.get(schema_name=connection.schema_name)
 
         site_url = 'https://' + tenant.domains.first().domain

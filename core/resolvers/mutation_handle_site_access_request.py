@@ -31,15 +31,15 @@ def resolve_handle_site_access_request(_, info, input):
     silent = clean_input.get("silent", False)
 
     if not silent:
-        context = get_default_email_context(info.context['request'])
+        context = get_default_email_context(user)
         context['request_name'] = access_request.claims.get('name')
 
         if accepted:
-            subject = ugettext_lazy("You are now member of: %(site_name)s" % {'site_name': config.NAME })
+            subject = ugettext_lazy("You are now member of: %(site_name)s") % {'site_name': config.NAME }
             context['intro'] = config.SITE_MEMBERSHIP_ACCEPTED_INTRO
             send_mail_multi.delay(tenant_schema(), subject, 'email/site_access_request_accepted.html', context, access_request.claims.get('email'))
         else:
-            subject = ugettext_lazy("Membership request declined for: %(site_name)s" % {'site_name': config.NAME })
+            subject = ugettext_lazy("Membership request declined for: %(site_name)s") % {'site_name': config.NAME }
             context['intro'] = config.SITE_MEMBERSHIP_DENIED_INTRO
             send_mail_multi.delay(tenant_schema(), subject, 'email/site_access_request_denied.html', context, access_request.claims.get('email'))
 

@@ -206,6 +206,8 @@ def import_users(self, schema_name, fields, csv_location, performing_user_guid):
     Import users
     '''
     with schema_context(schema_name):
+        if config.LANGUAGE:
+            translation.activate(config.LANGUAGE)
 
         performing_user = User.objects.get(id=performing_user_guid)
 
@@ -336,6 +338,9 @@ def create_notification(self, schema_name, verb, entity_id, sender_id, recipient
     for this group. An email task wil be triggered with this notification
     '''
     with schema_context(schema_name):
+        if config.LANGUAGE:
+            translation.activate(config.LANGUAGE)
+
         instance = Entity.objects.get_subclass(id=entity_id)
         sender = User.objects.get(id=sender_id)
         recipients = User.objects.filter(id__in=recipient_ids)

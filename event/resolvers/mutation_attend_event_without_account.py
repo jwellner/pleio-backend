@@ -3,10 +3,9 @@ from django.core.exceptions import ObjectDoesNotExist, ValidationError
 from django.core.validators import validate_email
 from django.utils.translation import ugettext_lazy
 from core.constances import COULD_NOT_FIND, INVALID_EMAIL, EMAIL_ALREADY_USED, EVENT_IS_FULL
-from core.lib import remove_none_from_dict, get_base_url, generate_code, get_default_email_context
+from core.lib import remove_none_from_dict, get_base_url, generate_code, get_default_email_context, tenant_schema
 from event.models import Event, EventAttendeeRequest
 from core.tasks import send_mail_multi
-from django_tenants.utils import parse_tenant_config_path
 
 def resolve_attend_event_without_account(_, info, input):
     # pylint: disable=redefined-builtin
@@ -28,8 +27,8 @@ def resolve_attend_event_without_account(_, info, input):
     except ValidationError:
         raise GraphQLError(INVALID_EMAIL)
 
-    url = get_base_url(info.context['request']) + '/events/confirm/' + event.guid + '?email=' + email + '&code='
-    subject = ugettext_lazy("Confirmation of registration %s" % event.title)
+    url = get_base_url() + '/events/confirm/' + event.guid + '?email=' + email + '&code='
+    subject = ugettext_lazy("Confirmation of registration %s") % event.title
 
     code = ""
     try:
@@ -46,14 +45,13 @@ def resolve_attend_event_without_account(_, info, input):
 
     link = url + code
 
-    schema_name = parse_tenant_config_path("")
-    context = get_default_email_context(info.context['request'])
+    context = get_default_email_context()
     context['link'] = link
     context['title'] = event.title
     context['location'] = event.location
     context['start_date'] = event.start_date
 
-    send_mail_multi.delay(schema_name, subject, 'email/attend_event_without_account.html', context, email)
+    send_mail_multi.delay(tenant_schema(), subject, 'email/attend_event_without_account.html', context, email)
 
     return {
         "entity": event

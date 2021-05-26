@@ -1,4 +1,5 @@
 import uuid
+import logging
 from auditlog.registry import auditlog
 from django.apps import apps
 from django.conf import settings
@@ -11,8 +12,11 @@ from django.dispatch import receiver
 from django.utils.text import slugify
 from django.utils import timezone
 from django.urls import reverse
-from core.lib import ACCESS_TYPE
+from django.utils.translation import ugettext_lazy
+from core.lib import ACCESS_TYPE, tenant_schema, get_default_email_context, get_base_url, html_to_text
 from core.constances import USER_ROLES
+
+logger = logging.getLogger(__name__)
 
 class GroupManager(models.Manager):
     def visible(self, user):
@@ -117,13 +121,22 @@ class Group(models.Model):
         return self.members.filter(user=user, type__in=['admin', 'owner']).exists()
 
     def join(self, user, member_type='member'):
-        return self.members.update_or_create(
+        # pylint: disable=unused-variable
+        already_member = self.is_full_member(user)
+
+        obj, created = self.members.update_or_create(
             user=user,
             defaults={
                 'type': member_type,
                 'enable_notification': self.auto_notification
             }
         )
+
+        # send welcome message for new members
+        if obj.type == 'member' and not already_member:
+            self._send_welcome_message(user)
+
+        return obj
 
     def leave(self, user):
         if self.subgroups:
@@ -150,6 +163,27 @@ class Group(models.Model):
             member.save()
             return True
         return False
+
+    def _send_welcome_message(self, user):
+        # pylint: disable=cyclic-import
+        # pylint: disable=import-outside-toplevel
+        
+        # strip tags and trim spaces 
+        has_message = html_to_text(self.welcome_message)
+        if has_message:
+            has_message = has_message.strip()
+
+        if has_message:
+            context = get_default_email_context(user)
+            context['welcome_message'] = self.welcome_message
+            context['welcome_message'] = context['welcome_message'].replace("[name]", user.name)
+            context['welcome_message'] = context['welcome_message'].replace("[group_name]", self.name)
+            context['welcome_message'] = context['welcome_message'].replace("[group_url]", f"{get_base_url()}{self.url}")
+
+            subject = ugettext_lazy("Welcome to %(group_name)s") % {'group_name': self.name}
+
+            from core.tasks import send_mail_multi
+            send_mail_multi.delay(tenant_schema(), subject, 'email/group_welcome.html', context, user.email)
 
     @property
     def guid(self):

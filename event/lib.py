@@ -9,6 +9,6 @@ def get_url(obj, request):
             obj.group.guid, slugify(obj.group.name)
         )
 
-    return get_base_url(request) + '{}/events/view/{}/{}'.format(
+    return get_base_url() + '{}/events/view/{}/{}'.format(
         prefix, obj.guid, slugify(obj.title)
     ).lower()

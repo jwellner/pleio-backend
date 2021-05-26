@@ -22,9 +22,15 @@ class JoinGroupTestCase(FastTenantTestCase):
         self.user2 = mixer.blend(User, name="b") # auto joined to group_auto
         self.user3 = mixer.blend(User, name="c") # auto joined to group_auto
         self.user4 = mixer.blend(User, name="d")
-        self.group = mixer.blend(Group, owner=self.user1, is_membership_on_request=False)
-        self.group2 = mixer.blend(Group, owner=self.user1, is_membership_on_request=False)
+        self.groupAdmin1 = mixer.blend(User, name="e")
+        self.groupAdmin2 = mixer.blend(User, name="f")
+        self.group = mixer.blend(Group, owner=self.user1, is_membership_on_request=False, welcome_message='welcome_message')
+        self.group2 = mixer.blend(Group, owner=self.user1, is_membership_on_request=False, welcome_message='<p> </p>  ')
+
         self.group_on_request = mixer.blend(Group, owner=self.user1, is_membership_on_request=True)
+        self.group_on_request.join(self.user1, member_type='owner')
+        self.group_on_request.join(self.groupAdmin1, member_type='admin')
+        self.group_on_request.join(self.groupAdmin2, member_type='admin')
         self.group2.join(self.user4, 'member')
 
     def tearDown(self):
@@ -62,7 +68,6 @@ class JoinGroupTestCase(FastTenantTestCase):
         errors = result[1]["errors"]
 
         self.assertEqual(errors[0]["message"], "not_logged_in")
-
 
     def test_join_group(self):
         mutation = """
@@ -111,7 +116,6 @@ class JoinGroupTestCase(FastTenantTestCase):
         self.assertEqual(self.user1.memberships.filter(group=self.group, type="member").count(), 1)
         self.assertEqual(self.user2.memberships.filter(group=self.group, type="member").count(), 1)
 
-    @override_settings(ALLOWED_HOSTS=['test.test'])
     @mock.patch('core.resolvers.mutation_join_group.send_mail_multi.delay')
     def test_join_group_on_request(self, mocked_send_mail_multi):
         mutation = """
@@ -139,25 +143,22 @@ class JoinGroupTestCase(FastTenantTestCase):
 
         request = HttpRequest()
         request.user = self.user2
-        request.META = {
-            'HTTP_HOST': 'test.test'
-        }
 
         result = graphql_sync(schema, { "query": mutation, "variables": variables }, context_value={ "request": request })
 
         data = result[1]["data"]
 
-        self.assertEqual(data["joinGroup"]["group"]["memberCount"], 0)
-        self.assertEqual(data["joinGroup"]["group"]["members"]["total"], 0)
-        mocked_send_mail_multi.assert_called_once()
+        self.assertEqual(data["joinGroup"]["group"]["memberCount"], 3)
+        self.assertEqual(data["joinGroup"]["group"]["members"]["total"], 3)
+        self.assertEqual(mocked_send_mail_multi.call_count, 3)
 
         request.user = self.user3
         result = graphql_sync(schema, { "query": mutation, "variables": variables }, context_value={ "request": request })
 
         data = result[1]["data"]
 
-        self.assertEqual(data["joinGroup"]["group"]["memberCount"], 0)
-        self.assertEqual(data["joinGroup"]["group"]["members"]["total"], 0)
+        self.assertEqual(data["joinGroup"]["group"]["memberCount"], 3)
+        self.assertEqual(data["joinGroup"]["group"]["members"]["total"], 3)
         self.assertEqual(self.user2.memberships.filter(group=self.group_on_request, type="pending").count(), 1)
         self.assertEqual(self.user3.memberships.filter(group=self.group_on_request, type="pending").count(), 1)
 
@@ -199,9 +200,9 @@ class JoinGroupTestCase(FastTenantTestCase):
         data = result[1]["data"]
 
         self.assertEqual(data["entity"]["guid"], self.group_auto.guid)
-        self.assertEqual(data["entity"]["memberCount"], 3) # to users should be added on create
-        self.assertEqual(data["entity"]["members"]["total"], 3) # to users should be added on create
-        self.assertEqual(len(data["entity"]["members"]["edges"]), 3)
+        self.assertEqual(data["entity"]["memberCount"], 5) # to users should be added on create
+        self.assertEqual(data["entity"]["members"]["total"], 5) # to users should be added on create
+        self.assertEqual(len(data["entity"]["members"]["edges"]), 5)
 
 
     def test_join_group_by_member_of_group(self):
@@ -234,3 +235,68 @@ class JoinGroupTestCase(FastTenantTestCase):
         errors = result[1]["errors"]
 
         self.assertEqual(errors[0]["message"], "already_member_of_group")
+
+    @mock.patch('core.tasks.send_mail_multi.delay')
+    def test_welcome_message(self, mock_send_mail_multi):
+        mutation = """
+            mutation ($group: joinGroupInput!) {
+                joinGroup(input: $group) {
+                    group {
+                        memberCount
+                        members {
+                            total
+                            edges {
+                                user {
+                                    guid
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        """
+        variables = {
+            "group": {
+                "guid": self.group.guid
+            }
+        }
+
+        request = HttpRequest()
+        request.user = self.user1
+        result = graphql_sync(schema, { "query": mutation, "variables": variables }, context_value={ "request": request })
+
+        data = result[1]["data"]
+
+        mock_send_mail_multi.assert_called_once()
+
+    @mock.patch('core.tasks.send_mail_multi.delay')
+    def test_no_welcome_message(self, mock_send_mail_multi):
+        mutation = """
+            mutation ($group: joinGroupInput!) {
+                joinGroup(input: $group) {
+                    group {
+                        memberCount
+                        members {
+                            total
+                            edges {
+                                user {
+                                    guid
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        """
+        variables = {
+            "group": {
+                "guid": self.group2.guid
+            }
+        }
+        request = HttpRequest()
+        request.user = self.user1
+        result = graphql_sync(schema, { "query": mutation, "variables": variables }, context_value={ "request": request })
+
+        data = result[1]["data"]
+
+        mock_send_mail_multi.assert_not_called()

@@ -40,7 +40,7 @@ def resolve_reject_membership_request(_, info, input):
     subject = ugettext_lazy("Request for access to the %(group_name)s group has been refused") % {'group_name': group.name}
 
     schema_name = parse_tenant_config_path("")
-    context = get_default_email_context(info.context['request'])
+    context = get_default_email_context(user)
     context['group_name'] = group.name
 
     send_mail_multi.delay(schema_name, subject, 'email/reject_membership_request.html', context, requesting_user.email)

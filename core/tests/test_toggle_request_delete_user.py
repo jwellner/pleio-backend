@@ -48,7 +48,6 @@ class ToggleRequestDeleteUserTestCase(FastTenantTestCase):
 
         self.assertEqual(errors[0]["message"], "not_logged_in")
 
-    @override_settings(ALLOWED_HOSTS=['test.test'])
     def test_toggle_request_delete_user(self):
         mutation = """
             mutation toggleRequestDeleteUser($input: toggleRequestDeleteUserInput!) {
@@ -67,16 +66,13 @@ class ToggleRequestDeleteUserTestCase(FastTenantTestCase):
 
         request = HttpRequest()
         request.user = self.user1
-        request.META = {
-            'HTTP_HOST': 'test.test'
-        }
+
         result = graphql_sync(schema, {"query": mutation, "variables": variables}, context_value={ "request": request })
 
         data = result[1]["data"]
 
         self.assertEqual(data["toggleRequestDeleteUser"]["viewer"]["guid"], self.user1.guid)
 
-    @override_settings(ALLOWED_HOSTS=['test.test'])
     @mock.patch('core.resolvers.mutation_toggle_request_delete_user.send_mail_multi.delay')
     def test_call_send_email(self, mocked_send_mail_multi):
         mutation = """
@@ -96,19 +92,16 @@ class ToggleRequestDeleteUserTestCase(FastTenantTestCase):
 
         request = HttpRequest()
         request.user = self.user1
-        request.META = {
-            'HTTP_HOST': 'test.test'
-        }
 
         result = graphql_sync(schema, {"query": mutation, "variables": variables}, context_value={ "request": request })
 
-        user_url = 'https://test.test' + self.user1.url
+        user_url = 'https://tenant.fast-test.com' + self.user1.url
         mocked_send_mail_multi.assert_called_once_with("fast_test", "Verzoek om account te verwijderen", 'email/toggle_request_delete_user_requested.html',
-                                                       {'user_name': self.user1.name, 'user_url': user_url, 'site_url': 'https://test.test', 'site_name': 'Pleio 2.0',
+                                                       {'user_name': self.user1.name, 'user_url': user_url, 'site_url': 'https://tenant.fast-test.com', 'site_name': 'Pleio 2.0',
                                                         'primary_color': '#0e2f56', 'header_color': '#0e2f56'}, self.user1.email)
 
         result2 = graphql_sync(schema, {"query": mutation, "variables": variables}, context_value={ "request": request })
 
         mocked_send_mail_multi.assert_called_with("fast_test", "Verzoek om account te verwijderen geannuleerd", 'email/toggle_request_delete_user_cancelled.html',
-                                                  {'user_name': self.user1.name, 'user_url': user_url, 'site_url': 'https://test.test', 'site_name': 'Pleio 2.0',
+                                                  {'user_name': self.user1.name, 'user_url': user_url, 'site_url': 'https://tenant.fast-test.com', 'site_name': 'Pleio 2.0',
                                                    'primary_color': '#0e2f56', 'header_color': '#0e2f56'}, self.user1.email)

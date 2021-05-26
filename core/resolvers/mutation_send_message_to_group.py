@@ -48,7 +48,7 @@ def resolve_send_message_to_group(_, info, input):
 
             email_addresses.append(receiving_user.email)
 
-    context = get_default_email_context(info.context['request'])
+    context = get_default_email_context(user)
     schema_name = parse_tenant_config_path("")
     context['message'] = format_html(clean_input.get('message'))
 

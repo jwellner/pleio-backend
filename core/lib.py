@@ -213,24 +213,28 @@ def is_valid_json(string):
     return True
 
 
-def get_base_url(request):
-    return 'https://' + request.get_host()
+def get_base_url():
+    try:
+        return 'https://' + connection.tenant.get_primary_domain().domain
+    except Exception:
+        return ''
 
 
-def get_default_email_context(request):
-    user_name = ""
-    site_url = get_base_url(request)
-    user_url = site_url
-    if hasattr(request.user, 'url'):
-        user_url = site_url + request.user.url
-    if hasattr(request.user, 'name'):
-        user_name = request.user.name
+def get_default_email_context(user=None):
+    site_url = get_base_url()
+    user_url = site_url + user.url if user else ''
+    user_name = user.name if user else ''
     site_name = config.NAME
     primary_color = config.COLOR_PRIMARY
     header_color = config.COLOR_HEADER if config.COLOR_HEADER else config.COLOR_PRIMARY
-    return {'user_name': user_name, 'user_url': user_url, 'site_url': site_url, 'site_name': site_name, 'primary_color': primary_color,
-            'header_color': header_color}
-
+    return {
+        'user_name': user_name,
+        'user_url': user_url,
+        'site_url': site_url,
+        'site_name': site_name,
+        'primary_color': primary_color,
+        'header_color': header_color
+    }
 
 def obfuscate_email(email):
     # alter email: example@domain.com -> e******@domain.com
@@ -281,7 +285,7 @@ def get_exportable_content_types():
     ]
 
 def tenant_schema():
-    return connection.get_schema()
+    return connection.schema_name
 
 def html_to_text(html):
     h = html2text.HTML2Text()
@@ -421,6 +425,7 @@ def is_valid_url_or_path(url):
         return False
 
 def get_mimetype(filepath):
+    mimetypes.init()
     mime_type, _ = mimetypes.guess_type(filepath)
     if not mime_type:
         return None

@@ -48,10 +48,10 @@ def resolve_confirm_attend_event_without_account(_, info, input):
     attendee_request.delete()
 
     link = get_url(event, info.context["request"])
-    subject = ugettext_lazy("Confirmation of registration for %s" % event.title)
+    subject = ugettext_lazy("Confirmation of registration for %s") % event.title
 
     schema_name = parse_tenant_config_path("")
-    context = get_default_email_context(info.context['request'])
+    context = get_default_email_context()
     context['link'] = link
     context['title'] = event.title
     context['location'] = event.location
