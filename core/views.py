@@ -73,6 +73,7 @@ def entity_view(request, entity_id=None, entity_title=None):
         status_code = 200
         if hasattr(entity, 'description') and entity.description:
             metadata["description"] = Truncator(entity.description).words(26).replace("\"", "")
+            metadata["og:description"] = metadata["description"]
         metadata["og:title"] = entity.title
         metadata["og:type"] = 'article'
         if hasattr(entity, 'featured_image') and entity.featured_image:
