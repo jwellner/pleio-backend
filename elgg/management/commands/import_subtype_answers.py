@@ -97,16 +97,32 @@ class Command(InteractiveTenantOption, BaseCommand):
                 try:
                     question_id = GuidMap.objects.filter(id=elgg_answer.entity.container_guid, object_type='question').first().guid
                     question = Question.objects.get(id=question_id)
-                    if question.comments.all().exists():
+
+                    if GuidMap.objects.filter(id=elgg_answer.entity.guid, object_type='answer').exists():
+                        self.stdout.write("x", ending="")
                         continue
-                    entity = Comment()
-                    entity.description = html.unescape(elgg_answer.description)
-                    entity.rich_description = elgg_answer.entity.get_metadata_value_by_name("richDescription")
-                    entity.owner = self.helpers.get_user_or_admin(elgg_answer.entity.owner_guid)
-                    entity.created_at = datetime.fromtimestamp(elgg_answer.entity.time_created)
-                    entity.updated_at = datetime.fromtimestamp(elgg_answer.entity.time_updated)
-                    entity.container = question
-                    entity.save()
+
+                    hasComment = question.comments.filter(description=html.unescape(elgg_answer.description)).first()
+                    if hasComment:
+                        self.stdout.write("X", ending="")
+                        # add mapping for future references
+                        GuidMap.objects.create(id=elgg_answer.entity.guid, guid=hasComment.guid, object_type='answer')
+                        continue
+
+                    comment = Comment()
+                    comment.description = html.unescape(elgg_answer.description)
+                    comment.rich_description = elgg_answer.entity.get_metadata_value_by_name("richDescription")
+                    comment.owner = self.helpers.get_user_or_admin(elgg_answer.entity.owner_guid)
+                    comment.created_at = datetime.fromtimestamp(elgg_answer.entity.time_created)
+                    comment.updated_at = datetime.fromtimestamp(elgg_answer.entity.time_updated)
+                    comment.container = question
+                    comment.save()
+
+                    self.helpers.save_entity_annotations(elgg_answer, comment, ["vote"])
+
+                    # add mapping for future references
+                    GuidMap.objects.create(id=elgg_answer.entity.guid, guid=comment.guid, object_type='answer')
+
                     self.added_answers = self.added_answers + 1
                     self.stdout.write(".", ending="")
                 except Exception:
