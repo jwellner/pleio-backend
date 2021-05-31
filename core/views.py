@@ -77,7 +77,7 @@ def entity_view(request, entity_id=None, entity_title=None):
         metadata["og:title"] = entity.title
         metadata["og:type"] = 'article'
         if hasattr(entity, 'featured_image') and entity.featured_image:
-            metadata["og:image"] = request.build_absolute_uri(entity.featured_image.url)
+            metadata["og:image"] = request.build_absolute_uri(entity.featured_image.embed_url)
         if hasattr(entity, 'featured_video') and entity.featured_video:
             metadata["og:video"] = entity.featured_video
         metadata["og:url"] = request.build_absolute_uri(request.path)
