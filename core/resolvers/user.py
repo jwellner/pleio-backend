@@ -1,6 +1,7 @@
 from ariadne import ObjectType
 from core import config
 from core.constances import ACCESS_TYPE, USER_ROLES
+from core.lib import get_language_options
 from core.models import ProfileField, UserProfileField
 from django.core.exceptions import ObjectDoesNotExist
 
@@ -116,6 +117,13 @@ def resolve_language(obj, info):
     if is_user_or_admin(obj, info):
         return obj.get_language()
     return None
+
+@user.field("languageOptions")
+def resolve_language_options(obj, info):
+    # pylint: disable=unused-argument
+    active_languages = config.EXTRA_LANGUAGES
+    active_languages.append(config.LANGUAGE)
+    return [i for i in get_language_options() if i['value'] in active_languages]
 
 @user.field("fieldsInOverview")
 def resolve_fields_in_overview(obj, info):

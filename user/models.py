@@ -161,7 +161,7 @@ class User(AbstractBaseUser):
         return self.name
 
     def get_language(self):
-        if self.profile.language and (self.profile.language in set((i['value'] for i in get_language_options()))):
+        if self.profile.language and ((self.profile.language == config.LANGUAGE) or (self.profile.language in config.EXTRA_LANGUAGES)):
             return self.profile.language
         return config.LANGUAGE
 

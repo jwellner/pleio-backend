@@ -5,6 +5,7 @@ from django_tenants.test.cases import FastTenantTestCase
 from backend2.schema import schema
 from ariadne import graphql_sync
 import json
+from django.core.cache import cache
 from django.contrib.auth.models import AnonymousUser
 from django.http import HttpRequest
 from core.models import Group
@@ -22,6 +23,8 @@ class SendMessageToUserTestCase(FastTenantTestCase):
         self.user2 = mixer.blend(User)
         self.user1.profile.language = 'en'
         self.user1.profile.save()
+        cache.set("%s%s" % (connection.schema_name, 'EXTRA_LANGUAGES'), ['en'])
+
 
     def tearDown(self):
         self.user1.delete()

@@ -169,6 +169,7 @@ extend type Query {
 extend type User {
   roles: [String]
   language: String
+  languageOptions: [Option]
 }
 
 extend type GroupNotificationItem {

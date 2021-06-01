@@ -1,4 +1,5 @@
 from django.conf import settings
+from django.core.cache import cache
 from django.db import connection
 from django_tenants.test.cases import FastTenantTestCase
 from django.utils import translation
@@ -24,7 +25,7 @@ class EditNotificationsTestCase(FastTenantTestCase):
         self.admin = mixer.blend(User)
         self.admin.roles = ['ADMIN']
         self.admin.save()
-
+        cache.set("%s%s" % (connection.schema_name, 'EXTRA_LANGUAGES'), ['en'])
 
     def tearDown(self):
         self.admin.delete()
