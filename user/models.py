@@ -53,7 +53,7 @@ class Manager(BaseUserManager):
             user.is_government = is_government
 
         if has_2fa_enabled:
-            user.has_2fa_enabled = has_2fa_enabled
+            user.has_2fa_enabled = has_2fa_enabledfrom core.lib import get_language_options
 
         if is_superadmin:
             user.is_superadmin = True
@@ -90,7 +90,7 @@ class User(AbstractBaseUser):
     email = models.EmailField(max_length=255, unique=True)
     name = models.CharField(max_length=100)
     is_active = models.BooleanField(default=True)
-    is_superadmin = models.BooleanField(default=False)from django.core.cache import cache
+    is_superadmin = models.BooleanField(default=False)
 
     external_id = models.CharField(
         max_length=50,
