@@ -53,7 +53,7 @@ class Manager(BaseUserManager):
             user.is_government = is_government
 
         if has_2fa_enabled:
-            user.has_2fa_enabled = has_2fa_enabledfrom core.lib import get_language_options
+            user.has_2fa_enabled = has_2fa_enabled
 
         if is_superadmin:
             user.is_superadmin = True
