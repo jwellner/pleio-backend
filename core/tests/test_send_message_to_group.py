@@ -87,15 +87,7 @@ class SendMessageToGroupTestCase(FastTenantTestCase):
         data = result[1]["data"]
 
         self.assertEqual(data["sendMessageToGroup"]["group"]["guid"], self.group1.guid)
-
-        subject = "Bericht van groep {0}: {1}".format(self.group1.name, 'testMessageSubject')
-        user_url = 'https://tenant.fast-test.com' + self.user1.url
         self.assertEqual(mocked_send_mail_multi.call_count, 2)
-
-        mocked_send_mail_multi.assert_any_call('fast_test', subject, 'email/send_message_to_group.html',
-                                                       {'user_name': self.user1.name, 'user_url': user_url,
-                                                        'site_url': 'https://tenant.fast-test.com', 'site_name': 'Pleio 2.0', 'primary_color': '#0e2f56',
-                                                        'header_color': '#0e2f56', 'message': '<p>testMessageContent</p>', 'subject': subject}, self.user3.email, language='nl')
 
     @mock.patch('core.resolvers.mutation_send_message_to_group.send_mail_multi.delay')
     def test_send_message_to_group_by_admin(self, mocked_send_mail_multi):
@@ -127,15 +119,7 @@ class SendMessageToGroupTestCase(FastTenantTestCase):
 
         result = graphql_sync(schema, {"query": mutation, "variables": variables}, context_value={ "request": request })
 
-        data = result[1]["data"]
-
-        subject = "Message from group {0}: {1}".format(self.group1.name, 'testMessageSubject')
-        user_url = 'https://tenant.fast-test.com' + self.admin.url
-
-        mocked_send_mail_multi.assert_any_call('fast_test', subject, 'email/send_message_to_group.html',
-                                                       {'user_name': self.admin.name, 'user_url': user_url,
-                                                        'site_url': 'https://tenant.fast-test.com', 'site_name': 'Pleio 2.0', 'primary_color': '#0e2f56',
-                                                        'header_color': '#0e2f56', 'message': '<p>testMessageContent</p>', 'subject': subject}, self.user2.email, language='en')
+        self.assertEqual(mocked_send_mail_multi.call_count, 2)
 
 
     @mock.patch('core.resolvers.mutation_send_message_to_group.send_mail_multi.delay')
@@ -276,15 +260,7 @@ class SendMessageToGroupTestCase(FastTenantTestCase):
 
         result = graphql_sync(schema, {"query": mutation, "variables": variables}, context_value={ "request": request })
 
-        data = result[1]["data"]
-
-        subject = "Bericht van groep {0}: {1}".format(self.group1.name, 'testMessageSubject')
-        user_url = 'https://tenant.fast-test.com' + self.user1.url
-
-        mocked_send_mail_multi.assert_any_call('fast_test', subject, 'email/send_message_to_group.html',
-                                                       {'user_name': self.user1.name, 'user_url': user_url,
-                                                        'site_url': 'https://tenant.fast-test.com', 'site_name': 'Pleio 2.0', 'primary_color': '#0e2f56',
-                                                        'header_color': '#0e2f56', 'message': '<p>testMessageContent</p>', 'subject': subject}, self.user1.email, language='nl')
+        self.assertEqual(mocked_send_mail_multi.call_count, 1)
 
 
     @mock.patch('core.resolvers.mutation_send_message_to_group.send_mail_multi.delay')
@@ -317,13 +293,4 @@ class SendMessageToGroupTestCase(FastTenantTestCase):
 
         result = graphql_sync(schema, {"query": mutation, "variables": variables}, context_value={ "request": request })
 
-        data = result[1]["data"]
-
-        self.assertEqual(data["sendMessageToGroup"]["group"]["guid"], self.group1.guid)
-
-        subject = "Bericht van groep {0}: {1}".format(self.group1.name, 'testMessageSubject')
-        user_url = 'https://tenant.fast-test.com' + self.user1.url
-        mocked_send_mail_multi.assert_any_call('fast_test', subject, 'email/send_message_to_group.html',
-                                                       {'user_name': self.user1.name, 'user_url': user_url,
-                                                        'site_url': 'https://tenant.fast-test.com', 'site_name': 'Pleio 2.0', 'primary_color': '#0e2f56',
-                                                        'header_color': '#0e2f56', 'message': '<p>testMessageContent</p>', 'subject': subject}, self.user3.email, language='nl')
+        self.assertEqual(mocked_send_mail_multi.call_count, 2)

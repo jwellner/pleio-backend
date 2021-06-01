@@ -14,6 +14,7 @@ def resolve_invite_to_group(_, info, input):
     # pylint: disable=redefined-builtin
     # pylint: disable=too-many-branches
     # pylint: disable=too-many-locals
+    # pylint: disable=too-many-statements
     user = info.context["request"].user
     clean_input = remove_none_from_dict(input)
 

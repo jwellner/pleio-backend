@@ -234,8 +234,6 @@ class SiteSettingsTestCase(FastTenantTestCase):
         self.cmsPage2.delete()
         self.profileField1.delete()
         self.profileField2.delete()
-        self.assertEqual(data["siteSettings"]["extraLanguages"], [])
-
         self.admin.delete()
         self.user.delete()
 

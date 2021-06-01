@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-05-25 10:37+0200\n"
+"POT-Creation-Date: 2021-06-01 14:14+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -18,11 +18,11 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#: backend2/config.py:62 core/resolvers/query_site.py:87
+#: backend2/config.py:62 core/lib.py:288
 msgid "English"
 msgstr "Engels"
 
-#: backend2/config.py:63 core/resolvers/query_site.py:87
+#: backend2/config.py:63 core/lib.py:288
 msgid "Dutch"
 msgstr "Nederlands"
 
@@ -103,12 +103,12 @@ msgstr "Wiki pagina's"
 msgid "Comments"
 msgstr "Reacties"
 
-#: core/management/commands/send_notification_emails.py:52
+#: core/management/commands/send_notification_emails.py:56
 #, python-format
 msgid "New notifications at %(site_name)s"
 msgstr "Nieuwe notificaties op %(site_name)s"
 
-#: core/management/commands/send_overview_emails.py:91
+#: core/management/commands/send_overview_emails.py:93
 #, python-format
 msgid "Regular overview of %(site_name)s"
 msgstr "Periodiek overzicht van %(site_name)s"
@@ -119,25 +119,25 @@ msgstr "Periodiek overzicht van %(site_name)s"
 msgid "Welcome to %(group_name)s"
 msgstr "Welkom bij: %(group_name)s"
 
-#: core/resolvers/mutation_accept_membership_request.py:38
+#: core/resolvers/mutation_accept_membership_request.py:42
 #, python-format
 msgid "Request for access to the %(group_name)s group has been approved"
 msgstr "Toegangsaanvraag voor de groep %(group_name)s goedgekeurd"
 
-#: core/resolvers/mutation_change_group_role.py:41
+#: core/resolvers/mutation_change_group_role.py:43
 #, python-format
 msgid "Ownership of the %(group_name)s group has been transferred"
 msgstr "Eigenaarschap van de groep %(group_name)s overgedragen"
 
-#: core/resolvers/mutation_delete_user.py:35
-#: core/resolvers/mutation_handle_delete_account_request.py:38
+#: core/resolvers/mutation_delete_user.py:39
+#: core/resolvers/mutation_handle_delete_account_request.py:42
 #, python-format
 msgid "Account of %(name_deleted_user)s removed"
 msgstr "Account verwijderd van %(name_deleted_user)s"
 
-#: core/resolvers/mutation_delete_user.py:41
-#: core/resolvers/mutation_handle_delete_account_request.py:46
-#: core/resolvers/mutation_toggle_user_role.py:43
+#: core/resolvers/mutation_delete_user.py:55
+#: core/resolvers/mutation_handle_delete_account_request.py:58
+#: core/resolvers/mutation_toggle_user_role.py:48
 #, python-format
 msgid "A site administrator was removed from %(site_name)s"
 msgstr "Een site beheerder is verwijderd van %(site_name)s"
@@ -160,7 +160,7 @@ msgstr "e-mail"
 msgid "name"
 msgstr "naam"
 
-#: core/resolvers/mutation_invite_to_group.py:43
+#: core/resolvers/mutation_invite_to_group.py:90
 #, python-format
 msgid "Invitation to become a member of the %(group_name)s group"
 msgstr "Uitnodiging om lid te worden van de groep %(group_name)s"
@@ -170,104 +170,104 @@ msgstr "Uitnodiging om lid te worden van de groep %(group_name)s"
 msgid "You are invited to join site %(site_name)s"
 msgstr "Je bent uitgenodigd om lid te worden van %(site_name)s"
 
-#: core/resolvers/mutation_join_group.py:32
+#: core/resolvers/mutation_join_group.py:42
 #, python-format
 msgid "Access request for the %(group_name)s group"
 msgstr "Toegangsaanvraag voor de groep %(group_name)s"
 
-#: core/resolvers/mutation_reject_membership_request.py:40
+#: core/resolvers/mutation_reject_membership_request.py:42
 #, python-format
 msgid "Request for access to the %(group_name)s group has been refused"
 msgstr "Toegangsaanvraag voor de groep %(group_name)s afgewezen"
 
-#: core/resolvers/mutation_resend_group_invitation.py:28
+#: core/resolvers/mutation_resend_group_invitation.py:36
 #, python-format
 msgid "Reminder to become a member of the %(group_name)s group"
 msgstr "Herinnering om lid te worden van de groep %(group_name)s"
 
-#: core/resolvers/mutation_send_message_to_group.py:55
+#: core/resolvers/mutation_send_message_to_group.py:57
 #, python-brace-format
 msgid "Message from group {0}: {1}"
 msgstr "Bericht van groep {0}: {1}"
 
-#: core/resolvers/mutation_send_message_to_user.py:29
+#: core/resolvers/mutation_send_message_to_user.py:31
 #, python-brace-format
 msgid "Message from {0}: {1}"
 msgstr "Bericht van {0}: {1}"
 
-#: core/resolvers/mutation_send_message_to_user.py:35
+#: core/resolvers/mutation_send_message_to_user.py:44
 #, python-brace-format
 msgid "Copy: Message from {0}: {1}"
 msgstr "Kopie: Bericht van {0}: {1}"
 
-#: core/resolvers/mutation_toggle_request_delete_user.py:32
+#: core/resolvers/mutation_toggle_request_delete_user.py:36
 msgid "Request to remove account cancelled"
 msgstr "Verzoek om account te verwijderen geannuleerd"
 
-#: core/resolvers/mutation_toggle_request_delete_user.py:40
+#: core/resolvers/mutation_toggle_request_delete_user.py:50
 msgid "Request to remove account"
 msgstr "Verzoek om account te verwijderen"
 
-#: core/resolvers/mutation_toggle_user_role.py:49
+#: core/resolvers/mutation_toggle_user_role.py:59
 #, python-format
 msgid "Your site administrator rights for %(site_name)s were removed"
 msgstr "U bent niet langer site beheerder van %(site_name)s"
 
-#: core/resolvers/mutation_toggle_user_role.py:61
+#: core/resolvers/mutation_toggle_user_role.py:80
 #, python-format
 msgid "A new site administrator was assigned for %(site_name)s"
 msgstr "Een nieuwe site beheerder is toegewezen aan %(site_name)s"
 
-#: core/resolvers/mutation_toggle_user_role.py:66
+#: core/resolvers/mutation_toggle_user_role.py:91
 #, python-format
 msgid "You're granted site administrator right on %(site_name)s"
 msgstr "U bent aangewezen als site beheerder van %(site_name)s"
 
-#: core/resolvers/query_site.py:118
+#: core/resolvers/query_site.py:119
 msgid "Activity stream"
 msgstr "Activiteitenstroom"
 
-#: core/resolvers/query_site.py:118
+#: core/resolvers/query_site.py:119
 msgid "CMS page"
 msgstr "CMS pagina"
 
-#: core/resolvers/query_site.py:155
+#: core/resolvers/query_site.py:156
 msgid "Daily"
 msgstr "Dagelijks"
 
-#: core/resolvers/query_site.py:156
+#: core/resolvers/query_site.py:157
 msgid "Weekly"
 msgstr "Wekelijks"
 
-#: core/resolvers/query_site.py:157
+#: core/resolvers/query_site.py:158
 msgid "Monthly"
 msgstr "Maandelijks"
 
-#: core/resolvers/query_site.py:158
+#: core/resolvers/query_site.py:159
 msgid "Never"
 msgstr "Nooit"
 
-#: core/resolvers/query_site.py:207
+#: core/resolvers/query_site.py:208
 msgid "Administrator"
 msgstr "Beheerder"
 
-#: core/resolvers/query_site.py:208
+#: core/resolvers/query_site.py:209
 msgid "Editor"
 msgstr "Redacteur"
 
-#: core/resolvers/query_site.py:209
+#: core/resolvers/query_site.py:210
 msgid "Question expert"
 msgstr "Vraagexpert"
 
-#: core/tasks.py:274
+#: core/tasks.py:276
 msgid "Import was a success"
 msgstr "Import afgerond"
 
-#: core/tasks.py:274
+#: core/tasks.py:276
 msgid "Import failed"
 msgstr "Import mislukt"
 
-#: core/tasks.py:353
+#: core/tasks.py:355
 #, python-format
 msgid "New notification at %(site_name)s: "
 msgstr "Nieuwe notificatie op %(site_name)s"
@@ -804,7 +804,7 @@ msgstr ""
 "De toegang is aangevraagd. Je ontvangt een e-mail wanneer de toegang door de "
 "beheerder wordt toegewezen."
 
-#: core/views.py:158
+#: core/views.py:159
 #, python-format
 msgid "New access request for %(site_name)s"
 msgstr "Nieuwe toegangsaanvraag voor %(site_name)s"
