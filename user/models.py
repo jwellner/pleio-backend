@@ -1,6 +1,5 @@
 import uuid
 from core import config
-from core.lib import get_language_options
 from core.models import UserProfile, ProfileField, UserProfileField, SiteAccessRequest
 from django.db.models.signals import post_save
 from django.db import models
@@ -91,7 +90,7 @@ class User(AbstractBaseUser):
     email = models.EmailField(max_length=255, unique=True)
     name = models.CharField(max_length=100)
     is_active = models.BooleanField(default=True)
-    is_superadmin = models.BooleanField(default=False)
+    is_superadmin = models.BooleanField(default=False)from django.core.cache import cache
 
     external_id = models.CharField(
         max_length=50,
