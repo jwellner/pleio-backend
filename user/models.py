@@ -1,4 +1,6 @@
 import uuid
+from core import config
+from core.lib import get_language_options
 from core.models import UserProfile, ProfileField, UserProfileField, SiteAccessRequest
 from django.db.models.signals import post_save
 from django.db import models
@@ -157,6 +159,11 @@ class User(AbstractBaseUser):
 
     def get_short_name(self):
         return self.name
+
+    def get_language(self):
+        if self.profile.language and (self.profile.language in set((i['value'] for i in get_language_options()))):
+            return self.profile.language
+        return config.LANGUAGE
 
     @property
     def guid(self):

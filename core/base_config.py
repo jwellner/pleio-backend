@@ -8,6 +8,7 @@ DEFAULT_SITE_CONFIG = {
     'NAME': ('Pleio 2.0', 'Name'),
     'DESCRIPTION': ('Omschrijving site', 'Description'),
     'LANGUAGE': ('nl', 'Language'),
+    'EXTRA_LANGUAGES': ([], 'Extra languages'),
     'IS_CLOSED': (True, 'Is site closed'),
     'ALLOW_REGISTRATION': (True, 'Allow registrations'),
     'DIRECT_REGISTRATION_DOMAINS': ([], 'Direct registration domains'),

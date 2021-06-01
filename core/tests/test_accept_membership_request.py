@@ -83,7 +83,7 @@ class AcceptMembershipRequestTestCase(FastTenantTestCase):
         self.assertEqual(data["acceptMembershipRequest"]["group"]["guid"], self.group1.guid)
 
         mocked_send_mail_multi.called_with('fast_test', subject, 'email/accept_membership_request.html', {'user_name': self.user1.name, 'user_url': user_url,
-            'site_url': 'https://tenant.fast-test.com', 'site_name': 'Pleio 2.0', 'primary_color': '#0e2f56', 'header_color': '#0e2f56', 'group_name': self.group1.name, 'link': link}, self.user2.email)
+            'site_url': 'https://tenant.fast-test.com', 'site_name': 'Pleio 2.0', 'primary_color': '#0e2f56', 'header_color': '#0e2f56', 'group_name': self.group1.name, 'link': link}, self.user2.email, language='nl')
 
 
     @mock.patch('core.resolvers.mutation_accept_membership_request.send_mail_multi.delay')
@@ -133,7 +133,7 @@ class AcceptMembershipRequestTestCase(FastTenantTestCase):
 
         self.assertEqual(data["acceptMembershipRequest"]["group"]["guid"], self.group1.guid)
         mocked_send_mail_multi.called_with('fast_test', subject, 'email/accept_membership_request.html', {'user_name': self.admin.name, 'user_url': user_url,
-            'site_url': 'https://tenant.fast-test.com', 'site_name': 'Pleio 2.0', 'primary_color': '#0e2f56', 'header_color': '#0e2f56', 'group_name': self.group1.name, 'link': link}, self.user2.email)
+            'site_url': 'https://tenant.fast-test.com', 'site_name': 'Pleio 2.0', 'primary_color': '#0e2f56', 'header_color': '#0e2f56', 'group_name': self.group1.name, 'link': link}, self.user2.email, language='nl')
 
     @mock.patch('core.resolvers.mutation_accept_membership_request.send_mail_multi')
     def test_accept_group_access_request_by_other_user(self, mocked_send_mail_multi):

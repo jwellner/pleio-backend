@@ -168,6 +168,7 @@ extend type Query {
 
 extend type User {
   roles: [String]
+  language: String
 }
 
 extend type GroupNotificationItem {
@@ -242,6 +243,7 @@ extend input editSiteSettingInput {
   redirects: [RedirectInput]
   """users with email adress in domain of directRegistrationDomains, can register even when allowRegistration is False"""
   directRegistrationDomains: [String]
+  extraLanguages: [String]
   profileSections: [ProfileSectionInput]
   onboardingEnabled: Boolean
   enableSearchEngineIndexing: Boolean
@@ -306,6 +308,7 @@ input RedirectInput {
 extend type SiteSettings {
   redirects: [Redirect]
   directRegistrationDomains: [String]
+  extraLanguages: [String]
   profileSections: [ProfileSection]
   exportableUserFields: [ExportableField]
   exportableContentTypes: [Option]
@@ -402,7 +405,7 @@ type Attachment {
   id: String
   mimeType: String
   url: String
-  name: String 
+  name: String
 }
 
 input addAttachmentInput {
@@ -420,4 +423,8 @@ input toggleEntityIsPinnedInput {
 
 type toggleEntityIsPinnedPayload {
   success: Boolean
+}
+
+extend input editNotificationsInput {
+  language: String
 }

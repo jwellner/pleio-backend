@@ -23,6 +23,7 @@ class SendMessageToGroupTestCase(FastTenantTestCase):
         self.user1.profile.save()
         self.user2 = mixer.blend(User)
         self.user2.profile.last_online = datetime.now()
+        self.user2.profile.language = 'en'
         self.user2.profile.save()
         self.user3 = mixer.blend(User)
         self.user3.profile.last_online = datetime.now()
@@ -94,7 +95,7 @@ class SendMessageToGroupTestCase(FastTenantTestCase):
         mocked_send_mail_multi.assert_any_call('fast_test', subject, 'email/send_message_to_group.html',
                                                        {'user_name': self.user1.name, 'user_url': user_url,
                                                         'site_url': 'https://tenant.fast-test.com', 'site_name': 'Pleio 2.0', 'primary_color': '#0e2f56',
-                                                        'header_color': '#0e2f56', 'message': '<p>testMessageContent</p>', 'subject': subject}, self.user3.email)
+                                                        'header_color': '#0e2f56', 'message': '<p>testMessageContent</p>', 'subject': subject}, self.user3.email, language='nl')
 
     @mock.patch('core.resolvers.mutation_send_message_to_group.send_mail_multi.delay')
     def test_send_message_to_group_by_admin(self, mocked_send_mail_multi):
@@ -128,13 +129,13 @@ class SendMessageToGroupTestCase(FastTenantTestCase):
 
         data = result[1]["data"]
 
-        subject = "Bericht van groep {0}: {1}".format(self.group1.name, 'testMessageSubject')
+        subject = "Message from group {0}: {1}".format(self.group1.name, 'testMessageSubject')
         user_url = 'https://tenant.fast-test.com' + self.admin.url
 
         mocked_send_mail_multi.assert_any_call('fast_test', subject, 'email/send_message_to_group.html',
                                                        {'user_name': self.admin.name, 'user_url': user_url,
                                                         'site_url': 'https://tenant.fast-test.com', 'site_name': 'Pleio 2.0', 'primary_color': '#0e2f56',
-                                                        'header_color': '#0e2f56', 'message': '<p>testMessageContent</p>', 'subject': subject}, self.user2.email)
+                                                        'header_color': '#0e2f56', 'message': '<p>testMessageContent</p>', 'subject': subject}, self.user2.email, language='en')
 
 
     @mock.patch('core.resolvers.mutation_send_message_to_group.send_mail_multi.delay')
@@ -283,7 +284,7 @@ class SendMessageToGroupTestCase(FastTenantTestCase):
         mocked_send_mail_multi.assert_any_call('fast_test', subject, 'email/send_message_to_group.html',
                                                        {'user_name': self.user1.name, 'user_url': user_url,
                                                         'site_url': 'https://tenant.fast-test.com', 'site_name': 'Pleio 2.0', 'primary_color': '#0e2f56',
-                                                        'header_color': '#0e2f56', 'message': '<p>testMessageContent</p>', 'subject': subject}, self.user1.email)
+                                                        'header_color': '#0e2f56', 'message': '<p>testMessageContent</p>', 'subject': subject}, self.user1.email, language='nl')
 
 
     @mock.patch('core.resolvers.mutation_send_message_to_group.send_mail_multi.delay')
@@ -325,4 +326,4 @@ class SendMessageToGroupTestCase(FastTenantTestCase):
         mocked_send_mail_multi.assert_any_call('fast_test', subject, 'email/send_message_to_group.html',
                                                        {'user_name': self.user1.name, 'user_url': user_url,
                                                         'site_url': 'https://tenant.fast-test.com', 'site_name': 'Pleio 2.0', 'primary_color': '#0e2f56',
-                                                        'header_color': '#0e2f56', 'message': '<p>testMessageContent</p>', 'subject': subject}, self.user3.email)
+                                                        'header_color': '#0e2f56', 'message': '<p>testMessageContent</p>', 'subject': subject}, self.user3.email, language='nl')

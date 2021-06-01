@@ -25,6 +25,7 @@ class ToggleUserRoleTestCase(FastTenantTestCase):
     def tearDown(self):
         self.user1.delete()
         self.admin.delete()
+        self.admin2.delete()
 
     def test_toggle_request_delete_user_by_anonymous(self):
         mutation = """

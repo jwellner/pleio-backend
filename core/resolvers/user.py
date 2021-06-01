@@ -110,6 +110,13 @@ def resolve_request_delete(obj, info):
         return obj.is_delete_requested
     return None
 
+@user.field("language")
+def resolve_language(obj, info):
+    # pylint: disable=unused-argument
+    if is_user_or_admin(obj, info):
+        return obj.get_language()
+    return None
+
 @user.field("fieldsInOverview")
 def resolve_fields_in_overview(obj, info):
     # pylint: disable=unused-argument

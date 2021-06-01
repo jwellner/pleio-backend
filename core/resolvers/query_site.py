@@ -5,7 +5,7 @@ from django.templatetags.static import static
 from cms.models import Page
 from core import config
 from core.constances import NOT_LOGGED_IN, USER_NOT_SITE_ADMIN, USER_ROLES
-from core.lib import get_access_ids, get_activity_filters, get_exportable_user_fields, get_exportable_content_types
+from core.lib import get_access_ids, get_activity_filters, get_exportable_user_fields, get_exportable_content_types, get_language_options
 from core.models import UserProfile, ProfileField, SiteInvitation, SiteAccessRequest, ProfileFieldValidator
 from user.models import User
 from graphql import GraphQLError
@@ -84,7 +84,8 @@ def get_site_settings():
         'name': config.NAME,
         'description': config.DESCRIPTION,
         'language': config.LANGUAGE,
-        'languageOptions': [{'value': 'nl', 'label': ugettext_lazy('Dutch')}, {'value': 'en', 'label': ugettext_lazy('English')}],
+        'languageOptions': get_language_options(),
+        'extraLanguages': config.EXTRA_LANGUAGES,
         'isClosed': config.IS_CLOSED,
         'allowRegistration': config.ALLOW_REGISTRATION,
         'directRegistrationDomains': config.DIRECT_REGISTRATION_DOMAINS,

@@ -40,6 +40,7 @@ class UserSettingsTestCase(FastTenantTestCase):
                         canEdit
                         emailNotifications
                         getsNewsletter
+                        language
                         emailOverview {
                             frequency
                         }
@@ -84,6 +85,7 @@ class UserSettingsTestCase(FastTenantTestCase):
         self.assertEqual(data["entity"]["username"], self.user1.guid)
         self.assertEqual(data["entity"]["emailNotifications"], False)
         self.assertEqual(data["entity"]["getsNewsletter"], False)
+        self.assertEqual(data["entity"]["language"], 'nl')
         self.assertEqual(data["entity"]["emailOverview"]["frequency"], "weekly")
         self.assertEqual(data["entity"]["groupNotifications"][0]["guid"], self.group1.guid)
         self.assertEqual(data["entity"]["groupNotifications"][0]["getsNotifications"], True)
@@ -111,6 +113,7 @@ class UserSettingsTestCase(FastTenantTestCase):
         self.assertEqual(data["entity"]["username"], self.user1.guid)
         self.assertEqual(data["entity"]["emailNotifications"], False)
         self.assertEqual(data["entity"]["getsNewsletter"], False)
+        self.assertEqual(data["entity"]["language"], 'nl')
         self.assertEqual(data["entity"]["emailOverview"]["frequency"], "weekly")
         self.assertEqual(data["entity"]["groupNotifications"][0]["guid"], self.group1.guid)
         self.assertEqual(data["entity"]["groupNotifications"][0]["getsNotifications"], True)

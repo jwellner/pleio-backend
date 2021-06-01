@@ -65,11 +65,15 @@ class CustomLocaleMiddleware(MiddlewareMixin):
     response_redirect_class = HttpResponseRedirect
 
     def process_request(self, request):
-        translation.activate(config.LANGUAGE)
-        request.LANGUAGE_CODE = translation.get_language()
+        pass
 
     def process_response(self, request, response):
-        language = translation.get_language()
+        if request.user.is_authenticated:
+            translation.activate(request.user.get_language())
+        else:
+            translation.activate(config.LANGUAGE)
+        request.LANGUAGE_CODE = translation.get_language()
+        language = request.LANGUAGE_CODE
         language_from_path = translation.get_language_from_path(request.path_info)
         urlconf = getattr(request, 'urlconf', settings.ROOT_URLCONF)
         i18n_patterns_used, prefixed_default_language = is_language_prefix_patterns_used(urlconf)

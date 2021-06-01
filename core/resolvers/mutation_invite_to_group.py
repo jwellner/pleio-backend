@@ -1,8 +1,10 @@
 from graphql import GraphQLError
 from django.core.exceptions import ObjectDoesNotExist
+from django.utils import translation
 from django.utils.translation import ugettext_lazy
 from core.models import Group, GroupInvitation
 from user.models import User
+from core import config
 from core.constances import NOT_LOGGED_IN, COULD_NOT_FIND, COULD_NOT_INVITE, USER_NOT_SITE_ADMIN, USER_ROLES
 from core.lib import remove_none_from_dict, get_base_url, generate_code, get_default_email_context
 from core.tasks import send_mail_multi
@@ -40,7 +42,6 @@ def resolve_invite_to_group(_, info, input):
                 group.join(u, 'member')
 
     if not clean_input.get("addAllUsers"):
-        subject = ugettext_lazy("Invitation to become a member of the %(group_name)s group") % {'group_name': group.name}
         url = get_base_url() + '/groups/invitations/?invitecode='
 
         for user_input in clean_input.get("users"):
@@ -79,12 +80,27 @@ def resolve_invite_to_group(_, info, input):
                 GroupInvitation.objects.create(code=code, invited_user=receiving_user, group=group, email=email)
 
             try:
+                language = None
+                if receiving_user:
+                    language = receiving_user.get_language()
+                    translation.activate(language)
+                else:
+                    translation.activate(config.LANGUAGE)
+
+                subject = ugettext_lazy("Invitation to become a member of the %(group_name)s group") % {'group_name': group.name}
                 schema_name = parse_tenant_config_path("")
                 context = get_default_email_context(user)
                 link = url + code
                 context['link'] = link
                 context['group_name'] = group.name
-                send_mail_multi.delay(schema_name, subject, 'email/invite_to_group.html', context, email)
+                send_mail_multi.delay(
+                    schema_name,
+                    subject,
+                    'email/invite_to_group.html',
+                    context,
+                    email,
+                    language=language
+                )
             except Exception:
                 # TODO: logging
                 pass

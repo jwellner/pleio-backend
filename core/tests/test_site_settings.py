@@ -47,6 +47,7 @@ class SiteSettingsTestCase(FastTenantTestCase):
                         label
                     }
                     language
+                    extraLanguages
                     name
                     description
                     isClosed
@@ -233,6 +234,8 @@ class SiteSettingsTestCase(FastTenantTestCase):
         self.cmsPage2.delete()
         self.profileField1.delete()
         self.profileField2.delete()
+        self.assertEqual(data["siteSettings"]["extraLanguages"], [])
+
         self.admin.delete()
         self.user.delete()
 
@@ -252,6 +255,7 @@ class SiteSettingsTestCase(FastTenantTestCase):
 
         self.assertEqual(data["siteSettings"]["name"], "Pleio 2.0")
         self.assertEqual(data["siteSettings"]["language"], "nl")
+        self.assertEqual(data["siteSettings"]["extraLanguages"], [])
         self.assertEqual(data["siteSettings"]["description"], "Omschrijving site")
         self.assertEqual(data["siteSettings"]["languageOptions"], [{'value': 'nl', 'label': 'Nederlands'}, {'value': 'en', 'label': 'Engels'}])
         self.assertEqual(data["siteSettings"]["isClosed"], False)

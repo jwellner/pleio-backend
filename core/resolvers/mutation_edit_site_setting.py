@@ -5,7 +5,7 @@ from core import config
 from core.models import Setting, ProfileField
 from core.models.user import validate_profile_sections
 from core.constances import NOT_LOGGED_IN, USER_NOT_SITE_ADMIN, USER_ROLES, INVALID_VALUE, REDIRECTS_HAS_LOOP, REDIRECTS_HAS_DUPLICATE_SOURCE
-from core.lib import remove_none_from_dict, access_id_to_acl, is_valid_domain, is_valid_url_or_path
+from core.lib import remove_none_from_dict, access_id_to_acl, is_valid_domain, is_valid_url_or_path, get_language_options
 from core.resolvers.query_site import get_site_settings
 from django.db import connection
 from django.core.cache import cache
@@ -269,6 +269,13 @@ def resolve_edit_site_setting(_, info, input):
             except ValueError:
                 raise GraphQLError(INVALID_VALUE)
         save_setting('WHITELISTED_IP_RANGES', clean_input.get('whitelistedIpRanges'))
+
+    if 'extraLanguages' in clean_input:
+        options = set((i['value'] for i in get_language_options()))
+        for language in clean_input.get('extraLanguages'):
+            if language not in options:
+                raise GraphQLError(INVALID_VALUE)
+        save_setting('EXTRA_LANGUAGES', clean_input.get('extraLanguages'))
 
     return {
         "siteSettings": get_site_settings()

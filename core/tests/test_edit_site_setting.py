@@ -43,6 +43,7 @@ class EditSiteSettingTestCase(FastTenantTestCase):
                 editSiteSetting(input: $input) {
                     siteSettings {
                         language
+                        extraLanguages
                         name
                         description
                         isClosed
@@ -183,6 +184,7 @@ class EditSiteSettingTestCase(FastTenantTestCase):
         variables = {
             "input": {
                 "language": "en",
+                "extraLanguages": ["nl"],
                 "name": "name2",
                 "description": "description2",
                 "isClosed": True,
@@ -304,6 +306,7 @@ class EditSiteSettingTestCase(FastTenantTestCase):
         data = result[1]["data"]
 
         self.assertEqual(data["editSiteSetting"]["siteSettings"]["language"], "en")
+        self.assertEqual(data["editSiteSetting"]["siteSettings"]["extraLanguages"], ["nl"])
         self.assertEqual(data["editSiteSetting"]["siteSettings"]["name"], "name2")
         self.assertEqual(data["editSiteSetting"]["siteSettings"]["description"], "description2")
         self.assertEqual(data["editSiteSetting"]["siteSettings"]["isClosed"], True)
@@ -702,3 +705,30 @@ class EditSiteSettingTestCase(FastTenantTestCase):
 
         self.assertEqual(data["editSiteSetting"]["siteSettings"]["walledGardenByIpEnabled"], True)
         self.assertEqual(data["editSiteSetting"]["siteSettings"]["enableSearchEngineIndexing"], False)
+
+    def test_edit_site_setting_invalid_extra_language(self):
+        mutation = """
+            mutation EditSiteSetting($input: editSiteSettingInput!) {
+                editSiteSetting(input: $input) {
+                    siteSettings {
+                        extraLanguages
+                    }
+                }
+            }
+        """
+
+        variables = {
+            "input": {
+                "extraLanguages": ['invalidlanguage']
+            }
+        }
+
+        request = HttpRequest()
+        request.user = self.admin
+        result = graphql_sync(schema, { "query": mutation, "variables": variables}, context_value={ "request": request })
+
+        self.assertTrue(result[0])
+
+        errors = result[1]["errors"]
+
+        self.assertEqual(errors[0]["message"], "invalid_value")
