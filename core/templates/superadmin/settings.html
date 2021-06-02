@@ -1,0 +1,44 @@
+{% extends "superadmin/base.html" %}
+
+{% load i18n %}
+
+{% block content %}
+
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+    <h1 class="h2">Settings</h1>
+</div>
+
+<p>Site settings for {{ config.NAME }}</p>
+
+<form method="post">
+    {% csrf_token %}
+    <div class="card">
+        <h5 class="card-header">Login Options</h5>
+        <div class="card-body">
+                {% for providerOption in config.OIDC_PROVIDER_OPTIONS %}
+                <div class="mb-2 form-check">
+                    <input type="checkbox" name="oidc_providers" value="{{ providerOption.value }}"
+                        {% if providerOption.value in config.OIDC_PROVIDERS %} checked {% endif %} />
+                    <label for="oidc_providers">{{ providerOption.label }}</label>
+                </div>
+                {% endfor %}
+                {{ form.errors.oidc_providers }}
+        </div>
+    </div>
+    <br>
+    <div class="card">
+        <h5 class="card-header">User</h5>
+        <div class="card-body">
+            <div class="mb-2 form-check">
+                <input type="checkbox" name="edit_user_name_enabled" id="edit_user_name_enabled" {% if config.EDIT_USER_NAME_ENABLED %} checked {% endif %} />
+                <label for="edit_user_name_enabled">Enable edit name</label>
+            </div>
+            {{ form.errors.edit_user_name_enabled }}
+        </div>
+    </div>
+
+    <br>
+    <button type="submit" class="btn btn-primary">Save</button>
+</form>
+
+{% endblock %}

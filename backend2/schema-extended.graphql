@@ -159,6 +159,8 @@ extend type Mutation {
   addAttachment(input: addAttachmentInput!): addAttachmentPayload
   """Toggle pinned on Entity"""
   toggleEntityIsPinned(input: toggleEntityIsPinnedInput!): toggleEntityIsPinnedPayload
+  """Edit username"""
+  editUserName(input: editUserNameInput!): editUserNamePayload
 }
 
 extend type Query {
@@ -244,7 +246,7 @@ extend input editSiteSettingInput {
   directRegistrationDomains: [String]
   profileSections: [ProfileSectionInput]
   onboardingEnabled: Boolean
-  enableSearchEngineIndexing: Boolean
+  searchEngineIndexingEnabled: Boolean
   onboardingForceExistingUsers: Boolean
   onboardingIntro: String
   limitedGroupAdd: Boolean
@@ -290,6 +292,7 @@ extend type Site {
   profileFields: [ProfileItem]
   onboardingEnabled: Boolean!
   onboardingIntro: String
+  editUserNameEnabled: Boolean!
 }
 
 type Redirect {
@@ -330,7 +333,7 @@ extend type SiteSettings {
   siteMembershipDeniedIntro: String
   idpId: String
   idpName: String
-  enableSearchEngineIndexing: Boolean!
+  searchEngineIndexingEnabled: Boolean!
   profileFieldValidators: [ProfileFieldValidator]
   flowEnabled: Boolean!
   flowSubtypes: [String]
@@ -339,6 +342,7 @@ extend type SiteSettings {
   flowCaseId: Int
   flowUserGuid: String
   iconAlt: String
+  editUserNameEnabled: Boolean!
 }
 
 extend input FeaturedInput {
@@ -420,4 +424,13 @@ input toggleEntityIsPinnedInput {
 
 type toggleEntityIsPinnedPayload {
   success: Boolean
+}
+
+input editUserNameInput {
+  guid: String!
+  name: String
+}
+
+type editUserNamePayload {
+  user: User
 }

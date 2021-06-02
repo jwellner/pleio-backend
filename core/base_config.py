@@ -130,6 +130,7 @@ DEFAULT_SITE_CONFIG = {
     'FLOW_TOKEN': ("", 'Flow token'),
     'FLOW_CASE_ID': (None, 'Flow case id'),
     'FLOW_USER_GUID': ("", 'Flow user guid'),
+    'EDIT_USER_NAME_ENABLED': (False, 'Allow users to change name')
 }
 """
 Default site configuration

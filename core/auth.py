@@ -109,8 +109,12 @@ class OIDCAuthBackend(OIDCAuthenticationBackend):
     def update_user(self, user, claims):
 
         user.external_id = claims.get('sub')
-        user.name = claims.get('name')
+
+        if not config.EDIT_USER_NAME_ENABLED:
+            user.name = claims.get('name')
+
         user.email = claims.get('email')
+
         # if user profile picture file exists, do not change to picture from account
         if claims.get('picture'):
             user.picture = claims.get('picture')
