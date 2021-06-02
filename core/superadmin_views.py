@@ -7,12 +7,27 @@ from django.shortcuts import redirect
 from django.views import View
 from core.tasks import elasticsearch_rebuild, replace_domain_links
 from core.lib import tenant_schema, is_valid_domain
-from core.superadmin.forms import LoginConfigForm
+from core.superadmin.forms import SettingsForm
 
 logger = logging.getLogger(__name__)
 
 
 class Dashboard(LoginRequiredMixin, UserPassesTestMixin, View):
+    http_method_names = ['get']
+
+    def test_func(self):
+        return self.request.user.is_superadmin
+
+    def handle_no_permission(self):
+        return redirect('/')
+
+    def get(self, request):
+        context = {
+        }
+
+        return render(request, 'superadmin/home.html', context)
+
+class Settings(LoginRequiredMixin, UserPassesTestMixin, View):
     http_method_names = ['post', 'get']
 
     def test_func(self):
@@ -22,18 +37,18 @@ class Dashboard(LoginRequiredMixin, UserPassesTestMixin, View):
         return redirect('/')
 
     def post(self, request):
-        form = LoginConfigForm(request.POST)
+        form = SettingsForm(request.POST)
         if form.is_valid():
             form.save()
-            return redirect('/superadmin')
+            return redirect('/superadmin/settings')
 
-        return render(request, 'superadmin/home.html', {'form': form})
+        return render(request, 'superadmin/settings.html', {'form': form})
 
     def get(self, request):
         context = {
         }
 
-        return render(request, 'superadmin/home.html', context)
+        return render(request, 'superadmin/settings.html', context)
 
 
 @login_required

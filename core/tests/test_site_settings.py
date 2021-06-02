@@ -59,7 +59,7 @@ class SiteSettingsTestCase(FastTenantTestCase):
                     defaultAccessId
                     googleAnalyticsId
                     googleSiteVerification
-                    enableSearchEngineIndexing
+                    searchEngineIndexingEnabled
                     piwikUrl
                     piwikId
 
@@ -261,7 +261,7 @@ class SiteSettingsTestCase(FastTenantTestCase):
         self.assertEqual(data["siteSettings"]["defaultAccessId"], 1)
         self.assertEqual(data["siteSettings"]["googleAnalyticsId"], "")
         self.assertEqual(data["siteSettings"]["googleSiteVerification"], "")
-        self.assertEqual(data["siteSettings"]["enableSearchEngineIndexing"], False)
+        self.assertEqual(data["siteSettings"]["searchEngineIndexingEnabled"], False)
         self.assertEqual(data["siteSettings"]["piwikUrl"], "https://stats.pleio.nl/")
         self.assertEqual(data["siteSettings"]["piwikId"], "")
 

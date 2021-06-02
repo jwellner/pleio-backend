@@ -100,6 +100,7 @@ class SiteTestCase(FastTenantTestCase):
                         category
                         fieldType
                     }
+                    editUserNameEnabled
                 }
             }
         """
@@ -142,6 +143,7 @@ class SiteTestCase(FastTenantTestCase):
 
         self.assertEqual(data["site"]["profileFields"][0]["key"], self.profileField1.key)
         self.assertEqual(data["site"]["profileFields"][1]["fieldType"], "dateField")
+        self.assertEqual(data["site"]["editUserNameEnabled"], config.EDIT_USER_NAME_ENABLED)
 
     def test_site_closed(self):
 
