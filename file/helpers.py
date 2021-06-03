@@ -1,5 +1,6 @@
 import mimetypes
 import logging
+import re
 from file.models import FileFolder
 from os import path
 from django.core.files.base import ContentFile
@@ -20,7 +21,7 @@ def get_download_filename(f):
 
         # guess_all_extensions does no init? -> https://github.com/python/cpython/blob/3.8/Lib/mimetypes.py#L160
         mimetypes.init()
-        # bug in guess_all_extensions where they convert all input to lowercase, 
+        # bug in guess_all_extensions where they convert all input to lowercase,
         # but the mimetype uses camelcase macroEnabled -> https://github.com/python/cpython/blob/3.8/Lib/mimetypes.py#L171
         mimetypes.add_type('application/vnd.ms-excel.sheet.macroenabled.12', '.xlsm')
 
@@ -33,6 +34,8 @@ def get_download_filename(f):
         # try add extension based on mimetype, else return title as name
         elif mimetypes.guess_extension(mime_type):
             filename = f.title + mimetypes.guess_extension(mime_type)
+
+    filename = re.sub(r'[^a-zA-Z0-9\-\._]', '-', filename)
 
     return filename
 
