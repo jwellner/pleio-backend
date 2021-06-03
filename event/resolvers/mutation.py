@@ -147,6 +147,8 @@ def resolve_add_event(_, info, input):
 
     entity.save()
 
+    entity.add_follow(user)
+
     return {
         "entity": entity
     }
