@@ -6,7 +6,7 @@ import json
 from django.contrib.auth.models import AnonymousUser
 from django.core.cache import cache
 from django.http import HttpRequest
-from core.models import Group
+from core.models import Group, Comment
 from user.models import User
 from question.models import Question
 from mixer.backend.django import mixer
@@ -30,6 +30,7 @@ class QuestionTestCase(FastTenantTestCase):
             is_closed=False
         )
 
+
         self.questionPrivate = Question.objects.create(
             title="Test private question",
             description="Description",
@@ -40,6 +41,13 @@ class QuestionTestCase(FastTenantTestCase):
             is_closed=False,
             is_featured=True
         )
+
+        self.comment1 = mixer.blend(Comment, container=self.questionPrivate)
+        self.comment2 = mixer.blend(Comment, container=self.questionPrivate)
+        self.comment3 = mixer.blend(Comment, container=self.questionPrivate)
+
+        self.questionPrivate.best_answer = self.comment2
+        self.questionPrivate.save()
 
         cache.set("%s%s" % (connection.schema_name, 'QUESTIONER_CAN_CHOOSE_BEST_ANSWER'), True)
 
@@ -233,3 +241,4 @@ class QuestionTestCase(FastTenantTestCase):
         self.assertEqual(data["entity"]["canChooseBestAnswer"], True)
         self.assertEqual(data["entity"]["owner"]["guid"], self.questionPrivate.owner.guid)
         self.assertEqual(data["entity"]["url"], "/questions/view/{}/{}".format(self.questionPrivate.guid, slugify(self.questionPrivate.title)))
+        self.assertEqual(data["entity"]["comments"][0]['guid'], self.comment2.guid)

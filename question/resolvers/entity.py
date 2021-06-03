@@ -1,4 +1,5 @@
 from ariadne import ObjectType
+from core import config
 from core.resolvers import shared
 
 question = ObjectType("Question")
@@ -54,6 +55,18 @@ def resolve_can_choose_best_answer(obj, info):
     # pylint: disable=unused-argument
     return obj.can_choose_best_answer(info.context["request"].user)
 
+@question.field("comments")
+def resolve_comments(obj, info):
+    # pylint: disable=unused-argument
+    comments = list(obj.comments.all())
+    if obj.best_answer and config.QUESTIONER_CAN_CHOOSE_BEST_ANSWER:
+        try:
+            comments.remove(obj.best_answer)
+            comments.insert(0, obj.best_answer)
+        except Exception:
+            pass
+    return comments
+
 
 question.set_field("guid", shared.resolve_entity_guid)
 question.set_field("status", shared.resolve_entity_status)
@@ -75,7 +88,6 @@ question.set_field("featured", shared.resolve_entity_featured)
 question.set_field("votes", shared.resolve_entity_votes)
 question.set_field("hasVoted", shared.resolve_entity_has_voted)
 question.set_field("canComment", shared.resolve_entity_can_comment)
-question.set_field("comments", shared.resolve_entity_comments)
 question.set_field("commentCount", shared.resolve_entity_comment_count)
 question.set_field("isFollowing", shared.resolve_entity_is_following)
 question.set_field("views", shared.resolve_entity_views)
