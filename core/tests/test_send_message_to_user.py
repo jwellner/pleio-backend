@@ -5,6 +5,7 @@ from django_tenants.test.cases import FastTenantTestCase
 from backend2.schema import schema
 from ariadne import graphql_sync
 import json
+from django.core.cache import cache
 from django.contrib.auth.models import AnonymousUser
 from django.http import HttpRequest
 from core.models import Group
@@ -20,6 +21,10 @@ class SendMessageToUserTestCase(FastTenantTestCase):
         self.anonymousUser = AnonymousUser()
         self.user1 = mixer.blend(User)
         self.user2 = mixer.blend(User)
+        self.user1.profile.language = 'en'
+        self.user1.profile.save()
+        cache.set("%s%s" % (connection.schema_name, 'EXTRA_LANGUAGES'), ['en'])
+
 
     def tearDown(self):
         self.user1.delete()
@@ -126,7 +131,7 @@ class SendMessageToUserTestCase(FastTenantTestCase):
         mocked_send_mail_multi.assert_called_once_with('fast_test', subject, 'email/send_message_to_user.html',
                                                        {'user_name': self.user1.name, 'user_url': user_url,
                                                         'site_url': 'https://tenant.fast-test.com', 'site_name': 'Pleio 2.0', 'primary_color': '#0e2f56',
-                                                        'header_color': '#0e2f56', 'message': '<p>testMessageContent</p>', 'subject': subject}, self.user2.email)
+                                                        'header_color': '#0e2f56', 'message': '<p>testMessageContent</p>', 'subject': subject}, self.user2.email, language='nl')
 
     @mock.patch('core.resolvers.mutation_send_message_to_user.send_mail_multi.delay')
     def test_call_send_email_with_copy_to_self(self, mocked_send_mail_multi):
@@ -156,13 +161,13 @@ class SendMessageToUserTestCase(FastTenantTestCase):
         mocked_send_mail_multi.assert_any_call('fast_test', subject, 'email/send_message_to_user.html',
                                                        {'user_name': self.user1.name, 'user_url': user_url,
                                                         'site_url': 'https://tenant.fast-test.com', 'site_name': 'Pleio 2.0', 'primary_color': '#0e2f56',
-                                                        'header_color': '#0e2f56', 'message': '<p>testMessageContent</p>', 'subject': subject}, self.user2.email)
+                                                        'header_color': '#0e2f56', 'message': '<p>testMessageContent</p>', 'subject': subject}, self.user2.email, language='nl')
 
-        subject_copy = 'Kopie: ' + subject
+        subject_copy = "Copy: Message from {0}: {1}".format(self.user1.name, 'testMessageSubject')
         mocked_send_mail_multi.assert_any_call('fast_test', subject_copy, 'email/send_message_to_user.html',
                                                        {'user_name': self.user1.name, 'user_url': user_url,
                                                         'site_url': 'https://tenant.fast-test.com', 'site_name': 'Pleio 2.0', 'primary_color': '#0e2f56',
-                                                        'header_color': '#0e2f56', 'message': '<p>testMessageContent</p>', 'subject': subject}, self.user1.email)
+                                                        'header_color': '#0e2f56', 'message': '<p>testMessageContent</p>', 'subject': subject}, self.user1.email, language='en')
 
     @mock.patch('core.resolvers.mutation_send_message_to_user.send_mail_multi.delay')
     def test_call_not_send_email_with_copy_to_self(self, mocked_send_mail_multi):
@@ -192,4 +197,4 @@ class SendMessageToUserTestCase(FastTenantTestCase):
         mocked_send_mail_multi.assert_called_once_with('fast_test', subject, 'email/send_message_to_user.html',
                                                        {'user_name': self.user1.name, 'user_url': user_url,
                                                         'site_url': 'https://tenant.fast-test.com', 'site_name': 'Pleio 2.0', 'primary_color': '#0e2f56',
-                                                        'header_color': '#0e2f56', 'message': '<p>testMessageContent</p>', 'subject': subject}, self.user2.email)
+                                                        'header_color': '#0e2f56', 'message': '<p>testMessageContent</p>', 'subject': subject}, self.user2.email, language='nl')

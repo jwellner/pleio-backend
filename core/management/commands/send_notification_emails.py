@@ -49,9 +49,11 @@ class Command(BaseCommand):
         users = User.objects.filter(is_active=True, _profile__receive_notification_email=True)
 
         show_excerpt = config.EMAIL_NOTIFICATION_SHOW_EXCERPT
-        subject = ugettext_lazy("New notifications at %(site_name)s") % {'site_name': config.NAME}
 
         for user in users:
+
+            translation.activate(user.get_language())
+            subject = ugettext_lazy("New notifications at %(site_name)s") % {'site_name': config.NAME}
 
             notifications = user.notifications.filter(emailed=False, verb__in=['created', 'commented'])[:5]
             # do not send mail when there are now new notifications

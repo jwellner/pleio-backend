@@ -43,6 +43,12 @@ class UserProfile(models.Model):
                                      blank=True, default=list)
     overview_email_last_received = models.DateTimeField(blank=True, null=True)
     receive_newsletter = models.BooleanField(default=False)
+    language = models.CharField(
+        max_length=10,
+        default=None,
+        blank=True,
+        null=True
+    )
 
     picture_file = models.ForeignKey(
         'file.FileFolder',

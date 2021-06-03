@@ -1,5 +1,6 @@
 from graphql import GraphQLError
 from django.core.exceptions import ObjectDoesNotExist
+from django.utils import translation
 from django.utils.translation import ugettext_lazy
 from core.models import Group
 from core.constances import NOT_LOGGED_IN, COULD_NOT_FIND, ALREADY_MEMBER_OF_GROUP
@@ -29,7 +30,6 @@ def resolve_join_group(_, info, input):
         group.join(user, 'member')
     else:
         group.join(user, 'pending')
-        subject = ugettext_lazy("Access request for the %(group_name)s group") % {'group_name': group.name}
         context = get_default_email_context(user)
         context['link'] = group_link
         context['group_name'] = group.name
@@ -37,7 +37,17 @@ def resolve_join_group(_, info, input):
 
         receiving_members = group.members.filter(type__in=['admin', 'owner'])
         for receiving_member in receiving_members:
-            send_mail_multi.delay(tenant_schema(), subject, 'email/join_group.html', context, receiving_member.user.email)
+            receiving_user = receiving_member.user
+            translation.activate(receiving_user.get_language())
+            subject = ugettext_lazy("Access request for the %(group_name)s group") % {'group_name': group.name}
+            send_mail_multi.delay(
+                tenant_schema(),
+                subject,
+                'email/join_group.html',
+                context,
+                receiving_user.email,
+                language=receiving_user.get_language()
+            )
 
     return {
         "group": group

@@ -1,6 +1,7 @@
 from graphql import GraphQLError
 from django.core.exceptions import ObjectDoesNotExist
 from django.utils.text import slugify
+from django.utils import translation
 from django.utils.translation import ugettext_lazy
 from core.models import Group, GroupMembership
 from user.models import User
@@ -38,6 +39,7 @@ def resolve_change_group_role(_, info, input):
 
     if clean_input.get("role") == "owner":
         schema_name = parse_tenant_config_path("")
+        translation.activate(changing_user.get_language())
         subject = ugettext_lazy("Ownership of the %(group_name)s group has been transferred") % {'group_name':group.name}
         link = get_base_url() + "/groups/view/{}/{}".format(group.guid, slugify(group.name))
 
@@ -57,7 +59,15 @@ def resolve_change_group_role(_, info, input):
             user_membership.save()
         except ObjectDoesNotExist:
             pass
-        send_mail_multi.delay(schema_name, subject, 'email/group_ownership_transferred.html', context, changing_user.email)
+
+        send_mail_multi.delay(
+            schema_name,
+            subject,
+            'email/group_ownership_transferred.html',
+            context,
+            changing_user.email,
+            language=changing_user.get_language()
+        )
 
     if clean_input.get("role") in ["member", "admin"]:
         try:

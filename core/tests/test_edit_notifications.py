@@ -1,12 +1,15 @@
 from django.conf import settings
+from django.core.cache import cache
 from django.db import connection
 from django_tenants.test.cases import FastTenantTestCase
+from django.utils import translation
 from backend2.schema import schema
 from ariadne import graphql_sync
 import json
 from django.contrib.auth.models import AnonymousUser
 from django.http import HttpRequest
 from core.models import Group
+from core.lib import get_language_options
 from user.models import User
 from mixer.backend.django import mixer
 from graphql import GraphQLError
@@ -22,7 +25,7 @@ class EditNotificationsTestCase(FastTenantTestCase):
         self.admin = mixer.blend(User)
         self.admin.roles = ['ADMIN']
         self.admin.save()
-
+        cache.set("%s%s" % (connection.schema_name, 'EXTRA_LANGUAGES'), ['en'])
 
     def tearDown(self):
         self.admin.delete()
@@ -37,6 +40,7 @@ class EditNotificationsTestCase(FastTenantTestCase):
                         guid
                         getsNewsletter
                         emailNotifications
+                        language
                         __typename
                     }
                     __typename
@@ -47,7 +51,8 @@ class EditNotificationsTestCase(FastTenantTestCase):
             "input": {
                 "guid": self.user1.guid,
                 "emailNotifications": True,
-                "newsletter": True
+                "newsletter": True,
+                "language": "en"
                 }
             }
 
@@ -62,6 +67,8 @@ class EditNotificationsTestCase(FastTenantTestCase):
         self.assertEqual(data["editNotifications"]["user"]["guid"], self.user1.guid)
         self.assertEqual(data["editNotifications"]["user"]["getsNewsletter"], True)
         self.assertEqual(data["editNotifications"]["user"]["emailNotifications"], True)
+        self.assertEqual(data["editNotifications"]["user"]["language"], "en")
+
 
     def test_edit_notifications_by_admin(self):
         mutation = """
@@ -71,6 +78,7 @@ class EditNotificationsTestCase(FastTenantTestCase):
                         guid
                         getsNewsletter
                         emailNotifications
+                        language
                         __typename
                     }
                     __typename
@@ -81,7 +89,8 @@ class EditNotificationsTestCase(FastTenantTestCase):
             "input": {
                 "guid": self.user1.guid,
                 "emailNotifications": True,
-                "newsletter": False
+                "newsletter": False,
+                "language": "en"
                 }
             }
 
@@ -96,6 +105,8 @@ class EditNotificationsTestCase(FastTenantTestCase):
         self.assertEqual(data["editNotifications"]["user"]["guid"], self.user1.guid)
         self.assertEqual(data["editNotifications"]["user"]["getsNewsletter"], False)
         self.assertEqual(data["editNotifications"]["user"]["emailNotifications"], True)
+        self.assertEqual(data["editNotifications"]["user"]["language"], "en")
+
 
     def test_edit_notifications_by_logged_in_user(self):
         mutation = """

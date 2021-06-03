@@ -1,11 +1,13 @@
 from graphql import GraphQLError
 from django.core.exceptions import ObjectDoesNotExist
-from core.constances import NOT_LOGGED_IN, COULD_NOT_FIND, COULD_NOT_SAVE, USER_ROLES
+from core.constances import NOT_LOGGED_IN, COULD_NOT_FIND, COULD_NOT_SAVE, USER_ROLES, INVALID_VALUE
 from user.models import User
-from core.lib import remove_none_from_dict
+from core.lib import remove_none_from_dict, get_language_options
+
 
 def resolve_edit_notifications(_, info, input):
     # pylint: disable=redefined-builtin
+    # TODO: refactor to edit user settings
 
     user = info.context["request"].user
     clean_input = remove_none_from_dict(input)
@@ -26,6 +28,12 @@ def resolve_edit_notifications(_, info, input):
 
     if 'newsletter' in clean_input:
         requested_user.profile.receive_newsletter = clean_input.get('newsletter')
+
+    if 'language' in clean_input:
+        if clean_input.get('language') in set((i['value'] for i in get_language_options())):
+            requested_user.profile.language = clean_input.get('language')
+        else:
+            raise GraphQLError(INVALID_VALUE)
 
     requested_user.profile.save()
 

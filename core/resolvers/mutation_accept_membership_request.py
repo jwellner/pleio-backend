@@ -1,5 +1,6 @@
 from graphql import GraphQLError
 from django.core.exceptions import ObjectDoesNotExist
+from django.utils import translation
 from django.utils.translation import ugettext_lazy
 from core.models import Group
 from user.models import User
@@ -35,6 +36,9 @@ def resolve_accept_membership_request(_, info, input):
 
     schema_name = parse_tenant_config_path("")
     group.join(requesting_user, 'member')
+
+    translation.activate(requesting_user.get_language())
+
     subject = ugettext_lazy("Request for access to the %(group_name)s group has been approved") % {'group_name': group.name}
     link = get_base_url() + group.url
 
@@ -42,7 +46,14 @@ def resolve_accept_membership_request(_, info, input):
     context['group_name'] = group.name
     context['link'] = link
 
-    send_mail_multi.delay(schema_name, subject, 'email/accept_membership_request.html', context, requesting_user.email)
+    send_mail_multi.delay(
+        schema_name,
+        subject,
+        'email/accept_membership_request.html',
+        context,
+        requesting_user.email,
+        language=requesting_user.get_language()
+    )
 
     return {
         "group": group
