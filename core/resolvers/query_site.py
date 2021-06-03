@@ -94,7 +94,7 @@ def get_site_settings():
 
         'googleAnalyticsId': config.GOOGLE_ANALYTICS_ID,
         'googleSiteVerification': config.GOOGLE_SITE_VERIFICATION,
-        'enableSearchEngineIndexing' : config.ENABLE_SEARCH_ENGINE_INDEXING,
+        'searchEngineIndexingEnabled' : config.ENABLE_SEARCH_ENGINE_INDEXING,
         'piwikUrl': config.PIWIK_URL,
         'piwikId': config.PIWIK_ID,
 
@@ -230,7 +230,8 @@ def get_site_settings():
         'flowAppUrl': config.FLOW_APP_URL,
         'flowToken': config.FLOW_TOKEN,
         'flowCaseId': config.FLOW_CASE_ID,
-        'flowUserGuid': config.FLOW_USER_GUID
+        'flowUserGuid': config.FLOW_USER_GUID,
+        'editUserNameEnabled': config.EDIT_USER_NAME_ENABLED
     }
 
     return site_settings

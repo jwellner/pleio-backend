@@ -56,7 +56,7 @@ class EditSiteSettingTestCase(FastTenantTestCase):
                         }
                         googleAnalyticsId
                         googleSiteVerification
-                        enableSearchEngineIndexing
+                        searchEngineIndexingEnabled
 
                         piwikUrl
                         piwikId
@@ -193,7 +193,7 @@ class EditSiteSettingTestCase(FastTenantTestCase):
                 "defaultAccessId": 0,
                 "googleAnalyticsId": "123",
                 "googleSiteVerification": "code1",
-                "enableSearchEngineIndexing": True,
+                "searchEngineIndexingEnabled": True,
 
                 "piwikUrl": "url3",
                 "piwikId": "id1",
@@ -295,7 +295,6 @@ class EditSiteSettingTestCase(FastTenantTestCase):
                 "flowCaseId": 1,
                 "flowUserGuid": self.admin.guid
 
-
             }
         }
 
@@ -316,7 +315,7 @@ class EditSiteSettingTestCase(FastTenantTestCase):
         self.assertEqual(data["editSiteSetting"]["siteSettings"]["defaultAccessIdOptions"], [{'value': 0, 'label': 'Alleen eigenaar'}, {'value': 1, 'label': 'Ingelogde gebruikers'}])
         self.assertEqual(data["editSiteSetting"]["siteSettings"]["googleAnalyticsId"], "123")
         self.assertEqual(data["editSiteSetting"]["siteSettings"]["googleSiteVerification"], "code1")
-        self.assertEqual(data["editSiteSetting"]["siteSettings"]["enableSearchEngineIndexing"], True)
+        self.assertEqual(data["editSiteSetting"]["siteSettings"]["searchEngineIndexingEnabled"], True)
 
         self.assertEqual(data["editSiteSetting"]["siteSettings"]["piwikUrl"], "url3")
         self.assertEqual(data["editSiteSetting"]["siteSettings"]["piwikId"], "id1")
@@ -683,7 +682,7 @@ class EditSiteSettingTestCase(FastTenantTestCase):
                 editSiteSetting(input: $input) {
                     siteSettings {
                         walledGardenByIpEnabled
-                        enableSearchEngineIndexing
+                        searchEngineIndexingEnabled
                     }
                 }
             }
@@ -704,7 +703,7 @@ class EditSiteSettingTestCase(FastTenantTestCase):
         data = result[1]["data"]
 
         self.assertEqual(data["editSiteSetting"]["siteSettings"]["walledGardenByIpEnabled"], True)
-        self.assertEqual(data["editSiteSetting"]["siteSettings"]["enableSearchEngineIndexing"], False)
+        self.assertEqual(data["editSiteSetting"]["siteSettings"]["searchEngineIndexingEnabled"], False)
 
     def test_edit_site_setting_invalid_extra_language(self):
         mutation = """
@@ -732,3 +731,5 @@ class EditSiteSettingTestCase(FastTenantTestCase):
         errors = result[1]["errors"]
 
         self.assertEqual(errors[0]["message"], "invalid_value")
+
+
