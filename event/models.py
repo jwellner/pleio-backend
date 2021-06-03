@@ -1,6 +1,6 @@
 from auditlog.registry import auditlog
 from django.db import models
-from core.models import Entity, CommentMixin, BookmarkMixin, NotificationMixin
+from core.models import Entity, CommentMixin, BookmarkMixin, NotificationMixin, FollowMixin
 from user.models import User
 from django.core.exceptions import ObjectDoesNotExist
 from django.utils.text import slugify
@@ -8,7 +8,7 @@ from django.utils import timezone
 from django.urls import reverse
 from file.models import FileFolder
 
-class Event(Entity, CommentMixin, BookmarkMixin, NotificationMixin):
+class Event(Entity, CommentMixin, BookmarkMixin, FollowMixin, NotificationMixin):
     class Meta:
         ordering = ['-created_at']
 
