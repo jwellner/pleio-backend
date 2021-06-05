@@ -27,7 +27,7 @@ python-memcached==1.59
 django-ses==1.0.3
 textract==1.6.3
 html2text==2020.1.16
-draftjs_exporter==v4.1.1
+draftjs_exporter==4.1.2
 django-widget-tweaks==1.4.8
 pydash==4.9.3
 django-signal-disabler==0.1.1
