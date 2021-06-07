@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-06-01 14:14+0200\n"
+"POT-Creation-Date: 2021-06-04 09:14+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -18,12 +18,20 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#: backend2/config.py:62 core/lib.py:288
+#: backend2/config.py:62 core/lib.py:290
 msgid "English"
 msgstr ""
 
-#: backend2/config.py:63 core/lib.py:288
+#: backend2/config.py:63 core/lib.py:289
 msgid "Dutch"
+msgstr ""
+
+#: backend2/config.py:64 core/lib.py:291
+msgid "German"
+msgstr ""
+
+#: backend2/config.py:65 core/lib.py:292
+msgid "French"
 msgstr ""
 
 #: core/forms.py:67
@@ -159,7 +167,7 @@ msgstr ""
 msgid "name"
 msgstr ""
 
-#: core/resolvers/mutation_invite_to_group.py:90
+#: core/resolvers/mutation_invite_to_group.py:91
 #, python-format
 msgid "Invitation to become a member of the %(group_name)s group"
 msgstr ""
@@ -184,7 +192,7 @@ msgstr ""
 msgid "Reminder to become a member of the %(group_name)s group"
 msgstr ""
 
-#: core/resolvers/mutation_send_message_to_group.py:57
+#: core/resolvers/mutation_send_message_to_group.py:56
 #, python-brace-format
 msgid "Message from group {0}: {1}"
 msgstr ""
