@@ -19,6 +19,7 @@ from django.core.cache import cache
 from django.template.loader import render_to_string
 from mixer.backend.django import mixer
 from notifications.signals import notify
+from core.lib import get_language_options
 
 
 class SiteSettingsTestCase(FastTenantTestCase):
@@ -255,7 +256,7 @@ class SiteSettingsTestCase(FastTenantTestCase):
         self.assertEqual(data["siteSettings"]["language"], "nl")
         self.assertEqual(data["siteSettings"]["extraLanguages"], [])
         self.assertEqual(data["siteSettings"]["description"], "Omschrijving site")
-        self.assertEqual(data["siteSettings"]["languageOptions"], [{'value': 'nl', 'label': 'Nederlands'}, {'value': 'en', 'label': 'Engels'}])
+        self.assertEqual(data["siteSettings"]["languageOptions"], get_language_options())
         self.assertEqual(data["siteSettings"]["isClosed"], False)
         self.assertEqual(data["siteSettings"]["allowRegistration"], True)
         self.assertEqual(data["siteSettings"]["directRegistrationDomains"], [])

@@ -60,7 +60,9 @@ LANGUAGE_CODE = 'nl-NL'
 
 LANGUAGES = [
     ('en', _('English')),
-    ('nl', _('Dutch'))
+    ('nl', _('Dutch')),
+    #('de', _('German')),
+    ('fr', _('French')),
 ]
 
 OIDC_RP_CLIENT_ID = os.getenv('OIDC_RP_CLIENT_ID')
