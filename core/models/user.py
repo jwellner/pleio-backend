@@ -223,6 +223,13 @@ class UserProfileField(models.Model):
 
         return self.value
 
+    @property
+    def value_list_field_indexing(self):
+        """Format value list according to type"""
+        if self.profile_field.field_type == "multi_select_field":
+            return self.value.split(',')
+        return []
+
     def __str__(self):
         return f"UserProfileField[{self.profile_field.name}]"
 
