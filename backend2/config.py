@@ -61,7 +61,7 @@ LANGUAGE_CODE = 'nl-NL'
 LANGUAGES = [
     ('en', _('English')),
     ('nl', _('Dutch')),
-    #('de', _('German')),
+    ('de', _('German')),
     ('fr', _('French')),
 ]
 

@@ -288,7 +288,7 @@ def get_language_options():
     return [
         {'value': 'nl', 'label': ugettext_lazy('Dutch')},
         {'value': 'en', 'label': ugettext_lazy('English')},
-        #{'value': 'de', 'label': ugettext_lazy('German')},
+        {'value': 'de', 'label': ugettext_lazy('German')},
         {'value': 'fr', 'label': ugettext_lazy('French')}
     ]
 
