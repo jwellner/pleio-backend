@@ -3,28 +3,28 @@
 # This file is distributed under the same license as the PACKAGE package.
 # FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
 #
-#, fuzzy
 msgid ""
 msgstr ""
-"Project-Id-Version: PACKAGE VERSION\n"
+"Project-Id-Version: Frans\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2021-06-08 14:20+0200\n"
-"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
-"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
-"Language-Team: LANGUAGE <LL@li.org>\n"
-"Language: \n"
+"PO-Revision-Date: 2021-05-28 17:19+0200\n"
+"Last-Translator: \n"
+"Language-Team: frans\n"
+"Language: fr\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"X-Generator: Poedit 2.4.3\n"
 
 #: backend2/config.py:62 core/lib.py:290
 msgid "English"
-msgstr "Engels"
+msgstr "Anglais"
 
 #: backend2/config.py:63 core/lib.py:289
 msgid "Dutch"
-msgstr "Nederlands"
+msgstr "Néerlandais"
 
 #: backend2/config.py:64 core/lib.py:291
 msgid "German"
@@ -36,249 +36,249 @@ msgstr ""
 
 #: core/forms.py:67
 msgid "Provide a valid value."
-msgstr "Voer een geldige waarde in."
+msgstr "Fournissez une valeur valide."
 
 #: core/lib.py:142 core/resolvers/mutation_import_users.py:30
 #: core/resolvers/query_site.py:67
 msgid "Just me"
-msgstr "Alleen eigenaar"
+msgstr "Juste moi"
 
 #: core/lib.py:145
 #, python-format
 msgid "Group: %(group_name)s"
-msgstr "Groep: %(group_name)s"
+msgstr "Groupe : %(group_name)s"
 
 #: core/lib.py:148
 #, python-format
 msgid "Subgroup: %(subgroup_name)s"
-msgstr "Subgroep: %(subgroup_name)s"
+msgstr "Sous-groupe : %(subgroup_name)s"
 
 #: core/lib.py:153 core/resolvers/mutation_import_users.py:31
 #: core/resolvers/query_site.py:68
 msgid "Logged in users"
-msgstr "Ingelogde gebruikers"
+msgstr "Utilisateurs connectés"
 
 #: core/lib.py:155 core/resolvers/mutation_import_users.py:34
 #: core/resolvers/query_site.py:72
 msgid "Public"
-msgstr "Iedereen (publiek zichtbaar)"
+msgstr "Public"
 
 #: core/lib.py:273
 msgid "Updates"
-msgstr ""
+msgstr "Mises à jour"
 
 #: core/lib.py:274
 msgid "Blogs"
-msgstr ""
+msgstr "Blogs"
 
 #: core/lib.py:275
 msgid "CMS pages"
-msgstr "CMS pagina's"
+msgstr "Pages SGC"
 
 #: core/lib.py:276
 msgid "Discussions"
-msgstr "Discussies"
+msgstr "Discussions"
 
 #: core/lib.py:277
 msgid "Events"
-msgstr "Agenda-items"
+msgstr "Événements"
 
 #: core/lib.py:278
 msgid "Files"
-msgstr "Bestanden"
+msgstr "Fichiers"
 
 #: core/lib.py:279
 msgid "News"
-msgstr "Nieuws"
+msgstr "Actualité"
 
 #: core/lib.py:280
 msgid "Polls"
-msgstr "Polls"
+msgstr "Sondages"
 
 #: core/lib.py:281
 msgid "Questions"
-msgstr "Vragen"
+msgstr "Questions"
 
 #: core/lib.py:282
 msgid "Tasks"
-msgstr "Taken"
+msgstr "Tâches"
 
 #: core/lib.py:283
 msgid "Wiki pages"
-msgstr "Wiki pagina's"
+msgstr "Wiki pages"
 
 #: core/lib.py:284
 msgid "Comments"
-msgstr "Reacties"
+msgstr "Commentaires"
 
 #: core/management/commands/send_notification_emails.py:56
 #, python-format
 msgid "New notifications at %(site_name)s"
-msgstr "Nieuwe notificaties op %(site_name)s"
+msgstr "Nouvelles notifications sur %(site_name)s"
 
 #: core/management/commands/send_overview_emails.py:93
 #, python-format
 msgid "Regular overview of %(site_name)s"
-msgstr "Periodiek overzicht van %(site_name)s"
+msgstr "Aperçu régulier de %(site_name)s"
 
 #: core/models/group.py:183
-#, fuzzy, python-format
-#| msgid "Group: %(group_name)s"
+#, python-format
 msgid "Welcome to %(group_name)s"
-msgstr "Welkom bij: %(group_name)s"
+msgstr "Bienvenue dans %(group_name)s"
 
 #: core/resolvers/mutation_accept_membership_request.py:42
 #, python-format
 msgid "Request for access to the %(group_name)s group has been approved"
-msgstr "Toegangsaanvraag voor de groep %(group_name)s goedgekeurd"
+msgstr "La demande d’accès au groupe %(group_name)s) a été approuvée"
 
 #: core/resolvers/mutation_change_group_role.py:43
 #, python-format
 msgid "Ownership of the %(group_name)s group has been transferred"
-msgstr "Eigenaarschap van de groep %(group_name)s overgedragen"
+msgstr "La propriété du groupe %(group_name)s a été transférée"
 
 #: core/resolvers/mutation_delete_user.py:39
 #: core/resolvers/mutation_handle_delete_account_request.py:42
 #, python-format
 msgid "Account of %(name_deleted_user)s removed"
-msgstr "Account verwijderd van %(name_deleted_user)s"
+msgstr "Compte de %(name_deleted_user)s supprimé"
 
 #: core/resolvers/mutation_delete_user.py:55
 #: core/resolvers/mutation_handle_delete_account_request.py:58
 #: core/resolvers/mutation_toggle_user_role.py:48
 #, python-format
 msgid "A site administrator was removed from %(site_name)s"
-msgstr "Een site beheerder is verwijderd van %(site_name)s"
+msgstr "Un administrateur de site a été supprimé de %(site_name)s"
 
 #: core/resolvers/mutation_handle_site_access_request.py:38
 #, python-format
 msgid "You are now member of: %(site_name)s"
-msgstr "Je hebt nu toegang tot: %(site_name)s"
+msgstr "Vous êtes désormais membre de : %(site_name)s"
 
 #: core/resolvers/mutation_handle_site_access_request.py:42
 #, python-format
 msgid "Membership request declined for: %(site_name)s"
-msgstr "Lidmaatschapsverzoek afgewezen voor: %(site_name)s"
+msgstr "Demande d’adhésion refusée pour : %(site_name)s"
 
 #: core/resolvers/mutation_import_users.py:17
 msgid "email"
-msgstr "e-mail"
+msgstr "courrier électronique"
 
 #: core/resolvers/mutation_import_users.py:18
 msgid "name"
-msgstr "naam"
+msgstr "nom"
 
 #: core/resolvers/mutation_invite_to_group.py:91
 #, python-format
 msgid "Invitation to become a member of the %(group_name)s group"
-msgstr "Uitnodiging om lid te worden van de groep %(group_name)s"
+msgstr "Invitation à devenir membre du groupe %(group_name)s"
 
 #: core/resolvers/mutation_invite_to_site.py:51
 #, python-format
 msgid "You are invited to join site %(site_name)s"
-msgstr "Je bent uitgenodigd om lid te worden van %(site_name)s"
+msgstr "Vous êtes invité à rejoindre le site %(site_name)s"
 
 #: core/resolvers/mutation_join_group.py:42
 #, python-format
 msgid "Access request for the %(group_name)s group"
-msgstr "Toegangsaanvraag voor de groep %(group_name)s"
+msgstr "Demande d’accès au groupe %(group_name)s"
 
 #: core/resolvers/mutation_reject_membership_request.py:42
 #, python-format
 msgid "Request for access to the %(group_name)s group has been refused"
-msgstr "Toegangsaanvraag voor de groep %(group_name)s afgewezen"
+msgstr "La demande d’accès au groupe %(group_name)s a été refusée"
 
 #: core/resolvers/mutation_resend_group_invitation.py:36
 #, python-format
 msgid "Reminder to become a member of the %(group_name)s group"
-msgstr "Herinnering om lid te worden van de groep %(group_name)s"
+msgstr "Rappel pour devenir membre du groupe %(group_name)s"
 
 #: core/resolvers/mutation_send_message_to_group.py:56
 #, python-brace-format
 msgid "Message from group {0}: {1}"
-msgstr "Bericht van groep {0}: {1}"
+msgstr "Message du groupe {0} : {1}"
 
 #: core/resolvers/mutation_send_message_to_user.py:31
 #, python-brace-format
 msgid "Message from {0}: {1}"
-msgstr "Bericht van {0}: {1}"
+msgstr "Message de {0} : {1}"
 
 #: core/resolvers/mutation_send_message_to_user.py:44
 #, python-brace-format
 msgid "Copy: Message from {0}: {1}"
-msgstr "Kopie: Bericht van {0}: {1}"
+msgstr "Copier : Message de {0} : {1}"
 
 #: core/resolvers/mutation_toggle_request_delete_user.py:36
 msgid "Request to remove account cancelled"
-msgstr "Verzoek om account te verwijderen geannuleerd"
+msgstr "Demande de suppression de compte annulée"
 
 #: core/resolvers/mutation_toggle_request_delete_user.py:50
 msgid "Request to remove account"
-msgstr "Verzoek om account te verwijderen"
+msgstr "Demande de suppression de compte"
 
 #: core/resolvers/mutation_toggle_user_role.py:59
 #, python-format
 msgid "Your site administrator rights for %(site_name)s were removed"
-msgstr "U bent niet langer site beheerder van %(site_name)s"
+msgstr ""
+"Vos droits d’administrateur de site pour %(site_name)s ont été supprimés"
 
 #: core/resolvers/mutation_toggle_user_role.py:80
 #, python-format
 msgid "A new site administrator was assigned for %(site_name)s"
-msgstr "Een nieuwe site beheerder is toegewezen aan %(site_name)s"
+msgstr "Un nouvel administrateur de site a été désigné pour %(site_name)s"
 
 #: core/resolvers/mutation_toggle_user_role.py:91
 #, python-format
 msgid "You're granted site administrator right on %(site_name)s"
-msgstr "U bent aangewezen als site beheerder van %(site_name)s"
+msgstr "Vous avez le droit d’administrateur de site sur %(site_name)s"
 
 #: core/resolvers/query_site.py:119
 msgid "Activity stream"
-msgstr "Activiteitenstroom"
+msgstr "Flux d’activité"
 
 #: core/resolvers/query_site.py:119
 msgid "CMS page"
-msgstr "CMS pagina"
+msgstr "Page SGC"
 
 #: core/resolvers/query_site.py:156
 msgid "Daily"
-msgstr "Dagelijks"
+msgstr "Quotidien"
 
 #: core/resolvers/query_site.py:157
 msgid "Weekly"
-msgstr "Wekelijks"
+msgstr "Hebdomadaire"
 
 #: core/resolvers/query_site.py:158
 msgid "Monthly"
-msgstr "Maandelijks"
+msgstr "Mensuel"
 
 #: core/resolvers/query_site.py:159
 msgid "Never"
-msgstr "Nooit"
+msgstr "Jamais"
 
 #: core/resolvers/query_site.py:208
 msgid "Administrator"
-msgstr "Beheerder"
+msgstr "Administrateur"
 
 #: core/resolvers/query_site.py:209
 msgid "Editor"
-msgstr "Redacteur"
+msgstr "Éditeur"
 
 #: core/resolvers/query_site.py:210
 msgid "Question expert"
-msgstr "Vraagexpert"
+msgstr "Expert en questions"
 
 #: core/tasks.py:276
 msgid "Import was a success"
-msgstr "Import afgerond"
+msgstr "Importation réussie"
 
 #: core/tasks.py:276
 msgid "Import failed"
-msgstr "Import mislukt"
+msgstr "Échec de l’importation"
 
 #: core/tasks.py:355
 #, python-format
 msgid "New notification at %(site_name)s: "
-msgstr "Nieuwe notificatie op %(site_name)s"
+msgstr "Nouvelle notification sur %(site_name)s : "
 
 #: core/templates/email/accept_membership_request.html:6
 #, python-format
@@ -287,9 +287,9 @@ msgid ""
 "%(group_name)s group. Follow the link below to go directly to the group:<br /"
 "><a href=\"%(link)s\">%(link)s</a> "
 msgstr ""
-"De beheerder %(user_name)s heeft jouw aanvraag tot de groep %(group_name)s "
-"goedgekeurd. Volg de onderstaande link om direct naar de groep te gaan:<br /"
-"><a href=\"%(link)s\">%(link)s</a>"
+"L’administrateur %(user_name)s a approuvé votre demande d’adhésion au groupe "
+"%(group_name)s. Suivez le lien ci-dessous pour accéder directement au "
+"groupe :<br /><a href=“%(link)s”>%(link)s</a> "
 
 #: core/templates/email/admin_user_deleted.html:6
 #, python-format
@@ -301,10 +301,10 @@ msgid ""
 "%(user_name)s.\n"
 msgstr ""
 "\n"
-"Hallo,\n"
+"Salut,<br><br>\n"
 "\n"
-"De beheerder %(name_deleted_user)s is verwijderd. Dit is gedaan door "
-"%(user_name)s.\n"
+"L’administrateur %(name_deleted_user)s est supprimé. Cette action a été "
+"menée par %(user_name)s.\n"
 
 #: core/templates/email/attend_event_without_account.html:5
 #, python-format
@@ -319,13 +319,12 @@ msgid ""
 "<a href=\"%(link)s\">%(link)s</a>\n"
 msgstr ""
 "\n"
-"Bevestig je aanmelding voor %(title)s.<br><br>\n"
+"Confirmez votre inscription à %(title)s.<br><br>\n"
+"Localisation : %(location)s<br>\n"
+"Date : %(start_date)s<br><br>\n"
+"Cliquez sur le lien ci-dessous pour confirmer.<br><br>\n"
 "\n"
-"Locatie: %(location)s<br>\n"
-"Datum: %(start_date)s<br><br>\n"
-"\n"
-"Klik op onderstaande link om te bevestigen. <br><br>\n"
-"<a href=\"%(link)s\">%(link)s</a>\n"
+"<a href=“%(link)s”>%(link)s</a>\n"
 
 #: core/templates/email/confirm_attend_event_without_account.html:5
 #, python-format
@@ -341,18 +340,19 @@ msgid ""
 "<a href=\"%(link)s\">%(link)s</a>\n"
 msgstr ""
 "\n"
-"Hierbij bevestigen we je aanmelding voor %(title)s.<br><br>\n"
+"Ceci est la confirmation de votre inscription à %(title)s.<br><br>\n"
+"Localisation : %(location)s<br>\n"
 "\n"
-"Locatie: %(location)s<br>\n"
-"Datum: %(start_date)s<br><br>\n"
+"Date : %(start_date)s<br><br>\n"
 "\n"
-"Klik op de onderstaande link om je aanmelding te bekijken of te wijzigen en "
-"om de afspraak in je agenda te zetten.  <br><br>\n"
-"<a href=\"%(link)s\">%(link)s</a>\n"
+"Cliquez sur le lien ci-dessous pour voir ou modifier votre inscription et "
+"pour ajouter ce rendez-vous à votre agenda.<br><br>\n"
+"\n"
+"<a href=“%(link)s”>%(link)s</a>\n"
 
 #: core/templates/email/entities/blog.html:27
 msgid "Blog created by"
-msgstr "Blog gemaakt door"
+msgstr "Blog créé par"
 
 #: core/templates/email/entities/blog.html:27
 #: core/templates/email/entities/event.html:19
@@ -360,25 +360,23 @@ msgstr "Blog gemaakt door"
 #: core/templates/email/entities/question.html:19
 #: core/templates/email/entities/wiki.html:19
 msgid "on"
-msgstr "op"
+msgstr "sur"
 
 #: core/templates/email/entities/event.html:19
 msgid "Agenda item created by"
-msgstr "Agenda-item gemaakt door"
+msgstr "Événement créé dans l’agenda par"
 
 #: core/templates/email/entities/news.html:33
-#, fuzzy
-#| msgid "News added on"
 msgid "News added by"
-msgstr "Nieuws geplaatst door"
+msgstr "Actualité ajoutée par"
 
 #: core/templates/email/entities/question.html:19
 msgid "Question asked by"
-msgstr "Vraag gesteld door"
+msgstr "Question posée par"
 
 #: core/templates/email/entities/wiki.html:19
 msgid "Wiki created by"
-msgstr "Wiki gemaakt door"
+msgstr "Wiki créé par"
 
 #: core/templates/email/group_ownership_transferred.html:6
 #, python-format
@@ -387,9 +385,8 @@ msgid ""
 "%(group_name)s to you. View the group at: <br /><a href=\"%(link)s\">"
 "%(link)s</a> "
 msgstr ""
-"De beheerder %(user_name)s heeft het eigenaarschap van de groep "
-"%(group_name)s aan jou overgedragen. Bekijk de groep op: <br /><a href="
-"\"%(link)s\">%(link)s</a> "
+"L’administrateur %(user_name)s vous a transféré la propriété du groupe "
+"%(group_name)s. Voir le groupe sur : <br /><a href=“%(link)s”>%(link)s</a> "
 
 #: core/templates/email/invite_to_group.html:6
 #, python-format
@@ -398,9 +395,9 @@ msgid ""
 "Follow the link below to become a member of the group: <br /><a href="
 "\"%(link)s\">%(link)s</a> "
 msgstr ""
-"Je bent uitgenodigd door %(user_name)s om lid te worden van de groep "
-"%(group_name)s. Volg de onderstaande link om lid te worden van de groep: "
-"<br /><a href=\"%(link)s\">%(link)s</a> "
+"Vous avez été invité par %(user_name)s à rejoindre le groupe %(group_name)s "
+"Suivez le lien ci-dessous pour devenir membre du groupe : <br /><a "
+"href=“%(link)s”>%(link)s</a> "
 
 #: core/templates/email/invite_to_site.html:6
 #, python-format
@@ -409,9 +406,9 @@ msgid ""
 "Follow the link below to become a member of the site: <br /><a href="
 "\"%(link)s\">%(link)s</a> "
 msgstr ""
-"Je bent uitgenodigd door %(user_name)s om lid te worden van de site "
-"%(site_name)s. Volg de onderstaande link om lid te worden van de site: <br /"
-"><a href=\"%(link)s\">%(link)s</a> "
+"Vous avez été invité par %(user_name)s à rejoindre le site %(site_name)s. "
+"Suivez le lien ci-dessous pour devenir membre du site : <br /><a "
+"href=“%(link)s”>%(link)s</a> "
 
 #: core/templates/email/join_group.html:6
 #, python-format
@@ -420,13 +417,13 @@ msgid ""
 "the group %(group_name)s. Follow the link below to become a member of the "
 "group: <br /><a href=\"%(link)s\">%(link)s</a> "
 msgstr ""
-"De gebruiker %(user_name)s (%(user_obfuscated_email)s) heeft toegang "
-"aangevraagd tot de groep %(group_name)s. Volg de onderstaande link om lid te "
-"worden van de groep:  <br /><a href=\"%(link)s\">%(link)s</a> "
+"L’utilisateur %(user_name)s (%(user_obfuscated_email)s) a demandé l’accès au "
+"groupe %(group_name)s. Suivez le lien ci-dessous pour devenir membre du "
+"groupe :  <br /><a href=“%(link)s”>%(link)s</a> "
 
 #: core/templates/email/notifications/blog.html:3
 msgid " has posted a new Blog: "
-msgstr " heeft een nieuw Blog gemaakt "
+msgstr " a publié un nouveau Blog : "
 
 #: core/templates/email/notifications/blog.html:9
 #: core/templates/email/notifications/discussion.html:9
@@ -435,27 +432,27 @@ msgstr " heeft een nieuw Blog gemaakt "
 #: core/templates/email/notifications/update.html:10
 #: core/templates/email/notifications/wiki.html:9
 msgid " has responded at: "
-msgstr " heeft gereageerd op "
+msgstr "a répondu à: "
 
 #: core/templates/email/notifications/discussion.html:3
 msgid " has begun a new Discussion: "
-msgstr " is een nieuwe Discussie gestart "
+msgstr " a répondu à : "
 
 #: core/templates/email/notifications/event.html:3
 msgid " has posted a new Agenda item: "
-msgstr " heeft een nieuw Agenda-item gemaakt "
+msgstr " a publié un nouvel événement dans l’Agenda : "
 
 #: core/templates/email/notifications/question.html:3
 msgid " has posted a Question: "
-msgstr " heeft een Vraag gesteld "
+msgstr " a publié une Question :  "
 
 #: core/templates/email/notifications/update.html:3
 msgid " has placed an Update: "
-msgstr " heeft een Update geplaatst "
+msgstr " a placé une Mise à jour :  "
 
 #: core/templates/email/notifications/wiki.html:3
 msgid " has posted a new Wiki: "
-msgstr " heeft een nieuwe Wiki gemaakt "
+msgstr " a publié un nouveau Wiki :  "
 
 #: core/templates/email/reject_membership_request.html:6
 #, python-format
@@ -463,8 +460,8 @@ msgid ""
 "The administrator %(user_name)s has rejected your request to join the "
 "%(group_name)s group. Contact the administrator for more information. "
 msgstr ""
-"De beheerder %(user_name)s heeft jouw aanvraag tot de groep %(group_name)s "
-"afgewezen. Neem contact op met de beheerder voor meer informatie."
+"L’administrateur %(user_name)s a refusé votre demande d’adhésion au groupe "
+"%(group_name)s. Contacter l’administrateur pour plus d’information. "
 
 #: core/templates/email/resend_group_invitation.html:6
 #, python-format
@@ -473,9 +470,9 @@ msgid ""
 "group. Follow the link below to become a member of the group: <br /><a href="
 "\"%(link)s\">%(link)s</a> "
 msgstr ""
-"Je bent nogmaals uitgenodigd door %(user_name)s om lid te worden van de "
-"groep %(group_name)s. Volg de onderstaande link om lid te worden van de "
-"groep: <br /><a href=\"%(link)s\">%(link)s</a> "
+"Vous avez été invité à nouveau par %(user_name)s à rejoindre le groupe "
+"%(group_name)s. Suivez le lien ci- dessous pour devenir membre du groupe : "
+"<br /><a href=“%(link)s”>%(link)s</a> "
 
 #: core/templates/email/send_message_to_group.html:6
 #: core/templates/email/send_message_to_user.html:6
@@ -484,8 +481,8 @@ msgid ""
 "This message is sent from <a href=\"%(site_url)s\">%(site_url)s</a> by <a "
 "href=\"%(user_url)s\">%(user_name)s</a>"
 msgstr ""
-"Dit bericht is verstuurd van <a href=\"%(site_url)s\">%(site_url)s</a> door "
-"<a href=\"%(user_url)s\">%(user_name)s</a>"
+"Ce message est envoyé depuis <a href=“%(site_url)s”>%(site_url)s</a> par <a "
+"href=“%(user_url)s”>%(user_name)s</a>"
 
 #: core/templates/email/send_message_to_group.html:8
 #: core/templates/email/send_message_to_user.html:8
@@ -494,8 +491,7 @@ msgid ""
 "Respond by clicking <a href=\"%(user_url)s/reply?subject=%(subject)s\">here</"
 "a>"
 msgstr ""
-"Reageer door <a href=\"%(user_url)s/reply?subject=%(subject)s\">hier</a> te "
-"klikken"
+"Répondez en cliquant <a href=“%(user_url)s/reply?subject=%(subject)s”>ici</a>"
 
 #: core/templates/email/send_notification_emails.html:37
 #, python-format
@@ -504,23 +500,24 @@ msgid ""
 "notifications.<br /> Click <a href=\"%(user_url)s\">here</a> to change your "
 "settings."
 msgstr ""
-" Je ontvangt deze e-mail omdat je aangemeld bent voor de notificaties.<br /> "
-"Klik <a href=\"%(user_url)s\">hier</a> om je instellingen aan te passen."
+" Vous avez reçu ce courrier électronique car vous avez demandé de recevoir "
+"les notifications.<br /> Cliquez<a href=“%(user_url)s”>ici</a> pour modifier "
+"vos paramètres."
 
 #: core/templates/email/send_overview_emails.html:29
 #, python-format
 msgid "%(featured_title)s"
-msgstr ""
+msgstr "%(featured_title)s"
 
 #: core/templates/email/send_overview_emails.html:78
 #, python-format
 msgid "For all new messages visit %(site_name)s"
-msgstr "Voor alle nieuwe berichten bekijk %(site_name)s"
+msgstr "Pour tous les nouveaux messages, rendez-vous sur %(site_name)s"
 
 #: core/templates/email/send_overview_emails.html:93
 #, python-format
 msgid "Go to %(site_name)s"
-msgstr "Ga naar %(site_name)s"
+msgstr "Rendez-vous sur %(site_name)s"
 
 #: core/templates/email/send_overview_emails.html:114
 #, python-format
@@ -529,8 +526,9 @@ msgid ""
 "notifications.<br /> Click <a href=\"%(user_url)s\">here</a> to change your "
 "settings."
 msgstr ""
-"Je ontvangt deze e-mail omdat je aangemeld bent voor de notificaties.<br /> "
-"Klik <a href=\"%(user_url)s\">hier</a> om je instellingen aan te passen."
+"Vous avez reçu ce courrier électronique car vous avez demandé de recevoir "
+"les notifications.<br /> Cliquez<a href=“%(user_url)s”>ici</a> pour modifier "
+"vos paramètres."
 
 #: core/templates/email/site_access_request.html:5
 #, python-format
@@ -544,13 +542,13 @@ msgid ""
 "\n"
 "<a href=\"%(site_admin_url)s\">%(site_admin_url)s</a>\n"
 msgstr ""
-"Beste %(admin_name)s,<br><br>\n"
+"Salut %(admin_name)s,<br><br>\n"
+"Une personne du nom %(request_name)s a réalisé une demande d’accès à "
+"%(site_name)s.<br><br>\n"
 "\n"
-"%(request_name)s heeft toegang aangevraagd tot %(site_name)s .<br><br>\n"
+"Pour examiner la demande, veuillez vous rendre sur :<br><br>\n"
 "\n"
-"Ga naar de volgende link om de aanvraag af te handelen:<br><br>\n"
-"\n"
-"<a href=\"%(site_admin_url)s\">%(site_admin_url)s</a>\n"
+"<a href=“%(site_admin_url)s”>%(site_admin_url)s</a>\n"
 
 #: core/templates/email/site_access_request_accepted.html:7
 #, python-format
@@ -563,14 +561,11 @@ msgid ""
 "    %(site_url)s<br>\n"
 "    "
 msgstr ""
-"Beste %(request_name)s, <br><br>\n"
+"Salut %(request_name)s, <br><br>\n"
 "\n"
-"      De beheerder heeft het verzoek tot lidmaatschap goedgekeurd. Je hebt "
-"nu toegang tot %(site_name)s .Volg de onderstaande link om direct naar de "
-"site te gaan:<br><br>\n"
-"\n"
-"    %(site_url)s<br>\n"
-"    "
+"L’administrateur a approuvé votre demande d’accès à %(site_name)s. Cliquez "
+"sur ce lien pour accéder au site :<br><br>\n"
+"%(site_url)s<br> "
 
 #: core/templates/email/site_access_request_denied.html:6
 #, python-format
@@ -581,11 +576,11 @@ msgid ""
 "your membership request. Please contact the administrator if you think this "
 "is a mistake."
 msgstr ""
-"Beste %(request_name)s, <br><br>\n"
+"Salut %(request_name)s, <br><br>\n"
 "\n"
-"    Helaas heeft de site-beheerder van %(site_name)s je lidmaatschapsverzoek "
-"afgewezen.Indien je denkt dat dit een vergissing is neem dan contact op met "
-"de site-beheerder. "
+"Malheureusement l’administrateur du site %(site_name)s a décidé de refuser "
+"votre demande d’adhésion. Veuillez contacter l’administrateur si vous pensez "
+"qu’il s’agit d’une erreur."
 
 #: core/templates/email/toggle_request_delete_user_cancelled.html:6
 #, python-format
@@ -593,8 +588,8 @@ msgid ""
 "You, as <strong> %(user_name)s </strong> user, have cancelled your request "
 "to remove your account. "
 msgstr ""
-"Je hebt als gebruiker <strong> %(user_name)s </strong> het verzoek om je "
-"account te laten verwijderen geannuleerd."
+"En tant qu’utilisateur de <strong> %(user_name) s </strong>, vous avez "
+"annulé votre demande de suppression de votre compte. "
 
 #: core/templates/email/toggle_request_delete_user_requested.html:6
 #, python-format
@@ -603,9 +598,9 @@ msgid ""
 "account be removed. You will be informed once the website administrator has "
 "done so. "
 msgstr ""
-"Je hebt als gebruiker <strong>%(user_name)s</strong> verzocht aan de "
-"deelsitebeheerders om je account te laten verwijderen. Wanneer de "
-"deelsitebeheerder dit heeft doorgevoerd, ontvang je hierover bericht. "
+"En tant qu’utilisateur, <strong>%(user_name)s</strong> vous avez demandé la "
+"suppression de votre compte. Vous serez informé lorsque l’administrateur du "
+"site aura exécuté votre demande. "
 
 #: core/templates/email/user_deleted.html:6
 #, python-format
@@ -622,15 +617,16 @@ msgid ""
 "for more information.\n"
 msgstr ""
 "\n"
-"Beste %(name_deleted_user)s,<br><br> Je lidmaatschap van <a href="
-"\"%(site_url)s\">%(site_url)s</a> is opgezegd door de beheerder.<br><br>\n"
+"Cher/Chère %(name_deleted_user)s,<br><br> Votre adhésion à <a "
+"href=“%(site_url)s”>%(site_url)s</a> a été annulée par l’administrateur."
+"<br><br>\n"
+"Votre profil, vos paramètres et vos articles sauvegardés ont été supprimés "
+"du site et votre contenu a été rendu anonyme.<br><br>\n"
 "\n"
-"Je profiel, instellingen en bewaarde items zijn verwijderd van de site en "
-"jouw content is geanonimiseerd.<br><br>\n"
 "\n"
-"Je Pleio-acount blijft bestaan evenals je lidmaatschap van eventuele andere "
-"sites. Zie <a href=\"https://account.pleio.nl\">account.pleio.nl</a> voor "
-"meer informatie.\n"
+"Votre compte Pleio continuera d’exister, tout comme votre adhésion à tout "
+"autre site. Rendez-vous sur <a href=“https://account.pleio.nl”>account.pleio."
+"nl</a> pour plus d’informations.\n"
 
 #: core/templates/email/user_import_failed.html:6
 #, python-format
@@ -642,6 +638,15 @@ msgid ""
 "\n"
 "<p>%(error_message)s</p>\n"
 msgstr ""
+"\n"
+"<p>Cher/Chère %(user_name)s,</p>\n"
+"\n"
+"<p>L’importation des utilisateurs a échoué. Voici le message d’erreur du "
+"serveur :</p>\n"
+"\n"
+"\n"
+"\n"
+"<p>%(error_message)s</p>\n"
 
 #: core/templates/email/user_import_success.html:6
 #, python-format
@@ -657,6 +662,20 @@ msgid ""
 "    <li>%(stats_error)s users failed</li>\n"
 "</ul>\n"
 msgstr ""
+"\n"
+"<p>Cher/Chère %(user_name)s,</p>\n"
+"\n"
+"<p>L’importation des utilisateurs a réussi. Voici les statistiques :</p>\n"
+"\n"
+"<ul>\n"
+"\n"
+"<li>%(stats_created)s utilisateurs ajoutés</li>\n"
+"\n"
+"<li>%(stats_updated)s utilisateurs mis à jour</li>\n"
+"\n"
+"<li>%(stats_error)s utilisateurs échec</li>\n"
+"\n"
+"</ul>\n"
 
 #: core/templates/email/user_role_admin_assigned_for_admins.html:6
 #, python-format
@@ -670,14 +689,17 @@ msgid ""
 "If you believe this was done in error, please login here %(site_url)s and "
 "undo this action.\n"
 msgstr ""
-"Hallo,<br><br>\n"
+"Salut,<br><br>\n"
 "\n"
-"De gebruiker %(name_of_user_admin_role_changed)s is aangewezen als nieuwe "
-"site beheerder door %(user_name)s.<br>\n"
-"Bekijk het profiel van de gebruiker hier: %(link)s .<br><br>\n"
 "\n"
-"Indien deze wijziging ongewenst is, kunt u zich hier %(site_url)s aanmelden "
-"om het ongedaan maken.\n"
+"\n"
+"L’utilisateur %(name_of_user_admin_role_changed)s a été désigné par "
+"%(user_name)s en tant que nouvel administrateur du site.<br>\n"
+"\n"
+"Consultez le profil du nouvel administrateur du site ici %(link)s .<br><br>\n"
+"\n"
+"Si vous pensez qu’il s’agit d’une erreur, veuillez vous connecter ici "
+"%(site_url)s et annulez cette action.\n"
 
 #: core/templates/email/user_role_admin_assigned_for_user.html:6
 #, python-format
@@ -691,15 +713,18 @@ msgid ""
 "If you believe this was done in error, please contact one of the other site "
 "administrators.\n"
 msgstr ""
-"Hallo %(name_of_user_admin_role_changed)s,<br><br>\n"
+"Salut %(name_of_user_admin_role_changed)s,<br><br>\n"
 "\n"
-"U bent aangewezen als site beheerder door %(user_name)s.<br><br>\n"
 "\n"
-"U kunt gebruik maken van uw nieuwe rechten door u hier aan te melden: "
-"%(site_url)s.<br><br>\n"
 "\n"
-"Indien deze wijziging ongewenst is, kunt u contact opnemen met een van de "
-"andere site beheerders.\n"
+"Vous avez été désigné comme nouvel administrateur de site par %(user_name)s."
+"<br><br>\n"
+"\n"
+"Profitez de vos nouveaux droits en vous connectant ici %(site_url)s."
+"<br><br>\n"
+"\n"
+"Si vous pensez qu’il s’agit d’une erreur, veuillez contacter l’un des autres "
+"administrateurs du site.\n"
 
 #: core/templates/email/user_role_admin_removed_for_admins.html:6
 #, python-format
@@ -713,14 +738,18 @@ msgid ""
 "If you believe this was done in error, please login here %(site_url)s and "
 "undo this action.\n"
 msgstr ""
-"Hallo,<br><br>\n"
+"Salut,<br><br>\n"
 "\n"
-"De gebruiker %(name_of_user_admin_role_changed)s is niet langer een site "
-"beheerder. Dit is gedaan door %(user_name)s.<br>\n"
-"Bekijk het profiel van de gebruiker hier: %(link)s.<br><br>\n"
 "\n"
-"Indien deze wijziging ongewenst is, kunt u zich hier %(site_url)s aanmelden "
-"om het ongedaan maken.\n"
+"\n"
+"L’utilisateur %(name_of_user_admin_role_changed)s n’est plus administrateur "
+"du site. Cette action a été réalisée par %(user_name)s.<br>\n"
+"\n"
+"Consultez le profile de l’ancien administrateur du site ici %(link)s."
+"<br><br>\n"
+"\n"
+"Si vous pensez qu’il s’agit d’une erreur, veuillez vous connecter ici "
+"%(site_url)s et annulez cette action.\n"
 
 #: core/templates/email/user_role_admin_removed_for_user.html:6
 #, python-format
@@ -732,122 +761,98 @@ msgid ""
 "If you believe this was done in error, please contact one of the other site "
 "administrators.\n"
 msgstr ""
-"Hallo %(name_of_user_admin_role_changed)s,<br><br>\n"
+"Salut %(name_of_user_admin_role_changed)s,<br><br>\n"
 "\n"
-"Uw site beheerder rechten zijn afgenomen door %(user_name)s.<br><br>\n"
+"Votre statut d’administrateur de site a été supprimé par %(user_name)s."
+"<br><br>\n"
 "\n"
-"Indien deze wijziging ongewenst is, kunt u contact opnemen met een van de "
-"andere site beheerders.\n"
+"Si vous pensez qu’il s’agit d’une erreur, veuillez contacter l’un des autres "
+"administrateurs du site.\n"
 
 #: core/templates/onboarding.html:14
 msgid ""
 "Your profile is missing some fields. We kindly ask you to fill in these "
 "details."
 msgstr ""
-"In je profiel ontbreken een aantal velden. We vragen je vriendelijk deze "
-"velden in te vullen."
+"Certains champs de votre profil sont incomplets. Veuillez compléter ces "
+"données."
 
 #: core/templates/onboarding.html:59
 msgid "Continue"
-msgstr "Ga verder"
+msgstr "Continuer"
 
 #: core/templates/registration/login.html:15
 msgid "This site is closed. Log in to get access."
-msgstr "Deze site is besloten. Log in om toegang te krijgen."
+msgstr "Ce site est fermé. Connectez-vous pour accéder."
 
 #: core/templates/registration/login.html:25
 msgid "or"
-msgstr "of"
+msgstr "ou"
 
 #: core/templates/registration/login.html:30
 #, python-format
 msgid "Log in using %(oidc_provider)s"
-msgstr "Log in met %(oidc_provider)s"
+msgstr "Connectez-vous en utilisant %(oidc_provider)s"
 
 #: core/templates/registration/login.html:36
 msgid "Don't have an account?"
-msgstr "Nog geen account?"
+msgstr "Vous n’avez pas de compte ?"
 
 #: core/templates/registration/login.html:36
 msgid "Register"
-msgstr "Registreer"
+msgstr "S’inscrire"
 
 #: core/templates/registration/request.html:18
 msgid "Request access"
-msgstr "Toegang aanvragen"
+msgstr "Demander l’accès"
 
 #: core/templates/registration/request.html:20
 msgid ""
 "To enter this site, you must request access from the admin. Click the button "
 "to request access."
 msgstr ""
-"Om toegang tot deze site te krijgen dient u toestemming te hebben van de "
-"beheerder. Vraag toestemming aan door op de knop hieronder te drukken."
+"Pour accéder à ce site, vous devez demander l’accès à l’administrateur.  "
+"Cliquez sur l’onglet pour demander l’accès."
 
 #: core/templates/registration/request.html:23
 msgid "Name"
-msgstr "Naam"
+msgstr "Nom"
 
 #: core/templates/registration/request.html:27
 msgid "Emailaddress"
-msgstr "E-mailadres"
+msgstr "Adresse électronique"
 
 #: core/templates/registration/request.html:32
 msgid "Request Access"
-msgstr "Toegang aanvragen"
+msgstr "Demander l’accès"
 
 #: core/templates/registration/request.html:33
 #: core/templates/registration/requested.html:17
 msgid "Logout"
-msgstr "Uitloggen"
+msgstr "Se déconnecter"
 
 #: core/templates/registration/requested.html:11
 msgid "Requested access"
-msgstr "Toegang aangevraagd"
+msgstr "Accès demandé"
 
 #: core/templates/registration/requested.html:13
 msgid ""
 "Access is requested. You will receive an e-mail when the request is accepted."
 msgstr ""
-"De toegang is aangevraagd. Je ontvangt een e-mail wanneer de toegang door de "
-"beheerder wordt toegewezen."
+"L’accès est demandé. Vous recevrez un courrier électronique lorsque l’accès "
+"sera accepté."
 
 #: core/views.py:159
 #, python-format
 msgid "New access request for %(site_name)s"
-msgstr "Nieuwe toegangsaanvraag voor %(site_name)s"
+msgstr "Nouvelle demande d’accès à %(site_name)s"
 
 #: event/resolvers/mutation_attend_event_without_account.py:31
 #, python-format
 msgid "Confirmation of registration %s"
-msgstr "Bevestiging aanmelding %s"
+msgstr "Confirmation de l’inscription %s"
 
 #: event/resolvers/mutation_confirm_attend_event_without_account.py:51
 #, python-format
 msgid "Confirmation of registration for %s"
-msgstr "Bevestiging aanmelding voor %s"
-
-#~ msgid "Log in using Pleio Account"
-#~ msgstr "Log in met Pleio Account"
-
-#~ msgid "Save"
-#~ msgstr "Opslaan"
-
-#~ msgid "Please correct the error below."
-#~ msgstr "Corrigeer de onderstaande fout."
-
-#~ msgid "Please correct the errors below."
-#~ msgstr "Corrigeer de onderstaande fouten."
-
-#~ msgid ""
-#~ "You are authenticated as %(username)s, but are not authorized to access "
-#~ "this page."
-#~ msgstr ""
-#~ "U bent geauthenticeerd als %(username) s, maar bent niet gemachtigd om "
-#~ "toegang te krijgen tot deze pagina."
-
-#~ msgid "Please click on the button to login."
-#~ msgstr "Klik op de knop om in te loggen."
-
-#~ msgid "Log in"
-#~ msgstr "Inloggen"
+msgstr "Confirmation de l’inscription %s"

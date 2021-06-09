@@ -284,6 +284,14 @@ def get_exportable_content_types():
         {"value": "comment", "label": ugettext_lazy("Comments")}
     ]
 
+def get_language_options():
+    return [
+        {'value': 'nl', 'label': ugettext_lazy('Dutch')},
+        {'value': 'en', 'label': ugettext_lazy('English')},
+        {'value': 'de', 'label': ugettext_lazy('German')},
+        {'value': 'fr', 'label': ugettext_lazy('French')}
+    ]
+
 def tenant_schema():
     return connection.schema_name
 

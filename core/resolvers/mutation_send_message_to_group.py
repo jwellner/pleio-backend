@@ -2,6 +2,7 @@ from graphql import GraphQLError
 from django.core.exceptions import ObjectDoesNotExist
 from core.models import Group
 from user.models import User
+from django.utils import translation
 from django.utils.translation import ugettext_lazy
 from django.utils.html import format_html
 from core.constances import NOT_LOGGED_IN, COULD_NOT_FIND, COULD_NOT_SAVE
@@ -30,13 +31,12 @@ def resolve_send_message_to_group(_, info, input):
     # threshold for deciding inactive user
     threshold = datetime.now() - timedelta(hours=4460)
 
-    email_addresses = []
+    receiving_users = []
 
     if clean_input.get('isTest'):
-        email_addresses = [user.email]
+        receiving_users = [user]
     elif clean_input.get('sendToAllMembers'):
-        active_members = User.objects.filter(memberships__group__in=[group], is_active=True, _profile__last_online__gte=threshold)
-        email_addresses = list(active_members.values_list('email', flat=True))
+        receiving_users = User.objects.filter(memberships__group__in=[group], is_active=True, _profile__last_online__gte=threshold)
     else:
         for guid in clean_input.get('recipients'):
             try:
@@ -45,18 +45,23 @@ def resolve_send_message_to_group(_, info, input):
                     continue
             except ObjectDoesNotExist:
                 continue
-
-            email_addresses.append(receiving_user.email)
+            receiving_users.append(receiving_user)
 
     context = get_default_email_context(user)
     schema_name = parse_tenant_config_path("")
     context['message'] = format_html(clean_input.get('message'))
 
-    subject = ugettext_lazy("Message from group {0}: {1}").format(group.name, clean_input.get('subject'))
-    context['subject'] = subject
-
-    for email_address in email_addresses:
-        send_mail_multi.delay(schema_name, subject, 'email/send_message_to_group.html', context, email_address)
+    for user in receiving_users:
+        translation.activate(user.get_language())
+        subject = ugettext_lazy("Message from group {0}: {1}").format(group.name, clean_input.get('subject'))
+        send_mail_multi.delay(
+            schema_name,
+            subject,
+            'email/send_message_to_group.html',
+            context,
+            user.email,
+            language=user.get_language()
+        )
 
     return {
           'group': group

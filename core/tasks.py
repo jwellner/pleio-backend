@@ -150,14 +150,16 @@ def elasticsearch_index_file(self, schema_name, file_guid):
 
 
 @shared_task(bind=True, ignore_result=True)
-def send_mail_multi(self, schema_name, subject, html_template, context, email_address, reply_to=None):
+def send_mail_multi(self, schema_name, subject, html_template, context, email_address, reply_to=None, language=None):
     # pylint: disable=unused-argument
     # pylint: disable=too-many-arguments
     '''
     send email
     '''
     with schema_context(schema_name):
-        if config.LANGUAGE:
+        if language:
+            translation.activate(language)
+        else:
             translation.activate(config.LANGUAGE)
 
         if not User.objects.filter(is_active=False, email=email_address).first():

@@ -64,7 +64,8 @@ class UserDocument(DefaultDocument):
             ),
             'name': fields.KeywordField(),
             'key': fields.KeywordField(),
-            'read_access': fields.ListField(fields.TextField(attr="read_access"))
+            'read_access': fields.ListField(fields.TextField(attr="read_access")),
+            'value_list': fields.ListField(fields.KeywordField(attr="value_list_field_indexing"))
         })
     })
 

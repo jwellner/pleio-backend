@@ -85,12 +85,12 @@ class Command(BaseCommand):
 
         users = User.objects.filter(is_active=True, _profile__receive_notification_email=True)
 
-        if config.EMAIL_OVERVIEW_SUBJECT:
-            subject = config.EMAIL_OVERVIEW_SUBJECT
-        else:
-            subject = ugettext_lazy("Regular overview of %(site_name)s") % {'site_name': config.NAME}
-
+        subject = config.EMAIL_OVERVIEW_SUBJECT
         for user in users:
+            translation.activate(user.get_language())
+
+            if not subject:
+                subject = ugettext_lazy("Regular overview of %(site_name)s") % {'site_name': config.NAME}
 
             # determine lower bound of emails in queries
             time_threshold = datetime.now() - timedelta(hours=1500)

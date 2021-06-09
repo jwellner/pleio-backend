@@ -1,5 +1,6 @@
 from graphql import GraphQLError
 from django.core.exceptions import ObjectDoesNotExist
+from django.utils import translation
 from django.utils.translation import ugettext_lazy
 from user.models import User
 from core.constances import NOT_LOGGED_IN, COULD_NOT_FIND, COULD_NOT_SAVE
@@ -25,21 +26,37 @@ def resolve_toggle_request_delete_user(_, info, input):
 
     context = get_default_email_context(user)
 
+    language = requested_user.get_language()
+    translation.activate(language)
+
     if user.is_delete_requested:
         user.is_delete_requested = False
         user.save()
 
         subject = ugettext_lazy("Request to remove account cancelled")
 
-        send_mail_multi.delay(tenant_schema(), subject, 'email/toggle_request_delete_user_cancelled.html', context, user.email)
-
+        send_mail_multi.delay(
+            tenant_schema(),
+            subject,
+            'email/toggle_request_delete_user_cancelled.html',
+            context,
+            user.email,
+            language=language
+        )
     else:
         user.is_delete_requested = True
         user.save()
 
         subject = ugettext_lazy("Request to remove account")
 
-        send_mail_multi.delay(tenant_schema(), subject, 'email/toggle_request_delete_user_requested.html', context, user.email)
+        send_mail_multi.delay(
+            tenant_schema(),
+            subject,
+            'email/toggle_request_delete_user_requested.html',
+            context,
+            user.email,
+            language=language
+        )
 
     return {
           "viewer": user

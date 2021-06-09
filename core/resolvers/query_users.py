@@ -49,10 +49,10 @@ def resolve_users(_, info, q="", filters=None, offset=0, limit=20):
         for f in filters:
             s = s.filter(
                 Q('nested', path='_profile.user_profile_fields', query=Q('bool', must=[
-                        Q('match', _profile__user_profile_fields__key=f['name']) &
-                        Q('terms', _profile__user_profile_fields__value__raw=f['values'])
-                        ]
-                    )
+                    Q('match', _profile__user_profile_fields__key=f['name']) & (
+                        Q('terms', _profile__user_profile_fields__value__raw=f['values']) |
+                        Q('terms', _profile__user_profile_fields__value_list=f['values'])
+                    )])
                 )
             )
 

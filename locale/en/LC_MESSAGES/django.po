@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-05-25 10:37+0200\n"
+"POT-Creation-Date: 2021-06-08 14:20+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -18,12 +18,20 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#: backend2/config.py:62 core/resolvers/query_site.py:87
+#: backend2/config.py:62 core/lib.py:290
 msgid "English"
 msgstr ""
 
-#: backend2/config.py:63 core/resolvers/query_site.py:87
+#: backend2/config.py:63 core/lib.py:289
 msgid "Dutch"
+msgstr ""
+
+#: backend2/config.py:64 core/lib.py:291
+msgid "German"
+msgstr ""
+
+#: backend2/config.py:65 core/lib.py:292
+msgid "French"
 msgstr ""
 
 #: core/forms.py:67
@@ -103,12 +111,12 @@ msgstr ""
 msgid "Comments"
 msgstr ""
 
-#: core/management/commands/send_notification_emails.py:52
+#: core/management/commands/send_notification_emails.py:56
 #, python-format
 msgid "New notifications at %(site_name)s"
 msgstr ""
 
-#: core/management/commands/send_overview_emails.py:91
+#: core/management/commands/send_overview_emails.py:93
 #, python-format
 msgid "Regular overview of %(site_name)s"
 msgstr ""
@@ -118,25 +126,25 @@ msgstr ""
 msgid "Welcome to %(group_name)s"
 msgstr ""
 
-#: core/resolvers/mutation_accept_membership_request.py:38
+#: core/resolvers/mutation_accept_membership_request.py:42
 #, python-format
 msgid "Request for access to the %(group_name)s group has been approved"
 msgstr ""
 
-#: core/resolvers/mutation_change_group_role.py:41
+#: core/resolvers/mutation_change_group_role.py:43
 #, python-format
 msgid "Ownership of the %(group_name)s group has been transferred"
 msgstr ""
 
-#: core/resolvers/mutation_delete_user.py:35
-#: core/resolvers/mutation_handle_delete_account_request.py:38
+#: core/resolvers/mutation_delete_user.py:39
+#: core/resolvers/mutation_handle_delete_account_request.py:42
 #, python-format
 msgid "Account of %(name_deleted_user)s removed"
 msgstr ""
 
-#: core/resolvers/mutation_delete_user.py:41
-#: core/resolvers/mutation_handle_delete_account_request.py:46
-#: core/resolvers/mutation_toggle_user_role.py:43
+#: core/resolvers/mutation_delete_user.py:55
+#: core/resolvers/mutation_handle_delete_account_request.py:58
+#: core/resolvers/mutation_toggle_user_role.py:48
 #, python-format
 msgid "A site administrator was removed from %(site_name)s"
 msgstr ""
@@ -159,7 +167,7 @@ msgstr ""
 msgid "name"
 msgstr ""
 
-#: core/resolvers/mutation_invite_to_group.py:43
+#: core/resolvers/mutation_invite_to_group.py:91
 #, python-format
 msgid "Invitation to become a member of the %(group_name)s group"
 msgstr ""
@@ -169,104 +177,104 @@ msgstr ""
 msgid "You are invited to join site %(site_name)s"
 msgstr ""
 
-#: core/resolvers/mutation_join_group.py:32
+#: core/resolvers/mutation_join_group.py:42
 #, python-format
 msgid "Access request for the %(group_name)s group"
 msgstr ""
 
-#: core/resolvers/mutation_reject_membership_request.py:40
+#: core/resolvers/mutation_reject_membership_request.py:42
 #, python-format
 msgid "Request for access to the %(group_name)s group has been refused"
 msgstr ""
 
-#: core/resolvers/mutation_resend_group_invitation.py:28
+#: core/resolvers/mutation_resend_group_invitation.py:36
 #, python-format
 msgid "Reminder to become a member of the %(group_name)s group"
 msgstr ""
 
-#: core/resolvers/mutation_send_message_to_group.py:55
+#: core/resolvers/mutation_send_message_to_group.py:56
 #, python-brace-format
 msgid "Message from group {0}: {1}"
 msgstr ""
 
-#: core/resolvers/mutation_send_message_to_user.py:29
+#: core/resolvers/mutation_send_message_to_user.py:31
 #, python-brace-format
 msgid "Message from {0}: {1}"
 msgstr ""
 
-#: core/resolvers/mutation_send_message_to_user.py:35
+#: core/resolvers/mutation_send_message_to_user.py:44
 #, python-brace-format
 msgid "Copy: Message from {0}: {1}"
 msgstr ""
 
-#: core/resolvers/mutation_toggle_request_delete_user.py:32
+#: core/resolvers/mutation_toggle_request_delete_user.py:36
 msgid "Request to remove account cancelled"
 msgstr ""
 
-#: core/resolvers/mutation_toggle_request_delete_user.py:40
+#: core/resolvers/mutation_toggle_request_delete_user.py:50
 msgid "Request to remove account"
 msgstr ""
 
-#: core/resolvers/mutation_toggle_user_role.py:49
+#: core/resolvers/mutation_toggle_user_role.py:59
 #, python-format
 msgid "Your site administrator rights for %(site_name)s were removed"
 msgstr ""
 
-#: core/resolvers/mutation_toggle_user_role.py:61
+#: core/resolvers/mutation_toggle_user_role.py:80
 #, python-format
 msgid "A new site administrator was assigned for %(site_name)s"
 msgstr ""
 
-#: core/resolvers/mutation_toggle_user_role.py:66
+#: core/resolvers/mutation_toggle_user_role.py:91
 #, python-format
 msgid "You're granted site administrator right on %(site_name)s"
 msgstr ""
 
-#: core/resolvers/query_site.py:118
+#: core/resolvers/query_site.py:119
 msgid "Activity stream"
 msgstr ""
 
-#: core/resolvers/query_site.py:118
+#: core/resolvers/query_site.py:119
 msgid "CMS page"
 msgstr ""
 
-#: core/resolvers/query_site.py:155
+#: core/resolvers/query_site.py:156
 msgid "Daily"
 msgstr ""
 
-#: core/resolvers/query_site.py:156
+#: core/resolvers/query_site.py:157
 msgid "Weekly"
 msgstr ""
 
-#: core/resolvers/query_site.py:157
+#: core/resolvers/query_site.py:158
 msgid "Monthly"
 msgstr ""
 
-#: core/resolvers/query_site.py:158
+#: core/resolvers/query_site.py:159
 msgid "Never"
 msgstr ""
 
-#: core/resolvers/query_site.py:207
+#: core/resolvers/query_site.py:208
 msgid "Administrator"
 msgstr ""
 
-#: core/resolvers/query_site.py:208
+#: core/resolvers/query_site.py:209
 msgid "Editor"
 msgstr ""
 
-#: core/resolvers/query_site.py:209
+#: core/resolvers/query_site.py:210
 msgid "Question expert"
 msgstr ""
 
-#: core/tasks.py:274
+#: core/tasks.py:276
 msgid "Import was a success"
 msgstr ""
 
-#: core/tasks.py:274
+#: core/tasks.py:276
 msgid "Import failed"
 msgstr ""
 
-#: core/tasks.py:353
+#: core/tasks.py:355
 #, python-format
 msgid "New notification at %(site_name)s: "
 msgstr ""
@@ -679,7 +687,7 @@ msgid ""
 "Access is requested. You will receive an e-mail when the request is accepted."
 msgstr ""
 
-#: core/views.py:158
+#: core/views.py:159
 #, python-format
 msgid "New access request for %(site_name)s"
 msgstr ""
