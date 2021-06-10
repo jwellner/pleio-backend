@@ -68,10 +68,11 @@ class CustomLocaleMiddleware(MiddlewareMixin):
         pass
 
     def process_response(self, request, response):
-        if request.user.is_authenticated:
-            translation.activate(request.user.get_language())
-        else:
-            translation.activate(config.LANGUAGE)
+        if not settings.RUN_AS_ADMIN_APP:
+            if request.user.is_authenticated:
+                translation.activate(request.user.get_language())
+            else:
+                translation.activate(config.LANGUAGE)
         request.LANGUAGE_CODE = translation.get_language()
         language = request.LANGUAGE_CODE
         language_from_path = translation.get_language_from_path(request.path_info)
