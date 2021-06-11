@@ -66,8 +66,10 @@ def resolve_invite_to_group(_, info, input):
                 continue
 
             code = None
+
             try:
-                code = GroupInvitation.objects.get(invited_user=receiving_user, group=group).code
+                if receiving_user:
+                    code = GroupInvitation.objects.get(invited_user=receiving_user, group=group).code
             except ObjectDoesNotExist:
                 pass
 
