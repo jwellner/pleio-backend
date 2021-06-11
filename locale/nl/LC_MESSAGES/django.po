@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-06-08 14:20+0200\n"
+"POT-Creation-Date: 2021-06-11 17:51+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -63,6 +63,30 @@ msgstr "Ingelogde gebruikers"
 msgid "Public"
 msgstr "Iedereen (publiek zichtbaar)"
 
+#: core/lib.py:165
+msgid "Event"
+msgstr "Agenda-item"
+
+#: core/lib.py:169
+msgid "Blog"
+msgstr "Blog"
+
+#: core/lib.py:173
+msgid "Discussion"
+msgstr "Discussie"
+
+#: core/lib.py:177 core/lib.py:279
+msgid "News"
+msgstr "Nieuws"
+
+#: core/lib.py:181
+msgid "Update"
+msgstr ""
+
+#: core/lib.py:185
+msgid "Question"
+msgstr "Vraag"
+
 #: core/lib.py:273
 msgid "Updates"
 msgstr ""
@@ -86,10 +110,6 @@ msgstr "Agenda-items"
 #: core/lib.py:278
 msgid "Files"
 msgstr "Bestanden"
-
-#: core/lib.py:279
-msgid "News"
-msgstr "Nieuws"
 
 #: core/lib.py:280
 msgid "Polls"
@@ -122,8 +142,6 @@ msgid "Regular overview of %(site_name)s"
 msgstr "Periodiek overzicht van %(site_name)s"
 
 #: core/models/group.py:183
-#, fuzzy, python-format
-#| msgid "Group: %(group_name)s"
 msgid "Welcome to %(group_name)s"
 msgstr "Welkom bij: %(group_name)s"
 
@@ -367,8 +385,6 @@ msgid "Agenda item created by"
 msgstr "Agenda-item gemaakt door"
 
 #: core/templates/email/entities/news.html:33
-#, fuzzy
-#| msgid "News added on"
 msgid "News added by"
 msgstr "Nieuws geplaatst door"
 

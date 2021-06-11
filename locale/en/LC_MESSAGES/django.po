@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-06-08 14:20+0200\n"
+"POT-Creation-Date: 2021-06-11 17:51+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -63,6 +63,30 @@ msgstr ""
 msgid "Public"
 msgstr ""
 
+#: core/lib.py:165
+msgid "Event"
+msgstr ""
+
+#: core/lib.py:169
+msgid "Blog"
+msgstr ""
+
+#: core/lib.py:173
+msgid "Discussion"
+msgstr ""
+
+#: core/lib.py:177 core/lib.py:279
+msgid "News"
+msgstr ""
+
+#: core/lib.py:181
+msgid "Update"
+msgstr ""
+
+#: core/lib.py:185
+msgid "Question"
+msgstr ""
+
 #: core/lib.py:273
 msgid "Updates"
 msgstr ""
@@ -85,10 +109,6 @@ msgstr ""
 
 #: core/lib.py:278
 msgid "Files"
-msgstr ""
-
-#: core/lib.py:279
-msgid "News"
 msgstr ""
 
 #: core/lib.py:280

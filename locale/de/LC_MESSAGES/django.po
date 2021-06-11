@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Duits\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-06-08 14:20+0200\n"
+"POT-Creation-Date: 2021-06-11 17:51+0200\n"
 "PO-Revision-Date: 2021-05-26 10:55+0200\n"
 "Last-Translator: \n"
 "Language-Team: \n"
@@ -63,6 +63,30 @@ msgstr "Angemeldete Benutzer"
 msgid "Public"
 msgstr "Öffentlich"
 
+#: core/lib.py:165
+msgid "Event"
+msgstr "Event"
+
+#: core/lib.py:169
+msgid "Blog"
+msgstr "Blog"
+
+#: core/lib.py:173
+msgid "Discussion"
+msgstr "Diskussion"
+
+#: core/lib.py:177 core/lib.py:279
+msgid "News"
+msgstr "Neuigkeiten"
+
+#: core/lib.py:181
+msgid "Update"
+msgstr "Update"
+
+#: core/lib.py:185
+msgid "Question"
+msgstr "Frage"
+
 #: core/lib.py:273
 msgid "Updates"
 msgstr "Updates"
@@ -86,10 +110,6 @@ msgstr "Events"
 #: core/lib.py:278
 msgid "Files"
 msgstr "Dateien"
-
-#: core/lib.py:279
-msgid "News"
-msgstr "Neuigkeiten"
 
 #: core/lib.py:280
 msgid "Polls"
@@ -122,8 +142,6 @@ msgid "Regular overview of %(site_name)s"
 msgstr "Regulärer Überblick über %(site_name)s"
 
 #: core/models/group.py:183
-#, fuzzy, python-format
-#| msgid "Group: %(group_name)s"
 msgid "Welcome to %(group_name)s"
 msgstr "Wilkommen zu: %(group_name)s"
 
