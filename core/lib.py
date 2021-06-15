@@ -162,27 +162,27 @@ def get_activity_filters():
         'contentTypes': [
             {
                 'key': 'event',
-                'value': 'Agenda-Item'
+                'value': ugettext_lazy("Event")
             },
             {
                 'key': 'blog',
-                'value': 'Blog'
+                'value': ugettext_lazy("Blog")
             },
             {
                 'key': 'discussion',
-                'value': 'Discussie'
+                'value': ugettext_lazy("Discussion")
             },
             {
                 'key': 'news',
-                'value': 'Nieuws'
+                'value': ugettext_lazy("News")
             },
             {
                 'key': 'statusupdate',
-                'value': 'Update'
+                'value': ugettext_lazy("Update")
             },
             {
                 'key': 'question',
-                'value': 'Vraag'
+                'value': ugettext_lazy("Question")
             },
         ]
     }

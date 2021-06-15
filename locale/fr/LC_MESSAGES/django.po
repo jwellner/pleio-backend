@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Frans\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-06-08 14:20+0200\n"
+"POT-Creation-Date: 2021-06-11 17:51+0200\n"
 "PO-Revision-Date: 2021-05-28 17:19+0200\n"
 "Last-Translator: \n"
 "Language-Team: frans\n"
@@ -63,6 +63,30 @@ msgstr "Utilisateurs connectés"
 msgid "Public"
 msgstr "Public"
 
+#: core/lib.py:165
+msgid "Event"
+msgstr "Événement"
+
+#: core/lib.py:169
+msgid "Blog"
+msgstr "Blog"
+
+#: core/lib.py:173
+msgid "Discussion"
+msgstr "Discussion"
+
+#: core/lib.py:177 core/lib.py:279
+msgid "News"
+msgstr "Actualité"
+
+#: core/lib.py:181
+msgid "Update"
+msgstr "Mettre à jour"
+
+#: core/lib.py:185
+msgid "Question"
+msgstr "Question"
+
 #: core/lib.py:273
 msgid "Updates"
 msgstr "Mises à jour"
@@ -86,10 +110,6 @@ msgstr "Événements"
 #: core/lib.py:278
 msgid "Files"
 msgstr "Fichiers"
-
-#: core/lib.py:279
-msgid "News"
-msgstr "Actualité"
 
 #: core/lib.py:280
 msgid "Polls"
