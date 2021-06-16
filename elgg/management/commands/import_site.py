@@ -848,11 +848,28 @@ class Command(InteractiveTenantOption, BaseCommand):
 
     def _import_file_folders(self):
         close_old_connections()
+
+        def is_loose_folder(elgg_entity):
+
+            try:
+                parent_guid = elgg_entity.entity.get_metadata_value_by_name("parent_guid")
+                if parent_guid == str(0):
+                    return False
+                elgg_entity = ElggObjectsEntity.objects.using(self.import_id).filter(entity__guid=parent_guid).first()
+                if not elgg_entity:
+                    return True
+                return is_loose_folder(elgg_entity)
+            except Exception:
+                return True
+            return False
+
         elgg_folder_items = ElggObjectsEntity.objects.using(self.import_id).filter(entity__subtype__subtype='folder')
 
         self.stdout.write("\n>> File folders (%i) " % elgg_folder_items.count(), ending="")
 
         for elgg_folder in elgg_folder_items:
+            if is_loose_folder(elgg_folder):
+                continue
             folder = self.mapper.get_folder(elgg_folder)
 
             try:
