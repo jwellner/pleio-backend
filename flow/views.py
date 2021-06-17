@@ -23,6 +23,7 @@ def validate_flow_token(request):
         pass
     return False
 
+
 @csrf_exempt
 @require_http_methods(["POST"])
 def add_comment(request):
@@ -45,10 +46,34 @@ def add_comment(request):
     except ObjectDoesNotExist:
         return JsonResponse({"error": "User configured in flow does not exist"}, status=401)
 
-    Comment.objects.create(
+    comment = Comment.objects.create(
         container=entity,
         owner=user,
         description=description
     )
 
-    return JsonResponse({"error": None, "status": "Comment created from flow"})
+    return JsonResponse({"error": None, "status": "Comment created from flow", "comment_id": str(comment.id)})
+
+
+@csrf_exempt
+@require_http_methods(["POST"])
+def edit_comment(request):
+    if not config.FLOW_ENABLED or not validate_flow_token(request):
+        return JsonResponse({"error": "Bad request"}, status=400)
+
+    description = request.POST.get("description", "")
+    object_id = request.POST.get("container_guid", "")
+
+    if not description or not object_id:
+        return JsonResponse({"error": "Bad request"}, status=400)
+
+    try:
+        comment = Comment.objects.get(id=object_id)
+    except ObjectDoesNotExist:
+        return JsonResponse({"error": "Flow comment does not exist"}, status=401)
+
+    comment.rich_description = None
+    comment.description = description
+    comment.save()
+
+    return JsonResponse({"error": None, "status": "Comment edited from flow"},  status=200)
