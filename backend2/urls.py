@@ -14,8 +14,6 @@ from file import views as file_views
 from event import views as event_views
 from user import views as user_views
 
-from flow import views as flow_views
-
 
 urlpatterns = [
     path('logout', core_views.logout, name='logout'),
@@ -56,7 +54,7 @@ urlpatterns = [
     path('robots.txt', core_views.robots_txt),
     path('sitemap.xml', cache_page(3600)(sitemap), {'sitemaps': sitemaps}, name='sitemap'),
 
-    path('flow/comments/add', flow_views.add_comment),
+    path('flow/', include('flow.urls')),
     path('profile_sync_api/', include('profile_sync.urls')),
 
     # Include elgg url's for redirects
