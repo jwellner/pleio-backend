@@ -219,7 +219,11 @@ class Mapper():
         if elgg_entity.entity.get_metadata_value_by_name("end_ts"):
             entity.end_date = datetime.fromtimestamp(int(elgg_entity.entity.get_metadata_value_by_name("end_ts")))
 
-        entity.location = elgg_entity.entity.get_metadata_value_by_name("location") if elgg_entity.entity.get_metadata_value_by_name("location") else ""
+        if elgg_entity.entity.get_metadata_value_by_name("location"):
+            entity.location = elgg_entity.entity.get_metadata_value_by_name("location")[:256]
+        else:
+            entity.location = ""
+
         entity.external_link = elgg_entity.entity.get_metadata_value_by_name("source") if elgg_entity.entity.get_metadata_value_by_name("source") else ""
         entity.max_attendees = int(float(elgg_entity.entity.get_metadata_value_by_name("maxAttendees"))) \
             if elgg_entity.entity.get_metadata_value_by_name("maxAttendees") else None
