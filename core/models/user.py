@@ -31,7 +31,7 @@ class UserProfile(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     user = models.OneToOneField('user.User', on_delete=models.CASCADE, related_name="_profile")
     last_online = models.DateTimeField(blank=True, null=True)
-    receive_notification_email = models.BooleanField(default=False)
+    receive_notification_email = models.BooleanField(default=True)
     overview_email_interval = models.CharField(
         max_length=10,
         choices=INTERVALS,

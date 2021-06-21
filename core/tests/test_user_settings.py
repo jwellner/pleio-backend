@@ -91,7 +91,7 @@ class UserSettingsTestCase(FastTenantTestCase):
 
         self.assertEqual(data["entity"]["canEdit"], True)
         self.assertEqual(data["entity"]["username"], self.user1.guid)
-        self.assertEqual(data["entity"]["emailNotifications"], False)
+        self.assertEqual(data["entity"]["emailNotifications"], True)
         self.assertEqual(data["entity"]["getsNewsletter"], False)
         self.assertEqual(data["entity"]["language"], 'nl')
         self.assertEqual(data["entity"]["languageOptions"], [{'value': 'nl', 'label': 'Nederlands'}, {'value': 'en', 'label': 'Engels'}])
@@ -121,7 +121,7 @@ class UserSettingsTestCase(FastTenantTestCase):
 
         self.assertEqual(data["entity"]["canEdit"], True)
         self.assertEqual(data["entity"]["username"], self.user1.guid)
-        self.assertEqual(data["entity"]["emailNotifications"], False)
+        self.assertEqual(data["entity"]["emailNotifications"], True)
         self.assertEqual(data["entity"]["getsNewsletter"], False)
         self.assertEqual(data["entity"]["language"], 'nl')
         self.assertEqual(data["entity"]["languageOptions"], [{'value': 'nl', 'label': 'Nederlands'}])
