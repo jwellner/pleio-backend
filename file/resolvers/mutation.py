@@ -44,6 +44,8 @@ def resolve_add_file(_, info, input):
         except ObjectDoesNotExist:
             try:
                 parent = FileFolder.objects.get_subclass(id=clean_input.get("containerGuid"))
+                if not parent.can_write(user):
+                    raise GraphQLError(COULD_NOT_SAVE)
             except ObjectDoesNotExist:
                 if not clean_input.get("containerGuid") == user.guid:
                     raise GraphQLError("INVALID_CONTAINER_GUID")
@@ -103,6 +105,8 @@ def resolve_add_folder(_, info, input):
         except ObjectDoesNotExist:
             try:
                 parent = FileFolder.objects.get_subclass(id=clean_input.get("containerGuid"))
+                if not parent.can_write(user):
+                    raise GraphQLError(COULD_NOT_SAVE)
             except ObjectDoesNotExist:
                 if not clean_input.get("containerGuid") == user.guid:
                     raise GraphQLError("INVALID_CONTAINER_GUID")
