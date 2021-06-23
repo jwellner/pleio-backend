@@ -6,10 +6,15 @@ from core.models import Setting, ProfileField
 from core.models.user import validate_profile_sections
 from core.constances import (
     NOT_LOGGED_IN, USER_NOT_SITE_ADMIN, USER_ROLES, INVALID_VALUE, REDIRECTS_HAS_LOOP, REDIRECTS_HAS_DUPLICATE_SOURCE, COULD_NOT_SAVE)
-from core.lib import remove_none_from_dict, access_id_to_acl, is_valid_domain, is_valid_url_or_path, get_language_options
+from core.lib import (
+    remove_none_from_dict, access_id_to_acl, is_valid_domain, is_valid_url_or_path, get_language_options,
+    tenant_schema, get_default_email_context )
 from core.resolvers.query_site import get_site_settings
+from core.tasks import send_mail_multi
+from user.models import User
 from django.db import connection
 from django.core.cache import cache
+from django.utils.translation import ugettext_lazy
 from file.helpers import resize_and_save_as_png
 from file.models import FileFolder
 
@@ -82,7 +87,6 @@ def resolve_edit_site_setting(_, info, input):
         'language': 'LANGUAGE',
         'name': 'NAME',
         'description': 'DESCRIPTION',
-        'isClosed': 'IS_CLOSED',
         'allowRegistration': 'ALLOW_REGISTRATION',
         'defaultAccessId': 'DEFAULT_ACCESS_ID',
         'googleAnalyticsId': 'GOOGLE_ANALYTICS_ID',
@@ -304,6 +308,24 @@ def resolve_edit_site_setting(_, info, input):
             if language not in options:
                 raise GraphQLError(INVALID_VALUE)
         save_setting('EXTRA_LANGUAGES', clean_input.get('extraLanguages'))
+
+    if 'isClosed' in clean_input:
+        if not config.IS_CLOSED == clean_input.get('isClosed'):
+            context = get_default_email_context(user)
+            context['access_level'] = ugettext_lazy("closed") if clean_input.get('isClosed') else "public"
+            subject = ugettext_lazy("Site access level changed for %(site_name)s") % {'site_name': context["site_name"]}
+
+            # mail to admins to notify about site access change
+            for admin_user in User.objects.filter(roles__contains=['ADMIN']):
+                send_mail_multi.delay(
+                    tenant_schema(),
+                    subject,
+                    'email/site_access_changed.html',
+                    context,
+                    admin_user.email,
+                    language=admin_user.get_language()
+                )
+            save_setting('IS_CLOSED', clean_input.get('isClosed'))
 
     return {
         "siteSettings": get_site_settings()
