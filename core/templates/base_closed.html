@@ -56,6 +56,9 @@
 			.button { background-color: {{ config.COLOR_SECONDARY }}; }
 			.button.___is-active, .button:hover, .button:active { background-color: {% hex_color_tint config.COLOR_SECONDARY 0.2 %}; }
 		</style>
+		{% if config.CUSTOM_CSS %}
+			<link href="/custom.css?v={{ config.CUSTOM_CSS_TIMESTAMP }}" rel="stylesheet" type="text/css" media="screen">
+		{% endif %}
     </head>
 	<body class="___{{ config.THEME }}" style="background:white;">
 		<div class="page-layout">

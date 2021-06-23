@@ -131,6 +131,7 @@ class WalledGardenMiddleware:
         public_urls += ("/onboarding",)
         public_urls += ("/robots.txt",)
         public_urls += ("/sitemap.xml",)
+        public_urls += ("/custom.css",)
         public_urls = [re.compile(v) for v in public_urls]
 
         return any(public_url.match(url) for public_url in public_urls)
