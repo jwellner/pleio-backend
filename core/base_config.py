@@ -36,6 +36,9 @@ DEFAULT_SITE_CONFIG = {
     'THEME': ('leraar', 'Theme'),
     'LOGO': ('', 'Logo'),
     'LOGO_ALT': ('', 'Logo alt text'),
+    'FAVICON': ('', 'Favicon'),
+    'FAVICON_16': ('', 'Favicon 16x16'),
+    'FAVICON_32': ('', 'Favicon 32x32'),
     'LIKE_ICON': ('heart', 'Like icon'),
 
     'ICON': ('', 'Icon'),

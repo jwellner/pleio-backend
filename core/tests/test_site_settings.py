@@ -80,6 +80,7 @@ class SiteSettingsTestCase(FastTenantTestCase):
                     theme
                     logo
                     logoAlt
+                    favicon
                     likeIcon
 
                     startPageOptions {
@@ -286,6 +287,7 @@ class SiteSettingsTestCase(FastTenantTestCase):
         self.assertEqual(data["siteSettings"]["theme"], "leraar")
         self.assertEqual(data["siteSettings"]["logo"], "")
         self.assertEqual(data["siteSettings"]["logoAlt"], "")
+        self.assertEqual(data["siteSettings"]["favicon"], "")
         self.assertEqual(data["siteSettings"]["likeIcon"], "heart")
 
         self.assertEqual(data["siteSettings"]["startPageOptions"], [{"value": "activity", "label": "Activiteitenstroom"},{"value": "cms", "label": "CMS pagina"}])

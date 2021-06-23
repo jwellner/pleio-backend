@@ -82,3 +82,19 @@ def resize_and_update_image(file: FileFolder, max_width = 1400, max_height = 200
         contents = output.getvalue()
         file_name = str(file.id) + '.jpg'
         file.upload.save(file_name, ContentFile(contents))
+
+
+def resize_and_save_as_png(file: FileFolder, max_width = 180, max_height = 180):
+    """
+    Resize FileFolder image to png
+    """
+    infile = file.upload.open()
+
+    with Image.open(infile) as im:
+        im.thumbnail((max_width, max_height), Image.LANCZOS)
+        output = BytesIO()
+        im = im.convert('RGB')
+        im.save(output, 'PNG')
+        contents = output.getvalue()
+        file_name = str(file.id) + '.png'
+        file.upload.save(file_name, ContentFile(contents))

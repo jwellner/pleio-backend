@@ -280,6 +280,12 @@ def onboarding(request):
 def custom_css(request):
     return HttpResponse(config.CUSTOM_CSS, content_type="text/css")
 
+@cache_control(public=True)
+def favicon(request):
+    print(config.FAVICON)
+    if config.FAVICON:
+        return redirect(config.FAVICON)
+    return redirect("/static/apple-touch-icon.png")
 
 @require_GET
 def robots_txt(request):

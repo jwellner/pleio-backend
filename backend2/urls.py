@@ -51,6 +51,7 @@ urlpatterns = [
     path('onboarding', core_views.onboarding, name='onboarding'),
 
     path('custom.css', core_views.custom_css),
+    path('favicon.png', core_views.favicon),
     path('robots.txt', core_views.robots_txt),
     path('sitemap.xml', cache_page(3600)(sitemap), {'sitemaps': sitemaps}, name='sitemap'),
 
