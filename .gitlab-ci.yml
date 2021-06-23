@@ -65,6 +65,9 @@ build:
   stage: build
   tags:
     - shell
+  only:
+    - dev
+    - master
   script:
     - docker build -t registry.gitlab.com/pleio/backend2:${CI_COMMIT_SHA:0:8} .
     - docker build -t registry.gitlab.com/pleio/backend2:latest .
