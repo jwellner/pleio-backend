@@ -335,3 +335,72 @@ class ViewerTestCase(FastTenantTestCase):
         data = result[1]["data"]
 
         self.assertEqual(data["viewer"]["canWriteToContainer"], True)
+
+    def test_viewer_can_write_to_container_user_self(self):
+        query = f"""
+            {{
+                viewer {{
+                    canWriteToContainer(
+                        containerGuid: "{self.authenticatedUser.guid}"
+                        subtype: "file"
+                    )
+                }}
+            }}
+        """
+
+        request = HttpRequest()
+        request.user = self.authenticatedUser
+
+        result = graphql_sync(schema, { "query": query}, context_value={ "request": request })
+
+        self.assertTrue(result[0])
+
+        data = result[1]["data"]
+
+        self.assertEqual(data["viewer"]["canWriteToContainer"], True)
+
+    def test_viewer_can_write_to_container_user_other(self):
+        query = f"""
+            {{
+                viewer {{
+                    canWriteToContainer(
+                        containerGuid: "{self.groupOwner.guid}"
+                        subtype: "file"
+                    )
+                }}
+            }}
+        """
+
+        request = HttpRequest()
+        request.user = self.authenticatedUser
+
+        result = graphql_sync(schema, { "query": query}, context_value={ "request": request })
+
+        self.assertTrue(result[0])
+
+        data = result[1]["data"]
+
+        self.assertEqual(data["viewer"]["canWriteToContainer"], False)
+
+    def test_viewer_can_write_to_container_user_admin(self):
+        query = f"""
+            {{
+                viewer {{
+                    canWriteToContainer(
+                        containerGuid: "{self.authenticatedUser.guid}"
+                        subtype: "file"
+                    )
+                }}
+            }}
+        """
+
+        request = HttpRequest()
+        request.user = self.authenticatedAdminUser
+
+        result = graphql_sync(schema, { "query": query}, context_value={ "request": request })
+
+        self.assertTrue(result[0])
+
+        data = result[1]["data"]
+
+        self.assertEqual(data["viewer"]["canWriteToContainer"], True)

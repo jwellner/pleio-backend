@@ -4,6 +4,7 @@ from django.core.exceptions import ValidationError
 from core.models import Entity
 from core.lib import get_acl
 from core.constances import ACCESS_TYPE, USER_ROLES
+from user.models import User
 
 logger = logging.getLogger(__name__)
 
@@ -38,11 +39,16 @@ def resolve_can_write_to_container(obj, info, containerGuid=None, subtype=None, 
             return True
         return False
 
-    # check if containerGuid is Entity (only used for wiki / files?)
+    # check if containerGuid is Entity of User
     try:
-        entity = Entity.objects.filter(id=containerGuid).first()
-        if entity:
-            return entity.can_write(user)
+        entity_container = Entity.objects.filter(id=containerGuid).first()
+        if entity_container:
+            return entity_container.can_write(user)
+
+        user_container = User.objects.filter(id=containerGuid).first()
+        if user_container and (user_container == user or user.has_role(USER_ROLES.ADMIN)):
+            return True
+
     except ValidationError as e:
         logger.error("Catched error %s", e)
         return False
