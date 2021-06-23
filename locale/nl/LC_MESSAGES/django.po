@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-06-11 17:51+0200\n"
+"POT-Creation-Date: 2021-06-23 12:19+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -18,19 +18,19 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#: backend2/config.py:62 core/lib.py:290
+#: backend2/config.py:62 core/lib.py:294
 msgid "English"
 msgstr "Engels"
 
-#: backend2/config.py:63 core/lib.py:289
+#: backend2/config.py:63 core/lib.py:293
 msgid "Dutch"
 msgstr "Nederlands"
 
-#: backend2/config.py:64 core/lib.py:291
+#: backend2/config.py:64 core/lib.py:295
 msgid "German"
 msgstr ""
 
-#: backend2/config.py:65 core/lib.py:292
+#: backend2/config.py:65 core/lib.py:296
 msgid "French"
 msgstr ""
 
@@ -75,7 +75,7 @@ msgstr "Blog"
 msgid "Discussion"
 msgstr "Discussie"
 
-#: core/lib.py:177 core/lib.py:279
+#: core/lib.py:177 core/lib.py:283
 msgid "News"
 msgstr "Nieuws"
 
@@ -87,47 +87,47 @@ msgstr ""
 msgid "Question"
 msgstr "Vraag"
 
-#: core/lib.py:273
-msgid "Updates"
-msgstr ""
-
-#: core/lib.py:274
-msgid "Blogs"
-msgstr ""
-
-#: core/lib.py:275
-msgid "CMS pages"
-msgstr "CMS pagina's"
-
-#: core/lib.py:276
-msgid "Discussions"
-msgstr "Discussies"
-
-#: core/lib.py:277
-msgid "Events"
-msgstr "Agenda-items"
-
-#: core/lib.py:278
-msgid "Files"
-msgstr "Bestanden"
-
-#: core/lib.py:280
-msgid "Polls"
-msgstr "Polls"
-
-#: core/lib.py:281
-msgid "Questions"
-msgstr "Vragen"
-
-#: core/lib.py:282
-msgid "Tasks"
-msgstr "Taken"
-
-#: core/lib.py:283
+#: core/lib.py:189 core/lib.py:287
 msgid "Wiki pages"
 msgstr "Wiki pagina's"
 
+#: core/lib.py:277
+msgid "Updates"
+msgstr ""
+
+#: core/lib.py:278
+msgid "Blogs"
+msgstr ""
+
+#: core/lib.py:279
+msgid "CMS pages"
+msgstr "CMS pagina's"
+
+#: core/lib.py:280
+msgid "Discussions"
+msgstr "Discussies"
+
+#: core/lib.py:281
+msgid "Events"
+msgstr "Agenda-items"
+
+#: core/lib.py:282
+msgid "Files"
+msgstr "Bestanden"
+
 #: core/lib.py:284
+msgid "Polls"
+msgstr "Polls"
+
+#: core/lib.py:285
+msgid "Questions"
+msgstr "Vragen"
+
+#: core/lib.py:286
+msgid "Tasks"
+msgstr "Taken"
+
+#: core/lib.py:288
 msgid "Comments"
 msgstr "Reacties"
 
@@ -142,6 +142,7 @@ msgid "Regular overview of %(site_name)s"
 msgstr "Periodiek overzicht van %(site_name)s"
 
 #: core/models/group.py:183
+#, python-format
 msgid "Welcome to %(group_name)s"
 msgstr "Welkom bij: %(group_name)s"
 
@@ -168,6 +169,19 @@ msgstr "Account verwijderd van %(name_deleted_user)s"
 msgid "A site administrator was removed from %(site_name)s"
 msgstr "Een site beheerder is verwijderd van %(site_name)s"
 
+#: core/resolvers/mutation_edit_site_setting.py:315
+msgid "closed"
+msgstr "gesloten"
+
+#: core/resolvers/mutation_edit_site_setting.py:315
+msgid "public"
+msgstr "publiek"
+
+#: core/resolvers/mutation_edit_site_setting.py:316
+#, python-format
+msgid "Site access level changed for %(site_name)s"
+msgstr "Toegangsniveau voor aangepast op %(site_name)s"
+
 #: core/resolvers/mutation_handle_site_access_request.py:38
 #, python-format
 msgid "You are now member of: %(site_name)s"
@@ -186,7 +200,7 @@ msgstr "e-mail"
 msgid "name"
 msgstr "naam"
 
-#: core/resolvers/mutation_invite_to_group.py:91
+#: core/resolvers/mutation_invite_to_group.py:93
 #, python-format
 msgid "Invitation to become a member of the %(group_name)s group"
 msgstr "Uitnodiging om lid te worden van de groep %(group_name)s"
@@ -249,39 +263,39 @@ msgstr "Een nieuwe site beheerder is toegewezen aan %(site_name)s"
 msgid "You're granted site administrator right on %(site_name)s"
 msgstr "U bent aangewezen als site beheerder van %(site_name)s"
 
-#: core/resolvers/query_site.py:119
+#: core/resolvers/query_site.py:120
 msgid "Activity stream"
 msgstr "Activiteitenstroom"
 
-#: core/resolvers/query_site.py:119
+#: core/resolvers/query_site.py:120
 msgid "CMS page"
 msgstr "CMS pagina"
 
-#: core/resolvers/query_site.py:156
+#: core/resolvers/query_site.py:157
 msgid "Daily"
 msgstr "Dagelijks"
 
-#: core/resolvers/query_site.py:157
+#: core/resolvers/query_site.py:158
 msgid "Weekly"
 msgstr "Wekelijks"
 
-#: core/resolvers/query_site.py:158
+#: core/resolvers/query_site.py:159
 msgid "Monthly"
 msgstr "Maandelijks"
 
-#: core/resolvers/query_site.py:159
+#: core/resolvers/query_site.py:160
 msgid "Never"
 msgstr "Nooit"
 
-#: core/resolvers/query_site.py:208
+#: core/resolvers/query_site.py:209
 msgid "Administrator"
 msgstr "Beheerder"
 
-#: core/resolvers/query_site.py:209
+#: core/resolvers/query_site.py:210
 msgid "Editor"
 msgstr "Redacteur"
 
-#: core/resolvers/query_site.py:210
+#: core/resolvers/query_site.py:211
 msgid "Question expert"
 msgstr "Vraagexpert"
 
@@ -547,6 +561,29 @@ msgid ""
 msgstr ""
 "Je ontvangt deze e-mail omdat je aangemeld bent voor de notificaties.<br /> "
 "Klik <a href=\"%(user_url)s\">hier</a> om je instellingen aan te passen."
+
+#: core/templates/email/site_access_changed.html:6
+#, python-format
+msgid ""
+"Hi,<br><br>\n"
+"\n"
+"The site access level for site <a href=\"%(site_url)s\">%(site_name)s</a> "
+"changed to <b>%(access_level)s</b>. <br><br>\n"
+"\n"
+"This action was taken by %(user_name)s.<br><br>\n"
+"\n"
+"If you believe this was done in error, please <a href=\"%(site_url)s/"
+"admin2\">go to the admin</a> and undo this action.\n"
+msgstr ""
+"Hallo,<br><br>\n"
+"\n"
+"Het toegangsniveau voor de site <a href=\"%(site_url)s\">%(site_name)s</a> "
+"is aangepast naar <b>%(access_level)s</b>. <br><br>\n"
+"\n"
+"Deze actie is uitgevoerd door %(user_name)s.<br><br>\n"
+"\n"
+"Als dit een fout is <a href=\"%(site_url)s/admin2\">ga naar de admin</a> en "
+"maak deze actie ongedaan.\n"
 
 #: core/templates/email/site_access_request.html:5
 #, python-format

@@ -312,7 +312,7 @@ def resolve_edit_site_setting(_, info, input):
     if 'isClosed' in clean_input:
         if not config.IS_CLOSED == clean_input.get('isClosed'):
             context = get_default_email_context(user)
-            context['access_level'] = ugettext_lazy("closed") if clean_input.get('isClosed') else "public"
+            context['access_level'] = ugettext_lazy("closed") if clean_input.get('isClosed') else ugettext_lazy("public")
             subject = ugettext_lazy("Site access level changed for %(site_name)s") % {'site_name': context["site_name"]}
 
             # mail to admins to notify about site access change
