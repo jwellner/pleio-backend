@@ -31,7 +31,7 @@ def resolve_toggle_user_role(_, info, input):
         raise GraphQLError(COULD_NOT_SAVE)
 
     schema_name = parse_tenant_config_path("")
-    context = get_default_email_context(user)
+    context = get_default_email_context(performing_user)
     context['name_of_user_admin_role_changed'] = user.name
     context['link'] = context['site_url'] + user.url
 

@@ -114,6 +114,7 @@ def get_site_settings():
         ],
         'logo': config.LOGO,
         'logoAlt': config.LOGO_ALT,
+        'favicon': config.FAVICON,
         'likeIcon': config.LIKE_ICON,
 
         'startPageOptions': [{"value": "activity", "label": ugettext_lazy("Activity stream")},{"value": "cms", "label": ugettext_lazy("CMS page")}],

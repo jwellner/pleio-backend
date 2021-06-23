@@ -32,7 +32,7 @@ def resolve_delete_user(_, info, input):
     user.delete()
 
     # Send email to user which is deleted
-    context = get_default_email_context(user)
+    context = get_default_email_context(performing_user)
     context['name_deleted_user'] = name_deleted_user
 
     translation.activate(language)
