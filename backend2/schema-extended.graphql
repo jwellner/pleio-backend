@@ -272,6 +272,8 @@ extend input editSiteSettingInput {
   flowCaseId: Int
   flowUserGuid: String
   iconAlt: String
+  favicon: Upload
+  removeFavicon: Boolean
 }
 
 input ProfileSectionInput {
@@ -347,6 +349,7 @@ extend type SiteSettings {
   flowUserGuid: String
   iconAlt: String
   editUserNameEnabled: Boolean!
+  favicon: String
 }
 
 extend input FeaturedInput {

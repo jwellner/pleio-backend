@@ -4,11 +4,13 @@ from graphql import GraphQLError
 from core import config
 from core.models import Setting, ProfileField
 from core.models.user import validate_profile_sections
-from core.constances import NOT_LOGGED_IN, USER_NOT_SITE_ADMIN, USER_ROLES, INVALID_VALUE, REDIRECTS_HAS_LOOP, REDIRECTS_HAS_DUPLICATE_SOURCE
+from core.constances import (
+    NOT_LOGGED_IN, USER_NOT_SITE_ADMIN, USER_ROLES, INVALID_VALUE, REDIRECTS_HAS_LOOP, REDIRECTS_HAS_DUPLICATE_SOURCE, COULD_NOT_SAVE)
 from core.lib import remove_none_from_dict, access_id_to_acl, is_valid_domain, is_valid_url_or_path, get_language_options
 from core.resolvers.query_site import get_site_settings
 from django.db import connection
 from django.core.cache import cache
+from file.helpers import resize_and_save_as_png
 from file.models import FileFolder
 
 
@@ -241,6 +243,32 @@ def resolve_edit_site_setting(_, info, input):
         except Exception:
             pass
         save_setting('ICON', "")
+
+    if 'favicon' in clean_input:
+        if not clean_input.get("favicon"):
+            raise GraphQLError("NO_FILE")
+
+        file = clean_input.get("favicon")
+
+        try:
+            favicon = FileFolder()
+            favicon.owner = user
+            favicon.upload = file
+            favicon.read_access = access_id_to_acl(favicon, 2)
+            favicon.write_access = access_id_to_acl(favicon, 0)
+            favicon.save()
+            resize_and_save_as_png(favicon, 180, 180)
+        except Exception:
+            raise GraphQLError(COULD_NOT_SAVE)
+
+        save_setting('FAVICON', favicon.download_url)
+
+    if 'removeFavicon' in clean_input:
+        try:
+            FileFolder.objects.get(id=config.FAVICON.split('/')[3]).delete()
+        except Exception:
+            pass
+        save_setting('FAVICON', "")
 
     if 'directRegistrationDomains' in clean_input:
         for domain in clean_input.get('directRegistrationDomains'):
