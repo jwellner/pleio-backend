@@ -177,6 +177,8 @@ class EditSiteSettingTestCase(FastTenantTestCase):
                         flowToken
                         flowCaseId
                         flowUserGuid
+
+                        commentWithoutAccountEnabled
                     }
                 }
             }
@@ -293,7 +295,9 @@ class EditSiteSettingTestCase(FastTenantTestCase):
                 "flowAppUrl": "https://flow.test",
                 "flowToken": "1234567890qwertyuiop",
                 "flowCaseId": 1,
-                "flowUserGuid": self.admin.guid
+                "flowUserGuid": self.admin.guid,
+
+                "commentWithoutAccountEnabled": True,
 
             }
         }
@@ -416,6 +420,8 @@ class EditSiteSettingTestCase(FastTenantTestCase):
         self.assertEqual(data["editSiteSetting"]["siteSettings"]["flowToken"], "1234567890qwertyuiop")
         self.assertEqual(data["editSiteSetting"]["siteSettings"]["flowCaseId"], 1)
         self.assertEqual(data["editSiteSetting"]["siteSettings"]["flowUserGuid"], self.admin.guid)
+
+        self.assertEqual(data["editSiteSetting"]["siteSettings"]["commentWithoutAccountEnabled"], True)
 
     @patch("core.lib.get_mimetype")
     @patch("{}.open".format(settings.DEFAULT_FILE_STORAGE))

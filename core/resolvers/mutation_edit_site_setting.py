@@ -172,7 +172,9 @@ def resolve_edit_site_setting(_, info, input):
         'flowAppUrl': 'FLOW_APP_URL',
         'flowToken': 'FLOW_TOKEN',
         'flowCaseId': 'FLOW_CASE_ID',
-        'flowUserGuid': 'FLOW_USER_GUID'
+        'flowUserGuid': 'FLOW_USER_GUID',
+
+        'commentWithoutAccountEnabled': 'COMMENT_WITHOUT_ACCOUNT_ENABLED'
     }
 
     for k, v in setting_keys.items():

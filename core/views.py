@@ -3,7 +3,10 @@ import json
 import logging
 from core.resolvers.query_site import get_settings
 from core import config
-from core.models import Entity, Group, UserProfileField, SiteAccessRequest, ProfileField, EntityAttachment, GroupAttachment, CommentAttachment
+from core.models import (
+    Entity, Group, UserProfileField, SiteAccessRequest, ProfileField, EntityAttachment, GroupAttachment,
+    CommentAttachment, CommentRequest, Comment
+)
 from core.lib import (
     access_id_to_acl, get_default_email_context, tenant_schema,
     get_exportable_content_types, get_model_by_subtype, datetime_isoformat
@@ -483,3 +486,30 @@ def attachment(request, attachment_type, attachment_id):
         raise Http404("File not found")
 
     raise Http404("File not found")
+
+
+def comment_confirm(request, entity_id):
+
+    try:
+        entity = Entity.objects.select_subclasses().get(id=entity_id)
+    except ObjectDoesNotExist:
+        raise Http404("Entity not found")
+
+    comment_request = CommentRequest.objects.filter(
+        object_id=entity.id,
+        code=request.GET.get('code', None),
+        email=request.GET.get('email', None)
+    ).first()
+
+    if comment_request:
+        Comment.objects.create(
+            container=entity,
+            description=comment_request.description,
+            rich_description=comment_request.rich_description,
+            email=comment_request.email,
+            name=comment_request.name
+        )
+
+        comment_request.delete()
+
+    return redirect(entity.url)

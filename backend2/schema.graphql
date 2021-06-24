@@ -318,6 +318,7 @@ type Comment implements Entity {
   votes: Int
   isBestAnswer: Boolean
   owner: User
+  ownerName: String
 }
 
 input confirmAttendEventWithoutAccountInput {
