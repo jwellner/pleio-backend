@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-06-11 17:51+0200\n"
+"POT-Creation-Date: 2021-06-23 12:19+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -18,19 +18,19 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#: backend2/config.py:62 core/lib.py:290
+#: backend2/config.py:62 core/lib.py:294
 msgid "English"
 msgstr ""
 
-#: backend2/config.py:63 core/lib.py:289
+#: backend2/config.py:63 core/lib.py:293
 msgid "Dutch"
 msgstr ""
 
-#: backend2/config.py:64 core/lib.py:291
+#: backend2/config.py:64 core/lib.py:295
 msgid "German"
 msgstr ""
 
-#: backend2/config.py:65 core/lib.py:292
+#: backend2/config.py:65 core/lib.py:296
 msgid "French"
 msgstr ""
 
@@ -75,7 +75,7 @@ msgstr ""
 msgid "Discussion"
 msgstr ""
 
-#: core/lib.py:177 core/lib.py:279
+#: core/lib.py:177 core/lib.py:283
 msgid "News"
 msgstr ""
 
@@ -87,47 +87,47 @@ msgstr ""
 msgid "Question"
 msgstr ""
 
-#: core/lib.py:273
-msgid "Updates"
-msgstr ""
-
-#: core/lib.py:274
-msgid "Blogs"
-msgstr ""
-
-#: core/lib.py:275
-msgid "CMS pages"
-msgstr ""
-
-#: core/lib.py:276
-msgid "Discussions"
-msgstr ""
-
-#: core/lib.py:277
-msgid "Events"
-msgstr ""
-
-#: core/lib.py:278
-msgid "Files"
-msgstr ""
-
-#: core/lib.py:280
-msgid "Polls"
-msgstr ""
-
-#: core/lib.py:281
-msgid "Questions"
-msgstr ""
-
-#: core/lib.py:282
-msgid "Tasks"
-msgstr ""
-
-#: core/lib.py:283
+#: core/lib.py:189 core/lib.py:287
 msgid "Wiki pages"
 msgstr ""
 
+#: core/lib.py:277
+msgid "Updates"
+msgstr ""
+
+#: core/lib.py:278
+msgid "Blogs"
+msgstr ""
+
+#: core/lib.py:279
+msgid "CMS pages"
+msgstr ""
+
+#: core/lib.py:280
+msgid "Discussions"
+msgstr ""
+
+#: core/lib.py:281
+msgid "Events"
+msgstr ""
+
+#: core/lib.py:282
+msgid "Files"
+msgstr ""
+
 #: core/lib.py:284
+msgid "Polls"
+msgstr ""
+
+#: core/lib.py:285
+msgid "Questions"
+msgstr ""
+
+#: core/lib.py:286
+msgid "Tasks"
+msgstr ""
+
+#: core/lib.py:288
 msgid "Comments"
 msgstr ""
 
@@ -169,6 +169,19 @@ msgstr ""
 msgid "A site administrator was removed from %(site_name)s"
 msgstr ""
 
+#: core/resolvers/mutation_edit_site_setting.py:315
+msgid "closed"
+msgstr ""
+
+#: core/resolvers/mutation_edit_site_setting.py:315
+msgid "public"
+msgstr ""
+
+#: core/resolvers/mutation_edit_site_setting.py:316
+#, python-format
+msgid "Site access level changed for %(site_name)s"
+msgstr ""
+
 #: core/resolvers/mutation_handle_site_access_request.py:38
 #, python-format
 msgid "You are now member of: %(site_name)s"
@@ -187,7 +200,7 @@ msgstr ""
 msgid "name"
 msgstr ""
 
-#: core/resolvers/mutation_invite_to_group.py:91
+#: core/resolvers/mutation_invite_to_group.py:93
 #, python-format
 msgid "Invitation to become a member of the %(group_name)s group"
 msgstr ""
@@ -250,39 +263,39 @@ msgstr ""
 msgid "You're granted site administrator right on %(site_name)s"
 msgstr ""
 
-#: core/resolvers/query_site.py:119
+#: core/resolvers/query_site.py:120
 msgid "Activity stream"
 msgstr ""
 
-#: core/resolvers/query_site.py:119
+#: core/resolvers/query_site.py:120
 msgid "CMS page"
 msgstr ""
 
-#: core/resolvers/query_site.py:156
+#: core/resolvers/query_site.py:157
 msgid "Daily"
 msgstr ""
 
-#: core/resolvers/query_site.py:157
+#: core/resolvers/query_site.py:158
 msgid "Weekly"
 msgstr ""
 
-#: core/resolvers/query_site.py:158
+#: core/resolvers/query_site.py:159
 msgid "Monthly"
 msgstr ""
 
-#: core/resolvers/query_site.py:159
+#: core/resolvers/query_site.py:160
 msgid "Never"
 msgstr ""
 
-#: core/resolvers/query_site.py:208
+#: core/resolvers/query_site.py:209
 msgid "Administrator"
 msgstr ""
 
-#: core/resolvers/query_site.py:209
+#: core/resolvers/query_site.py:210
 msgid "Editor"
 msgstr ""
 
-#: core/resolvers/query_site.py:210
+#: core/resolvers/query_site.py:211
 msgid "Question expert"
 msgstr ""
 
@@ -497,6 +510,20 @@ msgid ""
 "You have received this e-mail because you registered to receive "
 "notifications.<br /> Click <a href=\"%(user_url)s\">here</a> to change your "
 "settings."
+msgstr ""
+
+#: core/templates/email/site_access_changed.html:6
+#, python-format
+msgid ""
+"Hi,<br><br>\n"
+"\n"
+"The site access level for site <a href=\"%(site_url)s\">%(site_name)s</a> "
+"changed to <b>%(access_level)s</b>. <br><br>\n"
+"\n"
+"This action was taken by %(user_name)s.<br><br>\n"
+"\n"
+"If you believe this was done in error, please <a href=\"%(site_url)s/"
+"admin2\">go to the admin</a> and undo this action.\n"
 msgstr ""
 
 #: core/templates/email/site_access_request.html:5

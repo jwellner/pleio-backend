@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Frans\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-06-11 17:51+0200\n"
+"POT-Creation-Date: 2021-06-23 12:19+0200\n"
 "PO-Revision-Date: 2021-05-28 17:19+0200\n"
 "Last-Translator: \n"
 "Language-Team: frans\n"
@@ -18,19 +18,19 @@ msgstr ""
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 "X-Generator: Poedit 2.4.3\n"
 
-#: backend2/config.py:62 core/lib.py:290
+#: backend2/config.py:62 core/lib.py:294
 msgid "English"
 msgstr "Anglais"
 
-#: backend2/config.py:63 core/lib.py:289
+#: backend2/config.py:63 core/lib.py:293
 msgid "Dutch"
 msgstr "Néerlandais"
 
-#: backend2/config.py:64 core/lib.py:291
+#: backend2/config.py:64 core/lib.py:295
 msgid "German"
 msgstr ""
 
-#: backend2/config.py:65 core/lib.py:292
+#: backend2/config.py:65 core/lib.py:296
 msgid "French"
 msgstr ""
 
@@ -75,7 +75,7 @@ msgstr "Blog"
 msgid "Discussion"
 msgstr "Discussion"
 
-#: core/lib.py:177 core/lib.py:279
+#: core/lib.py:177 core/lib.py:283
 msgid "News"
 msgstr "Actualité"
 
@@ -87,47 +87,47 @@ msgstr "Mettre à jour"
 msgid "Question"
 msgstr "Question"
 
-#: core/lib.py:273
-msgid "Updates"
-msgstr "Mises à jour"
-
-#: core/lib.py:274
-msgid "Blogs"
-msgstr "Blogs"
-
-#: core/lib.py:275
-msgid "CMS pages"
-msgstr "Pages SGC"
-
-#: core/lib.py:276
-msgid "Discussions"
-msgstr "Discussions"
-
-#: core/lib.py:277
-msgid "Events"
-msgstr "Événements"
-
-#: core/lib.py:278
-msgid "Files"
-msgstr "Fichiers"
-
-#: core/lib.py:280
-msgid "Polls"
-msgstr "Sondages"
-
-#: core/lib.py:281
-msgid "Questions"
-msgstr "Questions"
-
-#: core/lib.py:282
-msgid "Tasks"
-msgstr "Tâches"
-
-#: core/lib.py:283
+#: core/lib.py:189 core/lib.py:287
 msgid "Wiki pages"
 msgstr "Wiki pages"
 
+#: core/lib.py:277
+msgid "Updates"
+msgstr "Mises à jour"
+
+#: core/lib.py:278
+msgid "Blogs"
+msgstr "Blogs"
+
+#: core/lib.py:279
+msgid "CMS pages"
+msgstr "Pages SGC"
+
+#: core/lib.py:280
+msgid "Discussions"
+msgstr "Discussions"
+
+#: core/lib.py:281
+msgid "Events"
+msgstr "Événements"
+
+#: core/lib.py:282
+msgid "Files"
+msgstr "Fichiers"
+
 #: core/lib.py:284
+msgid "Polls"
+msgstr "Sondages"
+
+#: core/lib.py:285
+msgid "Questions"
+msgstr "Questions"
+
+#: core/lib.py:286
+msgid "Tasks"
+msgstr "Tâches"
+
+#: core/lib.py:288
 msgid "Comments"
 msgstr "Commentaires"
 
@@ -169,6 +169,22 @@ msgstr "Compte de %(name_deleted_user)s supprimé"
 msgid "A site administrator was removed from %(site_name)s"
 msgstr "Un administrateur de site a été supprimé de %(site_name)s"
 
+#: core/resolvers/mutation_edit_site_setting.py:315
+msgid "closed"
+msgstr ""
+
+#: core/resolvers/mutation_edit_site_setting.py:315
+#, fuzzy
+#| msgid "Public"
+msgid "public"
+msgstr "Public"
+
+#: core/resolvers/mutation_edit_site_setting.py:316
+#, fuzzy, python-format
+#| msgid "New access request for %(site_name)s"
+msgid "Site access level changed for %(site_name)s"
+msgstr "Nouvelle demande d’accès à %(site_name)s"
+
 #: core/resolvers/mutation_handle_site_access_request.py:38
 #, python-format
 msgid "You are now member of: %(site_name)s"
@@ -187,7 +203,7 @@ msgstr "courrier électronique"
 msgid "name"
 msgstr "nom"
 
-#: core/resolvers/mutation_invite_to_group.py:91
+#: core/resolvers/mutation_invite_to_group.py:93
 #, python-format
 msgid "Invitation to become a member of the %(group_name)s group"
 msgstr "Invitation à devenir membre du groupe %(group_name)s"
@@ -251,39 +267,39 @@ msgstr "Un nouvel administrateur de site a été désigné pour %(site_name)s"
 msgid "You're granted site administrator right on %(site_name)s"
 msgstr "Vous avez le droit d’administrateur de site sur %(site_name)s"
 
-#: core/resolvers/query_site.py:119
+#: core/resolvers/query_site.py:120
 msgid "Activity stream"
 msgstr "Flux d’activité"
 
-#: core/resolvers/query_site.py:119
+#: core/resolvers/query_site.py:120
 msgid "CMS page"
 msgstr "Page SGC"
 
-#: core/resolvers/query_site.py:156
+#: core/resolvers/query_site.py:157
 msgid "Daily"
 msgstr "Quotidien"
 
-#: core/resolvers/query_site.py:157
+#: core/resolvers/query_site.py:158
 msgid "Weekly"
 msgstr "Hebdomadaire"
 
-#: core/resolvers/query_site.py:158
+#: core/resolvers/query_site.py:159
 msgid "Monthly"
 msgstr "Mensuel"
 
-#: core/resolvers/query_site.py:159
+#: core/resolvers/query_site.py:160
 msgid "Never"
 msgstr "Jamais"
 
-#: core/resolvers/query_site.py:208
+#: core/resolvers/query_site.py:209
 msgid "Administrator"
 msgstr "Administrateur"
 
-#: core/resolvers/query_site.py:209
+#: core/resolvers/query_site.py:210
 msgid "Editor"
 msgstr "Éditeur"
 
-#: core/resolvers/query_site.py:210
+#: core/resolvers/query_site.py:211
 msgid "Question expert"
 msgstr "Expert en questions"
 
@@ -549,6 +565,42 @@ msgstr ""
 "Vous avez reçu ce courrier électronique car vous avez demandé de recevoir "
 "les notifications.<br /> Cliquez<a href=“%(user_url)s”>ici</a> pour modifier "
 "vos paramètres."
+
+#: core/templates/email/site_access_changed.html:6
+#, fuzzy, python-format
+#| msgid ""
+#| "Hi,<br><br>\n"
+#| "\n"
+#| "The user %(name_of_user_admin_role_changed)s is no longer a site "
+#| "administrator. This action was taken by %(user_name)s.<br>\n"
+#| "Check out the profile of the old site administrator here %(link)s."
+#| "<br><br>\n"
+#| "\n"
+#| "If you believe this was done in error, please login here %(site_url)s and "
+#| "undo this action.\n"
+msgid ""
+"Hi,<br><br>\n"
+"\n"
+"The site access level for site <a href=\"%(site_url)s\">%(site_name)s</a> "
+"changed to <b>%(access_level)s</b>. <br><br>\n"
+"\n"
+"This action was taken by %(user_name)s.<br><br>\n"
+"\n"
+"If you believe this was done in error, please <a href=\"%(site_url)s/"
+"admin2\">go to the admin</a> and undo this action.\n"
+msgstr ""
+"Salut,<br><br>\n"
+"\n"
+"\n"
+"\n"
+"L’utilisateur %(name_of_user_admin_role_changed)s n’est plus administrateur "
+"du site. Cette action a été réalisée par %(user_name)s.<br>\n"
+"\n"
+"Consultez le profile de l’ancien administrateur du site ici %(link)s."
+"<br><br>\n"
+"\n"
+"Si vous pensez qu’il s’agit d’une erreur, veuillez vous connecter ici "
+"%(site_url)s et annulez cette action.\n"
 
 #: core/templates/email/site_access_request.html:5
 #, python-format
