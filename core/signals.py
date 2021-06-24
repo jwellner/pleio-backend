@@ -18,6 +18,11 @@ def comment_handler(sender, instance, created, **kwargs):
     if not settings.IMPORTING:
         if not created:
             return
+
+        # set container last_action
+        instance.container.last_action = instance.created_at
+        instance.container.save()
+
         user_ids = []
         followers = User.objects.filter(
             annotation__key='followed',

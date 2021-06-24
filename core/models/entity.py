@@ -41,6 +41,8 @@ class Entity(models.Model):
     )
     created_at = models.DateTimeField(default=timezone.now)
     updated_at = models.DateTimeField(default=timezone.now)
+    last_action = models.DateTimeField(default=timezone.now)
+
     tags = ArrayField(models.CharField(max_length=256),
                       blank=True, default=list)
 
