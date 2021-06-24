@@ -48,6 +48,8 @@ urlpatterns = [
     path('exporting/calendar/', event_views.export_calendar, name='event_calendar_export'),
     path('exporting/users', user_views.export, name='users_export'),
 
+    path('comment/confirm/<uuid:entity_id>', core_views.comment_confirm, name='comment_confirm'),
+
     path('onboarding', core_views.onboarding, name='onboarding'),
 
     path('custom.css', core_views.custom_css),

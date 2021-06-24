@@ -226,6 +226,8 @@ class SiteSettingsTestCase(FastTenantTestCase):
                     flowToken
                     flowCaseId
                     flowUserGuid
+
+                    commentWithoutAccountEnabled
                 }
             }
         """
@@ -405,6 +407,7 @@ class SiteSettingsTestCase(FastTenantTestCase):
         self.assertEqual(data["siteSettings"]["flowToken"], "")
         self.assertEqual(data["siteSettings"]["flowCaseId"], None)
         self.assertEqual(data["siteSettings"]["flowUserGuid"], "")
+        self.assertEqual(data["siteSettings"]["commentWithoutAccountEnabled"], False)
 
 
     def test_site_settings_by_anonymous(self):

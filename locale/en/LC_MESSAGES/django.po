@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-06-23 12:19+0200\n"
+"POT-Creation-Date: 2021-06-21 17:34+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -149,6 +149,11 @@ msgstr ""
 #: core/resolvers/mutation_accept_membership_request.py:42
 #, python-format
 msgid "Request for access to the %(group_name)s group has been approved"
+msgstr ""
+
+#: core/resolvers/mutation_add_comment_without_account.py:64
+#, python-format
+msgid "Confirm comment on %(site_name)s"
 msgstr ""
 
 #: core/resolvers/mutation_change_group_role.py:43
@@ -307,7 +312,7 @@ msgstr ""
 msgid "Import failed"
 msgstr ""
 
-#: core/tasks.py:355
+#: core/tasks.py:358
 #, python-format
 msgid "New notification at %(site_name)s: "
 msgstr ""
@@ -341,6 +346,19 @@ msgid ""
 "\n"
 "Click on the link below to confirm.<br><br>\n"
 "<a href=\"%(link)s\">%(link)s</a>\n"
+msgstr ""
+
+#: core/templates/email/confirm_add_comment_without_account.html:5
+#, python-format
+msgid ""
+"\n"
+"This is a request to confirm your comment on <a href=\"%(entity_url)s\">"
+"%(entity_title)s</a>.<br><br>\n"
+"\n"
+"Comment: %(comment)s<br>\n"
+"\n"
+"Click on the link below to confirm the comment.<br><br>\n"
+"<a href=\"%(confirm_url)s\">%(confirm_url)s</a>\n"
 msgstr ""
 
 #: core/templates/email/confirm_attend_event_without_account.html:5
@@ -734,7 +752,7 @@ msgid ""
 "Access is requested. You will receive an e-mail when the request is accepted."
 msgstr ""
 
-#: core/views.py:159
+#: core/views.py:162
 #, python-format
 msgid "New access request for %(site_name)s"
 msgstr ""

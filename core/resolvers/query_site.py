@@ -232,7 +232,8 @@ def get_site_settings():
         'flowToken': config.FLOW_TOKEN,
         'flowCaseId': config.FLOW_CASE_ID,
         'flowUserGuid': config.FLOW_USER_GUID,
-        'editUserNameEnabled': config.EDIT_USER_NAME_ENABLED
+        'editUserNameEnabled': config.EDIT_USER_NAME_ENABLED,
+        'commentWithoutAccountEnabled': config.COMMENT_WITHOUT_ACCOUNT_ENABLED,
     }
 
     return site_settings

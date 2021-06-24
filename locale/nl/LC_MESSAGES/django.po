@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-06-23 12:19+0200\n"
+"POT-Creation-Date: 2021-06-21 17:34+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -150,6 +150,12 @@ msgstr "Welkom bij: %(group_name)s"
 #, python-format
 msgid "Request for access to the %(group_name)s group has been approved"
 msgstr "Toegangsaanvraag voor de groep %(group_name)s goedgekeurd"
+
+#: core/resolvers/mutation_add_comment_without_account.py:64
+#, fuzzy, python-format
+#| msgid "Go to %(site_name)s"
+msgid "Confirm comment on %(site_name)s"
+msgstr "Bevestig reactie op %(site_name)s"
 
 #: core/resolvers/mutation_change_group_role.py:43
 #, python-format
@@ -307,7 +313,7 @@ msgstr "Import afgerond"
 msgid "Import failed"
 msgstr "Import mislukt"
 
-#: core/tasks.py:355
+#: core/tasks.py:358
 #, python-format
 msgid "New notification at %(site_name)s: "
 msgstr "Nieuwe notificatie op %(site_name)s"
@@ -358,6 +364,36 @@ msgstr ""
 "\n"
 "Klik op onderstaande link om te bevestigen. <br><br>\n"
 "<a href=\"%(link)s\">%(link)s</a>\n"
+
+#: core/templates/email/confirm_add_comment_without_account.html:5
+#, fuzzy, python-format
+#| msgid ""
+#| "\n"
+#| "This is a request to confirm your comment on <a href=\"%(entity_url)s\">"
+#| "%(title)s</a>.<br><br>\n"
+#| "\n"
+#| "Comment: %(comment)s<br>\n"
+#| "\n"
+#| "Click on the link below to confirm the comment.<br><br>\n"
+#| "<a href=\"%(confirm_url)s\">%(confirm_url)s</a>\n"
+msgid ""
+"\n"
+"This is a request to confirm your comment on <a href=\"%(entity_url)s\">"
+"%(entity_title)s</a>.<br><br>\n"
+"\n"
+"Comment: %(comment)s<br>\n"
+"\n"
+"Click on the link below to confirm the comment.<br><br>\n"
+"<a href=\"%(confirm_url)s\">%(confirm_url)s</a>\n"
+msgstr ""
+"\n"
+"it is een verzoek om je reactie te bevestigen op <a href=\"%(entity_url)s\">"
+"%(entity_title)s</a>.<br><br>\n"
+"\n"
+"Reactie: %(comment)s<br>\n"
+"\n"
+"Klik op de onderstaande link om je reactie te bevestigen.<br><br>\n"
+"<a href=\"%(confirm_url)s\">%(confirm_url)s</a>\n"
 
 #: core/templates/email/confirm_attend_event_without_account.html:5
 #, python-format
@@ -865,7 +901,7 @@ msgstr ""
 "De toegang is aangevraagd. Je ontvangt een e-mail wanneer de toegang door de "
 "beheerder wordt toegewezen."
 
-#: core/views.py:159
+#: core/views.py:162
 #, python-format
 msgid "New access request for %(site_name)s"
 msgstr "Nieuwe toegangsaanvraag voor %(site_name)s"

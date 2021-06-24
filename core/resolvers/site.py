@@ -212,3 +212,8 @@ def resolve_profile_fields(obj, info):
 def resolve_edit_user_name_enabled(obj, info):
     # pylint: disable=unused-argument
     return config.EDIT_USER_NAME_ENABLED
+
+@site.field("commentWithoutAccountEnabled")
+def resolve_comment_without_account_enabled(obj, info):
+    # pylint: disable=unused-argument
+    return config.COMMENT_WITHOUT_ACCOUNT_ENABLED

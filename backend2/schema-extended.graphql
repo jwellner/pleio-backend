@@ -161,6 +161,7 @@ extend type Mutation {
   toggleEntityIsPinned(input: toggleEntityIsPinnedInput!): toggleEntityIsPinnedPayload
   """Edit username"""
   editUserName(input: editUserNameInput!): editUserNamePayload
+  addCommentWithoutAccount(input: addCommentWithoutAccountInput!): addCommentWithoutAccountPayload
 }
 
 extend type Query {
@@ -274,6 +275,7 @@ extend input editSiteSettingInput {
   iconAlt: String
   favicon: Upload
   removeFavicon: Boolean
+  commentWithoutAccountEnabled: Boolean
 }
 
 input ProfileSectionInput {
@@ -298,6 +300,7 @@ extend type Site {
   onboardingEnabled: Boolean!
   onboardingIntro: String
   editUserNameEnabled: Boolean!
+  commentWithoutAccountEnabled: Boolean!
 }
 
 type Redirect {
@@ -350,6 +353,7 @@ extend type SiteSettings {
   iconAlt: String
   editUserNameEnabled: Boolean!
   favicon: String
+  commentWithoutAccountEnabled: Boolean!
 }
 
 extend input FeaturedInput {
@@ -444,4 +448,16 @@ input editUserNameInput {
 
 type editUserNamePayload {
   user: User
+}
+
+input addCommentWithoutAccountInput {
+  containerGuid: String!
+  name: String!
+  email: String!
+  description: String!
+  richDescription: String!
+}
+
+type addCommentWithoutAccountPayload {
+  success: Boolean
 }
