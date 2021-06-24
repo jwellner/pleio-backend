@@ -13,7 +13,7 @@ class News(Entity, VoteMixin, BookmarkMixin, FollowMixin, CommentMixin):
     News
     """
     class Meta:
-        ordering = ['-created_at']
+        ordering = ['-published']
 
     title = models.CharField(max_length=256)
     description = models.TextField()

@@ -29,5 +29,6 @@ class DiscussionDocument(DefaultDocument):
 
         fields = [
             'created_at',
-            'updated_at'
+            'updated_at',
+            'published'
         ]

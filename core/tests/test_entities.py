@@ -1,3 +1,4 @@
+from datetime import datetime, timedelta
 from django.db import connection
 from django_tenants.test.cases import FastTenantTestCase
 from core.models import Group
@@ -16,7 +17,9 @@ from mixer.backend.django import mixer
 class EntitiesTestCase(FastTenantTestCase):
 
     def setUp(self):
+        self.anonymousUser = AnonymousUser()
         self.authenticatedUser = mixer.blend(User)
+        self.user2 = mixer.blend(User)
         self.admin = mixer.blend(User, roles=['ADMIN'])
         self.group = mixer.blend(Group, owner=self.authenticatedUser)
         self.blog1 = Blog.objects.create(
@@ -83,9 +86,30 @@ class EntitiesTestCase(FastTenantTestCase):
             write_access=[ACCESS_TYPE.user.format(self.admin.id)]
         )
 
+        self.blog_draft1 = Blog.objects.create(
+            title="Blog draft1",
+            owner=self.authenticatedUser,
+            read_access=[ACCESS_TYPE.public],
+            write_access=[ACCESS_TYPE.user.format(self.authenticatedUser.id)],
+            group=self.group,
+            tags=["tag_four", "tag_three"],
+            is_featured=True,
+            published=None
+        )
+        self.blog_draft2 = Blog.objects.create(
+            title="Blog draft2",
+            owner=self.user2,
+            read_access=[ACCESS_TYPE.public],
+            write_access=[ACCESS_TYPE.user.format(self.authenticatedUser.id)],
+            group=self.group,
+            tags=["tag_four", "tag_three"],
+            is_featured=True,
+            published=datetime.now()+timedelta(days=5)
+        )
+
         self.query = """
-            query getEntities($subtype: String, $containerGuid: String, $tags: [String!], $tagLists: [[String]], $isFeatured: Boolean, $limit: Int, $offset: Int, $orderBy: OrderBy, $orderDirection: OrderDirection) {
-                entities(subtype: $subtype, containerGuid: $containerGuid, tags: $tags, tagLists: $tagLists, isFeatured: $isFeatured, limit: $limit, offset: $offset, orderBy: $orderBy, orderDirection: $orderDirection) {
+            query getEntities($subtype: String, $containerGuid: String, $tags: [String!], $tagLists: [[String]], $isFeatured: Boolean, $limit: Int, $offset: Int, $orderBy: OrderBy, $orderDirection: OrderDirection, $isDraft: Boolean, $userGuid: String) {
+                entities(subtype: $subtype, containerGuid: $containerGuid, tags: $tags, tagLists: $tagLists, isFeatured: $isFeatured, limit: $limit, offset: $offset, orderBy: $orderBy, orderDirection: $orderDirection, isDraft: $isDraft, userGuid: $userGuid) {
                     total
                     edges {
                         guid
@@ -351,3 +375,182 @@ class EntitiesTestCase(FastTenantTestCase):
         data = result[1]["data"]
 
         self.assertEqual(data["entities"]["edges"][0]["guid"], self.page3.guid)
+
+    def test_entities_all_draft(self):
+        request = HttpRequest()
+        request.user = self.authenticatedUser
+
+        variables = {
+            "containerGuid": None,
+            "isDraft": True
+        }
+
+        result = graphql_sync(schema, { "query": self.query, "variables": variables }, context_value={ "request": request })
+
+        self.assertTrue(result[0])
+
+        data = result[1]["data"]
+
+        self.assertEqual(data["entities"]["total"], 1)
+
+    def test_entities_all_draft_admin(self):
+        request = HttpRequest()
+        request.user = self.admin
+
+        variables = {
+            "containerGuid": None,
+            "isDraft": True
+        }
+
+        result = graphql_sync(schema, { "query": self.query, "variables": variables }, context_value={ "request": request })
+
+        self.assertTrue(result[0])
+
+        data = result[1]["data"]
+
+        self.assertEqual(data["entities"]["total"], 2)
+
+    def test_entities_all_draft_anon(self):
+        request = HttpRequest()
+        request.user = self.anonymousUser
+
+        variables = {
+            "containerGuid": None,
+            "isDraft": True
+        }
+
+        result = graphql_sync(schema, { "query": self.query, "variables": variables }, context_value={ "request": request })
+
+        self.assertTrue(result[0])
+
+        data = result[1]["data"]
+
+        self.assertEqual(data["entities"]["total"], 0)
+
+    def test_entities_all_draft_other(self):
+        request = HttpRequest()
+        request.user = self.user2
+
+        variables = {
+            "containerGuid": None,
+            "isDraft": True
+        }
+
+        result = graphql_sync(schema, { "query": self.query, "variables": variables }, context_value={ "request": request })
+
+        self.assertTrue(result[0])
+
+        data = result[1]["data"]
+
+        self.assertEqual(data["entities"]["total"], 1)
+
+    def test_entities_all_for_user(self):
+        request = HttpRequest()
+        request.user = self.authenticatedUser
+
+        variables = {
+            "containerGuid": None,
+            "userGuid": self.authenticatedUser.guid
+        }
+
+        result = graphql_sync(schema, { "query": self.query, "variables": variables }, context_value={ "request": request })
+
+        self.assertTrue(result[0])
+
+        data = result[1]["data"]
+
+        self.assertEqual(data["entities"]["total"], 5)
+
+    def test_entities_all_for_admin_by_user(self):
+        request = HttpRequest()
+        request.user = self.authenticatedUser
+
+        variables = {
+            "containerGuid": None,
+            "userGuid": self.admin.guid
+        }
+
+        result = graphql_sync(schema, { "query": self.query, "variables": variables }, context_value={ "request": request })
+
+        self.assertTrue(result[0])
+
+        data = result[1]["data"]
+
+        self.assertEqual(data["entities"]["total"], 3)
+
+    def test_entities_all_for_admin(self):
+        request = HttpRequest()
+        request.user = self.admin
+
+        variables = {
+            "containerGuid": None,
+            "userGuid": self.admin.guid
+        }
+
+        result = graphql_sync(schema, { "query": self.query, "variables": variables }, context_value={ "request": request })
+
+        self.assertTrue(result[0])
+
+        data = result[1]["data"]
+
+        self.assertEqual(data["entities"]["total"], 3)
+
+
+    def test_blog_draft_owner(self):
+
+        query = """
+            fragment BlogParts on Blog {
+                title
+            }
+            query GetBlog($guid: String!) {
+                entity(guid: $guid) {
+                    guid
+                    status
+                    ...BlogParts
+                }
+            }
+        """
+        request = HttpRequest()
+        request.user = self.authenticatedUser
+
+        variables = {
+            "guid": self.blog_draft1.guid
+        }
+
+        result = graphql_sync(schema, { "query": query , "variables": variables}, context_value={ "request": request })
+
+        self.assertTrue(result[0])
+
+        data = result[1]["data"]
+
+        self.assertEqual(data["entity"]["guid"], self.blog_draft1.guid)
+        self.assertEqual(data["entity"]["title"], self.blog_draft1.title)
+
+
+    def test_blog_draft_other(self):
+
+        query = """
+            fragment BlogParts on Blog {
+                title
+            }
+            query GetBlog($guid: String!) {
+                entity(guid: $guid) {
+                    guid
+                    status
+                    ...BlogParts
+                }
+            }
+        """
+        request = HttpRequest()
+        request.user = self.user2
+
+        variables = {
+            "guid": self.blog_draft1.guid
+        }
+
+        result = graphql_sync(schema, { "query": query , "variables": variables}, context_value={ "request": request })
+
+        self.assertTrue(result[0])
+
+        data = result[1]["data"]
+        self.assertIsNone(data["entity"])

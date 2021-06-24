@@ -49,7 +49,7 @@ def resolve_files(
     if orderBy == 'timeUpdated':
         order_by = 'updated_at'
     elif orderBy == 'timeCreated':
-        order_by = 'created_at'
+        order_by = 'published'
     else:
         order_by = 'title'
 

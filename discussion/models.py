@@ -8,7 +8,7 @@ from core.models import Entity, VoteMixin, CommentMixin, BookmarkMixin, FollowMi
 
 class Discussion(Entity, VoteMixin, BookmarkMixin, FollowMixin, CommentMixin, NotificationMixin):
     class Meta:
-        ordering = ['-created_at']
+        ordering = ['-published']
 
     title = models.CharField(max_length=256)
     description = models.TextField()

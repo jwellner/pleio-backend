@@ -7,7 +7,7 @@ from elasticsearch_dsl import A, Q
 from graphql import GraphQLError
 from itertools import chain
 from django_tenants.utils import parse_tenant_config_path
-from django.utils import dateparse
+from django.utils import dateparse, timezone
 
 
 def resolve_search(_, info, q=None, containerGuid=None, type=None, subtype=None, dateFrom=None, dateTo=None, offset=0, limit=20,
@@ -57,6 +57,8 @@ def resolve_search(_, info, q=None, containerGuid=None, type=None, subtype=None,
             'term', tenant_name=tenant_name
         ).filter(
             'range', created_at={'gte': date_from, 'lte': date_to}
+        ).filter(
+            'range', published={'gt': None, 'lte': timezone.now()}
         ).exclude(
             'term', is_active=False
         )

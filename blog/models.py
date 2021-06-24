@@ -10,7 +10,7 @@ class Blog(Entity, VoteMixin, BookmarkMixin, FollowMixin, CommentMixin, Notifica
     Blog
     """
     class Meta:
-        ordering = ['-created_at']
+        ordering = ['-published']
 
     title = models.CharField(max_length=256)
     description = models.TextField()

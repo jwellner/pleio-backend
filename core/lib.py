@@ -442,3 +442,17 @@ def get_mimetype(filepath):
     if not mime_type:
         return None
     return mime_type
+
+def get_user_ids_for_instance_notification(instance):
+    user_ids = []
+    try:
+        for member in instance.group.members.filter(type__in=['admin', 'owner', 'member'], enable_notification=True):
+            user = member.user
+            if instance.owner == user:
+                continue
+            if not instance.can_read(user):
+                continue
+            user_ids.append(user.id)
+    except Exception:
+        return []
+    return user_ids

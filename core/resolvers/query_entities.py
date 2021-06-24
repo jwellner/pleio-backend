@@ -92,12 +92,15 @@ def resolve_entities(
     orderBy=ORDER_BY.timeCreated,
     orderDirection=ORDER_DIRECTION.desc,
     isFeatured=None,
-    sortPinned=False
+    sortPinned=False,
+    isDraft=False,
+    userGuid=None
 ):
     # pylint: disable=unused-argument
     # pylint: disable=too-many-arguments
     # pylint: disable=redefined-builtin
     # pylint: disable=too-many-locals
+    # pylint: disable=too-many-branches
 
     # merge all in subtypes list
     if not subtypes and subtype:
@@ -117,7 +120,7 @@ def resolve_entities(
     elif orderBy == ORDER_BY.title:
         order_by = 'title'
     else:
-        order_by = 'created_at'
+        order_by = 'published'
 
     if orderDirection == ORDER_DIRECTION.desc:
         order_by = '-%s' % (order_by)
@@ -129,12 +132,19 @@ def resolve_entities(
         order_by = Coalesce('news__title', 'blog__title', 'filefolder__title', 'poll__title', 'statusupdate__title', 'wiki__title',
                                               'page__title', 'question__title', 'discussion__title', 'event__title').asc()
 
-    entities = Model.objects.visible(info.context["request"].user)
+    if isDraft:
+        entities = Model.objects.draft(info.context["request"].user)
+    else:
+        entities = Model.objects.visible(info.context["request"].user)
+
     entities = entities.filter(conditional_group_filter(containerGuid) &
                                conditional_tags_filter(tags) &
                                conditional_tag_lists_filter(tagLists) &
                                conditional_subtypes_filter(subtypes) &
                                conditional_is_featured_filter(isFeatured))
+
+    if userGuid:
+        entities = entities.filter(owner__id=userGuid)
 
     # when page is selected change sorting and only return pages without parent
     if subtype and subtype == 'page':

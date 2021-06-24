@@ -16,12 +16,12 @@ from django_tenants.utils import schema_context
 from django_elasticsearch_dsl.registries import registry
 from elasticsearch_dsl import Search
 from core import config
-from core.lib import html_to_text, access_id_to_acl
+from core.lib import html_to_text, access_id_to_acl, tenant_schema, get_user_ids_for_instance_notification
 # from core.management.commands.send_notification_emails import get_notification
 from core.models import ProfileField, UserProfileField, Entity, GroupMembership, Comment, Widget, Group
 from django.core.mail import EmailMultiAlternatives
 from django.template.loader import get_template
-from django.utils import translation
+from django.utils import timezone, translation
 from django.conf import settings
 from notifications.signals import notify
 from user.models import User
@@ -30,6 +30,19 @@ from elgg.models import GuidMap
 from file.models import FileFolder
 
 logger = get_task_logger(__name__)
+
+
+def create_notifications_for_scheduled_content(schema_name):
+    # TODO: use same code as in notification_handler in core.signals
+    with schema_context(schema_name):
+        for instance in Entity.objects.filter(notifications_created=False, published__lte=timezone.now()).exclude(published=None):
+            if not instance.group:
+                instance.notifications_created = True
+                instance.save()
+                continue
+            user_ids = get_user_ids_for_instance_notification(instance)
+            create_notification.delay(tenant_schema(), 'created', instance.id, instance.owner.id, user_ids)
+
 
 @shared_task(bind=True)
 def dispatch_crons(self, period):
@@ -41,6 +54,7 @@ def dispatch_crons(self, period):
         logger.info('Schedule cron %s for %s', period, client.schema_name)
 
         if period == 'hourly':
+            create_notifications_for_scheduled_content(client.schema_name)
             send_notifications.delay(client.schema_name)
 
         if period in ['daily', 'weekly', 'monthly']:
@@ -379,6 +393,8 @@ def create_notification(self, schema_name, verb, entity_id, sender_id, recipient
                         send_mail_multi.delay(schema_name, subject, 'email/send_notification_emails.html', context, recipient.email)
                     notification.emailed = True
                     notification.save()
+        instance.notifications_created = True
+        instance.save()
 
 
 @shared_task(bind=True, ignore_result=True)
