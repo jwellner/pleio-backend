@@ -83,10 +83,6 @@ msgstr "Neuigkeiten"
 msgid "Update"
 msgstr "Update"
 
-#: core/lib.py:185
-msgid "Question"
-msgstr "Frage"
-
 #: core/lib.py:189 core/lib.py:287
 msgid "Wiki pages"
 msgstr "Wiki-Seiten"

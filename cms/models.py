@@ -18,7 +18,7 @@ class Page(Entity):
 
     class Meta:
         # When positions are equal sort old -> new (used for menu's)
-        ordering = ['position', 'created_at']
+        ordering = ['position', 'published']
 
     title = models.CharField(max_length=256)
     description = models.TextField()

@@ -240,6 +240,8 @@ type Blog implements Entity {
   tags: [String]
   timeCreated: String
   timeUpdated: String
+  timePublished: String
+  statusPublished: String
   isFeatured: Boolean
   isHighlighted: Boolean
   isRecommended: Boolean
@@ -404,6 +406,8 @@ type Discussion implements Entity {
   tags: [String]
   timeCreated: String
   timeUpdated: String
+  timePublished: String
+  statusPublished: String  
   canEdit: Boolean!
   canComment: Boolean
   canVote: Boolean
@@ -734,6 +738,8 @@ type Event implements Entity {
   tags: [String]
   timeCreated: String
   timeUpdated: String
+  timePublished: String
+  statusPublished: String
   startDate: String
   endDate: String
   location: String
@@ -811,6 +817,8 @@ type FileFolder implements Entity {
   tags: [String]
   timeCreated: String
   timeUpdated: String
+  timePublished: String
+  statusPublished: String
   isFeatured: Boolean
   isHighlighted: Boolean
   isRecommended: Boolean
@@ -1156,6 +1164,8 @@ type News implements Entity {
   tags: [String]
   timeCreated: String
   timeUpdated: String
+  timePublished: String
+  statusPublished: String
   startDate: String
   endDate: String
   source: String
@@ -1240,6 +1250,8 @@ type Page implements Entity {
   url: String
   timeCreated: String
   timeUpdated: String
+  timePublished: String
+  statusPublished: String
   accessId: Int
   pageType: String
   rows: [Row]
@@ -1268,6 +1280,8 @@ type Poll implements Entity {
   url: String
   timeCreated: String
   timeUpdated: String
+  timePublished: String
+  statusPublished: String
   accessId: Int
   choices: [PollChoice]
   hasVoted: Boolean
@@ -1319,9 +1333,9 @@ type Query {
   groups(q: String, filter: GroupFilter, tags: [String], offset: Int, limit: Int): GroupList
   events(filter: EventFilter, containerGuid: String, offset: Int, limit: Int): EventList
   users(q: String!, offset: Int, limit: Int, filters: [FilterInput]): UserList
-  entities(offset: Int, limit: Int, type: Type, subtype: String, subtypes: [String], containerGuid: String, tags: [String], tagLists: [[String]], orderBy: OrderBy, orderDirection: OrderDirection, isFeatured: Boolean, sortPinned: Boolean): EntityList
+  entities(offset: Int, limit: Int, type: Type, subtype: String, subtypes: [String], containerGuid: String, tags: [String], tagLists: [[String]], orderBy: OrderBy, orderDirection: OrderDirection, isFeatured: Boolean, sortPinned: Boolean, isDraft: Boolean, userGuid: String): EntityList
   notifications(offset: Int, limit: Int, unread: Boolean): NotificationsList
-  activities(containerGuid: String, offset: Int, limit: Int, tags: [String], tagLists: [[String]], groupFilter: [String], subtypes: [String], orderBy: OrderBy, orderDirection: OrderDirection, sortPinned: Boolean): ActivityList
+  activities(containerGuid: String, offset: Int, limit: Int, tags: [String], tagLists: [[String]], groupFilter: [String], subtypes: [String], orderBy: OrderBy, orderDirection: OrderDirection, sortPinned: Boolean, isDraft: Boolean, userGuid: String): ActivityList
   bookmarks(offset: Int, limit: Int, subtype: String): EntityList
   filters: Filters
   site: Site
@@ -1342,6 +1356,8 @@ type Question implements Entity {
   tags: [String]
   timeCreated: String
   timeUpdated: String
+  timePublished: String
+  statusPublished: String 
   isFeatured: Boolean
   isHighlighted: Boolean
   isClosed: Boolean
@@ -1610,6 +1626,8 @@ type StatusUpdate implements Entity {
   tags: [String]
   timeCreated: String
   timeUpdated: String
+  timePublished: String
+  statusPublished: String
   canEdit: Boolean!
   canComment: Boolean
   canVote: Boolean
@@ -1671,6 +1689,8 @@ type Task implements Entity {
   tags: [String]
   timeCreated: String
   timeUpdated: String
+  timePublished: String
+  statusPublished: String
   canEdit: Boolean!
   canComment: Boolean
   canVote: Boolean
@@ -1850,6 +1870,8 @@ type Wiki implements Entity {
   url: String
   timeCreated: String
   timeUpdated: String
+  timePublished: String
+  statusPublished: String
   accessId: Int
   writeAccessId: Int
   isBookmarked: Boolean

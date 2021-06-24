@@ -1,7 +1,8 @@
 from graphql import GraphQLError
 from django.core.exceptions import ObjectDoesNotExist
+from django.utils import dateparse
 from core.lib import remove_none_from_dict, access_id_to_acl
-from core.constances import NOT_LOGGED_IN, COULD_NOT_FIND, COULD_NOT_SAVE
+from core.constances import NOT_LOGGED_IN, COULD_NOT_FIND, COULD_NOT_SAVE, INVALID_DATE
 from cms.models import Page
 
 
@@ -37,6 +38,15 @@ def resolve_edit_page(_, info, input):
         entity.description = clean_input.get("description")
     if 'richDescription' in clean_input:
         entity.rich_description = clean_input.get("richDescription")
+
+    if 'timePublished' in clean_input:
+        if clean_input.get("timePublished") is None:
+            entity.published = None
+        else:
+            try:
+                entity.published = dateparse.parse_datetime(clean_input.get("timePublished"))
+            except ObjectDoesNotExist:
+                raise GraphQLError(INVALID_DATE)
 
     entity.save()
 

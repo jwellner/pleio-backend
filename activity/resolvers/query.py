@@ -87,7 +87,9 @@ def resolve_activities(
         subtypes=None,
         orderBy="timeCreated",
         orderDirection="desc",
-        sortPinned=False
+        sortPinned=False,
+        isDraft=False,
+        userGuid=None
     ):
     #pylint: disable=unused-argument
     #pylint: disable=too-many-arguments
@@ -108,12 +110,19 @@ def resolve_activities(
     if sortPinned:
         order = ["-is_pinned"] + order
 
-    qs = Entity.objects.visible(info.context["request"].user)
+    if isDraft:
+        qs = Entity.objects.draft(info.context["request"].user)
+    else:
+        qs = Entity.objects.visible(info.context["request"].user)
+
     qs = qs.filter(conditional_subtypes_filter(subtypes) &
                    conditional_tags_filter(tags) &
                    conditional_tag_lists_filter(tagLists) &
                    conditional_group_filter(containerGuid) &
                    conditional_groups_filter(groupFilter, info.context["request"].user))
+
+    if userGuid:
+        qs = qs.filter(owner__id=userGuid)
     
     qs = qs.order_by(*order).select_subclasses()
 

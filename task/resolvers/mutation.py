@@ -44,6 +44,15 @@ def resolve_add_task(_, info, input):
     entity.description = clean_input.get("description", "")
     entity.rich_description = clean_input.get("richDescription", "")
 
+    if 'timePublished' in clean_input:
+        if clean_input.get("timePublished") is None:
+            entity.published = None
+        else:
+            try:
+                entity.published = dateparse.parse_datetime(clean_input.get("timePublished"))
+            except ObjectDoesNotExist:
+                raise GraphQLError(INVALID_DATE)
+
     entity.save()
 
     return {
@@ -84,6 +93,15 @@ def resolve_edit_task(_, info, input):
         entity.read_access = access_id_to_acl(entity, clean_input.get("accessId"))
     if 'writeAccessId' in clean_input:
         entity.write_access = access_id_to_acl(entity, clean_input.get("writeAccessId"))
+
+    if 'timePublished' in clean_input:
+        if clean_input.get("timePublished") is None:
+            entity.published = None
+        else:
+            try:
+                entity.published = dateparse.parse_datetime(clean_input.get("timePublished"))
+            except ObjectDoesNotExist:
+                raise GraphQLError(INVALID_DATE)
 
     # only admins can edit these fields
     if user.has_role(USER_ROLES.ADMIN):

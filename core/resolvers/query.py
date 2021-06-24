@@ -47,6 +47,7 @@ def resolve_entity(
 ):
     # pylint: disable=unused-argument
     # pylint: disable=too-many-arguments
+    # pylint: disable=too-many-branches
     # pylint: disable=redefined-builtin
 
     user = info.context["request"].user
@@ -77,6 +78,14 @@ def resolve_entity(
             entity = User.objects.visible(user).get(id=guid)
         except ObjectDoesNotExist:
             pass
+
+    # check if draft exists
+    if not entity:
+        if user.is_authenticated:
+            try:
+                entity = Entity.objects.draft(user).get_subclass(id=guid)
+            except ObjectDoesNotExist:
+                pass
 
     if not entity:
         return None

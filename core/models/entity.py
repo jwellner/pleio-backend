@@ -1,5 +1,6 @@
 import uuid
 from django.db import models
+from django.db.models import Q
 from django.contrib.postgres.fields import ArrayField
 from django.utils import timezone
 from model_utils.managers import InheritanceManager
@@ -9,8 +10,27 @@ from .shared import read_access_default, write_access_default
 
 
 class EntityManager(InheritanceManager):
-    def visible(self, user):
+    def draft(self, user):
         qs = self.get_queryset()
+        if not user.is_authenticated:
+            return qs.none()
+
+        qs = qs.filter(
+            Q(published__gt=timezone.now()) |
+            Q(published__isnull=True)
+        )
+
+        if user.has_role(USER_ROLES.ADMIN):
+            return qs
+
+        return qs.filter(owner=user)
+
+    def published(self):
+        qs = self.get_queryset()
+        return qs.filter(published__lte=timezone.now())
+
+    def visible(self, user):
+        qs = self.published()
         if user.is_authenticated and user.has_role(USER_ROLES.ADMIN):
             return qs
 
@@ -43,10 +63,12 @@ class Entity(models.Model):
     updated_at = models.DateTimeField(default=timezone.now)
     last_action = models.DateTimeField(default=timezone.now)
 
+    published = models.DateTimeField(default=timezone.now, null=True)
     tags = ArrayField(models.CharField(max_length=256),
                       blank=True, default=list)
 
     is_pinned = models.BooleanField(default=False)
+    notifications_created = models.BooleanField(default=False)
 
     def can_read(self, user):
         if user.is_authenticated and user.has_role(USER_ROLES.ADMIN):
@@ -70,8 +92,14 @@ class Entity(models.Model):
     def guid(self):
         return str(self.id)
 
+    @property
+    def status_published(self):
+        if self.published and (self.published.replace(tzinfo=None) < timezone.now()):
+            return 'published'
+        return 'draft'
+
     class Meta:
-        ordering = ['created_at']
+        ordering = ['published']
 
 
 class EntityView(models.Model):

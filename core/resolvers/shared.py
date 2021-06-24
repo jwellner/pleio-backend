@@ -85,6 +85,14 @@ def resolve_entity_time_updated(obj, info):
     # pylint: disable=unused-argument
     return obj.updated_at
 
+def resolve_entity_time_published(obj, info):
+    # pylint: disable=unused-argument
+    return obj.published
+
+def resolve_entity_status_published(obj, info):
+    # pylint: disable=unused-argument
+    return obj.status_published
+
 def resolve_entity_can_vote(obj, info):
     # pylint: disable=unused-argument
     try:
