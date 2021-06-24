@@ -93,13 +93,12 @@ def resolve_activities(
     #pylint: disable=too-many-arguments
     #pylint: disable=too-many-locals
 
-    # TODO: how to do lastAction?
     if orderBy == 'timeUpdated':
         order_by = 'updated_at'
-    elif orderBy == 'lastAction':
-        order_by = 'updated_at'
-    else:
+    elif orderBy == 'timeCreated':
         order_by = 'created_at'
+    else:
+        order_by = 'last_action'
 
     if orderDirection == 'desc':
         order_by = '-%s' % (order_by)

@@ -46,7 +46,6 @@ def resolve_files(
     #pylint: disable=too-many-arguments
     #pylint: disable=redefined-builtin
 
-    # TODO: how to do lastAction?
     if orderBy == 'timeUpdated':
         order_by = 'updated_at'
     elif orderBy == 'timeCreated':

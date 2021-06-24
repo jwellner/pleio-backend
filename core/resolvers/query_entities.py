@@ -113,7 +113,7 @@ def resolve_entities(
     if orderBy == ORDER_BY.timeUpdated:
         order_by = 'updated_at'
     elif orderBy == ORDER_BY.lastAction:
-        order_by = 'updated_at'
+        order_by = 'last_action'
     elif orderBy == ORDER_BY.title:
         order_by = 'title'
     else:
