@@ -177,6 +177,8 @@ class EditSiteSettingTestCase(FastTenantTestCase):
                         flowToken
                         flowCaseId
                         flowUserGuid
+
+                        commentWithoutAccountEnabled
                     }
                 }
             }
@@ -293,7 +295,9 @@ class EditSiteSettingTestCase(FastTenantTestCase):
                 "flowAppUrl": "https://flow.test",
                 "flowToken": "1234567890qwertyuiop",
                 "flowCaseId": 1,
-                "flowUserGuid": self.admin.guid
+                "flowUserGuid": self.admin.guid,
+
+                "commentWithoutAccountEnabled": True,
 
             }
         }
@@ -417,6 +421,8 @@ class EditSiteSettingTestCase(FastTenantTestCase):
         self.assertEqual(data["editSiteSetting"]["siteSettings"]["flowCaseId"], 1)
         self.assertEqual(data["editSiteSetting"]["siteSettings"]["flowUserGuid"], self.admin.guid)
 
+        self.assertEqual(data["editSiteSetting"]["siteSettings"]["commentWithoutAccountEnabled"], True)
+
     @patch("core.lib.get_mimetype")
     @patch("{}.open".format(settings.DEFAULT_FILE_STORAGE))
     def test_edit_site_setting_logo_and_icon(self, mock_open, mock_mimetype):
@@ -538,7 +544,10 @@ class EditSiteSettingTestCase(FastTenantTestCase):
 
         self.assertEqual(errors[0]["message"], "invalid_value")
 
-    def test_edit_site_setting_is_closed_default_access(self):
+
+
+    @patch('core.resolvers.mutation_edit_site_setting.send_mail_multi.delay')
+    def test_edit_site_setting_is_closed_default_access(self, mocked_send_mail_multi):
         mutation = """
             mutation EditSiteSetting($input: editSiteSettingInput!) {
                 editSiteSetting(input: $input) {
@@ -566,6 +575,8 @@ class EditSiteSettingTestCase(FastTenantTestCase):
         self.assertEqual(data["editSiteSetting"]["siteSettings"]["isClosed"], False)
         self.assertEqual(data["editSiteSetting"]["siteSettings"]["defaultAccessId"], 2)
 
+        self.assertEqual(mocked_send_mail_multi.call_count, 1)
+
         variables = {
             "input": {
                 "isClosed": True
@@ -580,6 +591,8 @@ class EditSiteSettingTestCase(FastTenantTestCase):
 
         self.assertEqual(data["editSiteSetting"]["siteSettings"]["isClosed"], True)
         self.assertEqual(data["editSiteSetting"]["siteSettings"]["defaultAccessId"], 1)
+
+        self.assertEqual(mocked_send_mail_multi.call_count, 2)
 
     def test_edit_site_setting_wrong_whitelisted_ip_range(self):
         mutation = """

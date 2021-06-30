@@ -38,7 +38,7 @@ class AddAttachmentTestCase(FastTenantTestCase):
 
     @patch("core.lib.get_mimetype")
     @patch("{}.open".format(settings.DEFAULT_FILE_STORAGE))
-    def test_add_attachment_annonymous(self, mock_open, mock_mimetype):
+    def test_add_attachment_anonymous(self, mock_open, mock_mimetype):
 
         blog1 = Blog.objects.create(
             title="Blog logged_in",

@@ -1,0 +1,13 @@
+{% extends "email/base_notification.html" %}
+{% load i18n %}
+
+{% block body %}
+{% blocktrans %}
+This is a request to confirm your comment on <a href="{{ entity_url }}">{{ entity_title }}</a>.<br><br>
+
+Comment: {{ comment }}<br>
+
+Click on the link below to confirm the comment.<br><br>
+<a href="{{ confirm_url }}">{{ confirm_url }}</a>
+{% endblocktrans %}
+{% endblock %}

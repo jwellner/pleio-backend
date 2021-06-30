@@ -21,7 +21,10 @@ class Comment(VoteMixin):
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
 
-    owner = models.ForeignKey('user.User', on_delete=models.PROTECT)
+    owner = models.ForeignKey('user.User', on_delete=models.PROTECT, null=True, blank=True)
+
+    name = models.CharField(max_length=256, null=True, blank=True)
+    email = models.CharField(max_length=256, null=True, blank=True)
 
     description = models.TextField()
     rich_description = models.TextField(null=True, blank=True)
@@ -60,6 +63,21 @@ class Comment(VoteMixin):
     def __str__(self):
         return f"Comment[{self.guid}]"
 
+class CommentRequest(models.Model):
+
+    code = models.CharField(max_length=36)
+
+    name = models.CharField(max_length=256, null=True, blank=True)
+    email = models.CharField(max_length=256, null=True, blank=True)
+
+    description = models.TextField()
+    rich_description = models.TextField(null=True, blank=True)
+
+    created_at = models.DateTimeField(default=timezone.now)
+
+    content_type = models.ForeignKey(ContentType, on_delete=models.PROTECT)
+    object_id = models.UUIDField(default=uuid.uuid4)
+    container = GenericForeignKey('content_type', 'object_id')
 
 class CommentMixin(models.Model):
     comments = GenericRelation(Comment)

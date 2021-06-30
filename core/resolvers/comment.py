@@ -15,6 +15,14 @@ def resolve_is_best_answer(obj, info):
         return True
     return False
 
+@comment.field("ownerName")
+def resolve_owner_name(obj, info):
+    # pylint: disable=unused-argument
+    if obj.owner:
+        return obj.owner.name
+    
+    return obj.name
+
 
 comment.set_field("description", shared.resolve_entity_description)
 comment.set_field("richDescription", shared.resolve_entity_rich_description)

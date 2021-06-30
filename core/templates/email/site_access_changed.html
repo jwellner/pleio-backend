@@ -1,0 +1,14 @@
+
+{% extends "email/base_notification.html" %}
+{% load i18n %}
+
+{% block body %}
+{% blocktrans %}Hi,<br><br>
+
+The site access level for site <a href="{{ site_url }}">{{ site_name}}</a> changed to <b>{{ access_level }}</b>. <br><br>
+
+This action was taken by {{ user_name }}.<br><br>
+
+If you believe this was done in error, please <a href="{{ site_url }}/admin2">go to the admin</a> and undo this action.
+{% endblocktrans %}
+{% endblock %}

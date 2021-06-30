@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Duits\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-06-11 17:51+0200\n"
+"POT-Creation-Date: 2021-06-21 17:34+0200\n"
 "PO-Revision-Date: 2021-05-26 10:55+0200\n"
 "Last-Translator: \n"
 "Language-Team: \n"
@@ -18,19 +18,19 @@ msgstr ""
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 "X-Generator: Poedit 2.4.3\n"
 
-#: backend2/config.py:62 core/lib.py:290
+#: backend2/config.py:62 core/lib.py:294
 msgid "English"
 msgstr "Englisch"
 
-#: backend2/config.py:63 core/lib.py:289
+#: backend2/config.py:63 core/lib.py:293
 msgid "Dutch"
 msgstr "Niederländisch"
 
-#: backend2/config.py:64 core/lib.py:291
+#: backend2/config.py:64 core/lib.py:295
 msgid "German"
 msgstr "Deutsch"
 
-#: backend2/config.py:65 core/lib.py:292
+#: backend2/config.py:65 core/lib.py:296
 msgid "French"
 msgstr ""
 
@@ -75,7 +75,7 @@ msgstr "Blog"
 msgid "Discussion"
 msgstr "Diskussion"
 
-#: core/lib.py:177 core/lib.py:279
+#: core/lib.py:177 core/lib.py:283
 msgid "News"
 msgstr "Neuigkeiten"
 
@@ -87,47 +87,47 @@ msgstr "Update"
 msgid "Question"
 msgstr "Frage"
 
-#: core/lib.py:273
-msgid "Updates"
-msgstr "Updates"
-
-#: core/lib.py:274
-msgid "Blogs"
-msgstr "Blogs"
-
-#: core/lib.py:275
-msgid "CMS pages"
-msgstr "CMS-Seiten"
-
-#: core/lib.py:276
-msgid "Discussions"
-msgstr "Diskussionen"
-
-#: core/lib.py:277
-msgid "Events"
-msgstr "Events"
-
-#: core/lib.py:278
-msgid "Files"
-msgstr "Dateien"
-
-#: core/lib.py:280
-msgid "Polls"
-msgstr "Umfragen"
-
-#: core/lib.py:281
-msgid "Questions"
-msgstr "Fragen"
-
-#: core/lib.py:282
-msgid "Tasks"
-msgstr "Aufgaben"
-
-#: core/lib.py:283
+#: core/lib.py:189 core/lib.py:287
 msgid "Wiki pages"
 msgstr "Wiki-Seiten"
 
+#: core/lib.py:277
+msgid "Updates"
+msgstr "Updates"
+
+#: core/lib.py:278
+msgid "Blogs"
+msgstr "Blogs"
+
+#: core/lib.py:279
+msgid "CMS pages"
+msgstr "CMS-Seiten"
+
+#: core/lib.py:280
+msgid "Discussions"
+msgstr "Diskussionen"
+
+#: core/lib.py:281
+msgid "Events"
+msgstr "Events"
+
+#: core/lib.py:282
+msgid "Files"
+msgstr "Dateien"
+
 #: core/lib.py:284
+msgid "Polls"
+msgstr "Umfragen"
+
+#: core/lib.py:285
+msgid "Questions"
+msgstr "Fragen"
+
+#: core/lib.py:286
+msgid "Tasks"
+msgstr "Aufgaben"
+
+#: core/lib.py:288
 msgid "Comments"
 msgstr "Kommentare"
 
@@ -142,6 +142,7 @@ msgid "Regular overview of %(site_name)s"
 msgstr "Regulärer Überblick über %(site_name)s"
 
 #: core/models/group.py:183
+#, python-format
 msgid "Welcome to %(group_name)s"
 msgstr "Wilkommen zu: %(group_name)s"
 
@@ -149,6 +150,12 @@ msgstr "Wilkommen zu: %(group_name)s"
 #, python-format
 msgid "Request for access to the %(group_name)s group has been approved"
 msgstr "Der Antrag auf Zugang zur %(group_name)s-Gruppe wurde genehmigt"
+
+#: core/resolvers/mutation_add_comment_without_account.py:64
+#, fuzzy, python-format
+#| msgid "Go to %(site_name)s"
+msgid "Confirm comment on %(site_name)s"
+msgstr "Bestätigen Sie den Kommentar zu %(site_name)s"
 
 #: core/resolvers/mutation_change_group_role.py:43
 #, python-format
@@ -168,6 +175,22 @@ msgstr "Konto von %(name_deleted_user)s wurde entfernt"
 msgid "A site administrator was removed from %(site_name)s"
 msgstr "Ein Site-Administrator wurde von %(site_name)s entfernt"
 
+#: core/resolvers/mutation_edit_site_setting.py:315
+msgid "closed"
+msgstr ""
+
+#: core/resolvers/mutation_edit_site_setting.py:315
+#, fuzzy
+#| msgid "Public"
+msgid "public"
+msgstr "Öffentlich"
+
+#: core/resolvers/mutation_edit_site_setting.py:316
+#, fuzzy, python-format
+#| msgid "New access request for %(site_name)s"
+msgid "Site access level changed for %(site_name)s"
+msgstr "Neue Zugriffsanfrage für %(site_name)s"
+
 #: core/resolvers/mutation_handle_site_access_request.py:38
 #, python-format
 msgid "You are now member of: %(site_name)s"
@@ -186,7 +209,7 @@ msgstr "E-Mail-Adresse"
 msgid "name"
 msgstr "Name"
 
-#: core/resolvers/mutation_invite_to_group.py:91
+#: core/resolvers/mutation_invite_to_group.py:93
 #, python-format
 msgid "Invitation to become a member of the %(group_name)s group"
 msgstr "Einladung, um Mitglied der %(group_name)s-Gruppe zu werden"
@@ -249,39 +272,39 @@ msgstr "Ein neuer Site-Administrator wurde %(site_name)s zugewiesen"
 msgid "You're granted site administrator right on %(site_name)s"
 msgstr "Ihnen wurden Site-Administratorrechte auf %(site_name)s gewährt"
 
-#: core/resolvers/query_site.py:119
+#: core/resolvers/query_site.py:120
 msgid "Activity stream"
 msgstr "Aktivitäten-Stream"
 
-#: core/resolvers/query_site.py:119
+#: core/resolvers/query_site.py:120
 msgid "CMS page"
 msgstr "CMS-Seite"
 
-#: core/resolvers/query_site.py:156
+#: core/resolvers/query_site.py:157
 msgid "Daily"
 msgstr "Täglich"
 
-#: core/resolvers/query_site.py:157
+#: core/resolvers/query_site.py:158
 msgid "Weekly"
 msgstr "Wöchentlich"
 
-#: core/resolvers/query_site.py:158
+#: core/resolvers/query_site.py:159
 msgid "Monthly"
 msgstr "Monatlich"
 
-#: core/resolvers/query_site.py:159
+#: core/resolvers/query_site.py:160
 msgid "Never"
 msgstr "Nie"
 
-#: core/resolvers/query_site.py:208
+#: core/resolvers/query_site.py:209
 msgid "Administrator"
 msgstr "Administrator"
 
-#: core/resolvers/query_site.py:209
+#: core/resolvers/query_site.py:210
 msgid "Editor"
 msgstr "Editor"
 
-#: core/resolvers/query_site.py:210
+#: core/resolvers/query_site.py:211
 msgid "Question expert"
 msgstr "Experten fragen"
 
@@ -293,7 +316,7 @@ msgstr "Import war erfolgreich"
 msgid "Import failed"
 msgstr "Import fehlgeschlagen"
 
-#: core/tasks.py:355
+#: core/tasks.py:358
 #, python-format
 msgid "New notification at %(site_name)s: "
 msgstr "Neue Benachrichtigung auf %(site_name)s: "
@@ -333,6 +356,34 @@ msgid ""
 "\n"
 "Click on the link below to confirm.<br><br>\n"
 "<a href=\"%(link)s\">%(link)s</a>\n"
+msgstr ""
+"\n"
+"Bestätigen Sie Ihre Registrierung für %(title)s.<br><br>\n"
+"Ort: %(location)s<br>\n"
+"Datum: %(start_date)s<br><br>\n"
+"Klicken Sie zur Bestätigung auf den unten stehenden Link.<br><br>\n"
+"<a href=“%(link)s”>%(link)s</a>\n"
+
+#: core/templates/email/confirm_add_comment_without_account.html:5
+#, fuzzy, python-format
+#| msgid ""
+#| "\n"
+#| "Confirm your registration for %(title)s.<br><br>\n"
+#| "\n"
+#| "Location: %(location)s<br>\n"
+#| "Date: %(start_date)s<br><br>\n"
+#| "\n"
+#| "Click on the link below to confirm.<br><br>\n"
+#| "<a href=\"%(link)s\">%(link)s</a>\n"
+msgid ""
+"\n"
+"This is a request to confirm your comment on <a href=\"%(entity_url)s\">"
+"%(entity_title)s</a>.<br><br>\n"
+"\n"
+"Comment: %(comment)s<br>\n"
+"\n"
+"Click on the link below to confirm the comment.<br><br>\n"
+"<a href=\"%(confirm_url)s\">%(confirm_url)s</a>\n"
 msgstr ""
 "\n"
 "Bestätigen Sie Ihre Registrierung für %(title)s.<br><br>\n"
@@ -546,6 +597,20 @@ msgstr ""
 "Sie haben diese E-Mail erhalten, weil Sie sich registriert haben, um "
 "Benachrichtigungen zu erhalten.<br /> Klicken Sie <a "
 "href=“%(user_url)s”>hier</a>, um Ihre Einstellungen zu ändern."
+
+#: core/templates/email/site_access_changed.html:6
+#, python-format
+msgid ""
+"Hi,<br><br>\n"
+"\n"
+"The site access level for site <a href=\"%(site_url)s\">%(site_name)s</a> "
+"changed to <b>%(access_level)s</b>. <br><br>\n"
+"\n"
+"This action was taken by %(user_name)s.<br><br>\n"
+"\n"
+"If you believe this was done in error, please <a href=\"%(site_url)s/"
+"admin2\">go to the admin</a> and undo this action.\n"
+msgstr ""
 
 #: core/templates/email/site_access_request.html:5
 #, python-format
@@ -786,7 +851,7 @@ msgstr ""
 "Zugang wird angefordert. Sie erhalten eine E-Mail, wenn die Anfrage "
 "angenommen wird."
 
-#: core/views.py:159
+#: core/views.py:162
 #, python-format
 msgid "New access request for %(site_name)s"
 msgstr "Neue Zugriffsanfrage für %(site_name)s"

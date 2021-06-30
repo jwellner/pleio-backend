@@ -18,17 +18,28 @@ def comment_handler(sender, instance, created, **kwargs):
     if not settings.IMPORTING:
         if not created:
             return
+
+        # set container last_action
+        instance.container.last_action = instance.created_at
+        instance.container.save()
+
         user_ids = []
         followers = User.objects.filter(
             annotation__key='followed',
-            annotation__object_id=instance.object_id).exclude(id=instance.owner.id)
+            annotation__object_id=instance.object_id)
+
+        if instance.owner:
+            followers = followers.exclude(id=instance.owner.id)
+            sender = instance.owner.id
+        else:
+            return #TODO: what to do with anonymous comments ???
 
         for follower in followers:
             if not instance.container.can_read(follower):
                 continue
             user_ids.append(follower.id)
 
-        create_notification.delay(tenant_schema(), 'commented', instance.container.id, instance.owner.id, user_ids)
+        create_notification.delay(tenant_schema(), 'commented', instance.container.id, sender, user_ids)
 
 
 def user_handler(sender, instance, created, **kwargs):

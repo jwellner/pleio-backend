@@ -1,5 +1,5 @@
 Django==3.2.4
-psycopg2-binary==2.8.6
+psycopg2-binary==2.9.1
 django-filter==2.4.0
 Pillow==8.2.0
 django-elasticsearch-dsl==7.2.0
@@ -17,10 +17,10 @@ django-storage-swift==1.2.19
 elastic-apm==6.2.2
 opentracing==2.4.0
 django-notifications-hq==1.6.0
-django-tenants==3.3.1
+django-tenants==3.3.2
 mysqlclient==2.0.3
 django-storages==1.11.1
-boto3==1.17.98
+boto3==1.17.101
 docutils==0.15
 phpserialize==1.3
 python-memcached==1.59

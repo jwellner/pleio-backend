@@ -1,6 +1,6 @@
 from django.db import connection
 from django_tenants.test.cases import FastTenantTestCase
-from core.models import Group
+from core.models import Group, Comment
 from user.models import User
 from blog.models import Blog
 from core.constances import ACCESS_TYPE
@@ -58,6 +58,13 @@ class ActivitiesTestCase(FastTenantTestCase):
             read_access=[ACCESS_TYPE.public],
             write_access=[ACCESS_TYPE.user.format(self.user1.id)],
             is_pinned=True
+        )
+
+        self.comment = Comment.objects.create(
+            owner=self.user2,
+            container=self.blog1,
+            description="Just testing",
+            rich_description="Just testing"
         )
 
         self.query = """
@@ -142,6 +149,7 @@ class ActivitiesTestCase(FastTenantTestCase):
         """
 
     def tearDown(self):
+        self.comment.delete()
         self.blog1.delete()
         self.blog2.delete()
         self.blog3.delete()
@@ -237,4 +245,25 @@ class ActivitiesTestCase(FastTenantTestCase):
         data = result[1]["data"]
 
         self.assertEqual(data["activities"]["edges"][0]["entity"]["guid"], self.blog5.guid)
+
+    def test_activities_last_action(self):
+        request = HttpRequest()
+        request.user = self.user2
+
+        variables = {
+            "limit": 20,
+            "offset": 0,
+            "subtypes": [],
+            "containerGuid": None,
+            "orderBy": "lastAction"
+        }
+
+        result = graphql_sync(schema, { "query": self.query, "variables": variables }, context_value={ "request": request })
+
+        self.assertTrue(result[0])
+
+        data = result[1]["data"]
+
+        self.assertEqual(data["activities"]["edges"][0]["entity"]["guid"], self.blog1.guid)
+
 
