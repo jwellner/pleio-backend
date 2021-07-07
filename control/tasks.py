@@ -277,20 +277,23 @@ def backup_site(self, backup_site_id):
 
     skip_tables = ("auth_permission", "django_content_type", "django_migrations", "django_session", "django_admin_log")
 
-    with connection.connection.cursor() as cursor:
-        cursor.execute( "SELECT table_name FROM information_schema.tables " +
-                        "WHERE ( table_schema = %s AND table_name NOT IN %s ) " +
-                        "ORDER BY table_name;", (backup_site.schema_name, skip_tables))
-        tables = cursor.fetchall()
+    # get psycopg2 cursor
+    cursor = connection.connection.cursor()
+
+    cursor.execute( "SELECT table_name FROM information_schema.tables " +
+                    "WHERE ( table_schema = %s AND table_name NOT IN %s ) " +
+                    "ORDER BY table_name;", (backup_site.schema_name, skip_tables))
+    tables = cursor.fetchall()
+
+    cursor.execute(f"SET search_path TO {backup_site.schema_name};")
 
     # dump data for all tables
     for row in tables:
-        table = f"{backup_site.schema_name}.{row[0]}"
+        table = f"{row[0]}"
         file_path = f"{backup_schema_folder}/{row[0]}.csv"
         f = open(file_path, 'wb+')
 
-        with connection.connection.cursor() as cursor:
-            cursor.copy_to(f, table)
+        cursor.copy_to(f, table)
         logger.info("Copy %s data to %s", table, file_path)
 
     # copy files
