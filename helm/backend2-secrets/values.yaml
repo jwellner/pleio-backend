@@ -1,4 +1,6 @@
 secretKey:
+elasticsearch:
+memcache:
 
 oidc:
   clientId:
@@ -13,3 +15,18 @@ db:
 email:
   host:
   port:
+
+s3: {}
+# accessKeyId:
+# secretAccessKey:
+# storageBucketName:
+# endpointUrl:
+
+apm: {}
+# serviceName:
+# token:
+# serverUrl:
+
+celery: {}
+# brokerUrl:
+# resultBackend:

@@ -6,7 +6,7 @@ metadata:
   labels:
     {{- include "backend2.labels" $labelData | nindent 4 }}
 spec:
-  replicas: {{ .Values.replicaCount }}
+  replicas: {{ .Values.api.replicaCount }}
   selector:
     matchLabels:
       {{- include "backend2.selectorLabels" $labelData | nindent 6 }}

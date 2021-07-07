@@ -1,32 +1,69 @@
-apiVersion: extensions/v1beta1
+{{- $serviceName := ((include "backend2.apiName" .)) -}}
+---
+{{- if or .Values.websitesAuto .Values.adminDomain }}
+apiVersion: networking.k8s.io/v1beta1
 kind: Ingress
 metadata:
   annotations:
     {{- with .Values.ingress.annotations }}
       {{ toYaml . | nindent 4 }}
     {{- end }}
-  name: {{ include "backend2.name" . }}
+  name: {{ printf "%s-auto-certs" ((include "backend2.name" .)) }}
 spec:
   rules:
-  {{- $serviceName := ((include "backend2.apiName" .)) -}}
-  {{- range .Values.domains }}
-    - host: {{ . }}
+  {{- range .Values.websitesAuto }}
+    - host: {{ .domain | quote }}
       http:
         paths:
           - backend:
               serviceName: {{ $serviceName }}
               servicePort: http
   {{- end }}
+  {{- if .Values.adminDomain }}
     - host: {{ .Values.adminDomain }}
       http:
         paths:
           - backend:
               serviceName: {{ include "backend2.adminName" . }}
               servicePort: http
+  {{- end }}
   tls:
+  {{- range .Values.websitesAuto }}
     - hosts:
-      {{- range .Values.domains }}
-        - {{ . }}
-      {{- end }}
+        - {{ .domain | quote }}
+      secretName: {{ .secretName }}
+  {{- end }}
+  {{- if .Values.adminDomain }}
+    - hosts:
         - {{ .Values.adminDomain }}
       secretName: {{ include "backend2.tlsSecretName" . }}
+  {{- end }}
+{{- end }}
+---
+{{- if .Values.websitesManual }}
+apiVersion: networking.k8s.io/v1beta1
+kind: Ingress
+metadata:
+  annotations:
+    {{- with .Values.ingress.annotations }}
+      {{ toYaml . | nindent 4 }}
+    {{- end }}
+    {{ .Values.ingress.issuerAnnotation }}
+  name: {{ printf "%s-manual-certs" ((include "backend2.name" .)) }}
+spec:
+  rules:
+  {{- range .Values.websitesManual }}
+    - host: {{ .domain | quote }}
+        http:
+          paths:
+            - backend:
+                serviceName: {{ $serviceName }}
+                servicePort: http
+  {{- end }}
+  tls:
+  {{- range .Values.websitesManual }}
+    - hosts:
+        - {{ .domain | quote }}
+      secretName: {{ .secretName }}
+  {{- end }}
+{{- end }}
