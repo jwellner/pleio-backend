@@ -77,9 +77,7 @@ def resolve_search(_, info, q=None, containerGuid=None, type=None, subtype=None,
 
     if orderBy == SEARCH_ORDER_BY.title:
         s = s.sort({'title.raw': {'order': orderDirection}})
-    elif orderBy == SEARCH_ORDER_BY.timeCreated:
-        s = s.sort({'created_at': {'order': orderDirection}})
-    elif orderBy == SEARCH_ORDER_BY.timePublished:
+    elif orderBy in [SEARCH_ORDER_BY.timeCreated, SEARCH_ORDER_BY.timePublished]:
         s = s.sort({'published': {'order': orderDirection}})
 
     a = A('terms', field='type')
