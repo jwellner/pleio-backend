@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-06-21 17:34+0200\n"
+"POT-Creation-Date: 2021-07-07 10:28+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -151,7 +151,7 @@ msgstr "Welkom bij: %(group_name)s"
 msgid "Request for access to the %(group_name)s group has been approved"
 msgstr "Toegangsaanvraag voor de groep %(group_name)s goedgekeurd"
 
-#: core/resolvers/mutation_add_comment_without_account.py:64
+#: core/resolvers/mutation_add_comment_without_account.py:60
 #, fuzzy, python-format
 #| msgid "Go to %(site_name)s"
 msgid "Confirm comment on %(site_name)s"
@@ -175,15 +175,15 @@ msgstr "Account verwijderd van %(name_deleted_user)s"
 msgid "A site administrator was removed from %(site_name)s"
 msgstr "Een site beheerder is verwijderd van %(site_name)s"
 
-#: core/resolvers/mutation_edit_site_setting.py:315
+#: core/resolvers/mutation_edit_site_setting.py:317
 msgid "closed"
 msgstr "gesloten"
 
-#: core/resolvers/mutation_edit_site_setting.py:315
+#: core/resolvers/mutation_edit_site_setting.py:317
 msgid "public"
 msgstr "publiek"
 
-#: core/resolvers/mutation_edit_site_setting.py:316
+#: core/resolvers/mutation_edit_site_setting.py:318
 #, python-format
 msgid "Site access level changed for %(site_name)s"
 msgstr "Toegangsniveau voor aangepast op %(site_name)s"
@@ -246,11 +246,13 @@ msgstr "Bericht van {0}: {1}"
 msgid "Copy: Message from {0}: {1}"
 msgstr "Kopie: Bericht van {0}: {1}"
 
-#: core/resolvers/mutation_toggle_request_delete_user.py:36
+#: core/resolvers/mutation_toggle_request_delete_user.py:38
+#: core/resolvers/mutation_toggle_request_delete_user.py:52
 msgid "Request to remove account cancelled"
 msgstr "Verzoek om account te verwijderen geannuleerd"
 
-#: core/resolvers/mutation_toggle_request_delete_user.py:50
+#: core/resolvers/mutation_toggle_request_delete_user.py:66
+#: core/resolvers/mutation_toggle_request_delete_user.py:80
 msgid "Request to remove account"
 msgstr "Verzoek om account te verwijderen"
 
@@ -313,7 +315,7 @@ msgstr "Import afgerond"
 msgid "Import failed"
 msgstr "Import mislukt"
 
-#: core/tasks.py:358
+#: core/tasks.py:355
 #, python-format
 msgid "New notification at %(site_name)s: "
 msgstr "Nieuwe notificatie op %(site_name)s"
@@ -685,6 +687,19 @@ msgstr ""
 "Je hebt als gebruiker <strong> %(user_name)s </strong> het verzoek om je "
 "account te laten verwijderen geannuleerd."
 
+#: core/templates/email/toggle_request_delete_user_cancelled_admin.html:6
+#, python-format
+msgid ""
+"The user <strong>%(user_name)s</strong> has cancelled his/her request to "
+"remove his/her account. This account will no longer be visible on the <a "
+"href='%(site_url)s/admin2/users/delete-requests'>list</a> of removal "
+"requests."
+msgstr ""
+"De gebruiker <strong> %(user_name)s </strong> heeft haar/zijn verzoek om het "
+"account te laten verwijderen geannuleerd. Dit account zal niet meer "
+"zichtbaar zijn op het <a href='%(site_url)s/admin2/users/delete-"
+"requests'>overzicht</a> van met de aanvragen voor verwijderen."
+
 #: core/templates/email/toggle_request_delete_user_requested.html:6
 #, python-format
 msgid ""
@@ -695,6 +710,17 @@ msgstr ""
 "Je hebt als gebruiker <strong>%(user_name)s</strong> verzocht aan de "
 "deelsitebeheerders om je account te laten verwijderen. Wanneer de "
 "deelsitebeheerder dit heeft doorgevoerd, ontvang je hierover bericht. "
+
+#: core/templates/email/toggle_request_delete_user_requested_admin.html:6
+#, python-format
+msgid ""
+"The user <strong>%(user_name)s</strong> wants his or her account removed, go "
+"<a href='%(site_url)s/admin2/users/delete-requests'>here</a> to the list of "
+"removal requests. "
+msgstr ""
+"De gebruiker <strong>%(user_name)s</strong> wil haar/zijn account laten "
+"verwijderen, ga <a href='%(site_url)s/admin2/users/delete-requests'>hier</a> "
+"naar het overzicht met de aanvragen voor verwijderen."
 
 #: core/templates/email/user_deleted.html:6
 #, python-format
