@@ -1,0 +1,15 @@
+secretKey:
+
+oidc:
+  clientId:
+  clientSecret:
+
+db:
+  host:
+  user:
+  password:
+  name:
+
+email:
+  host:
+  port:
