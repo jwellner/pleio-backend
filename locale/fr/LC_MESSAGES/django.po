@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Frans\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-06-21 17:34+0200\n"
+"POT-Creation-Date: 2021-07-07 10:28+0200\n"
 "PO-Revision-Date: 2021-05-28 17:19+0200\n"
 "Last-Translator: \n"
 "Language-Team: frans\n"
@@ -151,7 +151,7 @@ msgstr "Bienvenue dans %(group_name)s"
 msgid "Request for access to the %(group_name)s group has been approved"
 msgstr "La demande d’accès au groupe %(group_name)s) a été approuvée"
 
-#: core/resolvers/mutation_add_comment_without_account.py:64
+#: core/resolvers/mutation_add_comment_without_account.py:60
 #, fuzzy, python-format
 #| msgid "Go to %(site_name)s"
 msgid "Confirm comment on %(site_name)s"
@@ -175,17 +175,17 @@ msgstr "Compte de %(name_deleted_user)s supprimé"
 msgid "A site administrator was removed from %(site_name)s"
 msgstr "Un administrateur de site a été supprimé de %(site_name)s"
 
-#: core/resolvers/mutation_edit_site_setting.py:315
+#: core/resolvers/mutation_edit_site_setting.py:317
 msgid "closed"
 msgstr ""
 
-#: core/resolvers/mutation_edit_site_setting.py:315
+#: core/resolvers/mutation_edit_site_setting.py:317
 #, fuzzy
 #| msgid "Public"
 msgid "public"
 msgstr "Public"
 
-#: core/resolvers/mutation_edit_site_setting.py:316
+#: core/resolvers/mutation_edit_site_setting.py:318
 #, fuzzy, python-format
 #| msgid "New access request for %(site_name)s"
 msgid "Site access level changed for %(site_name)s"
@@ -249,11 +249,13 @@ msgstr "Message de {0} : {1}"
 msgid "Copy: Message from {0}: {1}"
 msgstr "Copier : Message de {0} : {1}"
 
-#: core/resolvers/mutation_toggle_request_delete_user.py:36
+#: core/resolvers/mutation_toggle_request_delete_user.py:38
+#: core/resolvers/mutation_toggle_request_delete_user.py:52
 msgid "Request to remove account cancelled"
 msgstr "Demande de suppression de compte annulée"
 
-#: core/resolvers/mutation_toggle_request_delete_user.py:50
+#: core/resolvers/mutation_toggle_request_delete_user.py:66
+#: core/resolvers/mutation_toggle_request_delete_user.py:80
 msgid "Request to remove account"
 msgstr "Demande de suppression de compte"
 
@@ -317,7 +319,7 @@ msgstr "Importation réussie"
 msgid "Import failed"
 msgstr "Échec de l’importation"
 
-#: core/tasks.py:358
+#: core/tasks.py:355
 #, python-format
 msgid "New notification at %(site_name)s: "
 msgstr "Nouvelle notification sur %(site_name)s : "
@@ -698,6 +700,15 @@ msgstr ""
 "En tant qu’utilisateur de <strong> %(user_name) s </strong>, vous avez "
 "annulé votre demande de suppression de votre compte. "
 
+#: core/templates/email/toggle_request_delete_user_cancelled_admin.html:6
+#, python-format
+msgid ""
+"The user <strong>%(user_name)s</strong> has cancelled his/her request to "
+"remove his/her account. This account will no longer be visible on the <a "
+"href='%(site_url)s/admin2/users/delete-requests'>list</a> of removal "
+"requests."
+msgstr ""
+
 #: core/templates/email/toggle_request_delete_user_requested.html:6
 #, python-format
 msgid ""
@@ -708,6 +719,14 @@ msgstr ""
 "En tant qu’utilisateur, <strong>%(user_name)s</strong> vous avez demandé la "
 "suppression de votre compte. Vous serez informé lorsque l’administrateur du "
 "site aura exécuté votre demande. "
+
+#: core/templates/email/toggle_request_delete_user_requested_admin.html:6
+#, python-format
+msgid ""
+"The user <strong>%(user_name)s</strong> wants his or her account removed, go "
+"<a href='%(site_url)s/admin2/users/delete-requests'>here</a> to the list of "
+"removal requests. "
+msgstr ""
 
 #: core/templates/email/user_deleted.html:6
 #, python-format

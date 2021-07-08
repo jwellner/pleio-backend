@@ -29,6 +29,8 @@ def resolve_toggle_request_delete_user(_, info, input):
     language = requested_user.get_language()
     translation.activate(language)
 
+    admin_users = User.objects.filter(roles__contains=['ADMIN'])
+
     if user.is_delete_requested:
         user.is_delete_requested = False
         user.save()
@@ -43,6 +45,20 @@ def resolve_toggle_request_delete_user(_, info, input):
             user.email,
             language=language
         )
+
+        # mail to admins to notify about removed admin
+        for admin_user in admin_users:
+            translation.activate(admin_user.get_language())
+            subject = ugettext_lazy("Request to remove account cancelled")
+            send_mail_multi.delay(
+                tenant_schema(),
+                subject,
+                'email/toggle_request_delete_user_cancelled_admin.html',
+                context,
+                admin_user.email,
+                language=admin_user.get_language()
+            )
+
     else:
         user.is_delete_requested = True
         user.save()
@@ -57,6 +73,19 @@ def resolve_toggle_request_delete_user(_, info, input):
             user.email,
             language=language
         )
+
+        # mail to admins to notify about removed admin
+        for admin_user in admin_users:
+            translation.activate(admin_user.get_language())
+            subject = ugettext_lazy("Request to remove account")
+            send_mail_multi.delay(
+                tenant_schema(),
+                subject,
+                'email/toggle_request_delete_user_requested_admin.html',
+                context,
+                admin_user.email,
+                language=admin_user.get_language()
+            )
 
     return {
           "viewer": user
