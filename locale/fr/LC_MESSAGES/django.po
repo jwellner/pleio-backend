@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Frans\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-06-21 17:34+0200\n"
+"POT-Creation-Date: 2021-07-08 10:24+0200\n"
 "PO-Revision-Date: 2021-06-24 15:12+0200\n"
 "Last-Translator: \n"
 "Language-Team: frans\n"
@@ -151,7 +151,7 @@ msgstr "Bienvenue dans %(group_name)s"
 msgid "Request for access to the %(group_name)s group has been approved"
 msgstr "La demande d’accès au groupe %(group_name)s) a été approuvée"
 
-#: core/resolvers/mutation_add_comment_without_account.py:64
+#: core/resolvers/mutation_add_comment_without_account.py:60
 #, python-format
 msgid "Confirm comment on %(site_name)s"
 msgstr "Confirmer le commentaire sur %(site_name)s"
@@ -178,11 +178,11 @@ msgstr "Un administrateur de site a été supprimé de %(site_name)s"
 msgid "closed"
 msgstr "fermé"
 
-#: core/resolvers/mutation_edit_site_setting.py:315
+#: core/resolvers/mutation_edit_site_setting.py:317
 msgid "public"
 msgstr "public"
 
-#: core/resolvers/mutation_edit_site_setting.py:316
+#: core/resolvers/mutation_edit_site_setting.py:318
 #, python-format
 msgid "Site access level changed for %(site_name)s"
 msgstr "Nouvelle demande d’accès à %(site_name)s"
