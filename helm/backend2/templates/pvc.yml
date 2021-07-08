@@ -25,3 +25,17 @@ spec:
   resources:
     requests:
       storage: {{ .Values.storage.dataSize }}
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ include "backend2.backupStorageName" . }}
+  labels:
+    {{- include "backend2.labels" . | nindent 4 }}
+spec:
+  storageClassName: {{ .Values.storage.className }}
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: {{ .Values.storage.backupSize }}

@@ -21,6 +21,9 @@ admin:
 api:
   replicaCount: 1
 
+background:
+  replicaCount: 1
+
 image:
   repository: registry.gitlab.com/pleio/backend2
   tag: latest
@@ -30,6 +33,7 @@ storage:
   className: efs
   dataSize: 1Mi
   tmpSize: 1Mi
+  backupSize: 1Mi
 
 ingress:
   annotations:

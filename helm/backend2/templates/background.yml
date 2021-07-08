@@ -1,0 +1,61 @@
+{{ $labelData := dict "Values" .Values "Release" .Release "Chart" .Chart "Component" "background" }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "backend2.backgroundName" . }}
+  labels:
+    {{- include "backend2.labels" $labelData | nindent 4 }}
+spec:
+  replicas: {{ .Values.background.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "backend2.selectorLabels" $labelData | nindent 6 }}
+  strategy:
+    rollingUpdate:
+      maxSurge: {{ add .Values.background.replicaCount 1 }}
+      maxUnavailable: 0
+    type: RollingUpdate
+  template:
+    metadata:
+      name: {{ include "backend2.backgroundName" . }}
+      labels:
+        {{- include "backend2.selectorLabels" $labelData | nindent 8 }}
+    spec:
+      containers:
+        - name: {{ include "backend2.backgroundName" . }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          command:
+            - celery
+            - -A
+            - backend2.celery
+            - worker
+            - -B
+            - -E
+            - -O
+            - fair
+            - -s
+            - /tmp/celerybeat-schedule
+            - --loglevel=info
+          volumeMounts:
+            - mountPath: /tmp
+              name: tmp-zip-storage
+            - mountPath: /app-data
+              name: pleio-data
+            - mountPath: /backup-storage
+              name: backup-storage
+          envFrom:
+            - configMapRef:
+                name: {{ include "backend2.name" . }}
+            - secretRef:
+                name: {{ include "backend2.secretsName" . }}
+      volumes:
+        - name: tmp-zip-storage
+          persistentVolumeClaim:
+            claimName: {{ include "backend2.tempStorageName" . }}
+        - name: pleio-data
+          persistentVolumeClaim:
+            claimName: {{ include "backend2.dataStorageName" . }}
+        - name: backup-storage
+          persistentVolumeClaim:
+            claimName: {{ include "backend2.backupStorageName" .}}

@@ -22,12 +22,20 @@
 {{- printf "%s-data" ((include "backend2.name" . )) -}}
 {{- end -}}
 
+{{- define "backend2.backupStorageName" -}}
+{{- printf "%s-backup" ((include "backend2.name" . )) -}}
+{{- end -}}
+
 {{- define "backend2.apiName" -}}
 {{- printf "%s-api" ((include "backend2.name" . )) -}}
 {{- end -}}
 
 {{- define "backend2.adminName" -}}
 {{- printf "%s-admin" ((include "backend2.name" . )) -}}
+{{- end -}}
+
+{{- define "backend2.backgroundName" -}}
+{{- printf "%s-background" ((include "backend2.name" . )) -}}
 {{- end -}}
 
 {{- define "backend2.chart" -}}
