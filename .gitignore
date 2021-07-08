@@ -19,3 +19,4 @@ postgres/
 /media/
 .localstack
 celerybeat-schedule
+*.tgz
