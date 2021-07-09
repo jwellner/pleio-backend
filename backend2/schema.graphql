@@ -1224,6 +1224,7 @@ is performed on the object, e.g. the latest comment that is placed.
 enum OrderBy {
   timeCreated
   timeUpdated
+  timePublished
   lastAction
   title
 }
@@ -1443,6 +1444,7 @@ Configure the way the search results are ordered. When not provided, sorting is 
 enum SearchOrderBy {
   title
   timeCreated
+  timePublished
 }
 
 type SearchTotal {

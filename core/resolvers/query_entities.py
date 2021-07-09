@@ -89,7 +89,7 @@ def resolve_entities(
     containerGuid=None,
     tags=None,
     tagLists=None,
-    orderBy=ORDER_BY.timeCreated,
+    orderBy=ORDER_BY.timePublished,
     orderDirection=ORDER_DIRECTION.desc,
     isFeatured=None,
     sortPinned=False,
@@ -115,6 +115,8 @@ def resolve_entities(
 
     if orderBy == ORDER_BY.timeUpdated:
         order_by = 'updated_at'
+    if orderBy == ORDER_BY.timeCreated:
+        order_by = 'created_at'
     elif orderBy == ORDER_BY.lastAction:
         order_by = 'last_action'
     elif orderBy == ORDER_BY.title:
