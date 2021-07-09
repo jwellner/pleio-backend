@@ -106,8 +106,8 @@ def get_acl(user):
 
 def remove_none_from_dict(values):
     """Cleanup resolver input: remove keys with None values"""
-
-    return {k:v for k,v in values.items() if v is not None}
+    # TODO: what are we going to do with values which kan be omitted or can be NULL
+    return {k:v for k,v in values.items() if (v is not None) or (k == 'timePublished') }
 
 def webpack_dev_server_is_available():
     """Return true when webpack developer server is available"""

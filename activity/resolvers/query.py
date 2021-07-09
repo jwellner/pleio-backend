@@ -1,6 +1,7 @@
 from ariadne import ObjectType
 from core.models import Entity
 from django.db.models import Q
+from core.constances import ORDER_BY, ORDER_DIRECTION
 
 query = ObjectType("Query")
 
@@ -85,8 +86,8 @@ def resolve_activities(
         tagLists=None,
         groupFilter=None,
         subtypes=None,
-        orderBy="timeCreated",
-        orderDirection="desc",
+        orderBy=ORDER_BY.timePublished,
+        orderDirection=ORDER_DIRECTION.desc,
         sortPinned=False,
         isDraft=False,
         userGuid=None
@@ -95,14 +96,18 @@ def resolve_activities(
     #pylint: disable=too-many-arguments
     #pylint: disable=too-many-locals
 
-    if orderBy == 'timeUpdated':
+    if orderBy == ORDER_BY.timeUpdated:
         order_by = 'updated_at'
-    elif orderBy == 'timeCreated':
+    elif orderBy == ORDER_BY.timeCreated:
         order_by = 'created_at'
-    else:
+    elif orderBy == ORDER_BY.lastAction:
         order_by = 'last_action'
+    elif orderBy == ORDER_BY.title:
+        order_by = 'title'
+    else:
+        order_by = 'published'
 
-    if orderDirection == 'desc':
+    if orderDirection == ORDER_DIRECTION.desc:
         order_by = '-%s' % (order_by)
 
     order = [order_by]
