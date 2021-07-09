@@ -95,7 +95,7 @@ AWS Review:
   only:
     - /^feature-(.*)$/
   script:
-    - helm upgrade --install -n pleio2 -f helm/backend2/values.yml --set image.tag=feature-${CI_COMMIT_SHA:0:8} backend2-review helm/backend2
+    - /usr/local/bin/kubectl -n pleio2 set image deployment/backend2-review-api backend2-review-api=registry.gitlab.com/pleio/backend2:feature-${CI_COMMIT_SHA:0:8}
 
 AWS Test:
   stage: deploy
