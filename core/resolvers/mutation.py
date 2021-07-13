@@ -22,6 +22,7 @@ from .mutation_delete_entity import resolve_delete_entity
 from .mutation_delete_user import resolve_delete_user
 from .mutation_toggle_user_role import resolve_toggle_user_role
 from .mutation_toggle_user_is_banned import resolve_toggle_user_is_banned
+from .mutation_edit_users import resolve_edit_users
 from .mutation_vote import resolve_vote
 from .mutation_bookmark import resolve_bookmark
 from .mutation_follow import resolve_follow
@@ -75,6 +76,7 @@ mutation.set_field("deleteEntity", resolve_delete_entity)
 mutation.set_field("deleteUser", resolve_delete_user)
 mutation.set_field("toggleUserRole", resolve_toggle_user_role)
 mutation.set_field("toggleUserIsBanned", resolve_toggle_user_is_banned)
+mutation.set_field("editUsers", resolve_edit_users)
 
 mutation.set_field("vote", resolve_vote)
 
