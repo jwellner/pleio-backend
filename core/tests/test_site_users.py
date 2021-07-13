@@ -47,6 +47,7 @@ class SiteUsersTestCase(FastTenantTestCase):
                         url
                         email
                         icon
+                        lastOnline
                         roles
                         requestDelete
                     }

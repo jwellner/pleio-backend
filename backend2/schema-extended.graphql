@@ -46,11 +46,25 @@ input toggleUserIsBannedInput {
   guid: String!
 }
 
+enum editUserAction {
+  ban,
+  unban
+}
+
+input editUsersInput {
+  guids: [String]!
+  action: editUserAction!
+}
+
 type deleteUserPayload {
   success: Boolean
 }
 
 type toggleUserRolePayload {
+  success: Boolean
+}
+
+type editUsersPayload {
   success: Boolean
 }
 
@@ -134,6 +148,8 @@ extend type Mutation {
   deleteUser(input: deleteUserInput!): deleteUserPayload
   toggleUserRole(input: toggleUserRoleInput!): toggleUserRolePayload
   toggleUserIsBanned(input: toggleUserIsBannedInput!): toggleUserIsBannedPayload
+  """Edit multiple users in bulk"""
+  editUsers(input: editUsersInput!): editUsersPayload
   addSiteSettingProfileField(input: addSiteSettingProfileFieldInput!): addSiteSettingProfileFieldPayload
   editSiteSettingProfileField(input: editSiteSettingProfileFieldInput!): editSiteSettingProfileFieldPayload
   deleteSiteSettingProfileField(input: deleteSiteSettingProfileFieldInput!): deleteSiteSettingProfileFieldPayload
@@ -173,6 +189,7 @@ extend type User {
   roles: [String]
   language: String
   languageOptions: [Option]
+  lastOnline: String
 }
 
 extend type GroupNotificationItem {
