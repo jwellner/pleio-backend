@@ -381,7 +381,7 @@ end $$;"""
     # read data from dumped tables
     for file in os.listdir(restore_schema_path):
         ext = file.split(".")
-        table = f"{tenant.schema_name}.{ext[0]}"
+        table = f"{ext[0]}"
         file_path = os.path.join(restore_schema_path, file)
         f = open(file_path, 'r')
 

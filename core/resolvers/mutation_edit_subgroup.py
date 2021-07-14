@@ -35,7 +35,7 @@ def resolve_edit_subgroup(_, info, input):
             # member of subgroup must be member of group
             group_ids = user.memberships.filter(type__in=('member', 'admin', 'owner')).values_list('group', flat=True)
             if subgroup.group.id not in group_ids:
-                raise GraphQLError(COULD_NOT_SAVE)
+                continue
             members.append(user)
 
     if 'name' in clean_input:

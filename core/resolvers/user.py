@@ -154,3 +154,10 @@ def resolve_email(obj, info):
     if is_user_or_admin(obj, info):
         return obj.email
     return None
+
+@user.field("lastOnline")
+def resolve_last_online(obj, info):
+    # pylint: disable=unused-argument
+    if is_user_or_admin(obj, info):
+        return obj.profile.last_online
+    return None

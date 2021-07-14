@@ -1,0 +1,32 @@
+secretKey:
+elasticsearch:
+memcache:
+
+oidc:
+  clientId:
+  clientSecret:
+
+db:
+  host:
+  user:
+  password:
+  name:
+
+email:
+  host:
+  port:
+
+s3: {}
+# accessKeyId:
+# secretAccessKey:
+# storageBucketName:
+# endpointUrl:
+
+apm: {}
+# serviceName:
+# token:
+# serverUrl:
+
+celery: {}
+# brokerUrl:
+# resultBackend:

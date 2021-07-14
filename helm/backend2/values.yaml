@@ -1,0 +1,46 @@
+accountDomain:
+adminDomain:
+# Websites that require manual certs
+websitesManual: []
+# Websites that automate certificates with an issuer
+websitesAuto: []
+# - domain: *.pleio.nl
+#   secretName: tls-wildcard.pleio.nl
+
+env: test
+debug: 'False'
+
+frontend:
+  repository: registry.gitlab.com/pleio/frontend
+  tag: B2-latest
+  pullPolicy: Always
+
+admin:
+  replicaCount: 1
+
+api:
+  replicaCount: 1
+
+background:
+  replicaCount: 1
+
+image:
+  repository: registry.gitlab.com/pleio/backend2
+  tag: latest
+  pullPolicy: IfNotPresent
+
+storage:
+  className: efs
+  dataSize: 1Mi
+  tmpSize: 1Mi
+  backupSize: 1Mi
+
+ingress:
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    nginx.ingress.kubernetes.io/proxy-body-size: 250m
+  issuerAnnotation: 'cert-manager.io/issuer: letsencrypt-pleio-prod-issuer'
+
+memcached:
+  persistence:
+    enabled: false

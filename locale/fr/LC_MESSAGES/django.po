@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Frans\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-06-21 17:34+0200\n"
-"PO-Revision-Date: 2021-05-28 17:19+0200\n"
+"POT-Creation-Date: 2021-07-08 10:24+0200\n"
+"PO-Revision-Date: 2021-06-24 15:12+0200\n"
 "Last-Translator: \n"
 "Language-Team: frans\n"
 "Language: fr\n"
@@ -28,11 +28,11 @@ msgstr "Néerlandais"
 
 #: backend2/config.py:64 core/lib.py:295
 msgid "German"
-msgstr ""
+msgstr "Allemande"
 
 #: backend2/config.py:65 core/lib.py:296
 msgid "French"
-msgstr ""
+msgstr "Français"
 
 #: core/forms.py:67
 msgid "Provide a valid value."
@@ -151,9 +151,8 @@ msgstr "Bienvenue dans %(group_name)s"
 msgid "Request for access to the %(group_name)s group has been approved"
 msgstr "La demande d’accès au groupe %(group_name)s) a été approuvée"
 
-#: core/resolvers/mutation_add_comment_without_account.py:64
-#, fuzzy, python-format
-#| msgid "Go to %(site_name)s"
+#: core/resolvers/mutation_add_comment_without_account.py:60
+#, python-format
 msgid "Confirm comment on %(site_name)s"
 msgstr "Confirmer le commentaire sur %(site_name)s"
 
@@ -175,19 +174,16 @@ msgstr "Compte de %(name_deleted_user)s supprimé"
 msgid "A site administrator was removed from %(site_name)s"
 msgstr "Un administrateur de site a été supprimé de %(site_name)s"
 
-#: core/resolvers/mutation_edit_site_setting.py:315
+#: core/resolvers/mutation_edit_site_setting.py:317
 msgid "closed"
-msgstr ""
+msgstr "fermé"
 
-#: core/resolvers/mutation_edit_site_setting.py:315
-#, fuzzy
-#| msgid "Public"
+#: core/resolvers/mutation_edit_site_setting.py:317
 msgid "public"
-msgstr "Public"
+msgstr "public"
 
-#: core/resolvers/mutation_edit_site_setting.py:316
-#, fuzzy, python-format
-#| msgid "New access request for %(site_name)s"
+#: core/resolvers/mutation_edit_site_setting.py:318
+#, python-format
 msgid "Site access level changed for %(site_name)s"
 msgstr "Nouvelle demande d’accès à %(site_name)s"
 
@@ -249,11 +245,13 @@ msgstr "Message de {0} : {1}"
 msgid "Copy: Message from {0}: {1}"
 msgstr "Copier : Message de {0} : {1}"
 
-#: core/resolvers/mutation_toggle_request_delete_user.py:36
+#: core/resolvers/mutation_toggle_request_delete_user.py:38
+#: core/resolvers/mutation_toggle_request_delete_user.py:52
 msgid "Request to remove account cancelled"
 msgstr "Demande de suppression de compte annulée"
 
-#: core/resolvers/mutation_toggle_request_delete_user.py:50
+#: core/resolvers/mutation_toggle_request_delete_user.py:66
+#: core/resolvers/mutation_toggle_request_delete_user.py:80
 msgid "Request to remove account"
 msgstr "Demande de suppression de compte"
 
@@ -317,7 +315,7 @@ msgstr "Importation réussie"
 msgid "Import failed"
 msgstr "Échec de l’importation"
 
-#: core/tasks.py:358
+#: core/tasks.py:355
 #, python-format
 msgid "New notification at %(site_name)s: "
 msgstr "Nouvelle notification sur %(site_name)s : "
@@ -369,16 +367,7 @@ msgstr ""
 "<a href=“%(link)s”>%(link)s</a>\n"
 
 #: core/templates/email/confirm_add_comment_without_account.html:5
-#, fuzzy, python-format
-#| msgid ""
-#| "\n"
-#| "Confirm your registration for %(title)s.<br><br>\n"
-#| "\n"
-#| "Location: %(location)s<br>\n"
-#| "Date: %(start_date)s<br><br>\n"
-#| "\n"
-#| "Click on the link below to confirm.<br><br>\n"
-#| "<a href=\"%(link)s\">%(link)s</a>\n"
+#, python-format
 msgid ""
 "\n"
 "This is a request to confirm your comment on <a href=\"%(entity_url)s\">"
@@ -390,12 +379,15 @@ msgid ""
 "<a href=\"%(confirm_url)s\">%(confirm_url)s</a>\n"
 msgstr ""
 "\n"
-"Confirmez votre inscription à %(title)s.<br><br>\n"
-"Localisation : %(location)s<br>\n"
-"Date : %(start_date)s<br><br>\n"
-"Cliquez sur le lien ci-dessous pour confirmer.<br><br>\n"
+"Ceci est une demande de confirmation de votre commentaire sur <a "
+"href=“%(entity_url)s”>%(entity_title)s</a>.<br><br>\n"
 "\n"
-"<a href=“%(link)s”>%(link)s</a>\n"
+"Commentaire: %(comment)s<br>\n"
+"\n"
+"Cliquez sur le lien ci-dessous pour confirmer le commentaire.<br><br>\n"
+"\n"
+"<a href=“%(confirm_url)s”>%(confirm_url)s</a>\n"
+"\n"
 
 #: core/templates/email/confirm_attend_event_without_account.html:5
 #, python-format
@@ -503,7 +495,7 @@ msgstr " a publié un nouveau Blog : "
 #: core/templates/email/notifications/update.html:10
 #: core/templates/email/notifications/wiki.html:9
 msgid " has responded at: "
-msgstr "a répondu à: "
+msgstr " a répondu à: "
 
 #: core/templates/email/notifications/discussion.html:3
 msgid " has begun a new Discussion: "
@@ -602,17 +594,7 @@ msgstr ""
 "vos paramètres."
 
 #: core/templates/email/site_access_changed.html:6
-#, fuzzy, python-format
-#| msgid ""
-#| "Hi,<br><br>\n"
-#| "\n"
-#| "The user %(name_of_user_admin_role_changed)s is no longer a site "
-#| "administrator. This action was taken by %(user_name)s.<br>\n"
-#| "Check out the profile of the old site administrator here %(link)s."
-#| "<br><br>\n"
-#| "\n"
-#| "If you believe this was done in error, please login here %(site_url)s and "
-#| "undo this action.\n"
+#, python-format
 msgid ""
 "Hi,<br><br>\n"
 "\n"
@@ -624,18 +606,16 @@ msgid ""
 "If you believe this was done in error, please <a href=\"%(site_url)s/"
 "admin2\">go to the admin</a> and undo this action.\n"
 msgstr ""
-"Salut,<br><br>\n"
+"Bonjour,<br><br>\n"
 "\n"
+"Le niveau d’accès au site pour le site <a href=“%(site_url)s”>%(site_name)s</"
+"a> est passé à <b>%(access_level)s</b>. <br><br>\n"
 "\n"
+"Cette action a été effectuée par %(user_name)s.<br><br>\n"
 "\n"
-"L’utilisateur %(name_of_user_admin_role_changed)s n’est plus administrateur "
-"du site. Cette action a été réalisée par %(user_name)s.<br>\n"
-"\n"
-"Consultez le profile de l’ancien administrateur du site ici %(link)s."
-"<br><br>\n"
-"\n"
-"Si vous pensez qu’il s’agit d’une erreur, veuillez vous connecter ici "
-"%(site_url)s et annulez cette action.\n"
+"Si vous pensez que cela a été fait par erreur, veuillez <a "
+"href=“%(site_url)s/admin2”>aller à l’administrateur</a> et annuler cette "
+"action.\n"
 
 #: core/templates/email/site_access_request.html:5
 #, python-format
@@ -698,6 +678,15 @@ msgstr ""
 "En tant qu’utilisateur de <strong> %(user_name) s </strong>, vous avez "
 "annulé votre demande de suppression de votre compte. "
 
+#: core/templates/email/toggle_request_delete_user_cancelled_admin.html:6
+#, python-format
+msgid ""
+"The user <strong>%(user_name)s</strong> has cancelled his/her request to "
+"remove his/her account. This account will no longer be visible on the <a "
+"href='%(site_url)s/admin2/users/delete-requests'>list</a> of removal "
+"requests."
+msgstr ""
+
 #: core/templates/email/toggle_request_delete_user_requested.html:6
 #, python-format
 msgid ""
@@ -708,6 +697,14 @@ msgstr ""
 "En tant qu’utilisateur, <strong>%(user_name)s</strong> vous avez demandé la "
 "suppression de votre compte. Vous serez informé lorsque l’administrateur du "
 "site aura exécuté votre demande. "
+
+#: core/templates/email/toggle_request_delete_user_requested_admin.html:6
+#, python-format
+msgid ""
+"The user <strong>%(user_name)s</strong> wants his or her account removed, go "
+"<a href='%(site_url)s/admin2/users/delete-requests'>here</a> to the list of "
+"removal requests. "
+msgstr ""
 
 #: core/templates/email/user_deleted.html:6
 #, python-format

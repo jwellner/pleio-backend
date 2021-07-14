@@ -5,8 +5,8 @@ metadata:
   labels:
     {{- include "backend2.labels" . | nindent 4 }}
 data:
-  ENV: test
-  DEBUG: "True"
+  ENV: {{ .Values.env }}
+  DEBUG: {{ .Values.debug | quote }}
   ALLOWED_HOST: "*"
   OIDC_RP_SCOPES: openid profile email
   OIDC_OP_AUTHORIZATION_ENDPOINT: {{ printf "%s/openid/authorize/" .Values.accountDomain }}

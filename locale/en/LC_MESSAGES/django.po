@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-06-21 17:34+0200\n"
+"POT-Creation-Date: 2021-07-08 10:24+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -151,7 +151,7 @@ msgstr ""
 msgid "Request for access to the %(group_name)s group has been approved"
 msgstr ""
 
-#: core/resolvers/mutation_add_comment_without_account.py:64
+#: core/resolvers/mutation_add_comment_without_account.py:60
 #, python-format
 msgid "Confirm comment on %(site_name)s"
 msgstr ""
@@ -174,15 +174,15 @@ msgstr ""
 msgid "A site administrator was removed from %(site_name)s"
 msgstr ""
 
-#: core/resolvers/mutation_edit_site_setting.py:315
+#: core/resolvers/mutation_edit_site_setting.py:317
 msgid "closed"
 msgstr ""
 
-#: core/resolvers/mutation_edit_site_setting.py:315
+#: core/resolvers/mutation_edit_site_setting.py:317
 msgid "public"
 msgstr ""
 
-#: core/resolvers/mutation_edit_site_setting.py:316
+#: core/resolvers/mutation_edit_site_setting.py:318
 #, python-format
 msgid "Site access level changed for %(site_name)s"
 msgstr ""
@@ -245,11 +245,13 @@ msgstr ""
 msgid "Copy: Message from {0}: {1}"
 msgstr ""
 
-#: core/resolvers/mutation_toggle_request_delete_user.py:36
+#: core/resolvers/mutation_toggle_request_delete_user.py:38
+#: core/resolvers/mutation_toggle_request_delete_user.py:52
 msgid "Request to remove account cancelled"
 msgstr ""
 
-#: core/resolvers/mutation_toggle_request_delete_user.py:50
+#: core/resolvers/mutation_toggle_request_delete_user.py:66
+#: core/resolvers/mutation_toggle_request_delete_user.py:80
 msgid "Request to remove account"
 msgstr ""
 
@@ -312,7 +314,7 @@ msgstr ""
 msgid "Import failed"
 msgstr ""
 
-#: core/tasks.py:358
+#: core/tasks.py:355
 #, python-format
 msgid "New notification at %(site_name)s: "
 msgstr ""
@@ -586,12 +588,29 @@ msgid ""
 "to remove your account. "
 msgstr ""
 
+#: core/templates/email/toggle_request_delete_user_cancelled_admin.html:6
+#, python-format
+msgid ""
+"The user <strong>%(user_name)s</strong> has cancelled his/her request to "
+"remove his/her account. This account will no longer be visible on the <a "
+"href='%(site_url)s/admin2/users/delete-requests'>list</a> of removal "
+"requests."
+msgstr ""
+
 #: core/templates/email/toggle_request_delete_user_requested.html:6
 #, python-format
 msgid ""
 "You, as user, <strong>%(user_name)s</strong> have requested that your "
 "account be removed. You will be informed once the website administrator has "
 "done so. "
+msgstr ""
+
+#: core/templates/email/toggle_request_delete_user_requested_admin.html:6
+#, python-format
+msgid ""
+"The user <strong>%(user_name)s</strong> wants his or her account removed, go "
+"<a href='%(site_url)s/admin2/users/delete-requests'>here</a> to the list of "
+"removal requests. "
 msgstr ""
 
 #: core/templates/email/user_deleted.html:6

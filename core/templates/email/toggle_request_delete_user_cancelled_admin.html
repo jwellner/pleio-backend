@@ -1,0 +1,7 @@
+    
+{% extends "email/base_notification.html" %}
+{% load i18n %}
+
+{% block body %}
+    {% blocktrans %}The user <strong>{{ user_name }}</strong> has cancelled his/her request to remove his/her account. This account will no longer be visible on the <a href='{{ site_url }}/admin2/users/delete-requests'>list</a> of removal requests.{% endblocktrans %}
+{% endblock %}

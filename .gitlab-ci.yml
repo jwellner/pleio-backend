@@ -95,7 +95,13 @@ AWS Review:
   only:
     - /^feature-(.*)$/
   script:
-    - helm upgrade --install -n pleio2 -f helm/backend2/values.yml --set image.tag=feature-${CI_COMMIT_SHA:0:8} backend2-review helm/backend2
+    - FRONTEND_TAG=$(kubectl get  -n pleio2 deployment backend2-review-api -o=jsonpath='{.spec.template.spec.initContainers[0].image}' | grep -oP '(?<=:).+')
+    - helm dependency update helm/backend2
+    - |
+      helm upgrade --install -n pleio2 -f helm/backend2/values.aws.review.yaml \
+        --set image.tag=feature-${CI_COMMIT_SHA:0:8} \
+        --set frontend.tag=${FRONTEND_TAG} \
+        backend2-review helm/backend2
 
 AWS Test:
   stage: deploy
