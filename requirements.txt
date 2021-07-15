@@ -7,7 +7,7 @@ Celery==5.1.2
 uwsgi==2.0.19.1
 mozilla-django-oidc==1.2.3
 Sphinx==4.1.0
-sphinx-autobuild==2020.9.1
+sphinx-autobuild==2021.3.14
 coverage==5.5
 prospector==1.2.0
 ariadne==0.13.0
