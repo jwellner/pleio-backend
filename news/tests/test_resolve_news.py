@@ -51,6 +51,7 @@ class NewsTestCase(FastTenantTestCase):
                 featured {
                     image
                     video
+                    videoTitle
                     positionY
                 }
                 isFeatured

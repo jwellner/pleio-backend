@@ -58,6 +58,7 @@ class BlogTestCase(FastTenantTestCase):
                 featured {
                     image
                     video
+                    videoTitle
                     positionY
                 }
                 isRecommended
