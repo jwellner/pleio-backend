@@ -44,6 +44,7 @@ def resolve_entity_featured(obj, info):
     return {
         'image': obj.featured_image_url,
         'video': obj.featured_video,
+        'videoTitle': obj.featured_video_title,
         'positionY': obj.featured_position_y,
         'alt': obj.featured_alt
     }
