@@ -44,6 +44,7 @@ class EditQuestionTestCase(FastTenantTestCase):
                 "featured": {
                     "positionY": 2,
                     "video": "testVideo2",
+                    "videoTitle": "testVideoTitle2",
                     "alt": "testAlt2"
                 }
             }
@@ -64,6 +65,7 @@ class EditQuestionTestCase(FastTenantTestCase):
                 featured {
                     image
                     video
+                    videoTitle
                     positionY
                     alt
                 }
@@ -106,6 +108,7 @@ class EditQuestionTestCase(FastTenantTestCase):
         self.assertEqual(data["editEntity"]["entity"]["isFeatured"], False) # nly with editor or admin role
         self.assertEqual(data["editEntity"]["entity"]["featured"]["positionY"], 2)
         self.assertEqual(data["editEntity"]["entity"]["featured"]["video"], "testVideo2")
+        self.assertEqual(data["editEntity"]["entity"]["featured"]["videoTitle"], "testVideoTitle2")
         self.assertEqual(data["editEntity"]["entity"]["featured"]["alt"], "testAlt2")
 
         self.question.refresh_from_db()

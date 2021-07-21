@@ -35,6 +35,7 @@ class AddQuestionTestCase(FastTenantTestCase):
                 "featured": {
                     "positionY": 10,
                     "video": "testVideo",
+                    "videoTitle": "testVideoTitle",
                     "alt": "testAlt"
                 }
             }
@@ -55,6 +56,7 @@ class AddQuestionTestCase(FastTenantTestCase):
                 featured {
                     image
                     video
+                    videoTitle
                     positionY
                     alt
                 }
@@ -94,6 +96,7 @@ class AddQuestionTestCase(FastTenantTestCase):
         self.assertEqual(data["addEntity"]["entity"]["isFeatured"], False) # only with editor or admin role
         self.assertEqual(data["addEntity"]["entity"]["featured"]["positionY"], 10)
         self.assertEqual(data["addEntity"]["entity"]["featured"]["video"], "testVideo")
+        self.assertEqual(data["addEntity"]["entity"]["featured"]["videoTitle"], "testVideoTitle")
         self.assertEqual(data["addEntity"]["entity"]["featured"]["alt"], "testAlt")
 
     def test_add_question_to_group(self):

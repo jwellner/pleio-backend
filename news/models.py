@@ -28,6 +28,7 @@ class News(Entity, VoteMixin, BookmarkMixin, FollowMixin, CommentMixin):
         null=True
     )
     featured_video = models.TextField(null=True, blank=True)
+    featured_video_title = models.CharField(max_length=256, default="")
     featured_position_y = models.IntegerField(default=0, null=False)
     featured_alt = models.CharField(max_length=256, default="")
 

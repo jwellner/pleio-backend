@@ -124,6 +124,7 @@ class EventsTestCase(FastTenantTestCase):
                     featured {
                         image
                         video
+                        videoTitle
                         positionY
                     }
                     startDate

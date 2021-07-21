@@ -45,6 +45,7 @@ class EditDiscussionTestCase(FastTenantTestCase):
                 "featured": {
                     "positionY": 2,
                     "video": "testVideo2",
+                    "videoTitle": "testVideoTitle2",
                     "alt": "testAlt2"
                 }
             }
@@ -66,6 +67,7 @@ class EditDiscussionTestCase(FastTenantTestCase):
                 featured {
                     image
                     video
+                    videoTitle
                     positionY
                     alt
                 }
@@ -115,6 +117,7 @@ class EditDiscussionTestCase(FastTenantTestCase):
         self.assertEqual(data["editEntity"]["entity"]["timeCreated"], str(self.discussionPublic.created_at))
         self.assertEqual(data["editEntity"]["entity"]["featured"]["positionY"], 2)
         self.assertEqual(data["editEntity"]["entity"]["featured"]["video"], "testVideo2")
+        self.assertEqual(data["editEntity"]["entity"]["featured"]["videoTitle"], "testVideoTitle2")
         self.assertEqual(data["editEntity"]["entity"]["featured"]["alt"], "testAlt2")
 
 

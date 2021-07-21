@@ -373,10 +373,6 @@ extend type SiteSettings {
   commentWithoutAccountEnabled: Boolean!
 }
 
-extend input FeaturedInput {
-  alt: String
-}
-
 extend input sendMessageToUserInput {
   sendCopyToSender: Boolean
 }

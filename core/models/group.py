@@ -63,6 +63,7 @@ class Group(models.Model):
         related_name='group_featured_image'
     )
     featured_video = models.TextField(null=True, blank=True)
+    featured_video_title = models.CharField(max_length=256, default="")
     featured_position_y = models.IntegerField(null=True)
     featured_alt = models.CharField(max_length=256, default="")
 

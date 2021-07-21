@@ -95,6 +95,7 @@ class ActivitiesTestCase(FastTenantTestCase):
             featured {
                 image
                 video
+                videoTitle
                 positionY
                 __typename
             }

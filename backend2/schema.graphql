@@ -778,6 +778,7 @@ type EventList {
 
 type Featured {
   video: String
+  videoTitle: String
   image: String
   positionY: Int
   alt: String
@@ -785,8 +786,10 @@ type Featured {
 
 input FeaturedInput {
   video: String
+  videoTitle: String
   image: Upload
   positionY: Int
+  alt: String
 }
 
 type FileFolder implements Entity {

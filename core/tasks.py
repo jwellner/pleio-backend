@@ -16,7 +16,7 @@ from django_tenants.utils import schema_context
 from django_elasticsearch_dsl.registries import registry
 from elasticsearch_dsl import Search
 from core import config
-from core.lib import html_to_text, access_id_to_acl
+from core.lib import html_to_text, access_id_to_acl, get_model_by_subtype
 # from core.management.commands.send_notification_emails import get_notification
 from core.models import ProfileField, UserProfileField, Entity, GroupMembership, Comment, Widget, Group
 from django.core.mail import EmailMultiAlternatives
@@ -73,14 +73,16 @@ def send_overview(self, schema_name, period):
     management.execute_from_command_line(['manage.py', 'tenant_command', 'send_overview_emails', '--schema', schema_name, '--interval', period])
 
 @shared_task(bind=True, ignore_result=True)
-def elasticsearch_rebuild_all(self):
+def elasticsearch_recreate_indices(self, index_name=None):
     # pylint: disable=unused-argument
     # pylint: disable=protected-access
     '''
-    Delete indexes and rebuild all tenants
+    Delete indexes, creates indexes
     '''
-
-    models = registry.get_models()
+    if index_name:
+        models = [get_model_by_subtype(index_name)]
+    else:
+        models = registry.get_models()
 
     # delete indexes
     for index in registry.get_indices(models):
@@ -90,48 +92,84 @@ def elasticsearch_rebuild_all(self):
         except Exception:
             logger.info('index %s does not exist', index._name)
 
-    for client in Client.objects.exclude(schema_name='public'):
-        elasticsearch_rebuild.delay(client.schema_name)
+        try:
+            index.create()
+            logger.info('created index %s')
+        except Exception:
+            logger.info('index %s already exists')
 
 
 @shared_task(bind=True, ignore_result=True)
-def elasticsearch_rebuild(self, schema_name):
+def elasticsearch_rebuild_all(self, index_name=None):
     # pylint: disable=unused-argument
+    # pylint: disable=protected-access
+    '''
+    Delete indexes, creates indexes and populate tenants
+
+    No option passed then all indices are rebuild
+    Options: ['news', 'file', 'question' 'wiki', 'discussion', 'page', 'event', 'blog', 'user', 'group']
+
+    '''
+    for client in Client.objects.exclude(schema_name='public'):
+        elasticsearch_rebuild.delay(client.schema_name, index_name)
+
+
+@shared_task(bind=True, ignore_result=True)
+def elasticsearch_rebuild(self, schema_name, index_name=None):
+    # pylint: disable=unused-argument
+    # pylint: disable=protected-access    
     '''
     Rebuild search index for tenant
     '''
     with schema_context(schema_name):
         logger.info('elasticsearch_rebuild \'%s\'', schema_name)
 
-        models = registry.get_models()
+        if index_name:
+            models = [get_model_by_subtype(index_name)]
+        else:
+            models = registry.get_models()
 
-        # create indexs if not exist
         for index in registry.get_indices(models):
-            try:
-                index.create()
-                logger.info('created index %s')
-            except Exception:
-                logger.info('index %s already exists')
+            elasticsearch_repopulate_index_for_tenant.delay(schema_name, index._name)
 
-        # delete all objects for tenant before updating
-        s = Search(index='_all').query().filter(
-            'term', tenant_name=schema_name
-        )
 
-        logger.info('deleting %i objects', s.count())
-        s.delete()
+@shared_task(bind=True, ignore_result=True)
+def elasticsearch_repopulate_index_for_tenant(self, schema_name, index_name):
+    # pylint: disable=unused-argument
+    # pylint: disable=protected-access
+    '''
+    Rebuild index for tenant
+    '''
+    with schema_context(schema_name):
+        if index_name:
+            models = [get_model_by_subtype(index_name)]
+        else:
+            models = registry.get_models()
 
-        for doc in registry.get_documents(models):
-            logger.info("indexing %i '%s' objects",
-                doc().get_queryset().count(),
-                doc.django.model.__name__
+
+        for index in registry.get_indices(models):          
+            logger.info('elasticsearch_repopulate_index_for_tenant \'%s\' \'%s\'', index_name, schema_name)
+
+            # delete all objects for tenant before updating
+            s = Search(index=index._name).query().filter(
+                'term', tenant_name=schema_name
             )
-            qs = doc().get_indexing_queryset()
 
-            if doc.django.model.__name__ == 'FileFolder':
-                doc().update(qs, parallel=False, chunk_size=10)
-            else:
-                doc().update(qs, parallel=False, chunk_size=500)
+            logger.info('deleting %i objects', s.count())
+            s.delete()
+
+            for doc in registry.get_documents(models):
+                logger.info("indexing %i '%s' objects",
+                    doc().get_queryset().count(),
+                    doc.django.model.__name__
+                )
+                qs = doc().get_indexing_queryset()
+
+                if doc.django.model.__name__ == 'FileFolder':
+                    doc().update(qs, parallel=False, chunk_size=10)
+                else:
+                    doc().update(qs, parallel=False, chunk_size=500)
+
 
 @shared_task(bind=True, ignore_result=True)
 def elasticsearch_index_file(self, schema_name, file_guid):

@@ -54,6 +54,7 @@ class EventTestCase(FastTenantTestCase):
                 featured {
                     image
                     video
+                    videoTitle
                     positionY
                     alt
                 }

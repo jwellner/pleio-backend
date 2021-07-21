@@ -70,6 +70,7 @@ class QuestionTestCase(FastTenantTestCase):
                 featured {
                     image
                     video
+                    videoTitle
                     positionY
                 }
                 canEdit
@@ -168,6 +169,7 @@ class QuestionTestCase(FastTenantTestCase):
                 featured {
                     image
                     video
+                    videoTitle
                     positionY
                 }
                 canEdit
