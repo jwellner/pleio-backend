@@ -830,6 +830,7 @@ type FileFolder implements Entity {
   comments: [Comment]
   commentCount: Int
   isPinned: Boolean!
+  size: Int
 }
 
 input FilterInput {

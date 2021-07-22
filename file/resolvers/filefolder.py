@@ -53,6 +53,15 @@ def resolve_download(obj, info):
 
     return obj.download_url
 
+@filefolder.field("size")
+def resolve_size(obj, info):
+    # pylint: disable=unused-argument
+
+    if obj.is_folder:
+        return 0
+
+    return obj.size
+
 
 filefolder.set_field("guid", shared.resolve_entity_guid)
 filefolder.set_field("status", shared.resolve_entity_status)

@@ -10,4 +10,11 @@
 
 <p>This is the superadmin for {{ config.NAME }}</p>
 
+<h3>Stats</h3>
+<h5>Diskspace</h5>
+<ul>
+    <li>Database: <strong>{{ stats.db_usage|filesizeformat }}</strong></li>
+    <li>Files: <strong>{{ stats.file_usage|filesizeformat }}</strong></li>
+</ul>
+
 {% endblock %}
