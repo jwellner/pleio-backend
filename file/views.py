@@ -25,7 +25,7 @@ def download(request, file_id=None, file_name=None):
 
         response = StreamingHttpResponse(streaming_content=entity.upload.open(), content_type=entity.mime_type)
         response['Content-Length'] = entity.upload.size
-        response['Content-Disposition'] = "attachment; filename=%s" % get_download_filename(entity)
+        response['Content-Disposition'] = "inline; filename=%s" % get_download_filename(entity)
         return response
 
     except ObjectDoesNotExist:
