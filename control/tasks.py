@@ -1,7 +1,6 @@
 from __future__ import absolute_import, unicode_literals
 
 import os
-import tempfile
 import shutil
 from datetime import datetime
 
@@ -12,7 +11,9 @@ from tenants.models import Client, Domain
 from django_tenants.utils import schema_context
 from django.conf import settings
 from django.db import connection
+from django.db.models import Sum
 from user.models import User
+from file.models import FileFolder
 
 logger = get_task_logger(__name__)
 
@@ -104,152 +105,6 @@ def get_sites_admin(self):
     return admins
 
 @shared_task(bind=True)
-def copy_site(self, copy_site_id, schema_name, domain):
-    # pylint: disable=unused-argument
-    # pylint: disable=too-many-locals
-    '''
-    Copy site to new schema
-    '''
-    with schema_context('public'):
-        try:
-            # does copy_site_id exist?
-            copy_site = Client.objects.get(id=copy_site_id)
-
-            # is schema_name available ?
-            if Client.objects.filter(schema_name=schema_name).first():
-                raise Exception("Target schema already exists!")
-
-            # is domain available ?
-            if Domain.objects.filter(domain=domain).first():
-                raise Exception("Target domain already exists!")
-
-            # test if media folder exists
-            if os.path.exists(os.path.join(settings.MEDIA_ROOT, schema_name)):
-                raise Exception("Target file path already exists, please clean up first.")
-
-        except Exception as e:
-            raise Exception(e)
-
-    export_folder = os.path.join(tempfile.gettempdir(), f"dump_{copy_site.schema_name}")
-
-    # remove folder if exists
-    if os.path.exists(export_folder):
-        shutil.rmtree(export_folder)
-
-    os.makedirs(export_folder)
-
-    skip_tables = ("auth_permission", "django_content_type", "django_migrations", "django_session")
-
-    with connection.connection.cursor() as cursor:
-        cursor.execute( "SELECT table_name FROM information_schema.tables " +
-                        "WHERE ( table_schema = %s AND table_name NOT IN %s ) " +
-                        "ORDER BY table_name;", (copy_site.schema_name, skip_tables))
-        tables = cursor.fetchall()
-
-    # dump data for all tables
-    for row in tables:
-        table = f"{copy_site.schema_name}.{row[0]}"
-        file_path = f"{export_folder}/{row[0]}.csv"
-        f = open(file_path, 'wb+')
-
-        with connection.connection.cursor() as cursor:
-            cursor.copy_to(f, table)
-        logger.info("Copy %s data to %s", table, file_path)
-
-    # create new tenant
-    with schema_context('public'):
-        tenant = Client(schema_name=schema_name, name=schema_name)
-        tenant.save()
-
-        d = Domain()
-        d.domain = domain
-        d.tenant = tenant
-        d.is_primary = True
-        d.save()
-
-    # get psycopg2 cursor
-    cursor = connection.connection.cursor()
-
-    cursor.execute(f"SET search_path TO {tenant.schema_name};")
-
-    # temporary remove foreign key constraints
-    sql_drop_key_contraints = """create table if not exists dropped_foreign_keys (
-    seq bigserial primary key,
-    sql text
-);
-
-do $$ declare t record;
-begin
-for t in select conrelid::regclass::varchar table_name, conname constraint_name,
-        pg_catalog.pg_get_constraintdef(r.oid, true) constraint_definition
-        from pg_catalog.pg_constraint r
-        where r.contype = 'f'
-        -- current schema only:
-        and r.connamespace = (select n.oid from pg_namespace n where n.nspname = current_schema())
-    loop
-
-    insert into dropped_foreign_keys (sql) values (
-        format('alter table %s add constraint %s %s',
-            quote_ident(t.table_name), quote_ident(t.constraint_name), t.constraint_definition));
-
-    execute format('alter table %s drop constraint %s', quote_ident(t.table_name), quote_ident(t.constraint_name));
-
-end loop;
-end $$;"""
-
-    cursor.execute(sql_drop_key_contraints)
-
-    # read data from dumped tables
-    for row in tables:
-
-        table = f"{tenant.schema_name}.{row[0]}"
-        file_path = f"{export_folder}/{row[0]}.csv"
-        f = open(file_path, 'r')
-
-        cursor.copy_from(f, table)
-
-        logger.info("read %s to %s", file_path, table)
-
-    # restore foreign key constraints
-    sql_restore_key_constraints = """do $$ declare t record;
-begin
--- order by seq for easier troubleshooting when data does not satisfy FKs
-for t in select * from dropped_foreign_keys order by seq loop
-execute t.sql;
-delete from dropped_foreign_keys where seq = t.seq;
-end loop;
-end $$;"""
-    cursor.execute(sql_restore_key_constraints)
-
-    # reset sql sequences (needed after reading data with copy_from)
-    sql_reset_sql_sequences = """do $$ declare rec record;
-begin
-for rec in SELECT 'SELECT SETVAL(' ||quote_literal(S.relname)|| ', MAX(' ||quote_ident(C.attname)|| ') ) FROM ' ||quote_ident(T.relname)|| ';' as sql
-    FROM pg_class AS S, pg_depend AS D, pg_class AS T, pg_attribute AS C, pg_tables AS PGT
-    WHERE S.relkind = 'S'
-        AND S.oid = D.objid
-        AND D.refobjid = T.oid
-        AND D.refobjid = C.attrelid
-        AND D.refobjsubid = C.attnum
-        AND T.relname = PGT.tablename
-        AND PGT.schemaname = current_schema()
-    ORDER BY S.relname loop
-        execute rec.sql;
-    end loop;
-end $$;"""
-
-    cursor.execute(sql_reset_sql_sequences)
-
-    # copy files
-    if os.path.exists(os.path.join(settings.MEDIA_ROOT, copy_site.schema_name)):
-        shutil.copytree(os.path.join(settings.MEDIA_ROOT, copy_site.schema_name), os.path.join(settings.MEDIA_ROOT, tenant.schema_name))
-
-    # cleanup dump folder
-    shutil.rmtree(export_folder, ignore_errors=True)
-
-    return tenant.id
-
-@shared_task(bind=True)
 def backup_site(self, backup_site_id):
     # pylint: disable=unused-argument
     # pylint: disable=too-many-locals
@@ -278,14 +133,14 @@ def backup_site(self, backup_site_id):
     skip_tables = ("auth_permission", "django_content_type", "django_migrations", "django_session", "django_admin_log")
 
     # get psycopg2 cursor
-    cursor = connection.connection.cursor()
+    cursor = connection.cursor()
 
     cursor.execute( "SELECT table_name FROM information_schema.tables " +
                     "WHERE ( table_schema = %s AND table_name NOT IN %s ) " +
                     "ORDER BY table_name;", (backup_site.schema_name, skip_tables))
     tables = cursor.fetchall()
 
-    cursor.execute(f"SET search_path TO {backup_site.schema_name};")
+    cursor.execute(f"SET search_path TO '{backup_site.schema_name}';")
 
     # dump data for all tables
     for row in tables:
@@ -345,9 +200,9 @@ def restore_site(self, restore_folder, schema_name, domain):
         d.save()
 
     # get psycopg2 cursor
-    cursor = connection.connection.cursor()
+    cursor = connection.cursor()
 
-    cursor.execute(f"SET search_path TO {tenant.schema_name};")
+    cursor.execute(f"SET search_path TO '{tenant.schema_name}';")
 
     # temporary remove foreign key constraints
     sql_drop_key_contraints = """create table if not exists dropped_foreign_keys (
@@ -451,3 +306,31 @@ def get_sites_by_email(self, email):
                 })
 
     return data
+
+@shared_task(bind=True)
+def get_db_disk_usage(self, schema_name):
+    # pylint: disable=unused-argument
+    '''
+    Get size by schema_name
+    '''
+    cursor = connection.cursor()
+    cursor.execute(f"SELECT sum(pg_relation_size(schemaname || '.' || tablename))::bigint FROM pg_tables WHERE schemaname = '{schema_name}';")
+    result = cursor.fetchone()
+    size_in_bytes = result[0]
+    
+    return size_in_bytes
+
+@shared_task(bind=True)
+def get_file_disk_usage(self, schema_name):
+    # pylint: disable=unused-argument
+    '''
+    Get size by schema_name
+    '''
+    total_size = 0
+    with schema_context(schema_name):
+        logger.info('get_file_size \'%s\'', schema_name)
+
+        f = FileFolder.objects.filter(is_folder=False).aggregate(total_size=Sum('size'))
+        total_size = f.get('total_size', 0)
+
+    return total_size

@@ -27,6 +27,7 @@ class FileFolder(Entity):
     thumbnail = models.FileField(upload_to='thumbnails/', blank=True, null=True)
 
     mime_type = models.CharField(null=True, blank=True, max_length=100)
+    size = models.IntegerField(default=0)
 
     def __str__(self):
         return f"FileFolder[{self.title}]"
@@ -89,6 +90,10 @@ def file_pre_save(sender, instance, **kwargs):
         instance.title = instance.upload.file.name
     if instance.upload:
         instance.mime_type = get_mimetype(instance.upload.path)
+        try:
+            instance.size = instance.upload.size
+        except Exception:
+            pass
 
 # update parent folders updated_at when adding, moving and deleting files
 @receiver([pre_save, pre_delete], sender=FileFolder)

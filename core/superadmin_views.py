@@ -8,6 +8,7 @@ from django.views import View
 from core.tasks import elasticsearch_rebuild, replace_domain_links
 from core.lib import tenant_schema, is_valid_domain
 from core.superadmin.forms import SettingsForm
+from control.tasks import get_db_disk_usage, get_file_disk_usage
 
 logger = logging.getLogger(__name__)
 
@@ -22,7 +23,14 @@ class Dashboard(LoginRequiredMixin, UserPassesTestMixin, View):
         return redirect('/')
 
     def get(self, request):
+        db_usage = get_db_disk_usage.delay(tenant_schema()).get(timeout=30)
+        file_usage = get_file_disk_usage.delay(tenant_schema()).get(timeout=30)
+
         context = {
+            'stats': {
+                'db_usage': db_usage,
+                'file_usage': file_usage
+            }
         }
 
         return render(request, 'superadmin/home.html', context)

@@ -70,11 +70,14 @@ class FileFolderTestCase(FastTenantTestCase):
 
     @patch("core.lib.get_mimetype")
     @patch("{}.save".format(settings.DEFAULT_FILE_STORAGE))
-    def test_file(self, mock_save, mock_mimetype):
+    @patch("{}.open".format(settings.DEFAULT_FILE_STORAGE))
+    def test_file(self, mock_open, mock_save, mock_mimetype):
         file_mock = MagicMock(spec=File)
         file_mock.name = 'test.gif'
         file_mock.content_type = 'image/gif'
+        file_mock.size = 123
 
+        mock_open.return_value = file_mock
         mock_save.return_value = 'test.gif'
         mock_mimetype.return_value = file_mock.content_type
 
@@ -143,11 +146,14 @@ class FileFolderTestCase(FastTenantTestCase):
 
     @patch("core.lib.get_mimetype")
     @patch("{}.save".format(settings.DEFAULT_FILE_STORAGE))
-    def test_file_in_folder(self, mock_save, mock_mimetype):
+    @patch("{}.open".format(settings.DEFAULT_FILE_STORAGE))
+    def test_file_in_folder(self, mock_open, mock_save, mock_mimetype):
         file_mock = MagicMock(spec=File)
         file_mock.name = 'test.pdf'
         file_mock.content_type = 'application/pdf'
+        file_mock.size = 123
 
+        mock_open.return_value = file_mock
         mock_save.return_value = 'test.pdf'
         mock_mimetype.return_value = file_mock.content_type
 
@@ -189,12 +195,15 @@ class FileFolderTestCase(FastTenantTestCase):
 
     @patch("core.lib.get_mimetype")
     @patch("{}.save".format(settings.DEFAULT_FILE_STORAGE))
-    def test_file_access(self, mock_save, mock_mimetype):
+    @patch("{}.open".format(settings.DEFAULT_FILE_STORAGE))
+    def test_file_access(self, mock_open, mock_save, mock_mimetype):
         file_mock = MagicMock(spec=File)
         file_mock.name = 'test.gif'
         file_mock.content_type = 'image/gif'
+        file_mock.size = 123
 
         mock_save.return_value = 'test.gif'
+        mock_open.return_value = file_mock
         mock_mimetype.return_value = file_mock.content_type
 
         self.file = FileFolder.objects.create(
