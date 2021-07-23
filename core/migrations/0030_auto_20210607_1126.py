@@ -21,7 +21,7 @@ def reverse_notifications_created(apps, schema_editor):
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('core', '0028_auto_20210617_1000'),
+        ('core', '0029_group_featured_video_title'),
     ]
 
     operations = [
