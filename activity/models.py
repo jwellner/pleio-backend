@@ -5,7 +5,7 @@ from core.models import Entity, VoteMixin, CommentMixin, BookmarkMixin, FollowMi
 
 class StatusUpdate(Entity, VoteMixin, CommentMixin, BookmarkMixin, FollowMixin, NotificationMixin):
     class Meta:
-        ordering = ['-created_at']
+        ordering = ['-published']
 
     title = models.CharField(max_length=256, blank=True)
     description = models.TextField()

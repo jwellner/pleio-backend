@@ -305,8 +305,13 @@ type ExportableField {
   label: String!
 }
 
+extend input addEntityInput {
+  timePublished: String
+}
+
 extend input editEntityInput {
   timeCreated: String
+  timePublished: String
   groupGuid: String
   ownerGuid: String
 }

@@ -10,7 +10,7 @@ from file.models import FileFolder
 
 class Event(Entity, CommentMixin, BookmarkMixin, FollowMixin, NotificationMixin):
     class Meta:
-        ordering = ['-created_at']
+        ordering = ['-published']
 
     title = models.CharField(max_length=256)
     description = models.TextField()

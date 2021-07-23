@@ -1,6 +1,7 @@
 from ariadne import ObjectType
 from core.models import Entity
 from django.db.models import Q
+from core.constances import ORDER_BY, ORDER_DIRECTION
 
 query = ObjectType("Query")
 
@@ -85,22 +86,28 @@ def resolve_activities(
         tagLists=None,
         groupFilter=None,
         subtypes=None,
-        orderBy="timeCreated",
-        orderDirection="desc",
-        sortPinned=False
+        orderBy=ORDER_BY.timePublished,
+        orderDirection=ORDER_DIRECTION.desc,
+        sortPinned=False,
+        isDraft=False,
+        userGuid=None
     ):
     #pylint: disable=unused-argument
     #pylint: disable=too-many-arguments
     #pylint: disable=too-many-locals
 
-    if orderBy == 'timeUpdated':
+    if orderBy == ORDER_BY.timeUpdated:
         order_by = 'updated_at'
-    elif orderBy == 'timeCreated':
+    elif orderBy == ORDER_BY.timeCreated:
         order_by = 'created_at'
-    else:
+    elif orderBy == ORDER_BY.lastAction:
         order_by = 'last_action'
+    elif orderBy == ORDER_BY.title:
+        order_by = 'title'
+    else:
+        order_by = 'published'
 
-    if orderDirection == 'desc':
+    if orderDirection == ORDER_DIRECTION.desc:
         order_by = '-%s' % (order_by)
 
     order = [order_by]
@@ -108,12 +115,19 @@ def resolve_activities(
     if sortPinned:
         order = ["-is_pinned"] + order
 
-    qs = Entity.objects.visible(info.context["request"].user)
+    if isDraft:
+        qs = Entity.objects.draft(info.context["request"].user)
+    else:
+        qs = Entity.objects.visible(info.context["request"].user)
+
     qs = qs.filter(conditional_subtypes_filter(subtypes) &
                    conditional_tags_filter(tags) &
                    conditional_tag_lists_filter(tagLists) &
                    conditional_group_filter(containerGuid) &
                    conditional_groups_filter(groupFilter, info.context["request"].user))
+
+    if userGuid:
+        qs = qs.filter(owner__id=userGuid)
     
     qs = qs.order_by(*order).select_subclasses()
 

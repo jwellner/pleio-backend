@@ -106,8 +106,8 @@ def get_acl(user):
 
 def remove_none_from_dict(values):
     """Cleanup resolver input: remove keys with None values"""
-
-    return {k:v for k,v in values.items() if v is not None}
+    # TODO: what are we going to do with values which kan be omitted or can be NULL
+    return {k:v for k,v in values.items() if (v is not None) or (k == 'timePublished') }
 
 def webpack_dev_server_is_available():
     """Return true when webpack developer server is available"""
@@ -442,3 +442,17 @@ def get_mimetype(filepath):
     if not mime_type:
         return None
     return mime_type
+
+def get_user_ids_for_instance_notification(instance):
+    user_ids = []
+    try:
+        for member in instance.group.members.filter(type__in=['admin', 'owner', 'member'], enable_notification=True):
+            user = member.user
+            if instance.owner == user:
+                continue
+            if not instance.can_read(user):
+                continue
+            user_ids.append(user.id)
+    except Exception:
+        return []
+    return user_ids

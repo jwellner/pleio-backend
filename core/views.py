@@ -72,6 +72,12 @@ def entity_view(request, entity_id=None, entity_title=None):
         except ObjectDoesNotExist:
             pass
 
+    if not entity:
+        try:
+            entity = Entity.objects.draft(user).select_subclasses().get(id=entity_id)
+        except ObjectDoesNotExist:
+            pass    
+
     if entity:
         status_code = 200
         if hasattr(entity, 'description') and entity.description:
