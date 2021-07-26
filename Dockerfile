@@ -14,9 +14,6 @@ RUN /app-tmp/venv/bin/pip3 install -r requirements.txt
 
 FROM python:3.8.10-slim
 
-# Workaround for error with postgresql-client package
-RUN mkdir -p /usr/share/man/man1/ /usr/share/man/man3/ /usr/share/man/man7/
-
 RUN apt-get update && apt-get install --no-install-recommends -y \
     libgnutls30 \
     gettext \
@@ -29,7 +26,16 @@ RUN apt-get update && apt-get install --no-install-recommends -y \
     poppler-utils \
     tesseract-ocr \
     swig \
-    ca-certificates
+    ca-certificates \
+    gnupg \
+    wget \ 
+    lsb-release 
+
+# Install postgresql client version 12
+RUN mkdir -p /usr/share/man/man1/ /usr/share/man/man3/ /usr/share/man/man7/
+RUN wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | apt-key add -
+RUN echo "deb http://apt.postgresql.org/pub/repos/apt/ `lsb_release -cs`-pgdg main" | tee  /etc/apt/sources.list.d/pgdg.list
+RUN apt-get update && apt-get install -y postgresql-client-12
 
 COPY --from=build /app-tmp/venv /app-tmp/venv
 ENV PATH="/app-tmp/venv/bin:${PATH}"
