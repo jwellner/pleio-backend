@@ -2,6 +2,7 @@ from __future__ import absolute_import, unicode_literals
 
 import os
 import shutil
+import subprocess
 from datetime import datetime
 
 from celery import shared_task
@@ -9,6 +10,7 @@ from celery.utils.log import get_task_logger
 
 from tenants.models import Client, Domain
 from django_tenants.utils import schema_context
+from django.core.management import call_command
 from django.conf import settings
 from django.db import connection
 from django.db.models import Sum
@@ -127,17 +129,30 @@ def backup_site(self, backup_site_id):
     if os.path.exists(backup_base_path):
         shutil.rmtree(backup_base_path)
 
-    backup_schema_folder = os.path.join(backup_base_path, "schema")
-    os.makedirs(backup_schema_folder)
+    backup_data_folder = os.path.join(backup_base_path, "data")
+    os.makedirs(backup_data_folder)
 
-    skip_tables = ("auth_permission", "django_content_type", "django_migrations", "django_session", "django_admin_log")
+    # Use pg_dump to dump schema to file, removing the schema name specifics
+    dump_command = (
+        f'pg_dump -n {backup_site.schema_name} --host={connection.settings_dict["HOST"]} --dbname={connection.settings_dict["NAME"]} '
+        f'--username={connection.settings_dict["USER"]} --no-password --schema-only --quote-all-identifiers --no-owner '
+        f'| sed \'s/"{backup_site.schema_name}"\\.//g\' '
+        f'| sed \'/^CREATE SCHEMA /d\' '
+        f'| sed \'/^SET /d\' '
+        f'| sed \'/^SELECT pg_catalog.set_config/d\' '
+        f'> {backup_base_path}/schema.sql'
+    )
+
+    logger.info(dump_command)
+
+    subprocess.run(dump_command, shell=True, env={'PGPASSWORD': connection.settings_dict["PASSWORD"]}, check=True)
 
     # get psycopg2 cursor
     cursor = connection.cursor()
 
     cursor.execute( "SELECT table_name FROM information_schema.tables " +
-                    "WHERE ( table_schema = %s AND table_name NOT IN %s ) " +
-                    "ORDER BY table_name;", (backup_site.schema_name, skip_tables))
+                    "WHERE ( table_schema = %s ) " +
+                    "ORDER BY table_name;", (backup_site.schema_name, ))
     tables = cursor.fetchall()
 
     cursor.execute(f"SET search_path TO '{backup_site.schema_name}';")
@@ -145,7 +160,7 @@ def backup_site(self, backup_site_id):
     # dump data for all tables
     for row in tables:
         table = f"{row[0]}"
-        file_path = f"{backup_schema_folder}/{row[0]}.csv"
+        file_path = f"{backup_data_folder}/{row[0]}.csv"
         f = open(file_path, 'wb+')
 
         cursor.copy_to(f, table)
@@ -188,21 +203,17 @@ def restore_site(self, restore_folder, schema_name, domain):
         except Exception as e:
             raise Exception(e)
 
-    # create new tenant
-    with schema_context('public'):
-        tenant = Client(schema_name=schema_name, name=schema_name)
-        tenant.save()
-
-        d = Domain()
-        d.domain = domain
-        d.tenant = tenant
-        d.is_primary = True
-        d.save()
-
     # get psycopg2 cursor
     cursor = connection.cursor()
 
-    cursor.execute(f"SET search_path TO '{tenant.schema_name}';")
+    cursor.execute(f"CREATE SCHEMA \"{schema_name}\";")
+    cursor.execute(f"SET search_path TO \"{schema_name}\";")
+
+    # CREATE schema
+    schema_file = open(f'{backup_base_path}/schema.sql', 'r')
+    sql_create_schema = schema_file.read()
+
+    cursor.execute(sql_create_schema)
 
     # temporary remove foreign key constraints
     sql_drop_key_contraints = """create table if not exists dropped_foreign_keys (
@@ -231,13 +242,13 @@ end $$;"""
 
     cursor.execute(sql_drop_key_contraints)
 
-    restore_schema_path = os.path.join(backup_base_path, "schema")
+    restore_data_path = os.path.join(backup_base_path, "data")
 
     # read data from dumped tables
-    for file in os.listdir(restore_schema_path):
+    for file in os.listdir(restore_data_path):
         ext = file.split(".")
         table = f"{ext[0]}"
-        file_path = os.path.join(restore_schema_path, file)
+        file_path = os.path.join(restore_data_path, file)
         f = open(file_path, 'r')
 
         # check if table exists
@@ -277,7 +288,21 @@ end $$;"""
 
     # copy files
     if os.path.exists(os.path.join(backup_base_path, "files")):
-        shutil.copytree(os.path.join(backup_base_path, "files"), os.path.join(settings.MEDIA_ROOT, tenant.schema_name))
+        shutil.copytree(os.path.join(backup_base_path, "files"), os.path.join(settings.MEDIA_ROOT, schema_name))
+
+
+    # create new tenant if everyting is successfull
+    with schema_context('public'):
+        tenant = Client(schema_name=schema_name, name=schema_name)
+        tenant.save()
+
+        d = Domain()
+        d.domain = domain
+        d.tenant = tenant
+        d.is_primary = True
+        d.save()
+
+    call_command('migrate_schemas', f'--schema={schema_name}')
 
     return tenant.id
 
