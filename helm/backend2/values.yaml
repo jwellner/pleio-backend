@@ -2,10 +2,11 @@ accountDomain:
 adminDomain:
 # Websites that require manual certs
 websitesManual: []
-# Websites that automate certificates with an issuer
-websitesAuto: []
 # - domain: *.pleio.nl
 #   secretName: tls-wildcard.pleio.nl
+websitesAuto: []
+# - domain: www.pleio-extra.nl
+#   secretName: tls-pleio-extra.nl
 
 env: test
 debug: 'False'
