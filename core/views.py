@@ -38,7 +38,7 @@ def default(request, exception=None):
     # pylint: disable=unused-argument
 
     if tenant_schema() == 'public':
-        return HttpResponse('Site does not exist', status=400)
+        return render(request, 'domain_placeholder.html', status=404)
 
     metadata = {
         "description" : config.DESCRIPTION,
