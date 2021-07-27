@@ -4,13 +4,6 @@ from django.db import migrations, models
 import django.utils.timezone
 
 
-def set_published_date(apps, schema_editor):
-    Entity = apps.get_model('core', 'Entity')
-    Entity.objects.update(published=models.F('created_at'))
-
-def reverse_published_date(apps, schema_editor):
-    pass
-
 class Migration(migrations.Migration):
 
     dependencies = [
@@ -27,7 +20,6 @@ class Migration(migrations.Migration):
             name='published',
             field=models.DateTimeField(null=True, default=django.utils.timezone.now),
         ),
-        migrations.RunPython(set_published_date, reverse_published_date),
         migrations.AddField(
             model_name='entity',
             name='notifications_created',
