@@ -57,11 +57,14 @@ def resolve_search(_, info, q=None, containerGuid=None, type=None, subtype=None,
             'term', tenant_name=tenant_name
         ).filter(
             'range', created_at={'gte': date_from, 'lte': date_to}
-        ).filter(
-            'range', published={'gt': None, 'lte': timezone.now()}
         ).exclude(
             'term', is_active=False
         )
+
+    s = s.query('bool', filter=[
+        Q('range', published={'gt': None, 'lte': timezone.now()}) |
+        Q('terms', type=['group', 'user'])
+    ])
 
     # Filter on container_guid (group.guid)
     if containerGuid:
