@@ -332,9 +332,8 @@ def get_sites_by_email(self, email):
 
     return data
 
-@shared_task(bind=True)
-def get_db_disk_usage(self, schema_name):
-    # pylint: disable=unused-argument
+@shared_task(bind=False)
+def get_db_disk_usage(schema_name):
     '''
     Get size by schema_name
     '''
@@ -345,9 +344,8 @@ def get_db_disk_usage(self, schema_name):
     
     return size_in_bytes
 
-@shared_task(bind=True)
-def get_file_disk_usage(self, schema_name):
-    # pylint: disable=unused-argument
+@shared_task(bind=False)
+def get_file_disk_usage(schema_name):
     '''
     Get size by schema_name
     '''
