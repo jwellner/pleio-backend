@@ -11,13 +11,6 @@ def set_published_date(apps, schema_editor):
 def reverse_published_date(apps, schema_editor):
     pass
 
-def set_notifications_created(apps, schema_editor):
-    Entity = apps.get_model('core', 'Entity')
-    Entity.objects.update(notifications_created=True)
-
-def reverse_notifications_created(apps, schema_editor):
-    pass
-
 class Migration(migrations.Migration):
 
     dependencies = [
@@ -38,7 +31,6 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='entity',
             name='notifications_created',
-            field=models.BooleanField(default=False),
-        ),
-        migrations.RunPython(set_notifications_created, reverse_notifications_created),
+            field=models.BooleanField(default=True),
+        )
     ]
