@@ -54,11 +54,11 @@ spec:
   rules:
   {{- range .Values.websitesManual }}
     - host: {{ .domain | quote }}
-        http:
-          paths:
-            - backend:
-                serviceName: {{ $serviceName }}
-                servicePort: http
+      http:
+        paths:
+          - backend:
+              serviceName: {{ $serviceName }}
+              servicePort: http
   {{- end }}
   tls:
   {{- range .Values.websitesManual }}
