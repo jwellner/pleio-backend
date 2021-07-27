@@ -30,6 +30,7 @@ class Command(BaseCommand):
         for file in files:
             try:
                 file.size = file.upload.size
+                file.save()
                 updated_files+=1
             except Exception:
                 file_errors+=1

@@ -23,8 +23,8 @@ class Dashboard(LoginRequiredMixin, UserPassesTestMixin, View):
         return redirect('/')
 
     def get(self, request):
-        db_usage = get_db_disk_usage.delay(tenant_schema()).get(timeout=30)
-        file_usage = get_file_disk_usage.delay(tenant_schema()).get(timeout=30)
+        db_usage = get_db_disk_usage(tenant_schema())
+        file_usage = get_file_disk_usage(tenant_schema())
 
         context = {
             'stats': {
