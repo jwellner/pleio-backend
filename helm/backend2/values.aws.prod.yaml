@@ -1,0 +1,9 @@
+accountDomain: https://account.pleio.nl
+websitesManual:
+  - domain: '*.pleio.nl'
+    secretName: tls-wildcard.pleio.nl
+
+api:
+  replicaCount: 1
+
+env: prod
