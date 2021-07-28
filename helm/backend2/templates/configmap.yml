@@ -18,5 +18,3 @@ data:
   MEDIA_ROOT: /app-data
   SWIFT_ENABLED: "False"
   S3_ENABLED: "False"
-  APM_ENABLED: "False"
-  MEMCACHE_ENABLED: "False"

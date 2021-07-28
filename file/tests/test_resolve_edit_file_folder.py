@@ -155,6 +155,7 @@ class EditFileFolderTestCase(FastTenantTestCase):
         file_mock = MagicMock(spec=File)
         file_mock.name = 'test.gif'
         file_mock.content_type = 'image/gif'
+        file_mock.size = 123
 
         mock_save.return_value = "test.gif"
         mock_open.return_value = file_mock
@@ -645,6 +646,7 @@ class EditFileFolderTestCase(FastTenantTestCase):
         file_mock.name = 'icon-name.jpg'
         file_mock.title = 'icon-name.jpg'
         file_mock.content_type = 'image/jpeg'
+        file_mock.size = 123
 
         mock_open.return_value = file_mock
         mock_mimetype.return_value = file_mock.content_type
@@ -680,6 +682,7 @@ class EditFileFolderTestCase(FastTenantTestCase):
         file_mock.name = 'localfile name'
         file_mock.title = 'csv-name.csv'
         file_mock.content_type = 'text/plain'
+        file_mock.size = 123
 
         mock_open.return_value = file_mock
         mock_mimetype.return_value = file_mock.content_type
@@ -704,6 +707,7 @@ class EditFileFolderTestCase(FastTenantTestCase):
         file_mock.name = 'localfile name'
         file_mock.title = 'csv-name.weird'
         file_mock.content_type = None
+        file_mock.size = 123
 
         mock_open.return_value = file_mock
         mock_mimetype.return_value = file_mock.content_type

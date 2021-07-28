@@ -56,11 +56,13 @@ class ORDER_DIRECTION:
 class ORDER_BY:
     timeCreated = 'timeCreated'
     timeUpdated = 'timeUpdated'
+    timePublished = 'timePublished'
     lastAction = 'lastAction'
     title = 'title'
 
 class SEARCH_ORDER_BY:
     timeCreated = 'timeCreated'
+    timePublished = 'timePublished'
     title = 'title'
 
 class ACCESS_TYPE:

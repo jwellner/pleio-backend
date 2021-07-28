@@ -61,6 +61,7 @@ def resolve_attend_event(_, info, input):
 def resolve_add_event(_, info, input):
     # pylint: disable=redefined-builtin
     # pylint: disable=too-many-branches
+    # pylint: disable=too-many-statements
 
 
     user = info.context["request"].user
@@ -146,6 +147,15 @@ def resolve_add_event(_, info, input):
 
     entity.rsvp = clean_input.get("rsvp", False)
     entity.attend_event_without_account = clean_input.get("attendEventWithoutAccount", False)
+
+    if 'timePublished' in clean_input:
+        if clean_input.get("timePublished") is None:
+            entity.published = None
+        else:
+            try:
+                entity.published = dateparse.parse_datetime(clean_input.get("timePublished"))
+            except ObjectDoesNotExist:
+                raise GraphQLError(INVALID_DATE)
 
     entity.save()
 
@@ -250,6 +260,15 @@ def resolve_edit_event(_, info, input):
         entity.rsvp = clean_input.get("rsvp")
     if 'attendEventWithoutAccount' in clean_input:
         entity.attend_event_without_account = clean_input.get("attendEventWithoutAccount")
+
+    if 'timePublished' in clean_input:
+        if clean_input.get("timePublished") is None:
+            entity.published = None
+        else:
+            try:
+                entity.published = dateparse.parse_datetime(clean_input.get("timePublished"))
+            except ObjectDoesNotExist:
+                raise GraphQLError(INVALID_DATE)
 
     # only admins can edit these fields
     if user.has_role(USER_ROLES.ADMIN):

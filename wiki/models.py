@@ -9,7 +9,7 @@ class Wiki(Entity, BookmarkMixin):
     """
     class Meta:
         # When positions are equal sort old -> new (used for menu's)
-        ordering = ['position', 'created_at']
+        ordering = ['position', 'published']
 
     position = models.IntegerField(null=False, default=0)
     title = models.CharField(max_length=256)

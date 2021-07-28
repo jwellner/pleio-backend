@@ -38,7 +38,7 @@ def default(request, exception=None):
     # pylint: disable=unused-argument
 
     if tenant_schema() == 'public':
-        return HttpResponse('Site does not exist', status=400)
+        return render(request, 'domain_placeholder.html', status=404)
 
     metadata = {
         "description" : config.DESCRIPTION,
@@ -71,6 +71,12 @@ def entity_view(request, entity_id=None, entity_title=None):
             entity = Entity.objects.visible(user).select_subclasses().get(id=entity_id)
         except ObjectDoesNotExist:
             pass
+
+    if not entity:
+        try:
+            entity = Entity.objects.draft(user).select_subclasses().get(id=entity_id)
+        except ObjectDoesNotExist:
+            pass    
 
     if entity:
         status_code = 200

@@ -8,7 +8,7 @@ class Task(Entity):
     Task
     """
     class Meta:
-        ordering = ['-created_at']
+        ordering = ['-published']
 
     STATE_TYPES = (
         ('NEW', 'New'),

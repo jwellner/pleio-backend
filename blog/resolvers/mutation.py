@@ -74,6 +74,15 @@ def resolve_add_blog(_, info, input):
         entity.featured_video_title = ""
         entity.featured_alt = ""
 
+    if 'timePublished' in clean_input:
+        if clean_input.get("timePublished") is None:
+            entity.published = None
+        else:
+            try:
+                entity.published = dateparse.parse_datetime(clean_input.get("timePublished"))
+            except ObjectDoesNotExist:
+                raise GraphQLError(INVALID_DATE)
+
     if user.has_role(USER_ROLES.ADMIN) or user.has_role(USER_ROLES.EDITOR):
         entity.is_recommended = clean_input.get("isRecommended")
 
@@ -155,6 +164,15 @@ def resolve_edit_blog(_, info, input):
         entity.featured_video_title = ""
         entity.featured_alt = ""
 
+    if 'timePublished' in clean_input:
+        if clean_input.get("timePublished") is None:
+            entity.published = None
+        else:
+            try:
+                entity.published = dateparse.parse_datetime(clean_input.get("timePublished"))
+            except ObjectDoesNotExist:
+                raise GraphQLError(INVALID_DATE)
+
     if user.has_role(USER_ROLES.ADMIN) or user.has_role(USER_ROLES.EDITOR):
         if 'isRecommended' in clean_input:
             entity.is_recommended = clean_input.get("isRecommended")
@@ -162,6 +180,7 @@ def resolve_edit_blog(_, info, input):
     if user.has_role(USER_ROLES.ADMIN) or user.has_role(USER_ROLES.EDITOR):
         if 'isFeatured' in clean_input:
             entity.is_featured = clean_input.get("isFeatured")
+
 
     # only admins can edit these fields
     if user.has_role(USER_ROLES.ADMIN):

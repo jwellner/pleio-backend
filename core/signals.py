@@ -3,7 +3,7 @@ from django.db.models.signals import post_save, pre_save
 from django.conf import settings
 from django.utils import timezone
 from notifications.signals import notify
-from core.lib import tenant_schema
+from core.lib import tenant_schema, get_user_ids_for_instance_notification, datetime_isoformat
 from core.models import Comment, Group, GroupInvitation, Entity, EntityViewCount, NotificationMixin
 from core.tasks import create_notification
 from user.models import User
@@ -68,18 +68,13 @@ def notification_handler(sender, instance, created, **kwargs):
 
     # pylint: disable=unused-argument
     if not settings.IMPORTING:
+        if (not instance.published) or (datetime_isoformat(instance.published) > datetime_isoformat(timezone.now())):
+            return
+
         if not instance.group or not created:
             return
 
-        user_ids = []
-        for member in instance.group.members.filter(type__in=['admin', 'owner', 'member'], enable_notification=True):
-            user = member.user
-            if instance.owner == user:
-                continue
-            if not instance.can_read(user):
-                continue
-            user_ids.append(user.id)
-
+        user_ids = get_user_ids_for_instance_notification(instance)
         create_notification.delay(tenant_schema(), 'created', instance.id, instance.owner.id, user_ids)
 
 def notification_update_handler(sender, instance, **kwargs):
