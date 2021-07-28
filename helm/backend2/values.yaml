@@ -35,6 +35,9 @@ storage:
   dataSize: 1Mi
   tmpSize: 1Mi
   backupSize: 1Mi
+  existingTempStorage:
+  existingDataStorage:
+  existingBackupStorage:
 
 ingress:
   annotations:
