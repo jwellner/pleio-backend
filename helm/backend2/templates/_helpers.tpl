@@ -38,6 +38,10 @@
 {{- printf "%s-background" ((include "backend2.name" . )) -}}
 {{- end -}}
 
+{{- define "backend2.filecleanup" -}}
+{{- printf "%s-filecleanup" ((include "backend2.name" . )) -}}
+{{- end -}}
+
 {{- define "backend2.chart" -}}
 {{- printf "%s-%s" .Chart.Name .Chart.Version | replace "+" "_" | trunc 63 | trimSuffix "-" -}}
 {{- end -}}
