@@ -15,15 +15,27 @@
 {{- end -}}
 
 {{- define "backend2.tempStorageName" -}}
+{{- if .Values.storage.existingTempStorage -}}
+{{- .Values.storage.existingTempStorage -}}
+{{- else -}}
 {{- printf "%s-tmp" ((include "backend2.name" . )) -}}
+{{- end -}}
 {{- end -}}
 
 {{- define "backend2.dataStorageName" -}}
+{{- if .Values.storage.existingDataStorage -}}
+{{- .Values.storage.existingDataStorage -}}
+{{- else -}}
 {{- printf "%s-data" ((include "backend2.name" . )) -}}
+{{- end -}}
 {{- end -}}
 
 {{- define "backend2.backupStorageName" -}}
+{{- if .Values.storage.existingBackupStorage -}}
+{{- .Values.storage.existingBackupStorage -}}
+{{- else -}}
 {{- printf "%s-backup" ((include "backend2.name" . )) -}}
+{{- end -}}
 {{- end -}}
 
 {{- define "backend2.apiName" -}}
