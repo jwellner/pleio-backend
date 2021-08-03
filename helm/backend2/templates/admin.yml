@@ -21,6 +21,16 @@ spec:
       labels:
         {{- include "backend2.selectorLabels" $labelData | nindent 8 }}
     spec:
+      initContainers:
+       - name: init-container
+         image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+         command: ['python', '/app/manage.py migrate_schemas']
+         imagePullPolicy: {{ .Values.image.imagePullPolicy }}
+         envFrom:
+          - configMapRef:
+              name: {{ include "backend2.name" . }}
+          - secretRef:
+              name: {{ include "backend2.secretsName" . }}
       containers:
         - name: {{ include "backend2.adminName" . }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
@@ -47,5 +57,3 @@ spec:
         - name: pleio-data
           persistentVolumeClaim:
             claimName: {{ include "backend2.dataStorageName" . }}
-
-
