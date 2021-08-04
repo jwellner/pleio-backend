@@ -95,7 +95,7 @@ build-feature:
     - helm dependency update helm/backend2
     - |
       helm upgrade --install -n pleio2 -f ${HELM_VALUES_FILE} \
-        --set image.tag=feature-${CI_COMMIT_SHA:0:8} \
+        --set image.tag=${TAG_PREFIX}${CI_COMMIT_SHA:0:8} \
         --set frontend.tag=${FRONTEND_TAG} \
         ${HELM_NAME} helm/backend2
 
@@ -107,6 +107,7 @@ AWS Review:
   variables:
     HELM_NAME: backend2-review
     HELM_VALUES_FILE: helm/backend2/values.aws.review.yaml
+    TAG_PREFIX: feature-
   extends:
     - .helm_deploy
 
