@@ -6,3 +6,6 @@ websitesManual:
 
 api:
   replicaCount: 2
+
+background:
+  replicaCount: 0

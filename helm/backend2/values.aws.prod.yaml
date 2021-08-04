@@ -6,6 +6,9 @@ websitesManual:
 api:
   replicaCount: 1
 
+background:
+  replicaCount: 0
+
 env: prod
 
 storage:
