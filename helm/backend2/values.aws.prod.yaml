@@ -1,0 +1,17 @@
+accountDomain: https://account.pleio.nl
+websitesManual:
+  - domain: '*.pleio.nl'
+    secretName: tls-wildcard.pleio.nl
+
+api:
+  replicaCount: 1
+
+background:
+  replicaCount: 0
+
+env: prod
+
+storage:
+  existingDataStorage: pleio-data
+  existingTempStorage: tmp-zip-storage
+  existingBackupStorage: backup-storage

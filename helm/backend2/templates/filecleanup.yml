@@ -1,0 +1,38 @@
+{{ $labelData := dict "Values" .Values "Release" .Release "Chart" .Chart "Component" "filecleanup" }}
+apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+  name: {{ include "backend2.filecleanup" . }}
+  labels:
+    {{- include "backend2.labels" $labelData | nindent 4 }}
+spec:
+  schedule: {{ .Values.cleanup.schedule | quote }}
+  jobTemplate:
+    metadata:
+      name: {{ include "backend2.filecleanup" . }}
+      labels:
+        {{- include "backend2.labels" $labelData | nindent 8 }}
+    spec:
+      backoffLimit: 0
+      template:
+        metadata:
+          name: {{ include "backend2.filecleanup" . }}
+          labels:
+            {{- include "backend2.labels" $labelData | nindent 12 }}
+        spec:
+          containers:
+            - name: {{ include "backend2.filecleanup" . }}
+              image: busybox:stable
+              imagePullPolicy: IfNotPresent
+              command:
+                - /bin/sh
+                - -c
+                - {{ printf "find /cleanme -type f -mtime +%d -exec rm {} \\;" (int64 .Values.cleanup.maxFileAge) }}
+              volumeMounts:
+                - mountPath: /cleanme
+                  name: tmp-zip-storage
+          volumes:
+            - name: tmp-zip-storage
+              persistentVolumeClaim:
+                claimName: {{ include "backend2.tempStorageName" . }}
+          restartPolicy: Never

@@ -19,12 +19,13 @@ from core import config
 from core.lib import html_to_text, access_id_to_acl, get_model_by_subtype, tenant_schema, get_user_ids_for_instance_notification
 
 # from core.management.commands.send_notification_emails import get_notification
-from core.models import ProfileField, UserProfileField, Entity, GroupMembership, Comment, Widget, Group
+from core.models import ProfileField, UserProfileField, Entity, GroupMembership, Comment, Widget, Group, NotificationMixin
 from django.core.mail import EmailMultiAlternatives
 from django.template.loader import get_template
 from django.utils import timezone, translation
 from django.conf import settings
 from notifications.signals import notify
+from notifications.models import Notification
 from user.models import User
 from django.utils.translation import ugettext_lazy
 from elgg.models import GuidMap
@@ -36,13 +37,22 @@ logger = get_task_logger(__name__)
 def create_notifications_for_scheduled_content(schema_name):
     # TODO: use same code as in notification_handler in core.signals
     with schema_context(schema_name):
-        for instance in Entity.objects.filter(notifications_created=False, published__lte=timezone.now()).exclude(published=None):
-            if not instance.group:
-                instance.notifications_created = True
-                instance.save()
-                continue
-            user_ids = get_user_ids_for_instance_notification(instance)
-            create_notification.delay(tenant_schema(), 'created', instance.id, instance.owner.id, user_ids)
+
+        for subclass in NotificationMixin.__subclasses__():
+            for instance in subclass.objects.filter(notifications_created=False, published__lte=timezone.now()).exclude(published=None):
+                if not instance.group:
+                    instance.notifications_created = True
+                    instance.save()
+                    continue
+
+                # skip if there are already notifications for this instance.id
+                if Notification.objects.filter(action_object_object_id=instance.id).count() > 0:
+                    instance.notifications_created = True
+                    instance.save()
+                    continue
+
+                user_ids = get_user_ids_for_instance_notification(instance)
+                create_notification.delay(tenant_schema(), 'created', instance.id, instance.owner.id, user_ids)
 
 
 @shared_task(bind=True)
@@ -372,7 +382,7 @@ def get_notification(notification):
         'action': notification.verb,
         'performer_name': performer.name,
         'entity_title': entity.title,
-        'entity_description': entity.description,
+        'entity_description': entity.description if hasattr(entity, 'description') else "",
         'entity_group': entity_group,
         'entity_group_name': entity_group_name,
         'entity_group_url': entity_group_url,
@@ -403,6 +413,9 @@ def create_notification(self, schema_name, verb, entity_id, sender_id, recipient
         # tuple with list is returned, get the notification created
         notifications = notify.send(sender, recipient=recipients, verb=verb, action_object=instance)[0][1]
 
+        instance.notifications_created = True
+        instance.save()
+
         # only send direct notification for content in groups
         if instance.group:
             subject = ugettext_lazy("New notification at %(site_name)s: ") % {'site_name': config.NAME}
@@ -432,8 +445,6 @@ def create_notification(self, schema_name, verb, entity_id, sender_id, recipient
                         send_mail_multi.delay(schema_name, subject, 'email/send_notification_emails.html', context, recipient.email)
                     notification.emailed = True
                     notification.save()
-        instance.notifications_created = True
-        instance.save()
 
 
 @shared_task(bind=True, ignore_result=True)

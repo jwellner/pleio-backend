@@ -6,3 +6,7 @@ The required values file can be found in our password storage. Copy its content 
 ```bash
 helm upgrade -n pleio2 -f helm/backend2-secrets/values.review.yaml backend2-review-secrets helm/backend2-secrets
 ```
+
+## Domains
+
+Domains that are routed to backend2 are managed through the websitesManual and websitesAuto values. Any domain in websitesAuto obtains automatic letsencrypt certificates. WebsitesManual provides a way to reference manually added certificates for example when a PKI certificate is required for a website or for a wildcard domain such as *.pleio.nl for which the letsencrypt certificate cannot yet be automated.

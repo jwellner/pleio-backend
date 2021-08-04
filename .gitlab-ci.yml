@@ -88,20 +88,28 @@ build-feature:
     - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN $CI_REGISTRY
     - docker push registry.gitlab.com/pleio/backend2:feature-${CI_COMMIT_SHA:0:8}
 
-AWS Review:
+.helm_deploy:
   stage: deploy
+  script:
+    - FRONTEND_TAG=$(kubectl get  -n pleio2 deployment ${HELM_NAME}-api -o=jsonpath='{.spec.template.spec.initContainers[0].image}' | grep -oP '(?<=:).+')
+    - helm dependency update helm/backend2
+    - |
+      helm upgrade --install -n pleio2 -f ${HELM_VALUES_FILE} \
+        --set image.tag=${TAG_PREFIX}${CI_COMMIT_SHA:0:8} \
+        --set frontend.tag=${FRONTEND_TAG} \
+        ${HELM_NAME} helm/backend2
+
+AWS Review:
   tags:
     - control-aws
   only:
     - /^feature-(.*)$/
-  script:
-    - FRONTEND_TAG=$(kubectl get  -n pleio2 deployment backend2-review-api -o=jsonpath='{.spec.template.spec.initContainers[0].image}' | grep -oP '(?<=:).+')
-    - helm dependency update helm/backend2
-    - |
-      helm upgrade --install -n pleio2 -f helm/backend2/values.aws.review.yaml \
-        --set image.tag=feature-${CI_COMMIT_SHA:0:8} \
-        --set frontend.tag=${FRONTEND_TAG} \
-        backend2-review helm/backend2
+  variables:
+    HELM_NAME: backend2-review
+    HELM_VALUES_FILE: helm/backend2/values.aws.review.yaml
+    TAG_PREFIX: feature-
+  extends:
+    - .helm_deploy
 
 AWS Test:
   stage: deploy
@@ -113,9 +121,21 @@ AWS Test:
     - /usr/local/bin/kubectl -n pleio2 set image deployment/api-test api-test=registry.gitlab.com/pleio/backend2:${CI_COMMIT_SHA:0:8}
     - /usr/local/bin/kubectl -n pleio2 set image deployment/admin-test admin-test=registry.gitlab.com/pleio/backend2:${CI_COMMIT_SHA:0:8}
     - /usr/local/bin/kubectl -n pleio2 set image deployment/background-test background-test=registry.gitlab.com/pleio/backend2:${CI_COMMIT_SHA:0:8}
+    - FRONTEND_TAG=$(kubectl get  -n pleio2 deployment backend2-test-api -o=jsonpath='{.spec.template.spec.initContainers[0].image}' | grep -oP '(?<=:).+')
+    - helm dependency update helm/backend2
     - sleep 30
     - /usr/local/bin/kubectl -n pleio2 patch deployment memcache-test -p "{\"spec\":{\"template\":{\"metadata\":{\"labels\":{\"date\":\"`date +'%s'`\"}}}}}"
 
+AWS Test (helm):
+  tags:
+    - control-aws
+  only:
+    - dev
+  variables:
+    HELM_NAME: backend2-test
+    HELM_VALUES_FILE: helm/backend2/values.aws.test.yaml
+  extends:
+    - .helm_deploy
 
 ODCN Test:
   stage: deploy
@@ -143,6 +163,17 @@ AWS Prod:
     - /usr/local/bin/kubectl -n pleio2 set image deployment/background background=registry.gitlab.com/pleio/backend2:${CI_COMMIT_SHA:0:8}
     - sleep 30
     - echo 'flush_all' | nc $AWS_MEMCACHED2_HOST 11211
+
+AWS Prod (helm):
+  tags:
+    - control-aws
+  only:
+    - master
+  variables:
+    HELM_NAME: backend2
+    HELM_VALUES_FILE: helm/backend2/values.aws.prod.yaml
+  extends:
+    - .helm_deploy
 
 ODCN Prod:
   stage: deploy

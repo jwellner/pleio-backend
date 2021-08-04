@@ -2,10 +2,11 @@ accountDomain:
 adminDomain:
 # Websites that require manual certs
 websitesManual: []
-# Websites that automate certificates with an issuer
-websitesAuto: []
 # - domain: *.pleio.nl
 #   secretName: tls-wildcard.pleio.nl
+websitesAuto: []
+# - domain: www.pleio-extra.nl
+#   secretName: tls-pleio-extra.nl
 
 env: test
 debug: 'False'
@@ -34,6 +35,15 @@ storage:
   dataSize: 1Mi
   tmpSize: 1Mi
   backupSize: 1Mi
+  existingTempStorage:
+  existingDataStorage:
+  existingBackupStorage:
+
+cleanup:
+  # The schedule for which the clean job will be run
+  schedule: '0 2 * * *' # every day at 2 in the morning
+  # The maximum amount of days, a file will exist in the tmp folder
+  maxFileAge: 2
 
 ingress:
   annotations:
