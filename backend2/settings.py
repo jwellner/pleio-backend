@@ -306,3 +306,5 @@ if APM_ENABLED:
 
 SECURE_REFERRER_POLICY = 'origin-when-cross-origin'
 DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
+
+CLAMAV_HOST = os.getenv('CLAMAV_HOST', None)

@@ -37,3 +37,4 @@ django-auditlog==1.0a1
 requests==2.26.0
 redis==3.5.3
 elasticsearch==7.13.4
+clamd==1.0.2

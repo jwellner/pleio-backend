@@ -1,4 +1,6 @@
 import os
+import clamd
+import logging
 from auditlog.registry import auditlog
 from django.urls import reverse
 from django.conf import settings
@@ -9,6 +11,8 @@ from django.db.models import ObjectDoesNotExist
 from django.db.models.signals import pre_save, pre_delete
 from django.dispatch import receiver
 from django.utils.text import slugify
+
+logger = logging.getLogger(__name__)
 
 def read_access_default():
     return []
@@ -74,6 +78,19 @@ class FileFolder(Entity):
         if self.children.count() > 0:
             return True
         return False
+
+    def scan(self):
+        if settings.CLAMAV_HOST:
+            cd = clamd.ClamdNetworkSocket(host=settings.CLAMAV_HOST, timeout=10)
+            result = None
+            try:
+                result = cd.instream(self.upload.file)
+            except Exception as e:
+                logger.error('Clamav service down with error: %s', e)
+
+            if result and result['stream'][0] == 'FOUND':
+                logger.error('Clamav found suspicious file: %s', result['stream'][1])
+                raise Exception('Suspicious file, found: %s' % result['stream'][1])
 
 
 def set_parent_folders_updated_at(instance):
