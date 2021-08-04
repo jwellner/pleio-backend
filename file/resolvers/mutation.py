@@ -1,6 +1,5 @@
 from graphql import GraphQLError
 from django.core.exceptions import ObjectDoesNotExist
-from django.conf import settings
 from ariadne import ObjectType
 from core import config
 from core.constances import ACCESS_TYPE, NOT_LOGGED_IN, COULD_NOT_FIND, COULD_NOT_SAVE, USER_ROLES
