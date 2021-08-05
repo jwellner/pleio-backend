@@ -3,7 +3,7 @@
     "config:base"
   ],
   "prConcurrentLimit": 5,
-  "automerge": true,
+  "automerge": false,
   "major": {
     "automerge": false
   }
