@@ -30,3 +30,5 @@ apm: {}
 celery: {}
 # brokerUrl:
 # resultBackend:
+
+clamav:

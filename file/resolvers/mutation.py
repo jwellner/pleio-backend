@@ -5,7 +5,7 @@ from core import config
 from core.constances import ACCESS_TYPE, NOT_LOGGED_IN, COULD_NOT_FIND, COULD_NOT_SAVE, USER_ROLES
 from core.lib import remove_none_from_dict, access_id_to_acl
 from core.models import Group
-from ..models import FileFolder
+from ..models import FileFolder, FILE_SCAN
 
 
 def update_access_recursive(user, entity, access_id, write_access_id):
@@ -76,9 +76,7 @@ def resolve_add_file(_, info, input):
     entity.read_access =  access_id_to_acl(entity, clean_input.get("accessId", config.DEFAULT_ACCESS_ID))
     entity.write_access = access_id_to_acl(entity, clean_input.get("writeAccessId"))
 
-    try:
-        entity.scan()
-    except Exception:
+    if entity.scan() == FILE_SCAN.VIRUS:
         raise GraphQLError("INVALID_FILE")
 
     entity.save()
@@ -174,9 +172,7 @@ def resolve_edit_file_folder(_, info, input):
 
     if 'file' in clean_input:
         entity.upload = clean_input.get("file")
-        try:
-            entity.scan()
-        except Exception:
+        if entity.scan() == FILE_SCAN.VIRUS:
             raise GraphQLError("INVALID_FILE")
 
 
@@ -262,9 +258,7 @@ def resolve_add_image(_, info, input):
 
     entity.upload = clean_input.get("image")
 
-    try:
-        entity.scan()
-    except Exception:
+    if entity.scan() == FILE_SCAN.VIRUS:
         raise GraphQLError("INVALID_FILE")
 
     entity.save()

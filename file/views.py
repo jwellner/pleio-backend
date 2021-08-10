@@ -20,6 +20,9 @@ def download(request, file_id=None, file_name=None):
     try:
         entity = FileFolder.objects.visible(user).get(id=file_id)
 
+        if entity.scan_incidents.count() > 0:
+            raise Http404("File not found")
+
         if entity.group and entity.group.is_closed and not entity.group.is_full_member(user) and not user.has_role(USER_ROLES.ADMIN):
             raise Http404("File not found")
 
@@ -44,6 +47,9 @@ def embed(request, file_id=None, file_name=None):
 
     try:
         entity = FileFolder.objects.visible(user).get(id=file_id)
+
+        if entity.scan_incidents.count() > 0:
+            raise Http404("File not found")
 
         if entity.group and entity.group.is_closed and not entity.group.is_full_member(user) and not user.has_role(USER_ROLES.ADMIN):
             raise Http404("File not found")
