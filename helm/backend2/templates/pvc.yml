@@ -13,7 +13,7 @@ spec:
     requests:
       storage: {{ .Values.storage.tmpSize }}
 {{- end -}}
-{{- if not .Values.storage.existingDataStorage -}}
+{{- if not .Values.storage.existingDataStorage }}
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim
@@ -29,7 +29,7 @@ spec:
     requests:
       storage: {{ .Values.storage.dataSize }}
 {{- end -}}
-{{- if not .Values.storage.existingBackupStorage -}}
+{{- if not .Values.storage.existingBackupStorage }}
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim
