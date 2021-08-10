@@ -99,8 +99,6 @@ class FileFolder(Entity):
                 return FILE_SCAN.UNKNOWN
 
             self.last_scan = timezone.now()
-            if not self._state.adding:
-                self.save()
 
             if result and result['stream'][0] == 'FOUND':
                 message = result['stream'][1]
@@ -109,7 +107,6 @@ class FileFolder(Entity):
 
                 ScanIncident.objects.create(
                     message=message,
-                    file=self if not self._state.adding else None,
                     file_created=self.created_at,
                     file_title=self.upload.file.name,
                     file_mime_type=get_mimetype(self.upload.path),

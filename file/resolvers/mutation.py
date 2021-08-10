@@ -175,7 +175,6 @@ def resolve_edit_file_folder(_, info, input):
         if entity.scan() == FILE_SCAN.VIRUS:
             raise GraphQLError("INVALID_FILE")
 
-
     if 'accessId' in clean_input:
         entity.read_access = access_id_to_acl(entity, clean_input.get("accessId"))
 
