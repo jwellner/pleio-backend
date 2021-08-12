@@ -149,7 +149,7 @@ class WalledGardenMiddleware:
                 'next': request.path_info
             }
 
-            return TemplateResponse(request, 'registration/login.html', context).render()
+            return TemplateResponse(request, 'registration/login.html', context, status=401).render()
 
         return self.get_response(request)
 
