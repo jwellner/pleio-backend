@@ -9,3 +9,6 @@ api:
 
 background:
   replicaCount: 0
+
+storage:
+  existingBackupStorage: backup-storage
