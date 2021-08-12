@@ -111,21 +111,6 @@ AWS Review:
   extends:
     - .helm_deploy
 
-AWS Test:
-  stage: deploy
-  tags:
-    - control-aws
-  only:
-    - dev
-  script:
-    - /usr/local/bin/kubectl -n pleio2 set image deployment/api-test api-test=registry.gitlab.com/pleio/backend2:${CI_COMMIT_SHA:0:8}
-    - /usr/local/bin/kubectl -n pleio2 set image deployment/admin-test admin-test=registry.gitlab.com/pleio/backend2:${CI_COMMIT_SHA:0:8}
-    - /usr/local/bin/kubectl -n pleio2 set image deployment/background-test background-test=registry.gitlab.com/pleio/backend2:${CI_COMMIT_SHA:0:8}
-    - FRONTEND_TAG=$(kubectl get  -n pleio2 deployment backend2-test-api -o=jsonpath='{.spec.template.spec.initContainers[0].image}' | grep -oP '(?<=:).+')
-    - helm dependency update helm/backend2
-    - sleep 30
-    - /usr/local/bin/kubectl -n pleio2 patch deployment memcache-test -p "{\"spec\":{\"template\":{\"metadata\":{\"labels\":{\"date\":\"`date +'%s'`\"}}}}}"
-
 AWS Test (helm):
   tags:
     - control-aws
