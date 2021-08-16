@@ -57,9 +57,13 @@ def resolve_users(_, info, q="", filters=None, offset=0, limit=20):
             )
 
     total = s.count()
-    # order by name
 
-    s = s.sort({'name.raw': {'order': 'asc'}})
+    # Sort on name is score is equal
+    s = s.sort(
+        '_score',
+        {'name.raw': {'order': 'asc'}}
+    )
+
     s = s[offset:offset+limit]
     response = s.execute()
 
