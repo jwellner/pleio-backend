@@ -52,6 +52,8 @@ class Command(BaseCommand):
 
         for user in users:
 
+            interval = user.profile.notification_email_interval_hours
+
             translation.activate(user.get_language())
             subject = ugettext_lazy("New notifications at %(site_name)s") % {'site_name': config.NAME}
 
@@ -60,10 +62,10 @@ class Command(BaseCommand):
             if not notifications:
                 continue
 
-            # do not send a mail when there is an notification less old than 24 hours emailed
-            time_threshold = datetime.now() - timedelta(hours=4)
-            notifications_emailed_in_last_4_hours = user.notifications.filter(emailed=True, timestamp__gte=time_threshold)
-            if notifications_emailed_in_last_4_hours:
+            # do not send a mail when there is an notification less old than 'interval' hours emailed
+            time_threshold = datetime.now() - timedelta(hours=interval)
+            notifications_emailed_in_last_interval_hours = user.notifications.filter(emailed=True, timestamp__gte=time_threshold)
+            if notifications_emailed_in_last_interval_hours:
                 continue
 
             self.send_notifications(user, notifications, subject, site_url, show_excerpt)

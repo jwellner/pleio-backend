@@ -129,7 +129,7 @@ class Group(models.Model):
             user=user,
             defaults={
                 'type': member_type,
-                'enable_notification': self.auto_notification
+                'notification_mode': 'overview' if self.auto_notification else 'disable'
             }
         )
 
@@ -148,14 +148,6 @@ class Group(models.Model):
             return self.members.get(user=user).delete()
         except ObjectDoesNotExist:
             return False
-
-    def set_member_notification(self, user, notification=True):
-        member = self.members.filter(user=user).first()
-        if member:
-            member.enable_notification = notification
-            member.save()
-            return True
-        return False
 
     def set_member_notification_mode(self, user, notification_mode='overview'):
         member = self.members.filter(user=user).first()
@@ -221,6 +213,7 @@ class GroupMembership(models.Model):
     )
 
     NOTIFICATION_MODES = (
+        ('disable', 'disable'),
         ('overview', 'overview'),
         ('direct', 'direct')
     )
@@ -240,7 +233,6 @@ class GroupMembership(models.Model):
         related_name='members',
         on_delete=models.CASCADE
     )
-    enable_notification = models.BooleanField(default=False)
     notification_mode = models.CharField(
         max_length=10,
         choices=NOTIFICATION_MODES,

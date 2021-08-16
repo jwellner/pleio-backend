@@ -117,18 +117,6 @@ def resolve_group_can_change_ownership(obj, info):
 
     return False
 
-@group.field("getsNotifications")
-def resolve_group_getsNotifications(obj, info):
-    # pylint: disable=unused-argument
-    user = info.context["request"].user
-    if not user.is_authenticated:
-        return False
-
-    try:
-        return obj.members.get(user=user).enable_notification
-    except ObjectDoesNotExist:
-        return False
-
 @group.field("notificationMode")
 def resolve_group_notification_mode(obj, info):
     # pylint: disable=unused-argument

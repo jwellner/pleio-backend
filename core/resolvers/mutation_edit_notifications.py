@@ -26,6 +26,12 @@ def resolve_edit_notifications(_, info, input):
     if 'emailNotifications' in clean_input:
         requested_user.profile.receive_notification_email = clean_input.get('emailNotifications')
 
+    if 'emailNotificationsFrequency' in clean_input:
+        if clean_input.get('emailNotificationsFrequency') > 0:
+            requested_user.profile.notification_email_interval_hours = clean_input.get('emailNotificationsFrequency')
+        else:
+            raise GraphQLError(INVALID_VALUE)
+
     if 'newsletter' in clean_input:
         requested_user.profile.receive_newsletter = clean_input.get('newsletter')
 

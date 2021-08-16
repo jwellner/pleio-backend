@@ -40,6 +40,7 @@ class EditNotificationsTestCase(FastTenantTestCase):
                         guid
                         getsNewsletter
                         emailNotifications
+                        emailNotificationsFrequency
                         language
                         __typename
                     }
@@ -51,6 +52,7 @@ class EditNotificationsTestCase(FastTenantTestCase):
             "input": {
                 "guid": self.user1.guid,
                 "emailNotifications": True,
+                "emailNotificationsFrequency": 24,
                 "newsletter": True,
                 "language": "en"
                 }
@@ -67,6 +69,7 @@ class EditNotificationsTestCase(FastTenantTestCase):
         self.assertEqual(data["editNotifications"]["user"]["guid"], self.user1.guid)
         self.assertEqual(data["editNotifications"]["user"]["getsNewsletter"], True)
         self.assertEqual(data["editNotifications"]["user"]["emailNotifications"], True)
+        self.assertEqual(data["editNotifications"]["user"]["emailNotificationsFrequency"], 24)
         self.assertEqual(data["editNotifications"]["user"]["language"], "en")
 
 
@@ -78,6 +81,7 @@ class EditNotificationsTestCase(FastTenantTestCase):
                         guid
                         getsNewsletter
                         emailNotifications
+                        emailNotificationsFrequency
                         language
                         __typename
                     }
@@ -89,6 +93,7 @@ class EditNotificationsTestCase(FastTenantTestCase):
             "input": {
                 "guid": self.user1.guid,
                 "emailNotifications": True,
+                "emailNotificationsFrequency": 24,
                 "newsletter": False,
                 "language": "en"
                 }
@@ -105,6 +110,7 @@ class EditNotificationsTestCase(FastTenantTestCase):
         self.assertEqual(data["editNotifications"]["user"]["guid"], self.user1.guid)
         self.assertEqual(data["editNotifications"]["user"]["getsNewsletter"], False)
         self.assertEqual(data["editNotifications"]["user"]["emailNotifications"], True)
+        self.assertEqual(data["editNotifications"]["user"]["emailNotificationsFrequency"], 24)
         self.assertEqual(data["editNotifications"]["user"]["language"], "en")
 
 
@@ -116,6 +122,7 @@ class EditNotificationsTestCase(FastTenantTestCase):
                         guid
                         getsNewsletter
                         emailNotifications
+                        emailNotificationsFrequency
                         __typename
                     }
                     __typename
@@ -126,6 +133,7 @@ class EditNotificationsTestCase(FastTenantTestCase):
             "input": {
                 "guid": self.user1.guid,
                 "emailNotifications": True,
+                "emailNotificationsFrequency": 24,
                 "newsletter": False
                 }
             }
@@ -150,6 +158,7 @@ class EditNotificationsTestCase(FastTenantTestCase):
                         guid
                         getsNewsletter
                         emailNotifications
+                        emailNotificationsFrequency
                         __typename
                     }
                     __typename
@@ -160,6 +169,7 @@ class EditNotificationsTestCase(FastTenantTestCase):
             "input": {
                 "guid": self.user1.guid,
                 "emailNotifications": True,
+                "emailNotificationsFrequency": 24,
                 "newsletter": False
                 }
             }

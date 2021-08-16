@@ -194,15 +194,21 @@ extend type User {
 
 extend type GroupNotificationItem {
   """ If notification for group for user is enabled, the notification mode is used sending the notification by email. 'overview': notification in overview. 'direct': every notification a direct email """
-  notificationMode: String
+  notificationMode: notificationModeOptions
 }
 
 extend type Group {
-  notificationMode: String
+  notificationMode: notificationModeOptions
 }
 
 extend input editGroupNotificationsInput {
-  notificationMode: String
+  notificationMode: notificationModeOptions
+}
+
+enum notificationModeOptions {
+  disable,
+  overview,
+  direct
 }
 
 input addSiteSettingProfileFieldInput {
