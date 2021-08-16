@@ -311,7 +311,7 @@ class Command(InteractiveTenantOption, BaseCommand):
                     user=user,
                     defaults={
                         'type': 'member',
-                        'enable_notification': enabled_notifications,
+                        'notification_mode': 'overview' if enabled_notifications else 'disable',
                         'created_at': datetime.fromtimestamp(relation.time_created)
                     }
                 )
@@ -335,7 +335,7 @@ class Command(InteractiveTenantOption, BaseCommand):
                     user=user,
                     defaults={
                         'type': 'admin',
-                        'enable_notification': enabled_notifications,
+                        'notification_mode': 'overview' if enabled_notifications else 'disable',
                         'created_at': datetime.fromtimestamp(relation.time_created)
                     }
                 )
@@ -351,7 +351,7 @@ class Command(InteractiveTenantOption, BaseCommand):
                 user=group.owner,
                 defaults={
                     'type': 'owner',
-                    'enable_notification': enabled_notifications,
+                    'notification_mode': 'overview' if enabled_notifications else 'disable',
                     'created_at': datetime.fromtimestamp(elgg_group.entity.time_created)
                 }
             )

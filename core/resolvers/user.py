@@ -54,8 +54,13 @@ def resolve_group_notifications(obj, info):
     if is_user_or_admin(obj, info):
         groups = []
         for membership in obj.memberships.filter(type__in=['admin', 'owner', 'member']):
-            groups.append({"guid": membership.group.guid, "name": membership.group.name, "getsNotifications": membership.enable_notification,
-                           "notificationMode": membership.notification_mode})
+            groups.append(
+                {
+                    "guid": membership.group.guid, 
+                    "name": membership.group.name, 
+                    "notificationMode": membership.notification_mode
+                }
+            )
         return groups
     return []
 
@@ -64,6 +69,13 @@ def resolve_email_notifications(obj, info):
     # pylint: disable=unused-argument
     if is_user_or_admin(obj, info):
         return obj.profile.receive_notification_email
+    return None
+
+@user.field("emailNotificationsFrequency")
+def resolve_email_notifications_frequency(obj, info):
+    # pylint: disable=unused-argument
+    if is_user_or_admin(obj, info):
+        return obj.profile.notification_email_interval_hours
     return None
 
 @user.field("emailOverview")

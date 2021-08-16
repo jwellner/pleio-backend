@@ -39,7 +39,6 @@ class EditGroupNotificationsTestCase(FastTenantTestCase):
                 editGroupNotifications(input: $input) {
                     group {
                         guid
-                        getsNotifications
                         notificationMode
                         __typename
                     }
@@ -50,7 +49,6 @@ class EditGroupNotificationsTestCase(FastTenantTestCase):
 
         variables = {
             "input": {
-                "getsNotifications": True,
                 "notificationMode": 'direct',
                 "guid": self.group1.guid,
                 "userGuid": self.user1.guid
@@ -66,7 +64,6 @@ class EditGroupNotificationsTestCase(FastTenantTestCase):
         data = result[1]["data"]
 
         self.assertEqual(data["editGroupNotifications"]["group"]["guid"], self.group1.guid)
-        self.assertEqual(data["editGroupNotifications"]["group"]["getsNotifications"], True)
         self.assertEqual(data["editGroupNotifications"]["group"]["notificationMode"], 'direct')
 
 
@@ -76,7 +73,6 @@ class EditGroupNotificationsTestCase(FastTenantTestCase):
                 editGroupNotifications(input: $input) {
                     group {
                         guid
-                        getsNotifications
                         __typename
                     }
                     __typename
@@ -86,7 +82,7 @@ class EditGroupNotificationsTestCase(FastTenantTestCase):
 
         variables = {
             "input": {
-                "getsNotifications": True,
+                "notificationMode": 'overview',
                 "guid": self.group1.guid,
                 "userGuid": self.user1.guid
                 }
@@ -102,7 +98,7 @@ class EditGroupNotificationsTestCase(FastTenantTestCase):
                 editGroupNotifications(input: $input) {
                     group {
                         guid
-                        getsNotifications
+                        notificationMode
                         __typename
                     }
                     __typename
@@ -112,7 +108,7 @@ class EditGroupNotificationsTestCase(FastTenantTestCase):
 
         variables = {
             "input": {
-                "getsNotifications": False,
+                "notificationMode": 'disable',
                 "guid": self.group1.guid,
                 "userGuid": self.user1.guid
                 }
@@ -127,7 +123,6 @@ class EditGroupNotificationsTestCase(FastTenantTestCase):
         data = result[1]["data"]
 
         self.assertEqual(data["editGroupNotifications"]["group"]["guid"], self.group1.guid)
-        self.assertEqual(data["editGroupNotifications"]["group"]["getsNotifications"], False)
 
     def test_edit_group_notifications_by_logged_in_user(self):
         mutation = """
@@ -135,7 +130,7 @@ class EditGroupNotificationsTestCase(FastTenantTestCase):
                 editGroupNotifications(input: $input) {
                     group {
                         guid
-                        getsNotifications
+                        notificationMode
                         __typename
                     }
                     __typename
@@ -145,7 +140,7 @@ class EditGroupNotificationsTestCase(FastTenantTestCase):
 
         variables = {
             "input": {
-                "getsNotifications": True,
+                "notificationMode": 'disable',
                 "guid": self.group1.guid,
                 "userGuid": self.user1.guid
                 }
@@ -169,7 +164,7 @@ class EditGroupNotificationsTestCase(FastTenantTestCase):
                 editGroupNotifications(input: $input) {
                     group {
                         guid
-                        getsNotifications
+                        notificationMode
                         __typename
                     }
                     __typename
@@ -179,7 +174,7 @@ class EditGroupNotificationsTestCase(FastTenantTestCase):
 
         variables = {
             "input": {
-                "getsNotifications": True,
+                "notificationMode": 'overview',
                 "guid": self.group1.guid
                 }
             }
@@ -194,7 +189,7 @@ class EditGroupNotificationsTestCase(FastTenantTestCase):
         data = result[1]["data"]
 
         self.assertEqual(data["editGroupNotifications"]["group"]["guid"], self.group1.guid)
-        self.assertEqual(data["editGroupNotifications"]["group"]["getsNotifications"], True)
+        self.assertEqual(data["editGroupNotifications"]["group"]["notificationMode"], 'overview')
 
     def test_edit_group_notifications_by_anonymous(self):
         mutation = """
@@ -202,7 +197,7 @@ class EditGroupNotificationsTestCase(FastTenantTestCase):
                 editGroupNotifications(input: $input) {
                     group {
                         guid
-                        getsNotifications
+                        notificationMode
                         __typename
                     }
                     __typename
@@ -212,7 +207,7 @@ class EditGroupNotificationsTestCase(FastTenantTestCase):
 
         variables = {
             "input": {
-                "getsNotifications": True,
+                "notificationMode": 'disable',
                 "guid": self.group1.guid,
                 "userGuid": self.user1.guid
                 }
