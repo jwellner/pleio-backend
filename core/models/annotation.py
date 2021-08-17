@@ -210,6 +210,11 @@ class FollowMixin(models.Model):
             if vote:
                 vote.delete()
 
+    def followers(self):
+        users = [i.user for i in Annotation.objects.get_all_for(content_object=self, key="followed")]
+        return users
+        
+
 class NotificationMixin(models.Model):
     """
     NotificationMixin add to model to implement notification on 'created'

@@ -443,16 +443,41 @@ def get_mimetype(filepath):
         return None
     return mime_type
 
-def get_user_ids_for_instance_notification(instance):
-    user_ids = []
+def map_notification(notification):
+    """ get a mapped notification """
+    entity = get_notification_action_entity(notification)
+    performer = apps.get_model('user.User').objects.get(id=notification.actor_object_id)
+    entity_group = False
+    entity_group_name = ""
+    entity_group_url = ""
+    if entity.group:
+        entity_group = True
+        entity_group_name = entity.group.name
+        entity_group_url = entity.group.url
+
+    return {
+        'id': notification.id,
+        'action': notification.verb,
+        'performer_name': performer.name,
+        'entity_title': entity.title if hasattr(entity, 'title') else "",
+        'entity_description': entity.description if hasattr(entity, 'description') else "",
+        'entity_group': entity_group,
+        'entity_group_name': entity_group_name,
+        'entity_group_url': entity_group_url,
+        'entity_url': entity.url,
+        'type_to_string': entity.type_to_string,
+        'timeCreated': notification.timestamp,
+        'isUnread': notification.unread
+    }
+    
+def get_notification_action_entity(notification):
+    """ get entity from actoin_object_object_id """
+    entity = None
+
     try:
-        for member in instance.group.members.filter(type__in=['admin', 'owner', 'member']).exclude(notification_mode=['disable']):
-            user = member.user
-            if instance.owner == user:
-                continue
-            if not instance.can_read(user):
-                continue
-            user_ids.append(user.id)
+        entity = apps.get_model('core.Entity').objects.get_subclass(id=notification.action_object_object_id)
     except Exception:
-        return []
-    return user_ids
+        entity = apps.get_model('user.User').objects.get(id=notification.actor_object_id)
+        entity.group = None
+
+    return entity

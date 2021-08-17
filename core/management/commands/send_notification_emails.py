@@ -1,16 +1,13 @@
 from django.core.management.base import BaseCommand
-from django.utils import timezone, translation
-from django.utils.text import Truncator
+from django.utils import translation
 from django.utils.translation import ugettext_lazy
 from django.db import connection
 from user.models import User
 from core import config
-from core.models import Entity
+from core.lib import get_default_email_context, map_notification
 from datetime import datetime, timedelta
-from tenants.models import Client
 from django.utils import translation
-from core.tasks import send_mail_multi, get_notification
-
+from core.tasks import send_mail_multi
 
 class Command(BaseCommand):
     help = 'Send notification emails'
@@ -21,34 +18,27 @@ class Command(BaseCommand):
     def add_arguments(self, parser):
         super().add_arguments(parser)
 
-    def send_notifications(self, user, notifications, subject, site_url, show_excerpt):
+    def send_notification_email(self, user, notifications, subject):
 
         mapped_notifications = []
         for notification in notifications:
-            mapped_notifications.append(get_notification(notification))
+            mapped_notifications.append(map_notification(notification))
+
         if notifications:
-            site_name = config.NAME
-            user_url = site_url + '/user/' + user.guid + '/settings'
-            primary_color = config.COLOR_PRIMARY
-            header_color = config.COLOR_HEADER if config.COLOR_HEADER else config.COLOR_PRIMARY
-            context = {'user_url': user_url, 'site_name': site_name, 'site_url': site_url, 'primary_color': primary_color,
-                       'header_color': header_color, 'notifications': mapped_notifications, 'show_excerpt': show_excerpt}
+            context = get_default_email_context(user)
+            context['user_url'] = user.url + '/settings'
+            context['show_excerpt'] = config.EMAIL_NOTIFICATION_SHOW_EXCERPT
+            context['notifications'] = mapped_notifications
 
             send_mail_multi.delay(connection.schema_name, subject, 'email/send_notification_emails.html', context, user.email)
-
+            
             user.notifications.mark_as_sent()
 
     def handle(self, *args, **options):
         if config.LANGUAGE:
             translation.activate(config.LANGUAGE)
 
-        tenant = Client.objects.get(schema_name=connection.schema_name)
-
-        site_url = 'https://' + tenant.domains.first().domain
-
         users = User.objects.filter(is_active=True, _profile__receive_notification_email=True)
-
-        show_excerpt = config.EMAIL_NOTIFICATION_SHOW_EXCERPT
 
         for user in users:
 
@@ -68,4 +58,4 @@ class Command(BaseCommand):
             if notifications_emailed_in_last_interval_hours:
                 continue
 
-            self.send_notifications(user, notifications, subject, site_url, show_excerpt)
+            self.send_notification_email(user, notifications, subject)

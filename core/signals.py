@@ -3,7 +3,7 @@ from django.db.models.signals import post_save, pre_save
 from django.conf import settings
 from django.utils import timezone
 from notifications.signals import notify
-from core.lib import tenant_schema, get_user_ids_for_instance_notification, datetime_isoformat
+from core.lib import tenant_schema, datetime_isoformat
 from core.models import Comment, Group, GroupInvitation, Entity, EntityViewCount, NotificationMixin
 from core.tasks import create_notification
 from user.models import User
@@ -23,23 +23,12 @@ def comment_handler(sender, instance, created, **kwargs):
         instance.container.last_action = instance.created_at
         instance.container.save()
 
-        user_ids = []
-        followers = User.objects.filter(
-            annotation__key='followed',
-            annotation__object_id=instance.object_id)
-
         if instance.owner:
-            followers = followers.exclude(id=instance.owner.id)
             sender = instance.owner.id
         else:
-            return #TODO: what to do with anonymous comments ???
+            return
 
-        for follower in followers:
-            if not instance.container.can_read(follower):
-                continue
-            user_ids.append(follower.id)
-
-        create_notification.delay(tenant_schema(), 'commented', instance.container.id, sender, user_ids)
+        create_notification.delay(tenant_schema(), 'commented', instance.container.id, sender)
 
 
 def user_handler(sender, instance, created, **kwargs):
@@ -67,15 +56,15 @@ def notification_handler(sender, instance, created, **kwargs):
     """
 
     # pylint: disable=unused-argument
-    if not settings.IMPORTING:
-        if (not instance.published) or (datetime_isoformat(instance.published) > datetime_isoformat(timezone.now())):
-            return
+    if not settings.IMPORTING and created:
+        if instance.__class__ in NotificationMixin.__subclasses__() and instance.group:
+            if (not instance.published) or (datetime_isoformat(instance.published) > datetime_isoformat(timezone.now())):
+                return
 
-        if not instance.group or not created:
-            return
-
-        user_ids = get_user_ids_for_instance_notification(instance)
-        create_notification.delay(tenant_schema(), 'created', instance.id, instance.owner.id, user_ids)
+            create_notification.delay(tenant_schema(), 'created', instance.id, instance.owner.id)
+        else:
+            instance.notifications_created = True
+            instance.save()
 
 def notification_update_handler(sender, instance, **kwargs):
     """ Delete notifications when read_access changed and user can not read entity """
@@ -109,11 +98,6 @@ def updated_at_handler(sender, instance, **kwargs):
 post_save.connect(comment_handler, sender=Comment)
 post_save.connect(user_handler, sender=User)
 
-# connect Models that implemented NotificationMixin
-for subclass in NotificationMixin.__subclasses__():
-    post_save.connect(notification_handler, sender=subclass)
-    pre_save.connect(notification_update_handler, sender=subclass)
-
 # Set updated_at
 pre_save.connect(updated_at_handler, sender=Comment)
 pre_save.connect(updated_at_handler, sender=EntityViewCount)
@@ -125,3 +109,5 @@ pre_save.connect(updated_at_handler, sender=User)
 # Connect to all Entity subclasses
 for subclass in Entity.__subclasses__():
     pre_save.connect(updated_at_handler, subclass)
+    pre_save.connect(notification_update_handler, sender=subclass)
+    post_save.connect(notification_handler, sender=subclass)
