@@ -34,7 +34,6 @@ class NotificationsTestCase(FastTenantTestCase):
         self.anonymousUser = AnonymousUser()
         self.group = mixer.blend(Group, owner=self.user1)
         self.group.join(self.user2, 'member')
-        self.group.set_member_notification(self.user2, True)
 
         self.blog1 = Blog.objects.create(
             title="Blog1",
@@ -156,7 +155,7 @@ class NotificationsTestCase(FastTenantTestCase):
 
         i = 0
         while i < 10:
-            create_notification.s(connection.schema_name, 'commented', self.comment1.container.id, self.comment1.owner.id, [self.user2.id]).apply()
+            create_notification.s(connection.schema_name, 'commented', self.comment1.container.id, self.comment1.owner.id).apply()
             i = i + 1
 
         result = graphql_sync(schema, {"query": self.query, "variables": variables}, context_value={ "request": request })
@@ -178,7 +177,7 @@ class NotificationsTestCase(FastTenantTestCase):
         variables = {
             "unread": True
         }
-        create_notification.s(connection.schema_name, 'commented', self.comment1.container.id, self.comment1.owner.id, [self.user2.id]).apply()
+        create_notification.s(connection.schema_name, 'commented', self.comment1.container.id, self.comment1.owner.id).apply()
         notification = self.user2.notifications.all()[0]
         notification.mark_as_read()
         result = graphql_sync(schema, {"query": self.query, "variables": variables}, context_value={ "request": request })
@@ -207,7 +206,7 @@ class NotificationsTestCase(FastTenantTestCase):
 
         variables = {
         }
-        create_notification.s(connection.schema_name, 'created', self.blog2.id, self.user1.id, [self.user2.id]).apply()
+        create_notification.s(connection.schema_name, 'created', self.blog2.id, self.user1.id).apply()
 
         result = graphql_sync(schema, {"query": self.query, "variables": variables}, context_value={ "request": request })
 
@@ -246,7 +245,7 @@ class NotificationsTestCase(FastTenantTestCase):
             write_access=[ACCESS_TYPE.user.format(self.user1.id)],
             group=self.group
         )
-        create_notification.s(connection.schema_name, 'created', blog3.id, self.user1.id, [self.user2.id]).apply()
+        create_notification.s(connection.schema_name, 'created', blog3.id, self.user1.id).apply()
 
         request = HttpRequest()
         request.user = self.user2

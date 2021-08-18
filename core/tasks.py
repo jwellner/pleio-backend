@@ -16,9 +16,7 @@ from django_tenants.utils import schema_context
 from django_elasticsearch_dsl.registries import registry
 from elasticsearch_dsl import Search
 from core import config
-from core.lib import html_to_text, access_id_to_acl, get_model_by_subtype, tenant_schema, get_user_ids_for_instance_notification
-
-# from core.management.commands.send_notification_emails import get_notification
+from core.lib import html_to_text, access_id_to_acl, get_model_by_subtype, map_notification, tenant_schema, get_default_email_context
 from core.models import ProfileField, UserProfileField, Entity, GroupMembership, Comment, Widget, Group, NotificationMixin
 from django.core.mail import EmailMultiAlternatives
 from django.template.loader import get_template
@@ -33,26 +31,30 @@ from file.models import FileFolder
 
 logger = get_task_logger(__name__)
 
-
+@shared_task()
 def create_notifications_for_scheduled_content(schema_name):
-    # TODO: use same code as in notification_handler in core.signals
     with schema_context(schema_name):
 
-        for subclass in NotificationMixin.__subclasses__():
-            for instance in subclass.objects.filter(notifications_created=False, published__lte=timezone.now()).exclude(published=None):
-                if not instance.group:
-                    instance.notifications_created = True
-                    instance.save()
-                    continue
+        for instance in Entity.objects.filter(notifications_created=False, published__lte=timezone.now()).exclude(published=None).select_subclasses():
+            # instance has no NotificationMixin impemented. Set notifications_created True so it is skipped next time.
+            if instance.__class__ not in NotificationMixin.__subclasses__():
+                instance.notifications_created = True
+                instance.save()
+                continue
 
-                # skip if there are already notifications for this instance.id
-                if Notification.objects.filter(action_object_object_id=instance.id).count() > 0:
-                    instance.notifications_created = True
-                    instance.save()
-                    continue
+            # instance has no group. Set notifications_created True so it is skipped next time.
+            if not instance.group:
+                instance.notifications_created = True
+                instance.save()
+                continue
 
-                user_ids = get_user_ids_for_instance_notification(instance)
-                create_notification.delay(tenant_schema(), 'created', instance.id, instance.owner.id, user_ids)
+            # there are already notifications for this instance.id. Set notifications_created True so it is skipped next time.
+            if Notification.objects.filter(action_object_object_id=instance.id).count() > 0:
+                instance.notifications_created = True
+                instance.save()
+                continue
+
+            create_notification.delay(tenant_schema(), 'created', instance.id, instance.owner.id)
 
 
 @shared_task(bind=True)
@@ -240,29 +242,6 @@ def send_mail_multi(self, schema_name, subject, html_template, context, email_ad
                 logger.error('email sent to %s failed. Error: %s', email_address, e)
 
 
-def get_import_users_data(fields, row):
-    data = {}
-    for field in fields:
-        field['value'] = row[field['csvColumn']]
-        data[field['userField']] = field
-    return data
-
-
-def get_import_users_user(data):
-
-    if 'id' in data:
-        try:
-            return User.objects.get(id=data['id']['value'])
-        except Exception:
-            pass
-    if 'email' in data:
-        try:
-            return User.objects.get(email=data['email']['value'])
-        except Exception:
-            pass
-
-    return False
-
 @shared_task(bind=True, ignore_result=True)
 def import_users(self, schema_name, fields, csv_location, performing_user_guid):
     # pylint: disable=unused-argument
@@ -270,6 +249,29 @@ def import_users(self, schema_name, fields, csv_location, performing_user_guid):
     '''
     Import users
     '''
+
+    def get_import_users_data(fields, row):
+        data = {}
+        for field in fields:
+            field['value'] = row[field['csvColumn']]
+            data[field['userField']] = field
+        return data
+
+    def get_import_users_user(data):
+
+        if 'id' in data:
+            try:
+                return User.objects.get(id=data['id']['value'])
+            except Exception:
+                pass
+        if 'email' in data:
+            try:
+                return User.objects.get(email=data['email']['value'])
+            except Exception:
+                pass
+
+        return False
+
     with schema_context(schema_name):
         if config.LANGUAGE:
             translation.activate(config.LANGUAGE)
@@ -354,50 +356,12 @@ def import_users(self, schema_name, fields, csv_location, performing_user_guid):
 
         send_mail_multi.delay(schema_name, subject, template, context, performing_user.email)
 
-def get_notification_action_entity(notification):
-    """ get entity from actoin_object_object_id """
-    try:
-        entity = Entity.objects.get_subclass(id=notification.action_object_object_id)
-    except Exception:
-        entity = User.objects.get(id=notification.actor_object_id)
-        entity.group = None
-
-    return entity
-
-
-def get_notification(notification):
-    """ get a mapped notification """
-    entity = get_notification_action_entity(notification)
-    performer = User.objects.get(id=notification.actor_object_id)
-    entity_group = False
-    entity_group_name = ""
-    entity_group_url = ""
-    if entity.group:
-        entity_group = True
-        entity_group_name = entity.group.name
-        entity_group_url = entity.group.url
-
-    return {
-        'id': notification.id,
-        'action': notification.verb,
-        'performer_name': performer.name,
-        'entity_title': entity.title,
-        'entity_description': entity.description if hasattr(entity, 'description') else "",
-        'entity_group': entity_group,
-        'entity_group_name': entity_group_name,
-        'entity_group_url': entity_group_url,
-        'entity_url': entity.url,
-        'type_to_string': entity.type_to_string,
-        'timeCreated': notification.timestamp,
-        'isUnread': notification.unread
-    }
-
-
 @shared_task(bind=True, ignore_result=True)
-def create_notification(self, schema_name, verb, entity_id, sender_id, recipient_ids):
+def create_notification(self, schema_name, verb, entity_id, sender_id):
     # pylint: disable=unused-argument
     # pylint: disable=too-many-arguments
     # pylint: disable=too-many-locals
+    # pylint: disable=too-many-branches
     '''
     task for creating a notification. If the content of the notification is in a group and the recipient has configured direct notifications
     for this group. An email task wil be triggered with this notification
@@ -405,10 +369,30 @@ def create_notification(self, schema_name, verb, entity_id, sender_id, recipient
     with schema_context(schema_name):
         if config.LANGUAGE:
             translation.activate(config.LANGUAGE)
-
+        
         instance = Entity.objects.get_subclass(id=entity_id)
         sender = User.objects.get(id=sender_id)
-        recipients = User.objects.filter(id__in=recipient_ids)
+
+        if verb == "created":
+            recipients = []
+            if instance.group:
+                for member in instance.group.members.filter(type__in=['admin', 'owner', 'member']).exclude(notification_mode=['disable']):
+                    if sender == member.user:
+                        continue
+                    if not instance.can_read(member.user):
+                        continue
+                    recipients.append(member.user)
+        elif verb == "commented":
+            recipients = []
+            if hasattr(instance, 'followers'):
+                for follower in instance.followers():
+                    if sender == follower:
+                        continue
+                    if not instance.can_read(follower):
+                        continue
+                    recipients.append(follower)
+        else:
+            return
 
         # tuple with list is returned, get the notification created
         notifications = notify.send(sender, recipient=recipients, verb=verb, action_object=instance)[0][1]
@@ -419,11 +403,6 @@ def create_notification(self, schema_name, verb, entity_id, sender_id, recipient
         # only send direct notification for content in groups
         if instance.group:
             subject = ugettext_lazy("New notification at %(site_name)s: ") % {'site_name': config.NAME}
-            tenant = Client.objects.get(schema_name=schema_name)
-            site_url = "https://" + tenant.domains.first().domain
-            site_name = config.NAME
-            primary_color = config.COLOR_PRIMARY
-            header_color = config.COLOR_HEADER if config.COLOR_HEADER else config.COLOR_PRIMARY
 
             for notification in notifications:
                 recipient = User.objects.get(id=notification.recipient_id)
@@ -438,11 +417,13 @@ def create_notification(self, schema_name, verb, entity_id, sender_id, recipient
                 if direct:
                     # do not send mail when notifications are disabled, but mark as send (so when enabled you dont receive old notifications!)
                     if recipient.profile.receive_notification_email:
-                        mapped_notifications = [get_notification(notification)]
-                        user_url = site_url + '/user/' + recipient.guid + '/settings'
-                        context = {'user_url': user_url, 'site_name': site_name, 'site_url': site_url, 'primary_color': primary_color,
-                                    'header_color': header_color, 'notifications': mapped_notifications, 'show_excerpt': False}
+                        context = get_default_email_context(recipient)
+                        context['user_url'] = context['user_url'].replace('/profile', '/settings')
+                        context['show_excerpt'] = config.EMAIL_NOTIFICATION_SHOW_EXCERPT
+                        context['notifications'] = [map_notification(notification)]
+
                         send_mail_multi.delay(schema_name, subject, 'email/send_notification_emails.html', context, recipient.email)
+
                     notification.emailed = True
                     notification.save()
 

@@ -24,7 +24,7 @@ spec:
       initContainers:
        - name: init-container
          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
-         command: ['python', '/app/manage.py migrate_schemas']
+         command: ['python', 'manage.py', 'migrate_schemas']
          imagePullPolicy: {{ .Values.image.imagePullPolicy }}
          envFrom:
           - configMapRef:

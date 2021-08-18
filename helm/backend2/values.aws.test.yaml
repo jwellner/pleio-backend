@@ -8,4 +8,8 @@ api:
   replicaCount: 2
 
 background:
-  replicaCount: 0
+  replicaCount: 1
+
+storage:
+  existingBackupStorage: backup-storage
+  existingDataStorage: pleio-data-test

@@ -11,7 +11,7 @@ def resolve_can_edit(obj, info):
 @comment.field("isBestAnswer")
 def resolve_is_best_answer(obj, info):
     # pylint: disable=unused-argument
-    if obj.container.best_answer and obj.container.best_answer == obj:
+    if hasattr(obj.container, 'best_answer') and obj.container.best_answer == obj:
         return True
     return False
 

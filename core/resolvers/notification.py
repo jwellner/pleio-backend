@@ -1,5 +1,5 @@
 from ariadne import ObjectType
-from core.tasks import get_notification_action_entity
+from core.lib import get_notification_action_entity
 from user.models import User
 
 

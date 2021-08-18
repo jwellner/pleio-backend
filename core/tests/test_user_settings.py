@@ -1,3 +1,4 @@
+from core.resolvers.group import auto_notification
 from django.db import connection
 from django_tenants.test.cases import FastTenantTestCase
 from core.models import Group, UserProfile, ProfileField, UserProfileField
@@ -19,12 +20,10 @@ class UserSettingsTestCase(FastTenantTestCase):
         self.user1 = mixer.blend(User)
         self.user2 = mixer.blend(User)
         self.admin = mixer.blend(User)
-        self.group1 = mixer.blend(Group, owner=self.user2, name='a')
-        self.group2 = mixer.blend(Group, owner=self.user2, name='b')
+        self.group1 = mixer.blend(Group, owner=self.user2, name='a', auto_notification=True)
+        self.group2 = mixer.blend(Group, owner=self.user2, name='b', auto_notification=False)
         self.group1.join(self.user1, 'member')
         self.group2.join(self.user1, 'member')
-
-        self.group1.set_member_notification(self.user1, True)
 
         self.admin.roles = ['ADMIN']
         self.admin.save()
@@ -40,6 +39,7 @@ class UserSettingsTestCase(FastTenantTestCase):
                         username
                         canEdit
                         emailNotifications
+                        emailNotificationsFrequency
                         getsNewsletter
                         language
                         languageOptions {
@@ -53,7 +53,6 @@ class UserSettingsTestCase(FastTenantTestCase):
                         groupNotifications {
                             guid
                             name
-                            getsNotifications
                             notificationMode
                             __typename
                         }
@@ -92,15 +91,15 @@ class UserSettingsTestCase(FastTenantTestCase):
         self.assertEqual(data["entity"]["canEdit"], True)
         self.assertEqual(data["entity"]["username"], self.user1.guid)
         self.assertEqual(data["entity"]["emailNotifications"], True)
+        self.assertEqual(data["entity"]["emailNotificationsFrequency"], 4)
         self.assertEqual(data["entity"]["getsNewsletter"], False)
         self.assertEqual(data["entity"]["language"], 'nl')
         self.assertEqual(data["entity"]["languageOptions"], [{'value': 'nl', 'label': 'Nederlands'}, {'value': 'en', 'label': 'Engels'}])
         self.assertEqual(data["entity"]["emailOverview"]["frequency"], "weekly")
         self.assertEqual(data["entity"]["groupNotifications"][0]["guid"], self.group1.guid)
-        self.assertEqual(data["entity"]["groupNotifications"][0]["getsNotifications"], True)
+        self.assertEqual(data["entity"]["groupNotifications"][0]["notificationMode"], 'overview')
         self.assertEqual(data["entity"]["groupNotifications"][1]["guid"], self.group2.guid)
-        self.assertEqual(data["entity"]["groupNotifications"][1]["getsNotifications"], False)
-        self.assertEqual(data["entity"]["groupNotifications"][1]["notificationMode"], 'overview')
+        self.assertEqual(data["entity"]["groupNotifications"][1]["notificationMode"], 'disable')
         cache.clear()
 
 
@@ -122,14 +121,15 @@ class UserSettingsTestCase(FastTenantTestCase):
         self.assertEqual(data["entity"]["canEdit"], True)
         self.assertEqual(data["entity"]["username"], self.user1.guid)
         self.assertEqual(data["entity"]["emailNotifications"], True)
+        self.assertEqual(data["entity"]["emailNotificationsFrequency"], 4)
         self.assertEqual(data["entity"]["getsNewsletter"], False)
         self.assertEqual(data["entity"]["language"], 'nl')
         self.assertEqual(data["entity"]["languageOptions"], [{'value': 'nl', 'label': 'Nederlands'}])
         self.assertEqual(data["entity"]["emailOverview"]["frequency"], "weekly")
         self.assertEqual(data["entity"]["groupNotifications"][0]["guid"], self.group1.guid)
-        self.assertEqual(data["entity"]["groupNotifications"][0]["getsNotifications"], True)
+        self.assertEqual(data["entity"]["groupNotifications"][0]["notificationMode"], 'overview')
         self.assertEqual(data["entity"]["groupNotifications"][1]["guid"], self.group2.guid)
-        self.assertEqual(data["entity"]["groupNotifications"][1]["getsNotifications"], False)
+        self.assertEqual(data["entity"]["groupNotifications"][1]["notificationMode"], 'disable')
 
     def test_get_profile_items_by_logged_in_user(self):
         """
@@ -149,6 +149,7 @@ class UserSettingsTestCase(FastTenantTestCase):
         self.assertEqual(data["entity"]["canEdit"], False)
         self.assertEqual(data["entity"]["username"], self.user1.guid)
         self.assertEqual(data["entity"]["emailNotifications"], None)
+        self.assertEqual(data["entity"]["emailNotificationsFrequency"], None)
         self.assertEqual(data["entity"]["getsNewsletter"], None)
         self.assertEqual(data["entity"]["emailOverview"], None)
         self.assertEqual(data["entity"]["groupNotifications"], [])
@@ -171,6 +172,7 @@ class UserSettingsTestCase(FastTenantTestCase):
         self.assertEqual(data["entity"]["canEdit"], False)
         self.assertEqual(data["entity"]["username"], self.user1.guid)
         self.assertEqual(data["entity"]["emailNotifications"], None)
+        self.assertEqual(data["entity"]["emailNotificationsFrequency"], None)
         self.assertEqual(data["entity"]["getsNewsletter"], None)
         self.assertEqual(data["entity"]["emailOverview"], None)
         self.assertEqual(data["entity"]["groupNotifications"], [])

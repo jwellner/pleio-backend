@@ -529,7 +529,6 @@ input editGroupInput {
 
 input editGroupNotificationsInput {
   guid: String!
-  getsNotifications: Boolean
   userGuid: String
 }
 
@@ -552,8 +551,9 @@ type editGroupWidgetPayload {
 }
 
 input editNotificationsInput {
-  guid: String
+  guid: String!
   emailNotifications: Boolean
+  emailNotificationsFrequency: Int
   newsletter: Boolean
 }
 
@@ -899,7 +899,6 @@ type Group implements Entity {
   membership: Membership
   accessIds: [AccessId]
   defaultAccessId: Int
-  getsNotifications: Boolean
   tags: [String]
   memberCount: Int!
   members(
@@ -936,7 +935,6 @@ type GroupList {
 type GroupNotificationItem {
   guid: String!
   name: String!
-  getsNotifications: Boolean!
 }
 
 type Invite {
@@ -1763,6 +1761,7 @@ type User implements Entity {
   name: String
   email: String
   emailNotifications: Boolean
+  emailNotificationsFrequency: Int
   getsNewsletter: Boolean
   emailOverview: EmailOverview
   profile: [ProfileItem]

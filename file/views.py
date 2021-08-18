@@ -23,9 +23,10 @@ def download(request, file_id=None, file_name=None):
         if entity.group and entity.group.is_closed and not entity.group.is_full_member(user) and not user.has_role(USER_ROLES.ADMIN):
             raise Http404("File not found")
 
+        attachment_or_inline = "attachment" if not entity.mime_type else "inline"
         response = StreamingHttpResponse(streaming_content=entity.upload.open(), content_type=entity.mime_type)
         response['Content-Length'] = entity.upload.size
-        response['Content-Disposition'] = "inline; filename=%s" % get_download_filename(entity)
+        response['Content-Disposition'] = f"{attachment_or_inline}; filename=%s" % get_download_filename(entity)
         return response
 
     except ObjectDoesNotExist:
