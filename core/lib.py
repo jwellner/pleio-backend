@@ -219,7 +219,8 @@ def is_valid_json(string):
 
 def get_base_url():
     try:
-        return 'https://' + connection.tenant.get_primary_domain().domain
+        tenant = apps.get_model('tenants.Client').objects.get(schema_name=connection.schema_name)
+        return 'https://' + tenant.get_primary_domain().domain
     except Exception:
         return ''
 

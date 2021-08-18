@@ -26,7 +26,7 @@ class Command(BaseCommand):
 
         if notifications:
             context = get_default_email_context(user)
-            context['user_url'] = user.url + '/settings'
+            context['user_url'] = context['user_url'].replace('/profile', '/settings')
             context['show_excerpt'] = config.EMAIL_NOTIFICATION_SHOW_EXCERPT
             context['notifications'] = mapped_notifications
 

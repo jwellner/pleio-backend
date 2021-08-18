@@ -418,7 +418,7 @@ def create_notification(self, schema_name, verb, entity_id, sender_id):
                     # do not send mail when notifications are disabled, but mark as send (so when enabled you dont receive old notifications!)
                     if recipient.profile.receive_notification_email:
                         context = get_default_email_context(recipient)
-                        context['user_url'] = recipient.url + '/settings'
+                        context['user_url'] = context['user_url'].replace('/profile', '/settings')
                         context['show_excerpt'] = config.EMAIL_NOTIFICATION_SHOW_EXCERPT
                         context['notifications'] = [map_notification(notification)]
 
