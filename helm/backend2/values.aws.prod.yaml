@@ -4,7 +4,7 @@ websitesManual:
     secretName: tls-wildcard.pleio.nl
 
 api:
-  replicaCount: 1
+  replicaCount: 8
 
 background:
   replicaCount: 0
