@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Duits\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-07-08 10:24+0200\n"
+"POT-Creation-Date: 2021-08-23 16:47+0200\n"
 "PO-Revision-Date: 2021-05-26 10:55+0200\n"
 "Last-Translator: \n"
 "Language-Team: \n"
@@ -18,19 +18,19 @@ msgstr ""
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 "X-Generator: Poedit 2.4.3\n"
 
-#: backend2/config.py:62 core/lib.py:294
+#: backend2/config.py:62 core/lib.py:295
 msgid "English"
 msgstr "Englisch"
 
-#: backend2/config.py:63 core/lib.py:293
+#: backend2/config.py:63 core/lib.py:294
 msgid "Dutch"
 msgstr "Niederländisch"
 
-#: backend2/config.py:64 core/lib.py:295
+#: backend2/config.py:64 core/lib.py:296
 msgid "German"
 msgstr "Deutsch"
 
-#: backend2/config.py:65 core/lib.py:296
+#: backend2/config.py:65 core/lib.py:297
 msgid "French"
 msgstr ""
 
@@ -75,7 +75,7 @@ msgstr "Blog"
 msgid "Discussion"
 msgstr "Diskussion"
 
-#: core/lib.py:177 core/lib.py:283
+#: core/lib.py:177 core/lib.py:284
 msgid "News"
 msgstr "Neuigkeiten"
 
@@ -83,51 +83,57 @@ msgstr "Neuigkeiten"
 msgid "Update"
 msgstr "Update"
 
-#: core/lib.py:189 core/lib.py:287
+#: core/lib.py:185
+#, fuzzy
+#| msgid "Questions"
+msgid "Question"
+msgstr "Fragen"
+
+#: core/lib.py:189 core/lib.py:288
 msgid "Wiki pages"
 msgstr "Wiki-Seiten"
 
-#: core/lib.py:277
+#: core/lib.py:278
 msgid "Updates"
 msgstr "Updates"
 
-#: core/lib.py:278
+#: core/lib.py:279
 msgid "Blogs"
 msgstr "Blogs"
 
-#: core/lib.py:279
+#: core/lib.py:280
 msgid "CMS pages"
 msgstr "CMS-Seiten"
 
-#: core/lib.py:280
+#: core/lib.py:281
 msgid "Discussions"
 msgstr "Diskussionen"
 
-#: core/lib.py:281
+#: core/lib.py:282
 msgid "Events"
 msgstr "Events"
 
-#: core/lib.py:282
+#: core/lib.py:283
 msgid "Files"
 msgstr "Dateien"
 
-#: core/lib.py:284
+#: core/lib.py:285
 msgid "Polls"
 msgstr "Umfragen"
 
-#: core/lib.py:285
+#: core/lib.py:286
 msgid "Questions"
 msgstr "Fragen"
 
-#: core/lib.py:286
+#: core/lib.py:287
 msgid "Tasks"
 msgstr "Aufgaben"
 
-#: core/lib.py:288
+#: core/lib.py:289
 msgid "Comments"
 msgstr "Kommentare"
 
-#: core/management/commands/send_notification_emails.py:56
+#: core/management/commands/send_notification_emails.py:48
 #, python-format
 msgid "New notifications at %(site_name)s"
 msgstr "Neue Benachrichtigungen bei %(site_name)s"
@@ -137,7 +143,7 @@ msgstr "Neue Benachrichtigungen bei %(site_name)s"
 msgid "Regular overview of %(site_name)s"
 msgstr "Regulärer Überblick über %(site_name)s"
 
-#: core/models/group.py:183
+#: core/models/group.py:176
 #, python-format
 msgid "Welcome to %(group_name)s"
 msgstr "Wilkommen zu: %(group_name)s"
@@ -306,15 +312,15 @@ msgstr "Editor"
 msgid "Question expert"
 msgstr "Experten fragen"
 
-#: core/tasks.py:276
+#: core/tasks.py:341
 msgid "Import was a success"
 msgstr "Import war erfolgreich"
 
-#: core/tasks.py:276
+#: core/tasks.py:341
 msgid "Import failed"
 msgstr "Import fehlgeschlagen"
 
-#: core/tasks.py:355
+#: core/tasks.py:405
 #, python-format
 msgid "New notification at %(site_name)s: "
 msgstr "Neue Benachrichtigung auf %(site_name)s: "
@@ -478,12 +484,12 @@ msgstr ""
 #, python-format
 msgid ""
 "The user %(user_name)s (%(user_obfuscated_email)s) has requested access to "
-"the group %(group_name)s. Follow the link below to become a member of the "
-"group: <br /><a href=\"%(link)s\">%(link)s</a> "
+"the group %(group_name)s. Follow the link below to review the request: <br /"
+"><a href=\"%(link)s\">%(link)s</a> "
 msgstr ""
 "Der Benutzer %(user_name)s (%(user_obfuscated_email)s) hat den Zugriff auf "
-"die Gruppe %(group_name)s angefordert. Folgen Sie dem unten stehenden Link, "
-"um Mitglied der Gruppe zu werden: <br /><a href=“%(link)s”>%(link)s</a> "
+"die Gruppe %(group_name)s angefordert. Folgen Sie dem untenstehenden Link, "
+"um den Antrag zu überprüfen: <br /><a href=“%(link)s”>%(link)s</a> "
 
 #: core/templates/email/notifications/blog.html:3
 msgid " has posted a new Blog: "
@@ -866,7 +872,7 @@ msgstr ""
 "Zugang wird angefordert. Sie erhalten eine E-Mail, wenn die Anfrage "
 "angenommen wird."
 
-#: core/views.py:162
+#: core/views.py:168
 #, python-format
 msgid "New access request for %(site_name)s"
 msgstr "Neue Zugriffsanfrage für %(site_name)s"

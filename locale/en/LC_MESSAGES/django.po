@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-07-08 10:24+0200\n"
+"POT-Creation-Date: 2021-08-23 16:47+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -18,19 +18,19 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#: backend2/config.py:62 core/lib.py:294
+#: backend2/config.py:62 core/lib.py:295
 msgid "English"
 msgstr ""
 
-#: backend2/config.py:63 core/lib.py:293
+#: backend2/config.py:63 core/lib.py:294
 msgid "Dutch"
 msgstr ""
 
-#: backend2/config.py:64 core/lib.py:295
+#: backend2/config.py:64 core/lib.py:296
 msgid "German"
 msgstr ""
 
-#: backend2/config.py:65 core/lib.py:296
+#: backend2/config.py:65 core/lib.py:297
 msgid "French"
 msgstr ""
 
@@ -75,7 +75,7 @@ msgstr ""
 msgid "Discussion"
 msgstr ""
 
-#: core/lib.py:177 core/lib.py:283
+#: core/lib.py:177 core/lib.py:284
 msgid "News"
 msgstr ""
 
@@ -87,51 +87,51 @@ msgstr ""
 msgid "Question"
 msgstr ""
 
-#: core/lib.py:189 core/lib.py:287
+#: core/lib.py:189 core/lib.py:288
 msgid "Wiki pages"
 msgstr ""
 
-#: core/lib.py:277
+#: core/lib.py:278
 msgid "Updates"
 msgstr ""
 
-#: core/lib.py:278
+#: core/lib.py:279
 msgid "Blogs"
 msgstr ""
 
-#: core/lib.py:279
+#: core/lib.py:280
 msgid "CMS pages"
 msgstr ""
 
-#: core/lib.py:280
+#: core/lib.py:281
 msgid "Discussions"
 msgstr ""
 
-#: core/lib.py:281
+#: core/lib.py:282
 msgid "Events"
 msgstr ""
 
-#: core/lib.py:282
+#: core/lib.py:283
 msgid "Files"
 msgstr ""
 
-#: core/lib.py:284
+#: core/lib.py:285
 msgid "Polls"
 msgstr ""
 
-#: core/lib.py:285
+#: core/lib.py:286
 msgid "Questions"
 msgstr ""
 
-#: core/lib.py:286
+#: core/lib.py:287
 msgid "Tasks"
 msgstr ""
 
-#: core/lib.py:288
+#: core/lib.py:289
 msgid "Comments"
 msgstr ""
 
-#: core/management/commands/send_notification_emails.py:56
+#: core/management/commands/send_notification_emails.py:48
 #, python-format
 msgid "New notifications at %(site_name)s"
 msgstr ""
@@ -141,7 +141,7 @@ msgstr ""
 msgid "Regular overview of %(site_name)s"
 msgstr ""
 
-#: core/models/group.py:183
+#: core/models/group.py:176
 #, python-format
 msgid "Welcome to %(group_name)s"
 msgstr ""
@@ -306,15 +306,15 @@ msgstr ""
 msgid "Question expert"
 msgstr ""
 
-#: core/tasks.py:276
+#: core/tasks.py:341
 msgid "Import was a success"
 msgstr ""
 
-#: core/tasks.py:276
+#: core/tasks.py:341
 msgid "Import failed"
 msgstr ""
 
-#: core/tasks.py:355
+#: core/tasks.py:405
 #, python-format
 msgid "New notification at %(site_name)s: "
 msgstr ""
@@ -433,8 +433,8 @@ msgstr ""
 #, python-format
 msgid ""
 "The user %(user_name)s (%(user_obfuscated_email)s) has requested access to "
-"the group %(group_name)s. Follow the link below to become a member of the "
-"group: <br /><a href=\"%(link)s\">%(link)s</a> "
+"the group %(group_name)s. Follow the link below to review the request: <br /"
+"><a href=\"%(link)s\">%(link)s</a> "
 msgstr ""
 
 #: core/templates/email/notifications/blog.html:3
@@ -771,7 +771,7 @@ msgid ""
 "Access is requested. You will receive an e-mail when the request is accepted."
 msgstr ""
 
-#: core/views.py:162
+#: core/views.py:168
 #, python-format
 msgid "New access request for %(site_name)s"
 msgstr ""

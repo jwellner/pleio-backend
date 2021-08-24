@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Frans\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-07-08 10:24+0200\n"
+"POT-Creation-Date: 2021-08-23 16:47+0200\n"
 "PO-Revision-Date: 2021-06-24 15:12+0200\n"
 "Last-Translator: \n"
 "Language-Team: frans\n"
@@ -18,19 +18,19 @@ msgstr ""
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 "X-Generator: Poedit 2.4.3\n"
 
-#: backend2/config.py:62 core/lib.py:294
+#: backend2/config.py:62 core/lib.py:295
 msgid "English"
 msgstr "Anglais"
 
-#: backend2/config.py:63 core/lib.py:293
+#: backend2/config.py:63 core/lib.py:294
 msgid "Dutch"
 msgstr "Néerlandais"
 
-#: backend2/config.py:64 core/lib.py:295
+#: backend2/config.py:64 core/lib.py:296
 msgid "German"
 msgstr "Allemande"
 
-#: backend2/config.py:65 core/lib.py:296
+#: backend2/config.py:65 core/lib.py:297
 msgid "French"
 msgstr "Français"
 
@@ -75,7 +75,7 @@ msgstr "Blog"
 msgid "Discussion"
 msgstr "Discussion"
 
-#: core/lib.py:177 core/lib.py:283
+#: core/lib.py:177 core/lib.py:284
 msgid "News"
 msgstr "Actualité"
 
@@ -87,51 +87,51 @@ msgstr "Mettre à jour"
 msgid "Question"
 msgstr "Question"
 
-#: core/lib.py:189 core/lib.py:287
+#: core/lib.py:189 core/lib.py:288
 msgid "Wiki pages"
 msgstr "Wiki pages"
 
-#: core/lib.py:277
+#: core/lib.py:278
 msgid "Updates"
 msgstr "Mises à jour"
 
-#: core/lib.py:278
+#: core/lib.py:279
 msgid "Blogs"
 msgstr "Blogs"
 
-#: core/lib.py:279
+#: core/lib.py:280
 msgid "CMS pages"
 msgstr "Pages SGC"
 
-#: core/lib.py:280
+#: core/lib.py:281
 msgid "Discussions"
 msgstr "Discussions"
 
-#: core/lib.py:281
+#: core/lib.py:282
 msgid "Events"
 msgstr "Événements"
 
-#: core/lib.py:282
+#: core/lib.py:283
 msgid "Files"
 msgstr "Fichiers"
 
-#: core/lib.py:284
+#: core/lib.py:285
 msgid "Polls"
 msgstr "Sondages"
 
-#: core/lib.py:285
+#: core/lib.py:286
 msgid "Questions"
 msgstr "Questions"
 
-#: core/lib.py:286
+#: core/lib.py:287
 msgid "Tasks"
 msgstr "Tâches"
 
-#: core/lib.py:288
+#: core/lib.py:289
 msgid "Comments"
 msgstr "Commentaires"
 
-#: core/management/commands/send_notification_emails.py:56
+#: core/management/commands/send_notification_emails.py:48
 #, python-format
 msgid "New notifications at %(site_name)s"
 msgstr "Nouvelles notifications sur %(site_name)s"
@@ -141,7 +141,7 @@ msgstr "Nouvelles notifications sur %(site_name)s"
 msgid "Regular overview of %(site_name)s"
 msgstr "Aperçu régulier de %(site_name)s"
 
-#: core/models/group.py:183
+#: core/models/group.py:176
 #, python-format
 msgid "Welcome to %(group_name)s"
 msgstr "Bienvenue dans %(group_name)s"
@@ -307,15 +307,15 @@ msgstr "Éditeur"
 msgid "Question expert"
 msgstr "Expert en questions"
 
-#: core/tasks.py:276
+#: core/tasks.py:341
 msgid "Import was a success"
 msgstr "Importation réussie"
 
-#: core/tasks.py:276
+#: core/tasks.py:341
 msgid "Import failed"
 msgstr "Échec de l’importation"
 
-#: core/tasks.py:355
+#: core/tasks.py:405
 #, python-format
 msgid "New notification at %(site_name)s: "
 msgstr "Nouvelle notification sur %(site_name)s : "
@@ -477,12 +477,12 @@ msgstr ""
 #, python-format
 msgid ""
 "The user %(user_name)s (%(user_obfuscated_email)s) has requested access to "
-"the group %(group_name)s. Follow the link below to become a member of the "
-"group: <br /><a href=\"%(link)s\">%(link)s</a> "
+"the group %(group_name)s. Follow the link below to review the request: <br /"
+"><a href=\"%(link)s\">%(link)s</a> "
 msgstr ""
 "L’utilisateur %(user_name)s (%(user_obfuscated_email)s) a demandé l’accès au "
-"groupe %(group_name)s. Suivez le lien ci-dessous pour devenir membre du "
-"groupe :  <br /><a href=“%(link)s”>%(link)s</a> "
+"groupe %(group_name)s. Suivez le lien ci-dessous pour examiner la demande: "
+"<br /><a href=“%(link)s”>%(link)s</a> "
 
 #: core/templates/email/notifications/blog.html:3
 msgid " has posted a new Blog: "
@@ -946,7 +946,7 @@ msgstr ""
 "L’accès est demandé. Vous recevrez un courrier électronique lorsque l’accès "
 "sera accepté."
 
-#: core/views.py:162
+#: core/views.py:168
 #, python-format
 msgid "New access request for %(site_name)s"
 msgstr "Nouvelle demande d’accès à %(site_name)s"
