@@ -5,7 +5,7 @@ from core import config
 from core.constances import ACCESS_TYPE, NOT_LOGGED_IN, COULD_NOT_FIND, COULD_NOT_SAVE, USER_ROLES
 from core.lib import remove_none_from_dict, access_id_to_acl
 from core.models import Group
-from ..models import FileFolder
+from ..models import FileFolder, FILE_SCAN
 
 
 def update_access_recursive(user, entity, access_id, write_access_id):
@@ -57,13 +57,13 @@ def resolve_add_file(_, info, input):
     if group and not group.is_full_member(user) and not user.has_role(USER_ROLES.ADMIN):
         raise GraphQLError("NOT_GROUP_MEMBER")
 
+    if not clean_input.get("file"):
+        raise GraphQLError("NO_FILE")
+
     entity = FileFolder()
 
     entity.owner = user
     entity.tags = clean_input.get("tags", [])
-
-    if not clean_input.get("file"):
-        raise GraphQLError("NO_FILE")
 
     entity.upload = clean_input.get("file")
 
@@ -75,6 +75,9 @@ def resolve_add_file(_, info, input):
 
     entity.read_access =  access_id_to_acl(entity, clean_input.get("accessId", config.DEFAULT_ACCESS_ID))
     entity.write_access = access_id_to_acl(entity, clean_input.get("writeAccessId"))
+
+    if entity.scan() == FILE_SCAN.VIRUS:
+        raise GraphQLError("INVALID_FILE")
 
     entity.save()
 
@@ -169,6 +172,8 @@ def resolve_edit_file_folder(_, info, input):
 
     if 'file' in clean_input:
         entity.upload = clean_input.get("file")
+        if entity.scan() == FILE_SCAN.VIRUS:
+            raise GraphQLError("INVALID_FILE")
 
     if 'accessId' in clean_input:
         entity.read_access = access_id_to_acl(entity, clean_input.get("accessId"))
@@ -251,6 +256,9 @@ def resolve_add_image(_, info, input):
     entity.write_access = access_id_to_acl(entity, 0)
 
     entity.upload = clean_input.get("image")
+
+    if entity.scan() == FILE_SCAN.VIRUS:
+        raise GraphQLError("INVALID_FILE")
 
     entity.save()
 

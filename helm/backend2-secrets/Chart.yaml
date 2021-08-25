@@ -2,4 +2,4 @@ apiVersion: v2
 name: backend2-secrets
 description: Secrets that are split from backend2 to avoid removing them through CI
 type: application
-version: 0.1.0
+version: 0.1.1

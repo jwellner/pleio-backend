@@ -1,8 +1,12 @@
 import os
+import clamd
+import logging
 from auditlog.registry import auditlog
 from django.urls import reverse
 from django.conf import settings
 from django.db import models
+from django.utils import timezone
+from enum import Enum
 from core.lib import generate_object_filename, get_mimetype
 from core.models import Entity
 from django.db.models import ObjectDoesNotExist
@@ -10,12 +14,19 @@ from django.db.models.signals import pre_save, pre_delete
 from django.dispatch import receiver
 from django.utils.text import slugify
 
+logger = logging.getLogger(__name__)
+
 def read_access_default():
     return []
 
 
 def write_access_default():
     return []
+
+class FILE_SCAN(Enum):
+    CLEAN = 'CLEAN'
+    VIRUS = 'VIRUS'
+    UNKNOWN = 'UNKNOWN'
 
 class FileFolder(Entity):
 
@@ -28,6 +39,8 @@ class FileFolder(Entity):
 
     mime_type = models.CharField(null=True, blank=True, max_length=100)
     size = models.IntegerField(default=0)
+
+    last_scan = models.DateTimeField(default=None, null=True)
 
     def __str__(self):
         return f"FileFolder[{self.title}]"
@@ -75,6 +88,47 @@ class FileFolder(Entity):
             return True
         return False
 
+    def scan(self) -> FILE_SCAN:
+        if settings.CLAMAV_HOST:
+            cd = clamd.ClamdNetworkSocket(host=settings.CLAMAV_HOST, timeout=10)
+            result = None
+            try:
+                result = cd.instream(self.upload.file)
+            except Exception as e:
+                logger.error('Clamav service down with error: %s', e)
+                return FILE_SCAN.UNKNOWN
+
+            self.last_scan = timezone.now()
+
+            if result and result['stream'][0] == 'FOUND':
+                message = result['stream'][1]
+
+                logger.error('Clamav found suspicious file: %s', message)
+
+                ScanIncident.objects.create(
+                    message=message,
+                    file_created=self.created_at,
+                    file_title=self.upload.file.name,
+                    file_mime_type=get_mimetype(self.upload.path),
+                    file_owner=self.owner,
+                    file_group=self.group,
+                )
+
+                return FILE_SCAN.VIRUS
+
+            return FILE_SCAN.CLEAN
+
+        return FILE_SCAN.UNKNOWN
+
+class ScanIncident(models.Model):
+    date = models.DateTimeField(default=timezone.now)
+    message = models.CharField(max_length=256)
+    file = models.ForeignKey('file.FileFolder', blank=True, null=True, on_delete=models.SET_NULL, related_name='scan_indicents')
+    file_created = models.DateTimeField(default=timezone.now)
+    file_group = models.ForeignKey('core.Group', blank=True, null=True, on_delete=models.SET_NULL)
+    file_title = models.CharField(max_length=256)
+    file_mime_type = models.CharField(null=True, blank=True, max_length=100)
+    file_owner = models.ForeignKey('user.User', blank=True, null=True, on_delete=models.SET_NULL)
 
 def set_parent_folders_updated_at(instance):
     if instance.parent and instance.parent.is_folder:

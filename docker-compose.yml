@@ -9,6 +9,7 @@ services:
       CELERY_BROKER_URL: 'amqp://rabbitmq'
       CELERY_RESULT_BACKEND: 'redis://redis:6379/0'
       MEMCACHE_HOST_PORT: memcached:11211
+      CLAMAV_HOST: clamav
     env_file:
       - ./.env
     stdin_open: true
@@ -87,8 +88,6 @@ services:
       memlock:
         soft: -1
         hard: -1
-    ports:
-      - "9200:9200"
     volumes:
       - esdata01:/usr/share/elasticsearch/data
     healthcheck:
@@ -104,8 +103,6 @@ services:
     - "1025:1025"
   memcached:
     image: memcached
-    ports:
-      - "11211:11211"
     restart: always
   rabbitmq:
     image: 'rabbitmq:3.6-management-alpine'
@@ -120,6 +117,8 @@ services:
     image: 'redis:6.2'
     ports:
       - '6379:6379'
+  clamav:
+    image: 'mkodockx/docker-clamav:1.0.3-alpine'
 
 volumes:
   frontend-build:
