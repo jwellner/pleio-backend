@@ -8,6 +8,7 @@ metadata:
     {{- with .Values.ingress.annotations }}
       {{ toYaml . | nindent 4 }}
     {{- end }}
+    {{ .Values.ingress.issuerAnnotation }}
   name: {{ printf "%s-auto-certs" ((include "backend2.name" .)) }}
 spec:
   rules:
@@ -48,7 +49,6 @@ metadata:
     {{- with .Values.ingress.annotations }}
       {{ toYaml . | nindent 4 }}
     {{- end }}
-    {{ .Values.ingress.issuerAnnotation }}
   name: {{ printf "%s-manual-certs" ((include "backend2.name" .)) }}
 spec:
   rules:

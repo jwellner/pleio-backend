@@ -13,3 +13,6 @@ background:
 storage:
   existingBackupStorage: backup-storage
   existingDataStorage: pleio-data-test
+
+ingress:
+  issuerAnnotation: 'cert-manager.io/cluster-issuer: letsencrypt-pleio-prod-issuer'
