@@ -8,7 +8,9 @@ metadata:
     {{- with .Values.ingress.annotations }}
       {{ toYaml . | nindent 4 }}
     {{- end }}
-    {{ .Values.ingress.issuerAnnotation }}
+    {{- with .Values.ingress.autoAnnotations -}}
+      {{ toYaml . | nindent 4 }}
+    {{- end }}
   name: {{ printf "%s-auto-certs" ((include "backend2.name" .)) }}
 spec:
   rules:
@@ -32,11 +34,13 @@ spec:
   {{- range .Values.websitesAuto }}
     - hosts:
         - {{ .domain | quote }}
+        - {{ printf "www.%s" .domain | quote }}
       secretName: {{ .secretName }}
   {{- end }}
   {{- if .Values.adminDomain }}
     - hosts:
         - {{ .Values.adminDomain }}
+        - {{ printf "www.%s" .Values.adminDomain | quote }}
       secretName: {{ include "backend2.tlsSecretName" . }}
   {{- end }}
 {{- end }}
@@ -47,6 +51,9 @@ kind: Ingress
 metadata:
   annotations:
     {{- with .Values.ingress.annotations }}
+      {{ toYaml . | nindent 4 }}
+    {{- end }}
+    {{- with .Values.ingress.manualAnnotations -}}
       {{ toYaml . | nindent 4 }}
     {{- end }}
   name: {{ printf "%s-manual-certs" ((include "backend2.name" .)) }}

@@ -17,4 +17,6 @@ storage:
   existingBackupStorage: backup-storage
 
 ingress:
-  issuerAnnotation: 'cert-manager.io/cluster-issuer: letsencrypt-pleio-prod-issuer'
+  autoAnnotations:
+    cert-manager.io/cluster-issuer: letsencrypt-pleio-prod-issuer
+    cert-manager.io/issuer:

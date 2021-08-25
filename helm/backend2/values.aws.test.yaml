@@ -15,4 +15,6 @@ storage:
   existingDataStorage: pleio-data-test
 
 ingress:
-  issuerAnnotation: 'cert-manager.io/cluster-issuer: letsencrypt-pleio-prod-issuer'
+  autoAnnotations:
+    cert-manager.io/cluster-issuer: letsencrypt-pleio-prod-issuer
+    cert-manager.io/issuer:

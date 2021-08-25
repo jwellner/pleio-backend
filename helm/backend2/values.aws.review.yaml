@@ -6,3 +6,8 @@ websitesAuto:
 
 env: test
 debug: 'True'
+
+ingress:
+  autoAnnotations:
+    cert-manager.io/cluster-issuer: letsencrypt-pleio-prod-issuer
+    cert-manager.io/issuer:
