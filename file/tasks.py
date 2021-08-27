@@ -1,6 +1,8 @@
 # Create your tasks here
 from __future__ import absolute_import, unicode_literals
 
+import signal_disabler
+
 from celery import shared_task
 from celery.utils.log import get_task_logger
 from datetime import datetime, timedelta
@@ -51,8 +53,9 @@ def scan(self, schema_name, limit=1000):
             elif result == FILE_SCAN.UNKNOWN:
                 continue
 
-            file.last_scan = timezone.now()
-            file.save()
+            with signal_disabler.disable():
+                file.last_scan = timezone.now()
+                file.save()
 
         if virus_count > 0:
             context = get_default_email_context()
