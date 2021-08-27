@@ -1,6 +1,9 @@
+import django_filters
+
 from django import forms
 from core import config
 from core.resolvers.mutation_edit_site_setting import save_setting
+from file.models import ScanIncident
 
 
 def option_to_choice(option):
@@ -19,3 +22,15 @@ class SettingsForm(forms.Form):
 
         save_setting('OIDC_PROVIDERS', data['oidc_providers'])
         save_setting('EDIT_USER_NAME_ENABLED', data['edit_user_name_enabled'])
+
+
+class ScanIncidentFilter(django_filters.FilterSet):
+    blocked = django_filters.BooleanFilter(
+        field_name='file',
+        lookup_expr='isnull',
+        widget=forms.Select(attrs={'class': 'form-select'}, choices=((None, "Alles"), (True, "Verwijderd",), (False, "Geblokkeerd"))),
+    )
+
+    class Meta:
+        model = ScanIncident
+        fields = []
