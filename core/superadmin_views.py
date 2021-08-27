@@ -7,8 +7,9 @@ from django.shortcuts import redirect
 from django.views import View
 from core.tasks import elasticsearch_rebuild, replace_domain_links
 from core.lib import tenant_schema, is_valid_domain
-from core.superadmin.forms import SettingsForm
+from core.superadmin.forms import SettingsForm, ScanIncidentFilter
 from control.tasks import get_db_disk_usage, get_file_disk_usage
+from file.models import ScanIncident
 
 logger = logging.getLogger(__name__)
 
@@ -58,6 +59,27 @@ class Settings(LoginRequiredMixin, UserPassesTestMixin, View):
 
         return render(request, 'superadmin/settings.html', context)
 
+class ScanLog(LoginRequiredMixin, UserPassesTestMixin, View):
+    http_method_names = ['get']
+
+    def test_func(self):
+        return self.request.user.is_superadmin
+
+    def handle_no_permission(self):
+        return redirect('/')
+
+    def get(self, request):
+
+        filtered_qs = ScanIncidentFilter(request.GET, queryset=ScanIncident.objects.all())
+        form = filtered_qs.form
+        qs = filtered_qs.qs[:100]
+
+        context = {
+            'qs': qs,
+            'form': form
+        }
+
+        return render(request, 'superadmin/scanlog.html', context)
 
 @login_required
 @user_passes_test(lambda u: u.is_superadmin, login_url='/', redirect_field_name=None)

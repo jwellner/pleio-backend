@@ -23,6 +23,10 @@ def download(request, file_id=None, file_name=None):
         if entity.group and entity.group.is_closed and not entity.group.is_full_member(user) and not user.has_role(USER_ROLES.ADMIN):
             raise Http404("File not found")
 
+        print(entity.scan_incidents.count())
+        if entity.scan_incidents.count() > 0:
+            raise Http404("File not found")
+
         attachment_or_inline = "attachment" if not entity.mime_type else "inline"
         response = StreamingHttpResponse(streaming_content=entity.upload.open(), content_type=entity.mime_type)
         response['Content-Length'] = entity.upload.size
@@ -48,6 +52,9 @@ def embed(request, file_id=None, file_name=None):
         if entity.group and entity.group.is_closed and not entity.group.is_full_member(user) and not user.has_role(USER_ROLES.ADMIN):
             raise Http404("File not found")
 
+        if entity.scan_incidents.count() > 0:
+            raise Http404("File not found")
+
         response = StreamingHttpResponse(streaming_content=entity.upload.open(), content_type=entity.mime_type)
         response['Content-Length'] = entity.upload.size
         return response
@@ -67,6 +74,9 @@ def featured(request, entity_guid=None):
         entity = Entity.objects.get_subclass(id=entity_guid)
 
         if hasattr(entity, 'featured_image') and entity.featured_image:
+            if entity.featured_image.scan_incidents.count() > 0:
+                raise Http404("File not found")
+
             response = StreamingHttpResponse(streaming_content=entity.featured_image.upload.open(), content_type=entity.featured_image.mime_type)
             response['Content-Length'] = entity.featured_image.upload.size
             return response
@@ -93,6 +103,8 @@ def bulk_download(request):
     for f in files:
         if f.group and f.group.is_closed and not f.group.is_full_member(user) and not user.has_role(USER_ROLES.ADMIN):
             continue
+        if f.scan_incidents.count() > 0:
+            continue
         zipf.writestr(path.basename(get_download_filename(f)), f.upload.read())
 
     # Add selected folders to zip
@@ -117,6 +129,9 @@ def thumbnail(request, file_id=None):
         entity = FileFolder.objects.visible(user).get(id=file_id)
 
     except ObjectDoesNotExist:
+        raise Http404("File not found")
+
+    if entity.scan_incidents.count() > 0:
         raise Http404("File not found")
 
     if not entity.thumbnail:

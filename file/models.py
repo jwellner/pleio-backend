@@ -107,6 +107,7 @@ class FileFolder(Entity):
 
                 ScanIncident.objects.create(
                     message=message,
+                    file=self if not self._state.adding else None,
                     file_created=self.created_at,
                     file_title=self.upload.file.name,
                     file_mime_type=get_mimetype(self.upload.path),
@@ -123,12 +124,15 @@ class FileFolder(Entity):
 class ScanIncident(models.Model):
     date = models.DateTimeField(default=timezone.now)
     message = models.CharField(max_length=256)
-    file = models.ForeignKey('file.FileFolder', blank=True, null=True, on_delete=models.SET_NULL, related_name='scan_indicents')
+    file = models.ForeignKey('file.FileFolder', blank=True, null=True, on_delete=models.SET_NULL, related_name='scan_incidents')
     file_created = models.DateTimeField(default=timezone.now)
     file_group = models.ForeignKey('core.Group', blank=True, null=True, on_delete=models.SET_NULL)
     file_title = models.CharField(max_length=256)
     file_mime_type = models.CharField(null=True, blank=True, max_length=100)
     file_owner = models.ForeignKey('user.User', blank=True, null=True, on_delete=models.SET_NULL)
+
+    class Meta:
+        ordering = ('-date',)
 
 def set_parent_folders_updated_at(instance):
     if instance.parent and instance.parent.is_folder:
@@ -138,6 +142,7 @@ def set_parent_folders_updated_at(instance):
 @receiver(pre_save, sender=FileFolder)
 def file_pre_save(sender, instance, **kwargs):
     # pylint: disable=unused-argument
+
     if settings.IMPORTING:
         return
     if instance.upload and not instance.title:
@@ -153,6 +158,7 @@ def file_pre_save(sender, instance, **kwargs):
 @receiver([pre_save, pre_delete], sender=FileFolder)
 def update_parent_timestamps(sender, instance, **kwargs):
     # pylint: disable=unused-argument
+
     if settings.IMPORTING:
         return
 
