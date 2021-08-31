@@ -19,7 +19,7 @@ def resolve_delete_entity(_, info, input):
         pass
 
     try:
-        entity = Entity.objects.get(id=input.get("guid"))
+        entity = Entity.objects.get_subclass(id=input.get("guid"))
     except ObjectDoesNotExist:
         pass
 

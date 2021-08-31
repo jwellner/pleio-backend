@@ -179,6 +179,9 @@ class EditSiteSettingTestCase(FastTenantTestCase):
                         flowUserGuid
 
                         commentWithoutAccountEnabled
+
+                        questionLockAfterActivity
+                        questionLockAfterActivityLink
                     }
                 }
             }
@@ -298,6 +301,9 @@ class EditSiteSettingTestCase(FastTenantTestCase):
                 "flowUserGuid": self.admin.guid,
 
                 "commentWithoutAccountEnabled": True,
+
+                "questionLockAfterActivity": True,
+                "questionLockAfterActivityLink": "https://test.link"
 
             }
         }
@@ -422,6 +428,9 @@ class EditSiteSettingTestCase(FastTenantTestCase):
         self.assertEqual(data["editSiteSetting"]["siteSettings"]["flowUserGuid"], self.admin.guid)
 
         self.assertEqual(data["editSiteSetting"]["siteSettings"]["commentWithoutAccountEnabled"], True)
+
+        self.assertEqual(data["editSiteSetting"]["siteSettings"]["questionLockAfterActivity"], True)
+        self.assertEqual(data["editSiteSetting"]["siteSettings"]["questionLockAfterActivityLink"], "https://test.link")
 
     @patch("core.lib.get_mimetype")
     @patch("{}.open".format(settings.DEFAULT_FILE_STORAGE))
