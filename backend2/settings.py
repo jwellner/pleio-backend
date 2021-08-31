@@ -305,6 +305,9 @@ if APM_ENABLED:
         set_global_tracer(Tracer(config=ELASTIC_APM))
 
 SECURE_REFERRER_POLICY = 'origin-when-cross-origin'
+SESSION_COOKIE_SECURE = not DEBUG
+CSRF_COOKIE_SECURE = not DEBUG
+
 DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
 
 CLAMAV_HOST = os.getenv('CLAMAV_HOST', None)
