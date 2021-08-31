@@ -226,9 +226,18 @@ def resolve_move_file_folder(_, info, input):
         entity.parent = None
 
     if parent:
-        if parent == entity:
-            # prevent moving folder in self
+        # prevent moving folder in self or descendant of self
+        parent_check = parent
+
+        while parent_check:
+            if parent_check == entity:
+                raise GraphQLError("INVALID_CONTAINER_GUID")
+            parent_check = parent_check.parent
+
+        # entity already in parent
+        if entity.parent == parent:
             raise GraphQLError("INVALID_CONTAINER_GUID")
+
         entity.parent = parent
 
     entity.save()
