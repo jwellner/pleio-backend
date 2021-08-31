@@ -10,7 +10,12 @@ def resolve_role(obj, info):
 @member.field("email")
 def resolve_email(obj, info):
     # pylint: disable=unused-argument
-    return obj.user.email
+
+    request_user = info.context["request"].user
+
+    if obj.user == request_user or obj.group.can_write(request_user):
+        return obj.user.email
+    return None
 
 @member.field("user")
 def resolve_user(obj, info):
