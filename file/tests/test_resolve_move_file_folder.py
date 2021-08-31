@@ -118,3 +118,20 @@ class MoveFileFolderTestCase(FastTenantTestCase):
 
         self.assertEqual(data["moveFileFolder"]["entity"]["parentFolder"], None)
         self.assertEqual(data["moveFileFolder"]["entity"]["group"]["guid"], self.group.guid)
+
+    def test_move_folder_to_self(self):
+
+        variables = self.data
+
+        variables["input"]["guid"] = self.folder.guid
+        variables["input"]["containerGuid"] = self.folder.guid
+
+        request = HttpRequest()
+        request.user = self.authenticatedUser
+
+        result = graphql_sync(schema, { "query": self.mutation, "variables": variables }, context_value={ "request": request })
+
+        errors = result[1]["errors"]
+
+        self.assertEqual(errors[0]["message"], "INVALID_CONTAINER_GUID")
+
