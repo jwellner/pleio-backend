@@ -26,12 +26,21 @@ class MoveFileFolderTestCase(FastTenantTestCase):
         self.group = mixer.blend(Group, owner=self.authenticatedUser, is_membership_on_request=False)
         self.group.join(self.authenticatedUser, 'owner')
 
+        self.folder_root = FileFolder.objects.create(
+            title="root",
+            read_access=[ACCESS_TYPE.user.format(self.authenticatedUser.id)],
+            write_access=[ACCESS_TYPE.user.format(self.authenticatedUser.id)],
+            owner=self.authenticatedUser,
+            is_folder=True
+        )
+
         self.folder = FileFolder.objects.create(
             title="images",
             read_access=[ACCESS_TYPE.user.format(self.authenticatedUser.id)],
             write_access=[ACCESS_TYPE.user.format(self.authenticatedUser.id)],
             owner=self.authenticatedUser,
-            is_folder=True
+            is_folder=True,
+            parent=self.folder_root
         )
 
         self.file = FileFolder.objects.create(
@@ -124,6 +133,38 @@ class MoveFileFolderTestCase(FastTenantTestCase):
         variables = self.data
 
         variables["input"]["guid"] = self.folder.guid
+        variables["input"]["containerGuid"] = self.folder.guid
+
+        request = HttpRequest()
+        request.user = self.authenticatedUser
+
+        result = graphql_sync(schema, { "query": self.mutation, "variables": variables }, context_value={ "request": request })
+
+        errors = result[1]["errors"]
+
+        self.assertEqual(errors[0]["message"], "INVALID_CONTAINER_GUID")
+
+    def test_move_folder_to_descendant_self(self):
+
+        variables = self.data
+
+        variables["input"]["guid"] = self.folder.guid
+        variables["input"]["containerGuid"] = self.folder.guid
+
+        request = HttpRequest()
+        request.user = self.authenticatedUser
+
+        result = graphql_sync(schema, { "query": self.mutation, "variables": variables }, context_value={ "request": request })
+
+        errors = result[1]["errors"]
+
+        self.assertEqual(errors[0]["message"], "INVALID_CONTAINER_GUID")
+
+    def test_move_folder_to_descendant_self(self):
+
+        variables = self.data
+
+        variables["input"]["guid"] = self.folder_root.guid
         variables["input"]["containerGuid"] = self.folder.guid
 
         request = HttpRequest()
