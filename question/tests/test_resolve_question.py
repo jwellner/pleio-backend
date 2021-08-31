@@ -51,7 +51,6 @@ class QuestionTestCase(FastTenantTestCase):
 
         cache.set("%s%s" % (connection.schema_name, 'QUESTIONER_CAN_CHOOSE_BEST_ANSWER'), True)
 
-
     def tearDown(self):
         self.questionPublic.delete()
         self.questionPrivate.delete()
@@ -102,6 +101,7 @@ class QuestionTestCase(FastTenantTestCase):
                 group {
                     guid
                 }
+                isLocked
             }
             query GetQuestion($guid: String!) {
                 entity(guid: $guid) {
@@ -141,6 +141,7 @@ class QuestionTestCase(FastTenantTestCase):
         self.assertEqual(data["entity"]["canBookmark"], False)
         self.assertEqual(data["entity"]["canEdit"], False)
         self.assertEqual(data["entity"]["canComment"], False)
+        self.assertEqual(data["entity"]["isLocked"], False)
         self.assertEqual(data["entity"]["canChooseBestAnswer"], False)
         self.assertEqual(data["entity"]["owner"]["guid"], self.questionPublic.owner.guid)
         self.assertEqual(data["entity"]["url"], "/questions/view/{}/{}".format(self.questionPublic.guid, slugify(self.questionPublic.title)))
@@ -158,6 +159,7 @@ class QuestionTestCase(FastTenantTestCase):
         self.assertEqual(data["entity"], None)
 
     def test_question_owner(self):
+        cache.set("%s%s" % (connection.schema_name, 'QUESTION_LOCK_AFTER_ACTIVITY'), False)
 
         query = """
             fragment QuestionParts on Question {
@@ -201,6 +203,7 @@ class QuestionTestCase(FastTenantTestCase):
                 group {
                     guid
                 }
+                isLocked
             }
             query GetQuestion($guid: String!) {
                 entity(guid: $guid) {
@@ -241,6 +244,98 @@ class QuestionTestCase(FastTenantTestCase):
         self.assertEqual(data["entity"]["canEdit"], True)
         self.assertEqual(data["entity"]["canComment"], True)
         self.assertEqual(data["entity"]["canChooseBestAnswer"], True)
+        self.assertEqual(data["entity"]["isLocked"], False)
+        self.assertEqual(data["entity"]["owner"]["guid"], self.questionPrivate.owner.guid)
+        self.assertEqual(data["entity"]["url"], "/questions/view/{}/{}".format(self.questionPrivate.guid, slugify(self.questionPrivate.title)))
+        self.assertEqual(data["entity"]["comments"][0]['guid'], self.comment2.guid)
+
+    def test_question_owner_locked(self):
+        cache.set("%s%s" % (connection.schema_name, 'QUESTION_LOCK_AFTER_ACTIVITY'), True)
+
+        query = """
+            fragment QuestionParts on Question {
+                title
+                description
+                richDescription
+                accessId
+                timeCreated
+                featured {
+                    image
+                    video
+                    videoTitle
+                    positionY
+                }
+                canEdit
+                tags
+                url
+                views
+                votes
+                hasVoted
+                isBookmarked
+                isFollowing
+                isFeatured
+                isClosed
+                canBookmark
+                canComment
+                canChooseBestAnswer
+                comments {
+                    guid
+                    description
+                    richDescription
+                    isBestAnswer
+                    canEdit
+                    timeCreated
+                    hasVoted
+                    votes
+                }
+                owner {
+                    guid
+                }
+                group {
+                    guid
+                }
+                isLocked
+            }
+            query GetQuestion($guid: String!) {
+                entity(guid: $guid) {
+                    guid
+                    status
+                    ...QuestionParts
+                }
+            }
+        """
+        request = HttpRequest()
+        request.user = self.authenticatedUser
+
+        variables = {
+            "guid": self.questionPrivate.guid
+        }
+
+        result = graphql_sync(schema, { "query": query , "variables": variables}, context_value={ "request": request })
+
+        self.assertTrue(result[0])
+
+        data = result[1]["data"]
+
+        self.assertEqual(data["entity"]["guid"], self.questionPrivate.guid)
+        self.assertEqual(data["entity"]["title"], self.questionPrivate.title)
+        self.assertEqual(data["entity"]["description"], self.questionPrivate.description)
+        self.assertEqual(data["entity"]["richDescription"], self.questionPrivate.rich_description)
+        self.assertEqual(data["entity"]["accessId"], 0)
+        self.assertEqual(data["entity"]["timeCreated"], str(self.questionPrivate.created_at))
+        self.assertEqual(data["entity"]["isClosed"], self.questionPrivate.is_closed)
+        self.assertEqual(data["entity"]["tags"], [])
+        self.assertEqual(data["entity"]["views"], 1)
+        self.assertEqual(data["entity"]["votes"], 0)
+        self.assertEqual(data["entity"]["hasVoted"], False)
+        self.assertEqual(data["entity"]["isBookmarked"], False)
+        self.assertEqual(data["entity"]["isFollowing"], False)
+        self.assertEqual(data["entity"]["isFeatured"], True)
+        self.assertEqual(data["entity"]["canBookmark"], True)
+        self.assertEqual(data["entity"]["canEdit"], False)
+        self.assertEqual(data["entity"]["canComment"], True)
+        self.assertEqual(data["entity"]["canChooseBestAnswer"], True)
+        self.assertEqual(data["entity"]["isLocked"], True)
         self.assertEqual(data["entity"]["owner"]["guid"], self.questionPrivate.owner.guid)
         self.assertEqual(data["entity"]["url"], "/questions/view/{}/{}".format(self.questionPrivate.guid, slugify(self.questionPrivate.title)))
         self.assertEqual(data["entity"]["comments"][0]['guid'], self.comment2.guid)

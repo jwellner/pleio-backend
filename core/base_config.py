@@ -135,7 +135,9 @@ DEFAULT_SITE_CONFIG = {
     'FLOW_CASE_ID': (None, 'Flow case id'),
     'FLOW_USER_GUID': ("", 'Flow user guid'),
     'EDIT_USER_NAME_ENABLED': (False, 'Allow users to change name'),
-    'COMMENT_WITHOUT_ACCOUNT_ENABLED': (False, 'Allow anonymous users to comment')
+    'COMMENT_WITHOUT_ACCOUNT_ENABLED': (False, 'Allow anonymous users to comment'),
+    'QUESTION_LOCK_AFTER_ACTIVITY': (False, 'Lock questions after comments are given'),
+    'QUESTION_LOCK_AFTER_ACTIVITY_LINK': ("", 'Link for locked questions'),
 }
 """
 Default site configuration

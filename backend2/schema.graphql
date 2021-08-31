@@ -673,6 +673,8 @@ input editSiteSettingInput {
   statusUpdateGroups: Boolean
   subgroups: Boolean
   groupMemberExport: Boolean
+  questionLockAfterActivity: Boolean
+  questionLockAfterActivityLink: String
 }
 
 type editSiteSettingPayload {
@@ -1380,6 +1382,7 @@ type Question implements Entity {
   comments: [Comment]
   commentCount: Int
   isPinned: Boolean!
+  isLocked: Boolean!
 }
 
 input rejectMembershipRequestInput {
@@ -1604,6 +1607,8 @@ type SiteSettings {
   statusUpdateGroups: Boolean!
   subgroups: Boolean!
   groupMemberExport: Boolean!
+  questionLockAfterActivity: Boolean!
+  questionLockAfterActivityLink: String
 }
 
 type StatsItem {

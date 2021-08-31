@@ -329,6 +329,8 @@ extend type Site {
   onboardingIntro: String
   editUserNameEnabled: Boolean!
   commentWithoutAccountEnabled: Boolean!
+  questionLockAfterActivity: Boolean!
+  questionLockAfterActivityLink: String
 }
 
 type Redirect {

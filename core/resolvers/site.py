@@ -217,3 +217,13 @@ def resolve_edit_user_name_enabled(obj, info):
 def resolve_comment_without_account_enabled(obj, info):
     # pylint: disable=unused-argument
     return config.COMMENT_WITHOUT_ACCOUNT_ENABLED
+
+@site.field("questionLockAfterActivity")
+def resolve_question_lock_after_activity(obj, info):
+    # pylint: disable=unused-argument
+    return config.QUESTION_LOCK_AFTER_ACTIVITY
+
+@site.field("questionLockAfterActivityLink")
+def resolve_question_lock_after_activity_link(obj, info):
+    # pylint: disable=unused-argument
+    return config.QUESTION_LOCK_AFTER_ACTIVITY_LINK
