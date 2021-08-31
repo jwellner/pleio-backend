@@ -226,6 +226,9 @@ def resolve_move_file_folder(_, info, input):
         entity.parent = None
 
     if parent:
+        if parent == entity:
+            # prevent moving folder in self
+            raise GraphQLError("INVALID_CONTAINER_GUID")
         entity.parent = parent
 
     entity.save()
