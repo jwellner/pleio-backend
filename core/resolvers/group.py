@@ -139,6 +139,14 @@ def resolve_group_subgroups(obj, info):
 def resolve_group_invite(obj, info, q=None, offset=0, limit=10):
     # pylint: disable=unused-argument
     # TODO: schema must be altered, this should not be type InvitedList
+    request_user = info.context["request"].user
+
+    if not obj.can_write(request_user):
+        return {
+            'total': 0,
+            'edges': []
+        }
+
     if q:
         users = User.objects.filter(name__icontains=q)[offset:offset+limit]
     else:
@@ -165,6 +173,14 @@ def resolve_group_invite(obj, info, q=None, offset=0, limit=10):
 @group.field("invited")
 def resolve_group_invited(obj, info, q=None, offset=0, limit=10):
     # pylint: disable=unused-argument
+    request_user = info.context["request"].user
+
+    if not obj.can_write(request_user):
+        return {
+            'total': 0,
+            'edges': []
+        }
+
     invited = obj.invitations.filter(group=obj)
 
     edges = invited[offset:offset+limit]
@@ -176,6 +192,14 @@ def resolve_group_invited(obj, info, q=None, offset=0, limit=10):
 @group.field("membershipRequests")
 def resolve_group_membership_requests(obj, info):
     # pylint: disable=unused-argument
+    request_user = info.context["request"].user
+
+    if not obj.can_write(request_user):
+        return {
+            'total': 0,
+            'edges': []
+        }
+
     membership_requests = obj.members.filter(type='pending')
     users = []
     for m in membership_requests:

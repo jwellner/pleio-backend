@@ -29,7 +29,11 @@ def resolve_invite_user(obj, info):
 def resolve_invite_email(obj, info):
     # pylint: disable=unused-argument
 
-    if obj.invited_user:
-        return obj.invited_user.email
+    request_user = info.context["request"].user
 
-    return obj.email
+    if obj.invited_user == request_user or obj.group.can_write(request_user):
+        if obj.invited_user:
+            return obj.invited_user.email
+
+        return obj.email
+    return None
