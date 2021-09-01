@@ -3,6 +3,7 @@ from django.db import models
 from django.utils.text import slugify
 from django.urls import reverse
 from core import config
+from core.lib import get_acl
 from core.models import Entity, VoteMixin, CommentMixin, BookmarkMixin, FollowMixin, Comment, NotificationMixin
 from core.constances import USER_ROLES
 from file.models import FileFolder
@@ -60,6 +61,25 @@ class Question(Entity, VoteMixin, BookmarkMixin, FollowMixin, CommentMixin, Noti
             (user.has_role(USER_ROLES.ADMIN) or user.has_role(USER_ROLES.QUESTION_MANAGER) or user == self.owner)
             and config.QUESTIONER_CAN_CHOOSE_BEST_ANSWER
         ):
+            return True
+
+        return False
+
+    def can_write(self, user):
+        if user.is_authenticated and user.has_role(USER_ROLES.ADMIN):
+            return True
+
+        if user.is_authenticated and self.group and self.group.members.filter(user=user, type__in=['admin', 'owner']).exists():
+            return True
+
+        if self.is_locked:
+            return False
+
+        return len(get_acl(user) & set(self.write_access)) > 0
+
+    @property
+    def is_locked(self):
+        if config.QUESTION_LOCK_AFTER_ACTIVITY and self.comments.count() > 0:
             return True
 
         return False

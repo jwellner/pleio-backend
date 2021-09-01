@@ -101,6 +101,8 @@ class SiteTestCase(FastTenantTestCase):
                     }
                     editUserNameEnabled
                     commentWithoutAccountEnabled
+                    questionLockAfterActivity
+                    questionLockAfterActivityLink
                 }
             }
         """
@@ -145,6 +147,8 @@ class SiteTestCase(FastTenantTestCase):
         self.assertEqual(data["site"]["profileFields"][1]["fieldType"], "dateField")
         self.assertEqual(data["site"]["editUserNameEnabled"], config.EDIT_USER_NAME_ENABLED)
         self.assertEqual(data["site"]["commentWithoutAccountEnabled"], config.COMMENT_WITHOUT_ACCOUNT_ENABLED)
+        self.assertEqual(data["site"]["questionLockAfterActivity"], config.QUESTION_LOCK_AFTER_ACTIVITY)
+        self.assertEqual(data["site"]["questionLockAfterActivityLink"], config.QUESTION_LOCK_AFTER_ACTIVITY_LINK)
 
     def test_site_closed(self):
 

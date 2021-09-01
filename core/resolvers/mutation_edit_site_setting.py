@@ -174,7 +174,11 @@ def resolve_edit_site_setting(_, info, input):
         'flowCaseId': 'FLOW_CASE_ID',
         'flowUserGuid': 'FLOW_USER_GUID',
 
-        'commentWithoutAccountEnabled': 'COMMENT_WITHOUT_ACCOUNT_ENABLED'
+        'commentWithoutAccountEnabled': 'COMMENT_WITHOUT_ACCOUNT_ENABLED',
+
+        'questionLockAfterActivity': 'QUESTION_LOCK_AFTER_ACTIVITY',
+        'questionLockAfterActivityLink': 'QUESTION_LOCK_AFTER_ACTIVITY_LINK',
+
     }
 
     for k, v in setting_keys.items():

@@ -1,0 +1,48 @@
+{% extends "superadmin/base.html" %}
+
+{% load i18n %}
+
+{% block content %}
+
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+    <h1 class="h2">Scan log</h1>
+    <div>
+        <form method="get" class="row  row-cols-lg-auto g-3 align-items-center">
+          <div class="col-12">
+            <label class="visually-hidden" for="inlineFormSelectPref">{{ form.blocked.label }}</label>
+            {{ form.blocked }}
+          </div>
+          <div class="col-12">
+            <button type="submit" class="btn btn-primary">Filter</button>
+          </div>
+        </form>
+      </div>
+</div>
+
+<table class="table" width="100%">
+    <thead>
+      <tr>
+        <th scope="col" width=175>Date</th>
+        <th scope="col">File</th>
+        <th scope="col">Message</th>
+        <th scope="col">User</th>
+        <th scope="col">Link</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for log in qs %}
+      <tr>
+        <td>{{ log.date|date:'Y-m-d H:i' }}</td>
+        <td>{{ log.file_title }}</td>
+        <td>{{ log.message }}</td>
+        <td><a href="{{ log.file_owner.url }}">{{ log.file_owner }}</a></td>
+        {% if log.file %}
+            <td><a href="{{ log.file.url }}">{{ log.file.url }}</a></td>
+        {% else %}
+            <td>verwijderd</td>
+        {% endif %}
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+{% endblock %}

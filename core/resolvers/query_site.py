@@ -234,6 +234,8 @@ def get_site_settings():
         'flowUserGuid': config.FLOW_USER_GUID,
         'editUserNameEnabled': config.EDIT_USER_NAME_ENABLED,
         'commentWithoutAccountEnabled': config.COMMENT_WITHOUT_ACCOUNT_ENABLED,
+        'questionLockAfterActivity': config.QUESTION_LOCK_AFTER_ACTIVITY,
+        'questionLockAfterActivityLink': config.QUESTION_LOCK_AFTER_ACTIVITY_LINK,
     }
 
     return site_settings

@@ -33,6 +33,7 @@ services:
       CELERY_BROKER_URL: 'amqp://rabbitmq'
       CELERY_RESULT_BACKEND: 'redis://redis:6379/0'
       MEMCACHE_HOST_PORT: memcached:11211
+      CLAMAV_HOST: clamav
     env_file:
       - ./.env
     stdin_open: true

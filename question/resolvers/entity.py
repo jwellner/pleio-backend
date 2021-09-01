@@ -67,6 +67,11 @@ def resolve_comments(obj, info):
             pass
     return comments
 
+@question.field("isLocked")
+def resolve_is_locked(obj, info):
+    # pylint: disable=unused-argument
+    return obj.is_locked
+
 
 question.set_field("guid", shared.resolve_entity_guid)
 question.set_field("status", shared.resolve_entity_status)
