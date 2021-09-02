@@ -65,7 +65,7 @@ def conditional_tags_filter(tags):
     if tags:
         filters = Q()
         for tag in tags:
-            filters.add(Q(tags__icontains=tag), Q.AND) # of Q.OR
+            filters.add(Q(tags__overlap=[tag]), Q.AND) # of Q.OR
 
         return filters
     return Q()
