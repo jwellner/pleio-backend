@@ -120,6 +120,10 @@ services:
       - '6379:6379'
   clamav:
     image: 'mkodockx/docker-clamav:1.0.3-alpine'
+    environment:
+      CLAMD_CONF_FILE: /mnt/clamd.conf
+    volumes:
+      - ./docker/clamd.conf:/mnt/clamd.conf
 
 volumes:
   frontend-build:
