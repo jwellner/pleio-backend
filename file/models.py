@@ -95,7 +95,7 @@ class FileFolder(Entity):
             try:
                 result = cd.instream(self.upload.file)
             except Exception as e:
-                logger.error('Clamav service down with error: %s', e)
+                logger.error('Clamav error scanning file (%s): %s', self.guid, e)
                 return FILE_SCAN.UNKNOWN
 
             self.last_scan = timezone.now()
