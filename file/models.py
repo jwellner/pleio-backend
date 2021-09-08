@@ -90,7 +90,7 @@ class FileFolder(Entity):
 
     def scan(self) -> FILE_SCAN:
         if settings.CLAMAV_HOST:
-            cd = clamd.ClamdNetworkSocket(host=settings.CLAMAV_HOST, timeout=10)
+            cd = clamd.ClamdNetworkSocket(host=settings.CLAMAV_HOST, timeout=120)
             result = None
             try:
                 result = cd.instream(self.upload.file)
