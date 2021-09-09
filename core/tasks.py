@@ -376,7 +376,7 @@ def create_notification(self, schema_name, verb, entity_id, sender_id):
         if verb == "created":
             recipients = []
             if instance.group:
-                for member in instance.group.members.filter(type__in=['admin', 'owner', 'member']).exclude(notification_mode=['disable']):
+                for member in instance.group.members.filter(type__in=['admin', 'owner', 'member']).exclude(notification_mode='disable'):
                     if sender == member.user:
                         continue
                     if not instance.can_read(member.user):

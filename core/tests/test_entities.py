@@ -49,7 +49,7 @@ class EntitiesTestCase(FastTenantTestCase):
             read_access=[ACCESS_TYPE.public],
             write_access=[ACCESS_TYPE.user.format(self.authenticatedUser.id)],
             group=self.group,
-            tags=["tag_four", "tag_three"],
+            tags=["tag_four", "tag_three", "tag_one_extra"],
             is_featured=True
         )
         self.news1 = News.objects.create(

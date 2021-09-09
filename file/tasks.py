@@ -46,11 +46,13 @@ def scan(self, schema_name, limit=1000):
 
         file_count = files.count()
         virus_count = 0
+        errors_count = 0
         for file in files:
             result = file.scan()
             if result == FILE_SCAN.VIRUS:
                 virus_count+=1
             elif result == FILE_SCAN.UNKNOWN:
+                errors_count+=1
                 continue
 
             with signal_disabler.disable():
@@ -73,4 +75,4 @@ def scan(self, schema_name, limit=1000):
                     language=admin_user.get_language()
                 )
 
-        logger.info("Scanned %i and found %i virusses @%s", file_count, virus_count, schema_name)
+        logger.info("Scanned %i and found %i virusses and %i errors @%s", file_count, virus_count, errors_count, schema_name)

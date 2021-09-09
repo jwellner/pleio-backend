@@ -35,7 +35,7 @@ spec:
             - -O
             - fair
             - -s
-            - /tmp/celerybeat-schedule
+            - /app-data/celerybeat-schedule
             - --loglevel=info
           volumeMounts:
             - mountPath: /tmp

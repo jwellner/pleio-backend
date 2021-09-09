@@ -90,12 +90,16 @@ class FileFolder(Entity):
 
     def scan(self) -> FILE_SCAN:
         if settings.CLAMAV_HOST:
-            cd = clamd.ClamdNetworkSocket(host=settings.CLAMAV_HOST, timeout=10)
+            cd = clamd.ClamdNetworkSocket(host=settings.CLAMAV_HOST, timeout=120)
             result = None
+
+            if not os.path.exists(self.upload.path):
+                return FILE_SCAN.CLEAN
+
             try:
                 result = cd.instream(self.upload.file)
             except Exception as e:
-                logger.error('Clamav service down with error: %s', e)
+                logger.error('Clamav error scanning file (%s): %s', self.guid, e)
                 return FILE_SCAN.UNKNOWN
 
             self.last_scan = timezone.now()

@@ -48,7 +48,7 @@ cleanup:
 ingress:
   annotations:
     kubernetes.io/ingress.class: nginx
-    nginx.ingress.kubernetes.io/proxy-body-size: 250m
+    nginx.ingress.kubernetes.io/proxy-body-size: 2050m
   issuerAnnotation: 'cert-manager.io/issuer: letsencrypt-pleio-prod-issuer'
 
 memcached:

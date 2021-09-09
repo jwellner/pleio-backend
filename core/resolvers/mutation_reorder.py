@@ -4,7 +4,6 @@ from django.db.models import Q
 from core.models import Entity
 from core.constances import NOT_LOGGED_IN, COULD_NOT_FIND, COULD_NOT_SAVE
 from core.lib import remove_none_from_dict
-from cms.utils import order_positions, reorder_positions
 
 def resolve_reorder(_, info, input):
     # pylint: disable=redefined-builtin
@@ -25,25 +24,17 @@ def resolve_reorder(_, info, input):
 
     if entity.parent and entity.parent.has_children():
 
-        # check if positions are ordered and set position fields if not
-        children = entity.parent.children.all()
-        if len(list(set(children.values_list('position')))) == 1:
-            position = 0
-            for child in children:
-                child.position = position
+        children = list(entity.parent.children.all())
+
+        current_index = children.index(entity)
+        children.insert(clean_input.get("destinationPosition"), children.pop(current_index))
+
+        for index, child in enumerate(children):
+            if child.position != index:
+                child.position = index
                 child.save()
-                position = position + 1
-            # refetch for updated position
-            entity = Entity.objects.filter(~Q(page__isnull=True) | ~Q(wiki__isnull=True)).get_subclass(id=clean_input.get("guid"))
 
-        old_position = entity.position
-        new_position = clean_input.get("destinationPosition")
-
-        entity.position = new_position
-        entity.save()
-
-        reorder_positions(entity, old_position, new_position)
-        order_positions(entity.parent)
+        entity.refresh_from_db()
 
     return {
         "container": entity.parent
