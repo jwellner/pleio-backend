@@ -1,14 +1,12 @@
 from auditlog.registry import auditlog
 from django.db import models
 from django.utils.text import slugify
-from django.urls import reverse
-from core.models import Entity, VoteMixin, CommentMixin, BookmarkMixin, FollowMixin
-from file.models import FileFolder
+from core.models import Entity, VoteMixin, CommentMixin, BookmarkMixin, FollowMixin, FeaturedCoverMixin
 from core.constances import USER_ROLES
 from core.lib import get_acl
 
 
-class News(Entity, VoteMixin, BookmarkMixin, FollowMixin, CommentMixin):
+class News(Entity, VoteMixin, BookmarkMixin, FollowMixin, CommentMixin, FeaturedCoverMixin):
     """
     News
     """
@@ -20,17 +18,6 @@ class News(Entity, VoteMixin, BookmarkMixin, FollowMixin, CommentMixin):
     rich_description = models.TextField(null=True, blank=True)
 
     is_featured = models.BooleanField(default=False)
-
-    featured_image = models.ForeignKey(
-        FileFolder,
-        on_delete=models.PROTECT,
-        blank=True,
-        null=True
-    )
-    featured_video = models.TextField(null=True, blank=True)
-    featured_video_title = models.CharField(max_length=256, default="")
-    featured_position_y = models.IntegerField(default=0, null=False)
-    featured_alt = models.CharField(max_length=256, default="")
 
     source = models.TextField(default="")
 
@@ -46,12 +33,6 @@ class News(Entity, VoteMixin, BookmarkMixin, FollowMixin, CommentMixin):
         return '/news/view/{}/{}'.format(
             self.guid, slugify(self.title)
         ).lower()
-
-    @property
-    def featured_image_url(self):
-        if self.featured_image:
-            return '%s?cache=%i' % (reverse('featured', args=[self.id]), int(self.featured_image.updated_at.timestamp()))
-        return None
 
     def can_write(self, user):
         if user.is_authenticated and (user.has_role(USER_ROLES.ADMIN) or user.has_role(USER_ROLES.EDITOR)):

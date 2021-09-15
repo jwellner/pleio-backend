@@ -77,6 +77,12 @@ class WikiTestCase(FastTenantTestCase):
                     guid
                 }
                 isFeatured
+                featured {
+                    image
+                    video
+                    videoTitle
+                    positionY
+                }
             }
             query GetWiki($guid: String!) {
                 entity(guid: $guid) {

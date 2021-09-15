@@ -1,9 +1,9 @@
 from auditlog.registry import auditlog
 from django.db import models
-from core.models import Entity, BookmarkMixin
+from core.models import Entity, BookmarkMixin, FeaturedCoverMixin
 from django.utils.text import slugify
 
-class Wiki(Entity, BookmarkMixin):
+class Wiki(Entity, FeaturedCoverMixin, BookmarkMixin):
     """
     Wiki
     """

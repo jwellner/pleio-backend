@@ -1,14 +1,12 @@
 from auditlog.registry import auditlog
 from django.db import models
-from core.models import Entity, CommentMixin, BookmarkMixin, NotificationMixin, FollowMixin
+from core.models import Entity, CommentMixin, BookmarkMixin, NotificationMixin, FollowMixin, FeaturedCoverMixin
 from user.models import User
 from django.core.exceptions import ObjectDoesNotExist
 from django.utils.text import slugify
 from django.utils import timezone
-from django.urls import reverse
-from file.models import FileFolder
 
-class Event(Entity, CommentMixin, BookmarkMixin, FollowMixin, NotificationMixin):
+class Event(Entity, CommentMixin, BookmarkMixin, FollowMixin, NotificationMixin, FeaturedCoverMixin):
     class Meta:
         ordering = ['-published']
 
@@ -17,17 +15,6 @@ class Event(Entity, CommentMixin, BookmarkMixin, FollowMixin, NotificationMixin)
     rich_description = models.TextField(null=True, blank=True)
 
     is_featured = models.BooleanField(default=False)
-
-    featured_image = models.ForeignKey(
-        FileFolder,
-        on_delete=models.PROTECT,
-        blank=True,
-        null=True
-    )
-    featured_video = models.TextField(null=True, blank=True)
-    featured_video_title = models.CharField(max_length=256, default="")
-    featured_position_y = models.IntegerField(default=0, null=False)
-    featured_alt = models.CharField(max_length=256, default="")
 
     start_date = models.DateTimeField(null=True, blank=True)
     end_date = models.DateTimeField(null=True, blank=True)
@@ -69,12 +56,6 @@ class Event(Entity, CommentMixin, BookmarkMixin, FollowMixin, NotificationMixin)
         return '{}/events/view/{}/{}'.format(
             prefix, self.guid, slugify(self.title)
         ).lower()
-
-    @property
-    def featured_image_url(self):
-        if self.featured_image:
-            return '%s?cache=%i' % (reverse('featured', args=[self.id]), int(self.featured_image.updated_at.timestamp()))
-        return None
 
 
 class EventAttendee(models.Model):
