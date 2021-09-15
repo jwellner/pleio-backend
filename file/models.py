@@ -93,10 +93,10 @@ class FileFolder(Entity):
             cd = clamd.ClamdNetworkSocket(host=settings.CLAMAV_HOST, timeout=120)
             result = None
 
-            if not os.path.exists(self.upload.path):
-                return FILE_SCAN.CLEAN
-
             try:
+                if not os.path.exists(self.upload.path):
+                    return FILE_SCAN.CLEAN
+
                 result = cd.instream(self.upload.file)
             except Exception as e:
                 logger.error('Clamav error scanning file (%s): %s', self.guid, e)

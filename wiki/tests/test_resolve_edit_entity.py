@@ -39,7 +39,13 @@ class AddWikiCase(FastTenantTestCase):
                 "accessId": 0,
                 "writeAccessId": 0,
                 "tags": ["tag1", "tag2"],
-                "isFeatured": True
+                "isFeatured": True,
+                "featured": {
+                    "positionY": 2,
+                    "video": "testVideo2",
+                    "videoTitle": "testVideoTitle2",
+                    "alt": "testAlt2"
+                }
             }
         }
         self.mutation = """
@@ -72,6 +78,13 @@ class AddWikiCase(FastTenantTestCase):
                 }
                 isFeatured
                 subtype
+                featured {
+                    image
+                    video
+                    videoTitle
+                    positionY
+                    alt
+                }
             }
             mutation ($input: editEntityInput!) {
                 editEntity(input: $input) {
@@ -104,6 +117,10 @@ class AddWikiCase(FastTenantTestCase):
         self.assertEqual(data["editEntity"]["entity"]["group"], None)
         self.assertEqual(data["editEntity"]["entity"]["owner"]["guid"], self.authenticatedUser.guid)
         self.assertEqual(data["editEntity"]["entity"]["timeCreated"], str(self.wikiPublic.created_at))
+        self.assertEqual(data["editEntity"]["entity"]["featured"]["positionY"], 2)
+        self.assertEqual(data["editEntity"]["entity"]["featured"]["video"], "testVideo2")
+        self.assertEqual(data["editEntity"]["entity"]["featured"]["videoTitle"], "testVideoTitle2")
+        self.assertEqual(data["editEntity"]["entity"]["featured"]["alt"], "testAlt2")
 
         self.wikiPublic.refresh_from_db()
 

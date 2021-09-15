@@ -1888,5 +1888,6 @@ type Wiki implements Entity {
   group: Group
   owner: User
   isPinned: Boolean!
+  featured: Featured
 }
 

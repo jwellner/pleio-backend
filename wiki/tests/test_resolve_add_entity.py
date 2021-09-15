@@ -50,7 +50,13 @@ class AddWikiCase(FastTenantTestCase):
                 "accessId": 0,
                 "writeAccessId": 0,
                 "tags": ["tag1", "tag2"],
-                "isFeatured": True
+                "isFeatured": True,
+                "featured": {
+                    "positionY": 2,
+                    "video": "testVideo2",
+                    "videoTitle": "testVideoTitle2",
+                    "alt": "testAlt2"
+                }
             }
         }
         self.mutation = """
@@ -79,6 +85,13 @@ class AddWikiCase(FastTenantTestCase):
                     guid
                 }
                 isFeatured
+                featured {
+                    image
+                    video
+                    videoTitle
+                    positionY
+                    alt
+                }
             }
             mutation ($input: addEntityInput!) {
                 addEntity(input: $input) {
@@ -106,7 +119,12 @@ class AddWikiCase(FastTenantTestCase):
         self.assertEqual(data["addEntity"]["entity"]["description"], variables["input"]["description"])
         self.assertEqual(data["addEntity"]["entity"]["richDescription"], variables["input"]["richDescription"])
         self.assertEqual(data["addEntity"]["entity"]["hasChildren"], False)
-        self.assertEqual(data["addEntity"]["entity"]["isFeatured"], False) # nly with editor or admin role
+        self.assertEqual(data["addEntity"]["entity"]["isFeatured"], False) # only with editor or admin role
+        self.assertEqual(data["addEntity"]["entity"]["featured"]["positionY"], 2)
+        self.assertEqual(data["addEntity"]["entity"]["featured"]["video"], "testVideo2")
+        self.assertEqual(data["addEntity"]["entity"]["featured"]["videoTitle"], "testVideoTitle2")
+        self.assertEqual(data["addEntity"]["entity"]["featured"]["alt"], "testAlt2")
+
 
     def test_add_wiki_to_parent(self):
 
