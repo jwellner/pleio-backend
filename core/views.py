@@ -291,7 +291,6 @@ def custom_css(request):
 
 @cache_control(public=True)
 def favicon(request):
-    print(config.FAVICON)
     if config.FAVICON:
         return redirect(config.FAVICON)
     return redirect("/static/apple-touch-icon.png")
