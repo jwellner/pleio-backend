@@ -34,7 +34,7 @@ def get_filter_options(key, user):
             if field['key'] == key and not set(user_acl).isdisjoint(set(field['read_access'])):
                 options.append(field['value'])
 
-    return sorted(list(set(options)))
+    return sorted(list(set(options)), key=str.lower)
 
 
 def resolve_filters(_, info):
