@@ -183,6 +183,7 @@ extend type Mutation {
 extend type Query {
   siteUsers(q: String, role: String, isDeleteRequested: Boolean, isBanned: Boolean, offset: Int, limit: Int, lastOnlineBefore: String): SiteUserList
   usersByBirthDate(profileFieldGuid: String!, futureDays: Int, offset: Int, limit: Int): SiteUserList
+  siteStats: SiteStats
 }
 
 extend type User {
@@ -384,6 +385,11 @@ extend type SiteSettings {
   editUserNameEnabled: Boolean!
   favicon: String
   commentWithoutAccountEnabled: Boolean!
+}
+
+type SiteStats {
+  dbUsage: Int
+  fileDiskUsage: Int
 }
 
 extend input sendMessageToUserInput {

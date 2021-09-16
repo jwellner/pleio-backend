@@ -13,9 +13,8 @@ from django_tenants.utils import schema_context
 from django.core.management import call_command
 from django.conf import settings
 from django.db import connection
-from django.db.models import Sum
+from core.models import SiteStat
 from user.models import User
-from file.models import FileFolder
 
 logger = get_task_logger(__name__)
 
@@ -335,25 +334,21 @@ def get_sites_by_email(self, email):
 @shared_task(bind=False)
 def get_db_disk_usage(schema_name):
     '''
-    Get size by schema_name
+    Get db disk usage by schema_name
     '''
-    cursor = connection.cursor()
-    cursor.execute(f"SELECT sum(pg_relation_size(schemaname || '.' || tablename))::bigint FROM pg_tables WHERE schemaname = '{schema_name}';")
-    result = cursor.fetchone()
-    size_in_bytes = result[0]
-    
-    return size_in_bytes
+    with schema_context(schema_name):
+        try:
+            return SiteStat.objects.filter(stat_type='DB_SIZE').latest('created_at').value
+        except Exception:
+            return 0
 
 @shared_task(bind=False)
 def get_file_disk_usage(schema_name):
     '''
-    Get size by schema_name
+    Get file disk usage by schema_name
     '''
-    total_size = 0
     with schema_context(schema_name):
-        logger.info('get_file_size \'%s\'', schema_name)
-
-        f = FileFolder.objects.filter(is_folder=False).aggregate(total_size=Sum('size'))
-        total_size = f.get('total_size', 0)
-
-    return total_size
+        try:
+            return SiteStat.objects.filter(stat_type='DISK_SIZE').latest('created_at').value
+        except Exception:
+            return 0

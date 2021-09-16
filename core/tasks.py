@@ -11,13 +11,15 @@ from celery import shared_task
 from celery.utils.log import get_task_logger
 
 from django.core import management
+from django.db import connection
+from django.db.models import Sum
 from tenants.models import Client
 from django_tenants.utils import schema_context
 from django_elasticsearch_dsl.registries import registry
 from elasticsearch_dsl import Search
 from core import config
 from core.lib import html_to_text, access_id_to_acl, get_model_by_subtype, map_notification, tenant_schema, get_default_email_context
-from core.models import ProfileField, UserProfileField, Entity, GroupMembership, Comment, Widget, Group, NotificationMixin
+from core.models import ProfileField, UserProfileField, Entity, GroupMembership, Comment, Widget, Group, NotificationMixin, SiteStat
 from django.core.mail import EmailMultiAlternatives
 from django.template.loader import get_template
 from django.utils import timezone, translation
@@ -69,6 +71,10 @@ def dispatch_crons(self, period):
         if period == 'hourly':
             create_notifications_for_scheduled_content(client.schema_name)
             send_notifications.delay(client.schema_name)
+
+        if period == 'daily':
+            save_db_disk_usage.delay(client.schema_name)
+            save_file_disk_usage.delay(client.schema_name)
 
         if period in ['daily', 'weekly', 'monthly']:
             send_overview.delay(client.schema_name, period)
@@ -686,3 +692,38 @@ def replace_domain_links(self, schema_name, replace_domain=None, replace_elgg_id
                 widget.save()
 
     logger.info("Done replacing links")
+
+
+@shared_task(bind=False)
+def save_db_disk_usage(schema_name):
+    '''
+    Save size by schema_name
+    '''
+    cursor = connection.cursor()
+    cursor.execute(f"SELECT sum(pg_relation_size(schemaname || '.' || tablename))::bigint FROM pg_tables WHERE schemaname = '{schema_name}';")
+    result = cursor.fetchone()
+    size_in_bytes = result[0]
+
+    with schema_context(schema_name):
+        SiteStat.objects.create(
+            stat_type='DB_SIZE',
+            value=size_in_bytes
+        )
+
+
+@shared_task(bind=False)
+def save_file_disk_usage(schema_name):
+    '''
+    Save size by schema_name
+    '''
+    total_size = 0
+    with schema_context(schema_name):
+        logger.info('get_file_size \'%s\'', schema_name)
+
+        f = FileFolder.objects.filter(is_folder=False).aggregate(total_size=Sum('size'))
+        total_size = f.get('total_size', 0)
+
+        SiteStat.objects.create(
+            stat_type='DISK_SIZE',
+            value=total_size
+        )
