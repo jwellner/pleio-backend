@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-08-23 16:47+0200\n"
+"POT-Creation-Date: 2021-09-15 09:58+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -18,19 +18,19 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#: backend2/config.py:62 core/lib.py:295
+#: backend2/config.py:62 core/lib.py:307
 msgid "English"
 msgstr "Engels"
 
-#: backend2/config.py:63 core/lib.py:294
+#: backend2/config.py:63 core/lib.py:306
 msgid "Dutch"
 msgstr "Nederlands"
 
-#: backend2/config.py:64 core/lib.py:296
+#: backend2/config.py:64 core/lib.py:308
 msgid "German"
 msgstr ""
 
-#: backend2/config.py:65 core/lib.py:297
+#: backend2/config.py:65 core/lib.py:309
 msgid "French"
 msgstr ""
 
@@ -38,96 +38,120 @@ msgstr ""
 msgid "Provide a valid value."
 msgstr "Voer een geldige waarde in."
 
-#: core/lib.py:142 core/resolvers/mutation_import_users.py:30
+#: core/forms.py:82 core/resolvers/query_site.py:160
+msgid "Never"
+msgstr "Nooit"
+
+#: core/forms.py:83 core/resolvers/query_site.py:157
+msgid "Daily"
+msgstr "Dagelijks"
+
+#: core/forms.py:84 core/resolvers/query_site.py:158
+msgid "Weekly"
+msgstr "Wekelijks"
+
+#: core/forms.py:85 core/resolvers/query_site.py:159
+msgid "Monthly"
+msgstr "Maandelijks"
+
+#: core/forms.py:88
+msgid "Receive notification emails"
+msgstr "Ontvang notificatie emails"
+
+#: core/forms.py:89
+msgid "Receive overview emails"
+msgstr "Ontvang overzicht emails"
+
+#: core/lib.py:143 core/resolvers/mutation_import_users.py:30
 #: core/resolvers/query_site.py:67
 msgid "Just me"
 msgstr "Alleen eigenaar"
 
-#: core/lib.py:145
+#: core/lib.py:146
 #, python-format
 msgid "Group: %(group_name)s"
 msgstr "Groep: %(group_name)s"
 
-#: core/lib.py:148
+#: core/lib.py:149
 #, python-format
 msgid "Subgroup: %(subgroup_name)s"
 msgstr "Subgroep: %(subgroup_name)s"
 
-#: core/lib.py:153 core/resolvers/mutation_import_users.py:31
+#: core/lib.py:154 core/resolvers/mutation_import_users.py:31
 #: core/resolvers/query_site.py:68
 msgid "Logged in users"
 msgstr "Ingelogde gebruikers"
 
-#: core/lib.py:155 core/resolvers/mutation_import_users.py:34
+#: core/lib.py:156 core/resolvers/mutation_import_users.py:34
 #: core/resolvers/query_site.py:72
 msgid "Public"
 msgstr "Iedereen (publiek zichtbaar)"
 
-#: core/lib.py:165
+#: core/lib.py:166
 msgid "Event"
 msgstr "Agenda-item"
 
-#: core/lib.py:169
+#: core/lib.py:170
 msgid "Blog"
 msgstr "Blog"
 
-#: core/lib.py:173
+#: core/lib.py:174
 msgid "Discussion"
 msgstr "Discussie"
 
-#: core/lib.py:177 core/lib.py:284
+#: core/lib.py:178 core/lib.py:296
 msgid "News"
 msgstr "Nieuws"
 
-#: core/lib.py:181
+#: core/lib.py:182
 msgid "Update"
 msgstr ""
 
-#: core/lib.py:185
+#: core/lib.py:186
 msgid "Question"
 msgstr "Vraag"
 
-#: core/lib.py:189 core/lib.py:288
+#: core/lib.py:190 core/lib.py:300
 msgid "Wiki pages"
 msgstr "Wiki pagina's"
 
-#: core/lib.py:278
+#: core/lib.py:290
 msgid "Updates"
 msgstr ""
 
-#: core/lib.py:279
+#: core/lib.py:291
 msgid "Blogs"
 msgstr ""
 
-#: core/lib.py:280
+#: core/lib.py:292
 msgid "CMS pages"
 msgstr "CMS pagina's"
 
-#: core/lib.py:281
+#: core/lib.py:293
 msgid "Discussions"
 msgstr "Discussies"
 
-#: core/lib.py:282
+#: core/lib.py:294
 msgid "Events"
 msgstr "Agenda-items"
 
-#: core/lib.py:283
+#: core/lib.py:295
 msgid "Files"
 msgstr "Bestanden"
 
-#: core/lib.py:285
+#: core/lib.py:297
 msgid "Polls"
 msgstr "Polls"
 
-#: core/lib.py:286
+#: core/lib.py:298
 msgid "Questions"
 msgstr "Vragen"
 
-#: core/lib.py:287
+#: core/lib.py:299
 msgid "Tasks"
 msgstr "Taken"
 
-#: core/lib.py:289
+#: core/lib.py:301
 msgid "Comments"
 msgstr "Reacties"
 
@@ -136,7 +160,7 @@ msgstr "Reacties"
 msgid "New notifications at %(site_name)s"
 msgstr "Nieuwe notificaties op %(site_name)s"
 
-#: core/management/commands/send_overview_emails.py:93
+#: core/management/commands/send_overview_emails.py:91
 #, python-format
 msgid "Regular overview of %(site_name)s"
 msgstr "Periodiek overzicht van %(site_name)s"
@@ -175,15 +199,15 @@ msgstr "Account verwijderd van %(name_deleted_user)s"
 msgid "A site administrator was removed from %(site_name)s"
 msgstr "Een site beheerder is verwijderd van %(site_name)s"
 
-#: core/resolvers/mutation_edit_site_setting.py:317
+#: core/resolvers/mutation_edit_site_setting.py:321
 msgid "closed"
 msgstr "gesloten"
 
-#: core/resolvers/mutation_edit_site_setting.py:317
+#: core/resolvers/mutation_edit_site_setting.py:321
 msgid "public"
 msgstr "publiek"
 
-#: core/resolvers/mutation_edit_site_setting.py:318
+#: core/resolvers/mutation_edit_site_setting.py:322
 #, python-format
 msgid "Site access level changed for %(site_name)s"
 msgstr "Toegangsniveau voor aangepast op %(site_name)s"
@@ -279,22 +303,6 @@ msgstr "Activiteitenstroom"
 msgid "CMS page"
 msgstr "CMS pagina"
 
-#: core/resolvers/query_site.py:157
-msgid "Daily"
-msgstr "Dagelijks"
-
-#: core/resolvers/query_site.py:158
-msgid "Weekly"
-msgstr "Wekelijks"
-
-#: core/resolvers/query_site.py:159
-msgid "Monthly"
-msgstr "Maandelijks"
-
-#: core/resolvers/query_site.py:160
-msgid "Never"
-msgstr "Nooit"
-
 #: core/resolvers/query_site.py:209
 msgid "Administrator"
 msgstr "Beheerder"
@@ -319,6 +327,21 @@ msgstr "Import mislukt"
 #, python-format
 msgid "New notification at %(site_name)s: "
 msgstr "Nieuwe notificatie op %(site_name)s"
+
+#: core/templates/edit_email_settings.html:16
+#, python-format
+msgid "Email preferences %(user_name)s:"
+msgstr "Email voorkeuren %(user_name)s "
+
+#: core/templates/edit_email_settings.html:21
+msgid "Save"
+msgstr "Opslaan"
+
+#: core/templates/edit_email_settings.html:28
+#: core/templates/email/send_overview_emails.html:93
+#, python-format
+msgid "Go to %(site_name)s"
+msgstr "Ga naar %(site_name)s"
 
 #: core/templates/email/accept_membership_request.html:6
 #, python-format
@@ -448,6 +471,19 @@ msgstr "Vraag gesteld door"
 msgid "Wiki created by"
 msgstr "Wiki gemaakt door"
 
+#: core/templates/email/file_scan_found.html:6
+#, python-format
+msgid ""
+"Hi,<br><br>\n"
+"\n"
+"We found %(virus_count)s suspicuous files while scanning for virusses. We "
+"have blocked the files for download.<br><br>\n"
+"\n"
+"Please visit the <a href=\"%(site_url)s/superadmin/scanlog\">file scan logs</"
+"a> to review.\n"
+"\n"
+msgstr ""
+
 #: core/templates/email/group_ownership_transferred.html:6
 #, python-format
 msgid ""
@@ -569,11 +605,12 @@ msgstr ""
 #, python-format
 msgid ""
 " You have received this e-mail because you registered to receive "
-"notifications.<br /> Click <a href=\"%(user_url)s\">here</a> to change your "
-"settings."
+"notifications.<br /> Click <a href=\"%(unsubscribe_url)s\">here</a> to "
+"change your settings."
 msgstr ""
 " Je ontvangt deze e-mail omdat je aangemeld bent voor de notificaties.<br /> "
-"Klik <a href=\"%(user_url)s\">hier</a> om je instellingen aan te passen."
+"Klik <a href=\"%(unsubscribe_url)s\">hier</a> om je instellingen aan te "
+"passen."
 
 #: core/templates/email/send_overview_emails.html:29
 #, python-format
@@ -585,20 +622,16 @@ msgstr ""
 msgid "For all new messages visit %(site_name)s"
 msgstr "Voor alle nieuwe berichten bekijk %(site_name)s"
 
-#: core/templates/email/send_overview_emails.html:93
-#, python-format
-msgid "Go to %(site_name)s"
-msgstr "Ga naar %(site_name)s"
-
 #: core/templates/email/send_overview_emails.html:114
 #, python-format
 msgid ""
 "You have received this e-mail because you registered to receive "
-"notifications.<br /> Click <a href=\"%(user_url)s\">here</a> to change your "
-"settings."
+"notifications.<br /> Click <a href=\"%(unsubscribe_url)s\">here</a> to "
+"change your settings."
 msgstr ""
 "Je ontvangt deze e-mail omdat je aangemeld bent voor de notificaties.<br /> "
-"Klik <a href=\"%(user_url)s\">hier</a> om je instellingen aan te passen."
+"Klik <a href=\"%(unsubscribe_url)s\">hier</a> om je instellingen aan te "
+"passen."
 
 #: core/templates/email/site_access_changed.html:6
 #, python-format
@@ -927,10 +960,14 @@ msgstr ""
 "De toegang is aangevraagd. Je ontvangt een e-mail wanneer de toegang door de "
 "beheerder wordt toegewezen."
 
-#: core/views.py:168
+#: core/views.py:170
 #, python-format
 msgid "New access request for %(site_name)s"
 msgstr "Nieuwe toegangsaanvraag voor %(site_name)s"
+
+#: core/views.py:545
+msgid "Saved"
+msgstr "Opgeslagen"
 
 #: event/resolvers/mutation_attend_event_without_account.py:31
 #, python-format
@@ -942,27 +979,7 @@ msgstr "Bevestiging aanmelding %s"
 msgid "Confirmation of registration for %s"
 msgstr "Bevestiging aanmelding voor %s"
 
-#~ msgid "Log in using Pleio Account"
-#~ msgstr "Log in met Pleio Account"
-
-#~ msgid "Save"
-#~ msgstr "Opslaan"
-
-#~ msgid "Please correct the error below."
-#~ msgstr "Corrigeer de onderstaande fout."
-
-#~ msgid "Please correct the errors below."
-#~ msgstr "Corrigeer de onderstaande fouten."
-
-#~ msgid ""
-#~ "You are authenticated as %(username)s, but are not authorized to access "
-#~ "this page."
-#~ msgstr ""
-#~ "U bent geauthenticeerd als %(username) s, maar bent niet gemachtigd om "
-#~ "toegang te krijgen tot deze pagina."
-
-#~ msgid "Please click on the button to login."
-#~ msgstr "Klik op de knop om in te loggen."
-
-#~ msgid "Log in"
-#~ msgstr "Inloggen"
+#: file/tasks.py:62
+#, python-format
+msgid "Filescan found suspicous files on %(site_url)s"
+msgstr ""

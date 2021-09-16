@@ -1,0 +1,30 @@
+{% extends "base_closed.html" %}
+
+{% load i18n %}
+
+{% block content %}
+
+    {% if messages %}
+    {% for message in messages %}
+    <div><strong>{{ message }}</strong></div>
+    {% endfor %}
+    {% endif %}
+
+	<div class="form">
+        {% if user_name %}
+            <h3>{% blocktrans %}Email preferences {{ user_name }}:{% endblocktrans %}</h3>
+            <form method="post">
+                {% csrf_token %}
+                {{ form.as_p }}
+                <div class="buttons ___space-between">
+                    <input type="submit" value="{% blocktrans %}Save{% endblocktrans %}" class="elgg-button button">
+                </div>
+            </form>
+        {% endif %}
+    </div>
+
+    <br>
+    <a href="{{ site_url }}" class="walled-garden_pleio-link">
+        {% blocktrans %}Go to {{ site_name }}{% endblocktrans %}
+    </a>
+{% endblock %}

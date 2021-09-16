@@ -9,15 +9,17 @@ from core.models import (
 )
 from core.lib import (
     access_id_to_acl, get_default_email_context, tenant_schema,
-    get_exportable_content_types, get_model_by_subtype, datetime_isoformat
+    get_exportable_content_types, get_model_by_subtype, datetime_isoformat, get_base_url
 )
-from core.forms import OnboardingForm, RequestAccessForm
+from core.forms import EditEmailSettingsForm, OnboardingForm, RequestAccessForm
 from core.constances import USER_ROLES
 from user.models import User
 from core.tasks import send_mail_multi
 from django.utils.translation import ugettext_lazy
 from core.auth import oidc_provider_logout_url
+from django.core import signing
 from django.contrib.contenttypes.fields import GenericRelation, GenericForeignKey
+from django.contrib import messages
 from django.contrib.auth.views import LogoutView
 from django.shortcuts import redirect, render
 from django.conf import settings
@@ -518,3 +520,41 @@ def comment_confirm(request, entity_id):
         comment_request.delete()
 
     return redirect(entity.url)
+
+
+def edit_email_settings(request, token):
+    user = None
+
+    try:
+        signer = signing.TimestampSigner()
+        data = signer.unsign_object(token, max_age=360000)
+
+        user = User.objects.get(id=data['id'], email=data['email'])
+
+    except (signing.BadSignature, ObjectDoesNotExist):
+        return HttpResponseRedirect('/')
+
+    if request.method == 'POST':
+        form = EditEmailSettingsForm(request.POST)
+
+        if form.is_valid():
+            user.profile.receive_notification_email = form.cleaned_data['notifications_email_enabled']
+            user.profile.overview_email_interval = form.cleaned_data['overview_email_enabled']
+            user.profile.save()
+            messages.success(request, ugettext_lazy('Saved'))
+
+    initial_dict = {
+        'notifications_email_enabled': user.profile.receive_notification_email,
+        'overview_email_enabled': user.profile.overview_email_interval,
+    }
+
+    form = EditEmailSettingsForm(initial = initial_dict)
+
+    context = {
+        'user_name': user.name,
+        'site_url': get_base_url(),
+        'site_name': config.NAME,
+        'form': form
+    }
+
+    return render(request, 'edit_email_settings.html', context)
