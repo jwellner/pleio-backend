@@ -74,3 +74,16 @@ class OnboardingForm(forms.Form):
 class RequestAccessForm(forms.Form):
 
     request_access = forms.BooleanField(widget=forms.HiddenInput())
+
+
+class EditEmailSettingsForm(forms.Form):
+
+    INTERVALS = (
+        ('never', ugettext_lazy('Never')),
+        ('daily', ugettext_lazy('Daily')),
+        ('weekly', ugettext_lazy('Weekly')),
+        ('monthly', ugettext_lazy('Monthly'))
+    )
+
+    notifications_email_enabled = forms.BooleanField(required=False, label=ugettext_lazy('Receive notification emails'))
+    overview_email_enabled = forms.ChoiceField(choices=INTERVALS, label=ugettext_lazy('Receive overview emails'))

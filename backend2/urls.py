@@ -54,6 +54,7 @@ urlpatterns = [
 
     path('onboarding', core_views.onboarding, name='onboarding'),
 
+    path('edit_email_settings/<str:token>', core_views.edit_email_settings, name='edit_email_settings'),
     path('custom.css', core_views.custom_css),
     path('favicon.png', core_views.favicon),
     path('robots.txt', core_views.robots_txt),

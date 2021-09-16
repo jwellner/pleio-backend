@@ -1,10 +1,11 @@
+from django.core import signing
 from django.core.management.base import BaseCommand
 from django.utils import translation
 from django.utils.translation import ugettext_lazy
 from django.db import connection
 from user.models import User
 from core import config
-from core.lib import get_default_email_context, map_notification
+from core.lib import get_default_email_context, map_notification, get_base_url
 from datetime import datetime, timedelta
 from django.utils import translation
 from core.tasks import send_mail_multi
@@ -26,7 +27,6 @@ class Command(BaseCommand):
 
         if notifications:
             context = get_default_email_context(user)
-            context['user_url'] = context['user_url'].replace('/profile', '/settings')
             context['show_excerpt'] = config.EMAIL_NOTIFICATION_SHOW_EXCERPT
             context['notifications'] = mapped_notifications
 

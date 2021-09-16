@@ -45,7 +45,7 @@ services:
       - db
       - rabbitmq
   frontend:
-    image: registry.gitlab.com/pleio/frontend:B2-latest
+    image: registry.gitlab.com/pleio/frontend:latest
     volumes:
       - frontend-build:/shared
     command: bash -c "cp -Rp /usr/share/nginx/html/. /shared && chown -R www-data:www-data /shared"
