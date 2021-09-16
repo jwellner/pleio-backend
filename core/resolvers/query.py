@@ -4,7 +4,7 @@ from graphql import GraphQLError
 from core.models import Entity, Group, EntityView, EntityViewCount
 from user.models import User
 from .query_viewer import resolve_viewer
-from .query_site import resolve_site, resolve_site_settings
+from .query_site import resolve_site, resolve_site_settings, resolve_site_stats
 from .query_site_users import resolve_site_users
 from .query_entities import resolve_entities
 from .query_groups import resolve_groups
@@ -24,6 +24,7 @@ query = ObjectType("Query")
 query.set_field("viewer", resolve_viewer)
 query.set_field("site", resolve_site)
 query.set_field("siteSettings", resolve_site_settings)
+query.set_field("siteStats", resolve_site_stats)
 query.set_field("siteUsers", resolve_site_users)
 query.set_field("entities", resolve_entities)
 query.set_field("groups", resolve_groups)

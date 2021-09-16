@@ -6,7 +6,7 @@ from cms.models import Page
 from core import config
 from core.constances import NOT_LOGGED_IN, USER_NOT_SITE_ADMIN, USER_ROLES
 from core.lib import get_access_ids, get_activity_filters, get_exportable_user_fields, get_exportable_content_types, get_language_options
-from core.models import UserProfile, ProfileField, SiteInvitation, SiteAccessRequest, ProfileFieldValidator
+from core.models import UserProfile, ProfileField, SiteInvitation, SiteAccessRequest, ProfileFieldValidator, SiteStat
 from user.models import User
 from graphql import GraphQLError
 
@@ -254,3 +254,28 @@ def resolve_site_settings(_, info):
         raise GraphQLError(USER_NOT_SITE_ADMIN)
 
     return get_site_settings()
+
+
+def resolve_site_stats(_, info):
+    user = info.context["request"].user
+
+    if not user.is_authenticated:
+        raise GraphQLError(NOT_LOGGED_IN)
+
+    if not user.has_role(USER_ROLES.ADMIN):
+        raise GraphQLError(USER_NOT_SITE_ADMIN)
+ 
+    try:
+        db_usage =  SiteStat.objects.filter(stat_type='DB_SIZE').latest('created_at').value
+    except Exception:
+        db_usage = 0
+
+    try:
+        file_disk_usage =  SiteStat.objects.filter(stat_type='DISK_SIZE').latest('created_at').value
+    except Exception:
+        file_disk_usage = 0
+
+    return {
+        'dbUsage': db_usage,
+        'fileDiskUsage': file_disk_usage
+    }

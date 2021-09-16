@@ -7,5 +7,5 @@ from .entity import Entity, EntityView, EntityViewCount
 from .attachment import EntityAttachment, CommentAttachment, GroupAttachment
 from .setting import Setting
 from .shared import read_access_default, write_access_default
-from .site import SiteInvitation, SiteAccessRequest
+from .site import SiteInvitation, SiteAccessRequest, SiteStat
 from .widget import Widget
