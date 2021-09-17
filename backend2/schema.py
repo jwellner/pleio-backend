@@ -5,8 +5,7 @@ from ariadne import load_schema_from_path, make_executable_schema
 
 # load schema from file...
 type_defs_base = load_schema_from_path("backend2/schema.graphql")
-type_defs_extended = load_schema_from_path("backend2/schema-extended.graphql")
-type_defs = [type_defs_base, type_defs_extended]
+type_defs = [type_defs_base]
 
 # get resolvers form apps
 resolvers = []
