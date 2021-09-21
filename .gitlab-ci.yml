@@ -156,6 +156,7 @@ AWS Prod (helm):
     - master
   only:
     - master
+  when: manual
   variables:
     HELM_NAME: backend2
     HELM_VALUES_FILE: helm/backend2/values.aws.prod.yaml
