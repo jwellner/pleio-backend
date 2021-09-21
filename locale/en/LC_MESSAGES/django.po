@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-09-15 09:58+0200\n"
+"POT-Creation-Date: 2021-09-20 16:43+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,22 +17,6 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
-
-#: backend2/config.py:62 core/lib.py:307
-msgid "English"
-msgstr ""
-
-#: backend2/config.py:63 core/lib.py:306
-msgid "Dutch"
-msgstr ""
-
-#: backend2/config.py:64 core/lib.py:308
-msgid "German"
-msgstr ""
-
-#: backend2/config.py:65 core/lib.py:309
-msgid "French"
-msgstr ""
 
 #: core/forms.py:67
 msgid "Provide a valid value."
@@ -314,25 +298,25 @@ msgstr ""
 msgid "Question expert"
 msgstr ""
 
-#: core/tasks.py:341
+#: core/tasks.py:347
 msgid "Import was a success"
 msgstr ""
 
-#: core/tasks.py:341
+#: core/tasks.py:347
 msgid "Import failed"
 msgstr ""
 
-#: core/tasks.py:405
+#: core/tasks.py:411
 #, python-format
 msgid "New notification at %(site_name)s: "
 msgstr ""
 
-#: core/templates/edit_email_settings.html:16
+#: core/templates/edit_email_settings.html:15
 #, python-format
 msgid "Email preferences %(user_name)s:"
 msgstr ""
 
-#: core/templates/edit_email_settings.html:21
+#: core/templates/edit_email_settings.html:20
 msgid "Save"
 msgstr ""
 
@@ -408,7 +392,7 @@ msgstr ""
 #: core/templates/email/entities/event.html:19
 #: core/templates/email/entities/news.html:33
 #: core/templates/email/entities/question.html:19
-#: core/templates/email/entities/wiki.html:19
+#: core/templates/email/entities/wiki.html:26
 msgid "on"
 msgstr ""
 
@@ -424,7 +408,7 @@ msgstr ""
 msgid "Question asked by"
 msgstr ""
 
-#: core/templates/email/entities/wiki.html:19
+#: core/templates/email/entities/wiki.html:26
 msgid "Wiki created by"
 msgstr ""
 
@@ -807,7 +791,7 @@ msgstr ""
 msgid "New access request for %(site_name)s"
 msgstr ""
 
-#: core/views.py:545
+#: core/views.py:544
 msgid "Saved"
 msgstr ""
 
@@ -821,7 +805,7 @@ msgstr ""
 msgid "Confirmation of registration for %s"
 msgstr ""
 
-#: file/tasks.py:62
+#: file/tasks.py:64
 #, python-format
 msgid "Filescan found suspicous files on %(site_url)s"
 msgstr ""

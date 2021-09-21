@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-09-15 09:58+0200\n"
+"POT-Creation-Date: 2021-09-20 16:43+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,22 +17,6 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
-
-#: backend2/config.py:62 core/lib.py:307
-msgid "English"
-msgstr "Engels"
-
-#: backend2/config.py:63 core/lib.py:306
-msgid "Dutch"
-msgstr "Nederlands"
-
-#: backend2/config.py:64 core/lib.py:308
-msgid "German"
-msgstr ""
-
-#: backend2/config.py:65 core/lib.py:309
-msgid "French"
-msgstr ""
 
 #: core/forms.py:67
 msgid "Provide a valid value."
@@ -315,25 +299,25 @@ msgstr "Redacteur"
 msgid "Question expert"
 msgstr "Vraagexpert"
 
-#: core/tasks.py:341
+#: core/tasks.py:347
 msgid "Import was a success"
 msgstr "Import afgerond"
 
-#: core/tasks.py:341
+#: core/tasks.py:347
 msgid "Import failed"
 msgstr "Import mislukt"
 
-#: core/tasks.py:405
+#: core/tasks.py:411
 #, python-format
 msgid "New notification at %(site_name)s: "
 msgstr "Nieuwe notificatie op %(site_name)s"
 
-#: core/templates/edit_email_settings.html:16
+#: core/templates/edit_email_settings.html:15
 #, python-format
 msgid "Email preferences %(user_name)s:"
 msgstr "Email voorkeuren %(user_name)s "
 
-#: core/templates/edit_email_settings.html:21
+#: core/templates/edit_email_settings.html:20
 msgid "Save"
 msgstr "Opslaan"
 
@@ -451,7 +435,7 @@ msgstr "Blog gemaakt door"
 #: core/templates/email/entities/event.html:19
 #: core/templates/email/entities/news.html:33
 #: core/templates/email/entities/question.html:19
-#: core/templates/email/entities/wiki.html:19
+#: core/templates/email/entities/wiki.html:26
 msgid "on"
 msgstr "op"
 
@@ -467,7 +451,7 @@ msgstr "Nieuws geplaatst door"
 msgid "Question asked by"
 msgstr "Vraag gesteld door"
 
-#: core/templates/email/entities/wiki.html:19
+#: core/templates/email/entities/wiki.html:26
 msgid "Wiki created by"
 msgstr "Wiki gemaakt door"
 
@@ -965,7 +949,7 @@ msgstr ""
 msgid "New access request for %(site_name)s"
 msgstr "Nieuwe toegangsaanvraag voor %(site_name)s"
 
-#: core/views.py:545
+#: core/views.py:544
 msgid "Saved"
 msgstr "Opgeslagen"
 
@@ -979,7 +963,7 @@ msgstr "Bevestiging aanmelding %s"
 msgid "Confirmation of registration for %s"
 msgstr "Bevestiging aanmelding voor %s"
 
-#: file/tasks.py:62
+#: file/tasks.py:64
 #, python-format
 msgid "Filescan found suspicous files on %(site_url)s"
 msgstr ""
