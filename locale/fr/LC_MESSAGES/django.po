@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Frans\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-09-15 09:58+0200\n"
+"POT-Creation-Date: 2021-09-20 16:43+0200\n"
 "PO-Revision-Date: 2021-06-24 15:12+0200\n"
 "Last-Translator: \n"
 "Language-Team: frans\n"
@@ -17,22 +17,6 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 "X-Generator: Poedit 2.4.3\n"
-
-#: backend2/config.py:62 core/lib.py:307
-msgid "English"
-msgstr "Anglais"
-
-#: backend2/config.py:63 core/lib.py:306
-msgid "Dutch"
-msgstr "Néerlandais"
-
-#: backend2/config.py:64 core/lib.py:308
-msgid "German"
-msgstr "Allemande"
-
-#: backend2/config.py:65 core/lib.py:309
-msgid "French"
-msgstr "Français"
 
 #: core/forms.py:67
 msgid "Provide a valid value."
@@ -315,25 +299,25 @@ msgstr "Éditeur"
 msgid "Question expert"
 msgstr "Expert en questions"
 
-#: core/tasks.py:341
+#: core/tasks.py:347
 msgid "Import was a success"
 msgstr "Importation réussie"
 
-#: core/tasks.py:341
+#: core/tasks.py:347
 msgid "Import failed"
 msgstr "Échec de l’importation"
 
-#: core/tasks.py:405
+#: core/tasks.py:411
 #, python-format
 msgid "New notification at %(site_name)s: "
 msgstr "Nouvelle notification sur %(site_name)s : "
 
-#: core/templates/edit_email_settings.html:16
+#: core/templates/edit_email_settings.html:15
 #, python-format
 msgid "Email preferences %(user_name)s:"
 msgstr ""
 
-#: core/templates/edit_email_settings.html:21
+#: core/templates/edit_email_settings.html:20
 msgid "Save"
 msgstr ""
 
@@ -444,7 +428,7 @@ msgstr "Blog créé par"
 #: core/templates/email/entities/event.html:19
 #: core/templates/email/entities/news.html:33
 #: core/templates/email/entities/question.html:19
-#: core/templates/email/entities/wiki.html:19
+#: core/templates/email/entities/wiki.html:26
 msgid "on"
 msgstr "sur"
 
@@ -460,7 +444,7 @@ msgstr "Actualité ajoutée par"
 msgid "Question asked by"
 msgstr "Question posée par"
 
-#: core/templates/email/entities/wiki.html:19
+#: core/templates/email/entities/wiki.html:26
 msgid "Wiki created by"
 msgstr "Wiki créé par"
 
@@ -990,7 +974,7 @@ msgstr ""
 msgid "New access request for %(site_name)s"
 msgstr "Nouvelle demande d’accès à %(site_name)s"
 
-#: core/views.py:545
+#: core/views.py:544
 msgid "Saved"
 msgstr ""
 
@@ -1004,7 +988,7 @@ msgstr "Confirmation de l’inscription %s"
 msgid "Confirmation of registration for %s"
 msgstr "Confirmation de l’inscription %s"
 
-#: file/tasks.py:62
+#: file/tasks.py:64
 #, python-format
 msgid "Filescan found suspicous files on %(site_url)s"
 msgstr ""

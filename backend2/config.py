@@ -1,5 +1,4 @@
 import os
-from django.utils.translation import ugettext_lazy as _
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = os.getenv('SECRET_KEY')
@@ -59,10 +58,10 @@ if not os.getenv('RUN_AS_ADMIN_APP'):
 LANGUAGE_CODE = 'nl-NL'
 
 LANGUAGES = [
-    ('en', _('English')),
-    ('nl', _('Dutch')),
-    ('de', _('German')),
-    ('fr', _('French')),
+    ('nl', 'Nederlands'),
+    ('en', 'English'),
+    ('de', 'Deutsch'),
+    ('fr', 'Français'),
 ]
 
 OIDC_RP_CLIENT_ID = os.getenv('OIDC_RP_CLIENT_ID')
