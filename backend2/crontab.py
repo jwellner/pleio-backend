@@ -32,9 +32,9 @@ beat_schedule = {
         'schedule': crontab(minute=0, hour=21, day_of_month=1, month_of_year=1),
         'args': ['yearly']
     },
-    #'file_scan': {
-    #    'task': 'core.tasks.dispatch_task',
-    #    'schedule': crontab(minute=15, hour=2),
-    #    'args': ['file.tasks.scan']
-    #}
+    'file_scan': {
+        'task': 'core.tasks.dispatch_task',
+        'schedule': crontab(minute=15, hour=2),
+        'args': ['file.tasks.scan']
+    }
 }

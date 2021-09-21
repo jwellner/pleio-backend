@@ -11,6 +11,7 @@ from core.constances import ACCESS_TYPE
 from core import config
 from django.apps import apps
 from django.conf import settings
+from django.core import signing
 from django.core.validators import URLValidator
 from django.db import connection
 from django.utils.text import slugify
@@ -232,13 +233,24 @@ def get_default_email_context(user=None):
     site_name = config.NAME
     primary_color = config.COLOR_PRIMARY
     header_color = config.COLOR_HEADER if config.COLOR_HEADER else config.COLOR_PRIMARY
+    if user:
+        signer = signing.TimestampSigner()
+        token = signer.sign_object({
+            "id": str(user.id),
+            "email": user.email
+        })
+        unsubscribe_url = site_url + '/edit_email_settings/' + token
+    else:
+        unsubscribe_url = ''
+    
     return {
         'user_name': user_name,
         'user_url': user_url,
         'site_url': site_url,
         'site_name': site_name,
         'primary_color': primary_color,
-        'header_color': header_color
+        'header_color': header_color,
+        'unsubscribe_url': unsubscribe_url
     }
 
 def obfuscate_email(email):
@@ -290,12 +302,7 @@ def get_exportable_content_types():
     ]
 
 def get_language_options():
-    return [
-        {'value': 'nl', 'label': ugettext_lazy('Dutch')},
-        {'value': 'en', 'label': ugettext_lazy('English')},
-        {'value': 'de', 'label': ugettext_lazy('German')},
-        {'value': 'fr', 'label': ugettext_lazy('French')}
-    ]
+    return [{'value': item[0], 'label': item[1]} for item in settings.LANGUAGES]
 
 def tenant_schema():
     return connection.schema_name

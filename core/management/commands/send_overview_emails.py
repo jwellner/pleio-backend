@@ -4,6 +4,7 @@ from django.utils import timezone, dateformat, formats, translation
 from django.utils.translation import ugettext_lazy
 from django.conf import settings
 from core import config
+from core.lib import get_base_url, get_default_email_context
 from core.models import Entity, EntityView
 from datetime import datetime, timedelta
 from django.db import connection
@@ -57,17 +58,14 @@ class Command(BaseCommand):
 
     def send_overview(self, user, entities, featured_entities, subject, site_url):
         if entities or featured_entities:
-            site_name = config.NAME
-            user_url = site_url + '/user/' + user.guid + '/settings'
-            primary_color = config.COLOR_PRIMARY
-            header_color = config.COLOR_HEADER if config.COLOR_HEADER else config.COLOR_PRIMARY
-
-            entities = get_serializable_entities(entities)
-            featured_entities = get_serializable_entities(featured_entities)
-
-            context = {'user_url': user_url, 'site_name': site_name, 'site_url': site_url, 'primary_color': primary_color, 'header_color': header_color,
-                       'entities': entities, 'featured': featured_entities, 'intro_text': config.EMAIL_OVERVIEW_INTRO, 'title': config.EMAIL_OVERVIEW_TITLE,
-                       'featured_enabled': config.EMAIL_OVERVIEW_ENABLE_FEATURED, 'featured_title': config.EMAIL_OVERVIEW_FEATURED_TITLE, 'subject': subject}
+            context = get_default_email_context(user)           
+            context['entities'] = get_serializable_entities(entities)
+            context['featured'] = get_serializable_entities(featured_entities)
+            context['intro_text'] = config.EMAIL_OVERVIEW_INTRO
+            context['title'] = config.EMAIL_OVERVIEW_TITLE
+            context['featured_enabled'] = config.EMAIL_OVERVIEW_ENABLE_FEATURED
+            context['featured_title'] = config.EMAIL_OVERVIEW_FEATURED_TITLE
+            context['subject'] = subject 
 
             send_mail_multi.delay(connection.schema_name, subject, 'email/send_overview_emails.html', context, user.email)
             user.profile.overview_email_last_received = datetime.now()

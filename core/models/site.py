@@ -22,3 +22,20 @@ class SiteAccessRequest(models.Model):
 
     created_at = models.DateTimeField(default=timezone.now)
     updated_at = models.DateTimeField(default=timezone.now)
+
+
+class SiteStat(models.Model):
+
+    STAT_TYPES = (
+        ('DISK_SIZE', 'DISK_SIZE'),
+        ('DB_SIZE', 'DB_SIZE'),
+    )
+
+    stat_type = models.CharField(
+        max_length=16,
+        choices=STAT_TYPES,
+        default='DISK_SIZE'
+    )
+
+    value = models.BigIntegerField(null=False)
+    created_at = models.DateTimeField(auto_now_add=True)

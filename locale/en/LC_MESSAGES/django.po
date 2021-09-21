@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-08-23 16:47+0200\n"
+"POT-Creation-Date: 2021-09-20 16:43+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -18,116 +18,124 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#: backend2/config.py:62 core/lib.py:295
-msgid "English"
-msgstr ""
-
-#: backend2/config.py:63 core/lib.py:294
-msgid "Dutch"
-msgstr ""
-
-#: backend2/config.py:64 core/lib.py:296
-msgid "German"
-msgstr ""
-
-#: backend2/config.py:65 core/lib.py:297
-msgid "French"
-msgstr ""
-
 #: core/forms.py:67
 msgid "Provide a valid value."
 msgstr ""
 
-#: core/lib.py:142 core/resolvers/mutation_import_users.py:30
+#: core/forms.py:82 core/resolvers/query_site.py:160
+msgid "Never"
+msgstr ""
+
+#: core/forms.py:83 core/resolvers/query_site.py:157
+msgid "Daily"
+msgstr ""
+
+#: core/forms.py:84 core/resolvers/query_site.py:158
+msgid "Weekly"
+msgstr ""
+
+#: core/forms.py:85 core/resolvers/query_site.py:159
+msgid "Monthly"
+msgstr ""
+
+#: core/forms.py:88
+msgid "Receive notification emails"
+msgstr ""
+
+#: core/forms.py:89
+msgid "Receive overview emails"
+msgstr ""
+
+#: core/lib.py:143 core/resolvers/mutation_import_users.py:30
 #: core/resolvers/query_site.py:67
 msgid "Just me"
 msgstr ""
 
-#: core/lib.py:145
+#: core/lib.py:146
 #, python-format
 msgid "Group: %(group_name)s"
 msgstr ""
 
-#: core/lib.py:148
+#: core/lib.py:149
 #, python-format
 msgid "Subgroup: %(subgroup_name)s"
 msgstr ""
 
-#: core/lib.py:153 core/resolvers/mutation_import_users.py:31
+#: core/lib.py:154 core/resolvers/mutation_import_users.py:31
 #: core/resolvers/query_site.py:68
 msgid "Logged in users"
 msgstr ""
 
-#: core/lib.py:155 core/resolvers/mutation_import_users.py:34
+#: core/lib.py:156 core/resolvers/mutation_import_users.py:34
 #: core/resolvers/query_site.py:72
 msgid "Public"
 msgstr ""
 
-#: core/lib.py:165
+#: core/lib.py:166
 msgid "Event"
 msgstr ""
 
-#: core/lib.py:169
+#: core/lib.py:170
 msgid "Blog"
 msgstr ""
 
-#: core/lib.py:173
+#: core/lib.py:174
 msgid "Discussion"
 msgstr ""
 
-#: core/lib.py:177 core/lib.py:284
+#: core/lib.py:178 core/lib.py:296
 msgid "News"
 msgstr ""
 
-#: core/lib.py:181
+#: core/lib.py:182
 msgid "Update"
 msgstr ""
 
-#: core/lib.py:185
+#: core/lib.py:186
 msgid "Question"
 msgstr ""
 
-#: core/lib.py:189 core/lib.py:288
+#: core/lib.py:190 core/lib.py:300
 msgid "Wiki pages"
 msgstr ""
 
-#: core/lib.py:278
+#: core/lib.py:290
 msgid "Updates"
 msgstr ""
 
-#: core/lib.py:279
+#: core/lib.py:291
 msgid "Blogs"
 msgstr ""
 
-#: core/lib.py:280
+#: core/lib.py:292
 msgid "CMS pages"
 msgstr ""
 
-#: core/lib.py:281
+#: core/lib.py:293
 msgid "Discussions"
 msgstr ""
 
-#: core/lib.py:282
+#: core/lib.py:294
 msgid "Events"
 msgstr ""
 
-#: core/lib.py:283
+#: core/lib.py:295
 msgid "Files"
 msgstr ""
 
-#: core/lib.py:285
+#: core/lib.py:297
 msgid "Polls"
 msgstr ""
 
-#: core/lib.py:286
+#: core/lib.py:298
 msgid "Questions"
 msgstr ""
 
-#: core/lib.py:287
+#: core/lib.py:299
 msgid "Tasks"
 msgstr ""
 
-#: core/lib.py:289
+#: core/lib.py:301
 msgid "Comments"
 msgstr ""
 
@@ -136,7 +144,7 @@ msgstr ""
 msgid "New notifications at %(site_name)s"
 msgstr ""
 
-#: core/management/commands/send_overview_emails.py:93
+#: core/management/commands/send_overview_emails.py:91
 #, python-format
 msgid "Regular overview of %(site_name)s"
 msgstr ""
@@ -174,15 +182,15 @@ msgstr ""
 msgid "A site administrator was removed from %(site_name)s"
 msgstr ""
 
-#: core/resolvers/mutation_edit_site_setting.py:317
+#: core/resolvers/mutation_edit_site_setting.py:321
 msgid "closed"
 msgstr ""
 
-#: core/resolvers/mutation_edit_site_setting.py:317
+#: core/resolvers/mutation_edit_site_setting.py:321
 msgid "public"
 msgstr ""
 
-#: core/resolvers/mutation_edit_site_setting.py:318
+#: core/resolvers/mutation_edit_site_setting.py:322
 #, python-format
 msgid "Site access level changed for %(site_name)s"
 msgstr ""
@@ -278,22 +286,6 @@ msgstr ""
 msgid "CMS page"
 msgstr ""
 
-#: core/resolvers/query_site.py:157
-msgid "Daily"
-msgstr ""
-
-#: core/resolvers/query_site.py:158
-msgid "Weekly"
-msgstr ""
-
-#: core/resolvers/query_site.py:159
-msgid "Monthly"
-msgstr ""
-
-#: core/resolvers/query_site.py:160
-msgid "Never"
-msgstr ""
-
 #: core/resolvers/query_site.py:209
 msgid "Administrator"
 msgstr ""
@@ -306,17 +298,32 @@ msgstr ""
 msgid "Question expert"
 msgstr ""
 
-#: core/tasks.py:341
+#: core/tasks.py:347
 msgid "Import was a success"
 msgstr ""
 
-#: core/tasks.py:341
+#: core/tasks.py:347
 msgid "Import failed"
 msgstr ""
 
-#: core/tasks.py:405
+#: core/tasks.py:411
 #, python-format
 msgid "New notification at %(site_name)s: "
+msgstr ""
+
+#: core/templates/edit_email_settings.html:15
+#, python-format
+msgid "Email preferences %(user_name)s:"
+msgstr ""
+
+#: core/templates/edit_email_settings.html:20
+msgid "Save"
+msgstr ""
+
+#: core/templates/edit_email_settings.html:28
+#: core/templates/email/send_overview_emails.html:93
+#, python-format
+msgid "Go to %(site_name)s"
 msgstr ""
 
 #: core/templates/email/accept_membership_request.html:6
@@ -385,7 +392,7 @@ msgstr ""
 #: core/templates/email/entities/event.html:19
 #: core/templates/email/entities/news.html:33
 #: core/templates/email/entities/question.html:19
-#: core/templates/email/entities/wiki.html:19
+#: core/templates/email/entities/wiki.html:26
 msgid "on"
 msgstr ""
 
@@ -401,8 +408,21 @@ msgstr ""
 msgid "Question asked by"
 msgstr ""
 
-#: core/templates/email/entities/wiki.html:19
+#: core/templates/email/entities/wiki.html:26
 msgid "Wiki created by"
+msgstr ""
+
+#: core/templates/email/file_scan_found.html:6
+#, python-format
+msgid ""
+"Hi,<br><br>\n"
+"\n"
+"We found %(virus_count)s suspicuous files while scanning for virusses. We "
+"have blocked the files for download.<br><br>\n"
+"\n"
+"Please visit the <a href=\"%(site_url)s/superadmin/scanlog\">file scan logs</"
+"a> to review.\n"
+"\n"
 msgstr ""
 
 #: core/templates/email/group_ownership_transferred.html:6
@@ -505,8 +525,8 @@ msgstr ""
 #, python-format
 msgid ""
 " You have received this e-mail because you registered to receive "
-"notifications.<br /> Click <a href=\"%(user_url)s\">here</a> to change your "
-"settings."
+"notifications.<br /> Click <a href=\"%(unsubscribe_url)s\">here</a> to "
+"change your settings."
 msgstr ""
 
 #: core/templates/email/send_overview_emails.html:29
@@ -519,17 +539,12 @@ msgstr ""
 msgid "For all new messages visit %(site_name)s"
 msgstr ""
 
-#: core/templates/email/send_overview_emails.html:93
-#, python-format
-msgid "Go to %(site_name)s"
-msgstr ""
-
 #: core/templates/email/send_overview_emails.html:114
 #, python-format
 msgid ""
 "You have received this e-mail because you registered to receive "
-"notifications.<br /> Click <a href=\"%(user_url)s\">here</a> to change your "
-"settings."
+"notifications.<br /> Click <a href=\"%(unsubscribe_url)s\">here</a> to "
+"change your settings."
 msgstr ""
 
 #: core/templates/email/site_access_changed.html:6
@@ -771,9 +786,13 @@ msgid ""
 "Access is requested. You will receive an e-mail when the request is accepted."
 msgstr ""
 
-#: core/views.py:168
+#: core/views.py:170
 #, python-format
 msgid "New access request for %(site_name)s"
+msgstr ""
+
+#: core/views.py:544
+msgid "Saved"
 msgstr ""
 
 #: event/resolvers/mutation_attend_event_without_account.py:31
@@ -784,4 +803,9 @@ msgstr ""
 #: event/resolvers/mutation_confirm_attend_event_without_account.py:51
 #, python-format
 msgid "Confirmation of registration for %s"
+msgstr ""
+
+#: file/tasks.py:64
+#, python-format
+msgid "Filescan found suspicous files on %(site_url)s"
 msgstr ""
