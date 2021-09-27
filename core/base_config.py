@@ -138,6 +138,9 @@ DEFAULT_SITE_CONFIG = {
     'COMMENT_WITHOUT_ACCOUNT_ENABLED': (False, 'Allow anonymous users to comment'),
     'QUESTION_LOCK_AFTER_ACTIVITY': (False, 'Lock questions after comments are given'),
     'QUESTION_LOCK_AFTER_ACTIVITY_LINK': ("", 'Link for locked questions'),
+
+    'LAST_RECEIVED_BOUNCING_EMAIL': ("2021-01-01", 'Last received bouncing email'),
+    'LAST_RECEIVED_DELETED_USER': ("2021-01-01", 'Last received deleted user'),
 }
 """
 Default site configuration

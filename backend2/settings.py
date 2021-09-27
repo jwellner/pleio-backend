@@ -311,3 +311,9 @@ CSRF_COOKIE_SECURE = not DEBUG
 DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
 
 CLAMAV_HOST = os.getenv('CLAMAV_HOST', None)
+
+BOUNCER_URL = os.getenv('BOUNCER_URL', None)
+BOUNCER_TOKEN = os.getenv('BOUNCER_TOKEN', None)
+
+ACCOUNT_URL = os.getenv('ACCOUNT_URL', None)
+ACCOUNT_TOKEN = os.getenv('ACCOUNT_TOKEN', None)

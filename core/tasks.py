@@ -4,6 +4,8 @@ import csv
 import os
 import json
 import re
+from django.core.exceptions import ObjectDoesNotExist
+import requests
 import signal_disabler
 from email.utils import formataddr
 
@@ -75,6 +77,8 @@ def dispatch_crons(self, period):
         if period == 'daily':
             save_db_disk_usage.delay(client.schema_name)
             save_file_disk_usage.delay(client.schema_name)
+            ban_users_that_bounce.delay(client.schema_name)
+            ban_users_with_no_account.delay(client.schema_name)
 
         if period in ['daily', 'weekly', 'monthly']:
             send_overview.delay(client.schema_name, period)
@@ -726,3 +730,89 @@ def save_file_disk_usage(schema_name):
             stat_type='DISK_SIZE',
             value=total_size
         )
+
+
+@shared_task(bind=False)
+def ban_users_that_bounce(schema_name):
+    '''
+    Ban users with email adresses that bounce
+    '''
+    with schema_context(schema_name):
+        if not settings.BOUNCER_URL or not settings.BOUNCER_TOKEN:
+            logger.error("Could not process bouncing emails as bouncer_url or bouncer_token is not set")
+            return
+
+        try:
+            headers = {
+                'Authorization': 'Token ' + settings.BOUNCER_TOKEN,
+                'Accept': 'application/json'
+            }
+            last_received = config.LAST_RECEIVED_BOUNCING_EMAIL
+            url = settings.BOUNCER_URL + '/api/orphans?last_received__gt=' + last_received
+            r = requests.get(url, headers=headers)
+        except Exception as e:
+            logger.error("Error getting bouncing email adresses: %s", e)
+
+        count = 0
+        for orphan in r.json():
+            last_received = orphan['last_received']
+
+            try:
+                user = User.objects.get(email=orphan['email'])
+            except ObjectDoesNotExist:
+                continue
+
+            if not user.is_active:
+                continue
+
+            user.is_active = False
+            user.ban_reason = 'bouncing email adres'
+            user.save()
+            count = count + 1
+
+        if count:
+            logger.info("Accounts blocked beacause of boucning email: %s", count)
+        config.LAST_RECEIVED_BOUNCING_EMAIL = last_received
+
+
+@shared_task(bind=False)
+def ban_users_with_no_account(schema_name):
+    '''
+    Ban users with email adresses that bounce
+    '''
+    with schema_context(schema_name):
+        if not settings.ACCOUNT_URL or not settings.ACCOUNT_TOKEN:
+            logger.error("Could not process deleted accounts as account_url or account_token is not set")
+            return
+
+        try:
+            headers = {
+                'Authorization': 'Token ' + settings.ACCOUNT_TOKEN,
+                'Accept': 'application/json'
+            }
+            last_received = config.LAST_RECEIVED_DELETED_USER
+            url = settings.ACCOUNT_URL + '/api/users/deleted?event_time__gt=' + last_received
+            r = requests.get(url, headers=headers)
+        except Exception as e:
+            logger.error("Error getting deleted accounts: %s", e)
+
+        count = 0
+        for orphan in r.json():
+            last_received = orphan['event_time']
+
+            try:
+                user = User.objects.get(external_id=orphan['userid'])
+            except ObjectDoesNotExist:
+                continue
+
+            if not user.is_active:
+                continue
+
+            user.is_active = False
+            user.ban_reason = 'user deleted in account'
+            user.save()
+            count = count + 1
+
+        if count:
+            logger.info("Accounts blocked beacause of deleted account in pleio: %s", count)
+        config.LAST_RECEIVED_DELETED_USER = last_received
