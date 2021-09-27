@@ -16,5 +16,6 @@ data:
   PROFILE_PICTURE_URL: {{ printf "%s" .Values.accountDomain }}
   FROM_EMAIL: noreply@mail.pleio.nl
   MEDIA_ROOT: /app-data
+  BACKUP_PATH: /backup-storage
   SWIFT_ENABLED: "False"
   S3_ENABLED: "False"
