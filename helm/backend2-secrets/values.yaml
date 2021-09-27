@@ -32,3 +32,11 @@ celery: {}
 # resultBackend:
 
 clamav:
+
+bouncer: {}
+# url
+# token
+
+accountApi: {}
+# url
+# token
