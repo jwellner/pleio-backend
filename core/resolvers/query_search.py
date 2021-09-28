@@ -45,12 +45,23 @@ def resolve_search(_, info, q=None, containerGuid=None, type=None, subtype=None,
         q = '*'
 
     s = Search(index='_all').query(
-            Q('simple_query_string', query=q, fields=['title^3', 'name^3', 'email', 'description', 'tags^3', 'file_contents', 'introduction']) |
-            Q('nested', path='_profile.user_profile_fields', ignore_unmapped=True, query=Q('bool', must=[
-                    Q('match', _profile__user_profile_fields__value=q), Q('terms', _profile__user_profile_fields__read_access=list(get_acl(user)))
+            Q('simple_query_string', query=q, fields=[
+                    'title^3',
+                    'name^3',
+                    'email',
+                    'description',
+                    'tags^3',
+                    'file_contents',
+                    'introduction',
+                    'comments.description'
+                ]
+            )
+            | Q('nested', path='_profile.user_profile_fields', ignore_unmapped=True, query=Q('bool', must=[
+                    Q('match', _profile__user_profile_fields__value=q),
+                    Q('terms', _profile__user_profile_fields__read_access=list(get_acl(user)))
                     ]
                 )
-              )
+            )
         ).filter(
             'terms', read_access=list(get_acl(user))
         ).filter(
