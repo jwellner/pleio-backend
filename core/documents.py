@@ -41,7 +41,6 @@ class DefaultDocument(Document):
 
         return ""
 
-
 @registry.register_document
 class UserDocument(DefaultDocument):
     id = fields.KeywordField()
