@@ -21,7 +21,8 @@ from django_elasticsearch_dsl.registries import registry
 from elasticsearch_dsl import Search
 from core import config
 from core.lib import html_to_text, access_id_to_acl, get_model_by_subtype, map_notification, tenant_schema, get_default_email_context
-from core.models import ProfileField, UserProfileField, Entity, GroupMembership, Comment, Widget, Group, NotificationMixin, SiteStat
+from core.models import ProfileField, UserProfileField, Entity, GroupMembership, Comment, Widget, Group, NotificationMixin, SiteStat, \
+     CommentAttachment, EntityAttachment, GroupAttachment
 from django.core.mail import EmailMultiAlternatives
 from django.template.loader import get_template
 from django.utils import timezone, translation
@@ -723,8 +724,29 @@ def save_file_disk_usage(schema_name):
     with schema_context(schema_name):
         logger.info('get_file_size \'%s\'', schema_name)
 
+        file_folder_size = 0
+        comment_attachment_size = 0
+        entity_attachment_size = 0
+        group_attachment_size = 0
+
         f = FileFolder.objects.filter(is_folder=False).aggregate(total_size=Sum('size'))
-        total_size = f.get('total_size', 0)
+        if f.get('total_size', 0):
+            file_folder_size = f.get('total_size', 0)
+
+        c = CommentAttachment.objects.all().aggregate(total_size=Sum('size'))
+        if c.get('total_size', 0):
+            comment_attachment_size = c.get('total_size', 0)
+
+        e = EntityAttachment.objects.all().aggregate(total_size=Sum('size'))
+        if e.get('total_size', 0):
+            entity_attachment_size = e.get('total_size', 0)
+
+        g = GroupAttachment.objects.all().aggregate(total_size=Sum('size'))
+        if g.get('total_size', 0):
+            group_attachment_size = g.get('total_size', 0)
+
+
+        total_size = file_folder_size + comment_attachment_size + entity_attachment_size + group_attachment_size
 
         SiteStat.objects.create(
             stat_type='DISK_SIZE',

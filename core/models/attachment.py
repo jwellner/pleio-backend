@@ -25,6 +25,7 @@ class Attachment(models.Model):
     name = models.CharField(max_length=256, default="")
     upload = models.FileField(upload_to=attachment_path, blank=True, null=True, max_length=512)
     mime_type = models.CharField(null=True, blank=True, max_length=100)
+    size = models.IntegerField(default=0)
     created_at = models.DateTimeField(default=timezone.now)
 
     def can_read(self, user):
@@ -69,7 +70,7 @@ class CommentAttachment(Attachment):
 @receiver(models.signals.pre_save, sender=EntityAttachment)
 @receiver(models.signals.pre_save, sender=GroupAttachment)
 @receiver(models.signals.pre_save, sender=CommentAttachment)
-def attachment_mimetype(sender, instance, **kwargs):
+def attachment_mimetype_size(sender, instance, **kwargs):
     # pylint: disable=unused-argument
     if settings.IMPORTING:
         return
@@ -77,6 +78,10 @@ def attachment_mimetype(sender, instance, **kwargs):
         instance.name = instance.upload.file.name
     if instance.upload:
         instance.mime_type = get_mimetype(instance.upload.path)
+        try:
+            instance.size = instance.upload.size
+        except Exception:
+            pass
 
 @receiver(models.signals.post_delete, sender=EntityAttachment)
 @receiver(models.signals.post_delete, sender=GroupAttachment)
