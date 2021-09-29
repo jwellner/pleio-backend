@@ -199,6 +199,7 @@ class User(AbstractBaseUser):
         self.email = "%s@deleted" % self.guid
         self.name = "Verwijderde gebruiker"
         self.external_id = None
+        self.custom_id = None
         self.picture = None
         self.is_government = False
         self.has_2fa_enabled = False
