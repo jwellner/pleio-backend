@@ -15,3 +15,8 @@ storage:
   existingDataStorage: pleio-data
   existingTempStorage: tmp-zip-storage
   existingBackupStorage: backup-storage
+
+ingress:
+  autoAnnotations:
+    cert-manager.io/cluster-issuer: letsencrypt-pleio-prod-issuer
+    cert-manager.io/issuer:
