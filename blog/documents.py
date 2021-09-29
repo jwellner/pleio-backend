@@ -1,6 +1,7 @@
 from django_elasticsearch_dsl import fields
 from django_elasticsearch_dsl.registries import registry
 from .models import Blog
+from core.models import Comment
 from core.documents import DefaultDocument, custom_analyzer
 
 
@@ -21,6 +22,13 @@ class BlogDocument(DefaultDocument):
         search_analyzer="standard"
     )
 
+    comments = fields.ObjectField(properties={
+        'description': fields.TextField(analyzer=custom_analyzer, search_analyzer="standard")
+    })
+
+    def get_instances_from_related(self, related_instance):
+        return related_instance.container
+
     class Index:
         name = 'blog'
 
@@ -32,3 +40,5 @@ class BlogDocument(DefaultDocument):
             'updated_at',
             'published'
         ]
+
+        related_models = [Comment]
