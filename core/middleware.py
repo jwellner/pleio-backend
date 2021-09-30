@@ -130,6 +130,7 @@ class WalledGardenMiddleware:
         public_urls += ("/login/request",)
         public_urls += ("/logout",)
         public_urls += ("/onboarding",)
+        public_urls += ("/unsupported_browser", )
         public_urls += ("/robots.txt",)
         public_urls += ("/sitemap.xml",)
         public_urls += ("/custom.css",)
@@ -138,6 +139,7 @@ class WalledGardenMiddleware:
         return any(public_url.match(url) for public_url in public_urls)
 
     def __call__(self, request):
+
         if request.user.is_authenticated or self.is_public_url(request.path_info):
             pass
         elif (
@@ -175,6 +177,7 @@ class OnboardingMiddleware:
         public_urls += ("/robots.txt",)
         public_urls += ("/sitemap.xml",)
         public_urls += ("/onboarding",)
+        public_urls += ("/unsupported_browser", )
         public_urls += ("/admin2",)
         public_urls += ("/graphql",)
         public_urls = [re.compile(v) for v in public_urls]
@@ -215,5 +218,24 @@ class RedirectMiddleware:
             and resolve(request.path).url_name in ["entity_view", "default", "redirect_friendly_url"]
         ):
             return redirect(config.REDIRECTS[request.path])
+
+        return response
+
+class UnsupporedBrowserMiddleWare:
+    """
+    Detect unsupported browser and redirect to information page
+    """
+    def __init__(self, get_response):
+        self.get_response = get_response
+
+    def __call__(self, request):
+        response = self.get_response(request)
+
+        # unsupported browser detection
+        if (
+            request.META.get('HTTP_USER_AGENT', '').find('Trident') != -1
+            and resolve(request.path).url_name in ["entity_view", "default", "onboarding"]
+        ):
+            return redirect('/unsupported_browser')
 
         return response

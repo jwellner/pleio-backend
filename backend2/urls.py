@@ -53,6 +53,7 @@ urlpatterns = [
     path('comment/confirm/<uuid:entity_id>', core_views.comment_confirm, name='comment_confirm'),
 
     path('onboarding', core_views.onboarding, name='onboarding'),
+    path('unsupported_browser', core_views.unsupported_browser, name='unsupported_browser'),
 
     path('edit_email_settings/<str:token>', core_views.edit_email_settings, name='edit_email_settings'),
     path('custom.css', core_views.custom_css),
