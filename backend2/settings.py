@@ -117,6 +117,7 @@ MIDDLEWARE = [
 ]
 
 if not RUN_AS_ADMIN_APP:
+    MIDDLEWARE.append('core.middleware.UnsupporedBrowserMiddleWare')
     MIDDLEWARE.append('core.middleware.WalledGardenMiddleware')
     MIDDLEWARE.append('core.middleware.OnboardingMiddleware')
     MIDDLEWARE.append('core.middleware.RedirectMiddleware')

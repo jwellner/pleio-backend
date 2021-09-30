@@ -558,3 +558,6 @@ def edit_email_settings(request, token):
     }
 
     return render(request, 'edit_email_settings.html', context)
+
+def unsupported_browser(request):
+    return render(request, 'unsupported_browser.html')
