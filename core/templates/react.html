@@ -83,19 +83,21 @@
     </div>
 
     {% if json_settings %}
-    <script>window.__SETTINGS__ = {{ json_settings|safe }};</script>
+    <script nonce="{{ CSP_NONCE }}">window.__SETTINGS__ = {{ json_settings|safe }};</script>
     {% endif %}
 
     {% if apollo_state %}
-    <script>window.__APOLLO_STATE__ = {{ apollo_state|safe }};</script>
+    <script nonce="{{ CSP_NONCE }}">window.__APOLLO_STATE__ = {{ apollo_state|safe }};</script>
     {% endif %}
 
+    <script nonce="{{ CSP_NONCE }}">__webpack_nonce__ = '{{ CSP_NONCE }}';</script>
+
     {% if webpack_dev_server %}
-    <script src="http://localhost:9001/vendor.js"></script>
-    <script src="http://localhost:9001/web.js"></script>
+    <script src="http://localhost:9001/vendor.js" nonce="{{ CSP_NONCE }}"></script>
+    <script src="http://localhost:9001/web.js" nonce="{{ CSP_NONCE }}"></script>
     {% else %}
-    <script src="{% static 'frontend/vendor.js' %}"></script>
-    <script src="{% static 'frontend/web.js' %}"></script>
+    <script src="{% static 'frontend/vendor.js' %}" nonce="{{ CSP_NONCE }}"></script>
+    <script src="{% static 'frontend/web.js' %}" nonce="{{ CSP_NONCE }}"></script>
     {% endif %}
 
     {% include 'elements/analytics.html' %}
