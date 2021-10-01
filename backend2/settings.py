@@ -114,6 +114,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'csp.middleware.CSPMiddleware',
 ]
 
 if not RUN_AS_ADMIN_APP:
@@ -141,6 +142,7 @@ TEMPLATES = [
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
                 'core.context_processor.config_processor',
+                'csp.context_processors.nonce',
             ],
         },
     },
@@ -305,10 +307,6 @@ if APM_ENABLED:
     if APM_OPENTRACING_ENABLED:
         set_global_tracer(Tracer(config=ELASTIC_APM))
 
-SECURE_REFERRER_POLICY = 'origin-when-cross-origin'
-SESSION_COOKIE_SECURE = not DEBUG
-CSRF_COOKIE_SECURE = not DEBUG
-
 DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
 
 CLAMAV_HOST = os.getenv('CLAMAV_HOST', None)
@@ -318,3 +316,63 @@ BOUNCER_TOKEN = os.getenv('BOUNCER_TOKEN', None)
 
 ACCOUNT_URL = os.getenv('ACCOUNT_URL', None)
 ACCOUNT_TOKEN = os.getenv('ACCOUNT_TOKEN', None)
+
+SECURE_REFERRER_POLICY = 'origin-when-cross-origin'
+SESSION_COOKIE_SECURE = not DEBUG
+CSRF_COOKIE_SECURE = not DEBUG
+
+# Content-Security-Policy header configuration https://django-csp.readthedocs.io/en/latest/configuration.html
+CSP_DEFAULT_SRC = ["'self'"]
+CSP_BASE_URI = ["'none'"]
+CSP_OBJECT_SRC = ["'none'"]
+CSP_IMG_SRC = [
+    "'self'",
+    "https://statistiek.rijksoverheid.nl",
+    "https://www.google-analytics.com",
+    "https://i.ytimg.com",
+    "https://i.vimeocdn.com"
+]
+if PROFILE_PICTURE_URL:
+    CSP_IMG_SRC.append(PROFILE_PICTURE_URL)
+
+# Inline CSS is used on sites so we need to allow it
+CSP_STYLE_SRC = [
+    "'self'",
+    "'unsafe-inline'",
+    "https://fonts.googleapis.com",
+    "https://fonts.gstatic.com"
+]
+CSP_FONT_SRC = [
+    "'self'",
+    "https://fonts.gstatic.com"
+]
+# Using unsafe-inline is not safe so we choose to use strict-dynamic (https://csp.withgoogle.com/docs/index.html)
+#CSP_SCRIPT_SRC = ["'self'", "'unsafe-inline'", "https://stats.pleio.nl", "https://statistiek.rijksoverheid.nl"]
+CSP_INCLUDE_NONCE_IN = ['script-src']
+CSP_SCRIPT_SRC = [
+    "'unsafe-inline'",
+    "'strict-dynamic'",
+    "https:",
+    "http:"
+] # for backward compatibility with older browsers that don't support strict-dynamic
+CSP_CONNECT_SRC = [
+    "'self'",
+    "https://stats.pleio.nl",
+    "https://statistiek.rijksoverheid.nl",
+    "https://www.google-analytics.com",
+    "https://vimeo.com",
+]
+CSP_FRAME_SRC = [
+    "'self'",
+    "https://www.youtube-nocookie.com",
+    "https://player.vimeo.com",
+    "https://formulieren.pleio.nl",
+    "https://api.eu.kaltura.com"
+]
+# Add csp.contrib.rate_limiting.RateLimitedCSPMiddleware middleware when enabling reporting
+#CSP_REPORT_URI = "/report-csp-violation"
+#CSP_REPORT_PERCENTAGE = 1 if DEBUG else 0.1
+
+# When DEBUG is on we don't require HTTPS on our resources because in a local environment
+CSP_UPGRADE_INSECURE_REQUESTS = not DEBUG
+CSP_REPORT_ONLY = os.getenv('CSP_REPORT_ONLY') == 'True'

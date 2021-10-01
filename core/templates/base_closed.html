@@ -51,7 +51,7 @@
 
 		<style>
 			/* Legacy theme color overrides */
-			body { font-family: "{{ config.FONT }}", sans-serif; }
+			body { font-family: "{{ config.FONT }}", sans-serif; background:white; }
 			.walled-garden_title { color: {{ config.COLOR_PRIMARY }}; }
 			.button { background-color: {{ config.COLOR_SECONDARY }}; }
 			.button.___is-active, .button:hover, .button:active { background-color: {% hex_color_tint config.COLOR_SECONDARY 0.2 %}; }
@@ -60,7 +60,7 @@
 			<link href="/custom.css?v={{ config.CUSTOM_CSS_TIMESTAMP }}" rel="stylesheet" type="text/css" media="screen">
 		{% endif %}
     </head>
-	<body class="___{{ config.THEME }}" style="background:white;">
+	<body class="___{{ config.THEME }}">
 		<div class="page-layout">
 			<header class="page-layout__header walled-garden_header">
 				<div class="walled-garden_header-top">
