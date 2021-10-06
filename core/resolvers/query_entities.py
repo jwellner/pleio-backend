@@ -32,6 +32,8 @@ def conditional_subtypes_filter(subtypes):
                 q_objects.add(~Q(page__isnull = True), Q.OR)
             elif object_type == 'file':
                 q_objects.add(~Q(filefolder__isnull = True), Q.OR)
+            elif object_type == 'task':
+                q_objects.add(~Q(task__isnull = True), Q.OR)
 
     return q_objects
 
