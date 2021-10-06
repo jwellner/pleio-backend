@@ -10,6 +10,7 @@ websitesAuto: []
 
 env: test
 debug: 'False'
+cspReportOnly: 'True'
 
 frontend:
   repository: registry.gitlab.com/pleio/frontend

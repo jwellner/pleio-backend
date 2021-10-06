@@ -6,6 +6,7 @@ websitesAuto:
 
 env: test
 debug: 'True'
+cspReportOnly: 'False'
 
 ingress:
   autoAnnotations:
