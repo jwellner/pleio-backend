@@ -123,7 +123,7 @@ if not RUN_AS_ADMIN_APP:
     MIDDLEWARE.append('core.middleware.OnboardingMiddleware')
     MIDDLEWARE.append('core.middleware.RedirectMiddleware')
     MIDDLEWARE.append('auditlog.middleware.AuditlogMiddleware')
-
+    
 if LOCAL_MIDDLEWARE:
     MIDDLEWARE += LOCAL_MIDDLEWARE
 
