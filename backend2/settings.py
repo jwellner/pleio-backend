@@ -330,7 +330,8 @@ CSP_IMG_SRC = [
     "https://statistiek.rijksoverheid.nl",
     "https://www.google-analytics.com",
     "https://i.ytimg.com",
-    "https://i.vimeocdn.com"
+    "https://i.vimeocdn.com",
+    "https://*.pleio.nl"
 ]
 if PROFILE_PICTURE_URL:
     CSP_IMG_SRC.append(PROFILE_PICTURE_URL)
@@ -366,8 +367,9 @@ CSP_FRAME_SRC = [
     "'self'",
     "https://www.youtube-nocookie.com",
     "https://player.vimeo.com",
-    "https://formulieren.pleio.nl",
-    "https://api.eu.kaltura.com"
+    "https://api.eu.kaltura.com",
+    "https://*.pleio.nl",
+    "https://feed.mikle.com"
 ]
 # Add csp.contrib.rate_limiting.RateLimitedCSPMiddleware middleware when enabling reporting
 #CSP_REPORT_URI = "/report-csp-violation"

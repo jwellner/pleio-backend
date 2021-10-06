@@ -4,6 +4,8 @@ websitesManual:
   - domain: '*.pleio-test.nl'
     secretName: tls-wildcard.pleio-test.nl
 
+cspReportOnly: 'False'
+
 api:
   replicaCount: 2
 

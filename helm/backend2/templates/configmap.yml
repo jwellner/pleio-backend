@@ -19,3 +19,4 @@ data:
   BACKUP_PATH: /backup-storage
   SWIFT_ENABLED: "False"
   S3_ENABLED: "False"
+  CSP_REPORT_ONLY: {{ .Values.cspReportOnly | quote }}
