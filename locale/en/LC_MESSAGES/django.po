@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-09-20 16:43+0200\n"
+"POT-Creation-Date: 2021-10-10 10:18+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -298,15 +298,15 @@ msgstr ""
 msgid "Question expert"
 msgstr ""
 
-#: core/tasks.py:347
+#: core/tasks.py:352
 msgid "Import was a success"
 msgstr ""
 
-#: core/tasks.py:347
+#: core/tasks.py:352
 msgid "Import failed"
 msgstr ""
 
-#: core/tasks.py:411
+#: core/tasks.py:416
 #, python-format
 msgid "New notification at %(site_name)s: "
 msgstr ""
@@ -557,8 +557,8 @@ msgid ""
 "\n"
 "This action was taken by %(user_name)s.<br><br>\n"
 "\n"
-"If you believe this was done in error, please <a href=\"%(site_url)s/"
-"admin2\">go to the admin</a> and undo this action.\n"
+"If you believe this was done in error, please <a href=\"%(site_url)s/admin"
+"\">go to the admin</a> and undo this action.\n"
 msgstr ""
 
 #: core/templates/email/site_access_request.html:5
@@ -608,8 +608,7 @@ msgstr ""
 msgid ""
 "The user <strong>%(user_name)s</strong> has cancelled his/her request to "
 "remove his/her account. This account will no longer be visible on the <a "
-"href='%(site_url)s/admin2/users/delete-requests'>list</a> of removal "
-"requests."
+"href='%(site_url)s/admin/users/delete-requests'>list</a> of removal requests."
 msgstr ""
 
 #: core/templates/email/toggle_request_delete_user_requested.html:6
@@ -624,7 +623,7 @@ msgstr ""
 #, python-format
 msgid ""
 "The user <strong>%(user_name)s</strong> wants his or her account removed, go "
-"<a href='%(site_url)s/admin2/users/delete-requests'>here</a> to the list of "
+"<a href='%(site_url)s/admin/users/delete-requests'>here</a> to the list of "
 "removal requests. "
 msgstr ""
 

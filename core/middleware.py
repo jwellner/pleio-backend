@@ -178,7 +178,7 @@ class OnboardingMiddleware:
         public_urls += ("/sitemap.xml",)
         public_urls += ("/onboarding",)
         public_urls += ("/unsupported_browser", )
-        public_urls += ("/admin2",)
+        public_urls += ("/admin",)
         public_urls += ("/graphql",)
         public_urls = [re.compile(v) for v in public_urls]
 
