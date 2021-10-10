@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-09-20 16:43+0200\n"
+"POT-Creation-Date: 2021-10-10 10:18+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -299,15 +299,15 @@ msgstr "Redacteur"
 msgid "Question expert"
 msgstr "Vraagexpert"
 
-#: core/tasks.py:347
+#: core/tasks.py:352
 msgid "Import was a success"
 msgstr "Import afgerond"
 
-#: core/tasks.py:347
+#: core/tasks.py:352
 msgid "Import failed"
 msgstr "Import mislukt"
 
-#: core/tasks.py:411
+#: core/tasks.py:416
 #, python-format
 msgid "New notification at %(site_name)s: "
 msgstr "Nieuwe notificatie op %(site_name)s"
@@ -618,7 +618,17 @@ msgstr ""
 "passen."
 
 #: core/templates/email/site_access_changed.html:6
-#, python-format
+#, fuzzy, python-format
+#| msgid ""
+#| "Hi,<br><br>\n"
+#| "\n"
+#| "The site access level for site <a href=\"%(site_url)s\">%(site_name)s</a> "
+#| "changed to <b>%(access_level)s</b>. <br><br>\n"
+#| "\n"
+#| "This action was taken by %(user_name)s.<br><br>\n"
+#| "\n"
+#| "If you believe this was done in error, please <a href=\"%(site_url)s/"
+#| "admin2\">go to the admin</a> and undo this action.\n"
 msgid ""
 "Hi,<br><br>\n"
 "\n"
@@ -627,8 +637,8 @@ msgid ""
 "\n"
 "This action was taken by %(user_name)s.<br><br>\n"
 "\n"
-"If you believe this was done in error, please <a href=\"%(site_url)s/"
-"admin2\">go to the admin</a> and undo this action.\n"
+"If you believe this was done in error, please <a href=\"%(site_url)s/admin"
+"\">go to the admin</a> and undo this action.\n"
 msgstr ""
 "Hallo,<br><br>\n"
 "\n"
@@ -637,7 +647,7 @@ msgstr ""
 "\n"
 "Deze actie is uitgevoerd door %(user_name)s.<br><br>\n"
 "\n"
-"Als dit een fout is <a href=\"%(site_url)s/admin2\">ga naar de admin</a> en "
+"Als dit een fout is <a href=\"%(site_url)s/admin\">ga naar de admin</a> en "
 "maak deze actie ongedaan.\n"
 
 #: core/templates/email/site_access_request.html:5
@@ -709,12 +719,11 @@ msgstr ""
 msgid ""
 "The user <strong>%(user_name)s</strong> has cancelled his/her request to "
 "remove his/her account. This account will no longer be visible on the <a "
-"href='%(site_url)s/admin2/users/delete-requests'>list</a> of removal "
-"requests."
+"href='%(site_url)s/admin/users/delete-requests'>list</a> of removal requests."
 msgstr ""
 "De gebruiker <strong> %(user_name)s </strong> heeft haar/zijn verzoek om het "
 "account te laten verwijderen geannuleerd. Dit account zal niet meer "
-"zichtbaar zijn op het <a href='%(site_url)s/admin2/users/delete-"
+"zichtbaar zijn op het <a href='%(site_url)s/admin/users/delete-"
 "requests'>overzicht</a> van met de aanvragen voor verwijderen."
 
 #: core/templates/email/toggle_request_delete_user_requested.html:6
@@ -732,11 +741,11 @@ msgstr ""
 #, python-format
 msgid ""
 "The user <strong>%(user_name)s</strong> wants his or her account removed, go "
-"<a href='%(site_url)s/admin2/users/delete-requests'>here</a> to the list of "
+"<a href='%(site_url)s/admin/users/delete-requests'>here</a> to the list of "
 "removal requests. "
 msgstr ""
 "De gebruiker <strong>%(user_name)s</strong> wil haar/zijn account laten "
-"verwijderen, ga <a href='%(site_url)s/admin2/users/delete-requests'>hier</a> "
+"verwijderen, ga <a href='%(site_url)s/admin/users/delete-requests'>hier</a> "
 "naar het overzicht met de aanvragen voor verwijderen."
 
 #: core/templates/email/user_deleted.html:6
