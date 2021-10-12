@@ -378,3 +378,11 @@ CSP_FRAME_SRC = [
 # When DEBUG is on we don't require HTTPS on our resources because in a local environment
 CSP_UPGRADE_INSECURE_REQUESTS = not DEBUG
 CSP_REPORT_ONLY = os.getenv('CSP_REPORT_ONLY') == 'True'
+
+if DEBUG:
+    # Add for local development
+    CSP_STYLE_SRC.append("http://localhost:9001")
+    CSP_SCRIPT_SRC.append("http://localhost:9001")
+    CSP_FONT_SRC.append("http://frontend-dev-server:9001")
+    CSP_CONNECT_SRC.append("http://frontend-dev-server:9001")
+    CSP_CONNECT_SRC.append("ws://frontend-dev-server:9001")
