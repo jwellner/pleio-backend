@@ -2248,8 +2248,8 @@ input RedirectInput {
 }
 
 type SiteStats {
-  dbUsage: Int
-  fileDiskUsage: Int
+  dbUsage: Float!
+  fileDiskUsage: Float!
 }
 
 input ProfileFieldValidatorInput {
