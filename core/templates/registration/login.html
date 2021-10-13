@@ -32,9 +32,11 @@
 						{% endif %}
 					{% endfor %}
 				</div>
+				{% if config.ALLOW_REGISTRATION %}
 				<div class="walled-garden_register content">
 					{% blocktrans %}Don't have an account?{% endblocktrans %} <a href="/login?login_credentials=true&amp;method=register" class="" rel="nofollow">{% blocktrans %}Register{% endblocktrans %}</a>
 				</div>
+				{% endif %}
 			</fieldset>
 		</form>
 	</div>

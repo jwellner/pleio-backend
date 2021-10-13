@@ -122,6 +122,7 @@ def login(request):
         request.session['invitecode'] = request.GET.get('invitecode')
 
     query_args = {}
+    redirect_url= None
 
     if config.IDP_ID and not request.GET.get('login_credentials'):
         query_args["idp"] = config.IDP_ID
@@ -129,9 +130,18 @@ def login(request):
     if request.GET.get('next'):
         query_args["next"] = request.GET.get('next')
 
-    redirect_url = reverse('oidc_authentication_init') + '?' +  urlencode(query_args)
+    if len(config.OIDC_PROVIDERS) == 1:
+        query_args["provider"] = config.OIDC_PROVIDERS[0]
+        # only redirect when there is a single provider configured otherwise show login page
+        redirect_url = reverse('oidc_authentication_init') + '?' +  urlencode(query_args)
 
-    return redirect(redirect_url)
+    if redirect_url:
+        return redirect(redirect_url)
+
+    context = {
+        'next': request.GET.get('next', '')
+    }
+    return render(request, 'registration/login.html', context)
 
 def oidc_failure(request):
     return redirect(settings.OIDC_OP_LOGOUT_ENDPOINT)
