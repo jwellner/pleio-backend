@@ -1,0 +1,5 @@
+apiVersion: v2
+name: backend2-sites
+description: Helm chart for deploying sites of backend2
+type: application
+version: 0.1.0
