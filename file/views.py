@@ -23,7 +23,6 @@ def download(request, file_id=None, file_name=None):
         if entity.group and entity.group.is_closed and not entity.group.is_full_member(user) and not user.has_role(USER_ROLES.ADMIN):
             raise Http404("File not found")
 
-        print(entity.scan_incidents.count())
         if entity.scan_incidents.count() > 0:
             raise Http404("File not found")
 
