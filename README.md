@@ -60,6 +60,8 @@ If you started your development environment for the first time execute the follo
 docker-compose exec admin /app/manage.py migrate_schemas --shared
 ```
 
+This is a command that also executes when doing docker-compose up. If that was successful, you should see that there are no migrations to run.
+
 #### Create admin tenant
 
 ```bash
@@ -72,6 +74,8 @@ Use the following parameters:
 - name: public
 - domain: localhost
 - is_primary: True
+
+When asked for an elgg-database, please fill in `test`. Do not leave this field empty. 
 
 #### Create superuser for admin
 
@@ -86,8 +90,15 @@ docker-compose exec admin /app/manage.py createsuperuser
     - Schema name: `test1`
     - Name: `My first test client`
     - Domain: `test1.pleio.local`
+    - elgg-database can be empty here
 
-Now browse to: http://test1.pleio.local
+Now browse to: http://test1.pleio.local:8000
+
+#### Run with a local frontend
+
+To run a local frontend with backend2 it is needed to first run the frontend (`yarn start`) and then restart the backend. At launch it will check whether a local frontend is running. 
+
+When opening http://test1.pleio.local:8000 you should see your local front-end being used. This frontend is now loaded from `localhost:9001`. This can be checked by inspecting the network activity. The CSS and JS should be loaded from `localhost:9001`.
 
 #### Cleanup and start over
 
