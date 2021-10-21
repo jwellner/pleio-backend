@@ -44,7 +44,7 @@ class Annotation(models.Model):
 
     data = models.JSONField(null=True, blank=True)
 
-    user = models.ForeignKey('user.User', on_delete=models.CASCADE)
+    user = models.ForeignKey('user.User', on_delete=models.CASCADE, related_name='annotations')
 
     created_at = models.DateTimeField(default=timezone.now)
 
