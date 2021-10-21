@@ -23,7 +23,7 @@ def resolve_site_users(_, info, q=None, role=None, isDeleteRequested=None, isBan
         except ValueError:
             raise GraphQLError(INVALID_DATE)
 
-    users = User.objects.all().order_by('name').exclude(name="Verwijderde gebruiker")
+    users = User.objects.all().order_by('name')
 
     if isBanned:
         users = users.filter(is_active=False)
