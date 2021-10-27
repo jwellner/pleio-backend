@@ -90,7 +90,7 @@ def users(request):
 
         serialized_users = []
 
-        users = User.objects.filter(created_at__gt=created_at).exclude(name="Verwijderde gebruiker").order_by('created_at')[:limit]
+        users = User.objects.filter(created_at__gt=created_at).order_by('created_at')[:limit]
 
         for user in users:
             serialized_users.append(serialize_user(user))
@@ -227,7 +227,7 @@ def users_delete(request, user_id):
             },
             status=403
         )
-    user = User.objects.filter(id=user_id).exclude(name="Verwijderde gebruiker").first()
+    user = User.objects.filter(id=user_id).first()
     if not user:
         return JsonResponse({
             "status": 404,
@@ -258,7 +258,7 @@ def ban_user(request, user_id):
             },
             status=403
         )
-    user = User.objects.filter(id=user_id).exclude(name="Verwijderde gebruiker").first()
+    user = User.objects.filter(id=user_id).first()
     if not user:
         return JsonResponse({
             "status": 404,
@@ -292,7 +292,7 @@ def unban_user(request, user_id):
             },
             status=403
         )
-    user = User.objects.filter(id=user_id).exclude(name="Verwijderde gebruiker").first()
+    user = User.objects.filter(id=user_id).first()
     if not user:
         return JsonResponse({
             "status": 404,
@@ -325,7 +325,7 @@ def avatar_user(request, user_id):
             },
             status=403
         )
-    user = User.objects.filter(id=user_id).exclude(name="Verwijderde gebruiker").first()
+    user = User.objects.filter(id=user_id).first()
     if not user:
         return JsonResponse({
             "status": 404,

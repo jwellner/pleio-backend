@@ -118,10 +118,11 @@ MIDDLEWARE = [
 ]
 
 if not RUN_AS_ADMIN_APP:
-    MIDDLEWARE.append('core.middleware.UnsupporedBrowserMiddleWare')
+    MIDDLEWARE.append('core.middleware.UnsupportedBrowserMiddleware')
     MIDDLEWARE.append('core.middleware.WalledGardenMiddleware')
     MIDDLEWARE.append('core.middleware.OnboardingMiddleware')
     MIDDLEWARE.append('core.middleware.RedirectMiddleware')
+    MIDDLEWARE.append('core.middleware.CustomCSPMiddleware')
     MIDDLEWARE.append('auditlog.middleware.AuditlogMiddleware')
     
 if LOCAL_MIDDLEWARE:

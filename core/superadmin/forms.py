@@ -1,8 +1,9 @@
 import django_filters
 
 from django import forms
+from django.core.validators import URLValidator
+from django.core.exceptions import ValidationError
 from core import config
-from core.resolvers.mutation_edit_site_setting import save_setting
 from file.models import ScanIncident
 
 
@@ -16,13 +17,23 @@ class SettingsForm(forms.Form):
         error_messages={'required': 'Choose at least one option'})
 
     edit_user_name_enabled = forms.BooleanField(required=False)
+    csp_header_exceptions = forms.CharField(required=False)
+
+    def clean(self):
+        cleaned_data = super().clean()
+        url_validator = URLValidator(schemes=["http", "https"])
+        for url in cleaned_data['csp_header_exceptions'].splitlines(False):
+            try:
+                url_validator(url)
+            except ValidationError:
+                self.add_error('csp_header_exceptions', "Contains invalid URL")
 
     def save(self):
         data = self.cleaned_data
 
-        save_setting('OIDC_PROVIDERS', data['oidc_providers'])
-        save_setting('EDIT_USER_NAME_ENABLED', data['edit_user_name_enabled'])
-
+        config.OIDC_PROVIDERS = data['oidc_providers']
+        config.EDIT_USER_NAME_ENABLED = data['edit_user_name_enabled']
+        config.CSP_HEADER_EXCEPTIONS = data['csp_header_exceptions'].splitlines(False)
 
 class ScanIncidentFilter(django_filters.FilterSet):
     blocked = django_filters.BooleanFilter(

@@ -221,7 +221,7 @@ class RedirectMiddleware:
 
         return response
 
-class UnsupporedBrowserMiddleWare:
+class UnsupportedBrowserMiddleware:
     """
     Detect unsupported browser and redirect to information page
     """
@@ -237,5 +237,16 @@ class UnsupporedBrowserMiddleWare:
             and resolve(request.path).url_name in ["entity_view", "default", "onboarding"]
         ):
             return redirect('/unsupported_browser')
+
+        return response
+
+class CustomCSPMiddleware:
+    def __init__(self, get_response):
+        self.get_response = get_response
+
+    def __call__(self, request):
+        response = self.get_response(request)
+        if config.CSP_HEADER_EXCEPTIONS:
+            response._csp_update = {'img-src': config.CSP_HEADER_EXCEPTIONS, 'frame-src': config.CSP_HEADER_EXCEPTIONS}
 
         return response

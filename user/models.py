@@ -12,6 +12,12 @@ from django.utils import timezone
 
 
 class Manager(BaseUserManager):
+    def get_queryset(self):
+        return super().get_queryset().exclude(is_active=False, name="Verwijderde gebruiker")
+
+    def with_deleted(self):
+        return super().get_queryset()
+
     def visible(self, user):
         # pylint: disable=unused-argument
         """
@@ -214,7 +220,12 @@ class User(AbstractBaseUser):
         except UserProfile.DoesNotExist:
             pass
 
+        # delete memberships and notifications
+        self.memberships.all().delete()
+        self.subgroups.all().delete()
         self.notifications.all().delete()
+        self.invitation.all().delete()
+        self.annotations.all().delete()
 
         self.save()
 
