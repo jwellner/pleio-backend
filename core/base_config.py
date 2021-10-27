@@ -141,6 +141,7 @@ DEFAULT_SITE_CONFIG = {
 
     'LAST_RECEIVED_BOUNCING_EMAIL': ("2021-01-01", 'Last received bouncing email'),
     'LAST_RECEIVED_DELETED_USER': ("2021-01-01", 'Last received deleted user'),
+    'CSP_HEADER_EXCEPTIONS': ([], 'CSP header exceptions')
 }
 """
 Default site configuration
