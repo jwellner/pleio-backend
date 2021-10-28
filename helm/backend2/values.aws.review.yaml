@@ -1,4 +1,4 @@
-accountDomain: https://account2.pleio-test.nl
+accountDomain: https://account.pleio-test.nl
 adminDomain: review-admin.pleio-test.nl
 websitesAuto:
   - domain: review.pleio-test.nl
