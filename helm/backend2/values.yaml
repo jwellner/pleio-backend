@@ -56,7 +56,6 @@ ingress:
   manualAnnotations:
   # extra annotations for the ingress with auto certificates
   autoAnnotations:
-    nginx.ingress.kubernetes.io/from-to-www-redirect: 'true'
     cert-manager.io/issuer: letsencrypt-pleio-prod-issuer
 
 memcached:

@@ -70,3 +70,10 @@ app.kubernetes.io/instance: {{ .Release.Name }}
 app.kubernetes.io/component: {{ .Component }}
 {{- end }}
 {{- end -}}
+
+{{- define "backend2.hosts" -}}
+- {{ . | quote }}
+{{- if not (hasPrefix "*" .) }}
+- {{ printf "www.%s" . | quote }}
+{{- end }}
+{{- end -}}
