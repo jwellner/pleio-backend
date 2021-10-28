@@ -1,10 +1,8 @@
-accountDomain: https://account.pleio-test.nl
+accountDomain: https://account2.pleio-test.nl
 adminDomain: review-admin.pleio-test.nl
 websitesAuto:
   - domain: review.pleio-test.nl
     secretName: tls-review.pleio-test
-  - domain: '*.review.pleio-test.nl'
-    secretName: tls-wildcard.review.pleio-test
 
 env: test
 debug: 'True'
