@@ -41,14 +41,12 @@ spec:
   tls:
   {{- range .Values.websitesAuto }}
     - hosts:
-        - {{ .domain | quote }}
-        - {{ printf "www.%s" .domain | quote }}
+        {{- include "backend2.hosts" .domain | nindent 8 }}
       secretName: {{ .secretName }}
   {{- end }}
   {{- if .Values.adminDomain }}
     - hosts:
-        - {{ .Values.adminDomain }}
-        - {{ printf "www.%s" .Values.adminDomain | quote }}
+        {{- include "backend2.hosts" .Values.adminDomain | nindent 8 }}
       secretName: {{ include "backend2.tlsSecretName" . }}
   {{- end }}
 {{- end }}
@@ -82,7 +80,7 @@ spec:
   tls:
   {{- range .Values.websitesManual }}
     - hosts:
-        - {{ .domain | quote }}
+        {{- include "backend2.hosts" .domain | nindent 8 }}
       secretName: {{ .secretName }}
   {{- end }}
 {{- end }}
