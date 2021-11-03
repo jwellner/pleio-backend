@@ -141,7 +141,11 @@ DEFAULT_SITE_CONFIG = {
 
     'LAST_RECEIVED_BOUNCING_EMAIL': ("2021-01-01", 'Last received bouncing email'),
     'LAST_RECEIVED_DELETED_USER': ("2021-01-01", 'Last received deleted user'),
-    'CSP_HEADER_EXCEPTIONS': ([], 'CSP header exceptions')
+    'CSP_HEADER_EXCEPTIONS': ([], 'CSP header exceptions'),
+
+    'KALTURA_VIDEO_ENABLED': (False, 'Allow adding Kaltura videos'),
+    'KALTURA_VIDEO_PARTNER_ID': ('', 'Partner ID for Kaltura video urls'),
+    'KALTURA_VIDEO_PLAYER_ID': ('', 'Player ID for Kaltura video urls'),
 }
 """
 Default site configuration

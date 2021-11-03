@@ -182,6 +182,10 @@ class EditSiteSettingTestCase(FastTenantTestCase):
 
                         questionLockAfterActivity
                         questionLockAfterActivityLink
+
+                        kalturaVideoEnabled
+                        kalturaVideoPartnerId
+                        kalturaVideoPlayerId
                     }
                 }
             }
@@ -303,7 +307,11 @@ class EditSiteSettingTestCase(FastTenantTestCase):
                 "commentWithoutAccountEnabled": True,
 
                 "questionLockAfterActivity": True,
-                "questionLockAfterActivityLink": "https://test.link"
+                "questionLockAfterActivityLink": "https://test.link",
+
+                "kalturaVideoEnabled": True,
+                "kalturaVideoPartnerId": "123",
+                "kalturaVideoPlayerId": "456",
 
             }
         }
@@ -432,6 +440,10 @@ class EditSiteSettingTestCase(FastTenantTestCase):
 
         self.assertEqual(data["editSiteSetting"]["siteSettings"]["questionLockAfterActivity"], True)
         self.assertEqual(data["editSiteSetting"]["siteSettings"]["questionLockAfterActivityLink"], "https://test.link")
+
+        self.assertEqual(data["editSiteSetting"]["siteSettings"]["kalturaVideoEnabled"], True)
+        self.assertEqual(data["editSiteSetting"]["siteSettings"]["kalturaVideoPartnerId"], "123")
+        self.assertEqual(data["editSiteSetting"]["siteSettings"]["kalturaVideoPlayerId"], "456")
 
     @patch("core.lib.get_mimetype")
     @patch("{}.open".format(settings.DEFAULT_FILE_STORAGE))

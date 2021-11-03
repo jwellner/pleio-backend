@@ -179,6 +179,9 @@ def resolve_edit_site_setting(_, info, input):
         'questionLockAfterActivity': 'QUESTION_LOCK_AFTER_ACTIVITY',
         'questionLockAfterActivityLink': 'QUESTION_LOCK_AFTER_ACTIVITY_LINK',
 
+        'kalturaVideoEnabled': 'KALTURA_VIDEO_ENABLED',
+        'kalturaVideoPartnerId': 'KALTURA_VIDEO_PARTNER_ID',
+        'kalturaVideoPlayerId': 'KALTURA_VIDEO_PLAYER_ID',
     }
 
     for k, v in setting_keys.items():

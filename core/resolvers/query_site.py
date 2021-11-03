@@ -59,6 +59,9 @@ def get_settings():
         "showExtraHomepageFilters": config.ACTIVITY_FEED_FILTERS_ENABLED,
         "showViewsCount": config.SHOW_VIEW_COUNT,
         "showLoginRegister": config.SHOW_LOGIN_REGISTER,
+        'kalturaVideoEnabled': config.KALTURA_VIDEO_ENABLED,
+        'kalturaVideoPartnerId': config.KALTURA_VIDEO_PARTNER_ID,
+        'kalturaVideoPlayerId': config.KALTURA_VIDEO_PLAYER_ID,
     }
 
 
@@ -236,6 +239,9 @@ def get_site_settings():
         'commentWithoutAccountEnabled': config.COMMENT_WITHOUT_ACCOUNT_ENABLED,
         'questionLockAfterActivity': config.QUESTION_LOCK_AFTER_ACTIVITY,
         'questionLockAfterActivityLink': config.QUESTION_LOCK_AFTER_ACTIVITY_LINK,
+        'kalturaVideoEnabled': config.KALTURA_VIDEO_ENABLED,
+        'kalturaVideoPartnerId': config.KALTURA_VIDEO_PARTNER_ID,
+        'kalturaVideoPlayerId': config.KALTURA_VIDEO_PLAYER_ID,
     }
 
     return site_settings
