@@ -313,6 +313,7 @@ class EditSiteSettingTestCase(FastTenantTestCase):
         result = graphql_sync(schema, { "query": mutation, "variables": variables }, context_value={ "request": request })
 
         data = result[1]["data"]
+        self.assertNotIn("errors", result[1], f'Unexpected errors: {result[1].get("errors", [])}')
 
         self.assertEqual(data["editSiteSetting"]["siteSettings"]["language"], "en")
         self.assertEqual(data["editSiteSetting"]["siteSettings"]["extraLanguages"], ["nl"])
