@@ -36,6 +36,20 @@
             {{ form.errors.edit_user_name_enabled }}
         </div>
     </div>
+    <br />
+    <div class="card">
+        <h5 class="card-header">Custom Javascript</h5>
+        <div class="card-body">
+            <div class="mb-2 form-check">
+                <textarea class="form-control" rows="4" name="custom_javascript" id="custom_javascript">{{ config.CUSTOM_JAVASCRIPT }}</textarea>
+                <div class="form-text">
+                    Add custom javascript that will be captured within a &lt;script&gt; tag.
+                    There is no syntax check, so use a tool like <a target="_blank" href="https://jshint.com/">jshint</a>
+                    to check the validity.
+                </div>
+            </div>
+        </div>
+    </div>
     <br>
     <div class="card">
         <h5 class="card-header">CSP Header exceptions</h5>
