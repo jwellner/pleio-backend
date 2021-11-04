@@ -17,6 +17,7 @@ class SettingsForm(forms.Form):
         error_messages={'required': 'Choose at least one option'})
 
     edit_user_name_enabled = forms.BooleanField(required=False)
+    custom_javascript = forms.CharField(required=False)
     csp_header_exceptions = forms.CharField(required=False)
 
     def clean(self):
@@ -33,6 +34,7 @@ class SettingsForm(forms.Form):
 
         config.OIDC_PROVIDERS = data['oidc_providers']
         config.EDIT_USER_NAME_ENABLED = data['edit_user_name_enabled']
+        config.CUSTOM_JAVASCRIPT = data['custom_javascript']
         config.CSP_HEADER_EXCEPTIONS = data['csp_header_exceptions'].splitlines(False)
 
 class ScanIncidentFilter(django_filters.FilterSet):

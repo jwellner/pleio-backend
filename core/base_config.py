@@ -22,6 +22,7 @@ DEFAULT_SITE_CONFIG = {
         {'value': 'pleio', 'label': 'Pleio Account', 'isDefault': True},
         {'value': 'fnv', 'label': 'Mijn FNV'},
     ], 'Default OP options'),
+    'CUSTOM_JAVASCRIPT': ('', 'Custom Javascript'),
 
     'THEME_OPTIONS': (
         [{"value": 'leraar', 'label': 'Standaard'}, {'value': 'rijkshuisstijl', 'label': 'Rijkshuisstijl'}],

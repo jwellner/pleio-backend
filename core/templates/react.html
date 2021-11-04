@@ -100,6 +100,12 @@
     <script src="{% static 'frontend/web.js' %}" nonce="{{ CSP_NONCE }}"></script>
     {% endif %}
 
+    {% if config.CUSTOM_JAVASCRIPT %}
+    <script nonce="{{ CSP_NONCE }}">
+        {{ config.CUSTOM_JAVASCRIPT|safe }}
+    </script>
+    {% endif %}
+
     {% include 'elements/analytics.html' %}
 </body>
 </html>
