@@ -53,7 +53,6 @@ def scan(self, schema_name, limit=1000):
                 virus_count+=1
             elif result == FILE_SCAN.UNKNOWN:
                 errors_count+=1
-                continue
 
             with signal_disabler.disable():
                 file.last_scan = timezone.now()
