@@ -328,6 +328,7 @@ CSP_BASE_URI = ["'none'"]
 CSP_OBJECT_SRC = ["'none'"]
 CSP_IMG_SRC = [
     "'self'",
+    "data:",
     "https://statistiek.rijksoverheid.nl",
     "https://www.google-analytics.com",
     "https://i.ytimg.com",
