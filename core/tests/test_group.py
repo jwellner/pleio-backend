@@ -376,3 +376,30 @@ class GroupTestCase(FastTenantTestCase):
         data = result[1]["data"]
 
         self.assertEqual(data["entity"]["canChangeOwnership"], True)
+
+    inaccessible_field = ["members", "invite", "invited", "membershipRequests"]
+    def test_unaccessible_data_for_unauthenticated_user(self):
+        for field in self.inaccessible_field:
+            with self.subTest():
+                query = """
+                    query Group($guid: String!) {{
+                        entity(guid: $guid) {{
+                            ... on Group {{
+                                {field} {{ total }}
+                            }}
+                        }}
+                    }}
+                """.format(field=field)
+
+                request = HttpRequest()
+                request.user = self.anonymousUser
+
+                variables = {
+                    "guid": self.group.guid
+                }
+
+                result = graphql_sync(schema, { "query": query, "variables": variables }, context_value={ "request": request })
+
+                self.assertTrue(result[0])
+                self.assertNotIn("errors", result[1], f'Unexpected errors: {result[1].get("errors", [])}')
+                self.assertEqual(result[1]["data"]["entity"][field]["total"], 0)
