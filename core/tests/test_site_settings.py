@@ -228,6 +228,10 @@ class SiteSettingsTestCase(FastTenantTestCase):
                     flowUserGuid
 
                     commentWithoutAccountEnabled
+
+                    kalturaVideoEnabled
+                    kalturaVideoPartnerId
+                    kalturaVideoPlayerId
                 }
             }
         """
@@ -408,6 +412,9 @@ class SiteSettingsTestCase(FastTenantTestCase):
         self.assertEqual(data["siteSettings"]["flowCaseId"], None)
         self.assertEqual(data["siteSettings"]["flowUserGuid"], "")
         self.assertEqual(data["siteSettings"]["commentWithoutAccountEnabled"], False)
+        self.assertEqual(data["siteSettings"]["kalturaVideoEnabled"], False)
+        self.assertEqual(data["siteSettings"]["kalturaVideoPartnerId"], "")
+        self.assertEqual(data["siteSettings"]["kalturaVideoPlayerId"], "")
 
 
     def test_site_settings_by_anonymous(self):

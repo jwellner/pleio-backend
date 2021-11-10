@@ -714,6 +714,9 @@ input editSiteSettingInput {
   favicon: Upload
   removeFavicon: Boolean
   commentWithoutAccountEnabled: Boolean
+  kalturaVideoEnabled: Boolean
+  kalturaVideoPartnerId: String
+  kalturaVideoPlayerId: String
 }
 
 type editSiteSettingPayload {
@@ -1739,6 +1742,9 @@ type SiteSettings {
   editUserNameEnabled: Boolean!
   favicon: String
   commentWithoutAccountEnabled: Boolean!
+  kalturaVideoEnabled: Boolean!
+  kalturaVideoPartnerId: String
+  kalturaVideoPlayerId: String
 }
 
 type StatsItem {

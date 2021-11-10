@@ -182,6 +182,10 @@ class EditSiteSettingTestCase(FastTenantTestCase):
 
                         questionLockAfterActivity
                         questionLockAfterActivityLink
+
+                        kalturaVideoEnabled
+                        kalturaVideoPartnerId
+                        kalturaVideoPlayerId
                     }
                 }
             }
@@ -303,7 +307,11 @@ class EditSiteSettingTestCase(FastTenantTestCase):
                 "commentWithoutAccountEnabled": True,
 
                 "questionLockAfterActivity": True,
-                "questionLockAfterActivityLink": "https://test.link"
+                "questionLockAfterActivityLink": "https://test.link",
+
+                "kalturaVideoEnabled": True,
+                "kalturaVideoPartnerId": "123",
+                "kalturaVideoPlayerId": "456",
 
             }
         }
@@ -313,6 +321,7 @@ class EditSiteSettingTestCase(FastTenantTestCase):
         result = graphql_sync(schema, { "query": mutation, "variables": variables }, context_value={ "request": request })
 
         data = result[1]["data"]
+        self.assertNotIn("errors", result[1], f'Unexpected errors: {result[1].get("errors", [])}')
 
         self.assertEqual(data["editSiteSetting"]["siteSettings"]["language"], "en")
         self.assertEqual(data["editSiteSetting"]["siteSettings"]["extraLanguages"], ["nl"])
@@ -431,6 +440,10 @@ class EditSiteSettingTestCase(FastTenantTestCase):
 
         self.assertEqual(data["editSiteSetting"]["siteSettings"]["questionLockAfterActivity"], True)
         self.assertEqual(data["editSiteSetting"]["siteSettings"]["questionLockAfterActivityLink"], "https://test.link")
+
+        self.assertEqual(data["editSiteSetting"]["siteSettings"]["kalturaVideoEnabled"], True)
+        self.assertEqual(data["editSiteSetting"]["siteSettings"]["kalturaVideoPartnerId"], "123")
+        self.assertEqual(data["editSiteSetting"]["siteSettings"]["kalturaVideoPlayerId"], "456")
 
     @patch("core.lib.get_mimetype")
     @patch("{}.open".format(settings.DEFAULT_FILE_STORAGE))
