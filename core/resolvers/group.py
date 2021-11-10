@@ -221,6 +221,13 @@ def resolve_group_members(group, info, q=None, offset=0, limit=5, inSubgroupId=N
     # pylint: disable=unused-argument
     # pylint: disable=too-many-arguments
 
+    request_user = info.context["request"].user
+    if not request_user.is_authenticated:
+        return {
+            'total': 0,
+            'edges': [],
+        }
+
     members = group.members.filter(type__in=['admin', 'owner', 'member'])
 
     if inSubgroupId:
