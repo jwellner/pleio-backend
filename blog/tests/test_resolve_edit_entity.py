@@ -28,7 +28,6 @@ class EditBlogTestCase(FastTenantTestCase):
         self.group = mixer.blend(Group)
         self.blog = Blog.objects.create(
             title="Test public event",
-            description="Description",
             rich_description="JSON to string",
             read_access=[ACCESS_TYPE.public],
             write_access=[ACCESS_TYPE.user.format(self.authenticatedUser.id)],
@@ -54,7 +53,6 @@ class EditBlogTestCase(FastTenantTestCase):
             "input": {
                 "guid": self.blog.guid,
                 "title": "My first Event",
-                "description": "My description",
                 "richDescription": "richDescription",
                 "accessId": 0,
                 "writeAccessId": 0,
@@ -70,7 +68,6 @@ class EditBlogTestCase(FastTenantTestCase):
         mutation = """
             fragment BlogParts on Blog {
                 title
-                description
                 richDescription
                 timeCreated
                 timeUpdated
@@ -111,7 +108,6 @@ class EditBlogTestCase(FastTenantTestCase):
         data = result[1]["data"]
 
         self.assertEqual(data["editEntity"]["entity"]["title"], variables["input"]["title"])
-        self.assertEqual(data["editEntity"]["entity"]["description"], variables["input"]["description"])
         self.assertEqual(data["editEntity"]["entity"]["richDescription"], variables["input"]["richDescription"])
         self.assertEqual(data["editEntity"]["entity"]["tags"], variables["input"]["tags"])
         self.assertEqual(data["editEntity"]["entity"]["isRecommended"], False) # only admin can set isRecommended
@@ -124,7 +120,6 @@ class EditBlogTestCase(FastTenantTestCase):
         self.blog.refresh_from_db()
 
         self.assertEqual(data["editEntity"]["entity"]["title"], self.blog.title)
-        self.assertEqual(data["editEntity"]["entity"]["description"], self.blog.description)
         self.assertEqual(data["editEntity"]["entity"]["richDescription"], self.blog.rich_description)
         self.assertEqual(data["editEntity"]["entity"]["tags"], self.blog.tags)
         self.assertEqual(data["editEntity"]["entity"]["isRecommended"], self.blog.is_recommended)
@@ -137,7 +132,6 @@ class EditBlogTestCase(FastTenantTestCase):
             "input": {
                 "guid": self.blog.guid,
                 "title": "My first Event",
-                "description": "My description",
                 "richDescription": "richDescription",
                 "accessId": 0,
                 "writeAccessId": 0,
@@ -152,7 +146,6 @@ class EditBlogTestCase(FastTenantTestCase):
         mutation = """
             fragment BlogParts on Blog {
                 title
-                description
                 richDescription
                 timeCreated
                 timeUpdated
@@ -191,7 +184,6 @@ class EditBlogTestCase(FastTenantTestCase):
         data = result[1]["data"]
 
         self.assertEqual(data["editEntity"]["entity"]["title"], variables["input"]["title"])
-        self.assertEqual(data["editEntity"]["entity"]["description"], variables["input"]["description"])
         self.assertEqual(data["editEntity"]["entity"]["richDescription"], variables["input"]["richDescription"])
         self.assertEqual(data["editEntity"]["entity"]["tags"], variables["input"]["tags"])
         self.assertEqual(data["editEntity"]["entity"]["isRecommended"], True)
@@ -202,7 +194,6 @@ class EditBlogTestCase(FastTenantTestCase):
         self.blog.refresh_from_db()
 
         self.assertEqual(data["editEntity"]["entity"]["title"], self.blog.title)
-        self.assertEqual(data["editEntity"]["entity"]["description"], self.blog.description)
         self.assertEqual(data["editEntity"]["entity"]["richDescription"], self.blog.rich_description)
         self.assertEqual(data["editEntity"]["entity"]["tags"], self.blog.tags)
         self.assertEqual(data["editEntity"]["entity"]["isRecommended"], self.blog.is_recommended)
@@ -217,7 +208,6 @@ class EditBlogTestCase(FastTenantTestCase):
             "input": {
                 "guid": self.blog.guid,
                 "title": "My first Event",
-                "description": "My description",
                 "richDescription": "richDescription",
                 "accessId": 0,
                 "writeAccessId": 0,
@@ -232,7 +222,6 @@ class EditBlogTestCase(FastTenantTestCase):
         mutation = """
             fragment BlogParts on Blog {
                 title
-                description
                 richDescription
                 timeCreated
                 timeUpdated
@@ -286,7 +275,6 @@ class EditBlogTestCase(FastTenantTestCase):
             "input": {
                 "guid": self.blog.guid,
                 "title": "My first Event",
-                "description": "My description",
                 "richDescription": "richDescription",
                 "accessId": 0,
                 "writeAccessId": 0,
@@ -302,7 +290,6 @@ class EditBlogTestCase(FastTenantTestCase):
         mutation = """
             fragment BlogParts on Blog {
                 title
-                description
                 richDescription
                 timeCreated
                 timeUpdated
@@ -343,7 +330,6 @@ class EditBlogTestCase(FastTenantTestCase):
         data = result[1]["data"]
 
         self.assertEqual(data["editEntity"]["entity"]["title"], variables["input"]["title"])
-        self.assertEqual(data["editEntity"]["entity"]["description"], variables["input"]["description"])
         self.assertEqual(data["editEntity"]["entity"]["richDescription"], variables["input"]["richDescription"])
         self.assertEqual(data["editEntity"]["entity"]["tags"], variables["input"]["tags"])
         self.assertEqual(data["editEntity"]["entity"]["isRecommended"], False) # only admin can set isRecommended
@@ -356,7 +342,6 @@ class EditBlogTestCase(FastTenantTestCase):
         self.blog.refresh_from_db()
 
         self.assertEqual(data["editEntity"]["entity"]["title"], self.blog.title)
-        self.assertEqual(data["editEntity"]["entity"]["description"], self.blog.description)
         self.assertEqual(data["editEntity"]["entity"]["richDescription"], self.blog.rich_description)
         self.assertEqual(data["editEntity"]["entity"]["tags"], self.blog.tags)
         self.assertEqual(data["editEntity"]["entity"]["isRecommended"], self.blog.is_recommended)

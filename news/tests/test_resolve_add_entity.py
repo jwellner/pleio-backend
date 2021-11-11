@@ -26,7 +26,6 @@ class AddNewsTestCase(FastTenantTestCase):
                 "type": "object",
                 "subtype": "news",
                 "title": "My first News",
-                "description": "My description",
                 "richDescription": "richDescription",
                 "accessId": 0,
                 "writeAccessId": 0,
@@ -38,7 +37,6 @@ class AddNewsTestCase(FastTenantTestCase):
         self.mutation = """
             fragment NewsParts on News {
                 title
-                description
                 richDescription
                 timeCreated
                 timeUpdated
@@ -88,7 +86,6 @@ class AddNewsTestCase(FastTenantTestCase):
         data = result[1]["data"]
 
         self.assertEqual(data["addEntity"]["entity"]["title"], variables["input"]["title"])
-        self.assertEqual(data["addEntity"]["entity"]["description"], variables["input"]["description"])
         self.assertEqual(data["addEntity"]["entity"]["richDescription"], variables["input"]["richDescription"])
         self.assertEqual(data["addEntity"]["entity"]["tags"], variables["input"]["tags"])
         self.assertEqual(data["addEntity"]["entity"]["isFeatured"], True)
@@ -106,7 +103,6 @@ class AddNewsTestCase(FastTenantTestCase):
         data = result[1]["data"]
 
         self.assertEqual(data["addEntity"]["entity"]["title"], variables["input"]["title"])
-        self.assertEqual(data["addEntity"]["entity"]["description"], variables["input"]["description"])
         self.assertEqual(data["addEntity"]["entity"]["richDescription"], variables["input"]["richDescription"])
         self.assertEqual(data["addEntity"]["entity"]["tags"], variables["input"]["tags"])
         self.assertEqual(data["addEntity"]["entity"]["isFeatured"], True)

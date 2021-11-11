@@ -23,14 +23,12 @@ class PageTestCase(FastTenantTestCase):
                                                read_access=[ACCESS_TYPE.public],
                                                write_access=[ACCESS_TYPE.user.format(self.user1.id)],
                                                title="Test parent page",
-                                               description="Description",
                                                rich_description="JSON to string",
                                                )
         self.page_child = Page.objects.create(owner=self.user1,
                                               read_access=[ACCESS_TYPE.public],
                                               write_access=[ACCESS_TYPE.user.format(self.user1.id)],
                                               title="Test child page",
-                                              description="Description",
                                               rich_description="JSON to string",
                                               parent=self.page_parent
                                               )
@@ -38,7 +36,6 @@ class PageTestCase(FastTenantTestCase):
                                               read_access=[ACCESS_TYPE.user.format(self.user2.id)],
                                               write_access=[ACCESS_TYPE.user.format(self.user2.id)],
                                               title="Test child page other user",
-                                              description="Description",
                                               rich_description="JSON to string",
                                               parent=self.page_parent
                                               )
@@ -46,7 +43,6 @@ class PageTestCase(FastTenantTestCase):
                                                     read_access=[ACCESS_TYPE.public],
                                                     write_access=[ACCESS_TYPE.user.format(self.user1.id)],
                                                     title="Test child of child page",
-                                                    description="Description",
                                                     rich_description="JSON to string",
                                                     parent=self.page_child
                                                     )
@@ -72,7 +68,6 @@ class PageTestCase(FastTenantTestCase):
                 canEdit
                 title
                 url
-                description
                 richDescription
                 tags
                 accessId
@@ -109,7 +104,6 @@ class PageTestCase(FastTenantTestCase):
 
         data = result[1]["data"]
         self.assertEqual(data["entity"]["title"], "Test parent page")
-        self.assertEqual(data["entity"]["description"], "Description")
         self.assertEqual(data["entity"]["richDescription"], "JSON to string")
         self.assertEqual(data["entity"]["tags"], [])
         self.assertEqual(data["entity"]["accessId"], 2)
@@ -140,7 +134,6 @@ class PageTestCase(FastTenantTestCase):
                 canEdit
                 title
                 url
-                description
                 richDescription
                 tags
                 accessId
@@ -177,7 +170,6 @@ class PageTestCase(FastTenantTestCase):
 
         data = result[1]["data"]
         self.assertEqual(data["entity"]["title"], "Test child page")
-        self.assertEqual(data["entity"]["description"], "Description")
         self.assertEqual(data["entity"]["richDescription"], "JSON to string")
         self.assertEqual(data["entity"]["tags"], [])
         self.assertEqual(data["entity"]["accessId"], 2)

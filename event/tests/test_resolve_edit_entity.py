@@ -26,7 +26,6 @@ class EditEventTestCase(FastTenantTestCase):
 
         self.eventPublic = Event.objects.create(
             title="Test public event",
-            description="Description",
             rich_description="JSON to string",
             read_access=[ACCESS_TYPE.public],
             write_access=[ACCESS_TYPE.user.format(self.authenticatedUser.id)],
@@ -38,7 +37,6 @@ class EditEventTestCase(FastTenantTestCase):
             "input": {
                 "guid": self.eventPublic.guid,
                 "title": "My first Event",
-                "description": "My description",
                 "richDescription": "richDescription",
                 "accessId": 0,
                 "writeAccessId": 0,
@@ -55,7 +53,6 @@ class EditEventTestCase(FastTenantTestCase):
         self.mutation = """
             fragment EventParts on Event {
                 title
-                description
                 richDescription
                 timeCreated
                 timeUpdated
@@ -102,7 +99,6 @@ class EditEventTestCase(FastTenantTestCase):
         data = result[1]["data"]
 
         self.assertEqual(data["editEntity"]["entity"]["title"], variables["input"]["title"])
-        self.assertEqual(data["editEntity"]["entity"]["description"], variables["input"]["description"])
         self.assertEqual(data["editEntity"]["entity"]["richDescription"], variables["input"]["richDescription"])
         self.assertEqual(data["editEntity"]["entity"]["startDate"], "2019-10-02T09:00:00+02:00")
         self.assertEqual(data["editEntity"]["entity"]["endDate"], "2019-10-02T10:00:00+02:00")
@@ -115,7 +111,6 @@ class EditEventTestCase(FastTenantTestCase):
         self.eventPublic.refresh_from_db()
 
         self.assertEqual(data["editEntity"]["entity"]["title"], self.eventPublic.title)
-        self.assertEqual(data["editEntity"]["entity"]["description"], self.eventPublic.description)
         self.assertEqual(data["editEntity"]["entity"]["richDescription"], self.eventPublic.rich_description)
         self.assertEqual(data["editEntity"]["entity"]["startDate"], str(datetime_isoformat(self.eventPublic.start_date)))
         self.assertEqual(data["editEntity"]["entity"]["endDate"], str(datetime_isoformat(self.eventPublic.end_date)))
@@ -145,7 +140,6 @@ class EditEventTestCase(FastTenantTestCase):
         data = result[1]["data"]
 
         self.assertEqual(data["editEntity"]["entity"]["title"], variables["input"]["title"])
-        self.assertEqual(data["editEntity"]["entity"]["description"], variables["input"]["description"])
         self.assertEqual(data["editEntity"]["entity"]["richDescription"], variables["input"]["richDescription"])
         self.assertEqual(data["editEntity"]["entity"]["startDate"], "2019-10-02T09:00:00+02:00")
         self.assertEqual(data["editEntity"]["entity"]["endDate"], "2019-10-02T10:00:00+02:00")
@@ -162,7 +156,6 @@ class EditEventTestCase(FastTenantTestCase):
         self.eventPublic.refresh_from_db()
 
         self.assertEqual(data["editEntity"]["entity"]["title"], self.eventPublic.title)
-        self.assertEqual(data["editEntity"]["entity"]["description"], self.eventPublic.description)
         self.assertEqual(data["editEntity"]["entity"]["richDescription"], self.eventPublic.rich_description)
         self.assertEqual(data["editEntity"]["entity"]["startDate"], str(datetime_isoformat(self.eventPublic.start_date)))
         self.assertEqual(data["editEntity"]["entity"]["endDate"], str(datetime_isoformat(self.eventPublic.end_date)))

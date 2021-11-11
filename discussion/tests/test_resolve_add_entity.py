@@ -27,7 +27,6 @@ class AddDiscussionTestCase(FastTenantTestCase):
                 "type": "object",
                 "subtype": "discussion",
                 "title": "My first discussion",
-                "description": "My description",
                 "richDescription": "richDescription",
                 "accessId": 0,
                 "writeAccessId": 0,
@@ -44,7 +43,6 @@ class AddDiscussionTestCase(FastTenantTestCase):
         self.mutation = """
             fragment DiscussionParts on Discussion {
                 title
-                description
                 richDescription
                 timeCreated
                 timeUpdated
@@ -89,7 +87,6 @@ class AddDiscussionTestCase(FastTenantTestCase):
         data = result[1]["data"]
 
         self.assertEqual(data["addEntity"]["entity"]["title"], variables["input"]["title"])
-        self.assertEqual(data["addEntity"]["entity"]["description"], variables["input"]["description"])
         self.assertEqual(data["addEntity"]["entity"]["richDescription"], variables["input"]["richDescription"])
         self.assertEqual(data["addEntity"]["entity"]["isFeatured"], False) # only editor or admin can set
         self.assertEqual(data["addEntity"]["entity"]["featured"]["positionY"], 10)
@@ -110,7 +107,6 @@ class AddDiscussionTestCase(FastTenantTestCase):
         data = result[1]["data"]
 
         self.assertEqual(data["addEntity"]["entity"]["title"], variables["input"]["title"])
-        self.assertEqual(data["addEntity"]["entity"]["description"], variables["input"]["description"])
         self.assertEqual(data["addEntity"]["entity"]["richDescription"], variables["input"]["richDescription"])
         self.assertEqual(data["addEntity"]["entity"]["isFeatured"], True)
 
@@ -127,7 +123,6 @@ class AddDiscussionTestCase(FastTenantTestCase):
         data = result[1]["data"]
 
         self.assertEqual(data["addEntity"]["entity"]["title"], variables["input"]["title"])
-        self.assertEqual(data["addEntity"]["entity"]["description"], variables["input"]["description"])
         self.assertEqual(data["addEntity"]["entity"]["richDescription"], variables["input"]["richDescription"])
         self.assertEqual(data["addEntity"]["entity"]["inGroup"], True)
         self.assertEqual(data["addEntity"]["entity"]["group"]["guid"], self.group.guid)

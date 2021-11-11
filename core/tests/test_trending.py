@@ -22,7 +22,6 @@ class TrendingTestCase(FastTenantTestCase):
 
         self.blog1 = Blog.objects.create(
             title="Test1",
-            description="Description 1",
             rich_description="",
             read_access=[ACCESS_TYPE.public],
             write_access=[ACCESS_TYPE.user.format(self.user1.id)],
@@ -31,7 +30,6 @@ class TrendingTestCase(FastTenantTestCase):
         )
         self.blog2 = Blog.objects.create(
             title="Test2",
-            description="Description 2",
             rich_description="",
             read_access=[ACCESS_TYPE.public],
             write_access=[ACCESS_TYPE.user.format(self.user1.id)],
@@ -40,7 +38,6 @@ class TrendingTestCase(FastTenantTestCase):
         )
         self.blog3 = Blog.objects.create(
             title="Test3",
-            description="Description 3",
             rich_description="",
             read_access=[ACCESS_TYPE.public],
             write_access=[ACCESS_TYPE.user.format(self.user1.id)],
@@ -49,7 +46,6 @@ class TrendingTestCase(FastTenantTestCase):
         )
         self.blog4 = Blog.objects.create(
             title="Test4",
-            description="Description 4",
             rich_description="",
             read_access=[ACCESS_TYPE.public],
             write_access=[ACCESS_TYPE.user.format(self.user1.id)],
@@ -59,7 +55,6 @@ class TrendingTestCase(FastTenantTestCase):
 
         self.blog5 = Blog.objects.create(
             title="Test5",
-            description="Description 5",
             rich_description="",
             read_access=[ACCESS_TYPE.public],
             write_access=[ACCESS_TYPE.user.format(self.user1.id)],
@@ -69,7 +64,6 @@ class TrendingTestCase(FastTenantTestCase):
 
         self.blog6 = Blog.objects.create(
             title="Test6",
-            description="Description 6",
             rich_description="",
             read_access=[ACCESS_TYPE.public],
             write_access=[ACCESS_TYPE.user.format(self.user1.id)],

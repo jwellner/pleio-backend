@@ -69,10 +69,9 @@ def resolve_edit_group(_, info, input):
         group.featured_video_title = ""
         group.featured_alt = ""
 
-    if 'description' in clean_input:
-        group.description = clean_input.get("description")
     if 'richDescription' in clean_input:
         group.rich_description = clean_input.get("richDescription")
+
     if 'introduction' in clean_input:
         group.introduction = clean_input.get("introduction")
     if 'isIntroductionPublic' in clean_input:

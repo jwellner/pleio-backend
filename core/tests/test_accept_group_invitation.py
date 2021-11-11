@@ -39,7 +39,6 @@ class AcceptGroupInvitationTestCase(FastTenantTestCase):
                     ... on Group {
                         name
                         plugins
-                        description
                         icon
                         isClosed
                         url
@@ -99,7 +98,6 @@ class AcceptGroupInvitationTestCase(FastTenantTestCase):
                     ... on Group {
                         name
                         plugins
-                        description
                         icon
                         isClosed
                         url

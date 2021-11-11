@@ -23,7 +23,6 @@ class AddWikiCase(FastTenantTestCase):
 
         self.wikiPublic = Wiki.objects.create(
             title="Test public wiki",
-            description="Description",
             rich_description="JSON to string",
             read_access=[ACCESS_TYPE.public],
             write_access=[ACCESS_TYPE.user.format(self.authenticatedUser.id)],
@@ -34,7 +33,6 @@ class AddWikiCase(FastTenantTestCase):
             "input": {
                 "guid": self.wikiPublic.guid,
                 "title": "My first Wiki",
-                "description": "My description",
                 "richDescription": "richDescription",
                 "accessId": 0,
                 "writeAccessId": 0,
@@ -51,7 +49,6 @@ class AddWikiCase(FastTenantTestCase):
         self.mutation = """
             fragment WikiParts on Wiki {
                 title
-                description
                 richDescription
                 timeCreated
                 timeUpdated
@@ -109,7 +106,6 @@ class AddWikiCase(FastTenantTestCase):
         data = result[1]["data"]
 
         self.assertEqual(data["editEntity"]["entity"]["title"], variables["input"]["title"])
-        self.assertEqual(data["editEntity"]["entity"]["description"], variables["input"]["description"])
         self.assertEqual(data["editEntity"]["entity"]["richDescription"], variables["input"]["richDescription"])
         self.assertEqual(data["editEntity"]["entity"]["hasChildren"], False)
         self.assertEqual(data["editEntity"]["entity"]["isFeatured"], False) # nly with editor or admin role
@@ -125,7 +121,6 @@ class AddWikiCase(FastTenantTestCase):
         self.wikiPublic.refresh_from_db()
 
         self.assertEqual(data["editEntity"]["entity"]["title"], self.wikiPublic.title)
-        self.assertEqual(data["editEntity"]["entity"]["description"], self.wikiPublic.description)
         self.assertEqual(data["editEntity"]["entity"]["richDescription"], self.wikiPublic.rich_description)
         self.assertEqual(data["editEntity"]["entity"]["hasChildren"], self.wikiPublic.has_children())
         self.assertEqual(data["editEntity"]["entity"]["isFeatured"], self.wikiPublic.is_featured)
@@ -146,7 +141,6 @@ class AddWikiCase(FastTenantTestCase):
         data = result[1]["data"]
 
         self.assertEqual(data["editEntity"]["entity"]["title"], variables["input"]["title"])
-        self.assertEqual(data["editEntity"]["entity"]["description"], variables["input"]["description"])
         self.assertEqual(data["editEntity"]["entity"]["richDescription"], variables["input"]["richDescription"])
         self.assertEqual(data["editEntity"]["entity"]["hasChildren"], False)
         self.assertEqual(data["editEntity"]["entity"]["isFeatured"], True)
@@ -158,7 +152,6 @@ class AddWikiCase(FastTenantTestCase):
         self.wikiPublic.refresh_from_db()
 
         self.assertEqual(data["editEntity"]["entity"]["title"], self.wikiPublic.title)
-        self.assertEqual(data["editEntity"]["entity"]["description"], self.wikiPublic.description)
         self.assertEqual(data["editEntity"]["entity"]["richDescription"], self.wikiPublic.rich_description)
         self.assertEqual(data["editEntity"]["entity"]["hasChildren"], self.wikiPublic.has_children())
         self.assertEqual(data["editEntity"]["entity"]["isFeatured"], self.wikiPublic.is_featured)

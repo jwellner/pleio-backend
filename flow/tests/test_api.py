@@ -56,7 +56,7 @@ class FlowApiTests(TenantTestCase):
         response = self.c.post("/flow/comments/add", headers=headers, data=self.data)
 
         comment = Comment.objects.all().first()
-        self.assertEqual(comment.description, 'test_description')
+        self.assertEqual(comment.rich_description, 'test_description')
         self.assertEqual(str(comment.container.id), str(self.blog1.id))
         self.assertEqual(comment.owner, self.user1)
 

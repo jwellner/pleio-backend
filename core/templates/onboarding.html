@@ -7,7 +7,7 @@
 {% block content %}
 
 {% if config.ONBOARDING_INTRO %}
-    {% draft_to_html config.ONBOARDING_INTRO %}
+    {% tiptap_to_html config.ONBOARDING_INTRO %}
 {% endif %}
 
 {% if not is_profile_complete %}

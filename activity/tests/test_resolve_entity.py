@@ -23,7 +23,6 @@ class StatusUpdateTestCase(FastTenantTestCase):
 
         self.statusPublic = StatusUpdate.objects.create(
             title="Test public event",
-            description="Description",
             rich_description="JSON to string",
             read_access=[ACCESS_TYPE.public],
             write_access=[ACCESS_TYPE.user.format(self.authenticatedUser.id)],
@@ -32,7 +31,6 @@ class StatusUpdateTestCase(FastTenantTestCase):
 
         self.statusPrivate = StatusUpdate.objects.create(
             title="Test private event",
-            description="Description",
             rich_description="JSON to string",
             read_access=[ACCESS_TYPE.user.format(self.authenticatedUser.id)],
             write_access=[ACCESS_TYPE.user.format(self.authenticatedUser.id)],
@@ -42,7 +40,6 @@ class StatusUpdateTestCase(FastTenantTestCase):
         self.query = """
             fragment StatusUpdateParts on StatusUpdate {
                 title
-                description
                 richDescription
                 timeCreated
                 timeUpdated
@@ -95,7 +92,6 @@ class StatusUpdateTestCase(FastTenantTestCase):
 
         self.assertEqual(data["entity"]["guid"], self.statusPublic.guid)
         self.assertEqual(data["entity"]["title"], self.statusPublic.title)
-        self.assertEqual(data["entity"]["description"], self.statusPublic.description)
         self.assertEqual(data["entity"]["richDescription"], self.statusPublic.rich_description)
         self.assertEqual(data["entity"]["accessId"], 2)
         self.assertEqual(data["entity"]["timeCreated"], str(self.statusPublic.created_at))
@@ -139,7 +135,6 @@ class StatusUpdateTestCase(FastTenantTestCase):
 
         self.assertEqual(data["entity"]["guid"], self.statusPrivate.guid)
         self.assertEqual(data["entity"]["title"], self.statusPrivate.title)
-        self.assertEqual(data["entity"]["description"], self.statusPrivate.description)
         self.assertEqual(data["entity"]["richDescription"], self.statusPrivate.rich_description)
         self.assertEqual(data["entity"]["accessId"], 0)
         self.assertEqual(data["entity"]["timeCreated"], str(self.statusPrivate.created_at))

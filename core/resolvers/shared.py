@@ -1,8 +1,8 @@
-import html2text
 from core.constances import ACCESS_TYPE
 from core.models import EntityViewCount
 from django.utils.text import Truncator
 from django.core.exceptions import ObjectDoesNotExist
+from core.utils.convert import tiptap_to_text
 
 def resolve_entity_access_id(obj, info):
     # pylint: disable=unused-argument
@@ -63,7 +63,7 @@ def resolve_entity_title(obj, info):
 
 def resolve_entity_description(obj, info):
     # pylint: disable=unused-argument
-    return obj.description
+    return tiptap_to_text(obj.rich_description)
 
 def resolve_entity_rich_description(obj, info):
     # pylint: disable=unused-argument
@@ -71,7 +71,7 @@ def resolve_entity_rich_description(obj, info):
 
 def resolve_entity_excerpt(obj, info):
     # pylint: disable=unused-argument
-    return Truncator(html2text.HTML2Text().handle(obj.description)).words(26)
+    return Truncator(tiptap_to_text(obj.rich_description)).words(26)
 
 def resolve_entity_tags(obj, info):
     # pylint: disable=unused-argument

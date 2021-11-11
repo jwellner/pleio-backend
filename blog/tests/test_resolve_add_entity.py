@@ -27,7 +27,6 @@ class AddBlogTestCase(FastTenantTestCase):
                 "type": "object",
                 "subtype": "blog",
                 "title": "My first Blog",
-                "description": "My description",
                 "richDescription": "richDescription",
                 "accessId": 0,
                 "writeAccessId": 0,
@@ -38,7 +37,6 @@ class AddBlogTestCase(FastTenantTestCase):
         self.mutation = """
             fragment BlogParts on Blog {
                 title
-                description
                 richDescription
                 timeCreated
                 timeUpdated
@@ -77,7 +75,6 @@ class AddBlogTestCase(FastTenantTestCase):
         data = result[1]["data"]
 
         self.assertEqual(data["addEntity"]["entity"]["title"], variables["input"]["title"])
-        self.assertEqual(data["addEntity"]["entity"]["description"], variables["input"]["description"])
         self.assertEqual(data["addEntity"]["entity"]["richDescription"], variables["input"]["richDescription"])
         self.assertEqual(data["addEntity"]["entity"]["tags"], variables["input"]["tags"])
         self.assertEqual(data["addEntity"]["entity"]["isRecommended"], False)
@@ -95,7 +92,6 @@ class AddBlogTestCase(FastTenantTestCase):
         data = result[1]["data"]
 
         self.assertEqual(data["addEntity"]["entity"]["title"], variables["input"]["title"])
-        self.assertEqual(data["addEntity"]["entity"]["description"], variables["input"]["description"])
         self.assertEqual(data["addEntity"]["entity"]["richDescription"], variables["input"]["richDescription"])
         self.assertEqual(data["addEntity"]["entity"]["tags"], variables["input"]["tags"])
         self.assertEqual(data["addEntity"]["entity"]["isRecommended"], True)
@@ -114,7 +110,6 @@ class AddBlogTestCase(FastTenantTestCase):
         data = result[1]["data"]
 
         self.assertEqual(data["addEntity"]["entity"]["title"], variables["input"]["title"])
-        self.assertEqual(data["addEntity"]["entity"]["description"], variables["input"]["description"])
         self.assertEqual(data["addEntity"]["entity"]["richDescription"], variables["input"]["richDescription"])
         self.assertEqual(data["addEntity"]["entity"]["inGroup"], True)
         self.assertEqual(data["addEntity"]["entity"]["group"]["guid"], self.group.guid)
@@ -128,7 +123,6 @@ class AddBlogTestCase(FastTenantTestCase):
                 "type": "object",
                 "subtype": "blog",
                 "title": "My first Blog",
-                "description": "My description",
                 "richDescription": "richDescription",
                 "accessId": 0,
                 "writeAccessId": 0,
@@ -140,7 +134,6 @@ class AddBlogTestCase(FastTenantTestCase):
         mutation = """
             fragment BlogParts on Blog {
                 title
-                description
                 richDescription
                 timeCreated
                 timeUpdated
@@ -176,7 +169,6 @@ class AddBlogTestCase(FastTenantTestCase):
         data = result[1]["data"]
 
         self.assertEqual(data["addEntity"]["entity"]["title"], variables["input"]["title"])
-        self.assertEqual(data["addEntity"]["entity"]["description"], variables["input"]["description"])
         self.assertEqual(data["addEntity"]["entity"]["richDescription"], variables["input"]["richDescription"])
         self.assertEqual(data["addEntity"]["entity"]["tags"], variables["input"]["tags"])
         self.assertEqual(data["addEntity"]["entity"]["isRecommended"], True)

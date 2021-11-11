@@ -22,7 +22,6 @@ class QuestionTestCase(FastTenantTestCase):
 
         self.questionPublic = Question.objects.create(
             title="Test public question",
-            description="Description",
             rich_description="JSON to string",
             read_access=[ACCESS_TYPE.public],
             write_access=[ACCESS_TYPE.user.format(self.authenticatedUser.id)],
@@ -33,7 +32,6 @@ class QuestionTestCase(FastTenantTestCase):
 
         self.questionPrivate = Question.objects.create(
             title="Test private question",
-            description="Description",
             rich_description="JSON to string",
             read_access=[ACCESS_TYPE.user.format(self.authenticatedUser.id)],
             write_access=[ACCESS_TYPE.user.format(self.authenticatedUser.id)],
@@ -62,7 +60,6 @@ class QuestionTestCase(FastTenantTestCase):
         query = """
             fragment QuestionParts on Question {
                 title
-                description
                 richDescription
                 accessId
                 timeCreated
@@ -87,7 +84,6 @@ class QuestionTestCase(FastTenantTestCase):
                 canChooseBestAnswer
                 comments {
                     guid
-                    description
                     richDescription
                     isBestAnswer
                     canEdit
@@ -126,7 +122,6 @@ class QuestionTestCase(FastTenantTestCase):
 
         self.assertEqual(data["entity"]["guid"], self.questionPublic.guid)
         self.assertEqual(data["entity"]["title"], self.questionPublic.title)
-        self.assertEqual(data["entity"]["description"], self.questionPublic.description)
         self.assertEqual(data["entity"]["richDescription"], self.questionPublic.rich_description)
         self.assertEqual(data["entity"]["accessId"], 2)
         self.assertEqual(data["entity"]["timeCreated"], str(self.questionPublic.created_at))
@@ -164,7 +159,6 @@ class QuestionTestCase(FastTenantTestCase):
         query = """
             fragment QuestionParts on Question {
                 title
-                description
                 richDescription
                 accessId
                 timeCreated
@@ -189,7 +183,6 @@ class QuestionTestCase(FastTenantTestCase):
                 canChooseBestAnswer
                 comments {
                     guid
-                    description
                     richDescription
                     isBestAnswer
                     canEdit
@@ -228,7 +221,6 @@ class QuestionTestCase(FastTenantTestCase):
 
         self.assertEqual(data["entity"]["guid"], self.questionPrivate.guid)
         self.assertEqual(data["entity"]["title"], self.questionPrivate.title)
-        self.assertEqual(data["entity"]["description"], self.questionPrivate.description)
         self.assertEqual(data["entity"]["richDescription"], self.questionPrivate.rich_description)
         self.assertEqual(data["entity"]["accessId"], 0)
         self.assertEqual(data["entity"]["timeCreated"], str(self.questionPrivate.created_at))
@@ -255,7 +247,6 @@ class QuestionTestCase(FastTenantTestCase):
         query = """
             fragment QuestionParts on Question {
                 title
-                description
                 richDescription
                 accessId
                 timeCreated
@@ -280,7 +271,6 @@ class QuestionTestCase(FastTenantTestCase):
                 canChooseBestAnswer
                 comments {
                     guid
-                    description
                     richDescription
                     isBestAnswer
                     canEdit
@@ -319,7 +309,6 @@ class QuestionTestCase(FastTenantTestCase):
 
         self.assertEqual(data["entity"]["guid"], self.questionPrivate.guid)
         self.assertEqual(data["entity"]["title"], self.questionPrivate.title)
-        self.assertEqual(data["entity"]["description"], self.questionPrivate.description)
         self.assertEqual(data["entity"]["richDescription"], self.questionPrivate.rich_description)
         self.assertEqual(data["entity"]["accessId"], 0)
         self.assertEqual(data["entity"]["timeCreated"], str(self.questionPrivate.created_at))

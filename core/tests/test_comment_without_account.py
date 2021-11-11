@@ -22,7 +22,6 @@ class CommentWithoutAccountTestCase(FastTenantTestCase):
 
         self.blogPublic = Blog.objects.create(
             title="Test public blog",
-            description="Description",
             rich_description="JSON to string",
             read_access=[ACCESS_TYPE.public],
             write_access=[ACCESS_TYPE.user.format(self.authenticatedUser.id)],
@@ -57,7 +56,6 @@ class CommentWithoutAccountTestCase(FastTenantTestCase):
                 "containerGuid": self.blogPublic.guid,
                 "email": "test@test.com",
                 "name": "Unit Tester",
-                "description": "Yolo!",
                 "richDescription": ""
             }
         }
@@ -85,7 +83,6 @@ class CommentWithoutAccountTestCase(FastTenantTestCase):
                 "containerGuid": self.blogPublic.guid,
                 "email": "xxxx",
                 "name": "Unit Tester",
-                "description": "Yolo!",
                 "richDescription": ""
             }
         }
@@ -114,7 +111,6 @@ class CommentWithoutAccountTestCase(FastTenantTestCase):
                 "containerGuid": self.blogPublic.guid,
                 "email": "test@test.com",
                 "name": "Unit Tester",
-                "description": "Yolo!",
                 "richDescription": ""
             }
         }
@@ -150,7 +146,6 @@ class CommentWithoutAccountTestCase(FastTenantTestCase):
         comment = self.blogPublic.comments.first()
 
         self.assertEqual(comment.owner, None)
-        self.assertEqual(comment.description, "Yolo!")
         self.assertEqual(comment.email, "test@test.com")
         self.assertEqual(comment.name, "Unit Tester")
 

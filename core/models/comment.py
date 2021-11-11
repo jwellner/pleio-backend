@@ -70,7 +70,7 @@ class CommentRequest(models.Model):
     name = models.CharField(max_length=256, null=True, blank=True)
     email = models.CharField(max_length=256, null=True, blank=True)
 
-    description = models.TextField()
+    description = models.TextField(default="")
     rich_description = models.TextField(null=True, blank=True)
 
     created_at = models.DateTimeField(default=timezone.now)

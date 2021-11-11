@@ -8,7 +8,7 @@ class StatusUpdate(Entity, VoteMixin, CommentMixin, BookmarkMixin, FollowMixin, 
         ordering = ['-published']
 
     title = models.CharField(max_length=256, blank=True)
-    description = models.TextField()
+    description = models.TextField(default="")
     rich_description = models.TextField(null=True, blank=True)
 
     def __str__(self):

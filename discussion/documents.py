@@ -3,6 +3,7 @@ from django_elasticsearch_dsl.registries import registry
 from .models import Discussion
 from core.models import Comment
 from core.documents import DefaultDocument, custom_analyzer
+from core.utils.convert import tiptap_to_text
 
 
 @registry.register_document
@@ -27,6 +28,12 @@ class DiscussionDocument(DefaultDocument):
 
     def get_instances_from_related(self, related_instance):
         return related_instance.container
+
+    def prepare_description(self, instance):
+        return tiptap_to_text(instance.rich_description)
+
+    def prepare_comments(self, instance):
+        return list(map(lambda comment: {"description": tiptap_to_text(comment.rich_description)}, list(instance.comments.all())))
 
     class Index:
         name = 'discussion'

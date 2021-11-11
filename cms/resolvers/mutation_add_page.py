@@ -2,6 +2,7 @@ from graphql import GraphQLError
 from django.core.exceptions import ObjectDoesNotExist
 from core.lib import remove_none_from_dict, access_id_to_acl
 from core.constances import NOT_LOGGED_IN, COULD_NOT_SAVE, COULD_NOT_FIND, INVALID_DATE
+from core.utils.convert import tiptap_to_text
 from cms.models import Page
 from django.utils import dateparse
 
@@ -39,8 +40,9 @@ def resolve_add_page(_, info, input):
             raise GraphQLError(COULD_NOT_FIND)
 
     entity.title = clean_input.get("title")
-    entity.description = clean_input.get("description")
     entity.rich_description = clean_input.get("richDescription")
+    entity.description = tiptap_to_text(entity.rich_description)
+
     entity.page_type = clean_input.get("pageType")
 
     if 'timePublished' in clean_input:

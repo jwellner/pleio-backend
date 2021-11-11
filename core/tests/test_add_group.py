@@ -27,7 +27,6 @@ class AddGroupCase(FastTenantTestCase):
             "group": {
                 "name": "Name",
                 "icon": "icon.png",
-                "description": "description",
                 "richDescription": "<p>richDescription</p>",
                 "introduction": "introductionMessage",
                 "isIntroductionPublic": False,
@@ -51,7 +50,6 @@ class AddGroupCase(FastTenantTestCase):
                         guid
                         name
                         icon
-                        description
                         richDescription
                         introduction
                         welcomeMessage
@@ -98,7 +96,6 @@ class AddGroupCase(FastTenantTestCase):
                         guid
                         name
                         icon
-                        description
                         richDescription
                         introduction
                         isIntroductionPublic
@@ -125,7 +122,6 @@ class AddGroupCase(FastTenantTestCase):
 
         self.assertEqual(data["addGroup"]["group"]["name"], variables["group"]["name"])
         self.assertIn('/icon.png', data["addGroup"]["group"]["icon"])
-        self.assertEqual(data["addGroup"]["group"]["description"], variables["group"]["description"])
         self.assertEqual(data["addGroup"]["group"]["richDescription"], variables["group"]["richDescription"])
         self.assertEqual(data["addGroup"]["group"]["introduction"], variables["group"]["introduction"])
         self.assertEqual(data["addGroup"]["group"]["isIntroductionPublic"], variables["group"]["isIntroductionPublic"])
@@ -149,7 +145,6 @@ class AddGroupCase(FastTenantTestCase):
                         guid
                         name
                         icon
-                        description
                         richDescription
                         introduction
                         welcomeMessage
@@ -193,7 +188,6 @@ class AddGroupCase(FastTenantTestCase):
                         guid
                         name
                         icon
-                        description
                         richDescription
                         introduction
                         welcomeMessage
@@ -220,7 +214,6 @@ class AddGroupCase(FastTenantTestCase):
         #self(data["addGroup"]["group"]["guid"], 'group:')
         self.assertEqual(data["addGroup"]["group"]["name"], variables["group"]["name"])
         self.assertIn('/icon.png', data["addGroup"]["group"]["icon"])
-        self.assertEqual(data["addGroup"]["group"]["description"], variables["group"]["description"])
         self.assertEqual(data["addGroup"]["group"]["richDescription"], variables["group"]["richDescription"])
         self.assertEqual(data["addGroup"]["group"]["introduction"], variables["group"]["introduction"])
         self.assertEqual(data["addGroup"]["group"]["welcomeMessage"], variables["group"]["welcomeMessage"])

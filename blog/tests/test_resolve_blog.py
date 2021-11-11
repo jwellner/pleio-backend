@@ -22,7 +22,6 @@ class BlogTestCase(FastTenantTestCase):
 
         self.blogPublic = Blog.objects.create(
             title="Test public blog",
-            description="Description",
             rich_description="JSON to string",
             read_access=[ACCESS_TYPE.public],
             write_access=[ACCESS_TYPE.user.format(self.authenticatedUser.id)],
@@ -32,7 +31,6 @@ class BlogTestCase(FastTenantTestCase):
 
         self.blogPrivate = Blog.objects.create(
             title="Test private blog",
-            description="Description",
             rich_description="JSON to string",
             read_access=[ACCESS_TYPE.user.format(self.authenticatedUser.id)],
             write_access=[ACCESS_TYPE.user.format(self.authenticatedUser.id)],
@@ -51,7 +49,6 @@ class BlogTestCase(FastTenantTestCase):
         query = """
             fragment BlogParts on Blog {
                 title
-                description
                 richDescription
                 accessId
                 timeCreated
@@ -101,7 +98,6 @@ class BlogTestCase(FastTenantTestCase):
 
         self.assertEqual(data["entity"]["guid"], self.blogPublic.guid)
         self.assertEqual(data["entity"]["title"], self.blogPublic.title)
-        self.assertEqual(data["entity"]["description"], self.blogPublic.description)
         self.assertEqual(data["entity"]["richDescription"], self.blogPublic.rich_description)
         self.assertEqual(data["entity"]["accessId"], 2)
         self.assertEqual(data["entity"]["timeCreated"], str(self.blogPublic.created_at))

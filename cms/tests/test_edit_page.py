@@ -44,7 +44,6 @@ class EditPageTestCase(FastTenantTestCase):
                 canEdit
                 title
                 url
-                description
                 richDescription
                 tags
                 parent {
@@ -59,7 +58,6 @@ class EditPageTestCase(FastTenantTestCase):
                 "title": "test",
                 "accessId": 1,
                 "tags": [],
-                "description": "test",
                 "richDescription": '{"blocks":[{"key":"6sb64","text":"test","type":"unstyled","depth":0,"inlineStyleRanges":[],"entityRanges":[],"data":{}}],"entityMap":{}}'
 
             }
@@ -73,7 +71,6 @@ class EditPageTestCase(FastTenantTestCase):
         data = result[1]["data"]
 
         self.assertEqual(data["editPage"]["entity"]["title"], "test")
-        self.assertEqual(data["editPage"]["entity"]["description"], "test")
         self.assertEqual(data["editPage"]["entity"]["richDescription"], '{"blocks":[{"key":"6sb64","text":"test","type":"unstyled","depth":0,"inlineStyleRanges":[],"entityRanges":[],"data":{}}],"entityMap":{}}')
         self.assertEqual(data["editPage"]["entity"]["tags"], [])
         self.assertEqual(data["editPage"]["entity"]["accessId"], 1)
@@ -99,7 +96,6 @@ class EditPageTestCase(FastTenantTestCase):
                 canEdit
                 title
                 url
-                description
                 richDescription
                 tags
                 parent {
@@ -114,7 +110,6 @@ class EditPageTestCase(FastTenantTestCase):
                 "title": "test",
                 "accessId": 1,
                 "tags": [],
-                "description": "test",
                 "richDescription": '{"blocks":[{"key":"6sb64","text":"test","type":"unstyled","depth":0,"inlineStyleRanges":[],"entityRanges":[],"data":{}}],"entityMap":{}}'
 
             }
@@ -128,7 +123,6 @@ class EditPageTestCase(FastTenantTestCase):
         data = result[1]["data"]
 
         self.assertEqual(data["editPage"]["entity"]["title"], "test")
-        self.assertEqual(data["editPage"]["entity"]["description"], "test")
         self.assertEqual(data["editPage"]["entity"]["richDescription"], '{"blocks":[{"key":"6sb64","text":"test","type":"unstyled","depth":0,"inlineStyleRanges":[],"entityRanges":[],"data":{}}],"entityMap":{}}')
         self.assertEqual(data["editPage"]["entity"]["tags"], [])
         self.assertEqual(data["editPage"]["entity"]["accessId"], 1)
@@ -154,7 +148,6 @@ class EditPageTestCase(FastTenantTestCase):
                 canEdit
                 title
                 url
-                description
                 richDescription
                 tags
                 parent {
@@ -169,7 +162,6 @@ class EditPageTestCase(FastTenantTestCase):
                 "title": "test",
                 "accessId": 1,
                 "tags": [],
-                "description": "test",
                 "richDescription": '{"blocks":[{"key":"6sb64","text":"test","type":"unstyled","depth":0,"inlineStyleRanges":[],"entityRanges":[],"data":{}}],"entityMap":{}}'
 
             }
@@ -203,7 +195,6 @@ class EditPageTestCase(FastTenantTestCase):
                 canEdit
                 title
                 url
-                description
                 richDescription
                 tags
                 parent {
@@ -218,7 +209,6 @@ class EditPageTestCase(FastTenantTestCase):
                 "title": "test",
                 "accessId": 1,
                 "tags": [],
-                "description": "test",
                 "richDescription": '{"blocks":[{"key":"6sb64","text":"test","type":"unstyled","depth":0,"inlineStyleRanges":[],"entityRanges":[],"data":{}}],"entityMap":{}}'
 
             }
