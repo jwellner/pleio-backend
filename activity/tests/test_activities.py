@@ -63,7 +63,6 @@ class ActivitiesTestCase(FastTenantTestCase):
         self.comment = Comment.objects.create(
             owner=self.user2,
             container=self.blog1,
-            description="Just testing",
             rich_description="Just testing"
         )
 
@@ -89,7 +88,6 @@ class ActivitiesTestCase(FastTenantTestCase):
             title
             url
             excerpt
-            description
             richDescription
             isHighlighted
             featured {
@@ -108,7 +106,6 @@ class ActivitiesTestCase(FastTenantTestCase):
             commentCount
             comments {
                 guid
-                description
                 richDescription
                 timeCreated
                 canEdit

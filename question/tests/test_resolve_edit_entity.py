@@ -24,7 +24,6 @@ class EditQuestionTestCase(FastTenantTestCase):
 
         self.question = Question.objects.create(
             title="Test public question",
-            description="Description",
             rich_description="JSON to string",
             read_access=[ACCESS_TYPE.public],
             write_access=[ACCESS_TYPE.user.format(self.authenticatedUser.id)],
@@ -35,7 +34,6 @@ class EditQuestionTestCase(FastTenantTestCase):
             "input": {
                 "guid": self.question.guid,
                 "title": "My first Question",
-                "description": "My description",
                 "richDescription": "richDescription",
                 "accessId": 0,
                 "writeAccessId": 0,
@@ -52,7 +50,6 @@ class EditQuestionTestCase(FastTenantTestCase):
         self.mutation = """
             fragment QuestionParts on Question {
                 title
-                description
                 richDescription
                 timeCreated
                 timeUpdated
@@ -101,7 +98,6 @@ class EditQuestionTestCase(FastTenantTestCase):
         data = result[1]["data"]
 
         self.assertEqual(data["editEntity"]["entity"]["title"], variables["input"]["title"])
-        self.assertEqual(data["editEntity"]["entity"]["description"], variables["input"]["description"])
         self.assertEqual(data["editEntity"]["entity"]["richDescription"], variables["input"]["richDescription"])
         self.assertEqual(data["editEntity"]["entity"]["tags"], variables["input"]["tags"])
         self.assertEqual(data["editEntity"]["entity"]["isClosed"], False)
@@ -114,7 +110,6 @@ class EditQuestionTestCase(FastTenantTestCase):
         self.question.refresh_from_db()
 
         self.assertEqual(data["editEntity"]["entity"]["title"], self.question.title)
-        self.assertEqual(data["editEntity"]["entity"]["description"], self.question.description)
         self.assertEqual(data["editEntity"]["entity"]["richDescription"], self.question.rich_description)
         self.assertEqual(data["editEntity"]["entity"]["tags"], self.question.tags)
         self.assertEqual(data["editEntity"]["entity"]["isClosed"], self.question.is_closed)
@@ -139,7 +134,6 @@ class EditQuestionTestCase(FastTenantTestCase):
         data = result[1]["data"]
 
         self.assertEqual(data["editEntity"]["entity"]["title"], variables["input"]["title"])
-        self.assertEqual(data["editEntity"]["entity"]["description"], variables["input"]["description"])
         self.assertEqual(data["editEntity"]["entity"]["richDescription"], variables["input"]["richDescription"])
         self.assertEqual(data["editEntity"]["entity"]["tags"], variables["input"]["tags"])
         self.assertEqual(data["editEntity"]["entity"]["isClosed"], False)
@@ -152,7 +146,6 @@ class EditQuestionTestCase(FastTenantTestCase):
         self.question.refresh_from_db()
 
         self.assertEqual(data["editEntity"]["entity"]["title"], self.question.title)
-        self.assertEqual(data["editEntity"]["entity"]["description"], self.question.description)
         self.assertEqual(data["editEntity"]["entity"]["richDescription"], self.question.rich_description)
         self.assertEqual(data["editEntity"]["entity"]["tags"], self.question.tags)
         self.assertEqual(data["editEntity"]["entity"]["isClosed"], self.question.is_closed)

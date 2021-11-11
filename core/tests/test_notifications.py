@@ -50,7 +50,6 @@ class NotificationsTestCase(FastTenantTestCase):
         )
         self.follow1 = self.blog1.add_follow(self.user2)
         self.comment1 = Comment.objects.create(
-            description='commenDescription1',
             owner=self.user1,
             container=self.blog1
         )

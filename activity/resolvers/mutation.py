@@ -4,6 +4,7 @@ from django.utils import dateparse
 from core import config
 from core.constances import NOT_LOGGED_IN, COULD_NOT_FIND, COULD_NOT_FIND_GROUP, COULD_NOT_SAVE, USER_ROLES, INVALID_DATE
 from core.lib import remove_none_from_dict, access_id_to_acl
+from core.utils.convert import tiptap_to_text
 from core.models import Group
 from user.models import User
 from ..models import StatusUpdate
@@ -58,8 +59,9 @@ def resolve_add_status_update(_, info, input):
     entity.write_access = access_id_to_acl(entity, clean_input.get("writeAccessId"))
 
     entity.title = clean_input.get("title", "")
-    entity.description = clean_input.get("description", "")
+
     entity.rich_description = clean_input.get("richDescription", "")
+    entity.description = tiptap_to_text(entity.rich_description)
 
     if 'timePublished' in clean_input:
         if clean_input.get("timePublished") is None:
@@ -101,10 +103,10 @@ def resolve_edit_status_update(_, info, input):
 
     if 'title' in clean_input:
         entity.title = clean_input.get("title")
-    if 'description' in clean_input:
-        entity.description = clean_input.get("description")
+
     if 'richDescription' in clean_input:
         entity.rich_description = clean_input.get("richDescription")
+        entity.description = tiptap_to_text(entity.rich_description)
 
     if 'tags' in clean_input:
         entity.tags = clean_input.get("tags")

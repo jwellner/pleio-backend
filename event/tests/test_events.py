@@ -28,7 +28,6 @@ class EventsTestCase(FastTenantTestCase):
 
         self.eventOneHourAgo = Event.objects.create(
             title="Test past event 1 hour ago",
-            description="Description",
             rich_description="JSON to string",
             read_access=[ACCESS_TYPE.public],
             write_access=[ACCESS_TYPE.user.format(self.user1.id)],
@@ -42,7 +41,6 @@ class EventsTestCase(FastTenantTestCase):
 
         self.eventFuture1 = Event.objects.create(
             title="Test future event 1",
-            description="Description",
             rich_description="JSON to string",
             read_access=[ACCESS_TYPE.logged_in],
             write_access=[ACCESS_TYPE.user.format(self.user1.id)],
@@ -56,7 +54,6 @@ class EventsTestCase(FastTenantTestCase):
 
         self.eventFuture2 = Event.objects.create(
             title="Test future event 2",
-            description="Description",
             rich_description="JSON to string",
             read_access=[ACCESS_TYPE.public],
             write_access=[ACCESS_TYPE.user.format(self.user1.id)],
@@ -70,7 +67,6 @@ class EventsTestCase(FastTenantTestCase):
 
         self.eventPast1 = Event.objects.create(
             title="Test past event 1",
-            description="Description",
             rich_description="JSON to string",
             read_access=[ACCESS_TYPE.public],
             write_access=[ACCESS_TYPE.user.format(self.user1.id)],
@@ -84,7 +80,6 @@ class EventsTestCase(FastTenantTestCase):
 
         self.eventFutureGroup = Event.objects.create(
             title="Test future event in group",
-            description="Description",
             rich_description="JSON to string",
             read_access=[ACCESS_TYPE.public],
             write_access=[ACCESS_TYPE.user.format(self.user1.id)],
@@ -134,7 +129,6 @@ class EventsTestCase(FastTenantTestCase):
                     commentCount
                     comments {
                         guid
-                        description
                         richDescription
                         timeCreated
                         canEdit

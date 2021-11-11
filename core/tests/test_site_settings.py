@@ -50,7 +50,6 @@ class SiteSettingsTestCase(FastTenantTestCase):
                     language
                     extraLanguages
                     name
-                    description
                     isClosed
                     allowRegistration
                     directRegistrationDomains
@@ -262,7 +261,6 @@ class SiteSettingsTestCase(FastTenantTestCase):
         self.assertEqual(data["siteSettings"]["name"], "Pleio 2.0")
         self.assertEqual(data["siteSettings"]["language"], "nl")
         self.assertEqual(data["siteSettings"]["extraLanguages"], [])
-        self.assertEqual(data["siteSettings"]["description"], "Omschrijving site")
         self.assertEqual(data["siteSettings"]["languageOptions"], get_language_options())
         self.assertEqual(data["siteSettings"]["isClosed"], False)
         self.assertEqual(data["siteSettings"]["allowRegistration"], True)

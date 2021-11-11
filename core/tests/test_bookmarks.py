@@ -21,7 +21,6 @@ class BookmarkTestCase(FastTenantTestCase):
 
         self.blog1 = Blog.objects.create(
             title="Test1",
-            description="Description",
             rich_description="",
             read_access=[ACCESS_TYPE.public],
             write_access=[ACCESS_TYPE.user.format(self.authenticatedUser.id)],
@@ -31,7 +30,6 @@ class BookmarkTestCase(FastTenantTestCase):
 
         self.blog2 = Blog.objects.create(
             title="Test2",
-            description="Description",
             rich_description="",
             read_access=[ACCESS_TYPE.public],
             write_access=[ACCESS_TYPE.user.format(self.authenticatedUser.id)],

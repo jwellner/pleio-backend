@@ -15,7 +15,7 @@ class Question(Entity, VoteMixin, BookmarkMixin, FollowMixin, CommentMixin, Noti
         ordering = ['-published']
 
     title = models.CharField(max_length=256)
-    description = models.TextField()
+    description = models.TextField(default="")
     rich_description = models.TextField(null=True, blank=True)
     is_closed = models.BooleanField(default=False)
     is_featured = models.BooleanField(default=False)

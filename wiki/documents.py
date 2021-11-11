@@ -2,6 +2,7 @@ from django_elasticsearch_dsl import fields
 from django_elasticsearch_dsl.registries import registry
 from .models import Wiki
 from core.documents import DefaultDocument, custom_analyzer
+from core.utils.convert import tiptap_to_text
 
 
 @registry.register_document
@@ -20,6 +21,9 @@ class WikiDocument(DefaultDocument):
         analyzer=custom_analyzer,
         search_analyzer="standard"
     )
+
+    def prepare_description(self, instance):
+        return tiptap_to_text(instance.rich_description)
 
     class Index:
         name = 'wiki'

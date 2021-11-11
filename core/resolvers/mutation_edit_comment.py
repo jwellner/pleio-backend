@@ -21,8 +21,6 @@ def resolve_edit_comment(_, info, input):
     if not comment.can_write(user):
         raise GraphQLError(COULD_NOT_SAVE)
 
-    if 'description' in clean_input:
-        comment.description = clean_input.get("description")
     if 'richDescription' in clean_input:
         comment.rich_description = clean_input.get("richDescription")
 

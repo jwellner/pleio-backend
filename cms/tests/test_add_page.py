@@ -40,7 +40,6 @@ class AddPageTestCase(FastTenantTestCase):
                 canEdit
                 title
                 url
-                description
                 richDescription
                 tags
                 parent {
@@ -55,7 +54,6 @@ class AddPageTestCase(FastTenantTestCase):
                 "pageType": "campagne",
                 "accessId": 1,
                 "tags": [],
-                "description": "test",
                 "richDescription": '{"blocks":[{"key":"6sb64","text":"test","type":"unstyled","depth":0,"inlineStyleRanges":[],"entityRanges":[],"data":{}}],"entityMap":{}}'
 
             }
@@ -68,7 +66,6 @@ class AddPageTestCase(FastTenantTestCase):
         data = result[1]["data"]
 
         self.assertEqual(data["addPage"]["entity"]["title"], "test")
-        self.assertEqual(data["addPage"]["entity"]["description"], "test")
         self.assertEqual(data["addPage"]["entity"]["richDescription"], '{"blocks":[{"key":"6sb64","text":"test","type":"unstyled","depth":0,"inlineStyleRanges":[],"entityRanges":[],"data":{}}],"entityMap":{}}')
         self.assertEqual(data["addPage"]["entity"]["pageType"], "campagne")
         self.assertEqual(data["addPage"]["entity"]["tags"], [])
@@ -95,7 +92,6 @@ class AddPageTestCase(FastTenantTestCase):
                 canEdit
                 title
                 url
-                description
                 richDescription
                 tags
                 parent {
@@ -111,7 +107,6 @@ class AddPageTestCase(FastTenantTestCase):
                 "containerGuid": self.page.guid,
                 "accessId": 1,
                 "tags": [],
-                "description": "text",
                 "richDescription": '{"blocks":[{"key":"6sb64","text":"test","type":"unstyled","depth":0,"inlineStyleRanges":[],"entityRanges":[],"data":{}}],"entityMap":{}}'
 
             }
@@ -124,7 +119,6 @@ class AddPageTestCase(FastTenantTestCase):
         data = result[1]["data"]
 
         self.assertEqual(data["addPage"]["entity"]["title"], "text")
-        self.assertEqual(data["addPage"]["entity"]["description"], "text")
         self.assertEqual(data["addPage"]["entity"]["richDescription"], '{"blocks":[{"key":"6sb64","text":"test","type":"unstyled","depth":0,"inlineStyleRanges":[],"entityRanges":[],"data":{}}],"entityMap":{}}')
         self.assertEqual(data["addPage"]["entity"]["pageType"], "text")
         self.assertEqual(data["addPage"]["entity"]["tags"], [])
@@ -151,7 +145,6 @@ class AddPageTestCase(FastTenantTestCase):
                 canEdit
                 title
                 url
-                description
                 richDescription
                 tags
                 parent {
@@ -166,7 +159,6 @@ class AddPageTestCase(FastTenantTestCase):
                 "pageType": "campagne",
                 "accessId": 1,
                 "tags": [],
-                "description": "test",
                 "richDescription": '{"blocks":[{"key":"6sb64","text":"test","type":"unstyled","depth":0,"inlineStyleRanges":[],"entityRanges":[],"data":{}}],"entityMap":{}}'
 
             }
@@ -179,7 +171,6 @@ class AddPageTestCase(FastTenantTestCase):
         data = result[1]["data"]
 
         self.assertEqual(data["addPage"]["entity"]["title"], "test")
-        self.assertEqual(data["addPage"]["entity"]["description"], "test")
         self.assertEqual(data["addPage"]["entity"]["richDescription"], '{"blocks":[{"key":"6sb64","text":"test","type":"unstyled","depth":0,"inlineStyleRanges":[],"entityRanges":[],"data":{}}],"entityMap":{}}')
         self.assertEqual(data["addPage"]["entity"]["pageType"], "campagne")
         self.assertEqual(data["addPage"]["entity"]["tags"], [])
@@ -206,7 +197,6 @@ class AddPageTestCase(FastTenantTestCase):
                 canEdit
                 title
                 url
-                description
                 richDescription
                 tags
                 parent {
@@ -222,7 +212,6 @@ class AddPageTestCase(FastTenantTestCase):
                 "containerGuid": self.page.guid,
                 "accessId": 1,
                 "tags": [],
-                "description": "text",
                 "richDescription": '{"blocks":[{"key":"6sb64","text":"test","type":"unstyled","depth":0,"inlineStyleRanges":[],"entityRanges":[],"data":{}}],"entityMap":{}}'
 
             }
@@ -235,7 +224,6 @@ class AddPageTestCase(FastTenantTestCase):
         data = result[1]["data"]
 
         self.assertEqual(data["addPage"]["entity"]["title"], "text")
-        self.assertEqual(data["addPage"]["entity"]["description"], "text")
         self.assertEqual(data["addPage"]["entity"]["richDescription"], '{"blocks":[{"key":"6sb64","text":"test","type":"unstyled","depth":0,"inlineStyleRanges":[],"entityRanges":[],"data":{}}],"entityMap":{}}')
         self.assertEqual(data["addPage"]["entity"]["pageType"], "text")
         self.assertEqual(data["addPage"]["entity"]["tags"], [])
@@ -262,7 +250,6 @@ class AddPageTestCase(FastTenantTestCase):
                 canEdit
                 title
                 url
-                description
                 richDescription
                 tags
                 parent {
@@ -277,7 +264,6 @@ class AddPageTestCase(FastTenantTestCase):
                 "pageType": "campagne",
                 "accessId": 1,
                 "tags": [],
-                "description": "test",
                 "richDescription": '{"blocks":[{"key":"6sb64","text":"test","type":"unstyled","depth":0,"inlineStyleRanges":[],"entityRanges":[],"data":{}}],"entityMap":{}}'
 
             }
@@ -312,7 +298,6 @@ class AddPageTestCase(FastTenantTestCase):
                 canEdit
                 title
                 url
-                description
                 richDescription
                 tags
                 parent {
@@ -327,7 +312,6 @@ class AddPageTestCase(FastTenantTestCase):
                 "pageType": "campagne",
                 "accessId": 1,
                 "tags": [],
-                "description": "test",
                 "richDescription": '{"blocks":[{"key":"6sb64","text":"test","type":"unstyled","depth":0,"inlineStyleRanges":[],"entityRanges":[],"data":{}}],"entityMap":{}}'
 
             }

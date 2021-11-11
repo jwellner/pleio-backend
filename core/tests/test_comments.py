@@ -21,7 +21,6 @@ class CommentTestCase(FastTenantTestCase):
 
         self.blogPublic = Blog.objects.create(
             title="Test public blog",
-            description="Description",
             rich_description="JSON to string",
             read_access=[ACCESS_TYPE.public],
             write_access=[ACCESS_TYPE.user.format(self.authenticatedUser.id)],
@@ -36,14 +35,12 @@ class CommentTestCase(FastTenantTestCase):
             name="Anoniemptje",
             email="test@test.com",
             container=self.blogPublic,
-            description="Just testing",
             rich_description="Just testing"
         )
 
         self.lastComment = Comment.objects.create(
             owner=self.authenticatedUser,
             container=self.blogPublic,
-            description="Just testing",
             rich_description="Just testing"
         )
 
@@ -59,7 +56,6 @@ class CommentTestCase(FastTenantTestCase):
                 commentCount
                 comments {
                     guid
-                    description
                     richDescription
                     ownerName
                 }
@@ -91,6 +87,4 @@ class CommentTestCase(FastTenantTestCase):
         self.assertEqual(data["entity"]["comments"][0]['guid'], self.lastComment.guid)
         self.assertEqual(data["entity"]["comments"][0]['ownerName'], self.lastComment.owner.name)
         self.assertEqual(data["entity"]["comments"][0]['richDescription'], self.lastComment.rich_description)
-        self.assertEqual(data["entity"]["comments"][0]['description'], self.lastComment.description)
-
         self.assertEqual(data["entity"]["comments"][1]['ownerName'], self.anonComment.name)

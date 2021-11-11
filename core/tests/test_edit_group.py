@@ -67,7 +67,6 @@ class EditGroupCase(FastTenantTestCase):
                         guid
                         name
                         icon
-                        description
                         excerpt
                         richDescription
                         introduction
@@ -89,7 +88,6 @@ class EditGroupCase(FastTenantTestCase):
                 "guid": self.group.guid,
                 "name": "Name",
                 "icon": "icon.png",
-                "description": "description",
                 "richDescription": "<p>richDescription</p>",
                 "introduction": "introdcution",
                 "isIntroductionPublic": True,
@@ -114,8 +112,6 @@ class EditGroupCase(FastTenantTestCase):
         self.assertEqual(data["editGroup"]["group"]["guid"], variables["group"]["guid"])
         self.assertEqual(data["editGroup"]["group"]["name"], variables["group"]["name"])
         self.assertIn('/icon.png', data["editGroup"]["group"]["icon"])
-        self.assertEqual(data["editGroup"]["group"]["description"], variables["group"]["description"])
-        self.assertEqual(data["editGroup"]["group"]["excerpt"], variables["group"]["description"])
         self.assertEqual(data["editGroup"]["group"]["richDescription"], variables["group"]["richDescription"])
         self.assertEqual(data["editGroup"]["group"]["introduction"], variables["group"]["introduction"])
         self.assertEqual(data["editGroup"]["group"]["isIntroductionPublic"], variables["group"]["isIntroductionPublic"])

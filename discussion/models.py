@@ -9,7 +9,7 @@ class Discussion(Entity, VoteMixin, BookmarkMixin, FollowMixin, CommentMixin, No
         ordering = ['-published']
 
     title = models.CharField(max_length=256)
-    description = models.TextField()
+    description = models.TextField(default="")
     rich_description = models.TextField(null=True, blank=True)
 
     is_featured = models.BooleanField(default=False)

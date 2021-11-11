@@ -24,7 +24,6 @@ class EditNewsTestCase(FastTenantTestCase):
 
         self.news = News.objects.create(
             title="Test public news",
-            description="Description",
             rich_description="JSON to string",
             read_access=[ACCESS_TYPE.public],
             write_access=[ACCESS_TYPE.user.format(self.authenticatedUser.id)],
@@ -36,7 +35,6 @@ class EditNewsTestCase(FastTenantTestCase):
             "input": {
                 "guid": self.news.guid,
                 "title": "My first News item",
-                "description": "My description",
                 "richDescription": "richDescription",
                 "accessId": 0,
                 "writeAccessId": 0,
@@ -48,7 +46,6 @@ class EditNewsTestCase(FastTenantTestCase):
         self.mutation = """
             fragment NewsParts on News {
                 title
-                description
                 richDescription
                 timeCreated
                 timeUpdated
@@ -86,7 +83,6 @@ class EditNewsTestCase(FastTenantTestCase):
         data = result[1]["data"]
 
         self.assertEqual(data["editEntity"]["entity"]["title"], variables["input"]["title"])
-        self.assertEqual(data["editEntity"]["entity"]["description"], variables["input"]["description"])
         self.assertEqual(data["editEntity"]["entity"]["richDescription"], variables["input"]["richDescription"])
         self.assertEqual(data["editEntity"]["entity"]["tags"], variables["input"]["tags"])
         self.assertEqual(data["editEntity"]["entity"]["isFeatured"], False) # Only editor or admin can set isFeatured
@@ -95,7 +91,6 @@ class EditNewsTestCase(FastTenantTestCase):
         self.news.refresh_from_db()
 
         self.assertEqual(data["editEntity"]["entity"]["title"], self.news.title)
-        self.assertEqual(data["editEntity"]["entity"]["description"], self.news.description)
         self.assertEqual(data["editEntity"]["entity"]["richDescription"], self.news.rich_description)
         self.assertEqual(data["editEntity"]["entity"]["tags"], self.news.tags)
         self.assertEqual(data["editEntity"]["entity"]["isFeatured"], self.news.is_featured)
@@ -105,7 +100,6 @@ class EditNewsTestCase(FastTenantTestCase):
 
         variables = self.data
         variables["input"]["title"] = "Update door editor"
-        variables["input"]["description"] = "Update door editor"
 
         request = HttpRequest()
         request.user = self.editorUser
@@ -115,7 +109,6 @@ class EditNewsTestCase(FastTenantTestCase):
         data = result[1]["data"]
 
         self.assertEqual(data["editEntity"]["entity"]["title"], variables["input"]["title"])
-        self.assertEqual(data["editEntity"]["entity"]["description"], variables["input"]["description"])
         self.assertEqual(data["editEntity"]["entity"]["richDescription"], variables["input"]["richDescription"])
         self.assertEqual(data["editEntity"]["entity"]["tags"], variables["input"]["tags"])
         self.assertEqual(data["editEntity"]["entity"]["isFeatured"], True)
@@ -126,7 +119,6 @@ class EditNewsTestCase(FastTenantTestCase):
         self.news.refresh_from_db()
 
         self.assertEqual(data["editEntity"]["entity"]["title"], self.news.title)
-        self.assertEqual(data["editEntity"]["entity"]["description"], self.news.description)
         self.assertEqual(data["editEntity"]["entity"]["richDescription"], self.news.rich_description)
         self.assertEqual(data["editEntity"]["entity"]["tags"], self.news.tags)
         self.assertEqual(data["editEntity"]["entity"]["isFeatured"], self.news.is_featured)
@@ -158,7 +150,6 @@ class EditNewsTestCase(FastTenantTestCase):
         self.news.refresh_from_db()
 
         self.assertEqual(data["editEntity"]["entity"]["title"], self.news.title)
-        self.assertEqual(data["editEntity"]["entity"]["description"], self.news.description)
         self.assertEqual(data["editEntity"]["entity"]["richDescription"], self.news.rich_description)
         self.assertEqual(data["editEntity"]["entity"]["tags"], self.news.tags)
         self.assertEqual(data["editEntity"]["entity"]["isFeatured"], self.news.is_featured)

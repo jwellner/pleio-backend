@@ -22,7 +22,6 @@ class WikiTestCase(FastTenantTestCase):
 
         self.wikiPublic = Wiki.objects.create(
             title="Test public wiki",
-            description="Description",
             rich_description="JSON to string",
             read_access=[ACCESS_TYPE.public],
             write_access=[ACCESS_TYPE.user.format(self.authenticatedUser.id)],
@@ -31,7 +30,6 @@ class WikiTestCase(FastTenantTestCase):
 
         self.wikiPrivate = Wiki.objects.create(
             title="Test private wiki",
-            description="Description",
             rich_description="JSON to string",
             read_access=[ACCESS_TYPE.user.format(self.authenticatedUser.id)],
             write_access=[ACCESS_TYPE.user.format(self.authenticatedUser.id)],
@@ -42,7 +40,6 @@ class WikiTestCase(FastTenantTestCase):
 
         self.wikiPrivate2 = Wiki.objects.create(
             title="Test private wiki 2",
-            description="Description",
             rich_description="JSON to string",
             read_access=[ACCESS_TYPE.user.format(self.authenticatedUser2.id)],
             write_access=[ACCESS_TYPE.user.format(self.authenticatedUser2.id)],
@@ -54,7 +51,6 @@ class WikiTestCase(FastTenantTestCase):
         self.query = """
             fragment WikiParts on Wiki {
                 title
-                description
                 richDescription
                 timeCreated
                 timeUpdated
@@ -115,7 +111,6 @@ class WikiTestCase(FastTenantTestCase):
 
         self.assertEqual(data["entity"]["guid"], self.wikiPublic.guid)
         self.assertEqual(data["entity"]["title"], self.wikiPublic.title)
-        self.assertEqual(data["entity"]["description"], self.wikiPublic.description)
         self.assertEqual(data["entity"]["richDescription"], self.wikiPublic.rich_description)
         self.assertEqual(data["entity"]["accessId"], 2)
         self.assertEqual(data["entity"]["timeCreated"], str(self.wikiPublic.created_at))
@@ -158,7 +153,6 @@ class WikiTestCase(FastTenantTestCase):
 
         self.assertEqual(data["entity"]["guid"], self.wikiPrivate.guid)
         self.assertEqual(data["entity"]["title"], self.wikiPrivate.title)
-        self.assertEqual(data["entity"]["description"], self.wikiPrivate.description)
         self.assertEqual(data["entity"]["richDescription"], self.wikiPrivate.rich_description)
         self.assertEqual(data["entity"]["accessId"], 0)
         self.assertEqual(data["entity"]["timeCreated"], str(self.wikiPrivate.created_at))
@@ -187,7 +181,6 @@ class WikiTestCase(FastTenantTestCase):
 
         self.assertEqual(data["entity"]["guid"], self.wikiPublic.guid)
         self.assertEqual(data["entity"]["title"], self.wikiPublic.title)
-        self.assertEqual(data["entity"]["description"], self.wikiPublic.description)
         self.assertEqual(data["entity"]["richDescription"], self.wikiPublic.rich_description)
         self.assertEqual(data["entity"]["accessId"], 2)
         self.assertEqual(data["entity"]["timeCreated"], str(self.wikiPublic.created_at))

@@ -2,7 +2,6 @@ from __future__ import absolute_import, unicode_literals
 
 import csv
 import os
-import json
 import re
 from django.core.exceptions import ObjectDoesNotExist
 import requests
@@ -451,7 +450,6 @@ def replace_domain_links(self, schema_name, replace_domain=None, replace_elgg_id
     Replace all links with old domain to new
     '''
     with schema_context(schema_name):
-        # TODO: Disable updated_at
 
         tenant = Client.objects.get(schema_name=schema_name)
         tenant_domain = tenant.get_primary_domain().domain
@@ -575,23 +573,6 @@ def replace_domain_links(self, schema_name, replace_domain=None, replace_elgg_id
             text = text.replace(f"https://{replace_domain}", f"https://{tenant_domain}")
             return text
 
-        def _replace_rich_description_json(rich_description):
-            if rich_description:
-                try:
-                    data = json.loads(rich_description)
-                    for idx in data["entityMap"]:
-                        if data["entityMap"][idx]["type"] == "IMAGE":
-                            data["entityMap"][idx]["data"]["src"] = _replace_links(data["entityMap"][idx]["data"]["src"])
-                        if data["entityMap"][idx]["type"] in ["LINK", "DOCUMENT"]:
-                            if "url" in data["entityMap"][idx]["data"]:
-                                data["entityMap"][idx]["data"]["url"] = _replace_links(data["entityMap"][idx]["data"]["url"])
-                            if "href" in data["entityMap"][idx]["data"]:
-                                data["entityMap"][idx]["data"]["href"] = _replace_links(data["entityMap"][idx]["data"]["href"])
-                    return json.dumps(data)
-                except Exception:
-                    pass
-            return rich_description
-
         logger.info("Start replace links on %s from %s to %s", tenant, replace_domain, tenant_domain)
 
         # -- Replace MENU items
@@ -626,43 +607,25 @@ def replace_domain_links(self, schema_name, replace_domain=None, replace_elgg_id
 
         for entity in entities:
             if hasattr(entity, 'rich_description'):
-                rich_description = _replace_rich_description_json(entity.rich_description)
+                rich_description = _replace_links(entity.rich_description)
 
-                description = _replace_links(entity.description)
-
-                if rich_description != entity.rich_description or description != entity.description:
+                if rich_description != entity.rich_description:
                     entity.rich_description = rich_description
-                    entity.description = description
                     entity.save()
 
         # -- Replace group description
         groups = Group.objects.all()
 
         for group in groups:
-            rich_description = _replace_rich_description_json(group.rich_description)
-            description = _replace_links(group.description)
-
-            try:
-                introduction = json.loads(group.introduction)
-                introduction = _replace_rich_description_json(group.introduction)
-            except Exception:
-                # old elgg sites dont have draftjs json
-                introduction = _replace_links(group.description)
-
-            try:
-                welcome_message = json.loads(group.welcome_message)
-                welcome_message = _replace_rich_description_json(group.welcome_message)
-            except Exception:
-                # old elgg sites dont have draftjs json
-                welcome_message = _replace_links(group.welcome_message)
+            rich_description = _replace_links(group.rich_description)
+            introduction = _replace_links(group.description)
+            welcome_message = _replace_links(group.welcome_message)
 
             if rich_description != group.rich_description or \
-                description != group.description or \
                 introduction != group.introduction or \
                 welcome_message != group.welcome_message:
 
                 group.rich_description = rich_description
-                group.description = description
                 group.introduction = introduction
                 group.welcome_message = welcome_message
                 group.save()
@@ -671,12 +634,10 @@ def replace_domain_links(self, schema_name, replace_domain=None, replace_elgg_id
         comments = Comment.objects.all()
 
         for comment in comments:
-            rich_description = _replace_rich_description_json(comment.rich_description)
-            description = _replace_links(comment.description)
+            rich_description = _replace_links(comment.rich_description)
 
-            if rich_description != comment.rich_description or description != comment.description:
+            if rich_description != comment.rich_description:
                 comment.rich_description = rich_description
-                comment.description = description
                 comment.save()
 
         # -- Replace widget settings
@@ -838,3 +799,11 @@ def ban_users_with_no_account(schema_name):
         if count:
             logger.info("Accounts blocked beacause of deleted account in pleio: %s", count)
         config.LAST_RECEIVED_DELETED_USER = last_received
+
+@shared_task(bind=True)
+def draft_to_tiptap(self, schema_name):
+    # pylint: disable=unused-argument
+    '''
+    Send overview mails for tenant
+    '''
+    management.execute_from_command_line(['manage.py', 'tenant_command', 'draft_to_tiptap', '--schema', schema_name])

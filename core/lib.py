@@ -213,7 +213,7 @@ def get_field_type(field_type):
 def is_valid_json(string):
     try:
         string = json.loads(string)
-    except ValueError:
+    except Exception:
         return False
     return True
 

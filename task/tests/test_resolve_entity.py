@@ -23,7 +23,6 @@ class TaskTestCase(FastTenantTestCase):
 
         self.taskPublic = Task.objects.create(
             title="Test public event",
-            description="Description",
             rich_description="JSON to string",
             read_access=[ACCESS_TYPE.public],
             write_access=[ACCESS_TYPE.user.format(self.authenticatedUser.id)],
@@ -33,7 +32,6 @@ class TaskTestCase(FastTenantTestCase):
 
         self.taskPrivate = Task.objects.create(
             title="Test private event",
-            description="Description",
             rich_description="JSON to string",
             read_access=[ACCESS_TYPE.user.format(self.authenticatedUser.id)],
             write_access=[ACCESS_TYPE.user.format(self.authenticatedUser.id)],
@@ -44,7 +42,6 @@ class TaskTestCase(FastTenantTestCase):
         self.query = """
             fragment TaskParts on Task {
                 title
-                description
                 richDescription
                 timeCreated
                 timeUpdated
@@ -90,7 +87,6 @@ class TaskTestCase(FastTenantTestCase):
 
         self.assertEqual(data["entity"]["guid"], self.taskPublic.guid)
         self.assertEqual(data["entity"]["title"], self.taskPublic.title)
-        self.assertEqual(data["entity"]["description"], self.taskPublic.description)
         self.assertEqual(data["entity"]["richDescription"], self.taskPublic.rich_description)
         self.assertEqual(data["entity"]["accessId"], 2)
         self.assertEqual(data["entity"]["timeCreated"], str(self.taskPublic.created_at))
@@ -126,7 +122,6 @@ class TaskTestCase(FastTenantTestCase):
 
         self.assertEqual(data["entity"]["guid"], self.taskPrivate.guid)
         self.assertEqual(data["entity"]["title"], self.taskPrivate.title)
-        self.assertEqual(data["entity"]["description"], self.taskPrivate.description)
         self.assertEqual(data["entity"]["richDescription"], self.taskPrivate.rich_description)
         self.assertEqual(data["entity"]["accessId"], 0)
         self.assertEqual(data["entity"]["timeCreated"], str(self.taskPrivate.created_at))

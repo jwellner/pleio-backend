@@ -23,7 +23,6 @@ class GroupsEmptyTestCase(FastTenantTestCase):
                     edges {
                         guid
                         name
-                        description
                         tags
                     }
                 }
@@ -69,7 +68,6 @@ class GroupsNotEmptyTestCase(FastTenantTestCase):
                     edges {
                         guid
                         name
-                        description
                         tags
                     }
                 }
@@ -98,7 +96,6 @@ class GroupsNotEmptyTestCase(FastTenantTestCase):
                     edges {
                         guid
                         name
-                        description
                         tags
                     }
                 }
@@ -126,7 +123,6 @@ class GroupsNotEmptyTestCase(FastTenantTestCase):
                     edges {
                         guid
                         name
-                        description
                         richDescription
                         canEdit
                         excerpt
@@ -174,7 +170,6 @@ class GroupsNotEmptyTestCase(FastTenantTestCase):
                     edges {
                         guid
                         name
-                        description
                         richDescription
                         canEdit
                         excerpt

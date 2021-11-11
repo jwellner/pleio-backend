@@ -26,7 +26,6 @@ class AddTaskTestCase(FastTenantTestCase):
                 "type": "object",
                 "subtype": "task",
                 "title": "My first Task",
-                "description": "My description",
                 "richDescription": "richDescription",
                 "tags": ["tag1", "tag2"],
                 "accessId": 1,
@@ -38,7 +37,6 @@ class AddTaskTestCase(FastTenantTestCase):
         self.mutation = """
             fragment TaskParts on Task {
                 title
-                description
                 richDescription
                 timeCreated
                 timeUpdated
@@ -76,7 +74,6 @@ class AddTaskTestCase(FastTenantTestCase):
         data = result[1]["data"]
 
         self.assertEqual(data["addEntity"]["entity"]["title"], variables["input"]["title"])
-        self.assertEqual(data["addEntity"]["entity"]["description"], variables["input"]["description"])
         self.assertEqual(data["addEntity"]["entity"]["richDescription"], variables["input"]["richDescription"])
         self.assertEqual(data["addEntity"]["entity"]["state"], "NEW")
 
@@ -93,7 +90,6 @@ class AddTaskTestCase(FastTenantTestCase):
         data = result[1]["data"]
 
         self.assertEqual(data["addEntity"]["entity"]["title"], variables["input"]["title"])
-        self.assertEqual(data["addEntity"]["entity"]["description"], variables["input"]["description"])
         self.assertEqual(data["addEntity"]["entity"]["richDescription"], variables["input"]["richDescription"])
         self.assertEqual(data["addEntity"]["entity"]["inGroup"], True)
         self.assertEqual(data["addEntity"]["entity"]["group"]["guid"], self.group.guid)

@@ -45,10 +45,10 @@ class EditSiteSettingTestCase(FastTenantTestCase):
                         language
                         extraLanguages
                         name
-                        description
                         isClosed
                         allowRegistration
                         directRegistrationDomains
+                        description
                         defaultAccessId
                         defaultAccessIdOptions {
                             value

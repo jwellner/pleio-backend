@@ -49,7 +49,7 @@ def add_comment(request):
     comment = Comment.objects.create(
         container=entity,
         owner=user,
-        description=description
+        rich_description=description
     )
 
     return JsonResponse({"error": None, "status": "Comment created from flow", "comment_id": str(comment.id)})
@@ -72,8 +72,7 @@ def edit_comment(request):
     except ObjectDoesNotExist:
         return JsonResponse({"error": "Flow comment does not exist"}, status=401)
 
-    comment.rich_description = None
-    comment.description = description
+    comment.rich_description = description
     comment.save()
 
     return JsonResponse({"error": None, "status": "Comment edited from flow"},  status=200)

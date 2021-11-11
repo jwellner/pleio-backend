@@ -10,7 +10,7 @@
 </div>
 <div class="content">
 	{% if config.LOGIN_INTRO %}
-		{% draft_to_html config.LOGIN_INTRO %}
+		{% tiptap_to_html config.LOGIN_INTRO %}
 	{% else %}
 		<p>{% blocktrans %}This site is closed. Log in to get access.{% endblocktrans %}</p>
 	{% endif %}
