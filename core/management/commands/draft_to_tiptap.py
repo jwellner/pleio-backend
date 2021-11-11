@@ -152,7 +152,7 @@ class Command(BaseCommand):
                     continue
 
                 original = DraftBackup()
-                original.content_id = item.guid
+                original.content_id = item.id
                 original.property = 'rich_description'
                 original.data = item.rich_description
                 original.save()
