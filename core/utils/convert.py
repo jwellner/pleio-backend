@@ -26,7 +26,7 @@ def is_tiptap(json_string):
 
 def tiptap_to_html(s):
     if not is_tiptap(s):
-        return ""
+        return s
 
     doc = json.loads(s)
     try:
@@ -34,7 +34,7 @@ def tiptap_to_html(s):
         html = DOMSerializer.from_schema(tiptap_schema).serialize_fragment(doc_node.content)
     except Exception as e:
         logger.error(e)
-        html = "Error loading html"
+        html = s
     return str(html)
 
 def tiptap_to_text(json_string):
