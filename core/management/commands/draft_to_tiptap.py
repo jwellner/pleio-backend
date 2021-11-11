@@ -144,7 +144,7 @@ class Command(BaseCommand):
         comment_requests = CommentRequest.objects.all()
 
         for item in comment_requests:
-            original = DraftBackup.objects.filter(content_id=item.guid, property='rich_description').first()
+            original = DraftBackup.objects.filter(content_id=item.id, property='rich_description').first()
 
             if not original:
                 if is_tiptap(item.rich_description):
