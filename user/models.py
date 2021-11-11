@@ -1,6 +1,8 @@
 import uuid
 from core import config
+from core.constances import USER_ROLES
 from core.models import UserProfile, ProfileField, UserProfileField, SiteAccessRequest
+from django.db.models import Q
 from django.db.models.signals import post_save
 from django.db import models
 from django.contrib.postgres.fields import ArrayField
@@ -86,6 +88,35 @@ class Manager(BaseUserManager):
         user.save(using=self._db)
 
         return user
+
+    def get_filtered_users(self, q=None, role=None, isDeleteRequested=None, isBanned=False, last_online_before=None):
+        # pylint: disable=too-many-arguments
+
+        users = User.objects.all().order_by('name')
+
+        if isBanned:
+            users = users.filter(is_active=False)
+        else:
+            users = users.filter(is_active=True)
+
+        if q:
+            users = users.filter(
+                Q(name__icontains=q) |
+                Q(email__icontains=q) |
+                Q(id__iexact=q)
+            )
+
+        if last_online_before:
+            users = users.filter(_profile__last_online__lt=last_online_before)
+
+        if role is not None and hasattr(USER_ROLES, role.upper()):
+            ROLE_FILTER = getattr(USER_ROLES, role.upper())
+            users = users.filter(roles__contains=[ROLE_FILTER])
+
+        if isDeleteRequested is not None:
+            users = users.filter(is_delete_requested=isDeleteRequested)
+
+        return users
 
 
 class User(AbstractBaseUser):
