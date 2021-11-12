@@ -1079,15 +1079,23 @@ type MembershipRequestList {
   edges: [User]
 }
 
+enum Visibility {
+  ADMIN
+  USER
+  GUEST
+}
+
 type MenuItem {
   title: String!
   link: String
   children: [MenuItem]
+  visibility: [Visibility]
 }
 
 input MenuItemInput {
   title: String!
   link: String
+  visibility: [Visibility]
 
   """Temporary id of this menu item."""
   id: Int!

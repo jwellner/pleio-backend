@@ -13,6 +13,7 @@ from user.models import User
 from mixer.backend.django import mixer
 from graphql import GraphQLError
 from unittest.mock import patch, MagicMock
+from core.constances import VISIBILITY
 
 class EditSiteSettingTestCase(FastTenantTestCase):
 
@@ -83,7 +84,9 @@ class EditSiteSettingTestCase(FastTenantTestCase):
                                 children {
                                     title
                                 }
+                                visibility
                             }
+                            visibility
                         }
 
                         numberOfFeaturedItems
@@ -353,9 +356,14 @@ class EditSiteSettingTestCase(FastTenantTestCase):
         self.assertEqual(data["editSiteSetting"]["siteSettings"]["showIcon"], True)
         self.assertEqual(data["editSiteSetting"]["siteSettings"]["iconAlt"], "iconAlt")
         # TODO: self.assertEqual(data["editSiteSetting"]["siteSettings"]["icon"], "heart")
-        self.assertEqual(data["editSiteSetting"]["siteSettings"]["menu"], [{"title": "Nieuws", "link": "/news", "children": [
-            {"title": "Blog", "link": "/blog", "children": []}
-        ]}])
+        self.assertEqual(data["editSiteSetting"]["siteSettings"]["menu"], [{
+            "title": "Nieuws",
+            "link": "/news",
+            "children": [
+                {"title": "Blog", "link": "/blog", "children": [], "visibility": [VISIBILITY.ADMIN, VISIBILITY.GUEST, VISIBILITY.USER]},
+            ],
+            "visibility": [VISIBILITY.ADMIN, VISIBILITY.GUEST, VISIBILITY.USER]
+        }])
 
         self.assertEqual(data["editSiteSetting"]["siteSettings"]["numberOfFeaturedItems"], 3)
         self.assertEqual(data["editSiteSetting"]["siteSettings"]["enableFeedSorting"], True)
