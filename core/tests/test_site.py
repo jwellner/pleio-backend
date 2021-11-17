@@ -32,7 +32,7 @@ class SiteTestCase(FastTenantTestCase):
                         children {
                             title
                             link
-                            acccessId
+                            accessId
                         }
                         accessId
                     }
