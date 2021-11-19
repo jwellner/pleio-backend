@@ -13,7 +13,6 @@ from user.models import User
 from mixer.backend.django import mixer
 from graphql import GraphQLError
 from unittest.mock import patch, MagicMock
-from core.constances import VISIBILITY
 
 class EditSiteSettingTestCase(FastTenantTestCase):
 
@@ -84,9 +83,9 @@ class EditSiteSettingTestCase(FastTenantTestCase):
                                 children {
                                     title
                                 }
-                                visibility
+                                accessId
                             }
-                            visibility
+                            accessId
                         }
 
                         numberOfFeaturedItems
@@ -360,9 +359,9 @@ class EditSiteSettingTestCase(FastTenantTestCase):
             "title": "Nieuws",
             "link": "/news",
             "children": [
-                {"title": "Blog", "link": "/blog", "children": [], "visibility": [VISIBILITY.ADMIN, VISIBILITY.GUEST, VISIBILITY.USER]},
+                {"title": "Blog", "link": "/blog", "children": [], "accessId": 2},
             ],
-            "visibility": [VISIBILITY.ADMIN, VISIBILITY.GUEST, VISIBILITY.USER]
+            "accessId": 2
         }])
 
         self.assertEqual(data["editSiteSetting"]["siteSettings"]["numberOfFeaturedItems"], 3)

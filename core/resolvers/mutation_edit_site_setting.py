@@ -6,7 +6,7 @@ from core.models import Setting, ProfileField
 from core.models.user import validate_profile_sections
 from core.constances import (
     COULD_NOT_SAVE, INVALID_VALUE, NOT_LOGGED_IN, REDIRECTS_HAS_DUPLICATE_SOURCE,
-    REDIRECTS_HAS_LOOP, USER_NOT_SITE_ADMIN, USER_ROLES, VISIBILITY )
+    REDIRECTS_HAS_LOOP, USER_NOT_SITE_ADMIN, USER_ROLES )
 from core.lib import (
     remove_none_from_dict, access_id_to_acl, is_valid_domain, is_valid_url_or_path, get_language_options,
     tenant_schema, get_default_email_context )
@@ -30,9 +30,9 @@ def save_setting(key, value):
 
 def get_menu_item(menu, item, depth=0):
     children = get_menu_children(menu, item["id"], depth)
-    visibility = item.get("visibility", [VISIBILITY.ADMIN, VISIBILITY.GUEST, VISIBILITY.USER])
+    access_id = item.get("accessId")
 
-    return {"title": item["title"], "link": item["link"], "children": children, "visibility": visibility}
+    return {"title": item["title"], "link": item["link"], "children": children, "accessId": access_id}
 
 
 def get_menu_children(menu, item_id, depth=0):

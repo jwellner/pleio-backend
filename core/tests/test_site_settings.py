@@ -100,7 +100,9 @@ class SiteSettingsTestCase(FastTenantTestCase):
                         children {
                             title
                             link
+                            accessId
                         }
+                        accessId
                     }
 
                     numberOfFeaturedItems
@@ -304,11 +306,11 @@ class SiteSettingsTestCase(FastTenantTestCase):
         self.assertEqual(data["siteSettings"]["showIcon"], False)
         self.assertIn("/static/icon", data["siteSettings"]["icon"]) # show default'':
         self.assertEqual(data["siteSettings"]["menu"], [
-            {"link": "/blog", "title": "Blog", "children": []},
-            {"link": "/news", "title": "Nieuws", "children": []},
-            {"link": "/groups", "title": "Groepen", "children": []},
-            {"link": "/questions", "title": "Vragen", "children": []},
-            {"link": "/wiki", "title": "Wiki", "children": []}
+            {"link": "/blog", "title": "Blog", "children": [], "accessId": 2},
+            {"link": "/news", "title": "Nieuws", "children": [], "accessId": 2},
+            {"link": "/groups", "title": "Groepen", "children": [], "accessId": 2},
+            {"link": "/questions", "title": "Vragen", "children": [], "accessId": 2},
+            {"link": "/wiki", "title": "Wiki", "children": [], "accessId": 2}
         ])
 
         self.assertEqual(data["siteSettings"]["numberOfFeaturedItems"], 0)
