@@ -7,12 +7,12 @@ def get_with_accessid(menu_item):
     children = [get_with_accessid(child) for child in menu_item.get("children", [])]
     access_id = 2 # public access by default
 
-    return {"link": menu_item["link"], "title": menu_item["title"], "children": children, "accessId": access_id}
+    return {"link": menu_item.get("link", None), "title": menu_item.get("title", ""), "children": children, "accessId": access_id}
 
 def get_without_accessid(menu_item):
     children = [get_without_accessid(child) for child in menu_item.get("children", [])]
 
-    return {"link": menu_item["link"], "title": menu_item["title"], "children": children}
+    return {"link": menu_item.get("link", None), "title": menu_item.get("title", ""), "children": children}
 
 
 def forward_add_accessid(apps, schema_editor):
