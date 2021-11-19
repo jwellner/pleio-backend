@@ -21,7 +21,6 @@ class NewsTestCase(FastTenantTestCase):
 
         self.newsPublic = News.objects.create(
             title="Test public news",
-            description="Description",
             rich_description="JSON to string",
             read_access=[ACCESS_TYPE.public],
             write_access=[ACCESS_TYPE.user.format(self.authenticatedUser.id)],
@@ -32,7 +31,6 @@ class NewsTestCase(FastTenantTestCase):
 
         self.newsPrivate = News.objects.create(
             title="Test private news",
-            description="Description",
             rich_description="JSON to string",
             read_access=[ACCESS_TYPE.user.format(self.authenticatedUser.id)],
             write_access=[ACCESS_TYPE.user.format(self.authenticatedUser.id)],
@@ -44,7 +42,6 @@ class NewsTestCase(FastTenantTestCase):
         self.query = """
             fragment NewsParts on News {
                 title
-                description
                 richDescription
                 accessId
                 timeCreated
@@ -100,7 +97,6 @@ class NewsTestCase(FastTenantTestCase):
        
         self.assertEqual(data["entity"]["guid"], self.newsPublic.guid)
         self.assertEqual(data["entity"]["title"], self.newsPublic.title)
-        self.assertEqual(data["entity"]["description"], self.newsPublic.description)
         self.assertEqual(data["entity"]["richDescription"], self.newsPublic.rich_description)
         self.assertEqual(data["entity"]["accessId"], 2)
         self.assertEqual(data["entity"]["timeCreated"], str(self.newsPublic.created_at))
@@ -145,7 +141,6 @@ class NewsTestCase(FastTenantTestCase):
        
         self.assertEqual(data["entity"]["guid"], self.newsPrivate.guid)
         self.assertEqual(data["entity"]["title"], self.newsPrivate.title)
-        self.assertEqual(data["entity"]["description"], self.newsPrivate.description)
         self.assertEqual(data["entity"]["richDescription"], self.newsPrivate.rich_description)
         self.assertEqual(data["entity"]["accessId"], 0)
         self.assertEqual(data["entity"]["timeCreated"], str(self.newsPrivate.created_at))

@@ -21,7 +21,7 @@ class Page(Entity):
         ordering = ['position', 'published']
 
     title = models.CharField(max_length=256)
-    description = models.TextField()
+    description = models.TextField(default="")
     rich_description = models.TextField(null=True, blank=True)
 
     page_type = models.CharField(max_length=256, choices=PAGE_TYPES)

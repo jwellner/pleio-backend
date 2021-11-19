@@ -1,4 +1,3 @@
-from django.db.models import Q
 from django.utils import dateparse
 from user.models import User
 from core.constances import NOT_LOGGED_IN, USER_NOT_SITE_ADMIN, USER_ROLES, INVALID_DATE
@@ -23,29 +22,7 @@ def resolve_site_users(_, info, q=None, role=None, isDeleteRequested=None, isBan
         except ValueError:
             raise GraphQLError(INVALID_DATE)
 
-    users = User.objects.all().order_by('name')
-
-    if isBanned:
-        users = users.filter(is_active=False)
-    else:
-        users = users.filter(is_active=True)
-
-    if q:
-        users = users.filter(
-            Q(name__icontains=q) |
-            Q(email__icontains=q) |
-            Q(id__iexact=q)
-        )
-
-    if last_online_before:
-        users = users.filter(_profile__last_online__lt=last_online_before)
-
-    if role is not None and hasattr(USER_ROLES, role.upper()):
-        ROLE_FILTER = getattr(USER_ROLES, role.upper())
-        users = users.filter(roles__contains=[ROLE_FILTER])
-
-    if isDeleteRequested is not None:
-        users = users.filter(is_delete_requested=isDeleteRequested)
+    users = User.objects.get_filtered_users(q=q, role=role, isDeleteRequested=isDeleteRequested, isBanned=isBanned, last_online_before=last_online_before)
 
     edges = users[offset:offset+limit]
 

@@ -43,4 +43,17 @@
     </div>
   </div>
 
+  <div class="card mt-4">
+    <h5 class="card-header">Draft to Tiptap</h5>
+    <div class="card-body">
+        <form method="post">
+            {% csrf_token %}
+            <input type="hidden" name="task" value="draft_to_tiptap">
+            <p>This task convert all draft fields to TipTap.</p>
+            <button type="submit" class="btn btn-primary">Execute draft to tiptap</button>
+        </form>
+    </div>
+  </div>
+
+
 {% endblock %}

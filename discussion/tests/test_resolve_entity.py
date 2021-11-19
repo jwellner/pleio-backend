@@ -23,7 +23,6 @@ class EventTestCase(FastTenantTestCase):
 
         self.discussionPublic = Discussion.objects.create(
             title="Test public event",
-            description="Description",
             rich_description="JSON to string",
             read_access=[ACCESS_TYPE.public],
             write_access=[ACCESS_TYPE.user.format(self.authenticatedUser.id)],
@@ -32,7 +31,6 @@ class EventTestCase(FastTenantTestCase):
 
         self.discussionPrivate = Discussion.objects.create(
             title="Test private event",
-            description="Description",
             rich_description="JSON to string",
             read_access=[ACCESS_TYPE.user.format(self.authenticatedUser.id)],
             write_access=[ACCESS_TYPE.user.format(self.authenticatedUser.id)],
@@ -43,7 +41,6 @@ class EventTestCase(FastTenantTestCase):
         self.query = """
             fragment DiscussionParts on Discussion {
                 title
-                description
                 richDescription
                 timeCreated
                 timeUpdated
@@ -96,7 +93,6 @@ class EventTestCase(FastTenantTestCase):
 
         self.assertEqual(data["entity"]["guid"], self.discussionPublic.guid)
         self.assertEqual(data["entity"]["title"], self.discussionPublic.title)
-        self.assertEqual(data["entity"]["description"], self.discussionPublic.description)
         self.assertEqual(data["entity"]["richDescription"], self.discussionPublic.rich_description)
         self.assertEqual(data["entity"]["accessId"], 2)
         self.assertEqual(data["entity"]["timeCreated"], str(self.discussionPublic.created_at))
@@ -133,7 +129,6 @@ class EventTestCase(FastTenantTestCase):
 
         self.assertEqual(data["entity"]["guid"], self.discussionPrivate.guid)
         self.assertEqual(data["entity"]["title"], self.discussionPrivate.title)
-        self.assertEqual(data["entity"]["description"], self.discussionPrivate.description)
         self.assertEqual(data["entity"]["richDescription"], self.discussionPrivate.rich_description)
         self.assertEqual(data["entity"]["accessId"], 0)
         self.assertEqual(data["entity"]["timeCreated"], str(self.discussionPrivate.created_at))

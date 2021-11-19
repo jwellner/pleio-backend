@@ -36,7 +36,7 @@ class Group(models.Model):
 
     name = models.CharField(max_length=200)
 
-    description = models.TextField()
+    description = models.TextField(default="")
     rich_description = models.JSONField(null=True, blank=True)
 
     introduction = models.TextField(default='')

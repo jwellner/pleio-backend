@@ -121,7 +121,6 @@ class Command(InteractiveTenantOption, BaseCommand):
                             self.replaced_profile_link_count = self.replaced_profile_link_count + 1
                 return text
 
-
             def _replace_rich_description_json(rich_description):
                 if rich_description:
                     try:

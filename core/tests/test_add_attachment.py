@@ -209,7 +209,6 @@ class AddAttachmentTestCase(FastTenantTestCase):
         )
 
         comment = Comment.objects.create(
-            description="Comment",
             owner=self.authenticatedUser,
             container=blog1
         )

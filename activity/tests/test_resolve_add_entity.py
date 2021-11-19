@@ -26,7 +26,6 @@ class AddStatusUpdateTestCase(FastTenantTestCase):
                 "type": "object",
                 "subtype": "status_update",
                 "title": "My first StatusUpdate",
-                "description": "My description",
                 "richDescription": "richDescription",
                 "tags": ["tag1", "tag2"]
             }
@@ -34,7 +33,6 @@ class AddStatusUpdateTestCase(FastTenantTestCase):
         self.mutation = """
             fragment StatusUpdateParts on StatusUpdate {
                 title
-                description
                 richDescription
                 timeCreated
                 timeUpdated
@@ -71,7 +69,6 @@ class AddStatusUpdateTestCase(FastTenantTestCase):
         data = result[1]["data"]
 
         self.assertEqual(data["addEntity"]["entity"]["title"], variables["input"]["title"])
-        self.assertEqual(data["addEntity"]["entity"]["description"], variables["input"]["description"])
         self.assertEqual(data["addEntity"]["entity"]["richDescription"], variables["input"]["richDescription"])
 
     def test_add_status_update_to_group(self):
@@ -87,7 +84,6 @@ class AddStatusUpdateTestCase(FastTenantTestCase):
         data = result[1]["data"]
 
         self.assertEqual(data["addEntity"]["entity"]["title"], variables["input"]["title"])
-        self.assertEqual(data["addEntity"]["entity"]["description"], variables["input"]["description"])
         self.assertEqual(data["addEntity"]["entity"]["richDescription"], variables["input"]["richDescription"])
         self.assertEqual(data["addEntity"]["entity"]["inGroup"], True)
         self.assertEqual(data["addEntity"]["entity"]["group"]["guid"], self.group.guid)

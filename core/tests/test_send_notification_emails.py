@@ -144,7 +144,6 @@ class SendNotificationEmailsTestCase(FastTenantTestCase):
         self.assertEqual(args[3]['notifications'][0]['action'], 'created')
         self.assertEqual(args[3]['notifications'][0]['performer_name'], self.user1.name)
         self.assertEqual(args[3]['notifications'][0]['entity_title'], blog2.title)
-        self.assertEqual(args[3]['notifications'][0]['entity_description'], blog2.description)
         self.assertEqual(args[3]['notifications'][0]['entity_url'], blog2.url)
         self.assertEqual(args[3]['notifications'][0]['entity_group'], True)
         self.assertEqual(args[3]['notifications'][0]['entity_group_name'], self.group.name)

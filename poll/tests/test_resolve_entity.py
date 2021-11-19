@@ -23,7 +23,6 @@ class PollTestCase(FastTenantTestCase):
 
         self.pollPublic = Poll.objects.create(
             title="Test public poll",
-            description="Description",
             read_access=[ACCESS_TYPE.public],
             write_access=[ACCESS_TYPE.user.format(self.authenticatedUser.id)],
             owner=self.authenticatedUser
@@ -31,7 +30,6 @@ class PollTestCase(FastTenantTestCase):
 
         self.pollPrivate = Poll.objects.create(
             title="Test private poll",
-            description="Description",
             read_access=[ACCESS_TYPE.user.format(self.authenticatedUser.id)],
             write_access=[ACCESS_TYPE.user.format(self.authenticatedUser.id)],
             owner=self.authenticatedUser

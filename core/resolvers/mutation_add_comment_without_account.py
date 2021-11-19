@@ -45,7 +45,7 @@ def resolve_add_comment_without_account(_, info, input):
         email=email,
         name=name,
         container=entity,
-        description=input.get("description"),
+        description=input.get("description", ""),
         rich_description=input.get("richDescription")
     )
 
@@ -53,7 +53,7 @@ def resolve_add_comment_without_account(_, info, input):
 
     context = get_default_email_context()
     context['confirm_url'] = confirm_url
-    context['comment'] = input.get("description")
+    context['comment'] = input.get("description", "")
     context['entity_title'] = entity.title
     context['entity_url'] = get_base_url() + entity.url
 

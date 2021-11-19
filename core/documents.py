@@ -5,6 +5,7 @@ from elasticsearch_dsl import analysis, analyzer
 from .models.user import UserProfile, UserProfileField
 from .models.group import Group
 from user.models import User
+from core.utils.convert import tiptap_to_text
 
 
 custom_asciifolding_filter = analysis.token_filter(
@@ -115,6 +116,9 @@ class GroupDocument(DefaultDocument):
         analyzer=custom_analyzer,
         search_analyzer="standard"
     )
+
+    def prepare_description(self, instance):
+        return tiptap_to_text(instance.rich_description)
 
     class Index:
         name = 'group'

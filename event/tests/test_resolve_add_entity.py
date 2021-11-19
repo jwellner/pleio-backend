@@ -27,7 +27,6 @@ class AddEventTestCase(FastTenantTestCase):
                 "type": "object",
                 "subtype": "event",
                 "title": "My first Event",
-                "description": "My description",
                 "richDescription": "richDescription",
                 "accessId": 0,
                 "writeAccessId": 0,
@@ -44,7 +43,6 @@ class AddEventTestCase(FastTenantTestCase):
         self.mutation = """
             fragment EventParts on Event {
                 title
-                description
                 richDescription
                 timeCreated
                 timeUpdated
@@ -88,7 +86,6 @@ class AddEventTestCase(FastTenantTestCase):
         data = result[1]["data"]
 
         self.assertEqual(data["addEntity"]["entity"]["title"], variables["input"]["title"])
-        self.assertEqual(data["addEntity"]["entity"]["description"], variables["input"]["description"])
         self.assertEqual(data["addEntity"]["entity"]["richDescription"], variables["input"]["richDescription"])
         self.assertEqual(data["addEntity"]["entity"]["location"], variables["input"]["location"])
         self.assertEqual(data["addEntity"]["entity"]["rsvp"], variables["input"]["rsvp"])
@@ -111,7 +108,6 @@ class AddEventTestCase(FastTenantTestCase):
         data = result[1]["data"]
 
         self.assertEqual(data["addEntity"]["entity"]["title"], variables["input"]["title"])
-        self.assertEqual(data["addEntity"]["entity"]["description"], variables["input"]["description"])
         self.assertEqual(data["addEntity"]["entity"]["richDescription"], variables["input"]["richDescription"])
         self.assertEqual(data["addEntity"]["entity"]["inGroup"], True)
         self.assertEqual(data["addEntity"]["entity"]["group"]["guid"], self.group.guid)

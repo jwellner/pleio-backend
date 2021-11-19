@@ -24,7 +24,6 @@ class EditStatusUpdateTestCase(FastTenantTestCase):
 
         self.statusPublic = StatusUpdate.objects.create(
             title="Test public update",
-            description="Description",
             rich_description="JSON to string",
             read_access=[ACCESS_TYPE.public],
             write_access=[ACCESS_TYPE.user.format(self.authenticatedUser.id)],
@@ -35,7 +34,6 @@ class EditStatusUpdateTestCase(FastTenantTestCase):
             "input": {
                 "guid": self.statusPublic.guid,
                 "title": "My first update",
-                "description": "My description",
                 "richDescription": "richDescription",
                 "tags": ["tag1", "tag2"],
             }
@@ -43,7 +41,6 @@ class EditStatusUpdateTestCase(FastTenantTestCase):
         self.mutation = """
             fragment StatusUpdateParts on StatusUpdate {
                 title
-                description
                 richDescription
                 timeCreated
                 timeUpdated
@@ -83,13 +80,11 @@ class EditStatusUpdateTestCase(FastTenantTestCase):
         data = result[1]["data"]
 
         self.assertEqual(data["editEntity"]["entity"]["title"], variables["input"]["title"])
-        self.assertEqual(data["editEntity"]["entity"]["description"], variables["input"]["description"])
         self.assertEqual(data["editEntity"]["entity"]["richDescription"], variables["input"]["richDescription"])
 
         self.statusPublic.refresh_from_db()
 
         self.assertEqual(data["editEntity"]["entity"]["title"], self.statusPublic.title)
-        self.assertEqual(data["editEntity"]["entity"]["description"], self.statusPublic.description)
         self.assertEqual(data["editEntity"]["entity"]["richDescription"], self.statusPublic.rich_description)
         self.assertEqual(data["editEntity"]["entity"]["group"], None)
         self.assertEqual(data["editEntity"]["entity"]["owner"]["guid"], self.authenticatedUser.guid)
@@ -111,7 +106,6 @@ class EditStatusUpdateTestCase(FastTenantTestCase):
         data = result[1]["data"]
 
         self.assertEqual(data["editEntity"]["entity"]["title"], variables["input"]["title"])
-        self.assertEqual(data["editEntity"]["entity"]["description"], variables["input"]["description"])
         self.assertEqual(data["editEntity"]["entity"]["richDescription"], variables["input"]["richDescription"])
         self.assertEqual(data["editEntity"]["entity"]["group"]["guid"], self.group.guid)
         self.assertEqual(data["editEntity"]["entity"]["owner"]["guid"], self.user2.guid)
@@ -121,7 +115,6 @@ class EditStatusUpdateTestCase(FastTenantTestCase):
         self.statusPublic.refresh_from_db()
 
         self.assertEqual(data["editEntity"]["entity"]["title"], self.statusPublic.title)
-        self.assertEqual(data["editEntity"]["entity"]["description"], self.statusPublic.description)
         self.assertEqual(data["editEntity"]["entity"]["richDescription"], self.statusPublic.rich_description)
         self.assertEqual(data["editEntity"]["entity"]["group"]["guid"], self.group.guid)
         self.assertEqual(data["editEntity"]["entity"]["owner"]["guid"], self.user2.guid)

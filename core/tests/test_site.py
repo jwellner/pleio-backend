@@ -32,7 +32,9 @@ class SiteTestCase(FastTenantTestCase):
                         children {
                             title
                             link
+                            accessId
                         }
+                        accessId
                     }
                     profile {
                         key

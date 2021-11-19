@@ -173,7 +173,6 @@ class AddFileTestCase(FastTenantTestCase):
                 "title": "testfolder",
                 "accessId": 1,
                 "writeAccessId": 0,
-                "description": "",
                 "type": "object"
             }
         }
@@ -217,7 +216,6 @@ class AddFileTestCase(FastTenantTestCase):
                 "title": "testfolder",
                 "accessId": 1,
                 "writeAccessId": 0,
-                "description": "",
                 "type": "object"
             }
         }
@@ -263,7 +261,6 @@ class AddFileTestCase(FastTenantTestCase):
                 "title": "testfolder",
                 "accessId": 1,
                 "writeAccessId": 0,
-                "description": "",
                 "type": "object"
             }
         }

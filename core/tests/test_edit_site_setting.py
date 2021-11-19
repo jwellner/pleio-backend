@@ -45,10 +45,10 @@ class EditSiteSettingTestCase(FastTenantTestCase):
                         language
                         extraLanguages
                         name
-                        description
                         isClosed
                         allowRegistration
                         directRegistrationDomains
+                        description
                         defaultAccessId
                         defaultAccessIdOptions {
                             value
@@ -83,7 +83,9 @@ class EditSiteSettingTestCase(FastTenantTestCase):
                                 children {
                                     title
                                 }
+                                accessId
                             }
+                            accessId
                         }
 
                         numberOfFeaturedItems
@@ -353,9 +355,14 @@ class EditSiteSettingTestCase(FastTenantTestCase):
         self.assertEqual(data["editSiteSetting"]["siteSettings"]["showIcon"], True)
         self.assertEqual(data["editSiteSetting"]["siteSettings"]["iconAlt"], "iconAlt")
         # TODO: self.assertEqual(data["editSiteSetting"]["siteSettings"]["icon"], "heart")
-        self.assertEqual(data["editSiteSetting"]["siteSettings"]["menu"], [{"title": "Nieuws", "link": "/news", "children": [
-            {"title": "Blog", "link": "/blog", "children": []}
-        ]}])
+        self.assertEqual(data["editSiteSetting"]["siteSettings"]["menu"], [{
+            "title": "Nieuws",
+            "link": "/news",
+            "children": [
+                {"title": "Blog", "link": "/blog", "children": [], "accessId": 2},
+            ],
+            "accessId": 2
+        }])
 
         self.assertEqual(data["editSiteSetting"]["siteSettings"]["numberOfFeaturedItems"], 3)
         self.assertEqual(data["editSiteSetting"]["siteSettings"]["enableFeedSorting"], True)

@@ -3,6 +3,7 @@ from django.core.exceptions import ObjectDoesNotExist
 from blog.models import Blog
 from core.lib import remove_none_from_dict, access_id_to_acl, tenant_schema
 from core.constances import NOT_LOGGED_IN, COULD_NOT_FIND_GROUP, COULD_NOT_FIND, COULD_NOT_SAVE, USER_ROLES, INVALID_DATE
+from core.utils.convert import tiptap_to_text
 from core.models import Group
 from file.models import FileFolder
 from file.tasks import resize_featured
@@ -45,8 +46,8 @@ def resolve_add_blog(_, info, input):
     entity.write_access = access_id_to_acl(entity, clean_input.get("writeAccessId"))
 
     entity.title = clean_input.get("title")
-    entity.description = clean_input.get("description")
     entity.rich_description = clean_input.get("richDescription")
+    entity.description = tiptap_to_text(entity.rich_description)
 
     if 'featured' in clean_input:
         entity.featured_position_y = clean_input.get("featured").get("positionY", 0)
@@ -129,10 +130,11 @@ def resolve_edit_blog(_, info, input):
 
     if 'title' in clean_input:
         entity.title = clean_input.get("title")
-    if 'description' in clean_input:
-        entity.description = clean_input.get("description")
+
     if 'richDescription' in clean_input:
         entity.rich_description = clean_input.get("richDescription")
+        entity.description = tiptap_to_text(entity.rich_description)
+
 
     if 'featured' in clean_input:
         entity.featured_position_y = clean_input.get("featured").get("positionY", 0)

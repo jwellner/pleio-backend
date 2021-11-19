@@ -24,7 +24,6 @@ class ToggleBestAnswerTestCase(FastTenantTestCase):
 
         self.question = Question.objects.create(
             title="Test1",
-            description="Description",
             rich_description="",
             read_access=[ACCESS_TYPE.public],
             write_access=[ACCESS_TYPE.user.format(self.authenticatedUser.id)],
@@ -33,7 +32,6 @@ class ToggleBestAnswerTestCase(FastTenantTestCase):
         )
 
         self.answer = Comment.objects.create(
-            description="Answer",
             rich_description="",
             owner=self.authenticatedUser,
             container=self.question

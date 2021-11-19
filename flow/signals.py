@@ -7,6 +7,7 @@ from django.db import connection
 from tenants.models import Client
 from blog.models import Blog
 from core import config
+from core.utils.convert import tiptap_to_text
 from core.models import Comment, Entity
 from discussion.models import Discussion
 from flow.models import FlowId
@@ -36,7 +37,8 @@ def object_handler(sender, instance, created, **kwargs):
         url_prefix = "https://" + tenant.domains.first().domain
 
         title = instance.title if instance.title else 'Geen titel gegeven'
-        description = f"{instance.description} <br /><br /><a href='{url_prefix}{instance.url}'>{instance.url}</a>"
+
+        description = f"{tiptap_to_text(instance.rich_description)} <br /><br /><a href='{url_prefix}{instance.url}'>{instance.url}</a>"
 
         json = {
             'casetype': str(config.FLOW_CASE_ID),
@@ -79,7 +81,7 @@ def comment_handler(sender, instance, created, **kwargs):
         json = {
             'case': flow_id,
             'author': instance.owner.name,
-            'description': instance.description
+            'description': tiptap_to_text(instance.rich_description)
         }
 
         requests.post(url, headers=headers, json=json)

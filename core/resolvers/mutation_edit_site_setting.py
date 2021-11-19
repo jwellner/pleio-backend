@@ -5,7 +5,8 @@ from core import config
 from core.models import Setting, ProfileField
 from core.models.user import validate_profile_sections
 from core.constances import (
-    NOT_LOGGED_IN, USER_NOT_SITE_ADMIN, USER_ROLES, INVALID_VALUE, REDIRECTS_HAS_LOOP, REDIRECTS_HAS_DUPLICATE_SOURCE, COULD_NOT_SAVE)
+    COULD_NOT_SAVE, INVALID_VALUE, NOT_LOGGED_IN, REDIRECTS_HAS_DUPLICATE_SOURCE,
+    REDIRECTS_HAS_LOOP, USER_NOT_SITE_ADMIN, USER_ROLES )
 from core.lib import (
     remove_none_from_dict, access_id_to_acl, is_valid_domain, is_valid_url_or_path, get_language_options,
     tenant_schema, get_default_email_context )
@@ -27,6 +28,13 @@ def save_setting(key, value):
     cache.set("%s%s" % (connection.schema_name, key), value)
 
 
+def get_menu_item(menu, item, depth=0):
+    children = get_menu_children(menu, item["id"], depth)
+    access_id = item.get("accessId")
+
+    return {"title": item["title"], "link": item["link"], "children": children, "accessId": access_id}
+
+
 def get_menu_children(menu, item_id, depth=0):
     if depth == 3:
         return []
@@ -35,7 +43,8 @@ def get_menu_children(menu, item_id, depth=0):
     children = []
     for item in menu:
         if item["parentId"] == item_id:
-            children.append({"title": item["title"], "link": item["link"], "children": get_menu_children(menu, item["id"], depth)})
+            children.append(get_menu_item(menu, item))
+
     return children
 
 
@@ -192,7 +201,7 @@ def resolve_edit_site_setting(_, info, input):
         menu = []
         for item in clean_input.get('menu'):
             if item['parentId'] is None:
-                menu.append({"title": item["title"], "link": item["link"], "children": get_menu_children(clean_input.get('menu'), item["id"])})
+                menu.append(get_menu_item(clean_input.get('menu'), item))
         save_setting('MENU', menu)
 
     if 'profile' in clean_input:

@@ -21,7 +21,6 @@ class EditTaskStateTestCase(FastTenantTestCase):
 
         self.taskPublic = Task.objects.create(
             title="Test public update",
-            description="Description",
             rich_description="JSON to string",
             read_access=[ACCESS_TYPE.public],
             write_access=[ACCESS_TYPE.user.format(self.authenticatedUser.id)],
@@ -37,7 +36,6 @@ class EditTaskStateTestCase(FastTenantTestCase):
         self.mutation = """
             fragment TaskParts on Task {
                 title
-                description
                 richDescription
                 timeCreated
                 timeUpdated

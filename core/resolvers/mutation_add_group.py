@@ -57,7 +57,6 @@ def resolve_add_group(_, info, input):
         group.featured_video_title = ""
         group.featured_alt = ""
 
-    group.description = clean_input.get("description", "")
     group.rich_description = clean_input.get("richDescription", "")
     group.introduction = clean_input.get("introduction", "")
     group.is_introduction_public = clean_input.get("isIntroductionPublic", False)

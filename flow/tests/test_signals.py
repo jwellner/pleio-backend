@@ -46,6 +46,7 @@ class SignalsTestCase(FastTenantTestCase):
         self.blog1 = Blog.objects.create(
             title="Blog1",
             owner=self.user1,
+            rich_description="",
             read_access=[ACCESS_TYPE.public],
             write_access=[ACCESS_TYPE.user.format(self.user1.id)]
         )
@@ -53,7 +54,7 @@ class SignalsTestCase(FastTenantTestCase):
         url = 'https://flow.test/api/cases/'
         headers = {'Authorization': 'Token ' + config.FLOW_TOKEN, 'Accept': 'application/json'}
 
-        description = f"{self.blog1.description} <br /><br /><a href='{self.url_prefix}{self.blog1.url}'>{self.blog1.url}</a>"
+        description = f"{self.blog1.rich_description} <br /><br /><a href='{self.url_prefix}{self.blog1.url}'>{self.blog1.url}</a>"
         json_data = {
             'casetype': '1',
             'name': 'Blog1',
@@ -65,7 +66,7 @@ class SignalsTestCase(FastTenantTestCase):
         mocked_post.assert_called_with(url, headers=headers, json=json_data)
 
         self.comment1 = Comment.objects.create(
-            description='commenDescription1',
+            rich_description="commenDescription1",
             owner=self.user1,
             container=self.blog1
         )
@@ -77,7 +78,7 @@ class SignalsTestCase(FastTenantTestCase):
         json_data = {
             'case': str(case_id),
             'author': self.comment1.owner.name,
-            'description': self.comment1.description
+            'description': self.comment1.rich_description
         }
 
         mocked_post.assert_called_with(url, headers=headers, json=json_data)
@@ -95,6 +96,7 @@ class SignalsTestCase(FastTenantTestCase):
         self.blog1 = Blog.objects.create(
             title="Blog1",
             owner=self.user1,
+            rich_description="",
             read_access=[ACCESS_TYPE.public],
             write_access=[ACCESS_TYPE.user.format(self.user1.id)]
         )
@@ -102,7 +104,7 @@ class SignalsTestCase(FastTenantTestCase):
         url = 'https://flow.test/api/cases/'
         headers = {'Authorization': 'Token ' + config.FLOW_TOKEN, 'Accept': 'application/json'}
 
-        description = f"{self.blog1.description} <br /><br /><a href='{self.url_prefix}{self.blog1.url}'>{self.blog1.url}</a>"
+        description = f"{self.blog1.rich_description} <br /><br /><a href='{self.url_prefix}{self.blog1.url}'>{self.blog1.url}</a>"
         json_data = {
             'casetype': '1',
             'name': 'Blog1',
@@ -116,7 +118,7 @@ class SignalsTestCase(FastTenantTestCase):
         cache.set("%s%s" % (connection.schema_name, 'FLOW_SUBTYPES'), ['blog', 'discussion'])
 
         self.comment1 = Comment.objects.create(
-            description='commenDescription1',
+            rich_description='commenDescription1',
             owner=self.user1,
             container=self.blog1
         )

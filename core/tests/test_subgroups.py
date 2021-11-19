@@ -45,7 +45,6 @@ class SubgroupsTestCase(FastTenantTestCase):
 
         self.blog = Blog.objects.create(
             title="Test subgroup blog",
-            description="Description",
             rich_description="JSON to string",
             read_access=[ACCESS_TYPE.user.format(self.user1.id), ACCESS_TYPE.subgroup.format(self.subgroup1.access_id)],
             write_access=[ACCESS_TYPE.user.format(self.user1.id)],
@@ -56,7 +55,6 @@ class SubgroupsTestCase(FastTenantTestCase):
 
         self.blog2 = Blog.objects.create(
             title="Test subgroup blog",
-            description="Description",
             rich_description="JSON to string",
             read_access=[ACCESS_TYPE.user.format(self.user1.id), ACCESS_TYPE.subgroup.format(self.subgroup1.access_id)],
             write_access=[ACCESS_TYPE.user.format(self.user1.id), ACCESS_TYPE.subgroup.format(self.subgroup1.access_id)],
@@ -205,7 +203,6 @@ class SubgroupsTestCase(FastTenantTestCase):
                         defaultAccessId
                         accessIds {
                             id
-                            description
                             __typename
                         }
                         __typename
@@ -311,13 +308,11 @@ class SubgroupsTestCase(FastTenantTestCase):
             "input": {
                 "guid": self.blog2.guid,
                 "title": "Update blog title",
-                "description": "Update blog description"
             }
         }
         mutation = """
             fragment BlogParts on Blog {
                 title
-                description
                 richDescription
                 timeCreated
                 timeUpdated
@@ -353,7 +348,6 @@ class SubgroupsTestCase(FastTenantTestCase):
 
         self.assertEqual(data["editEntity"]["entity"]["guid"], self.blog2.guid)
         self.assertEqual(data["editEntity"]["entity"]["title"], "Update blog title")
-        self.assertEqual(data["editEntity"]["entity"]["description"], "Update blog description")
         self.assertEqual(data["editEntity"]["entity"]["accessId"], 10001)
         self.assertEqual(data["editEntity"]["entity"]["writeAccessId"], 10001)
 
@@ -363,13 +357,11 @@ class SubgroupsTestCase(FastTenantTestCase):
             "input": {
                 "guid": self.blog2.guid,
                 "title": "Update blog title",
-                "description": "Update blog description"
             }
         }
         mutation = """
             fragment BlogParts on Blog {
                 title
-                description
                 richDescription
                 timeCreated
                 timeUpdated

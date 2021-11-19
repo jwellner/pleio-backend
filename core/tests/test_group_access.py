@@ -147,7 +147,6 @@ class TestGroupAccess(FastTenantTestCase):
             "input": {
                 "guid": self.blog1.guid,
                 "title": "Testing",
-                "description": "Public content possible?",
                 "accessId": 2,
             }
         }
@@ -187,13 +186,11 @@ class TestGroupAccess(FastTenantTestCase):
             "input": {
                 "guid": self.blog1.guid,
                 "title": "Update by admin",
-                "description": "123"
             }
         }
         mutation = """
             fragment BlogParts on Blog {
                 title
-                description
             }
             mutation ($input: editEntityInput!) {
                 editEntity(input: $input) {
@@ -216,7 +213,6 @@ class TestGroupAccess(FastTenantTestCase):
         data = result[1]["data"]
 
         self.assertEqual(data["editEntity"]["entity"]["title"], "Update by admin")
-        self.assertEqual(data["editEntity"]["entity"]["description"], "123")
 
     def test_group_admin_can_edit_content(self):
         self.group.is_closed = True
@@ -227,13 +223,11 @@ class TestGroupAccess(FastTenantTestCase):
             "input": {
                 "guid": self.blog1.guid,
                 "title": "Update by admin",
-                "description": "123"
             }
         }
         mutation = """
             fragment BlogParts on Blog {
                 title
-                description
             }
             mutation ($input: editEntityInput!) {
                 editEntity(input: $input) {
@@ -256,7 +250,6 @@ class TestGroupAccess(FastTenantTestCase):
         data = result[1]["data"]
 
         self.assertEqual(data["editEntity"]["entity"]["title"], "Update by admin")
-        self.assertEqual(data["editEntity"]["entity"]["description"], "123")
 
     def test_site_admin_can_edit_content(self):
         self.group.is_closed = True
@@ -267,13 +260,11 @@ class TestGroupAccess(FastTenantTestCase):
             "input": {
                 "guid": self.blog1.guid,
                 "title": "Update by admin",
-                "description": "123"
             }
         }
         mutation = """
             fragment BlogParts on Blog {
                 title
-                description
             }
             mutation ($input: editEntityInput!) {
                 editEntity(input: $input) {
@@ -296,4 +287,3 @@ class TestGroupAccess(FastTenantTestCase):
         data = result[1]["data"]
 
         self.assertEqual(data["editEntity"]["entity"]["title"], "Update by admin")
-        self.assertEqual(data["editEntity"]["entity"]["description"], "123")

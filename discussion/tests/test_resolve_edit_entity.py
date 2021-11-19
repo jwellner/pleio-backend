@@ -24,7 +24,6 @@ class EditDiscussionTestCase(FastTenantTestCase):
 
         self.discussionPublic = Discussion.objects.create(
             title="Test public event",
-            description="Description",
             rich_description="JSON to string",
             read_access=[ACCESS_TYPE.public],
             write_access=[ACCESS_TYPE.user.format(self.authenticatedUser.id)],
@@ -36,7 +35,6 @@ class EditDiscussionTestCase(FastTenantTestCase):
             "input": {
                 "guid": self.discussionPublic.guid,
                 "title": "My first Event",
-                "description": "My description",
                 "richDescription": "richDescription",
                 "accessId": 0,
                 "writeAccessId": 0,
@@ -54,7 +52,6 @@ class EditDiscussionTestCase(FastTenantTestCase):
         self.mutation = """
             fragment DiscussionParts on Discussion {
                 title
-                description
                 richDescription
                 timeCreated
                 timeUpdated
@@ -102,14 +99,12 @@ class EditDiscussionTestCase(FastTenantTestCase):
         data = result[1]["data"]
 
         self.assertEqual(data["editEntity"]["entity"]["title"], variables["input"]["title"])
-        self.assertEqual(data["editEntity"]["entity"]["description"], variables["input"]["description"])
         self.assertEqual(data["editEntity"]["entity"]["richDescription"], variables["input"]["richDescription"])
         self.assertEqual(data["editEntity"]["entity"]["isFeatured"], False)
 
         self.discussionPublic.refresh_from_db()
 
         self.assertEqual(data["editEntity"]["entity"]["title"], self.discussionPublic.title)
-        self.assertEqual(data["editEntity"]["entity"]["description"], self.discussionPublic.description)
         self.assertEqual(data["editEntity"]["entity"]["richDescription"], self.discussionPublic.rich_description)
         self.assertEqual(data["editEntity"]["entity"]["isFeatured"], False)
         self.assertEqual(data["editEntity"]["entity"]["group"], None)
@@ -136,7 +131,6 @@ class EditDiscussionTestCase(FastTenantTestCase):
         data = result[1]["data"]
 
         self.assertEqual(data["editEntity"]["entity"]["title"], variables["input"]["title"])
-        self.assertEqual(data["editEntity"]["entity"]["description"], variables["input"]["description"])
         self.assertEqual(data["editEntity"]["entity"]["richDescription"], variables["input"]["richDescription"])
         self.assertEqual(data["editEntity"]["entity"]["isFeatured"], True)
         self.assertEqual(data["editEntity"]["entity"]["group"]["guid"], self.group.guid)
@@ -146,7 +140,6 @@ class EditDiscussionTestCase(FastTenantTestCase):
         self.discussionPublic.refresh_from_db()
 
         self.assertEqual(data["editEntity"]["entity"]["title"], self.discussionPublic.title)
-        self.assertEqual(data["editEntity"]["entity"]["description"], self.discussionPublic.description)
         self.assertEqual(data["editEntity"]["entity"]["richDescription"], self.discussionPublic.rich_description)
         self.assertEqual(data["editEntity"]["entity"]["isFeatured"], True)
         self.assertEqual(data["editEntity"]["entity"]["group"]["guid"], self.group.guid)
