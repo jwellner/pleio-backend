@@ -253,7 +253,7 @@ def draft_to_tiptap(draft_string):
             entity = None
             if len(block["entityRanges"]) == 1:
                 entity = entityForKey(block["entityRanges"][0]["key"])
-                if entity:
+                if entity and entity["type"] == "DOCUMENT":
                     offset = block["entityRanges"][0]["offset"]
                     length = block["entityRanges"][0]["length"]
                     text = block["text"][:block["entityRanges"][0]["offset"]]
