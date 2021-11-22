@@ -109,6 +109,7 @@ def draft_to_tiptap(draft_string):
 
         def get_marks(index):
             in_marks = []
+            document = None
 
             for i in block['inlineStyleRanges']:
                 if index in range(i['offset'], i['offset'] + i['length']):
@@ -128,31 +129,50 @@ def draft_to_tiptap(draft_string):
                             'target': entity['data'].get('target', None)
                         }
                     })
+                elif entity["type"] == "DOCUMENT" and index in range(i['offset'], i['offset'] + i['length']):
+                    document = {
+                        'type': 'file',
+                        'attrs': {
+                            "mimeType": entity["data"].get("mimeType", None),
+                            "name": entity["data"].get("name"),
+                            "size": entity["data"].get("size", 0),
+                            "url": entity["data"].get("url")
+                        }
+                    }
 
-            return in_marks
+            return (in_marks, document)
 
         content = []
+        files = []
         prev_marks = None
+        prev_file = None
 
         for idx, letter in enumerate(block["text"]):
-            marks = get_marks(idx)
+            marks, file = get_marks(idx)
 
-            if prev_marks != marks:
-                content.append({
-                    "type": "text",
-                    "text": ""
-                })
+            if not file:
+                if prev_marks != marks:
+                    content.append({
+                        "type": "text",
+                        "text": ""
+                    })
 
-                if len(marks) > 0:
-                    content[-1]["marks"] = marks
+                    if len(marks) > 0:
+                        content[-1]["marks"] = marks
 
-            content[-1]["text"] += letter
+                content[-1]["text"] += letter
 
-            prev_marks = marks
+                prev_marks = marks
+            else:
+                if prev_file != file:
+                    files.append(file)
+                prev_file = file
 
-        return content
+        return (content, files)
 
     for block in draft["blocks"]:
+
+        content, files = text_to_content(block)
 
         if block["type"] in map_headers.keys():
             tiptap['content'].append({
@@ -160,19 +180,19 @@ def draft_to_tiptap(draft_string):
                 'attrs': {
                     'level': map_headers[block["type"]]
                 },
-                'content': text_to_content(block)
+                'content': content
             })
 
         elif block["type"] in ["paragraph", "section", "article", "code-block"]:
             tiptap['content'].append({
                 'type': 'paragraph',
-                'content': text_to_content(block)
+                'content': content
             })
 
         elif block["type"] == "intro":
             tiptap['content'].append({
                 'type': 'paragraph',
-                'content': text_to_content(block),
+                'content': content,
                 'attrs': {
                     'intro': True
                 }
@@ -181,7 +201,7 @@ def draft_to_tiptap(draft_string):
         elif block["type"] == "blockquote":
             tiptap['content'].append({
                 'type': 'blockquote',
-                'content': text_to_content(block)
+                'content': content
             })
 
         elif block["type"] in ["unordered-list-item", "ordered-list-item"]:
@@ -192,7 +212,7 @@ def draft_to_tiptap(draft_string):
                 'content': [
                     {
                         'type': 'paragraph',
-                        'content': text_to_content(block)
+                        'content': content
                     }
                 ]
             }
@@ -250,33 +270,24 @@ def draft_to_tiptap(draft_string):
                     })
 
         elif block["type"] == "unstyled":
-            entity = None
-            if len(block["entityRanges"]) == 1:
-                entity = entityForKey(block["entityRanges"][0]["key"])
-                if entity and entity["type"] == "DOCUMENT":
-                    offset = block["entityRanges"][0]["offset"]
-                    length = block["entityRanges"][0]["length"]
-                    text = block["text"][:block["entityRanges"][0]["offset"]]
-                    text += block["text"][offset+length:]
-                    block["text"] = text
 
-            if len(block["text"]) > 0:
+            if len(content) > 0:
                 if (
                         len(tiptap["content"]) > 0 and
                         tiptap["content"][-1].get("attrs", None) and
                         tiptap["content"][-1]["attrs"].get("unstyled", None)
                     ): 
                     tiptap["content"][-1]["content"].append({'type': 'hardBreak'})
-                    tiptap["content"][-1]["content"].extend(text_to_content(block))
+                    tiptap["content"][-1]["content"].extend(content)
                 else:
                     tiptap["content"].append({
                         'type': 'paragraph',
-                        'content': text_to_content(block),
+                        'content': content,
                         'attrs': {
                             'unstyled': True
                         }
                     })
-            elif not entity:
+            elif len(files) == 0:
                 # add hardBreak if empty text node and previous is also unstyled
                 if (
                         len(tiptap["content"]) > 0 and
@@ -285,19 +296,11 @@ def draft_to_tiptap(draft_string):
                     ): 
                     tiptap["content"][-1]["content"].append({'type': 'hardBreak'})
 
-            if entity and entity["type"] == "DOCUMENT":
-                tiptap["content"].append({
-                    'type': 'file',
-                    'attrs': {
-                        "mimeType": entity["data"].get("mimeType", None),
-                        "name": entity["data"].get("name"),
-                        "size": entity["data"].get("size", 0),
-                        "url": entity["data"].get("url")
-                    }
-                })
-
         else:
             logger.error("Unhandled block: \"%s\"", block['type'])
             logger.error(block)
+
+        for file in files:
+            tiptap["content"].append(file)
 
     return json.dumps(tiptap)

@@ -196,7 +196,7 @@ class Command(BaseCommand):
                 item.rich_description = draft_to_tiptap(original_rich.data)
                 count_rich+=1
             else:
-                draft_string = json.dumps(html_to_draftjs(original.data))
+                draft_string = json.dumps(html_to_draftjs(original_rich.data))
                 item.rich_description = draft_to_tiptap(draft_string)
                 count_html+=1
             item.save()
