@@ -175,13 +175,14 @@ def draft_to_tiptap(draft_string):
         content, files = text_to_content(block)
 
         if block["type"] in map_headers.keys():
-            tiptap['content'].append({
-                'type': 'heading',
-                'attrs': {
-                    'level': map_headers[block["type"]]
-                },
-                'content': content
-            })
+            if len(content) > 0:
+                tiptap['content'].append({
+                    'type': 'heading',
+                    'attrs': {
+                        'level': map_headers[block["type"]]
+                    },
+                    'content': content
+                })
 
         elif block["type"] in ["paragraph", "section", "article", "code-block"]:
             tiptap['content'].append({
