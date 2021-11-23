@@ -79,7 +79,7 @@ input addEntityInput {
   writeAccessId: Int
   tags: [String]
   mentions: [String]
-  timePublished: String
+  timePublished: DateTime
 }
 
 type addEntityPayload {
@@ -478,8 +478,8 @@ input editEntityInput {
   writeAccessId: Int
   tags: [String]
   mentions: [String]
-  timeCreated: String
-  timePublished: String
+  timeCreated: DateTime
+  timePublished: DateTime
   groupGuid: String
   ownerGuid: String
 }
