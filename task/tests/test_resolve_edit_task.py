@@ -84,7 +84,7 @@ class EditTaskTestCase(FastTenantTestCase):
         self.assertEqual(data["editEntity"]["entity"]["state"], "NEW")
         self.assertEqual(data["editEntity"]["entity"]["group"], None)
         self.assertEqual(data["editEntity"]["entity"]["owner"]["guid"], self.authenticatedUser.guid)
-        self.assertEqual(data["editEntity"]["entity"]["timeCreated"], str(self.taskPublic.created_at))
+        self.assertEqual(data["editEntity"]["entity"]["timeCreated"], self.taskPublic.created_at.isoformat())
 
         self.taskPublic.refresh_from_db()
 
@@ -112,7 +112,7 @@ class EditTaskTestCase(FastTenantTestCase):
         self.assertEqual(data["editEntity"]["entity"]["state"], "NEW")
         self.assertEqual(data["editEntity"]["entity"]["group"]["guid"], self.group.guid)
         self.assertEqual(data["editEntity"]["entity"]["owner"]["guid"], self.user2.guid)
-        self.assertEqual(data["editEntity"]["entity"]["timeCreated"], "2018-12-10 23:00:00+00:00")
+        self.assertEqual(data["editEntity"]["entity"]["timeCreated"], "2018-12-10T23:00:00+00:00")
 
         self.taskPublic.refresh_from_db()
 
@@ -121,7 +121,7 @@ class EditTaskTestCase(FastTenantTestCase):
         self.assertEqual(data["editEntity"]["entity"]["state"], self.taskPublic.state)
         self.assertEqual(data["editEntity"]["entity"]["group"]["guid"], self.group.guid)
         self.assertEqual(data["editEntity"]["entity"]["owner"]["guid"], self.user2.guid)
-        self.assertEqual(data["editEntity"]["entity"]["timeCreated"], "2018-12-10 23:00:00+00:00")
+        self.assertEqual(data["editEntity"]["entity"]["timeCreated"], "2018-12-10T23:00:00+00:00")
 
 
     def test_edit_task_group_null_by_admin(self):
