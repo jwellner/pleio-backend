@@ -124,7 +124,7 @@ if not RUN_AS_ADMIN_APP:
     MIDDLEWARE.append('core.middleware.RedirectMiddleware')
     MIDDLEWARE.append('core.middleware.CustomCSPMiddleware')
     MIDDLEWARE.append('auditlog.middleware.AuditlogMiddleware')
-    
+
 if LOCAL_MIDDLEWARE:
     MIDDLEWARE += LOCAL_MIDDLEWARE
 
@@ -219,7 +219,7 @@ USE_I18N = True
 
 USE_L10N = True
 
-USE_TZ = False
+USE_TZ = True
 
 TIME_ZONE = 'Europe/Amsterdam'
 

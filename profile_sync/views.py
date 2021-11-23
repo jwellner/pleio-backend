@@ -12,6 +12,7 @@ from core.models import Group, ProfileField, UserProfileField
 from file.models import FileFolder
 from profile_sync.models import Logs
 from user.models import User
+from django.utils import timezone
 
 logger = logging.getLogger(__name__)
 
@@ -75,7 +76,7 @@ def users(request):
         if request.GET.get('limit'):
             limit=int(request.GET.get('limit'))
 
-        created_at = datetime(1980, 1, 1)
+        created_at = datetime(1980, 1, 1, tzinfo=timezone.utc)
         if request.GET.get('cursor'):
             try:
                 created_at = User.objects.get(id=request.GET.get('cursor')).created_at

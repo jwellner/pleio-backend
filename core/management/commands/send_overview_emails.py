@@ -6,7 +6,7 @@ from django.conf import settings
 from core import config
 from core.lib import get_base_url, get_default_email_context
 from core.models import Entity, EntityView
-from datetime import datetime, timedelta
+from datetime import timedelta
 from django.db import connection
 from tenants.models import Client
 from user.models import User
@@ -58,17 +58,17 @@ class Command(BaseCommand):
 
     def send_overview(self, user, entities, featured_entities, subject, site_url):
         if entities or featured_entities:
-            context = get_default_email_context(user)           
+            context = get_default_email_context(user)
             context['entities'] = get_serializable_entities(entities)
             context['featured'] = get_serializable_entities(featured_entities)
             context['intro_text'] = config.EMAIL_OVERVIEW_INTRO
             context['title'] = config.EMAIL_OVERVIEW_TITLE
             context['featured_enabled'] = config.EMAIL_OVERVIEW_ENABLE_FEATURED
             context['featured_title'] = config.EMAIL_OVERVIEW_FEATURED_TITLE
-            context['subject'] = subject 
+            context['subject'] = subject
 
             send_mail_multi.delay(connection.schema_name, subject, 'email/send_overview_emails.html', context, user.email)
-            user.profile.overview_email_last_received = datetime.now()
+            user.profile.overview_email_last_received = timezone.now()
             user.profile.save()
 
     def handle(self, *args, **options):
@@ -91,7 +91,7 @@ class Command(BaseCommand):
                 subject = ugettext_lazy("Regular overview of %(site_name)s") % {'site_name': config.NAME}
 
             # determine lower bound of emails in queries
-            time_threshold = datetime.now() - timedelta(hours=1500)
+            time_threshold = timezone.now() - timedelta(hours=1500)
             if user.profile.overview_email_last_received and user.profile.overview_email_last_received > time_threshold:
                 lower_bound = user.profile.overview_email_last_received
             else:

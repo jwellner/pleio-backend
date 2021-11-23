@@ -13,6 +13,7 @@ from core.constances import ACCESS_TYPE, USER_ROLES
 from mixer.backend.django import mixer
 from graphql import GraphQLError
 from datetime import datetime
+from django.utils import timezone
 
 class EditEventTestCase(FastTenantTestCase):
 
@@ -30,7 +31,7 @@ class EditEventTestCase(FastTenantTestCase):
             read_access=[ACCESS_TYPE.public],
             write_access=[ACCESS_TYPE.user.format(self.authenticatedUser.id)],
             owner=self.authenticatedUser,
-            start_date=datetime.now()
+            start_date=timezone.now()
         )
 
         self.data = {

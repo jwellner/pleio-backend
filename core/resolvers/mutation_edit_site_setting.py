@@ -1,4 +1,3 @@
-import datetime
 import ipaddress
 from graphql import GraphQLError
 from core import config
@@ -18,6 +17,7 @@ from django.core.cache import cache
 from django.utils.translation import ugettext_lazy
 from file.helpers import resize_and_save_as_png
 from file.models import FileFolder
+from django.utils import timezone
 
 
 def save_setting(key, value):
@@ -303,7 +303,7 @@ def resolve_edit_site_setting(_, info, input):
 
     if 'customCss' in clean_input:
         save_setting('CUSTOM_CSS', clean_input.get('customCss'))
-        save_setting('CUSTOM_CSS_TIMESTAMP', int(datetime.datetime.now().timestamp()))
+        save_setting('CUSTOM_CSS_TIMESTAMP', int(timezone.now().timestamp()))
 
     if 'walledGardenByIpEnabled' in clean_input:
         save_setting('WALLED_GARDEN_BY_IP_ENABLED', clean_input.get('walledGardenByIpEnabled'))
