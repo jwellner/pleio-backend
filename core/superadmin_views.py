@@ -5,7 +5,7 @@ from django.contrib.auth.decorators import user_passes_test, login_required
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.shortcuts import redirect
 from django.views import View
-from core.tasks import elasticsearch_rebuild, replace_domain_links, draft_to_tiptap
+from core.tasks import elasticsearch_rebuild, replace_domain_links
 from core.lib import tenant_schema, is_valid_domain
 from core.superadmin.forms import SettingsForm, ScanIncidentFilter
 from control.tasks import get_db_disk_usage, get_file_disk_usage
@@ -93,9 +93,6 @@ def tasks(request):
         if request.POST.get("task", False) == "elasticsearch_rebuild":
             elasticsearch_rebuild.delay(tenant_schema())
             messages.success(request, 'Elasticsearch rebuild started')
-        elif request.POST.get("task", False) == "draft_to_tiptap":
-            draft_to_tiptap.delay(tenant_schema())
-            messages.success(request, 'Draft to Tiptap conversion started')
         elif request.POST.get("task", False) == "replace_links":
             replace_domain = request.POST.get("replace_domain") if request.POST.get("replace_domain") else current_domain
             replace_elgg_id = bool(request.POST.get("replace_elgg_id", False))
