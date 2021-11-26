@@ -12,8 +12,9 @@ from core.constances import ACCESS_TYPE, USER_ROLES
 from mixer.backend.django import mixer
 from graphql import GraphQLError
 from datetime import datetime
+from core.tests.helpers import GraphqlTestMixin
 
-class EditTaskTestCase(FastTenantTestCase):
+class EditTaskTestCase(FastTenantTestCase, GraphqlTestMixin):
 
     def setUp(self):
         self.anonymousUser = AnonymousUser()
@@ -106,6 +107,8 @@ class EditTaskTestCase(FastTenantTestCase):
         result = graphql_sync(schema, { "query": self.mutation, "variables": variables }, context_value={ "request": request })
 
         data = result[1]["data"]
+
+        self.assertGraphqlSuccess(result)
 
         self.assertEqual(data["editEntity"]["entity"]["title"], variables["input"]["title"])
         self.assertEqual(data["editEntity"]["entity"]["richDescription"], variables["input"]["richDescription"])
