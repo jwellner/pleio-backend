@@ -1,9 +1,9 @@
 from auditlog.registry import auditlog
 from django.db import models
 from django.utils.text import slugify
-from core.models import Entity, VoteMixin, CommentMixin, BookmarkMixin, FollowMixin, NotificationMixin, FeaturedCoverMixin
+from core.models import Entity, VoteMixin, CommentMixin, BookmarkMixin, FollowMixin, NotificationMixin, FeaturedCoverMixin, ArticleMixin
 
-class Blog(Entity, FeaturedCoverMixin, VoteMixin, BookmarkMixin, FollowMixin, CommentMixin, NotificationMixin):
+class Blog(Entity, FeaturedCoverMixin, VoteMixin, BookmarkMixin, FollowMixin, CommentMixin, NotificationMixin, ArticleMixin):
     """
     Blog
     """
@@ -11,8 +11,6 @@ class Blog(Entity, FeaturedCoverMixin, VoteMixin, BookmarkMixin, FollowMixin, Co
         ordering = ['-published']
 
     title = models.CharField(max_length=256)
-    description = models.TextField(default="")
-    rich_description = models.TextField(null=True, blank=True)
     is_recommended = models.BooleanField(default=False)
     is_featured = models.BooleanField(default=False)
 
