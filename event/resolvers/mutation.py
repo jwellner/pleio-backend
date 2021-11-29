@@ -150,13 +150,7 @@ def resolve_add_event(_, info, input):
     entity.attend_event_without_account = clean_input.get("attendEventWithoutAccount", False)
 
     if 'timePublished' in clean_input:
-        if clean_input.get("timePublished") is None:
-            entity.published = None
-        else:
-            try:
-                entity.published = dateparse.parse_datetime(clean_input.get("timePublished"))
-            except ObjectDoesNotExist:
-                raise GraphQLError(INVALID_DATE)
+        entity.published = clean_input.get("timePublished", None)
 
     entity.save()
 
@@ -263,13 +257,7 @@ def resolve_edit_event(_, info, input):
         entity.attend_event_without_account = clean_input.get("attendEventWithoutAccount")
 
     if 'timePublished' in clean_input:
-        if clean_input.get("timePublished") is None:
-            entity.published = None
-        else:
-            try:
-                entity.published = dateparse.parse_datetime(clean_input.get("timePublished"))
-            except ObjectDoesNotExist:
-                raise GraphQLError(INVALID_DATE)
+        entity.published = clean_input.get("timePublished", None)
 
     # only admins can edit these fields
     if user.has_role(USER_ROLES.ADMIN):
@@ -291,11 +279,7 @@ def resolve_edit_event(_, info, input):
                 raise GraphQLError(COULD_NOT_FIND)
 
         if 'timeCreated' in clean_input:
-            try:
-                created_at = dateparse.parse_datetime(clean_input.get("timeCreated"))
-                entity.created_at = created_at
-            except ObjectDoesNotExist:
-                raise GraphQLError(INVALID_DATE)
+            entity.created_at = clean_input.get("timeCreated")
 
     entity.save()
 

@@ -2,13 +2,14 @@ from importlib import import_module
 from django.apps import apps
 
 from ariadne import load_schema_from_path, make_executable_schema
+from ariadne.contrib.django.scalars import datetime_scalar
 
 # load schema from file...
 type_defs_base = load_schema_from_path("backend2/schema.graphql")
 type_defs = [type_defs_base]
 
 # get resolvers form apps
-resolvers = []
+resolvers = [datetime_scalar]
 for app in apps.get_app_configs():
     try:
         search = "%s.%s" % (app.name, "resolvers")

@@ -12,30 +12,31 @@ from user.models import User
 from mixer.backend.django import mixer
 from graphql import GraphQLError
 from unittest import mock
-from datetime import datetime, timedelta
+from datetime import timedelta
+from django.utils import timezone
 
 class SendMessageToGroupTestCase(FastTenantTestCase):
 
     def setUp(self):
         self.anonymousUser = AnonymousUser()
         self.user1 = mixer.blend(User)
-        self.user1.profile.last_online = datetime.now()
+        self.user1.profile.last_online = timezone.now()
         self.user1.profile.save()
         self.user2 = mixer.blend(User)
-        self.user2.profile.last_online = datetime.now()
+        self.user2.profile.last_online = timezone.now()
         self.user2.profile.language = 'en'
         self.user2.profile.save()
         self.user3 = mixer.blend(User)
-        self.user3.profile.last_online = datetime.now()
+        self.user3.profile.last_online = timezone.now()
         self.user3.profile.save()
         self.user4 = mixer.blend(User)
-        self.user4.profile.last_online = datetime.now()
+        self.user4.profile.last_online = timezone.now()
         self.user4.profile.save()
         self.user5 = mixer.blend(User, is_active=False)
-        self.user5.profile.last_online = datetime.now()
+        self.user5.profile.last_online = timezone.now()
         self.user5.profile.save()
         self.user6 = mixer.blend(User)
-        self.user6.profile.last_online = datetime.now() - timedelta(days=200)
+        self.user6.profile.last_online = timezone.now() - timedelta(days=200)
         self.user6.profile.save()
         self.admin = mixer.blend(User)
         self.admin.roles = ['ADMIN']

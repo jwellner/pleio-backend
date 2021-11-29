@@ -13,6 +13,7 @@ from core.constances import ACCESS_TYPE, USER_ROLES
 from mixer.backend.django import mixer
 from graphql import GraphQLError
 from datetime import datetime
+from django.utils import timezone
 
 class EditEventTestCase(FastTenantTestCase):
 
@@ -30,7 +31,7 @@ class EditEventTestCase(FastTenantTestCase):
             read_access=[ACCESS_TYPE.public],
             write_access=[ACCESS_TYPE.user.format(self.authenticatedUser.id)],
             owner=self.authenticatedUser,
-            start_date=datetime.now()
+            start_date=timezone.now()
         )
 
         self.data = {
@@ -41,8 +42,8 @@ class EditEventTestCase(FastTenantTestCase):
                 "accessId": 0,
                 "writeAccessId": 0,
                 "tags": ["tag1", "tag2"],
-                "startDate": "2019-10-02 09:00:00",
-                "endDate": "2019-10-02 10:00:00",
+                "startDate": "2019-10-02T09:00:00+02:00",
+                "endDate": "2019-10-02T10:00:00+02:00",
                 "maxAttendees": "10",
                 "location": "Utrecht",
                 "source": "https://www.pleio.nl",
@@ -121,7 +122,7 @@ class EditEventTestCase(FastTenantTestCase):
         self.assertEqual(data["editEntity"]["entity"]["rsvp"], self.eventPublic.rsvp)
         self.assertEqual(data["editEntity"]["entity"]["group"], None)
         self.assertEqual(data["editEntity"]["entity"]["owner"]["guid"], self.authenticatedUser.guid)
-        self.assertEqual(data["editEntity"]["entity"]["timeCreated"], str(self.eventPublic.created_at))
+        self.assertEqual(data["editEntity"]["entity"]["timeCreated"], self.eventPublic.created_at.isoformat())
 
 
 
@@ -150,7 +151,7 @@ class EditEventTestCase(FastTenantTestCase):
         self.assertEqual(data["editEntity"]["entity"]["rsvp"], variables["input"]["rsvp"])
         self.assertEqual(data["editEntity"]["entity"]["group"]["guid"], self.group.guid)
         self.assertEqual(data["editEntity"]["entity"]["owner"]["guid"], self.user2.guid)
-        self.assertEqual(data["editEntity"]["entity"]["timeCreated"], "2018-12-10 23:00:00+00:00")
+        self.assertEqual(data["editEntity"]["entity"]["timeCreated"], "2018-12-10T23:00:00+00:00")
 
 
         self.eventPublic.refresh_from_db()
@@ -166,7 +167,7 @@ class EditEventTestCase(FastTenantTestCase):
         self.assertEqual(data["editEntity"]["entity"]["rsvp"], self.eventPublic.rsvp)
         self.assertEqual(data["editEntity"]["entity"]["group"]["guid"], self.group.guid)
         self.assertEqual(data["editEntity"]["entity"]["owner"]["guid"], self.user2.guid)
-        self.assertEqual(data["editEntity"]["entity"]["timeCreated"], "2018-12-10 23:00:00+00:00")
+        self.assertEqual(data["editEntity"]["entity"]["timeCreated"], "2018-12-10T23:00:00+00:00")
 
     def test_edit_event_group_null_by_admin(self):
 

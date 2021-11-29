@@ -1,10 +1,9 @@
 from graphql import GraphQLError
 from django.core.exceptions import ObjectDoesNotExist
-from django.utils import dateparse
 from core.lib import remove_none_from_dict, access_id_to_acl, tenant_schema
 from core.models import Comment, Group
 from core.constances import NOT_LOGGED_IN, COULD_NOT_FIND, COULD_NOT_SAVE, COULD_NOT_FIND_GROUP, \
-    USER_NOT_MEMBER_OF_GROUP, USER_ROLES, INVALID_DATE
+    USER_NOT_MEMBER_OF_GROUP, USER_ROLES
 from core.utils.convert import tiptap_to_text
 from file.models import FileFolder
 from file.tasks import resize_featured
@@ -127,13 +126,7 @@ def resolve_add_question(_, info, input):
         entity.featured_alt = ""
 
     if 'timePublished' in clean_input:
-        if clean_input.get("timePublished") is None:
-            entity.published = None
-        else:
-            try:
-                entity.published = dateparse.parse_datetime(clean_input.get("timePublished"))
-            except ObjectDoesNotExist:
-                raise GraphQLError(INVALID_DATE)
+        entity.published = clean_input.get("timePublished")
 
     if user.has_role(USER_ROLES.ADMIN) or user.has_role(USER_ROLES.EDITOR):
         if 'isFeatured' in clean_input:
@@ -218,13 +211,7 @@ def resolve_edit_question(_, info, input):
             entity.is_featured = clean_input.get("isFeatured")
 
     if 'timePublished' in clean_input:
-        if clean_input.get("timePublished") is None:
-            entity.published = None
-        else:
-            try:
-                entity.published = dateparse.parse_datetime(clean_input.get("timePublished"))
-            except ObjectDoesNotExist:
-                raise GraphQLError(INVALID_DATE)
+        entity.published = clean_input.get("timePublished")
 
     # only admins can edit these fields
     if user.has_role(USER_ROLES.ADMIN):
@@ -246,11 +233,7 @@ def resolve_edit_question(_, info, input):
                 raise GraphQLError(COULD_NOT_FIND)
 
         if 'timeCreated' in clean_input:
-            try:
-                created_at = dateparse.parse_datetime(clean_input.get("timeCreated"))
-                entity.created_at = created_at
-            except ObjectDoesNotExist:
-                raise GraphQLError(INVALID_DATE)
+            entity.created_at = clean_input.get("timeCreated")
 
     entity.save()
 

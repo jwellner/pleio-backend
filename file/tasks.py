@@ -5,7 +5,7 @@ import signal_disabler
 
 from celery import shared_task
 from celery.utils.log import get_task_logger
-from datetime import datetime, timedelta
+from datetime import timedelta
 from django.db.models import Q, F
 from django_tenants.utils import schema_context
 from django.utils import timezone
@@ -38,7 +38,7 @@ def scan(self, schema_name, limit=1000):
     Scan files
     '''
     with schema_context(schema_name):
-        time_threshold = datetime.now() - timedelta(days=7)
+        time_threshold = timezone.now() - timedelta(days=7)
 
         files = FileFolder.objects.filter(is_folder=False)
         files = files.filter(Q(last_scan__isnull=True) | Q(last_scan__lt=time_threshold))

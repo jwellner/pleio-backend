@@ -94,7 +94,7 @@ class Entity(models.Model):
 
     @property
     def status_published(self):
-        if self.published and (self.published.replace(tzinfo=None) < timezone.now()):
+        if self.published and (self.published < timezone.now()):
             return 'published'
         return 'draft'
 

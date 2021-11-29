@@ -112,7 +112,7 @@ class AddWikiCase(FastTenantTestCase):
         self.assertEqual(data["editEntity"]["entity"]["subtype"], "wiki")
         self.assertEqual(data["editEntity"]["entity"]["group"], None)
         self.assertEqual(data["editEntity"]["entity"]["owner"]["guid"], self.authenticatedUser.guid)
-        self.assertEqual(data["editEntity"]["entity"]["timeCreated"], str(self.wikiPublic.created_at))
+        self.assertEqual(data["editEntity"]["entity"]["timeCreated"], self.wikiPublic.created_at.isoformat())
         self.assertEqual(data["editEntity"]["entity"]["featured"]["positionY"], 2)
         self.assertEqual(data["editEntity"]["entity"]["featured"]["video"], "testVideo2")
         self.assertEqual(data["editEntity"]["entity"]["featured"]["videoTitle"], "testVideoTitle2")
@@ -147,7 +147,7 @@ class AddWikiCase(FastTenantTestCase):
         self.assertEqual(data["editEntity"]["entity"]["subtype"], "wiki")
         self.assertEqual(data["editEntity"]["entity"]["group"]["guid"], self.group.guid)
         self.assertEqual(data["editEntity"]["entity"]["owner"]["guid"], self.user2.guid)
-        self.assertEqual(data["editEntity"]["entity"]["timeCreated"], "2018-12-10 23:00:00+00:00")
+        self.assertEqual(data["editEntity"]["entity"]["timeCreated"], "2018-12-10T23:00:00+00:00")
 
         self.wikiPublic.refresh_from_db()
 
@@ -157,7 +157,7 @@ class AddWikiCase(FastTenantTestCase):
         self.assertEqual(data["editEntity"]["entity"]["isFeatured"], self.wikiPublic.is_featured)
         self.assertEqual(data["editEntity"]["entity"]["group"]["guid"], self.group.guid)
         self.assertEqual(data["editEntity"]["entity"]["owner"]["guid"], self.user2.guid)
-        self.assertEqual(data["editEntity"]["entity"]["timeCreated"], "2018-12-10 23:00:00+00:00")
+        self.assertEqual(data["editEntity"]["entity"]["timeCreated"], "2018-12-10T23:00:00+00:00")
 
     def test_edit_wiki_group_null_by_admin(self):
 

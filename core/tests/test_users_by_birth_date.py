@@ -13,8 +13,8 @@ from django.contrib.auth.models import AnonymousUser
 from django.http import HttpRequest
 from mixer.backend.django import mixer
 from notifications.signals import notify
-from django.utils import dateparse
-from datetime import datetime, timedelta
+from django.utils import dateparse, timezone
+from datetime import timedelta
 from core.lib import access_id_to_acl
 
 class UsersByBirthDateTestCase(FastTenantTestCase):
@@ -31,7 +31,7 @@ class UsersByBirthDateTestCase(FastTenantTestCase):
 
         self.birthday_field = ProfileField.objects.create(key='birthday', name='birthday', field_type='date_field')
 
-        today = datetime.now()
+        today = timezone.now()
         tomorrow = today + timedelta(days=1)
         overtomorrow = today + timedelta(days=2)
         next_months = today + timedelta(weeks=5)

@@ -3,7 +3,6 @@ from __future__ import absolute_import, unicode_literals
 import os
 import shutil
 import subprocess
-from datetime import datetime
 
 from celery import shared_task
 from celery.utils.log import get_task_logger
@@ -15,6 +14,7 @@ from django.conf import settings
 from django.db import connection
 from core.models import SiteStat
 from user.models import User
+from django.utils import timezone
 
 logger = get_task_logger(__name__)
 
@@ -120,7 +120,7 @@ def backup_site(self, backup_site_id):
         except Exception as e:
             raise Exception(e)
 
-    now = datetime.now()
+    now = timezone.now()
     backup_folder = f"{now.strftime('%Y%m%d')}_{backup_site.schema_name}"
     backup_base_path = os.path.join(settings.BACKUP_PATH, backup_folder)
 
@@ -178,7 +178,7 @@ def restore_site(self, restore_folder, schema_name, domain):
     '''
     Restore backup from path to new tenant
     '''
-    
+
     backup_base_path = os.path.join(settings.BACKUP_PATH, restore_folder)
 
     with schema_context('public'):

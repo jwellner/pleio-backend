@@ -88,7 +88,7 @@ class EditStatusUpdateTestCase(FastTenantTestCase):
         self.assertEqual(data["editEntity"]["entity"]["richDescription"], self.statusPublic.rich_description)
         self.assertEqual(data["editEntity"]["entity"]["group"], None)
         self.assertEqual(data["editEntity"]["entity"]["owner"]["guid"], self.authenticatedUser.guid)
-        self.assertEqual(data["editEntity"]["entity"]["timeCreated"], str(self.statusPublic.created_at))
+        self.assertEqual(data["editEntity"]["entity"]["timeCreated"], self.statusPublic.created_at.isoformat())
 
 
     def test_edit_status_update_by_admin(self):
@@ -109,7 +109,7 @@ class EditStatusUpdateTestCase(FastTenantTestCase):
         self.assertEqual(data["editEntity"]["entity"]["richDescription"], variables["input"]["richDescription"])
         self.assertEqual(data["editEntity"]["entity"]["group"]["guid"], self.group.guid)
         self.assertEqual(data["editEntity"]["entity"]["owner"]["guid"], self.user2.guid)
-        self.assertEqual(data["editEntity"]["entity"]["timeCreated"], "2018-12-10 23:00:00+00:00")
+        self.assertEqual(data["editEntity"]["entity"]["timeCreated"], "2018-12-10T23:00:00+00:00")
 
 
         self.statusPublic.refresh_from_db()
@@ -118,7 +118,7 @@ class EditStatusUpdateTestCase(FastTenantTestCase):
         self.assertEqual(data["editEntity"]["entity"]["richDescription"], self.statusPublic.rich_description)
         self.assertEqual(data["editEntity"]["entity"]["group"]["guid"], self.group.guid)
         self.assertEqual(data["editEntity"]["entity"]["owner"]["guid"], self.user2.guid)
-        self.assertEqual(data["editEntity"]["entity"]["timeCreated"], "2018-12-10 23:00:00+00:00")
+        self.assertEqual(data["editEntity"]["entity"]["timeCreated"], "2018-12-10T23:00:00+00:00")
 
 
     def test_edit_status_update_group_null_by_admin(self):

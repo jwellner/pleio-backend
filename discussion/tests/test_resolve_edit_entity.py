@@ -109,7 +109,7 @@ class EditDiscussionTestCase(FastTenantTestCase):
         self.assertEqual(data["editEntity"]["entity"]["isFeatured"], False)
         self.assertEqual(data["editEntity"]["entity"]["group"], None)
         self.assertEqual(data["editEntity"]["entity"]["owner"]["guid"], self.authenticatedUser.guid)
-        self.assertEqual(data["editEntity"]["entity"]["timeCreated"], str(self.discussionPublic.created_at))
+        self.assertEqual(data["editEntity"]["entity"]["timeCreated"], self.discussionPublic.created_at.isoformat())
         self.assertEqual(data["editEntity"]["entity"]["featured"]["positionY"], 2)
         self.assertEqual(data["editEntity"]["entity"]["featured"]["video"], "testVideo2")
         self.assertEqual(data["editEntity"]["entity"]["featured"]["videoTitle"], "testVideoTitle2")
@@ -135,7 +135,7 @@ class EditDiscussionTestCase(FastTenantTestCase):
         self.assertEqual(data["editEntity"]["entity"]["isFeatured"], True)
         self.assertEqual(data["editEntity"]["entity"]["group"]["guid"], self.group.guid)
         self.assertEqual(data["editEntity"]["entity"]["owner"]["guid"], self.user2.guid)
-        self.assertEqual(data["editEntity"]["entity"]["timeCreated"], "2018-12-10 23:00:00+00:00")
+        self.assertEqual(data["editEntity"]["entity"]["timeCreated"], "2018-12-10T23:00:00+00:00")
 
         self.discussionPublic.refresh_from_db()
 
@@ -144,7 +144,7 @@ class EditDiscussionTestCase(FastTenantTestCase):
         self.assertEqual(data["editEntity"]["entity"]["isFeatured"], True)
         self.assertEqual(data["editEntity"]["entity"]["group"]["guid"], self.group.guid)
         self.assertEqual(data["editEntity"]["entity"]["owner"]["guid"], self.user2.guid)
-        self.assertEqual(data["editEntity"]["entity"]["timeCreated"], "2018-12-10 23:00:00+00:00")
+        self.assertEqual(data["editEntity"]["entity"]["timeCreated"], "2018-12-10T23:00:00+00:00")
 
 
     def test_edit_discussion_group_null_by_admin(self):
