@@ -43,8 +43,7 @@ def resolve_users_by_birth_date(_, info, profileFieldGuid, futureDays=30, offset
         Q(profile_field=profile_field) &
         filter_dates
     ).order_by(
-        'value_date__month',
-        'value_date__day'
+        'value_date'
     )
 
     ids = []
