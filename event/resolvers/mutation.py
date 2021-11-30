@@ -1,6 +1,5 @@
 from ariadne import ObjectType
 from django.core.exceptions import ObjectDoesNotExist
-from django.utils import dateparse
 from graphql import GraphQLError
 from core.constances import NOT_LOGGED_IN, COULD_NOT_FIND, EVENT_IS_FULL, EVENT_INVALID_STATE, COULD_NOT_FIND_GROUP, INVALID_DATE, COULD_NOT_SAVE, USER_ROLES
 from core.lib import remove_none_from_dict, access_id_to_acl, tenant_schema
@@ -131,8 +130,8 @@ def resolve_add_event(_, info, input):
     if not clean_input.get("startDate", None) or not clean_input.get("endDate", None):
         raise GraphQLError(INVALID_DATE)
 
-    entity.start_date = dateparse.parse_datetime(clean_input.get("startDate"))
-    entity.end_date = dateparse.parse_datetime(clean_input.get("endDate"))
+    entity.start_date = clean_input.get("startDate")
+    entity.end_date = clean_input.get("endDate")
 
     if entity.start_date > entity.end_date:
         raise GraphQLError(INVALID_DATE)
@@ -233,9 +232,9 @@ def resolve_edit_event(_, info, input):
         raise GraphQLError(INVALID_DATE)
 
     if 'startDate' in clean_input:
-        entity.start_date = dateparse.parse_datetime(clean_input.get("startDate"))
+        entity.start_date = clean_input.get("startDate")
     if 'endDate' in clean_input:
-        entity.end_date = dateparse.parse_datetime(clean_input.get("endDate"))
+        entity.end_date = clean_input.get("endDate")
 
     if entity.start_date > entity.end_date:
         raise GraphQLError(INVALID_DATE)

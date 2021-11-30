@@ -68,8 +68,8 @@ input addEntityInput {
   isFeatured: Boolean
   attendEventWithoutAccount: Boolean
   featured: FeaturedInput
-  startDate: String
-  endDate: String
+  startDate: DateTime
+  endDate: DateTime
   source: String
   location: String
   maxAttendees: String
@@ -467,8 +467,8 @@ input editEntityInput {
   isFeatured: Boolean
   attendEventWithoutAccount: Boolean
   featured: FeaturedInput
-  startDate: String
-  endDate: String
+  startDate: DateTime
+  endDate: DateTime
   source: String
   location: String
   maxAttendees: String
