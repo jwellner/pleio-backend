@@ -203,9 +203,13 @@ class ArticleMixin(models.Model):
     class Meta:
         abstract = True
 
+    abstract = models.TextField(null=True, blank=True)
     description = models.TextField(default="")
     rich_description = models.TextField(null=True, blank=True)
 
     @property
     def excerpt(self):
+        if self.abstract:
+            return self.abstract
+
         return truncate_rich_description(self.rich_description)

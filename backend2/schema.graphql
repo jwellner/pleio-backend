@@ -63,6 +63,7 @@ input addEntityInput {
   type: Type
   subtype: String!
   title: String
+  abstract: String
   richDescription: String
   isRecommended: Boolean
   isFeatured: Boolean
@@ -231,6 +232,7 @@ type Blog implements Entity {
   status: Int
   subtype: String
   title: String
+  abstract: String
   description: String
   richDescription: String
   inGroup: Boolean
@@ -397,6 +399,7 @@ type Discussion implements Entity {
   status: Int
   subtype: String
   title: String
+  abstract: String
   description: String
   richDescription: String
   inGroup: Boolean
@@ -462,6 +465,7 @@ type editEmailOverviewPayload {
 input editEntityInput {
   guid: String!
   title: String
+  abstract: String
   richDescription: String
   isRecommended: Boolean
   isFeatured: Boolean
@@ -769,6 +773,7 @@ type Event implements Entity {
   status: Int
   subtype: String
   title: String
+  abstract: String
   description: String
   richDescription: String
   inGroup: Boolean
@@ -1233,6 +1238,7 @@ type News implements Entity {
   status: Int
   subtype: String
   title: String
+  abstract: String
   description: String
   richDescription: String
   excerpt: String
@@ -1431,6 +1437,7 @@ type Question implements Entity {
   status: Int
   subtype: String
   title: String
+  abstract: String
   description: String
   richDescription: String
   inGroup: Boolean
@@ -2005,6 +2012,7 @@ type Wiki implements Entity {
   subtype: String
   canEdit: Boolean!
   title: String
+  abstract: String
   description: String
   hasChildren: Boolean
   children: [Wiki]
