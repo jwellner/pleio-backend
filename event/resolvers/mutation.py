@@ -4,6 +4,7 @@ from graphql import GraphQLError
 from core.constances import NOT_LOGGED_IN, COULD_NOT_FIND, EVENT_IS_FULL, EVENT_INVALID_STATE, COULD_NOT_FIND_GROUP, INVALID_DATE, COULD_NOT_SAVE, USER_ROLES
 from core.lib import remove_none_from_dict, access_id_to_acl, tenant_schema
 from core.models import Group
+from core.resolvers.shared import clean_abstract
 from core.utils.convert import tiptap_to_text
 from file.models import FileFolder
 from file.tasks import resize_featured
@@ -96,6 +97,10 @@ def resolve_add_event(_, info, input):
     entity.title = clean_input.get("title")
     entity.rich_description = clean_input.get("richDescription")
     entity.description = tiptap_to_text(entity.rich_description)
+    if 'abstract' in clean_input:
+        abstract = clean_input.get("abstract")
+        clean_abstract(abstract)
+        entity.abstract = abstract
 
     if 'featured' in clean_input:
         entity.featured_position_y = clean_input.get("featured").get("positionY", 0)
@@ -186,6 +191,11 @@ def resolve_edit_event(_, info, input):
     if 'richDescription' in clean_input:
         entity.rich_description = clean_input.get("richDescription")
         entity.description = tiptap_to_text(entity.rich_description)
+
+    if 'abstract' in clean_input:
+        abstract = clean_input.get("abstract")
+        clean_abstract(abstract)
+        entity.abstract = abstract
 
     if 'tags' in clean_input:
         entity.tags = clean_input.get("tags")

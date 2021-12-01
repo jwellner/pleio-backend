@@ -2,6 +2,7 @@ from graphql import GraphQLError
 from django.core.exceptions import ObjectDoesNotExist
 from core.lib import remove_none_from_dict, access_id_to_acl, tenant_schema
 from core.models import Comment, Group
+from core.resolvers.shared import clean_abstract
 from core.constances import NOT_LOGGED_IN, COULD_NOT_FIND, COULD_NOT_SAVE, COULD_NOT_FIND_GROUP, \
     USER_NOT_MEMBER_OF_GROUP, USER_ROLES
 from core.utils.convert import tiptap_to_text
@@ -98,6 +99,10 @@ def resolve_add_question(_, info, input):
     entity.title = clean_input.get("title")
     entity.rich_description = clean_input.get("richDescription")
     entity.description = tiptap_to_text(entity.rich_description)
+    if 'abstract' in clean_input:
+        abstract = clean_input.get("abstract")
+        clean_abstract(abstract)
+        entity.abstract = abstract
 
     if 'featured' in clean_input:
         entity.featured_position_y = clean_input.get("featured").get("positionY", 0)
@@ -175,6 +180,11 @@ def resolve_edit_question(_, info, input):
     if 'richDescription' in clean_input:
         entity.rich_description = clean_input.get("richDescription")
         entity.description = tiptap_to_text(entity.rich_description)
+
+    if 'abstract' in clean_input:
+        abstract = clean_input.get("abstract")
+        clean_abstract(abstract)
+        entity.abstract = abstract
 
     if 'featured' in clean_input:
         entity.featured_position_y = clean_input.get("featured").get("positionY", 0)

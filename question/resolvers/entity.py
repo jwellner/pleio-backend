@@ -76,6 +76,7 @@ def resolve_is_locked(obj, info):
 question.set_field("guid", shared.resolve_entity_guid)
 question.set_field("status", shared.resolve_entity_status)
 question.set_field("title", shared.resolve_entity_title)
+question.set_field("abstract", shared.resolve_entity_abstract)
 question.set_field("description", shared.resolve_entity_description)
 question.set_field("richDescription", shared.resolve_entity_rich_description)
 question.set_field("excerpt", shared.resolve_entity_excerpt)

@@ -6,6 +6,7 @@ from django.contrib.contenttypes.fields import GenericRelation
 from django.urls import reverse
 from notifications.models import Notification
 from .annotation import Annotation
+from core.utils.convert import truncate_rich_description
 
 class VoteMixin(models.Model):
     def vote_count(self):
@@ -159,7 +160,7 @@ class FollowMixin(models.Model):
     def followers(self):
         users = [i.user for i in Annotation.objects.get_all_for(content_object=self, key="followed")]
         return users
-        
+
 
 class NotificationMixin(models.Model):
     """
@@ -197,3 +198,18 @@ class FeaturedCoverMixin(models.Model):
         if self.featured_image:
             return '%s?cache=%i' % (reverse('featured', args=[self.id]), int(self.featured_image.updated_at.timestamp()))
         return None
+
+class ArticleMixin(models.Model):
+    class Meta:
+        abstract = True
+
+    abstract = models.TextField(null=True, blank=True)
+    description = models.TextField(default="")
+    rich_description = models.TextField(null=True, blank=True)
+
+    @property
+    def excerpt(self):
+        if self.abstract:
+            return self.abstract
+
+        return truncate_rich_description(self.rich_description)

@@ -4,6 +4,7 @@ from core.lib import is_valid_json, draft_to_html
 from core.utils import tiptap_schema
 from prosemirror.model import Node
 from prosemirror.model import DOMSerializer
+from django.utils.text import Truncator
 
 logger = logging.getLogger(__name__)
 
@@ -277,7 +278,7 @@ def draft_to_tiptap(draft_string):
                         len(tiptap["content"]) > 0 and
                         tiptap["content"][-1].get("attrs", None) and
                         tiptap["content"][-1]["attrs"].get("unstyled", None)
-                    ): 
+                    ):
                     tiptap["content"][-1]["content"].append({'type': 'hardBreak'})
                     tiptap["content"][-1]["content"].extend(content)
                 else:
@@ -294,7 +295,7 @@ def draft_to_tiptap(draft_string):
                         len(tiptap["content"]) > 0 and
                         tiptap["content"][-1].get("attrs", None) and
                         tiptap["content"][-1]["attrs"].get("unstyled", None)
-                    ): 
+                    ):
                     tiptap["content"][-1]["content"].append({'type': 'hardBreak'})
 
         else:
@@ -305,3 +306,6 @@ def draft_to_tiptap(draft_string):
             tiptap["content"].append(file)
 
     return json.dumps(tiptap)
+
+def truncate_rich_description(description):
+    return Truncator(tiptap_to_text(description)).words(26)

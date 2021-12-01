@@ -32,6 +32,7 @@ def resolve_is_featured(obj, info):
 discussion.set_field("guid", shared.resolve_entity_guid)
 discussion.set_field("status", shared.resolve_entity_status)
 discussion.set_field("title", shared.resolve_entity_title)
+discussion.set_field("abstract", shared.resolve_entity_abstract)
 discussion.set_field("description", shared.resolve_entity_description)
 discussion.set_field("richDescription", shared.resolve_entity_rich_description)
 discussion.set_field("excerpt", shared.resolve_entity_excerpt)
