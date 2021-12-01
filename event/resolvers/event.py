@@ -128,6 +128,7 @@ def resolve_attendees_without_account(obj, info):
 event.set_field("guid", shared.resolve_entity_guid)
 event.set_field("status", shared.resolve_entity_status)
 event.set_field("title", shared.resolve_entity_title)
+event.set_field("abstract", shared.resolve_entity_abstract)
 event.set_field("description", shared.resolve_entity_description)
 event.set_field("richDescription", shared.resolve_entity_rich_description)
 event.set_field("excerpt", shared.resolve_entity_excerpt)

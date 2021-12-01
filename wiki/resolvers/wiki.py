@@ -50,6 +50,7 @@ def resolve_is_featured(obj, info):
 wiki.set_field("guid", shared.resolve_entity_guid)
 wiki.set_field("status", shared.resolve_entity_status)
 wiki.set_field("title", shared.resolve_entity_title)
+wiki.set_field("abstract", shared.resolve_entity_abstract)
 wiki.set_field("description", shared.resolve_entity_description)
 wiki.set_field("richDescription", shared.resolve_entity_rich_description)
 wiki.set_field("excerpt", shared.resolve_entity_excerpt)

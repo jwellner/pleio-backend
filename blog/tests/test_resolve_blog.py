@@ -100,7 +100,7 @@ class BlogTestCase(FastTenantTestCase):
         self.assertEqual(data["entity"]["title"], self.blogPublic.title)
         self.assertEqual(data["entity"]["richDescription"], self.blogPublic.rich_description)
         self.assertEqual(data["entity"]["accessId"], 2)
-        self.assertEqual(data["entity"]["timeCreated"], str(self.blogPublic.created_at))
+        self.assertEqual(data["entity"]["timeCreated"], self.blogPublic.created_at.isoformat())
         self.assertEqual(data["entity"]["isRecommended"], self.blogPublic.is_recommended)
         self.assertEqual(data["entity"]["tags"], [])
         self.assertEqual(data["entity"]["views"], 1)

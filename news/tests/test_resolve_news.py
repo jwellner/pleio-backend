@@ -79,13 +79,13 @@ class NewsTestCase(FastTenantTestCase):
         self.newsPublic.delete()
         self.newsPrivate.delete()
         self.authenticatedUser.delete()
-    
+
     def test_news_anonymous(self):
 
         request = HttpRequest()
         request.user = self.anonymousUser
 
-        variables = { 
+        variables = {
             "guid": self.newsPublic.guid
         }
 
@@ -94,12 +94,12 @@ class NewsTestCase(FastTenantTestCase):
         self.assertTrue(result[0])
 
         data = result[1]["data"]
-       
+
         self.assertEqual(data["entity"]["guid"], self.newsPublic.guid)
         self.assertEqual(data["entity"]["title"], self.newsPublic.title)
         self.assertEqual(data["entity"]["richDescription"], self.newsPublic.rich_description)
         self.assertEqual(data["entity"]["accessId"], 2)
-        self.assertEqual(data["entity"]["timeCreated"], str(self.newsPublic.created_at))
+        self.assertEqual(data["entity"]["timeCreated"], self.newsPublic.created_at.isoformat())
         self.assertEqual(data["entity"]["isFeatured"], self.newsPublic.is_featured)
         self.assertEqual(data["entity"]["tags"], [])
         self.assertEqual(data["entity"]["views"], 1)
@@ -113,7 +113,7 @@ class NewsTestCase(FastTenantTestCase):
         self.assertEqual(data["entity"]["url"], "/news/view/{}/{}".format(self.newsPublic.guid, slugify(self.newsPublic.title)))
         self.assertEqual(data["entity"]["source"], self.newsPublic.source)
 
-        variables = { 
+        variables = {
             "guid": self.newsPrivate.guid
         }
 
@@ -122,14 +122,14 @@ class NewsTestCase(FastTenantTestCase):
         self.assertTrue(result[0])
 
         data = result[1]["data"]
-       
+
         self.assertEqual(data["entity"], None)
 
     def test_news_private(self):
         request = HttpRequest()
         request.user = self.authenticatedUser
 
-        variables = { 
+        variables = {
             "guid": self.newsPrivate.guid
         }
 
@@ -138,12 +138,12 @@ class NewsTestCase(FastTenantTestCase):
         self.assertTrue(result[0])
 
         data = result[1]["data"]
-       
+
         self.assertEqual(data["entity"]["guid"], self.newsPrivate.guid)
         self.assertEqual(data["entity"]["title"], self.newsPrivate.title)
         self.assertEqual(data["entity"]["richDescription"], self.newsPrivate.rich_description)
         self.assertEqual(data["entity"]["accessId"], 0)
-        self.assertEqual(data["entity"]["timeCreated"], str(self.newsPrivate.created_at))
+        self.assertEqual(data["entity"]["timeCreated"], self.newsPrivate.created_at.isoformat())
         self.assertEqual(data["entity"]["isFeatured"], self.newsPrivate.is_featured)
         self.assertEqual(data["entity"]["tags"], [])
         self.assertEqual(data["entity"]["views"], 1)

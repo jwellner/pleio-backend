@@ -1,11 +1,12 @@
 import logging
-from datetime import datetime, timedelta
+from datetime import timedelta
 from user.models import User
 from core.models import ProfileField, UserProfileField
 from core.constances import INVALID_KEY
 from graphql import GraphQLError
 from django.db.models import Q
 from django.core.exceptions import ObjectDoesNotExist
+from django.utils import timezone
 
 logger = logging.getLogger(__name__)
 
@@ -24,8 +25,8 @@ def resolve_users_by_birth_date(_, info, profileFieldGuid, futureDays=30, offset
     if not profile_field.field_type == "date_field":
         raise GraphQLError(INVALID_KEY)
 
-    day = datetime.now() - timedelta(days=2)
-    end_day = datetime.now() + timedelta(days=futureDays)
+    day = timezone.now() - timedelta(days=2)
+    end_day = timezone.now() + timedelta(days=futureDays)
 
     filter_dates = Q()
     while day < end_day:
@@ -33,17 +34,16 @@ def resolve_users_by_birth_date(_, info, profileFieldGuid, futureDays=30, offset
             Q(
                 value_date__month=day.month,
                 value_date__day=day.day
-            ), 
+            ),
             Q.OR
         )
         day += timedelta(days=1)
 
     user_profile_fields = UserProfileField.objects.visible(user).filter(
-        Q(profile_field=profile_field) & 
+        Q(profile_field=profile_field) &
         filter_dates
     ).order_by(
-        'value_date__month',
-        'value_date__day'
+        'value_date'
     )
 
     ids = []

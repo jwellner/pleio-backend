@@ -43,6 +43,7 @@ def resolve_url(obj, info):
 blog.set_field("guid", shared.resolve_entity_guid)
 blog.set_field("status", shared.resolve_entity_status)
 blog.set_field("title", shared.resolve_entity_title)
+blog.set_field("abstract", shared.resolve_entity_abstract)
 blog.set_field("description", shared.resolve_entity_description)
 blog.set_field("richDescription", shared.resolve_entity_rich_description)
 blog.set_field("excerpt", shared.resolve_entity_excerpt)

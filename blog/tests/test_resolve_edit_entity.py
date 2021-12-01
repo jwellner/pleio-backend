@@ -6,15 +6,16 @@ import json
 from django.contrib.auth.models import AnonymousUser
 from django.http import HttpRequest
 from core.models import Group
+from core.tests.helpers import GraphqlTestMixin
 from user.models import User
 from blog.models import Blog
-from core.constances import ACCESS_TYPE
+from core.constances import ACCESS_TYPE, TEXT_TOO_LONG
 from mixer.backend.django import mixer
 from graphql import GraphQLError
 from datetime import datetime
 from django.utils import dateparse
 
-class EditBlogTestCase(FastTenantTestCase):
+class EditBlogTestCase(FastTenantTestCase, GraphqlTestMixin):
 
     def setUp(self):
         self.anonymousUser = AnonymousUser()
@@ -113,7 +114,7 @@ class EditBlogTestCase(FastTenantTestCase):
         self.assertEqual(data["editEntity"]["entity"]["isRecommended"], False) # only admin can set isRecommended
         self.assertEqual(data["editEntity"]["entity"]["group"], None)
         self.assertEqual(data["editEntity"]["entity"]["owner"]["guid"], self.authenticatedUser.guid)
-        self.assertEqual(data["editEntity"]["entity"]["timeCreated"], str(self.blog.created_at))
+        self.assertEqual(data["editEntity"]["entity"]["timeCreated"], self.blog.created_at.isoformat())
         self.assertEqual(data["editEntity"]["entity"]["statusPublished"], 'draft')
         self.assertEqual(data["editEntity"]["entity"]["timePublished"], None)
 
@@ -189,7 +190,7 @@ class EditBlogTestCase(FastTenantTestCase):
         self.assertEqual(data["editEntity"]["entity"]["isRecommended"], True)
         self.assertEqual(data["editEntity"]["entity"]["group"]["guid"], self.group.guid)
         self.assertEqual(data["editEntity"]["entity"]["owner"]["guid"], self.user2.guid)
-        self.assertEqual(data["editEntity"]["entity"]["timeCreated"], "2018-12-10 23:00:00+00:00")
+        self.assertEqual(data["editEntity"]["entity"]["timeCreated"], "2018-12-10T23:00:00+00:00")
 
         self.blog.refresh_from_db()
 
@@ -200,7 +201,7 @@ class EditBlogTestCase(FastTenantTestCase):
         self.assertEqual(data["editEntity"]["entity"]["group"]["guid"], self.group.guid)
         self.assertEqual(data["editEntity"]["entity"]["owner"]["guid"], self.user2.guid)
         self.assertEqual(data["editEntity"]["entity"]["statusPublished"], "published")
-        self.assertEqual(data["editEntity"]["entity"]["timeCreated"], "2018-12-10 23:00:00+00:00")
+        self.assertEqual(data["editEntity"]["entity"]["timeCreated"], "2018-12-10T23:00:00+00:00")
 
     def test_edit_blog_group_null_by_admin(self):
 
@@ -335,9 +336,9 @@ class EditBlogTestCase(FastTenantTestCase):
         self.assertEqual(data["editEntity"]["entity"]["isRecommended"], False) # only admin can set isRecommended
         self.assertEqual(data["editEntity"]["entity"]["group"], None)
         self.assertEqual(data["editEntity"]["entity"]["owner"]["guid"], self.authenticatedUser.guid)
-        self.assertEqual(data["editEntity"]["entity"]["timeCreated"], str(self.blog.created_at))
+        self.assertEqual(data["editEntity"]["entity"]["timeCreated"], self.blog.created_at.isoformat())
         self.assertEqual(data["editEntity"]["entity"]["statusPublished"], 'draft')
-        self.assertEqual(data["editEntity"]["entity"]["timePublished"], "4018-12-10 23:00:00+00:00")
+        self.assertEqual(data["editEntity"]["entity"]["timePublished"], "4018-12-10T23:00:00+00:00")
 
         self.blog.refresh_from_db()
 
@@ -345,3 +346,100 @@ class EditBlogTestCase(FastTenantTestCase):
         self.assertEqual(data["editEntity"]["entity"]["richDescription"], self.blog.rich_description)
         self.assertEqual(data["editEntity"]["entity"]["tags"], self.blog.tags)
         self.assertEqual(data["editEntity"]["entity"]["isRecommended"], self.blog.is_recommended)
+
+    def test_edit_abstract(self):
+        variables = {
+            "input": {
+                "guid": self.blog.guid,
+                "abstract": "intro",
+                "richDescription": "description",
+            }
+        }
+        mutation = """
+            fragment BlogParts on Blog {
+                abstract
+                excerpt
+            }
+            mutation ($input: editEntityInput!) {
+                editEntity(input: $input) {
+                    entity {
+                    guid
+                    status
+                    ...BlogParts
+                    }
+                }
+            }
+        """
+
+        request = HttpRequest()
+        request.user = self.authenticatedUser
+
+        result = graphql_sync(schema, { "query": mutation, "variables": variables }, context_value={ "request": request })
+
+        self.assertGraphqlSuccess(result)
+        data = result[1]["data"]
+        self.assertEqual(data["editEntity"]["entity"]["abstract"], "intro")
+        self.assertEqual(data["editEntity"]["entity"]["excerpt"], "intro")
+
+    def test_edit_without_abstract(self):
+        variables = {
+            "input": {
+                "guid": self.blog.guid,
+                "richDescription": "description",
+            }
+        }
+        mutation = """
+            fragment BlogParts on Blog {
+                abstract
+                excerpt
+            }
+            mutation ($input: editEntityInput!) {
+                editEntity(input: $input) {
+                    entity {
+                    guid
+                    status
+                    ...BlogParts
+                    }
+                }
+            }
+        """
+
+        request = HttpRequest()
+        request.user = self.authenticatedUser
+
+        result = graphql_sync(schema, { "query": mutation, "variables": variables }, context_value={ "request": request })
+
+        self.assertGraphqlSuccess(result)
+        data = result[1]["data"]
+        self.assertEqual(data["editEntity"]["entity"]["abstract"], None)
+        self.assertEqual(data["editEntity"]["entity"]["excerpt"], "description")
+
+    def test_edit_abstract_too_long(self):
+        variables = {
+            "input": {
+                "guid": self.blog.guid,
+                "abstract": "x" * 321,
+            }
+        }
+        mutation = """
+            fragment BlogParts on Blog {
+                abstract
+                excerpt
+            }
+            mutation ($input: editEntityInput!) {
+                editEntity(input: $input) {
+                    entity {
+                    guid
+                    status
+                    ...BlogParts
+                    }
+                }
+            }
+        """
+
+        request = HttpRequest()
+        request.user = self.authenticatedUser
+
+        result = graphql_sync(schema, { "query": mutation, "variables": variables }, context_value={ "request": request })
+
+        self.assertGraphqlError(result, TEXT_TOO_LONG)

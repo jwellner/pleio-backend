@@ -1,3 +1,5 @@
+scalar DateTime
+
 input acceptGroupInvitationInput {
   """The unique invite code."""
   code: String
@@ -61,13 +63,14 @@ input addEntityInput {
   type: Type
   subtype: String!
   title: String
+  abstract: String
   richDescription: String
   isRecommended: Boolean
   isFeatured: Boolean
   attendEventWithoutAccount: Boolean
   featured: FeaturedInput
-  startDate: String
-  endDate: String
+  startDate: DateTime
+  endDate: DateTime
   source: String
   location: String
   maxAttendees: String
@@ -77,7 +80,7 @@ input addEntityInput {
   writeAccessId: Int
   tags: [String]
   mentions: [String]
-  timePublished: String
+  timePublished: DateTime
 }
 
 type addEntityPayload {
@@ -229,6 +232,7 @@ type Blog implements Entity {
   status: Int
   subtype: String
   title: String
+  abstract: String
   description: String
   richDescription: String
   inGroup: Boolean
@@ -236,9 +240,9 @@ type Blog implements Entity {
   excerpt: String
   url: String
   tags: [String]
-  timeCreated: String
-  timeUpdated: String
-  timePublished: String
+  timeCreated: DateTime
+  timeUpdated: DateTime
+  timePublished: DateTime
   statusPublished: String
   isFeatured: Boolean
   isHighlighted: Boolean
@@ -308,8 +312,8 @@ type Comment implements Entity {
   excerpt: String
   url: String
   tags: [String]
-  timeCreated: String
-  timeUpdated: String
+  timeCreated: DateTime
+  timeUpdated: DateTime
   canEdit: Boolean!
   canVote: Boolean
   accessId: Int
@@ -395,6 +399,7 @@ type Discussion implements Entity {
   status: Int
   subtype: String
   title: String
+  abstract: String
   description: String
   richDescription: String
   inGroup: Boolean
@@ -402,10 +407,10 @@ type Discussion implements Entity {
   excerpt: String
   url: String
   tags: [String]
-  timeCreated: String
-  timeUpdated: String
-  timePublished: String
-  statusPublished: String  
+  timeCreated: DateTime
+  timeUpdated: DateTime
+  timePublished: DateTime
+  statusPublished: String
   canEdit: Boolean!
   canComment: Boolean
   canVote: Boolean
@@ -460,13 +465,14 @@ type editEmailOverviewPayload {
 input editEntityInput {
   guid: String!
   title: String
+  abstract: String
   richDescription: String
   isRecommended: Boolean
   isFeatured: Boolean
   attendEventWithoutAccount: Boolean
   featured: FeaturedInput
-  startDate: String
-  endDate: String
+  startDate: DateTime
+  endDate: DateTime
   source: String
   location: String
   maxAttendees: String
@@ -476,8 +482,8 @@ input editEntityInput {
   writeAccessId: Int
   tags: [String]
   mentions: [String]
-  timeCreated: String
-  timePublished: String
+  timeCreated: DateTime
+  timePublished: DateTime
   groupGuid: String
   ownerGuid: String
 }
@@ -767,6 +773,7 @@ type Event implements Entity {
   status: Int
   subtype: String
   title: String
+  abstract: String
   description: String
   richDescription: String
   inGroup: Boolean
@@ -774,9 +781,9 @@ type Event implements Entity {
   excerpt: String
   url: String
   tags: [String]
-  timeCreated: String
-  timeUpdated: String
-  timePublished: String
+  timeCreated: DateTime
+  timeUpdated: DateTime
+  timePublished: DateTime
   statusPublished: String
   startDate: String
   endDate: String
@@ -853,9 +860,9 @@ type FileFolder implements Entity {
   url: String
   download: String
   tags: [String]
-  timeCreated: String
-  timeUpdated: String
-  timePublished: String
+  timeCreated: DateTime
+  timeUpdated: DateTime
+  timePublished: DateTime
   statusPublished: String
   isFeatured: Boolean
   isHighlighted: Boolean
@@ -980,7 +987,7 @@ type GroupNotificationItem {
 
 type Invite {
   id: Int
-  timeCreated: String
+  timeCreated: DateTime
   invited: Boolean!
   user: User
   email: String
@@ -1231,14 +1238,15 @@ type News implements Entity {
   status: Int
   subtype: String
   title: String
+  abstract: String
   description: String
   richDescription: String
   excerpt: String
   url: String
   tags: [String]
-  timeCreated: String
-  timeUpdated: String
-  timePublished: String
+  timeCreated: DateTime
+  timeUpdated: DateTime
+  timePublished: DateTime
   statusPublished: String
   startDate: String
   endDate: String
@@ -1271,7 +1279,7 @@ type Notification {
   performer: User
   entity: Entity
   container: Entity
-  timeCreated: String
+  timeCreated: DateTime
   isUnread: Boolean
 }
 
@@ -1323,9 +1331,9 @@ type Page implements Entity {
   richDescription: String
   excerpt: String
   url: String
-  timeCreated: String
-  timeUpdated: String
-  timePublished: String
+  timeCreated: DateTime
+  timeUpdated: DateTime
+  timePublished: DateTime
   statusPublished: String
   accessId: Int
   pageType: String
@@ -1353,9 +1361,9 @@ type Poll implements Entity {
   canEdit: Boolean!
   title: String
   url: String
-  timeCreated: String
-  timeUpdated: String
-  timePublished: String
+  timeCreated: DateTime
+  timeUpdated: DateTime
+  timePublished: DateTime
   statusPublished: String
   accessId: Int
   choices: [PollChoice]
@@ -1429,6 +1437,7 @@ type Question implements Entity {
   status: Int
   subtype: String
   title: String
+  abstract: String
   description: String
   richDescription: String
   inGroup: Boolean
@@ -1436,10 +1445,10 @@ type Question implements Entity {
   excerpt: String
   url: String
   tags: [String]
-  timeCreated: String
-  timeUpdated: String
-  timePublished: String
-  statusPublished: String 
+  timeCreated: DateTime
+  timeUpdated: DateTime
+  timePublished: DateTime
+  statusPublished: String
   isFeatured: Boolean
   isHighlighted: Boolean
   isClosed: Boolean
@@ -1761,9 +1770,9 @@ type StatusUpdate implements Entity {
   excerpt: String
   url: String
   tags: [String]
-  timeCreated: String
-  timeUpdated: String
-  timePublished: String
+  timeCreated: DateTime
+  timeUpdated: DateTime
+  timePublished: DateTime
   statusPublished: String
   canEdit: Boolean!
   canComment: Boolean
@@ -1824,9 +1833,9 @@ type Task implements Entity {
   thumbnail: String
   url: String
   tags: [String]
-  timeCreated: String
-  timeUpdated: String
-  timePublished: String
+  timeCreated: DateTime
+  timeUpdated: DateTime
+  timePublished: DateTime
   statusPublished: String
   canEdit: Boolean!
   canComment: Boolean
@@ -2003,6 +2012,7 @@ type Wiki implements Entity {
   subtype: String
   canEdit: Boolean!
   title: String
+  abstract: String
   description: String
   hasChildren: Boolean
   children: [Wiki]
@@ -2010,9 +2020,9 @@ type Wiki implements Entity {
   richDescription: String
   excerpt: String
   url: String
-  timeCreated: String
-  timeUpdated: String
-  timePublished: String
+  timeCreated: DateTime
+  timeUpdated: DateTime
+  timePublished: DateTime
   statusPublished: String
   accessId: Int
   writeAccessId: Int

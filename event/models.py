@@ -1,12 +1,12 @@
 from auditlog.registry import auditlog
 from django.db import models
-from core.models import Entity, CommentMixin, BookmarkMixin, NotificationMixin, FollowMixin, FeaturedCoverMixin
+from core.models import Entity, CommentMixin, BookmarkMixin, NotificationMixin, FollowMixin, FeaturedCoverMixin, ArticleMixin
 from user.models import User
 from django.core.exceptions import ObjectDoesNotExist
 from django.utils.text import slugify
 from django.utils import timezone
 
-class Event(Entity, CommentMixin, BookmarkMixin, FollowMixin, NotificationMixin, FeaturedCoverMixin):
+class Event(Entity, CommentMixin, BookmarkMixin, FollowMixin, NotificationMixin, FeaturedCoverMixin, ArticleMixin):
     class Meta:
         ordering = ['-published']
 

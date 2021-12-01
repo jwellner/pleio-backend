@@ -1,8 +1,9 @@
-from core.constances import ACCESS_TYPE
+from core.constances import ACCESS_TYPE, TEXT_TOO_LONG
 from core.models import EntityViewCount
-from django.utils.text import Truncator
 from django.core.exceptions import ObjectDoesNotExist
-from core.utils.convert import tiptap_to_text
+from core.utils.convert import tiptap_to_text, truncate_rich_description
+from graphql import GraphQLError
+from core.lib import html_to_text
 
 def resolve_entity_access_id(obj, info):
     # pylint: disable=unused-argument
@@ -61,6 +62,10 @@ def resolve_entity_title(obj, info):
     # pylint: disable=unused-argument
     return obj.title
 
+def resolve_entity_abstract(obj, info):
+    # pylint: disable=unused-argument
+    return obj.abstract
+
 def resolve_entity_description(obj, info):
     # pylint: disable=unused-argument
     return tiptap_to_text(obj.rich_description)
@@ -71,7 +76,10 @@ def resolve_entity_rich_description(obj, info):
 
 def resolve_entity_excerpt(obj, info):
     # pylint: disable=unused-argument
-    return Truncator(tiptap_to_text(obj.rich_description)).words(26)
+    if hasattr(obj, 'excerpt'):
+        return obj.excerpt
+
+    return truncate_rich_description(obj.rich_description)
 
 def resolve_entity_tags(obj, info):
     # pylint: disable=unused-argument
@@ -174,3 +182,9 @@ def resolve_entity_is_pinned(obj, info):
     if hasattr(obj, "is_pinned"):
         return obj.is_pinned
     return False
+
+# TODO: this function should be moved later on to a shared class
+def clean_abstract(abstract):
+    text = html_to_text(abstract)
+    if len(text) > 320:
+        raise GraphQLError(TEXT_TOO_LONG)

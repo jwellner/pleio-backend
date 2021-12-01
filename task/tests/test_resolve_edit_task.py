@@ -12,8 +12,9 @@ from core.constances import ACCESS_TYPE, USER_ROLES
 from mixer.backend.django import mixer
 from graphql import GraphQLError
 from datetime import datetime
+from core.tests.helpers import GraphqlTestMixin
 
-class EditTaskTestCase(FastTenantTestCase):
+class EditTaskTestCase(FastTenantTestCase, GraphqlTestMixin):
 
     def setUp(self):
         self.anonymousUser = AnonymousUser()
@@ -84,7 +85,7 @@ class EditTaskTestCase(FastTenantTestCase):
         self.assertEqual(data["editEntity"]["entity"]["state"], "NEW")
         self.assertEqual(data["editEntity"]["entity"]["group"], None)
         self.assertEqual(data["editEntity"]["entity"]["owner"]["guid"], self.authenticatedUser.guid)
-        self.assertEqual(data["editEntity"]["entity"]["timeCreated"], str(self.taskPublic.created_at))
+        self.assertEqual(data["editEntity"]["entity"]["timeCreated"], self.taskPublic.created_at.isoformat())
 
         self.taskPublic.refresh_from_db()
 
@@ -107,12 +108,14 @@ class EditTaskTestCase(FastTenantTestCase):
 
         data = result[1]["data"]
 
+        self.assertGraphqlSuccess(result)
+
         self.assertEqual(data["editEntity"]["entity"]["title"], variables["input"]["title"])
         self.assertEqual(data["editEntity"]["entity"]["richDescription"], variables["input"]["richDescription"])
         self.assertEqual(data["editEntity"]["entity"]["state"], "NEW")
         self.assertEqual(data["editEntity"]["entity"]["group"]["guid"], self.group.guid)
         self.assertEqual(data["editEntity"]["entity"]["owner"]["guid"], self.user2.guid)
-        self.assertEqual(data["editEntity"]["entity"]["timeCreated"], "2018-12-10 23:00:00+00:00")
+        self.assertEqual(data["editEntity"]["entity"]["timeCreated"], "2018-12-10T23:00:00+00:00")
 
         self.taskPublic.refresh_from_db()
 
@@ -121,7 +124,7 @@ class EditTaskTestCase(FastTenantTestCase):
         self.assertEqual(data["editEntity"]["entity"]["state"], self.taskPublic.state)
         self.assertEqual(data["editEntity"]["entity"]["group"]["guid"], self.group.guid)
         self.assertEqual(data["editEntity"]["entity"]["owner"]["guid"], self.user2.guid)
-        self.assertEqual(data["editEntity"]["entity"]["timeCreated"], "2018-12-10 23:00:00+00:00")
+        self.assertEqual(data["editEntity"]["entity"]["timeCreated"], "2018-12-10T23:00:00+00:00")
 
 
     def test_edit_task_group_null_by_admin(self):

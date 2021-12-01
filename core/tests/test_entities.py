@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta
+from datetime import timedelta
 from django.db import connection
 from django_tenants.test.cases import FastTenantTestCase
 from core.models import Group
@@ -13,6 +13,7 @@ import json
 from django.contrib.auth.models import AnonymousUser
 from django.http import HttpRequest
 from mixer.backend.django import mixer
+from django.utils import timezone
 
 class EntitiesTestCase(FastTenantTestCase):
 
@@ -104,7 +105,7 @@ class EntitiesTestCase(FastTenantTestCase):
             group=self.group,
             tags=["tag_four", "tag_three"],
             is_featured=True,
-            published=datetime.now()+timedelta(days=5)
+            published=timezone.now()+timedelta(days=5)
         )
 
         self.query = """

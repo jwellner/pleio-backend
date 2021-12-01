@@ -51,6 +51,7 @@ def resolve_url(obj, info):
 news.set_field("guid", shared.resolve_entity_guid)
 news.set_field("status", shared.resolve_entity_status)
 news.set_field("title", shared.resolve_entity_title)
+news.set_field("abstract", shared.resolve_entity_abstract)
 news.set_field("description", shared.resolve_entity_description)
 news.set_field("richDescription", shared.resolve_entity_rich_description)
 news.set_field("excerpt", shared.resolve_entity_excerpt)

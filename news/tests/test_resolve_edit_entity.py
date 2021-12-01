@@ -114,7 +114,7 @@ class EditNewsTestCase(FastTenantTestCase):
         self.assertEqual(data["editEntity"]["entity"]["isFeatured"], True)
         self.assertEqual(data["editEntity"]["entity"]["source"], variables["input"]["source"])
         self.assertEqual(data["editEntity"]["entity"]["owner"]["guid"], self.authenticatedUser.guid)
-        self.assertEqual(data["editEntity"]["entity"]["timeCreated"], str(self.news.created_at))
+        self.assertEqual(data["editEntity"]["entity"]["timeCreated"], self.news.created_at.isoformat())
 
         self.news.refresh_from_db()
 
@@ -124,7 +124,7 @@ class EditNewsTestCase(FastTenantTestCase):
         self.assertEqual(data["editEntity"]["entity"]["isFeatured"], self.news.is_featured)
         self.assertEqual(data["editEntity"]["entity"]["source"], self.news.source)
         self.assertEqual(data["editEntity"]["entity"]["owner"]["guid"], self.authenticatedUser.guid)
-        self.assertEqual(data["editEntity"]["entity"]["timeCreated"], str(self.news.created_at))
+        self.assertEqual(data["editEntity"]["entity"]["timeCreated"], self.news.created_at.isoformat())
 
     def test_edit_news_admin(self):
 
@@ -145,7 +145,7 @@ class EditNewsTestCase(FastTenantTestCase):
         self.assertEqual(data["editEntity"]["entity"]["isFeatured"], True)
         self.assertEqual(data["editEntity"]["entity"]["source"], variables["input"]["source"])
         self.assertEqual(data["editEntity"]["entity"]["owner"]["guid"], self.user2.guid)
-        self.assertEqual(data["editEntity"]["entity"]["timeCreated"], "2018-12-10 23:00:00+00:00")
+        self.assertEqual(data["editEntity"]["entity"]["timeCreated"], "2018-12-10T23:00:00+00:00")
 
         self.news.refresh_from_db()
 
@@ -155,4 +155,4 @@ class EditNewsTestCase(FastTenantTestCase):
         self.assertEqual(data["editEntity"]["entity"]["isFeatured"], self.news.is_featured)
         self.assertEqual(data["editEntity"]["entity"]["source"], self.news.source)
         self.assertEqual(data["editEntity"]["entity"]["owner"]["guid"], self.user2.guid)
-        self.assertEqual(data["editEntity"]["entity"]["timeCreated"], "2018-12-10 23:00:00+00:00")
+        self.assertEqual(data["editEntity"]["entity"]["timeCreated"], "2018-12-10T23:00:00+00:00")

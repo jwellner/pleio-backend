@@ -83,7 +83,7 @@ class PollTestCase(FastTenantTestCase):
         self.assertEqual(data["entity"]["guid"], self.pollPublic.guid)
         self.assertEqual(data["entity"]["title"], self.pollPublic.title)
         self.assertEqual(data["entity"]["accessId"], 2)
-        self.assertEqual(data["entity"]["timeCreated"], str(self.pollPublic.created_at))
+        self.assertEqual(data["entity"]["timeCreated"], self.pollPublic.created_at.isoformat())
         self.assertEqual(data["entity"]["url"], "/polls/view/{}/{}".format(self.pollPublic.guid, slugify(self.pollPublic.title)))
 
         variables = {
@@ -115,7 +115,7 @@ class PollTestCase(FastTenantTestCase):
         self.assertEqual(data["entity"]["guid"], self.pollPrivate.guid)
         self.assertEqual(data["entity"]["title"], self.pollPrivate.title)
         self.assertEqual(data["entity"]["accessId"], 0)
-        self.assertEqual(data["entity"]["timeCreated"], str(self.pollPrivate.created_at))
+        self.assertEqual(data["entity"]["timeCreated"], self.pollPrivate.created_at.isoformat())
         self.assertEqual(data["entity"]["canEdit"], True)
         self.assertEqual(data["entity"]["hasVoted"], False)
         self.assertEqual(data["entity"]["choices"], [])

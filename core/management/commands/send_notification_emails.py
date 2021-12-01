@@ -6,8 +6,8 @@ from django.db import connection
 from user.models import User
 from core import config
 from core.lib import get_default_email_context, map_notification, get_base_url
-from datetime import datetime, timedelta
-from django.utils import translation
+from datetime import timedelta
+from django.utils import timezone, translation
 from core.tasks import send_mail_multi
 
 class Command(BaseCommand):
@@ -31,7 +31,7 @@ class Command(BaseCommand):
             context['notifications'] = mapped_notifications
 
             send_mail_multi.delay(connection.schema_name, subject, 'email/send_notification_emails.html', context, user.email)
-            
+
             user.notifications.mark_as_sent()
 
     def handle(self, *args, **options):
@@ -53,7 +53,7 @@ class Command(BaseCommand):
                 continue
 
             # do not send a mail when there is an notification less old than 'interval' hours emailed
-            time_threshold = datetime.now() - timedelta(hours=interval)
+            time_threshold = timezone.now() - timedelta(hours=interval)
             notifications_emailed_in_last_interval_hours = user.notifications.filter(emailed=True, timestamp__gte=time_threshold)
             if notifications_emailed_in_last_interval_hours:
                 continue

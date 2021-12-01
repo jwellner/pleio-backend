@@ -2,13 +2,13 @@ from graphql import GraphQLError
 from django.core.exceptions import ObjectDoesNotExist
 from blog.models import Blog
 from core.lib import remove_none_from_dict, access_id_to_acl, tenant_schema
-from core.constances import NOT_LOGGED_IN, COULD_NOT_FIND_GROUP, COULD_NOT_FIND, COULD_NOT_SAVE, USER_ROLES, INVALID_DATE
+from core.constances import NOT_LOGGED_IN, COULD_NOT_FIND_GROUP, COULD_NOT_FIND, COULD_NOT_SAVE, USER_ROLES
+from core.resolvers.shared import clean_abstract
 from core.utils.convert import tiptap_to_text
 from core.models import Group
 from file.models import FileFolder
 from file.tasks import resize_featured
 from user.models import User
-from django.utils import dateparse
 
 def resolve_add_blog(_, info, input):
     # pylint: disable=redefined-builtin
@@ -48,6 +48,10 @@ def resolve_add_blog(_, info, input):
     entity.title = clean_input.get("title")
     entity.rich_description = clean_input.get("richDescription")
     entity.description = tiptap_to_text(entity.rich_description)
+    if 'abstract' in clean_input:
+        abstract = clean_input.get("abstract")
+        clean_abstract(abstract)
+        entity.abstract = abstract
 
     if 'featured' in clean_input:
         entity.featured_position_y = clean_input.get("featured").get("positionY", 0)
@@ -76,13 +80,7 @@ def resolve_add_blog(_, info, input):
         entity.featured_alt = ""
 
     if 'timePublished' in clean_input:
-        if clean_input.get("timePublished") is None:
-            entity.published = None
-        else:
-            try:
-                entity.published = dateparse.parse_datetime(clean_input.get("timePublished"))
-            except ObjectDoesNotExist:
-                raise GraphQLError(INVALID_DATE)
+        entity.published = clean_input.get("timePublished", None)
 
     if user.has_role(USER_ROLES.ADMIN) or user.has_role(USER_ROLES.EDITOR):
         entity.is_recommended = clean_input.get("isRecommended")
@@ -135,6 +133,10 @@ def resolve_edit_blog(_, info, input):
         entity.rich_description = clean_input.get("richDescription")
         entity.description = tiptap_to_text(entity.rich_description)
 
+    if 'abstract' in clean_input:
+        abstract = clean_input.get("abstract")
+        clean_abstract(abstract)
+        entity.abstract = abstract
 
     if 'featured' in clean_input:
         entity.featured_position_y = clean_input.get("featured").get("positionY", 0)
@@ -167,13 +169,7 @@ def resolve_edit_blog(_, info, input):
         entity.featured_alt = ""
 
     if 'timePublished' in clean_input:
-        if clean_input.get("timePublished") is None:
-            entity.published = None
-        else:
-            try:
-                entity.published = dateparse.parse_datetime(clean_input.get("timePublished"))
-            except ObjectDoesNotExist:
-                raise GraphQLError(INVALID_DATE)
+        entity.published = clean_input.get("timePublished", None)
 
     if user.has_role(USER_ROLES.ADMIN) or user.has_role(USER_ROLES.EDITOR):
         if 'isRecommended' in clean_input:
@@ -204,11 +200,7 @@ def resolve_edit_blog(_, info, input):
                 raise GraphQLError(COULD_NOT_FIND)
 
         if 'timeCreated' in clean_input:
-            try:
-                created_at = dateparse.parse_datetime(clean_input.get("timeCreated"))
-                entity.created_at = created_at
-            except ObjectDoesNotExist:
-                raise GraphQLError(INVALID_DATE)
+            entity.created_at = clean_input.get("timeCreated")
 
 
     entity.save()
