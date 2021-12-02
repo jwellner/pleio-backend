@@ -2,6 +2,7 @@ from django.db import connection
 from django_tenants.test.cases import FastTenantTestCase
 from django.test import override_settings
 from core.models import Group, Comment, ProfileField, UserProfileField
+from core.tests.helpers import GraphqlTestMixin
 from user.models import User
 from blog.models import Blog
 from cms.models import Page
@@ -17,7 +18,7 @@ from django.utils import dateparse, timezone
 from datetime import timedelta
 from core.lib import access_id_to_acl
 
-class UsersByBirthDateTestCase(FastTenantTestCase):
+class UsersByBirthDateTestCase(FastTenantTestCase, GraphqlTestMixin):
 
     def setUp(self):
         self.user1 = mixer.blend(User, name="Tt")
@@ -81,7 +82,7 @@ class UsersByBirthDateTestCase(FastTenantTestCase):
 
         result = graphql_sync(schema, {"query": self.query, "variables": variables}, context_value={ "request": request })
 
-        self.assertTrue(result[0])
+        self.assertGraphqlSuccess(result)
         data = result[1]["data"]
 
         self.assertEqual(data["usersByBirthDate"]["total"], 3)
@@ -100,7 +101,7 @@ class UsersByBirthDateTestCase(FastTenantTestCase):
 
         result = graphql_sync(schema, {"query": self.query, "variables": variables}, context_value={ "request": request })
 
-        self.assertTrue(result[0])
+        self.assertGraphqlSuccess(result)
         data = result[1]["data"]
 
         self.assertEqual(data["usersByBirthDate"]["total"], 4)
@@ -118,7 +119,7 @@ class UsersByBirthDateTestCase(FastTenantTestCase):
 
         result = graphql_sync(schema, {"query": self.query, "variables": variables}, context_value={ "request": request })
 
-        self.assertTrue(result[0])
+        self.assertGraphqlSuccess(result)
         data = result[1]["data"]
 
         self.assertEqual(data["usersByBirthDate"]["total"], 1)
@@ -137,7 +138,7 @@ class UsersByBirthDateTestCase(FastTenantTestCase):
 
         result = graphql_sync(schema, {"query": self.query, "variables": variables}, context_value={ "request": request })
 
-        self.assertTrue(result[0])
+        self.assertGraphqlSuccess(result)
         data = result[1]["data"]
 
         self.assertEqual(data["usersByBirthDate"]["total"], 5)

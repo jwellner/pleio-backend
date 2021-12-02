@@ -4,7 +4,7 @@ from user.models import User
 from core.models import ProfileField, UserProfileField
 from core.constances import INVALID_KEY
 from graphql import GraphQLError
-from django.db.models import Q
+from django.db.models import Q, Case, When, Value
 from django.core.exceptions import ObjectDoesNotExist
 from django.utils import timezone
 
@@ -43,7 +43,12 @@ def resolve_users_by_birth_date(_, info, profileFieldGuid, futureDays=30, offset
         Q(profile_field=profile_field) &
         filter_dates
     ).order_by(
-        'value_date'
+        Case(
+            When(value_date__month__gte=day.month, then=Value(0)),
+            When(value_date__month__lt=day.month, then=Value(1)),
+        ),
+        'value_date__month',
+        'value_date__day',
     )
 
     ids = []
