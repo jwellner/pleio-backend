@@ -56,7 +56,7 @@ ingress:
   manualAnnotations:
   # extra annotations for the ingress with auto certificates
   autoAnnotations:
-    cert-manager.io/issuer: letsencrypt-pleio-prod-issuer
+    cert-manager.io/cluster-issuer: letsencrypt-pleio-prod-issuer
 
 memcached:
   persistence:

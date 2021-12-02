@@ -26,6 +26,3 @@ ingress:
       SecRule REQUEST_URI "@beginsWith /graphql" "id:4,ctl:ruleRemoveById=932150"
       SecRule REQUEST_URI "@beginsWith /graphql" "id:5,ctl:ruleRemoveById=932100"
       SecRule REQUEST_URI "@beginsWith /graphql" "id:6,ctl:ruleRemoveById=949110"
-  autoAnnotations:
-    cert-manager.io/cluster-issuer: letsencrypt-pleio-prod-issuer
-    cert-manager.io/issuer:
