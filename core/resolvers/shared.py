@@ -185,6 +185,6 @@ def resolve_entity_is_pinned(obj, info):
 
 # TODO: this function should be moved later on to a shared class
 def clean_abstract(abstract):
-    text = html_to_text(abstract)
+    text = html_to_text(abstract).strip()
     if len(text) > 320:
         raise GraphQLError(TEXT_TOO_LONG)
