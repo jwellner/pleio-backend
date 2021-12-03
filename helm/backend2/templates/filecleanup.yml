@@ -1,5 +1,5 @@
 {{ $labelData := dict "Values" .Values "Release" .Release "Chart" .Chart "Component" "filecleanup" }}
-apiVersion: batch/v1beta1
+apiVersion: batch/v1
 kind: CronJob
 metadata:
   name: {{ include "backend2.filecleanup" . }}
