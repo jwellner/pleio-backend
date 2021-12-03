@@ -122,6 +122,17 @@ AWS Test (helm):
   extends:
     - .helm_deploy
 
+ODCN Test (helm):
+  tags:
+    - control-odc
+  only:
+    - dev
+  variables:
+    HELM_NAME: backend2-test
+    HELM_VALUES_FILE: helm/backend2/values.odcn.test.yaml
+  extends:
+    - .helm_deploy
+
 ODCN Test:
   stage: deploy
   tags:
@@ -170,3 +181,15 @@ ODCN Prod:
     - /snap/bin/kubectl --kubeconfig ~/.kube/config-odcn -n pleio2 set image deployment/api api=registry.gitlab.com/pleio/backend2:${CI_COMMIT_SHA:0:8}
     - /snap/bin/kubectl --kubeconfig ~/.kube/config-odcn -n pleio2 set image deployment/admin admin=registry.gitlab.com/pleio/backend2:${CI_COMMIT_SHA:0:8}
     - /snap/bin/kubectl --kubeconfig ~/.kube/config-odcn -n pleio2 set image deployment/background background=registry.gitlab.com/pleio/backend2:${CI_COMMIT_SHA:0:8}
+
+ODCN Prod (helm):
+  tags:
+    - control-odc
+  only:
+    - master
+  when: manual
+  variables:
+    HELM_NAME: backend2
+    HELM_VALUES_FILE: helm/backend2/values.odcn.prod.yaml
+  extends:
+    - .helm_deploy

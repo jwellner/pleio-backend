@@ -32,6 +32,8 @@ image:
   pullPolicy: IfNotPresent
 
 storage:
+  # one of "pvc", "hostpath"
+  type: pvc
   className: efs
   dataSize: 1Mi
   tmpSize: 1Mi

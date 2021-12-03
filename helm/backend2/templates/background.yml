@@ -51,11 +51,26 @@ spec:
                 name: {{ include "backend2.secretsName" . }}
       volumes:
         - name: tmp-zip-storage
+          {{- if eq .Values.storage.type "hostpath"}}
+          hostPath:
+            path: {{ .Values.storage.existingTempStorage }}
+          {{- else }}
           persistentVolumeClaim:
             claimName: {{ include "backend2.tempStorageName" . }}
+          {{- end }}
         - name: pleio-data
+          {{- if eq .Values.storage.type "hostpath" }}
+          hostPath:
+            path: {{ .Values.storage.existingDataStorage }}
+          {{- else }}
           persistentVolumeClaim:
             claimName: {{ include "backend2.dataStorageName" . }}
+          {{- end }}
         - name: backup-storage
+          {{- if eq .Values.storage.type "hostpath" }}
+          hostPath:
+            path: {{ .Values.storage.existingTempStorage }}
+          {{- else }}
           persistentVolumeClaim:
-            claimName: {{ include "backend2.backupStorageName" .}}
+            claimName: {{ include "backend2.backupStorageName" . }}
+          {{- end }}
