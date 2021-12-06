@@ -152,8 +152,6 @@ AWS Prod (helm):
     - control-aws
   only:
     - master
-  only:
-    - master
   when: manual
   variables:
     HELM_NAME: backend2
