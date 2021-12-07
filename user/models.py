@@ -1,6 +1,7 @@
 import uuid
 from core import config
 from core.constances import USER_ROLES
+from core.data.paginate_result import PaginateResult
 from core.models import UserProfile, ProfileField, UserProfileField, SiteAccessRequest
 from datetime import timedelta
 from django.db.models import Case, Q, Value, When
@@ -160,7 +161,7 @@ class Manager(BaseUserManager):
         id_dict = {d.guid: d for d in users}
         sorted_users = [id_dict[id] for id in ids]
 
-        return sorted_users
+        return PaginateResult(user_profile_fields.count(), sorted_users)
 
 
 class User(AbstractBaseUser):

@@ -19,7 +19,4 @@ def resolve_users_by_birth_date(_, info, profileFieldGuid, futureDays=30, offset
     except InvalidFieldException:
         raise GraphQLError(INVALID_KEY)
 
-    return {
-        'total': len(sorted_users),
-        'edges': sorted_users
-    }
+    return sorted_users

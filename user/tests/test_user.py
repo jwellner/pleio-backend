@@ -30,7 +30,7 @@ class UserTestCase(FastTenantTestCase):
         start_date = datetime.strptime("2021-12-01", "%Y-%m-%d")
         end_date = datetime.strptime("2021-12-05", "%Y-%m-%d")
 
-        users = User.objects.get_upcoming_birthday_users(self.birthday_field.guid, self.user, start_date, end_date)
+        users = User.objects.get_upcoming_birthday_users(self.birthday_field.guid, self.user, start_date, end_date).edges
 
         self.assertListEqual([first, second, third], users)
 
@@ -41,7 +41,7 @@ class UserTestCase(FastTenantTestCase):
         start_date = datetime.strptime("2021-12-01", "%Y-%m-%d")
         end_date = datetime.strptime("2021-12-05", "%Y-%m-%d")
 
-        users = User.objects.get_upcoming_birthday_users(self.birthday_field.guid, self.user, start_date, end_date)
+        users = User.objects.get_upcoming_birthday_users(self.birthday_field.guid, self.user, start_date, end_date).edges
 
         self.assertListEqual([first, second], users)
 
@@ -51,7 +51,7 @@ class UserTestCase(FastTenantTestCase):
         start_date = datetime.strptime("2021-12-01", "%Y-%m-%d")
         end_date = datetime.strptime("2022-01-31", "%Y-%m-%d")
 
-        users = User.objects.get_upcoming_birthday_users(self.birthday_field.guid, self.user, start_date, end_date)
+        users = User.objects.get_upcoming_birthday_users(self.birthday_field.guid, self.user, start_date, end_date).edges
 
         self.assertListEqual([first, second], users)
 
@@ -78,6 +78,6 @@ class UserTestCase(FastTenantTestCase):
         start_date = datetime.strptime("2021-12-04", "%Y-%m-%d")
         end_date = datetime.strptime("2022-01-06", "%Y-%m-%d")
 
-        users = User.objects.get_upcoming_birthday_users(self.birthday_field.guid, self.user, start_date, end_date, 0,  5)
+        users = User.objects.get_upcoming_birthday_users(self.birthday_field.guid, self.user, start_date, end_date, 0,  5).edges
 
         self.assertListEqual(expected_users, users)
