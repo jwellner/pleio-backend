@@ -55,5 +55,10 @@ spec:
               value: "True"
       volumes:
         - name: pleio-data
+          {{- if eq .Values.storage.type "hostpath" }}
+          hostPath:
+            path: {{ .Values.storage.existingDataStorage }}
+          {{- else }}
           persistentVolumeClaim:
             claimName: {{ include "backend2.dataStorageName" . }}
+          {{- end }}

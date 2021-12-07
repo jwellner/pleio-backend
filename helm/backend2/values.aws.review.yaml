@@ -13,8 +13,3 @@ cspReportOnly: 'False'
 storage:
   className: efs-v2
   existingBackupStorage: backup-storage
-
-ingress:
-  autoAnnotations:
-    cert-manager.io/cluster-issuer: letsencrypt-pleio-prod-issuer
-    cert-manager.io/issuer:

@@ -15,17 +15,3 @@ background:
 storage:
   existingBackupStorage: backup-storage
   existingDataStorage: pleio-data-test
-
-ingress:
-  annotations:
-    nginx.ingress.kubernetes.io/modsecurity-snippet: |
-      SecRuleEngine On
-      SecRule REQUEST_URI "@beginsWith /graphql" "id:1,ctl:ruleRemoveById=932110"
-      SecRule REQUEST_URI "@beginsWith /graphql" "id:2,ctl:ruleRemoveById=932115"
-      SecRule REQUEST_URI "@beginsWith /graphql" "id:3,ctl:ruleRemoveById=932105"
-      SecRule REQUEST_URI "@beginsWith /graphql" "id:4,ctl:ruleRemoveById=932150"
-      SecRule REQUEST_URI "@beginsWith /graphql" "id:5,ctl:ruleRemoveById=932100"
-      SecRule REQUEST_URI "@beginsWith /graphql" "id:6,ctl:ruleRemoveById=949110"
-  autoAnnotations:
-    cert-manager.io/cluster-issuer: letsencrypt-pleio-prod-issuer
-    cert-manager.io/issuer:

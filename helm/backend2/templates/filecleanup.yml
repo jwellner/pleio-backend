@@ -1,5 +1,5 @@
 {{ $labelData := dict "Values" .Values "Release" .Release "Chart" .Chart "Component" "filecleanup" }}
-apiVersion: batch/v1beta1
+apiVersion: batch/v1
 kind: CronJob
 metadata:
   name: {{ include "backend2.filecleanup" . }}
@@ -33,6 +33,11 @@ spec:
                   name: tmp-zip-storage
           volumes:
             - name: tmp-zip-storage
+              {{- if eq .Values.storage.type "hostpath" }}
+              hostPath:
+                path: {{ .Values.storage.existingTempStorage }}
+              {{- else }}
               persistentVolumeClaim:
                 claimName: {{ include "backend2.tempStorageName" . }}
+              {{- end }}
           restartPolicy: Never

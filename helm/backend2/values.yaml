@@ -32,6 +32,8 @@ image:
   pullPolicy: IfNotPresent
 
 storage:
+  # one of "pvc", "hostpath"
+  type: pvc
   className: efs
   dataSize: 1Mi
   tmpSize: 1Mi
@@ -51,12 +53,20 @@ ingress:
   annotations:
     kubernetes.io/ingress.class: nginx
     nginx.ingress.kubernetes.io/proxy-body-size: 2050m
+    nginx.ingress.kubernetes.io/modsecurity-snippet: |
+      SecRuleEngine On
+      SecRule REQUEST_URI "@beginsWith /graphql" "id:1,ctl:ruleRemoveById=932110"
+      SecRule REQUEST_URI "@beginsWith /graphql" "id:2,ctl:ruleRemoveById=932115"
+      SecRule REQUEST_URI "@beginsWith /graphql" "id:3,ctl:ruleRemoveById=932105"
+      SecRule REQUEST_URI "@beginsWith /graphql" "id:4,ctl:ruleRemoveById=932150"
+      SecRule REQUEST_URI "@beginsWith /graphql" "id:5,ctl:ruleRemoveById=932100"
+      SecRule REQUEST_URI "@beginsWith /graphql" "id:6,ctl:ruleRemoveById=949110"
   # extra annotations for the ingress with manual certificates
   # cannot contain from-to-www-redirect since it does not work for wildcards
   manualAnnotations:
   # extra annotations for the ingress with auto certificates
   autoAnnotations:
-    cert-manager.io/issuer: letsencrypt-pleio-prod-issuer
+    cert-manager.io/cluster-issuer: letsencrypt-pleio-prod-issuer
 
 memcached:
   persistence:
