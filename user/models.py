@@ -1,8 +1,10 @@
 import uuid
 from core import config
 from core.constances import USER_ROLES
+from core.data.paginate_result import PaginateResult
 from core.models import UserProfile, ProfileField, UserProfileField, SiteAccessRequest
-from django.db.models import Q
+from datetime import timedelta
+from django.db.models import Case, Q, Value, When
 from django.db.models.signals import post_save
 from django.db import models
 from django.contrib.postgres.fields import ArrayField
@@ -117,6 +119,49 @@ class Manager(BaseUserManager):
             users = users.filter(is_delete_requested=isDeleteRequested)
 
         return users
+
+    def get_upcoming_birthday_users(self, profileFieldGuid, user, start_date, end_date, offset=0, limit=20):
+        # pylint: disable=too-many-arguments
+        # pylint: disable=too-many-locals
+
+        profile_field = ProfileField.objects.get_date_field(profileFieldGuid)
+
+        index = start_date
+        filter_dates = Q()
+        while index < end_date:
+            filter_dates.add(
+                Q(
+                    value_date__month=index.month,
+                    value_date__day=index.day
+                ),
+                Q.OR
+            )
+            index += timedelta(days=1)
+
+        user_profile_fields = UserProfileField.objects.visible(user).filter(
+            Q(profile_field=profile_field) &
+            filter_dates
+        ).order_by(
+            Case(
+                When(value_date__month__gte=start_date.month, then=Value(0)),
+                When(value_date__month__lt=start_date.month, then=Value(1)),
+            ),
+            'value_date__month',
+            'value_date__day',
+        )
+
+        ids = []
+        selection = user_profile_fields[offset:offset+limit]
+        for item in selection:
+            ids.append(item.user_profile.user.guid)
+
+        users = User.objects.filter(id__in=ids)
+
+        # use birthday ordering on objects
+        id_dict = {d.guid: d for d in users}
+        sorted_users = [id_dict[id] for id in ids]
+
+        return PaginateResult(user_profile_fields.count(), sorted_users)
 
 
 class User(AbstractBaseUser):

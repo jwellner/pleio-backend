@@ -9,8 +9,10 @@ from django.utils import timezone
 from datetime import datetime
 from core.lib import get_acl, draft_to_text, html_to_text
 from core.constances import USER_ROLES
+from core.exceptions import InvalidFieldException
 from core import config
 from .shared import read_access_default, write_access_default
+from django.core.exceptions import ObjectDoesNotExist
 
 logger = logging.getLogger(__name__)
 
@@ -93,6 +95,17 @@ class ProfileFieldValidator(models.Model):
                 return True
         return False
 
+class ProfileFieldManager(models.Manager):
+    def get_date_field(self, guid):
+        try:
+            profile_field = self.get_queryset().get(id=guid)
+        except ObjectDoesNotExist:
+            raise InvalidFieldException()
+
+        if not profile_field.field_type == "date_field":
+            raise InvalidFieldException()
+
+        return profile_field
 
 class ProfileField(models.Model):
     """
@@ -108,6 +121,8 @@ class ProfileField(models.Model):
         ('multi_select_field', 'multi_select_field'),
         ('text_field', 'text_field'),
     )
+
+    objects = ProfileFieldManager()
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     key = models.CharField(max_length=255, unique=True)

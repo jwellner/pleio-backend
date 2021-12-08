@@ -1,0 +1,21 @@
+accountDomain: https://account.pleio.nl
+websitesManual:
+  - domain: '*.pleio-test.nl'
+    secretName: tls-wildcard.pleio-test.nl
+
+cspReportOnly: 'False'
+
+api:
+  replicaCount: 2
+
+background:
+  replicaCount: 0
+
+admin:
+  replicaCount: 0
+
+storage:
+  type: hostpath
+  existingTempStorage: /storage/_pleio2-test/tmp
+  existingDataStorage: /storage/_pleio2-test/data
+  existingBackupStorage: /storage/backup-storage
