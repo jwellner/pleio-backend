@@ -120,6 +120,14 @@ class Manager(BaseUserManager):
 
         return users
 
+    def get_unmentioned_users(self, user_ids, instance):
+        if not user_ids:
+            return self.get_queryset().none()
+
+        return self.get_queryset() \
+            .filter(id__in=user_ids) \
+            .filter(~Q(notifications__verb='mentioned', notifications__action_object_object_id=instance.id))
+
     def get_upcoming_birthday_users(self, profileFieldGuid, user, start_date, end_date, offset=0, limit=20):
         # pylint: disable=too-many-arguments
         # pylint: disable=too-many-locals

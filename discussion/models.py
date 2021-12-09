@@ -1,10 +1,10 @@
 from auditlog.registry import auditlog
 from django.db import models
 from django.utils.text import slugify
-from core.models import Entity, VoteMixin, CommentMixin, BookmarkMixin, FollowMixin, NotificationMixin, FeaturedCoverMixin, ArticleMixin
+from core.models import Entity, VoteMixin, CommentMixin, BookmarkMixin, FollowMixin, MentionMixin, FeaturedCoverMixin, ArticleMixin
 
 
-class Discussion(Entity, VoteMixin, BookmarkMixin, FollowMixin, CommentMixin, NotificationMixin, FeaturedCoverMixin, ArticleMixin):
+class Discussion(Entity, VoteMixin, BookmarkMixin, FollowMixin, CommentMixin, MentionMixin, FeaturedCoverMixin, ArticleMixin):
     class Meta:
         ordering = ['-published']
 
@@ -33,6 +33,10 @@ class Discussion(Entity, VoteMixin, BookmarkMixin, FollowMixin, CommentMixin, No
         return '{}/discussion/view/{}/{}'.format(
             prefix, self.guid, slugify(self.title)
         ).lower()
+
+    @property
+    def rich_fields(self):
+        return [self.rich_description]
 
 
 auditlog.register(Discussion)

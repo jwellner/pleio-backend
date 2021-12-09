@@ -1,9 +1,9 @@
 from auditlog.registry import auditlog
 from django.db import models
 from django.utils.text import slugify
-from core.models import Entity, VoteMixin, CommentMixin, BookmarkMixin, FollowMixin, NotificationMixin, FeaturedCoverMixin, ArticleMixin
+from core.models import Entity, VoteMixin, CommentMixin, BookmarkMixin, FollowMixin, MentionMixin, FeaturedCoverMixin, ArticleMixin
 
-class Blog(Entity, FeaturedCoverMixin, VoteMixin, BookmarkMixin, FollowMixin, CommentMixin, NotificationMixin, ArticleMixin):
+class Blog(Entity, FeaturedCoverMixin, VoteMixin, BookmarkMixin, FollowMixin, CommentMixin, MentionMixin, ArticleMixin):
     """
     Blog
     """
@@ -33,6 +33,10 @@ class Blog(Entity, FeaturedCoverMixin, VoteMixin, BookmarkMixin, FollowMixin, Co
         return '{}/blog/view/{}/{}'.format(
             prefix, self.guid, slugify(self.title)
         ).lower()
+
+    @property
+    def rich_fields(self):
+        return [self.rich_description]
 
 
 auditlog.register(Blog)

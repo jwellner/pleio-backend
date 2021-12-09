@@ -1,3 +1,4 @@
+import abc
 from django.db import models
 from django.db.models import Sum, IntegerField
 from django.db.models.functions import Cast
@@ -6,6 +7,7 @@ from django.contrib.contenttypes.fields import GenericRelation
 from django.urls import reverse
 from notifications.models import Notification
 from .annotation import Annotation
+from core.models.shared import AbstractModelMeta
 from core.utils.convert import truncate_rich_description
 
 class VoteMixin(models.Model):
@@ -213,3 +215,17 @@ class ArticleMixin(models.Model):
             return self.abstract
 
         return truncate_rich_description(self.rich_description)
+
+class MentionMixin(NotificationMixin, metaclass=AbstractModelMeta):
+
+    class Meta:
+        abstract = True
+
+    @property
+    @abc.abstractmethod
+    def rich_fields(self):
+        """ Return a list of Tiptap objects e.g. [self.rich_description]. These are parsed and used to find mentioned users """
+
+    @property
+    def mentioned_users(self):
+        return set() # TODO get menitioned users based on rich text fields

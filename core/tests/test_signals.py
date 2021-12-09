@@ -11,9 +11,11 @@ from blog.models import Blog
 from mixer.backend.django import mixer
 from core.constances import ACCESS_TYPE
 from core.lib import get_acl, access_id_to_acl
-from core.signals import comment_handler, user_handler, notification_handler
+from core.signals import comment_handler, mention_handler, notification_handler, user_handler
+from core.tests.helpers import QuerySetWith
 from django.utils.text import slugify
 from django.db.models.signals import post_save
+from notifications.models import Notification
 from unittest import mock
 
 
@@ -69,3 +71,16 @@ class SignalsTestCase(FastTenantTestCase):
     def test_notification_handler(self, mocked_create_notification):
         notification_handler(self.user1, self.blog2, True, action_object=self.blog2)
         mocked_create_notification.assert_called_once_with(connection.schema_name, 'created', self.blog2.id, self.blog2.owner.id)
+
+    @mock.patch('blog.models.Blog.mentioned_users', new_callable=mock.PropertyMock)
+    @mock.patch('notifications.signals.notify.send')
+    def test_mention_handler_no_mentions(self, mocked_send, mock_mentioned_users):
+        mock_mentioned_users.return_value = set()
+        mentionObj = Blog(owner=self.user1)
+
+    @mock.patch('core.tasks.create_notification.delay')
+    def test_mention_handler(self, mocked_create_notification):
+        mentionObj = Blog(owner=self.user1)
+
+        mention_handler(self.user1, mentionObj, True)
+        mocked_create_notification.assert_called_once_with(connection.schema_name, 'mentioned', 'blog.blog', mentionObj.id, self.user1.id)

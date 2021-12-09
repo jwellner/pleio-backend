@@ -4,7 +4,7 @@ from django.conf import settings
 from django.utils import timezone
 from notifications.signals import notify
 from core.lib import tenant_schema, datetime_isoformat
-from core.models import Comment, Group, GroupInvitation, Entity, EntityViewCount, NotificationMixin
+from core.models import Comment, Group, GroupInvitation, Entity, EntityViewCount, NotificationMixin, MentionMixin
 from core.tasks import create_notification
 from user.models import User
 from event.models import EventAttendee
@@ -57,7 +57,7 @@ def notification_handler(sender, instance, created, **kwargs):
 
     # pylint: disable=unused-argument
     if not settings.IMPORTING and created:
-        if instance.__class__ in NotificationMixin.__subclasses__() and instance.group:
+        if issubclass(type(instance), NotificationMixin) and instance.group:
             if (not instance.published) or (datetime_isoformat(instance.published) > datetime_isoformat(timezone.now())):
                 return
 
@@ -93,6 +93,19 @@ def updated_at_handler(sender, instance, **kwargs):
     if not instance._state.adding and not settings.IMPORTING:
         instance.updated_at = timezone.now()
 
+def mention_handler(sender, instance, created, **kwargs):
+    """ Look for users that are mentioned and notify them """
+    # pylint: disable=unused-argument
+
+    if settings.IMPORTING:
+        return
+
+    if not issubclass(type(instance), MentionMixin):
+        return
+
+    to_be_mentioned = User.objects.get_unmentioned_users(instance.mentioned_users, instance)
+    notify.send(instance.owner, recipient=to_be_mentioned, verb='mention', action_object=instance)
+
 
 # Notification handlers
 post_save.connect(comment_handler, sender=Comment)
@@ -111,3 +124,6 @@ for subclass in Entity.__subclasses__():
     pre_save.connect(updated_at_handler, subclass)
     pre_save.connect(notification_update_handler, sender=subclass)
     post_save.connect(notification_handler, sender=subclass)
+
+for subclass in MentionMixin.__subclasses__():
+    post_save.connect(mention_handler, subclass)
