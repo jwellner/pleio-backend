@@ -9,6 +9,7 @@ from notifications.models import Notification
 from .annotation import Annotation
 from core.models.shared import AbstractModelMeta
 from core.utils.convert import truncate_rich_description
+from core.utils.tiptap_parser import Tiptap
 
 class VoteMixin(models.Model):
     def vote_count(self):
@@ -228,4 +229,9 @@ class MentionMixin(NotificationMixin, metaclass=AbstractModelMeta):
 
     @property
     def mentioned_users(self):
-        return set() # TODO get menitioned users based on rich text fields
+        user_ids = set()
+        for tiptap in self.rich_fields:
+            parser = Tiptap(tiptap)
+            user_ids.update(parser.mentioned_users)
+
+        return user_ids
