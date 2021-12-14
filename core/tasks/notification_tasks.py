@@ -1,16 +1,14 @@
 from celery import shared_task
-from core import config
 from core.models.entity import Entity
 from core.models.group import GroupMembership
-from core.lib import get_default_email_context, map_notification, tenant_schema
-from core.tasks.mail_tasks import send_mail_multi
-from django.utils import timezone, translation
-from django.utils.translation import ugettext_lazy
+from core.lib import tenant_schema
+from django.utils import timezone
 from django_tenants.utils import schema_context
 from notifications.signals import notify
 from user.models import User
 from core.models.mixin import NotificationMixin
 from notifications.models import Notification
+from core.services.mail_service import MailService
 
 @shared_task()
 def create_notifications_for_scheduled_content(schema_name):
@@ -49,9 +47,6 @@ def create_notification(self, schema_name, verb, entity_id, sender_id):
     for this group. An email task wil be triggered with this notification
     '''
     with schema_context(schema_name):
-        if config.LANGUAGE:
-            translation.activate(config.LANGUAGE)
-
         instance = Entity.objects.get_subclass(id=entity_id)
         sender = User.objects.get(id=sender_id)
 
@@ -84,8 +79,7 @@ def create_notification(self, schema_name, verb, entity_id, sender_id):
 
         # only send direct notification for content in groups
         if instance.group:
-            subject = ugettext_lazy("New notification at %(site_name)s: ") % {'site_name': config.NAME}
-
+            mail_service = MailService()
             for notification in notifications:
                 recipient = User.objects.get(id=notification.recipient_id)
                 direct = False
@@ -97,13 +91,4 @@ def create_notification(self, schema_name, verb, entity_id, sender_id):
 
                 # send email direct and mark emailed as True
                 if direct:
-                    # do not send mail when notifications are disabled, but mark as send (so when enabled you dont receive old notifications!)
-                    if recipient.profile.receive_notification_email:
-                        context = get_default_email_context(recipient)
-                        context['show_excerpt'] = config.EMAIL_NOTIFICATION_SHOW_EXCERPT
-                        context['notifications'] = [map_notification(notification)]
-
-                        send_mail_multi.delay(schema_name, subject, 'email/send_notification_emails.html', context, recipient.email)
-
-                    notification.emailed = True
-                    notification.save()
+                    mail_service.send_notification_email(schema_name, recipient, [notification])
