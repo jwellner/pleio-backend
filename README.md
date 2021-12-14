@@ -75,7 +75,7 @@ Use the following parameters:
 - domain: localhost
 - is_primary: True
 
-When asked for an elgg-database, please fill in `test`. Do not leave this field empty. 
+When asked for an elgg-database, please fill in `test`. Do not leave this field empty.
 
 #### Create superuser for admin
 
@@ -96,7 +96,7 @@ Now browse to: http://test1.pleio.local:8000
 
 #### Run with a local frontend
 
-To run a local frontend with backend2 it is needed to first run the frontend (`yarn start`) and then restart the backend. At launch it will check whether a local frontend is running. 
+To run a local frontend with backend2 it is needed to first run the frontend (`yarn start`) and then restart the backend. At launch it will check whether a local frontend is running.
 
 When opening http://test1.pleio.local:8000 you should see your local front-end being used. This frontend is now loaded from `localhost:9001`. This can be checked by inspecting the network activity. The CSS and JS should be loaded from `localhost:9001`.
 
@@ -243,49 +243,49 @@ docker-compose exec background celery -A backend2.celery call {taskname} --args=
 
 Possible tasknames and arguments:
 
-- core.tasks.dispatch_crons, ["{period}"]
-- core.tasks.dispatch_task, ["{task_name}", **"{arguments}"]
-- core.tasks.send_notifications, ["{schema_name}"]
-- core.tasks.send_overview, ["{schema_name}", "{overview}"]
-- core.tasks.elasticsearch_recreate_indices
-- core.tasks.elasticsearch_recreate_indices ["{index_name}"] 
-- core.tasks.elasticsearch_rebuild_all
-- core.tasks.elasticsearch_rebuild_all ["{index_name}"] 
-- core.tasks.elasticsearch_rebuild, ["{schema_name}"] 
-- core.tasks.elasticsearch_rebuild, ["{schema_name}","{index_name}"]
-- core.tasks.elasticsearch_index_file, ["{schema_name}", "{file_guid}"]
+- core.tasks.cronjobs.dispatch_crons, ["{period}"]
+- core.tasks.cronjobs.dispatch_task, ["{task_name}", **"{arguments}"]
+- core.tasks.notification_tasks.send_notifications, ["{schema_name}"]
+- core.tasks.cronjobs.send_overview, ["{schema_name}", "{overview}"]
+- core.tasks.elasticsearch_tasks.elasticsearch_recreate_indices
+- core.tasks.elasticsearch_tasks.elasticsearch_recreate_indices ["{index_name}"]
+- core.tasks.elasticsearch_tasks.elasticsearch_rebuild_all
+- core.tasks.elasticsearch_tasls.elasticsearch_rebuild_all ["{index_name}"]
+- core.tasks.elasticsearch_tasls.elasticsearch_rebuild, ["{schema_name}"]
+- core.tasks.elasticsearch_tasls.elasticsearch_rebuild, ["{schema_name}","{index_name}"]
+- core.tasks.elasticsearch_tasls.elasticsearch_index_file, ["{schema_name}", "{file_guid}"]
 
 Some example commands:
 
 ### Search index recreate all indexes after changes in documents
 ```
-docker-compose exec background celery -A backend2.celery call core.tasks.elasticsearch_recreate_indices
+docker-compose exec background celery -A backend2.celery call core.tasks.elasticsearch_tasls.elasticsearch_recreate_indices
 ```
 
 ### Search index recreate 1 index after changes in documents
 ```
-docker-compose exec background celery -A backend2.celery call core.tasks.elasticsearch_recreate_indices --args='["blog"]'
+docker-compose exec background celery -A backend2.celery call core.tasks.elasticsearch_tasls.elasticsearch_recreate_indices --args='["blog"]'
 ```
 
 ### Search index populate all content for all tenants
 ```
-docker-compose exec background celery -A backend2.celery call core.tasks.elasticsearch_rebuild_all
+docker-compose exec background celery -A backend2.celery call core.tasks.elasticsearch_tasls.elasticsearch_rebuild_all
 ```
 
 ### Search index populate 1 index for all tentants
 ```
-docker-compose exec background celery -A backend2.celery call core.tasks.elasticsearch_rebuild_all --args='["blog"]'
+docker-compose exec background celery -A backend2.celery call core.tasks.elasticsearch_tasls.elasticsearch_rebuild_all --args='["blog"]'
 ```
 
 ### Search index populate 1 index of 1 tentant
 ```
-docker-compose exec background celery -A backend2.celery call core.tasks.elasticsearch_rebuild_all --args='["tenant1", "blog"]'
+docker-compose exec background celery -A backend2.celery call core.tasks.elasticsearch_tasls.elasticsearch_rebuild_all --args='["tenant1", "blog"]'
 ```
 
 #### Run the daily cron on all tenants:
 
 ```bash
-docker-compose exec background celery -A backend2.celery call core.tasks.dispatch_crons --args='["daily"]'
+docker-compose exec background celery -A backend2.celery call core.tasks.cronjobs.dispatch_crons --args='["daily"]'
 ```
 
 ## Elastic APM
