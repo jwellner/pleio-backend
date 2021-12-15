@@ -10,26 +10,32 @@
 {% block body %}
     {% for notification in notifications  %}
         <hr style="border:none;border-bottom:1px solid #ececec;margin:1.5rem 0;width:100%">
-        {% if notification.type_to_string == 'blog' %}
-            {% include "email/notifications/blog.html" %}
-        {% endif %}
-        {% if notification.type_to_string == 'discussion' %}
-            {% include "email/notifications/discussion.html" %}
-        {% endif %}
-        {% if notification.type_to_string == 'event' %}
-            {% include "email/notifications/event.html" %}
-        {% endif %}
-        {% if notification.type_to_string == 'question' %}
-            {% include "email/notifications/question.html" %}
-        {% endif %}
-        {% if notification.type_to_string == 'wiki' %}
-            {% include "email/notifications/wiki.html" %}
-        {% endif %}
-        {% if notification.type_to_string == 'thewire' %}
-            {% include "email/notifications/update.html" %}
+        {% if notification.action == 'mentioned' %}
+            <strong>{{ notification.performer_name }}</strong>
+            {% blocktrans %} has mentioned you at: {% endblocktrans %}
+            <strong><a href="{{ site_url }}{{ notification.entity_url }}?utm_medium=email&utm_campaign=notification_overview">{{ notification.entity_title }}</a></strong>
+            {% if notification.entity_group %} in <strong><a href="{{ site_url }}{{ notification.entity_group_url }}?utm_medium=email&utm_campaign=notification_overview">{{ notification.entity_group_name }}</a></strong>{% endif %}.
+        {% else %}
+            {% if notification.type_to_string == 'blog' %}
+                {% include "email/notifications/blog.html" %}
+            {% endif %}
+            {% if notification.type_to_string == 'discussion' %}
+                {% include "email/notifications/discussion.html" %}
+            {% endif %}
+            {% if notification.type_to_string == 'event' %}
+                {% include "email/notifications/event.html" %}
+            {% endif %}
+            {% if notification.type_to_string == 'question' %}
+                {% include "email/notifications/question.html" %}
+            {% endif %}
+            {% if notification.type_to_string == 'wiki' %}
+                {% include "email/notifications/wiki.html" %}
+            {% endif %}
+            {% if notification.type_to_string == 'thewire' %}
+                {% include "email/notifications/update.html" %}
+            {% endif %}
         {% endif %}
     {% endfor %}
-
 {% endblock %}
 
 

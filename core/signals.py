@@ -103,8 +103,7 @@ def mention_handler(sender, instance, created, **kwargs):
     if not issubclass(type(instance), MentionMixin):
         return
 
-    to_be_mentioned = User.objects.get_unmentioned_users(instance.mentioned_users, instance)
-    notify.send(instance.owner, recipient=to_be_mentioned, verb='mention', action_object=instance)
+    create_notification.delay(tenant_schema(), 'mentioned', instance.id, instance.owner.id)
 
 
 # Notification handlers

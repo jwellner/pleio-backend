@@ -68,14 +68,17 @@ def create_notification(self, schema_name, verb, entity_id, sender_id):
                     if not instance.can_read(follower):
                         continue
                     recipients.append(follower)
+        elif verb == 'mentioned':
+            recipients = User.objects.get_unmentioned_users(instance.mentioned_users, instance)
         else:
             return
 
         # tuple with list is returned, get the notification created
         notifications = notify.send(sender, recipient=recipients, verb=verb, action_object=instance)[0][1]
 
-        instance.notifications_created = True
-        instance.save()
+        if verb != 'mentioned':
+            instance.notifications_created = True
+            instance.save()
 
         # only send direct notification for content in groups
         if instance.group:
