@@ -242,7 +242,7 @@ def get_default_email_context(user=None):
         unsubscribe_url = site_url + '/edit_email_settings/' + token
     else:
         unsubscribe_url = ''
-    
+
     return {
         'user_name': user_name,
         'user_url': user_url,
@@ -477,15 +477,15 @@ def map_notification(notification):
         'timeCreated': notification.timestamp,
         'isUnread': notification.unread
     }
-    
+
 def get_notification_action_entity(notification):
     """ get entity from actoin_object_object_id """
-    entity = None
+    entity = notification.action_object
 
-    try:
-        entity = apps.get_model('core.Entity').objects.get_subclass(id=notification.action_object_object_id)
-    except Exception:
-        entity = apps.get_model('user.User').objects.get(id=notification.actor_object_id)
+    if not hasattr(entity, 'group'):
         entity.group = None
 
     return entity
+
+def get_model_name(instance):
+    return instance._meta.app_label + '.' + instance._meta.model_name

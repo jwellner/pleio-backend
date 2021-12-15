@@ -4,7 +4,7 @@ from django.db import models
 from django.contrib.contenttypes.fields import GenericForeignKey, GenericRelation
 from django.contrib.contenttypes.models import ContentType
 from django.utils import timezone
-from .mixin import VoteMixin
+from .mixin import VoteMixin, MentionMixin
 from core.constances import USER_ROLES
 
 
@@ -14,7 +14,7 @@ class CommentManager(models.Manager):
 
         return queryset
 
-class Comment(VoteMixin):
+class Comment(VoteMixin, MentionMixin):
     class Meta:
         ordering = ['-created_at']
     objects = CommentManager()
@@ -62,6 +62,28 @@ class Comment(VoteMixin):
 
     def __str__(self):
         return f"Comment[{self.guid}]"
+
+    @property
+    def rich_fields(self):
+        return [self.rich_description]
+
+    @property
+    def group(self):
+        if self.container and hasattr(self.container, 'group'):
+            return self.container.group
+
+        return None
+
+    @property
+    def type_to_string(self):
+        return 'comment'
+
+    @property
+    def title(self):
+        if self.container and hasattr(self.container, 'title'):
+            return self.container.title
+
+        return ''
 
 class CommentRequest(models.Model):
 

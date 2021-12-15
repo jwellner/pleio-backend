@@ -93,7 +93,7 @@ class SendNotificationEmailsTestCase(FastTenantTestCase):
 
     @mock.patch('core.tasks.mail_tasks.send_mail_multi.delay')
     def test_notifications_not_sent_to_banned_users(self, mocked_send_mail_multi):
-        create_notification.s(connection.schema_name, 'commented', self.blog1.id, self.user1.id).apply()
+        create_notification.s(connection.schema_name, 'commented', 'blog.blog', self.blog1.id, self.user1.id).apply()
         self.user2.is_active = False
         self.user2.save()
         call_command('send_notification_emails')
@@ -101,7 +101,7 @@ class SendNotificationEmailsTestCase(FastTenantTestCase):
 
     @mock.patch('core.tasks.mail_tasks.send_mail_multi.delay')
     def test_notifications_not_sent_notifications_off(self, mocked_send_mail_multi):
-        create_notification.s(connection.schema_name, 'commented', self.blog1.id, self.user1.id).apply()
+        create_notification.s(connection.schema_name, 'commented', 'blog.blog', self.blog1.id, self.user1.id).apply()
         self.user2.profile.receive_notification_email = False
         self.user2.profile.save()
         self.user2.is_active = True
@@ -111,7 +111,7 @@ class SendNotificationEmailsTestCase(FastTenantTestCase):
 
     @mock.patch('core.tasks.mail_tasks.send_mail_multi.delay')
     def test_template_context_of_commented_notification(self, mocked_send_mail_multi):
-        create_notification.s(connection.schema_name, 'commented', self.blog1.id, self.user1.id).apply()
+        create_notification.s(connection.schema_name, 'commented', 'blog.blog', self.blog1.id, self.user1.id).apply()
         call_command('send_notification_emails')
 
         args, kwargs = mocked_send_mail_multi.call_args
@@ -133,7 +133,7 @@ class SendNotificationEmailsTestCase(FastTenantTestCase):
             write_access=[ACCESS_TYPE.user.format(self.user1.id)],
             group=self.group
         )
-        create_notification.s(connection.schema_name, 'created', blog2.id, self.user1.id).apply()
+        create_notification.s(connection.schema_name, 'created', 'blog.blog', blog2.id, self.user1.id).apply()
 
         call_command('send_notification_emails')
 
@@ -157,7 +157,7 @@ class SendNotificationEmailsTestCase(FastTenantTestCase):
     def test_command_notifications_disabled(self, mocked_send_mail_multi):
         i = 0
         while i < 5:
-            create_notification.s(connection.schema_name, 'created', self.blog1.id, self.user1.id).apply()
+            create_notification.s(connection.schema_name, 'created', 'blog.blog', self.blog1.id, self.user1.id).apply()
             i = i + 1
 
         call_command('send_notification_emails')

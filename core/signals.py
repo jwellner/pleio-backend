@@ -3,7 +3,7 @@ from django.db.models.signals import post_save, pre_save
 from django.conf import settings
 from django.utils import timezone
 from notifications.signals import notify
-from core.lib import tenant_schema, datetime_isoformat
+from core.lib import datetime_isoformat, get_model_name, tenant_schema
 from core.models import Comment, Group, GroupInvitation, Entity, EntityViewCount, NotificationMixin, MentionMixin
 from core.tasks import create_notification
 from user.models import User
@@ -28,7 +28,7 @@ def comment_handler(sender, instance, created, **kwargs):
         else:
             return
 
-        create_notification.delay(tenant_schema(), 'commented', instance.container.id, sender)
+        create_notification.delay(tenant_schema(), 'commented', get_model_name(instance.container), instance.container.id, sender)
 
 
 def user_handler(sender, instance, created, **kwargs):
@@ -61,7 +61,7 @@ def notification_handler(sender, instance, created, **kwargs):
             if (not instance.published) or (datetime_isoformat(instance.published) > datetime_isoformat(timezone.now())):
                 return
 
-            create_notification.delay(tenant_schema(), 'created', instance.id, instance.owner.id)
+            create_notification.delay(tenant_schema(), 'created', get_model_name(instance), instance.id, instance.owner.id)
         else:
             instance.notifications_created = True
             instance.save()
@@ -103,7 +103,10 @@ def mention_handler(sender, instance, created, **kwargs):
     if not issubclass(type(instance), MentionMixin):
         return
 
-    create_notification.delay(tenant_schema(), 'mentioned', instance.id, instance.owner.id)
+    if not instance.owner: # extra robustness for when tests don't assign an owner
+        return
+
+    create_notification.delay(tenant_schema(), 'mentioned', get_model_name(instance), instance.id, instance.owner.id)
 
 
 # Notification handlers

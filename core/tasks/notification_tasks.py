@@ -1,7 +1,8 @@
 from celery import shared_task
 from core.models.entity import Entity
 from core.models.group import GroupMembership
-from core.lib import tenant_schema
+from core.lib import get_model_name, tenant_schema
+from django.apps import apps
 from django.utils import timezone
 from django_tenants.utils import schema_context
 from notifications.signals import notify
@@ -33,11 +34,11 @@ def create_notifications_for_scheduled_content(schema_name):
                 instance.save()
                 continue
 
-            create_notification.delay(tenant_schema(), 'created', instance.id, instance.owner.id)
+            create_notification.delay(tenant_schema(), 'created', get_model_name(instance), instance.id, instance.owner.id)
 
 
 @shared_task(bind=True, ignore_result=True)
-def create_notification(self, schema_name, verb, entity_id, sender_id):
+def create_notification(self, schema_name, verb, model_name, entity_id, sender_id):
     # pylint: disable=unused-argument
     # pylint: disable=too-many-arguments
     # pylint: disable=too-many-locals
@@ -47,7 +48,8 @@ def create_notification(self, schema_name, verb, entity_id, sender_id):
     for this group. An email task wil be triggered with this notification
     '''
     with schema_context(schema_name):
-        instance = Entity.objects.get_subclass(id=entity_id)
+        Model = apps.get_model(model_name)
+        instance = Model.objects.get(id=entity_id)
         sender = User.objects.get(id=sender_id)
 
         if verb == "created":
