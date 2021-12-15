@@ -51,6 +51,8 @@ def tiptap_to_text(json_string):
             text += node['text']
         elif node['type'] == 'hardBreak':
             text += "\n"
+        elif node['type'] == 'mention':
+            text += '@' + node['attrs']['label']
         else:
             for item in node.get('content', []):
                 text += get_text(item)
