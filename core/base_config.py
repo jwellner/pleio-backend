@@ -21,6 +21,7 @@ DEFAULT_SITE_CONFIG = {
     'OIDC_PROVIDER_OPTIONS': ([
         {'value': 'pleio', 'label': 'Pleio Account', 'isDefault': True},
         {'value': 'fnv', 'label': 'Mijn FNV'},
+        {'value': 'knb-test', 'label': 'Notariaat Test'},
     ], 'Default OP options'),
     'CUSTOM_JAVASCRIPT': ('', 'Custom Javascript'),
 

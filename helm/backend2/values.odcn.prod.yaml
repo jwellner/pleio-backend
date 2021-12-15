@@ -14,8 +14,10 @@ background:
 admin:
   replicaCount: 0
 
+env: prod
+
 storage:
   type: hostpath
-  existingTempStorage: /storage/_pleio2-test/tmp
-  existingDataStorage: /storage/_pleio2-test/data
+  existingTempStorage: /storage/_pleio2/tmp
+  existingDataStorage: /storage/_pleio2/data
   existingBackupStorage: /storage/backup-storage
