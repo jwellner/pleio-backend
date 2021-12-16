@@ -61,6 +61,11 @@ def create_notification(self, schema_name, verb, model_name, entity_id, sender_i
                     if not instance.can_read(member.user):
                         continue
                     recipients.append(member.user)
+
+            if not instance.notifications_created:
+                instance.notifications_created = True
+                instance.save()
+
         elif verb == "commented":
             recipients = []
             if hasattr(instance, 'followers'):
@@ -77,10 +82,6 @@ def create_notification(self, schema_name, verb, model_name, entity_id, sender_i
 
         # tuple with list is returned, get the notification created
         notifications = notify.send(sender, recipient=recipients, verb=verb, action_object=instance)[0][1]
-
-        if verb != 'mentioned':
-            instance.notifications_created = True
-            instance.save()
 
         # only send direct notification for content in groups
         if instance.group:
