@@ -52,6 +52,7 @@ REDIRECTS_HAS_DUPLICATE_SOURCE = "redirects_has_duplicate_source"
 OIDC_PROVIDER_OPTIONS = [
     {'value': 'pleio', 'label': 'Pleio Account', 'isDefault': True},
     {'value': 'fnv', 'label': 'Mijn FNV'},
+    {'value': 'knb', 'label': 'Notariaat'},
     {'value': 'knb-test', 'label': 'Notariaat Test'},
 ]
 
