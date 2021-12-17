@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Duits\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-10-10 10:18+0200\n"
+"POT-Creation-Date: 2021-12-15 17:53+0100\n"
 "PO-Revision-Date: 2021-05-26 10:55+0200\n"
 "Last-Translator: \n"
 "Language-Team: \n"
@@ -22,19 +22,19 @@ msgstr ""
 msgid "Provide a valid value."
 msgstr "Geben Sie einen gültigen Wert an."
 
-#: core/forms.py:82 core/resolvers/query_site.py:160
+#: core/forms.py:82 core/resolvers/query_site.py:163
 msgid "Never"
 msgstr "Nie"
 
-#: core/forms.py:83 core/resolvers/query_site.py:157
+#: core/forms.py:83 core/resolvers/query_site.py:160
 msgid "Daily"
 msgstr "Täglich"
 
-#: core/forms.py:84 core/resolvers/query_site.py:158
+#: core/forms.py:84 core/resolvers/query_site.py:161
 msgid "Weekly"
 msgstr "Wöchentlich"
 
-#: core/forms.py:85 core/resolvers/query_site.py:159
+#: core/forms.py:85 core/resolvers/query_site.py:162
 msgid "Monthly"
 msgstr "Monatlich"
 
@@ -47,7 +47,7 @@ msgid "Receive overview emails"
 msgstr ""
 
 #: core/lib.py:143 core/resolvers/mutation_import_users.py:30
-#: core/resolvers/query_site.py:67
+#: core/resolvers/query_site.py:70
 msgid "Just me"
 msgstr "Nur ich"
 
@@ -62,12 +62,12 @@ msgid "Subgroup: %(subgroup_name)s"
 msgstr "Untergruppe: %(subgroup_name)s"
 
 #: core/lib.py:154 core/resolvers/mutation_import_users.py:31
-#: core/resolvers/query_site.py:68
+#: core/resolvers/query_site.py:71
 msgid "Logged in users"
 msgstr "Angemeldete Benutzer"
 
 #: core/lib.py:156 core/resolvers/mutation_import_users.py:34
-#: core/resolvers/query_site.py:72
+#: core/resolvers/query_site.py:75
 msgid "Public"
 msgstr "Öffentlich"
 
@@ -141,11 +141,6 @@ msgstr "Aufgaben"
 msgid "Comments"
 msgstr "Kommentare"
 
-#: core/management/commands/send_notification_emails.py:48
-#, python-format
-msgid "New notifications at %(site_name)s"
-msgstr "Neue Benachrichtigungen bei %(site_name)s"
-
 #: core/management/commands/send_overview_emails.py:91
 #, python-format
 msgid "Regular overview of %(site_name)s"
@@ -185,17 +180,17 @@ msgstr "Konto von %(name_deleted_user)s wurde entfernt"
 msgid "A site administrator was removed from %(site_name)s"
 msgstr "Ein Site-Administrator wurde von %(site_name)s entfernt"
 
-#: core/resolvers/mutation_edit_site_setting.py:321
+#: core/resolvers/mutation_edit_site_setting.py:333
 msgid "closed"
 msgstr ""
 
-#: core/resolvers/mutation_edit_site_setting.py:321
+#: core/resolvers/mutation_edit_site_setting.py:333
 #, fuzzy
 #| msgid "Public"
 msgid "public"
 msgstr "Öffentlich"
 
-#: core/resolvers/mutation_edit_site_setting.py:322
+#: core/resolvers/mutation_edit_site_setting.py:334
 #, fuzzy, python-format
 #| msgid "New access request for %(site_name)s"
 msgid "Site access level changed for %(site_name)s"
@@ -284,38 +279,43 @@ msgstr "Ein neuer Site-Administrator wurde %(site_name)s zugewiesen"
 msgid "You're granted site administrator right on %(site_name)s"
 msgstr "Ihnen wurden Site-Administratorrechte auf %(site_name)s gewährt"
 
-#: core/resolvers/query_site.py:120
+#: core/resolvers/query_site.py:123
 msgid "Activity stream"
 msgstr "Aktivitäten-Stream"
 
-#: core/resolvers/query_site.py:120
+#: core/resolvers/query_site.py:123
 msgid "CMS page"
 msgstr "CMS-Seite"
 
-#: core/resolvers/query_site.py:209
+#: core/resolvers/query_site.py:212
 msgid "Administrator"
 msgstr "Administrator"
 
-#: core/resolvers/query_site.py:210
+#: core/resolvers/query_site.py:213
 msgid "Editor"
 msgstr "Editor"
 
-#: core/resolvers/query_site.py:211
+#: core/resolvers/query_site.py:214
 msgid "Question expert"
 msgstr "Experten fragen"
 
-#: core/tasks.py:352
-msgid "Import was a success"
-msgstr "Import war erfolgreich"
-
-#: core/tasks.py:352
-msgid "Import failed"
-msgstr "Import fehlgeschlagen"
-
-#: core/tasks.py:416
+#: core/services/mail_service.py:26
 #, python-format
 msgid "New notification at %(site_name)s: "
 msgstr "Neue Benachrichtigung auf %(site_name)s: "
+
+#: core/services/mail_service.py:28
+#, python-format
+msgid "New notifications at %(site_name)s"
+msgstr "Neue Benachrichtigungen bei %(site_name)s"
+
+#: core/tasks/misc.py:119
+msgid "Import was a success"
+msgstr "Import war erfolgreich"
+
+#: core/tasks/misc.py:119
+msgid "Import failed"
+msgstr "Import fehlgeschlagen"
 
 #: core/templates/edit_email_settings.html:15
 #, python-format
@@ -585,7 +585,12 @@ msgstr ""
 "Antworten Sie, indem Sie <a href=“%(user_url)s/reply?subject="
 "%(subject)s”>hier</a> klicken"
 
-#: core/templates/email/send_notification_emails.html:37
+#: core/templates/email/send_notification_emails.html:15
+#, python-format
+msgid " has mentioned you at: "
+msgstr ""
+
+#: core/templates/email/send_notification_emails.html:43
 #, fuzzy, python-format
 #| msgid ""
 #| " You have received this e-mail because you registered to receive "
@@ -846,11 +851,11 @@ msgstr "oder"
 msgid "Log in using %(oidc_provider)s"
 msgstr "Melden Sie sich mit %(oidc_provider)s an"
 
-#: core/templates/registration/login.html:36
+#: core/templates/registration/login.html:37
 msgid "Don't have an account?"
 msgstr "Haben Sie kein Konto?"
 
-#: core/templates/registration/login.html:36
+#: core/templates/registration/login.html:37
 msgid "Register"
 msgstr "Registrieren"
 
@@ -894,12 +899,12 @@ msgstr ""
 "Zugang wird angefordert. Sie erhalten eine E-Mail, wenn die Anfrage "
 "angenommen wird."
 
-#: core/views.py:170
+#: core/views.py:180
 #, python-format
 msgid "New access request for %(site_name)s"
 msgstr "Neue Zugriffsanfrage für %(site_name)s"
 
-#: core/views.py:544
+#: core/views.py:554
 msgid "Saved"
 msgstr ""
 
@@ -913,7 +918,7 @@ msgstr "Anmeldungsbestätigung %s"
 msgid "Confirmation of registration for %s"
 msgstr "Bestätigung der Registrierung für %s"
 
-#: file/tasks.py:64
+#: file/tasks.py:63
 #, python-format
 msgid "Filescan found suspicous files on %(site_url)s"
 msgstr ""

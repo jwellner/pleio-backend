@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-10-10 10:18+0200\n"
+"POT-Creation-Date: 2021-12-15 17:53+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -22,19 +22,19 @@ msgstr ""
 msgid "Provide a valid value."
 msgstr ""
 
-#: core/forms.py:82 core/resolvers/query_site.py:160
+#: core/forms.py:82 core/resolvers/query_site.py:163
 msgid "Never"
 msgstr ""
 
-#: core/forms.py:83 core/resolvers/query_site.py:157
+#: core/forms.py:83 core/resolvers/query_site.py:160
 msgid "Daily"
 msgstr ""
 
-#: core/forms.py:84 core/resolvers/query_site.py:158
+#: core/forms.py:84 core/resolvers/query_site.py:161
 msgid "Weekly"
 msgstr ""
 
-#: core/forms.py:85 core/resolvers/query_site.py:159
+#: core/forms.py:85 core/resolvers/query_site.py:162
 msgid "Monthly"
 msgstr ""
 
@@ -47,7 +47,7 @@ msgid "Receive overview emails"
 msgstr ""
 
 #: core/lib.py:143 core/resolvers/mutation_import_users.py:30
-#: core/resolvers/query_site.py:67
+#: core/resolvers/query_site.py:70
 msgid "Just me"
 msgstr ""
 
@@ -62,12 +62,12 @@ msgid "Subgroup: %(subgroup_name)s"
 msgstr ""
 
 #: core/lib.py:154 core/resolvers/mutation_import_users.py:31
-#: core/resolvers/query_site.py:68
+#: core/resolvers/query_site.py:71
 msgid "Logged in users"
 msgstr ""
 
 #: core/lib.py:156 core/resolvers/mutation_import_users.py:34
-#: core/resolvers/query_site.py:72
+#: core/resolvers/query_site.py:75
 msgid "Public"
 msgstr ""
 
@@ -139,11 +139,6 @@ msgstr ""
 msgid "Comments"
 msgstr ""
 
-#: core/management/commands/send_notification_emails.py:48
-#, python-format
-msgid "New notifications at %(site_name)s"
-msgstr ""
-
 #: core/management/commands/send_overview_emails.py:91
 #, python-format
 msgid "Regular overview of %(site_name)s"
@@ -182,15 +177,15 @@ msgstr ""
 msgid "A site administrator was removed from %(site_name)s"
 msgstr ""
 
-#: core/resolvers/mutation_edit_site_setting.py:321
+#: core/resolvers/mutation_edit_site_setting.py:333
 msgid "closed"
 msgstr ""
 
-#: core/resolvers/mutation_edit_site_setting.py:321
+#: core/resolvers/mutation_edit_site_setting.py:333
 msgid "public"
 msgstr ""
 
-#: core/resolvers/mutation_edit_site_setting.py:322
+#: core/resolvers/mutation_edit_site_setting.py:334
 #, python-format
 msgid "Site access level changed for %(site_name)s"
 msgstr ""
@@ -278,37 +273,42 @@ msgstr ""
 msgid "You're granted site administrator right on %(site_name)s"
 msgstr ""
 
-#: core/resolvers/query_site.py:120
+#: core/resolvers/query_site.py:123
 msgid "Activity stream"
 msgstr ""
 
-#: core/resolvers/query_site.py:120
+#: core/resolvers/query_site.py:123
 msgid "CMS page"
 msgstr ""
 
-#: core/resolvers/query_site.py:209
+#: core/resolvers/query_site.py:212
 msgid "Administrator"
 msgstr ""
 
-#: core/resolvers/query_site.py:210
+#: core/resolvers/query_site.py:213
 msgid "Editor"
 msgstr ""
 
-#: core/resolvers/query_site.py:211
+#: core/resolvers/query_site.py:214
 msgid "Question expert"
 msgstr ""
 
-#: core/tasks.py:352
+#: core/services/mail_service.py:26
+#, python-format
+msgid "New notification at %(site_name)s: "
+msgstr ""
+
+#: core/services/mail_service.py:28
+#, python-format
+msgid "New notifications at %(site_name)s"
+msgstr ""
+
+#: core/tasks/misc.py:119
 msgid "Import was a success"
 msgstr ""
 
-#: core/tasks.py:352
+#: core/tasks/misc.py:119
 msgid "Import failed"
-msgstr ""
-
-#: core/tasks.py:416
-#, python-format
-msgid "New notification at %(site_name)s: "
 msgstr ""
 
 #: core/templates/edit_email_settings.html:15
@@ -521,7 +521,12 @@ msgid ""
 "a>"
 msgstr ""
 
-#: core/templates/email/send_notification_emails.html:37
+#: core/templates/email/send_notification_emails.html:15
+#, python-format
+msgid " has mentioned you at: "
+msgstr ""
+
+#: core/templates/email/send_notification_emails.html:43
 #, python-format
 msgid ""
 " You have received this e-mail because you registered to receive "
@@ -741,11 +746,11 @@ msgstr ""
 msgid "Log in using %(oidc_provider)s"
 msgstr ""
 
-#: core/templates/registration/login.html:36
+#: core/templates/registration/login.html:37
 msgid "Don't have an account?"
 msgstr ""
 
-#: core/templates/registration/login.html:36
+#: core/templates/registration/login.html:37
 msgid "Register"
 msgstr ""
 
@@ -785,12 +790,12 @@ msgid ""
 "Access is requested. You will receive an e-mail when the request is accepted."
 msgstr ""
 
-#: core/views.py:170
+#: core/views.py:180
 #, python-format
 msgid "New access request for %(site_name)s"
 msgstr ""
 
-#: core/views.py:544
+#: core/views.py:554
 msgid "Saved"
 msgstr ""
 
@@ -804,7 +809,7 @@ msgstr ""
 msgid "Confirmation of registration for %s"
 msgstr ""
 
-#: file/tasks.py:64
+#: file/tasks.py:63
 #, python-format
 msgid "Filescan found suspicous files on %(site_url)s"
 msgstr ""

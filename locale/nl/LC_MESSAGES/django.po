@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-10-10 10:18+0200\n"
+"POT-Creation-Date: 2021-12-15 17:53+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -22,19 +22,19 @@ msgstr ""
 msgid "Provide a valid value."
 msgstr "Voer een geldige waarde in."
 
-#: core/forms.py:82 core/resolvers/query_site.py:160
+#: core/forms.py:82 core/resolvers/query_site.py:163
 msgid "Never"
 msgstr "Nooit"
 
-#: core/forms.py:83 core/resolvers/query_site.py:157
+#: core/forms.py:83 core/resolvers/query_site.py:160
 msgid "Daily"
 msgstr "Dagelijks"
 
-#: core/forms.py:84 core/resolvers/query_site.py:158
+#: core/forms.py:84 core/resolvers/query_site.py:161
 msgid "Weekly"
 msgstr "Wekelijks"
 
-#: core/forms.py:85 core/resolvers/query_site.py:159
+#: core/forms.py:85 core/resolvers/query_site.py:162
 msgid "Monthly"
 msgstr "Maandelijks"
 
@@ -47,7 +47,7 @@ msgid "Receive overview emails"
 msgstr "Ontvang overzicht emails"
 
 #: core/lib.py:143 core/resolvers/mutation_import_users.py:30
-#: core/resolvers/query_site.py:67
+#: core/resolvers/query_site.py:70
 msgid "Just me"
 msgstr "Alleen eigenaar"
 
@@ -62,12 +62,12 @@ msgid "Subgroup: %(subgroup_name)s"
 msgstr "Subgroep: %(subgroup_name)s"
 
 #: core/lib.py:154 core/resolvers/mutation_import_users.py:31
-#: core/resolvers/query_site.py:68
+#: core/resolvers/query_site.py:71
 msgid "Logged in users"
 msgstr "Ingelogde gebruikers"
 
 #: core/lib.py:156 core/resolvers/mutation_import_users.py:34
-#: core/resolvers/query_site.py:72
+#: core/resolvers/query_site.py:75
 msgid "Public"
 msgstr "Iedereen (publiek zichtbaar)"
 
@@ -139,11 +139,6 @@ msgstr "Taken"
 msgid "Comments"
 msgstr "Reacties"
 
-#: core/management/commands/send_notification_emails.py:48
-#, python-format
-msgid "New notifications at %(site_name)s"
-msgstr "Nieuwe notificaties op %(site_name)s"
-
 #: core/management/commands/send_overview_emails.py:91
 #, python-format
 msgid "Regular overview of %(site_name)s"
@@ -183,15 +178,15 @@ msgstr "Account verwijderd van %(name_deleted_user)s"
 msgid "A site administrator was removed from %(site_name)s"
 msgstr "Een site beheerder is verwijderd van %(site_name)s"
 
-#: core/resolvers/mutation_edit_site_setting.py:321
+#: core/resolvers/mutation_edit_site_setting.py:333
 msgid "closed"
 msgstr "gesloten"
 
-#: core/resolvers/mutation_edit_site_setting.py:321
+#: core/resolvers/mutation_edit_site_setting.py:333
 msgid "public"
 msgstr "publiek"
 
-#: core/resolvers/mutation_edit_site_setting.py:322
+#: core/resolvers/mutation_edit_site_setting.py:334
 #, python-format
 msgid "Site access level changed for %(site_name)s"
 msgstr "Toegangsniveau voor aangepast op %(site_name)s"
@@ -279,38 +274,43 @@ msgstr "Een nieuwe site beheerder is toegewezen aan %(site_name)s"
 msgid "You're granted site administrator right on %(site_name)s"
 msgstr "U bent aangewezen als site beheerder van %(site_name)s"
 
-#: core/resolvers/query_site.py:120
+#: core/resolvers/query_site.py:123
 msgid "Activity stream"
 msgstr "Activiteitenstroom"
 
-#: core/resolvers/query_site.py:120
+#: core/resolvers/query_site.py:123
 msgid "CMS page"
 msgstr "CMS pagina"
 
-#: core/resolvers/query_site.py:209
+#: core/resolvers/query_site.py:212
 msgid "Administrator"
 msgstr "Beheerder"
 
-#: core/resolvers/query_site.py:210
+#: core/resolvers/query_site.py:213
 msgid "Editor"
 msgstr "Redacteur"
 
-#: core/resolvers/query_site.py:211
+#: core/resolvers/query_site.py:214
 msgid "Question expert"
 msgstr "Vraagexpert"
 
-#: core/tasks.py:352
-msgid "Import was a success"
-msgstr "Import afgerond"
-
-#: core/tasks.py:352
-msgid "Import failed"
-msgstr "Import mislukt"
-
-#: core/tasks.py:416
+#: core/services/mail_service.py:26
 #, python-format
 msgid "New notification at %(site_name)s: "
 msgstr "Nieuwe notificatie op %(site_name)s"
+
+#: core/services/mail_service.py:28
+#, python-format
+msgid "New notifications at %(site_name)s"
+msgstr "Nieuwe notificaties op %(site_name)s"
+
+#: core/tasks/misc.py:119
+msgid "Import was a success"
+msgstr "Import afgerond"
+
+#: core/tasks/misc.py:119
+msgid "Import failed"
+msgstr "Import mislukt"
 
 #: core/templates/edit_email_settings.html:15
 #, python-format
@@ -585,7 +585,12 @@ msgstr ""
 "Reageer door <a href=\"%(user_url)s/reply?subject=%(subject)s\">hier</a> te "
 "klikken"
 
-#: core/templates/email/send_notification_emails.html:37
+#: core/templates/email/send_notification_emails.html:15
+#, python-format
+msgid " has mentioned you at: "
+msgstr " heeft je genoemd bij: "
+
+#: core/templates/email/send_notification_emails.html:43
 #, python-format
 msgid ""
 " You have received this e-mail because you registered to receive "
@@ -905,11 +910,11 @@ msgstr "of"
 msgid "Log in using %(oidc_provider)s"
 msgstr "Log in met %(oidc_provider)s"
 
-#: core/templates/registration/login.html:36
+#: core/templates/registration/login.html:37
 msgid "Don't have an account?"
 msgstr "Nog geen account?"
 
-#: core/templates/registration/login.html:36
+#: core/templates/registration/login.html:37
 msgid "Register"
 msgstr "Registreer"
 
@@ -953,12 +958,12 @@ msgstr ""
 "De toegang is aangevraagd. Je ontvangt een e-mail wanneer de toegang door de "
 "beheerder wordt toegewezen."
 
-#: core/views.py:170
+#: core/views.py:180
 #, python-format
 msgid "New access request for %(site_name)s"
 msgstr "Nieuwe toegangsaanvraag voor %(site_name)s"
 
-#: core/views.py:544
+#: core/views.py:554
 msgid "Saved"
 msgstr "Opgeslagen"
 
@@ -972,7 +977,7 @@ msgstr "Bevestiging aanmelding %s"
 msgid "Confirmation of registration for %s"
 msgstr "Bevestiging aanmelding voor %s"
 
-#: file/tasks.py:64
+#: file/tasks.py:63
 #, python-format
 msgid "Filescan found suspicous files on %(site_url)s"
 msgstr ""

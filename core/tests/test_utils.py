@@ -51,7 +51,7 @@ class UtilsTestCase(FastTenantTestCase):
     def test_is_tiptap(self):
         self.assertTrue(is_tiptap(json.dumps(self.tiptap_json)))
         self.assertFalse(is_tiptap(json.dumps(self.draft_json)))
-    
+
     def test_is_draft(self):
         self.assertTrue(is_draft(json.dumps(self.draft_json)))
         self.assertFalse(is_draft(json.dumps(self.tiptap_json)))
@@ -59,6 +59,25 @@ class UtilsTestCase(FastTenantTestCase):
     def test_tiptap_to_text(self):
         result = tiptap_to_text(json.dumps(self.tiptap_json))
         self.assertIn("Dit is een paragraph", result)
+
+    def test_tiptap_to_text_with_mention(self):
+        tiptap = {
+            'type': 'doc',
+            'content': [
+                {
+                    'type': 'mention',
+                    'attrs': {
+                        'id': '1234-1234-1234-12',
+                        'label': 'user X'
+                    },
+                }
+            ],
+        }
+
+        result = tiptap_to_text(json.dumps(tiptap))
+
+        self.assertIn("user X", result)
+
 
     def test_tiptap_to_html(self):
         result = tiptap_to_html(json.dumps(self.tiptap_json))

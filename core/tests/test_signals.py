@@ -11,9 +11,11 @@ from blog.models import Blog
 from mixer.backend.django import mixer
 from core.constances import ACCESS_TYPE
 from core.lib import get_acl, access_id_to_acl
-from core.signals import comment_handler, user_handler, notification_handler
+from core.signals import comment_handler, mention_handler, notification_handler, user_handler
+from core.tests.helpers import QuerySetWith
 from django.utils.text import slugify
 from django.db.models.signals import post_save
+from notifications.models import Notification
 from unittest import mock
 
 
@@ -63,9 +65,23 @@ class SignalsTestCase(FastTenantTestCase):
     @mock.patch('core.tasks.create_notification.delay')
     def test_comment_handler(self, mocked_create_notification):
         comment_handler(self.user1, self.comment1, True, action_object=self.blog1)
-        mocked_create_notification.assert_called_once_with(connection.schema_name, 'commented', self.blog1.id, self.comment1.owner.id)
+        mocked_create_notification.has_calls([
+            mock.call(connection.schema_name, 'commented', 'blog.blog', self.blog1.id, self.comment1.owner.id),
+            mock.call(connection.schema_name, 'mentioned', 'blog.blog', self.comment1.id, self.comment1.owner.id),
+
+        ])
 
     @mock.patch('core.tasks.create_notification.delay')
     def test_notification_handler(self, mocked_create_notification):
         notification_handler(self.user1, self.blog2, True, action_object=self.blog2)
-        mocked_create_notification.assert_called_once_with(connection.schema_name, 'created', self.blog2.id, self.blog2.owner.id)
+        mocked_create_notification.has_calls([
+            mock.call(connection.schema_name, 'created', 'blog.blog', self.blog2.id, self.blog2.owner.id),
+            mock.call(connection.schema_name, 'mentioned', 'blog.blog', self.blog2.id, self.blog2.owner.id),
+        ])
+
+    @mock.patch('core.tasks.create_notification.delay')
+    def test_mention_handler(self, mocked_create_notification):
+        mentionObj = Blog(owner=self.user1)
+
+        mention_handler(self.user1, mentionObj, True)
+        mocked_create_notification.assert_called_once_with(connection.schema_name, 'mentioned', 'blog.blog', mentionObj.id, self.user1.id)
