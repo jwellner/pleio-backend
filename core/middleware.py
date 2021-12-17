@@ -13,6 +13,7 @@ from django.contrib.auth import logout
 from django.template.response import TemplateResponse
 
 from core import config
+from core.constances import OIDC_PROVIDER_OPTIONS
 from core.lib import get_client_ip
 
 
@@ -149,7 +150,10 @@ class WalledGardenMiddleware:
             and not is_ip_whitelisted(request)
         ):
             context = {
-                'next': request.path_info
+                'next': request.path_info,
+                'constants': {
+                    'OIDC_PROVIDER_OPTIONS': OIDC_PROVIDER_OPTIONS,
+                },
             }
 
             return TemplateResponse(request, 'registration/login.html', context, status=401).render()
