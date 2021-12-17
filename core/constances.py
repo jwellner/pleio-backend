@@ -49,6 +49,12 @@ EVENT_IS_FULL = "event_is_full"
 EVENT_INVALID_STATE = "event_invalid_state"
 REDIRECTS_HAS_LOOP = "redirects_has_loop"
 REDIRECTS_HAS_DUPLICATE_SOURCE = "redirects_has_duplicate_source"
+OIDC_PROVIDER_OPTIONS = [
+    {'value': 'pleio', 'label': 'Pleio Account', 'isDefault': True},
+    {'value': 'fnv', 'label': 'Mijn FNV'},
+    {'value': 'knb', 'label': 'Notariaat'},
+    {'value': 'knb-test', 'label': 'Notariaat Test'},
+]
 
 class ORDER_DIRECTION:
     asc = 'asc'

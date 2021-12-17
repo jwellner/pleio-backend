@@ -12,7 +12,7 @@ from core.lib import (
     get_exportable_content_types, get_model_by_subtype, datetime_isoformat, get_base_url
 )
 from core.forms import EditEmailSettingsForm, OnboardingForm, RequestAccessForm
-from core.constances import USER_ROLES
+from core.constances import USER_ROLES, OIDC_PROVIDER_OPTIONS
 from user.models import User
 from core.tasks import send_mail_multi
 from django.utils.translation import ugettext_lazy
@@ -78,7 +78,7 @@ def entity_view(request, entity_id=None, entity_title=None):
         try:
             entity = Entity.objects.draft(user).select_subclasses().get(id=entity_id)
         except ObjectDoesNotExist:
-            pass    
+            pass
 
     if entity:
         status_code = 200
@@ -139,7 +139,10 @@ def login(request):
         return redirect(redirect_url)
 
     context = {
-        'next': request.GET.get('next', '')
+        'next': request.GET.get('next', ''),
+        'constants': {
+            'OIDC_PROVIDER_OPTIONS': OIDC_PROVIDER_OPTIONS,
+        },
     }
     return render(request, 'registration/login.html', context)
 
@@ -430,7 +433,7 @@ def export_content(request, content_type=None):
                 continue
             fields.append(field)
             field_names.append(field.name)
-        
+
         # if more fields needed, refactor
         field_names.append('url')
         field_names.append('owner_url')

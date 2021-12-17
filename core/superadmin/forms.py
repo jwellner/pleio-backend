@@ -4,6 +4,7 @@ from django import forms
 from django.core.validators import URLValidator
 from django.core.exceptions import ValidationError
 from core import config
+from core.constances import OIDC_PROVIDER_OPTIONS
 from file.models import ScanIncident
 
 
@@ -13,7 +14,7 @@ def option_to_choice(option):
 
 class SettingsForm(forms.Form):
     oidc_providers = forms.MultipleChoiceField(
-        choices=map(option_to_choice, config.OIDC_PROVIDER_OPTIONS),
+        choices=map(option_to_choice, OIDC_PROVIDER_OPTIONS),
         error_messages={'required': 'Choose at least one option'})
 
     edit_user_name_enabled = forms.BooleanField(required=False)

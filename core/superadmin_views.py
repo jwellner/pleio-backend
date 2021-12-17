@@ -5,6 +5,7 @@ from django.contrib.auth.decorators import user_passes_test, login_required
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.shortcuts import redirect
 from django.views import View
+from core.constances import OIDC_PROVIDER_OPTIONS
 from core.tasks import elasticsearch_rebuild, replace_domain_links
 from core.lib import tenant_schema, is_valid_domain
 from core.superadmin.forms import SettingsForm, ScanIncidentFilter
@@ -39,6 +40,13 @@ class Dashboard(LoginRequiredMixin, UserPassesTestMixin, View):
 class Settings(LoginRequiredMixin, UserPassesTestMixin, View):
     http_method_names = ['post', 'get']
 
+    def get_context(self):
+        return {
+            'constants': {
+                'OIDC_PROVIDER_OPTIONS': OIDC_PROVIDER_OPTIONS,
+            },
+        }
+
     def test_func(self):
         return self.request.user.is_superadmin
 
@@ -51,11 +59,13 @@ class Settings(LoginRequiredMixin, UserPassesTestMixin, View):
             form.save()
             return redirect('/superadmin/settings')
 
-        return render(request, 'superadmin/settings.html', {'form': form})
+        context = self.get_context()
+        context['form'] = form
+
+        return render(request, 'superadmin/settings.html', context)
 
     def get(self, request):
-        context = {
-        }
+        context = self.get_context()
 
         return render(request, 'superadmin/settings.html', context)
 
