@@ -42,3 +42,4 @@ django-csp==3.7
 beautifulsoup4>4.7
 html-purifier==0.1.9
 prosemirror-py==0.2
+django-autotranslate==1.2.0

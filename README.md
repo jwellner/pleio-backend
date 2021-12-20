@@ -223,7 +223,15 @@ With this command, you will create and edit .po files. The files will be filled 
 docker-compose exec api python manage.py makemessages -a
 ```
 
-With this command, you will compile the translation files which the application will use
+With this command, you will automatic translate fuzzy and missing strings in .po files. See https://github.com/ankitpopli1891/django-autotranslate/ for more usage options. A DEEPL token in your environment is necesarry.
+
+```bash
+docker-compose exec api python manage.py translate_messages --untranslated
+```
+
+
+
+With this command, you will compile the translation files which the application will use. To activate locally, restart the api container.
 
 ```bash
 docker-compose exec api python manage.py compilemessages

@@ -85,6 +85,7 @@ TENANT_APPS = [
     'django_elasticsearch_dsl',
     'notifications',
     'auditlog',
+    'autotranslate',
     'flow',
     'profile_sync'
 
@@ -389,3 +390,6 @@ if DEBUG:
     CSP_FONT_SRC.append("http://frontend-dev-server:9001")
     CSP_CONNECT_SRC.append("http://frontend-dev-server:9001")
     CSP_CONNECT_SRC.append("ws://frontend-dev-server:9001")
+
+AUTOTRANSLATE_TRANSLATOR_SERVICE = 'core.services.translate_service.DeeplTranslatorService'
+DEEPL_TOKEN = os.getenv('DEEPL_TOKEN', None)
