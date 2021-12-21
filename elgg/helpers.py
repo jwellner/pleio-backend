@@ -207,6 +207,8 @@ class ElggHelpers():
         for item in menu_input:
             if 'children' not in item:
                 item["children"] = []
+            if 'accessId' not in item:
+                item["accessId"] = 2
             menu.append(item)
 
         return menu
