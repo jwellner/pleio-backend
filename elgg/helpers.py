@@ -1,6 +1,7 @@
 import os
 from datetime import datetime
 from django.core.files.storage import default_storage
+from django.utils import timezone
 from phpserialize import unserialize
 
 from cms.models import Page
@@ -348,8 +349,8 @@ class ElggHelpers():
             entity.read_access = self.elgg_access_id_to_acl(entity, 2)
             entity.write_access = self.elgg_access_id_to_acl(entity, 0)
 
-            entity.created_at = datetime.fromtimestamp(elgg_entity.entity.time_created, tz="Europe/Amsterdam")
-            entity.updated_at = datetime.fromtimestamp(elgg_entity.entity.time_updated, tz="Europe/Amsterdam")
+            entity.created_at = datetime.fromtimestamp(elgg_entity.entity.time_created, tz=timezone.utc)
+            entity.updated_at = datetime.fromtimestamp(elgg_entity.entity.time_updated, tz=timezone.utc)
 
             entity.save()
             return entity
@@ -390,8 +391,8 @@ class ElggHelpers():
             entity.read_access = self.elgg_access_id_to_acl(entity, 2)
             entity.write_access = self.elgg_access_id_to_acl(entity, 0)
 
-            entity.created_at = datetime.fromtimestamp(elgg_entity.entity.time_created, tz="Europe/Amsterdam")
-            entity.updated_at = datetime.fromtimestamp(elgg_entity.entity.time_updated, tz="Europe/Amsterdam")
+            entity.created_at = datetime.fromtimestamp(elgg_entity.entity.time_created, tz=timezone.utc)
+            entity.updated_at = datetime.fromtimestamp(elgg_entity.entity.time_updated, tz=timezone.utc)
 
             entity.save()
 

@@ -17,8 +17,7 @@ from django_tenants.utils import schema_context
 from tenants.models import Client, Domain
 
 from django.db import connections, connection
-from django.db import IntegrityError
-from core.lib import tenant_schema
+from django.utils import timezone
 
 
 class Command(InteractiveTenantOption, BaseCommand):
@@ -113,8 +112,8 @@ class Command(InteractiveTenantOption, BaseCommand):
                     comment.description = html.unescape(elgg_answer.description)
                     comment.rich_description = elgg_answer.entity.get_metadata_value_by_name("richDescription")
                     comment.owner = self.helpers.get_user_or_admin(elgg_answer.entity.owner_guid)
-                    comment.created_at = datetime.fromtimestamp(elgg_answer.entity.time_created, tz="Europe/Amsterdam")
-                    comment.updated_at = datetime.fromtimestamp(elgg_answer.entity.time_updated, tz="Europe/Amsterdam")
+                    comment.created_at = datetime.fromtimestamp(elgg_answer.entity.time_created, tz=timezone.utc)
+                    comment.updated_at = datetime.fromtimestamp(elgg_answer.entity.time_updated, tz=timezone.utc)
                     comment.container = question
                     comment.save()
 
