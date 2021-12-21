@@ -562,6 +562,7 @@ class ElggHelpers():
                 start_day.day,
                 start_time.hour,
                 start_time.minute,
-                start_time.second
+                start_time.second,
+                tzinfo=timezone.utc
             )
         return start_date_time
