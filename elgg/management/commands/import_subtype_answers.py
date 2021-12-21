@@ -113,8 +113,8 @@ class Command(InteractiveTenantOption, BaseCommand):
                     comment.description = html.unescape(elgg_answer.description)
                     comment.rich_description = elgg_answer.entity.get_metadata_value_by_name("richDescription")
                     comment.owner = self.helpers.get_user_or_admin(elgg_answer.entity.owner_guid)
-                    comment.created_at = datetime.fromtimestamp(elgg_answer.entity.time_created)
-                    comment.updated_at = datetime.fromtimestamp(elgg_answer.entity.time_updated)
+                    comment.created_at = datetime.fromtimestamp(elgg_answer.entity.time_created, tz="Europe/Amsterdam")
+                    comment.updated_at = datetime.fromtimestamp(elgg_answer.entity.time_updated, tz="Europe/Amsterdam")
                     comment.container = question
                     comment.save()
 
