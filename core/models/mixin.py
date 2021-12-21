@@ -147,11 +147,19 @@ class FollowMixin(models.Model):
         if not user.is_authenticated:
             return None
 
-        return Annotation.objects.create(
-            user=user,
-            content_object=self,
-            key="followed"
+        annotation = Annotation.objects.get_for(
+            user,
+            self,
+            'followed',
         )
+        if not annotation:
+            annotation = Annotation.objects.create(
+                user=user,
+                content_object=self,
+                key='followed',
+            )
+
+        return annotation
 
     def remove_follow(self, user):
         if user.is_authenticated:

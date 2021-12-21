@@ -28,6 +28,9 @@ def comment_handler(sender, instance, created, **kwargs):
         else:
             return
 
+        if hasattr(instance.container, 'add_follow'):
+            instance.container.add_follow(instance.owner)
+
         create_notification.delay(tenant_schema(), 'commented', get_model_name(instance.container), instance.container.id, sender)
 
 

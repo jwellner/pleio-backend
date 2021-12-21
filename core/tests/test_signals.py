@@ -5,7 +5,7 @@ from ariadne import graphql_sync
 import json
 from django.contrib.auth.models import AnonymousUser
 from django.http import HttpRequest
-from core.models import Group, Comment
+from core.models import Group, Comment, Annotation
 from user.models import User
 from blog.models import Blog
 from mixer.backend.django import mixer
@@ -70,6 +70,25 @@ class SignalsTestCase(FastTenantTestCase):
             mock.call(connection.schema_name, 'mentioned', 'blog.blog', self.comment1.id, self.comment1.owner.id),
 
         ])
+
+    @mock.patch('core.tasks.create_notification.delay')
+    def test_follow_after_comment(self, __):
+        commentingUser = mixer.blend(User)
+
+        Comment.objects.create(owner=commentingUser, container=self.blog1)
+
+        annotations = Annotation.objects.filter(user=commentingUser, object_id=self.blog1.id, key='followed')
+        self.assertEqual(len(annotations), 1)
+
+    @mock.patch('core.tasks.create_notification.delay')
+    def test_follow_once_after_multiple_comment(self, __):
+        commentingUser = mixer.blend(User)
+
+        Comment.objects.create(owner=commentingUser, container=self.blog1)
+        Comment.objects.create(owner=commentingUser, container=self.blog1)
+
+        annotations = Annotation.objects.filter(user=commentingUser, object_id=self.blog1.id, key='followed')
+        self.assertEqual(len(annotations), 1)
 
     @mock.patch('core.tasks.create_notification.delay')
     def test_notification_handler(self, mocked_create_notification):
