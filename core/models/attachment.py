@@ -8,6 +8,7 @@ from django.utils.text import slugify
 from django.urls import reverse
 from django.conf import settings
 from core.lib import get_mimetype
+from core.models.mixin import ModelWithFile
 
 logger = logging.getLogger(__name__)
 
@@ -17,7 +18,7 @@ def attachment_path(instance, filename):
     filename = "%s.%s" % (slugify(name), ext)
     return os.path.join('attachments', str(instance.attached.id), filename)
 
-class Attachment(models.Model):
+class Attachment(ModelWithFile):
     class Meta:
         abstract = True
 
@@ -38,6 +39,10 @@ class Attachment(models.Model):
     @property
     def url(self):
         return reverse('attachment', args=[self.type, self.id])
+
+    @property
+    def file_fields(self):
+        return [self.upload]
 
     def __str__(self):
         return f"{self._meta.object_name}[{self.upload.name}]"
@@ -82,16 +87,3 @@ def attachment_mimetype_size(sender, instance, **kwargs):
             instance.size = instance.upload.size
         except Exception:
             pass
-
-@receiver(models.signals.post_delete, sender=EntityAttachment)
-@receiver(models.signals.post_delete, sender=GroupAttachment)
-@receiver(models.signals.post_delete, sender=CommentAttachment)
-def attachment_delete(sender, instance, **kwargs):
-    # pylint: disable=unused-argument
-    try:
-        if instance.upload:
-            if os.path.isfile(instance.upload.path):
-                os.remove(instance.upload.path)
-    except Exception as e:
-        logger.error("Error deleting file %s : %s", instance.upload.path, str(e))
-    

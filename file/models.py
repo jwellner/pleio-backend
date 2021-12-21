@@ -9,6 +9,7 @@ from django.utils import timezone
 from enum import Enum
 from core.lib import generate_object_filename, get_mimetype
 from core.models import Entity
+from core.models.mixin import ModelWithFile
 from django.db.models import ObjectDoesNotExist
 from django.db.models.signals import pre_save, pre_delete
 from django.dispatch import receiver
@@ -28,7 +29,7 @@ class FILE_SCAN(Enum):
     VIRUS = 'VIRUS'
     UNKNOWN = 'UNKNOWN'
 
-class FileFolder(Entity):
+class FileFolder(Entity, ModelWithFile):
 
     title = models.CharField(max_length=256)
 
@@ -82,6 +83,10 @@ class FileFolder(Entity):
     @property
     def thumbnail_url(self):
         return reverse('thumbnail', args=[self.id])
+
+    @property
+    def file_fields(self):
+        return [self.thumbnail, self.upload]
 
     def has_children(self):
         if self.children.count() > 0:

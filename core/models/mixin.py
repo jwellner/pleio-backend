@@ -10,6 +10,7 @@ from .annotation import Annotation
 from core.models.shared import AbstractModelMeta
 from core.utils.convert import truncate_rich_description
 from core.utils.tiptap_parser import Tiptap
+from core.lib import delete_attached_file
 
 class VoteMixin(models.Model):
     def vote_count(self):
@@ -243,3 +244,16 @@ class MentionMixin(NotificationMixin, metaclass=AbstractModelMeta):
             user_ids.update(parser.mentioned_users)
 
         return user_ids
+
+class ModelWithFile(models.Model, metaclass=AbstractModelMeta):
+    class Meta:
+        abstract = True
+
+    @property
+    @abc.abstractmethod
+    def file_fields(self):
+        """ Return a list of fields that contain a file (i.e. FileField and ImageField) """
+
+    def delete_files(self):
+        for field in self.file_fields:
+            delete_attached_file(field)
