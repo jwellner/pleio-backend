@@ -352,6 +352,7 @@ class ElggHelpers():
             entity.write_access = self.elgg_access_id_to_acl(entity, 0)
 
             entity.created_at = datetime.fromtimestamp(elgg_entity.entity.time_created, tz=timezone.utc)
+            entity.published = datetime.fromtimestamp(elgg_entity.entity.time_created, tz=timezone.utc)
             entity.updated_at = datetime.fromtimestamp(elgg_entity.entity.time_updated, tz=timezone.utc)
 
             entity.save()
@@ -394,6 +395,7 @@ class ElggHelpers():
             entity.write_access = self.elgg_access_id_to_acl(entity, 0)
 
             entity.created_at = datetime.fromtimestamp(elgg_entity.entity.time_created, tz=timezone.utc)
+            entity.published = datetime.fromtimestamp(elgg_entity.entity.time_created, tz=timezone.utc)
             entity.updated_at = datetime.fromtimestamp(elgg_entity.entity.time_updated, tz=timezone.utc)
 
             entity.save()

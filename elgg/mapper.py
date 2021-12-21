@@ -154,6 +154,7 @@ class Mapper():
     def get_blog(self, elgg_entity: ElggObjectsEntity):
         entity = Blog()
         entity.created_at = datetime.fromtimestamp(elgg_entity.entity.time_created, tz=timezone.utc)
+        entity.published = datetime.fromtimestamp(elgg_entity.entity.time_created, tz=timezone.utc)
         entity.updated_at = datetime.fromtimestamp(elgg_entity.entity.time_updated, tz=timezone.utc)
         entity.title = html.unescape(elgg_entity.title[:256])
         entity.description = html.unescape(elgg_entity.description)
@@ -179,6 +180,7 @@ class Mapper():
     def get_news(self, elgg_entity: ElggObjectsEntity):
         entity = News()
         entity.created_at = datetime.fromtimestamp(elgg_entity.entity.time_created, tz=timezone.utc)
+        entity.published = datetime.fromtimestamp(elgg_entity.entity.time_created, tz=timezone.utc)
         entity.updated_at = datetime.fromtimestamp(elgg_entity.entity.time_updated, tz=timezone.utc)
         entity.title = html.unescape(elgg_entity.title[:256])
         entity.description = html.unescape(elgg_entity.description)
@@ -205,6 +207,7 @@ class Mapper():
     def get_event(self, elgg_entity: ElggObjectsEntity):
         entity = Event()
         entity.created_at = datetime.fromtimestamp(elgg_entity.entity.time_created, tz=timezone.utc)
+        entity.published = datetime.fromtimestamp(elgg_entity.entity.time_created, tz=timezone.utc)
         entity.updated_at = datetime.fromtimestamp(elgg_entity.entity.time_updated, tz=timezone.utc)
         entity.title = html.unescape(elgg_entity.title[:256])
         entity.description = html.unescape(elgg_entity.description)
@@ -260,6 +263,7 @@ class Mapper():
         entity.read_access = self.helpers.elgg_access_id_to_acl(entity, elgg_entity.entity.access_id)
 
         entity.created_at = datetime.fromtimestamp(elgg_entity.entity.time_created, tz=timezone.utc)
+        entity.published = datetime.fromtimestamp(elgg_entity.entity.time_created, tz=timezone.utc)
         entity.updated_at = datetime.fromtimestamp(elgg_entity.entity.time_updated, tz=timezone.utc)
 
         return entity
@@ -283,6 +287,7 @@ class Mapper():
         entity.read_access = self.helpers.elgg_access_id_to_acl(entity, elgg_entity.entity.access_id)
 
         entity.created_at = datetime.fromtimestamp(elgg_entity.entity.time_created, tz=timezone.utc)
+        entity.published = datetime.fromtimestamp(elgg_entity.entity.time_created, tz=timezone.utc)
         entity.updated_at = datetime.fromtimestamp(elgg_entity.entity.time_updated, tz=timezone.utc)
 
         return entity
@@ -306,6 +311,7 @@ class Mapper():
         entity.read_access = self.helpers.elgg_access_id_to_acl(entity, elgg_entity.entity.access_id)
 
         entity.created_at = datetime.fromtimestamp(elgg_entity.entity.time_created, tz=timezone.utc)
+        entity.published = datetime.fromtimestamp(elgg_entity.entity.time_created, tz=timezone.utc)
         entity.updated_at = datetime.fromtimestamp(elgg_entity.entity.time_updated, tz=timezone.utc)
 
         return entity
@@ -328,6 +334,7 @@ class Mapper():
         entity.read_access = self.helpers.elgg_access_id_to_acl(entity, elgg_entity.entity.access_id)
 
         entity.created_at = datetime.fromtimestamp(elgg_entity.entity.time_created, tz=timezone.utc)
+        entity.published = datetime.fromtimestamp(elgg_entity.entity.time_created, tz=timezone.utc)
         entity.updated_at = datetime.fromtimestamp(elgg_entity.entity.time_updated, tz=timezone.utc)
 
         return entity
@@ -416,6 +423,7 @@ class Mapper():
         entity.read_access = self.helpers.elgg_access_id_to_acl(entity, elgg_entity.entity.access_id)
 
         entity.created_at = datetime.fromtimestamp(elgg_entity.entity.time_created, tz=timezone.utc)
+        entity.published = datetime.fromtimestamp(elgg_entity.entity.time_created, tz=timezone.utc)
         entity.updated_at = datetime.fromtimestamp(elgg_entity.entity.time_updated, tz=timezone.utc)
 
         return entity
@@ -446,6 +454,7 @@ class Mapper():
         entity.read_access = self.helpers.elgg_access_id_to_acl(entity, elgg_entity.entity.access_id)
 
         entity.created_at = datetime.fromtimestamp(elgg_entity.entity.time_created, tz=timezone.utc)
+        entity.published = datetime.fromtimestamp(elgg_entity.entity.time_created, tz=timezone.utc)
         entity.updated_at = datetime.fromtimestamp(elgg_entity.entity.time_updated, tz=timezone.utc)
 
         return entity
@@ -513,6 +522,7 @@ class Mapper():
         entity.read_access = self.helpers.elgg_access_id_to_acl(entity, elgg_entity.entity.access_id)
 
         entity.created_at = datetime.fromtimestamp(elgg_entity.entity.time_created, tz=timezone.utc)
+        entity.published = datetime.fromtimestamp(elgg_entity.entity.time_created, tz=timezone.utc)
         entity.updated_at = datetime.fromtimestamp(elgg_entity.entity.time_updated, tz=timezone.utc)
 
         # Test if parent folder still exists
@@ -561,6 +571,7 @@ class Mapper():
             entity.read_access = self.helpers.elgg_access_id_to_acl(entity, elgg_entity.entity.access_id)
 
             entity.created_at = datetime.fromtimestamp(elgg_entity.entity.time_created, tz=timezone.utc)
+            entity.published = datetime.fromtimestamp(elgg_entity.entity.time_created, tz=timezone.utc)
             entity.updated_at = datetime.fromtimestamp(elgg_entity.entity.time_updated, tz=timezone.utc)
 
             return entity
@@ -572,6 +583,7 @@ class Mapper():
     def get_wiki(self, elgg_entity: ElggObjectsEntity):
         entity = Wiki()
         entity.created_at = datetime.fromtimestamp(elgg_entity.entity.time_created, tz=timezone.utc)
+        entity.published = datetime.fromtimestamp(elgg_entity.entity.time_created, tz=timezone.utc)
         entity.updated_at = datetime.fromtimestamp(elgg_entity.entity.time_updated, tz=timezone.utc)
         entity.title = html.unescape(elgg_entity.title[:256])
         entity.description = html.unescape(elgg_entity.description)
