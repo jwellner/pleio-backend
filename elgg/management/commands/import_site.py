@@ -312,7 +312,7 @@ class Command(InteractiveTenantOption, BaseCommand):
                     defaults={
                         'type': 'member',
                         'notification_mode': 'overview' if enabled_notifications else 'disable',
-                        'created_at': datetime.fromtimestamp(relation.time_created)
+                        'created_at': datetime.fromtimestamp(relation.time_created, tz="Europe/Amsterdam")
                     }
                 )
 
@@ -336,7 +336,7 @@ class Command(InteractiveTenantOption, BaseCommand):
                     defaults={
                         'type': 'admin',
                         'notification_mode': 'overview' if enabled_notifications else 'disable',
-                        'created_at': datetime.fromtimestamp(relation.time_created)
+                        'created_at': datetime.fromtimestamp(relation.time_created, tz="Europe/Amsterdam")
                     }
                 )
 
@@ -352,7 +352,7 @@ class Command(InteractiveTenantOption, BaseCommand):
                 defaults={
                     'type': 'owner',
                     'notification_mode': 'overview' if enabled_notifications else 'disable',
-                    'created_at': datetime.fromtimestamp(elgg_group.entity.time_created)
+                    'created_at': datetime.fromtimestamp(elgg_group.entity.time_created, tz="Europe/Amsterdam")
                 }
             )
 
@@ -367,7 +367,7 @@ class Command(InteractiveTenantOption, BaseCommand):
                     group.members.create(
                         user=user,
                         type='pending',
-                        created_at=datetime.fromtimestamp(relation.time_created)
+                        created_at=datetime.fromtimestamp(relation.time_created, tz="Europe/Amsterdam")
                     )
                 except Exception:
                     continue
@@ -535,8 +535,8 @@ class Command(InteractiveTenantOption, BaseCommand):
                     event.attendees.update_or_create(
                         user=user,
                         state="accept",
-                        created_at=datetime.fromtimestamp(relation.time_created),
-                        updated_at=datetime.fromtimestamp(relation.time_created)
+                        created_at=datetime.fromtimestamp(relation.time_created, tz="Europe/Amsterdam"),
+                        updated_at=datetime.fromtimestamp(relation.time_created, tz="Europe/Amsterdam")
                     )
 
                 # maybe
@@ -550,8 +550,8 @@ class Command(InteractiveTenantOption, BaseCommand):
                     event.attendees.update_or_create(
                         user=user,
                         state="maybe",
-                        created_at=datetime.fromtimestamp(relation.time_created),
-                        updated_at=datetime.fromtimestamp(relation.time_created)
+                        created_at=datetime.fromtimestamp(relation.time_created, tz="Europe/Amsterdam"),
+                        updated_at=datetime.fromtimestamp(relation.time_created, tz="Europe/Amsterdam")
                     )
 
                 # reject
@@ -565,8 +565,8 @@ class Command(InteractiveTenantOption, BaseCommand):
                     event.attendees.update_or_create(
                         user=user,
                         state="reject",
-                        created_at=datetime.fromtimestamp(relation.time_created),
-                        updated_at=datetime.fromtimestamp(relation.time_created)
+                        created_at=datetime.fromtimestamp(relation.time_created, tz="Europe/Amsterdam"),
+                        updated_at=datetime.fromtimestamp(relation.time_created, tz="Europe/Amsterdam")
                     )
 
                 # attending without account
@@ -578,8 +578,8 @@ class Command(InteractiveTenantOption, BaseCommand):
                         name=relation.right.get_metadata_value_by_name("name"),
                         user=None,
                         state="accept",
-                        created_at=datetime.fromtimestamp(relation.time_created),
-                        updated_at=datetime.fromtimestamp(relation.time_created)
+                        created_at=datetime.fromtimestamp(relation.time_created, tz="Europe/Amsterdam"),
+                        updated_at=datetime.fromtimestamp(relation.time_created, tz="Europe/Amsterdam")
                     )
 
                 #TODO: attending without account that still have to be confirmed? skipped for now.

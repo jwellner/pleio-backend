@@ -44,8 +44,8 @@ class Mapper():
         user.name = html.unescape(elgg_user.name)
         user.external_id = elgg_user.pleio_guid
         user.picture = f"{settings.PROFILE_PICTURE_URL}/mod/profile/icondirect.php?guid={elgg_user.pleio_guid}&size=large"
-        user.created_at = datetime.fromtimestamp(elgg_user.entity.time_created)
-        user.updated_at = datetime.fromtimestamp(elgg_user.entity.time_updated)
+        user.created_at = datetime.fromtimestamp(elgg_user.entity.time_created, tz="Europe/Amsterdam")
+        user.updated_at = datetime.fromtimestamp(elgg_user.entity.time_updated, tz="Europe/Amsterdam")
         user.is_active = elgg_user.banned == "no"
         user.is_delete_requested = bool(elgg_user.entity.get_metadata_value_by_name("requestDelete"))
         user.ban_reason = elgg_user.entity.get_metadata_value_by_name("ban_reason") \
@@ -60,7 +60,7 @@ class Mapper():
         return user
 
     def get_user_profile(self, elgg_user: ElggUsersEntity):
-        last_online = datetime.fromtimestamp(elgg_user.last_action) if elgg_user.last_action > 0 else None
+        last_online = datetime.fromtimestamp(elgg_user.last_action, tz="Europe/Amsterdam") if elgg_user.last_action > 0 else None
         interval_private = elgg_user.entity.private.filter(name__startswith="email_overview_").first()
         last_received_private = elgg_user.entity.private.filter(name__startswith="latest_email_overview_").first()
         receive_notification_metadata = elgg_user.entity.metadata.filter(name__string="notification:method:email").first()
@@ -72,7 +72,8 @@ class Mapper():
         user_profile.last_online = last_online
         user_profile.overview_email_interval = interval_private.value if interval_private else 'never' # TODO: should get default for site
         user_profile.overview_email_tags = elgg_user.entity.get_metadata_values_by_name("editEmailOverviewTags")
-        user_profile.overview_email_last_received = datetime.fromtimestamp(int(last_received_private.value)) if last_received_private else None
+        user_profile.overview_email_last_received = datetime.fromtimestamp(int(last_received_private.value), tz="Europe/Amsterdam") \
+            if last_received_private else None
         user_profile.receive_newsletter = receive_newsletter
         user_profile.receive_notification_email = receive_notification_email
         return user_profile
@@ -108,8 +109,8 @@ class Mapper():
 
         group = Group()
         group.name = html.unescape(elgg_group.name[:200])
-        group.created_at = datetime.fromtimestamp(elgg_group.entity.time_created)
-        group.updated_at = datetime.fromtimestamp(elgg_group.entity.time_updated)
+        group.created_at = datetime.fromtimestamp(elgg_group.entity.time_created, tz="Europe/Amsterdam")
+        group.updated_at = datetime.fromtimestamp(elgg_group.entity.time_updated, tz="Europe/Amsterdam")
         group.description = html.unescape(elgg_group.description)
         group.rich_description = elgg_group.entity.get_metadata_value_by_name("richDescription")
         group.introduction = elgg_group.entity.get_metadata_value_by_name("introduction") \
@@ -118,7 +119,7 @@ class Mapper():
         group.welcome_message = elgg_group.entity.get_private_value_by_name("group_tools:welcome_message") \
             if elgg_group.entity.get_private_value_by_name("group_tools:welcome_message") else ""
         group.icon = self.helpers.save_and_get_group_icon(elgg_group)
-        group.created_at = datetime.fromtimestamp(elgg_group.entity.time_created)
+        group.created_at = datetime.fromtimestamp(elgg_group.entity.time_created, tz="Europe/Amsterdam")
         group.is_featured = elgg_group.entity.get_metadata_value_by_name("isFeatured") == "1"
         group.featured_image = self.helpers.save_and_get_featured_image(elgg_group)
         group.featured_video = elgg_group.entity.get_metadata_value_by_name("featuredVideo")
@@ -151,8 +152,8 @@ class Mapper():
 
     def get_blog(self, elgg_entity: ElggObjectsEntity):
         entity = Blog()
-        entity.created_at = datetime.fromtimestamp(elgg_entity.entity.time_created)
-        entity.updated_at = datetime.fromtimestamp(elgg_entity.entity.time_updated)
+        entity.created_at = datetime.fromtimestamp(elgg_entity.entity.time_created, tz="Europe/Amsterdam")
+        entity.updated_at = datetime.fromtimestamp(elgg_entity.entity.time_updated, tz="Europe/Amsterdam")
         entity.title = html.unescape(elgg_entity.title[:256])
         entity.description = html.unescape(elgg_entity.description)
         entity.rich_description = elgg_entity.entity.get_metadata_value_by_name("richDescription")
@@ -176,8 +177,8 @@ class Mapper():
 
     def get_news(self, elgg_entity: ElggObjectsEntity):
         entity = News()
-        entity.created_at = datetime.fromtimestamp(elgg_entity.entity.time_created)
-        entity.updated_at = datetime.fromtimestamp(elgg_entity.entity.time_updated)
+        entity.created_at = datetime.fromtimestamp(elgg_entity.entity.time_created, tz="Europe/Amsterdam")
+        entity.updated_at = datetime.fromtimestamp(elgg_entity.entity.time_updated, tz="Europe/Amsterdam")
         entity.title = html.unescape(elgg_entity.title[:256])
         entity.description = html.unescape(elgg_entity.description)
         entity.rich_description = elgg_entity.entity.get_metadata_value_by_name("richDescription")
@@ -202,8 +203,8 @@ class Mapper():
 
     def get_event(self, elgg_entity: ElggObjectsEntity):
         entity = Event()
-        entity.created_at = datetime.fromtimestamp(elgg_entity.entity.time_created)
-        entity.updated_at = datetime.fromtimestamp(elgg_entity.entity.time_updated)
+        entity.created_at = datetime.fromtimestamp(elgg_entity.entity.time_created, tz="Europe/Amsterdam")
+        entity.updated_at = datetime.fromtimestamp(elgg_entity.entity.time_updated, tz="Europe/Amsterdam")
         entity.title = html.unescape(elgg_entity.title[:256])
         entity.description = html.unescape(elgg_entity.description)
         entity.rich_description = elgg_entity.entity.get_metadata_value_by_name("richDescription")
@@ -217,7 +218,7 @@ class Mapper():
         if elgg_entity.entity.get_metadata_value_by_name("start_day"):
             entity.start_date = self.helpers.get_event_start_date(elgg_entity.entity)
         if elgg_entity.entity.get_metadata_value_by_name("end_ts"):
-            entity.end_date = datetime.fromtimestamp(int(elgg_entity.entity.get_metadata_value_by_name("end_ts")))
+            entity.end_date = datetime.fromtimestamp(int(elgg_entity.entity.get_metadata_value_by_name("end_ts")), tz="Europe/Amsterdam")
 
         if elgg_entity.entity.get_metadata_value_by_name("location"):
             entity.location = elgg_entity.entity.get_metadata_value_by_name("location")[:256]
@@ -257,8 +258,8 @@ class Mapper():
         entity.write_access = [ACCESS_TYPE.user.format(entity.owner.guid)]
         entity.read_access = self.helpers.elgg_access_id_to_acl(entity, elgg_entity.entity.access_id)
 
-        entity.created_at = datetime.fromtimestamp(elgg_entity.entity.time_created)
-        entity.updated_at = datetime.fromtimestamp(elgg_entity.entity.time_updated)
+        entity.created_at = datetime.fromtimestamp(elgg_entity.entity.time_created, tz="Europe/Amsterdam")
+        entity.updated_at = datetime.fromtimestamp(elgg_entity.entity.time_updated, tz="Europe/Amsterdam")
 
         return entity
 
@@ -280,8 +281,8 @@ class Mapper():
         entity.write_access = [ACCESS_TYPE.user.format(entity.owner.guid)]
         entity.read_access = self.helpers.elgg_access_id_to_acl(entity, elgg_entity.entity.access_id)
 
-        entity.created_at = datetime.fromtimestamp(elgg_entity.entity.time_created)
-        entity.updated_at = datetime.fromtimestamp(elgg_entity.entity.time_updated)
+        entity.created_at = datetime.fromtimestamp(elgg_entity.entity.time_created, tz="Europe/Amsterdam")
+        entity.updated_at = datetime.fromtimestamp(elgg_entity.entity.time_updated, tz="Europe/Amsterdam")
 
         return entity
 
@@ -303,8 +304,8 @@ class Mapper():
         entity.write_access = [ACCESS_TYPE.user.format(entity.owner.guid)]
         entity.read_access = self.helpers.elgg_access_id_to_acl(entity, elgg_entity.entity.access_id)
 
-        entity.created_at = datetime.fromtimestamp(elgg_entity.entity.time_created)
-        entity.updated_at = datetime.fromtimestamp(elgg_entity.entity.time_updated)
+        entity.created_at = datetime.fromtimestamp(elgg_entity.entity.time_created, tz="Europe/Amsterdam")
+        entity.updated_at = datetime.fromtimestamp(elgg_entity.entity.time_updated, tz="Europe/Amsterdam")
 
         return entity
 
@@ -325,8 +326,8 @@ class Mapper():
         entity.write_access = [ACCESS_TYPE.user.format(entity.owner.guid)]
         entity.read_access = self.helpers.elgg_access_id_to_acl(entity, elgg_entity.entity.access_id)
 
-        entity.created_at = datetime.fromtimestamp(elgg_entity.entity.time_created)
-        entity.updated_at = datetime.fromtimestamp(elgg_entity.entity.time_updated)
+        entity.created_at = datetime.fromtimestamp(elgg_entity.entity.time_created, tz="Europe/Amsterdam")
+        entity.updated_at = datetime.fromtimestamp(elgg_entity.entity.time_updated, tz="Europe/Amsterdam")
 
         return entity
 
@@ -413,8 +414,8 @@ class Mapper():
         entity.write_access = [ACCESS_TYPE.user.format(entity.owner.guid)]
         entity.read_access = self.helpers.elgg_access_id_to_acl(entity, elgg_entity.entity.access_id)
 
-        entity.created_at = datetime.fromtimestamp(elgg_entity.entity.time_created)
-        entity.updated_at = datetime.fromtimestamp(elgg_entity.entity.time_updated)
+        entity.created_at = datetime.fromtimestamp(elgg_entity.entity.time_created, tz="Europe/Amsterdam")
+        entity.updated_at = datetime.fromtimestamp(elgg_entity.entity.time_updated, tz="Europe/Amsterdam")
 
         return entity
 
@@ -423,8 +424,8 @@ class Mapper():
         entity.description = html.unescape(elgg_entity.description)
         entity.rich_description = elgg_entity.entity.get_metadata_value_by_name("richDescription")
         entity.owner = self.helpers.get_user_or_admin(elgg_entity.entity.owner_guid)
-        entity.created_at = datetime.fromtimestamp(elgg_entity.entity.time_created)
-        entity.updated_at = datetime.fromtimestamp(elgg_entity.entity.time_updated)
+        entity.created_at = datetime.fromtimestamp(elgg_entity.entity.time_created, tz="Europe/Amsterdam")
+        entity.updated_at = datetime.fromtimestamp(elgg_entity.entity.time_updated, tz="Europe/Amsterdam")
 
         return entity
 
@@ -443,8 +444,8 @@ class Mapper():
         entity.write_access = [ACCESS_TYPE.user.format(entity.owner.guid)]
         entity.read_access = self.helpers.elgg_access_id_to_acl(entity, elgg_entity.entity.access_id)
 
-        entity.created_at = datetime.fromtimestamp(elgg_entity.entity.time_created)
-        entity.updated_at = datetime.fromtimestamp(elgg_entity.entity.time_updated)
+        entity.created_at = datetime.fromtimestamp(elgg_entity.entity.time_created, tz="Europe/Amsterdam")
+        entity.updated_at = datetime.fromtimestamp(elgg_entity.entity.time_updated, tz="Europe/Amsterdam")
 
         return entity
 
@@ -482,7 +483,7 @@ class Mapper():
             notification.unread = elgg_notification.unread == "yes"
             notification.verb = elgg_notification.action
             notification.actor_content_type = ContentType.objects.get(app_label='user', model='user')
-            notification.timestamp = datetime.fromtimestamp(elgg_notification.time_created)
+            notification.timestamp = datetime.fromtimestamp(elgg_notification.time_created, tz="Europe/Amsterdam")
             notification.emailed = True # make sure no imported notifications are mailed again
 
             return notification
@@ -510,8 +511,8 @@ class Mapper():
         entity.write_access = self.helpers.elgg_access_id_to_acl(entity, write_access_id)
         entity.read_access = self.helpers.elgg_access_id_to_acl(entity, elgg_entity.entity.access_id)
 
-        entity.created_at = datetime.fromtimestamp(elgg_entity.entity.time_created)
-        entity.updated_at = datetime.fromtimestamp(elgg_entity.entity.time_updated)
+        entity.created_at = datetime.fromtimestamp(elgg_entity.entity.time_created, tz="Europe/Amsterdam")
+        entity.updated_at = datetime.fromtimestamp(elgg_entity.entity.time_updated, tz="Europe/Amsterdam")
 
         # Test if parent folder still exists
         parent_id = elgg_entity.entity.get_metadata_value_by_name("parent_guid")
@@ -558,8 +559,8 @@ class Mapper():
             entity.write_access = self.helpers.elgg_access_id_to_acl(entity, write_access_id)
             entity.read_access = self.helpers.elgg_access_id_to_acl(entity, elgg_entity.entity.access_id)
 
-            entity.created_at = datetime.fromtimestamp(elgg_entity.entity.time_created)
-            entity.updated_at = datetime.fromtimestamp(elgg_entity.entity.time_updated)
+            entity.created_at = datetime.fromtimestamp(elgg_entity.entity.time_created, tz="Europe/Amsterdam")
+            entity.updated_at = datetime.fromtimestamp(elgg_entity.entity.time_updated, tz="Europe/Amsterdam")
 
             return entity
 
@@ -569,8 +570,8 @@ class Mapper():
 
     def get_wiki(self, elgg_entity: ElggObjectsEntity):
         entity = Wiki()
-        entity.created_at = datetime.fromtimestamp(elgg_entity.entity.time_created)
-        entity.updated_at = datetime.fromtimestamp(elgg_entity.entity.time_updated)
+        entity.created_at = datetime.fromtimestamp(elgg_entity.entity.time_created, tz="Europe/Amsterdam")
+        entity.updated_at = datetime.fromtimestamp(elgg_entity.entity.time_updated, tz="Europe/Amsterdam")
         entity.title = html.unescape(elgg_entity.title[:256])
         entity.description = html.unescape(elgg_entity.description)
         entity.rich_description = elgg_entity.entity.get_metadata_value_by_name("richDescription")
