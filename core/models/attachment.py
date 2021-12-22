@@ -18,7 +18,7 @@ def attachment_path(instance, filename):
     ext = filename.split('.')[-1]
     name = filename.split('.')[0]
     filename = "%s.%s" % (slugify(name), ext)
-    return os.path.join('attachments', str(instance.attached.id), filename)
+    return os.path.join('attachments', str(instance.id), filename)
 
 class Attachment(ModelWithFile):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
@@ -44,7 +44,7 @@ class Attachment(ModelWithFile):
 
     @property
     def url(self):
-        return reverse('attachment', args=[self.type, self.id])
+        return reverse('attachment', args=[self.id])
 
     @property
     def file_fields(self):
