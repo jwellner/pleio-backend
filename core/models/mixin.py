@@ -9,7 +9,6 @@ from notifications.models import Notification
 from .annotation import Annotation
 from core.models.shared import AbstractModelMeta
 from core.utils.convert import truncate_rich_description
-from core.utils.tiptap_parser import Tiptap
 from core.lib import delete_attached_file
 
 class VoteMixin(models.Model):
@@ -226,24 +225,6 @@ class ArticleMixin(models.Model):
 
         return truncate_rich_description(self.rich_description)
 
-class MentionMixin(NotificationMixin, metaclass=AbstractModelMeta):
-
-    class Meta:
-        abstract = True
-
-    @property
-    @abc.abstractmethod
-    def rich_fields(self):
-        """ Return a list of Tiptap objects e.g. [self.rich_description]. These are parsed and used to find mentioned users """
-
-    @property
-    def mentioned_users(self):
-        user_ids = set()
-        for tiptap in self.rich_fields:
-            parser = Tiptap(tiptap)
-            user_ids.update(parser.mentioned_users)
-
-        return user_ids
 
 class ModelWithFile(models.Model, metaclass=AbstractModelMeta):
     class Meta:

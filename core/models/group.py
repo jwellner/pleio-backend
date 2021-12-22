@@ -15,6 +15,7 @@ from django.urls import reverse
 from django.utils.translation import ugettext_lazy
 from core.lib import ACCESS_TYPE, tenant_schema, get_default_email_context, get_base_url, html_to_text
 from core.constances import USER_ROLES
+from .rich_fields import AttachmentMixin
 
 logger = logging.getLogger(__name__)
 
@@ -24,7 +25,7 @@ class GroupManager(models.Manager):
             pass
         return self.get_queryset()
 
-class Group(models.Model):
+class Group(models.Model, AttachmentMixin):
     class Meta:
         ordering = ['name']
 
@@ -160,8 +161,8 @@ class Group(models.Model):
     def _send_welcome_message(self, user):
         # pylint: disable=cyclic-import
         # pylint: disable=import-outside-toplevel
-        
-        # strip tags and trim spaces 
+
+        # strip tags and trim spaces
         has_message = html_to_text(self.welcome_message)
         if has_message:
             has_message = has_message.strip()
@@ -195,6 +196,10 @@ class Group(models.Model):
         if self.featured_image:
             return '%s?cache=%i' % (reverse('featured', args=[self.id]), int(self.featured_image.updated_at.timestamp()))
         return None
+
+    @property
+    def rich_fields(self):
+        return [self.rich_description]
 
     def search_read_access(self):
         return [ACCESS_TYPE.public]

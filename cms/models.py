@@ -1,13 +1,13 @@
 import uuid
 from auditlog.registry import auditlog
 from django.db import models
-from core.models import Entity
+from core.models import Entity, AttachmentMixin
 from core.constances import USER_ROLES
 from django.contrib.postgres.fields import ArrayField
 from django.utils.text import slugify
 
 
-class Page(Entity):
+class Page(Entity, AttachmentMixin):
     """
     Page for CMS
     """
@@ -51,6 +51,10 @@ class Page(Entity):
     @property
     def type_to_string(self):
         return 'page'
+
+    @property
+    def rich_fields(self):
+        return [self.rich_description]
 
 
 class Row(models.Model):

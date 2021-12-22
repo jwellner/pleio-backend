@@ -14,11 +14,26 @@ class Tiptap:
     def mentioned_users(self):
         users = set()
         for mention in self.get_nodes('mention'):
-            user = mention.get('attrs', {}).get('id', None)
+            user = self.get_field(mention, 'id')
             if user:
                 users.add(user)
 
         return users
+
+    @property
+    def attached_sources(self):
+        sources = set()
+        for image in self.get_nodes('image'):
+            src = self.get_field(image, 'src')
+            if src:
+                sources.add(src)
+
+        for file in self.get_nodes('file'):
+            src = self.get_field(file, 'url')
+            if src:
+                sources.add(src)
+
+        return sources
 
     def get_nodes(self, node_type):
         if (self.tiptap_json.get('type', None) == node_type):
@@ -30,3 +45,6 @@ class Tiptap:
             nodes.extend(tiptap.get_nodes(node_type))
 
         return nodes
+
+    def get_field(self, node, field):
+        return node.get('attrs', {}).get(field, None)
