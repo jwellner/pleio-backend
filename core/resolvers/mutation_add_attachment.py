@@ -1,5 +1,5 @@
 from graphql import GraphQLError
-from core.models import Entity, Comment, Group, EntityAttachment, CommentAttachment, GroupAttachment # Group, Comment
+from core.models import Entity, Comment, Group, Attachment
 from core.constances import NOT_LOGGED_IN, INVALID_CONTENT_GUID, COULD_NOT_ADD
 
 def resolve_add_attachment(_, info, input):
@@ -15,7 +15,10 @@ def resolve_add_attachment(_, info, input):
     types = [Entity, Group, Comment] # Group, Comment
 
     for t in types:
-        content = t.objects.filter(id=input.get("contentGuid")).first()
+        if t == Entity:
+            content = t.objects.filter(id=input.get("contentGuid")).select_subclasses().first()
+        else:
+            content = t.objects.filter(id=input.get("contentGuid")).first()
         if content:
             break
 
@@ -25,14 +28,7 @@ def resolve_add_attachment(_, info, input):
     if not content.can_write(user):
         raise GraphQLError(COULD_NOT_ADD)
 
-    attachment = None
-
-    if content._meta.object_name == 'Entity':
-        attachment = EntityAttachment.objects.create(attached=content, upload=input.get("file"))
-    if content._meta.object_name == 'Group':
-        attachment = GroupAttachment.objects.create(attached=content, upload=input.get("file"))
-    if content._meta.object_name == 'Comment':
-        attachment = CommentAttachment.objects.create(attached=content, upload=input.get("file"))
+    attachment = Attachment.objects.create(attached=content, upload=input.get("file"))
 
     if not attachment:
         raise GraphQLError(COULD_NOT_ADD)

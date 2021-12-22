@@ -1,5 +1,5 @@
 import os
-from core.models.attachment import EntityAttachment
+from core.models.attachment import Attachment
 from django_tenants.test.cases import FastTenantTestCase
 from django.core.files import File
 from django.conf import settings
@@ -24,7 +24,7 @@ class DeleteAttachmentTestCase(FastTenantTestCase):
 
     def test_delete_removes_file(self):
         blog = mixer.blend(Blog)
-        attachment = mixer.blend(EntityAttachment, attached=blog)
+        attachment = mixer.blend(Attachment, attached=blog)
         path = self.attach_file(attachment, 'upload', 'testfile.txt')
         self.assertTrue(os.path.isfile(path)) # assert file exists before starting test
 

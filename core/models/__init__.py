@@ -4,7 +4,7 @@ from .annotation import Annotation
 from .mixin import VoteMixin, BookmarkMixin, FollowMixin, NotificationMixin, FeaturedCoverMixin, ArticleMixin, MentionMixin
 from .comment import Comment, CommentMixin, CommentRequest
 from .entity import Entity, EntityView, EntityViewCount
-from .attachment import EntityAttachment, CommentAttachment, GroupAttachment
+from .attachment import Attachment
 from .setting import Setting
 from .shared import read_access_default, write_access_default
 from .site import SiteInvitation, SiteAccessRequest, SiteStat

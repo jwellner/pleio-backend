@@ -5,7 +5,7 @@ import signal_disabler
 from django.core.management.base import BaseCommand
 from django.db.models import Q, Count
 from django.db import connection
-from core.models import CommentAttachment, EntityAttachment, GroupAttachment
+from core.models import Attachment
 
 
 class Command(BaseCommand):
@@ -26,25 +26,7 @@ class Command(BaseCommand):
         updated_attachments = 0
         attachment_errors = 0
 
-        for attachment in CommentAttachment.objects.all():
-            try:
-                attachment.size = attachment.upload.size
-                attachment.save()
-                updated_attachments+=1
-            except Exception:
-                attachment_errors+=1
-                pass
-
-        for attachment in EntityAttachment.objects.all():
-            try:
-                attachment.size = attachment.upload.size
-                attachment.save()
-                updated_attachments+=1
-            except Exception:
-                attachment_errors+=1
-                pass
-
-        for attachment in GroupAttachment.objects.all():
+        for attachment in Attachment.objects.all():
             try:
                 attachment.size = attachment.upload.size
                 attachment.save()

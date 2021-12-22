@@ -1,19 +1,16 @@
-from django.db import connection
 from django_tenants.test.cases import FastTenantTestCase
 from django.core.files import File
 from django.conf import settings
 from backend2.schema import schema
 from ariadne import graphql_sync
-from ariadne.file_uploads import combine_multipart_data, upload_scalar
-import json
+from ariadne.file_uploads import upload_scalar
 from django.contrib.auth.models import AnonymousUser
 from django.http import HttpRequest
-from core.models import Group, Comment, EntityAttachment, GroupAttachment, CommentAttachment
+from core.models import Group, Comment, Attachment
 from user.models import User
 from blog.models import Blog
 from core.constances import ACCESS_TYPE
 from mixer.backend.django import mixer
-from graphql import GraphQLError
 from unittest.mock import MagicMock, patch
 
 class AddAttachmentTestCase(FastTenantTestCase):
@@ -26,7 +23,7 @@ class AddAttachmentTestCase(FastTenantTestCase):
         self.mutation = """
             mutation addAttachment($input: addAttachmentInput!) {
                 addAttachment(input: $input) {
-                    attachment {      
+                    attachment {
                         id
                         url
                         mimeType
@@ -149,9 +146,9 @@ class AddAttachmentTestCase(FastTenantTestCase):
         self.assertEqual(blog1.attachments.count(), 2)
 
         # delete blog and check if attachments are deleted
-        self.assertEqual(EntityAttachment.objects.count(), 2)
+        self.assertEqual(Attachment.objects.count(), 2)
         blog1.delete()
-        self.assertEqual(EntityAttachment.objects.count(), 0)
+        self.assertEqual(Attachment.objects.count(), 0)
 
     @patch("core.lib.get_mimetype")
     @patch("{}.open".format(settings.DEFAULT_FILE_STORAGE))
@@ -193,9 +190,9 @@ class AddAttachmentTestCase(FastTenantTestCase):
         self.assertEqual(group.attachments.count(), 2)
 
         # delete blog and check if attachments are deleted
-        self.assertEqual(GroupAttachment.objects.count(), 2)
+        self.assertEqual(Attachment.objects.count(), 2)
         group.delete()
-        self.assertEqual(GroupAttachment.objects.count(), 0)
+        self.assertEqual(Attachment.objects.count(), 0)
 
 
     @patch("core.lib.get_mimetype")
@@ -247,6 +244,6 @@ class AddAttachmentTestCase(FastTenantTestCase):
         self.assertEqual(comment.attachments.count(), 2)
 
         # delete blog and check if attachments are deleted
-        self.assertEqual(CommentAttachment.objects.count(), 2)
+        self.assertEqual(Attachment.objects.count(), 2)
         comment.delete()
-        self.assertEqual(CommentAttachment.objects.count(), 0)
+        self.assertEqual(Attachment.objects.count(), 0)

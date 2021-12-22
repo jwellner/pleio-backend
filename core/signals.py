@@ -5,7 +5,7 @@ from django.utils import timezone
 from notifications.signals import notify
 from core.lib import datetime_isoformat, get_model_name, tenant_schema
 from core.models import Comment, Group, GroupInvitation, Entity, EntityViewCount, NotificationMixin, MentionMixin
-from core.models.attachment import CommentAttachment, EntityAttachment, GroupAttachment
+from core.models.attachment import Attachment
 from core.tasks import create_notification
 from file.models import FileFolder
 from user.models import User
@@ -131,9 +131,7 @@ pre_save.connect(updated_at_handler, sender=EventAttendee)
 pre_save.connect(updated_at_handler, sender=User)
 
 post_delete.connect(file_delete_handler, sender=FileFolder)
-post_delete.connect(file_delete_handler, sender=EntityAttachment)
-post_delete.connect(file_delete_handler, sender=GroupAttachment)
-post_delete.connect(file_delete_handler, sender=CommentAttachment)
+post_delete.connect(file_delete_handler, sender=Attachment)
 
 # Connect to all Entity subclasses
 for subclass in Entity.__subclasses__():

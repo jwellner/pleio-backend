@@ -9,7 +9,7 @@ from django.utils import timezone, dateformat, formats
 from django.utils.translation import ugettext_lazy
 from django.conf import settings
 from core import config
-from core.models import Entity, EntityAttachment, Comment, CommentAttachment, Group, GroupAttachment
+from core.models import Entity, Attachment, Comment, Group
 from datetime import datetime, timedelta
 from django.db import connection
 from tenants.models import Client
@@ -55,31 +55,11 @@ class Command(BaseCommand):
                         file_entity = FileFolder.objects.get(id=file_id)
 
                         if not file_entity.group:
-
-                            url = ''
-
-                            if isinstance(entity, Entity):
-                                attachment = EntityAttachment.objects.create(
-                                    mime_type=file_entity.mime_type,
-                                    attached=entity
-                                )
-
-                                url = entity.url
-                            elif isinstance(entity, Comment):
-                                attachment = CommentAttachment.objects.create(
-                                    mime_type=file_entity.mime_type,
-                                    attached=entity
-                                )
-
-                                url = 'comment'
-                            elif isinstance(entity, Group):
-                                attachment = GroupAttachment.objects.create(
-                                    mime_type=file_entity.mime_type,
-                                    attached=entity
-                                )
-                                url = entity.url
-                            else:
-                                raise Exception('Invalid entity instance')
+                            attachment = Attachment.objects.create(
+                                mime_type=file_entity.mime_type,
+                                attached=entity
+                            )
+                            url = entity.url
 
                             old_file = file_entity.upload.open()
                             attachment.upload.save(os.path.basename(file_entity.upload.name), old_file)
