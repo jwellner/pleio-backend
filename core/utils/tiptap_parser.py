@@ -1,4 +1,7 @@
 import json
+import logging
+
+LOGGER = logging.getLogger(__name__)
 
 class Tiptap:
 
@@ -6,7 +9,11 @@ class Tiptap:
         if not tiptap_json:
             self.tiptap_json = {}
         elif isinstance(tiptap_json, str):
-            self.tiptap_json = json.loads(tiptap_json)
+            try:
+                self.tiptap_json = json.loads(tiptap_json)
+            except json.JSONDecodeError:
+                LOGGER.warning("Failed to decode json and using empty object instead: %s", tiptap_json)
+                self.tiptap_json = {}
         else:
             self.tiptap_json = tiptap_json
 
