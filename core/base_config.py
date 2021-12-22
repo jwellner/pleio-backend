@@ -18,11 +18,6 @@ DEFAULT_SITE_CONFIG = {
     'PIWIK_URL': ('https://stats.pleio.nl/', 'Piwik url'),
     'PIWIK_ID': ('', 'Piwik ID'),
     'OIDC_PROVIDERS': (['pleio'], 'OIDC Providers'),
-    'OIDC_PROVIDER_OPTIONS': ([
-        {'value': 'pleio', 'label': 'Pleio Account', 'isDefault': True},
-        {'value': 'fnv', 'label': 'Mijn FNV'},
-        {'value': 'knb-test', 'label': 'Notariaat Test'},
-    ], 'Default OP options'),
     'CUSTOM_JAVASCRIPT': ('', 'Custom Javascript'),
 
     'THEME_OPTIONS': (

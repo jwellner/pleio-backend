@@ -3,12 +3,11 @@
 # This file is distributed under the same license as the PACKAGE package.
 # FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
 #
-#, fuzzy
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-10-10 10:18+0200\n"
+"POT-Creation-Date: 2021-12-20 11:51+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -22,19 +21,19 @@ msgstr ""
 msgid "Provide a valid value."
 msgstr "Voer een geldige waarde in."
 
-#: core/forms.py:82 core/resolvers/query_site.py:160
+#: core/forms.py:82 core/resolvers/query_site.py:163
 msgid "Never"
 msgstr "Nooit"
 
-#: core/forms.py:83 core/resolvers/query_site.py:157
+#: core/forms.py:83 core/resolvers/query_site.py:160
 msgid "Daily"
 msgstr "Dagelijks"
 
-#: core/forms.py:84 core/resolvers/query_site.py:158
+#: core/forms.py:84 core/resolvers/query_site.py:161
 msgid "Weekly"
 msgstr "Wekelijks"
 
-#: core/forms.py:85 core/resolvers/query_site.py:159
+#: core/forms.py:85 core/resolvers/query_site.py:162
 msgid "Monthly"
 msgstr "Maandelijks"
 
@@ -47,7 +46,7 @@ msgid "Receive overview emails"
 msgstr "Ontvang overzicht emails"
 
 #: core/lib.py:143 core/resolvers/mutation_import_users.py:30
-#: core/resolvers/query_site.py:67
+#: core/resolvers/query_site.py:70
 msgid "Just me"
 msgstr "Alleen eigenaar"
 
@@ -62,12 +61,12 @@ msgid "Subgroup: %(subgroup_name)s"
 msgstr "Subgroep: %(subgroup_name)s"
 
 #: core/lib.py:154 core/resolvers/mutation_import_users.py:31
-#: core/resolvers/query_site.py:68
+#: core/resolvers/query_site.py:71
 msgid "Logged in users"
 msgstr "Ingelogde gebruikers"
 
 #: core/lib.py:156 core/resolvers/mutation_import_users.py:34
-#: core/resolvers/query_site.py:72
+#: core/resolvers/query_site.py:75
 msgid "Public"
 msgstr "Iedereen (publiek zichtbaar)"
 
@@ -89,7 +88,7 @@ msgstr "Nieuws"
 
 #: core/lib.py:182
 msgid "Update"
-msgstr ""
+msgstr "Update"
 
 #: core/lib.py:186
 msgid "Question"
@@ -101,11 +100,11 @@ msgstr "Wiki pagina's"
 
 #: core/lib.py:290
 msgid "Updates"
-msgstr ""
+msgstr "Updates"
 
 #: core/lib.py:291
 msgid "Blogs"
-msgstr ""
+msgstr "Blogs"
 
 #: core/lib.py:292
 msgid "CMS pages"
@@ -139,11 +138,6 @@ msgstr "Taken"
 msgid "Comments"
 msgstr "Reacties"
 
-#: core/management/commands/send_notification_emails.py:48
-#, python-format
-msgid "New notifications at %(site_name)s"
-msgstr "Nieuwe notificaties op %(site_name)s"
-
 #: core/management/commands/send_overview_emails.py:91
 #, python-format
 msgid "Regular overview of %(site_name)s"
@@ -160,10 +154,9 @@ msgid "Request for access to the %(group_name)s group has been approved"
 msgstr "Toegangsaanvraag voor de groep %(group_name)s goedgekeurd"
 
 #: core/resolvers/mutation_add_comment_without_account.py:60
-#, fuzzy, python-format
-#| msgid "Go to %(site_name)s"
+#, python-format
 msgid "Confirm comment on %(site_name)s"
-msgstr "Bevestig reactie op %(site_name)s"
+msgstr "Bevestig commentaar op %(site_name)s"
 
 #: core/resolvers/mutation_change_group_role.py:43
 #, python-format
@@ -183,15 +176,15 @@ msgstr "Account verwijderd van %(name_deleted_user)s"
 msgid "A site administrator was removed from %(site_name)s"
 msgstr "Een site beheerder is verwijderd van %(site_name)s"
 
-#: core/resolvers/mutation_edit_site_setting.py:321
+#: core/resolvers/mutation_edit_site_setting.py:333
 msgid "closed"
 msgstr "gesloten"
 
-#: core/resolvers/mutation_edit_site_setting.py:321
+#: core/resolvers/mutation_edit_site_setting.py:333
 msgid "public"
 msgstr "publiek"
 
-#: core/resolvers/mutation_edit_site_setting.py:322
+#: core/resolvers/mutation_edit_site_setting.py:334
 #, python-format
 msgid "Site access level changed for %(site_name)s"
 msgstr "Toegangsniveau voor aangepast op %(site_name)s"
@@ -279,38 +272,43 @@ msgstr "Een nieuwe site beheerder is toegewezen aan %(site_name)s"
 msgid "You're granted site administrator right on %(site_name)s"
 msgstr "U bent aangewezen als site beheerder van %(site_name)s"
 
-#: core/resolvers/query_site.py:120
+#: core/resolvers/query_site.py:123
 msgid "Activity stream"
 msgstr "Activiteitenstroom"
 
-#: core/resolvers/query_site.py:120
+#: core/resolvers/query_site.py:123
 msgid "CMS page"
 msgstr "CMS pagina"
 
-#: core/resolvers/query_site.py:209
+#: core/resolvers/query_site.py:212
 msgid "Administrator"
 msgstr "Beheerder"
 
-#: core/resolvers/query_site.py:210
+#: core/resolvers/query_site.py:213
 msgid "Editor"
 msgstr "Redacteur"
 
-#: core/resolvers/query_site.py:211
+#: core/resolvers/query_site.py:214
 msgid "Question expert"
 msgstr "Vraagexpert"
 
-#: core/tasks.py:352
-msgid "Import was a success"
-msgstr "Import afgerond"
-
-#: core/tasks.py:352
-msgid "Import failed"
-msgstr "Import mislukt"
-
-#: core/tasks.py:416
+#: core/services/mail_service.py:26
 #, python-format
 msgid "New notification at %(site_name)s: "
 msgstr "Nieuwe notificatie op %(site_name)s"
+
+#: core/services/mail_service.py:28
+#, python-format
+msgid "New notifications at %(site_name)s"
+msgstr "Nieuwe notificaties op %(site_name)s"
+
+#: core/tasks/misc.py:119
+msgid "Import was a success"
+msgstr "Import afgerond"
+
+#: core/tasks/misc.py:119
+msgid "Import failed"
+msgstr "Import mislukt"
 
 #: core/templates/edit_email_settings.html:15
 #, python-format
@@ -331,12 +329,12 @@ msgstr "Ga naar %(site_name)s"
 #, python-format
 msgid ""
 "The administrator %(user_name)s has approved your request to join the "
-"%(group_name)s group. Follow the link below to go directly to the group:<br /"
-"><a href=\"%(link)s\">%(link)s</a> "
+"%(group_name)s group. Follow the link below to go directly to the group:<br "
+"/><a href=\"%(link)s\">%(link)s</a> "
 msgstr ""
 "De beheerder %(user_name)s heeft jouw aanvraag tot de groep %(group_name)s "
-"goedgekeurd. Volg de onderstaande link om direct naar de groep te gaan:<br /"
-"><a href=\"%(link)s\">%(link)s</a>"
+"goedgekeurd. Volg de onderstaande link om direct naar de groep te gaan:<br "
+"/><a href=\"%(link)s\">%(link)s</a>"
 
 #: core/templates/email/admin_user_deleted.html:6
 #, python-format
@@ -344,14 +342,12 @@ msgid ""
 "\n"
 "Hi,<br><br>\n"
 "\n"
-"The administrator %(name_deleted_user)s is deleted. This action was taken by "
-"%(user_name)s.\n"
+"The administrator %(name_deleted_user)s is deleted. This action was taken by %(user_name)s.\n"
 msgstr ""
 "\n"
 "Hallo,\n"
 "\n"
-"De beheerder %(name_deleted_user)s is verwijderd. Dit is gedaan door "
-"%(user_name)s.\n"
+"De beheerder %(name_deleted_user)s is verwijderd. Dit is gedaan door %(user_name)s.\n"
 
 #: core/templates/email/attend_event_without_account.html:5
 #, python-format
@@ -375,20 +371,10 @@ msgstr ""
 "<a href=\"%(link)s\">%(link)s</a>\n"
 
 #: core/templates/email/confirm_add_comment_without_account.html:5
-#, fuzzy, python-format
-#| msgid ""
-#| "\n"
-#| "This is a request to confirm your comment on <a href=\"%(entity_url)s\">"
-#| "%(title)s</a>.<br><br>\n"
-#| "\n"
-#| "Comment: %(comment)s<br>\n"
-#| "\n"
-#| "Click on the link below to confirm the comment.<br><br>\n"
-#| "<a href=\"%(confirm_url)s\">%(confirm_url)s</a>\n"
+#, python-format
 msgid ""
 "\n"
-"This is a request to confirm your comment on <a href=\"%(entity_url)s\">"
-"%(entity_title)s</a>.<br><br>\n"
+"This is a request to confirm your comment on <a href=\"%(entity_url)s\">%(entity_title)s</a>.<br><br>\n"
 "\n"
 "Comment: %(comment)s<br>\n"
 "\n"
@@ -396,12 +382,11 @@ msgid ""
 "<a href=\"%(confirm_url)s\">%(confirm_url)s</a>\n"
 msgstr ""
 "\n"
-"it is een verzoek om je reactie te bevestigen op <a href=\"%(entity_url)s\">"
-"%(entity_title)s</a>.<br><br>\n"
+"Dit is een verzoek om uw reactie op <a href=\"%(entity_url)s\">%(entity_title)s</a> te bevestigen.<br><br>\n"
 "\n"
-"Reactie: %(comment)s<br>\n"
+"Commentaar: %(comment)s<br>\n"
 "\n"
-"Klik op de onderstaande link om je reactie te bevestigen.<br><br>\n"
+"Klik op de onderstaande link om uw reactie te bevestigen.<br><br>\n"
 "<a href=\"%(confirm_url)s\">%(confirm_url)s</a>\n"
 
 #: core/templates/email/confirm_attend_event_without_account.html:5
@@ -413,8 +398,7 @@ msgid ""
 "Location: %(location)s<br>\n"
 "Date: %(start_date)s<br><br>\n"
 "\n"
-"Click on the link below to see or make changes to your registration and to "
-"add this appointment to your agenda.<br><br>\n"
+"Click on the link below to see or make changes to your registration and to add this appointment to your agenda.<br><br>\n"
 "<a href=\"%(link)s\">%(link)s</a>\n"
 msgstr ""
 "\n"
@@ -423,8 +407,7 @@ msgstr ""
 "Locatie: %(location)s<br>\n"
 "Datum: %(start_date)s<br><br>\n"
 "\n"
-"Klik op de onderstaande link om je aanmelding te bekijken of te wijzigen en "
-"om de afspraak in je agenda te zetten.  <br><br>\n"
+"Klik op de onderstaande link om je aanmelding te bekijken of te wijzigen en om de afspraak in je agenda te zetten.  <br><br>\n"
 "<a href=\"%(link)s\">%(link)s</a>\n"
 
 #: core/templates/email/entities/blog.html:27
@@ -460,53 +443,57 @@ msgstr "Wiki gemaakt door"
 msgid ""
 "Hi,<br><br>\n"
 "\n"
-"We found %(virus_count)s suspicuous files while scanning for virusses. We "
-"have blocked the files for download.<br><br>\n"
+"We found %(virus_count)s suspicuous files while scanning for virusses. We have blocked the files for download.<br><br>\n"
 "\n"
-"Please visit the <a href=\"%(site_url)s/superadmin/scanlog\">file scan logs</"
-"a> to review.\n"
+"Please visit the <a href=\"%(site_url)s/superadmin/scanlog\">file scan logs</a> to review.\n"
 "\n"
 msgstr ""
+"Hoi,<br><br>\n"
+"\n"
+"We hebben %(virus_count)s verdachte bestanden gevonden tijdens het scannen op virussen. We hebben het downloaden van deze bestanden geblokkeerd.<br><br>\n"
+"\n"
+"Ga naar de <a href=\"%(site_url)s/superadmin/scanlog\">bestandsscanlogs</a> om ze te bekijken.\n"
+"\n"
 
 #: core/templates/email/group_ownership_transferred.html:6
 #, python-format
 msgid ""
 "The administrator %(user_name)s has transferred the ownership of the group "
-"%(group_name)s to you. View the group at: <br /><a href=\"%(link)s\">"
-"%(link)s</a> "
+"%(group_name)s to you. View the group at: <br /><a "
+"href=\"%(link)s\">%(link)s</a> "
 msgstr ""
 "De beheerder %(user_name)s heeft het eigenaarschap van de groep "
-"%(group_name)s aan jou overgedragen. Bekijk de groep op: <br /><a href="
-"\"%(link)s\">%(link)s</a> "
+"%(group_name)s aan jou overgedragen. Bekijk de groep op: <br /><a "
+"href=\"%(link)s\">%(link)s</a> "
 
 #: core/templates/email/invite_to_group.html:6
 #, python-format
 msgid ""
 "You have been invited by %(user_name)s to join the %(group_name)s group. "
-"Follow the link below to become a member of the group: <br /><a href="
-"\"%(link)s\">%(link)s</a> "
+"Follow the link below to become a member of the group: <br /><a "
+"href=\"%(link)s\">%(link)s</a> "
 msgstr ""
 "Je bent uitgenodigd door %(user_name)s om lid te worden van de groep "
-"%(group_name)s. Volg de onderstaande link om lid te worden van de groep: "
-"<br /><a href=\"%(link)s\">%(link)s</a> "
+"%(group_name)s. Volg de onderstaande link om lid te worden van de groep: <br"
+" /><a href=\"%(link)s\">%(link)s</a> "
 
 #: core/templates/email/invite_to_site.html:6
 #, python-format
 msgid ""
 "You have been invited by %(user_name)s to join the site %(site_name)s. "
-"Follow the link below to become a member of the site: <br /><a href="
-"\"%(link)s\">%(link)s</a> "
+"Follow the link below to become a member of the site: <br /><a "
+"href=\"%(link)s\">%(link)s</a> "
 msgstr ""
 "Je bent uitgenodigd door %(user_name)s om lid te worden van de site "
-"%(site_name)s. Volg de onderstaande link om lid te worden van de site: <br /"
-"><a href=\"%(link)s\">%(link)s</a> "
+"%(site_name)s. Volg de onderstaande link om lid te worden van de site: <br "
+"/><a href=\"%(link)s\">%(link)s</a> "
 
 #: core/templates/email/join_group.html:6
 #, python-format
 msgid ""
 "The user %(user_name)s (%(user_obfuscated_email)s) has requested access to "
-"the group %(group_name)s. Follow the link below to review the request: <br /"
-"><a href=\"%(link)s\">%(link)s</a> "
+"the group %(group_name)s. Follow the link below to review the request: <br "
+"/><a href=\"%(link)s\">%(link)s</a> "
 msgstr ""
 "De gebruiker %(user_name)s (%(user_obfuscated_email)s) heeft toegang "
 "aangevraagd tot de groep %(group_name)s. Volg de onderstaande link om de "
@@ -558,8 +545,8 @@ msgstr ""
 #, python-format
 msgid ""
 "You have been invited again by %(user_name)s to join the %(group_name)s "
-"group. Follow the link below to become a member of the group: <br /><a href="
-"\"%(link)s\">%(link)s</a> "
+"group. Follow the link below to become a member of the group: <br /><a "
+"href=\"%(link)s\">%(link)s</a> "
 msgstr ""
 "Je bent nogmaals uitgenodigd door %(user_name)s om lid te worden van de "
 "groep %(group_name)s. Volg de onderstaande link om lid te worden van de "
@@ -579,27 +566,31 @@ msgstr ""
 #: core/templates/email/send_message_to_user.html:8
 #, python-format
 msgid ""
-"Respond by clicking <a href=\"%(user_url)s/reply?subject=%(subject)s\">here</"
-"a>"
+"Respond by clicking <a "
+"href=\"%(user_url)s/reply?subject=%(subject)s\">here</a>"
 msgstr ""
 "Reageer door <a href=\"%(user_url)s/reply?subject=%(subject)s\">hier</a> te "
 "klikken"
 
-#: core/templates/email/send_notification_emails.html:37
+#: core/templates/email/send_notification_emails.html:15
+msgid " has mentioned you at: "
+msgstr " heeft je genoemd bij: "
+
+#: core/templates/email/send_notification_emails.html:43
 #, python-format
 msgid ""
 " You have received this e-mail because you registered to receive "
 "notifications.<br /> Click <a href=\"%(unsubscribe_url)s\">here</a> to "
 "change your settings."
 msgstr ""
-" Je ontvangt deze e-mail omdat je aangemeld bent voor de notificaties.<br /> "
-"Klik <a href=\"%(unsubscribe_url)s\">hier</a> om je instellingen aan te "
+" Je ontvangt deze e-mail omdat je aangemeld bent voor de notificaties.<br />"
+" Klik <a href=\"%(unsubscribe_url)s\">hier</a> om je instellingen aan te "
 "passen."
 
 #: core/templates/email/send_overview_emails.html:29
 #, python-format
 msgid "%(featured_title)s"
-msgstr ""
+msgstr "%(featured_title)s"
 
 #: core/templates/email/send_overview_emails.html:78
 #, python-format
@@ -618,45 +609,30 @@ msgstr ""
 "passen."
 
 #: core/templates/email/site_access_changed.html:6
-#, fuzzy, python-format
-#| msgid ""
-#| "Hi,<br><br>\n"
-#| "\n"
-#| "The site access level for site <a href=\"%(site_url)s\">%(site_name)s</a> "
-#| "changed to <b>%(access_level)s</b>. <br><br>\n"
-#| "\n"
-#| "This action was taken by %(user_name)s.<br><br>\n"
-#| "\n"
-#| "If you believe this was done in error, please <a href=\"%(site_url)s/"
-#| "admin2\">go to the admin</a> and undo this action.\n"
+#, python-format
 msgid ""
 "Hi,<br><br>\n"
 "\n"
-"The site access level for site <a href=\"%(site_url)s\">%(site_name)s</a> "
-"changed to <b>%(access_level)s</b>. <br><br>\n"
+"The site access level for site <a href=\"%(site_url)s\">%(site_name)s</a> changed to <b>%(access_level)s</b>. <br><br>\n"
 "\n"
 "This action was taken by %(user_name)s.<br><br>\n"
 "\n"
-"If you believe this was done in error, please <a href=\"%(site_url)s/admin"
-"\">go to the admin</a> and undo this action.\n"
+"If you believe this was done in error, please <a href=\"%(site_url)s/admin\">go to the admin</a> and undo this action.\n"
 msgstr ""
-"Hallo,<br><br>\n"
+"Hoi,<br><br>\n"
 "\n"
-"Het toegangsniveau voor de site <a href=\"%(site_url)s\">%(site_name)s</a> "
-"is aangepast naar <b>%(access_level)s</b>. <br><br>\n"
+"Het toegangsniveau voor de site <a href=\"%(site_url)s\">%(site_name)s</a> is gewijzigd in <b>%(access_level)s</b>. <br><br>\n"
 "\n"
 "Deze actie is uitgevoerd door %(user_name)s.<br><br>\n"
 "\n"
-"Als dit een fout is <a href=\"%(site_url)s/admin\">ga naar de admin</a> en "
-"maak deze actie ongedaan.\n"
+"Als u denkt dat dit per ongeluk is gebeurd, <a href=\"%(site_url)s/admin\">ga dan naar de admin</a> en maak deze actie ongedaan.\n"
 
 #: core/templates/email/site_access_request.html:5
 #, python-format
 msgid ""
 "Hello %(admin_name)s,<br><br>\n"
 "\n"
-"Somebody with the name %(request_name)s has performed an access request to "
-"%(site_name)s .<br><br>\n"
+"Somebody with the name %(request_name)s has performed an access request to %(site_name)s .<br><br>\n"
 "\n"
 "To review the request please visit:<br><br>\n"
 "\n"
@@ -675,17 +651,14 @@ msgstr ""
 msgid ""
 "Hello %(request_name)s, <br><br>\n"
 "\n"
-"    The administrator approved your access request to %(site_name)s . Go to "
-"this link to get access to the site:<br><br>\n"
+"    The administrator approved your access request to %(site_name)s . Go to this link to get access to the site:<br><br>\n"
 "\n"
 "    %(site_url)s<br>\n"
 "    "
 msgstr ""
 "Beste %(request_name)s, <br><br>\n"
 "\n"
-"      De beheerder heeft het verzoek tot lidmaatschap goedgekeurd. Je hebt "
-"nu toegang tot %(site_name)s .Volg de onderstaande link om direct naar de "
-"site te gaan:<br><br>\n"
+"      De beheerder heeft het verzoek tot lidmaatschap goedgekeurd. Je hebt nu toegang tot %(site_name)s .Volg de onderstaande link om direct naar de site te gaan:<br><br>\n"
 "\n"
 "    %(site_url)s<br>\n"
 "    "
@@ -695,15 +668,11 @@ msgstr ""
 msgid ""
 "Hello %(request_name)s, <br><br>\n"
 "\n"
-"    Unfortunately the site administrator of %(site_name)s decided to decline "
-"your membership request. Please contact the administrator if you think this "
-"is a mistake."
+"    Unfortunately the site administrator of %(site_name)s decided to decline your membership request. Please contact the administrator if you think this is a mistake."
 msgstr ""
 "Beste %(request_name)s, <br><br>\n"
 "\n"
-"    Helaas heeft de site-beheerder van %(site_name)s je lidmaatschapsverzoek "
-"afgewezen.Indien je denkt dat dit een vergissing is neem dan contact op met "
-"de site-beheerder. "
+"    Helaas heeft de site-beheerder van %(site_name)s je lidmaatschapsverzoek afgewezen.Indien je denkt dat dit een vergissing is neem dan contact op met de site-beheerder. "
 
 #: core/templates/email/toggle_request_delete_user_cancelled.html:6
 #, python-format
@@ -719,10 +688,11 @@ msgstr ""
 msgid ""
 "The user <strong>%(user_name)s</strong> has cancelled his/her request to "
 "remove his/her account. This account will no longer be visible on the <a "
-"href='%(site_url)s/admin/users/delete-requests'>list</a> of removal requests."
+"href='%(site_url)s/admin/users/delete-requests'>list</a> of removal "
+"requests."
 msgstr ""
-"De gebruiker <strong> %(user_name)s </strong> heeft haar/zijn verzoek om het "
-"account te laten verwijderen geannuleerd. Dit account zal niet meer "
+"De gebruiker <strong> %(user_name)s </strong> heeft haar/zijn verzoek om het"
+" account te laten verwijderen geannuleerd. Dit account zal niet meer "
 "zichtbaar zijn op het <a href='%(site_url)s/admin/users/delete-"
 "requests'>overzicht</a> van met de aanvragen voor verwijderen."
 
@@ -740,8 +710,8 @@ msgstr ""
 #: core/templates/email/toggle_request_delete_user_requested_admin.html:6
 #, python-format
 msgid ""
-"The user <strong>%(user_name)s</strong> wants his or her account removed, go "
-"<a href='%(site_url)s/admin/users/delete-requests'>here</a> to the list of "
+"The user <strong>%(user_name)s</strong> wants his or her account removed, go"
+" <a href='%(site_url)s/admin/users/delete-requests'>here</a> to the list of "
 "removal requests. "
 msgstr ""
 "De gebruiker <strong>%(user_name)s</strong> wil haar/zijn account laten "
@@ -752,26 +722,18 @@ msgstr ""
 #, python-format
 msgid ""
 "\n"
-"Dear %(name_deleted_user)s,<br><br> Your membership of <a href=\"%(site_url)s"
-"\">%(site_url)s</a> has been cancelled by the administrator.<br><br>\n"
+"Dear %(name_deleted_user)s,<br><br> Your membership of <a href=\"%(site_url)s\">%(site_url)s</a> has been cancelled by the administrator.<br><br>\n"
 "\n"
-"Your profile, settings and saved items have been removed from the site and "
-"your content has been made anonymous.<br><br>\n"
+"Your profile, settings and saved items have been removed from the site and your content has been made anonymous.<br><br>\n"
 "\n"
-"Your Pleio account will continue to exist as will your membership of any "
-"other sites. See <a href=\"https://account.pleio.nl\">account.pleio.nl</a> "
-"for more information.\n"
+"Your Pleio account will continue to exist as will your membership of any other sites. See <a href=\"https://account.pleio.nl\">account.pleio.nl</a> for more information.\n"
 msgstr ""
 "\n"
-"Beste %(name_deleted_user)s,<br><br> Je lidmaatschap van <a href="
-"\"%(site_url)s\">%(site_url)s</a> is opgezegd door de beheerder.<br><br>\n"
+"Beste %(name_deleted_user)s,<br><br> Je lidmaatschap van <a href=\"%(site_url)s\">%(site_url)s</a> is opgezegd door de beheerder.<br><br>\n"
 "\n"
-"Je profiel, instellingen en bewaarde items zijn verwijderd van de site en "
-"jouw content is geanonimiseerd.<br><br>\n"
+"Je profiel, instellingen en bewaarde items zijn verwijderd van de site en jouw content is geanonimiseerd.<br><br>\n"
 "\n"
-"Je Pleio-acount blijft bestaan evenals je lidmaatschap van eventuele andere "
-"sites. Zie <a href=\"https://account.pleio.nl\">account.pleio.nl</a> voor "
-"meer informatie.\n"
+"Je Pleio-acount blijft bestaan evenals je lidmaatschap van eventuele andere sites. Zie <a href=\"https://account.pleio.nl\">account.pleio.nl</a> voor meer informatie.\n"
 
 #: core/templates/email/user_import_failed.html:6
 #, python-format
@@ -783,6 +745,12 @@ msgid ""
 "\n"
 "<p>%(error_message)s</p>\n"
 msgstr ""
+"\n"
+"<p>Daarvan %(user_name)s,</p>\n"
+"\n"
+"<p>De import van gebruikers is mislukt. Hier is de foutmelding van de server:</p>\n"
+"\n"
+"<p>%(error_message)s</p>\n"
 
 #: core/templates/email/user_import_success.html:6
 #, python-format
@@ -798,27 +766,33 @@ msgid ""
 "    <li>%(stats_error)s users failed</li>\n"
 "</ul>\n"
 msgstr ""
+"\n"
+"<p>Daarvan %(user_name)s,</p>\n"
+"\n"
+"<p>De import van gebruikers is gelukt. Hier zijn de statistieken:</p>\n"
+"\n"
+"<ul>\n"
+"    <li>%(stats_created)s gebruikers toegevoegd</li>\n"
+"    <li>%(stats_updated)s gebruikers bijgewerkt</li>\n"
+"    <li>%(stats_error)s gebruikers mislukt</li>\n"
+"</ul>\n"
 
 #: core/templates/email/user_role_admin_assigned_for_admins.html:6
 #, python-format
 msgid ""
 "Hi,<br><br>\n"
 "\n"
-"The user %(name_of_user_admin_role_changed)s was assigned as a new site "
-"administrator by %(user_name)s.<br>\n"
+"The user %(name_of_user_admin_role_changed)s was assigned as a new site administrator by %(user_name)s.<br>\n"
 "Check out the profile of the new site administrator here %(link)s .<br><br>\n"
 "\n"
-"If you believe this was done in error, please login here %(site_url)s and "
-"undo this action.\n"
+"If you believe this was done in error, please login here %(site_url)s and undo this action.\n"
 msgstr ""
 "Hallo,<br><br>\n"
 "\n"
-"De gebruiker %(name_of_user_admin_role_changed)s is aangewezen als nieuwe "
-"site beheerder door %(user_name)s.<br>\n"
+"De gebruiker %(name_of_user_admin_role_changed)s is aangewezen als nieuwe site beheerder door %(user_name)s.<br>\n"
 "Bekijk het profiel van de gebruiker hier: %(link)s .<br><br>\n"
 "\n"
-"Indien deze wijziging ongewenst is, kunt u zich hier %(site_url)s aanmelden "
-"om het ongedaan maken.\n"
+"Indien deze wijziging ongewenst is, kunt u zich hier %(site_url)s aanmelden om het ongedaan maken.\n"
 
 #: core/templates/email/user_role_admin_assigned_for_user.html:6
 #, python-format
@@ -829,39 +803,32 @@ msgid ""
 "\n"
 "Enjoy your new found rights by logging in here %(site_url)s.<br><br>\n"
 "\n"
-"If you believe this was done in error, please contact one of the other site "
-"administrators.\n"
+"If you believe this was done in error, please contact one of the other site administrators.\n"
 msgstr ""
 "Hallo %(name_of_user_admin_role_changed)s,<br><br>\n"
 "\n"
 "U bent aangewezen als site beheerder door %(user_name)s.<br><br>\n"
 "\n"
-"U kunt gebruik maken van uw nieuwe rechten door u hier aan te melden: "
-"%(site_url)s.<br><br>\n"
+"U kunt gebruik maken van uw nieuwe rechten door u hier aan te melden: %(site_url)s.<br><br>\n"
 "\n"
-"Indien deze wijziging ongewenst is, kunt u contact opnemen met een van de "
-"andere site beheerders.\n"
+"Indien deze wijziging ongewenst is, kunt u contact opnemen met een van de andere site beheerders.\n"
 
 #: core/templates/email/user_role_admin_removed_for_admins.html:6
 #, python-format
 msgid ""
 "Hi,<br><br>\n"
 "\n"
-"The user %(name_of_user_admin_role_changed)s is no longer a site "
-"administrator. This action was taken by %(user_name)s.<br>\n"
+"The user %(name_of_user_admin_role_changed)s is no longer a site administrator. This action was taken by %(user_name)s.<br>\n"
 "Check out the profile of the old site administrator here %(link)s.<br><br>\n"
 "\n"
-"If you believe this was done in error, please login here %(site_url)s and "
-"undo this action.\n"
+"If you believe this was done in error, please login here %(site_url)s and undo this action.\n"
 msgstr ""
 "Hallo,<br><br>\n"
 "\n"
-"De gebruiker %(name_of_user_admin_role_changed)s is niet langer een site "
-"beheerder. Dit is gedaan door %(user_name)s.<br>\n"
+"De gebruiker %(name_of_user_admin_role_changed)s is niet langer een site beheerder. Dit is gedaan door %(user_name)s.<br>\n"
 "Bekijk het profiel van de gebruiker hier: %(link)s.<br><br>\n"
 "\n"
-"Indien deze wijziging ongewenst is, kunt u zich hier %(site_url)s aanmelden "
-"om het ongedaan maken.\n"
+"Indien deze wijziging ongewenst is, kunt u zich hier %(site_url)s aanmelden om het ongedaan maken.\n"
 
 #: core/templates/email/user_role_admin_removed_for_user.html:6
 #, python-format
@@ -870,15 +837,13 @@ msgid ""
 "\n"
 "Your site administrator role was removed by %(user_name)s.<br><br>\n"
 "\n"
-"If you believe this was done in error, please contact one of the other site "
-"administrators.\n"
+"If you believe this was done in error, please contact one of the other site administrators.\n"
 msgstr ""
 "Hallo %(name_of_user_admin_role_changed)s,<br><br>\n"
 "\n"
 "Uw site beheerder rechten zijn afgenomen door %(user_name)s.<br><br>\n"
 "\n"
-"Indien deze wijziging ongewenst is, kunt u contact opnemen met een van de "
-"andere site beheerders.\n"
+"Indien deze wijziging ongewenst is, kunt u contact opnemen met een van de andere site beheerders.\n"
 
 #: core/templates/onboarding.html:14
 msgid ""
@@ -905,11 +870,11 @@ msgstr "of"
 msgid "Log in using %(oidc_provider)s"
 msgstr "Log in met %(oidc_provider)s"
 
-#: core/templates/registration/login.html:36
+#: core/templates/registration/login.html:37
 msgid "Don't have an account?"
 msgstr "Nog geen account?"
 
-#: core/templates/registration/login.html:36
+#: core/templates/registration/login.html:37
 msgid "Register"
 msgstr "Registreer"
 
@@ -919,8 +884,8 @@ msgstr "Toegang aanvragen"
 
 #: core/templates/registration/request.html:20
 msgid ""
-"To enter this site, you must request access from the admin. Click the button "
-"to request access."
+"To enter this site, you must request access from the admin. Click the button"
+" to request access."
 msgstr ""
 "Om toegang tot deze site te krijgen dient u toestemming te hebben van de "
 "beheerder. Vraag toestemming aan door op de knop hieronder te drukken."
@@ -948,17 +913,18 @@ msgstr "Toegang aangevraagd"
 
 #: core/templates/registration/requested.html:13
 msgid ""
-"Access is requested. You will receive an e-mail when the request is accepted."
+"Access is requested. You will receive an e-mail when the request is "
+"accepted."
 msgstr ""
-"De toegang is aangevraagd. Je ontvangt een e-mail wanneer de toegang door de "
-"beheerder wordt toegewezen."
+"De toegang is aangevraagd. Je ontvangt een e-mail wanneer de toegang door de"
+" beheerder wordt toegewezen."
 
-#: core/views.py:170
+#: core/views.py:183
 #, python-format
 msgid "New access request for %(site_name)s"
 msgstr "Nieuwe toegangsaanvraag voor %(site_name)s"
 
-#: core/views.py:544
+#: core/views.py:557
 msgid "Saved"
 msgstr "Opgeslagen"
 
@@ -972,7 +938,7 @@ msgstr "Bevestiging aanmelding %s"
 msgid "Confirmation of registration for %s"
 msgstr "Bevestiging aanmelding voor %s"
 
-#: file/tasks.py:64
+#: file/tasks.py:63
 #, python-format
 msgid "Filescan found suspicous files on %(site_url)s"
-msgstr ""
+msgstr "Filescan heeft verdachte bestanden gevonden op %(site_url)s"

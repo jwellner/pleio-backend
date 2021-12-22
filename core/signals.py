@@ -3,8 +3,8 @@ from django.db.models.signals import post_save, pre_save
 from django.conf import settings
 from django.utils import timezone
 from notifications.signals import notify
-from core.lib import tenant_schema, datetime_isoformat
-from core.models import Comment, Group, GroupInvitation, Entity, EntityViewCount, NotificationMixin
+from core.lib import datetime_isoformat, get_model_name, tenant_schema
+from core.models import Comment, Group, GroupInvitation, Entity, EntityViewCount, NotificationMixin, MentionMixin
 from core.tasks import create_notification
 from user.models import User
 from event.models import EventAttendee
@@ -28,7 +28,10 @@ def comment_handler(sender, instance, created, **kwargs):
         else:
             return
 
-        create_notification.delay(tenant_schema(), 'commented', instance.container.id, sender)
+        if hasattr(instance.container, 'add_follow'):
+            instance.container.add_follow(instance.owner)
+
+        create_notification.delay(tenant_schema(), 'commented', get_model_name(instance.container), instance.container.id, sender)
 
 
 def user_handler(sender, instance, created, **kwargs):
@@ -57,11 +60,11 @@ def notification_handler(sender, instance, created, **kwargs):
 
     # pylint: disable=unused-argument
     if not settings.IMPORTING and created:
-        if instance.__class__ in NotificationMixin.__subclasses__() and instance.group:
+        if issubclass(type(instance), NotificationMixin) and instance.group:
             if (not instance.published) or (datetime_isoformat(instance.published) > datetime_isoformat(timezone.now())):
                 return
 
-            create_notification.delay(tenant_schema(), 'created', instance.id, instance.owner.id)
+            create_notification.delay(tenant_schema(), 'created', get_model_name(instance), instance.id, instance.owner.id)
         else:
             instance.notifications_created = True
             instance.save()
@@ -93,6 +96,21 @@ def updated_at_handler(sender, instance, **kwargs):
     if not instance._state.adding and not settings.IMPORTING:
         instance.updated_at = timezone.now()
 
+def mention_handler(sender, instance, created, **kwargs):
+    """ Look for users that are mentioned and notify them """
+    # pylint: disable=unused-argument
+
+    if settings.IMPORTING:
+        return
+
+    if not issubclass(type(instance), MentionMixin):
+        return
+
+    if not instance.owner: # extra robustness for when tests don't assign an owner
+        return
+
+    create_notification.delay(tenant_schema(), 'mentioned', get_model_name(instance), instance.id, instance.owner.id)
+
 
 # Notification handlers
 post_save.connect(comment_handler, sender=Comment)
@@ -111,3 +129,6 @@ for subclass in Entity.__subclasses__():
     pre_save.connect(updated_at_handler, subclass)
     pre_save.connect(notification_update_handler, sender=subclass)
     post_save.connect(notification_handler, sender=subclass)
+
+for subclass in MentionMixin.__subclasses__():
+    post_save.connect(mention_handler, subclass)

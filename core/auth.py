@@ -9,6 +9,7 @@ from django.db.models import Q
 from django.shortcuts import redirect
 from django.utils.http import urlencode
 from core import config
+from core.constances import OIDC_PROVIDER_OPTIONS
 from core.models import SiteInvitation, SiteAccessRequest
 
 import logging
@@ -47,7 +48,7 @@ class OIDCAuthenticateView(OIDCAuthenticationRequestView):
             extra_params.update({'idp': idp})
 
         provider = self.request.GET.get('provider', None)
-        providerOption = next(filter(lambda option: option['value'] == provider, config.OIDC_PROVIDER_OPTIONS), None)
+        providerOption = next(filter(lambda option: option['value'] == provider, OIDC_PROVIDER_OPTIONS), None)
         if providerOption and not providerOption.get('isDefault', False):
             extra_params.update({'provider': provider})
 

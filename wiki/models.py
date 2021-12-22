@@ -1,9 +1,9 @@
 from auditlog.registry import auditlog
 from django.db import models
-from core.models import Entity, BookmarkMixin, FeaturedCoverMixin, ArticleMixin
+from core.models import Entity, BookmarkMixin, FeaturedCoverMixin, ArticleMixin, MentionMixin
 from django.utils.text import slugify
 
-class Wiki(Entity, FeaturedCoverMixin, BookmarkMixin, ArticleMixin):
+class Wiki(Entity, FeaturedCoverMixin, BookmarkMixin, ArticleMixin, MentionMixin):
     """
     Wiki
     """
@@ -44,6 +44,10 @@ class Wiki(Entity, FeaturedCoverMixin, BookmarkMixin, ArticleMixin):
         return '{}/wiki/view/{}/{}'.format(
             prefix, self.guid, slugify(self.title)
         ).lower()
+
+    @property
+    def rich_fields(self):
+        return [self.rich_description]
 
 
 auditlog.register(Wiki)

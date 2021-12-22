@@ -1,12 +1,12 @@
 from auditlog.registry import auditlog
 from django.db import models
 from django.utils.text import slugify
-from core.models import Entity, VoteMixin, CommentMixin, BookmarkMixin, FollowMixin, FeaturedCoverMixin, ArticleMixin
+from core.models import Entity, VoteMixin, CommentMixin, BookmarkMixin, FollowMixin, FeaturedCoverMixin, ArticleMixin, MentionMixin
 from core.constances import USER_ROLES
 from core.lib import get_acl
 
 
-class News(Entity, VoteMixin, BookmarkMixin, FollowMixin, CommentMixin, FeaturedCoverMixin, ArticleMixin):
+class News(Entity, VoteMixin, BookmarkMixin, FollowMixin, CommentMixin, FeaturedCoverMixin, ArticleMixin, MentionMixin):
     """
     News
     """
@@ -39,6 +39,10 @@ class News(Entity, VoteMixin, BookmarkMixin, FollowMixin, CommentMixin, Featured
             return True
 
         return len(get_acl(user) & set(self.write_access)) > 0
+
+    @property
+    def rich_fields(self):
+        return [self.rich_description]
 
 
 auditlog.register(News)

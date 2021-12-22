@@ -24,7 +24,7 @@
 						<a href="{% url 'oidc_authentication_init' %}?idp={{ config.IDP_ID }}&next={{ next }}" class="button ___medium" rel="nofollow">{{ config.IDP_NAME }}</a>
 						<div class="walled-garden_buttons-or">{% blocktrans %}or{% endblocktrans %}</div>
 					{% endif %}
-					{% for providerOption in config.OIDC_PROVIDER_OPTIONS %}
+					{% for providerOption in constants.OIDC_PROVIDER_OPTIONS %}
 						{% if providerOption.value in config.OIDC_PROVIDERS %}
 							<a href="{% url 'oidc_authentication_init' %}?next={{ next }}&provider={{ providerOption.value }}" class="button ___medium {% if config.IDP_ID %}___line{% endif%}" rel="nofollow">
 								{% blocktrans with oidc_provider=providerOption.label %}Log in using {{ oidc_provider }}{% endblocktrans %}

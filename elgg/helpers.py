@@ -1,6 +1,7 @@
 import os
 from datetime import datetime
 from django.core.files.storage import default_storage
+from django.utils import timezone
 from phpserialize import unserialize
 
 from cms.models import Page
@@ -206,6 +207,8 @@ class ElggHelpers():
         for item in menu_input:
             if 'children' not in item:
                 item["children"] = []
+            if 'accessId' not in item:
+                item["accessId"] = 2
             menu.append(item)
 
         return menu
@@ -348,8 +351,9 @@ class ElggHelpers():
             entity.read_access = self.elgg_access_id_to_acl(entity, 2)
             entity.write_access = self.elgg_access_id_to_acl(entity, 0)
 
-            entity.created_at = datetime.fromtimestamp(elgg_entity.entity.time_created)
-            entity.updated_at = datetime.fromtimestamp(elgg_entity.entity.time_updated)
+            entity.created_at = datetime.fromtimestamp(elgg_entity.entity.time_created, tz=timezone.utc)
+            entity.published = datetime.fromtimestamp(elgg_entity.entity.time_created, tz=timezone.utc)
+            entity.updated_at = datetime.fromtimestamp(elgg_entity.entity.time_updated, tz=timezone.utc)
 
             entity.save()
             return entity
@@ -390,8 +394,9 @@ class ElggHelpers():
             entity.read_access = self.elgg_access_id_to_acl(entity, 2)
             entity.write_access = self.elgg_access_id_to_acl(entity, 0)
 
-            entity.created_at = datetime.fromtimestamp(elgg_entity.entity.time_created)
-            entity.updated_at = datetime.fromtimestamp(elgg_entity.entity.time_updated)
+            entity.created_at = datetime.fromtimestamp(elgg_entity.entity.time_created, tz=timezone.utc)
+            entity.published = datetime.fromtimestamp(elgg_entity.entity.time_created, tz=timezone.utc)
+            entity.updated_at = datetime.fromtimestamp(elgg_entity.entity.time_updated, tz=timezone.utc)
 
             entity.save()
 
@@ -561,6 +566,7 @@ class ElggHelpers():
                 start_day.day,
                 start_time.hour,
                 start_time.minute,
-                start_time.second
+                start_time.second,
+                tzinfo=timezone.utc
             )
         return start_date_time

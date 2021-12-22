@@ -3,11 +3,11 @@ from django.db import models
 from django.utils.text import slugify
 from core import config
 from core.lib import get_acl
-from core.models import Entity, VoteMixin, CommentMixin, BookmarkMixin, FollowMixin, Comment, NotificationMixin, FeaturedCoverMixin, ArticleMixin
+from core.models import Entity, VoteMixin, CommentMixin, BookmarkMixin, FollowMixin, Comment, MentionMixin, FeaturedCoverMixin, ArticleMixin
 from core.constances import USER_ROLES
 
 
-class Question(Entity, VoteMixin, BookmarkMixin, FollowMixin, CommentMixin, NotificationMixin, FeaturedCoverMixin, ArticleMixin):
+class Question(Entity, VoteMixin, BookmarkMixin, FollowMixin, CommentMixin, MentionMixin, FeaturedCoverMixin, ArticleMixin):
     """
     Question
     """
@@ -90,6 +90,10 @@ class Question(Entity, VoteMixin, BookmarkMixin, FollowMixin, CommentMixin, Noti
     @property
     def type_to_string(self):
         return 'question'
+
+    @property
+    def rich_fields(self):
+        return [self.rich_description]
 
 
 auditlog.register(Question)
