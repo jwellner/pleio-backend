@@ -5,6 +5,7 @@ from core.tasks.mail_tasks import send_mail_multi
 from notifications.models import Notification
 
 class MailService:
+
     def send_notification_email(self, schema_name, recipient, notifications):
         if not notifications:
             return
@@ -23,7 +24,8 @@ class MailService:
 
     def get_notification_subject(self, notifications):
         if len(notifications) == 1:
-            return translation.ugettext_lazy("New notification at %(site_name)s: ") % {'site_name': config.NAME}
+            notification = map_notification(notifications[0])
+            return translation.ugettext_lazy("Notification on %(entity_title)s") % {'entity_title': notification['entity_title']}
 
         return translation.ugettext_lazy("New notifications at %(site_name)s") % {'site_name': config.NAME}
 
