@@ -12,7 +12,7 @@ def resolve_add_attachment(_, info, input):
     if not input.get("file"):
         raise GraphQLError("NO_FILE")
 
-    attachment = Attachment.objects.create(upload=input.get("file"))
+    attachment = Attachment.objects.create(upload=input.get("file"), owner=user)
 
     if not attachment:
         raise GraphQLError(COULD_NOT_ADD)

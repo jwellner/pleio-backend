@@ -27,12 +27,16 @@ class Attachment(ModelWithFile):
     mime_type = models.CharField(null=True, blank=True, max_length=100)
     size = models.IntegerField(default=0)
     created_at = models.DateTimeField(default=timezone.now)
+    owner = models.ForeignKey('user.User', on_delete=models.PROTECT)
 
     attached_content_type = models.ForeignKey(ContentType, blank=True, null=True, on_delete=models.CASCADE)
     attached_object_id = models.UUIDField(blank=True, null=True)
     attached = GenericForeignKey(ct_field='attached_content_type', fk_field='attached_object_id')
 
     def can_read(self, user):
+        if not self.attached:
+            return user == self.owner
+
         if not hasattr(self.attached, 'can_read'):
             return True # Groups don't have the function implemented
 
