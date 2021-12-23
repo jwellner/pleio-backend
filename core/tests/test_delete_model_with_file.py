@@ -41,3 +41,16 @@ class DeleteAttachmentTestCase(FastTenantTestCase):
 
         self.assertFalse(os.path.isfile(path))
         self.assertFalse(os.path.isfile(thumbnailPath))
+
+    def test_delete_attachment_and_file(self):
+        blog = mixer.blend(Blog)
+
+        attachment = mixer.blend(Attachment, attached=blog)
+        path = self.attach_file(attachment, 'upload', 'testfile.txt')
+        self.assertTrue(os.path.isfile(path)) # assert file exists before starting test
+        self.assertEqual(attachment, Attachment.objects.filter(id=attachment.id).first())
+
+        blog.delete()
+
+        self.assertEqual(None, Attachment.objects.filter(id=attachment.id).first())
+        self.assertFalse(os.path.exists(path))
