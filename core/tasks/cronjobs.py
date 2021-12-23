@@ -35,6 +35,7 @@ def dispatch_crons(self, period):
             save_file_disk_usage.delay(client.schema_name)
             ban_users_that_bounce.delay(client.schema_name)
             ban_users_with_no_account.delay(client.schema_name)
+            remove_floating_attachments(client.schema_name)
 
         if period in ['daily', 'weekly', 'monthly']:
             send_overview.delay(client.schema_name, period)
@@ -200,3 +201,9 @@ def ban_users_with_no_account(schema_name):
         if count:
             logger.info("Accounts blocked beacause of deleted account in pleio: %s", count)
         config.LAST_RECEIVED_DELETED_USER = last_received
+
+@shared_task()
+def remove_floating_attachments(schema_name):
+    with schema_context(schema_name):
+        deleted = Attachment.objects.filter(attached_content_type=None).delete()
+        logger.info("%s: %d floating attachments were deleted.", schema_name, deleted)
