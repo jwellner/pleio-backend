@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-12-20 11:51+0100\n"
+"POT-Creation-Date: 2021-12-23 12:38+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -292,12 +292,13 @@ msgstr "Editor"
 msgid "Question expert"
 msgstr "Question expert"
 
-#: core/services/mail_service.py:26
-#, python-format
-msgid "New notification at %(site_name)s: "
-msgstr "New notification at %(site_name)s:"
+#: core/services/mail_service.py:27
+#, fuzzy, python-format
+#| msgid "New notifications at %(site_name)s"
+msgid "Notification on %(entity_title)s"
+msgstr "Notification on %(entity_title)s"
 
-#: core/services/mail_service.py:28
+#: core/services/mail_service.py:29
 #, python-format
 msgid "New notifications at %(site_name)s"
 msgstr "New notifications at %(site_name)s"
@@ -942,3 +943,6 @@ msgstr "Confirmation of registration for %s"
 #, python-format
 msgid "Filescan found suspicous files on %(site_url)s"
 msgstr "Filescan found suspicous files on %(site_url)s"
+
+#~ msgid "New notification at %(site_name)s: "
+#~ msgstr "New notification at %(site_name)s:"

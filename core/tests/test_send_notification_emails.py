@@ -77,6 +77,22 @@ class SendNotificationEmailsTestCase(FastTenantTestCase):
         self.assertEqual(args[4], self.user2.email)
 
     @mock.patch('core.tasks.mail_tasks.send_mail_multi.delay')
+    def test_command_send_1_notifications(self, mocked_send_mail_multi):
+        notify.send(self.user1, recipient=[self.user2], verb="created", action_object=self.blog1)[0][1]
+
+        call_command('send_notification_emails')
+
+        args, kwargs = mocked_send_mail_multi.call_args
+        subject = "Notificatie op %s" % self.blog1.title
+
+        self.assertEqual(mocked_send_mail_multi.call_count, 1)
+        self.assertEqual(args[0], 'fast_test')
+        self.assertEqual(args[1], subject)
+        self.assertEqual(args[2], 'email/send_notification_emails.html')
+        self.assertEqual(len(args[3]['notifications']), 1)
+        self.assertEqual(args[4], self.user2.email)
+
+    @mock.patch('core.tasks.mail_tasks.send_mail_multi.delay')
     def test_command_do_not_send_welcome_notification(self, mocked_send_mail_multi):
         """ Welcome notification is created on user creation, this should not be send """
         call_command('send_notification_emails')
@@ -138,7 +154,6 @@ class SendNotificationEmailsTestCase(FastTenantTestCase):
         call_command('send_notification_emails')
 
         args, kwargs = mocked_send_mail_multi.call_args
-        subject = "Nieuwe notificaties op %s" % config.NAME
 
         self.assertEqual(mocked_send_mail_multi.call_count, 1)
         self.assertEqual(args[3]['notifications'][0]['action'], 'created')
