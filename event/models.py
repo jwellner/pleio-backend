@@ -1,12 +1,12 @@
 from auditlog.registry import auditlog
 from django.db import models
-from core.models import Entity, CommentMixin, BookmarkMixin, NotificationMixin, FollowMixin, FeaturedCoverMixin, ArticleMixin
+from core.models import Entity, CommentMixin, BookmarkMixin, NotificationMixin, FollowMixin, FeaturedCoverMixin, ArticleMixin, AttachmentMixin
 from user.models import User
 from django.core.exceptions import ObjectDoesNotExist
 from django.utils.text import slugify
 from django.utils import timezone
 
-class Event(Entity, CommentMixin, BookmarkMixin, FollowMixin, NotificationMixin, FeaturedCoverMixin, ArticleMixin):
+class Event(Entity, CommentMixin, BookmarkMixin, FollowMixin, NotificationMixin, FeaturedCoverMixin, ArticleMixin, AttachmentMixin):
     class Meta:
         ordering = ['-published']
 
@@ -56,6 +56,10 @@ class Event(Entity, CommentMixin, BookmarkMixin, FollowMixin, NotificationMixin,
         return '{}/events/view/{}/{}'.format(
             prefix, self.guid, slugify(self.title)
         ).lower()
+
+    @property
+    def rich_fields(self):
+        return [self.rich_description]
 
 
 class EventAttendee(models.Model):

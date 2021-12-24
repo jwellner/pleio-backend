@@ -4,8 +4,8 @@ import logging
 from core.resolvers.query_site import get_settings
 from core import config
 from core.models import (
-    Entity, Group, UserProfileField, SiteAccessRequest, ProfileField, EntityAttachment, GroupAttachment,
-    CommentAttachment, CommentRequest, Comment
+    Entity, Group, UserProfileField, SiteAccessRequest, ProfileField, Attachment,
+    CommentRequest, Comment
 )
 from core.lib import (
     access_id_to_acl, get_default_email_context, tenant_schema,
@@ -486,13 +486,7 @@ def attachment(request, attachment_type, attachment_id):
         raise Http404("File not found")
 
     try:
-        attachment = None
-        if attachment_type == 'entity':
-            attachment = EntityAttachment.objects.get(id=attachment_id)
-        if attachment_type == 'comment':
-            attachment = CommentAttachment.objects.get(id=attachment_id)
-        if attachment_type == 'group':
-            attachment = GroupAttachment.objects.get(id=attachment_id)
+        attachment = Attachment.objects.get(id=attachment_id)
 
         if not attachment or not attachment.can_read(user):
             raise Http404("File not found")

@@ -1,9 +1,9 @@
 from auditlog.registry import auditlog
 from django.db import models
-from core.models import Entity
+from core.models import Entity, AttachmentMixin
 from django.utils.text import slugify
 
-class Task(Entity):
+class Task(Entity, AttachmentMixin):
     """
     Task
     """
@@ -45,6 +45,10 @@ class Task(Entity):
         return '{}/task/view/{}/{}'.format(
             prefix, self.guid, slugify(self.title)
         ).lower()
+
+    @property
+    def rich_fields(self):
+        return [self.rich_description]
 
 
 auditlog.register(Task)

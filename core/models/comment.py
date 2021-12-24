@@ -4,7 +4,8 @@ from django.db import models
 from django.contrib.contenttypes.fields import GenericForeignKey, GenericRelation
 from django.contrib.contenttypes.models import ContentType
 from django.utils import timezone
-from .mixin import VoteMixin, MentionMixin
+from .mixin import VoteMixin
+from .rich_fields import MentionMixin, AttachmentMixin
 from core.constances import USER_ROLES
 
 
@@ -14,7 +15,7 @@ class CommentManager(models.Manager):
 
         return queryset
 
-class Comment(VoteMixin, MentionMixin):
+class Comment(VoteMixin, MentionMixin, AttachmentMixin):
     class Meta:
         ordering = ['-created_at']
     objects = CommentManager()

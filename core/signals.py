@@ -1,11 +1,13 @@
 import logging
-from django.db.models.signals import post_save, pre_save
+from django.db.models.signals import post_save, pre_save, post_delete
 from django.conf import settings
 from django.utils import timezone
 from notifications.signals import notify
 from core.lib import datetime_isoformat, get_model_name, tenant_schema
 from core.models import Comment, Group, GroupInvitation, Entity, EntityViewCount, NotificationMixin, MentionMixin
+from core.models.attachment import Attachment
 from core.tasks import create_notification
+from file.models import FileFolder
 from user.models import User
 from event.models import EventAttendee
 from notifications.models import Notification
@@ -111,6 +113,10 @@ def mention_handler(sender, instance, created, **kwargs):
 
     create_notification.delay(tenant_schema(), 'mentioned', get_model_name(instance), instance.id, instance.owner.id)
 
+def file_delete_handler(sender, instance, using, **kwargs):
+    # pylint: disable=unused-argument
+    instance.delete_files()
+
 
 # Notification handlers
 post_save.connect(comment_handler, sender=Comment)
@@ -123,6 +129,9 @@ pre_save.connect(updated_at_handler, sender=Group)
 pre_save.connect(updated_at_handler, sender=GroupInvitation)
 pre_save.connect(updated_at_handler, sender=EventAttendee)
 pre_save.connect(updated_at_handler, sender=User)
+
+post_delete.connect(file_delete_handler, sender=FileFolder)
+post_delete.connect(file_delete_handler, sender=Attachment)
 
 # Connect to all Entity subclasses
 for subclass in Entity.__subclasses__():

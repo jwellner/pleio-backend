@@ -1,10 +1,10 @@
 from auditlog.registry import auditlog
 from django.db import models
 from django.utils.text import slugify
-from core.models import Entity, VoteMixin, CommentMixin, BookmarkMixin, FollowMixin, MentionMixin, FeaturedCoverMixin, ArticleMixin
+from core.models import Entity, VoteMixin, CommentMixin, BookmarkMixin, FollowMixin, MentionMixin, FeaturedCoverMixin, ArticleMixin, AttachmentMixin
 
 
-class Discussion(Entity, VoteMixin, BookmarkMixin, FollowMixin, CommentMixin, MentionMixin, FeaturedCoverMixin, ArticleMixin):
+class Discussion(Entity, VoteMixin, BookmarkMixin, FollowMixin, CommentMixin, MentionMixin, FeaturedCoverMixin, ArticleMixin, AttachmentMixin):
     class Meta:
         ordering = ['-published']
 
