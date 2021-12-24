@@ -8,10 +8,13 @@ from blog.models import Blog
 from file.models import FileFolder
 
 class DeleteAttachmentTestCase(FastTenantTestCase):
-    basepath = settings.MEDIA_ROOT + 'fast_test/'
+    basepath = 'test_files/'
 
     def setUp(self):
         os.makedirs(self.basepath, exist_ok=True)
+
+    def tearDown(self):
+        os.system(f"rm -r {self.basepath}")
 
     def attach_file(self, instance, attr, filename):
         path = self.basepath + filename
@@ -19,8 +22,9 @@ class DeleteAttachmentTestCase(FastTenantTestCase):
             file = File(f)
             file.write("some content")
             setattr(instance, attr, file)
+            instance.save()
 
-        return path
+        return getattr(instance, attr).path
 
     def test_delete_removes_file(self):
         blog = mixer.blend(Blog)
