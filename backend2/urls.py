@@ -40,7 +40,8 @@ urlpatterns = [
     path('file/thumbnail/<uuid:file_id>', file_views.thumbnail, name='thumbnail'),
     path('file/featured/<uuid:entity_guid>', file_views.featured, name='featured'),
 
-    path('attachment/<str:attachment_type>/<uuid:attachment_id>', core_views.attachment, name='attachment'),
+    path('attachment/<uuid:attachment_id>', core_views.attachment, name='attachment'),
+    path('attachment/<str:attachment_type>/<uuid:attachment_id>', core_views.attachment, name='attachment'), # old url for backwards compatability
 
     path('bulk_download', file_views.bulk_download, name='bulk_download'),
 

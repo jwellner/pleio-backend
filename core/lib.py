@@ -198,6 +198,14 @@ def generate_object_filename(obj, filename):
     filename = "%s.%s" % (slugify(name), ext)
     return os.path.join(str(obj.id), filename)
 
+def delete_attached_file(filefield):
+    if not filefield:
+        return
+
+    file_path = filefield.path
+    if os.path.isfile(file_path):
+        os.remove(file_path)
+
 def get_field_type(field_type):
     if field_type == 'select_field':
         return 'selectField'

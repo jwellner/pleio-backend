@@ -1,12 +1,12 @@
 from auditlog.registry import auditlog
 from django.db import models
 from django.utils.text import slugify
-from core.models import Entity, VoteMixin, CommentMixin, BookmarkMixin, FollowMixin, FeaturedCoverMixin, ArticleMixin, MentionMixin
+from core.models import Entity, VoteMixin, CommentMixin, BookmarkMixin, FollowMixin, FeaturedCoverMixin, ArticleMixin, MentionMixin, AttachmentMixin
 from core.constances import USER_ROLES
 from core.lib import get_acl
 
 
-class News(Entity, VoteMixin, BookmarkMixin, FollowMixin, CommentMixin, FeaturedCoverMixin, ArticleMixin, MentionMixin):
+class News(Entity, VoteMixin, BookmarkMixin, FollowMixin, CommentMixin, FeaturedCoverMixin, ArticleMixin, MentionMixin, AttachmentMixin):
     """
     News
     """

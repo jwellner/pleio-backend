@@ -1,9 +1,9 @@
 from auditlog.registry import auditlog
 from django.db import models
 from django.utils.text import slugify
-from core.models import Entity, VoteMixin, CommentMixin, BookmarkMixin, FollowMixin, MentionMixin, FeaturedCoverMixin, ArticleMixin
+from core.models import Entity, VoteMixin, CommentMixin, BookmarkMixin, FollowMixin, MentionMixin, FeaturedCoverMixin, ArticleMixin, AttachmentMixin
 
-class Blog(Entity, FeaturedCoverMixin, VoteMixin, BookmarkMixin, FollowMixin, CommentMixin, MentionMixin, ArticleMixin):
+class Blog(Entity, FeaturedCoverMixin, VoteMixin, BookmarkMixin, FollowMixin, CommentMixin, MentionMixin, AttachmentMixin, ArticleMixin):
     """
     Blog
     """

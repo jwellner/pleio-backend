@@ -3,7 +3,7 @@ import requests
 from celery import shared_task
 from celery.utils.log import get_task_logger
 from core import config
-from core.models import SiteStat, CommentAttachment, EntityAttachment, GroupAttachment
+from core.models import SiteStat, Attachment
 from core.tasks.notification_tasks import create_notifications_for_scheduled_content
 from django.conf import settings
 from django.core import management
@@ -35,6 +35,7 @@ def dispatch_crons(self, period):
             save_file_disk_usage.delay(client.schema_name)
             ban_users_that_bounce.delay(client.schema_name)
             ban_users_with_no_account.delay(client.schema_name)
+            remove_floating_attachments(client.schema_name)
 
         if period in ['daily', 'weekly', 'monthly']:
             send_overview.delay(client.schema_name, period)
@@ -96,28 +97,17 @@ def save_file_disk_usage(schema_name):
         logger.info('get_file_size \'%s\'', schema_name)
 
         file_folder_size = 0
-        comment_attachment_size = 0
-        entity_attachment_size = 0
-        group_attachment_size = 0
+        attachment_size = 0
 
         f = FileFolder.objects.filter(is_folder=False).aggregate(total_size=Sum('size'))
         if f.get('total_size', 0):
             file_folder_size = f.get('total_size', 0)
 
-        c = CommentAttachment.objects.all().aggregate(total_size=Sum('size'))
-        if c.get('total_size', 0):
-            comment_attachment_size = c.get('total_size', 0)
-
-        e = EntityAttachment.objects.all().aggregate(total_size=Sum('size'))
+        e = Attachment.objects.all().aggregate(total_size=Sum('size'))
         if e.get('total_size', 0):
-            entity_attachment_size = e.get('total_size', 0)
+            attachment_size = e.get('total_size', 0)
 
-        g = GroupAttachment.objects.all().aggregate(total_size=Sum('size'))
-        if g.get('total_size', 0):
-            group_attachment_size = g.get('total_size', 0)
-
-
-        total_size = file_folder_size + comment_attachment_size + entity_attachment_size + group_attachment_size
+        total_size = file_folder_size + attachment_size
 
         SiteStat.objects.create(
             stat_type='DISK_SIZE',
@@ -211,3 +201,9 @@ def ban_users_with_no_account(schema_name):
         if count:
             logger.info("Accounts blocked beacause of deleted account in pleio: %s", count)
         config.LAST_RECEIVED_DELETED_USER = last_received
+
+@shared_task()
+def remove_floating_attachments(schema_name):
+    with schema_context(schema_name):
+        deleted = Attachment.objects.filter(attached_content_type=None).delete()
+        logger.info("%s: %d floating attachments were deleted.", schema_name, deleted)

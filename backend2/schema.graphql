@@ -2321,7 +2321,7 @@ type Attachment {
 }
 
 input addAttachmentInput {
-  contentGuid: String!
+  contentGuid: String @deprecated(reason: "attachment relations are made through references in the text")
   file: Upload!
 }
 

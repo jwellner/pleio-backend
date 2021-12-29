@@ -1,9 +1,9 @@
 from auditlog.registry import auditlog
 from django.db import models
 from django.utils.text import slugify
-from core.models import Entity, VoteMixin, CommentMixin, BookmarkMixin, FollowMixin, NotificationMixin
+from core.models import Entity, VoteMixin, CommentMixin, BookmarkMixin, FollowMixin, NotificationMixin, AttachmentMixin
 
-class StatusUpdate(Entity, VoteMixin, CommentMixin, BookmarkMixin, FollowMixin, NotificationMixin):
+class StatusUpdate(Entity, VoteMixin, CommentMixin, BookmarkMixin, FollowMixin, NotificationMixin, AttachmentMixin):
     class Meta:
         ordering = ['-published']
 
@@ -30,6 +30,10 @@ class StatusUpdate(Entity, VoteMixin, CommentMixin, BookmarkMixin, FollowMixin, 
         return '{}#{}'.format(
             prefix, self.guid
         ).lower()
+
+    @property
+    def rich_fields(self):
+        return [self.rich_description]
 
 
 auditlog.register(StatusUpdate)

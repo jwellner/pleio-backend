@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Frans\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-12-20 11:51+0100\n"
+"POT-Creation-Date: 2021-12-23 12:38+0100\n"
 "PO-Revision-Date: 2021-06-24 15:12+0200\n"
 "Last-Translator: \n"
 "Language-Team: frans\n"
@@ -294,12 +294,12 @@ msgstr "Éditeur"
 msgid "Question expert"
 msgstr "Expert en questions"
 
-#: core/services/mail_service.py:26
+#: core/services/mail_service.py:27
 #, python-format
-msgid "New notification at %(site_name)s: "
-msgstr "Nouvelle notification sur %(site_name)s : "
+msgid "Notification on %(entity_title)s"
+msgstr "Notification sur %(entity_title)s"
 
-#: core/services/mail_service.py:28
+#: core/services/mail_service.py:29
 #, python-format
 msgid "New notifications at %(site_name)s"
 msgstr "Nouvelles notifications sur %(site_name)s"
@@ -580,6 +580,7 @@ msgid " has mentioned you at: "
 msgstr " vous a mentionné à :"
 
 #: core/templates/email/send_notification_emails.html:43
+#, python-format
 msgid ""
 " You have received this e-mail because you registered to receive "
 "notifications.<br /> Click <a href=\"%(unsubscribe_url)s\">here</a> to "
@@ -955,3 +956,6 @@ msgstr "Confirmation de l’inscription %s"
 #, python-format
 msgid "Filescan found suspicous files on %(site_url)s"
 msgstr "Filescan a trouvé des fichiers suspects sur %(site_url)s."
+
+#~ msgid "New notification at %(site_name)s: "
+#~ msgstr "Nouvelle notification sur %(site_name)s : "
