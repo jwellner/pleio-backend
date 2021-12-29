@@ -478,17 +478,14 @@ def export_content(request, content_type=None):
     return response
 
 
-def attachment(request, attachment_type, attachment_id):
+def attachment(request, attachment_id, attachment_type = None):
     # pylint: disable=unused-argument
     user = request.user
-
-    if attachment_type not in ['entity', 'comment', 'group']:
-        raise Http404("File not found")
 
     try:
         attachment = Attachment.objects.get(id=attachment_id)
 
-        if not attachment or not attachment.can_read(user):
+        if not attachment.can_read(user):
             raise Http404("File not found")
 
         response = StreamingHttpResponse(streaming_content=attachment.upload.open(), content_type=attachment.mime_type)
