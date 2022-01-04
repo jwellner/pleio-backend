@@ -1,4 +1,4 @@
-FROM python:3.8.10-slim AS build
+FROM python:3.9.9-slim AS build
 
 RUN apt-get update && apt-get install --no-install-recommends -y \
     build-essential \
@@ -12,7 +12,7 @@ WORKDIR /app-tmp
 COPY requirements.txt /app-tmp
 RUN /app-tmp/venv/bin/pip3 install -r requirements.txt
 
-FROM python:3.8.10-slim
+FROM python:3.9.9-slim
 
 RUN apt-get update && apt-get install --no-install-recommends -y \
     libgnutls30 \
