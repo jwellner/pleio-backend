@@ -14,7 +14,9 @@ logger = logging.getLogger(__name__)
 @registry.register_document
 class FileDocument(DefaultDocument):
     id = fields.KeywordField()
-    tags = fields.ListField(fields.TextField())
+    tags = fields.ListField(fields.TextField(
+        fields={'raw': fields.KeywordField()}
+    ))
     read_access = fields.ListField(fields.KeywordField())
     type = fields.KeywordField(attr="type_to_string")
     title = fields.TextField(
@@ -48,6 +50,9 @@ class FileDocument(DefaultDocument):
         except Exception as e:
             logger.error('Error occured while indexing file (%s): %s', instance.id, e)
             return file_contents
+
+    def prepare_tags(self, instance):
+        return [x.lower() for x in instance.tags]
 
     def update(self, thing, refresh=None, action='index', parallel=False, **kwargs):
         if isinstance(thing, models.Model) and not thing.group and action == "index":
