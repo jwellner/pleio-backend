@@ -4,8 +4,10 @@ from auditlog.registry import auditlog
 from django.db import models
 from django.contrib.postgres.fields import ArrayField
 
+from core.models.rich_fields import AttachmentMixin
 
-class Widget(models.Model):
+
+class Widget(AttachmentMixin, models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     group = models.ForeignKey(
         'core.Group',
@@ -44,12 +46,22 @@ class Widget(models.Model):
 
         return False
 
+    def can_read(self, user):
+        if self.page:
+            return self.page.can_read(user)
+
+        return False
+
     @property
     def type_to_string(self):
         return 'widget'
 
     def __str__(self):
         return f"Widget[{self.guid}]"
+
+    @property
+    def rich_fields(self):
+        return [setting.get('value', '') for setting in self.settings if setting.get('key', '') == 'richDescription']
 
 
 auditlog.register(Widget)
