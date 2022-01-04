@@ -100,7 +100,9 @@ class UserDocument(DefaultDocument):
 @registry.register_document
 class GroupDocument(DefaultDocument):
     id = fields.KeywordField()
-    tags = fields.ListField(fields.TextField())
+    tags = fields.ListField(fields.TextField(
+        fields={'raw': fields.KeywordField()}
+    ))
     type = fields.KeywordField(attr="type_to_string")
     read_access = fields.ListField(fields.TextField(attr="search_read_access"))
     name = fields.TextField(
@@ -119,6 +121,9 @@ class GroupDocument(DefaultDocument):
 
     def prepare_description(self, instance):
         return tiptap_to_text(instance.rich_description)
+
+    def prepare_tags(self, instance):
+        return [x.lower() for x in instance.tags]
 
     class Index:
         name = 'group'

@@ -8,7 +8,9 @@ from core.utils.convert import tiptap_to_text
 @registry.register_document
 class WikiDocument(DefaultDocument):
     id = fields.KeywordField()
-    tags = fields.ListField(fields.TextField())
+    tags = fields.ListField(fields.TextField(
+        fields={'raw': fields.KeywordField()}
+    ))
     read_access = fields.ListField(fields.KeywordField())
     type = fields.KeywordField(attr="type_to_string")
     title = fields.TextField(
@@ -24,6 +26,9 @@ class WikiDocument(DefaultDocument):
 
     def prepare_description(self, instance):
         return tiptap_to_text(instance.rich_description)
+
+    def prepare_tags(self, instance):
+        return [x.lower() for x in instance.tags]
 
     class Index:
         name = 'wiki'

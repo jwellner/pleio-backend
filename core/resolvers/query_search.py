@@ -82,11 +82,9 @@ def resolve_search(_, info, q=None, containerGuid=None, type=None, subtype=None,
         s = s.filter('term', container_guid=containerGuid)
 
     if tagLists:
-        for tagList in tagLists:
-            # TODO: remove after improving tags, to lowecase tags
-            tagList = [x.lower() for x in tagList]
+        for tags in tagLists:
             s = s.filter(
-                'terms', tags=tagList
+                'terms', tags__raw=[x.lower() for x in tags]
             )
 
     if orderBy == SEARCH_ORDER_BY.title:
