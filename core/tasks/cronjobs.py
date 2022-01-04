@@ -35,6 +35,8 @@ def dispatch_crons(self, period):
             save_file_disk_usage.delay(client.schema_name)
             ban_users_that_bounce.delay(client.schema_name)
             ban_users_with_no_account.delay(client.schema_name)
+
+        if period == 'weekly':
             remove_floating_attachments(client.schema_name)
 
         if period in ['daily', 'weekly', 'monthly']:
