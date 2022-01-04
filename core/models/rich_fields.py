@@ -71,7 +71,3 @@ class AttachmentMixin(RichFieldsMixin, metaclass=AbstractModelMeta):
     def sources_to_attachments(self, sources):
         attachment_ids = filter(None, [self.source_to_attachment_id(source) for source in sources])
         return Attachment.objects.filter(id__in=attachment_ids)
-
-    def save(self, *args, **kwargs):
-        super().save(*args, **kwargs)
-        self.update_attachments_links()
