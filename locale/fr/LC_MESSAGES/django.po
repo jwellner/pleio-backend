@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Frans\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-12-23 12:38+0100\n"
+"POT-Creation-Date: 2022-01-11 21:48+0100\n"
 "PO-Revision-Date: 2021-06-24 15:12+0200\n"
 "Last-Translator: \n"
 "Language-Team: frans\n"
@@ -83,7 +83,7 @@ msgstr "Blog"
 msgid "Discussion"
 msgstr "Discussion"
 
-#: core/lib.py:178 core/lib.py:296
+#: core/lib.py:178 core/lib.py:304
 msgid "News"
 msgstr "Actualité"
 
@@ -95,56 +95,60 @@ msgstr "Mettre à jour"
 msgid "Question"
 msgstr "Question"
 
-#: core/lib.py:190 core/lib.py:300
+#: core/lib.py:190 core/lib.py:308
 msgid "Wiki pages"
 msgstr "Wiki pages"
 
-#: core/lib.py:290
+#: core/lib.py:298
 msgid "Updates"
 msgstr "Mises à jour"
 
-#: core/lib.py:291
+#: core/lib.py:299
 msgid "Blogs"
 msgstr "Blogs"
 
-#: core/lib.py:292
+#: core/lib.py:300
 msgid "CMS pages"
 msgstr "Pages SGC"
 
-#: core/lib.py:293
+#: core/lib.py:301
 msgid "Discussions"
 msgstr "Discussions"
 
-#: core/lib.py:294
+#: core/lib.py:302
 msgid "Events"
 msgstr "Événements"
 
-#: core/lib.py:295
+#: core/lib.py:303
 msgid "Files"
 msgstr "Fichiers"
 
-#: core/lib.py:297
+#: core/lib.py:305
 msgid "Polls"
 msgstr "Sondages"
 
-#: core/lib.py:298
+#: core/lib.py:306
 msgid "Questions"
 msgstr "Questions"
 
-#: core/lib.py:299
+#: core/lib.py:307
 msgid "Tasks"
 msgstr "Tâches"
 
-#: core/lib.py:301
+#: core/lib.py:309
 msgid "Comments"
 msgstr "Commentaires"
+
+#: core/lib.py:310
+msgid "Groups"
+msgstr "Groupes"
 
 #: core/management/commands/send_overview_emails.py:91
 #, python-format
 msgid "Regular overview of %(site_name)s"
 msgstr "Aperçu régulier de %(site_name)s"
 
-#: core/models/group.py:176
+#: core/models/group.py:177
 #, python-format
 msgid "Welcome to %(group_name)s"
 msgstr "Bienvenue dans %(group_name)s"
@@ -294,12 +298,12 @@ msgstr "Éditeur"
 msgid "Question expert"
 msgstr "Expert en questions"
 
-#: core/services/mail_service.py:27
+#: core/services/mail_service.py:28
 #, python-format
 msgid "Notification on %(entity_title)s"
 msgstr "Notification sur %(entity_title)s"
 
-#: core/services/mail_service.py:29
+#: core/services/mail_service.py:30
 #, python-format
 msgid "New notifications at %(site_name)s"
 msgstr "Nouvelles notifications sur %(site_name)s"
@@ -938,7 +942,7 @@ msgstr ""
 msgid "New access request for %(site_name)s"
 msgstr "Nouvelle demande d’accès à %(site_name)s"
 
-#: core/views.py:557
+#: core/views.py:548
 msgid "Saved"
 msgstr "Sauvegardé"
 

@@ -306,7 +306,8 @@ def get_exportable_content_types():
         {"value": "question", "label": ugettext_lazy("Questions")},
         {"value": "task", "label": ugettext_lazy("Tasks")},
         {"value": "wiki", "label": ugettext_lazy("Wiki pages")},
-        {"value": "comment", "label": ugettext_lazy("Comments")}
+        {"value": "comment", "label": ugettext_lazy("Comments")},
+        {"value": "group", "label": ugettext_lazy("Groups")}
     ]
 
 def get_language_options():
