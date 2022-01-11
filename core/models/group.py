@@ -199,7 +199,7 @@ class Group(models.Model, AttachmentMixin):
 
     @property
     def rich_fields(self):
-        return [self.rich_description]
+        return [self.rich_description, self.introduction]
 
     def search_read_access(self):
         return [ACCESS_TYPE.public]
