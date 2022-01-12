@@ -2,6 +2,7 @@ from collections import namedtuple
 from typing import Optional
 
 
+# pylint: disable=unsubscriptable-object
 def str_value_to_dimension(value: Optional[str]):
     if isinstance(value, str) and value.isnumeric():
         return value + "px"

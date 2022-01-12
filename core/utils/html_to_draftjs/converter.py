@@ -118,6 +118,7 @@ class SoupConverter():
         self._blocks = []
 
     def _process_element_for_block(
+        # pylint: disable=unsubscriptable-object
         self, block, element: Tag, parent_element: Optional[Tag]
     ):
         for node in element.contents:
@@ -167,6 +168,7 @@ class SoupConverter():
             else:
                 self.handle_inline(node, block, start_pos, length)
 
+    # pylint: disable=unsubscriptable-object
     def build_block(self, element, parent: Optional[Tag] = None):
         """
         :param element:
@@ -192,6 +194,7 @@ class SoupConverter():
         # Finalize the block data
         block["key"] = self.key_generator(block)
 
+    # pylint: disable=unsubscriptable-object
     def get_typed_block_type(self, element: Tag, parent: Optional[Tag]) -> str:
         definitions = self.typed_blocks_types[element.name.lower()]
         if isinstance(definitions, str):
