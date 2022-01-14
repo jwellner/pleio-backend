@@ -92,6 +92,21 @@ docker-compose exec admin /app/manage.py createsuperuser
     - Domain: `test1.pleio.local`
     - elgg-database can be empty here
 
+#### Edit hosts file
+To be able to reach `.local` urls add the following line to the hosts file:
+
+`127.0.0.1 test1.pleio.local`
+
+On Windows you can find your hosts file here: 
+
+`C:/Windows/System32/drivers/etc/hosts`
+
+On OSX enter the following in Terminal: 
+
+```
+sudo nano /etc/hosts
+```
+
 Now browse to: http://test1.pleio.local:8000
 
 #### Run with a local frontend
@@ -117,7 +132,7 @@ How to setup Dnsmasq for `*.local` domains on a mac:
 ```bash
 brew install dnsmasq
 echo 'address=/.local/127.0.0.1' > $(brew --prefix)/etc/dnsmasq.conf
-brew services start dnsmasq
+sudo brew services start dnsmasq
 sudo mkdir -v /etc/resolver
 sudo bash -c 'echo "nameserver 127.0.0.1" > /etc/resolver/local'
 ```
