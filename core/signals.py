@@ -2,12 +2,11 @@ import logging
 from django.db.models.signals import post_save, pre_save, post_delete
 from django.conf import settings
 from django.utils import timezone
+from core.models.mixin import ModelWithFile
 from notifications.signals import notify
 from core.lib import datetime_isoformat, get_model_name, tenant_schema
 from core.models import Comment, Group, GroupInvitation, Entity, EntityViewCount, NotificationMixin, MentionMixin, AttachmentMixin
-from core.models.attachment import Attachment
 from core.tasks import create_notification
-from file.models import FileFolder
 from user.models import User
 from event.models import EventAttendee
 from notifications.models import Notification
@@ -134,9 +133,6 @@ pre_save.connect(updated_at_handler, sender=GroupInvitation)
 pre_save.connect(updated_at_handler, sender=EventAttendee)
 pre_save.connect(updated_at_handler, sender=User)
 
-post_delete.connect(file_delete_handler, sender=FileFolder)
-post_delete.connect(file_delete_handler, sender=Attachment)
-
 # Connect to all Entity subclasses
 for subclass in Entity.__subclasses__():
     pre_save.connect(updated_at_handler, subclass)
@@ -148,3 +144,6 @@ for subclass in MentionMixin.__subclasses__():
 
 for subclass in AttachmentMixin.__subclasses__():
     post_save.connect(attachment_handler, subclass)
+
+for subclass in ModelWithFile.__subclasses__():
+    post_delete.connect(file_delete_handler, subclass)

@@ -1,6 +1,7 @@
 import csv
 import json
 import logging
+import core.tasks
 from core.resolvers.query_site import get_settings
 from core import config
 from core.models import (
@@ -14,7 +15,6 @@ from core.lib import (
 from core.forms import EditEmailSettingsForm, OnboardingForm, RequestAccessForm
 from core.constances import USER_ROLES, OIDC_PROVIDER_OPTIONS
 from user.models import User
-from core.tasks import send_mail_multi
 from django.utils.translation import ugettext_lazy
 from core.auth import oidc_provider_logout_url
 from django.core import signing
@@ -184,7 +184,7 @@ def request_access(request):
 
                 for admin in admins:
                     context['admin_name'] = admin.name
-                    send_mail_multi.delay(tenant_schema(), subject, 'email/site_access_request.html', context, admin.email)
+                    core.tasks.send_mail_multi.delay(tenant_schema(), subject, 'email/site_access_request.html', context, admin.email)
 
             return redirect('access_requested')
 
@@ -482,21 +482,33 @@ def attachment(request, attachment_id, attachment_type = None):
     # pylint: disable=unused-argument
     user = request.user
 
+    size = request.GET.get('size', None)
+
     try:
         attachment = Attachment.objects.get(id=attachment_id)
 
         if not attachment.can_read(user):
             raise Http404("File not found")
+        
+        return_file = attachment
 
-        response = StreamingHttpResponse(streaming_content=attachment.upload.open(), content_type=attachment.mime_type)
-        response['Content-Length'] = attachment.upload.size
-        response['Content-Disposition'] = "attachment; filename=%s" % attachment.name
+        if size:
+            resized_image = attachment.get_resized_image(size)
+
+            if resized_image:
+                return_file = resized_image
+            else:
+                return redirect(attachment.url)
+
+        attachment_or_inline = "attachment" if not return_file.mime_type else "inline"
+
+        response = StreamingHttpResponse(streaming_content=return_file.upload.open(), content_type=return_file.mime_type)
+        response['Content-Length'] = return_file.upload.size
+        response['Content-Disposition'] = f"{attachment_or_inline}; filename=%s" % return_file.name
         return response
 
     except ObjectDoesNotExist:
         raise Http404("File not found")
-
-    raise Http404("File not found")
 
 
 def comment_confirm(request, entity_id):

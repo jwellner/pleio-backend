@@ -207,7 +207,14 @@ class FeaturedCoverMixin(models.Model):
     @property
     def featured_image_url(self):
         if self.featured_image:
-            return '%s?cache=%i' % (reverse('featured', args=[self.id]), int(self.featured_image.updated_at.timestamp()))
+            timestamp = self.featured_image.updated_at.timestamp()
+            try:
+                latest = self.featured_image.resized_images.latest('created_at')
+                timestamp = latest.created_at.timestamp()
+            except Exception:
+                pass
+
+            return '%s?cache=%i' % (reverse('featured', args=[self.id]), int(timestamp))
         return None
 
 class ArticleMixin(models.Model):
@@ -238,3 +245,4 @@ class ModelWithFile(models.Model, metaclass=AbstractModelMeta):
     def delete_files(self):
         for field in self.file_fields:
             delete_attached_file(field)
+            
