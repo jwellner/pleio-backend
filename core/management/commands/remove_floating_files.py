@@ -5,6 +5,7 @@ from django.conf import settings
 from django.core.management.base import BaseCommand
 from django_tenants.utils import schema_context, tenant_context
 from core.models.attachment import Attachment
+from core.models.image import ResizedImage
 from file.models import FileFolder
 from tenants.models import Client
 
@@ -44,7 +45,8 @@ class Command(BaseCommand):
             floating_files.difference_update(grounded_files)
             grounded_files = FileFolder.objects.filter(thumbnail__in=floating_files).values_list('thumbnail', flat=True)
             floating_files.difference_update(grounded_files)
-
+            grounded_files = ResizedImage.objects.filter(upload__in=floating_files).values_list('upload', flat=True)
+            floating_files.difference_update(grounded_files)
             return floating_files
 
     def remove_file(self, tenant, file):

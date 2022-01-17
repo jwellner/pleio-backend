@@ -2,13 +2,18 @@ import csv
 import os
 import re
 import signal_disabler
+from PIL import Image
+from io import BytesIO
+from django.core.files.base import ContentFile
+from django.apps import apps
 
 from celery import shared_task
 from celery.utils.log import get_task_logger
 from core import config
 from core.lib import access_id_to_acl
 from core.tasks.mail_tasks import send_mail_multi
-from core.models import Group, Entity, Widget, Comment, ProfileField, UserProfileField
+from core.models import Group, Entity, Widget, Comment, ProfileField, UserProfileField, \
+    ResizedImage, ResizedImageMixin
 from django.core import management
 from django.utils import translation
 from django.utils.translation import ugettext_lazy
@@ -356,7 +361,6 @@ def replace_domain_links(self, schema_name, replace_domain=None, replace_elgg_id
     logger.info("Done replacing links")
 
 
-
 @shared_task(bind=True)
 def draft_to_tiptap(self, schema_name):
     # pylint: disable=unused-argument
@@ -364,3 +368,45 @@ def draft_to_tiptap(self, schema_name):
     Send overview mails for tenant
     '''
     management.execute_from_command_line(['manage.py', 'tenant_command', 'draft_to_tiptap', '--schema', schema_name])
+
+
+@shared_task(bind=True)
+def image_resize(self, schema_name, model_name, content_id, size):
+    # pylint: disable=unused-argument
+    with schema_context(schema_name):
+        model = apps.get_model(model_name)
+
+        if not issubclass(model, ResizedImageMixin):
+            logger.error("Not a subclass of ResizedImageMixin %s", model)
+            return
+
+        original = model.objects.filter(id=content_id).first()
+
+        if not original:
+            logger.error("File not found %s", content_id)
+            return
+
+        if not original.is_image():
+            logger.error("File not a image %s", content_id)
+            return
+
+        thumbnail_size = (size, 10000)
+        infile = original.upload_field.open()
+
+        try:
+            im = Image.open(infile)
+            im.thumbnail(thumbnail_size, Image.LANCZOS)
+
+            output = BytesIO()
+            im.save(output, im.format)
+            contents = output.getvalue()
+
+            resized_image = ResizedImage()
+            resized_image.mime_type = Image.MIME[im.format]
+            resized_image.size = size
+            resized_image.original = original
+            resized_image.upload.save(original.upload_field.name, ContentFile(contents))
+            resized_image.save()
+
+        except IOError:
+            logger.error("Unable to resize file: %s", infile)
