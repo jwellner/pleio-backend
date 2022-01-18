@@ -10,6 +10,7 @@ from enum import Enum
 from core.lib import generate_object_filename, get_mimetype
 from core.models import Entity
 from core.models.mixin import ModelWithFile
+from core.models.image import ResizedImageMixin
 from django.db.models import ObjectDoesNotExist
 from django.db.models.signals import pre_save, pre_delete
 from django.dispatch import receiver
@@ -29,7 +30,7 @@ class FILE_SCAN(Enum):
     VIRUS = 'VIRUS'
     UNKNOWN = 'UNKNOWN'
 
-class FileFolder(Entity, ModelWithFile):
+class FileFolder(Entity, ModelWithFile, ResizedImageMixin):
 
     title = models.CharField(max_length=256)
 
@@ -129,6 +130,14 @@ class FileFolder(Entity, ModelWithFile):
             return FILE_SCAN.CLEAN
 
         return FILE_SCAN.UNKNOWN
+
+    @property
+    def upload_field(self):
+        return self.upload
+
+    @property
+    def mime_type_field(self):
+        return self.mime_type
 
 class ScanIncident(models.Model):
     date = models.DateTimeField(default=timezone.now)

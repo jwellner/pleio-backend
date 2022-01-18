@@ -11,3 +11,4 @@ from .site import SiteInvitation, SiteAccessRequest, SiteStat
 from .widget import Widget
 from .draft_backup import DraftBackup
 from .rich_fields import MentionMixin, AttachmentMixin
+from .image import ResizedImage, ResizedImageMixin

@@ -11,6 +11,7 @@ from django.urls import reverse
 from django.conf import settings
 from core.lib import get_mimetype
 from core.models.mixin import ModelWithFile
+from core.models.image import ResizedImageMixin
 
 logger = logging.getLogger(__name__)
 
@@ -20,7 +21,7 @@ def attachment_path(instance, filename):
     filename = "%s.%s" % (slugify(name), ext)
     return os.path.join('attachments', str(instance.id), filename)
 
-class Attachment(ModelWithFile):
+class Attachment(ModelWithFile, ResizedImageMixin):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     name = models.CharField(max_length=256, default="")
     upload = models.FileField(upload_to=attachment_path, blank=True, null=True, max_length=512)
@@ -53,6 +54,14 @@ class Attachment(ModelWithFile):
     @property
     def file_fields(self):
         return [self.upload]
+
+    @property
+    def upload_field(self):
+        return self.upload
+
+    @property
+    def mime_type_field(self):
+        return self.mime_type
 
     def __str__(self):
         return f"{self._meta.object_name}[{self.upload.name}]"

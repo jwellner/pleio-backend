@@ -2,6 +2,7 @@ import zipfile
 from django.core.exceptions import ObjectDoesNotExist
 from django.http import Http404, FileResponse, StreamingHttpResponse
 from django.views.decorators.cache import cache_control
+from django.shortcuts import redirect
 from core.lib import get_tmp_file_path
 from core.models import Entity
 from core.constances import USER_ROLES
@@ -13,6 +14,7 @@ from os import path
 def download(request, file_id=None, file_name=None):
     # pylint: disable=unused-argument
     user = request.user
+    size = request.GET.get('size', None)
 
     if not file_id:
         raise Http404("File not found")
@@ -26,21 +28,30 @@ def download(request, file_id=None, file_name=None):
         if entity.scan_incidents.count() > 0:
             raise Http404("File not found")
 
-        attachment_or_inline = "attachment" if not entity.mime_type else "inline"
-        response = StreamingHttpResponse(streaming_content=entity.upload.open(), content_type=entity.mime_type)
-        response['Content-Length'] = entity.upload.size
+        return_file = entity
+
+        if size:
+            resized_image = entity.get_resized_image(size)
+
+            if resized_image:
+                return_file = resized_image
+            else:
+                return redirect(entity.download_url)
+
+        attachment_or_inline = "attachment" if not return_file.mime_type else "inline"
+        response = StreamingHttpResponse(streaming_content=return_file.upload.open(), content_type=return_file.mime_type)
+        response['Content-Length'] = return_file.upload.size
         response['Content-Disposition'] = f"{attachment_or_inline}; filename=%s" % get_download_filename(entity)
         return response
 
     except ObjectDoesNotExist:
         raise Http404("File not found")
 
-    raise Http404("File not found")
-
 @cache_control(public=True, max_age=15724800)
 def embed(request, file_id=None, file_name=None):
     # pylint: disable=unused-argument
     user = request.user
+    size = request.GET.get('size', None)
 
     if not file_id:
         raise Http404("File not found")
@@ -54,17 +65,26 @@ def embed(request, file_id=None, file_name=None):
         if entity.scan_incidents.count() > 0:
             raise Http404("File not found")
 
-        response = StreamingHttpResponse(streaming_content=entity.upload.open(), content_type=entity.mime_type)
-        response['Content-Length'] = entity.upload.size
+        return_file = entity
+
+        if size:
+            resized_image = entity.get_resized_image(size)
+
+            if resized_image:
+                return_file = resized_image
+            else:
+                return redirect(entity.embed_url)
+
+        response = StreamingHttpResponse(streaming_content=return_file.upload.open(), content_type=return_file.mime_type)
+        response['Content-Length'] = return_file.upload.size
         return response
 
     except ObjectDoesNotExist:
         raise Http404("File not found")
 
-    raise Http404("File not found")
-
 @cache_control(public=True, max_age=15724800)
 def featured(request, entity_guid=None):
+    size = request.GET.get('size', None)
     if not entity_guid:
         raise Http404("File not found")
 
@@ -76,8 +96,18 @@ def featured(request, entity_guid=None):
             if entity.featured_image.scan_incidents.count() > 0:
                 raise Http404("File not found")
 
-            response = StreamingHttpResponse(streaming_content=entity.featured_image.upload.open(), content_type=entity.featured_image.mime_type)
-            response['Content-Length'] = entity.featured_image.upload.size
+            return_file = entity.featured_image
+
+            if size:
+                resized_image = entity.featured_image.get_resized_image(size)
+
+                if resized_image:
+                    return_file = resized_image
+                else:
+                    return redirect(entity.featured_image_url)
+
+            response = StreamingHttpResponse(streaming_content=return_file.upload.open(), content_type=return_file.mime_type)
+            response['Content-Length'] = return_file.upload.size
             return response
 
     except ObjectDoesNotExist:
