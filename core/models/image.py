@@ -79,4 +79,4 @@ class ResizedImageMixin(models.Model):
     def resize(self, size):
         model = ContentType.objects.get_for_model(self)
         model_name = "%s.%s" % (model.app_label, model.model)
-        celery.current_app.send_task('core.tasks.misc.image_resize', (tenant_schema(), model_name, self.id, size,))
+        celery.current_app.send_task('core.tasks.misc.disabled_image_resize', (tenant_schema(), model_name, self.id, size,))

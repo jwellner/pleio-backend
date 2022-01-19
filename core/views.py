@@ -482,7 +482,8 @@ def attachment(request, attachment_id, attachment_type = None):
     # pylint: disable=unused-argument
     user = request.user
 
-    size = request.GET.get('size', None)
+    #size = request.GET.get('size', None)
+    size = None
 
     try:
         attachment = Attachment.objects.get(id=attachment_id)
