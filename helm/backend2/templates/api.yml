@@ -55,6 +55,8 @@ spec:
                 name: {{ include "backend2.name" . }}
             - secretRef:
                 name: {{ include "backend2.secretsName" . }}
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
       volumes:
         - name: tmp-zip-storage
           {{- if eq .Values.storage.type "hostpath" }}
