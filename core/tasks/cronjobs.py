@@ -222,4 +222,4 @@ def resize_pending_images(schema_name):
         pending = ResizedImage.objects.filter(status=ResizedImage.PENDING, created_at__lt=time_threshold)
         for image in pending:
             celery.current_app.send_task('core.tasks.misc.image_resize', (schema_name, image.id,))
-        logger.info("%s: %d floating attachments were deleted.", schema_name, pending.count())
+        logger.info("%s: %d pending image resizes.", schema_name, pending.count())
