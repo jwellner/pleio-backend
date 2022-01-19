@@ -369,9 +369,13 @@ def draft_to_tiptap(self, schema_name):
     '''
     management.execute_from_command_line(['manage.py', 'tenant_command', 'draft_to_tiptap', '--schema', schema_name])
 
-
 @shared_task(bind=True)
 def image_resize(self, schema_name, model_name, content_id, size):
+    # pylint: disable=unused-argument
+    return
+
+@shared_task(bind=True)
+def disabled_image_resize(self, schema_name, model_name, content_id, size):
     # pylint: disable=unused-argument
     with schema_context(schema_name):
         model = apps.get_model(model_name)
