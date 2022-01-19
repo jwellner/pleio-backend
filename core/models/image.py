@@ -21,6 +21,11 @@ def image_path(instance, filename):
     return os.path.join('images', str(instance.original.id), filename)
 
 class ResizedImage(ModelWithFile):
+
+    OK = 'OK'
+    PENDING = 'PENDING'
+    FAILED = 'FAILED'
+
     original_content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
     original_object_id = models.UUIDField()
     original = GenericForeignKey(ct_field='original_content_type', fk_field='original_object_id')
@@ -28,7 +33,11 @@ class ResizedImage(ModelWithFile):
     upload = models.FileField(upload_to=image_path, max_length=512)
     size = models.IntegerField()
     mime_type = models.CharField(null=True, blank=True, max_length=100)
+
+    status = models.CharField(max_length=255, default=PENDING)
+
     created_at = models.DateTimeField(default=timezone.now)
+    updated_at = models.DateTimeField(auto_now=True)
 
     @property
     def file_fields(self):
@@ -71,12 +80,16 @@ class ResizedImageMixin(models.Model):
             return None
 
         image = self.resized_images.filter(size=size).first()
+
         if not image:
-            self.resize(size)
+            tmp_img = ResizedImage.objects.create(
+                size=size,
+                original=self
+            )
 
-        return image
+            celery.current_app.send_task('core.tasks.misc.image_resize', (tenant_schema(), tmp_img.id,))
 
-    def resize(self, size):
-        model = ContentType.objects.get_for_model(self)
-        model_name = "%s.%s" % (model.app_label, model.model)
-        celery.current_app.send_task('core.tasks.misc.disabled_image_resize', (tenant_schema(), model_name, self.id, size,))
+        if image and image.status == ResizedImage.OK:
+            return image
+
+        return None
