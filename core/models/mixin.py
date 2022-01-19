@@ -209,8 +209,8 @@ class FeaturedCoverMixin(models.Model):
         if self.featured_image:
             timestamp = self.featured_image.updated_at.timestamp()
             try:
-                latest = self.featured_image.resized_images.latest('created_at')
-                timestamp = latest.created_at.timestamp()
+                latest = self.featured_image.resized_images.latest('updated_at')
+                timestamp = latest.updated_at.timestamp()
             except Exception:
                 pass
 

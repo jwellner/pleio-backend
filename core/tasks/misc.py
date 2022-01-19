@@ -5,15 +5,12 @@ import signal_disabler
 from PIL import Image
 from io import BytesIO
 from django.core.files.base import ContentFile
-from django.apps import apps
-
 from celery import shared_task
 from celery.utils.log import get_task_logger
 from core import config
 from core.lib import access_id_to_acl
 from core.tasks.mail_tasks import send_mail_multi
-from core.models import Group, Entity, Widget, Comment, ProfileField, UserProfileField, \
-    ResizedImage, ResizedImageMixin
+from core.models import Group, Entity, Widget, Comment, ProfileField, UserProfileField, ResizedImage
 from django.core import management
 from django.utils import translation
 from django.utils.translation import ugettext_lazy
@@ -369,33 +366,22 @@ def draft_to_tiptap(self, schema_name):
     '''
     management.execute_from_command_line(['manage.py', 'tenant_command', 'draft_to_tiptap', '--schema', schema_name])
 
-@shared_task(bind=True)
-def image_resize(self, schema_name, model_name, content_id, size):
-    # pylint: disable=unused-argument
-    return
 
 @shared_task(bind=True)
-def disabled_image_resize(self, schema_name, model_name, content_id, size):
+def image_resize(self, schema_name, resize_image_id):
     # pylint: disable=unused-argument
     with schema_context(schema_name):
-        model = apps.get_model(model_name)
-
-        if not issubclass(model, ResizedImageMixin):
-            logger.error("Not a subclass of ResizedImageMixin %s", model)
+        try:
+            resized_image = ResizedImage.objects.get(id=resize_image_id)
+        except Exception as e:
+            logger.error(e)
             return
 
-        original = model.objects.filter(id=content_id).first()
-
-        if not original:
-            logger.error("File not found %s", content_id)
+        if resized_image.status == ResizedImage.OK:
             return
 
-        if not original.is_image():
-            logger.error("File not a image %s", content_id)
-            return
-
-        thumbnail_size = (size, 10000)
-        infile = original.upload_field.open()
+        thumbnail_size = (resized_image.size, 10000)
+        infile = resized_image.original.upload_field.open()
 
         try:
             im = Image.open(infile)
@@ -405,12 +391,12 @@ def disabled_image_resize(self, schema_name, model_name, content_id, size):
             im.save(output, im.format)
             contents = output.getvalue()
 
-            resized_image = ResizedImage()
             resized_image.mime_type = Image.MIME[im.format]
-            resized_image.size = size
-            resized_image.original = original
-            resized_image.upload.save(original.upload_field.name, ContentFile(contents))
+            resized_image.upload.save(resized_image.original.upload_field.name, ContentFile(contents))
+            resized_image.status = ResizedImage.OK
             resized_image.save()
 
         except IOError:
+            resized_image.status = ResizedImage.FAILED
+            resized_image.save()
             logger.error("Unable to resize file: %s", infile)

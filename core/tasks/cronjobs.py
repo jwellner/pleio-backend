@@ -1,9 +1,10 @@
 import requests
 
+import celery
 from celery import shared_task
 from celery.utils.log import get_task_logger
 from core import config
-from core.models import SiteStat, Attachment
+from core.models import SiteStat, Attachment, ResizedImage
 from core.tasks.notification_tasks import create_notifications_for_scheduled_content
 from django.conf import settings
 from django.core import management
@@ -11,6 +12,8 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.db import connection
 from django.db.models import Sum
 from django_tenants.utils import schema_context
+from django.utils import timezone
+from datetime import timedelta
 from file.models import FileFolder
 from tenants.models import Client
 from user.models import User
@@ -35,6 +38,8 @@ def dispatch_crons(self, period):
             save_file_disk_usage.delay(client.schema_name)
             ban_users_that_bounce.delay(client.schema_name)
             ban_users_with_no_account.delay(client.schema_name)
+            resize_pending_images.delay(client.schema_name)
+
 
         if period == 'weekly':
             remove_floating_attachments(client.schema_name)
@@ -209,3 +214,12 @@ def remove_floating_attachments(schema_name):
     with schema_context(schema_name):
         deleted = Attachment.objects.filter(attached_content_type=None).delete()
         logger.info("%s: %d floating attachments were deleted.", schema_name, deleted)
+
+@shared_task()
+def resize_pending_images(schema_name):
+    with schema_context(schema_name):
+        time_threshold = timezone.now() - timedelta(hours=1)
+        pending = ResizedImage.objects.filter(status=ResizedImage.PENDING, created_at__lt=time_threshold)
+        for image in pending:
+            celery.current_app.send_task('core.tasks.misc.image_resize', (schema_name, image.id,))
+        logger.info("%s: %d pending image resizes.", schema_name, pending.count())

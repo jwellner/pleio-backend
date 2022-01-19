@@ -50,10 +50,10 @@ class ResizeImageTestCase(FastTenantTestCase):
             upload=self.get_image('testfile.jpg')
         )
 
-        #response = self.client.get(attachment.url + "?size=414", follow=True)
+        response = self.client.get(attachment.url + "?size=414", follow=True)
 
-        #mock_send_task.assert_called_once()
-        #self.assertRedirects(response, attachment.url)
+        mock_send_task.assert_called_once()
+        self.assertRedirects(response, attachment.url)
 
     @mock.patch('celery.current_app.send_task')
     def test_resize(self, mock_send_task):
@@ -62,10 +62,15 @@ class ResizeImageTestCase(FastTenantTestCase):
             owner=self.authenticatedUser,
             upload=self.get_image('testfile.jpg')
         )
+        ResizedImage.objects.create(
+            original=attachment,
+            size=414,
+            upload=self.get_image('testfile2.jpg'),
+            status='OK'
+        )
 
-        #image_resize.apply((connection.schema_name, 'core.Attachment', attachment.id, 414)).get()
-        #response = self.client.get(attachment.url + "?size=414")
+        response = self.client.get(attachment.url + "?size=414")
 
-        #mock_send_task.assert_not_called()
+        mock_send_task.assert_not_called()
 
-        #self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.status_code, 200)
