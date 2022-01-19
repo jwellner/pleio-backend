@@ -462,12 +462,12 @@ def get_mimetype(filepath):
 
 def map_notification(notification):
     """ get a mapped notification """
-    entity = get_notification_action_entity(notification)
+    entity = notification.action_object
     performer = apps.get_model('user.User').objects.get(id=notification.actor_object_id)
     entity_group = False
     entity_group_name = ""
     entity_group_url = ""
-    if entity.group:
+    if hasattr(entity, 'group') and entity.group:
         entity_group = True
         entity_group_name = entity.group.name
         entity_group_url = entity.group.url
@@ -486,15 +486,6 @@ def map_notification(notification):
         'timeCreated': notification.timestamp,
         'isUnread': notification.unread
     }
-
-def get_notification_action_entity(notification):
-    """ get entity from actoin_object_object_id """
-    entity = notification.action_object
-
-    if not hasattr(entity, 'group'):
-        entity.group = None
-
-    return entity
 
 def get_model_name(instance):
     return instance._meta.app_label + '.' + instance._meta.model_name
