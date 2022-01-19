@@ -371,7 +371,11 @@ def draft_to_tiptap(self, schema_name):
 def image_resize(self, schema_name, resize_image_id):
     # pylint: disable=unused-argument
     with schema_context(schema_name):
-        resized_image = ResizedImage.object.get(resize_image_id)
+        try:
+            resized_image = ResizedImage.objects.get(id=resize_image_id)
+        except Exception as e:
+            logger.error(e)
+            return
 
         if resized_image.status == ResizedImage.OK:
             return
