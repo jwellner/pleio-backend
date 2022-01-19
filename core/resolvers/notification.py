@@ -1,5 +1,4 @@
 from ariadne import ObjectType
-from core.lib import get_notification_action_entity
 from user.models import User
 
 
@@ -19,17 +18,23 @@ def resolve_action(obj, info):
 @notification.field("performer")
 def resolve_performer(obj, info):
     # pylint: disable=unused-argument
-    return User.objects.get(id=obj.actor_object_id)
+    return User.objects.with_deleted().get(id=obj.actor_object_id)
 
 @notification.field("entity")
 def resolve_entity(obj, info):
     # pylint: disable=unused-argument
-    return get_notification_action_entity(obj)
+    if obj.action_object:
+        return obj.action_object
+
+    return None
 
 @notification.field("container")
 def resolve_container(obj, info):
     # pylint: disable=unused-argument
-    return get_notification_action_entity(obj).group
+    if obj.action_object and hasattr(obj.action_object , 'group'):
+        return obj.action_object.group
+
+    return None
 
 @notification.field("timeCreated")
 def resolve_timestamp(obj, info):
