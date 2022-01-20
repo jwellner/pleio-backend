@@ -2,6 +2,7 @@ import abc
 from core.models.attachment import Attachment
 from core.models.shared import AbstractModelMeta
 from core.utils.tiptap_parser import Tiptap
+from core.lib import is_valid_uuid
 from django.contrib.contenttypes.fields import GenericRelation
 from pathlib import PurePosixPath
 from urllib.parse import unquote, urlparse
@@ -62,8 +63,13 @@ class AttachmentMixin(RichFieldsMixin, metaclass=AbstractModelMeta):
     def source_to_attachment_id(self, source):
         # NOTE: this is a simple approach that fits the current urls "/attachment/<type>/<id>", it might not be sufficient for future changes
         source_parts = PurePosixPath(unquote(urlparse(source).path)).parts
-        # NOTE: Images that have been added with addImage end up in "/file/download/<id>/<name>" these are filefolders so they are skipped
-        if source_parts[1] == 'file':
+        if len(source_parts) < 2:
+            return None
+
+        if not source_parts[1] == 'attachment':
+            return None
+
+        if not is_valid_uuid(source_parts[-1]):
             return None
 
         return source_parts[-1]
