@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-01-11 21:48+0100\n"
+"POT-Creation-Date: 2022-01-20 11:09+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -297,8 +297,6 @@ msgid "Question expert"
 msgstr "Question expert"
 
 #: core/services/mail_service.py:28
-#, fuzzy, python-format
-#| msgid "New notifications at %(site_name)s"
 msgid "Notification on %(entity_title)s"
 msgstr "Notification on %(entity_title)s"
 
@@ -307,11 +305,11 @@ msgstr "Notification on %(entity_title)s"
 msgid "New notifications at %(site_name)s"
 msgstr "New notifications at %(site_name)s"
 
-#: core/tasks/misc.py:119
+#: core/tasks/misc.py:121
 msgid "Import was a success"
 msgstr "Import was a success"
 
-#: core/tasks/misc.py:119
+#: core/tasks/misc.py:121
 msgid "Import failed"
 msgstr "Import failed"
 
@@ -413,6 +411,45 @@ msgstr ""
 "Date: %(start_date)s<br><br>\n"
 "\n"
 "Click on the link below to see or make changes to your registration and to add this appointment to your agenda.<br><br>\n"
+"<a href=\"%(link)s\">%(link)s</a>\n"
+
+#: core/templates/email/delete_event_attendees.html:7
+#, python-format
+msgid ""
+"\n"
+"        Dear %(removed_attendee_name)s,\n"
+"    "
+msgstr ""
+"\n"
+"        Dear %(removed_attendee_name)s,\n"
+"    "
+
+#: core/templates/email/delete_event_attendees.html:11
+msgid ""
+"\n"
+"        Dear user,\n"
+"    "
+msgstr ""
+"\n"
+"        Dear user,\n"
+"    "
+
+#: core/templates/email/delete_event_attendees.html:16
+msgid ""
+"\n"
+"You are removed as attendee from %(title)s.<br><br>\n"
+"\n"
+"If you have questions, please contact the event organizer.\n"
+"\n"
+"Click on the link below to see the event.<br><br>\n"
+"<a href=\"%(link)s\">%(link)s</a>\n"
+msgstr ""
+"\n"
+"You are removed as attendee from %(title)s.<br><br>\n"
+"\n"
+"If you have questions, please contact the event organizer.\n"
+"\n"
+"Click on the link below to see the event.<br><br>\n"
 "<a href=\"%(link)s\">%(link)s</a>\n"
 
 #: core/templates/email/entities/blog.html:27
@@ -929,7 +966,7 @@ msgstr ""
 msgid "New access request for %(site_name)s"
 msgstr "New access request for %(site_name)s"
 
-#: core/views.py:548
+#: core/views.py:560
 msgid "Saved"
 msgstr "Saved"
 
@@ -942,6 +979,11 @@ msgstr "Confirmation of registration %s"
 #, python-format
 msgid "Confirmation of registration for %s"
 msgstr "Confirmation of registration for %s"
+
+#: event/resolvers/mutation_delete_event_attendees.py:32
+#, python-format
+msgid "Removed from event: %s"
+msgstr "Removed from event: %s"
 
 #: file/tasks.py:63
 #, python-format
