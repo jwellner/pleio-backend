@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-01-11 21:48+0100\n"
+"POT-Creation-Date: 2022-01-20 11:09+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -306,11 +306,11 @@ msgstr "Notificatie op %(entity_title)s"
 msgid "New notifications at %(site_name)s"
 msgstr "Nieuwe notificaties op %(site_name)s"
 
-#: core/tasks/misc.py:119
+#: core/tasks/misc.py:121
 msgid "Import was a success"
 msgstr "Import afgerond"
 
-#: core/tasks/misc.py:119
+#: core/tasks/misc.py:121
 msgid "Import failed"
 msgstr "Import mislukt"
 
@@ -412,6 +412,45 @@ msgstr ""
 "Datum: %(start_date)s<br><br>\n"
 "\n"
 "Klik op de onderstaande link om je aanmelding te bekijken of te wijzigen en om de afspraak in je agenda te zetten.  <br><br>\n"
+"<a href=\"%(link)s\">%(link)s</a>\n"
+
+#: core/templates/email/delete_event_attendees.html:7
+#, python-format
+msgid ""
+"\n"
+"        Dear %(removed_attendee_name)s,\n"
+"    "
+msgstr ""
+"\n"
+"        Beste %(removed_attendee_name)s,\n"
+"    "
+
+#: core/templates/email/delete_event_attendees.html:11
+msgid ""
+"\n"
+"        Dear user,\n"
+"    "
+msgstr ""
+"\n"
+"        Beste gebruiker,\n"
+"    "
+
+#: core/templates/email/delete_event_attendees.html:16
+msgid ""
+"\n"
+"You are removed as attendee from %(title)s.<br><br>\n"
+"\n"
+"If you have questions, please contact the event organizer.\n"
+"\n"
+"Click on the link below to see the event.<br><br>\n"
+"<a href=\"%(link)s\">%(link)s</a>\n"
+msgstr ""
+"\n"
+"U bent verwijderd als genodigde van %(title)s.<br><br>\n"
+"\n"
+"Als u vragen hebt, kunt u contact opnemen met de organisator van het evenement.\n"
+"\n"
+"Klik op de onderstaande link om het evenement te bekijken.<br><br>\n"
 "<a href=\"%(link)s\">%(link)s</a>\n"
 
 #: core/templates/email/entities/blog.html:27
@@ -928,7 +967,7 @@ msgstr ""
 msgid "New access request for %(site_name)s"
 msgstr "Nieuwe toegangsaanvraag voor %(site_name)s"
 
-#: core/views.py:548
+#: core/views.py:560
 msgid "Saved"
 msgstr "Opgeslagen"
 
@@ -941,6 +980,11 @@ msgstr "Bevestiging aanmelding %s"
 #, python-format
 msgid "Confirmation of registration for %s"
 msgstr "Bevestiging aanmelding voor %s"
+
+#: event/resolvers/mutation_delete_event_attendees.py:32
+#, python-format
+msgid "Removed from event: %s"
+msgstr "Verwijderd uit gebeurtenis: %s"
 
 #: file/tasks.py:63
 #, python-format

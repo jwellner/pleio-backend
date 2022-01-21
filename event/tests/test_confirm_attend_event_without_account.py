@@ -39,6 +39,7 @@ class ConfirmAttendEventWithoutAccountTestCase(FastTenantTestCase):
                 confirmAttendEventWithoutAccount(input: $input) {
                     entity {
                         guid
+                        attendeesWithoutAccountEmailAddresses
                         __typename
                     }
                     __typename
@@ -62,6 +63,7 @@ class ConfirmAttendEventWithoutAccountTestCase(FastTenantTestCase):
         data = result[1]["data"]
 
         self.assertEqual(data["confirmAttendEventWithoutAccount"]["entity"]["guid"], self.event.guid)
+        self.assertEqual(data["confirmAttendEventWithoutAccount"]["entity"]["attendeesWithoutAccountEmailAddresses"], [])
 
         mocked_send_mail_multi.assert_called_once()
 

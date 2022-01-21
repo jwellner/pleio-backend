@@ -124,6 +124,18 @@ def resolve_attendees_without_account(obj, info):
 
     return obj.attendees.exclude(user__isnull=False).count()
 
+@event.field("attendeesWithoutAccountEmailAddresses")
+def resolve_attendees_without_account_email_addresses(obj, info):
+    # pylint: disable=unused-argument
+    user = info.context["request"].user
+    if not user.is_authenticated:
+        return []
+
+    if not obj.can_write(user):
+        return []
+
+    return obj.attendees.exclude(user__isnull=False).values_list("email", flat=True)
+
 
 event.set_field("guid", shared.resolve_entity_guid)
 event.set_field("status", shared.resolve_entity_status)

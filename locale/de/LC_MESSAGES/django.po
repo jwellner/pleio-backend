@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Duits\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-01-11 21:48+0100\n"
+"POT-Creation-Date: 2022-01-20 11:09+0100\n"
 "PO-Revision-Date: 2021-05-26 10:55+0200\n"
 "Last-Translator: \n"
 "Language-Team: \n"
@@ -307,11 +307,11 @@ msgstr "Benachrichtigung über %(entity_title)s"
 msgid "New notifications at %(site_name)s"
 msgstr "Neue Benachrichtigungen bei %(site_name)s"
 
-#: core/tasks/misc.py:119
+#: core/tasks/misc.py:121
 msgid "Import was a success"
 msgstr "Import war erfolgreich"
 
-#: core/tasks/misc.py:119
+#: core/tasks/misc.py:121
 msgid "Import failed"
 msgstr "Import fehlgeschlagen"
 
@@ -410,6 +410,45 @@ msgstr ""
 "Klicken Sie auf den unten stehenden Link, um Ihre Registrierung anzuzeigen oder zu ändern und diesen Termin zu Ihrem Kalender hinzuzufügen.<br><br>\n"
 "\n"
 "<a href=“%(link)s”>%(link)s</a>\n"
+
+#: core/templates/email/delete_event_attendees.html:7
+#, python-format
+msgid ""
+"\n"
+"        Dear %(removed_attendee_name)s,\n"
+"    "
+msgstr ""
+"\n"
+"        Sehr geehrter %(removed_attendee_name)s,\n"
+"    "
+
+#: core/templates/email/delete_event_attendees.html:11
+msgid ""
+"\n"
+"        Dear user,\n"
+"    "
+msgstr ""
+"\n"
+"        Lieber Benutzer,\n"
+"    "
+
+#: core/templates/email/delete_event_attendees.html:16
+msgid ""
+"\n"
+"You are removed as attendee from %(title)s.<br><br>\n"
+"\n"
+"If you have questions, please contact the event organizer.\n"
+"\n"
+"Click on the link below to see the event.<br><br>\n"
+"<a href=\"%(link)s\">%(link)s</a>\n"
+msgstr ""
+"\n"
+"Sie werden als Teilnehmer von %(title)sentfernt.<br><br>\n"
+"\n"
+"Wenn Sie Fragen haben, wenden Sie sich bitte an den Organisator der Veranstaltung.\n"
+"\n"
+"Klicken Sie auf den untenstehenden Link, um die Veranstaltung zu sehen.<br><br>\n"
+"<a href=\"%(link)s\">%(link)s</a>\n"
 
 #: core/templates/email/entities/blog.html:27
 msgid "Blog created by"
@@ -918,7 +957,7 @@ msgstr ""
 msgid "New access request for %(site_name)s"
 msgstr "Neue Zugriffsanfrage für %(site_name)s"
 
-#: core/views.py:548
+#: core/views.py:560
 msgid "Saved"
 msgstr "Gerettet"
 
@@ -931,6 +970,11 @@ msgstr "Anmeldungsbestätigung %s"
 #, python-format
 msgid "Confirmation of registration for %s"
 msgstr "Bestätigung der Registrierung für %s"
+
+#: event/resolvers/mutation_delete_event_attendees.py:32
+#, python-format
+msgid "Removed from event: %s"
+msgstr "Entfernt vom Ereignis: %s"
 
 #: file/tasks.py:63
 #, python-format

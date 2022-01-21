@@ -37,6 +37,28 @@ class Event(Entity, CommentMixin, BookmarkMixin, FollowMixin, NotificationMixin,
 
         return attendee
 
+    def delete_attendee(self, user, email):
+        deleted = False        
+        if not user.is_authenticated:
+            return None
+        
+        # try delete attendee with account
+        try:
+            attendee = User.objects.get(email=email)
+            self.attendees.get(user=attendee).delete()
+            deleted = True
+        except ObjectDoesNotExist:
+            pass
+
+        # try delete attendee without account
+        try:
+            self.attendees.get(email=email).delete()
+            deleted = True
+        except ObjectDoesNotExist:
+            pass
+
+        return deleted
+
     def __str__(self):
         return f"Event[{self.title}]"
 
