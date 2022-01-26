@@ -479,6 +479,7 @@ def map_notification(notification):
         'performer_name': performer.name,
         'entity_title': entity.title if hasattr(entity, 'title') else "",
         'entity_description': entity.description if hasattr(entity, 'description') else "",
+        'entity_type': entity._meta.verbose_name,
         'entity_group': entity_group,
         'entity_group_name': entity_group_name,
         'entity_group_url': entity_group_url,
