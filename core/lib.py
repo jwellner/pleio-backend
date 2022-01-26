@@ -5,6 +5,7 @@ import re
 import secrets
 import tempfile
 import mimetypes
+import uuid
 from pytz import timezone
 from colour import Color
 from core.constances import ACCESS_TYPE
@@ -478,6 +479,7 @@ def map_notification(notification):
         'performer_name': performer.name,
         'entity_title': entity.title if hasattr(entity, 'title') else "",
         'entity_description': entity.description if hasattr(entity, 'description') else "",
+        'entity_type': entity._meta.verbose_name,
         'entity_group': entity_group,
         'entity_group_name': entity_group_name,
         'entity_group_url': entity_group_url,
@@ -489,3 +491,10 @@ def map_notification(notification):
 
 def get_model_name(instance):
     return instance._meta.app_label + '.' + instance._meta.model_name
+
+def is_valid_uuid(val):
+    try:
+        uuid.UUID(str(val))
+        return True
+    except ValueError:
+        return False

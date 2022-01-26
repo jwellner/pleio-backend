@@ -8,7 +8,7 @@ from django.http import HttpRequest
 from django.utils import timezone
 from core.models import Group
 from user.models import User
-from event.models import Event
+from event.models import Event, EventAttendee
 from mixer.backend.django import mixer
 from core.constances import ACCESS_TYPE
 from core.lib import get_acl, access_id_to_acl, datetime_isoformat
@@ -49,6 +49,12 @@ class EventTestCase(FastTenantTestCase):
             attend_event_without_account=True
         )
 
+        EventAttendee.objects.create(
+            event=self.eventPrivate,
+            state='accept',
+            email='test@test.nl'
+        )
+
         self.query = """
             fragment EventParts on Event {
                 title
@@ -70,6 +76,7 @@ class EventTestCase(FastTenantTestCase):
                 source
                 rsvp
                 attendEventWithoutAccount
+                attendeesWithoutAccountEmailAddresses
                 location
             }
             query GetEvent($guid: String!) {
@@ -115,6 +122,7 @@ class EventTestCase(FastTenantTestCase):
         self.assertEqual(data["entity"]["location"], self.eventPublic.location)
         self.assertEqual(data["entity"]["rsvp"], self.eventPublic.rsvp)
         self.assertEqual(data["entity"]["attendEventWithoutAccount"], self.eventPublic.attend_event_without_account)
+        self.assertEqual(data["entity"]["attendeesWithoutAccountEmailAddresses"], [])
 
         variables = {
             "guid": self.eventPrivate.guid
@@ -156,3 +164,5 @@ class EventTestCase(FastTenantTestCase):
         self.assertEqual(data["entity"]["location"], self.eventPrivate.location)
         self.assertEqual(data["entity"]["rsvp"], self.eventPrivate.rsvp)
         self.assertEqual(data["entity"]["attendEventWithoutAccount"], self.eventPrivate.attend_event_without_account)
+        self.assertEqual(data["entity"]["attendeesWithoutAccountEmailAddresses"], ['test@test.nl'])
+

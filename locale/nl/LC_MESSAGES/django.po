@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-01-11 21:48+0100\n"
+"POT-Creation-Date: 2022-01-26 12:55+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -16,6 +16,10 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#: activity/models.py:10
+msgid "status update"
+msgstr "statusupdate"
 
 #: core/forms.py:67
 msgid "Provide a valid value."
@@ -45,100 +49,100 @@ msgstr "Ontvang notificatie emails"
 msgid "Receive overview emails"
 msgstr "Ontvang overzicht emails"
 
-#: core/lib.py:143 core/resolvers/mutation_import_users.py:30
+#: core/lib.py:144 core/resolvers/mutation_import_users.py:30
 #: core/resolvers/query_site.py:70
 msgid "Just me"
 msgstr "Alleen eigenaar"
 
-#: core/lib.py:146
+#: core/lib.py:147
 #, python-format
 msgid "Group: %(group_name)s"
 msgstr "Groep: %(group_name)s"
 
-#: core/lib.py:149
+#: core/lib.py:150
 #, python-format
 msgid "Subgroup: %(subgroup_name)s"
 msgstr "Subgroep: %(subgroup_name)s"
 
-#: core/lib.py:154 core/resolvers/mutation_import_users.py:31
+#: core/lib.py:155 core/resolvers/mutation_import_users.py:31
 #: core/resolvers/query_site.py:71
 msgid "Logged in users"
 msgstr "Ingelogde gebruikers"
 
-#: core/lib.py:156 core/resolvers/mutation_import_users.py:34
+#: core/lib.py:157 core/resolvers/mutation_import_users.py:34
 #: core/resolvers/query_site.py:75
 msgid "Public"
 msgstr "Iedereen (publiek zichtbaar)"
 
-#: core/lib.py:166
+#: core/lib.py:167
 msgid "Event"
 msgstr "Agenda-item"
 
-#: core/lib.py:170
+#: core/lib.py:171
 msgid "Blog"
 msgstr "Blog"
 
-#: core/lib.py:174
+#: core/lib.py:175
 msgid "Discussion"
 msgstr "Discussie"
 
-#: core/lib.py:178 core/lib.py:304
+#: core/lib.py:179 core/lib.py:305
 msgid "News"
 msgstr "Nieuws"
 
-#: core/lib.py:182
+#: core/lib.py:183
 msgid "Update"
 msgstr "Update"
 
-#: core/lib.py:186
+#: core/lib.py:187
 msgid "Question"
 msgstr "Vraag"
 
-#: core/lib.py:190 core/lib.py:308
+#: core/lib.py:191 core/lib.py:309
 msgid "Wiki pages"
 msgstr "Wiki pagina's"
 
-#: core/lib.py:298
+#: core/lib.py:299
 msgid "Updates"
 msgstr "Updates"
 
-#: core/lib.py:299
+#: core/lib.py:300
 msgid "Blogs"
 msgstr "Blogs"
 
-#: core/lib.py:300
+#: core/lib.py:301
 msgid "CMS pages"
 msgstr "CMS pagina's"
 
-#: core/lib.py:301
+#: core/lib.py:302
 msgid "Discussions"
 msgstr "Discussies"
 
-#: core/lib.py:302
+#: core/lib.py:303
 msgid "Events"
 msgstr "Agenda-items"
 
-#: core/lib.py:303
+#: core/lib.py:304
 msgid "Files"
 msgstr "Bestanden"
 
-#: core/lib.py:305
+#: core/lib.py:306
 msgid "Polls"
 msgstr "Polls"
 
-#: core/lib.py:306
+#: core/lib.py:307
 msgid "Questions"
 msgstr "Vragen"
 
-#: core/lib.py:307
+#: core/lib.py:308
 msgid "Tasks"
 msgstr "Taken"
 
-#: core/lib.py:309
+#: core/lib.py:310
 msgid "Comments"
 msgstr "Reacties"
 
-#: core/lib.py:310
+#: core/lib.py:311
 msgid "Groups"
 msgstr "Groepen"
 
@@ -296,21 +300,26 @@ msgstr "Redacteur"
 msgid "Question expert"
 msgstr "Vraagexpert"
 
-#: core/services/mail_service.py:28
+#: core/services/mail_service.py:30 core/services/mail_service.py:38
 #, python-format
 msgid "Notification on %(entity_title)s"
 msgstr "Notificatie op %(entity_title)s"
 
-#: core/services/mail_service.py:30
+#: core/services/mail_service.py:32
+#, python-format
+msgid "Notification on %(entity_type)s in group %(entity_group_name)s"
+msgstr "Notificatie op %(entity_type)s in groep %(entity_group_name)s"
+
+#: core/services/mail_service.py:40
 #, python-format
 msgid "New notifications at %(site_name)s"
 msgstr "Nieuwe notificaties op %(site_name)s"
 
-#: core/tasks/misc.py:119
+#: core/tasks/misc.py:121
 msgid "Import was a success"
 msgstr "Import afgerond"
 
-#: core/tasks/misc.py:119
+#: core/tasks/misc.py:121
 msgid "Import failed"
 msgstr "Import mislukt"
 
@@ -412,6 +421,45 @@ msgstr ""
 "Datum: %(start_date)s<br><br>\n"
 "\n"
 "Klik op de onderstaande link om je aanmelding te bekijken of te wijzigen en om de afspraak in je agenda te zetten.  <br><br>\n"
+"<a href=\"%(link)s\">%(link)s</a>\n"
+
+#: core/templates/email/delete_event_attendees.html:7
+#, python-format
+msgid ""
+"\n"
+"        Dear %(removed_attendee_name)s,\n"
+"    "
+msgstr ""
+"\n"
+"        Beste %(removed_attendee_name)s,\n"
+"    "
+
+#: core/templates/email/delete_event_attendees.html:11
+msgid ""
+"\n"
+"        Dear user,\n"
+"    "
+msgstr ""
+"\n"
+"        Beste gebruiker,\n"
+"    "
+
+#: core/templates/email/delete_event_attendees.html:16
+msgid ""
+"\n"
+"You are removed as attendee from %(title)s.<br><br>\n"
+"\n"
+"If you have questions, please contact the event organizer.\n"
+"\n"
+"Click on the link below to see the event.<br><br>\n"
+"<a href=\"%(link)s\">%(link)s</a>\n"
+msgstr ""
+"\n"
+"U bent verwijderd als genodigde van %(title)s.<br><br>\n"
+"\n"
+"Als u vragen hebt, kunt u contact opnemen met de organisator van het evenement.\n"
+"\n"
+"Klik op de onderstaande link om het evenement te bekijken.<br><br>\n"
 "<a href=\"%(link)s\">%(link)s</a>\n"
 
 #: core/templates/email/entities/blog.html:27
@@ -928,7 +976,7 @@ msgstr ""
 msgid "New access request for %(site_name)s"
 msgstr "Nieuwe toegangsaanvraag voor %(site_name)s"
 
-#: core/views.py:548
+#: core/views.py:560
 msgid "Saved"
 msgstr "Opgeslagen"
 
@@ -941,6 +989,11 @@ msgstr "Bevestiging aanmelding %s"
 #, python-format
 msgid "Confirmation of registration for %s"
 msgstr "Bevestiging aanmelding voor %s"
+
+#: event/resolvers/mutation_delete_event_attendees.py:32
+#, python-format
+msgid "Removed from event: %s"
+msgstr "Verwijderd uit gebeurtenis: %s"
 
 #: file/tasks.py:63
 #, python-format

@@ -1,0 +1,24 @@
+{% extends "email/base_notification.html" %}
+{% load i18n %}
+
+{% block body %}
+
+{% if removed_attendee_name %}
+    {% blocktrans %}
+        Dear {{ removed_attendee_name }},
+    {% endblocktrans %}
+{% else %}
+    {% blocktrans %}
+        Dear user,
+    {% endblocktrans %}
+{% endif %}
+
+{% blocktrans %}
+You are removed as attendee from {{ title }}.<br><br>
+
+If you have questions, please contact the event organizer.
+
+Click on the link below to see the event.<br><br>
+<a href="{{ link }}">{{ link }}</a>
+{% endblocktrans %}
+{% endblock %}

@@ -351,6 +351,17 @@ type deleteEntityPayload {
   success: Boolean
 }
 
+"""Remove attendees from event"""
+input deleteEventAttendeesInput {
+  guid: String!
+  """Email addresses of attendees to be removed"""
+  emailAddresses: [String!]
+}
+
+type deleteEventAttendeesPayload {
+  entity: Event
+}
+
 input deleteGroupInvitationInput {
   """The id of the invitation to delete."""
   id: Int
@@ -811,6 +822,7 @@ type Event implements Entity {
   isAttending: String
   attendees(offset: Int, limit: Int, state: String): AttendeesList
   attendeesWithoutAccount: Int
+  attendeesWithoutAccountEmailAddresses: [String]
   comments: [Comment]
   commentCount: Int
   isPinned: Boolean!
@@ -1184,6 +1196,7 @@ type Mutation {
   attendEvent(input: attendEventInput!): attendEventPayload
   attendEventWithoutAccount(input: attendEventWithoutAccountInput!): attendEventWithoutAccountPayload
   confirmAttendEventWithoutAccount(input: confirmAttendEventWithoutAccountInput!): confirmAttendEventWithoutAccountPayload
+  deleteEventAttendees(input: deleteEventAttendeesInput!): deleteEventAttendeesPayload
   markAsRead(input: markAsReadInput!): markAsReadPayload
   markAllAsRead(input: markAllAsReadInput!): markAllAsReadPayload
   toggleBestAnswer(input: toggleBestAnswerInput!): toggleBestAnswerPayload

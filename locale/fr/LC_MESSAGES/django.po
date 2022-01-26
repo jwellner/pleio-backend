@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Frans\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-01-11 21:48+0100\n"
+"POT-Creation-Date: 2022-01-26 12:55+0100\n"
 "PO-Revision-Date: 2021-06-24 15:12+0200\n"
 "Last-Translator: \n"
 "Language-Team: frans\n"
@@ -17,6 +17,10 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 "X-Generator: Poedit 2.4.3\n"
+
+#: activity/models.py:10
+msgid "status update"
+msgstr "mise à jour du statut"
 
 #: core/forms.py:67
 msgid "Provide a valid value."
@@ -46,100 +50,100 @@ msgstr "Recevoir des courriels de notification"
 msgid "Receive overview emails"
 msgstr "Recevoir des courriels de présentation"
 
-#: core/lib.py:143 core/resolvers/mutation_import_users.py:30
+#: core/lib.py:144 core/resolvers/mutation_import_users.py:30
 #: core/resolvers/query_site.py:70
 msgid "Just me"
 msgstr "Juste moi"
 
-#: core/lib.py:146
+#: core/lib.py:147
 #, python-format
 msgid "Group: %(group_name)s"
 msgstr "Groupe : %(group_name)s"
 
-#: core/lib.py:149
+#: core/lib.py:150
 #, python-format
 msgid "Subgroup: %(subgroup_name)s"
 msgstr "Sous-groupe : %(subgroup_name)s"
 
-#: core/lib.py:154 core/resolvers/mutation_import_users.py:31
+#: core/lib.py:155 core/resolvers/mutation_import_users.py:31
 #: core/resolvers/query_site.py:71
 msgid "Logged in users"
 msgstr "Utilisateurs connectés"
 
-#: core/lib.py:156 core/resolvers/mutation_import_users.py:34
+#: core/lib.py:157 core/resolvers/mutation_import_users.py:34
 #: core/resolvers/query_site.py:75
 msgid "Public"
 msgstr "Public"
 
-#: core/lib.py:166
+#: core/lib.py:167
 msgid "Event"
 msgstr "Événement"
 
-#: core/lib.py:170
+#: core/lib.py:171
 msgid "Blog"
 msgstr "Blog"
 
-#: core/lib.py:174
+#: core/lib.py:175
 msgid "Discussion"
 msgstr "Discussion"
 
-#: core/lib.py:178 core/lib.py:304
+#: core/lib.py:179 core/lib.py:305
 msgid "News"
 msgstr "Actualité"
 
-#: core/lib.py:182
+#: core/lib.py:183
 msgid "Update"
 msgstr "Mettre à jour"
 
-#: core/lib.py:186
+#: core/lib.py:187
 msgid "Question"
 msgstr "Question"
 
-#: core/lib.py:190 core/lib.py:308
+#: core/lib.py:191 core/lib.py:309
 msgid "Wiki pages"
 msgstr "Wiki pages"
 
-#: core/lib.py:298
+#: core/lib.py:299
 msgid "Updates"
 msgstr "Mises à jour"
 
-#: core/lib.py:299
+#: core/lib.py:300
 msgid "Blogs"
 msgstr "Blogs"
 
-#: core/lib.py:300
+#: core/lib.py:301
 msgid "CMS pages"
 msgstr "Pages SGC"
 
-#: core/lib.py:301
+#: core/lib.py:302
 msgid "Discussions"
 msgstr "Discussions"
 
-#: core/lib.py:302
+#: core/lib.py:303
 msgid "Events"
 msgstr "Événements"
 
-#: core/lib.py:303
+#: core/lib.py:304
 msgid "Files"
 msgstr "Fichiers"
 
-#: core/lib.py:305
+#: core/lib.py:306
 msgid "Polls"
 msgstr "Sondages"
 
-#: core/lib.py:306
+#: core/lib.py:307
 msgid "Questions"
 msgstr "Questions"
 
-#: core/lib.py:307
+#: core/lib.py:308
 msgid "Tasks"
 msgstr "Tâches"
 
-#: core/lib.py:309
+#: core/lib.py:310
 msgid "Comments"
 msgstr "Commentaires"
 
-#: core/lib.py:310
+#: core/lib.py:311
 msgid "Groups"
 msgstr "Groupes"
 
@@ -298,21 +302,26 @@ msgstr "Éditeur"
 msgid "Question expert"
 msgstr "Expert en questions"
 
-#: core/services/mail_service.py:28
+#: core/services/mail_service.py:30 core/services/mail_service.py:38
 #, python-format
 msgid "Notification on %(entity_title)s"
 msgstr "Notification sur %(entity_title)s"
 
-#: core/services/mail_service.py:30
+#: core/services/mail_service.py:32
+#, python-format
+msgid "Notification on %(entity_type)s in group %(entity_group_name)s"
+msgstr "Notification sur %(entity_type)s dans le groupe %(entity_group_name)s"
+
+#: core/services/mail_service.py:40
 #, python-format
 msgid "New notifications at %(site_name)s"
 msgstr "Nouvelles notifications sur %(site_name)s"
 
-#: core/tasks/misc.py:119
+#: core/tasks/misc.py:121
 msgid "Import was a success"
 msgstr "Importation réussie"
 
-#: core/tasks/misc.py:119
+#: core/tasks/misc.py:121
 msgid "Import failed"
 msgstr "Échec de l’importation"
 
@@ -417,6 +426,45 @@ msgstr ""
 "Cliquez sur le lien ci-dessous pour voir ou modifier votre inscription et pour ajouter ce rendez-vous à votre agenda.<br><br>\n"
 "\n"
 "<a href=“%(link)s”>%(link)s</a>\n"
+
+#: core/templates/email/delete_event_attendees.html:7
+#, python-format
+msgid ""
+"\n"
+"        Dear %(removed_attendee_name)s,\n"
+"    "
+msgstr ""
+"\n"
+"        Cher %(removed_attendee_name)s,\n"
+"    "
+
+#: core/templates/email/delete_event_attendees.html:11
+msgid ""
+"\n"
+"        Dear user,\n"
+"    "
+msgstr ""
+"\n"
+"        Cher utilisateur,\n"
+"    "
+
+#: core/templates/email/delete_event_attendees.html:16
+msgid ""
+"\n"
+"You are removed as attendee from %(title)s.<br><br>\n"
+"\n"
+"If you have questions, please contact the event organizer.\n"
+"\n"
+"Click on the link below to see the event.<br><br>\n"
+"<a href=\"%(link)s\">%(link)s</a>\n"
+msgstr ""
+"\n"
+"Vous êtes supprimé en tant que participant de %(title)s.<br><br>\n"
+"\n"
+"Si vous avez des questions, veuillez contacter l'organisateur de l'événement.\n"
+"\n"
+"Cliquez sur le lien ci-dessous pour voir l'événement.<br><br>\n"
+"<a href=\"%(link)s\">%(link)s</a>\n"
 
 #: core/templates/email/entities/blog.html:27
 msgid "Blog created by"
@@ -942,7 +990,7 @@ msgstr ""
 msgid "New access request for %(site_name)s"
 msgstr "Nouvelle demande d’accès à %(site_name)s"
 
-#: core/views.py:548
+#: core/views.py:560
 msgid "Saved"
 msgstr "Sauvegardé"
 
@@ -955,6 +1003,11 @@ msgstr "Confirmation de l’inscription %s"
 #, python-format
 msgid "Confirmation of registration for %s"
 msgstr "Confirmation de l’inscription %s"
+
+#: event/resolvers/mutation_delete_event_attendees.py:32
+#, python-format
+msgid "Removed from event: %s"
+msgstr "Retiré de l'événement : %s"
 
 #: file/tasks.py:63
 #, python-format

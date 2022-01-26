@@ -23,11 +23,23 @@ class MailService:
         Notification.objects.filter(id__in=[notification.id for notification in notifications]).update(emailed=True)
 
     def get_notification_subject(self, notifications):
+        subject = ""
         if len(notifications) == 1:
             notification = map_notification(notifications[0])
-            return translation.ugettext_lazy("Notification on %(entity_title)s") % {'entity_title': notification['entity_title']}
+            if notification['entity_title']:
+                subject = translation.ugettext_lazy("Notification on %(entity_title)s") % {'entity_title': notification['entity_title']}
+            elif notification['entity_group']:
+                subject = translation.ugettext_lazy("Notification on %(entity_type)s in group %(entity_group_name)s") % {
+                    'entity_type': notification['entity_type'],
+                    'entity_group_name': notification['entity_group_name']
+                }
+            else:
+                # Keeping the variable the same is on purpose so it can use the same translation
+                subject = translation.ugettext_lazy("Notification on %(entity_title)s") % {'entity_title': notification['entity_type']}
+        else:
+            subject = translation.ugettext_lazy("New notifications at %(site_name)s") % {'site_name': config.NAME}
 
-        return translation.ugettext_lazy("New notifications at %(site_name)s") % {'site_name': config.NAME}
+        return subject
 
     def get_notification_context(self, recipient, notifications):
         mapped_notifications = []

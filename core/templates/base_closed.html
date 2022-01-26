@@ -6,10 +6,10 @@
 		<meta http-equiv="X-UA-Compatible" content="IE=edge">
 		<meta charset="utf-8">
         <title>{{ config.NAME }}</title>
-        
+
 		<link rel="apple-touch-icon" sizes="180x180" href="/favicon.png">
-		<link rel="icon" type="image/png" sizes="32x32" href="/favicon.png">    
-		<link rel="icon" type="image/png" sizes="16x16" href="/favicon.png">  
+		<link rel="icon" type="image/png" sizes="32x32" href="/favicon.png">
+		<link rel="icon" type="image/png" sizes="16x16" href="/favicon.png">
 
 		<link rel="manifest" href="{% static 'site.webmanifest' %}">
         <meta name="msapplication-TileColor" content="#da532c">
@@ -35,19 +35,7 @@
         <meta name="google-site-verification" content="{{ config.GOOGLE_SITE_VERIFICATION }}">
         {% endif %}
 
-		{% if config.FONT %}
-			{% if config.FONT == "Roboto" %}
-				<link href="https://fonts.googleapis.com/css?family=Roboto:400,500,700&display=swap" rel="stylesheet">
-			{% elif config.FONT == "Merriweather" %}
-				<link href="https://fonts.googleapis.com/css?family=Merriweather:400,700&display=swap" rel="stylesheet">
-			{% elif config.FONT == "Source Sans Pro" %}
-				<link href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,600,700&display=swap" rel="stylesheet">
-			{% elif config.FONT == "Open Sans" %}
-				<link href="https://fonts.googleapis.com/css?family=Open+Sans:400,600,700&display=swap" rel="stylesheet">
-			{% elif config.FONT == "PT Sans" %}
-				<link href="https://fonts.googleapis.com/css2?family=PT+Sans:wght@400;700&display=swap" rel="stylesheet">
-			{% endif %}
-		{% endif %}
+		{% include 'elements/fonts.html' %}
 
 		<style>
 			/* Legacy theme color overrides */

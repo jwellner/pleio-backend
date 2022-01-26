@@ -1,11 +1,13 @@
 from auditlog.registry import auditlog
 from django.db import models
 from django.utils.text import slugify
+from django.utils.translation import ugettext_lazy
 from core.models import Entity, VoteMixin, CommentMixin, BookmarkMixin, FollowMixin, NotificationMixin, AttachmentMixin
 
 class StatusUpdate(Entity, VoteMixin, CommentMixin, BookmarkMixin, FollowMixin, NotificationMixin, AttachmentMixin):
     class Meta:
         ordering = ['-published']
+        verbose_name = ugettext_lazy("status update")
 
     title = models.CharField(max_length=256, blank=True)
     description = models.TextField(default="")

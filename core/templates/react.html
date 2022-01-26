@@ -33,19 +33,7 @@
     <meta name="google-site-verification" content="{{ config.GOOGLE_SITE_VERIFICATION }}">
     {% endif %}
 
-    {% if config.FONT %}
-        {% if config.FONT == "Roboto" %}
-            <link href="https://fonts.googleapis.com/css?family=Roboto:400,500,700&display=swap" rel="stylesheet">
-        {% elif config.FONT == "Merriweather" %}
-            <link href="https://fonts.googleapis.com/css?family=Merriweather:400,700&display=swap" rel="stylesheet">
-        {% elif config.FONT == "Source Sans Pro" %}
-            <link href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,600,700&display=swap" rel="stylesheet">
-        {% elif config.FONT == "Open Sans" %}
-            <link href="https://fonts.googleapis.com/css?family=Open+Sans:400,600,700&display=swap" rel="stylesheet">
-        {% elif config.FONT == "PT Sans" %}
-            <link href="https://fonts.googleapis.com/css2?family=PT+Sans:wght@400;700&display=swap" rel="stylesheet">
-        {% endif %}
-    {% endif %}
+    {% include 'elements/fonts.html' %}
 
     {% if config.CUSTOM_CSS %}
         <link href="/custom.css?v={{ config.CUSTOM_CSS_TIMESTAMP }}" rel="stylesheet" type="text/css" media="screen">
