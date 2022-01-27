@@ -138,10 +138,9 @@ def resolve_edit_discussion(_, info, input):
         elif clean_input.get("featured").get("image"):
 
             if entity.featured_image:
-                imageFile = entity.featured_image
-            else:
-                imageFile = FileFolder()
+                entity.featured_image.delete()
 
+            imageFile = FileFolder()
             imageFile.owner = entity.owner
             imageFile.read_access = entity.read_access
             imageFile.write_access = entity.write_access

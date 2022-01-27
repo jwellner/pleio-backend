@@ -49,10 +49,9 @@ def resolve_edit_group(_, info, input):
         elif clean_input.get("featured").get("image"):
 
             if group.featured_image:
-                imageFile = group.featured_image
-            else:
-                imageFile = FileFolder()
+                group.featured_image.delete()
 
+            imageFile = FileFolder()
             imageFile.owner = group.owner
             imageFile.read_access = [ACCESS_TYPE.public]
             imageFile.write_access = [ACCESS_TYPE.user.format(user.id)]
