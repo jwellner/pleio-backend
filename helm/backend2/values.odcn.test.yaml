@@ -9,7 +9,7 @@ api:
   replicaCount: 2
 
 background:
-  replicaCount: 0
+  replicaCount: 2
 
 admin:
   replicaCount: 0

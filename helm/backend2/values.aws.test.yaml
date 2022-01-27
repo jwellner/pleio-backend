@@ -10,7 +10,7 @@ api:
   replicaCount: 2
 
 background:
-  replicaCount: 1
+  replicaCount: 2
 
 storage:
   existingBackupStorage: backup-storage
