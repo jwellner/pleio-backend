@@ -1,6 +1,7 @@
 import requests
 
 import celery
+from auditlog.models import LogEntry
 from celery import shared_task
 from celery.utils.log import get_task_logger
 from core import config
@@ -39,6 +40,7 @@ def dispatch_crons(self, period):
             ban_users_that_bounce.delay(client.schema_name)
             ban_users_with_no_account.delay(client.schema_name)
             resize_pending_images.delay(client.schema_name)
+            cleanup_auditlog.delay(client.schema_name)
 
 
         if period == 'weekly':
@@ -223,3 +225,10 @@ def resize_pending_images(schema_name):
         for image in pending:
             celery.current_app.send_task('core.tasks.misc.image_resize', (schema_name, image.id,))
         logger.info("%s: %d pending image resizes.", schema_name, pending.count())
+
+@shared_task()
+def cleanup_auditlog(schema_name):
+    minimum_timestamp = timezone.now() - timedelta(days=31)
+    with schema_context(schema_name):
+        deletedLogs = LogEntry.objects.filter(timestamp__lt=minimum_timestamp).delete()
+        logger.info("%s: %d log entries were deleted", schema_name, deletedLogs[0])
