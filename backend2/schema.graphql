@@ -1576,6 +1576,11 @@ input sendMessageToGroupInput {
   An (optional) parameter for sending the message to all members of the group.
   """
   sendToAllMembers: Boolean
+
+  """
+  An (optional) parameter for sending a copy of the message to the sender
+  """
+  sendCopyToSender: Boolean
 }
 
 type sendMessageToGroupPayload {
