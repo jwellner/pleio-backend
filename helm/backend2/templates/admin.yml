@@ -53,6 +53,22 @@ spec:
           env:
             - name: RUN_AS_ADMIN_APP
               value: "True"
+        {{- if .Values.tunnel.hostname }}
+        - name: tunnel
+          image: "{{ .Values.tunnel.repository }}:{{ .Values.tunnel.tag }}"
+          command:
+            - cloudflared
+            - tunnel
+          args:
+            - --url=http://127.0.0.1:8000
+            - --hostname={{ .Values.tunnel.hostname }}
+            - --origincert=/etc/cloudflared/cert.pem
+            - --no-autoupdate
+          volumeMounts:
+            - mountPath: /etc/cloudflared
+              name: tunnel-secret
+              readOnly: true
+        {{- end }}
       volumes:
         - name: pleio-data
           {{- if eq .Values.storage.type "hostpath" }}
@@ -62,3 +78,9 @@ spec:
           persistentVolumeClaim:
             claimName: {{ include "backend2.dataStorageName" . }}
           {{- end }}
+        {{- if .Values.tunnel.hostname }}
+        - name: tunnel-secret
+          secret:
+            defaultMode: 420
+            secretName: {{ .Values.tunnel.secretname }}
+        {{- end }}
