@@ -46,8 +46,12 @@
 {{- printf "%s-admin" ((include "backend2.name" . )) -}}
 {{- end -}}
 
-{{- define "backend2.backgroundName" -}}
-{{- printf "%s-background" ((include "backend2.name" . )) -}}
+{{- define "backend2.backgroundSchedulerName" -}}
+{{- printf "%s-background-scheduler" ((include "backend2.name" . )) -}}
+{{- end -}}
+
+{{- define "backend2.backgroundWorkerName" -}}
+{{- printf "%s-background-worker" ((include "backend2.name" . )) -}}
 {{- end -}}
 
 {{- define "backend2.filecleanup" -}}
