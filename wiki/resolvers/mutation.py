@@ -163,6 +163,7 @@ def resolve_edit_wiki(_, info, input):
 
             if entity.featured_image:
                 imageFile = entity.featured_image
+                imageFile.resized_images.all().delete()
             else:
                 imageFile = FileFolder()
 
