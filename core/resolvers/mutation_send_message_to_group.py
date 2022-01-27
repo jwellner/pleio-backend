@@ -51,9 +51,21 @@ def resolve_send_message_to_group(_, info, input):
     schema_name = parse_tenant_config_path("")
     context['message'] = format_html(clean_input.get('message'))
 
-    for user in receiving_users:
-        translation.activate(user.get_language())
+    for receiving_user in receiving_users:
+        translation.activate(receiving_user.get_language())
         subject = ugettext_lazy("Message from group {0}: {1}").format(group.name, clean_input.get('subject'))
+        send_mail_multi.delay(
+            schema_name,
+            subject,
+            'email/send_message_to_group.html',
+            context,
+            receiving_user.email,
+            language=receiving_user.get_language()
+        )
+
+    if clean_input.get('sendCopyToSender', False) and user not in receiving_users:
+        translation.activate(user.get_language())
+        subject = ugettext_lazy("Copy: Message from group {0}: {1}").format(group.name, clean_input.get('subject'))
         send_mail_multi.delay(
             schema_name,
             subject,

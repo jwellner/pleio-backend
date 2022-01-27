@@ -295,3 +295,170 @@ class SendMessageToGroupTestCase(FastTenantTestCase):
         result = graphql_sync(schema, {"query": mutation, "variables": variables}, context_value={ "request": request })
 
         self.assertEqual(mocked_send_mail_multi.call_count, 2)
+
+    @mock.patch('core.resolvers.mutation_send_message_to_group.send_mail_multi.delay')
+    def test_send_message_to_group_with_copy(self, mocked_send_mail_multi):
+        mutation = """
+            mutation SendMessageModal($input: sendMessageToGroupInput!) {
+                sendMessageToGroup(input: $input) {
+                    group {
+                    ... on Group {
+                        guid
+                        __typename
+                    }
+                    __typename
+                    }
+                    __typename
+                }
+            }
+        """
+        variables = {
+            "input": {
+                "guid": self.group1.guid,
+                "subject": "testMessageSubject",
+                "message": "<p>testMessageContent</p>",
+                "sendCopyToSender": True,
+                "recipients": [self.user3.guid]
+            }
+        }
+
+        request = HttpRequest()
+        request.user = self.user1
+
+        graphql_sync(schema, {"query": mutation, "variables": variables}, context_value={ "request": request })
+
+        self.assertEqual(mocked_send_mail_multi.call_count, 2)
+
+    @mock.patch('core.resolvers.mutation_send_message_to_group.send_mail_multi.delay')
+    def test_send_message_to_group_including_self_with_copy(self, mocked_send_mail_multi):
+        mutation = """
+            mutation SendMessageModal($input: sendMessageToGroupInput!) {
+                sendMessageToGroup(input: $input) {
+                    group {
+                    ... on Group {
+                        guid
+                        __typename
+                    }
+                    __typename
+                    }
+                    __typename
+                }
+            }
+        """
+        variables = {
+            "input": {
+                "guid": self.group1.guid,
+                "subject": "testMessageSubject",
+                "message": "<p>testMessageContent</p>",
+                "sendCopyToSender": True,
+                "recipients": [self.user3.guid, self.user1.guid]
+            }
+        }
+
+        request = HttpRequest()
+        request.user = self.user1
+
+        graphql_sync(schema, {"query": mutation, "variables": variables}, context_value={ "request": request })
+
+        self.assertEqual(mocked_send_mail_multi.call_count, 2)
+
+    @mock.patch('core.resolvers.mutation_send_message_to_group.send_mail_multi.delay')
+    def test_send_message_as_test_with_copy(self, mocked_send_mail_multi):
+        mutation = """
+            mutation SendMessageModal($input: sendMessageToGroupInput!) {
+                sendMessageToGroup(input: $input) {
+                    group {
+                    ... on Group {
+                        guid
+                        __typename
+                    }
+                    __typename
+                    }
+                    __typename
+                }
+            }
+        """
+        variables = {
+            "input": {
+                "guid": self.group1.guid,
+                "subject": "testMessageSubject",
+                "message": "<p>testMessageContent</p>",
+                "sendToAllMembers": True,
+                "sendCopyToSender": True,
+                "isTest": True
+            }
+        }
+
+        request = HttpRequest()
+        request.user = self.user1
+
+        graphql_sync(schema, {"query": mutation, "variables": variables}, context_value={ "request": request })
+
+        self.assertEqual(mocked_send_mail_multi.call_count, 1)
+
+    @mock.patch('core.resolvers.mutation_send_message_to_group.send_mail_multi.delay')
+    def test_send_message_to_all_members_with_copy(self, mocked_send_mail_multi):
+        mutation = """
+            mutation SendMessageModal($input: sendMessageToGroupInput!) {
+                sendMessageToGroup(input: $input) {
+                    group {
+                    ... on Group {
+                        guid
+                        __typename
+                    }
+                    __typename
+                    }
+                    __typename
+                }
+            }
+        """
+        variables = {
+            "input": {
+                "guid": self.group1.guid,
+                "subject": "testMessageSubject",
+                "message": "<p>testMessageContent</p>",
+                "sendToAllMembers": True,
+                "sendCopyToSender": True,
+            }
+        }
+
+        request = HttpRequest()
+        request.user = self.user1
+
+        graphql_sync(schema, {"query": mutation, "variables": variables}, context_value={ "request": request })
+
+        self.assertEqual(mocked_send_mail_multi.call_count, 3)
+
+    @mock.patch('core.resolvers.mutation_send_message_to_group.send_mail_multi.delay')
+    def test_send_message_to_all_members_including_self_with_copy(self, mocked_send_mail_multi):
+        self.group1.join(self.user1, 'member')
+        mutation = """
+            mutation SendMessageModal($input: sendMessageToGroupInput!) {
+                sendMessageToGroup(input: $input) {
+                    group {
+                    ... on Group {
+                        guid
+                        __typename
+                    }
+                    __typename
+                    }
+                    __typename
+                }
+            }
+        """
+        variables = {
+            "input": {
+                "guid": self.group1.guid,
+                "subject": "testMessageSubject",
+                "message": "<p>testMessageContent</p>",
+                "sendToAllMembers": True,
+                "sendCopyToSender": True,
+            }
+        }
+
+        request = HttpRequest()
+        request.user = self.user1
+
+        graphql_sync(schema, {"query": mutation, "variables": variables}, context_value={ "request": request })
+
+        self.assertEqual(mocked_send_mail_multi.call_count, 3)
