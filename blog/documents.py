@@ -30,7 +30,9 @@ class BlogDocument(DefaultDocument):
     })
 
     def get_instances_from_related(self, related_instance):
-        return related_instance.container
+        if isinstance(related_instance, Comment) and isinstance(related_instance.container, Blog):
+            return related_instance.container
+        return None
 
     def prepare_description(self, instance):
         return tiptap_to_text(instance.rich_description)
