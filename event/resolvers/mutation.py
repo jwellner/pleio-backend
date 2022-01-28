@@ -217,6 +217,7 @@ def resolve_edit_event(_, info, input):
 
             if entity.featured_image:
                 imageFile = entity.featured_image
+                imageFile.resized_images.all().delete()
             else:
                 imageFile = FileFolder()
 
