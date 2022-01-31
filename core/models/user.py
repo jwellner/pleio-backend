@@ -199,7 +199,7 @@ def validate_profile_sections(sections):
 
 class UserProfileField(models.Model):
 
-    class META:
+    class Meta:
         unique_together = ('user_profile', 'profile_field')
 
     objects = UserProfileFieldManager()
