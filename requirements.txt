@@ -44,3 +44,4 @@ beautifulsoup4>4.7
 html-purifier==0.1.9
 prosemirror-py==0.2
 django-autotranslate==1.2.0
+futures==2.2.0
