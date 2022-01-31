@@ -11,7 +11,6 @@ from django.contrib.postgres.fields import ArrayField
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
 from django.conf import settings
 from django.dispatch import receiver
-from django.core.exceptions import ObjectDoesNotExist
 from django.utils import timezone
 
 
@@ -275,11 +274,10 @@ class User(AbstractBaseUser):
         incomplete = 0
 
         for field in fields:
-            try:
-                user_profile_field = UserProfileField.objects.get(profile_field=field, user_profile=self.profile)
-                if user_profile_field.value == '':
-                    incomplete += 1
-            except ObjectDoesNotExist:
+            user_profile_field = UserProfileField.objects.filter(profile_field=field, user_profile=self.profile).first()
+            if user_profile_field and user_profile_field.value == '':
+                incomplete += 1
+            if not user_profile_field:
                 incomplete += 1
 
         return incomplete == 0
