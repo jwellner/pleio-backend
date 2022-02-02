@@ -35,6 +35,7 @@ class ResizedImage(ModelWithFile):
     mime_type = models.CharField(null=True, blank=True, max_length=100)
 
     status = models.CharField(max_length=255, default=PENDING)
+    message = models.TextField(default="")
 
     created_at = models.DateTimeField(default=timezone.now)
     updated_at = models.DateTimeField(auto_now=True)
