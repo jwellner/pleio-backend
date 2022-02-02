@@ -33,4 +33,4 @@ storage:
   existingBackupStorage: /storage/backup-storage
 
 tunnel:
-  hostname: admin-aws-prod.pleio-beheer.nl
+  hostname: admin-odcn-prod.pleio-beheer.nl
