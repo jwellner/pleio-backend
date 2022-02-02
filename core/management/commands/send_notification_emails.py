@@ -18,7 +18,7 @@ class Command(BaseCommand):
         for user in users:
             interval = user.profile.notification_email_interval_hours
 
-            notifications = user.notifications.filter(emailed=False, verb__in=['created', 'commented'])[:5]
+            notifications = user.notifications.filter(emailed=False, verb__in=['created', 'commented', 'mentioned'])[:5]
             # do not send mail when there are now new notifications
             if not notifications:
                 continue

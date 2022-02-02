@@ -1,3 +1,4 @@
+import random
 from django_tenants.test.cases import FastTenantTestCase
 from django.db import connection
 from core.models import Group, Comment
@@ -49,6 +50,7 @@ class SendNotificationEmailsTestCase(FastTenantTestCase):
 
         self.follow1 = self.blog1.add_follow(self.user2)
         self.follow2 = self.blog1.add_follow(self.user3)
+        self.verbs = ["created", "mentioned", "commented"]
 
     def tearDown(self):
         self.blog1.delete()
@@ -61,7 +63,7 @@ class SendNotificationEmailsTestCase(FastTenantTestCase):
     def test_command_send_5_notifications(self, mocked_send_mail_multi):
         i = 0
         while i < 5:
-            notify.send(self.user1, recipient=[self.user2], verb="created", action_object=self.blog1)[0][1]
+            notify.send(self.user1, recipient=[self.user2], verb=random.choice(self.verbs), action_object=self.blog1)[0][1]
             i += 1
 
         call_command('send_notification_emails')
@@ -101,7 +103,7 @@ class SendNotificationEmailsTestCase(FastTenantTestCase):
     def test_notifications_marked_as_sent(self):
         i = 0
         while i < 10:
-            notify.send(self.user1, recipient=[self.user2], verb="created", action_object=self.blog1)[0][1]
+            notify.send(self.user1, recipient=[self.user2], verb=random.choice(self.verbs), action_object=self.blog1)[0][1]
             i = i + 1
         call_command('send_notification_emails')
 
