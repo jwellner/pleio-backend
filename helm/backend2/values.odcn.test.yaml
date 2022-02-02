@@ -9,10 +9,7 @@ api:
   replicaCount: 2
 
 background:
-  replicaCount: 0
-
-admin:
-  replicaCount: 0
+  replicaCount: 2
 
 resources:
   # We usually recommend not to specify default resources and to leave this as a conscious
@@ -31,3 +28,6 @@ storage:
   existingTempStorage: /storage/_pleio2-test/tmp
   existingDataStorage: /storage/_pleio2-test/data
   existingBackupStorage: /storage/backup-storage
+
+tunnel:
+  hostname: admin-odcn-test.pleio-beheer.nl

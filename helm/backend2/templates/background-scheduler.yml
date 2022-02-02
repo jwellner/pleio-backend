@@ -1,63 +1,47 @@
-{{ $labelData := dict "Values" .Values "Release" .Release "Chart" .Chart "Component" "background" }}
+{{ $labelData := dict "Values" .Values "Release" .Release "Chart" .Chart "Component" "background-scheduler" }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ include "backend2.backgroundName" . }}
+  name: {{ include "backend2.backgroundSchedulerName" . }}
   labels:
     {{- include "backend2.labels" $labelData | nindent 4 }}
 spec:
-  replicas: {{ .Values.background.replicaCount }}
+  replicas: 1 # Avoid duplicate tasks and never use more than 1 scheduler
   selector:
     matchLabels:
       {{- include "backend2.selectorLabels" $labelData | nindent 6 }}
   strategy:
     rollingUpdate:
-      maxSurge: {{ add .Values.background.replicaCount 1 }}
+      maxSurge: 1
       maxUnavailable: 0
     type: RollingUpdate
   template:
     metadata:
-      name: {{ include "backend2.backgroundName" . }}
+      name: {{ include "backend2.backgroundSchedulerName" . }}
       labels:
         {{- include "backend2.selectorLabels" $labelData | nindent 8 }}
     spec:
       containers:
-        - name: {{ include "backend2.backgroundName" . }}
+        - name: {{ include "backend2.backgroundSchedulerName" . }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           command:
             - celery
             - -A
             - backend2.celery
-            - worker
-            - -B
-            - -E
-            - -O
-            - fair
+            - beat
             - -s
             - /app-data/celerybeat-schedule
             - --loglevel=info
           volumeMounts:
-            - mountPath: /tmp
-              name: tmp-zip-storage
             - mountPath: /app-data
               name: pleio-data
-            - mountPath: /backup-storage
-              name: backup-storage
           envFrom:
             - configMapRef:
                 name: {{ include "backend2.name" . }}
             - secretRef:
                 name: {{ include "backend2.secretsName" . }}
       volumes:
-        - name: tmp-zip-storage
-          {{- if eq .Values.storage.type "hostpath"}}
-          hostPath:
-            path: {{ .Values.storage.existingTempStorage }}
-          {{- else }}
-          persistentVolumeClaim:
-            claimName: {{ include "backend2.tempStorageName" . }}
-          {{- end }}
         - name: pleio-data
           {{- if eq .Values.storage.type "hostpath" }}
           hostPath:
@@ -65,12 +49,4 @@ spec:
           {{- else }}
           persistentVolumeClaim:
             claimName: {{ include "backend2.dataStorageName" . }}
-          {{- end }}
-        - name: backup-storage
-          {{- if eq .Values.storage.type "hostpath" }}
-          hostPath:
-            path: {{ .Values.storage.existingBackupStorage }}
-          {{- else }}
-          persistentVolumeClaim:
-            claimName: {{ include "backend2.backupStorageName" . }}
           {{- end }}

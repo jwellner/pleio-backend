@@ -9,7 +9,7 @@ api:
   replicaCount: 8
 
 background:
-  replicaCount: 0
+  replicaCount: 2
 
 env: prod
 
@@ -29,3 +29,6 @@ resources:
  requests:
    cpu: 1000m
   # memory: 128Mi
+
+tunnel:
+  hostname: admin-aws-prod.pleio-beheer.nl

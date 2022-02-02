@@ -9,10 +9,7 @@ api:
   replicaCount: 14
 
 background:
-  replicaCount: 0
-
-admin:
-  replicaCount: 0
+  replicaCount: 2
 
 env: prod
 
@@ -34,3 +31,6 @@ storage:
   existingTempStorage: /storage/_pleio2/tmp
   existingDataStorage: /storage/_pleio2/data
   existingBackupStorage: /storage/backup-storage
+
+tunnel:
+  hostname: admin-aws-prod.pleio-beheer.nl

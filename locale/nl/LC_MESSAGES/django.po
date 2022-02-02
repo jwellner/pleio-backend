@@ -993,7 +993,7 @@ msgstr "Bevestiging aanmelding voor %s"
 #: event/resolvers/mutation_delete_event_attendees.py:32
 #, python-format
 msgid "Removed from event: %s"
-msgstr "Verwijderd uit gebeurtenis: %s"
+msgstr "Verwijderd uit evenement: %s"
 
 #: file/tasks.py:63
 #, python-format
