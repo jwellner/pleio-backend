@@ -381,9 +381,9 @@ def image_resize(self, schema_name, resize_image_id):
             return
 
         thumbnail_size = (resized_image.size, 10000)
-        infile = resized_image.original.upload_field.open()
 
         try:
+            infile = resized_image.original.upload_field.open()
             im = Image.open(infile)
             im.thumbnail(thumbnail_size, Image.LANCZOS)
 
@@ -396,7 +396,8 @@ def image_resize(self, schema_name, resize_image_id):
             resized_image.status = ResizedImage.OK
             resized_image.save()
 
-        except IOError:
+        except Exception as e:
             resized_image.status = ResizedImage.FAILED
+            resized_image.message = str(e)
             resized_image.save()
-            logger.error("Unable to resize file: %s", infile)
+            logger.error(e)
