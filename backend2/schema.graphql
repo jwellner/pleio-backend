@@ -325,10 +325,12 @@ type Comment implements Entity {
   ownerName: String
 }
 
+"""Confirm of event attendance, for users without an account. Delete option wil remove attendee from event (default=false)"""
 input confirmAttendEventWithoutAccountInput {
   guid: String!
   email: String!
-  code: String!
+  code: String!,
+  delete: Boolean
 }
 
 type confirmAttendEventWithoutAccountPayload {
