@@ -27,6 +27,7 @@ class ConfirmAttendEventWithoutAccountTestCase(FastTenantTestCase):
         self.event.attend_event_without_account = True
         self.event.save()
         EventAttendeeRequest.objects.create(code='1234567890', email='pete@tenant.fast-test.com', event=self.event)
+        EventAttendeeRequest.objects.create(code='1234567890', email='test@tenant.fast-test.com', event=self.event)
 
     def tearDown(self):
         self.event.delete()
@@ -131,4 +132,49 @@ class ConfirmAttendEventWithoutAccountTestCase(FastTenantTestCase):
 
         errors = result[1]["errors"]
 
-        self.assertEqual(errors[0]["message"], "could_not_find")
+        self.assertEqual(errors[0]["message"], "already_registered")
+        
+
+    @mock.patch('event.resolvers.mutation_confirm_attend_event_without_account.send_mail_multi.delay')
+    def test_confirm_delete_attend_event_without_account(self, mocked_send_mail_multi):
+        mutation = """
+            mutation confirmAttendEventWithoutAccount($input: confirmAttendEventWithoutAccountInput!) {
+                confirmAttendEventWithoutAccount(input: $input) {
+                    entity {
+                        guid
+                        attendeesWithoutAccount
+                        attendeesWithoutAccountEmailAddresses
+                        __typename
+                    }
+                    __typename
+                }
+            }
+        """
+
+        variables = {
+            "input": {
+                "guid": self.event.guid,
+                "code": "1234567890",
+                "email": "test@tenant.fast-test.com",
+                "delete": True
+            }
+        }
+
+        EventAttendee.objects.create(
+            event=self.event,
+            state='accept',
+            user=None,
+            email='test@tenant.fast-test.com'
+        )
+
+        request = HttpRequest()
+        request.user = self.anonymousUser
+
+        self.assertEqual(self.event.attendees.exclude(user__isnull=False).count(), 1)
+
+        result = graphql_sync(schema, { "query": mutation, "variables": variables }, context_value={ "request": request })
+        data = result[1]["data"]
+
+        self.assertEqual(data["confirmAttendEventWithoutAccount"]["entity"]["guid"], self.event.guid)
+        self.assertEqual(data["confirmAttendEventWithoutAccount"]["entity"]["attendeesWithoutAccountEmailAddresses"], [])
+        self.assertEqual(self.event.attendees.exclude(user__isnull=False).count(), 0)
