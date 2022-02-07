@@ -1,0 +1,62 @@
+{% extends "superadmin/base.html" %}
+
+{% load i18n %}
+
+{% block content %}
+
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+    <h1 class="h2">Audit log</h1>
+    <form method="get">
+        {{ form.object_pk }}
+        {{ form.content_type }}
+        <button type="submit" class="btn btn-primary">Filter</button>
+    </form>
+</div>
+
+
+<table class="table" width="100%">
+    <thead>
+        <tr>
+            <th scope="col" width=175>Date</th>
+            <th scope="col">Action</th>
+            <th scope="col">User</th>
+            <th scope="col">ObjectType</th>
+            <th scope="col">Object</th>
+            <th scope="col">Changes</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for log in logs %}
+        <tr>
+            <td>{{ log.timestamp|date:'Y-m-d H:i' }}</td>
+            <td>
+                {% if log.action == 0 %}
+                CREATE
+                {% elif log.action == 1 %}
+                UPDATE
+                {% elif log.action == 2 %}
+                DELETE
+                {% else %}
+                UNKNOWN
+                {% endif %}
+            </td>
+            <td>
+                {% if log.actor %}
+                {{ log.actor }}
+                {% else %}
+                SYSTEM
+                {% endif %}
+            </td>
+            <td>{{ log.content_type }}</td>
+            <td>{{ log.object_pk }}</td>
+            <td>
+                {% for key, value in log.changes_obj.items %}
+                    <strong>{{ key }}:</strong> {{ value.0 }} &#8594; {{ value.1 }}
+                    <br />
+                {% endfor %}
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

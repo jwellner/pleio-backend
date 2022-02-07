@@ -1,4 +1,6 @@
+import json
 import logging
+from auditlog.models import LogEntry
 from django.shortcuts import render
 from django.contrib import messages
 from django.contrib.auth.decorators import user_passes_test, login_required
@@ -79,6 +81,22 @@ class ScanLog(SuperAdminView):
         }
 
         return render(request, 'superadmin/scanlog.html', context)
+
+class AuditLog(SuperAdminView):
+    http_method_names = ['get']
+
+    def get(self, request):
+        filtered_qs = AuditLogFilter(request.GET, LogEntry.objects.all())
+        logs = filtered_qs.qs[:100]
+        for log in logs:
+            log.changes_obj = json.loads(log.changes)
+
+        context = {
+            'logs': logs,
+            'form': filtered_qs.form
+        }
+
+        return render(request, 'superadmin/auditlog.html', context)
 
 @login_required
 @user_passes_test(lambda u: u.is_superadmin, login_url='/', redirect_field_name=None)
