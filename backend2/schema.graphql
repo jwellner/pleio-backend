@@ -794,6 +794,9 @@ type Event implements Entity {
   abstract: String
   description: String
   richDescription: String
+  hasChildren: Boolean
+  children: [Event]
+  parent: Event
   inGroup: Boolean
   group: Group
   excerpt: String

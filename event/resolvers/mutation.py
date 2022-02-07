@@ -75,12 +75,19 @@ def resolve_add_event(_, info, input):
         raise GraphQLError(NOT_LOGGED_IN)
 
     group = None
+    parent = None
 
     if 'containerGuid' in clean_input:
         try:
             group = Group.objects.get(id=clean_input.get("containerGuid"))
         except ObjectDoesNotExist:
-            raise GraphQLError(COULD_NOT_FIND_GROUP)
+            try:
+                parent = Event.objects.get_subclass(id=clean_input.get("containerGuid"))
+            except ObjectDoesNotExist:
+                raise GraphQLError(COULD_NOT_FIND_GROUP)
+
+    if parent and parent.group:
+        group = parent.group
 
     if group and not group.is_full_member(user) and not user.has_role(USER_ROLES.ADMIN):
         raise GraphQLError("NOT_GROUP_MEMBER")
@@ -90,8 +97,8 @@ def resolve_add_event(_, info, input):
     entity.owner = user
     entity.tags = clean_input.get("tags")
 
-    if group:
-        entity.group = group
+    entity.group = group
+    entity.parent = parent
 
     entity.read_access = access_id_to_acl(entity, clean_input.get("accessId"))
     entity.write_access = access_id_to_acl(entity, clean_input.get("writeAccessId"))
