@@ -1,7 +1,7 @@
 from django_tenants.test.cases import FastTenantTestCase
 from core import config
 from user.models import User
-from core.models import ProfileField
+from core.models import ProfileField, Setting
 from backend2.schema import schema
 from ariadne import graphql_sync
 from mixer.backend.django import mixer
@@ -19,6 +19,10 @@ class SiteTestCase(FastTenantTestCase):
 
         self.profileField1 = ProfileField.objects.create(key='text_key1', name='text_name', field_type='text_field')
         self.profileField2 = ProfileField.objects.create(key='text_key2', name='text_name', field_type='date_field')
+
+        cache.set("%s%s" % (connection.schema_name, 'PROFILE_SECTIONS'),
+            [{"name": "section_one", "profileFieldGuids": [self.profileField1.guid, self.profileField2.guid]}]
+        )
 
         self.query = """
             query testSite {
@@ -114,6 +118,7 @@ class SiteTestCase(FastTenantTestCase):
 
         self.profileField1.delete()
         self.profileField2.delete()
+        cache.clear()
 
     def test_site(self):
 

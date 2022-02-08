@@ -1,6 +1,6 @@
 from django.db import connection
 from django_tenants.test.cases import FastTenantTestCase
-from core.models import UserProfile, ProfileField, UserProfileField, Setting
+from core.models import ProfileField, UserProfileField, Group, GroupProfileFieldSetting
 from user.models import User
 from blog.models import Blog
 from django.core.cache import cache
@@ -67,6 +67,14 @@ class ProfileTestCase(FastTenantTestCase):
             name="profile_field5_name"
         )
 
+        self.group = mixer.blend(Group)
+
+        GroupProfileFieldSetting.objects.create(
+            profile_field=self.profile_field2,
+            group=self.group,
+            show_field=True
+        )
+
         cache.set("%s%s" % (connection.schema_name, 'PROFILE_SECTIONS'), [
             {"name": "", "profileFieldGuids": [str(self.profile_field1.id), str(self.profile_field5.id)]},
             {"name": "section_one", "profileFieldGuids": [str(self.profile_field3.id)]},
@@ -74,7 +82,7 @@ class ProfileTestCase(FastTenantTestCase):
         ])
 
         self.query = """
-            query Profile($username: String!) {
+            query Profile($username: String!, $groupGuid: String) {
                 entity(username: $username) {
                     guid
                     status
@@ -94,7 +102,7 @@ class ProfileTestCase(FastTenantTestCase):
                             isInOverview
                             __typename
                         }
-                        fieldsInOverview {
+                        fieldsInOverview(groupGuid: $groupGuid) {
                             key
                             label
                             value
@@ -255,4 +263,18 @@ class ProfileTestCase(FastTenantTestCase):
         self.assertEqual(data["entity"]["profile"][2]["fieldOptions"], ["option1", "option2", "option3"])
         self.assertEqual(data["entity"]["profile"][2]["isFilterable"], True)
         self.assertEqual(data["entity"]["profile"][2]["isInOverview"], True)
+
+    def test_user_fields_in_group_overview(self):
+        request = HttpRequest()
+        request.user = self.user2
+
+        variables = { "username": self.user1.guid, "groupGuid": self.group.guid}
+
+        result = graphql_sync(schema, { "query": self.query, "variables": variables }, context_value={ "request": request })
+
+        self.assertTrue(result[0])
+
+        data = result[1]["data"]
+
+        self.assertEqual(data["entity"]["fieldsInOverview"][0]["key"], "profile_field2")
 

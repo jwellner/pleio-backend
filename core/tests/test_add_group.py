@@ -9,7 +9,7 @@ from django.core.cache import cache
 from django.core.files import File
 from django.contrib.auth.models import AnonymousUser
 from django.http import HttpRequest
-from core.models import Group
+from core.models import Group, ProfileField
 from user.models import User
 from mixer.backend.django import mixer
 from graphql import GraphQLError
@@ -224,3 +224,44 @@ class AddGroupCase(FastTenantTestCase):
         self.assertEqual(data["addGroup"]["group"]["isAutoMembershipEnabled"], True)
         self.assertEqual(data["addGroup"]["group"]["autoNotification"], variables["group"]["autoNotification"])
         self.assertEqual(data["addGroup"]["group"]["tags"], ["tag_one", "tag_two"])
+
+    def test_add_group_member_fields(self):
+
+        profile_field1 = ProfileField.objects.create(key='text_key', name='text_name', field_type='text_field')
+
+        cache.set("%s%s" % (connection.schema_name, 'PROFILE_SECTIONS'),
+            [{"name": "section_one", "profileFieldGuids": [profile_field1.guid]}]
+        )
+
+        mutation = """
+            mutation ($group: addGroupInput!) {
+                addGroup(input: $group) {
+                    group {
+                        guid
+                        name
+                        showMemberProfileFields {
+                            guid
+                            name
+                        }
+                    }
+                }
+            }
+        """
+
+        variables = {
+            "group": {
+                "name": "Test123",
+                "showMemberProfileFieldGuids": [str(profile_field1.id)]
+            }
+        }
+
+        request = HttpRequest()
+        request.user = self.admin
+
+        result = graphql_sync(schema, { "query": mutation, "variables": variables }, context_value={ "request": request })
+
+        data = result[1]["data"]
+
+        self.assertEqual(data["addGroup"]["group"]["name"], variables["group"]["name"])
+        self.assertEqual(len(data["addGroup"]["group"]["showMemberProfileFields"]), 1)
+        self.assertEqual(data["addGroup"]["group"]["showMemberProfileFields"][0]["guid"], profile_field1.guid)

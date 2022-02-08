@@ -175,7 +175,6 @@ class ProfileField(models.Model):
                     return False
         return True
 
-
 class UserProfileFieldManager(models.Manager):
     def visible(self, user):
         qs = self.get_queryset()
@@ -248,7 +247,6 @@ class UserProfileField(models.Model):
 
     def __str__(self):
         return f"UserProfileField[{self.profile_field.name}]"
-
 
 @receiver(pre_save, sender=UserProfileField)
 def set_date_field_value(sender, instance, **kwargs):
