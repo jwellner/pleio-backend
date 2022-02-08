@@ -10,6 +10,7 @@ annotations:
   nginx.ingress.kubernetes.io/modsecurity-snippet: |
     SecRuleEngine On
     SecRule REQUEST_URI "@beginsWith /graphql" "id:1,ctl:ruleEngine=Off"
+    SecRuleRemoveById 950000-959999
 
 autoAnnotations:
   cert-manager.io/cluster-issuer: letsencrypt-pleio-prod-issuer
