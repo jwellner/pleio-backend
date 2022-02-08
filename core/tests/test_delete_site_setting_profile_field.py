@@ -112,8 +112,10 @@ class DeleteSiteSettingProfileFieldTestCase(FastTenantTestCase):
 
     def test_profile_sections_after_delete_by_admin(self):
 
-        config.PROFILE_SECTIONS = [{"name": "section_one", "profileFieldGuids": [str(self.profileField1.id)]},
-                                   {"name": "section_two", "profileFieldGuids": [str(self.profileField2.id)]}]
+        cache.set("%s%s" % (connection.schema_name, 'PROFILE_SECTIONS'),
+            [{"name": "section_one", "profileFieldGuids": [str(self.profileField1.id)]},
+            {"name": "section_two", "profileFieldGuids": [str(self.profileField2.id)]}]
+        )
 
         mutation = """
             mutation deleteSiteSettingProfileField($input: deleteSiteSettingProfileFieldInput!) {

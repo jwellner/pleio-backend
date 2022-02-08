@@ -290,5 +290,10 @@ def resolve_icon(group, info):
 
     return None
 
+@group.field("showMemberProfileFields")
+def resolve_profile_fields_filter(group, info):
+    # pylint: disable=unused-argument
+    return [setting.profile_field for setting in group.profile_field_settings.filter(show_field=True)]
+
 
 group.set_field("excerpt", shared.resolve_entity_excerpt)

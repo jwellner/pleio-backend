@@ -6,8 +6,10 @@ import json
 from django.conf import settings
 from django.contrib.auth.models import AnonymousUser
 from django.core.files import File
+from django.core.cache import cache
 from django.http import HttpRequest
-from core.models import Group
+from core import config
+from core.models import Group, ProfileField, Setting
 from user.models import User
 from mixer.backend.django import mixer
 from graphql import GraphQLError
@@ -21,6 +23,9 @@ class EditGroupCase(FastTenantTestCase):
         self.user = mixer.blend(User)
         self.admin = mixer.blend(User, roles=['ADMIN'])
         self.group = mixer.blend(Group, owner=self.user)
+
+    def tearDown(self):
+        cache.clear()
 
     def test_edit_group_anon(self):
 
@@ -123,3 +128,93 @@ class EditGroupCase(FastTenantTestCase):
         self.assertEqual(data["editGroup"]["group"]["isAutoMembershipEnabled"], False)
         self.assertEqual(data["editGroup"]["group"]["autoNotification"], variables["group"]["autoNotification"])
         self.assertEqual(data["editGroup"]["group"]["tags"], ["tag_one", "tag_two"])
+
+    def test_edit_group_member_fields_invalid_id(self):
+        mutation = """
+            mutation ($group: editGroupInput!) {
+                editGroup(input: $group) {
+                    group {
+                        guid
+                        showMemberProfileFields {
+                            guid
+                            name
+                        }
+                    }
+                }
+            }
+        """
+        variables = {
+            "group": {
+                "guid": self.group.guid,
+                "showMemberProfileFieldGuids": ['123']
+            }
+        }
+
+        request = HttpRequest()
+        request.user = self.user
+
+        result = graphql_sync(schema, { "query": mutation, "variables": variables }, context_value={ "request": request })
+
+        errors = result[1]["errors"]
+
+        self.assertEqual(errors[0]["message"], "invalid_profile_field_guid")
+
+    def test_edit_group_member_fields(self):
+
+        profile_field1 = ProfileField.objects.create(key='text_key', name='text_name', field_type='text_field')
+        profile_field2 = ProfileField.objects.create(key='text_key2', name='text_name2', field_type='text_field')
+
+        cache.set("%s%s" % (connection.schema_name, 'PROFILE_SECTIONS'),
+            [{"name": "section_one", "profileFieldGuids": [profile_field1.guid, profile_field2.guid]}]
+        )
+
+        mutation = """
+            mutation ($group: editGroupInput!) {
+                editGroup(input: $group) {
+                    group {
+                        guid
+                        showMemberProfileFields {
+                            guid
+                            name
+                        }
+                    }
+                }
+            }
+        """
+
+        variables = {
+            "group": {
+                "guid": self.group.guid,
+                "showMemberProfileFieldGuids": [profile_field1.guid, profile_field2.guid]
+            }
+        }
+
+        request = HttpRequest()
+        request.user = self.user
+
+        result = graphql_sync(schema, { "query": mutation, "variables": variables }, context_value={ "request": request })
+
+        data = result[1]["data"]
+
+        self.assertEqual(data["editGroup"]["group"]["guid"], variables["group"]["guid"])
+        self.assertEqual(len(data["editGroup"]["group"]["showMemberProfileFields"]), 2)
+        self.assertEqual(data["editGroup"]["group"]["showMemberProfileFields"][0]["guid"], profile_field1.guid)
+        self.assertEqual(data["editGroup"]["group"]["showMemberProfileFields"][1]["guid"], profile_field2.guid)
+
+        variables = {
+            "group": {
+                "guid": self.group.guid,
+                "showMemberProfileFieldGuids": [profile_field2.guid]
+            }
+        }
+
+        request = HttpRequest()
+        request.user = self.user
+
+        result = graphql_sync(schema, { "query": mutation, "variables": variables }, context_value={ "request": request })
+
+        data = result[1]["data"]
+
+        self.assertEqual(data["editGroup"]["group"]["guid"], variables["group"]["guid"])
+        self.assertEqual(len(data["editGroup"]["group"]["showMemberProfileFields"]), 1)
+        self.assertEqual(data["editGroup"]["group"]["showMemberProfileFields"][0]["guid"], profile_field2.guid)

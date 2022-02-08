@@ -119,6 +119,7 @@ input addGroupInput {
   welcomeMessage: String
   tags: [String]
   plugins: [Plugins]
+  showMemberProfileFieldGuids: [String]
 }
 
 type addGroupPayload {
@@ -544,6 +545,7 @@ input editGroupInput {
   welcomeMessage: String
   tags: [String]
   plugins: [Plugins]
+  showMemberProfileFieldGuids: [String]
 }
 
 input editGroupNotificationsInput {
@@ -907,7 +909,7 @@ input FilterInput {
 
 """Available Filters"""
 type Filters {
-  users: [UserFilter]
+  users(groupGuid: String): [UserFilter]
 }
 
 input followInput {
@@ -979,6 +981,7 @@ type Group implements Entity {
   welcomeMessage: String
   widgets: [Widget]
   notificationMode: notificationModeOptions
+  showMemberProfileFields: [ProfileItem]
 }
 
 """Show all groups or only mine"""
@@ -1434,7 +1437,7 @@ type Query {
   files(containerGuid: String, filter: String, orderBy: String, orderDirection: String, offset: Int, limit: Int): EntityList
   groups(q: String, filter: GroupFilter, tags: [String], offset: Int, limit: Int): GroupList
   events(filter: EventFilter, containerGuid: String, offset: Int, limit: Int): EventList
-  users(q: String!, offset: Int, limit: Int, filters: [FilterInput]): UserList
+  users(q: String!, offset: Int, limit: Int, filters: [FilterInput], groupGuid: String): UserList
   entities(offset: Int, limit: Int, type: Type, subtype: String, subtypes: [String], containerGuid: String, tags: [String], tagLists: [[String]], orderBy: OrderBy, orderDirection: OrderDirection, isFeatured: Boolean, sortPinned: Boolean, isDraft: Boolean, userGuid: String): EntityList
   notifications(offset: Int, limit: Int, unread: Boolean): NotificationsList
   activities(containerGuid: String, offset: Int, limit: Int, tags: [String], tagLists: [[String]], groupFilter: [String], subtypes: [String], orderBy: OrderBy, orderDirection: OrderDirection, sortPinned: Boolean, isDraft: Boolean, userGuid: String): ActivityList
@@ -1931,7 +1934,7 @@ type User implements Entity {
   getsNewsletter: Boolean
   emailOverview: EmailOverview
   profile: [ProfileItem]
-  fieldsInOverview: [ProfileOverviewItem]
+  fieldsInOverview(groupGuid: String): [ProfileOverviewItem]
   stats: [StatsItem]
   groupNotifications: [GroupNotificationItem]
   icon: String

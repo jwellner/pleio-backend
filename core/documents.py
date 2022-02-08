@@ -3,7 +3,7 @@ from django_elasticsearch_dsl.registries import registry
 from django_tenants.utils import parse_tenant_config_path
 from elasticsearch_dsl import analysis, analyzer
 from .models.user import UserProfile, UserProfileField
-from .models.group import Group
+from .models.group import Group, GroupMembership
 from user.models import User
 from core.utils.convert import tiptap_to_text
 
@@ -71,6 +71,11 @@ class UserDocument(DefaultDocument):
 
     last_online = fields.DateField()
 
+    memberships = fields.NestedField(properties={
+        'group_id': fields.KeywordField(attr='group.id'),
+        'type': fields.KeywordField()
+    })
+
     def prepare_last_online(self, instance):
         return instance.profile.last_online
 
@@ -86,7 +91,7 @@ class UserDocument(DefaultDocument):
             'updated_at'
         ]
 
-        related_models = [UserProfile, UserProfileField]
+        related_models = [UserProfile, UserProfileField, GroupMembership]
 
     def get_instances_from_related(self, related_instance):
         """From Django dsl docs: If related_models is set, define how to retrieve the UserProfile instance(s) from the related model.
@@ -95,6 +100,10 @@ class UserDocument(DefaultDocument):
         """
         if isinstance(related_instance, UserProfile):
             return related_instance.user
+
+        if isinstance(related_instance, GroupMembership):
+            return related_instance.user
+
         return related_instance.user_profile.user
 
 @registry.register_document

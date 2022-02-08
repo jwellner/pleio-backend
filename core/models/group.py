@@ -79,7 +79,7 @@ class Group(models.Model, AttachmentMixin):
                       blank=True, default=list)
     plugins = ArrayField(models.CharField(
         max_length=256), blank=True, default=list)
-
+    
     def __str__(self):
         return f"Group[{self.name}]"
 
@@ -295,6 +295,16 @@ class Subgroup(models.Model):
 
     def __str__(self):
         return f"Subgroup[{self.name}]"
+
+
+class GroupProfileFieldSetting(models.Model):
+    """
+    Group settings for ProfileField
+    """
+    group = models.ForeignKey('core.Group', related_name='profile_field_settings', on_delete=models.CASCADE)
+    profile_field = models.ForeignKey('core.ProfileField', related_name='group_settings', on_delete=models.CASCADE)
+    show_field = models.BooleanField(default=False)
+
 
 @receiver([pre_save], sender=Group)
 def update_entity_access(sender, instance, **kwargs):
