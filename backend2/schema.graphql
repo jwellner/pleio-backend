@@ -323,6 +323,9 @@ type Comment implements Entity {
   isBestAnswer: Boolean
   owner: User
   ownerName: String
+  canComment: Boolean
+  comments: [Comment]
+  commentCount: Int
 }
 
 """Confirm of event attendance, for users without an account. Delete option wil remove attendee from event (default=false)"""

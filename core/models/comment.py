@@ -1,13 +1,12 @@
 import uuid
 from auditlog.registry import auditlog
 from django.db import models
-from django.contrib.contenttypes.fields import GenericForeignKey, GenericRelation
+from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
 from django.utils import timezone
-from .mixin import VoteMixin
+from .mixin import VoteMixin, CommentMixin
 from .rich_fields import MentionMixin, AttachmentMixin
 from core.constances import USER_ROLES
-
 
 class CommentManager(models.Manager):
     def visible(self):
@@ -15,7 +14,7 @@ class CommentManager(models.Manager):
 
         return queryset
 
-class Comment(VoteMixin, MentionMixin, AttachmentMixin):
+class Comment(VoteMixin, MentionMixin, AttachmentMixin, CommentMixin):
     class Meta:
         ordering = ['-created_at']
     objects = CommentManager()
@@ -50,6 +49,13 @@ class Comment(VoteMixin, MentionMixin, AttachmentMixin):
         if self.container and hasattr(self.container, 'can_read'):
             return self.container.can_read(user)
         return False
+
+    def get_root_container(self, parent=None):
+        if not parent:
+            parent = self.container
+        if isinstance(parent, Comment):
+            return self.get_root_container(parent.container)
+        return parent
 
     @property
     def guid(self):
@@ -86,6 +92,7 @@ class Comment(VoteMixin, MentionMixin, AttachmentMixin):
 
         return ''
 
+
 class CommentRequest(models.Model):
 
     code = models.CharField(max_length=36)
@@ -101,18 +108,6 @@ class CommentRequest(models.Model):
     content_type = models.ForeignKey(ContentType, on_delete=models.PROTECT)
     object_id = models.UUIDField(default=uuid.uuid4)
     container = GenericForeignKey('content_type', 'object_id')
-
-class CommentMixin(models.Model):
-    comments = GenericRelation(Comment)
-
-    def can_comment(self, user):
-        if not user.is_authenticated:
-            return False
-
-        return True
-
-    class Meta:
-        abstract = True
 
 
 auditlog.register(Comment)

@@ -20,19 +20,19 @@ def comment_handler(sender, instance, created, **kwargs):
         if not created:
             return
 
-        # set container last_action
-        instance.container.last_action = instance.created_at
-        instance.container.save()
-
         if instance.owner:
             sender = instance.owner.id
         else:
             return
 
-        if hasattr(instance.container, 'add_follow'):
-            instance.container.add_follow(instance.owner)
+        container = instance.get_root_container()
+        container.last_action = instance.created_at
+        container.save()
 
-        create_notification.delay(tenant_schema(), 'commented', get_model_name(instance.container), instance.container.id, sender)
+        if hasattr(container, 'add_follow'):
+            container.add_follow(instance.owner)
+
+        create_notification.delay(tenant_schema(), 'commented', get_model_name(container), container.id, sender)
 
 
 def user_handler(sender, instance, created, **kwargs):
