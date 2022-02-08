@@ -62,6 +62,7 @@ ingress:
     nginx.ingress.kubernetes.io/modsecurity-snippet: |
       SecRuleEngine On
       SecRule REQUEST_URI "@beginsWith /graphql" "id:1,ctl:ruleEngine=Off"
+      SecRuleRemoveById 950000-959999
   # extra annotations for the ingress with manual certificates
   # cannot contain from-to-www-redirect since it does not work for wildcards
   manualAnnotations:
