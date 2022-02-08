@@ -1,4 +1,5 @@
 import abc
+from django.apps import apps
 from django.db import models
 from django.db.models import Sum, IntegerField
 from django.db.models.functions import Cast
@@ -10,6 +11,7 @@ from .annotation import Annotation
 from core.models.shared import AbstractModelMeta
 from core.utils.convert import truncate_rich_description
 from core.lib import delete_attached_file
+from core.constances import USER_ROLES
 
 class VoteMixin(models.Model):
     def vote_count(self):
@@ -245,4 +247,32 @@ class ModelWithFile(models.Model, metaclass=AbstractModelMeta):
     def delete_files(self):
         for field in self.file_fields:
             delete_attached_file(field)
+
+class CommentMixin(models.Model):
+    comments = GenericRelation('core.Comment')
+
+    def can_comment(self, user):
+        if not user.is_authenticated:
+            return False
+
+        if isinstance(self, apps.get_model('core', 'Comment')) and \
+            isinstance(self.container, apps.get_model('core', 'Comment')):
+            return False
+
+        if self.group and not self.group.is_full_member(user) and not user.has_role(USER_ROLES.ADMIN):
+            return False
+
+        return True
+
+    def get_flat_comment_list(self, comments=None):
+        if not comments:
+            comments = self.comments.all()
+        for item in comments:
+            yield item
+            if item.comments.count() > 0:
+                for x in self.get_flat_comment_list(item.comments.all()):
+                    yield x
+
+    class Meta:
+        abstract = True
             
