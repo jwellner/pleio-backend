@@ -323,7 +323,7 @@ def update_entity_access(sender, instance, **kwargs):
         filters.add(Q(group__id=instance.id), Q.AND)
         filters.add(Q(read_access__overlap=list([ACCESS_TYPE.public, ACCESS_TYPE.logged_in])), Q.AND)
 
-        entities = Entity.objects.filter(filters)
+        entities = Entity.allObjects.filter(filters)
         for entity in entities:
             if ACCESS_TYPE.public in entity.read_access:
                 entity.read_access.remove(ACCESS_TYPE.public)

@@ -132,7 +132,7 @@ class Command(BaseCommand):
 
         # -- fix access of files in content of closed groups
 
-        entities = Entity.objects.filter(group__is_closed=True).select_subclasses()
+        entities = Entity.allObjects.filter(group__is_closed=True).select_subclasses()
 
         self.stdout.write(f"start checking access of files in {entities.count()} groups")
 
