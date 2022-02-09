@@ -1,6 +1,8 @@
 import django_filters
 
+from auditlog.models import LogEntry
 from django import forms
+from django.contrib.contenttypes.models import ContentType
 from django.core.validators import URLValidator
 from django.core.exceptions import ValidationError
 from core import config
@@ -47,4 +49,16 @@ class ScanIncidentFilter(django_filters.FilterSet):
 
     class Meta:
         model = ScanIncident
+        fields = []
+
+class AuditLogFilter(django_filters.FilterSet):
+    object_pk = django_filters.CharFilter(
+        lookup_expr='iexact',
+        widget=forms.TextInput(attrs={'placeholder': 'Object ID'}),
+    )
+
+    content_type = django_filters.ModelChoiceFilter(queryset=ContentType.objects.all().order_by('app_label'))
+
+    class Meta:
+        model = LogEntry
         fields = []

@@ -29,15 +29,16 @@ class DiscussionDocument(DefaultDocument):
     })
 
     def get_instances_from_related(self, related_instance):
-        if isinstance(related_instance, Comment) and isinstance(related_instance.container, Discussion):
-            return related_instance.container
+        root_container = related_instance.get_root_container()
+        if isinstance(related_instance, Comment) and isinstance(root_container, Discussion):
+            return root_container
         return None
 
     def prepare_description(self, instance):
         return tiptap_to_text(instance.rich_description)
 
     def prepare_comments(self, instance):
-        return list(map(lambda comment: {"description": tiptap_to_text(comment.rich_description)}, list(instance.comments.all())))
+        return list(map(lambda comment: {"description": tiptap_to_text(comment.rich_description)}, list(instance.get_flat_comment_list())))
 
     def prepare_tags(self, instance):
         return [x.lower() for x in instance.tags]

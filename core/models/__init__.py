@@ -1,5 +1,5 @@
 from .user import UserProfile, ProfileField, UserProfileField, ProfileFieldValidator
-from .group import Group, GroupMembership, GroupInvitation, Subgroup
+from .group import Group, GroupMembership, GroupInvitation, Subgroup, GroupProfileFieldSetting
 from .annotation import Annotation
 from .mixin import VoteMixin, BookmarkMixin, FollowMixin, NotificationMixin, FeaturedCoverMixin, ArticleMixin
 from .comment import Comment, CommentMixin, CommentRequest

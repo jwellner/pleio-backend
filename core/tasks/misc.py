@@ -317,7 +317,7 @@ def replace_domain_links(self, schema_name, replace_domain=None, replace_elgg_id
 
         for group in groups:
             rich_description = _replace_links(group.rich_description)
-            introduction = _replace_links(group.description)
+            introduction = _replace_links(group.introduction)
             welcome_message = _replace_links(group.welcome_message)
 
             if rich_description != group.rich_description or \

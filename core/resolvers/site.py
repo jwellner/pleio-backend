@@ -206,7 +206,13 @@ def resolve_cancel_membership(obj, info):
 @site.field("profileFields")
 def resolve_profile_fields(obj, info):
     # pylint: disable=unused-argument
-    return ProfileField.objects.all()
+
+    profile_section_guids = []
+
+    for section in config.PROFILE_SECTIONS:
+        profile_section_guids.extend(section['profileFieldGuids'])
+
+    return ProfileField.objects.filter(id__in=profile_section_guids)
 
 @site.field("editUserNameEnabled")
 def resolve_edit_user_name_enabled(obj, info):

@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-01-26 12:55+0100\n"
+"POT-Creation-Date: 2022-02-04 08:54+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -245,6 +245,11 @@ msgstr "Herinnering om lid te worden van de groep %(group_name)s"
 msgid "Message from group {0}: {1}"
 msgstr "Bericht van groep {0}: {1}"
 
+#: core/resolvers/mutation_send_message_to_group.py:68
+#, python-brace-format
+msgid "Copy: Message from group {0}: {1}"
+msgstr "Kopie: Bericht van groep {0}: {1}"
+
 #: core/resolvers/mutation_send_message_to_user.py:31
 #, python-brace-format
 msgid "Message from {0}: {1}"
@@ -411,17 +416,21 @@ msgid ""
 "Location: %(location)s<br>\n"
 "Date: %(start_date)s<br><br>\n"
 "\n"
-"Click on the link below to see or make changes to your registration and to add this appointment to your agenda.<br><br>\n"
-"<a href=\"%(link)s\">%(link)s</a>\n"
+"Click on the link below to see your registration and to add this appointment to your agenda.<br><br>\n"
+"<a href=\"%(link)s\">%(link)s</a><br><br>\n"
+"\n"
+"If you want to cancel your registration of the event, use <a href=\"%(leave_link)s\">%(leave_link)s</a>\n"
 msgstr ""
 "\n"
-"Hierbij bevestigen we je aanmelding voor %(title)s.<br><br>\n"
+"Dit is de bevestiging van uw inschrijving voor %(title)s.<br><br>\n"
 "\n"
 "Locatie: %(location)s<br>\n"
 "Datum: %(start_date)s<br><br>\n"
 "\n"
-"Klik op de onderstaande link om je aanmelding te bekijken of te wijzigen en om de afspraak in je agenda te zetten.  <br><br>\n"
-"<a href=\"%(link)s\">%(link)s</a>\n"
+"Klik op de link hieronder om uw inschrijving te bekijken en deze afspraak aan uw agenda toe te voegen.<br><br>\n"
+"<a href=\"%(link)s\">%(link)s</a><br><br>\n"
+"\n"
+"Als u uw inschrijving voor deze afspraak wilt annuleren, gebruik dan <a href=\"%(leave_link)s\">%(leave_link)s</a>\n"
 
 #: core/templates/email/delete_event_attendees.html:7
 #, python-format
@@ -445,6 +454,7 @@ msgstr ""
 "    "
 
 #: core/templates/email/delete_event_attendees.html:16
+#, python-format
 msgid ""
 "\n"
 "You are removed as attendee from %(title)s.<br><br>\n"
@@ -985,7 +995,7 @@ msgstr "Opgeslagen"
 msgid "Confirmation of registration %s"
 msgstr "Bevestiging aanmelding %s"
 
-#: event/resolvers/mutation_confirm_attend_event_without_account.py:51
+#: event/resolvers/mutation_confirm_attend_event_without_account.py:69
 #, python-format
 msgid "Confirmation of registration for %s"
 msgstr "Bevestiging aanmelding voor %s"

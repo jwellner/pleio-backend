@@ -1,4 +1,6 @@
+import json
 import logging
+from auditlog.models import LogEntry
 from django.shortcuts import render
 from django.contrib import messages
 from django.contrib.auth.decorators import user_passes_test, login_required
@@ -8,21 +10,22 @@ from django.views import View
 from core.constances import OIDC_PROVIDER_OPTIONS
 from core.tasks import elasticsearch_rebuild, replace_domain_links
 from core.lib import tenant_schema, is_valid_domain
-from core.superadmin.forms import SettingsForm, ScanIncidentFilter
+from core.superadmin.forms import AuditLogFilter, SettingsForm, ScanIncidentFilter
 from control.tasks import get_db_disk_usage, get_file_disk_usage
 from file.models import ScanIncident
 
 logger = logging.getLogger(__name__)
 
 
-class Dashboard(LoginRequiredMixin, UserPassesTestMixin, View):
-    http_method_names = ['get']
-
+class SuperAdminView(LoginRequiredMixin, UserPassesTestMixin, View):
     def test_func(self):
         return self.request.user.is_superadmin
 
     def handle_no_permission(self):
         return redirect('/')
+
+class Dashboard(SuperAdminView):
+    http_method_names = ['get']
 
     def get(self, request):
         db_usage = get_db_disk_usage(tenant_schema())
@@ -37,7 +40,7 @@ class Dashboard(LoginRequiredMixin, UserPassesTestMixin, View):
 
         return render(request, 'superadmin/home.html', context)
 
-class Settings(LoginRequiredMixin, UserPassesTestMixin, View):
+class Settings(SuperAdminView):
     http_method_names = ['post', 'get']
 
     def get_context(self):
@@ -46,12 +49,6 @@ class Settings(LoginRequiredMixin, UserPassesTestMixin, View):
                 'OIDC_PROVIDER_OPTIONS': OIDC_PROVIDER_OPTIONS,
             },
         }
-
-    def test_func(self):
-        return self.request.user.is_superadmin
-
-    def handle_no_permission(self):
-        return redirect('/')
 
     def post(self, request):
         form = SettingsForm(request.POST)
@@ -69,14 +66,8 @@ class Settings(LoginRequiredMixin, UserPassesTestMixin, View):
 
         return render(request, 'superadmin/settings.html', context)
 
-class ScanLog(LoginRequiredMixin, UserPassesTestMixin, View):
+class ScanLog(SuperAdminView):
     http_method_names = ['get']
-
-    def test_func(self):
-        return self.request.user.is_superadmin
-
-    def handle_no_permission(self):
-        return redirect('/')
 
     def get(self, request):
 
@@ -90,6 +81,37 @@ class ScanLog(LoginRequiredMixin, UserPassesTestMixin, View):
         }
 
         return render(request, 'superadmin/scanlog.html', context)
+
+class AuditLog(SuperAdminView):
+    http_method_names = ['get']
+
+    def get(self, request):
+        page_param = request.GET.get('page', '1')
+        page = max(int(page_param) - 1, 0) if page_param.isnumeric() else 0
+        page_size = 100
+        offset = page * page_size
+
+        filtered_qs = AuditLogFilter(request.GET, LogEntry.objects.all())
+        logs = filtered_qs.qs[offset:offset+page_size+1] # grab one extra so we can check if there are more pages
+        for log in logs:
+            log.changes_obj = json.loads(log.changes)
+
+        next_page = request.GET.copy()
+        next_page['page'] = page + 2
+        previous_page = request.GET.copy()
+        previous_page['page'] = page
+
+        has_next = len(logs) > page_size
+        has_previous = page > 0
+
+        context = {
+            'logs': logs[:page_size],
+            'form': filtered_qs.form,
+            'previous_page': previous_page.urlencode() if has_previous else None,
+            'next_page': next_page.urlencode() if has_next else None
+        }
+
+        return render(request, 'superadmin/auditlog.html', context)
 
 @login_required
 @user_passes_test(lambda u: u.is_superadmin, login_url='/', redirect_field_name=None)

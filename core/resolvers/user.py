@@ -1,9 +1,10 @@
 from ariadne import ObjectType
 from core import config
-from core.constances import ACCESS_TYPE, USER_ROLES
+from core.constances import ACCESS_TYPE, USER_ROLES, COULD_NOT_FIND
 from core.lib import get_language_options
-from core.models import ProfileField, UserProfileField
+from core.models import ProfileField, UserProfileField, Group
 from django.core.exceptions import ObjectDoesNotExist
+from graphql import GraphQLError
 
 user = ObjectType("User")
 
@@ -138,8 +139,17 @@ def resolve_language_options(obj, info):
     return [i for i in get_language_options() if i['value'] in active_languages]
 
 @user.field("fieldsInOverview")
-def resolve_fields_in_overview(obj, info):
+def resolve_fields_in_overview(obj, info, groupGuid=None):
     # pylint: disable=unused-argument
+
+    if groupGuid:
+        try:
+            group = Group.objects.get(id=groupGuid)
+        except Group.DoesNotExist:
+            raise GraphQLError(COULD_NOT_FIND)
+    else:
+        group = None
+
     user_profile_fields = []
 
     # only get configured profile fields
@@ -148,16 +158,33 @@ def resolve_fields_in_overview(obj, info):
     for section in config.PROFILE_SECTIONS:
         profile_section_guids.extend(section['profileFieldGuids'])
 
-    for field in ProfileField.objects.filter(id__in=profile_section_guids, is_in_overview=True):
-        field.value = ""
-        field.label = field.name
-        try:
-            qs = UserProfileField.objects.visible(info.context["request"].user)
-            field.value = qs.get(profile_field=field, user_profile=obj.profile).value
-        except ObjectDoesNotExist:
-            pass
+    if group:
+        for setting in group.profile_field_settings.filter(show_field=True):
+            if setting.profile_field.guid in profile_section_guids:
+                field = {
+                    'key': setting.profile_field.key,
+                    'label': setting.profile_field.name,
+                    'value': ''
+                }
+                try:
+                    qs = UserProfileField.objects.visible(info.context["request"].user)
+                    field['value'] = qs.get(profile_field=setting.profile_field, user_profile=obj.profile).value
+                except ObjectDoesNotExist:
+                    pass
 
-        user_profile_fields.append(field)
+                user_profile_fields.append(field)
+    else:
+        for field in ProfileField.objects.filter(id__in=profile_section_guids, is_in_overview=True):
+            field.value = ""
+            field.label = field.name
+            try:
+                qs = UserProfileField.objects.visible(info.context["request"].user)
+                field.value = qs.get(profile_field=field, user_profile=obj.profile).value
+            except ObjectDoesNotExist:
+                pass
+
+            user_profile_fields.append(field)
+
     return user_profile_fields
 
 @user.field("email")
