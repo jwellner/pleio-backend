@@ -86,14 +86,29 @@ class AuditLog(SuperAdminView):
     http_method_names = ['get']
 
     def get(self, request):
+        page_param = request.GET.get('page', '1')
+        page = max(int(page_param) - 1, 0) if page_param.isnumeric() else 0
+        page_size = 100
+        offset = page * page_size
+
         filtered_qs = AuditLogFilter(request.GET, LogEntry.objects.all())
-        logs = filtered_qs.qs[:100]
+        logs = filtered_qs.qs[offset:offset+page_size+1] # grab one extra so we can check if there are more pages
         for log in logs:
             log.changes_obj = json.loads(log.changes)
 
+        next_page = request.GET.copy()
+        next_page['page'] = page + 2
+        previous_page = request.GET.copy()
+        previous_page['page'] = page
+
+        has_next = len(logs) > page_size
+        has_previous = page > 0
+
         context = {
-            'logs': logs,
-            'form': filtered_qs.form
+            'logs': logs[:page_size],
+            'form': filtered_qs.form,
+            'previous_page': previous_page.urlencode() if has_previous else None,
+            'next_page': next_page.urlencode() if has_next else None
         }
 
         return render(request, 'superadmin/auditlog.html', context)
