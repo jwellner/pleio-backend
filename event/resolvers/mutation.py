@@ -206,6 +206,15 @@ def resolve_edit_event(_, info, input):
         clean_abstract(abstract)
         entity.abstract = abstract
 
+    if 'containerGuid' in clean_input:
+        try:
+            container = Event.objects.get_subclass(id=clean_input.get("containerGuid"))
+        except ObjectDoesNotExist:
+            GraphQLError(COULD_NOT_FIND)
+
+        entity.parent = container
+        entity.group = container.group
+
     if 'tags' in clean_input:
         entity.tags = clean_input.get("tags")
     if 'accessId' in clean_input:

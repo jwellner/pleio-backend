@@ -12,7 +12,7 @@ from core.constances import ACCESS_TYPE
 from core.lib import datetime_isoformat
 from mixer.backend.django import mixer
 from graphql import GraphQLError
-from datetime import timezone
+from django.utils import timezone
 
 class AddEventTestCase(FastTenantTestCase):
 
@@ -63,6 +63,10 @@ class AddEventTestCase(FastTenantTestCase):
             fragment EventParts on Event {
                 title
                 richDescription
+                parent {
+                    guid
+                }
+                hasChildren
                 timeCreated
                 timeUpdated
                 accessId
