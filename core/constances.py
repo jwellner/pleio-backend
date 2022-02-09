@@ -1,3 +1,6 @@
+from enum import Enum
+
+
 ALREADY_MEMBER_OF_GROUP = "already_member_of_group"
 ALREADY_REGISTERED = "already_registered"
 ALREADY_VOTED = "already_voted"
@@ -90,3 +93,8 @@ class USER_ROLES:
     ADMIN = "ADMIN"
     EDITOR = "EDITOR"
     QUESTION_MANAGER = "QUESTION_MANAGER"
+
+
+SYSTEM_TAG_CATEGORY = "Systeem"
+class SYSTEM_TAGS(str, Enum):
+    ARCHIVED = 'gearchiveerd'

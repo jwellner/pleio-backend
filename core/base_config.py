@@ -3,6 +3,8 @@ from django.db import connection
 from django.core.cache import cache
 from django.apps import apps
 
+from core.constances import SYSTEM_TAG_CATEGORY, SYSTEM_TAGS
+
 DEFAULT_SITE_CONFIG = {
     'BACKEND_VERSION': ('2.0', 'Backend version'),
     'NAME': ('Pleio 2.0', 'Name'),
@@ -212,12 +214,19 @@ class Config():
         if result is None:
             result = default
             setattr(self, key, default)
-            return result
+
+        if key == 'TAG_CATEGORIES':
+            result.append({'name': SYSTEM_TAG_CATEGORY, 'values': [tag.value for tag in SYSTEM_TAGS ]})
+
         return result
 
     def __setattr__(self, key, value):
         if key not in DEFAULT_SITE_CONFIG:
             raise AttributeError(key)
+
+        if key == 'TAG_CATEGORIES':
+            value = [category for category in value if category.get('name', '') != SYSTEM_TAG_CATEGORY]
+
         self._backend.set(key, value)
 
     def __dir__(self):
