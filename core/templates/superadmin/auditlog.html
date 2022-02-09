@@ -59,4 +59,16 @@
         {% endfor %}
     </tbody>
 </table>
+<div class="d-flex justify-content-between">
+    <div>
+        {% if previous_page %}
+        <a href="?{{ previous_page }}" class="btn btn-primary">Previous</a>
+        {% endif %}
+    </div>
+    <div>
+        {% if next_page %}
+        <a href="?{{ next_page }}" class="btn btn-primary">Next</a>
+        {% endif %}
+    </div>
+</div>
 {% endblock %}
