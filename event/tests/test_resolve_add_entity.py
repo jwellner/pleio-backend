@@ -22,23 +22,17 @@ class AddEventTestCase(FastTenantTestCase):
         self.group = mixer.blend(Group, owner=self.authenticatedUser, is_membership_on_request=False)
         self.group.join(self.authenticatedUser, 'owner')
 
-        self.eventPublic = Event.objects.create(
-            title="Test public event",
-            rich_description="JSON to string",
-            read_access=[ACCESS_TYPE.public],
-            write_access=[ACCESS_TYPE.user.format(self.authenticatedUser.id)],
-            owner=self.authenticatedUser,
-            start_date=timezone.now()
+        self.eventPublic = mixer.blend(Event, 
+            owner=self.authenticatedUser, 
+            read_access=[ACCESS_TYPE.public], 
+            write_access=[ACCESS_TYPE.user.format(self.authenticatedUser.id)]
         )
 
-        self.eventGroupPublic = Event.objects.create(
-            title="Test public event",
-            rich_description="JSON to string",
-            read_access=[ACCESS_TYPE.public],
+        self.eventGroupPublic = mixer.blend(Event, 
+            owner=self.authenticatedUser, 
+            read_access=[ACCESS_TYPE.public], 
             write_access=[ACCESS_TYPE.user.format(self.authenticatedUser.id)],
-            owner=self.authenticatedUser,
-            group=self.group,
-            start_date=timezone.now()
+            group=self.group
         )
 
         self.data = {

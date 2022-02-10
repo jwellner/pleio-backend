@@ -82,7 +82,7 @@ def resolve_add_event(_, info, input):
             group = Group.objects.get(id=clean_input.get("containerGuid"))
         except ObjectDoesNotExist:
             try:
-                parent = Event.objects.get_subclass(id=clean_input.get("containerGuid"))
+                parent = Event.objects.get(id=clean_input.get("containerGuid"))
             except ObjectDoesNotExist:
                 raise GraphQLError(COULD_NOT_FIND_GROUP)
 
@@ -208,7 +208,7 @@ def resolve_edit_event(_, info, input):
 
     if 'containerGuid' in clean_input:
         try:
-            container = Event.objects.get_subclass(id=clean_input.get("containerGuid"))
+            container = Event.objects.get(id=clean_input.get("containerGuid"))
         except ObjectDoesNotExist:
             GraphQLError(COULD_NOT_FIND)
 
