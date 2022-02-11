@@ -14,6 +14,8 @@ class Event(Entity, CommentMixin, BookmarkMixin, FollowMixin, NotificationMixin,
     description = models.TextField(default="")
     rich_description = models.TextField(null=True, blank=True)
 
+    parent = models.ForeignKey('self', blank=True, null=True, related_name='children', on_delete=models.CASCADE)
+
     is_featured = models.BooleanField(default=False)
 
     start_date = models.DateTimeField(null=True, blank=True)
@@ -25,6 +27,11 @@ class Event(Entity, CommentMixin, BookmarkMixin, FollowMixin, NotificationMixin,
     max_attendees = models.PositiveIntegerField(null=True, blank=True)
     rsvp = models.BooleanField(default=False)
     attend_event_without_account = models.BooleanField(default=False)
+
+    def has_children(self):
+        if self.children.count() > 0:
+            return True
+        return False
 
     def get_attendee(self, user):
         if not user.is_authenticated:

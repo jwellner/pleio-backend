@@ -75,12 +75,21 @@ def resolve_add_event(_, info, input):
         raise GraphQLError(NOT_LOGGED_IN)
 
     group = None
+    parent = None
 
     if 'containerGuid' in clean_input:
         try:
             group = Group.objects.get(id=clean_input.get("containerGuid"))
         except ObjectDoesNotExist:
-            raise GraphQLError(COULD_NOT_FIND_GROUP)
+            try:
+                parent = Event.objects.get(id=clean_input.get("containerGuid"))
+                if isinstance(parent.parent, Event):
+                    raise GraphQLError("SUBEVENT_OF_SUBEVENT")
+            except ObjectDoesNotExist:
+                raise GraphQLError(COULD_NOT_FIND_GROUP)
+
+    if parent and parent.group:
+        group = parent.group
 
     if group and not group.is_full_member(user) and not user.has_role(USER_ROLES.ADMIN):
         raise GraphQLError("NOT_GROUP_MEMBER")
@@ -90,8 +99,8 @@ def resolve_add_event(_, info, input):
     entity.owner = user
     entity.tags = clean_input.get("tags")
 
-    if group:
-        entity.group = group
+    entity.group = group
+    entity.parent = parent
 
     entity.read_access = access_id_to_acl(entity, clean_input.get("accessId"))
     entity.write_access = access_id_to_acl(entity, clean_input.get("writeAccessId"))
@@ -198,6 +207,17 @@ def resolve_edit_event(_, info, input):
         abstract = clean_input.get("abstract")
         clean_abstract(abstract)
         entity.abstract = abstract
+
+    if 'containerGuid' in clean_input:
+        try:
+            container = Event.objects.get(id=clean_input.get("containerGuid"))
+            if isinstance(container.parent, Event):
+                raise GraphQLError("SUBEVENT_OF_SUBEVENT")
+        except ObjectDoesNotExist:
+            GraphQLError(COULD_NOT_FIND)
+
+        entity.parent = container
+        entity.group = container.group
 
     if 'tags' in clean_input:
         entity.tags = clean_input.get("tags")
