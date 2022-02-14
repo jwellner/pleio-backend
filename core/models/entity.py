@@ -67,8 +67,11 @@ class Entity(models.Model):
     tags = ArrayField(models.CharField(max_length=256),
                       blank=True, default=list)
 
-    is_pinned = models.BooleanField(default=False)
     notifications_created = models.BooleanField(default=False)
+
+    is_pinned = models.BooleanField(default=False)
+    is_featured = models.BooleanField(default=False)
+    is_recommended = models.BooleanField(default=False)
 
     def can_read(self, user):
         if user.is_authenticated and user.has_role(USER_ROLES.ADMIN):

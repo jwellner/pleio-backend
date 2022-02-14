@@ -16,8 +16,6 @@ class Event(Entity, CommentMixin, BookmarkMixin, FollowMixin, NotificationMixin,
 
     parent = models.ForeignKey('self', blank=True, null=True, related_name='children', on_delete=models.CASCADE)
 
-    is_featured = models.BooleanField(default=False)
-
     start_date = models.DateTimeField(null=True, blank=True)
     end_date = models.DateTimeField(null=True, blank=True)
 

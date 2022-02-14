@@ -17,8 +17,6 @@ class News(Entity, VoteMixin, BookmarkMixin, FollowMixin, CommentMixin, Featured
     description = models.TextField(default="")
     rich_description = models.TextField(null=True, blank=True)
 
-    is_featured = models.BooleanField(default=False)
-
     source = models.TextField(default="")
 
     def __str__(self):
