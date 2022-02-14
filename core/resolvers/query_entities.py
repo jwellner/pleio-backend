@@ -52,16 +52,10 @@ def conditional_is_featured_filter(is_featured):
     """
     Only filter is_featured on news list
     """
-    q_objects = Q()
     if is_featured:
-        q_objects.add(Q(blog__is_featured = True), Q.OR)
-        q_objects.add(Q(news__is_featured = True), Q.OR)
-        q_objects.add(Q(event__is_featured = True), Q.OR)
-        q_objects.add(Q(question__is_featured = True), Q.OR)
-        q_objects.add(Q(discussion__is_featured = True), Q.OR)
-        q_objects.add(Q(wiki__is_featured = True), Q.OR)
+        return Q(is_featured=True)
 
-    return q_objects
+    return Q()
 
 def conditional_tags_filter(tags):
     if tags:
@@ -141,11 +135,11 @@ def resolve_entities(
     else:
         entities = Model.objects.visible(info.context["request"].user)
 
-    entities = entities.filter(conditional_group_filter(containerGuid) &
-                               conditional_tags_filter(tags) &
-                               conditional_tag_lists_filter(tagLists) &
+    entities = entities.filter(conditional_is_featured_filter(isFeatured) &
+                               conditional_group_filter(containerGuid) &
                                conditional_subtypes_filter(subtypes) &
-                               conditional_is_featured_filter(isFeatured))
+                               conditional_tags_filter(tags) &
+                               conditional_tag_lists_filter(tagLists))
 
     if userGuid:
         entities = entities.filter(owner__id=userGuid)
