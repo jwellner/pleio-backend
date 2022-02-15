@@ -9,7 +9,7 @@ from core.models import Group, Comment, ProfileField, SiteInvitation, SiteAccess
 from user.models import User
 from blog.models import Blog
 from cms.models import Page
-from core.constances import ACCESS_TYPE, SYSTEM_TAG_CATEGORY, SYSTEM_TAGS
+from core.constances import ACCESS_TYPE
 from backend2.schema import schema
 from ariadne import graphql_sync
 import json
@@ -333,7 +333,7 @@ class SiteSettingsTestCase(FastTenantTestCase):
         self.assertEqual(data["siteSettings"]["profile"], [])
         self.assertEqual(data["siteSettings"]["profileFields"], [{"key": self.profileField1.key}, {"key": self.profileField2.key}])
 
-        self.assertEqual(data["siteSettings"]["tagCategories"], [{"name": SYSTEM_TAG_CATEGORY, "values": [tag.value for tag in SYSTEM_TAGS]}])
+        self.assertEqual(data["siteSettings"]["tagCategories"], [])
         self.assertEqual(data["siteSettings"]["showTagsInFeed"], False)
         self.assertEqual(data["siteSettings"]["showTagsInDetail"], False)
 

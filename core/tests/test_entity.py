@@ -1,9 +1,9 @@
 from django.db import connection
 from django_tenants.test.cases import FastTenantTestCase
-from core.models import Group, GroupInvitation, Entity
+from core.models import Group, GroupInvitation
 from user.models import User
 from file.models import FileFolder
-from core.constances import ACCESS_TYPE, SYSTEM_TAGS
+from core.constances import ACCESS_TYPE
 from backend2.schema import schema
 from ariadne import graphql_sync
 import json
@@ -225,23 +225,3 @@ class EntityTestCase(FastTenantTestCase):
 
         self.assertEqual(data["breadcrumb"][0]["guid"], self.folder.guid)
         self.assertEqual(data["breadcrumb"][1]["guid"], self.subFolder.guid)
-
-class EntityQueriesTestCase(FastTenantTestCase):
-
-    def test_get_unarchived_entities(self):
-        entity = mixer.blend(Entity, tags=[])
-        archived_entity = mixer.blend(Entity, tags=[SYSTEM_TAGS.ARCHIVED])
-
-        entities = Entity.objects.all()
-
-        self.assertNotIn(archived_entity, entities)
-        self.assertIn(entity, entities)
-
-    def test_get_all_entities(self):
-        entity = mixer.blend(Entity, tags=[])
-        archived_entity = mixer.blend(Entity, tags=[SYSTEM_TAGS.ARCHIVED])
-
-        entities = Entity.allObjects.all()
-
-        self.assertIn(archived_entity, entities)
-        self.assertIn(entity, entities)

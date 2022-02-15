@@ -302,7 +302,7 @@ def replace_domain_links(self, schema_name, replace_domain=None, replace_elgg_id
         config.REDIRECTS = redirects
 
         # -- Replace entity descriptions
-        entities = Entity.allObjects.all().select_subclasses()
+        entities = Entity.objects.all().select_subclasses()
 
         for entity in entities:
             if hasattr(entity, 'rich_description'):

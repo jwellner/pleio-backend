@@ -117,7 +117,7 @@ class Command(BaseCommand):
             except Exception:
                 pass
 
-        entities = Entity.allObjects.all().select_subclasses()
+        entities = Entity.objects.all().select_subclasses()
 
         self.stdout.write(f"Start checking {entities.count()} entities")
 

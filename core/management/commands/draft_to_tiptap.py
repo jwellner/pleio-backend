@@ -65,7 +65,7 @@ class Command(BaseCommand):
         count_rich = 0
         count_skipped = 0
 
-        entities = Entity.allObjects.all().select_subclasses()
+        entities = Entity.objects.all().select_subclasses()
         for item in entities:
             if not hasattr(item, 'rich_description'):
                 continue

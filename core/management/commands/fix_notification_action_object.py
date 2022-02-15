@@ -36,7 +36,7 @@ class Command(BaseCommand):
 
         notifs = Notification.objects.filter(action_object_content_type_id=None)
         for n in notifs:
-            entity = Entity.allObjects.filter(id=n.action_object_object_id).select_subclasses().first()
+            entity = Entity.objects.filter(id=n.action_object_object_id).select_subclasses().first()
             if entity:
                 n.action_object = entity
                 n.save()

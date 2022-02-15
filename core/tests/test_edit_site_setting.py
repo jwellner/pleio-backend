@@ -8,7 +8,6 @@ import json
 from django.core.cache import cache
 from django.contrib.auth.models import AnonymousUser
 from django.http import HttpRequest
-from core.constances import SYSTEM_TAG_CATEGORY, SYSTEM_TAGS
 from core.models import Group, Widget, Setting, ProfileField
 from user.models import User
 from mixer.backend.django import mixer
@@ -393,8 +392,7 @@ class EditSiteSettingTestCase(FastTenantTestCase):
                                                                                       {"name": "section_three", "profileFieldGuids": []}])
 
         self.assertEqual(data["editSiteSetting"]["siteSettings"]["tagCategories"], [{"name": "cat1", "values": ["tag1", "tag2"]},
-                                                                                    {"name": "cat2", "values": ["tag3", "tag4"]},
-                                                                                    {"name": SYSTEM_TAG_CATEGORY, "values": [tag.value for tag in SYSTEM_TAGS]}])
+                                                                                    {"name": "cat2", "values": ["tag3", "tag4"]}])
         self.assertEqual(data["editSiteSetting"]["siteSettings"]["showTagsInFeed"], True)
         self.assertEqual(data["editSiteSetting"]["siteSettings"]["showTagsInDetail"], True)
 

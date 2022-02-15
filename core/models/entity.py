@@ -6,11 +6,10 @@ from django.utils import timezone
 from model_utils.managers import InheritanceManager
 from core.lib import get_acl
 from core.constances import USER_ROLES
-from core.models.tags import ModelWithTagsManager
 from .shared import read_access_default, write_access_default
 
 
-class EntityManager(ModelWithTagsManager, InheritanceManager):
+class EntityManager(InheritanceManager):
     def draft(self, user):
         qs = self.get_queryset()
         if not user.is_authenticated:
@@ -40,7 +39,6 @@ class EntityManager(ModelWithTagsManager, InheritanceManager):
 
 class Entity(models.Model):
     objects = EntityManager()
-    allObjects = EntityManager(exclude_archived=False)
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
 
