@@ -45,6 +45,7 @@ def object_handler(sender, instance, created, **kwargs):
             'name': title,
             'description': description,
             'external_id': str(instance.id),
+            'external_author': str(instance.owner.name),
             'tags': []
         }
 
