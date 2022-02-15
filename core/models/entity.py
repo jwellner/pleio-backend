@@ -5,7 +5,7 @@ from django.contrib.postgres.fields import ArrayField
 from django.utils import timezone
 from model_utils.managers import InheritanceManager
 from core.lib import get_acl
-from core.constances import USER_ROLES
+from core.constances import ENTITY_STATUS, USER_ROLES
 from .shared import read_access_default, write_access_default
 
 
@@ -64,6 +64,7 @@ class Entity(models.Model):
     last_action = models.DateTimeField(default=timezone.now)
 
     published = models.DateTimeField(default=timezone.now, null=True)
+    is_archived = models.BooleanField(default=False)
     tags = ArrayField(models.CharField(max_length=256),
                       blank=True, default=list)
 
@@ -97,9 +98,13 @@ class Entity(models.Model):
 
     @property
     def status_published(self):
-        if self.published and (self.published < timezone.now()):
-            return 'published'
-        return 'draft'
+        if self.is_archived:
+            return ENTITY_STATUS.ARCHIVED
+
+        if self.published and self.published < timezone.now():
+            return ENTITY_STATUS.PUBLISHED
+
+        return ENTITY_STATUS.DRAFT
 
     class Meta:
         ordering = ['published']
