@@ -18,6 +18,21 @@ def resolve_excerpt(obj, info):
     # pylint: disable=unused-argument
     return "event"
 
+@event.field("hasChildren")
+def resolve_has_children(obj, info):
+    # pylint: disable=unused-argument
+    return obj.has_children()
+
+@event.field("children")
+def resolve_children(obj, info):
+    # pylint: disable=unused-argument
+    return obj.children.visible(info.context["request"].user)
+
+@event.field("parent")
+def resolve_parent(obj, info):
+    # pylint: disable=unused-argument
+    return obj.parent
+
 @event.field("inGroup")
 def resolve_in_group(obj, info):
     # pylint: disable=unused-argument

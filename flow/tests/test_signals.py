@@ -60,6 +60,7 @@ class SignalsTestCase(FastTenantTestCase):
             'name': 'Blog1',
             'description': description,
             'external_id': str(self.blog1.id),
+            'external_author': self.blog1.owner.name,
             'tags': []
         }
 

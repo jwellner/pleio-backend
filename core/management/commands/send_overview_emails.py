@@ -107,7 +107,7 @@ class Command(BaseCommand):
             if interval != 'monthly' and config.EMAIL_OVERVIEW_ENABLE_FEATURED:
                 # get featured entities
                 featured_entities = Entity.objects.visible(user)
-                featured_entities = featured_entities.filter(Q(blog__is_recommended=True) | Q(blog__is_featured=True) | Q(news__is_featured=True))
+                featured_entities = featured_entities.filter(Q(is_recommended=True) | Q(is_featured=True))
                 featured_entities = featured_entities.filter(created_at__gte=lower_bound)
                 featured_entities = featured_entities[:3]
                 featured_entities = featured_entities.select_subclasses()
