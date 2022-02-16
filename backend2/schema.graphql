@@ -358,6 +358,10 @@ type deleteEntityPayload {
   success: Boolean
 }
 
+type archiveEntityPayload {
+  success: Boolean
+}
+
 """Remove attendees from event"""
 input deleteEventAttendeesInput {
   guid: String!
@@ -1143,6 +1147,7 @@ type Mutation {
   addEntity(input: addEntityInput!): addEntityPayload
   editEntity(input: editEntityInput!): editEntityPayload
   deleteEntity(input: deleteEntityInput!): deleteEntityPayload
+  toggleEntityArchived(guid: String!): archiveEntityPayload
   addFile(input: addFileInput!): addFilePayload
   editFileFolder(input: editFileFolderInput!): editFileFolderPayload
   moveFileFolder(input: moveFileFolderInput!): moveFileFolderPayload
