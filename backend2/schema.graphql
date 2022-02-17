@@ -205,6 +205,7 @@ type AttendeesList {
   total: Int!
   totalMaybe: Int!
   totalReject: Int!
+  totalWaitinglist: Int!
   edges: [User]
 }
 
@@ -1204,6 +1205,7 @@ type Mutation {
   """Change the role of a user in a group."""
   changeGroupRole(input: changeGroupRoleInput!): changeGroupRolePayload
   editTask(input: editTaskInput!): editTaskPayload
+  """Attend an event with state accept, waitinglist, maybe or reject """
   attendEvent(input: attendEventInput!): attendEventPayload
   attendEventWithoutAccount(input: attendEventWithoutAccountInput!): attendEventWithoutAccountPayload
   confirmAttendEventWithoutAccount(input: confirmAttendEventWithoutAccountInput!): confirmAttendEventWithoutAccountPayload

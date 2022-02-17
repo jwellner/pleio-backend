@@ -46,16 +46,19 @@ def resolve_attend_event(_, info, input):
         attendee.event = event
         attendee.user = user
 
-    if clean_input.get("state") not in ["accept", "reject", "maybe"]:
+    if clean_input.get("state") not in ["accept", "reject", "maybe", "waitinglist"]:
         raise GraphQLError(EVENT_INVALID_STATE)
 
     if clean_input.get("state") == "accept" and not attendee.state == "accept":
-        if event.max_attendees and event.attendees.filter(state="accept").count() >= event.max_attendees:
+        if event.is_full():
             raise GraphQLError(EVENT_IS_FULL)
 
     attendee.state = clean_input.get("state")
 
     attendee.save()
+
+    if clean_input.get("state") != "accept":
+        event.process_waitinglist()
 
     return {
         "entity": event
