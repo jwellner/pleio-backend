@@ -6,7 +6,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('event', '0008_event_parent'),
+        ('event', '0010_remove_event_is_featured'),
     ]
 
     operations = [
