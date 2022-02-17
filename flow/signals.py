@@ -8,7 +8,7 @@ from tenants.models import Client
 from blog.models import Blog
 from core import config
 from core.utils.convert import tiptap_to_text
-from core.models import Comment, Entity
+from core.models import Comment
 from discussion.models import Discussion
 from flow.models import FlowId
 from news.models import News
@@ -63,12 +63,15 @@ def comment_handler(sender, instance, created, **kwargs):
         settings.IMPORTING
         or not config.FLOW_ENABLED
         or not created
-        or Entity.objects.get_subclass(id=instance.container.id).type_to_string not in config.FLOW_SUBTYPES
     ):
         return
 
+    root_container = instance.get_root_container()
+    if root_container.type_to_string not in config.FLOW_SUBTYPES:
+        return
+
     try:
-        flow_id = str(FlowId.objects.get(object_id=instance.container.id).flow_id)
+        flow_id = str(FlowId.objects.get(object_id=root_container.id).flow_id)
     except ObjectDoesNotExist:
         return
 
