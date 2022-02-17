@@ -1,0 +1,15 @@
+{% extends "email/base_notification.html" %}
+{% load i18n %}
+
+{% block body %}
+{% blocktrans %}
+You are added as attendee for {{ title }} from the waitinglist.<br><br>
+
+Location: {{ location }}<br>
+Date: {{ start_date }}<br><br>
+
+Click on the link below to see the event.<br><br>
+<a href="{{ link }}">{{ link }}</a>
+{% endblocktrans %}
+{% endblock %}
+

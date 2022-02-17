@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Frans\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-02-04 08:54+0100\n"
+"POT-Creation-Date: 2022-02-12 07:38+0100\n"
 "PO-Revision-Date: 2021-06-24 15:12+0200\n"
 "Last-Translator: \n"
 "Language-Team: frans\n"
@@ -368,6 +368,26 @@ msgstr ""
 "Salut,<br><br>\n"
 "\n"
 "L’administrateur %(name_deleted_user)s est supprimé. Cette action a été menée par %(user_name)s.\n"
+
+#: core/templates/email/attend_event_from_waitinglist.html:5
+msgid ""
+"\n"
+"You are added as attendee for %(title)s from the waitinglist.<br><br>\n"
+"\n"
+"Location: %(location)s<br>\n"
+"Date: %(start_date)s<br><br>\n"
+"\n"
+"Click on the link below to see the event.<br><br>\n"
+"<a href=\"%(link)s\">%(link)s</a>\n"
+msgstr ""
+"\n"
+"Vous êtes ajouté comme participant pour %(title)s à partir de la liste d'attente.<br><br>\n"
+"\n"
+"Lieu : %(location)s<br>\n"
+"Date : %(start_date)s<br><br><br>\n"
+"\n"
+"Cliquez sur le lien ci-dessous pour voir l'événement.<br><br><br>\n"
+"<a href=\"%(link)s\">%(link)s</a>\n"
 
 #: core/templates/email/attend_event_without_account.html:5
 #, python-format
@@ -1002,6 +1022,11 @@ msgstr "Nouvelle demande d’accès à %(site_name)s"
 #: core/views.py:560
 msgid "Saved"
 msgstr "Sauvegardé"
+
+#: event/models.py:105
+#, python-format
+msgid "Added to event %s from waitinglist"
+msgstr "Ajouté à l'événement %s de la liste d'attente"
 
 #: event/resolvers/mutation_attend_event_without_account.py:31
 #, python-format

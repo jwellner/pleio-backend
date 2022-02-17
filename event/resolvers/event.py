@@ -112,6 +112,7 @@ def resolve_attendees(obj, info, limit=20, offset=0, state=None):
             "total": 0,
             "totalMaybe": 0,
             "totalReject": 0,
+            "totalWaitinglist": 0,
             "edges": []
         }
 
@@ -119,6 +120,8 @@ def resolve_attendees(obj, info, limit=20, offset=0, state=None):
     # TODO: create other type for edges to support external attendees?
     qs = obj.attendees.exclude(user__isnull=True)
     qs = qs.filter(conditional_state_filter(state))
+    if state == 'waitinglist':
+        qs = qs.order_by('updated_at')
     qs = qs[offset:offset+limit]
 
     users = [item.user for item in qs]
@@ -127,6 +130,7 @@ def resolve_attendees(obj, info, limit=20, offset=0, state=None):
         "total": obj.attendees.filter(state="accept").count(),
         "totalMaybe": obj.attendees.filter(state="maybe").count(),
         "totalReject": obj.attendees.filter(state="reject").count(),
+        "totalWaitinglist": obj.attendees.filter(state="waitinglist").count(),
         "edges": users
     }
 

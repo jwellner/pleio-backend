@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-02-04 08:54+0100\n"
+"POT-Creation-Date: 2022-02-12 07:38+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -366,6 +366,26 @@ msgstr ""
 "Hi,<br><br>\n"
 "\n"
 "The administrator %(name_deleted_user)s is deleted. This action was taken by %(user_name)s.\n"
+
+#: core/templates/email/attend_event_from_waitinglist.html:5
+msgid ""
+"\n"
+"You are added as attendee for %(title)s from the waitinglist.<br><br>\n"
+"\n"
+"Location: %(location)s<br>\n"
+"Date: %(start_date)s<br><br>\n"
+"\n"
+"Click on the link below to see the event.<br><br>\n"
+"<a href=\"%(link)s\">%(link)s</a>\n"
+msgstr ""
+"\n"
+"You are added as attendee for %(title)s from the waitinglist.<br><br>\n"
+"\n"
+"Location: %(location)s<br>\n"
+"Date: %(start_date)s<br><br>\n"
+"\n"
+"Click on the link below to see the event.<br><br>\n"
+"<a href=\"%(link)s\">%(link)s</a>\n"
 
 #: core/templates/email/attend_event_without_account.html:5
 #, python-format
@@ -989,6 +1009,11 @@ msgstr "New access request for %(site_name)s"
 #: core/views.py:560
 msgid "Saved"
 msgstr "Saved"
+
+#: event/models.py:105
+#, python-format
+msgid "Added to event %s from waitinglist"
+msgstr "Added to event %s from waitinglist"
 
 #: event/resolvers/mutation_attend_event_without_account.py:31
 #, python-format

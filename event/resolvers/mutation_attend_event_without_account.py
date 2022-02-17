@@ -19,7 +19,7 @@ def resolve_attend_event_without_account(_, info, input):
     except ObjectDoesNotExist:
         raise GraphQLError(COULD_NOT_FIND)
 
-    if event.max_attendees and event.attendees.filter(state="accept").count() >= event.max_attendees:
+    if event.is_full():
         raise GraphQLError(EVENT_IS_FULL)
 
     try:

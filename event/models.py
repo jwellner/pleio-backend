@@ -1,6 +1,11 @@
 from auditlog.registry import auditlog
 from django.db import models
+from django_tenants.utils import parse_tenant_config_path
+from django.utils.translation import ugettext_lazy
+from core.lib import get_default_email_context
 from core.models import Entity, CommentMixin, BookmarkMixin, NotificationMixin, FollowMixin, FeaturedCoverMixin, ArticleMixin, AttachmentMixin
+from core.tasks import send_mail_multi
+from event.lib import get_url
 from user.models import User
 from django.core.exceptions import ObjectDoesNotExist
 from django.utils.text import slugify
@@ -64,6 +69,11 @@ class Event(Entity, CommentMixin, BookmarkMixin, FollowMixin, NotificationMixin,
 
         return deleted
 
+    def is_full(self):
+        if self.max_attendees and self.attendees.filter(state="accept").count() >= self.max_attendees:
+            return True
+        return False
+
     def __str__(self):
         return f"Event[{self.title}]"
 
@@ -88,13 +98,36 @@ class Event(Entity, CommentMixin, BookmarkMixin, FollowMixin, NotificationMixin,
     def rich_fields(self):
         return [self.rich_description]
 
+    def process_waitinglist(self):
+        link = get_url(self, None)
+        subject = ugettext_lazy("Added to event %s from waitinglist") % self.title
+
+        schema_name = parse_tenant_config_path("")
+        context = get_default_email_context()
+        context['link'] = link
+        context['title'] = self.title
+        context['location'] = self.location
+        context['start_date'] = self.start_date
+        for attendee in self.attendees.filter(state='waitinglist').order_by('updated_at'):
+            if self.is_full():
+                break
+            attendee.state = 'accept'
+            attendee.save()
+            try:
+                send_mail_multi.delay(schema_name, subject, 'email/attend_event_from_waitinglist.html', context, attendee.user.email)
+            except Exception:
+                send_mail_multi.delay(schema_name, subject, 'email/attend_event_from_waitinglist.html', context, attendee.email)
+
+        return True
+
 
 class EventAttendee(models.Model):
 
     STATE_TYPES = (
         ('accept', 'Accept'),
         ('maybe', 'Maybe'),
-        ('reject', 'Reject')
+        ('reject', 'Reject'),
+        ('waitinglist', 'Waitinglist')
     )
 
     event = models.ForeignKey(
