@@ -1,0 +1,40 @@
+version: '3'
+
+# setup https://gist.github.com/avshabanov/eb8e03a050c79f8e77420b06f9b4abe5
+
+services:
+  api:
+    environment:
+      DB_HOST: db-primary
+      DB_HOST_REPLICA: db-replica
+
+  admin:
+    environment:
+      DB_HOST: db-primary
+
+  background:
+    environment:
+      DB_HOST: db-primary
+
+  db-primary:
+    image: postgres:12
+    environment:
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    volumes:
+      - ${HOME}/opt/postgres/simple-replica/primary/postgresql.conf:/etc/postgresql/postgresql.conf
+      - ${HOME}/opt/postgres/simple-replica/primary/data:/var/lib/postgresql/data
+      - ${HOME}/opt/postgres/simple-replica/primary/pg_hba.conf:/var/lib/postgresql/data/pg_hba.conf
+      - ${HOME}/opt/postgres/simple-replica/primary/archive:/var/lib/postgresql-master/archive
+    command: ["postgres", "-c", "config_file=/etc/postgresql/postgresql.conf"]
+
+  db-replica:
+    depends_on:
+      - "db-primary"
+    image: postgres:12
+    environment:
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    volumes:
+      - ${HOME}/opt/postgres/simple-replica/replica/postgresql.conf:/etc/postgresql/postgresql.conf
+      - ${HOME}/opt/postgres/simple-replica/replica/data:/var/lib/postgresql/data
+      - ${HOME}/opt/postgres/simple-replica/replica/pg_hba.conf:/var/lib/postgresql/data/pg_hba.conf
+    command: ["postgres", "-c", "config_file=/etc/postgresql/postgresql.conf"]
