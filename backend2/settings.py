@@ -106,7 +106,7 @@ if RUN_AS_ADMIN_APP:
     AUTHENTICATION_BACKENDS = ['django.contrib.auth.backends.ModelBackend']
 
 MIDDLEWARE = [
-    'django_tenants.middleware.main.TenantMainMiddleware',
+    'backend2.middleware.ReadReplicaTenantMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'core.middleware.CustomLocaleMiddleware',
@@ -266,6 +266,7 @@ if S3_ENABLED:
 ELASTICSEARCH_DSL_SIGNAL_PROCESSOR = 'core.elasticsearch.CustomSignalProcessor'
 DATABASE_ROUTERS = (
     'django_tenants.routers.TenantSyncRouter',
+    'backend2.dbrouter.PrimaryReplicaRouter',
 )
 
 TENANT_MODEL = "tenants.Client"

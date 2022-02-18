@@ -19,8 +19,17 @@ DATABASES = {
         'USER': os.getenv('DB_USER'),
         'PASSWORD': os.getenv('DB_PASSWORD'),
         'NAME': os.getenv('DB_NAME'),
-    }
+    },
 }
+
+if os.getenv('DB_HOST_REPLICA'):
+    DATABASES["replica"] = {
+        'ENGINE': 'django_tenants.postgresql_backend',
+        'HOST': os.getenv('DB_HOST_REPLICA'),
+        'USER': os.getenv('DB_USER'),
+        'PASSWORD': os.getenv('DB_PASSWORD'),
+        'NAME': os.getenv('DB_NAME'),
+    }
 
 if os.getenv('ELGG_DB_HOST'):
     DATABASES["elgg_control"] = {

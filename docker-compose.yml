@@ -72,10 +72,9 @@ services:
     image: postgres:12
     environment:
       POSTGRES_PASSWORD: ${DB_PASSWORD}
-    env_file:
-      - ./.env
     volumes:
       - postgres_data:/var/lib/postgresql/data/
+
   elasticsearch:
     image: docker.elastic.co/elasticsearch/elasticsearch:7.16.2
     environment:

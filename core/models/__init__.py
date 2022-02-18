@@ -1,3 +1,4 @@
+import core.models.django_auditlog
 from .user import UserProfile, ProfileField, UserProfileField, ProfileFieldValidator
 from .group import Group, GroupMembership, GroupInvitation, Subgroup, GroupProfileFieldSetting
 from .annotation import Annotation
