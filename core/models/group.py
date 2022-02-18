@@ -73,6 +73,8 @@ class Group(models.Model, AttachmentMixin):
     is_leaving_group_disabled = models.BooleanField(default=False)
     is_auto_membership_enabled = models.BooleanField(default=False)
 
+    is_hidden = models.BooleanField(default=False)
+
     auto_notification = models.BooleanField(default=False)
 
     tags = ArrayField(models.CharField(max_length=256),
