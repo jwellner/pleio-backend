@@ -10,6 +10,18 @@ from .shared import read_access_default, write_access_default
 
 
 class EntityManager(InheritanceManager):
+    def __init__(self, exclude_archived = True):
+        super().__init__()
+
+        self.exclude_archived = exclude_archived
+
+    def get_queryset(self):
+        qs = super().get_queryset()
+        if(self.exclude_archived):
+            qs = qs.exclude(is_archived=True)
+
+        return qs
+
     def draft(self, user):
         qs = self.get_queryset()
         if not user.is_authenticated:
@@ -39,6 +51,7 @@ class EntityManager(InheritanceManager):
 
 class Entity(models.Model):
     objects = EntityManager()
+    all_objects = EntityManager(exclude_archived=False)
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
 

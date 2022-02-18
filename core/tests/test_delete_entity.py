@@ -270,3 +270,30 @@ class DeleteEntityTestCase(FastTenantTestCase):
         errors = result[1]["errors"]
 
         self.assertEqual(errors[0]["message"], "not_logged_in")
+
+    def test_delete_archived(self):
+        mutation = """
+            mutation deleteEntity($input: deleteEntityInput!) {
+                deleteEntity(input: $input) {
+                    success
+                }
+            }
+        """
+        variables = {
+            "input": {
+                "guid": self.blog1.guid
+            }
+        }
+        self.blog1.is_archived = True
+        self.blog1.save()
+
+        request = HttpRequest()
+        request.user = self.user1
+
+        self.assertEqual(Blog.all_objects.all().count(), 2)
+
+        result = graphql_sync(schema, {"query": mutation, "variables": variables }, context_value={ "request": request })
+        data = result[1]["data"]
+
+        self.assertEqual(data["deleteEntity"]["success"], True)
+        self.assertEqual(Blog.all_objects.all().count(), 1)

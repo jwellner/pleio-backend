@@ -61,7 +61,7 @@ def notification_handler(sender, instance, created, **kwargs):
 
     # pylint: disable=unused-argument
     if not settings.IMPORTING and created:
-        if issubclass(type(instance), NotificationMixin) and instance.group:
+        if not instance.is_archived and issubclass(type(instance), NotificationMixin) and instance.group:
             if (not instance.published) or (datetime_isoformat(instance.published) > datetime_isoformat(timezone.now())):
                 return
 

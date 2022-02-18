@@ -195,6 +195,27 @@ class EntityTestCase(FastTenantTestCase):
         self.assertEqual(data["entity"]["guid"], self.file.guid)
         self.assertEqual(data["entity"]["__typename"], "FileFolder")
 
+    def test_entity_archived(self):
+        query = """
+            query getFileFolder($guid: String!) {
+                entity(guid: $guid) {
+                    guid
+                }
+            }
+        """
+        self.file.is_archived = True
+        self.file.save()
+        request = HttpRequest()
+        request.user = self.authenticatedUser
+        variables = {
+            "guid": self.file.guid
+        }
+
+        result = graphql_sync(schema, { "query": query, "variables": variables }, context_value={ "request": request })
+
+        self.assertTrue(result[0])
+        data = result[1]["data"]
+        self.assertEqual(data["entity"]["guid"], self.file.guid)
 
     def test_entity_breadcrumb_file_folder(self):
 
