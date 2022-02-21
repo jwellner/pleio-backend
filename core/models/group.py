@@ -24,11 +24,11 @@ class GroupManager(models.Manager):
         if not user.is_authenticated:
             return self.get_queryset().exclude(is_hidden=True)
 
-        is_hidden_and_user_is_no_member = Q()
-        is_hidden_and_user_is_no_member.add(Q(is_hidden=True), Q.AND)
-        is_hidden_and_user_is_no_member.add(~Q(members__user=user), Q.AND)
+        hidden_groups_where_users_isnt_a_member = Q()
+        hidden_groups_where_users_isnt_a_member.add(Q(is_hidden=True), Q.AND)
+        hidden_groups_where_users_isnt_a_member.add(~Q(members__user=user), Q.AND)
 
-        return self.get_queryset().exclude(is_hidden_and_user_is_no_member)
+        return self.get_queryset().exclude(hidden_groups_where_users_isnt_a_member)
 
 class Group(models.Model, AttachmentMixin):
     class Meta:
