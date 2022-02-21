@@ -207,3 +207,69 @@ class GroupsNotEmptyTestCase(FastTenantTestCase):
 
         self.assertEqual(data["groups"]["total"], 1)
         self.assertEqual(data["groups"]["edges"][0]["guid"], self.group1.guid)
+
+
+class HiddenGroupTestCase(FastTenantTestCase):
+
+    def setUp(self):
+        self.anonymous_user = AnonymousUser()
+        self.authenticated_user = mixer.blend(User, name="yy")
+        self.group_member_user = mixer.blend(User, name="xx")
+        self.non_member_user = mixer.blend(User, name="yyy")
+        self.group = mixer.blend(Group, owner=self.authenticated_user,
+                                 introduction='introductionMessage',
+                                 is_hidden=True)
+        self.group.join(self.group_member_user, 'member')
+
+    def test_hidden_group_is_hidden_for_non_members(self):
+        query = """
+            query GroupsQuery {  
+                groups {
+                    total    
+               }
+            }
+        """
+
+        request = HttpRequest()
+        request.user = self.non_member_user
+
+        result = graphql_sync(schema, {"query": query}, context_value={"request": request})
+        self.assertTrue(result[0])
+        self.assertEqual(result[1]["data"]["groups"]["total"], 0)
+
+    def test_hidden_group_is_visible_for_members(self):
+        query = """
+            query GroupsQuery {  
+                groups {
+                    total    
+                    edges {      
+                        guid
+                    }    
+               }
+            }
+        """
+
+        request = HttpRequest()
+        request.user = self.group_member_user
+
+        result = graphql_sync(schema, {"query": query}, context_value={"request": request})
+
+        self.assertTrue(result[0])
+        data = result[1]["data"]
+        self.assertEqual(data["groups"]["total"], 1)
+        self.assertEqual(data["groups"]["edges"][0]["guid"], self.group.guid)
+
+    def test_hidden_group_is_hidden_for_anonymous_users(self):
+        query = """
+            query GroupsQuery {  
+                groups {
+                    total    
+               }
+            }
+        """
+        request = HttpRequest()
+        request.user = self.anonymous_user
+
+        result = graphql_sync(schema, {"query": query}, context_value={"request": request})
+        self.assertTrue(result[0])
+        self.assertEqual(result[1]["data"]["groups"]["total"], 0)
