@@ -1,4 +1,3 @@
-from django.db import connection
 from django_tenants.test.cases import FastTenantTestCase
 from core.models import Group, GroupInvitation
 from user.models import User
@@ -6,7 +5,6 @@ from file.models import FileFolder
 from core.constances import ACCESS_TYPE
 from backend2.schema import schema
 from ariadne import graphql_sync
-import json
 from django.contrib.auth.models import AnonymousUser
 from django.http import HttpRequest
 from mixer.backend.django import mixer
@@ -447,3 +445,21 @@ class GroupTestCase(FastTenantTestCase):
         data = result[1]["data"]
         self.assertEqual(data["groups"]["total"], 1)
         self.assertEqual(data["groups"]["edges"][0]["guid"], self.group.guid)
+
+    def test_hidden_group_is_hidden_for_anonymous_users(self):
+        self.group.is_hidden = True
+        self.group.save()
+
+        query = """
+            query GroupsQuery {  
+                groups {
+                    total    
+               }
+            }
+        """
+        request = HttpRequest()
+        request.user = self.anonymousUser
+
+        result = graphql_sync(schema, {"query": query}, context_value={"request": request})
+        self.assertTrue(result[0])
+        self.assertEqual(result[1]["data"]["groups"]["total"], 0)

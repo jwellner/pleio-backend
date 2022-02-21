@@ -22,7 +22,7 @@ logger = logging.getLogger(__name__)
 class GroupManager(models.Manager):
     def visible(self, user):
         if not user.is_authenticated:
-            return self.get_queryset()
+            return self.get_queryset().exclude(is_hidden=True)
 
         is_hidden_and_user_is_no_member = Q()
         is_hidden_and_user_is_no_member.add(Q(is_hidden=True), Q.AND)
