@@ -116,6 +116,7 @@ input addGroupInput {
   richDescription: String
   introduction: String
   isIntroductionPublic: Boolean
+  isHidden: Boolean
   welcomeMessage: String
   tags: [String]
   plugins: [Plugins]
@@ -546,6 +547,7 @@ input editGroupInput {
   richDescription: String
   introduction: String
   isIntroductionPublic: Boolean
+  isHidden: Boolean
   welcomeMessage: String
   tags: [String]
   plugins: [Plugins]
@@ -959,6 +961,7 @@ type Group implements Entity {
   canEdit: Boolean!
   canChangeOwnership: Boolean
   isClosed: Boolean
+  isHidden: Boolean
   isMembershipOnRequest: Boolean
   isFeatured: Boolean
   autoNotification: Boolean

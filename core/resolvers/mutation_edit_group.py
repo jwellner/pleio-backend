@@ -82,6 +82,8 @@ def resolve_edit_group(_, info, input):
 
     if 'isClosed' in clean_input:
         group.is_closed = clean_input.get("isClosed")
+    if 'isHidden' in clean_input:
+        group.is_hidden = clean_input.get("isHidden")
     if 'isMembershipOnRequest' in clean_input:
         group.is_membership_on_request = clean_input.get("isMembershipOnRequest")
     if 'autoNotification' in clean_input:
