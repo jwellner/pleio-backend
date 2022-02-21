@@ -41,7 +41,7 @@ def get_serializable_entities(entities):
             'group': entity_group,
             'group_name': entity_group_name,
             'group_url': entity_group_url,
-            'created_at': entity.created_at.strftime("%e-%m-%Y")  # formatting done here because it's not a date object anymore after serialization
+            'published': entity.published.strftime("%e-%m-%Y")  # formatting done here because it's not a date object anymore after serialization
         }
         serializable_entities.append(serializable_entity)
     return serializable_entities
@@ -81,7 +81,7 @@ class Command(BaseCommand):
 
         interval = options['interval']
 
-        users = User.objects.filter(is_active=True, _profile__receive_notification_email=True)
+        users = User.objects.filter(is_active=True, _profile__receive_notification_email=True, _profile__overview_email_interval=interval)
 
         subject = config.EMAIL_OVERVIEW_SUBJECT
         for user in users:
@@ -91,15 +91,19 @@ class Command(BaseCommand):
                 subject = ugettext_lazy("Regular overview of %(site_name)s") % {'site_name': config.NAME}
 
             # determine lower bound of emails in queries
-            time_threshold = timezone.now() - timedelta(hours=1500)
+            # if user has never received overview mails use last interval period for time delta
+            if interval == "monthly":
+                delta = timedelta(weeks=4)
+            elif interval == "weekly":
+                delta = timedelta(weeks=1)
+            else:
+                delta = timedelta(days=1)
+
+            time_threshold = timezone.now() - delta
             if user.profile.overview_email_last_received and user.profile.overview_email_last_received > time_threshold:
                 lower_bound = user.profile.overview_email_last_received
             else:
                 lower_bound = time_threshold
-
-            # determine interval
-            if interval != user.profile.overview_email_interval:
-                continue
 
             featured_entities = Entity.objects.none()
 
@@ -108,7 +112,7 @@ class Command(BaseCommand):
                 # get featured entities
                 featured_entities = Entity.objects.visible(user)
                 featured_entities = featured_entities.filter(Q(is_recommended=True) | Q(is_featured=True))
-                featured_entities = featured_entities.filter(created_at__gte=lower_bound)
+                featured_entities = featured_entities.filter(published__gte=lower_bound)
                 featured_entities = featured_entities[:3]
                 featured_entities = featured_entities.select_subclasses()
 
@@ -117,15 +121,15 @@ class Command(BaseCommand):
 
             entity_views = EntityView.objects.filter(viewer=user)
 
-            # filter on created_at after last received overview or maximum lower bound
-            entities = entities.filter(created_at__gte=lower_bound)
+            # filter on published after last received overview or maximum lower bound
+            entities = entities.filter(published__gte=lower_bound)
             entities = entities.filter(
                 ~Q(news__isnull=True) |
                 ~Q(blog__isnull=True) |
                 ~Q(event__isnull=True) |
                 ~Q(wiki__isnull=True) |
                 ~Q(question__isnull=True)
-            )
+            ).order_by("-published")
             entity_views = entity_views.filter(created_at__gte=lower_bound)
 
             # remove featured and viewed entities from entities
