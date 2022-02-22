@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Duits\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-02-12 07:38+0100\n"
+"POT-Creation-Date: 2022-02-21 17:34+0100\n"
 "PO-Revision-Date: 2021-05-26 10:55+0200\n"
 "Last-Translator: \n"
 "Language-Team: \n"
@@ -505,7 +505,6 @@ msgstr "Blog erstellt von"
 
 #: core/templates/email/entities/blog.html:27
 #: core/templates/email/entities/event.html:19
-#: core/templates/email/entities/news.html:33
 #: core/templates/email/entities/question.html:19
 #: core/templates/email/entities/wiki.html:26
 msgid "on"
@@ -516,8 +515,9 @@ msgid "Agenda item created by"
 msgstr "Kalendereintrag erstellt von"
 
 #: core/templates/email/entities/news.html:33
-msgid "News added by"
-msgstr "Neuigkeiten hinzugefügt von"
+#| msgid "News added by"
+msgid "News added on"
+msgstr "Nachrichten hinzugefügt am"
 
 #: core/templates/email/entities/question.html:19
 msgid "Question asked by"
@@ -1010,7 +1010,7 @@ msgstr "Neue Zugriffsanfrage für %(site_name)s"
 msgid "Saved"
 msgstr "Gerettet"
 
-#: event/models.py:105
+#: event/models.py:103
 #, python-format
 msgid "Added to event %s from waitinglist"
 msgstr "Zum Ereignis %s von der Warteliste hinzugefügt"
@@ -1034,6 +1034,9 @@ msgstr "Entfernt vom Ereignis: %s"
 #, python-format
 msgid "Filescan found suspicous files on %(site_url)s"
 msgstr "Filescan hat verdächtige Dateien auf %(site_url)sgefunden"
+
+#~ msgid "On"
+#~ msgstr "Auf"
 
 #~ msgid "New notification at %(site_name)s: "
 #~ msgstr "Neue Benachrichtigung auf %(site_name)s: "
