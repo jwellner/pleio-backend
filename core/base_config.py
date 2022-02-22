@@ -18,6 +18,7 @@ DEFAULT_SITE_CONFIG = {
     'PIWIK_URL': ('https://stats.pleio.nl/', 'Piwik url'),
     'PIWIK_ID': ('', 'Piwik ID'),
     'OIDC_PROVIDERS': (['pleio'], 'OIDC Providers'),
+    'AUTO_APPROVE_SSO': (False, 'Automatically approve users that use one of configured SSO options'),
     'CUSTOM_JAVASCRIPT': ('', 'Custom Javascript'),
 
     'THEME_OPTIONS': (

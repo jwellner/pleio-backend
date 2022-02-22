@@ -67,12 +67,7 @@ class OIDCAuthBackend(OIDCAuthenticationBackend):
         return User.objects.filter(Q(external_id__iexact=external_id) | Q(email__iexact=email))
 
     def create_user(self, claims):
-        if (
-            not config.ALLOW_REGISTRATION
-            and not claims.get('is_admin', False)
-            and not claims.get('email').split('@')[1] in config.DIRECT_REGISTRATION_DOMAINS
-            and not SiteAccessRequest.objects.filter(email=claims.get('email'), accepted=True).first()
-        ):
+        if self.requires_approval(claims):
             if self.request.session.get('invitecode'):
                 try:
                     invite = SiteInvitation.objects.get(
@@ -106,6 +101,27 @@ class OIDCAuthBackend(OIDCAuthenticationBackend):
         )
 
         return user
+
+    def requires_approval(self, claims):
+        """Check whether a new user needs approval of an admin before they can be given access based on their claims and the site's configuration"""
+
+        return (
+            not config.ALLOW_REGISTRATION # a site that allows registration, automatically accepts new users
+            and not claims.get('is_admin', False) # Pleio admins (not site admins) do not need approval
+            and not claims.get('email').split('@')[1] in config.DIRECT_REGISTRATION_DOMAINS # Approval can be skipped for configured email domains
+            and not SiteAccessRequest.objects.filter(email=claims.get('email'), accepted=True).first() # Users that are already approved, don't require it
+            and not self.approve_by_sso(claims) # Users can be approved based on the SSO they use
+        )
+
+    def approve_by_sso(self, claims):
+        """Check if a user can be approved based on the sso they use (i.e. is one of the configured saml/oidc providers)"""
+        if not config.AUTO_APPROVE_SSO:
+            return False
+
+        return (
+            set(claims.get('sso', [])) & set(config.OIDC_PROVIDERS)
+            or set(claims.get('sso', [])) & set([config.IDP_ID])
+        )
 
     def update_user(self, user, claims):
 
