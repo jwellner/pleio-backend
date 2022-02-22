@@ -7,7 +7,7 @@ from django.db import connection
 from tenants.models import Client
 from blog.models import Blog
 from core import config
-from core.utils.convert import tiptap_to_text
+from core.utils.convert import tiptap_to_html
 from core.models import Comment
 from discussion.models import Discussion
 from flow.models import FlowId
@@ -36,11 +36,13 @@ def object_handler(sender, instance, created, **kwargs):
         tenant = Client.objects.get(schema_name=connection.schema_name)
         url_prefix = "https://" + tenant.domains.first().domain
 
-        title = instance.title if hasattr(instance, 'title')  else 'Geen titel gegeven'
+        title = instance.title if hasattr(instance, 'title') and instance.title  else 'Geen titel gegeven'
 
-        abstract = f"{instance.abstract}" if hasattr(instance, 'abstract') else ''
+        abstract = f"{instance.abstract}" if hasattr(instance, 'abstract') and instance.abstract else ''
 
-        description = f"{abstract}{tiptap_to_text(instance.rich_description)} <br /><br /><a href='{url_prefix}{instance.url}'>{instance.url}</a>"
+        content = tiptap_to_html(instance.rich_description)
+
+        description = f"{abstract}{content}<p><a href='{url_prefix}{instance.url}'>{instance.url}</a></p>"
 
         json = {
             'casetype': str(config.FLOW_CASE_ID),
@@ -87,7 +89,7 @@ def comment_handler(sender, instance, created, **kwargs):
         json = {
             'case': flow_id,
             'author': instance.owner.name,
-            'description': tiptap_to_text(instance.rich_description)
+            'description': tiptap_to_html(instance.rich_description)
         }
 
         requests.post(url, headers=headers, json=json)
