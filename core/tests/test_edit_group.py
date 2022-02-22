@@ -2,17 +2,14 @@ from django.db import connection
 from django_tenants.test.cases import FastTenantTestCase
 from backend2.schema import schema
 from ariadne import graphql_sync
-import json
 from django.conf import settings
 from django.contrib.auth.models import AnonymousUser
 from django.core.files import File
 from django.core.cache import cache
 from django.http import HttpRequest
-from core import config
-from core.models import Group, ProfileField, Setting
+from core.models import Group, ProfileField
 from user.models import User
 from mixer.backend.django import mixer
-from graphql import GraphQLError
 from unittest.mock import patch, MagicMock
 
 
@@ -78,6 +75,7 @@ class EditGroupCase(FastTenantTestCase):
                         isIntroductionPublic
                         welcomeMessage
                         isClosed
+                        isHidden
                         isMembershipOnRequest
                         isFeatured
                         autoNotification
@@ -98,6 +96,7 @@ class EditGroupCase(FastTenantTestCase):
                 "isIntroductionPublic": True,
                 "welcomeMessage": "welcomeMessage",
                 "isClosed": True,
+                "isHidden": True,
                 "isMembershipOnRequest": True,
                 "isFeatured": True,
                 "autoNotification": True,
@@ -122,6 +121,7 @@ class EditGroupCase(FastTenantTestCase):
         self.assertEqual(data["editGroup"]["group"]["isIntroductionPublic"], variables["group"]["isIntroductionPublic"])
         self.assertEqual(data["editGroup"]["group"]["welcomeMessage"], variables["group"]["welcomeMessage"])
         self.assertEqual(data["editGroup"]["group"]["isClosed"], variables["group"]["isClosed"])
+        self.assertEqual(data["editGroup"]["group"]["isHidden"], variables["group"]["isHidden"])
         self.assertEqual(data["editGroup"]["group"]["isMembershipOnRequest"], variables["group"]["isMembershipOnRequest"])
         self.assertEqual(data["editGroup"]["group"]["isFeatured"], False)
         self.assertEqual(data["editGroup"]["group"]["isLeavingGroupDisabled"], False)

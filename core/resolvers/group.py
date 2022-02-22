@@ -59,6 +59,11 @@ def resolve_group_is_closed(obj, info):
     # pylint: disable=unused-argument
     return obj.is_closed
 
+@group.field("isHidden")
+def resolve_group_is_hidden(obj, info):
+    # pylint: disable=unused-argument
+    return obj.is_hidden
+
 @group.field("isMembershipOnRequest")
 def resolve_group_is_membership_on_request(obj, info):
     # pylint: disable=unused-argument

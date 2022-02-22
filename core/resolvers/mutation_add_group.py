@@ -65,6 +65,7 @@ def resolve_add_group(_, info, input):
     group.welcome_message = clean_input.get("welcomeMessage", "")
 
     group.is_closed = clean_input.get("isClosed", False)
+    group.is_hidden = clean_input.get("isHidden", False)
     group.is_membership_on_request = clean_input.get("isMembershipOnRequest", False)
     group.auto_notification = clean_input.get("autoNotification", False)
 
