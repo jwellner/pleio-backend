@@ -6,7 +6,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('core', '0051_auto_20220203_1553'),
+        ('core', '0053_reset_resized_images'),
     ]
 
     operations = [
