@@ -1,23 +1,13 @@
 from django.db import connection
 from django_tenants.test.cases import FastTenantTestCase
-from backend2.schema import schema
-from ariadne import graphql_sync
-import json
 from django.core.cache import cache
-from django.contrib.auth.models import AnonymousUser
-from django.http import HttpRequest
-from core.models import Group, Comment
+from core.models import Comment
 from user.models import User
 from blog.models import Blog
 from core import config
 from mixer.backend.django import mixer
 from core.constances import ACCESS_TYPE
-from core.lib import get_acl, access_id_to_acl
-from core.signals import comment_handler, user_handler, notification_handler
-from django.utils.text import slugify
-from django.db.models.signals import post_save
 from unittest import mock
-from flow.signals import object_handler
 from flow.models import FlowId
 
 
@@ -46,7 +36,8 @@ class SignalsTestCase(FastTenantTestCase):
         self.blog1 = Blog.objects.create(
             title="Blog1",
             owner=self.user1,
-            rich_description="",
+            abstract="abstract",
+            rich_description="rich_description",
             read_access=[ACCESS_TYPE.public],
             write_access=[ACCESS_TYPE.user.format(self.user1.id)]
         )
@@ -54,7 +45,7 @@ class SignalsTestCase(FastTenantTestCase):
         url = 'https://flow.test/api/cases/'
         headers = {'Authorization': 'Token ' + config.FLOW_TOKEN, 'Accept': 'application/json'}
 
-        description = f"{self.blog1.rich_description} <br /><br /><a href='{self.url_prefix}{self.blog1.url}'>{self.blog1.url}</a>"
+        description = f"{self.blog1.abstract}{self.blog1.rich_description} <br /><br /><a href='{self.url_prefix}{self.blog1.url}'>{self.blog1.url}</a>"
         json_data = {
             'casetype': '1',
             'name': 'Blog1',

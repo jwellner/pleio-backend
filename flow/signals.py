@@ -36,9 +36,11 @@ def object_handler(sender, instance, created, **kwargs):
         tenant = Client.objects.get(schema_name=connection.schema_name)
         url_prefix = "https://" + tenant.domains.first().domain
 
-        title = instance.title if instance.title else 'Geen titel gegeven'
+        title = instance.title if hasattr(instance, 'title')  else 'Geen titel gegeven'
 
-        description = f"{tiptap_to_text(instance.rich_description)} <br /><br /><a href='{url_prefix}{instance.url}'>{instance.url}</a>"
+        abstract = f"{instance.abstract}" if hasattr(instance, 'abstract') else ''
+
+        description = f"{abstract}{tiptap_to_text(instance.rich_description)} <br /><br /><a href='{url_prefix}{instance.url}'>{instance.url}</a>"
 
         json = {
             'casetype': str(config.FLOW_CASE_ID),
