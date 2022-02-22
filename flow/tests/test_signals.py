@@ -1,3 +1,4 @@
+import json
 from django.db import connection
 from django_tenants.test.cases import FastTenantTestCase
 from django.core.cache import cache
@@ -33,11 +34,33 @@ class SignalsTestCase(FastTenantTestCase):
 
         mocked_post.return_value.json.return_value = {'id': 100}
 
+        rich_description = json.dumps({
+            'type': 'doc',
+            'content': [
+                {
+                    'type': 'paragraph',
+                    'content': [
+                        {
+                            'type': 'text',
+                            'text': 'Dit is een '
+                        },
+                        {
+                            'type': 'text',
+                            'text': 'paragraph',
+                            'marks': [{'type': 'bold'}],
+                        }
+                    ]
+                }
+            ]
+        })
+
+        rich_description_html = '<p>Dit is een <strong>paragraph</strong></p>'
+
         self.blog1 = Blog.objects.create(
             title="Blog1",
             owner=self.user1,
             abstract="abstract",
-            rich_description="rich_description",
+            rich_description=rich_description,
             read_access=[ACCESS_TYPE.public],
             write_access=[ACCESS_TYPE.user.format(self.user1.id)]
         )
@@ -45,7 +68,7 @@ class SignalsTestCase(FastTenantTestCase):
         url = 'https://flow.test/api/cases/'
         headers = {'Authorization': 'Token ' + config.FLOW_TOKEN, 'Accept': 'application/json'}
 
-        description = f"{self.blog1.abstract}{self.blog1.rich_description} <br /><br /><a href='{self.url_prefix}{self.blog1.url}'>{self.blog1.url}</a>"
+        description = f"{self.blog1.abstract}{rich_description_html}<p><a href='{self.url_prefix}{self.blog1.url}'>{self.blog1.url}</a></p>"
         json_data = {
             'casetype': '1',
             'name': 'Blog1',
