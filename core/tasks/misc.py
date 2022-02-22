@@ -11,7 +11,6 @@ from core import config
 from core.lib import access_id_to_acl
 from core.tasks.mail_tasks import send_mail_multi
 from core.models import Group, Entity, Widget, Comment, ProfileField, UserProfileField, ResizedImage
-from django.core import management
 from django.utils import translation
 from django.utils.translation import ugettext_lazy
 from django_tenants.utils import schema_context
@@ -356,16 +355,6 @@ def replace_domain_links(self, schema_name, replace_domain=None, replace_elgg_id
                 widget.save()
 
     logger.info("Done replacing links")
-
-
-@shared_task(bind=True)
-def draft_to_tiptap(self, schema_name):
-    # pylint: disable=unused-argument
-    '''
-    Send overview mails for tenant
-    '''
-    management.execute_from_command_line(['manage.py', 'tenant_command', 'draft_to_tiptap', '--schema', schema_name])
-
 
 @shared_task(bind=True)
 def image_resize(self, schema_name, resize_image_id):
