@@ -380,13 +380,17 @@ def image_resize(self, schema_name, resize_image_id):
         if resized_image.status == ResizedImage.OK:
             return
 
-        thumbnail_size = (resized_image.size, 10000)
-
         try:
             infile = resized_image.original.upload_field.open()
             im = Image.open(infile)
-            im.thumbnail(thumbnail_size, Image.LANCZOS)
 
+            # Set the smallest dimension to the requested size to avoid pixelly images
+            if im.width > im.height:
+                thumbnail_size = (im.width, resized_image.size)
+            else:
+                thumbnail_size = (resized_image.size, im.height)
+
+            im.thumbnail(thumbnail_size, Image.LANCZOS)
             output = BytesIO()
             im.save(output, im.format)
             contents = output.getvalue()
