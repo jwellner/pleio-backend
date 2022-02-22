@@ -7,10 +7,11 @@ from django.dispatch import receiver
 from django.contrib.postgres.fields import ArrayField
 from django.utils import timezone
 from datetime import datetime
-from core.lib import get_acl, draft_to_text, html_to_text
+from core.lib import get_acl
 from core.constances import USER_ROLES
 from core.exceptions import InvalidFieldException
 from core import config
+from core.utils.convert import tiptap_to_text
 from .shared import read_access_default, write_access_default
 from django.core.exceptions import ObjectDoesNotExist
 
@@ -231,10 +232,7 @@ class UserProfileField(models.Model):
     def value_field_indexing(self):
         """Format value according to type"""
         if self.profile_field.field_type == "html_field":
-            text = draft_to_text(self.value)
-            if text:
-                return text
-            return html_to_text(self.value)
+            return tiptap_to_text(self.value)
 
         return self.value
 

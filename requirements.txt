@@ -13,7 +13,7 @@ prospector==1.2.0
 ariadne==0.13.0
 graphql-core==3.1.7
 django-model-utils==4.1.1
-mixer==7.1.2
+mixer==7.2.1
 django-storage-swift==1.2.19
 elastic-apm==6.3.3
 opentracing==2.4.0
@@ -28,7 +28,6 @@ python-memcached==1.59
 django-ses==2.2.0
 textract==1.6.3
 html2text==2020.1.16
-draftjs_exporter==4.1.2
 django-widget-tweaks==1.4.8
 pydash==5.0.2
 django-signal-disabler==0.1.1
@@ -40,9 +39,6 @@ redis==3.5.3
 elasticsearch==7.13.4
 clamd==1.0.2
 django-csp==3.7
-beautifulsoup4>4.7
-html-purifier==0.1.9
 prosemirror-py==0.2
 django-autotranslate==1.2.0
 futures==2.2.0 # remove when autotranslate dependency is fixed
-faker==12.0.0 # remove when mixer is fixed https://github.com/klen/mixer/issues/145
