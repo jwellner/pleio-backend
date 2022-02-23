@@ -6,6 +6,10 @@ BR_DOM = ["br"]
 OL_DOM = ["ol", 0]
 UL_DOM = ["ul", 0]
 LI_DOM = ["li", 0]
+TABLE_DOM = ["table", 0]
+TABLE_HEADER_DOM = ["th", 0]
+TABLE_ROW_DOM = ["tr", 0]
+TABLE_CELL_DOM = ["td", 0]
 
 nodes = {
     "doc": {"content": "block+"},
@@ -97,10 +101,8 @@ nodes = {
             "a",
             {
                 "href": node.attrs["url"],
-                "alt": node.attrs["alt"],
-                "title": node.attrs["title"],
             },
-            0
+            node.attrs["name"]
         ],
     },
     "video": {
@@ -131,14 +133,14 @@ nodes = {
     "bulletList": {
         "group": "block",
         "content": "listItem+",
-        "parseDom": [{"tag": "ul"}],
+        "parseDOM": [{"tag": "ul"}],
         "toDOM": lambda _: UL_DOM
     },
     "orderedList": {
         "attrs": {"order": {"default": 1}},
         "group": "block",
         "content": "listItem+",
-        "parseDom": [{"tag": "ol"}],
+        "parseDOM": [{"tag": "ol"}],
         "toDOM": lambda node: (
             OL_DOM if node.attrs.get("order") == 1 else ["ol", {"start": node.attrs["order"]}, 0]
         ),
@@ -148,6 +150,27 @@ nodes = {
         "defining": True,
         "content": "paragraph block*",
         "toDOM": lambda _: LI_DOM
+    },
+    "table": {
+        "parseDOM": [{"tag": "table"}],
+        "group": "block",
+        "content": "tableHeader+ tableRow+",
+        "toDOM": lambda _: TABLE_DOM
+    },
+    "tableHeader": {
+        "parseDOM": [{"tag": "th"}],
+        "content": "paragraph block*",
+        "toDOM": lambda _: TABLE_HEADER_DOM
+    },
+    "tableRow": {
+        "parseDOM": [{"tag": "tr"}],
+        "content": "tableCell+",
+        "toDOM": lambda _: TABLE_ROW_DOM
+    },
+    "tableCell": {
+        "parseDOM": [{"tag": "td"}],
+        "content": "paragraph block*",
+        "toDOM": lambda _: TABLE_CELL_DOM
     },
 }
 
