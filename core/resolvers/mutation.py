@@ -1,4 +1,6 @@
 from ariadne import ObjectType
+
+from core.resolvers.mutation_archive_entity import resolve_archive_entity
 from .mutation_add_group import resolve_add_group
 from .mutation_edit_group import resolve_edit_group
 from .mutation_join_group import resolve_join_group
@@ -73,6 +75,7 @@ mutation.set_field("editGroupWidget", resolve_edit_group_widget)
 mutation.set_field("addEntity", resolve_add_entity)
 mutation.set_field("editEntity", resolve_edit_entity)
 mutation.set_field("deleteEntity", resolve_delete_entity)
+mutation.set_field("toggleEntityArchived", resolve_archive_entity)
 mutation.set_field("deleteUser", resolve_delete_user)
 mutation.set_field("toggleUserRole", resolve_toggle_user_role)
 mutation.set_field("toggleUserIsBanned", resolve_toggle_user_is_banned)

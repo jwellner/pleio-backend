@@ -1,12 +1,12 @@
-from django.db import connection
+from datetime import timedelta
+from django.utils import timezone
 from django_tenants.test.cases import FastTenantTestCase
-from core.models import Group, GroupInvitation
+from core.models import Group, GroupInvitation, Entity
 from user.models import User
 from file.models import FileFolder
-from core.constances import ACCESS_TYPE
+from core.constances import ACCESS_TYPE, ENTITY_STATUS
 from backend2.schema import schema
 from ariadne import graphql_sync
-import json
 from django.contrib.auth.models import AnonymousUser
 from django.http import HttpRequest
 from mixer.backend.django import mixer
@@ -69,7 +69,7 @@ class EntityTestCase(FastTenantTestCase):
         request = HttpRequest()
         request.user = self.anonymousUser
 
-        variables = { 
+        variables = {
             "username": self.authenticatedUser.guid
         }
 
@@ -78,7 +78,7 @@ class EntityTestCase(FastTenantTestCase):
         self.assertTrue(result[0])
 
         data = result[1]["data"]
-        
+
         self.assertEqual(data["entity"]["guid"], self.authenticatedUser.guid)
         self.assertEqual(data["entity"]["email"], None)
         self.assertEqual(data["entity"]["__typename"], "User")
@@ -100,7 +100,7 @@ class EntityTestCase(FastTenantTestCase):
         request = HttpRequest()
         request.user = self.authenticatedUser
 
-        variables = { 
+        variables = {
             "username": self.authenticatedUser.guid
         }
 
@@ -109,7 +109,7 @@ class EntityTestCase(FastTenantTestCase):
         self.assertTrue(result[0])
 
         data = result[1]["data"]
-        
+
         self.assertEqual(data["entity"]["guid"], self.authenticatedUser.guid)
         self.assertEqual(data["entity"]["email"], self.authenticatedUser.email)
         self.assertEqual(data["entity"]["__typename"], "User")
@@ -128,7 +128,7 @@ class EntityTestCase(FastTenantTestCase):
         request = HttpRequest()
         request.user = self.authenticatedUser
 
-        variables = { 
+        variables = {
             "guid": self.authenticatedUser.guid
         }
 
@@ -137,7 +137,7 @@ class EntityTestCase(FastTenantTestCase):
         self.assertTrue(result[0])
 
         data = result[1]["data"]
-        
+
         self.assertEqual(data["entity"]["guid"], self.authenticatedUser.guid)
         self.assertEqual(data["entity"]["__typename"], "User")
 
@@ -155,7 +155,7 @@ class EntityTestCase(FastTenantTestCase):
         request = HttpRequest()
         request.user = self.authenticatedUser
 
-        variables = { 
+        variables = {
             "guid": self.group.guid
         }
 
@@ -164,7 +164,7 @@ class EntityTestCase(FastTenantTestCase):
         self.assertTrue(result[0])
 
         data = result[1]["data"]
-        
+
         self.assertEqual(data["entity"]["guid"], self.group.guid)
         self.assertEqual(data["entity"]["__typename"], "Group")
 
@@ -182,7 +182,7 @@ class EntityTestCase(FastTenantTestCase):
         request = HttpRequest()
         request.user = self.authenticatedUser
 
-        variables = { 
+        variables = {
             "guid": self.file.guid
         }
 
@@ -191,10 +191,31 @@ class EntityTestCase(FastTenantTestCase):
         self.assertTrue(result[0])
 
         data = result[1]["data"]
-        
+
         self.assertEqual(data["entity"]["guid"], self.file.guid)
         self.assertEqual(data["entity"]["__typename"], "FileFolder")
 
+    def test_entity_archived(self):
+        query = """
+            query getFileFolder($guid: String!) {
+                entity(guid: $guid) {
+                    guid
+                }
+            }
+        """
+        self.file.is_archived = True
+        self.file.save()
+        request = HttpRequest()
+        request.user = self.authenticatedUser
+        variables = {
+            "guid": self.file.guid
+        }
+
+        result = graphql_sync(schema, { "query": query, "variables": variables }, context_value={ "request": request })
+
+        self.assertTrue(result[0])
+        data = result[1]["data"]
+        self.assertEqual(data["entity"]["guid"], self.file.guid)
 
     def test_entity_breadcrumb_file_folder(self):
 
@@ -213,7 +234,7 @@ class EntityTestCase(FastTenantTestCase):
         request = HttpRequest()
         request.user = self.authenticatedUser
 
-        variables = { 
+        variables = {
             "guid": self.file.guid
         }
 
@@ -225,3 +246,25 @@ class EntityTestCase(FastTenantTestCase):
 
         self.assertEqual(data["breadcrumb"][0]["guid"], self.folder.guid)
         self.assertEqual(data["breadcrumb"][1]["guid"], self.subFolder.guid)
+
+class EntityModelTestCase(FastTenantTestCase):
+
+    def test_published_status(self):
+        tests = [
+            (False, None, 'draft'),
+            (False, timezone.now() + timedelta(days=1), 'draft'),
+            (False, timezone.now() + timedelta(days=-1), 'published'),
+            (True, None, 'archived'),
+            (True, timezone.now() + timedelta(days=-1), 'archived'),
+        ]
+
+        for is_archived, published, expected in tests:
+            with self.subTest(is_archived=is_archived, published=published):
+                entity = mixer.blend(
+                    Entity,
+                    is_archived=is_archived,
+                    published=published)
+
+                result = entity.status_published
+
+                self.assertEqual(result, expected)

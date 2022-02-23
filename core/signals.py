@@ -61,7 +61,7 @@ def notification_handler(sender, instance, created, **kwargs):
 
     # pylint: disable=unused-argument
     if not settings.IMPORTING and created:
-        if issubclass(type(instance), NotificationMixin) and instance.group:
+        if not instance.is_archived and issubclass(type(instance), NotificationMixin) and instance.group:
             if (not instance.published) or (datetime_isoformat(instance.published) > datetime_isoformat(timezone.now())):
                 return
 
@@ -120,6 +120,10 @@ def attachment_handler(sender, instance, using, **kwargs):
     # pylint: disable=unused-argument
     instance.update_attachments_links()
 
+def process_waitinglist_handler(sender, instance, using, **kwargs):
+    # pylint: disable=unused-argument
+    instance.event.process_waitinglist()
+
 
 # Notification handlers
 post_save.connect(comment_handler, sender=Comment)
@@ -132,6 +136,9 @@ pre_save.connect(updated_at_handler, sender=Group)
 pre_save.connect(updated_at_handler, sender=GroupInvitation)
 pre_save.connect(updated_at_handler, sender=EventAttendee)
 pre_save.connect(updated_at_handler, sender=User)
+
+# If attendee is deleted, process waitinglist
+post_delete.connect(process_waitinglist_handler, sender=EventAttendee)
 
 # Connect to all Entity subclasses
 for subclass in Entity.__subclasses__():

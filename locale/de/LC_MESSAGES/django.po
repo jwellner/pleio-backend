@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Duits\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-02-04 08:54+0100\n"
+"POT-Creation-Date: 2022-02-21 17:34+0100\n"
 "PO-Revision-Date: 2021-05-26 10:55+0200\n"
 "Last-Translator: \n"
 "Language-Team: \n"
@@ -366,6 +366,36 @@ msgstr ""
 "\n"
 "Hallo,<br><br> der Administrator %(name_deleted_user)s wird gelöscht. Diese Aktion wurde von %(user_name)s durchgeführt.\n"
 
+#: core/templates/email/attend_event_from_waitinglist.html:5
+#, fuzzy, python-format
+#| msgid ""
+#| "\n"
+#| "Confirm your registration for %(title)s.<br><br>\n"
+#| "\n"
+#| "Location: %(location)s<br>\n"
+#| "Date: %(start_date)s<br><br>\n"
+#| "\n"
+#| "Click on the link below to confirm.<br><br>\n"
+#| "<a href=\"%(link)s\">%(link)s</a>\n"
+msgid ""
+"\n"
+"You are added as attendee for %(title)s from the waitinglist.<br><br>\n"
+"\n"
+"Location: %(location)s<br>\n"
+"Date: %(start_date)s<br><br>\n"
+"\n"
+"Click on the link below to see the event.<br><br>\n"
+"<a href=\"%(link)s\">%(link)s</a>\n"
+msgstr ""
+"\n"
+"Sie werden als Teilnehmer für %(title)s von der Warteliste hinzugefügt.<br><br>\n"
+"\n"
+"Ort: %(location)s<br>\n"
+"Datum: %(start_date)s<br><br>\n"
+"\n"
+"Klicken Sie auf den untenstehenden Link, um die Veranstaltung zu sehen.<br><br>\n"
+"<a href=\"%(link)s\">%(link)s</a>\n"
+
 #: core/templates/email/attend_event_without_account.html:5
 #, python-format
 msgid ""
@@ -475,7 +505,6 @@ msgstr "Blog erstellt von"
 
 #: core/templates/email/entities/blog.html:27
 #: core/templates/email/entities/event.html:19
-#: core/templates/email/entities/news.html:33
 #: core/templates/email/entities/question.html:19
 #: core/templates/email/entities/wiki.html:26
 msgid "on"
@@ -486,8 +515,9 @@ msgid "Agenda item created by"
 msgstr "Kalendereintrag erstellt von"
 
 #: core/templates/email/entities/news.html:33
-msgid "News added by"
-msgstr "Neuigkeiten hinzugefügt von"
+#| msgid "News added by"
+msgid "News added on"
+msgstr "Nachrichten hinzugefügt am"
 
 #: core/templates/email/entities/question.html:19
 msgid "Question asked by"
@@ -980,6 +1010,11 @@ msgstr "Neue Zugriffsanfrage für %(site_name)s"
 msgid "Saved"
 msgstr "Gerettet"
 
+#: event/models.py:103
+#, python-format
+msgid "Added to event %s from waitinglist"
+msgstr "Zum Ereignis %s von der Warteliste hinzugefügt"
+
 #: event/resolvers/mutation_attend_event_without_account.py:31
 #, python-format
 msgid "Confirmation of registration %s"
@@ -999,6 +1034,9 @@ msgstr "Entfernt vom Ereignis: %s"
 #, python-format
 msgid "Filescan found suspicous files on %(site_url)s"
 msgstr "Filescan hat verdächtige Dateien auf %(site_url)sgefunden"
+
+#~ msgid "On"
+#~ msgstr "Auf"
 
 #~ msgid "New notification at %(site_name)s: "
 #~ msgstr "Neue Benachrichtigung auf %(site_name)s: "

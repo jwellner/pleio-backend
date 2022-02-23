@@ -5,11 +5,23 @@ from django.contrib.postgres.fields import ArrayField
 from django.utils import timezone
 from model_utils.managers import InheritanceManager
 from core.lib import get_acl
-from core.constances import USER_ROLES
+from core.constances import ENTITY_STATUS, USER_ROLES
 from .shared import read_access_default, write_access_default
 
 
 class EntityManager(InheritanceManager):
+    def __init__(self, exclude_archived = True):
+        super().__init__()
+
+        self.exclude_archived = exclude_archived
+
+    def get_queryset(self):
+        qs = super().get_queryset()
+        if(self.exclude_archived):
+            qs = qs.exclude(is_archived=True)
+
+        return qs
+
     def draft(self, user):
         qs = self.get_queryset()
         if not user.is_authenticated:
@@ -39,6 +51,7 @@ class EntityManager(InheritanceManager):
 
 class Entity(models.Model):
     objects = EntityManager()
+    all_objects = EntityManager(exclude_archived=False)
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
 
@@ -64,6 +77,7 @@ class Entity(models.Model):
     last_action = models.DateTimeField(default=timezone.now)
 
     published = models.DateTimeField(default=timezone.now, null=True)
+    is_archived = models.BooleanField(default=False)
     tags = ArrayField(models.CharField(max_length=256),
                       blank=True, default=list)
 
@@ -97,9 +111,13 @@ class Entity(models.Model):
 
     @property
     def status_published(self):
-        if self.published and (self.published < timezone.now()):
-            return 'published'
-        return 'draft'
+        if self.is_archived:
+            return ENTITY_STATUS.ARCHIVED
+
+        if self.published and self.published < timezone.now():
+            return ENTITY_STATUS.PUBLISHED
+
+        return ENTITY_STATUS.DRAFT
 
     class Meta:
         ordering = ['published']

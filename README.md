@@ -342,7 +342,14 @@ You can also run AMP in locally with docker-compose:
 docker-compose -f docker-compose.yml -f docker-compose.apm.yml up
 ```
 
-## DISABLE EMAIL
+## EMAIL
+
+Locally `mailcatcher` should be installed. At `http://localhost:1080` you can view the emails send by `pleio.local`.
+
+Links from an email have to be adjusted manually to work locally by removing the `s` from `https` and adding the portnumber `:8000`.
+So for instance, `https://test1.pleio.local/events` should become `http://test1.pleio.local:8000/events`.
+
+### DISABLE EMAIL
 
 Settings for disabling email configured with setting following environment variable
 

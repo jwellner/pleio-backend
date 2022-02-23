@@ -1,4 +1,3 @@
-from django.db import connection
 from django_tenants.test.cases import FastTenantTestCase
 from core.models import Group, GroupInvitation
 from user.models import User
@@ -6,7 +5,6 @@ from file.models import FileFolder
 from core.constances import ACCESS_TYPE
 from backend2.schema import schema
 from ariadne import graphql_sync
-import json
 from django.contrib.auth.models import AnonymousUser
 from django.http import HttpRequest
 from mixer.backend.django import mixer
@@ -403,3 +401,4 @@ class GroupTestCase(FastTenantTestCase):
                 self.assertTrue(result[0])
                 self.assertNotIn("errors", result[1], f'Unexpected errors: {result[1].get("errors", [])}')
                 self.assertEqual(result[1]["data"]["entity"][field]["total"], 0)
+

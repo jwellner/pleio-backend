@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-02-04 08:54+0100\n"
+"POT-Creation-Date: 2022-02-21 17:34+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -367,6 +367,27 @@ msgstr ""
 "\n"
 "The administrator %(name_deleted_user)s is deleted. This action was taken by %(user_name)s.\n"
 
+#: core/templates/email/attend_event_from_waitinglist.html:5
+#, python-format
+msgid ""
+"\n"
+"You are added as attendee for %(title)s from the waitinglist.<br><br>\n"
+"\n"
+"Location: %(location)s<br>\n"
+"Date: %(start_date)s<br><br>\n"
+"\n"
+"Click on the link below to see the event.<br><br>\n"
+"<a href=\"%(link)s\">%(link)s</a>\n"
+msgstr ""
+"\n"
+"You are added as attendee for %(title)s from the waitinglist.<br><br>\n"
+"\n"
+"Location: %(location)s<br>\n"
+"Date: %(start_date)s<br><br>\n"
+"\n"
+"Click on the link below to see the event.<br><br>\n"
+"<a href=\"%(link)s\">%(link)s</a>\n"
+
 #: core/templates/email/attend_event_without_account.html:5
 #, python-format
 msgid ""
@@ -478,7 +499,6 @@ msgstr "Blog created by"
 
 #: core/templates/email/entities/blog.html:27
 #: core/templates/email/entities/event.html:19
-#: core/templates/email/entities/news.html:33
 #: core/templates/email/entities/question.html:19
 #: core/templates/email/entities/wiki.html:26
 msgid "on"
@@ -489,8 +509,9 @@ msgid "Agenda item created by"
 msgstr "Agenda item created by"
 
 #: core/templates/email/entities/news.html:33
-msgid "News added by"
-msgstr "News added by"
+#| msgid "News added by"
+msgid "News added on"
+msgstr "News added on"
 
 #: core/templates/email/entities/question.html:19
 msgid "Question asked by"
@@ -990,6 +1011,11 @@ msgstr "New access request for %(site_name)s"
 msgid "Saved"
 msgstr "Saved"
 
+#: event/models.py:103
+#, python-format
+msgid "Added to event %s from waitinglist"
+msgstr "Added to event %s from waitinglist"
+
 #: event/resolvers/mutation_attend_event_without_account.py:31
 #, python-format
 msgid "Confirmation of registration %s"
@@ -1009,6 +1035,9 @@ msgstr "Removed from event: %s"
 #, python-format
 msgid "Filescan found suspicous files on %(site_url)s"
 msgstr "Filescan found suspicous files on %(site_url)s"
+
+#~ msgid "On"
+#~ msgstr "On"
 
 #~ msgid "New notification at %(site_name)s: "
 #~ msgstr "New notification at %(site_name)s:"

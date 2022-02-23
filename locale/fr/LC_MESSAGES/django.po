@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Frans\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-02-04 08:54+0100\n"
+"POT-Creation-Date: 2022-02-21 17:34+0100\n"
 "PO-Revision-Date: 2021-06-24 15:12+0200\n"
 "Last-Translator: \n"
 "Language-Team: frans\n"
@@ -369,6 +369,27 @@ msgstr ""
 "\n"
 "L’administrateur %(name_deleted_user)s est supprimé. Cette action a été menée par %(user_name)s.\n"
 
+#: core/templates/email/attend_event_from_waitinglist.html:5
+#, python-format
+msgid ""
+"\n"
+"You are added as attendee for %(title)s from the waitinglist.<br><br>\n"
+"\n"
+"Location: %(location)s<br>\n"
+"Date: %(start_date)s<br><br>\n"
+"\n"
+"Click on the link below to see the event.<br><br>\n"
+"<a href=\"%(link)s\">%(link)s</a>\n"
+msgstr ""
+"\n"
+"Vous êtes ajouté comme participant pour %(title)s à partir de la liste d'attente.<br><br>\n"
+"\n"
+"Lieu : %(location)s<br>\n"
+"Date : %(start_date)s<br><br><br>\n"
+"\n"
+"Cliquez sur le lien ci-dessous pour voir l'événement.<br><br><br>\n"
+"<a href=\"%(link)s\">%(link)s</a>\n"
+
 #: core/templates/email/attend_event_without_account.html:5
 #, python-format
 msgid ""
@@ -481,7 +502,6 @@ msgstr "Blog créé par"
 
 #: core/templates/email/entities/blog.html:27
 #: core/templates/email/entities/event.html:19
-#: core/templates/email/entities/news.html:33
 #: core/templates/email/entities/question.html:19
 #: core/templates/email/entities/wiki.html:26
 msgid "on"
@@ -492,8 +512,9 @@ msgid "Agenda item created by"
 msgstr "Événement créé dans l’agenda par"
 
 #: core/templates/email/entities/news.html:33
-msgid "News added by"
-msgstr "Actualité ajoutée par"
+#| msgid "News added by"
+msgid "News added on"
+msgstr "Nouvelles ajoutées le"
 
 #: core/templates/email/entities/question.html:19
 msgid "Question asked by"
@@ -1003,6 +1024,11 @@ msgstr "Nouvelle demande d’accès à %(site_name)s"
 msgid "Saved"
 msgstr "Sauvegardé"
 
+#: event/models.py:103
+#, python-format
+msgid "Added to event %s from waitinglist"
+msgstr "Ajouté à l'événement %s de la liste d'attente"
+
 #: event/resolvers/mutation_attend_event_without_account.py:31
 #, python-format
 msgid "Confirmation of registration %s"
@@ -1022,6 +1048,9 @@ msgstr "Retiré de l'événement : %s"
 #, python-format
 msgid "Filescan found suspicous files on %(site_url)s"
 msgstr "Filescan a trouvé des fichiers suspects sur %(site_url)s."
+
+#~ msgid "On"
+#~ msgstr "Sur"
 
 #~ msgid "New notification at %(site_name)s: "
 #~ msgstr "Nouvelle notification sur %(site_name)s : "

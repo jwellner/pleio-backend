@@ -2,17 +2,14 @@ from django.db import connection
 from django_tenants.test.cases import FastTenantTestCase
 from backend2.schema import schema
 from ariadne import graphql_sync
-import json
-from core import config
 from django.conf import settings
 from django.core.cache import cache
 from django.core.files import File
 from django.contrib.auth.models import AnonymousUser
 from django.http import HttpRequest
-from core.models import Group, ProfileField
+from core.models import ProfileField
 from user.models import User
 from mixer.backend.django import mixer
-from graphql import GraphQLError
 from unittest.mock import patch, MagicMock
 
 
@@ -37,6 +34,7 @@ class AddGroupCase(FastTenantTestCase):
                 "isAutoMembershipEnabled": True,
                 "isLeavingGroupDisabled": True,
                 "autoNotification": True,
+                "isHidden": True,
                 "tags": ["tag_one", "tag_two"]
             }
         }
@@ -101,6 +99,7 @@ class AddGroupCase(FastTenantTestCase):
                         isIntroductionPublic
                         welcomeMessage
                         isClosed
+                        isHidden
                         isMembershipOnRequest
                         isFeatured
                         autoNotification
@@ -127,6 +126,7 @@ class AddGroupCase(FastTenantTestCase):
         self.assertEqual(data["addGroup"]["group"]["isIntroductionPublic"], variables["group"]["isIntroductionPublic"])
         self.assertEqual(data["addGroup"]["group"]["welcomeMessage"], variables["group"]["welcomeMessage"])
         self.assertEqual(data["addGroup"]["group"]["isClosed"], variables["group"]["isClosed"])
+        self.assertEqual(data["addGroup"]["group"]["isHidden"], variables["group"]["isHidden"])
         self.assertEqual(data["addGroup"]["group"]["isMembershipOnRequest"], variables["group"]["isMembershipOnRequest"])
         self.assertEqual(data["addGroup"]["group"]["isFeatured"], False)
         self.assertEqual(data["addGroup"]["group"]["isLeavingGroupDisabled"], False)

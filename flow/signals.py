@@ -7,8 +7,8 @@ from django.db import connection
 from tenants.models import Client
 from blog.models import Blog
 from core import config
-from core.utils.convert import tiptap_to_text
-from core.models import Comment, Entity
+from core.utils.convert import tiptap_to_html
+from core.models import Comment
 from discussion.models import Discussion
 from flow.models import FlowId
 from news.models import News
@@ -36,9 +36,13 @@ def object_handler(sender, instance, created, **kwargs):
         tenant = Client.objects.get(schema_name=connection.schema_name)
         url_prefix = "https://" + tenant.domains.first().domain
 
-        title = instance.title if instance.title else 'Geen titel gegeven'
+        title = instance.title if hasattr(instance, 'title') and instance.title  else 'Geen titel gegeven'
 
-        description = f"{tiptap_to_text(instance.rich_description)} <br /><br /><a href='{url_prefix}{instance.url}'>{instance.url}</a>"
+        abstract = f"{instance.abstract}" if hasattr(instance, 'abstract') and instance.abstract else ''
+
+        content = tiptap_to_html(instance.rich_description)
+
+        description = f"{abstract}{content}<p><a href='{url_prefix}{instance.url}'>{instance.url}</a></p>"
 
         json = {
             'casetype': str(config.FLOW_CASE_ID),
@@ -63,12 +67,15 @@ def comment_handler(sender, instance, created, **kwargs):
         settings.IMPORTING
         or not config.FLOW_ENABLED
         or not created
-        or Entity.objects.get_subclass(id=instance.container.id).type_to_string not in config.FLOW_SUBTYPES
     ):
         return
 
+    root_container = instance.get_root_container()
+    if root_container.type_to_string not in config.FLOW_SUBTYPES:
+        return
+
     try:
-        flow_id = str(FlowId.objects.get(object_id=instance.container.id).flow_id)
+        flow_id = str(FlowId.objects.get(object_id=root_container.id).flow_id)
     except ObjectDoesNotExist:
         return
 
@@ -82,7 +89,7 @@ def comment_handler(sender, instance, created, **kwargs):
         json = {
             'case': flow_id,
             'author': instance.owner.name,
-            'description': tiptap_to_text(instance.rich_description)
+            'description': tiptap_to_html(instance.rich_description)
         }
 
         requests.post(url, headers=headers, json=json)

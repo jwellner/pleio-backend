@@ -6,8 +6,8 @@ from core.lib import hex_color_tint as hex_color_tint_processor
 register = template.Library()
 
 @register.simple_tag(name="tiptap_to_html", )
-def tiptap_to_html(draft):
-    return mark_safe(tiptap_to_html_processor(draft))
+def tiptap_to_html(data):
+    return mark_safe(tiptap_to_html_processor(data))
 
 @register.simple_tag(name="hex_color_tint", )
 def hex_color_tint(color, tint = 0.5):

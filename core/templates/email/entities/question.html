@@ -16,8 +16,8 @@
                             </tr>
                             <tr>
                                 <td class="h2" style="color:#999999; font-family:Arial,sans-serif; font-size:12px; line-height:18px; text-align:left; padding-bottom:12px">
-                                    {% blocktrans %}Question asked by{% endblocktrans %} {{ entity.owner_name }} {% blocktrans %}on{% endblocktrans %} {{ entity.created_at}}
-                                    {% if entity.group %} in <strong><a href="{{ site_url }}{{ entity.group_url }}">{{ entity.group_name }}</a></strong>{% endif %}.
+                                    {% blocktrans %}Question asked by{% endblocktrans %} {{ entity.owner_name }} {% blocktrans %}on{% endblocktrans %} {{ entity.published}}
+                                    {% if entity.group %} in <strong><a href="{{ site_url }}{{ entity.group_url }}">{{ entity.group_name }}</a></strong>{% endif %}
                                 </td>
                             </tr>
                             <tr>

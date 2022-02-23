@@ -11,7 +11,6 @@ from core import config
 from core.lib import access_id_to_acl
 from core.tasks.mail_tasks import send_mail_multi
 from core.models import Group, Entity, Widget, Comment, ProfileField, UserProfileField, ResizedImage
-from django.core import management
 from django.utils import translation
 from django.utils.translation import ugettext_lazy
 from django_tenants.utils import schema_context
@@ -357,16 +356,6 @@ def replace_domain_links(self, schema_name, replace_domain=None, replace_elgg_id
 
     logger.info("Done replacing links")
 
-
-@shared_task(bind=True)
-def draft_to_tiptap(self, schema_name):
-    # pylint: disable=unused-argument
-    '''
-    Send overview mails for tenant
-    '''
-    management.execute_from_command_line(['manage.py', 'tenant_command', 'draft_to_tiptap', '--schema', schema_name])
-
-
 @shared_task(bind=True)
 def image_resize(self, schema_name, resize_image_id):
     # pylint: disable=unused-argument
@@ -380,13 +369,17 @@ def image_resize(self, schema_name, resize_image_id):
         if resized_image.status == ResizedImage.OK:
             return
 
-        thumbnail_size = (resized_image.size, 10000)
-
         try:
             infile = resized_image.original.upload_field.open()
             im = Image.open(infile)
-            im.thumbnail(thumbnail_size, Image.LANCZOS)
 
+            # Set the smallest dimension to the requested size to avoid pixelly images
+            if im.width > im.height:
+                thumbnail_size = (im.width, resized_image.size)
+            else:
+                thumbnail_size = (resized_image.size, im.height)
+
+            im.thumbnail(thumbnail_size, Image.LANCZOS)
             output = BytesIO()
             im.save(output, im.format)
             contents = output.getvalue()

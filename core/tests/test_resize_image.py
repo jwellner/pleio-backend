@@ -33,16 +33,16 @@ class ResizeImageTestCase(FastTenantTestCase):
     def tearDown(self):
         os.system(f"rm -r {self.basepath}")
 
-    def get_image(self, filename):
+    def get_image(self, filename, size=(800, 1280)):
         output = BytesIO()
-        img = Image.new("RGB", (800, 1280), (255, 255, 255))
+        img = Image.new("RGB", size, (255, 255, 255))
         img.save(output, "JPEG")
 
         contents = output.getvalue()
 
         return ContentFile(contents, filename)
-    
-    @mock.patch('celery.current_app.send_task')    
+
+    @mock.patch('celery.current_app.send_task')
     def test_redirect(self, mock_send_task):
         attachment = Attachment.objects.create(
             attached=self.blog,
@@ -56,7 +56,7 @@ class ResizeImageTestCase(FastTenantTestCase):
         self.assertRedirects(response, attachment.url)
 
     @mock.patch('celery.current_app.send_task')
-    def test_resize(self, mock_send_task):
+    def test_resize_resolve(self, mock_send_task):
         attachment = Attachment.objects.create(
             attached=self.blog,
             owner=self.authenticatedUser,
@@ -74,3 +74,65 @@ class ResizeImageTestCase(FastTenantTestCase):
         mock_send_task.assert_not_called()
 
         self.assertEqual(response.status_code, 200)
+
+    def test_resize_square(self):
+        size = 414
+        attachment = mixer.blend(Attachment, upload=self.get_image('testfile.jpg', size=(1000, 1000)))
+        img = ResizedImage.objects.create(
+            original=attachment,
+            size=size,
+        )
+
+        image_resize.s(self.tenant.schema_name, img.pk).apply()
+        img = ResizedImage.objects.get(pk=img.pk)
+
+        self.assertEqual(img.status, ResizedImage.OK)
+        resized = Image.open(img.upload.open())
+        self.assertEqual(resized.width, size)
+        self.assertEqual(resized.height, size)
+
+    def test_resize_small(self):
+        size = 414
+        height = 10
+        attachment = mixer.blend(Attachment, upload=self.get_image('testfile.jpg', size=(1000, height)))
+        img = ResizedImage.objects.create(
+            original=attachment,
+            size=size,
+        )
+
+        image_resize.s(self.tenant.schema_name, img.pk).apply()
+        img = ResizedImage.objects.get(pk=img.pk)
+
+        self.assertEqual(img.status, ResizedImage.OK)
+        resized = Image.open(img.upload.open())
+        self.assertEqual(resized.height, height)
+
+    def test_resize_vertical(self):
+        size = 414
+        attachment = mixer.blend(Attachment, upload=self.get_image('testfile.jpg', size=(800, 1000)))
+        img = ResizedImage.objects.create(
+            original=attachment,
+            size=size,
+        )
+
+        image_resize.s(self.tenant.schema_name, img.pk).apply()
+        img = ResizedImage.objects.get(pk=img.pk)
+
+        self.assertEqual(img.status, ResizedImage.OK)
+        resized = Image.open(img.upload.open())
+        self.assertEqual(resized.width, size)
+
+    def test_resize_horizontal(self):
+        size = 414
+        attachment = mixer.blend(Attachment, upload=self.get_image('testfile.jpg', size=(1000, 800)))
+        img = ResizedImage.objects.create(
+            original=attachment,
+            size=size,
+        )
+
+        image_resize.s(self.tenant.schema_name, img.pk).apply()
+        img = ResizedImage.objects.get(pk=img.pk)
+
+        self.assertEqual(img.status, ResizedImage.OK)
+        resized = Image.open(img.upload.open())
+        self.assertEqual(resized.height, size)
