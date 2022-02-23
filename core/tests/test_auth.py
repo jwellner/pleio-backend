@@ -14,6 +14,9 @@ class OIDCAuthBackendTestCase(FastTenantTestCase):
         config.AUTO_APPROVE_SSO = False
         SiteAccessRequest.objects.all().delete()
 
+    def tearDown(self):
+        config.reset()
+
     def test_requires_approval_required(self):
         claims = {
             'is_admin' : False,

@@ -223,3 +223,6 @@ class Config():
 
     def __dir__(self):
         return DEFAULT_SITE_CONFIG.keys()
+
+    def reset(self):
+        self._backend.init()
