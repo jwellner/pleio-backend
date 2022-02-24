@@ -2,9 +2,25 @@
 {% load i18n %}
 
 {% block body %}
-{% blocktrans %}
-This is confirmation of your registration for {{ title }}.<br><br>
+{% if state == 'waitinglist' %}
+    {% blocktrans %}
+        This is confirmation of your registration for the <em>waitinglist</em> of {{ title }}.<br><br>
+    {% endblocktrans %}
+{% elif state == 'accept' %}
+    {% blocktrans %}
+        This is confirmation of your registration for {{ title }}.<br><br>
+    {% endblocktrans %}
+{% elif state == 'maybe' %}
+    {% blocktrans %}
+        The state for registration for {{ title }} changed to <em>maybe</em>.<br><br>
+    {% endblocktrans %}
+{% elif state == 'reject' %}
+    {% blocktrans %}
+        The state for registration for {{ title }} changed to <em>rejected</em>.<br><br>
+    {% endblocktrans %}
+{% endif %}
 
+{% blocktrans %}
 Location: {{ location }}<br>
 Date: {{ start_date }}<br><br>
 

@@ -336,7 +336,8 @@ input confirmAttendEventWithoutAccountInput {
   guid: String!
   email: String!
   code: String!,
-  delete: Boolean
+  delete: Boolean,
+  state: String
 }
 
 type confirmAttendEventWithoutAccountPayload {

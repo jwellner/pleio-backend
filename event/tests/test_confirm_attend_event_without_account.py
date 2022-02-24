@@ -103,38 +103,6 @@ class ConfirmAttendEventWithoutAccountTestCase(FastTenantTestCase):
 
         self.assertEqual(errors[0]["message"], "event_is_full")
 
-    def test_attend_event_without_account_attend_twice(self):
-        mutation = """
-            mutation confirmAttendEventWithoutAccount($input: confirmAttendEventWithoutAccountInput!) {
-                confirmAttendEventWithoutAccount(input: $input) {
-                    entity {
-                        guid
-                        __typename
-                    }
-                    __typename
-                }
-            }
-        """
-
-        variables = {
-            "input": {
-                "guid": self.event.guid,
-                "code": "1234567890",
-                "email": "pete@tenant.fast-test.com"
-            }
-        }
-
-        request = HttpRequest()
-        request.user = self.anonymousUser
-
-        result = graphql_sync(schema, { "query": mutation, "variables": variables }, context_value={ "request": request })
-        result = graphql_sync(schema, { "query": mutation, "variables": variables }, context_value={ "request": request })
-
-        errors = result[1]["errors"]
-
-        self.assertEqual(errors[0]["message"], "already_registered")
-        
-
     @mock.patch('event.resolvers.mutation_confirm_attend_event_without_account.send_mail_multi.delay')
     def test_confirm_delete_attend_event_without_account(self, mocked_send_mail_multi):
         mutation = """
@@ -178,3 +146,40 @@ class ConfirmAttendEventWithoutAccountTestCase(FastTenantTestCase):
         self.assertEqual(data["confirmAttendEventWithoutAccount"]["entity"]["guid"], self.event.guid)
         self.assertEqual(data["confirmAttendEventWithoutAccount"]["entity"]["attendeesWithoutAccountEmailAddresses"], [])
         self.assertEqual(self.event.attendees.exclude(user__isnull=False).count(), 0)
+
+
+    def test_confirm_attend_event_is_full_without_account_waitinglist(self):
+        mutation = """
+            mutation confirmAttendEventWithoutAccount($input: confirmAttendEventWithoutAccountInput!) {
+                confirmAttendEventWithoutAccount(input: $input) {
+                    entity {
+                        guid
+                        __typename
+                    }
+                    __typename
+                }
+            }
+        """
+
+        variables = {
+            "input": {
+                "guid": self.event.guid,
+                "code": "1234567890",
+                "state": "waitinglist",
+                "email": "pete@tenant.fast-test.com"
+
+            }
+        }
+
+        EventAttendee.objects.create(
+            event=self.event,
+            state='accept',
+            user=self.authenticatedUser
+        )
+
+        request = HttpRequest()
+        request.user = self.anonymousUser
+
+        result = graphql_sync(schema, { "query": mutation, "variables": variables }, context_value={ "request": request })
+        
+        self.assertEqual(self.event.attendees.filter(state='waitinglist').count(), 1)
