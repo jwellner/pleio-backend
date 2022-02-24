@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Frans\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-02-21 17:34+0100\n"
+"POT-Creation-Date: 2022-02-24 10:17+0100\n"
 "PO-Revision-Date: 2021-06-24 15:12+0200\n"
 "Last-Translator: \n"
 "Language-Team: frans\n"
@@ -50,100 +50,100 @@ msgstr "Recevoir des courriels de notification"
 msgid "Receive overview emails"
 msgstr "Recevoir des courriels de présentation"
 
-#: core/lib.py:144 core/resolvers/mutation_import_users.py:30
+#: core/lib.py:141 core/resolvers/mutation_import_users.py:30
 #: core/resolvers/query_site.py:70
 msgid "Just me"
 msgstr "Juste moi"
 
-#: core/lib.py:147
+#: core/lib.py:144
 #, python-format
 msgid "Group: %(group_name)s"
 msgstr "Groupe : %(group_name)s"
 
-#: core/lib.py:150
+#: core/lib.py:147
 #, python-format
 msgid "Subgroup: %(subgroup_name)s"
 msgstr "Sous-groupe : %(subgroup_name)s"
 
-#: core/lib.py:155 core/resolvers/mutation_import_users.py:31
+#: core/lib.py:152 core/resolvers/mutation_import_users.py:31
 #: core/resolvers/query_site.py:71
 msgid "Logged in users"
 msgstr "Utilisateurs connectés"
 
-#: core/lib.py:157 core/resolvers/mutation_import_users.py:34
+#: core/lib.py:154 core/resolvers/mutation_import_users.py:34
 #: core/resolvers/query_site.py:75
 msgid "Public"
 msgstr "Public"
 
-#: core/lib.py:167
+#: core/lib.py:164
 msgid "Event"
 msgstr "Événement"
 
-#: core/lib.py:171
+#: core/lib.py:168
 msgid "Blog"
 msgstr "Blog"
 
-#: core/lib.py:175
+#: core/lib.py:172
 msgid "Discussion"
 msgstr "Discussion"
 
-#: core/lib.py:179 core/lib.py:305
+#: core/lib.py:176 core/lib.py:302
 msgid "News"
 msgstr "Actualité"
 
-#: core/lib.py:183
+#: core/lib.py:180
 msgid "Update"
 msgstr "Mettre à jour"
 
-#: core/lib.py:187
+#: core/lib.py:184
 msgid "Question"
 msgstr "Question"
 
-#: core/lib.py:191 core/lib.py:309
+#: core/lib.py:188 core/lib.py:306
 msgid "Wiki pages"
 msgstr "Wiki pages"
 
-#: core/lib.py:299
+#: core/lib.py:296
 msgid "Updates"
 msgstr "Mises à jour"
 
-#: core/lib.py:300
+#: core/lib.py:297
 msgid "Blogs"
 msgstr "Blogs"
 
-#: core/lib.py:301
+#: core/lib.py:298
 msgid "CMS pages"
 msgstr "Pages SGC"
 
-#: core/lib.py:302
+#: core/lib.py:299
 msgid "Discussions"
 msgstr "Discussions"
 
-#: core/lib.py:303
+#: core/lib.py:300
 msgid "Events"
 msgstr "Événements"
 
-#: core/lib.py:304
+#: core/lib.py:301
 msgid "Files"
 msgstr "Fichiers"
 
-#: core/lib.py:306
+#: core/lib.py:303
 msgid "Polls"
 msgstr "Sondages"
 
-#: core/lib.py:307
+#: core/lib.py:304
 msgid "Questions"
 msgstr "Questions"
 
-#: core/lib.py:308
+#: core/lib.py:305
 msgid "Tasks"
 msgstr "Tâches"
 
-#: core/lib.py:310
+#: core/lib.py:307
 msgid "Comments"
 msgstr "Commentaires"
 
-#: core/lib.py:311
+#: core/lib.py:308
 msgid "Groups"
 msgstr "Groupes"
 
@@ -152,7 +152,7 @@ msgstr "Groupes"
 msgid "Regular overview of %(site_name)s"
 msgstr "Aperçu régulier de %(site_name)s"
 
-#: core/models/group.py:177
+#: core/models/group.py:184
 #, python-format
 msgid "Welcome to %(group_name)s"
 msgstr "Bienvenue dans %(group_name)s"
@@ -322,11 +322,11 @@ msgstr "Notification sur %(entity_type)s dans le groupe %(entity_group_name)s"
 msgid "New notifications at %(site_name)s"
 msgstr "Nouvelles notifications sur %(site_name)s"
 
-#: core/tasks/misc.py:121
+#: core/tasks/misc.py:120
 msgid "Import was a success"
 msgstr "Importation réussie"
 
-#: core/tasks/misc.py:121
+#: core/tasks/misc.py:120
 msgid "Import failed"
 msgstr "Échec de l’importation"
 
@@ -431,11 +431,51 @@ msgstr ""
 "<a href=“%(confirm_url)s”>%(confirm_url)s</a>\n"
 "\n"
 
-#: core/templates/email/confirm_attend_event_without_account.html:5
+#: core/templates/email/confirm_attend_event_without_account.html:6
 #, python-format
 msgid ""
 "\n"
-"This is confirmation of your registration for %(title)s.<br><br>\n"
+"        This is confirmation of your registration for the <em>waitinglist</em> of %(title)s.<br><br>\n"
+"    "
+msgstr ""
+"\n"
+"        Ceci est la confirmation de votre inscription à la <em>liste d'attente</em> de %(title)s.<br><br>.\n"
+"    "
+
+#: core/templates/email/confirm_attend_event_without_account.html:10
+msgid ""
+"\n"
+"        This is confirmation of your registration for %(title)s.<br><br>\n"
+"    "
+msgstr ""
+"\n"
+"        Ceci est la confirmation de votre inscription à %(title)s.<br><br>\n"
+"    "
+
+#: core/templates/email/confirm_attend_event_without_account.html:14
+#, python-format
+msgid ""
+"\n"
+"        The state for registration for %(title)s changed to <em>maybe</em>.<br><br>\n"
+"    "
+msgstr ""
+"\n"
+"        L'état pour l'enregistrement de %(title)s est passé à <em>maybe</em>.<br><br>.\n"
+"    "
+
+#: core/templates/email/confirm_attend_event_without_account.html:18
+#, python-format
+msgid ""
+"\n"
+"        The state for registration for %(title)s changed to <em>rejected</em>.<br><br>\n"
+"    "
+msgstr ""
+"\n"
+"        L'état pour l'enregistrement de %(title)s est passé à <em>rejected</em>.<br><br>.\n"
+"    "
+
+#: core/templates/email/confirm_attend_event_without_account.html:23
+msgid ""
 "\n"
 "Location: %(location)s<br>\n"
 "Date: %(start_date)s<br><br>\n"
@@ -446,15 +486,13 @@ msgid ""
 "If you want to cancel your registration of the event, use <a href=\"%(leave_link)s\">%(leave_link)s</a>\n"
 msgstr ""
 "\n"
-"Ceci est la confirmation de votre inscription à %(title)s.<br><br>\n"
-"\n"
-"Lieu : %(location)s<br>\n"
-"Date : __date de début__<br><br><br>\n"
+"Emplacement : %(location)s<br>\n"
+"Date : %(start_date)s<br><br><br>\n"
 "\n"
 "Cliquez sur le lien ci-dessous pour voir votre inscription et ajouter ce rendez-vous à votre agenda.<br><br>.\n"
-"<a href=\" %(start_date)s\">%(link)s</a><br><br>\n"
+"<a href=\"%(link)s\">%(link)s</a><br><br>\n"
 "\n"
-"Si vous souhaitez annuler votre inscription à l'événement, utilisez <a href=\"%(link)s\">%(leave_link)s</a>.\n"
+"Si vous souhaitez annuler votre inscription à l'événement, utilisez <a href=\"%(leave_link)s\">%(leave_link)s</a>.\n"
 
 #: core/templates/email/delete_event_attendees.html:7
 #, python-format
@@ -512,7 +550,6 @@ msgid "Agenda item created by"
 msgstr "Événement créé dans l’agenda par"
 
 #: core/templates/email/entities/news.html:33
-#| msgid "News added by"
 msgid "News added on"
 msgstr "Nouvelles ajoutées le"
 
@@ -1034,7 +1071,7 @@ msgstr "Ajouté à l'événement %s de la liste d'attente"
 msgid "Confirmation of registration %s"
 msgstr "Confirmation de l’inscription %s"
 
-#: event/resolvers/mutation_confirm_attend_event_without_account.py:69
+#: event/resolvers/mutation_confirm_attend_event_without_account.py:75
 #, python-format
 msgid "Confirmation of registration for %s"
 msgstr "Confirmation de l’inscription %s"
