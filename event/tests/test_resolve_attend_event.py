@@ -53,7 +53,7 @@ class AttendEventTestCase(FastTenantTestCase):
                         guid
                         attendees(state: "accept") {
                             edges {
-                                guid
+                                name
                             }
                         }
                         __typename
@@ -89,7 +89,8 @@ class AttendEventTestCase(FastTenantTestCase):
                         guid
                         attendees(state: "waitinglist") {
                             edges {
-                                guid
+                                name
+                                email
                             }
                         }
                         __typename
@@ -122,7 +123,7 @@ class AttendEventTestCase(FastTenantTestCase):
 
         self.assertEqual(data["attendEvent"]["entity"]["guid"], self.eventPublic.guid)
         self.assertEqual(len(data["attendEvent"]["entity"]["attendees"]["edges"]), 1)
-        self.assertEqual(data["attendEvent"]["entity"]["attendees"]["edges"][0]["guid"], self.attendee2.guid)
+        self.assertEqual(data["attendEvent"]["entity"]["attendees"]["edges"][0]["email"], self.attendee2.email)
 
 
     def test_attend_event_from_accept_to_reject(self):
@@ -133,7 +134,7 @@ class AttendEventTestCase(FastTenantTestCase):
                         guid
                         attendees(state: "accept") {
                             edges {
-                                guid
+                                name
                             }
                         }
                         __typename

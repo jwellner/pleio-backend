@@ -152,13 +152,11 @@ class EventsTestCase(FastTenantTestCase):
                     attendees(limit: 1) {
                         total
                         edges {
-                        guid
-                        username
+                        email
                         name
                         icon
                         }
                     }
-                    attendeesWithoutAccount
                     group {
                         guid
                         ... on Group {
@@ -204,7 +202,6 @@ class EventsTestCase(FastTenantTestCase):
         self.assertEqual(data["events"]["total"], 2)
         self.assertEqual(data["events"]["edges"][0]["attendees"]["total"], 0)
         self.assertEqual(len(data["events"]["edges"][0]["attendees"]["edges"]), 0)
-        self.assertEqual(data["events"]["edges"][0]["attendeesWithoutAccount"], 0)
 
     def test_events_upcoming(self):
 

@@ -40,7 +40,12 @@ class ConfirmAttendEventWithoutAccountTestCase(FastTenantTestCase):
                 confirmAttendEventWithoutAccount(input: $input) {
                     entity {
                         guid
-                        attendeesWithoutAccountEmailAddresses
+                        attendees {
+                            total
+                            edges {
+                                name
+                            }
+                        }
                         __typename
                     }
                     __typename
@@ -64,7 +69,7 @@ class ConfirmAttendEventWithoutAccountTestCase(FastTenantTestCase):
         data = result[1]["data"]
 
         self.assertEqual(data["confirmAttendEventWithoutAccount"]["entity"]["guid"], self.event.guid)
-        self.assertEqual(data["confirmAttendEventWithoutAccount"]["entity"]["attendeesWithoutAccountEmailAddresses"], [])
+        self.assertEqual(data["confirmAttendEventWithoutAccount"]["entity"]["attendees"]["edges"], [])
 
         mocked_send_mail_multi.assert_called_once()
 
@@ -110,8 +115,11 @@ class ConfirmAttendEventWithoutAccountTestCase(FastTenantTestCase):
                 confirmAttendEventWithoutAccount(input: $input) {
                     entity {
                         guid
-                        attendeesWithoutAccount
-                        attendeesWithoutAccountEmailAddresses
+                        attendees {
+                            edges {
+                                name
+                            }
+                        }
                         __typename
                     }
                     __typename
@@ -144,7 +152,7 @@ class ConfirmAttendEventWithoutAccountTestCase(FastTenantTestCase):
         data = result[1]["data"]
 
         self.assertEqual(data["confirmAttendEventWithoutAccount"]["entity"]["guid"], self.event.guid)
-        self.assertEqual(data["confirmAttendEventWithoutAccount"]["entity"]["attendeesWithoutAccountEmailAddresses"], [])
+        self.assertEqual(data["confirmAttendEventWithoutAccount"]["entity"]["attendees"]["edges"], [])
         self.assertEqual(self.event.attendees.exclude(user__isnull=False).count(), 0)
 
 

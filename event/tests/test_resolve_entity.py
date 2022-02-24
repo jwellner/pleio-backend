@@ -55,6 +55,12 @@ class EventTestCase(FastTenantTestCase):
             email='test@test.nl'
         )
 
+        EventAttendee.objects.create(
+            event=self.eventPrivate,
+            state='accept',
+            user=self.authenticatedUser
+        )
+
         self.query = """
             fragment EventParts on Event {
                 title
@@ -75,9 +81,15 @@ class EventTestCase(FastTenantTestCase):
                 location
                 source
                 rsvp
-                attendEventWithoutAccount
-                attendeesWithoutAccountEmailAddresses
                 location
+                attendEventWithoutAccount
+                attendees {
+                    total
+                    edges {
+                        name
+                        email
+                    }
+                }
             }
             query GetEvent($guid: String!) {
                 entity(guid: $guid) {
@@ -103,7 +115,6 @@ class EventTestCase(FastTenantTestCase):
         }
 
         result = graphql_sync(schema, { "query": self.query , "variables": variables}, context_value={ "request": request })
-
         self.assertTrue(result[0])
 
         data = result[1]["data"]
@@ -122,7 +133,7 @@ class EventTestCase(FastTenantTestCase):
         self.assertEqual(data["entity"]["location"], self.eventPublic.location)
         self.assertEqual(data["entity"]["rsvp"], self.eventPublic.rsvp)
         self.assertEqual(data["entity"]["attendEventWithoutAccount"], self.eventPublic.attend_event_without_account)
-        self.assertEqual(data["entity"]["attendeesWithoutAccountEmailAddresses"], [])
+        self.assertEqual(len(data["entity"]["attendees"]["edges"]), 0)
 
         variables = {
             "guid": self.eventPrivate.guid
@@ -164,5 +175,5 @@ class EventTestCase(FastTenantTestCase):
         self.assertEqual(data["entity"]["location"], self.eventPrivate.location)
         self.assertEqual(data["entity"]["rsvp"], self.eventPrivate.rsvp)
         self.assertEqual(data["entity"]["attendEventWithoutAccount"], self.eventPrivate.attend_event_without_account)
-        self.assertEqual(data["entity"]["attendeesWithoutAccountEmailAddresses"], ['test@test.nl'])
+        self.assertEqual(data["entity"]["attendees"]["edges"][0]["email"], 'test@test.nl')
 

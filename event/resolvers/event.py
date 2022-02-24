@@ -116,44 +116,29 @@ def resolve_attendees(obj, info, limit=20, offset=0, state=None):
             "edges": []
         }
 
-    # only return attending registered users
-    # TODO: create other type for edges to support external attendees?
-    qs = obj.attendees.exclude(user__isnull=True)
+    qs = obj.attendees.all()
     qs = qs.filter(conditional_state_filter(state))
     if state == 'waitinglist':
         qs = qs.order_by('updated_at')
     qs = qs[offset:offset+limit]
 
-    users = [item.user for item in qs]
+    attendees = [
+        {
+        "email": item.user.email if item.user else item.email, 
+        "name": item.user.name if item.user else item.name, 
+        "state": item.state,
+        "icon": item.user.icon if item.user else None, 
+        "url": item.user.url if item.user else None 
+        } 
+        for item in qs]
 
     return {
         "total": obj.attendees.filter(state="accept").count(),
         "totalMaybe": obj.attendees.filter(state="maybe").count(),
         "totalReject": obj.attendees.filter(state="reject").count(),
         "totalWaitinglist": obj.attendees.filter(state="waitinglist").count(),
-        "edges": users
+        "edges": attendees
     }
-
-@event.field("attendeesWithoutAccount")
-def resolve_attendees_without_account(obj, info):
-    # pylint: disable=unused-argument
-    user = info.context["request"].user
-    if not user.is_authenticated:
-        return 0
-
-    return obj.attendees.exclude(user__isnull=False).count()
-
-@event.field("attendeesWithoutAccountEmailAddresses")
-def resolve_attendees_without_account_email_addresses(obj, info):
-    # pylint: disable=unused-argument
-    user = info.context["request"].user
-    if not user.is_authenticated:
-        return []
-
-    if not obj.can_write(user):
-        return []
-
-    return obj.attendees.exclude(user__isnull=False).values_list("email", flat=True)
 
 
 event.set_field("guid", shared.resolve_entity_guid)
