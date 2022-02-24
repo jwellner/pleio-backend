@@ -118,10 +118,12 @@ def resolve_attendees(obj, info, limit=20, offset=0, state=None):
 
     can_write = obj.can_write(user)
 
-    qs = obj.attendees.all()
+    #TODO: how to order on 2 different fields?
+    qs = obj.attendees.all().order_by('user__name', 'name')
     qs = qs.filter(conditional_state_filter(state))
     if state == 'waitinglist':
         qs = qs.order_by('updated_at')
+
     qs = qs[offset:offset+limit]
 
     # email adresses only for user with event write permissions

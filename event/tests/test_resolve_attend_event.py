@@ -123,7 +123,7 @@ class AttendEventTestCase(FastTenantTestCase):
 
         self.assertEqual(data["attendEvent"]["entity"]["guid"], self.eventPublic.guid)
         self.assertEqual(len(data["attendEvent"]["entity"]["attendees"]["edges"]), 1)
-        self.assertEqual(data["attendEvent"]["entity"]["attendees"]["edges"][0]["email"], self.attendee2.email)
+        self.assertEqual(data["attendEvent"]["entity"]["attendees"]["edges"][0]["email"], '')
 
 
     def test_attend_event_from_accept_to_reject(self):
