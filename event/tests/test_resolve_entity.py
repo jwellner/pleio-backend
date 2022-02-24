@@ -19,7 +19,7 @@ class EventTestCase(FastTenantTestCase):
 
     def setUp(self):
         self.anonymousUser = AnonymousUser()
-        self.authenticatedUser = mixer.blend(User)
+        self.authenticatedUser = mixer.blend(User, name="test_name2")
         self.user = mixer.blend(User)
 
         self.eventPublic = Event.objects.create(
@@ -97,6 +97,9 @@ class EventTestCase(FastTenantTestCase):
                     edges {
                         name
                         email
+                        url
+                        icon
+                        state
                     }
                 }
             }
@@ -185,6 +188,15 @@ class EventTestCase(FastTenantTestCase):
         self.assertEqual(data["entity"]["rsvp"], self.eventPrivate.rsvp)
         self.assertEqual(data["entity"]["attendEventWithoutAccount"], self.eventPrivate.attend_event_without_account)
         self.assertEqual(data["entity"]["attendees"]["edges"][0]["email"], 'test@test.nl')
+        self.assertEqual(data["entity"]["attendees"]["edges"][0]["name"], 'test_name')
+        self.assertEqual(data["entity"]["attendees"]["edges"][0]["url"], None)
+        self.assertEqual(data["entity"]["attendees"]["edges"][0]["icon"], None)
+        self.assertEqual(data["entity"]["attendees"]["edges"][0]["state"], 'accept')
+        self.assertEqual(data["entity"]["attendees"]["edges"][1]["name"], 'test_name2')
+        self.assertEqual(data["entity"]["attendees"]["edges"][1]["url"], self.authenticatedUser.url)
+        self.assertEqual(data["entity"]["attendees"]["edges"][1]["icon"], self.authenticatedUser.icon)
+        self.assertEqual(data["entity"]["attendees"]["edges"][1]["state"], 'accept')
+        self.assertEqual(len(data["entity"]["attendees"]["edges"]), 2)
 
     def test_event_user(self):
 
