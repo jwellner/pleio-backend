@@ -116,15 +116,23 @@ def resolve_attendees(obj, info, limit=20, offset=0, state=None):
             "edges": []
         }
 
+    can_write = obj.can_write(user)
+
     qs = obj.attendees.all()
     qs = qs.filter(conditional_state_filter(state))
     if state == 'waitinglist':
         qs = qs.order_by('updated_at')
     qs = qs[offset:offset+limit]
 
+    # email adresses only for user with event write permissions
+    def get_email(item, can_write):
+        if can_write:
+            return item.user.email if item.user else item.email
+        return ""
+
     attendees = [
         {
-        "email": item.user.email if item.user else item.email, 
+        "email": get_email(item, can_write),
         "name": item.user.name if item.user else item.name, 
         "state": item.state,
         "icon": item.user.icon if item.user else None, 
