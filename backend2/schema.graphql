@@ -230,6 +230,16 @@ type attendEventWithoutAccountPayload {
   entity: Event
 }
 
+type AttendeeWithoutAccount {
+  name: String!
+  email: String!
+}
+
+type AttendeeWithoutAccountList {
+  total: Int!
+  edges: [AttendeeWithoutAccount]
+}
+
 type Blog implements Entity {
   guid: String!
   status: Int
@@ -839,8 +849,7 @@ type Event implements Entity {
   owner: User
   isAttending: String
   attendees(offset: Int, limit: Int, state: String): AttendeesList
-  attendeesWithoutAccount: Int
-  attendeesWithoutAccountEmailAddresses: [String]
+  attendeesWithoutAccount(offset: Int, limit: Int, state: String): AttendeeWithoutAccountList
   comments: [Comment]
   commentCount: Int
   isPinned: Boolean!
