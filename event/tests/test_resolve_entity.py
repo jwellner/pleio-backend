@@ -67,13 +67,14 @@ class EventTestCase(FastTenantTestCase):
         EventAttendee.objects.create(
             event=self.eventPrivate,
             state='accept',
-            name="test_name",
+            name="test_name1",
             email='test@test.nl'
         )
 
         EventAttendee.objects.create(
             event=self.eventPrivate,
             state='accept',
+            name="test_name3",
             user=self.authenticatedUser
         )
 
@@ -201,14 +202,16 @@ class EventTestCase(FastTenantTestCase):
         self.assertEqual(data["entity"]["location"], self.eventPrivate.location)
         self.assertEqual(data["entity"]["rsvp"], self.eventPrivate.rsvp)
         self.assertEqual(data["entity"]["attendEventWithoutAccount"], self.eventPrivate.attend_event_without_account)
-        self.assertEqual(data["entity"]["attendees"]["edges"][2]["name"], 'test_name')
-        self.assertEqual(data["entity"]["attendees"]["edges"][2]["url"], None)
-        self.assertEqual(data["entity"]["attendees"]["edges"][2]["icon"], None)
-        self.assertEqual(data["entity"]["attendees"]["edges"][2]["state"], 'accept')
-        self.assertEqual(data["entity"]["attendees"]["edges"][0]["name"], 'test_name2')
-        self.assertEqual(data["entity"]["attendees"]["edges"][0]["url"], self.authenticatedUser.url)
-        self.assertEqual(data["entity"]["attendees"]["edges"][0]["icon"], self.authenticatedUser.icon)
+        self.assertEqual(data["entity"]["attendees"]["edges"][0]["name"], 'test_name1')
+        self.assertEqual(data["entity"]["attendees"]["edges"][0]["url"], None)
+        self.assertEqual(data["entity"]["attendees"]["edges"][0]["icon"], None)
         self.assertEqual(data["entity"]["attendees"]["edges"][0]["state"], 'accept')
+        self.assertEqual(data["entity"]["attendees"]["edges"][1]["name"], 'test_name2')
+        self.assertEqual(data["entity"]["attendees"]["edges"][1]["url"], self.authenticatedUser.url)
+        self.assertEqual(data["entity"]["attendees"]["edges"][1]["icon"], self.authenticatedUser.icon)
+        self.assertEqual(data["entity"]["attendees"]["edges"][1]["state"], 'accept')
+        self.assertEqual(data["entity"]["attendees"]["edges"][2]["name"], 'test_name3')
+        self.assertEqual(data["entity"]["attendees"]["edges"][3]["name"], 'test_name4')
         self.assertEqual(len(data["entity"]["attendees"]["edges"]), 4)
 
     def test_event_user(self):
