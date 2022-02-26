@@ -146,7 +146,7 @@ def resolve_attendees(obj, info, limit=20, offset=0, state=None):
         "url": item.user.url if item.user else None 
         } 
         for item in qs]
-    print(attendees)
+
     return {
         "total": obj.attendees.filter(state="accept").count(),
         "totalMaybe": obj.attendees.filter(state="maybe").count(),
