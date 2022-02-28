@@ -25,6 +25,10 @@ class BlogDocument(DefaultDocument):
         search_analyzer="standard"
     )
 
+    owner = fields.ObjectField(properties={
+        'name': fields.TextField(analyzer=custom_analyzer, search_analyzer="standard")
+    })
+
     comments = fields.ObjectField(properties={
         'description': fields.TextField(analyzer=custom_analyzer, search_analyzer="standard")
     })
