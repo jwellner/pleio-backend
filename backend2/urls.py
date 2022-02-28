@@ -52,6 +52,8 @@ urlpatterns = [
     path('exporting/calendar/', event_views.export_calendar, name='event_calendar_export'),
     path('exporting/users', user_views.export, name='users_export'),
 
+    path('qr/url/<uuid:entity_id>', core_views.get_url_qr, name='url_qr'),
+
     path('comment/confirm/<uuid:entity_id>', core_views.comment_confirm, name='comment_confirm'),
 
     path('onboarding', core_views.onboarding, name='onboarding'),

@@ -2,6 +2,7 @@ import csv
 import json
 import logging
 import core.tasks
+import qrcode
 from core.resolvers.query_site import get_settings
 from core import config
 from core.models import (
@@ -15,6 +16,7 @@ from core.lib import (
 from core.forms import EditEmailSettingsForm, OnboardingForm, RequestAccessForm
 from core.constances import USER_ROLES, OIDC_PROVIDER_OPTIONS
 from user.models import User
+from event.lib import get_url
 from django.utils.translation import ugettext_lazy
 from core.auth import oidc_provider_logout_url
 from django.core import signing
@@ -25,7 +27,7 @@ from django.shortcuts import redirect, render
 from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist
 from django.db import models
-from django.utils.text import Truncator
+from django.utils.text import Truncator, slugify
 from django.utils.http import urlencode
 from django.urls import reverse
 from django.views.decorators.cache import cache_control
@@ -577,3 +579,29 @@ def edit_email_settings(request, token):
 
 def unsupported_browser(request):
     return render(request, 'unsupported_browser.html')
+
+def get_url_qr(request, entity_id=None):
+    #Only implemented for Events. Can be adjusted to be used for other entities
+    user = request.user
+
+    if not user.is_authenticated:
+        raise Http404("Event not found")
+
+    try:
+        entity = Entity.objects.visible(user).get_subclass(id=entity_id)
+    except ObjectDoesNotExist:
+        raise Http404("Event not found")
+
+    url = get_url(entity, request)
+    if hasattr(entity, 'title') and entity.title:
+        filename = slugify(entity.title)[:248].removesuffix("-")
+    else:
+        filename = entity.id
+
+    code = qrcode.make(url)
+
+    response = HttpResponse(content_type='image/png')
+    code.save(response, "PNG")
+    response['Content-Disposition'] = f'attachment; filename="qr_{filename}.png"'
+
+    return response
