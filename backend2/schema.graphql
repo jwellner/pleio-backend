@@ -741,6 +741,7 @@ input editSiteSettingInput {
   siteMembershipDeniedIntro: String
   idpId: String
   idpName: String
+  autoApproveSSO: Boolean
   flowEnabled: Boolean
   flowSubtypes: [String]
   flowAppUrl: String
@@ -1788,6 +1789,7 @@ type SiteSettings {
   siteMembershipDeniedIntro: String
   idpId: String
   idpName: String
+  autoApproveSSO: Boolean
   searchEngineIndexingEnabled: Boolean!
   profileFieldValidators: [ProfileFieldValidator]
   flowEnabled: Boolean!

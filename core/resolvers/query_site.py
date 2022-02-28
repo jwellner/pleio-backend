@@ -228,6 +228,7 @@ def get_site_settings():
         'siteMembershipDeniedIntro': config.SITE_MEMBERSHIP_DENIED_INTRO,
         'idpId': config.IDP_ID,
         'idpName': config.IDP_NAME,
+        'autoApproveSSO': config.AUTO_APPROVE_SSO,
         # TODO: remove after flow connects to general api
         'flowEnabled': config.FLOW_ENABLED,
         'flowSubtypes': config.FLOW_SUBTYPES,

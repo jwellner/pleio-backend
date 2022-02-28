@@ -172,6 +172,7 @@ class EditSiteSettingTestCase(FastTenantTestCase):
                         siteMembershipDeniedIntro
                         idpId
                         idpName
+                        autoApproveSSO
 
                         flowEnabled
                         flowSubtypes
@@ -297,6 +298,7 @@ class EditSiteSettingTestCase(FastTenantTestCase):
                 'siteMembershipDeniedIntro': 'Your request is not accepted',
                 "idpId": "idp_id",
                 "idpName": "idp_name",
+                "autoApproveSSO": True,
 
                 # TODO: remove after flow connects to general api
                 "flowEnabled": True,
@@ -434,6 +436,7 @@ class EditSiteSettingTestCase(FastTenantTestCase):
         self.assertEqual(data["editSiteSetting"]["siteSettings"]["siteMembershipDeniedIntro"], 'Your request is not accepted')
         self.assertEqual(data["editSiteSetting"]["siteSettings"]["idpId"], 'idp_id')
         self.assertEqual(data["editSiteSetting"]["siteSettings"]["idpName"], 'idp_name')
+        self.assertEqual(data["editSiteSetting"]["siteSettings"]["autoApproveSSO"], True)
 
         # TODO: remove after flow connects to general api
         self.assertEqual(data["editSiteSetting"]["siteSettings"]["flowEnabled"], True)
