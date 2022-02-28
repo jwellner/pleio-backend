@@ -55,3 +55,13 @@ class Tiptap:
 
     def get_field(self, node, field):
         return node.get('attrs', {}).get(field, None)
+
+    def replace_url(self, original, replacement):
+        for x in self.get_nodes('file'):
+            if self.get_field(x, 'url') == original:
+                x['attrs']['url'] = replacement
+
+    def replace_src(self, original, replacement):
+        for x in self.get_nodes('image'):
+            if self.get_field(x, 'src') == original:
+                x['attrs']['src'] = replacement

@@ -7,6 +7,7 @@ from django.db import models
 from django.dispatch import receiver
 from django.utils import timezone
 from django.utils.text import slugify
+from django.core.files.base import ContentFile
 from django.urls import reverse
 from django.conf import settings
 from core.lib import get_mimetype
@@ -42,6 +43,17 @@ class Attachment(ModelWithFile, ResizedImageMixin):
             return True # Groups don't have the function implemented
 
         return self.attached.can_read(user)
+
+    def make_copy(self, user):
+        new = Attachment()
+        new_file = ContentFile(self.upload.read())
+        new_file.name = self.upload.name
+        new.upload = new_file
+        new.owner = user
+
+        new.save()
+
+        return new
 
     @property
     def type(self):

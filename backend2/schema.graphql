@@ -344,6 +344,17 @@ type confirmAttendEventWithoutAccountPayload {
   entity: Event
 }
 
+input copyEntityInput {
+  guid: String!
+  ownerGuid: String!
+  subtype: String!
+}
+
+type copyEntityPayload {
+  entity: Entity
+}
+
+
 input deleteColumnInput {
   guid: String!
 }
@@ -1150,6 +1161,8 @@ type Mutation {
   editSiteSetting(input: editSiteSettingInput!): editSiteSettingPayload
   addEntity(input: addEntityInput!): addEntityPayload
   editEntity(input: editEntityInput!): editEntityPayload
+  """Currently only implemented for events"""
+  copyEntity(input: copyEntityInput!): copyEntityPayload
   deleteEntity(input: deleteEntityInput!): deleteEntityPayload
   toggleEntityArchived(guid: String!): archiveEntityPayload
   addFile(input: addFileInput!): addFilePayload

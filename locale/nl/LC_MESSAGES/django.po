@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-02-24 10:17+0100\n"
+"POT-Creation-Date: 2022-02-23 16:26+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -1052,6 +1052,11 @@ msgstr "Opgeslagen"
 #, python-format
 msgid "Added to event %s from waitinglist"
 msgstr "Toegevoegd aan evenement %s van wachtlijst"
+
+#: event/resolvers/mutation.py:320
+#, python-format
+msgid "Copy %s"
+msgstr "Kopie %s"
 
 #: event/resolvers/mutation_attend_event_without_account.py:31
 #, python-format

@@ -1,14 +1,18 @@
+import json
+from core.utils.tiptap_parser import Tiptap
 from ariadne import ObjectType
 from django.core.exceptions import ObjectDoesNotExist
 from graphql import GraphQLError
 from core.constances import NOT_LOGGED_IN, COULD_NOT_FIND, EVENT_IS_FULL, EVENT_INVALID_STATE, COULD_NOT_FIND_GROUP, INVALID_DATE, COULD_NOT_SAVE, USER_ROLES
-from core.lib import remove_none_from_dict, access_id_to_acl, tenant_schema
+from core.lib import get_access_id, remove_none_from_dict, access_id_to_acl, tenant_schema
 from core.models import Group
 from core.resolvers.shared import clean_abstract
 from core.utils.convert import tiptap_to_text
 from file.models import FileFolder
 from file.tasks import resize_featured
 from user.models import User
+from django.utils.translation import ugettext_lazy
+from django.utils import timezone
 
 from ..models import Event, EventAttendee
 from event.resolvers.mutation_attend_event_without_account import resolve_attend_event_without_account
@@ -316,6 +320,57 @@ def resolve_edit_event(_, info, input):
         if 'timeCreated' in clean_input:
             entity.created_at = clean_input.get("timeCreated")
 
+    entity.save()
+
+    return {
+        "entity": entity
+    }
+
+
+def resolve_copy_event(_, info, input):
+    # pylint: disable=redefined-builtin
+
+    user = info.context["request"].user
+
+    clean_input = remove_none_from_dict(input)
+
+    if not user.is_authenticated:
+        raise GraphQLError(NOT_LOGGED_IN)
+
+    try:
+        entity = Event.objects.get(id=clean_input.get("guid"))
+    except ObjectDoesNotExist:
+        raise GraphQLError(COULD_NOT_FIND)
+
+    if not entity.can_write(user):
+        raise GraphQLError(COULD_NOT_SAVE)
+
+    attachments = entity.attachments_in_text()
+    for x in attachments:
+        attachment_copy = x.make_copy(user)
+        original = "/attachment/%s" %x.id
+        replacement = "/attachment/%s" %attachment_copy.id
+        tiptap = Tiptap(entity.rich_description)
+        tiptap.replace_url(original, replacement)
+        tiptap.replace_src(original, replacement) 
+        entity.rich_description = json.dumps(tiptap.tiptap_json)
+
+    entity.title = ugettext_lazy("Copy %s") %entity.title
+    entity.start_date = timezone.now()
+    entity.end_date = None
+    entity.owner = user
+    entity.is_featured = False
+    entity.is_pinned = False
+    entity.notifications_created = False
+    entity.published = timezone.now()
+    entity.created_at = timezone.now()
+    entity.updated_at = timezone.now()
+    entity.last_action = timezone.now()
+    entity.read_access = access_id_to_acl(entity, get_access_id(entity))
+    entity.write_access = access_id_to_acl(entity, 0)
+
+    entity.pk = None
+    entity.id = None
     entity.save()
 
     return {
