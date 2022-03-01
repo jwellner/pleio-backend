@@ -362,7 +362,7 @@ def resolve_copy_event(_, info, input):
     entity.is_featured = False
     entity.is_pinned = False
     entity.notifications_created = False
-    entity.published = timezone.now()
+    entity.published = None
     entity.created_at = timezone.now()
     entity.updated_at = timezone.now()
     entity.last_action = timezone.now()
