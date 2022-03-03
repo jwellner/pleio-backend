@@ -6,6 +6,7 @@ from core.lib import remove_none_from_dict, ACCESS_TYPE
 from file.models import FileFolder
 from django.core.exceptions import ValidationError
 
+
 def resolve_add_group(_, info, input):
     # pylint: disable=redefined-builtin
     # pylint: disable=unused-variable
@@ -63,6 +64,7 @@ def resolve_add_group(_, info, input):
     group.introduction = clean_input.get("introduction", "")
     group.is_introduction_public = clean_input.get("isIntroductionPublic", False)
     group.welcome_message = clean_input.get("welcomeMessage", "")
+    group.required_fields_message = clean_input.get("requiredProfileFieldsMessage", "")
 
     group.is_closed = clean_input.get("isClosed", False)
     group.is_hidden = clean_input.get("isHidden", False)
@@ -76,9 +78,9 @@ def resolve_add_group(_, info, input):
 
     group.plugins = clean_input.get("plugins", [])
     group.tags = clean_input.get("tags", [])
-    
+
     group.save()
-    
+
     if 'showMemberProfileFieldGuids' in clean_input:
         for profile_field_id in clean_input.get("showMemberProfileFieldGuids"):
             try:
@@ -88,6 +90,19 @@ def resolve_add_group(_, info, input):
                     group=group
                 )
                 setting.show_field = True
+                setting.save()
+            except (ProfileField.DoesNotExist, ValidationError):
+                raise GraphQLError(INVALID_PROFILE_FIELD_GUID)
+
+    if 'requiredProfileFieldGuids' in clean_input:
+        for profile_field_id in clean_input.get('requiredProfileFieldGuids'):
+            try:
+                profile_field = ProfileField.objects.get(id=profile_field_id)
+                setting, created = GroupProfileFieldSetting.objects.get_or_create(
+                    profile_field=profile_field,
+                    group=group
+                )
+                setting.is_required = True
                 setting.save()
             except (ProfileField.DoesNotExist, ValidationError):
                 raise GraphQLError(INVALID_PROFILE_FIELD_GUID)
