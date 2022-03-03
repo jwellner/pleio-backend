@@ -1,6 +1,6 @@
 from django.db import connection
 from django_tenants.test.cases import FastTenantTestCase
-from core.models import Group
+from core.models import Group, GroupProfileFieldSetting, ProfileField, UserProfile, UserProfileField
 from core.lib import access_id_to_acl
 from user.models import User
 from blog.models import Blog
@@ -11,6 +11,7 @@ import json
 from django.contrib.auth.models import AnonymousUser
 from django.http import HttpRequest
 from mixer.backend.django import mixer
+
 
 class TestGroupAccess(FastTenantTestCase):
 
@@ -46,7 +47,6 @@ class TestGroupAccess(FastTenantTestCase):
         self.site_admin.delete()
 
     def test_open_group(self):
-
         query = """
             query BlogItem($guid: String!) {
                 entity(guid: $guid) {
@@ -68,7 +68,7 @@ class TestGroupAccess(FastTenantTestCase):
             "guid": self.blog1.guid
         }
 
-        result = graphql_sync(schema, {"query": query, "variables": variables }, context_value={ "request": request })
+        result = graphql_sync(schema, {"query": query, "variables": variables}, context_value={"request": request})
 
         self.assertTrue(result[0])
 
@@ -101,7 +101,7 @@ class TestGroupAccess(FastTenantTestCase):
             "guid": self.blog1.guid
         }
 
-        result = graphql_sync(schema, {"query": query, "variables": variables }, context_value={ "request": request })
+        result = graphql_sync(schema, {"query": query, "variables": variables}, context_value={"request": request})
 
         data = result[1]["data"]
 
@@ -110,7 +110,7 @@ class TestGroupAccess(FastTenantTestCase):
         # site_user is not in group and should not be able to read blog
         request.user = self.site_user
 
-        result = graphql_sync(schema, {"query": query, "variables": variables }, context_value={ "request": request })
+        result = graphql_sync(schema, {"query": query, "variables": variables}, context_value={"request": request})
 
         data = result[1]["data"]
 
@@ -119,7 +119,7 @@ class TestGroupAccess(FastTenantTestCase):
         # group_user is in group and should be able to read blog
         request.user = self.group_user
 
-        result = graphql_sync(schema, {"query": query, "variables": variables }, context_value={ "request": request })
+        result = graphql_sync(schema, {"query": query, "variables": variables}, context_value={"request": request})
 
         self.assertTrue(result[0])
 
@@ -130,7 +130,7 @@ class TestGroupAccess(FastTenantTestCase):
         # site_admin is admin and should be able to read blog
         request.user = self.site_admin
 
-        result = graphql_sync(schema, {"query": query, "variables": variables }, context_value={ "request": request })
+        result = graphql_sync(schema, {"query": query, "variables": variables}, context_value={"request": request})
 
         self.assertTrue(result[0])
 
@@ -141,7 +141,6 @@ class TestGroupAccess(FastTenantTestCase):
     def test_open_content_closed_group(self):
         self.group.is_closed = True
         self.group.save()
-
 
         data = {
             "input": {
@@ -168,7 +167,7 @@ class TestGroupAccess(FastTenantTestCase):
         request = HttpRequest()
         request.user = self.group_user_blog_owner
 
-        result = graphql_sync(schema, { "query": mutation, "variables": data }, context_value={ "request": request })
+        result = graphql_sync(schema, {"query": mutation, "variables": data}, context_value={"request": request})
 
         self.assertTrue(result[0])
 
@@ -180,7 +179,6 @@ class TestGroupAccess(FastTenantTestCase):
     def test_group_owner_can_edit_content(self):
         self.group.is_closed = True
         self.group.save()
-
 
         data = {
             "input": {
@@ -206,7 +204,7 @@ class TestGroupAccess(FastTenantTestCase):
         request = HttpRequest()
         request.user = self.group_owner
 
-        result = graphql_sync(schema, { "query": mutation, "variables": data }, context_value={ "request": request })
+        result = graphql_sync(schema, {"query": mutation, "variables": data}, context_value={"request": request})
 
         self.assertTrue(result[0])
 
@@ -217,7 +215,6 @@ class TestGroupAccess(FastTenantTestCase):
     def test_group_admin_can_edit_content(self):
         self.group.is_closed = True
         self.group.save()
-
 
         data = {
             "input": {
@@ -243,7 +240,7 @@ class TestGroupAccess(FastTenantTestCase):
         request = HttpRequest()
         request.user = self.group_admin
 
-        result = graphql_sync(schema, { "query": mutation, "variables": data }, context_value={ "request": request })
+        result = graphql_sync(schema, {"query": mutation, "variables": data}, context_value={"request": request})
 
         self.assertTrue(result[0])
 
@@ -254,7 +251,6 @@ class TestGroupAccess(FastTenantTestCase):
     def test_site_admin_can_edit_content(self):
         self.group.is_closed = True
         self.group.save()
-
 
         data = {
             "input": {
@@ -280,10 +276,86 @@ class TestGroupAccess(FastTenantTestCase):
         request = HttpRequest()
         request.user = self.site_admin
 
-        result = graphql_sync(schema, { "query": mutation, "variables": data }, context_value={ "request": request })
+        result = graphql_sync(schema, {"query": mutation, "variables": data}, context_value={"request": request})
 
         self.assertTrue(result[0])
 
         data = result[1]["data"]
 
         self.assertEqual(data["editEntity"]["entity"]["title"], "Update by admin")
+
+    def _prepare_group_with_one_profile_fields_required(self):
+        profile_field = ProfileField.objects.create(
+            key='text_key',
+            name='text_name',
+            field_type='text_field'
+        )
+        GroupProfileFieldSetting.objects.create(
+            group=self.group,
+            profile_field=profile_field,
+            is_required=True
+        )
+        return profile_field
+
+    def test_profile_field_required_feedback_when_user_has_profile_not_filled_in(self):
+        profile_field = self._prepare_group_with_one_profile_fields_required()
+
+        query = """
+            query Group($guid: String!) {
+                entity(guid: $guid) {
+                    guid
+                    ... on Group {
+                        memberMissingFieldGuids
+                    }
+                }
+            }
+        """
+
+        request = HttpRequest()
+        request.user = self.site_user
+
+        variables = {
+            "guid": self.group.guid
+        }
+
+        success, result = graphql_sync(schema, {"query": query, "variables": variables},
+                                       context_value={"request": request})
+
+        self.assertTrue(success, msg=result)
+        self.assertEqual(result['data']['entity']['memberMissingFieldGuids'], [profile_field.guid],
+                         msg="Ontbrekende profiel velden verwacht, maar er zijn geen velden verplicht, of alles is toch ingevuld")
+
+    def test_profile_field_required_feedback_when_user_has_profile_filled_in(self):
+        profile_field = self._prepare_group_with_one_profile_fields_required()
+        user_profile = UserProfile.objects.create(user=self.site_user)
+
+        UserProfileField.objects.create(
+            user_profile=user_profile,
+            profile_field=profile_field,
+            value="some value"
+        )
+
+        query = """
+            query Group($guid: String!) {
+                entity(guid: $guid) {
+                    guid
+                    ... on Group {
+                        memberMissingFieldGuids
+                    }
+                }
+            }
+        """
+
+        request = HttpRequest()
+        request.user = self.site_user
+
+        variables = {
+            "guid": self.group.guid
+        }
+
+        success, result = graphql_sync(schema, {"query": query, "variables": variables},
+                                       context_value={"request": request})
+
+        self.assertTrue(success, msg=result)
+        self.assertEqual(result['data']['entity']['memberMissingFieldGuids'], [],
+                         msg="Geen ontbrekende profiel velden verwacht, is toch het profiel niet voldoende ingevuld?")

@@ -3,7 +3,7 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.db.models import Case, When, IntegerField
 from core.constances import MEMBERSHIP, USER_ROLES
 from core.lib import get_access_ids
-from core.models import GroupInvitation, Subgroup, GroupProfileFieldSetting, UserProfileField
+from core.models import GroupInvitation, Subgroup, GroupProfileFieldSetting, UserProfileField, UserProfile
 from user.models import User
 from core import config
 from core.resolvers import shared
@@ -341,17 +341,20 @@ def resolve_profile_fields_filter(group, info):
 
 
 @group.field("memberMissingFieldGuids")
-def resolve_profile_fields_filter(group, info):
-    user = info.context["request"].user
-    required_profile_fields = [setting.profile_field.key for setting in
+def resolve_missing_profile_fields_filter(group, info):
+    required_profile_fields = [setting.profile_field.guid for setting in
                                GroupProfileFieldSetting.objects.filter(group=group, is_required=True)]
 
     if len(required_profile_fields) > 0:
-        existing_profile_fields = [field.profile_field.key for field in
-                                   UserProfileField.objects.filter(user_profile=user)]
-        return [guid for guid in required_profile_fields if guid not in existing_profile_fields]
+        try:
+            profile = UserProfile.objects.get(user=info.context["request"].user)
+            existing_profile_fields = [field.profile_field.guid for field in
+                                       UserProfileField.objects.filter(user_profile=profile)]
+            return [guid for guid in required_profile_fields if guid not in existing_profile_fields]
+        except UserProfile.DoesNotExist:
+            pass
 
-    return []
+    return required_profile_fields
 
 
 group.set_field("excerpt", shared.resolve_entity_excerpt)
