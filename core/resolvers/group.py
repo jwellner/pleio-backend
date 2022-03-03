@@ -335,7 +335,7 @@ def resolve_profile_fields_filter(group, info):
 
 
 @group.field("requiredProfileFields")
-def resolve_profile_fields_filter(group, info):
+def resolve_required_profile_fields_filter(group, info):
     # pylint: disable=unused-argument
     return [setting.profile_field for setting in group.profile_field_settings.filter(is_required=True)]
 
