@@ -327,7 +327,7 @@ class TestGroupAccess(FastTenantTestCase):
 
     def test_profile_field_required_feedback_when_user_has_profile_filled_in(self):
         profile_field = self._prepare_group_with_one_profile_fields_required()
-        user_profile = UserProfile.objects.create(user=self.site_user)
+        user_profile = mixer.blend(UserProfile, user=self.site_user)
 
         UserProfileField.objects.create(
             user_profile=user_profile,
