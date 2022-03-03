@@ -251,7 +251,7 @@ class EditGroupCase(FastTenantTestCase):
         success, result = graphql_sync(schema, {"query": mutation, "variables": variables},
                                        context_value={"request": request})
 
-        self.assertTrue(success, msg="De eerste parameter van het resultaat geeft 'false' aan.")
+        self.assertTrue(success, msg=result)
 
         from core.models.group import GroupProfileFieldSetting
         required_fields = [obj.profile_field.guid for obj in
@@ -288,7 +288,7 @@ class EditGroupCase(FastTenantTestCase):
         success, result = graphql_sync(schema, {"query": mutation, "variables": variables},
                                        context_value={"request": request})
 
-        self.assertTrue(success, msg="Het resultaat van het request geeft aan dat er fouten kunnen zijn.")
+        self.assertTrue(success, msg=result)
 
         self.group.refresh_from_db()
         self.assertEqual(self.group.required_fields_message, EXPECTED_MESSAGE, msg="De inhoud van required_fields_message wordt niet goed geupdate.")
