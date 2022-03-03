@@ -53,7 +53,8 @@ def resolve_search(_, info, q=None, containerGuid=None, type=None, subtype=None,
                     'tags^3',
                     'file_contents',
                     'introduction',
-                    'comments.description'
+                    'comments.description',
+                    'owner.name'
                 ]
             )
             | Q('nested', path='_profile.user_profile_fields', ignore_unmapped=True, query=Q('bool', must=[

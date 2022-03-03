@@ -336,12 +336,24 @@ input confirmAttendEventWithoutAccountInput {
   guid: String!
   email: String!
   code: String!,
-  delete: Boolean
+  delete: Boolean,
+  state: String
 }
 
 type confirmAttendEventWithoutAccountPayload {
   entity: Event
 }
+
+input copyEntityInput {
+  guid: String!
+  ownerGuid: String!
+  subtype: String!
+}
+
+type copyEntityPayload {
+  entity: Entity
+}
+
 
 input deleteColumnInput {
   guid: String!
@@ -729,6 +741,7 @@ input editSiteSettingInput {
   siteMembershipDeniedIntro: String
   idpId: String
   idpName: String
+  autoApproveSSO: Boolean
   flowEnabled: Boolean
   flowSubtypes: [String]
   flowAppUrl: String
@@ -1149,6 +1162,8 @@ type Mutation {
   editSiteSetting(input: editSiteSettingInput!): editSiteSettingPayload
   addEntity(input: addEntityInput!): addEntityPayload
   editEntity(input: editEntityInput!): editEntityPayload
+  """Currently only implemented for events"""
+  copyEntity(input: copyEntityInput!): copyEntityPayload
   deleteEntity(input: deleteEntityInput!): deleteEntityPayload
   toggleEntityArchived(guid: String!): archiveEntityPayload
   addFile(input: addFileInput!): addFilePayload
@@ -1774,6 +1789,7 @@ type SiteSettings {
   siteMembershipDeniedIntro: String
   idpId: String
   idpName: String
+  autoApproveSSO: Boolean
   searchEngineIndexingEnabled: Boolean!
   profileFieldValidators: [ProfileFieldValidator]
   flowEnabled: Boolean!

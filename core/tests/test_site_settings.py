@@ -220,6 +220,7 @@ class SiteSettingsTestCase(FastTenantTestCase):
                     siteMembershipDeniedIntro
                     idpId
                     idpName
+                    autoApproveSSO
 
                     flowEnabled
                     flowSubtypes
@@ -405,6 +406,7 @@ class SiteSettingsTestCase(FastTenantTestCase):
         self.assertEqual(data["siteSettings"]["siteMembershipDeniedIntro"], "")
         self.assertEqual(data["siteSettings"]["idpId"], "")
         self.assertEqual(data["siteSettings"]["idpName"], "")
+        self.assertEqual(data["siteSettings"]["autoApproveSSO"], False)
         # TODO: remove after flow connects to general api
         self.assertEqual(data["siteSettings"]["flowEnabled"], False)
         self.assertEqual(data["siteSettings"]["flowSubtypes"], [])

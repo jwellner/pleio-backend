@@ -1,4 +1,5 @@
 from django.db import connection
+from core.models.attachment import Attachment
 from django_tenants.test.cases import FastTenantTestCase
 from backend2.schema import schema
 from ariadne import graphql_sync
@@ -175,3 +176,19 @@ class AddEventTestCase(FastTenantTestCase):
 
         self.assertTrue(self.eventGroupPublic.has_children())
         self.assertEqual(self.eventGroupPublic.children.first().guid, data["addEntity"]["entity"]["guid"])
+
+    def test_add_event_with_attachment(self):
+        attachment = mixer.blend(Attachment)
+
+        variables = self.data
+        variables["input"]["richDescription"] = json.dumps({ 'type': 'file', 'attrs': {'url': f"/attachment/entity/{attachment.id}" }})
+
+        request = HttpRequest()
+        request.user = self.authenticatedUser
+
+        result = graphql_sync(schema, { "query": self.mutation, "variables": variables }, context_value={ "request": request })
+
+        data = result[1]["data"]
+        event = Event.objects.get(id=data["addEntity"]["entity"]["guid"])
+
+        self.assertTrue(event.attachments.filter(id=attachment.id).exists())

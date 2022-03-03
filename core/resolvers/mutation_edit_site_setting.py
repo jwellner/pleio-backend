@@ -175,6 +175,7 @@ def resolve_edit_site_setting(_, info, input):
         'siteMembershipDeniedIntro': 'SITE_MEMBERSHIP_DENIED_INTRO',
         'idpId': 'IDP_ID',
         'idpName': 'IDP_NAME',
+        'autoApproveSSO': 'AUTO_APPROVE_SSO',
 
         'flowEnabled': 'FLOW_ENABLED',
         'flowSubtypes': 'FLOW_SUBTYPES',

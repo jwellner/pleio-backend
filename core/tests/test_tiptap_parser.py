@@ -63,3 +63,52 @@ class TiptapParserTestCase(FastTenantTestCase):
         tiptap = Tiptap(tiptap_json)
 
         self.assertSetEqual(tiptap.mentioned_users, {user_id})
+
+    def test_replace_url(self):
+        original = "https://example.com"
+        replacement = "https://google.com"
+        tiptap_json = {
+           'type': 'file',
+           'attrs': {
+               'url': original,
+           },
+        }
+        tiptap = Tiptap(tiptap_json)
+
+        tiptap.replace_url(original, replacement)
+        result = tiptap.tiptap_json
+
+        self.assertEqual(result['attrs']['url'], replacement)
+
+    def test_replace_url_empty(self):
+        original = ""
+        replacement = "https://google.com"
+        tiptap_json = {
+            'type': 'file',
+            'attrs': {
+                'url': "https://example.com",
+            },
+        }
+        tiptap = Tiptap(tiptap_json)
+
+        tiptap.replace_url(original, replacement)
+        result = tiptap.tiptap_json
+
+        self.assertEqual(result['attrs']['url'], tiptap_json['attrs']['url'])
+    
+    def test_replace_src(self):
+        original = "https://example.com"
+        replacement = "https://google.com"
+        tiptap_json = {
+            'type': 'image',
+            'attrs': {
+               'src': original,
+            },
+        }
+        tiptap = Tiptap(tiptap_json)
+
+        tiptap.replace_src(original, replacement)
+        result = tiptap.tiptap_json
+
+        self.assertEqual(result['attrs']['src'], replacement)
+

@@ -20,6 +20,7 @@ from .mutation_add_group_widget import resolve_add_group_widget
 from .mutation_edit_group_widget import resolve_edit_group_widget
 from .mutation_add_entity import resolve_add_entity
 from .mutation_edit_entity import resolve_edit_entity
+from .mutation_copy_entity import resolve_copy_entity
 from .mutation_delete_entity import resolve_delete_entity
 from .mutation_delete_user import resolve_delete_user
 from .mutation_toggle_user_role import resolve_toggle_user_role
@@ -74,6 +75,7 @@ mutation.set_field("editGroupWidget", resolve_edit_group_widget)
 
 mutation.set_field("addEntity", resolve_add_entity)
 mutation.set_field("editEntity", resolve_edit_entity)
+mutation.set_field("copyEntity", resolve_copy_entity)
 mutation.set_field("deleteEntity", resolve_delete_entity)
 mutation.set_field("toggleEntityArchived", resolve_archive_entity)
 mutation.set_field("deleteUser", resolve_delete_user)
