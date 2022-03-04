@@ -13,13 +13,13 @@ from user.models import User
 class EventsTestCase(FastTenantTestCase):
 
     def setUp(self):
-        self.mutation = """"
-                        mutation ($input: sendMessageToEventInput!) {
-                            sendMessageToEvent(input: $input) {
-                                success
-                            }
-                        }
-                        """
+        self.mutation = """
+            mutation ($input: sendMessageToEventInput!) {
+                sendMessageToEvent(input: $input) {
+                    success
+                }
+            }
+            """
 
         self.group = mixer.blend(Group)
         self.event = mixer.blend(Event, group=self.group)
@@ -40,8 +40,18 @@ class EventsTestCase(FastTenantTestCase):
         request = HttpRequest()
         request.user = self.owner
 
-        result = graphql_sync(schema, { "query": self.mutation , "variables": {}}, context_value={ "request": request })
+        success, result = graphql_sync(schema, { "query": self.mutation , "variables": {
+            'input': {
+                'guid': self.event.guid,
+                'subject': "expected subject",
+                'message': "expected message",
+                'sendTest': True,
+                'sendToAttendees': True,
+                'sendToWaitinglist': True,
+                'sendCopyToSender': True,
+            }
+        }}, context_value={ "request": request })
 
-        self.assertEqual([], result, msg=result)
+        self.assertTrue('errors' not in result, msg=result)
 
 
