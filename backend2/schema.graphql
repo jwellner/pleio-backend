@@ -1228,11 +1228,13 @@ type Mutation {
   """Change the role of a user in a group."""
   changeGroupRole(input: changeGroupRoleInput!): changeGroupRolePayload
   editTask(input: editTaskInput!): editTaskPayload
+
   """Attend an event with state accept, waitinglist, maybe or reject """
   attendEvent(input: attendEventInput!): attendEventPayload
   attendEventWithoutAccount(input: attendEventWithoutAccountInput!): attendEventWithoutAccountPayload
   confirmAttendEventWithoutAccount(input: confirmAttendEventWithoutAccountInput!): confirmAttendEventWithoutAccountPayload
   deleteEventAttendees(input: deleteEventAttendeesInput!): deleteEventAttendeesPayload
+
   markAsRead(input: markAsReadInput!): markAsReadPayload
   markAllAsRead(input: markAllAsReadInput!): markAllAsReadPayload
   toggleBestAnswer(input: toggleBestAnswerInput!): toggleBestAnswerPayload
@@ -1242,6 +1244,9 @@ type Mutation {
   voteOnPoll(input: voteOnPollInput!): voteOnPollPayload
   addPoll(input: addPollInput!): addPollPayload
   editPoll(input: editPollInput!): editPollPayload
+
+  """Send message to members of an event"""
+  sendMessageToEvent(input: sendMessageToEventInput!): sendMessageToEventPayload
 
   """Send a message to a user."""
   sendMessageToUser(input: sendMessageToUserInput!): sendMessageToUserPayload
@@ -1636,6 +1641,22 @@ input sendMessageToUserInput {
 }
 
 type sendMessageToUserPayload {
+  success: Boolean
+}
+
+input sendMessageToEventInput {
+  guid: String
+
+  subject: String
+  message: String
+
+  sendTest: Boolean
+  sendToAttendees: Boolean
+  sendToWaitinglist: Boolean
+  sendCopyToSender: Boolean
+}
+
+type sendMessageToEventPayload {
   success: Boolean
 }
 
