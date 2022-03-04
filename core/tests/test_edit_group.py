@@ -7,6 +7,7 @@ from django.contrib.auth.models import AnonymousUser
 from django.core.files import File
 from django.core.cache import cache
 from django.http import HttpRequest
+from core.constances import USER_ROLES
 from core.models import Group, ProfileField
 from user.models import User
 from mixer.backend.django import mixer
@@ -18,7 +19,7 @@ class EditGroupCase(FastTenantTestCase):
     def setUp(self):
         self.anonymousUser = AnonymousUser()
         self.user = mixer.blend(User)
-        self.admin = mixer.blend(User, roles=['ADMIN'])
+        self.admin = mixer.blend(User, roles=[USER_ROLES.ADMIN])
         self.group = mixer.blend(Group, owner=self.user)
 
     def tearDown(self):
@@ -94,7 +95,6 @@ class EditGroupCase(FastTenantTestCase):
                 "isIntroductionPublic": True,
                 "welcomeMessage": "welcomeMessage",
                 "isClosed": True,
-                "isHidden": True,
                 "isMembershipOnRequest": True,
                 "isFeatured": True,
                 "autoNotification": True,
@@ -119,9 +119,7 @@ class EditGroupCase(FastTenantTestCase):
         self.assertEqual(data["editGroup"]["group"]["isIntroductionPublic"], variables["group"]["isIntroductionPublic"])
         self.assertEqual(data["editGroup"]["group"]["welcomeMessage"], variables["group"]["welcomeMessage"])
         self.assertEqual(data["editGroup"]["group"]["isClosed"], variables["group"]["isClosed"])
-        self.assertEqual(data["editGroup"]["group"]["isHidden"], variables["group"]["isHidden"])
-        self.assertEqual(data["editGroup"]["group"]["isMembershipOnRequest"],
-                         variables["group"]["isMembershipOnRequest"])
+        self.assertEqual(data["editGroup"]["group"]["isMembershipOnRequest"], variables["group"]["isMembershipOnRequest"])
         self.assertEqual(data["editGroup"]["group"]["isFeatured"], False)
         self.assertEqual(data["editGroup"]["group"]["isLeavingGroupDisabled"], False)
         self.assertEqual(data["editGroup"]["group"]["isAutoMembershipEnabled"], False)
@@ -220,6 +218,66 @@ class EditGroupCase(FastTenantTestCase):
         self.assertEqual(data["editGroup"]["group"]["guid"], variables["group"]["guid"])
         self.assertEqual(len(data["editGroup"]["group"]["showMemberProfileFields"]), 1)
         self.assertEqual(data["editGroup"]["group"]["showMemberProfileFields"][0]["guid"], profile_field2.guid)
+
+    def test_group_can_be_hidden_with_site_admin_perms(self):
+        mutation = """
+            mutation ($group: editGroupInput!) {
+                editGroup(input: $group) {
+                    group {
+                        guid
+                        isHidden
+                    }
+                }
+            }
+        """
+        variables = {
+            "group": {
+                "guid": self.group.guid,
+                "isHidden": True,
+            }
+        }
+
+        request = HttpRequest()
+        request.user = self.admin
+
+        result = graphql_sync(schema,
+                              {"query": mutation, "variables": variables},
+                              context_value={"request": request})
+
+        data = result[1]["data"]
+
+        # Expect is_hidden is set to True like requested
+        self.assertEqual(data["editGroup"]["group"]["isHidden"],
+                         variables["group"]["isHidden"])
+
+    def test_group_cannot_be_hidden_without_site_admin_perms(self):
+        mutation = """
+            mutation ($group: editGroupInput!) {
+                editGroup(input: $group) {
+                    group {
+                        guid
+                        isHidden
+                    }
+                }
+            }
+        """
+        variables = {
+            "group": {
+                "guid": self.group.guid,
+                "isHidden": True,
+            }
+        }
+
+        request = HttpRequest()
+        request.user = self.user
+
+        result = graphql_sync(schema,
+                              {"query": mutation, "variables": variables},
+                              context_value={"request": request})
+        data = result[1]["data"]
+
+        # Expect is_hidden is not set to True like requested
+        self.assertFalse(data["editGroup"]["group"]["isHidden"])
 
     def test_edit_required_profile_fields(self):
         profile_field1, profile_field2 = self._build_profile_fields()
