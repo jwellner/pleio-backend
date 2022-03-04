@@ -1,5 +1,5 @@
 from ariadne import ObjectType
-from django.core.exceptions import ObjectDoesNotExist
+from django.core.exceptions import ObjectDoesNotExist, ValidationError
 from django.db.models import Case, When, IntegerField
 from core.constances import MEMBERSHIP, USER_ROLES
 from core.lib import get_access_ids
@@ -342,6 +342,9 @@ def resolve_required_profile_fields_filter(group, info):
 
 @group.field("memberMissingFieldGuids")
 def resolve_missing_profile_fields_filter(group, info):
+    if info.context["request"].user.is_anonymous:
+        return []
+
     required_profile_fields = [setting.profile_field.guid for setting in
                                GroupProfileFieldSetting.objects.filter(group=group, is_required=True)]
 

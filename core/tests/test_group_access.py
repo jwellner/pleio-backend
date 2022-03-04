@@ -359,3 +359,30 @@ class TestGroupAccess(FastTenantTestCase):
         self.assertTrue(success, msg=result)
         self.assertEqual(result['data']['entity']['memberMissingFieldGuids'], [],
                          msg="Geen ontbrekende profiel velden verwacht, is toch het profiel niet voldoende ingevuld?")
+
+    def test_profile_field_required_feedback_when_anonymous_user_queries_groep(self):
+        profile_field = self._prepare_group_with_one_profile_fields_required()
+
+        query = """
+            query Group($guid: String!) {
+                entity(guid: $guid) {
+                    guid
+                    ... on Group {
+                        memberMissingFieldGuids
+                    }
+                }
+            }
+        """
+
+        request = HttpRequest()
+        request.user = self.anonymousUser
+
+        variables = {
+            "guid": self.group.guid
+        }
+
+        success, result = graphql_sync(schema, {"query": query, "variables": variables},
+                                       context_value={"request": request})
+
+        self.assertTrue(success, msg=result)
+        self.assertEqual(result['data']['entity']['memberMissingFieldGuids'], [], msg="Anoniem moet geen ontbrekende profielvelden teruggeven omdat het profiel niet kán worden aangevuld.")
