@@ -6,7 +6,7 @@ from event.models import Event
 
 def resolve_send_message_to_event(_, info, input):
     try:
-        event = Event.objects.get(guid=input['guid'])
+        event = Event.objects.get(id=input.get('guid'))
 
         user = info.context['request'].user
         if not event.can_write(user):

@@ -1645,19 +1645,20 @@ type sendMessageToUserPayload {
 }
 
 input sendMessageToEventInput {
+  """The guid of the event"""
   guid: String
 
   subject: String
   message: String
 
-  sendTest: Boolean
-  sendToAttendees: Boolean
-  sendToWaitinglist: Boolean
-  sendCopyToSender: Boolean
+  sendTest: Boolean!
+  sendToAttendees: Boolean!
+  sendToWaitinglist: Boolean!
+  sendCopyToSender: Boolean!
 }
 
 type sendMessageToEventPayload {
-  success: Boolean
+  success: Boolean!
 }
 
 """The current site"""
