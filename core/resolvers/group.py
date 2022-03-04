@@ -1,5 +1,5 @@
 from ariadne import ObjectType
-from django.core.exceptions import ObjectDoesNotExist, ValidationError
+from django.core.exceptions import ObjectDoesNotExist
 from django.db.models import Case, When, IntegerField
 from core.constances import MEMBERSHIP, USER_ROLES
 from core.lib import get_access_ids
