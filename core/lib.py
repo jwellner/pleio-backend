@@ -20,6 +20,8 @@ from django.utils.text import slugify
 from django.utils.translation import ugettext, ugettext_lazy
 from enum import Enum
 
+from core.utils.tiptap_parser import Tiptap
+
 
 class TypeModels(Enum):
     """Can be used to convert GraphQL types to Django models"""
@@ -103,10 +105,20 @@ def get_acl(user):
 
     return acl
 
+
 def remove_none_from_dict(values):
-    """Cleanup resolver input: remove keys with None values"""
+    """ Cleanup resolver input """
     # TODO: what are we going to do with values which kan be omitted or can be NULL
-    return {k:v for k,v in values.items() if (v is not None) or (k == 'timePublished') }
+
+    # Prevent external attachment URLs
+    rich_description = values.get("richDescription")
+    if rich_description:
+        tiptap = Tiptap(rich_description)
+        tiptap.check_for_external_urls()
+
+    # Remove items with None values from dict except for timePublished data
+    return {k: v for k, v in values.items() if (v is not None) or (k == 'timePublished')}
+
 
 def webpack_dev_server_is_available():
     """Return true when webpack developer server is available"""
