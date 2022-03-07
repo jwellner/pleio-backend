@@ -11,6 +11,7 @@ from event.models import Event, EventAttendee
 
 
 def resolve_send_message_to_event(_, info, input):
+    # pylint: disable=redefined-builtin
     try:
         event = Event.objects.get(id=input.get('guid'))
 
@@ -49,7 +50,7 @@ def resolve_send_message_to_event(_, info, input):
         raise GraphQLError(COULD_NOT_FIND)
 
 
-class SendEventMessage(object):
+class SendEventMessage:
 
     def __init__(self):
         self.messageCount = 0
