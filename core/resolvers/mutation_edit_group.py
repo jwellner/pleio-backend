@@ -6,6 +6,7 @@ from core.lib import remove_none_from_dict, ACCESS_TYPE, tenant_schema
 from file.models import FileFolder
 from file.tasks import resize_featured
 
+
 def resolve_edit_group(_, info, input):
     # pylint: disable=redefined-builtin
     # pylint: disable=too-many-branches
@@ -79,6 +80,8 @@ def resolve_edit_group(_, info, input):
         group.is_introduction_public = clean_input.get("isIntroductionPublic")
     if 'welcomeMessage' in clean_input:
         group.welcome_message = clean_input.get("welcomeMessage")
+    if 'requiredProfileFieldsMessage' in clean_input:
+        group.required_fields_message = clean_input.get("requiredProfileFieldsMessage", "")
 
     if 'isClosed' in clean_input:
         group.is_closed = clean_input.get("isClosed")
@@ -115,7 +118,24 @@ def resolve_edit_group(_, info, input):
             except (ProfileField.DoesNotExist, ValidationError):
                 raise GraphQLError(INVALID_PROFILE_FIELD_GUID)
         # disable other
-        group.profile_field_settings.exclude(profile_field__id__in=clean_input.get("showMemberProfileFieldGuids")).update(show_field=False)
+        group.profile_field_settings.exclude(
+            profile_field__id__in=clean_input.get("showMemberProfileFieldGuids")).update(show_field=False)
+
+    if 'requiredProfileFieldGuids' in clean_input:
+        for profile_field_id in clean_input.get("requiredProfileFieldGuids"):
+            try:
+                profile_field = ProfileField.objects.get(id=profile_field_id)
+                setting, created = GroupProfileFieldSetting.objects.get_or_create(
+                    profile_field=profile_field,
+                    group=group
+                )
+                setting.is_required = True
+                setting.save()
+            except (ProfileField.DoesNotExist, ValidationError):
+                raise GraphQLError(INVALID_PROFILE_FIELD_GUID)
+        # disable other
+        group.profile_field_settings.exclude(
+            profile_field__id__in=clean_input.get("requiredProfileFieldGuids")).update(is_required=False)
 
     group.save()
 

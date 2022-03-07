@@ -121,6 +121,8 @@ input addGroupInput {
   tags: [String]
   plugins: [Plugins]
   showMemberProfileFieldGuids: [String]
+  requiredProfileFieldsMessage: String
+  requiredProfileFieldGuids: [String]
 }
 
 type addGroupPayload {
@@ -568,6 +570,8 @@ input editGroupInput {
   tags: [String]
   plugins: [Plugins]
   showMemberProfileFieldGuids: [String]
+  requiredProfileFieldsMessage: String
+  requiredProfileFieldGuids: [String]
 }
 
 input editGroupNotificationsInput {
@@ -1009,6 +1013,9 @@ type Group implements Entity {
   widgets: [Widget]
   notificationMode: notificationModeOptions
   showMemberProfileFields: [ProfileItem]
+  requiredProfileFields: [ProfileItem]
+  requiredProfileFieldsMessage: String
+  memberMissingFieldGuids: [String]
 }
 
 """Show all groups or only mine"""

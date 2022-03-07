@@ -19,6 +19,7 @@ from .rich_fields import AttachmentMixin
 
 logger = logging.getLogger(__name__)
 
+
 class GroupManager(models.Manager):
     def visible(self, user):
         if not user.is_authenticated:
@@ -29,6 +30,7 @@ class GroupManager(models.Manager):
         hidden_groups_where_users_isnt_a_member.add(~Q(members__user=user), Q.AND)
 
         return self.get_queryset().exclude(hidden_groups_where_users_isnt_a_member)
+
 
 class Group(models.Model, AttachmentMixin):
     class Meta:
@@ -48,6 +50,7 @@ class Group(models.Model, AttachmentMixin):
     introduction = models.TextField(default='')
     is_introduction_public = models.BooleanField(default=False)
     welcome_message = models.TextField(default='')
+    required_fields_message = models.TextField(default='')
 
     icon = models.ForeignKey(
         'file.FileFolder',
@@ -86,7 +89,7 @@ class Group(models.Model, AttachmentMixin):
                       blank=True, default=list)
     plugins = ArrayField(models.CharField(
         max_length=256), blank=True, default=list)
-    
+
     def __str__(self):
         return f"Group[{self.name}]"
 
@@ -260,6 +263,7 @@ class GroupMembership(models.Model):
 
     created_at = models.DateTimeField(default=timezone.now)
 
+
 class GroupInvitation(models.Model):
     class Meta:
         unique_together = ('invited_user', 'group')
@@ -311,6 +315,7 @@ class GroupProfileFieldSetting(models.Model):
     group = models.ForeignKey('core.Group', related_name='profile_field_settings', on_delete=models.CASCADE)
     profile_field = models.ForeignKey('core.ProfileField', related_name='group_settings', on_delete=models.CASCADE)
     show_field = models.BooleanField(default=False)
+    is_required = models.BooleanField(default=False)
 
 
 @receiver([pre_save], sender=Group)

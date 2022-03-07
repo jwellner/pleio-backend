@@ -26,7 +26,6 @@ class EditGroupCase(FastTenantTestCase):
         cache.clear()
 
     def test_edit_group_anon(self):
-
         mutation = """
             mutation ($group: editGroupInput!) {
                 editGroup(input: $group) {
@@ -46,7 +45,7 @@ class EditGroupCase(FastTenantTestCase):
         request = HttpRequest()
         request.user = self.anonymousUser
 
-        result = graphql_sync(schema, { "query": mutation, "variables": variables }, context_value={ "request": request })
+        result = graphql_sync(schema, {"query": mutation, "variables": variables}, context_value={"request": request})
 
         errors = result[1]["errors"]
 
@@ -55,7 +54,6 @@ class EditGroupCase(FastTenantTestCase):
     @patch("core.lib.get_mimetype")
     @patch("{}.open".format(settings.DEFAULT_FILE_STORAGE))
     def test_edit_group(self, mock_open, mock_mimetype):
-
         file_mock = MagicMock(spec=File)
         file_mock.name = 'icon.png'
         file_mock.content_type = 'image/png'
@@ -109,7 +107,7 @@ class EditGroupCase(FastTenantTestCase):
         request = HttpRequest()
         request.user = self.user
 
-        result = graphql_sync(schema, { "query": mutation, "variables": variables }, context_value={ "request": request })
+        result = graphql_sync(schema, {"query": mutation, "variables": variables}, context_value={"request": request})
 
         data = result[1]["data"]
 
@@ -152,20 +150,23 @@ class EditGroupCase(FastTenantTestCase):
         request = HttpRequest()
         request.user = self.user
 
-        result = graphql_sync(schema, { "query": mutation, "variables": variables }, context_value={ "request": request })
+        result = graphql_sync(schema, {"query": mutation, "variables": variables}, context_value={"request": request})
 
         errors = result[1]["errors"]
 
         self.assertEqual(errors[0]["message"], "invalid_profile_field_guid")
 
-    def test_edit_group_member_fields(self):
-
+    def _build_profile_fields(self):
         profile_field1 = ProfileField.objects.create(key='text_key', name='text_name', field_type='text_field')
         profile_field2 = ProfileField.objects.create(key='text_key2', name='text_name2', field_type='text_field')
 
         cache.set("%s%s" % (connection.schema_name, 'PROFILE_SECTIONS'),
-            [{"name": "section_one", "profileFieldGuids": [profile_field1.guid, profile_field2.guid]}]
-        )
+                  [{"name": "section_one", "profileFieldGuids": [profile_field1.guid, profile_field2.guid]}]
+                  )
+        return [profile_field1, profile_field2]
+
+    def test_edit_group_member_fields(self):
+        profile_field1, profile_field2 = self._build_profile_fields()
 
         mutation = """
             mutation ($group: editGroupInput!) {
@@ -191,7 +192,7 @@ class EditGroupCase(FastTenantTestCase):
         request = HttpRequest()
         request.user = self.user
 
-        result = graphql_sync(schema, { "query": mutation, "variables": variables }, context_value={ "request": request })
+        result = graphql_sync(schema, {"query": mutation, "variables": variables}, context_value={"request": request})
 
         data = result[1]["data"]
 
@@ -210,7 +211,7 @@ class EditGroupCase(FastTenantTestCase):
         request = HttpRequest()
         request.user = self.user
 
-        result = graphql_sync(schema, { "query": mutation, "variables": variables }, context_value={ "request": request })
+        result = graphql_sync(schema, {"query": mutation, "variables": variables}, context_value={"request": request})
 
         data = result[1]["data"]
 
@@ -277,3 +278,75 @@ class EditGroupCase(FastTenantTestCase):
 
         # Expect is_hidden is not set to True like requested
         self.assertFalse(data["editGroup"]["group"]["isHidden"])
+
+    def test_edit_required_profile_fields(self):
+        profile_field1, profile_field2 = self._build_profile_fields()
+
+        mutation = """
+            mutation ($group: editGroupInput!) {
+                editGroup(input: $group) {
+                    group {
+                        guid
+                        requiredProfileFields {
+                            guid
+                            name
+                        }
+                    }
+                }
+            }
+        """
+
+        variables = {
+            "group": {
+                "guid": self.group.guid,
+                "requiredProfileFieldGuids": [profile_field1.guid]
+            }
+        }
+
+        request = HttpRequest()
+        request.user = self.user
+
+        success, result = graphql_sync(schema, {"query": mutation, "variables": variables},
+                                       context_value={"request": request})
+
+        self.assertTrue(success, msg=result)
+
+        from core.models.group import GroupProfileFieldSetting
+        required_fields = [obj.profile_field.guid for obj in
+                           GroupProfileFieldSetting.objects.filter(is_required=True, group=self.group)]
+        self.assertEqual(len(required_fields), 1,
+                         msg="We expected exactly one result as required GroupProfileFieldSetting")
+        self.assertEqual(required_fields, [profile_field1.guid],
+                         msg="We expected the first profile field as required GroupProfileFieldSetting")
+
+    def test_edit_required_profile_fields_help_message(self):
+        EXPECTED_MESSAGE = "I'd expect it to look like this"
+
+        mutation = """
+            mutation ($group: editGroupInput!) {
+                editGroup(input: $group) {
+                    group {
+                        guid
+                        requiredProfileFieldsMessage
+                    }
+                }
+            }
+        """
+
+        variables = {
+            "group": {
+                "guid": self.group.guid,
+                "requiredProfileFieldsMessage": EXPECTED_MESSAGE
+            }
+        }
+
+        request = HttpRequest()
+        request.user = self.user
+
+        success, result = graphql_sync(schema, {"query": mutation, "variables": variables},
+                                       context_value={"request": request})
+
+        self.assertTrue(success, msg=result)
+
+        self.group.refresh_from_db()
+        self.assertEqual(self.group.required_fields_message, EXPECTED_MESSAGE, msg="De inhoud van required_fields_message wordt niet goed geupdate.")
