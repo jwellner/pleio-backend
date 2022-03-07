@@ -2,7 +2,7 @@ from graphql import GraphQLError
 from django.core.exceptions import ObjectDoesNotExist, ValidationError
 from core.models import Group, ProfileField, GroupProfileFieldSetting
 from core.constances import NOT_LOGGED_IN, COULD_NOT_SAVE, COULD_NOT_FIND, USER_ROLES, INVALID_PROFILE_FIELD_GUID
-from core.lib import remove_none_from_dict, ACCESS_TYPE, tenant_schema
+from core.lib import clean_graphql_input, ACCESS_TYPE, tenant_schema
 from file.models import FileFolder
 from file.tasks import resize_featured
 
@@ -15,7 +15,7 @@ def resolve_edit_group(_, info, input):
 
     user = info.context["request"].user
 
-    clean_input = remove_none_from_dict(input)
+    clean_input = clean_graphql_input(input)
 
     if not user.is_authenticated:
         raise GraphQLError(NOT_LOGGED_IN)

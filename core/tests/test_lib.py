@@ -2,10 +2,10 @@ from unittest import mock
 
 from django_tenants.test.cases import FastTenantTestCase
 
-from core.lib import remove_none_from_dict
+from core.lib import clean_graphql_input
 
 
-class TestRemoveNoneFromDict(FastTenantTestCase):
+class TestCleanGraphQLInput(FastTenantTestCase):
     def test_none_values_are_removed_from_dict(self):
         d = {
             "key1": "value1",
@@ -22,7 +22,7 @@ class TestRemoveNoneFromDict(FastTenantTestCase):
             "key5": False,
         }
 
-        result = remove_none_from_dict(d)
+        result = clean_graphql_input(d)
         self.assertEqual(result, expected)
 
     def test_empty_time_published_is_not_removed_from_dict(self):
@@ -31,7 +31,7 @@ class TestRemoveNoneFromDict(FastTenantTestCase):
             "timePublished": None,
         }
 
-        result = remove_none_from_dict(d)
+        result = clean_graphql_input(d)
         self.assertEqual(result, d)
 
     @mock.patch("core.lib.Tiptap")
@@ -40,7 +40,7 @@ class TestRemoveNoneFromDict(FastTenantTestCase):
             "richDescription": "foo",
         }
 
-        remove_none_from_dict(d)
+        clean_graphql_input(d)
 
         mock_tiptap.assert_called_once_with("foo")
         mock_tiptap.return_value.check_for_external_urls.assert_called_once_with()
@@ -51,6 +51,6 @@ class TestRemoveNoneFromDict(FastTenantTestCase):
             "key:": "value"
         }
 
-        remove_none_from_dict(d)
+        clean_graphql_input(d)
 
         mock_tiptap.assert_not_called()

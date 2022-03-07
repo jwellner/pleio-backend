@@ -7,7 +7,7 @@ from core.constances import (
     COULD_NOT_SAVE, INVALID_VALUE, NOT_LOGGED_IN, REDIRECTS_HAS_DUPLICATE_SOURCE,
     REDIRECTS_HAS_LOOP, USER_NOT_SITE_ADMIN, USER_ROLES )
 from core.lib import (
-    remove_none_from_dict, access_id_to_acl, is_valid_domain, is_valid_url_or_path, get_language_options,
+    clean_graphql_input, access_id_to_acl, is_valid_domain, is_valid_url_or_path, get_language_options,
     tenant_schema, get_default_email_context )
 from core.resolvers.query_site import get_site_settings
 from core.tasks import send_mail_multi
@@ -84,7 +84,7 @@ def resolve_edit_site_setting(_, info, input):
     # pylint: disable=too-many-statements
 
     user = info.context["request"].user
-    clean_input = remove_none_from_dict(input)
+    clean_input = clean_graphql_input(input)
 
     if not user.is_authenticated:
         raise GraphQLError(NOT_LOGGED_IN)

@@ -106,7 +106,7 @@ def get_acl(user):
     return acl
 
 
-def remove_none_from_dict(values):
+def clean_graphql_input(values):
     """ Cleanup resolver input """
     # TODO: what are we going to do with values which kan be omitted or can be NULL
 

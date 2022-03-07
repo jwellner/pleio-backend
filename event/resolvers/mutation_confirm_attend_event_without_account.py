@@ -4,7 +4,7 @@ from django.core.validators import validate_email
 from django.core.exceptions import ValidationError
 from django.utils.translation import ugettext_lazy
 from core.constances import COULD_NOT_FIND, INVALID_EMAIL, EVENT_INVALID_STATE, EVENT_IS_FULL, COULD_NOT_SAVE, NOT_ATTENDING_PARENT_EVENT
-from core.lib import remove_none_from_dict, get_base_url, get_default_email_context
+from core.lib import clean_graphql_input, get_base_url, get_default_email_context
 from event.models import Event, EventAttendeeRequest, EventAttendee
 from event.lib import get_url
 from core.tasks import send_mail_multi
@@ -14,8 +14,8 @@ def resolve_confirm_attend_event_without_account(_, info, input):
     # pylint: disable=redefined-builtin
     # pylint: disable=unused-argument
     # pylint: disable=too-many-statements
-    
-    clean_input = remove_none_from_dict(input)
+
+    clean_input = clean_graphql_input(input)
 
     email = clean_input.get("email")
     delete = clean_input.get("delete")

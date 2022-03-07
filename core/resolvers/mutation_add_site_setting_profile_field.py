@@ -2,7 +2,7 @@ from graphql import GraphQLError
 from django.db import IntegrityError
 from core.models import ProfileField, ProfileFieldValidator
 from core.constances import NOT_LOGGED_IN, USER_NOT_SITE_ADMIN, USER_ROLES, COULD_NOT_FIND
-from core.lib import remove_none_from_dict, generate_code
+from core.lib import clean_graphql_input, generate_code
 from django.core.exceptions import ObjectDoesNotExist
 
 def create_profile_field():
@@ -20,7 +20,7 @@ def resolve_add_site_setting_profile_field(_, info, input):
     # pylint: disable=too-many-locals
 
     user = info.context["request"].user
-    clean_input = remove_none_from_dict(input)
+    clean_input = clean_graphql_input(input)
 
     if not user.is_authenticated:
         raise GraphQLError(NOT_LOGGED_IN)

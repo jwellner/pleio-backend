@@ -4,10 +4,10 @@ from ariadne import ObjectType
 from django.core.exceptions import ObjectDoesNotExist
 from graphql import GraphQLError
 from core.constances import (
-    NOT_LOGGED_IN, COULD_NOT_FIND, EVENT_IS_FULL, EVENT_INVALID_STATE, 
+    NOT_LOGGED_IN, COULD_NOT_FIND, EVENT_IS_FULL, EVENT_INVALID_STATE,
     COULD_NOT_FIND_GROUP, INVALID_DATE, COULD_NOT_SAVE, NOT_ATTENDING_PARENT_EVENT, USER_ROLES
 )
-from core.lib import get_access_id, remove_none_from_dict, access_id_to_acl, tenant_schema
+from core.lib import get_access_id, clean_graphql_input, access_id_to_acl, tenant_schema
 from core.models import Group
 from core.resolvers.shared import clean_abstract
 from core.utils.convert import tiptap_to_text
@@ -33,7 +33,7 @@ def resolve_attend_event(_, info, input):
     # pylint: disable=redefined-builtin
 
     user = info.context["request"].user
-    clean_input = remove_none_from_dict(input)
+    clean_input = clean_graphql_input(input)
 
     if not user.is_authenticated:
         raise GraphQLError(NOT_LOGGED_IN)
@@ -86,7 +86,7 @@ def resolve_add_event(_, info, input):
 
     user = info.context["request"].user
 
-    clean_input = remove_none_from_dict(input)
+    clean_input = clean_graphql_input(input)
 
     if not user.is_authenticated:
         raise GraphQLError(NOT_LOGGED_IN)
@@ -200,7 +200,7 @@ def resolve_edit_event(_, info, input):
 
     user = info.context["request"].user
 
-    clean_input = remove_none_from_dict(input)
+    clean_input = clean_graphql_input(input)
 
     if not info.context["request"].user.is_authenticated:
         raise GraphQLError(NOT_LOGGED_IN)
@@ -377,7 +377,7 @@ def resolve_copy_event(_, info, input):
 
     user = info.context["request"].user
 
-    clean_input = remove_none_from_dict(input)
+    clean_input = clean_graphql_input(input)
 
     if not user.is_authenticated:
         raise GraphQLError(NOT_LOGGED_IN)

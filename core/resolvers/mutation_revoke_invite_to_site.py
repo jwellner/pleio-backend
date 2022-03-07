@@ -3,7 +3,7 @@ from django.core.exceptions import ValidationError
 from django.core.validators import validate_email
 from core.models import SiteInvitation
 from core.constances import NOT_LOGGED_IN, INVALID_EMAIL, USER_NOT_SITE_ADMIN, USER_ROLES
-from core.lib import remove_none_from_dict
+from core.lib import clean_graphql_input
 
 def validate_email_addresses(email_addresses):
     if not email_addresses:
@@ -19,7 +19,7 @@ def resolve_revoke_invite_to_site(_, info, input):
     # pylint: disable=redefined-builtin
     # pylint: disable=too-many-branches
     user = info.context["request"].user
-    clean_input = remove_none_from_dict(input)
+    clean_input = clean_graphql_input(input)
 
     if not user.is_authenticated:
         raise GraphQLError(NOT_LOGGED_IN)

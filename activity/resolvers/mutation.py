@@ -2,7 +2,7 @@ from graphql import GraphQLError
 from django.core.exceptions import ObjectDoesNotExist
 from core import config
 from core.constances import NOT_LOGGED_IN, COULD_NOT_FIND, COULD_NOT_FIND_GROUP, COULD_NOT_SAVE, USER_ROLES
-from core.lib import remove_none_from_dict, access_id_to_acl
+from core.lib import clean_graphql_input, access_id_to_acl
 from core.utils.convert import tiptap_to_text
 from core.models import Group
 from user.models import User
@@ -21,7 +21,7 @@ def resolve_add_status_update(_, info, input):
 
     user = info.context["request"].user
 
-    clean_input = remove_none_from_dict(input)
+    clean_input = clean_graphql_input(input)
 
     if not user.is_authenticated:
         raise GraphQLError(NOT_LOGGED_IN)
@@ -81,7 +81,7 @@ def resolve_edit_status_update(_, info, input):
 
     user = info.context["request"].user
 
-    clean_input = remove_none_from_dict(input)
+    clean_input = clean_graphql_input(input)
 
     if not info.context["request"].user.is_authenticated:
         raise GraphQLError(NOT_LOGGED_IN)
