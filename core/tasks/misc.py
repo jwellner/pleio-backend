@@ -60,7 +60,8 @@ def import_users(self, schema_name, fields, csv_location, performing_user_guid):
         stats = {
             'created': 0,
             'updated': 0,
-            'error': 0
+            'error': 0,
+            'processed': 0,
         }
 
         logger.info("Start import on tenant %s by user", performing_user.email)
@@ -107,6 +108,11 @@ def import_users(self, schema_name, fields, csv_location, performing_user_guid):
                                     user_profile_field.read_access = access_id_to_acl(user, values['accessId'])
 
                                 user_profile_field.save()
+
+                    stats['processed'] += 1
+
+                    if stats['processed'] % 100 == 0:
+                        logger.info('Batch users imported: %s', stats)
 
             success = True
 
