@@ -8,6 +8,8 @@ from core.tasks import send_mail_multi
 from event.lib import get_url
 from user.models import User
 from django.core.exceptions import ObjectDoesNotExist
+from django.db.models.signals import post_save
+from django.dispatch import receiver
 from django.utils.text import slugify
 from django.utils import timezone
 
@@ -174,6 +176,21 @@ class EventAttendeeRequest(models.Model):
 
     def __str__(self):
         return f"EventAttendeeRequest[{self.name}]"
+
+#Subevents are dependent on the main event, so when an event is saved, its subevents are updated
+@receiver(post_save, sender=Event)
+def event_post_save(sender, instance, **kwargs):
+    # pylint: disable=unused-argument
+
+    if instance.has_children():
+        for child in instance.children.all():
+            child.is_archived = instance.is_archived
+            child.published = instance.published
+            child.read_access = instance.read_access
+            child.write_access = instance.write_access
+            child.owner = instance.owner
+            child.group = instance.group
+            child.save()
 
 
 auditlog.register(Event)

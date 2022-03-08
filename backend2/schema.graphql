@@ -358,6 +358,7 @@ input copyEntityInput {
   guid: String!
   ownerGuid: String!
   subtype: String!
+  copySubevents: Boolean
 }
 
 type copyEntityPayload {
