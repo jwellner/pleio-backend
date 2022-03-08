@@ -256,6 +256,38 @@ class EventsTestCase(FastTenantTestCase):
         self.assertTrue('errors' not in result, msg=result)
         self.assertEqual(result['data']['sendMessageToEvent']['messageCount'], 4)
 
+    @mock.patch('event.resolvers.mutation_messages.send_mail_multi.delay')
+    def test_event_mailer_should_give_event_name_and_subject_in_mail_subject(self, mocked_send_mail_multi):
+        from event.resolvers.mutation_messages import SendEventMessage
+
+        expected_subject = "expected_subject"
+
+        mailer = SendEventMessage()
+        mailer.populate(self.event, self.owner, "", expected_subject)
+
+        mailer.send(self.owner, copy=False)
+
+        self.assertEqual(mocked_send_mail_multi.call_args.kwargs['subject'], "Message from event {event}: {subject}".format(
+            event=self.event.title,
+            subject=expected_subject
+        ))
+
+    @mock.patch('event.resolvers.mutation_messages.send_mail_multi.delay')
+    def test_event_mailer_should_give_copy_in_the_subject_of_copies(self, mocked_send_mail_multi):
+        from event.resolvers.mutation_messages import SendEventMessage
+
+        expected_subject = "expected_subject"
+
+        mailer = SendEventMessage()
+        mailer.populate(self.event, self.owner, "", expected_subject)
+
+        mailer.send(self.owner, copy=True)
+
+        self.assertEqual(mocked_send_mail_multi.call_args.kwargs['subject'], "Copy: Message from event {event}: {subject}".format(
+            event=self.event.title,
+            subject=expected_subject
+        ))
+
 
 @contextmanager
 def suppress_stdout():

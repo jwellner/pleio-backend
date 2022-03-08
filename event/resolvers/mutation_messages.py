@@ -65,7 +65,7 @@ class SendEventMessage:
 
     def send(self, receiving_user, copy: bool):
         translation.activate(receiving_user.get_language())
-        if copy:
+        if not copy:
             subject = ugettext_lazy("Message from event {0}: {1}").format(self.event.title, self.subject)
         else:
             subject = ugettext_lazy("Copy: Message from event {0}: {1}").format(self.event.title, self.subject)
@@ -73,10 +73,10 @@ class SendEventMessage:
         self.messageCount = self.messageCount + 1
 
         send_mail_multi.delay(
-            self.schema_name,
-            subject,
-            'email/send_message_to_event.html',
-            self.context,
-            receiving_user.email,
+            schema_name=self.schema_name,
+            subject=subject,
+            html_template='email/send_message_to_event.html',
+            context=self.context,
+            email_address=receiving_user.email,
             language=receiving_user.get_language()
         )
