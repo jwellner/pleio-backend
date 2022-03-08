@@ -62,8 +62,15 @@ class Event(Entity, CommentMixin, BookmarkMixin, FollowMixin, NotificationMixin,
 
         # try delete attendee without account
         try:
-            self.attendees.get(email=email).delete()
+            attendee = self.attendees.get(email=email)
+            attendee.delete()
             deleted = True
+        except ObjectDoesNotExist:
+            pass
+
+        # try delete attendee without account request
+        try:
+            EventAttendeeRequest.objects.get(event=self, email=email).delete()
         except ObjectDoesNotExist:
             pass
 

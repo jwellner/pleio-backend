@@ -192,3 +192,38 @@ class AttendEventWithoutAccountTestCase(FastTenantTestCase):
         errors = result[1]["errors"]
 
         self.assertEqual(errors[0]["message"], "event_is_full")
+
+    @mock.patch('event.resolvers.mutation_attend_event_without_account.generate_code', return_value='6df8cdad5582833eeab4')
+    @mock.patch('event.resolvers.mutation_attend_event_without_account.send_mail_multi.delay')
+    def test_attend_event_without_account_no_name(self, mocked_send_mail_multi, mocked_generate_code):
+        mutation = """
+            mutation RequestAttendance($input: attendEventWithoutAccountInput!) {
+                attendEventWithoutAccount(input: $input) {
+                    entity {
+                        guid
+                        ... on Event {
+                            title
+                            __typename
+                        }
+                        __typename
+                    }
+                    __typename
+                }
+            }
+        """
+
+        variables = {
+            "input": {
+                "guid": self.event.guid,
+                "name": "",
+                "email": "pete@tenant.fast-test.com"
+            }
+        }
+
+        request = HttpRequest()
+        request.user = self.anonymousUser
+
+        result = graphql_sync(schema, { "query": mutation, "variables": variables }, context_value={ "request": request })
+        errors = result[1]["errors"]
+
+        self.assertEqual(errors[0]["message"], "invalid_name")
