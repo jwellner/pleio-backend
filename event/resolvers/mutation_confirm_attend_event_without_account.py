@@ -3,7 +3,7 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.core.validators import validate_email
 from django.core.exceptions import ValidationError
 from django.utils.translation import ugettext_lazy
-from core.constances import COULD_NOT_FIND, INVALID_EMAIL, EVENT_INVALID_STATE, EVENT_IS_FULL, COULD_NOT_SAVE
+from core.constances import COULD_NOT_FIND, INVALID_EMAIL, EVENT_INVALID_STATE, EVENT_IS_FULL, COULD_NOT_SAVE, NOT_ATTENDING_PARENT_EVENT
 from core.lib import remove_none_from_dict, get_base_url, get_default_email_context
 from event.models import Event, EventAttendeeRequest, EventAttendee
 from event.lib import get_url
@@ -13,6 +13,8 @@ from django_tenants.utils import parse_tenant_config_path
 def resolve_confirm_attend_event_without_account(_, info, input):
     # pylint: disable=redefined-builtin
     # pylint: disable=unused-argument
+    # pylint: disable=too-many-statements
+    
     clean_input = remove_none_from_dict(input)
 
     email = clean_input.get("email")
@@ -40,6 +42,13 @@ def resolve_confirm_attend_event_without_account(_, info, input):
 
     if not event.attend_event_without_account:
         raise GraphQLError(COULD_NOT_SAVE)
+
+    # check if is attending parent
+    if event.parent and (state =='accept'):
+        try:
+            EventAttendee.objects.get(email=attendee_request.email, event=event.parent, state='accept')
+        except ObjectDoesNotExist:
+            raise GraphQLError(NOT_ATTENDING_PARENT_EVENT)
 
     # delete attendee and attendee request
     if delete:

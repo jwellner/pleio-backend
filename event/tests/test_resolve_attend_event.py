@@ -186,3 +186,48 @@ class AttendEventTestCase(FastTenantTestCase):
         self.assertEqual(data["attendEvent"]["entity"]["guid"], self.eventPublic.guid)
         self.assertEqual(len(data["attendEvent"]["entity"]["attendees"]["edges"]), 2)
         self.assertEqual(EventAttendee.objects.filter(event=self.eventPublic, user=self.attendee3, state='accept').count(), 1)
+
+    def test_attend_event_accept(self):
+
+        subevent = Event.objects.create(
+            title="Test public event",
+            rich_description="JSON to string",
+            read_access=[ACCESS_TYPE.public],
+            write_access=[ACCESS_TYPE.user.format(self.attendee1.id)],
+            owner=self.attendee1,
+            max_attendees = 2,
+            parent=self.eventPublic
+        )
+
+        mutation = """
+            mutation AttendEvent($input: attendEventInput!) {
+                attendEvent(input: $input) {
+                    entity {
+                        guid
+                        attendees(state: "accept") {
+                            edges {
+                                name
+                            }
+                        }
+                        __typename
+                    }
+                    __typename
+                }
+            }
+        """
+
+        variables = {
+            "input": {
+                "guid": subevent.guid,
+                "state": 'accept'
+            }
+        }
+
+        request = HttpRequest()
+        request.user = self.attendee2
+
+        result = graphql_sync(schema, { "query": mutation, "variables": variables }, context_value={ "request": request })
+
+        errors = result[1]["errors"]
+
+        self.assertEqual(errors[0]["message"], "not_attending_parent_event")

@@ -52,6 +52,7 @@ USER_NOT_MEMBER_OF_GROUP = "user_not_member_of_group"
 USER_NOT_SITE_ADMIN = "user_not_site_admin"
 EVENT_IS_FULL = "event_is_full"
 EVENT_INVALID_STATE = "event_invalid_state"
+NOT_ATTENDING_PARENT_EVENT = "not_attending_parent_event"
 REDIRECTS_HAS_LOOP = "redirects_has_loop"
 REDIRECTS_HAS_DUPLICATE_SOURCE = "redirects_has_duplicate_source"
 OIDC_PROVIDER_OPTIONS = [

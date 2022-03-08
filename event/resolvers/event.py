@@ -1,8 +1,10 @@
 from ariadne import ObjectType
+from django.core.exceptions import ObjectDoesNotExist
 from core.resolvers import shared
 from django.db.models import Q, Case, When
-from core.lib import datetime_isoformat
 
+from core.lib import datetime_isoformat
+from event.models import EventAttendee
 
 def conditional_state_filter(state):
     if state:
@@ -101,6 +103,18 @@ def resolve_is_attending(obj, info):
         return attendee.state
 
     return None
+
+@event.field("isAttendingParent")
+def resolve_is_attending_parent(obj, info):
+    # pylint: disable=unused-argument
+    if obj.parent is None:
+        return True
+    try:
+        EventAttendee.objects.get(user=info.context["request"].user, event=obj.parent, state='accept')
+        return True
+    except ObjectDoesNotExist:
+        pass
+    return False
 
 @event.field("attendees")
 def resolve_attendees(obj, info, limit=20, offset=0, state=None):

@@ -863,6 +863,7 @@ type Event implements Entity {
   views: Int
   owner: User
   isAttending: String
+  isAttendingParent: Boolean
   attendees(offset: Int, limit: Int, state: String): AttendeesList
   comments: [Comment]
   commentCount: Int

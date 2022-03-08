@@ -3,6 +3,7 @@ from django_tenants.test.cases import FastTenantTestCase
 from core.models import Group, Comment
 from user.models import User
 from blog.models import Blog
+from event.models import Event
 from core.constances import ACCESS_TYPE
 from backend2.schema import schema
 from ariadne import graphql_sync
@@ -264,4 +265,40 @@ class ActivitiesTestCase(FastTenantTestCase):
 
         self.assertEqual(data["activities"]["edges"][0]["entity"]["guid"], self.blog1.guid)
 
+    def test_activities_no_subevents(self):
+        
+        event = Event.objects.create(
+            title="event",
+            owner=self.user1,
+            read_access=[ACCESS_TYPE.public],
+            write_access=[ACCESS_TYPE.user.format(self.user1.id)],
+            tags=["tag_one", "tag_two"]
+        )
+       
+        subevent = Event.objects.create(
+            title="subevent",
+            owner=self.user1,
+            read_access=[ACCESS_TYPE.public],
+            write_access=[ACCESS_TYPE.user.format(self.user1.id)],
+            tags=["tag_one", "tag_two"],
+            parent = event
+        )
 
+        variables = {
+            "limit": 20,
+            "offset": 0,
+            "subtypes": [],
+            "containerGuid": None,
+            "orderBy": "timeCreated"
+        }      
+        request = HttpRequest()
+        request.user = self.user2
+
+        
+        result = graphql_sync(schema, { "query": self.query, "variables": variables }, context_value={ "request": request })
+
+        self.assertTrue(result[0])
+
+        data = result[1]["data"]
+
+        self.assertEqual(data["activities"]["edges"][0]["entity"]["guid"], event.guid)
