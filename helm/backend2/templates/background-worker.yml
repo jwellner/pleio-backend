@@ -48,6 +48,9 @@ spec:
                 name: {{ include "backend2.name" . }}
             - secretRef:
                 name: {{ include "backend2.secretsName" . }}
+          env:
+            - name: DB_HOST_REPLICA
+              value: ""
       volumes:
         - name: tmp-zip-storage
           {{- if eq .Values.storage.type "hostpath"}}
