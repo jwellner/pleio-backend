@@ -326,24 +326,10 @@ def resolve_edit_event(_, info, input):
         "entity": entity
     }
 
-
-def resolve_copy_event(_, info, input):
+def copy_event(event_id, user):
     # pylint: disable=redefined-builtin
 
-    user = info.context["request"].user
-
-    clean_input = remove_none_from_dict(input)
-
-    if not user.is_authenticated:
-        raise GraphQLError(NOT_LOGGED_IN)
-
-    try:
-        entity = Event.objects.get(id=clean_input.get("guid"))
-    except ObjectDoesNotExist:
-        raise GraphQLError(COULD_NOT_FIND)
-
-    if not entity.can_write(user):
-        raise GraphQLError(COULD_NOT_SAVE)
+    entity = Event.objects.get(id=event_id)
 
     attachments = entity.attachments_in_text()
     for x in attachments:
@@ -372,6 +358,35 @@ def resolve_copy_event(_, info, input):
     entity.pk = None
     entity.id = None
     entity.save()
+
+    return entity
+
+
+def resolve_copy_event(_, info, input):
+    # pylint: disable=redefined-builtin
+
+    user = info.context["request"].user
+
+    clean_input = remove_none_from_dict(input)
+
+    if not user.is_authenticated:
+        raise GraphQLError(NOT_LOGGED_IN)
+
+    try:
+        event = Event.objects.get(id=clean_input.get("guid"))
+    except ObjectDoesNotExist:
+        raise GraphQLError(COULD_NOT_FIND)
+
+    if not event.can_write(user):
+        raise GraphQLError(COULD_NOT_SAVE)
+
+    entity = copy_event(clean_input.get("guid"), user)
+
+    if clean_input.get("copySubevents", True) and event.has_children():
+        for child in event.children.all():
+            new = copy_event(child.guid, user)
+            new.parent = entity
+            new.save()
 
     return {
         "entity": entity
