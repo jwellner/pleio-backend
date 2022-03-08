@@ -21,6 +21,7 @@ class EventTestCase(FastTenantTestCase):
         self.anonymousUser = AnonymousUser()
         self.authenticatedUser = mixer.blend(User, name="test_name2")
         self.user = mixer.blend(User)
+        self.user1 = mixer.blend(User)
         self.user2 = mixer.blend(User, name="test_name3")
 
         self.eventPublic = Event.objects.create(
@@ -34,6 +35,19 @@ class EventTestCase(FastTenantTestCase):
             external_link="https://www.pleio.nl",
             rsvp=True,
             max_attendees=None
+        )
+        self.subEventPublic = Event.objects.create(
+            title="Test public event",
+            rich_description="JSON to string",
+            read_access=[ACCESS_TYPE.public],
+            write_access=[ACCESS_TYPE.user.format(self.authenticatedUser.id)],
+            owner=self.authenticatedUser,
+            start_date=timezone.now(),
+            location="Utrecht",
+            external_link="https://www.pleio.nl",
+            rsvp=True,
+            max_attendees=None,
+            parent=self.eventPublic
         )
 
         self.eventPrivate = Event.objects.create(
@@ -105,6 +119,8 @@ class EventTestCase(FastTenantTestCase):
                 location
                 source
                 rsvp
+                isAttending
+                isAttendingParent
                 location
                 attendEventWithoutAccount
                 attendees {
@@ -257,3 +273,33 @@ class EventTestCase(FastTenantTestCase):
         data = result[1]["data"]
 
         self.assertEqual(data["entity"], None)
+
+    def test_subevent_attending_parent(self):
+        request = HttpRequest()
+        request.user = self.user1
+
+        variables = {
+            "guid": self.subEventPublic .guid
+        }
+
+        result = graphql_sync(schema, { "query": self.query , "variables": variables}, context_value={ "request": request })
+
+        self.assertTrue(result[0])
+
+        data = result[1]["data"]
+
+        self.assertEqual(data["entity"]["isAttendingParent"], False)
+
+        EventAttendee.objects.create(
+            event=self.eventPublic,
+            state='accept',
+            user=self.user1
+        )
+
+        result = graphql_sync(schema, { "query": self.query , "variables": variables}, context_value={ "request": request })
+
+        self.assertTrue(result[0])
+
+        data = result[1]["data"]
+
+        self.assertEqual(data["entity"]["isAttendingParent"], True)

@@ -17,7 +17,7 @@ def conditional_subtypes_filter(subtypes):
             elif object_type == 'blog':
                 q_objects.add(~Q(blog__isnull = True), Q.OR)
             elif object_type == 'event':
-                q_objects.add(~Q(event__isnull = True), Q.OR)
+                q_objects.add(~Q(event__isnull = True) & ~Q(event__parent__isnull = False), Q.OR)
             elif object_type == 'discussion':
                 q_objects.add(~Q(discussion__isnull = True), Q.OR)
             elif object_type == 'statusupdate':
@@ -34,7 +34,18 @@ def conditional_subtypes_filter(subtypes):
                 q_objects.add(~Q(filefolder__isnull = True), Q.OR)
             elif object_type == 'task':
                 q_objects.add(~Q(task__isnull = True), Q.OR)
-
+    else:
+        q_objects.add(~Q(news__isnull = True), Q.OR)
+        q_objects.add(~Q(blog__isnull = True), Q.OR)
+        q_objects.add(~Q(event__isnull = True) & ~Q(event__parent__isnull = False), Q.OR)
+        q_objects.add(~Q(discussion__isnull = True), Q.OR)
+        q_objects.add(~Q(statusupdate__isnull = True), Q.OR)
+        q_objects.add(~Q(question__isnull = True), Q.OR)
+        q_objects.add(~Q(poll__isnull = True), Q.OR)
+        q_objects.add(~Q(wiki__isnull = True), Q.OR)
+        q_objects.add(~Q(page__isnull = True), Q.OR)
+        q_objects.add(~Q(filefolder__isnull = True), Q.OR)
+        q_objects.add(~Q(task__isnull = True), Q.OR)
     return q_objects
 
 def conditional_group_filter(container_guid):

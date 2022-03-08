@@ -5,6 +5,7 @@ from core.models import Group
 from user.models import User
 from blog.models import Blog
 from cms.models import Page
+from event.models import Event
 from news.models import News
 from core.constances import ACCESS_TYPE
 from backend2.schema import schema
@@ -117,6 +118,7 @@ class EntitiesTestCase(FastTenantTestCase):
                         ...BlogListFragment
                         ...PageListFragment
                         ...NewsListFragment
+                        ...EventListFragment
                         __typename
                     }
                 }
@@ -129,6 +131,10 @@ class EntitiesTestCase(FastTenantTestCase):
             }
             fragment NewsListFragment on News {
                 title
+            }
+            fragment EventListFragment on Event {
+                title
+                guid
             }
         """
 
@@ -555,3 +561,36 @@ class EntitiesTestCase(FastTenantTestCase):
 
         data = result[1]["data"]
         self.assertIsNone(data["entity"])
+
+
+    def test_entities_no_subevents(self):
+        event = Event.objects.create(
+            title="Event1",
+            owner=self.authenticatedUser,
+            read_access=[ACCESS_TYPE.public],
+            write_access=[ACCESS_TYPE.user.format(self.authenticatedUser.id)]
+        )
+        subevent = Event.objects.create(
+            title="Subevent1",
+            owner=self.authenticatedUser,
+            read_access=[ACCESS_TYPE.public],
+            write_access=[ACCESS_TYPE.user.format(self.authenticatedUser.id)],
+            parent=event
+        )
+
+
+        request = HttpRequest()
+        request.user = self.authenticatedUser
+
+        variables = {
+            "containerGuid": None,
+            "orderBy": "timeCreated"
+        }
+
+        result = graphql_sync(schema, { "query": self.query, "variables": variables }, context_value={ "request": request })
+
+        self.assertTrue(result[0])
+
+        data = result[1]["data"]
+
+        self.assertEqual(data["entities"]["edges"][0]["guid"], event.guid)

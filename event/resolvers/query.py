@@ -35,7 +35,8 @@ def resolve_events(obj, info, filter=None, containerGuid=None, offset=0, limit=2
 
     qs = qs.filter(
         conditional_date_filter(filter) &
-        conditional_group_filter(containerGuid)
+        conditional_group_filter(containerGuid) &
+        ~Q(parent__isnull = False)
     )
 
     if filter == 'previous':

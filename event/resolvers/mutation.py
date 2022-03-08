@@ -3,7 +3,10 @@ from core.utils.tiptap_parser import Tiptap
 from ariadne import ObjectType
 from django.core.exceptions import ObjectDoesNotExist
 from graphql import GraphQLError
-from core.constances import NOT_LOGGED_IN, COULD_NOT_FIND, EVENT_IS_FULL, EVENT_INVALID_STATE, COULD_NOT_FIND_GROUP, INVALID_DATE, COULD_NOT_SAVE, USER_ROLES
+from core.constances import (
+    NOT_LOGGED_IN, COULD_NOT_FIND, EVENT_IS_FULL, EVENT_INVALID_STATE, 
+    COULD_NOT_FIND_GROUP, INVALID_DATE, COULD_NOT_SAVE, NOT_ATTENDING_PARENT_EVENT, USER_ROLES
+)
 from core.lib import get_access_id, remove_none_from_dict, access_id_to_acl, tenant_schema
 from core.models import Group
 from core.resolvers.shared import clean_abstract
@@ -39,6 +42,13 @@ def resolve_attend_event(_, info, input):
         event = Event.objects.visible(user).get(id=clean_input.get("guid"))
     except ObjectDoesNotExist:
         raise GraphQLError(COULD_NOT_FIND)
+
+    # check if is attending parent
+    if clean_input.get("state") == "accept" and event.parent:
+        try:
+            EventAttendee.objects.get(user=user, event=event.parent, state='accept')
+        except ObjectDoesNotExist:
+            raise GraphQLError(NOT_ATTENDING_PARENT_EVENT)
 
     try:
         attendee = event.attendees.get(user=user)

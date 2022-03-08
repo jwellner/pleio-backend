@@ -281,3 +281,39 @@ class EventsTestCase(FastTenantTestCase):
 
         data = result[1]["data"]
         self.assertEqual(data["events"]["total"], 1)
+
+
+    def test_events_no_subevent(self):
+
+        subevent = Event.objects.create(
+            title="Test sub event",
+            rich_description="JSON to string",
+            read_access=[ACCESS_TYPE.public],
+            write_access=[ACCESS_TYPE.user.format(self.user1.id)],
+            owner=self.user1,
+            start_date=timezone.now() + timezone.timedelta(days=1),
+            location="Utrecht",
+            external_link="https://www.pleio.nl",
+            rsvp=True,
+            max_attendees=None,
+            parent=self.eventFuture2
+        )
+
+        request = HttpRequest()
+        request.user = self.user2
+
+        variables = {
+            "limit": 20,
+            "offset": 0,
+            "containerGuid": "1",
+            "filter": "upcoming"
+        }
+
+        result = graphql_sync(schema, { "query": self.query , "variables": variables}, context_value={ "request": request })
+
+        self.assertTrue(result[0])
+
+        data = result[1]["data"]
+
+        self.assertEqual(data["events"]["total"], 3)
+        self.assertTrue(subevent.guid not in [d['guid'] for d in data["events"]["edges"]])
