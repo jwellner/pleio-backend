@@ -2,7 +2,7 @@ from graphql import GraphQLError
 from django.core.exceptions import ObjectDoesNotExist
 from core.constances import NOT_LOGGED_IN, COULD_NOT_FIND, COULD_NOT_SAVE, USER_ROLES, INVALID_VALUE
 from user.models import User
-from core.lib import remove_none_from_dict, get_language_options
+from core.lib import clean_graphql_input, get_language_options
 
 
 def resolve_edit_notifications(_, info, input):
@@ -10,7 +10,7 @@ def resolve_edit_notifications(_, info, input):
     # TODO: refactor to edit user settings
 
     user = info.context["request"].user
-    clean_input = remove_none_from_dict(input)
+    clean_input = clean_graphql_input(input)
 
     if not user.is_authenticated:
         raise GraphQLError(NOT_LOGGED_IN)

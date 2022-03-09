@@ -2,7 +2,7 @@ from graphql import GraphQLError
 from core import config
 from core.models import Group, ProfileField, GroupProfileFieldSetting
 from core.constances import NOT_LOGGED_IN, COULD_NOT_SAVE, USER_ROLES, INVALID_PROFILE_FIELD_GUID
-from core.lib import remove_none_from_dict, ACCESS_TYPE
+from core.lib import clean_graphql_input, ACCESS_TYPE
 from file.models import FileFolder
 from django.core.exceptions import ValidationError
 
@@ -19,7 +19,7 @@ def resolve_add_group(_, info, input):
     if config.LIMITED_GROUP_ADD and not user.has_role(USER_ROLES.ADMIN):
         raise GraphQLError(COULD_NOT_SAVE)
 
-    clean_input = remove_none_from_dict(input)
+    clean_input = clean_graphql_input(input)
 
     group = Group()
     group.owner = user

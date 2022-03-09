@@ -6,7 +6,7 @@ from graphql import GraphQLError
 from django.utils.translation import ugettext_lazy
 from core import config
 from core.constances import NOT_LOGGED_IN, USER_NOT_SITE_ADMIN, USER_ROLES, INVALID_KEY
-from core.lib import remove_none_from_dict, get_tmp_file_path, tenant_schema
+from core.lib import clean_graphql_input, get_tmp_file_path, tenant_schema
 from core.models import ProfileField
 from core.tasks import import_users
 
@@ -40,7 +40,7 @@ def resolve_import_users_step_1(_, info, input):
     # pylint: disable=redefined-builtin
     # pylint: disable=too-many-branches
     user = info.context["request"].user
-    clean_input = remove_none_from_dict(input)
+    clean_input = clean_graphql_input(input)
 
     if not user.is_authenticated:
         raise GraphQLError(NOT_LOGGED_IN)
@@ -78,7 +78,7 @@ def resolve_import_users_step_2(_, info, input):
     # pylint: disable=redefined-builtin
     # pylint: disable=too-many-branches
     user = info.context["request"].user
-    clean_input = remove_none_from_dict(input)
+    clean_input = clean_graphql_input(input)
 
     if not user.is_authenticated:
         raise GraphQLError(NOT_LOGGED_IN)

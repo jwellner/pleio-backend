@@ -1,5 +1,10 @@
+import json
+
+from django.core.exceptions import ValidationError
+
 from core.utils.tiptap_parser import Tiptap
 from django_tenants.test.cases import FastTenantTestCase
+
 
 class TiptapParserTestCase(FastTenantTestCase):
     def test_mentioned_users(self):
@@ -112,3 +117,28 @@ class TiptapParserTestCase(FastTenantTestCase):
 
         self.assertEqual(result['attrs']['src'], replacement)
 
+    def test_validate_rich_text_attachments_with_absolute_urls(self):
+        file_json = json.dumps({"content": [
+            {"type": "file", "attrs": {"url": "https://example.com"}}
+        ]})
+        image_json = json.dumps({"content": [
+            {"type": "image", "attrs": {"src": "https://example.com"}}
+        ]})
+
+        with self.assertRaises(ValidationError):
+            Tiptap(file_json).check_for_external_urls()
+
+        with self.assertRaises(ValidationError):
+            Tiptap(image_json).check_for_external_urls()
+
+    def test_validate_rich_text_attachments_with_relative_urls(self):
+        file_json = json.dumps({"content": [
+            {"type": "file", "attrs": {"url": "/foo/bar"}}
+        ]})
+        image_json = json.dumps({"content": [
+            {"type": "image", "attrs": {"src": "no/path/prefix"}}
+        ]})
+
+        # Expect no ValidationErrors being raised
+        Tiptap(file_json).check_for_external_urls()
+        Tiptap(image_json).check_for_external_urls()

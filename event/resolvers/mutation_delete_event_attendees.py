@@ -2,7 +2,7 @@ from graphql import GraphQLError
 from django.core.exceptions import ObjectDoesNotExist
 from django.utils.translation import ugettext_lazy
 from core.constances import COULD_NOT_FIND, NOT_LOGGED_IN, COULD_NOT_SAVE
-from core.lib import remove_none_from_dict, get_default_email_context
+from core.lib import clean_graphql_input, get_default_email_context
 from user.models import User
 from event.models import Event
 from event.lib import get_url
@@ -15,7 +15,7 @@ def resolve_delete_event_attendees(_, info, input):
 
     user = info.context["request"].user
 
-    clean_input = remove_none_from_dict(input)
+    clean_input = clean_graphql_input(input)
 
     if not info.context["request"].user.is_authenticated:
         raise GraphQLError(NOT_LOGGED_IN)

@@ -17,10 +17,7 @@ def resolve_group_widgets(obj, info):
     return obj.widgets.all()
 
 
-@group.field("richDescription")
-def resolve_group_rich_description(obj, info):
-    # pylint: disable=unused-argument
-    return obj.rich_description
+group.set_field("richDescription", shared.resolve_entity_rich_description)
 
 
 @group.field("description")

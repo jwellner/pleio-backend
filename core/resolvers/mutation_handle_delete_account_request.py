@@ -3,7 +3,7 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.utils import translation
 from django.utils.translation import ugettext_lazy
 from core.constances import NOT_LOGGED_IN, USER_NOT_SITE_ADMIN, USER_ROLES, INVALID_KEY
-from core.lib import remove_none_from_dict, tenant_schema, get_default_email_context
+from core.lib import clean_graphql_input, tenant_schema, get_default_email_context
 from core.tasks import send_mail_multi
 from user.models import User
 
@@ -18,7 +18,7 @@ def resolve_handle_delete_account_request(_, info, input):
     if not performing_user.has_role(USER_ROLES.ADMIN):
         raise GraphQLError(USER_NOT_SITE_ADMIN)
 
-    clean_input = remove_none_from_dict(input)
+    clean_input = clean_graphql_input(input)
 
     try:
         user_to_delete = User.objects.get(id=clean_input.get("guid"), is_delete_requested=True)

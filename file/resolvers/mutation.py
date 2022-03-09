@@ -3,7 +3,7 @@ from django.core.exceptions import ObjectDoesNotExist
 from ariadne import ObjectType
 from core import config
 from core.constances import ACCESS_TYPE, NOT_LOGGED_IN, COULD_NOT_FIND, COULD_NOT_SAVE, USER_ROLES
-from core.lib import remove_none_from_dict, access_id_to_acl
+from core.lib import clean_graphql_input, access_id_to_acl
 from core.models import Group
 from ..models import FileFolder, FILE_SCAN
 
@@ -30,7 +30,7 @@ def resolve_add_file(_, info, input):
 
     user = info.context["request"].user
 
-    clean_input = remove_none_from_dict(input)
+    clean_input = clean_graphql_input(input)
 
     if not user.is_authenticated:
         raise GraphQLError(NOT_LOGGED_IN)
@@ -94,7 +94,7 @@ def resolve_add_folder(_, info, input):
 
     user = info.context["request"].user
 
-    clean_input = remove_none_from_dict(input)
+    clean_input = clean_graphql_input(input)
 
     if not user.is_authenticated:
         raise GraphQLError(NOT_LOGGED_IN)
@@ -149,7 +149,7 @@ def resolve_edit_file_folder(_, info, input):
 
     user = info.context["request"].user
 
-    clean_input = remove_none_from_dict(input)
+    clean_input = clean_graphql_input(input)
 
     if not user.is_authenticated:
         raise GraphQLError(NOT_LOGGED_IN)
@@ -196,7 +196,7 @@ def resolve_move_file_folder(_, info, input):
 
     user = info.context["request"].user
 
-    clean_input = remove_none_from_dict(input)
+    clean_input = clean_graphql_input(input)
 
     if not user.is_authenticated:
         raise GraphQLError(NOT_LOGGED_IN)
@@ -252,7 +252,7 @@ def resolve_add_image(_, info, input):
 
     user = info.context["request"].user
 
-    clean_input = remove_none_from_dict(input)
+    clean_input = clean_graphql_input(input)
 
     if not user.is_authenticated:
         raise GraphQLError(NOT_LOGGED_IN)

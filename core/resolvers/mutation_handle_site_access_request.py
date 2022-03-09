@@ -3,7 +3,7 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.utils.translation import ugettext_lazy
 from core.models import SiteAccessRequest
 from core.constances import NOT_LOGGED_IN, USER_NOT_SITE_ADMIN, USER_ROLES
-from core.lib import remove_none_from_dict, tenant_schema, get_default_email_context
+from core.lib import clean_graphql_input, tenant_schema, get_default_email_context
 from core.tasks import send_mail_multi
 from core import config
 
@@ -18,7 +18,7 @@ def resolve_handle_site_access_request(_, info, input):
     if not user.has_role(USER_ROLES.ADMIN):
         raise GraphQLError(USER_NOT_SITE_ADMIN)
 
-    clean_input = remove_none_from_dict(input)
+    clean_input = clean_graphql_input(input)
 
     try:
         access_request = SiteAccessRequest.objects.get(email=clean_input.get("email"))

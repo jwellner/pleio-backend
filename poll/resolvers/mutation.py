@@ -1,7 +1,7 @@
 from graphql import GraphQLError
 from django.core.exceptions import ObjectDoesNotExist
 from core.constances import NOT_LOGGED_IN, COULD_NOT_SAVE, COULD_NOT_FIND, ALREADY_VOTED, INVALID_ANSWER
-from core.lib import remove_none_from_dict, access_id_to_acl
+from core.lib import clean_graphql_input, access_id_to_acl
 from ..models import Poll, PollChoice
 
 def resolve_add_poll(_, info, input):
@@ -9,7 +9,7 @@ def resolve_add_poll(_, info, input):
 
     user = info.context["request"].user
 
-    clean_input = remove_none_from_dict(input)
+    clean_input = clean_graphql_input(input)
 
     if not user.is_authenticated:
         raise GraphQLError(NOT_LOGGED_IN)
@@ -41,7 +41,7 @@ def resolve_edit_poll(_, info, input):
 
     user = info.context["request"].user
 
-    clean_input = remove_none_from_dict(input)
+    clean_input = clean_graphql_input(input)
 
     if not user.is_authenticated:
         raise GraphQLError(NOT_LOGGED_IN)
@@ -79,7 +79,7 @@ def resolve_vote_on_poll(_, info, input):
 
     user = info.context["request"].user
 
-    clean_input = remove_none_from_dict(input)
+    clean_input = clean_graphql_input(input)
 
     if not user.is_authenticated:
         raise GraphQLError(NOT_LOGGED_IN)

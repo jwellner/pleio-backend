@@ -1,6 +1,6 @@
 from graphql import GraphQLError
 from django.core.exceptions import ObjectDoesNotExist
-from core.lib import remove_none_from_dict
+from core.lib import clean_graphql_input
 from core.constances import NOT_LOGGED_IN, COULD_NOT_FIND, COULD_NOT_ADD
 from core.models import Comment, Entity, CommentMixin
 
@@ -9,7 +9,7 @@ def resolve_add_comment(_, info, input):
     # pylint: disable=redefined-builtin
     user = info.context["request"].user
 
-    clean_input = remove_none_from_dict(input)
+    clean_input = clean_graphql_input(input)
 
     if not user.is_authenticated:
         raise GraphQLError(NOT_LOGGED_IN)

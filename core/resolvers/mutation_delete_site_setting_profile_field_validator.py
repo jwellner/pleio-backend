@@ -1,7 +1,7 @@
 from graphql import GraphQLError
 from core.models import ProfileFieldValidator
 from core.constances import NOT_LOGGED_IN, USER_NOT_SITE_ADMIN, COULD_NOT_FIND, USER_ROLES
-from core.lib import remove_none_from_dict
+from core.lib import clean_graphql_input
 from django.core.exceptions import ObjectDoesNotExist
 
 
@@ -12,7 +12,7 @@ def resolve_delete_site_setting_profile_field_validator(_, info, input):
     # pylint: disable=too-many-locals
 
     user = info.context["request"].user
-    clean_input = remove_none_from_dict(input)
+    clean_input = clean_graphql_input(input)
 
     if not user.is_authenticated:
         raise GraphQLError(NOT_LOGGED_IN)

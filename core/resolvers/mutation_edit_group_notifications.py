@@ -2,7 +2,7 @@ from graphql import GraphQLError
 from django.core.exceptions import ObjectDoesNotExist
 from core.constances import NOT_LOGGED_IN, COULD_NOT_FIND, COULD_NOT_SAVE, USER_ROLES
 from core.models import Group
-from core.lib import remove_none_from_dict
+from core.lib import clean_graphql_input
 from user.models import User
 
 def resolve_edit_group_notifications(_, info, input):
@@ -11,7 +11,7 @@ def resolve_edit_group_notifications(_, info, input):
     # TODO: refactor this to user_settings mutation
 
     user = info.context["request"].user
-    clean_input = remove_none_from_dict(input)
+    clean_input = clean_graphql_input(input)
 
     if not user.is_authenticated:
         raise GraphQLError(NOT_LOGGED_IN)

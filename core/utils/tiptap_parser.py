@@ -1,7 +1,10 @@
 import json
 import logging
+from urllib.parse import urlparse
+from django.core.exceptions import ValidationError
 
 LOGGER = logging.getLogger(__name__)
+
 
 class Tiptap:
 
@@ -65,3 +68,17 @@ class Tiptap:
         for x in self.get_nodes('image'):
             if self.get_field(x, 'src') == original:
                 x['attrs']['src'] = replacement
+
+    def check_for_external_urls(self):
+        content = self.tiptap_json.get("content", [])
+
+        for item in content:
+            if item.get("type") == "file":
+                url = item.get("attrs", {}).get("url", "")
+            elif item.get("type") == "image":
+                url = item.get("attrs", {}).get("src", "")
+            else:
+                continue
+
+            if urlparse(url).netloc:
+                raise ValidationError(f"Not a relative URL: {url}")
