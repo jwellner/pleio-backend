@@ -9,6 +9,8 @@ class Client(TenantMixin):
     # database used for migration
     elgg_database = models.CharField(max_length=100, blank=True, null=True)
 
+    is_active = models.BooleanField(default=True)
+
     # default true, schema will be automatically created and synced when it is saved
     auto_create_schema = True
 

@@ -4,7 +4,14 @@ from django_tenants.utils import get_tenant_domain_model
 
 
 class ReadReplicaTenantMiddleware(TenantMainMiddleware):
+
+    def get_tenant(self, domain_model, hostname):
+        """Overwrites the default get_tenant to support disable active sites"""
+        domain = domain_model.objects.select_related('tenant').get(domain=hostname, tenant__is_active=True)
+        return domain.tenant
+
     def process_request(self, request):
+        """Overwrites the django-tenant process_request middleware to support setting tenants on multiple databases"""
         # Connection needs first to be at the public schema, as this is where
         # the tenant metadata is stored.
 
