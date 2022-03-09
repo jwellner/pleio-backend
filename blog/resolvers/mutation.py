@@ -1,7 +1,7 @@
 from graphql import GraphQLError
 from django.core.exceptions import ObjectDoesNotExist
 from blog.models import Blog
-from core.lib import remove_none_from_dict, access_id_to_acl, tenant_schema
+from core.lib import clean_graphql_input, access_id_to_acl, tenant_schema
 from core.constances import NOT_LOGGED_IN, COULD_NOT_FIND_GROUP, COULD_NOT_FIND, COULD_NOT_SAVE, USER_ROLES
 from core.resolvers.shared import clean_abstract
 from core.utils.convert import tiptap_to_text
@@ -17,7 +17,7 @@ def resolve_add_blog(_, info, input):
 
     user = info.context["request"].user
 
-    clean_input = remove_none_from_dict(input)
+    clean_input = clean_graphql_input(input)
 
     if not user.is_authenticated:
         raise GraphQLError(NOT_LOGGED_IN)
@@ -104,7 +104,7 @@ def resolve_edit_blog(_, info, input):
 
     user = info.context["request"].user
 
-    clean_input = remove_none_from_dict(input)
+    clean_input = clean_graphql_input(input)
 
     if not info.context["request"].user.is_authenticated:
         raise GraphQLError(NOT_LOGGED_IN)

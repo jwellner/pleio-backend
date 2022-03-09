@@ -3,13 +3,13 @@ from django.core.exceptions import ObjectDoesNotExist
 from core.models import Group, Subgroup
 from user.models import User
 from core.constances import NOT_LOGGED_IN, INVALID_VALUE, COULD_NOT_FIND, COULD_NOT_SAVE
-from core.lib import remove_none_from_dict
+from core.lib import clean_graphql_input
 
 def resolve_add_subgroup(_, info, input):
     # pylint: disable=redefined-builtin
     # TODO: alter graphql schema to make groupGuid and name required
     user = info.context["request"].user
-    clean_input = remove_none_from_dict(input)
+    clean_input = clean_graphql_input(input)
 
     if not user.is_authenticated:
         raise GraphQLError(NOT_LOGGED_IN)

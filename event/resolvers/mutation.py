@@ -3,8 +3,11 @@ from core.utils.tiptap_parser import Tiptap
 from ariadne import ObjectType
 from django.core.exceptions import ObjectDoesNotExist
 from graphql import GraphQLError
-from core.constances import NOT_LOGGED_IN, COULD_NOT_FIND, EVENT_IS_FULL, EVENT_INVALID_STATE, COULD_NOT_FIND_GROUP, INVALID_DATE, COULD_NOT_SAVE, USER_ROLES
-from core.lib import get_access_id, remove_none_from_dict, access_id_to_acl, tenant_schema
+from core.constances import (
+    NOT_LOGGED_IN, COULD_NOT_FIND, EVENT_IS_FULL, EVENT_INVALID_STATE,
+    COULD_NOT_FIND_GROUP, INVALID_DATE, COULD_NOT_SAVE, NOT_ATTENDING_PARENT_EVENT, USER_ROLES
+)
+from core.lib import get_access_id, clean_graphql_input, access_id_to_acl, tenant_schema
 from core.models import Group
 from core.resolvers.shared import clean_abstract
 from core.utils.convert import tiptap_to_text
@@ -30,7 +33,7 @@ def resolve_attend_event(_, info, input):
     # pylint: disable=redefined-builtin
 
     user = info.context["request"].user
-    clean_input = remove_none_from_dict(input)
+    clean_input = clean_graphql_input(input)
 
     if not user.is_authenticated:
         raise GraphQLError(NOT_LOGGED_IN)
@@ -39,6 +42,13 @@ def resolve_attend_event(_, info, input):
         event = Event.objects.visible(user).get(id=clean_input.get("guid"))
     except ObjectDoesNotExist:
         raise GraphQLError(COULD_NOT_FIND)
+
+    # check if is attending parent
+    if clean_input.get("state") == "accept" and event.parent:
+        try:
+            EventAttendee.objects.get(user=user, event=event.parent, state='accept')
+        except ObjectDoesNotExist:
+            raise GraphQLError(NOT_ATTENDING_PARENT_EVENT)
 
     try:
         attendee = event.attendees.get(user=user)
@@ -76,7 +86,7 @@ def resolve_add_event(_, info, input):
 
     user = info.context["request"].user
 
-    clean_input = remove_none_from_dict(input)
+    clean_input = clean_graphql_input(input)
 
     if not user.is_authenticated:
         raise GraphQLError(NOT_LOGGED_IN)
@@ -190,7 +200,7 @@ def resolve_edit_event(_, info, input):
 
     user = info.context["request"].user
 
-    clean_input = remove_none_from_dict(input)
+    clean_input = clean_graphql_input(input)
 
     if not info.context["request"].user.is_authenticated:
         raise GraphQLError(NOT_LOGGED_IN)
@@ -326,24 +336,10 @@ def resolve_edit_event(_, info, input):
         "entity": entity
     }
 
-
-def resolve_copy_event(_, info, input):
+def copy_event(event_id, user):
     # pylint: disable=redefined-builtin
 
-    user = info.context["request"].user
-
-    clean_input = remove_none_from_dict(input)
-
-    if not user.is_authenticated:
-        raise GraphQLError(NOT_LOGGED_IN)
-
-    try:
-        entity = Event.objects.get(id=clean_input.get("guid"))
-    except ObjectDoesNotExist:
-        raise GraphQLError(COULD_NOT_FIND)
-
-    if not entity.can_write(user):
-        raise GraphQLError(COULD_NOT_SAVE)
+    entity = Event.objects.get(id=event_id)
 
     attachments = entity.attachments_in_text()
     for x in attachments:
@@ -372,6 +368,35 @@ def resolve_copy_event(_, info, input):
     entity.pk = None
     entity.id = None
     entity.save()
+
+    return entity
+
+
+def resolve_copy_event(_, info, input):
+    # pylint: disable=redefined-builtin
+
+    user = info.context["request"].user
+
+    clean_input = clean_graphql_input(input)
+
+    if not user.is_authenticated:
+        raise GraphQLError(NOT_LOGGED_IN)
+
+    try:
+        event = Event.objects.get(id=clean_input.get("guid"))
+    except ObjectDoesNotExist:
+        raise GraphQLError(COULD_NOT_FIND)
+
+    if not event.can_write(user):
+        raise GraphQLError(COULD_NOT_SAVE)
+
+    entity = copy_event(clean_input.get("guid"), user)
+
+    if clean_input.get("copySubevents", True) and event.has_children():
+        for child in event.children.all():
+            new = copy_event(child.guid, user)
+            new.parent = entity
+            new.save()
 
     return {
         "entity": entity

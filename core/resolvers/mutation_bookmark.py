@@ -1,5 +1,5 @@
 from core.constances import NOT_LOGGED_IN, COULD_NOT_FIND
-from core.lib import remove_none_from_dict
+from core.lib import clean_graphql_input
 from core.models import Entity
 from graphql import GraphQLError
 from django.core.exceptions import ObjectDoesNotExist
@@ -10,7 +10,7 @@ def resolve_bookmark(_, info, input):
 
     user = info.context["request"].user
 
-    clean_input = remove_none_from_dict(input)
+    clean_input = clean_graphql_input(input)
 
     if not user.is_authenticated:
         raise GraphQLError(NOT_LOGGED_IN)

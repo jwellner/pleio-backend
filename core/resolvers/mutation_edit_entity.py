@@ -1,6 +1,6 @@
 from graphql import GraphQLError
 from django.core.exceptions import ObjectDoesNotExist
-from core.lib import remove_none_from_dict
+from core.lib import clean_graphql_input
 from core.constances import NOT_LOGGED_IN, INVALID_SUBTYPE
 from core.models import Entity
 from core.resolvers.mutation_edit_comment import resolve_edit_comment
@@ -16,7 +16,7 @@ from question.resolvers.mutation import resolve_edit_question
 def resolve_edit_entity(_, info, input):
     # pylint: disable=redefined-builtin
 
-    clean_input = remove_none_from_dict(input)
+    clean_input = clean_graphql_input(input)
 
     if not info.context["request"].user.is_authenticated:
         raise GraphQLError(NOT_LOGGED_IN)

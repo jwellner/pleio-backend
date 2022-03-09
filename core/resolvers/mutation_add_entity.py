@@ -1,5 +1,5 @@
 from graphql import GraphQLError
-from core.lib import remove_none_from_dict
+from core.lib import clean_graphql_input
 from core.constances import INVALID_SUBTYPE
 from core.resolvers.mutation_add_comment import resolve_add_comment
 from blog.resolvers.mutation import resolve_add_blog
@@ -15,7 +15,7 @@ from question.resolvers.mutation import resolve_add_question
 def resolve_add_entity(_, info, input):
     # pylint: disable=redefined-builtin
 
-    clean_input = remove_none_from_dict(input)
+    clean_input = clean_graphql_input(input)
 
     if clean_input.get("subtype") == "blog":
         return resolve_add_blog(_, info, input)

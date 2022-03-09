@@ -106,7 +106,7 @@ def get_sites_admin(self):
     return admins
 
 @shared_task(bind=True)
-def backup_site(self, backup_site_id):
+def backup_site(self, backup_site_id, skip_files=False, backup_folder=None):
     # pylint: disable=unused-argument
     # pylint: disable=too-many-locals
     '''
@@ -121,7 +121,10 @@ def backup_site(self, backup_site_id):
             raise Exception(e)
 
     now = timezone.now()
-    backup_folder = f"{now.strftime('%Y%m%d')}_{backup_site.schema_name}"
+
+    if not backup_folder:
+        backup_folder = f"{now.strftime('%Y%m%d')}_{backup_site.schema_name}"
+
     backup_base_path = os.path.join(settings.BACKUP_PATH, backup_folder)
 
     # remove folder if exists
@@ -166,8 +169,9 @@ def backup_site(self, backup_site_id):
         logger.info("Copy %s data to %s", table, file_path)
 
     # copy files
-    backup_files_folder = os.path.join(backup_base_path, "files")
-    shutil.copytree(os.path.join(settings.MEDIA_ROOT, backup_site.schema_name), backup_files_folder)
+    if not skip_files:
+        backup_files_folder = os.path.join(backup_base_path, "files")
+        shutil.copytree(os.path.join(settings.MEDIA_ROOT, backup_site.schema_name), backup_files_folder)
 
     return backup_folder
 

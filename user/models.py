@@ -220,6 +220,12 @@ class User(AbstractBaseUser):
     def url(self):
         return "/user/{}/profile".format(self.guid)
 
+    @property
+    def icon(self):
+        if self.profile.picture_file:
+            return self.profile.picture_file.thumbnail_url
+        return self.picture
+
     def search_read_access(self):
         return ['logged_in']
 

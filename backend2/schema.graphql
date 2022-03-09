@@ -121,6 +121,8 @@ input addGroupInput {
   tags: [String]
   plugins: [Plugins]
   showMemberProfileFieldGuids: [String]
+  requiredProfileFieldsMessage: String
+  requiredProfileFieldGuids: [String]
 }
 
 type addGroupPayload {
@@ -202,12 +204,20 @@ type addWidgetPayload {
   widget: Widget
 }
 
+type Attendee {
+  name: String
+  email: String!
+  state: String!
+  url: String
+  icon: String
+}
+
 type AttendeesList {
   total: Int!
   totalMaybe: Int!
   totalReject: Int!
   totalWaitinglist: Int!
-  edges: [User]
+  edges: [Attendee]
 }
 
 input attendEventInput {
@@ -348,6 +358,7 @@ input copyEntityInput {
   guid: String!
   ownerGuid: String!
   subtype: String!
+  copySubevents: Boolean
 }
 
 type copyEntityPayload {
@@ -568,6 +579,8 @@ input editGroupInput {
   tags: [String]
   plugins: [Plugins]
   showMemberProfileFieldGuids: [String]
+  requiredProfileFieldsMessage: String
+  requiredProfileFieldGuids: [String]
 }
 
 input editGroupNotificationsInput {
@@ -850,9 +863,8 @@ type Event implements Entity {
   views: Int
   owner: User
   isAttending: String
+  isAttendingParent: Boolean
   attendees(offset: Int, limit: Int, state: String): AttendeesList
-  attendeesWithoutAccount: Int
-  attendeesWithoutAccountEmailAddresses: [String]
   comments: [Comment]
   commentCount: Int
   isPinned: Boolean!
@@ -1009,6 +1021,9 @@ type Group implements Entity {
   widgets: [Widget]
   notificationMode: notificationModeOptions
   showMemberProfileFields: [ProfileItem]
+  requiredProfileFields: [ProfileItem]
+  requiredProfileFieldsMessage: String
+  memberMissingFieldGuids: [String]
 }
 
 """Show all groups or only mine"""

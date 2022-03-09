@@ -15,7 +15,7 @@ def conditional_subtypes_filter(subtypes):
             elif object_type == 'blog':
                 q_objects.add(~Q(blog__isnull = True), Q.OR)
             elif object_type == 'event':
-                q_objects.add(~Q(event__isnull = True), Q.OR)
+                q_objects.add(~Q(event__isnull = True) & ~Q(event__parent__isnull = False), Q.OR)
             elif object_type == 'discussion':
                 q_objects.add(~Q(discussion__isnull = True), Q.OR)
             elif object_type == 'statusupdate':
@@ -28,7 +28,7 @@ def conditional_subtypes_filter(subtypes):
         # activities should only search for these entities:
         q_objects.add(~Q(news__isnull = True), Q.OR)
         q_objects.add(~Q(blog__isnull = True), Q.OR)
-        q_objects.add(~Q(event__isnull = True), Q.OR)
+        q_objects.add(~Q(event__isnull = True) & ~Q(event__parent__isnull = False), Q.OR)
         q_objects.add(~Q(discussion__isnull = True), Q.OR)
         q_objects.add(~Q(statusupdate__isnull = True), Q.OR)
         q_objects.add(~Q(question__isnull = True), Q.OR)

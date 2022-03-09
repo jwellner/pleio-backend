@@ -6,14 +6,14 @@ from django.utils.translation import ugettext_lazy
 from core.models import Group, GroupMembership
 from user.models import User
 from core.constances import NOT_LOGGED_IN, COULD_NOT_FIND, COULD_NOT_SAVE, USER_NOT_MEMBER_OF_GROUP
-from core.lib import remove_none_from_dict, get_base_url, get_default_email_context
+from core.lib import clean_graphql_input, get_base_url, get_default_email_context
 from core.tasks import send_mail_multi
 from django_tenants.utils import parse_tenant_config_path
 
 def resolve_change_group_role(_, info, input):
     # pylint: disable=redefined-builtin
     user = info.context["request"].user
-    clean_input = remove_none_from_dict(input)
+    clean_input = clean_graphql_input(input)
 
     if not user.is_authenticated:
         raise GraphQLError(NOT_LOGGED_IN)

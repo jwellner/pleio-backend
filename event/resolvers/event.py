@@ -1,8 +1,10 @@
 from ariadne import ObjectType
+from django.core.exceptions import ObjectDoesNotExist
 from core.resolvers import shared
-from django.db.models import Q
-from core.lib import datetime_isoformat
+from django.db.models import Q, Case, When
 
+from core.lib import datetime_isoformat
+from event.models import EventAttendee
 
 def conditional_state_filter(state):
     if state:
@@ -102,6 +104,18 @@ def resolve_is_attending(obj, info):
 
     return None
 
+@event.field("isAttendingParent")
+def resolve_is_attending_parent(obj, info):
+    # pylint: disable=unused-argument
+    if obj.parent is None:
+        return True
+    try:
+        EventAttendee.objects.get(user=info.context["request"].user, event=obj.parent, state='accept')
+        return True
+    except ObjectDoesNotExist:
+        pass
+    return False
+
 @event.field("attendees")
 def resolve_attendees(obj, info, limit=20, offset=0, state=None):
     # pylint: disable=unused-argument
@@ -116,44 +130,44 @@ def resolve_attendees(obj, info, limit=20, offset=0, state=None):
             "edges": []
         }
 
-    # only return attending registered users
-    # TODO: create other type for edges to support external attendees?
-    qs = obj.attendees.exclude(user__isnull=True)
+    can_write = obj.can_write(user)
+    qs = obj.attendees.all()
     qs = qs.filter(conditional_state_filter(state))
     if state == 'waitinglist':
         qs = qs.order_by('updated_at')
+    else:
+        qs = qs.annotate(
+            names=Case(
+                When(user=None, then='name'),
+                default='user__name',
+        ),
+        ).order_by('names')
+
     qs = qs[offset:offset+limit]
 
-    users = [item.user for item in qs]
+    # email adresses only for user with event write permissions
+    def get_email(item, can_write):
+        if can_write:
+            return item.user.email if item.user else item.email
+        return ""
+
+    attendees = [
+        {
+        "email": get_email(item, can_write),
+        "name": item.user.name if item.user else item.name, 
+        "state": item.state,
+        "icon": item.user.icon if item.user else None, 
+        "url": item.user.url if item.user else None 
+        } 
+        for item in qs]
 
     return {
         "total": obj.attendees.filter(state="accept").count(),
         "totalMaybe": obj.attendees.filter(state="maybe").count(),
         "totalReject": obj.attendees.filter(state="reject").count(),
         "totalWaitinglist": obj.attendees.filter(state="waitinglist").count(),
-        "edges": users
+        "edges": attendees
     }
-
-@event.field("attendeesWithoutAccount")
-def resolve_attendees_without_account(obj, info):
-    # pylint: disable=unused-argument
-    user = info.context["request"].user
-    if not user.is_authenticated:
-        return 0
-
-    return obj.attendees.exclude(user__isnull=False).count()
-
-@event.field("attendeesWithoutAccountEmailAddresses")
-def resolve_attendees_without_account_email_addresses(obj, info):
-    # pylint: disable=unused-argument
-    user = info.context["request"].user
-    if not user.is_authenticated:
-        return []
-
-    if not obj.can_write(user):
-        return []
-
-    return obj.attendees.exclude(user__isnull=False).values_list("email", flat=True)
 
 
 event.set_field("guid", shared.resolve_entity_guid)

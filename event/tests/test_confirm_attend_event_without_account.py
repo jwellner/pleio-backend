@@ -40,7 +40,12 @@ class ConfirmAttendEventWithoutAccountTestCase(FastTenantTestCase):
                 confirmAttendEventWithoutAccount(input: $input) {
                     entity {
                         guid
-                        attendeesWithoutAccountEmailAddresses
+                        attendees {
+                            total
+                            edges {
+                                name
+                            }
+                        }
                         __typename
                     }
                     __typename
@@ -64,7 +69,7 @@ class ConfirmAttendEventWithoutAccountTestCase(FastTenantTestCase):
         data = result[1]["data"]
 
         self.assertEqual(data["confirmAttendEventWithoutAccount"]["entity"]["guid"], self.event.guid)
-        self.assertEqual(data["confirmAttendEventWithoutAccount"]["entity"]["attendeesWithoutAccountEmailAddresses"], [])
+        self.assertEqual(data["confirmAttendEventWithoutAccount"]["entity"]["attendees"]["edges"], [])
 
         mocked_send_mail_multi.assert_called_once()
 
@@ -110,8 +115,11 @@ class ConfirmAttendEventWithoutAccountTestCase(FastTenantTestCase):
                 confirmAttendEventWithoutAccount(input: $input) {
                     entity {
                         guid
-                        attendeesWithoutAccount
-                        attendeesWithoutAccountEmailAddresses
+                        attendees {
+                            edges {
+                                name
+                            }
+                        }
                         __typename
                     }
                     __typename
@@ -144,7 +152,7 @@ class ConfirmAttendEventWithoutAccountTestCase(FastTenantTestCase):
         data = result[1]["data"]
 
         self.assertEqual(data["confirmAttendEventWithoutAccount"]["entity"]["guid"], self.event.guid)
-        self.assertEqual(data["confirmAttendEventWithoutAccount"]["entity"]["attendeesWithoutAccountEmailAddresses"], [])
+        self.assertEqual(data["confirmAttendEventWithoutAccount"]["entity"]["attendees"]["edges"], [])
         self.assertEqual(self.event.attendees.exclude(user__isnull=False).count(), 0)
 
 
@@ -183,3 +191,43 @@ class ConfirmAttendEventWithoutAccountTestCase(FastTenantTestCase):
         result = graphql_sync(schema, { "query": mutation, "variables": variables }, context_value={ "request": request })
         
         self.assertEqual(self.event.attendees.filter(state='waitinglist').count(), 1)
+
+
+    @mock.patch('event.resolvers.mutation_confirm_attend_event_without_account.send_mail_multi.delay')
+    def test_confirm_attend_event_without_account_subevent_without_parent(self, mocked_send_mail_multi):
+        
+        subevent = mixer.blend(Event)
+        subevent.parent = self.event
+        subevent.attend_event_without_account = True
+        subevent.save()
+        EventAttendeeRequest.objects.create(code='1234567890', email='pete@tenant.fast-test.com', event=subevent)
+        
+        mutation = """
+            mutation confirmAttendEventWithoutAccount($input: confirmAttendEventWithoutAccountInput!) {
+                confirmAttendEventWithoutAccount(input: $input) {
+                    entity {
+                        guid
+                        __typename
+                    }
+                    __typename
+                }
+            }
+        """
+
+        variables = {
+            "input": {
+                "guid": subevent.guid,
+                "code": "1234567890",
+                "email": "pete@tenant.fast-test.com",
+                "state": "accept"
+            }
+        }
+
+        request = HttpRequest()
+        request.user = self.anonymousUser
+
+        result = graphql_sync(schema, { "query": mutation, "variables": variables }, context_value={ "request": request })
+
+        errors = result[1]["errors"]
+
+        self.assertEqual(errors[0]["message"], "not_attending_parent_event")
