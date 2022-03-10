@@ -21,12 +21,14 @@ from ..models import Event, EventAttendee
 from event.resolvers.mutation_attend_event_without_account import resolve_attend_event_without_account
 from event.resolvers.mutation_confirm_attend_event_without_account import resolve_confirm_attend_event_without_account
 from event.resolvers.mutation_delete_event_attendees import resolve_delete_event_attendees
+from event.resolvers.mutation_messages import resolve_send_message_to_event
 
 mutation = ObjectType("Mutation")
 
 mutation.set_field("attendEventWithoutAccount", resolve_attend_event_without_account)
 mutation.set_field("confirmAttendEventWithoutAccount", resolve_confirm_attend_event_without_account)
 mutation.set_field("deleteEventAttendees", resolve_delete_event_attendees)
+mutation.set_field("sendMessageToEvent", resolve_send_message_to_event)
 
 @mutation.field("attendEvent")
 def resolve_attend_event(_, info, input):
