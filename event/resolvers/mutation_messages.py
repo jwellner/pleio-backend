@@ -5,7 +5,7 @@ from django_tenants.utils import parse_tenant_config_path
 from graphql import GraphQLError
 
 from core.constances import COULD_NOT_FIND, NOT_AUTHORIZED
-from core.lib import remove_none_from_dict, get_default_email_context
+from core.lib import clean_graphql_input, get_default_email_context
 from core.tasks import send_mail_multi
 from event.models import Event, EventAttendee
 
@@ -19,7 +19,7 @@ def resolve_send_message_to_event(_, info, input):
         if not event.can_write(user):
             raise GraphQLError(NOT_AUTHORIZED)
 
-        clean_input = remove_none_from_dict(input)
+        clean_input = clean_graphql_input(input)
 
         receiving_users = []
         if clean_input.get('isTest'):
