@@ -21,10 +21,10 @@ class AddBlogTestCase(FastTenantTestCase):
             Q('simple_query_string', query='Jan', fields=['owner.name'])
             )
         response = s.execute()
+
         for hit in response:
-            print(
-                "Blog title : {}, owner: {}".format(hit.title, hit.owner)
-            )
+            self.assertEqual(hit.title, self.data.title)
+            self.assertEqual(hit.owner.name, self.authenticatedUser.name)
 
         self.assertTrue(response)
 
