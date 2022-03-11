@@ -1,4 +1,6 @@
 import os
+from unittest import mock
+
 from django.conf import settings
 from django.core.files.base import ContentFile
 from django_tenants.test.cases import FastTenantTestCase
@@ -12,6 +14,7 @@ class RemoveFloatingFilesTestCase(FastTenantTestCase):
 
     def setUp(self):
         self.command = Command()
+        self.command.stdout = mock.Mock()
         self.fake_tenant = 'no-tenant'
         os.makedirs(os.path.join(settings.MEDIA_ROOT, self.fake_tenant),  exist_ok=True)
 
