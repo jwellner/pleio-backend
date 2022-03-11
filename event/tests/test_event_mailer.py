@@ -1,4 +1,3 @@
-from contextlib import contextmanager
 from unittest import mock
 
 from ariadne import graphql_sync
@@ -9,6 +8,7 @@ from mixer.backend.django import mixer
 from backend2.schema import schema
 from core.constances import ACCESS_TYPE
 from core.models import Group
+from core.utils.test import suppress_stdout
 from event.models import Event, EventAttendee
 from user.models import User
 
@@ -287,13 +287,3 @@ class EventsTestCase(FastTenantTestCase):
             event=self.event.title,
             subject=expected_subject
         ))
-
-
-@contextmanager
-def suppress_stdout():
-    from contextlib import redirect_stderr, redirect_stdout
-    from os import devnull
-
-    with open(devnull, 'w') as fnull:
-        with redirect_stderr(fnull) as err, redirect_stdout(fnull) as out:
-            yield (err, out)
