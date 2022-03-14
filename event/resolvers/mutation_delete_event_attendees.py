@@ -33,6 +33,12 @@ def resolve_delete_event_attendees(_, info, input):
 
     for email_address in clean_input.get("emailAddresses"):
         if event.delete_attendee(user, email_address):
+
+            #Delete atttendee from subevents as well
+            if event.has_children():
+                for child in event.children.all():
+                    child.delete_attendee(user, email_address)
+
             schema_name = parse_tenant_config_path("")
             context = get_default_email_context()
             context['link'] = link

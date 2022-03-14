@@ -8,7 +8,7 @@ from core.tasks import send_mail_multi
 from event.lib import get_url
 from user.models import User
 from django.core.exceptions import ObjectDoesNotExist
-from django.db.models.signals import post_save
+from django.db.models.signals import pre_save, post_save
 from django.dispatch import receiver
 from django.utils.text import slugify
 from django.utils import timezone
@@ -191,6 +191,19 @@ def event_post_save(sender, instance, **kwargs):
             child.owner = instance.owner
             child.group = instance.group
             child.save()
+
+#When a subevent is edited and saved, the fields dependent on the parent are updated accordingly
+@receiver(pre_save, sender=Event)
+def event_pre_save(sender, instance, **kwargs):
+    # pylint: disable=unused-argument
+    
+    if instance.parent:
+        instance.is_archived = instance.parent.is_archived
+        instance.published = instance.parent.published
+        instance.read_access = instance.parent.read_access
+        instance.write_access = instance.parent.write_access
+        instance.owner = instance.parent.owner
+        instance.group = instance.parent.group
 
 
 auditlog.register(Event)
