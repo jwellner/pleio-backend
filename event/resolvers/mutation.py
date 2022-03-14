@@ -71,6 +71,17 @@ def resolve_attend_event(_, info, input):
 
     attendee.state = clean_input.get("state")
 
+    #When an attendee leaves/maybes the main event, also automatically leave the subevents
+    if (attendee.state == "reject" or attendee.state == 'maybe') and event.has_children():
+        for child in event.children.all():
+            try:
+                sub_attendee = child.attendees.get(user=user)
+            except ObjectDoesNotExist:
+                continue
+            
+            sub_attendee.state = attendee.state
+            sub_attendee.save()
+
     attendee.save()
 
     if clean_input.get("state") != "accept":
