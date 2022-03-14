@@ -117,8 +117,9 @@ def resolve_is_attending_parent(obj, info):
     return False
 
 @event.field("attendees")
-def resolve_attendees(obj, info, limit=20, offset=0, state=None):
+def resolve_attendees(obj, info, query=None, limit=20, offset=0, state=None):
     # pylint: disable=unused-argument
+    # pylint: disable=too-many-arguments
 
     user = info.context["request"].user
     if not user.is_authenticated:
@@ -132,6 +133,14 @@ def resolve_attendees(obj, info, limit=20, offset=0, state=None):
 
     can_write = obj.can_write(user)
     qs = obj.attendees.all()
+
+    if query:
+        qs = qs.filter(
+            Q(name__icontains=query) |
+            Q(email__icontains=query) |
+            Q(id__iexact=query)
+        )
+
     qs = qs.filter(conditional_state_filter(state))
     if state == 'waitinglist':
         qs = qs.order_by('updated_at')

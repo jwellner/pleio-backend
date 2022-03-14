@@ -864,7 +864,7 @@ type Event implements Entity {
   owner: User
   isAttending: String
   isAttendingParent: Boolean
-  attendees(offset: Int, limit: Int, state: String): AttendeesList
+  attendees(query: String, offset: Int, limit: Int, state: String): AttendeesList
   comments: [Comment]
   commentCount: Int
   isPinned: Boolean!
