@@ -529,7 +529,6 @@ def comment_confirm(request, entity_id):
     if comment_request:
         Comment.objects.create(
             container=entity,
-            description=comment_request.description,
             rich_description=comment_request.rich_description,
             email=comment_request.email,
             name=comment_request.name

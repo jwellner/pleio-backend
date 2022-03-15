@@ -9,8 +9,6 @@ class Discussion(Entity, VoteMixin, BookmarkMixin, FollowMixin, CommentMixin, Me
         ordering = ['-published']
 
     title = models.CharField(max_length=256)
-    description = models.TextField(default="")
-    rich_description = models.TextField(null=True, blank=True)
 
     def __str__(self):
         return f"Discussion[{self.title}]"

@@ -9,7 +9,6 @@ class Poll(Entity):
         ordering = ['-id']
 
     title = models.CharField(max_length=256)
-    description = models.TextField(default="")
 
     def __str__(self):
         return f"Poll[{self.title}]"

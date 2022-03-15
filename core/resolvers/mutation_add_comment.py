@@ -35,7 +35,6 @@ def resolve_add_comment(_, info, input):
     comment = Comment.objects.create(
         container=container,
         owner=user,
-        description=clean_input.get("description", ""),
         rich_description=clean_input.get("richDescription")
     )
 

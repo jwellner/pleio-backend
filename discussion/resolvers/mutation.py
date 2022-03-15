@@ -4,7 +4,6 @@ from core.lib import clean_graphql_input, access_id_to_acl, tenant_schema
 from core.constances import NOT_LOGGED_IN, COULD_NOT_SAVE, COULD_NOT_FIND, COULD_NOT_FIND_GROUP, USER_ROLES
 from core.models import Group
 from core.resolvers.shared import clean_abstract
-from core.utils.convert import tiptap_to_text
 from file.models import FileFolder
 from file.tasks import resize_featured
 from user.models import User
@@ -44,7 +43,7 @@ def resolve_add_discussion(_, info, input):
 
     entity.title = clean_input.get("title")
     entity.rich_description = clean_input.get("richDescription")
-    entity.description = tiptap_to_text(entity.rich_description)
+
     if 'abstract' in clean_input:
         abstract = clean_input.get("abstract")
         clean_abstract(abstract)
@@ -116,7 +115,6 @@ def resolve_edit_discussion(_, info, input):
         entity.title = clean_input.get("title")
     if 'richDescription' in clean_input:
         entity.rich_description = clean_input.get("richDescription")
-        entity.description = tiptap_to_text(entity.rich_description)
     if 'abstract' in clean_input:
         abstract = clean_input.get("abstract")
         clean_abstract(abstract)

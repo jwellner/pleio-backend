@@ -3,7 +3,6 @@ from django.core.exceptions import ObjectDoesNotExist
 from core import config
 from core.constances import NOT_LOGGED_IN, COULD_NOT_FIND, COULD_NOT_FIND_GROUP, COULD_NOT_SAVE, USER_ROLES
 from core.lib import clean_graphql_input, access_id_to_acl
-from core.utils.convert import tiptap_to_text
 from core.models import Group
 from user.models import User
 from ..models import StatusUpdate
@@ -60,7 +59,6 @@ def resolve_add_status_update(_, info, input):
     entity.title = clean_input.get("title", "")
 
     entity.rich_description = clean_input.get("richDescription", "")
-    entity.description = tiptap_to_text(entity.rich_description)
 
     if 'timePublished' in clean_input:
         entity.published = clean_input.get("timePublished", None)
@@ -99,7 +97,6 @@ def resolve_edit_status_update(_, info, input):
 
     if 'richDescription' in clean_input:
         entity.rich_description = clean_input.get("richDescription")
-        entity.description = tiptap_to_text(entity.rich_description)
 
     if 'tags' in clean_input:
         entity.tags = clean_input.get("tags")
