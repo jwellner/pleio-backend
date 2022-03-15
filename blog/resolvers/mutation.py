@@ -4,7 +4,6 @@ from blog.models import Blog
 from core.lib import clean_graphql_input, access_id_to_acl, tenant_schema
 from core.constances import NOT_LOGGED_IN, COULD_NOT_FIND_GROUP, COULD_NOT_FIND, COULD_NOT_SAVE, USER_ROLES
 from core.resolvers.shared import clean_abstract
-from core.utils.convert import tiptap_to_text
 from core.models import Group
 from file.models import FileFolder
 from file.tasks import resize_featured
@@ -47,7 +46,7 @@ def resolve_add_blog(_, info, input):
 
     entity.title = clean_input.get("title")
     entity.rich_description = clean_input.get("richDescription")
-    entity.description = tiptap_to_text(entity.rich_description)
+
     if 'abstract' in clean_input:
         abstract = clean_input.get("abstract")
         clean_abstract(abstract)
@@ -131,7 +130,6 @@ def resolve_edit_blog(_, info, input):
 
     if 'richDescription' in clean_input:
         entity.rich_description = clean_input.get("richDescription")
-        entity.description = tiptap_to_text(entity.rich_description)
 
     if 'abstract' in clean_input:
         abstract = clean_input.get("abstract")

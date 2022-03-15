@@ -10,7 +10,6 @@ from core.constances import (
 from core.lib import get_access_id, clean_graphql_input, access_id_to_acl, tenant_schema
 from core.models import Group
 from core.resolvers.shared import clean_abstract
-from core.utils.convert import tiptap_to_text
 from file.models import FileFolder
 from file.tasks import resize_featured
 from user.models import User
@@ -137,7 +136,7 @@ def resolve_add_event(_, info, input):
 
     entity.title = clean_input.get("title")
     entity.rich_description = clean_input.get("richDescription")
-    entity.description = tiptap_to_text(entity.rich_description)
+
     if 'abstract' in clean_input:
         abstract = clean_input.get("abstract")
         clean_abstract(abstract)
@@ -231,7 +230,6 @@ def resolve_edit_event(_, info, input):
 
     if 'richDescription' in clean_input:
         entity.rich_description = clean_input.get("richDescription")
-        entity.description = tiptap_to_text(entity.rich_description)
 
     if 'abstract' in clean_input:
         abstract = clean_input.get("abstract")

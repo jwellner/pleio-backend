@@ -18,8 +18,6 @@ class Event(Entity, CommentMixin, BookmarkMixin, FollowMixin, NotificationMixin,
         ordering = ['-published']
 
     title = models.CharField(max_length=256)
-    description = models.TextField(default="")
-    rich_description = models.TextField(null=True, blank=True)
 
     parent = models.ForeignKey('self', blank=True, null=True, related_name='children', on_delete=models.CASCADE)
 

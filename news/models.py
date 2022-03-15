@@ -14,9 +14,6 @@ class News(Entity, VoteMixin, BookmarkMixin, FollowMixin, CommentMixin, Featured
         ordering = ['-published']
 
     title = models.CharField(max_length=256)
-    description = models.TextField(default="")
-    rich_description = models.TextField(null=True, blank=True)
-
     source = models.TextField(default="")
 
     def __str__(self):

@@ -3,6 +3,7 @@ from django.db import models
 from django.utils.text import slugify
 from django.utils.translation import ugettext_lazy
 from core.models import Entity, VoteMixin, CommentMixin, BookmarkMixin, FollowMixin, NotificationMixin, AttachmentMixin
+from core.utils.convert import tiptap_to_text
 
 class StatusUpdate(Entity, VoteMixin, CommentMixin, BookmarkMixin, FollowMixin, NotificationMixin, AttachmentMixin):
     class Meta:
@@ -10,7 +11,6 @@ class StatusUpdate(Entity, VoteMixin, CommentMixin, BookmarkMixin, FollowMixin, 
         verbose_name = ugettext_lazy("status update")
 
     title = models.CharField(max_length=256, blank=True)
-    description = models.TextField(default="")
     rich_description = models.TextField(null=True, blank=True)
 
     def __str__(self):
@@ -36,6 +36,10 @@ class StatusUpdate(Entity, VoteMixin, CommentMixin, BookmarkMixin, FollowMixin, 
     @property
     def rich_fields(self):
         return [self.rich_description]
+
+    @property
+    def description(self):
+        return tiptap_to_text(self.rich_description)
 
 
 auditlog.register(StatusUpdate)
