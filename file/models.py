@@ -172,16 +172,16 @@ def prepare_read_access_weight(instance):
         #4: Ingelogd
         #5: Publiek
     """
-    if _loop_file_read_access(instance, lambda x: x == 'logged_in'):
-        return 4
     if _loop_file_read_access(instance, lambda x: x == 'public'):
         return 5
-    if _loop_file_read_access(instance, lambda x: x[:5] == 'user:'):
-        return 1
+    if _loop_file_read_access(instance, lambda x: x == 'logged_in'):
+        return 4
     if _loop_file_read_access(instance, lambda x: x[:6] == 'group:'):
         return 3
     if _loop_file_read_access(instance, lambda x: x[:9] == 'subgroup:'):
         return 2
+    if _loop_file_read_access(instance, lambda x: x[:5] == 'user:'):
+        return 1
     return 6
 
 
