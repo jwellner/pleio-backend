@@ -45,7 +45,6 @@ def resolve_add_comment_without_account(_, info, input):
         email=email,
         name=name,
         container=entity,
-        description=input.get("description", ""),
         rich_description=input.get("richDescription")
     )
 

@@ -864,7 +864,7 @@ type Event implements Entity {
   owner: User
   isAttending: String
   isAttendingParent: Boolean
-  attendees(offset: Int, limit: Int, state: String): AttendeesList
+  attendees(query: String, offset: Int, limit: Int, state: String): AttendeesList
   comments: [Comment]
   commentCount: Int
   isPinned: Boolean!
@@ -1243,11 +1243,13 @@ type Mutation {
   """Change the role of a user in a group."""
   changeGroupRole(input: changeGroupRoleInput!): changeGroupRolePayload
   editTask(input: editTaskInput!): editTaskPayload
+
   """Attend an event with state accept, waitinglist, maybe or reject """
   attendEvent(input: attendEventInput!): attendEventPayload
   attendEventWithoutAccount(input: attendEventWithoutAccountInput!): attendEventWithoutAccountPayload
   confirmAttendEventWithoutAccount(input: confirmAttendEventWithoutAccountInput!): confirmAttendEventWithoutAccountPayload
   deleteEventAttendees(input: deleteEventAttendeesInput!): deleteEventAttendeesPayload
+
   markAsRead(input: markAsReadInput!): markAsReadPayload
   markAllAsRead(input: markAllAsReadInput!): markAllAsReadPayload
   toggleBestAnswer(input: toggleBestAnswerInput!): toggleBestAnswerPayload
@@ -1257,6 +1259,9 @@ type Mutation {
   voteOnPoll(input: voteOnPollInput!): voteOnPollPayload
   addPoll(input: addPollInput!): addPollPayload
   editPoll(input: editPollInput!): editPollPayload
+
+  """Send message to members of an event"""
+  sendMessageToEvent(input: sendMessageToEventInput!): sendMessageToEventPayload
 
   """Send a message to a user."""
   sendMessageToUser(input: sendMessageToUserInput!): sendMessageToUserPayload
@@ -1652,6 +1657,23 @@ input sendMessageToUserInput {
 
 type sendMessageToUserPayload {
   success: Boolean
+}
+
+input sendMessageToEventInput {
+  """The guid of the event"""
+  guid: String!
+
+  subject: String!
+  message: String!
+
+  isTest: Boolean
+  sendToAttendees: Boolean
+  sendCopyToSender: Boolean
+}
+
+type sendMessageToEventPayload {
+  success: Boolean!
+  messageCount: Int!
 }
 
 """The current site"""

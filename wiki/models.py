@@ -13,9 +13,6 @@ class Wiki(Entity, FeaturedCoverMixin, BookmarkMixin, ArticleMixin, MentionMixin
 
     position = models.IntegerField(null=False, default=0)
     title = models.CharField(max_length=256)
-    description = models.TextField(default="")
-    rich_description = models.TextField(null=True, blank=True)
-
     parent = models.ForeignKey('self', blank=True, null=True, related_name='children', on_delete=models.CASCADE)
 
     def has_children(self):

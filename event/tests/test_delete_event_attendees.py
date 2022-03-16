@@ -152,3 +152,91 @@ class DeleteEventAttendeesTestCase(FastTenantTestCase):
         errors = result[1]["errors"]
 
         self.assertEqual(errors[0]["message"], "could_not_save")
+
+    def test_delete_attendees_from_event_with_subevent(self):
+        subevent = mixer.blend(Event,
+            parent = self.event
+        )
+
+        mixer.blend(EventAttendee, 
+            user = self.authenticatedUser,
+            event = subevent
+        )
+
+        self.assertEqual(subevent.attendees.count(), 1)
+
+        mutation = """
+            mutation deleteEventAttendees($input: deleteEventAttendeesInput!) {
+                deleteEventAttendees(input: $input) {
+                    entity {
+                        guid
+                        __typename
+                    }
+                    __typename
+                }
+            }
+        """
+
+        variables = {
+            "input": {
+                "guid": self.event.guid,
+                "emailAddresses": ["test2@test.nl", self.authenticatedUser.email]
+            }
+        }
+
+        request = HttpRequest()
+        request.user = self.admin
+
+        result = graphql_sync(schema, { "query": mutation, "variables": variables }, context_value={ "request": request })
+
+        data = result[1]["data"]
+        
+        self.event.refresh_from_db()
+
+        self.assertEqual(self.event.attendees.count(), 1)
+        self.assertEqual(data["deleteEventAttendees"]["entity"]["guid"], self.event.guid)
+        self.assertEqual(subevent.attendees.count(), 0)
+
+    def test_delete_attendees_from_event(self):
+        subevent = mixer.blend(Event,
+            parent = self.event
+        )
+
+        EventAttendee.objects.create(
+            event=subevent,
+            user=None
+        )
+
+        self.assertEqual(subevent.attendees.count(), 1)
+
+        mutation = """
+            mutation deleteEventAttendees($input: deleteEventAttendeesInput!) {
+                deleteEventAttendees(input: $input) {
+                    entity {
+                        guid
+                        __typename
+                    }
+                    __typename
+                }
+            }
+        """
+
+        variables = {
+            "input": {
+                "guid": self.event.guid,
+                "emailAddresses": ["test2@test.nl", self.authenticatedUser.email]
+            }
+        }
+
+        request = HttpRequest()
+        request.user = self.admin
+
+        result = graphql_sync(schema, { "query": mutation, "variables": variables }, context_value={ "request": request })
+
+        data = result[1]["data"]
+        
+        self.event.refresh_from_db()
+
+        self.assertEqual(self.event.attendees.count(), 1)
+        self.assertEqual(data["deleteEventAttendees"]["entity"]["guid"], self.event.guid)
+        self.assertEqual(subevent.attendees.count(), 1)

@@ -187,7 +187,7 @@ class AttendEventTestCase(FastTenantTestCase):
         self.assertEqual(len(data["attendEvent"]["entity"]["attendees"]["edges"]), 2)
         self.assertEqual(EventAttendee.objects.filter(event=self.eventPublic, user=self.attendee3, state='accept').count(), 1)
 
-    def test_attend_event_accept(self):
+    def test_not_attending_parent_event(self):
 
         subevent = Event.objects.create(
             title="Test public event",
@@ -231,3 +231,103 @@ class AttendEventTestCase(FastTenantTestCase):
         errors = result[1]["errors"]
 
         self.assertEqual(errors[0]["message"], "not_attending_parent_event")
+
+    def test_reject_event_with_subevent(self):
+        subevent = mixer.blend(
+            Event,
+            parent = self.eventPublic,
+        )
+
+        sub_attendee = mixer.blend(
+            EventAttendee,
+            event = subevent,
+            user = self.attendee1,
+            state = 'accept'
+        )
+
+        mutation = """
+            mutation AttendEvent($input: attendEventInput!) {
+                attendEvent(input: $input) {
+                    entity {
+                        guid
+                        attendees(state: "reject") {
+                            edges {
+                                name
+                            }
+                        }
+                        __typename
+                    }
+                    __typename
+                }
+            }
+        """
+
+        variables = {
+            "input": {
+                "guid": self.eventPublic.guid,
+                "state": 'reject'
+            }
+        }
+
+        request = HttpRequest()
+        request.user = self.attendee1
+
+        result = graphql_sync(schema, { "query": mutation, "variables": variables }, context_value={ "request": request })
+
+        data = result[1]["data"]
+
+        sub_attendee.refresh_from_db()
+
+        self.assertEqual(data["attendEvent"]["entity"]["guid"], self.eventPublic.guid)
+        self.assertEqual(len(data["attendEvent"]["entity"]["attendees"]["edges"]), 1)
+        self.assertEqual(sub_attendee.state, 'reject')
+
+    def test_maybe_event_with_subevent(self):
+        subevent = mixer.blend(
+            Event,
+            parent = self.eventPublic,
+        )
+
+        sub_attendee = mixer.blend(
+            EventAttendee,
+            event = subevent,
+            user = self.attendee1,
+            state = 'accept'
+        )
+
+        mutation = """
+            mutation AttendEvent($input: attendEventInput!) {
+                attendEvent(input: $input) {
+                    entity {
+                        guid
+                        attendees(state: "maybe") {
+                            edges {
+                                name
+                            }
+                        }
+                        __typename
+                    }
+                    __typename
+                }
+            }
+        """
+
+        variables = {
+            "input": {
+                "guid": self.eventPublic.guid,
+                "state": 'maybe'
+            }
+        }
+
+        request = HttpRequest()
+        request.user = self.attendee1
+
+        result = graphql_sync(schema, { "query": mutation, "variables": variables }, context_value={ "request": request })
+
+        data = result[1]["data"]
+
+        sub_attendee.refresh_from_db()
+
+        self.assertEqual(data["attendEvent"]["entity"]["guid"], self.eventPublic.guid)
+        self.assertEqual(len(data["attendEvent"]["entity"]["attendees"]["edges"]), 1)
+        self.assertEqual(sub_attendee.state, 'maybe')

@@ -79,12 +79,14 @@ def notification_update_handler(sender, instance, **kwargs):
         if not instance.group or instance._state.adding:
             return
 
-        entity = Entity.objects.get(id=instance.id)
+        # check if instance has id, when copying entity, id is None
+        if instance.id:
+            entity = Entity.objects.get(id=instance.id)
 
-        if entity.read_access != instance.read_access:
-            for notification in Notification.objects.filter(action_object_object_id=instance.id):
-                if not instance.can_read(notification.recipient):
-                    notification.delete()
+            if entity.read_access != instance.read_access:
+                for notification in Notification.objects.filter(action_object_object_id=instance.id):
+                    if not instance.can_read(notification.recipient):
+                        notification.delete()
 
 def updated_at_handler(sender, instance, **kwargs):
     """ This adds the current date/time to updated_at only when the instance is updated

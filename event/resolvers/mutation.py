@@ -10,7 +10,6 @@ from core.constances import (
 from core.lib import get_access_id, clean_graphql_input, access_id_to_acl, tenant_schema
 from core.models import Group
 from core.resolvers.shared import clean_abstract
-from core.utils.convert import tiptap_to_text
 from file.models import FileFolder
 from file.tasks import resize_featured
 from user.models import User
@@ -21,12 +20,14 @@ from ..models import Event, EventAttendee
 from event.resolvers.mutation_attend_event_without_account import resolve_attend_event_without_account
 from event.resolvers.mutation_confirm_attend_event_without_account import resolve_confirm_attend_event_without_account
 from event.resolvers.mutation_delete_event_attendees import resolve_delete_event_attendees
+from event.resolvers.mutation_messages import resolve_send_message_to_event
 
 mutation = ObjectType("Mutation")
 
 mutation.set_field("attendEventWithoutAccount", resolve_attend_event_without_account)
 mutation.set_field("confirmAttendEventWithoutAccount", resolve_confirm_attend_event_without_account)
 mutation.set_field("deleteEventAttendees", resolve_delete_event_attendees)
+mutation.set_field("sendMessageToEvent", resolve_send_message_to_event)
 
 @mutation.field("attendEvent")
 def resolve_attend_event(_, info, input):
@@ -68,6 +69,17 @@ def resolve_attend_event(_, info, input):
             raise GraphQLError(EVENT_IS_FULL)
 
     attendee.state = clean_input.get("state")
+
+    #When an attendee leaves/maybes the main event, also automatically leave the subevents
+    if (attendee.state == "reject" or attendee.state == 'maybe') and event.has_children():
+        for child in event.children.all():
+            try:
+                sub_attendee = child.attendees.get(user=user)
+            except ObjectDoesNotExist:
+                continue
+            
+            sub_attendee.state = attendee.state
+            sub_attendee.save()
 
     attendee.save()
 
@@ -124,7 +136,7 @@ def resolve_add_event(_, info, input):
 
     entity.title = clean_input.get("title")
     entity.rich_description = clean_input.get("richDescription")
-    entity.description = tiptap_to_text(entity.rich_description)
+
     if 'abstract' in clean_input:
         abstract = clean_input.get("abstract")
         clean_abstract(abstract)
@@ -218,7 +230,6 @@ def resolve_edit_event(_, info, input):
 
     if 'richDescription' in clean_input:
         entity.rich_description = clean_input.get("richDescription")
-        entity.description = tiptap_to_text(entity.rich_description)
 
     if 'abstract' in clean_input:
         abstract = clean_input.get("abstract")

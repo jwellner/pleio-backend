@@ -1,6 +1,7 @@
 from auditlog.registry import auditlog
 from django.db import models
 from core.models import Entity, AttachmentMixin
+from core.utils.convert import tiptap_to_text
 from django.utils.text import slugify
 
 class Task(Entity, AttachmentMixin):
@@ -17,7 +18,6 @@ class Task(Entity, AttachmentMixin):
     )
 
     title = models.CharField(max_length=256)
-    description = models.TextField(default="")
     rich_description = models.TextField(null=True, blank=True)
 
     state = models.CharField(
@@ -49,6 +49,10 @@ class Task(Entity, AttachmentMixin):
     @property
     def rich_fields(self):
         return [self.rich_description]
+
+    @property
+    def description(self):
+        return tiptap_to_text(self.rich_description)
 
 
 auditlog.register(Task)

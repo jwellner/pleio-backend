@@ -2,7 +2,6 @@ from graphql import GraphQLError
 from django.core.exceptions import ObjectDoesNotExist
 from core.lib import clean_graphql_input, access_id_to_acl
 from core.constances import NOT_LOGGED_IN, COULD_NOT_FIND, COULD_NOT_SAVE
-from core.utils.convert import tiptap_to_text
 from cms.models import Page
 
 
@@ -37,7 +36,6 @@ def resolve_edit_page(_, info, input):
 
     if 'richDescription' in clean_input:
         entity.rich_description = clean_input.get("richDescription")
-        entity.description = tiptap_to_text(entity.rich_description)
 
     if 'timePublished' in clean_input:
         entity.published = clean_input.get("timePublished", None)

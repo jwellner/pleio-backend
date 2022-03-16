@@ -4,7 +4,6 @@ from core.lib import clean_graphql_input, access_id_to_acl, tenant_schema
 from core.constances import NOT_LOGGED_IN, COULD_NOT_FIND_GROUP, COULD_NOT_FIND, COULD_NOT_SAVE, USER_ROLES
 from core.models import Group
 from core.resolvers.shared import clean_abstract
-from core.utils.convert import tiptap_to_text
 from user.models import User
 from wiki.models import Wiki
 from file.models import FileFolder
@@ -54,7 +53,7 @@ def resolve_add_wiki(_, info, input):
 
     entity.title = clean_input.get("title")
     entity.rich_description = clean_input.get("richDescription")
-    entity.description = tiptap_to_text(entity.rich_description)
+
     if 'abstract' in clean_input:
         abstract = clean_input.get("abstract")
         clean_abstract(abstract)
@@ -135,7 +134,6 @@ def resolve_edit_wiki(_, info, input):
 
     if 'richDescription' in clean_input:
         entity.rich_description = clean_input.get("richDescription")
-        entity.description = tiptap_to_text(entity.rich_description)
 
     if 'abstract' in clean_input:
         abstract = clean_input.get("abstract")

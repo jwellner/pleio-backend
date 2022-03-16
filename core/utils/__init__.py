@@ -60,6 +60,8 @@ nodes = {
                 "src": node.attrs["src"],
                 "alt": node.attrs["alt"],
                 "title": node.attrs["title"],
+                "size": node.attrs["size"],
+                "caption": node.attrs["caption"],
             },
         ],
     },
@@ -82,6 +84,8 @@ nodes = {
                 "src": node.attrs["src"],
                 "alt": node.attrs["alt"],
                 "title": node.attrs["title"],
+                "size": node.attrs["size"],
+                "caption": node.attrs["caption"],
             },
         ],
     },
@@ -199,6 +203,5 @@ marks = {
     },
     "underline": {"parseDOM": [{"tag": "u"}], "toDOM": lambda _, __: UNDERLINE_DOM},
 }
-
 
 tiptap_schema = Schema({"nodes": nodes, "marks": marks})

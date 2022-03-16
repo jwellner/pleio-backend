@@ -2,7 +2,6 @@ from graphql import GraphQLError
 from django.core.exceptions import ObjectDoesNotExist
 from core.lib import clean_graphql_input, access_id_to_acl
 from core.constances import NOT_LOGGED_IN, COULD_NOT_SAVE, COULD_NOT_FIND
-from core.utils.convert import tiptap_to_text
 from cms.models import Page
 
 
@@ -40,7 +39,6 @@ def resolve_add_page(_, info, input):
 
     entity.title = clean_input.get("title")
     entity.rich_description = clean_input.get("richDescription")
-    entity.description = tiptap_to_text(entity.rich_description)
 
     entity.page_type = clean_input.get("pageType")
 

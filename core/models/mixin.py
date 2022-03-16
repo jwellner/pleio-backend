@@ -9,7 +9,7 @@ from django.urls import reverse
 from notifications.models import Notification
 from .annotation import Annotation
 from core.models.shared import AbstractModelMeta
-from core.utils.convert import truncate_rich_description
+from core.utils.convert import truncate_rich_description, tiptap_to_text
 from core.lib import delete_attached_file
 from core.constances import USER_ROLES
 
@@ -224,7 +224,6 @@ class ArticleMixin(models.Model):
         abstract = True
 
     abstract = models.TextField(null=True, blank=True)
-    description = models.TextField(default="")
     rich_description = models.TextField(null=True, blank=True)
 
     @property
@@ -233,6 +232,10 @@ class ArticleMixin(models.Model):
             return self.abstract
 
         return truncate_rich_description(self.rich_description)
+
+    @property
+    def description(self):
+        return tiptap_to_text(self.rich_description)
 
 
 class ModelWithFile(models.Model, metaclass=AbstractModelMeta):
