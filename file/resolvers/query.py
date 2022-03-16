@@ -50,6 +50,8 @@ def resolve_files(
         order_by = 'updated_at'
     elif orderBy == 'timeCreated':
         order_by = 'published'
+    elif orderBy == 'readAccessWeight':
+        order_by = 'read_access_weight'
     else:
         order_by = 'title'
 

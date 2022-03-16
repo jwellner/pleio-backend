@@ -18,6 +18,7 @@ from django.utils.text import slugify
 
 logger = logging.getLogger(__name__)
 
+
 def read_access_default():
     return []
 
@@ -25,13 +26,14 @@ def read_access_default():
 def write_access_default():
     return []
 
+
 class FILE_SCAN(Enum):
     CLEAN = 'CLEAN'
     VIRUS = 'VIRUS'
     UNKNOWN = 'UNKNOWN'
 
-class FileFolder(Entity, ModelWithFile, ResizedImageMixin):
 
+class FileFolder(Entity, ModelWithFile, ResizedImageMixin):
     title = models.CharField(max_length=256)
 
     parent = models.ForeignKey('self', blank=True, null=True, related_name='children', on_delete=models.CASCADE)
@@ -43,6 +45,8 @@ class FileFolder(Entity, ModelWithFile, ResizedImageMixin):
     size = models.IntegerField(default=0)
 
     last_scan = models.DateTimeField(default=None, null=True)
+
+    read_access_weight = models.IntegerField(default=0)
 
     def __str__(self):
         return f"FileFolder[{self.title}]"
@@ -62,7 +66,7 @@ class FileFolder(Entity, ModelWithFile, ResizedImageMixin):
                 prefix = '/groups/view/{}/{}'.format(
                     self.group.guid, slugify(self.group.name)
                 )
-            else: # personal file browser url
+            else:  # personal file browser url
                 prefix = '/user/{}'.format(self.owner.guid)
 
             return '{}/files/{}'.format(
@@ -139,10 +143,12 @@ class FileFolder(Entity, ModelWithFile, ResizedImageMixin):
     def mime_type_field(self):
         return self.mime_type
 
+
 class ScanIncident(models.Model):
     date = models.DateTimeField(default=timezone.now)
     message = models.CharField(max_length=256)
-    file = models.ForeignKey('file.FileFolder', blank=True, null=True, on_delete=models.SET_NULL, related_name='scan_incidents')
+    file = models.ForeignKey('file.FileFolder', blank=True, null=True, on_delete=models.SET_NULL,
+                             related_name='scan_incidents')
     file_created = models.DateTimeField(default=timezone.now)
     file_group = models.ForeignKey('core.Group', blank=True, null=True, on_delete=models.SET_NULL)
     file_title = models.CharField(max_length=256)
@@ -152,14 +158,45 @@ class ScanIncident(models.Model):
     class Meta:
         ordering = ('-date',)
 
+
 def set_parent_folders_updated_at(instance):
     if instance.parent and instance.parent.is_folder:
         instance.parent.save()
         set_parent_folders_updated_at(instance.parent)
 
+
+def prepare_read_access_weight(instance):
+    """ #1: Eigenaar
+        #2: Subgroep
+        #3: Groep
+        #4: Ingelogd
+        #5: Publiek
+    """
+    if _loop_file_read_access(instance, lambda x: x == 'logged_in'):
+        return 4
+    if _loop_file_read_access(instance, lambda x: x == 'public'):
+        return 5
+    if _loop_file_read_access(instance, lambda x: x[:5] == 'user:'):
+        return 1
+    if _loop_file_read_access(instance, lambda x: x[:6] == 'group:'):
+        return 3
+    if _loop_file_read_access(instance, lambda x: x[:9] == 'subgroup:'):
+        return 2
+    return 6
+
+
+def _loop_file_read_access(file, callback):
+    for perm in file.read_access:
+        if callback(perm):
+            return True
+    return False
+
+
 @receiver(pre_save, sender=FileFolder)
 def file_pre_save(sender, instance, **kwargs):
     # pylint: disable=unused-argument
+
+    instance.read_access_weight = prepare_read_access_weight(instance)
 
     if settings.IMPORTING:
         return
@@ -171,6 +208,7 @@ def file_pre_save(sender, instance, **kwargs):
             instance.size = instance.upload.size
         except Exception:
             pass
+
 
 # update parent folders updated_at when adding, moving and deleting files
 @receiver([pre_save, pre_delete], sender=FileFolder)

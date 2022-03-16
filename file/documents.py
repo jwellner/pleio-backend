@@ -11,6 +11,7 @@ from core.documents import DefaultDocument, custom_analyzer
 
 logger = logging.getLogger(__name__)
 
+
 @registry.register_document
 class FileDocument(DefaultDocument):
     id = fields.KeywordField()
@@ -30,6 +31,8 @@ class FileDocument(DefaultDocument):
         search_analyzer="standard"
     )
 
+    read_access_weight = fields.IntegerField()
+
     def prepare_file_contents(self, instance):
         # pylint: disable=unused-argument
         file_contents = ''
@@ -43,7 +46,8 @@ class FileDocument(DefaultDocument):
                             for line in f:
                                 temp.write(line)
                             temp.close()
-                            file_contents = re.sub(r"\s+", " ", textract.process(temp.name, encoding='utf8').decode("utf-8"))
+                            file_contents = re.sub(r"\s+", " ",
+                                                   textract.process(temp.name, encoding='utf8').decode("utf-8"))
                             os.unlink(temp.name)
 
             return file_contents
