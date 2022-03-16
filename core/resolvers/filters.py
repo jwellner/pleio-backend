@@ -9,24 +9,32 @@ from django_tenants.utils import parse_tenant_config_path
 
 filters = ObjectType("Filters")
 
-def get_filter_options(key, user):
+
+def get_filter_options(key, user, group=None):
     options = []
 
     tenant_name = parse_tenant_config_path("")
 
     user_acl = list(get_acl(user))
 
-    s = Search(index='user').query(
+    s = Search(index='user').filter(
         Q('nested', path='_profile.user_profile_fields', query=Q('bool', must=[
-                Q('terms', _profile__user_profile_fields__read_access=user_acl)
-                ]
-            )
-        )
+            Q('terms', _profile__user_profile_fields__read_access=user_acl)
+        ]))
     ).filter(
         'term', tenant_name=tenant_name
     ).exclude(
         'term', is_active=False
     )
+
+    if group is not None:
+        s = s.filter(
+            Q('nested', path='memberships', query=Q('bool', must=[
+                Q('match', memberships__group_id=group.id)
+            ], must_not=[
+                Q('match', memberships__type="pending")
+            ]))
+        )
 
     # TODO: use aggregations
     for hit in s.scan():
@@ -35,6 +43,7 @@ def get_filter_options(key, user):
                 options.append(field['value'])
 
     return sorted(list(set(options)), key=str.lower)
+
 
 @filters.field("users")
 def resolve_users_filters(_, info, groupGuid=None):
@@ -72,7 +81,7 @@ def resolve_users_filters(_, info, groupGuid=None):
             if field.field_type in ['multi_select_field', 'select_field']:
                 options = field.field_options
             else:
-                options = get_filter_options(field.key, user)
+                options = get_filter_options(field.key, user, group)
             if options:
                 user_filters.append({
                     "name": field.key,
