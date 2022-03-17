@@ -3,7 +3,6 @@ from django.core.exceptions import ObjectDoesNotExist
 from graphql import GraphQLError
 from core.models import Entity, Group, EntityView, EntityViewCount
 from user.models import User
-from .query_member_profile_modal import resolve_member_profile_modal
 from .query_viewer import resolve_viewer
 from .query_site import resolve_site, resolve_site_settings, resolve_site_stats
 from .query_site_users import resolve_site_users
@@ -29,7 +28,6 @@ query.set_field("siteStats", resolve_site_stats)
 query.set_field("siteUsers", resolve_site_users)
 query.set_field("entities", resolve_entities)
 query.set_field("groups", resolve_groups)
-query.set_field("memberProfileModal", resolve_member_profile_modal)
 query.set_field("bookmarks", resolve_bookmarks)
 query.set_field("search", resolve_search)
 query.set_field("users", resolve_users)

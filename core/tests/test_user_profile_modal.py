@@ -12,7 +12,7 @@ from mixer.backend.django import mixer
 class UserSettingsTestCase(FastTenantTestCase):
 
     def setUp(self):
-        self.member = mixer.blend(User)
+        self.member = mixer.blend(User, name="Member")
         self.group = mixer.blend(Group, required_fields_message="Please complete your profile")
         self.profile_field = ProfileField.objects.create(
             key='text_key',
@@ -26,18 +26,24 @@ class UserSettingsTestCase(FastTenantTestCase):
         )
 
         self.query = """
-            query ($guid: String!) {
-                memberProfileModal(groupGuid: $guid) {
-                    total
-                    edges {
-                        guid
+            query ($user: String!, $group: String!) {
+                entity(guid: $user) {
+                    guid
+                    ... on User {
+                        profileModal(groupGuid: $group) {
+                            total
+                            edges {
+                                guid
+                            }
+                            intro
+                        }
                     }
-                    intro
                 }
             }
         """
         self.variables = {
-            "guid": self.group.guid
+            "group": self.group.guid,
+            "user": self.member.guid
         }
 
     def graphql_sync(self, visitor, expect_errors=False):
@@ -54,17 +60,12 @@ class UserSettingsTestCase(FastTenantTestCase):
         return result.get('data')
 
     def assertProfileFieldsMissing(self, data):
-        self.assertEqual(data['memberProfileModal']['total'], 1)
-        self.assertEqual(data['memberProfileModal']['intro'], self.group.required_fields_message)
-        self.assertEqual(data['memberProfileModal']['edges'][0]['guid'], self.profile_field.guid)
+        self.assertEqual(data['entity']['profileModal']['total'], 1)
+        self.assertEqual(data['entity']['profileModal']['intro'], self.group.required_fields_message)
+        self.assertEqual(data['entity']['profileModal']['edges'][0]['guid'], self.profile_field.guid)
 
     def assertProfileFieldsOK(self, data):
-        self.assertEqual(data['memberProfileModal']['total'], 0)
-
-    def test_query_should_not_give_profile_field_info_in_case_of_an_anonymous_user(self):
-        data = self.graphql_sync(visitor=AnonymousUser())
-
-        self.assertProfileFieldsOK(data)
+        self.assertEqual(data['entity']['profileModal']['total'], 0)
 
     def test_query_should_give_profile_field_info_when_user_has_profile_not_filled_in(self):
         data = self.graphql_sync(visitor=self.member)

@@ -2,7 +2,7 @@ from ariadne import ObjectType
 from core import config
 from core.constances import ACCESS_TYPE, USER_ROLES, COULD_NOT_FIND
 from core.lib import get_language_options
-from core.models import ProfileField, UserProfileField, Group
+from core.models import ProfileField, UserProfileField, Group, GroupProfileFieldSetting, UserProfile
 from django.core.exceptions import ObjectDoesNotExist
 from graphql import GraphQLError
 
@@ -198,3 +198,41 @@ def resolve_last_online(obj, info):
     if is_user_or_admin(obj, info):
         return obj.profile.last_online
     return None
+
+
+@user.field('profileModal')
+def resolve_profile_modal(obj, info, groupGuid):
+    # pylint: disable=unused-argument
+    class ModalNotRequiredSignal(Exception):
+        pass
+
+    try:
+        group = Group.objects.get(id=groupGuid)
+
+        required_profile_fields = [setting.profile_field.id for setting in
+                                   GroupProfileFieldSetting.objects.filter(group=group, is_required=True)]
+
+        if len(required_profile_fields) == 0:
+            raise ModalNotRequiredSignal()
+
+        profile = UserProfile.objects.get(user=obj)
+        existing_profile_fields = [field.profile_field.id for field in
+                                   UserProfileField.objects.filter(user_profile=profile) if field.value != '']
+        missing_profile_fields = [field_id for field_id in required_profile_fields if
+                                  field_id not in existing_profile_fields]
+
+        if len(missing_profile_fields) == 0:
+            raise ModalNotRequiredSignal()
+
+        return {
+            "total": len(missing_profile_fields),
+            "edges": ProfileField.objects.filter(id__in=missing_profile_fields),
+            "intro": group.required_fields_message
+        }
+
+    except (ModalNotRequiredSignal, UserProfile.DoesNotExist):
+        pass
+
+    return {'total': 0}
+
+
