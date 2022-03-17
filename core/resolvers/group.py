@@ -3,7 +3,7 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.db.models import Case, When, IntegerField
 from core.constances import MEMBERSHIP, USER_ROLES
 from core.lib import get_access_ids
-from core.models import GroupInvitation, Subgroup, GroupProfileFieldSetting, UserProfileField, UserProfile
+from core.models import GroupInvitation, Subgroup
 from user.models import User
 from core import config
 from core.resolvers import shared
