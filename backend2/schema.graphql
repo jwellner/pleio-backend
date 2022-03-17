@@ -1023,7 +1023,6 @@ type Group implements Entity {
   showMemberProfileFields: [ProfileItem]
   requiredProfileFields: [ProfileItem]
   requiredProfileFieldsMessage: String
-  memberMissingFieldGuids: [String]
 }
 
 """Show all groups or only mine"""
@@ -1035,6 +1034,12 @@ enum GroupFilter {
 type GroupList {
   total: Int!
   edges: [Group]
+}
+
+type MemberProfileModal {
+  total: Int!
+  edges: [ProfileItem]
+  intro: String
 }
 
 type GroupNotificationItem {
@@ -1487,6 +1492,7 @@ type Query {
   breadcrumb(guid: String): [Entity]
   files(containerGuid: String, filter: String, orderBy: String, orderDirection: String, offset: Int, limit: Int): EntityList
   groups(q: String, filter: GroupFilter, tags: [String], offset: Int, limit: Int): GroupList
+  memberProfileModal(groupGuid: String!): MemberProfileModal
   events(filter: EventFilter, containerGuid: String, offset: Int, limit: Int): EventList
   users(q: String!, offset: Int, limit: Int, filters: [FilterInput], groupGuid: String): UserList
   entities(offset: Int, limit: Int, type: Type, subtype: String, subtypes: [String], containerGuid: String, tags: [String], tagLists: [[String]], orderBy: OrderBy, orderDirection: OrderDirection, isFeatured: Boolean, sortPinned: Boolean, isDraft: Boolean, userGuid: String): EntityList
