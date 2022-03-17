@@ -34,7 +34,11 @@ class TestFileQueryOrderByFileWeight(FastTenantTestCase):
                                      group=self.group,
                                      title="private")
 
-        self.query = """
+    def test_number_weight_of_files(self):
+        request = HttpRequest()
+        request.user = self.owner
+
+        query = """
             query FilesQuery($containerGuid: String!, $orderBy: String) {
                 files(containerGuid: $containerGuid, orderBy: $orderBy) {
                     total
@@ -45,16 +49,12 @@ class TestFileQueryOrderByFileWeight(FastTenantTestCase):
             }
         """
 
-    def test_number_weight_of_files(self):
-        request = HttpRequest()
-        request.user = self.owner
-
         variables = {
             "containerGuid": self.group.guid,
             "orderBy": "readAccessWeight",
         }
 
-        success, result = graphql_sync(schema, {"query": self.query, "variables": variables},
+        success, result = graphql_sync(schema, {"query": query, "variables": variables},
                                        context_value={"request": request})
 
         actual_order = [record['guid'] for record in result['data']['files']['edges']]
@@ -64,6 +64,39 @@ class TestFileQueryOrderByFileWeight(FastTenantTestCase):
             self.group_file.guid,
             self.authentic_file.guid,
             self.public_file.guid,
+        ])
+
+    def test_number_weight_of_files_reverse(self):
+        request = HttpRequest()
+        request.user = self.owner
+
+        query = """
+            query FilesQuery($containerGuid: String!, $orderBy: String, $orderDirection: String) {
+                files(containerGuid: $containerGuid, orderBy: $orderBy, orderDirection: $orderDirection) {
+                    total
+                    edges {
+                        guid
+                    }
+                }
+            }
+        """
+
+        variables = {
+            "containerGuid": self.group.guid,
+            "orderBy": "readAccessWeight",
+            "orderDirection": "desc"
+        }
+
+        success, result = graphql_sync(schema, {"query": query, "variables": variables},
+                                       context_value={"request": request})
+
+        actual_order = [record['guid'] for record in result['data']['files']['edges']]
+        self.assertEqual(actual_order, [
+            self.public_file.guid,
+            self.authentic_file.guid,
+            self.group_file.guid,
+            self.subgroup_file.guid,
+            self.user_file.guid,
         ])
 
 

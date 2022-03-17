@@ -46,17 +46,18 @@ def resolve_files(
     #pylint: disable=too-many-arguments
     #pylint: disable=redefined-builtin
 
+    order_by = ['title']
+
     if orderBy == 'timeUpdated':
-        order_by = 'updated_at'
-    elif orderBy == 'timeCreated':
-        order_by = 'published'
+        order_by.insert(0, 'updated_at')
+    elif orderBy == ['timeCreated']:
+        order_by.insert(0, 'published')
     elif orderBy == 'readAccessWeight':
-        order_by = 'read_access_weight'
-    else:
-        order_by = 'title'
+        order_by.insert(0, 'read_access_weight')
 
     if orderDirection == 'desc':
-        order_by = '-%s' % (order_by)
+        for n, value in enumerate(order_by):
+            order_by[n] = '-%s' % (order_by[n])
 
     is_folder = False
     is_user = False
@@ -78,7 +79,7 @@ def resolve_files(
 
     qs = FileFolder.objects.visible(info.context["request"].user)
     qs = qs.filter(conditional_group_folder_user_container_filter(containerGuid, is_folder, is_user) & conditional_filter_subtype(filter))
-    qs = qs.order_by('-is_folder', order_by)
+    qs = qs.order_by('-is_folder', *order_by)
 
     edges = qs[offset:offset+limit]
 
