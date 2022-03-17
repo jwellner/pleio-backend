@@ -34,7 +34,7 @@ class TestFileQueryOrderByFileWeight(FastTenantTestCase):
                                      group=self.group,
                                      title="private")
 
-    def test_number_weight_of_files(self):
+    def test_read_access_weight_of_files(self):
         request = HttpRequest()
         request.user = self.owner
 
@@ -66,7 +66,7 @@ class TestFileQueryOrderByFileWeight(FastTenantTestCase):
             self.public_file.guid,
         ])
 
-    def test_number_weight_of_files_reverse(self):
+    def test_read_access_weight_of_files_reverse(self):
         request = HttpRequest()
         request.user = self.owner
 
