@@ -17,7 +17,7 @@ def resolve_member_profile_modal(_, info, groupGuid):
 
         profile = UserProfile.objects.get(user=info.context["request"].user)
         existing_profile_fields = [field.profile_field.id for field in
-                                   UserProfileField.objects.filter(user_profile=profile)]
+                                   UserProfileField.objects.filter(user_profile=profile) if field.value is not '']
         missing_profile_fields = [field_id for field_id in required_profile_fields if field_id not in existing_profile_fields]
 
         if len(missing_profile_fields) == 0:

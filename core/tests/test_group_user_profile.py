@@ -53,12 +53,23 @@ class UserSettingsTestCase(FastTenantTestCase):
 
         return result.get('data')
 
-    def test_query_should_give_profile_field_info_when_user_has_profile_not_filled_in(self):
-        data = self.graphql_sync(visitor=self.member)
-
+    def assertProfileFieldsMissing(self, data):
         self.assertEqual(data['memberProfileModal']['total'], 1)
         self.assertEqual(data['memberProfileModal']['intro'], self.group.required_fields_message)
         self.assertEqual(data['memberProfileModal']['edges'][0]['guid'], self.profile_field.guid)
+
+    def assertProfileFieldsOK(self, data):
+        self.assertEqual(data['memberProfileModal']['total'], 0)
+
+    def test_query_should_not_give_profile_field_info_in_case_of_an_anonymous_user(self):
+        data = self.graphql_sync(visitor=AnonymousUser())
+
+        self.assertProfileFieldsOK(data)
+
+    def test_query_should_give_profile_field_info_when_user_has_profile_not_filled_in(self):
+        data = self.graphql_sync(visitor=self.member)
+
+        self.assertProfileFieldsMissing(data)
 
     def test_query_should_not_give_profile_field_info_when_user_has_profile_filled_in(self):
         user_profile, created = UserProfile.objects.get_or_create(user=self.member)
@@ -70,9 +81,15 @@ class UserSettingsTestCase(FastTenantTestCase):
 
         data = self.graphql_sync(visitor=self.member)
 
-        self.assertEqual(data['memberProfileModal']['total'], 0)
+        self.assertProfileFieldsOK(data)
 
-    def test_query_should_not_give_profile_field_info_in_case_of_an_anonymous_user(self):
-        data = self.graphql_sync(visitor=AnonymousUser())
+    def test_query_should_give_profile_field_info_when_user_has_empty_string_profile(self):
+        user_profile, created = UserProfile.objects.get_or_create(user=self.member)
+        data = self.graphql_sync(visitor=self.member)
+        UserProfileField.objects.create(
+            user_profile=user_profile,
+            profile_field=self.profile_field,
+            value=''
+        )
 
-        self.assertEqual(data['memberProfileModal']['total'], 0)
+        self.assertProfileFieldsMissing(data)
