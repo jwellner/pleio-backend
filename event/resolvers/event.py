@@ -124,9 +124,10 @@ def resolve_attendees(obj, info, query=None, limit=20, offset=0, state=None, ord
 
 
     user = info.context["request"].user
+
     if not user.is_authenticated:
         return {
-            "total": 0,
+            "total": obj.attendees.filter(state="accept").count(),
             "totalMaybe": 0,
             "totalReject": 0,
             "totalWaitinglist": 0,
