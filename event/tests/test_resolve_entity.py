@@ -10,7 +10,7 @@ from core.models import Group
 from user.models import User
 from event.models import Event, EventAttendee
 from mixer.backend.django import mixer
-from core.constances import ACCESS_TYPE
+from core.constances import ACCESS_TYPE, ATTENDEE_ORDER_BY
 from core.lib import get_acl, access_id_to_acl, datetime_isoformat
 from django.utils.text import slugify
 
@@ -195,7 +195,8 @@ class EventTestCase(FastTenantTestCase):
         request.user = self.authenticatedUser
 
         variables = {
-            "guid": self.eventPrivate.guid
+            "guid": self.eventPrivate.guid,
+            "orderBy": ATTENDEE_ORDER_BY.name
         }
 
         result = graphql_sync(schema, { "query": self.query , "variables": variables}, context_value={ "request": request })

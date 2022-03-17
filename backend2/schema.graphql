@@ -864,7 +864,7 @@ type Event implements Entity {
   owner: User
   isAttending: String
   isAttendingParent: Boolean
-  attendees(query: String, offset: Int, limit: Int, state: String): AttendeesList
+  attendees(query: String, offset: Int, limit: Int, state: String, orderBy: AttendeeOrderBy, orderDirection: OrderDirection): AttendeesList
   comments: [Comment]
   commentCount: Int
   isPinned: Boolean!
@@ -874,6 +874,13 @@ type Event implements Entity {
 enum EventFilter {
   upcoming
   previous
+}
+
+"""attributes the attendees can be ordered by"""
+enum AttendeeOrderBy {
+  email
+  name
+  timeUpdated
 }
 
 type EventList {

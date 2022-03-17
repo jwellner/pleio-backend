@@ -5,6 +5,7 @@ from django.db.models import Q, Case, When
 
 from core.lib import datetime_isoformat
 from event.models import EventAttendee
+from core.constances import ATTENDEE_ORDER_BY, ORDER_DIRECTION
 
 def conditional_state_filter(state):
     if state:
@@ -117,9 +118,10 @@ def resolve_is_attending_parent(obj, info):
     return False
 
 @event.field("attendees")
-def resolve_attendees(obj, info, query=None, limit=20, offset=0, state=None):
+def resolve_attendees(obj, info, query=None, limit=20, offset=0, state=None, orderBy=ATTENDEE_ORDER_BY.name, orderDirection=ORDER_DIRECTION.asc):
     # pylint: disable=unused-argument
     # pylint: disable=too-many-arguments
+
 
     user = info.context["request"].user
     if not user.is_authenticated:
@@ -142,16 +144,23 @@ def resolve_attendees(obj, info, query=None, limit=20, offset=0, state=None):
         )
 
     qs = qs.filter(conditional_state_filter(state))
-    if state == 'waitinglist':
-        qs = qs.order_by('updated_at')
-    else:
+
+    if orderBy == ATTENDEE_ORDER_BY.email: 
+        order_by = 'email'
+    elif orderBy == ATTENDEE_ORDER_BY.timeUpdated:
+        order_by = 'updated_at'
+    elif orderBy == ATTENDEE_ORDER_BY.name:
         qs = qs.annotate(
             names=Case(
                 When(user=None, then='name'),
                 default='user__name',
-        ),
-        ).order_by('names')
+        ))
+        order_by = 'names'
 
+    if orderDirection == ORDER_DIRECTION.desc:
+        order_by = '-%s' % (order_by)
+
+    qs = qs.order_by(order_by)
     qs = qs[offset:offset+limit]
 
     # email adresses only for user with event write permissions
