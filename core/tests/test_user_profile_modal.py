@@ -9,7 +9,7 @@ from user.models import User
 from mixer.backend.django import mixer
 
 
-class UserSettingsTestCase(FastTenantTestCase):
+class UserProfileModalTestCase(FastTenantTestCase):
 
     def setUp(self):
         self.member = mixer.blend(User, name="Member")
