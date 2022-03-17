@@ -57,7 +57,7 @@ def resolve_files(
 
     if orderDirection == 'desc':
         for n, value in enumerate(order_by):
-            order_by[n] = '-%s' % (order_by[n])
+            order_by[n] = '-%s' % value
 
     is_folder = False
     is_user = False
