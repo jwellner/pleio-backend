@@ -273,8 +273,6 @@ TENANT_MODEL = "tenants.Client"
 
 TENANT_DOMAIN_MODEL = "tenants.Domain"
 
-IMPORTING = False
-
 # Celery
 CELERY_BROKER_URL = os.getenv('CELERY_BROKER_URL')
 CELERY_RESULT_BACKEND = os.getenv('CELERY_RESULT_BACKEND')
