@@ -4,6 +4,7 @@ from django.http import HttpRequest
 from django_tenants.test.cases import FastTenantTestCase
 
 from backend2.schema import schema
+from core.constances import ACCESS_TYPE
 from core.models import Group, ProfileField, GroupProfileFieldSetting, UserProfile, UserProfileField
 from user.models import User
 from mixer.backend.django import mixer
@@ -34,6 +35,7 @@ class UserProfileModalTestCase(FastTenantTestCase):
                             total
                             edges {
                                 guid
+                                accessId
                             }
                             intro
                         }
@@ -86,11 +88,26 @@ class UserProfileModalTestCase(FastTenantTestCase):
 
     def test_query_should_give_profile_field_info_when_user_has_empty_string_profile(self):
         user_profile, created = UserProfile.objects.get_or_create(user=self.member)
-        data = self.graphql_sync(visitor=self.member)
         UserProfileField.objects.create(
             user_profile=user_profile,
             profile_field=self.profile_field,
             value=''
         )
 
+        data = self.graphql_sync(visitor=self.member)
+
         self.assertProfileFieldsMissing(data)
+
+    def test_query_should_copy_access_properties_in_profile_items(self):
+        user_profile, created = UserProfile.objects.get_or_create(user=self.member)
+        UserProfileField.objects.create(
+            user_profile=user_profile,
+            profile_field=self.profile_field,
+            read_access=[ACCESS_TYPE.logged_in],
+            value='',
+        )
+
+        data = self.graphql_sync(visitor=self.member)
+        self.assertEqual(data['entity']['profileModal']['edges'][0]['accessId'], 1)
+
+

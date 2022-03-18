@@ -241,12 +241,24 @@ def resolve_profile_modal(obj, info, groupGuid):
         missing_profile_fields = [field_id for field_id in required_profile_fields if
                                   field_id not in existing_profile_fields]
 
+        edges = []
+        for field in ProfileField.objects.filter(id__in=missing_profile_fields):
+            field.read_access = []
+            try:
+                user_profile_field = UserProfileField.objects.visible(info.context["request"].user).get(
+                    profile_field=field,
+                    user_profile=obj.profile)
+                field.read_access = user_profile_field.read_access
+            except ObjectDoesNotExist:
+                field.read_access = [ACCESS_TYPE.logged_in]
+            edges.append(field)
+
         if len(missing_profile_fields) == 0:
             raise ModalNotRequiredSignal()
 
         return {
             "total": len(missing_profile_fields),
-            "edges": ProfileField.objects.filter(id__in=missing_profile_fields),
+            "edges": edges,
             "intro": group.required_fields_message
         }
 
