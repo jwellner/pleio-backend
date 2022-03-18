@@ -3,10 +3,12 @@ from backend2.schema import schema
 from ariadne import graphql_sync
 import json
 import os
+import datetime
 from django.contrib.auth.models import AnonymousUser
 from django.http import HttpRequest
 from django.utils import timezone
 from django.utils.translation import ugettext_lazy
+from core.lib import datetime_isoformat
 from core.models import Group, Attachment
 from user.models import User
 from event.models import Event
@@ -20,6 +22,7 @@ class CopyEventTestCase(FastTenantTestCase):
     basepath = 'test_files/'
     
     def setUp(self):
+        self.now = datetime.datetime.now(tz=timezone.utc)
         self.anonymousUser = AnonymousUser()
         self.authenticatedUser = mixer.blend(User)
         self.admin = mixer.blend(User, roles=[USER_ROLES.ADMIN])
@@ -30,7 +33,16 @@ class CopyEventTestCase(FastTenantTestCase):
         self.eventPublic = mixer.blend(Event, 
             owner=self.authenticatedUser, 
             read_access=[ACCESS_TYPE.public], 
-            write_access=[ACCESS_TYPE.user.format(self.authenticatedUser.id)]
+            write_access=[ACCESS_TYPE.user.format(self.authenticatedUser.id)],
+            start_date="2020-09-15 09:20:51.15+00",
+            end_date="2020-09-16 07:20:51.15+00"
+        )
+
+        self.eventGroup = mixer.blend(Event,
+            owner=self.authenticatedUser,
+            read_access=[ACCESS_TYPE.public], 
+            write_access=[ACCESS_TYPE.user.format(self.authenticatedUser.id)],
+            group = self.group
         )
 
         self.eventAttachment = mixer.blend(Event, 
@@ -59,6 +71,13 @@ class CopyEventTestCase(FastTenantTestCase):
         self.data2 = {
             "input": {
                 "guid": self.eventAttachment.guid,
+                "ownerGuid": self.authenticatedUser.guid,
+                "subtype": "event"
+            }
+        }
+        self.data3 = {
+            "input": {
+                "guid": self.eventGroup.guid,
                 "ownerGuid": self.authenticatedUser.guid,
                 "subtype": "event"
             }
@@ -129,7 +148,10 @@ class CopyEventTestCase(FastTenantTestCase):
 
         self.assertEqual(data["copyEntity"]["entity"]["title"], ugettext_lazy("Copy %s") %self.eventPublic.title)
         self.assertEqual(data["copyEntity"]["entity"]["richDescription"], self.eventPublic.rich_description)
-        self.assertEqual(data["copyEntity"]["entity"]["endDate"], None)
+        start_date = self.eventPublic.start_date.replace(year=self.now.year, month=self.now.month, day=self.now.day, microsecond=0, tzinfo=timezone.utc)
+        self.assertEqual(data["copyEntity"]["entity"]["startDate"], str(datetime_isoformat(start_date)))
+        end_date = start_date + (self.eventPublic.end_date - self.eventPublic.start_date)
+        self.assertEqual(data["copyEntity"]["entity"]["endDate"], str(datetime_isoformat(end_date)))
         self.assertEqual(data["copyEntity"]["entity"]["maxAttendees"], self.eventPublic.max_attendees)
         self.assertEqual(data["copyEntity"]["entity"]["location"], self.eventPublic.location)
         self.assertEqual(data["copyEntity"]["entity"]["source"], self.eventPublic.external_link)
@@ -256,6 +278,63 @@ class CopyEventTestCase(FastTenantTestCase):
         self.assertNotEqual(subevent.guid, event.children.first().guid)
         self.assertEqual(event.children.count(), 2)
         for child in event.children.all():
+            self.assertEqual(child.status_published, ENTITY_STATUS.DRAFT)
+
+        event.published = timezone.now()
+        event.save()
+        self.assertEqual(event.status_published, ENTITY_STATUS.PUBLISHED)
+        for child in event.children.all():
+            self.assertEqual(child.status_published, ENTITY_STATUS.PUBLISHED)
+
+    def test_copy_in_group(self):
+
+        variables = self.data3
+
+        request = HttpRequest()
+        request.user = self.authenticatedUser
+
+        result = graphql_sync(schema, { "query": self.mutation, "variables": variables }, context_value={ "request": request })
+
+        data = result[1]["data"]
+
+        event = Event.objects.get(id=data["copyEntity"]["entity"]["guid"])
+
+        self.assertEqual(event.group.guid, self.group.guid)
+        self.assertEqual(data["copyEntity"]["entity"]["group"]["guid"], self.group.guid)
+        self.assertEqual(data["copyEntity"]["entity"]["owner"]["guid"], self.authenticatedUser.guid)
+
+    def test_copy_with_children_in_group(self):
+
+        subevent = mixer.blend(Event, 
+            parent = self.eventGroup
+        )
+
+        subevent2 = mixer.blend(Event,
+            parent = self.eventGroup
+        )
+
+        self.assertEqual(subevent.group.guid, self.group.guid)
+
+        variables = self.data3
+        request = HttpRequest()
+        request.user = self.authenticatedUser
+
+        self.eventPublic.refresh_from_db()
+
+        result = graphql_sync(schema, { "query": self.mutation, "variables": variables }, context_value={ "request": request })
+
+        data = result[1]["data"]
+        event = Event.objects.get(id=data["copyEntity"]["entity"]["guid"])
+
+        event.refresh_from_db() 
+
+        self.assertEqual(event.status_published, ENTITY_STATUS.DRAFT)
+        self.assertTrue(event.has_children())
+        self.assertNotEqual(subevent.guid, event.children.first().guid)
+        self.assertEqual(event.children.count(), 2)
+        self.assertEqual(self.eventGroup.children.count(), 2)
+        for child in event.children.all():
+            self.assertEqual(child.group.guid, self.group.guid)
             self.assertEqual(child.status_published, ENTITY_STATUS.DRAFT)
 
         event.published = timezone.now()

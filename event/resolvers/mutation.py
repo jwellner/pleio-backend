@@ -347,10 +347,12 @@ def resolve_edit_event(_, info, input):
         "entity": entity
     }
 
-def copy_event(event_id, user):
+def copy_event(event_id, user, parent=None):
     # pylint: disable=redefined-builtin
 
     entity = Event.objects.get(id=event_id)
+    
+    now = timezone.now()
 
     attachments = entity.attachments_in_text()
     for x in attachments:
@@ -362,19 +364,35 @@ def copy_event(event_id, user):
         tiptap.replace_src(original, replacement) 
         entity.rich_description = json.dumps(tiptap.tiptap_json)
 
-    entity.title = ugettext_lazy("Copy %s") %entity.title
-    entity.start_date = timezone.now()
-    entity.end_date = None
+    #preserve time of original event
+    if entity.start_date:
+        if entity.end_date:
+            difference = entity.end_date - entity.start_date
+        entity.start_date = entity.start_date.replace(
+            year=now.year,
+            month=now.month,
+            day=now.day,
+        )
+        if entity.end_date:
+            entity.end_date = entity.start_date + difference
+
     entity.owner = user
     entity.is_featured = False
     entity.is_pinned = False
     entity.notifications_created = False
     entity.published = None
-    entity.created_at = timezone.now()
-    entity.updated_at = timezone.now()
-    entity.last_action = timezone.now()
+    entity.created_at = now
+    entity.updated_at = now
+    entity.last_action = now
     entity.read_access = access_id_to_acl(entity, get_access_id(entity))
     entity.write_access = access_id_to_acl(entity, 0)
+
+    if parent:
+        entity.parent = parent
+    
+    # subevents keep original title
+    if not parent:
+        entity.title = ugettext_lazy("Copy %s") %entity.title
 
     entity.pk = None
     entity.id = None
@@ -405,9 +423,7 @@ def resolve_copy_event(_, info, input):
 
     if clean_input.get("copySubevents", True) and event.has_children():
         for child in event.children.all():
-            new = copy_event(child.guid, user)
-            new.parent = entity
-            new.save()
+            copy_event(child.guid, user, entity)
 
     return {
         "entity": entity

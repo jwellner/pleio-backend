@@ -2,7 +2,7 @@ from ariadne import ObjectType
 from django.core.exceptions import ObjectDoesNotExist
 from core.resolvers import shared
 from django.db.models import Q, Case, When
-
+from core.constances import ENTITY_STATUS
 from core.lib import datetime_isoformat
 from event.models import EventAttendee
 from core.constances import ATTENDEE_ORDER_BY, ORDER_DIRECTION
@@ -29,7 +29,9 @@ def resolve_has_children(obj, info):
 @event.field("children")
 def resolve_children(obj, info):
     # pylint: disable=unused-argument
-    return obj.children.visible(info.context["request"].user)
+    if obj.status_published == ENTITY_STATUS.PUBLISHED:
+        return obj.children.visible(info.context["request"].user)
+    return obj.children.draft(info.context["request"].user)
 
 @event.field("parent")
 def resolve_parent(obj, info):
