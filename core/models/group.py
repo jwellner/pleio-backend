@@ -2,7 +2,6 @@ import uuid
 import logging
 from auditlog.registry import auditlog
 from django.apps import apps
-from django.conf import settings
 from django.contrib.postgres.fields import ArrayField
 from django.core.exceptions import ObjectDoesNotExist
 from django.db import models
@@ -328,9 +327,6 @@ def update_entity_access(sender, instance, **kwargs):
     """
     Update Entity read_access when group is set to 'Closed'
     """
-    if settings.IMPORTING:
-        return
-
     if instance.is_closed:
         # to prevent cyclic import
         Entity = apps.get_model('core', 'Entity')

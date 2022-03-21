@@ -1,6 +1,5 @@
 import logging
 import requests
-from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist
 from django.db.models.signals import post_save
 from django.db import connection
@@ -19,8 +18,7 @@ logger = logging.getLogger(__name__)
 def object_handler(sender, instance, created, **kwargs):
     # pylint: disable=unused-argument
     if (
-        settings.IMPORTING
-        or not config.FLOW_ENABLED
+        not config.FLOW_ENABLED
         or not created
         or instance.type_to_string not in config.FLOW_SUBTYPES
     ):
@@ -64,8 +62,7 @@ def comment_handler(sender, instance, created, **kwargs):
     # pylint: disable=unused-argument
 
     if (
-        settings.IMPORTING
-        or not config.FLOW_ENABLED
+        not config.FLOW_ENABLED
         or not created
     ):
         return

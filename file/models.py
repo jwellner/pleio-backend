@@ -198,8 +198,6 @@ def file_pre_save(sender, instance, **kwargs):
 
     instance.read_access_weight = prepare_read_access_weight(instance)
 
-    if settings.IMPORTING:
-        return
     if instance.upload and not instance.title:
         instance.title = instance.upload.file.name
     if instance.upload:
@@ -214,9 +212,6 @@ def file_pre_save(sender, instance, **kwargs):
 @receiver([pre_save, pre_delete], sender=FileFolder)
 def update_parent_timestamps(sender, instance, **kwargs):
     # pylint: disable=unused-argument
-
-    if settings.IMPORTING:
-        return
 
     set_parent_folders_updated_at(instance)
 

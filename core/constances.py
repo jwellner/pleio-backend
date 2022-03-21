@@ -63,6 +63,12 @@ OIDC_PROVIDER_OPTIONS = [
     {'value': 'knb-test', 'label': 'Notariaat Test'},
 ]
 
+class ATTENDEE_ORDER_BY:
+    name = 'name'
+    email = 'email'
+    timeUpdated = 'timeUpdated'
+    timeCheckedIn = 'timeCheckedIn'
+
 class ORDER_DIRECTION:
     asc = 'asc'
     desc = 'desc'
