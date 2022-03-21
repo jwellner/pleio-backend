@@ -3,6 +3,7 @@ from mixer.backend.django import mixer
 from event.models import Event, EventAttendee
 from user.models import User
 from django.http import HttpRequest
+from django.utils import timezone
 from ariadne import graphql_sync
 from backend2.schema import schema
 from core.constances import USER_ROLES, ATTENDEE_ORDER_BY, ORDER_DIRECTION
@@ -26,7 +27,8 @@ class AttendeesTestCase(FastTenantTestCase):
             event=self.eventPublic,
             name='Ee',
             state='maybe',
-            email='Aa@test.nl'
+            email='Aa@test.nl',
+            checked_in_at=timezone.now()
         )
         mixer.blend(
             EventAttendee,
@@ -40,15 +42,16 @@ class AttendeesTestCase(FastTenantTestCase):
             event=self.eventPublic,
             state='accept',
             name='Cc',
-            email='Bcc@test.nl'
+            email='Bcc@test.nl',
+            checked_in_at=(timezone.now() - timezone.timedelta(minutes=10))
         )
 
 
         self.query = """
-            query EventQuery($guid: String, $offset: Int, $limit: Int, $orderBy: AttendeeOrderBy, $orderDirection: OrderDirection) {
+            query EventQuery($guid: String, $offset: Int, $limit: Int, $orderBy: AttendeeOrderBy, $orderDirection: OrderDirection, $isCheckedIn: Boolean) {
                 entity(guid: $guid) {
                     ... on Event {
-                        attendees(offset: $offset, limit: $limit, orderBy: $orderBy, orderDirection: $orderDirection) {
+                        attendees(offset: $offset, limit: $limit, orderBy: $orderBy, orderDirection: $orderDirection, isCheckedIn: $isCheckedIn) {
                             edges {
                                 name
                                 email
@@ -134,3 +137,37 @@ class AttendeesTestCase(FastTenantTestCase):
         self.assertEqual(data["entity"]["attendees"]["edges"][0]["name"], "Ee")
 
 
+    def test_checked_in_attendees(self):
+
+        request = HttpRequest()
+        request.user = self.admin
+
+        variables = {
+            "guid": self.eventPublic.guid,
+            "isCheckedIn": True
+        }
+
+        result = graphql_sync(schema, {"query": self.query, "variables": variables}, context_value={ "request": request })
+
+        self.assertTrue(result[0])
+        data = result[1]["data"]
+
+        self.assertEqual([d['name'] for d in data["entity"]["attendees"]["edges"]], ["Cc", "Ee"])
+
+
+    def test_not_checked_in_attendees(self):
+
+        request = HttpRequest()
+        request.user = self.admin
+
+        variables = {
+            "guid": self.eventPublic.guid,
+            "isCheckedIn": False
+        }
+
+        result = graphql_sync(schema, {"query": self.query, "variables": variables}, context_value={ "request": request })
+
+        self.assertTrue(result[0])
+        data = result[1]["data"]
+
+        self.assertEqual([d['name'] for d in data["entity"]["attendees"]["edges"]], ['Bb', 'Dd'])

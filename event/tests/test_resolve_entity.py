@@ -23,6 +23,7 @@ class EventTestCase(FastTenantTestCase):
         self.user = mixer.blend(User)
         self.user1 = mixer.blend(User)
         self.user2 = mixer.blend(User, name="test_name3")
+        self.today = timezone.now()
 
         self.eventPublic = Event.objects.create(
             title="Test public event",
@@ -82,7 +83,8 @@ class EventTestCase(FastTenantTestCase):
             event=self.eventPrivate,
             state='accept',
             name="test_name1",
-            email='test@test.nl'
+            email='test@test.nl',
+            checked_in_at=self.today
         )
 
         EventAttendee.objects.create(
@@ -128,6 +130,7 @@ class EventTestCase(FastTenantTestCase):
                     edges {
                         name
                         email
+                        timeCheckedIn
                         url
                         icon
                         state
@@ -220,6 +223,7 @@ class EventTestCase(FastTenantTestCase):
         self.assertEqual(data["entity"]["rsvp"], self.eventPrivate.rsvp)
         self.assertEqual(data["entity"]["attendEventWithoutAccount"], self.eventPrivate.attend_event_without_account)
         self.assertEqual(data["entity"]["attendees"]["edges"][0]["name"], 'test_name1')
+        self.assertEqual(data["entity"]["attendees"]["edges"][0]["timeCheckedIn"], self.today.isoformat())
         self.assertEqual(data["entity"]["attendees"]["edges"][0]["url"], None)
         self.assertEqual(data["entity"]["attendees"]["edges"][0]["icon"], None)
         self.assertEqual(data["entity"]["attendees"]["edges"][0]["state"], 'accept')

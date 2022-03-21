@@ -100,7 +100,7 @@ def resolve_max_attendees(obj, info):
 @event.field("isAttending")
 def resolve_is_attending(obj, info):
     # pylint: disable=unused-argument
-    attendee = obj.get_attendee(info.context["request"].user)
+    attendee = obj.get_attendee(info.context["request"].user, info.context["request"].user.email)
 
     if attendee:
         return attendee.state
@@ -120,7 +120,8 @@ def resolve_is_attending_parent(obj, info):
     return False
 
 @event.field("attendees")
-def resolve_attendees(obj, info, query=None, limit=20, offset=0, state=None, orderBy=ATTENDEE_ORDER_BY.name, orderDirection=ORDER_DIRECTION.asc):
+def resolve_attendees(obj, info, query=None, limit=20, offset=0, state=None,
+                      orderBy=ATTENDEE_ORDER_BY.name, orderDirection=ORDER_DIRECTION.asc, isCheckedIn=None):
     # pylint: disable=unused-argument
     # pylint: disable=too-many-arguments
 
@@ -148,10 +149,17 @@ def resolve_attendees(obj, info, query=None, limit=20, offset=0, state=None, ord
 
     qs = qs.filter(conditional_state_filter(state))
 
+    if isCheckedIn is False:
+        qs = qs.filter(checked_in_at__isnull = True)
+    elif isCheckedIn is True:
+        qs = qs.filter(checked_in_at__isnull = False)
+
     if orderBy == ATTENDEE_ORDER_BY.email: 
         order_by = 'email'
     elif orderBy == ATTENDEE_ORDER_BY.timeUpdated:
         order_by = 'updated_at'
+    elif orderBy == ATTENDEE_ORDER_BY.timeCheckedIn:
+        order_by = 'checked_in_at'
     elif orderBy == ATTENDEE_ORDER_BY.name:
         qs = qs.annotate(
             names=Case(
@@ -178,7 +186,8 @@ def resolve_attendees(obj, info, query=None, limit=20, offset=0, state=None, ord
         "name": item.user.name if item.user else item.name, 
         "state": item.state,
         "icon": item.user.icon if item.user else None, 
-        "url": item.user.url if item.user else None 
+        "url": item.user.url if item.user else None,
+        "timeCheckedIn": item.checked_in_at
         } 
         for item in qs]
 
