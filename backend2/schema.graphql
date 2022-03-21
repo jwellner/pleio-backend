@@ -208,6 +208,7 @@ type Attendee {
   name: String
   email: String!
   state: String!
+  timeCheckedIn: DateTime
   url: String
   icon: String
 }
@@ -386,8 +387,23 @@ type archiveEntityPayload {
   success: Boolean
 }
 
+"""Edit attendee of event"""
+input editEventAttendeeInput {
+  """Event guid"""
+  guid: String!
+  """Email addresses of attendees to be removed"""
+  emailAddress: String!
+  """Fields than can be edited"""
+  timeCheckedIn: DateTime
+}
+
+type editEventAttendeePayload {
+  entity: Event
+}
+
 """Remove attendees from event"""
 input deleteEventAttendeesInput {
+    """Event guid"""
   guid: String!
   """Email addresses of attendees to be removed"""
   emailAddresses: [String!]
@@ -864,7 +880,7 @@ type Event implements Entity {
   owner: User
   isAttending: String
   isAttendingParent: Boolean
-  attendees(query: String, offset: Int, limit: Int, state: String, orderBy: AttendeeOrderBy, orderDirection: OrderDirection): AttendeesList
+  attendees(query: String, offset: Int, limit: Int, state: String, orderBy: AttendeeOrderBy, orderDirection: OrderDirection, isCheckedIn: Boolean): AttendeesList
   comments: [Comment]
   commentCount: Int
   isPinned: Boolean!
@@ -881,6 +897,7 @@ enum AttendeeOrderBy {
   email
   name
   timeUpdated
+  timeCheckedIn
 }
 
 type EventList {
@@ -1255,6 +1272,7 @@ type Mutation {
   attendEvent(input: attendEventInput!): attendEventPayload
   attendEventWithoutAccount(input: attendEventWithoutAccountInput!): attendEventWithoutAccountPayload
   confirmAttendEventWithoutAccount(input: confirmAttendEventWithoutAccountInput!): confirmAttendEventWithoutAccountPayload
+  editEventAttendee(input: editEventAttendeeInput!): editEventAttendeePayload
   deleteEventAttendees(input: deleteEventAttendeesInput!): deleteEventAttendeesPayload
 
   markAsRead(input: markAsReadInput!): markAsReadPayload

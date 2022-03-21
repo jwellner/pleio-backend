@@ -67,6 +67,7 @@ class ATTENDEE_ORDER_BY:
     name = 'name'
     email = 'email'
     timeUpdated = 'timeUpdated'
+    timeCheckedIn = 'timeCheckedIn'
 
 class ORDER_DIRECTION:
     asc = 'asc'
