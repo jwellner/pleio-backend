@@ -1036,12 +1036,6 @@ type GroupList {
   edges: [Group]
 }
 
-type ProfileModal {
-  total: Int!
-  edges: [ProfileItem]
-  intro: String
-}
-
 type GroupNotificationItem {
   guid: String!
   name: String!
@@ -2008,7 +2002,7 @@ type User implements Entity {
   getsNewsletter: Boolean
   emailOverview: EmailOverview
   profile: [ProfileItem]
-  profileModal(groupGuid: String!): ProfileModal
+  missingProfileFields(groupGuid: String!): [ProfileItem]
   fieldsInOverview(groupGuid: String): [ProfileOverviewItem]
   stats: [StatsItem]
   groupNotifications: [GroupNotificationItem]

@@ -220,8 +220,8 @@ def resolve_last_online(obj, info):
     return None
 
 
-@user.field('profileModal')
-def resolve_profile_modal(obj, info, groupGuid):
+@user.field('missingProfileFields')
+def resolve_missing_profile_fields(obj, info, groupGuid):
     # pylint: disable=unused-argument
     class ModalNotRequiredSignal(Exception):
         pass
@@ -241,7 +241,7 @@ def resolve_profile_modal(obj, info, groupGuid):
         missing_profile_fields = [field_id for field_id in required_profile_fields if
                                   field_id not in existing_profile_fields]
 
-        edges = []
+        missing_profile_fields_result = []
         for field in ProfileField.objects.filter(id__in=missing_profile_fields):
             field.read_access = []
             try:
@@ -251,18 +251,14 @@ def resolve_profile_modal(obj, info, groupGuid):
                 field.read_access = user_profile_field.read_access
             except ObjectDoesNotExist:
                 field.read_access = [ACCESS_TYPE.logged_in]
-            edges.append(field)
+            missing_profile_fields_result.append(field)
 
         if len(missing_profile_fields) == 0:
             raise ModalNotRequiredSignal()
 
-        return {
-            "total": len(missing_profile_fields),
-            "edges": edges,
-            "intro": group.required_fields_message
-        }
+        return missing_profile_fields_result
 
     except (ModalNotRequiredSignal, UserProfile.DoesNotExist):
         pass
 
-    return {'total': 0}
+    return []

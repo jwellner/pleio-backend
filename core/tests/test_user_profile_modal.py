@@ -31,13 +31,11 @@ class UserProfileModalTestCase(FastTenantTestCase):
                 entity(guid: $user) {
                     guid
                     ... on User {
-                        profileModal(groupGuid: $group) {
-                            total
-                            edges {
+                        missingProfileFields(groupGuid: $group) {
+                        ... on ProfileItem {
                                 guid
                                 accessId
                             }
-                            intro
                         }
                     }
                 }
@@ -62,12 +60,11 @@ class UserProfileModalTestCase(FastTenantTestCase):
         return result.get('data')
 
     def assertProfileFieldsMissing(self, data):
-        self.assertEqual(data['entity']['profileModal']['total'], 1)
-        self.assertEqual(data['entity']['profileModal']['intro'], self.group.required_fields_message)
-        self.assertEqual(data['entity']['profileModal']['edges'][0]['guid'], self.profile_field.guid)
+        self.assertEqual(len(data['entity']['missingProfileFields']), 1)
+        self.assertEqual(data['entity']['missingProfileFields'][0]['guid'], self.profile_field.guid)
 
     def assertProfileFieldsOK(self, data):
-        self.assertEqual(data['entity']['profileModal']['total'], 0)
+        self.assertEqual(len(data['entity']['missingProfileFields']), 0)
 
     def test_query_should_give_profile_field_info_when_user_has_profile_not_filled_in(self):
         data = self.graphql_sync(visitor=self.member)
@@ -108,6 +105,6 @@ class UserProfileModalTestCase(FastTenantTestCase):
         )
 
         data = self.graphql_sync(visitor=self.member)
-        self.assertEqual(data['entity']['profileModal']['edges'][0]['accessId'], 1)
+        self.assertEqual(data['entity']['missingProfileFields'][0]['accessId'], 1)
 
 
