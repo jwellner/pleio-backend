@@ -100,10 +100,12 @@ def resolve_max_attendees(obj, info):
 @event.field("isAttending")
 def resolve_is_attending(obj, info):
     # pylint: disable=unused-argument
-    attendee = obj.get_attendee(info.context["request"].user, info.context["request"].user.email)
+    user = info.context["request"].user
 
-    if attendee:
-        return attendee.state
+    if user.is_authenticated:
+        attendee = obj.get_attendee(user, user.email)
+        if attendee:
+            return attendee.state
 
     return None
 
