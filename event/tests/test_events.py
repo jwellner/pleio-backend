@@ -19,6 +19,7 @@ class EventsTestCase(FastTenantTestCase):
 
     def setUp(self):
         tomorrow = timezone.now() + timezone.timedelta(days=1)
+        day_after_tomorrow = timezone.now() + timezone.timedelta(days=2)
         yesterday = timezone.now() - timezone.timedelta(days=1)
         hours_ago_1 = timezone.now() - timezone.timedelta(hours=1)
         self.anonymousUser = AnonymousUser()
@@ -58,7 +59,7 @@ class EventsTestCase(FastTenantTestCase):
             read_access=[ACCESS_TYPE.public],
             write_access=[ACCESS_TYPE.user.format(self.user1.id)],
             owner=self.user1,
-            start_date=tomorrow,
+            start_date=day_after_tomorrow,
             location="Utrecht",
             external_link="https://www.pleio.nl",
             rsvp=True,
@@ -189,9 +190,9 @@ class EventsTestCase(FastTenantTestCase):
             "filter": "upcoming"
         }
 
-        mixer.blend(EventAttendee, user=self.user2, email=None, event=self.eventFuture1)
+        mixer.blend(EventAttendee, user=self.user2, email=None, event=self.eventFuture1, state='accept')
         mixer.blend(EventAttendee, user=None, event=self.eventFuture1)
-        mixer.blend(EventAttendee, user=self.user2, email=None, event=self.eventFuture2)
+        mixer.blend(EventAttendee, user=self.user2, email=None, event=self.eventFuture2, state='accept')
         mixer.blend(EventAttendee, user=None, event=self.eventFuture2)
 
         result = graphql_sync(schema, { "query": self.query , "variables": variables}, context_value={ "request": request })
@@ -200,7 +201,7 @@ class EventsTestCase(FastTenantTestCase):
 
         data = result[1]["data"]
         self.assertEqual(data["events"]["total"], 2)
-        self.assertEqual(data["events"]["edges"][0]["attendees"]["total"], 0)
+        self.assertEqual(data["events"]["edges"][1]["attendees"]["total"], 1)
         self.assertEqual(len(data["events"]["edges"][0]["attendees"]["edges"]), 0)
 
     def test_events_upcoming(self):

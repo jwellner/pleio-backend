@@ -36,14 +36,22 @@ class Event(Entity, CommentMixin, BookmarkMixin, FollowMixin, NotificationMixin,
             return True
         return False
 
-    def get_attendee(self, user):
+    def get_attendee(self, user, email=None):
         if not user.is_authenticated:
             return None
 
+        attendee = None
+        
         try:
-            attendee = self.attendees.get(user=user)
+            attendee_user = User.objects.get(email=email)
+            attendee = self.attendees.get(user=attendee_user)
         except ObjectDoesNotExist:
-            return None
+            pass
+        
+        try:
+            attendee = self.attendees.get(email=email)
+        except ObjectDoesNotExist:
+            pass
 
         return attendee
 
@@ -153,6 +161,7 @@ class EventAttendee(models.Model):
 
     user = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)
 
+    checked_in_at = models.DateTimeField(default=None, null=True)
     created_at = models.DateTimeField(default=timezone.now)
     updated_at = models.DateTimeField(default=timezone.now)
 

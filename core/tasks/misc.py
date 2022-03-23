@@ -1,6 +1,5 @@
 import csv
 import os
-import re
 import signal_disabler
 from PIL import Image
 from io import BytesIO
@@ -14,8 +13,6 @@ from core.models import Group, Entity, Widget, Comment, ProfileField, UserProfil
 from django.utils import translation
 from django.utils.translation import ugettext_lazy
 from django_tenants.utils import schema_context
-from elgg.models import GuidMap
-from file.models import FileFolder
 from tenants.models import Client
 from user.models import User
 
@@ -143,7 +140,7 @@ def import_users(self, schema_name, fields, csv_location, performing_user_guid):
 
 @shared_task(bind=True, ignore_result=True)
 @signal_disabler.disable()
-def replace_domain_links(self, schema_name, replace_domain=None, replace_elgg_id=False):
+def replace_domain_links(self, schema_name, replace_domain=None):
     # pylint: disable=unused-argument
     # pylint: disable=too-many-locals
     # pylint: disable=too-many-statements
@@ -162,114 +159,6 @@ def replace_domain_links(self, schema_name, replace_domain=None, replace_elgg_id
             replace_domain = tenant_domain
 
         def _replace_links(text):
-            if replace_elgg_id:
-                # match links where old ID has to be simply replaced
-                matches = re.findall(rf'(((https:\/\/{re.escape(replace_domain)})|(^|(?<=[ \"\n])))[\w\-\/]*\/(view|download)\/([0-9]+)[\w\-\.\/\?\%]*)', text)
-
-                for match in matches:
-                    link = match[0]
-                    new_link = link
-                    ids = re.findall(r'\/([0-9]+)', link)
-                    for guid in ids:
-                        map_entity = GuidMap.objects.filter(id=guid).first()
-                        if map_entity:
-                            new_link = new_link.replace(str(guid), str(map_entity.guid))
-
-                    if link != new_link:
-                        text = text.replace(link, new_link)
-
-                # match thumbnail links and replace with file download link
-                matches = re.findall(
-                    rf'(((https:\/\/{re.escape(replace_domain)})|(^|(?<=[ \"\n])))\/mod\/file\/thumbnail.php\?file_guid=([0-9]+)[^\"^ ]*)',
-                    text
-                )
-
-                for match in matches:
-                    link = match[0]
-                    file_id = match[4]
-                    has_file = GuidMap.objects.filter(id=file_id, object_type="file").first()
-                    if has_file:
-                        try:
-                            file_entity = FileFolder.objects.get(id=has_file.guid)
-                            text = text.replace(link, file_entity.download_url)
-                        except Exception:
-                            pass
-
-
-                # match old /file/view links and replace with new /files/view link, only for migrates files
-                matches = re.findall(
-                    rf'(((https:\/\/{re.escape(replace_domain)})|(^|(?<=[ \"\n])))\/file\/view\/([\w\-]+)\/[\w\-\.\/\?\%]*)',
-                    text
-                )
-
-                for match in matches:
-                    link = match[0]
-                    file_id = match[4]
-
-                    # try old elgg id
-                    try:
-                        has_file = GuidMap.objects.filter(id=file_id, object_type="file").first()
-                        if has_file:
-                            file_entity = FileFolder.objects.get(id=has_file.guid)
-                            text = text.replace(link, file_entity.url)
-                    except Exception:
-                        pass
-
-                    # try new uuid
-                    try:
-                        has_file = GuidMap.objects.filter(guid=file_id, object_type="file").first()
-                        if has_file:
-                            file_entity = FileFolder.objects.get(id=file_id)
-                            text = text.replace(link, file_entity.url)
-                    except Exception:
-                        pass
-
-                # match group profile links and replace new link
-                matches = re.findall(
-                    rf'(((https:\/\/{re.escape(replace_domain)})|(^|(?<=[ \"\n])))\/groups\/profile\/([0-9]+)\/[^\"^ ]*)',
-                    text
-                )
-
-                for match in matches:
-                    link = match[0]
-                    group_id = match[4]
-                    has_group = GuidMap.objects.filter(id=group_id, object_type="group").first()
-
-                    if has_group:
-                        try:
-                            group_entity = Group.objects.get(id=has_group.guid)
-                            text = text.replace(link, group_entity.url)
-                        except Exception:
-                            pass
-
-                # match and replace folder links
-                matches = re.findall(
-                    rf'(((https:\/\/{re.escape(replace_domain)})|(^|(?<=[ \"\n])))\/file\/group\/([0-9]+)\/all(#([0-9]+))?[^\"^ ]*)',
-                    text
-                )
-
-                for match in matches:
-                    link = match[0]
-                    group_id = match[4]
-                    folder_id = match[6]
-                    has_folder = GuidMap.objects.filter(id=folder_id, object_type="folder").first() if folder_id else False
-                    has_group = GuidMap.objects.filter(id=group_id, object_type="group").first()
-
-
-                    if has_folder:
-                        try:
-                            folder_entity = FileFolder.objects.get(id=has_folder.guid)
-                            text = text.replace(link, folder_entity.url)
-                        except Exception:
-                            pass
-                    elif has_group:
-                        try:
-                            group_entity = Group.objects.get(id=has_group.guid)
-                            text = text.replace(link, group_entity.url + "/files")
-                        except Exception:
-                            pass
-
-
             # make absolute links relative
             text = text.replace(f"https://{replace_domain}/", f"/")
 

@@ -9,7 +9,6 @@ from django.utils import timezone
 from django.utils.text import slugify
 from django.core.files.base import ContentFile
 from django.urls import reverse
-from django.conf import settings
 from core.lib import get_mimetype
 from core.models.mixin import ModelWithFile
 from core.models.image import ResizedImageMixin
@@ -81,8 +80,6 @@ class Attachment(ModelWithFile, ResizedImageMixin):
 @receiver(models.signals.pre_save, sender=Attachment)
 def attachment_mimetype_size(sender, instance, **kwargs):
     # pylint: disable=unused-argument
-    if settings.IMPORTING:
-        return
     if instance.upload and not instance.name:
         instance.name = instance.upload.file.name
     if instance.upload:

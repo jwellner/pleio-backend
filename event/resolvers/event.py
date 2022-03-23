@@ -2,9 +2,10 @@ from ariadne import ObjectType
 from django.core.exceptions import ObjectDoesNotExist
 from core.resolvers import shared
 from django.db.models import Q, Case, When
-
+from core.constances import ENTITY_STATUS
 from core.lib import datetime_isoformat
 from event.models import EventAttendee
+from core.constances import ATTENDEE_ORDER_BY, ORDER_DIRECTION
 
 def conditional_state_filter(state):
     if state:
@@ -28,7 +29,9 @@ def resolve_has_children(obj, info):
 @event.field("children")
 def resolve_children(obj, info):
     # pylint: disable=unused-argument
-    return obj.children.visible(info.context["request"].user)
+    if obj.status_published == ENTITY_STATUS.PUBLISHED:
+        return obj.children.visible(info.context["request"].user)
+    return obj.children.draft(info.context["request"].user)
 
 @event.field("parent")
 def resolve_parent(obj, info):
@@ -97,10 +100,12 @@ def resolve_max_attendees(obj, info):
 @event.field("isAttending")
 def resolve_is_attending(obj, info):
     # pylint: disable=unused-argument
-    attendee = obj.get_attendee(info.context["request"].user)
+    user = info.context["request"].user
 
-    if attendee:
-        return attendee.state
+    if user.is_authenticated:
+        attendee = obj.get_attendee(user, user.email)
+        if attendee:
+            return attendee.state
 
     return None
 
@@ -117,14 +122,17 @@ def resolve_is_attending_parent(obj, info):
     return False
 
 @event.field("attendees")
-def resolve_attendees(obj, info, query=None, limit=20, offset=0, state=None):
+def resolve_attendees(obj, info, query=None, limit=20, offset=0, state=None,
+                      orderBy=ATTENDEE_ORDER_BY.name, orderDirection=ORDER_DIRECTION.asc, isCheckedIn=None):
     # pylint: disable=unused-argument
     # pylint: disable=too-many-arguments
 
+
     user = info.context["request"].user
+
     if not user.is_authenticated:
         return {
-            "total": 0,
+            "total": obj.attendees.filter(state="accept").count(),
             "totalMaybe": 0,
             "totalReject": 0,
             "totalWaitinglist": 0,
@@ -142,16 +150,30 @@ def resolve_attendees(obj, info, query=None, limit=20, offset=0, state=None):
         )
 
     qs = qs.filter(conditional_state_filter(state))
-    if state == 'waitinglist':
-        qs = qs.order_by('updated_at')
-    else:
+
+    if isCheckedIn is False:
+        qs = qs.filter(checked_in_at__isnull = True)
+    elif isCheckedIn is True:
+        qs = qs.filter(checked_in_at__isnull = False)
+
+    if orderBy == ATTENDEE_ORDER_BY.email: 
+        order_by = 'email'
+    elif orderBy == ATTENDEE_ORDER_BY.timeUpdated:
+        order_by = 'updated_at'
+    elif orderBy == ATTENDEE_ORDER_BY.timeCheckedIn:
+        order_by = 'checked_in_at'
+    elif orderBy == ATTENDEE_ORDER_BY.name:
         qs = qs.annotate(
             names=Case(
                 When(user=None, then='name'),
                 default='user__name',
-        ),
-        ).order_by('names')
+        ))
+        order_by = 'names'
 
+    if orderDirection == ORDER_DIRECTION.desc:
+        order_by = '-%s' % (order_by)
+
+    qs = qs.order_by(order_by)
     qs = qs[offset:offset+limit]
 
     # email adresses only for user with event write permissions
@@ -166,7 +188,8 @@ def resolve_attendees(obj, info, query=None, limit=20, offset=0, state=None):
         "name": item.user.name if item.user else item.name, 
         "state": item.state,
         "icon": item.user.icon if item.user else None, 
-        "url": item.user.url if item.user else None 
+        "url": item.user.url if item.user else None,
+        "timeCheckedIn": item.checked_in_at
         } 
         for item in qs]
 
