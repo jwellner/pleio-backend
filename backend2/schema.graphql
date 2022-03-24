@@ -391,7 +391,7 @@ type archiveEntityPayload {
 input editEventAttendeeInput {
   """Event guid"""
   guid: String!
-  """Email addresses of attendees to be removed"""
+  """Email addresses of attendee to edit"""
   emailAddress: String!
   """Fields than can be edited"""
   timeCheckedIn: DateTime
