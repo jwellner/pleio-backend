@@ -136,6 +136,9 @@ class EventTestCase(FastTenantTestCase):
                         state
                     }
                 }
+                children {
+                    guid
+                }
             }
             query GetEvent($guid: String!) {
                 entity(guid: $guid) {
@@ -308,3 +311,23 @@ class EventTestCase(FastTenantTestCase):
         data = result[1]["data"]
 
         self.assertEqual(data["entity"]["isAttendingParent"], True)
+
+
+    def test_event_archived(self):
+
+        self.eventPublic.is_archived = True
+        self.eventPublic.save()
+        request = HttpRequest()
+        request.user = self.anonymousUser
+
+        variables = {
+            "guid": self.eventPublic.guid
+        }
+
+        result = graphql_sync(schema, { "query": self.query , "variables": variables}, context_value={ "request": request })
+        self.assertTrue(result[0])
+
+        data = result[1]["data"]
+
+        self.assertEqual(data["entity"]["guid"], self.eventPublic.guid)
+        self.assertEqual(data["entity"]["children"][0]["guid"], self.subEventPublic.guid)
