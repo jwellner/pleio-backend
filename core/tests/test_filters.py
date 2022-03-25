@@ -7,11 +7,12 @@ from django.core.cache import cache
 from django.contrib.auth.models import AnonymousUser
 from django.http import HttpRequest
 from core.models import Group, ProfileField, Setting, GroupProfileFieldSetting, UserProfileField, UserProfile
+from core.tests.helpers import ElasticsearchTestMixin
 from user.models import User
 from mixer.backend.django import mixer
 
 
-class FiltersTestCase(FastTenantTestCase):
+class FiltersTestCase(FastTenantTestCase, ElasticsearchTestMixin):
 
     def setUp(self):
         self.anonymousUser = AnonymousUser()
@@ -127,10 +128,13 @@ class FiltersTestCase(FastTenantTestCase):
         request = HttpRequest()
         request.user = self.user
 
+        # Elasticsearch is accessed when groups queried.
+        self.initialize_index()
+
         result = graphql_sync(schema, {"query": query, "variables": variables}, context_value={"request": request})
 
         data = result[1]["data"]
-
+        self.assertIsNotNone(data["filters"]["users"], msg=result)
         self.assertEqual(len(data["filters"]["users"]), 1)
         self.assertEqual(data["filters"]["users"][0]["name"], "multi_key")
         self.assertEqual(data["filters"]["users"][0]["fieldType"], "multi_select_field")
