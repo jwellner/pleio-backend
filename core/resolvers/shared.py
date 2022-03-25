@@ -183,18 +183,18 @@ def resolve_entity_comment_count(obj, info):
     return _comment_count_from_index(obj) or _comment_count_from_object(obj)
 
 
-def _comment_count_from_index(instance):
+def _comment_count_from_index(obj):
     query = Search(index='_all') \
-        .query('match', id=instance.guid) \
+        .query('match', id=obj.guid) \
         .source(['id', 'comments'])
     for match in query.execute():
-        if match.id == instance.guid:
+        if match.id == obj.guid:
             return len(match.comments)
 
 
-def _comment_count_from_object(instance):
+def _comment_count_from_object(obj):
     try:
-        return len([c.id for c in instance.get_flat_comment_list()])
+        return len([c.id for c in obj.get_flat_comment_list()])
     except AttributeError:
         return 0
 
