@@ -1,3 +1,5 @@
+from elasticsearch_dsl import Search
+
 from core.constances import ACCESS_TYPE, TEXT_TOO_LONG
 from core.models import EntityViewCount
 from django.core.exceptions import ObjectDoesNotExist
@@ -178,6 +180,19 @@ def resolve_entity_comments(obj, info):
 
 def resolve_entity_comment_count(obj, info):
     # pylint: disable=unused-argument
+    return _comment_count_from_index(obj.guid) or _comment_count_from_object(obj)
+
+
+def _comment_count_from_index(instance_id):
+    query = Search(index='_all') \
+        .query('match', id=instance_id) \
+        .source(['id', 'comments'])
+    for match in query.execute():
+        if match.id == instance_id:
+            return len(match.comments)
+
+
+def _comment_count_from_object(obj):
     try:
         return len([c.id for c in obj.get_flat_comment_list()])
     except AttributeError:
