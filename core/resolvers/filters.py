@@ -78,7 +78,7 @@ def resolve_users_filters(_, info, groupGuid=None):
             is_filter = field.is_filter
 
         if is_filter and field.is_filterable:
-            if field.field_type in ['multi_select_field', 'select_field']:
+            if not group and field.field_type in ['multi_select_field', 'select_field']:
                 options = field.field_options
             else:
                 options = get_filter_options(field.key, user, group)
