@@ -180,21 +180,21 @@ def resolve_entity_comments(obj, info):
 
 def resolve_entity_comment_count(obj, info):
     # pylint: disable=unused-argument
-    return _comment_count_from_index(obj.guid) or _comment_count_from_object(obj)
+    return _comment_count_from_index(obj) or _comment_count_from_object(obj)
 
 
-def _comment_count_from_index(instance_id):
+def _comment_count_from_index(instance):
     query = Search(index='_all') \
-        .query('match', id=instance_id) \
+        .query('match', id=instance.guid) \
         .source(['id', 'comments'])
     for match in query.execute():
-        if match.id == instance_id:
+        if match.id == instance.guid:
             return len(match.comments)
 
 
-def _comment_count_from_object(obj):
+def _comment_count_from_object(instance):
     try:
-        return len([c.id for c in obj.get_flat_comment_list()])
+        return len([c.id for c in instance.get_flat_comment_list()])
     except AttributeError:
         return 0
 
