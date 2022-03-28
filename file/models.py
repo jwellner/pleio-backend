@@ -15,6 +15,7 @@ from django.db.models import ObjectDoesNotExist
 from django.db.models.signals import pre_save, pre_delete
 from django.dispatch import receiver
 from django.utils.text import slugify
+from django.core.files.base import ContentFile
 
 logger = logging.getLogger(__name__)
 
@@ -46,6 +47,17 @@ class FileFolder(Entity, ModelWithFile, ResizedImageMixin):
 
     def __str__(self):
         return f"FileFolder[{self.title}]"
+
+    def make_copy(self, user):
+        new = FileFolder()
+        new_file = ContentFile(self.upload.read())
+        new_file.name = self.upload.name
+        new.upload = new_file
+        new.owner = user
+
+        new.save()
+
+        return new
 
     @property
     def type_to_string(self):

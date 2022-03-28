@@ -366,6 +366,10 @@ def copy_event(event_id, user, parent=None):
         tiptap.replace_src(original, replacement) 
         entity.rich_description = json.dumps(tiptap.tiptap_json)
 
+    if entity.featured_image:
+        featured = entity.featured_image
+        entity.featured_image = featured.make_copy(user)
+
     #preserve time of original event
     if entity.start_date:
         if entity.end_date:
