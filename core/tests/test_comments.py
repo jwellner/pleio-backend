@@ -94,7 +94,7 @@ class CommentTestCase(FastTenantTestCase):
         data = result[1]["data"]
 
         self.assertEqual(data["entity"]["guid"], self.blogPublic.guid)
-        self.assertEqual(data["entity"]["commentCount"], 7)
+        self.assertEqual(data["entity"]["commentCount"], 8)
         # first should be last added comment
         self.assertEqual(data["entity"]["comments"][0]['guid'], self.lastComment.guid)
         self.assertEqual(data["entity"]["comments"][0]['ownerName'], self.lastComment.owner.name)
@@ -143,7 +143,7 @@ class CommentTestCase(FastTenantTestCase):
         data = result[1]["data"]
 
         self.assertEqual(data["entity"]["guid"], self.blogPublic.guid)
-        self.assertEqual(data["entity"]["commentCount"], 7)
+        self.assertEqual(data["entity"]["commentCount"], 8)
         # first should be last added comment
         self.assertEqual(data["entity"]["comments"][0]['guid'], self.lastComment.guid)
         self.assertEqual(data["entity"]["comments"][0]['ownerName'], self.lastComment.owner.name)
