@@ -232,12 +232,12 @@ def resolve_missing_profile_fields(obj, info, groupGuid):
         required_profile_fields = [setting.profile_field.id for setting in
                                    GroupProfileFieldSetting.objects.filter(group=group, is_required=True)]
 
-        if len(required_profile_fields) == 0:
+        if not required_profile_fields:
             raise ModalNotRequiredSignal()
 
         profile = UserProfile.objects.get(user=obj)
         existing_profile_fields = [field.profile_field.id for field in
-                                   UserProfileField.objects.filter(user_profile=profile) if field.value != '']
+                                   UserProfileField.objects.filter(user_profile=profile) if not field.is_empty]
         missing_profile_fields = [field_id for field_id in required_profile_fields if
                                   field_id not in existing_profile_fields]
 
