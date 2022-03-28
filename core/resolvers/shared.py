@@ -180,7 +180,10 @@ def resolve_entity_comments(obj, info):
 
 def resolve_entity_comment_count(obj, info):
     # pylint: disable=unused-argument
-    return _comment_count_from_index(obj) or _comment_count_from_object(obj)
+    count = _comment_count_from_index(obj)
+    if count is None:
+        return _comment_count_from_object(obj)
+    return count
 
 
 def _comment_count_from_index(obj):
@@ -190,13 +193,15 @@ def _comment_count_from_index(obj):
     for match in query.execute():
         if match.id == obj.guid:
             return len(match.comments)
+    return None
 
 
 def _comment_count_from_object(obj):
     try:
         return len([c.id for c in obj.get_flat_comment_list()])
     except AttributeError:
-        return 0
+        pass
+    return 0
 
 
 def resolve_entity_is_following(obj, info):
