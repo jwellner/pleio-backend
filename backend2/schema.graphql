@@ -1047,7 +1047,6 @@ type Group implements Entity {
   showMemberProfileFields: [ProfileItem]
   requiredProfileFields: [ProfileItem]
   requiredProfileFieldsMessage: String
-  memberMissingFieldGuids: [String]
 }
 
 """Show all groups or only mine"""
@@ -2028,6 +2027,7 @@ type User implements Entity {
   getsNewsletter: Boolean
   emailOverview: EmailOverview
   profile: [ProfileItem]
+  missingProfileFields(groupGuid: String!): [ProfileItem]
   fieldsInOverview(groupGuid: String): [ProfileOverviewItem]
   stats: [StatsItem]
   groupNotifications: [GroupNotificationItem]
