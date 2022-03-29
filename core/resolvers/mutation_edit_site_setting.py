@@ -15,7 +15,7 @@ from user.models import User
 from django.db import connection
 from django.core.cache import cache
 from django.utils.translation import ugettext_lazy
-from file.helpers import resize_and_save_as_png
+from file.helpers.images import resize_and_save_as_png
 from file.models import FileFolder
 from django.utils import timezone
 

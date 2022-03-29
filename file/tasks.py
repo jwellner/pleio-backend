@@ -11,7 +11,7 @@ from django_tenants.utils import schema_context
 from django.utils import timezone
 from django.utils.translation import ugettext_lazy
 from file.models import FileFolder, FILE_SCAN
-from file.helpers import resize_and_update_image
+from file.helpers.images import resize_and_update_image
 from core.lib import get_default_email_context
 from core.tasks import send_mail_multi
 from user.models import User

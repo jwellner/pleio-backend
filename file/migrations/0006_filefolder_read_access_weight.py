@@ -5,11 +5,11 @@ from django.db import migrations, models
 
 def populate_read_access_weight(apps, schema_editor):
     # pylint: disable=unused-argument
-    from file.models import prepare_read_access_weight
+    from file.helpers.access import get_read_access_weight
     FileFolder = apps.get_model('file', 'FileFolder')
 
     for file_folder in FileFolder.objects.all():
-        file_folder.read_access_weight = prepare_read_access_weight(file_folder)
+        file_folder.read_access_weight = get_read_access_weight(file_folder)
         file_folder.save()
 
 

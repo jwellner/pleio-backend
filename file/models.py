@@ -16,6 +16,8 @@ from django.db.models.signals import pre_save, pre_delete
 from django.dispatch import receiver
 from django.utils.text import slugify
 
+from file.helpers.access import get_read_access_weight
+
 logger = logging.getLogger(__name__)
 
 
@@ -165,38 +167,10 @@ def set_parent_folders_updated_at(instance):
         set_parent_folders_updated_at(instance.parent)
 
 
-def prepare_read_access_weight(instance):
-    """ #1: Eigenaar
-        #2: Subgroep
-        #3: Groep
-        #4: Ingelogd
-        #5: Publiek
-    """
-    if _loop_file_read_access(instance, lambda x: x == 'public'):
-        return 5
-    if _loop_file_read_access(instance, lambda x: x == 'logged_in'):
-        return 4
-    if _loop_file_read_access(instance, lambda x: x[:6] == 'group:'):
-        return 3
-    if _loop_file_read_access(instance, lambda x: x[:9] == 'subgroup:'):
-        return 2
-    if _loop_file_read_access(instance, lambda x: x[:5] == 'user:'):
-        return 1
-    return 6
-
-
-def _loop_file_read_access(file, callback):
-    for perm in file.read_access:
-        if callback(perm):
-            return True
-    return False
-
-
 @receiver(pre_save, sender=FileFolder)
 def file_pre_save(sender, instance, **kwargs):
     # pylint: disable=unused-argument
-
-    instance.read_access_weight = prepare_read_access_weight(instance)
+    instance.read_access_weight = get_read_access_weight(instance)
 
     if instance.upload and not instance.title:
         instance.title = instance.upload.file.name

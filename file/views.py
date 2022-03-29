@@ -7,7 +7,8 @@ from core.lib import get_tmp_file_path
 from core.models import Entity
 from core.constances import USER_ROLES
 from file.models import FileFolder
-from file.helpers import add_folders_to_zip, generate_thumbnail, get_download_filename
+from file.helpers.compression import add_folders_to_zip, get_download_filename
+from file.helpers.images import generate_thumbnail
 from os import path
 
 
