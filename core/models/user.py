@@ -243,6 +243,12 @@ class UserProfileField(models.Model):
             return self.value.split(',')
         return []
 
+    @property
+    def is_empty(self):
+        if self.profile_field.field_type == 'date_field':
+            return self.value_date is None
+        return self.value is None or self.value == ''
+
     def __str__(self):
         return f"UserProfileField[{self.profile_field.name}]"
 

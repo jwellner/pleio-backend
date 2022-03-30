@@ -189,15 +189,14 @@ class EventAttendeeRequest(models.Model):
 def event_post_save(sender, instance, **kwargs):
     # pylint: disable=unused-argument
 
-    if instance.has_children():
-        for child in instance.children.all():
-            child.is_archived = instance.is_archived
-            child.published = instance.published
-            child.read_access = instance.read_access
-            child.write_access = instance.write_access
-            child.owner = instance.owner
-            child.group = instance.group
-            child.save()
+    for child in Event.all_objects.filter(parent=instance):
+        child.is_archived = instance.is_archived
+        child.published = instance.published
+        child.read_access = instance.read_access
+        child.write_access = instance.write_access
+        child.owner = instance.owner
+        child.group = instance.group
+        child.save()
 
 #When a subevent is edited and saved, the fields dependent on the parent are updated accordingly
 @receiver(pre_save, sender=Event)

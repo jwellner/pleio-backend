@@ -391,7 +391,7 @@ type archiveEntityPayload {
 input editEventAttendeeInput {
   """Event guid"""
   guid: String!
-  """Email addresses of attendees to be removed"""
+  """Email addresses of attendee to edit"""
   emailAddress: String!
   """Fields than can be edited"""
   timeCheckedIn: DateTime
@@ -1047,7 +1047,6 @@ type Group implements Entity {
   showMemberProfileFields: [ProfileItem]
   requiredProfileFields: [ProfileItem]
   requiredProfileFieldsMessage: String
-  memberMissingFieldGuids: [String]
 }
 
 """Show all groups or only mine"""
@@ -2028,6 +2027,7 @@ type User implements Entity {
   getsNewsletter: Boolean
   emailOverview: EmailOverview
   profile: [ProfileItem]
+  missingProfileFields(groupGuid: String!): [ProfileItem]
   fieldsInOverview(groupGuid: String): [ProfileOverviewItem]
   stats: [StatsItem]
   groupNotifications: [GroupNotificationItem]

@@ -4,7 +4,7 @@ from core.resolvers import shared
 from django.db.models import Q, Case, When
 from core.constances import ENTITY_STATUS
 from core.lib import datetime_isoformat
-from event.models import EventAttendee
+from event.models import Event, EventAttendee
 from core.constances import ATTENDEE_ORDER_BY, ORDER_DIRECTION
 
 def conditional_state_filter(state):
@@ -29,9 +29,12 @@ def resolve_has_children(obj, info):
 @event.field("children")
 def resolve_children(obj, info):
     # pylint: disable=unused-argument
+    """
+    Children fields published and isArchived are kept in sync with the parent event, see signals in event/models.py
+    """
     if obj.status_published == ENTITY_STATUS.PUBLISHED:
         return obj.children.visible(info.context["request"].user)
-    return obj.children.draft(info.context["request"].user)
+    return Event.all_objects.filter(parent=obj)
 
 @event.field("parent")
 def resolve_parent(obj, info):
