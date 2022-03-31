@@ -2,6 +2,7 @@ import mimetypes
 import re
 from os import path
 from core.lib import get_mimetype
+from file.models import FileFolder
 
 
 def get_download_filename(f):
@@ -34,7 +35,6 @@ def get_download_filename(f):
 
 
 def add_folders_to_zip(zip_file, folders, user, file_path):
-    from file.models import FileFolder
     for folder in folders:
         files = FileFolder.objects.visible(user).filter(parent=folder.id, is_folder=False)
         file_path = path.join(file_path, folder.title)
