@@ -105,7 +105,7 @@ class StatusUpdateTestCase(FastTenantTestCase):
         self.assertEqual(data["entity"]["canComment"], False)
         self.assertEqual(data["entity"]["canEdit"], False)
         self.assertEqual(data["entity"]["canVote"], False)
-        self.assertEqual(data["entity"]["url"], "#{}".format(self.statusPublic.guid))
+        self.assertEqual(data["entity"]["url"], "/update/view/{}".format(self.statusPublic.guid))
 
         variables = {
             "guid": self.statusPrivate.guid
