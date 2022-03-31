@@ -1,3 +1,4 @@
+from django.utils import timezone
 from django_tenants.test.cases import FastTenantTestCase
 from backend2.schema import schema
 from ariadne import graphql_sync
@@ -9,9 +10,11 @@ from blog.models import Blog
 from mixer.backend.django import mixer
 from core.constances import ACCESS_TYPE
 
+
 class CommentTestCase(FastTenantTestCase):
 
     def setUp(self):
+        super().setUp()
         self.anonymousUser = AnonymousUser()
         self.authenticatedUser = mixer.blend(User)
 
@@ -49,9 +52,8 @@ class CommentTestCase(FastTenantTestCase):
     def tearDown(self):
         self.blogPublic.delete()
         self.authenticatedUser.delete()
-    
-    def test_blog_anonymous(self):
 
+    def test_blog_anonymous(self):
         query = """
             fragment BlogParts on Blog {
                 title
@@ -81,18 +83,18 @@ class CommentTestCase(FastTenantTestCase):
         request = HttpRequest()
         request.user = self.anonymousUser
 
-        variables = { 
+        variables = {
             "guid": self.blogPublic.guid
         }
 
-        result = graphql_sync(schema, { "query": query , "variables": variables}, context_value={ "request": request })
+        result = graphql_sync(schema, {"query": query, "variables": variables}, context_value={"request": request})
 
         self.assertTrue(result[0])
 
         data = result[1]["data"]
-       
+
         self.assertEqual(data["entity"]["guid"], self.blogPublic.guid)
-        self.assertEqual(data["entity"]["commentCount"], 7)
+        self.assertEqual(data["entity"]["commentCount"], 8)
         # first should be last added comment
         self.assertEqual(data["entity"]["comments"][0]['guid'], self.lastComment.guid)
         self.assertEqual(data["entity"]["comments"][0]['ownerName'], self.lastComment.owner.name)
@@ -100,9 +102,7 @@ class CommentTestCase(FastTenantTestCase):
         self.assertEqual(data["entity"]["comments"][0]['canComment'], False)
         self.assertEqual(data["entity"]["comments"][1]['ownerName'], self.anonComment.name)
 
-
     def test_comment_on_comment(self):
-
         query = """
             fragment BlogParts on Blog {
                 title
@@ -132,18 +132,18 @@ class CommentTestCase(FastTenantTestCase):
         request = HttpRequest()
         request.user = self.authenticatedUser
 
-        variables = { 
+        variables = {
             "guid": self.blogPublic.guid
         }
 
-        result = graphql_sync(schema, { "query": query , "variables": variables}, context_value={ "request": request })
+        result = graphql_sync(schema, {"query": query, "variables": variables}, context_value={"request": request})
 
         self.assertTrue(result[0])
 
         data = result[1]["data"]
-       
+
         self.assertEqual(data["entity"]["guid"], self.blogPublic.guid)
-        self.assertEqual(data["entity"]["commentCount"], 7)
+        self.assertEqual(data["entity"]["commentCount"], 8)
         # first should be last added comment
         self.assertEqual(data["entity"]["comments"][0]['guid'], self.lastComment.guid)
         self.assertEqual(data["entity"]["comments"][0]['ownerName'], self.lastComment.owner.name)
@@ -154,9 +154,7 @@ class CommentTestCase(FastTenantTestCase):
         self.assertEqual(data["entity"]["comments"][0]['comments'][0]['canComment'], False)
         self.assertEqual(data["entity"]["comments"][1]['ownerName'], self.anonComment.name)
 
-
     def test_add_comment(self):
-
         blog = Blog.objects.create(
             title="Test public blog",
             rich_description="JSON to string",
@@ -176,7 +174,7 @@ class CommentTestCase(FastTenantTestCase):
                 }
             }
         """
-        variables = { 
+        variables = {
             "input": {
                 "subtype": "comment",
                 "containerGuid": blog.guid,
@@ -187,7 +185,7 @@ class CommentTestCase(FastTenantTestCase):
         request = HttpRequest()
         request.user = self.authenticatedUser
 
-        result = graphql_sync(schema, { "query": mutation, "variables": variables }, context_value={ "request": request })
+        result = graphql_sync(schema, {"query": mutation, "variables": variables}, context_value={"request": request})
 
         self.assertTrue(result[0])
 
@@ -204,7 +202,7 @@ class CommentTestCase(FastTenantTestCase):
                 "richDescription": ""
             }
         }
-        result = graphql_sync(schema, { "query": mutation, "variables": variables }, context_value={ "request": request })
+        result = graphql_sync(schema, {"query": mutation, "variables": variables}, context_value={"request": request})
 
         self.assertTrue(result[0])
 
@@ -222,7 +220,7 @@ class CommentTestCase(FastTenantTestCase):
                 "richDescription": ""
             }
         }
-        result = graphql_sync(schema, { "query": mutation, "variables": variables }, context_value={ "request": request })
+        result = graphql_sync(schema, {"query": mutation, "variables": variables}, context_value={"request": request})
 
         errors = result[1]["errors"]
 
@@ -232,5 +230,39 @@ class CommentTestCase(FastTenantTestCase):
         self.assertEqual(blog.comments.first().comments.count(), 1)
         self.assertEqual(blog.comments.first().comments.first().comments.count(), 0)
 
+    def test_flat_comment_list(self):
+        owner = mixer.blend(User)
+        # Blog, or any other comment containing entity.
+        instance = Blog.objects.create(owner=owner,
+                                       title="Title",
+                                       rich_description="Bla",
+                                       read_access=[ACCESS_TYPE.public],
+                                       published=timezone.now() - timezone.timedelta(days=-1))
+        # Normal comment.
+        c1 = Comment.objects.create(container=instance,
+                                    owner=owner)
+        # Nested comment.
+        Comment.objects.create(container=c1,
+                               owner=owner)
 
+        query = """
+        query GetCommentCount($query: String!) {
+          entity(guid: $query) {
+            guid
+            ... on Blog {
+              commentCount
+            }
+            __typename
+          }
+        }
+        """
+        variables = {
+            'query': instance.guid
+        }
 
+        request = HttpRequest()
+        request.user = owner
+        success, result = graphql_sync(schema, {"query": query, "variables": variables},
+                                       context_value={"request": request})
+
+        self.assertEqual(result['data']['entity']['commentCount'], 2)
