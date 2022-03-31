@@ -2,10 +2,10 @@ from auditlog.registry import auditlog
 from django.db import models
 from django.utils.text import slugify
 from django.utils.translation import ugettext_lazy
-from core.models import Entity, VoteMixin, CommentMixin, BookmarkMixin, FollowMixin, NotificationMixin, AttachmentMixin
+from core.models import Entity, VoteMixin, CommentMixin, BookmarkMixin, FollowMixin, AttachmentMixin, MentionMixin
 from core.utils.convert import tiptap_to_text
 
-class StatusUpdate(Entity, VoteMixin, CommentMixin, BookmarkMixin, FollowMixin, NotificationMixin, AttachmentMixin):
+class StatusUpdate(Entity, VoteMixin, CommentMixin, BookmarkMixin, FollowMixin, AttachmentMixin, MentionMixin):
     class Meta:
         ordering = ['-published']
         verbose_name = ugettext_lazy("status update")
@@ -29,7 +29,7 @@ class StatusUpdate(Entity, VoteMixin, CommentMixin, BookmarkMixin, FollowMixin, 
                 self.group.guid, slugify(self.group.name)
             )
 
-        return '{}#{}'.format(
+        return '{}/update/view/{}'.format(
             prefix, self.guid
         ).lower()
 
