@@ -17,7 +17,10 @@ from django.dispatch import receiver
 from django.utils.text import slugify
 from django.core.files.base import ContentFile
 
+from file.helpers.access import get_read_access_weight
+
 logger = logging.getLogger(__name__)
+
 
 def read_access_default():
     return []
@@ -26,13 +29,14 @@ def read_access_default():
 def write_access_default():
     return []
 
+
 class FILE_SCAN(Enum):
     CLEAN = 'CLEAN'
     VIRUS = 'VIRUS'
     UNKNOWN = 'UNKNOWN'
 
-class FileFolder(Entity, ModelWithFile, ResizedImageMixin):
 
+class FileFolder(Entity, ModelWithFile, ResizedImageMixin):
     title = models.CharField(max_length=256)
 
     parent = models.ForeignKey('self', blank=True, null=True, related_name='children', on_delete=models.CASCADE)
@@ -44,6 +48,8 @@ class FileFolder(Entity, ModelWithFile, ResizedImageMixin):
     size = models.IntegerField(default=0)
 
     last_scan = models.DateTimeField(default=None, null=True)
+
+    read_access_weight = models.IntegerField(default=0)
 
     def __str__(self):
         return f"FileFolder[{self.title}]"
@@ -74,7 +80,7 @@ class FileFolder(Entity, ModelWithFile, ResizedImageMixin):
                 prefix = '/groups/view/{}/{}'.format(
                     self.group.guid, slugify(self.group.name)
                 )
-            else: # personal file browser url
+            else:  # personal file browser url
                 prefix = '/user/{}'.format(self.owner.guid)
 
             return '{}/files/{}'.format(
@@ -151,10 +157,12 @@ class FileFolder(Entity, ModelWithFile, ResizedImageMixin):
     def mime_type_field(self):
         return self.mime_type
 
+
 class ScanIncident(models.Model):
     date = models.DateTimeField(default=timezone.now)
     message = models.CharField(max_length=256)
-    file = models.ForeignKey('file.FileFolder', blank=True, null=True, on_delete=models.SET_NULL, related_name='scan_incidents')
+    file = models.ForeignKey('file.FileFolder', blank=True, null=True, on_delete=models.SET_NULL,
+                             related_name='scan_incidents')
     file_created = models.DateTimeField(default=timezone.now)
     file_group = models.ForeignKey('core.Group', blank=True, null=True, on_delete=models.SET_NULL)
     file_title = models.CharField(max_length=256)
@@ -164,14 +172,17 @@ class ScanIncident(models.Model):
     class Meta:
         ordering = ('-date',)
 
+
 def set_parent_folders_updated_at(instance):
     if instance.parent and instance.parent.is_folder:
         instance.parent.save()
         set_parent_folders_updated_at(instance.parent)
 
+
 @receiver(pre_save, sender=FileFolder)
 def file_pre_save(sender, instance, **kwargs):
     # pylint: disable=unused-argument
+    instance.read_access_weight = get_read_access_weight(instance)
 
     if instance.upload and not instance.title:
         instance.title = instance.upload.file.name
@@ -181,6 +192,7 @@ def file_pre_save(sender, instance, **kwargs):
             instance.size = instance.upload.size
         except Exception:
             pass
+
 
 # update parent folders updated_at when adding, moving and deleting files
 @receiver([pre_save, pre_delete], sender=FileFolder)

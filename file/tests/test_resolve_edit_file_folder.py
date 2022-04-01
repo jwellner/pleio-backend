@@ -11,7 +11,7 @@ from django.contrib.auth.models import AnonymousUser
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.http import HttpRequest
 from core.models import Group
-from file.helpers import get_download_filename
+from file.helpers.compression import get_download_filename
 from user.models import User
 from event.models import Event
 from core.constances import ACCESS_TYPE
