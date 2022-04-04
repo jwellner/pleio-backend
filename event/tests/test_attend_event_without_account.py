@@ -189,9 +189,9 @@ class AttendEventWithoutAccountTestCase(FastTenantTestCase):
         request.user = self.anonymousUser
 
         result = graphql_sync(schema, { "query": mutation, "variables": variables }, context_value={ "request": request })
-        errors = result[1]["errors"]
+        
+        self.assertTrue(result[0])
 
-        self.assertEqual(errors[0]["message"], "event_is_full")
 
     @mock.patch('event.resolvers.mutation_attend_event_without_account.generate_code', return_value='6df8cdad5582833eeab4')
     @mock.patch('event.resolvers.mutation_attend_event_without_account.send_mail_multi.delay')

@@ -2,7 +2,7 @@ from graphql import GraphQLError
 from django.core.exceptions import ObjectDoesNotExist, ValidationError
 from django.core.validators import validate_email
 from django.utils.translation import ugettext_lazy
-from core.constances import COULD_NOT_FIND, INVALID_EMAIL, EMAIL_ALREADY_USED, EVENT_IS_FULL, NOT_ATTENDING_PARENT_EVENT
+from core.constances import COULD_NOT_FIND, INVALID_EMAIL, EMAIL_ALREADY_USED, NOT_ATTENDING_PARENT_EVENT
 from core.lib import clean_graphql_input, get_base_url, generate_code, get_default_email_context, tenant_schema
 from event.lib import validate_name
 from event.models import Event, EventAttendee, EventAttendeeRequest
@@ -20,9 +20,6 @@ def resolve_attend_event_without_account(_, info, input):
         event = Event.objects.get(id=clean_input.get("guid"))
     except ObjectDoesNotExist:
         raise GraphQLError(COULD_NOT_FIND)
-
-    if event.is_full():
-        raise GraphQLError(EVENT_IS_FULL)
 
     # check if is attending parent
     if event.parent:
