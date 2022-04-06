@@ -145,10 +145,21 @@ def resolve_attendees(obj, info, query=None, limit=20, offset=0, state=None,
     can_write = obj.can_write(user)
     qs = obj.attendees.all()
 
+    qs = qs.annotate(
+        names=Case(
+                When(user=None, then='name'),
+                default='user__name',
+    ))
+    qs = qs.annotate(
+        emails=Case(
+                When(user=None, then='email'),
+                default='user__email',
+    ))
+
     if query:
         qs = qs.filter(
-            Q(name__icontains=query) |
-            Q(email__icontains=query) |
+            Q(names__icontains=query) |
+            Q(emails__icontains=query) |
             Q(id__iexact=query)
         )
 
@@ -166,11 +177,6 @@ def resolve_attendees(obj, info, query=None, limit=20, offset=0, state=None,
     elif orderBy == ATTENDEE_ORDER_BY.timeCheckedIn:
         order_by = 'checked_in_at'
     elif orderBy == ATTENDEE_ORDER_BY.name:
-        qs = qs.annotate(
-            names=Case(
-                When(user=None, then='name'),
-                default='user__name',
-        ))
         order_by = 'names'
 
     if orderDirection == ORDER_DIRECTION.desc:
