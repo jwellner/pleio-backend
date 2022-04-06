@@ -50,6 +50,8 @@ spec:
           env:
             - name: RUN_AS_ADMIN_APP
               value: "True"
+            - name: DB_HOST_REPLICA
+              value: ""
         {{- if .Values.tunnel.hostname }}
         - name: tunnel
           image: "{{ .Values.tunnel.repository }}:{{ .Values.tunnel.tag }}"
