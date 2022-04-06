@@ -1,12 +1,13 @@
 
 from django_tenants.test.cases import FastTenantTestCase
 from blog.models import Blog
+from core.tests.helpers import ElasticsearchTestMixin
 from user.models import User
 from mixer.backend.django import mixer
 from elasticsearch_dsl import Search, Q
 
 
-class AddBlogTestCase(FastTenantTestCase):
+class AddBlogTestCase(FastTenantTestCase, ElasticsearchTestMixin):
     def setUp(self):
         self.authenticatedUser = mixer.blend(User,
             name = "Jan de Vries"
@@ -17,6 +18,8 @@ class AddBlogTestCase(FastTenantTestCase):
         )
 
     def test_blog_document(self):
+        self.initialize_index()
+
         s = Search(index='_all').query(
             Q('simple_query_string', query='Jan', fields=['owner.name'])
             )
