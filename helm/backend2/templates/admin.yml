@@ -19,15 +19,15 @@ spec:
         {{- include "backend2.selectorLabels" $labelData | nindent 8 }}
     spec:
       initContainers:
-       - name: init-container
-         image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
-         command: ['python', 'manage.py', 'migrate_schemas']
-         imagePullPolicy: {{ .Values.image.imagePullPolicy }}
-         envFrom:
-          - configMapRef:
-              name: {{ include "backend2.name" . }}
-          - secretRef:
-              name: {{ include "backend2.secretsName" . }}
+        - name: init-container
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          command: ['python', 'manage.py', 'migrate_schemas']
+          imagePullPolicy: {{ .Values.image.imagePullPolicy }}
+          envFrom:
+            - configMapRef:
+                name: {{ include "backend2.name" . }}
+            - secretRef:
+                name: {{ include "backend2.secretsName" . }}
           env:
             - name: RUN_AS_ADMIN_APP
               value: "True"
