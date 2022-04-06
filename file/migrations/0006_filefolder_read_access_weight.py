@@ -9,8 +9,11 @@ def populate_read_access_weight(apps, schema_editor):
     FileFolder = apps.get_model('file', 'FileFolder')
 
     for file_folder in FileFolder.objects.all():
-        file_folder.read_access_weight = get_read_access_weight(file_folder)
-        file_folder.save()
+        try:
+            file_folder.read_access_weight = get_read_access_weight(file_folder)
+            file_folder.save()
+        except Exception as e:
+            print(e)
 
 
 class Migration(migrations.Migration):
@@ -24,5 +27,5 @@ class Migration(migrations.Migration):
             name='read_access_weight',
             field=models.IntegerField(default=0),
         ),
-        migrations.RunPython(populate_read_access_weight)
+        migrations.RunPython(populate_read_access_weight, migrations.RunPython.noop)
     ]
