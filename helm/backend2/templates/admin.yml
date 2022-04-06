@@ -28,6 +28,11 @@ spec:
               name: {{ include "backend2.name" . }}
           - secretRef:
               name: {{ include "backend2.secretsName" . }}
+          env:
+            - name: RUN_AS_ADMIN_APP
+              value: "True"
+            - name: DB_HOST_REPLICA
+              value: ""
       containers:
         - name: {{ include "backend2.adminName" . }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
