@@ -46,6 +46,8 @@ class EditEventTestCase(FastTenantTestCase):
                 "endDate": "2019-10-02T10:00:00+02:00",
                 "maxAttendees": "10",
                 "location": "Utrecht",
+                "locationLink": "maps.google.nl",
+                "locationAddress": "Kerkstraat 10",
                 "source": "https://www.pleio.nl",
                 "attendEventWithoutAccount": True,
                 "rsvp": True
@@ -75,6 +77,8 @@ class EditEventTestCase(FastTenantTestCase):
                 startDate
                 endDate
                 location
+                locationLink
+                locationAddress
                 maxAttendees
             }
             mutation ($input: editEntityInput!) {
@@ -105,6 +109,8 @@ class EditEventTestCase(FastTenantTestCase):
         self.assertEqual(data["editEntity"]["entity"]["endDate"], "2019-10-02T10:00:00+02:00")
         self.assertEqual(data["editEntity"]["entity"]["maxAttendees"], variables["input"]["maxAttendees"])
         self.assertEqual(data["editEntity"]["entity"]["location"], variables["input"]["location"])
+        self.assertEqual(data["editEntity"]["entity"]["locationLink"], variables["input"]["locationLink"])
+        self.assertEqual(data["editEntity"]["entity"]["locationAddress"], variables["input"]["locationAddress"])
         self.assertEqual(data["editEntity"]["entity"]["source"], variables["input"]["source"])
         self.assertEqual(data["editEntity"]["entity"]["attendEventWithoutAccount"], variables["input"]["attendEventWithoutAccount"])
         self.assertEqual(data["editEntity"]["entity"]["rsvp"], variables["input"]["rsvp"])
@@ -117,6 +123,9 @@ class EditEventTestCase(FastTenantTestCase):
         self.assertEqual(data["editEntity"]["entity"]["endDate"], str(datetime_isoformat(self.eventPublic.end_date)))
         self.assertEqual(data["editEntity"]["entity"]["maxAttendees"], str(self.eventPublic.max_attendees))
         self.assertEqual(data["editEntity"]["entity"]["location"], self.eventPublic.location)
+        self.assertEqual(data["editEntity"]["entity"]["locationLink"], self.eventPublic.location_link)
+        self.assertEqual(data["editEntity"]["entity"]["locationAddress"], self.eventPublic.location_address)
+
         self.assertEqual(data["editEntity"]["entity"]["source"], self.eventPublic.external_link)
         self.assertEqual(data["editEntity"]["entity"]["attendEventWithoutAccount"], self.eventPublic.attend_event_without_account)
         self.assertEqual(data["editEntity"]["entity"]["rsvp"], self.eventPublic.rsvp)

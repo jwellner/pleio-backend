@@ -54,7 +54,11 @@ def resolve_attend_event_without_account(_, info, input):
     context = get_default_email_context()
     context['link'] = link
     context['title'] = event.title
-    context['location'] = event.location
+
+    context['location'] = event.location if event.location else None
+    context['locationLink'] = event.location_link if event.location_link else None
+    context['locationAddress'] = event.location_address if event.location_address else None
+
     context['start_date'] = event.start_date
 
     send_mail_multi.delay(tenant_schema(), subject, 'email/attend_event_without_account.html', context, email)

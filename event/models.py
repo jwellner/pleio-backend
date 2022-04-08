@@ -25,6 +25,8 @@ class Event(Entity, CommentMixin, BookmarkMixin, FollowMixin, NotificationMixin,
     end_date = models.DateTimeField(null=True, blank=True)
 
     location = models.CharField(max_length=256, default="")
+    location_address = models.CharField(max_length=256, default="")
+    location_link = models.CharField(max_length=256, default="")
     external_link = models.TextField(default="")
 
     max_attendees = models.PositiveIntegerField(null=True, blank=True)
@@ -121,7 +123,11 @@ class Event(Entity, CommentMixin, BookmarkMixin, FollowMixin, NotificationMixin,
         context = get_default_email_context()
         context['link'] = link
         context['title'] = self.title
-        context['location'] = self.location
+
+        context['location'] = self.location if self.location else None
+        context['locationLink'] = self.location_link if self.location_link else None
+        context['locationAddress'] = self.location_address if self.location_address else None
+
         context['start_date'] = self.start_date
         for attendee in self.attendees.filter(state='waitinglist').order_by('updated_at'):
             if self.is_full():

@@ -49,6 +49,8 @@ class AddEventTestCase(FastTenantTestCase):
                 "endDate": "2019-10-02T10:00:00+02:00",
                 "maxAttendees": "10",
                 "location": "Utrecht",
+                "locationLink": "maps.google.nl",
+                "locationAddress": "Kerkstraat 10",
                 "source": "https://www.pleio.nl",
                 "attendEventWithoutAccount": True,
                 "rsvp": True
@@ -79,6 +81,8 @@ class AddEventTestCase(FastTenantTestCase):
                 startDate
                 endDate
                 location
+                locationLink
+                locationAddress
                 maxAttendees
             }
             mutation ($input: addEntityInput!) {
@@ -106,6 +110,8 @@ class AddEventTestCase(FastTenantTestCase):
         self.assertEqual(data["addEntity"]["entity"]["title"], variables["input"]["title"])
         self.assertEqual(data["addEntity"]["entity"]["richDescription"], variables["input"]["richDescription"])
         self.assertEqual(data["addEntity"]["entity"]["location"], variables["input"]["location"])
+        self.assertEqual(data["addEntity"]["entity"]["locationLink"], variables["input"]["locationLink"])
+        self.assertEqual(data["addEntity"]["entity"]["locationAddress"], variables["input"]["locationAddress"])
         self.assertEqual(data["addEntity"]["entity"]["rsvp"], variables["input"]["rsvp"])
         self.assertEqual(data["addEntity"]["entity"]["source"], variables["input"]["source"])
         self.assertEqual(data["addEntity"]["entity"]["startDate"], "2019-10-02T09:00:00+02:00")

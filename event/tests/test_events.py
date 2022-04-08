@@ -59,7 +59,7 @@ class EventsTestCase(FastTenantTestCase):
             read_access=[ACCESS_TYPE.public],
             write_access=[ACCESS_TYPE.user.format(self.user1.id)],
             owner=self.user1,
-            start_date=day_after_tomorrow,
+            start_date=tomorrow,
             location="Utrecht",
             external_link="https://www.pleio.nl",
             rsvp=True,
