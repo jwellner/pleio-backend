@@ -65,7 +65,10 @@ def export_calendar(request):
     output.write('SUMMARY:' + request.GET.get("text", "") + '\n')
     output.write('URL:' + request.GET.get("url", "") + '\n')
     output.write('DESCRIPTION:' + request.GET.get("details", "") + '\n')
-    output.write('LOCATION:' + request.GET.get("location", "") + '\n')
+    if request.GET.get("location", ""):
+        output.write('LOCATION:' + request.GET.get("location", "") + '\n')
+    elif request.GET.get("locationAddress", ""):
+        output.write('LOCATION:' + request.GET.get("locationAddress", "") + '\n')
     output.write('END:VEVENT\n')
     output.write('END:VCALENDAR\n')
 

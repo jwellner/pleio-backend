@@ -14,6 +14,7 @@ def resolve_confirm_attend_event_without_account(_, info, input):
     # pylint: disable=redefined-builtin
     # pylint: disable=unused-argument
     # pylint: disable=too-many-statements
+    # pylint: disable=too-many-branches
 
     clean_input = clean_graphql_input(input)
 
@@ -89,7 +90,11 @@ def resolve_confirm_attend_event_without_account(_, info, input):
         context['link'] = link
         context['leave_link'] = leave_link
         context['title'] = event.title
-        context['location'] = event.location
+
+        context['location'] = event.location if event.location else None
+        context['locationLink'] = event.location_link if event.location_link else None
+        context['locationAddress'] = event.location_address if event.location_address else None
+
         context['start_date'] = event.start_date
         context['state'] = state
 
