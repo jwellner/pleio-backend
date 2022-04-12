@@ -1,6 +1,6 @@
 from graphql import GraphQLError
 from django.core.exceptions import ObjectDoesNotExist
-from core.models import Group
+from core.models import Group, Subgroup
 from user.models import User
 from django.utils import timezone, translation
 from django.utils.translation import ugettext_lazy
@@ -10,6 +10,7 @@ from core.lib import clean_graphql_input, get_default_email_context
 from datetime import timedelta
 from core.tasks import send_mail_multi
 from django_tenants.utils import parse_tenant_config_path
+
 
 def resolve_send_message_to_group(_, info, input):
     # pylint: disable=redefined-builtin
@@ -36,9 +37,14 @@ def resolve_send_message_to_group(_, info, input):
     if clean_input.get('isTest'):
         receiving_users = [user]
     elif clean_input.get('sendToAllMembers'):
-        receiving_users = User.objects.filter(memberships__group__in=[group], is_active=True, _profile__last_online__gte=threshold)
+        receiving_users = User.objects.filter(memberships__group__in=[group], is_active=True,
+                                              _profile__last_online__gte=threshold)
     else:
-        for guid in clean_input.get('recipients'):
+        if clean_input.get('subGroup'):
+            subgroup = Subgroup.objects.get(id=clean_input.get('subGroup'))
+            receiving_users.extend([member for member in subgroup.members.all() if group.is_member(member)])
+
+        for guid in (clean_input.get('recipients') or []):
             try:
                 receiving_user = User.objects.get(id=guid, is_active=True, _profile__last_online__gte=threshold)
                 if not group.is_member(receiving_user):
@@ -76,5 +82,5 @@ def resolve_send_message_to_group(_, info, input):
         )
 
     return {
-          'group': group
+        'group': group
     }
