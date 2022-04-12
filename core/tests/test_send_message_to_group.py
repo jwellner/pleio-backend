@@ -1,19 +1,15 @@
-from django.conf import settings
-from django.db import connection
 from django_tenants.test.cases import FastTenantTestCase
-from django.test import override_settings
 from backend2.schema import schema
 from ariadne import graphql_sync
-import json
 from django.contrib.auth.models import AnonymousUser
 from django.http import HttpRequest
-from core.models import Group
+from core.models import Group, Subgroup
 from user.models import User
 from mixer.backend.django import mixer
-from graphql import GraphQLError
 from unittest import mock
 from datetime import timedelta
 from django.utils import timezone
+
 
 class SendMessageToGroupTestCase(FastTenantTestCase):
 
@@ -46,6 +42,10 @@ class SendMessageToGroupTestCase(FastTenantTestCase):
         self.group1.join(self.user3, 'member')
         self.group1.join(self.user5, 'member')
         self.group1.join(self.user6, 'member')
+        self.subgroup = mixer.blend(Subgroup)
+        self.subgroup.members.add(self.user2)
+        self.subgroup.members.add(self.user3)
+        self.subgroup.members.add(self.user4)
 
     def tearDown(self):
         self.group1.delete()
@@ -84,11 +84,15 @@ class SendMessageToGroupTestCase(FastTenantTestCase):
         request = HttpRequest()
         request.user = self.user1
 
-        result = graphql_sync(schema, {"query": mutation, "variables": variables}, context_value={ "request": request })
+        result = graphql_sync(schema, {"query": mutation, "variables": variables}, context_value={"request": request})
         data = result[1]["data"]
 
         self.assertEqual(data["sendMessageToGroup"]["group"]["guid"], self.group1.guid)
-        self.assertEqual(mocked_send_mail_multi.call_count, 2)
+
+        expected = [self.user2.email,
+                    self.user3.email]
+        self.assertEqual([c.args[4] for c in mocked_send_mail_multi.call_args_list],
+                         expected, msg="Expected to be send to two users with the initiator in the reply-to argument")
 
     @mock.patch('core.resolvers.mutation_send_message_to_group.send_mail_multi.delay')
     def test_send_message_to_group_by_admin(self, mocked_send_mail_multi):
@@ -118,10 +122,9 @@ class SendMessageToGroupTestCase(FastTenantTestCase):
         request = HttpRequest()
         request.user = self.admin
 
-        result = graphql_sync(schema, {"query": mutation, "variables": variables}, context_value={ "request": request })
+        result = graphql_sync(schema, {"query": mutation, "variables": variables}, context_value={"request": request})
 
         self.assertEqual(mocked_send_mail_multi.call_count, 2)
-
 
     @mock.patch('core.resolvers.mutation_send_message_to_group.send_mail_multi.delay')
     def test_send_message_to_group_by_group_member(self, mocked_send_mail_multi):
@@ -151,7 +154,7 @@ class SendMessageToGroupTestCase(FastTenantTestCase):
         request = HttpRequest()
         request.user = self.user2
 
-        result = graphql_sync(schema, {"query": mutation, "variables": variables}, context_value={ "request": request })
+        result = graphql_sync(schema, {"query": mutation, "variables": variables}, context_value={"request": request})
 
         errors = result[1]["errors"]
 
@@ -186,13 +189,12 @@ class SendMessageToGroupTestCase(FastTenantTestCase):
         request = HttpRequest()
         request.user = self.user4
 
-        result = graphql_sync(schema, {"query": mutation, "variables": variables}, context_value={ "request": request })
+        result = graphql_sync(schema, {"query": mutation, "variables": variables}, context_value={"request": request})
 
         errors = result[1]["errors"]
 
         self.assertEqual(errors[0]["message"], "could_not_save")
         assert not mocked_send_mail_multi.called
-
 
     @mock.patch('core.resolvers.mutation_send_message_to_group.send_mail_multi.delay')
     def test_send_message_to_group_by_anonymous(self, mocked_send_mail_multi):
@@ -222,13 +224,12 @@ class SendMessageToGroupTestCase(FastTenantTestCase):
         request = HttpRequest()
         request.user = self.anonymousUser
 
-        result = graphql_sync(schema, {"query": mutation, "variables": variables}, context_value={ "request": request })
+        result = graphql_sync(schema, {"query": mutation, "variables": variables}, context_value={"request": request})
 
         errors = result[1]["errors"]
 
         self.assertEqual(errors[0]["message"], "not_logged_in")
         assert not mocked_send_mail_multi.called
-
 
     @mock.patch('core.resolvers.mutation_send_message_to_group.send_mail_multi.delay')
     def test_send_message_as_test_by_group_owner(self, mocked_send_mail_multi):
@@ -259,10 +260,9 @@ class SendMessageToGroupTestCase(FastTenantTestCase):
         request = HttpRequest()
         request.user = self.user1
 
-        result = graphql_sync(schema, {"query": mutation, "variables": variables}, context_value={ "request": request })
+        result = graphql_sync(schema, {"query": mutation, "variables": variables}, context_value={"request": request})
 
         self.assertEqual(mocked_send_mail_multi.call_count, 1)
-
 
     @mock.patch('core.resolvers.mutation_send_message_to_group.send_mail_multi.delay')
     def test_send_message_to_all_members_by_group_owner(self, mocked_send_mail_multi):
@@ -292,7 +292,7 @@ class SendMessageToGroupTestCase(FastTenantTestCase):
         request = HttpRequest()
         request.user = self.user1
 
-        result = graphql_sync(schema, {"query": mutation, "variables": variables}, context_value={ "request": request })
+        result = graphql_sync(schema, {"query": mutation, "variables": variables}, context_value={"request": request})
 
         self.assertEqual(mocked_send_mail_multi.call_count, 2)
 
@@ -325,7 +325,7 @@ class SendMessageToGroupTestCase(FastTenantTestCase):
         request = HttpRequest()
         request.user = self.user1
 
-        graphql_sync(schema, {"query": mutation, "variables": variables}, context_value={ "request": request })
+        graphql_sync(schema, {"query": mutation, "variables": variables}, context_value={"request": request})
 
         self.assertEqual(mocked_send_mail_multi.call_count, 2)
 
@@ -358,7 +358,7 @@ class SendMessageToGroupTestCase(FastTenantTestCase):
         request = HttpRequest()
         request.user = self.user1
 
-        graphql_sync(schema, {"query": mutation, "variables": variables}, context_value={ "request": request })
+        graphql_sync(schema, {"query": mutation, "variables": variables}, context_value={"request": request})
 
         self.assertEqual(mocked_send_mail_multi.call_count, 2)
 
@@ -392,7 +392,7 @@ class SendMessageToGroupTestCase(FastTenantTestCase):
         request = HttpRequest()
         request.user = self.user1
 
-        graphql_sync(schema, {"query": mutation, "variables": variables}, context_value={ "request": request })
+        graphql_sync(schema, {"query": mutation, "variables": variables}, context_value={"request": request})
 
         self.assertEqual(mocked_send_mail_multi.call_count, 1)
 
@@ -425,7 +425,7 @@ class SendMessageToGroupTestCase(FastTenantTestCase):
         request = HttpRequest()
         request.user = self.user1
 
-        graphql_sync(schema, {"query": mutation, "variables": variables}, context_value={ "request": request })
+        graphql_sync(schema, {"query": mutation, "variables": variables}, context_value={"request": request})
 
         self.assertEqual(mocked_send_mail_multi.call_count, 3)
 
@@ -459,6 +459,43 @@ class SendMessageToGroupTestCase(FastTenantTestCase):
         request = HttpRequest()
         request.user = self.user1
 
-        graphql_sync(schema, {"query": mutation, "variables": variables}, context_value={ "request": request })
+        graphql_sync(schema, {"query": mutation, "variables": variables}, context_value={"request": request})
 
         self.assertEqual(mocked_send_mail_multi.call_count, 3)
+
+    @mock.patch('core.resolvers.mutation_send_message_to_group.send_mail_multi.delay')
+    def test_send_message_to_subgroup_subset_members(self, mocked_send_mail_multi):
+        self.group1.join(self.user1, 'member')
+        mutation = """
+            mutation SendMessageModal($input: sendMessageToGroupInput!) {
+                sendMessageToGroup(input: $input) {
+                    group {
+                    ... on Group {
+                        guid
+                        __typename
+                    }
+                    __typename
+                    }
+                    __typename
+                }
+            }
+        """
+        variables = {
+            "input": {
+                "guid": self.group1.guid,
+                "subject": "testMessageSubject",
+                "message": "<p>testMessageContent</p>",
+                "subGroup": self.subgroup.id,
+            }
+        }
+
+        request = HttpRequest()
+        request.user = self.user1
+
+        graphql_sync(schema, {"query": mutation, "variables": variables}, context_value={"request": request})
+
+        mails = [a.args[4] for a in mocked_send_mail_multi.call_args_list]
+        self.assertIn(self.user2.email, mails)
+        self.assertIn(self.user3.email, mails)
+        self.assertNotIn(self.user4.email, mails)
+        self.assertEqual(mocked_send_mail_multi.call_count, 2, msg="Expect only members of the group AND the subgroup")
