@@ -31,6 +31,7 @@ def get_sites(self):
         sites.append({
             'id': client.id,
             'name': client.schema_name,
+            'is_active': client.is_active,
             'domain': client.get_primary_domain().domain
         })
 
@@ -356,3 +357,25 @@ def get_file_disk_usage(schema_name):
             return SiteStat.objects.filter(stat_type='DISK_SIZE').latest('created_at').value
         except Exception:
             return 0
+
+
+@shared_task(bind=True)
+def update_site(self, site_id, data):
+    # pylint: disable=unused-argument
+    '''
+    Update site data
+    '''
+    with schema_context('public'):
+        try:
+            tenant = Client.objects.get(id=site_id)
+
+            if data.get('is_active', None) in [True, False]:
+                tenant.is_active = data.get('is_active')
+
+            tenant.save()
+
+        except Exception as e:
+            # raise general exception because remote doenst have Client exception
+            raise Exception(e)
+
+    return True
