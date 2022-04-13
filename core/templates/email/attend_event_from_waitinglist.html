@@ -4,8 +4,39 @@
 {% block body %}
 {% blocktrans %}
 You are added as attendee for {{ title }} from the waitinglist.<br><br>
+{% endblocktrans %}
 
-Location: {{ location }}<br>
+{% if location != None and locationAddress != None and locationLink != None %}
+    {% blocktrans %}    
+    Location: <a href="{{ locationLink }}"> {{ location }}</a> - {{ locationAddress }}<br>
+    {% endblocktrans %}
+{% elif location != None and locationAddress != None %} 
+    {% blocktrans %}    
+    Location: {{ location }} - {{ locationAddress }}<br>
+    {% endblocktrans %}
+{% elif locationAddress != None and locationLink != None %}
+    {% blocktrans %} 
+    Location: <a href="{{ locationLink }}"> {{ locationAddress }}</a><br>
+    {% endblocktrans %}
+{% elif location != None and locationLink != None %}
+    {% blocktrans %}
+    Location: <a href="{{ locationLink }}"> {{ location }}</a><br>
+    {% endblocktrans %}
+{% elif location != None %} 
+    {% blocktrans %}
+    Location: {{ location }}<br>
+    {% endblocktrans %}
+{% elif locationAddress != None %} 
+    {% blocktrans %}
+    Location: {{ locationAddress }}<br>
+    {% endblocktrans %}
+{% elif locationLink != None %}
+    {% blocktrans %}
+    Location: <a href="{{ locationLink }}"> Location </a><br>
+    {% endblocktrans %}
+{% endif %}
+
+{% blocktrans %}
 Date: {{ start_date }}<br><br>
 
 Click on the link below to see the event.<br><br>

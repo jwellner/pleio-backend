@@ -22,7 +22,7 @@ class ConfirmAttendEventWithoutAccountTestCase(FastTenantTestCase):
     def setUp(self):
         self.anonymousUser = AnonymousUser()
         self.authenticatedUser = mixer.blend(User)
-        self.event = mixer.blend(Event)
+        self.event = mixer.blend(Event, location="place", location_link="test.com", location_address="Straat 10")
         self.event.max_attendees = 1
         self.event.attend_event_without_account = True
         self.event.save()

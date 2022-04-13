@@ -88,6 +88,21 @@ def resolve_source(obj, info):
     # pylint: disable=unused-argument
     return obj.external_link
 
+@event.field("location")
+def resolve_location(obj, info):
+    # pylint: disable=unused-argument
+    return obj.location
+
+@event.field("locationLink")
+def resolve_location_link(obj, info):
+    # pylint: disable=unused-argument
+    return obj.location_link
+
+@event.field("locationAddress")
+def resolve_location_address(obj, info):
+    # pylint: disable=unused-argument
+    return obj.location_address
+
 @event.field("attendEventWithoutAccount")
 def resolve_attend_event_without_account(obj, info):
     # pylint: disable=unused-argument

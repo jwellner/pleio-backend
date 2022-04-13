@@ -73,6 +73,8 @@ input addEntityInput {
   endDate: DateTime
   source: String
   location: String
+  locationLink: String
+  locationAddress: String
   maxAttendees: String
   rsvp: Boolean
   containerGuid: String
@@ -537,6 +539,8 @@ input editEntityInput {
   endDate: DateTime
   source: String
   location: String
+  locationLink: String
+  locationAddress: String
   maxAttendees: String
   rsvp: Boolean
   accessId: Int
@@ -858,6 +862,8 @@ type Event implements Entity {
   startDate: String
   endDate: String
   location: String
+  locationAddress: String
+  locationLink: String
   source: String
   maxAttendees: String
   rsvp: Boolean
@@ -1651,6 +1657,9 @@ input sendMessageToGroupInput {
 
   """An (optional) list of recipients to send the message to."""
   recipients: [String]
+
+  """ ID of a subgroup to send a message to """
+  subGroup: Int
 
   """
   An (optional) parameter for sending the message to all members of the group.

@@ -185,6 +185,8 @@ def resolve_add_event(_, info, input):
 
     entity.external_link = clean_input.get("source", "")
     entity.location = clean_input.get("location", "")
+    entity.location_link = clean_input.get("locationLink", "")
+    entity.location_address = clean_input.get("locationAddress", "")
 
     if 'maxAttendees' in clean_input:
         if clean_input.get("maxAttendees") == "":
@@ -306,6 +308,10 @@ def resolve_edit_event(_, info, input):
         entity.external_link = clean_input.get("source")
     if 'location' in clean_input:
         entity.location = clean_input.get("location")
+    if 'locationLink' in clean_input:
+        entity.location_link = clean_input.get("locationLink")
+    if 'locationAddress' in clean_input:
+        entity.location_address = clean_input.get("locationAddress")
 
     if 'maxAttendees' in clean_input:
         if clean_input.get("maxAttendees") == "":
