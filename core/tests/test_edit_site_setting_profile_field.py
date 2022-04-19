@@ -12,6 +12,7 @@ from user.models import User
 from mixer.backend.django import mixer
 from graphql import GraphQLError
 
+
 class EditSiteSettingProfileFieldTestCase(FastTenantTestCase):
 
     def setUp(self):
@@ -27,16 +28,13 @@ class EditSiteSettingProfileFieldTestCase(FastTenantTestCase):
             validator_data=['aap', 'noot', 'mies']
         )
 
-
     def tearDown(self):
         self.admin.delete()
         self.profileField1.delete()
         self.user.delete()
         cache.clear()
 
-
     def test_edit_site_setting_profile_field_by_anonymous(self):
-
         mutation = """
             mutation editSiteSettingProfileField($input: editSiteSettingProfileFieldInput!) {
                 editSiteSettingProfileField(input: $input) {
@@ -55,15 +53,13 @@ class EditSiteSettingProfileFieldTestCase(FastTenantTestCase):
         request = HttpRequest()
         request.user = self.anonymousUser
 
-        result = graphql_sync(schema, { "query": mutation, "variables": variables }, context_value={ "request": request })
+        result = graphql_sync(schema, {"query": mutation, "variables": variables}, context_value={"request": request})
 
         errors = result[1]["errors"]
 
         self.assertEqual(errors[0]["message"], "not_logged_in")
 
-
     def test_edit_profile_field_by_user(self):
-
         mutation = """
             mutation editSiteSettingProfileField($input: editSiteSettingProfileFieldInput!) {
                 editSiteSettingProfileField(input: $input) {
@@ -81,15 +77,13 @@ class EditSiteSettingProfileFieldTestCase(FastTenantTestCase):
         request = HttpRequest()
         request.user = self.user
 
-        result = graphql_sync(schema, { "query": mutation, "variables": variables }, context_value={ "request": request })
+        result = graphql_sync(schema, {"query": mutation, "variables": variables}, context_value={"request": request})
 
         errors = result[1]["errors"]
 
         self.assertEqual(errors[0]["message"], "user_not_site_admin")
 
-
     def test_edit_profile_field_by_admin(self):
-
         mutation = """
             mutation editSiteSettingProfileField($input: editSiteSettingProfileFieldInput!) {
                 editSiteSettingProfileField(input: $input) {
@@ -101,7 +95,6 @@ class EditSiteSettingProfileFieldTestCase(FastTenantTestCase):
                         isEditable
                         isFilter
                         isInOverview
-                        fieldType
                         fieldOptions
                         isInOnboarding
                         isMandatory
@@ -129,7 +122,7 @@ class EditSiteSettingProfileFieldTestCase(FastTenantTestCase):
         request = HttpRequest()
         request.user = self.admin
 
-        result = graphql_sync(schema, { "query": mutation, "variables": variables }, context_value={ "request": request })
+        result = graphql_sync(schema, {"query": mutation, "variables": variables}, context_value={"request": request})
 
         data = result[1]["data"]
 
@@ -139,33 +132,12 @@ class EditSiteSettingProfileFieldTestCase(FastTenantTestCase):
         self.assertEqual(data["editSiteSettingProfileField"]["profileItem"]["isEditable"], False)
         self.assertEqual(data["editSiteSettingProfileField"]["profileItem"]["isFilter"], True)
         self.assertEqual(data["editSiteSettingProfileField"]["profileItem"]["isInOverview"], True)
-        self.assertEqual(data["editSiteSettingProfileField"]["profileItem"]["fieldType"], "textField")
         self.assertEqual(data["editSiteSettingProfileField"]["profileItem"]["fieldOptions"], ["option1", "option2"])
         self.assertEqual(data["editSiteSettingProfileField"]["profileItem"]["isInOnboarding"], True)
         self.assertEqual(data["editSiteSettingProfileField"]["profileItem"]["isMandatory"], True)
         self.assertEqual(data["editSiteSettingProfileField"]["profileItem"]["profileFieldValidator"]["name"], self.profileFieldValidator1.name)
 
-
-        variables = {
-            "input": {
-                "guid": str(self.profileField1.id),
-                "fieldType": "date_field",
-            }
-        }
-        request = HttpRequest()
-        request.user = self.admin
-
-        result = graphql_sync(schema, { "query": mutation, "variables": variables }, context_value={ "request": request })
-
-        data = result[1]["data"]
-
-        self.assertEqual(data["editSiteSettingProfileField"]["profileItem"]["fieldType"], "dateField")
-        self.assertEqual(data["editSiteSettingProfileField"]["profileItem"]["profileFieldValidator"], None) # validator only for text_field
-
-
-
     def test_edit_profile_field_existing_key(self):
-
         mutation = """
             mutation editSiteSettingProfileField($input: editSiteSettingProfileFieldInput!) {
                 editSiteSettingProfileField(input: $input) {
@@ -185,7 +157,7 @@ class EditSiteSettingProfileFieldTestCase(FastTenantTestCase):
         request = HttpRequest()
         request.user = self.admin
 
-        result = graphql_sync(schema, { "query": mutation, "variables": variables }, context_value={ "request": request })
+        result = graphql_sync(schema, {"query": mutation, "variables": variables}, context_value={"request": request})
 
         errors = result[1]["errors"]
 

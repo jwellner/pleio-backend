@@ -4,6 +4,7 @@ from core.constances import NOT_LOGGED_IN, USER_NOT_SITE_ADMIN, COULD_NOT_FIND, 
 from core.lib import clean_graphql_input
 from django.core.exceptions import ObjectDoesNotExist
 
+
 def resolve_edit_site_setting_profile_field(_, info, input):
     # pylint: disable=redefined-builtin
     # pylint: disable=unused-variable
@@ -51,7 +52,6 @@ def resolve_edit_site_setting_profile_field(_, info, input):
     if 'isMandatory' in clean_input:
         profile_field.is_mandatory = clean_input["isMandatory"]
 
-
     if 'profileFieldValidatorId' in input:
         if input.get('profileFieldValidatorId'):
             try:
@@ -60,13 +60,6 @@ def resolve_edit_site_setting_profile_field(_, info, input):
             except ObjectDoesNotExist:
                 raise GraphQLError(COULD_NOT_FIND)
         else:
-            profile_field.validators.set([])
-
-    if 'fieldType' in clean_input:
-        profile_field.field_type = clean_input["fieldType"]
-
-        # TODO: for now only allow validators for `text_field` so we remove if fieldType changed:
-        if profile_field.field_type != "text_field":
             profile_field.validators.set([])
 
     profile_field.save()
