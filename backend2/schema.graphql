@@ -2330,7 +2330,6 @@ input editSiteSettingProfileFieldInput {
   isEditable: Boolean
   isFilter: Boolean
   isInOverview: Boolean
-  fieldType: String
   fieldOptions: [String]
   isInOnboarding: Boolean
   isMandatory: Boolean
