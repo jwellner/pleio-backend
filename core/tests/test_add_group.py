@@ -275,3 +275,49 @@ class AddGroupCase(FastTenantTestCase):
         self.assertEqual(data["addGroup"]["group"]["name"], variables["group"]["name"])
         self.assertEqual(len(data["addGroup"]["group"]["showMemberProfileFields"]), 1)
         self.assertEqual(data["addGroup"]["group"]["showMemberProfileFields"][0]["guid"], profile_field1.guid)
+
+    def test_add_prohibited_member_fields(self):
+        profile_field1 = ProfileField.objects.create(key='text_key', name='text_name', field_type='html_field')
+
+        cache.set("%s%s" % (connection.schema_name, 'PROFILE_SECTIONS'),
+                  [{"name": "section_one", "profileFieldGuids": [profile_field1.guid]}]
+                  )
+
+        mutation = """
+            mutation ($group: addGroupInput!) {
+                addGroup(input: $group) {
+                    group {
+                        guid
+                        name
+                        showMemberProfileFields {
+                            guid
+                            name
+                        }
+                    }
+                }
+            }
+        """
+
+        variables = {
+            "group": {
+                "name": "Test123",
+                "showMemberProfileFieldGuids": [str(profile_field1.id)]
+            }
+        }
+
+        request = HttpRequest()
+        request.user = self.admin
+
+        success, result = graphql_sync(schema, {"query": mutation, "variables": variables},
+                                       context_value={"request": request})
+
+        errors = result.get("errors")
+        self.assertIsNotNone(errors, msg=errors)
+        self.assertGraphQlError(errors, "invalid_profile_field_guid")
+
+    def assertGraphQlError(self, errors, expected, msg=None):
+        if errors and len(errors) > 0:
+            for details in errors:
+                if expected in details['message']:
+                    return
+        self.fail(msg or "Did not find %s in the error message(s)" % expected)

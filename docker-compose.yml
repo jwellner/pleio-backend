@@ -1,6 +1,7 @@
 version: '3'
 
 services:
+
   api:
     build: .
     restart: on-failure
@@ -26,6 +27,7 @@ services:
       - frontend
       - admin
       - rabbitmq
+
   background:
     build: .
     restart: on-failure
@@ -44,6 +46,7 @@ services:
     depends_on:
       - db
       - rabbitmq
+
   frontend:
     image: registry.gitlab.com/pleio/frontend:latest
     volumes:
@@ -100,10 +103,11 @@ services:
     image: dockage/mailcatcher:0.7.1
     ports:
     - "1080:1080"
-    - "1025:1025"
+
   memcached:
     image: memcached
     restart: always
+
   rabbitmq:
     image: 'rabbitmq:3.6-management-alpine'
     ports:
@@ -113,10 +117,12 @@ services:
       AMQP_URL: 'amqp://localhost?connection_attempts=5&retry_delay=5'
       RABBITMQ_DEFAULT_USER: "guest"
       RABBITMQ_DEFAULT_PASS: "guest"
+
   redis:
     image: 'redis:6.2'
     ports:
       - '6379:6379'
+
   clamav:
     image: 'mkodockx/docker-clamav:1.0.3-alpine'
     environment:
