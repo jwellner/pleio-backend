@@ -3,7 +3,7 @@ import logging
 from auditlog.registry import auditlog
 from django.apps import apps
 from django.contrib.postgres.fields import ArrayField
-from django.core.exceptions import ObjectDoesNotExist
+from django.core.exceptions import ObjectDoesNotExist, ValidationError
 from django.db import models
 from django.db.models import Q
 from django.db.models.signals import pre_save
@@ -181,7 +181,8 @@ class Group(models.Model, AttachmentMixin):
             context['welcome_message'] = self.welcome_message
             context['welcome_message'] = context['welcome_message'].replace("[name]", user.name)
             context['welcome_message'] = context['welcome_message'].replace("[group_name]", self.name)
-            context['welcome_message'] = context['welcome_message'].replace("[group_url]", f"{get_base_url()}{self.url}")
+            context['welcome_message'] = context['welcome_message'].replace("[group_url]",
+                                                                            f"{get_base_url()}{self.url}")
 
             subject = ugettext_lazy("Welcome to %(group_name)s") % {'group_name': self.name}
 
@@ -203,7 +204,8 @@ class Group(models.Model, AttachmentMixin):
     @property
     def featured_image_url(self):
         if self.featured_image:
-            return '%s?cache=%i' % (reverse('featured', args=[self.id]), int(self.featured_image.updated_at.timestamp()))
+            return '%s?cache=%i' % (
+                reverse('featured', args=[self.id]), int(self.featured_image.updated_at.timestamp()))
         return None
 
     @property
@@ -319,6 +321,15 @@ class GroupProfileFieldSetting(models.Model):
     profile_field = models.ForeignKey('core.ProfileField', related_name='group_settings', on_delete=models.CASCADE)
     show_field = models.BooleanField(default=False)
     is_required = models.BooleanField(default=False)
+
+    def clean(self):
+        if self.profile_field.field_type == 'html_field' and self.show_field:
+            raise ValidationError("Long text fields are not allowed to display on the member page.")
+
+    def save(self, *args, **kwargs):
+        # pylint: disable=arguments-differ
+        self.full_clean()
+        super(GroupProfileFieldSetting, self).save(*args, **kwargs)
 
 
 @receiver([pre_save], sender=Group)
