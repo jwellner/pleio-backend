@@ -72,6 +72,7 @@ input addEntityInput {
   startDate: DateTime
   endDate: DateTime
   source: String
+  ticketLink: String
   location: String
   locationLink: String
   locationAddress: String
@@ -538,6 +539,7 @@ input editEntityInput {
   startDate: DateTime
   endDate: DateTime
   source: String
+  ticketLink: String
   location: String
   locationLink: String
   locationAddress: String
@@ -865,6 +867,7 @@ type Event implements Entity {
   locationAddress: String
   locationLink: String
   source: String
+  ticketLink: String
   maxAttendees: String
   rsvp: Boolean
   isFeatured: Boolean
