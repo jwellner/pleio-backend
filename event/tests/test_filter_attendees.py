@@ -6,12 +6,13 @@ from django.http import HttpRequest
 from ariadne import graphql_sync
 from backend2.schema import schema
 from core.constances import USER_ROLES
+from django.utils import timezone
 
 class AttendeesTestCase(FastTenantTestCase):
     
     def setUp(self):
         self.eventPublic = mixer.blend(Event)
-
+        self.today = timezone.now()
         self.admin = mixer.blend(User, roles=[USER_ROLES.ADMIN])
 
         self.attendee1 = mixer.blend(User)
@@ -24,7 +25,8 @@ class AttendeesTestCase(FastTenantTestCase):
             EventAttendee,
             user=self.attendee1,
             event=self.eventPublic,
-            state='maybe'
+            state='maybe',
+            checked_in_at= self.today.isoformat()
         )
         mixer.blend(
             EventAttendee,
@@ -53,6 +55,9 @@ class AttendeesTestCase(FastTenantTestCase):
                             }
                             total
                             totalMaybe
+                            totalAccept
+                            totalGoing
+                            totalCheckedIn
                         }
                     }
                 }
@@ -81,9 +86,12 @@ class AttendeesTestCase(FastTenantTestCase):
         self.assertTrue(result[0])
         data = result[1]["data"]
 
-        self.assertEqual(data["entity"]["attendees"]["total"], 1)
+        self.assertEqual(data["entity"]["attendees"]["total"], 3)
         self.assertEqual(data["entity"]["attendees"]["totalMaybe"], 2)
         self.assertEqual(len(data["entity"]["attendees"]["edges"]), 3)
+        self.assertEqual(data["entity"]["attendees"]["totalCheckedIn"], 1)
+        self.assertEqual(data["entity"]["attendees"]["totalGoing"], 0)
+
 
     def test_query_attendees_filter_name(self):
         request = HttpRequest()
@@ -99,6 +107,7 @@ class AttendeesTestCase(FastTenantTestCase):
         self.assertTrue(result[0])
         data = result[1]["data"]
 
-        self.assertEqual(data["entity"]["attendees"]["total"], 1)
+        self.assertEqual(data["entity"]["attendees"]["total"], 3)
+        self.assertEqual(data["entity"]["attendees"]["totalAccept"], 1)
         self.assertEqual(len(data["entity"]["attendees"]["edges"]), 1)
         self.assertEqual(data["entity"]["attendees"]["edges"][0]["name"], "Xx")

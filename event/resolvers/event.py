@@ -154,10 +154,13 @@ def resolve_attendees(obj, info, query=None, limit=20, offset=0, state=None,
 
     if not user.is_authenticated:
         return {
-            "total": obj.attendees.filter(state="accept").count(),
+            "total": obj.attendees.count(),
+            "totalAccept": obj.attendees.filter(state="accept").count(),
+            "totalGoing": 0,
             "totalMaybe": 0,
             "totalReject": 0,
             "totalWaitinglist": 0,
+            "totalCheckedIn": 0,
             "edges": []
         }
 
@@ -221,11 +224,15 @@ def resolve_attendees(obj, info, query=None, limit=20, offset=0, state=None,
         } 
         for item in qs]
 
+
     return {
-        "total": obj.attendees.filter(state="accept").count(),
+        "total": obj.attendees.count(),
+        "totalAccept": obj.attendees.filter(state="accept").count(),
+        "totalGoing": obj.attendees.filter(state="accept").count() - obj.attendees.filter(checked_in_at__isnull = False).count(),
         "totalMaybe": obj.attendees.filter(state="maybe").count(),
         "totalReject": obj.attendees.filter(state="reject").count(),
         "totalWaitinglist": obj.attendees.filter(state="waitinglist").count(),
+        "totalCheckedIn": obj.attendees.filter(checked_in_at__isnull = False).count(),
         "edges": attendees
     }
 
