@@ -202,7 +202,7 @@ class EventsTestCase(FastTenantTestCase):
         data = result[1]["data"]
         self.assertEqual(data["events"]["total"], 2)
         self.assertEqual(data["events"]["edges"][1]["guid"], self.eventFuture2.guid)
-        self.assertEqual(data["events"]["edges"][1]["attendees"]["total"], 1)
+        self.assertEqual(data["events"]["edges"][1]["attendees"]["total"], 2)
         self.assertEqual(len(data["events"]["edges"][0]["attendees"]["edges"]), 0)
 
     def test_events_upcoming(self):

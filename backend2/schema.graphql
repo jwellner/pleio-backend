@@ -217,9 +217,13 @@ type Attendee {
 
 type AttendeesList {
   total: Int!
+  totalAccept: Int!
+  """totalGoing means having state accept, but not checked in yet."""
+  totalGoing: Int!
   totalMaybe: Int!
   totalReject: Int!
   totalWaitinglist: Int!
+  totalCheckedIn: Int!
   edges: [Attendee]
 }
 
