@@ -20,11 +20,6 @@ class Migration(migrations.Migration):
             name='location_link',
             field=models.CharField(default='', max_length=256),
         ),
-        migrations.AddField(
-            model_name='event',
-            name='ticket_link',
-            field=models.TextField(default=''),
-        ),
         migrations.AlterField(
             model_name='eventattendee',
             name='email',
