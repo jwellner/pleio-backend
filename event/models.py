@@ -28,6 +28,7 @@ class Event(Entity, CommentMixin, BookmarkMixin, FollowMixin, NotificationMixin,
     location_address = models.CharField(max_length=256, default="")
     location_link = models.CharField(max_length=256, default="")
     external_link = models.TextField(default="")
+    ticket_link = models.TextField(default="")
 
     max_attendees = models.PositiveIntegerField(null=True, blank=True)
     rsvp = models.BooleanField(default=False)

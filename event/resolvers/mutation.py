@@ -184,6 +184,7 @@ def resolve_add_event(_, info, input):
         raise GraphQLError(INVALID_DATE)
 
     entity.external_link = clean_input.get("source", "")
+    entity.ticket_link = clean_input.get("ticketLink", "")
     entity.location = clean_input.get("location", "")
     entity.location_link = clean_input.get("locationLink", "")
     entity.location_address = clean_input.get("locationAddress", "")
@@ -306,6 +307,8 @@ def resolve_edit_event(_, info, input):
 
     if 'source' in clean_input:
         entity.external_link = clean_input.get("source")
+    if 'ticketLink' in clean_input:
+        entity.ticket_link = clean_input.get("ticketLink")
     if 'location' in clean_input:
         entity.location = clean_input.get("location")
     if 'locationLink' in clean_input:
