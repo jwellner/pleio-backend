@@ -247,16 +247,14 @@ class SiteSettingsTestCase(FastTenantTestCase):
         self.admin.delete()
         self.user.delete()
 
-
     def test_site_settings_by_admin(self):
-
         request = HttpRequest()
         request.user = self.admin
 
         variables = {
         }
 
-        result = graphql_sync(schema, {"query": self.query, "variables": variables}, context_value={ "request": request })
+        result = graphql_sync(schema, {"query": self.query, "variables": variables}, context_value={"request": request})
 
         self.assertTrue(result[0])
         data = result[1]["data"]
@@ -284,8 +282,8 @@ class SiteSettingsTestCase(FastTenantTestCase):
             {"value": "Rijksoverheid Sans", "label": "Rijksoverheid Sans"},
             {"value": "Roboto", "label": "Roboto"},
             {"value": "Source Sans Pro", "label": "Source Sans Pro"}
-            ]
-        )
+        ]
+                         )
 
         self.assertEqual(data["siteSettings"]["font"], "Rijksoverheid Sans")
         self.assertEqual(data["siteSettings"]["colorHeader"], "#0e2f56")
@@ -305,7 +303,7 @@ class SiteSettingsTestCase(FastTenantTestCase):
         ])
         self.assertEqual(data["siteSettings"]["startPageCms"], "")
         self.assertEqual(data["siteSettings"]["showIcon"], False)
-        self.assertIn("/static/icon", data["siteSettings"]["icon"]) # show default'':
+        self.assertIn("/static/icon", data["siteSettings"]["icon"])  # show default'':
         self.assertEqual(data["siteSettings"]["menu"], [
             {"link": "/blog", "title": "Blog", "children": [], "accessId": 2},
             {"link": "/news", "title": "Nieuws", "children": [], "accessId": 2},
@@ -419,9 +417,7 @@ class SiteSettingsTestCase(FastTenantTestCase):
         self.assertEqual(data["siteSettings"]["kalturaVideoPartnerId"], "")
         self.assertEqual(data["siteSettings"]["kalturaVideoPlayerId"], "")
 
-
     def test_site_settings_by_anonymous(self):
-
         request = HttpRequest()
         request.user = self.anonymousUser
 
@@ -435,7 +431,7 @@ class SiteSettingsTestCase(FastTenantTestCase):
                 }
             }
         """
-        result = graphql_sync(schema, {"query": self.query, "variables": variables}, context_value={ "request": request })
+        result = graphql_sync(schema, {"query": self.query, "variables": variables}, context_value={"request": request})
 
         self.assertTrue(result[0])
 
@@ -443,9 +439,7 @@ class SiteSettingsTestCase(FastTenantTestCase):
 
         self.assertEqual(errors[0]["message"], "not_logged_in")
 
-
     def test_site_settings_by_user(self):
-
         request = HttpRequest()
         request.user = self.user
 
@@ -459,13 +453,61 @@ class SiteSettingsTestCase(FastTenantTestCase):
                 }
             }
         """
-        result = graphql_sync(schema, {"query": self.query, "variables": variables}, context_value={ "request": request })
+        result = graphql_sync(schema, {"query": self.query, "variables": variables}, context_value={"request": request})
 
         self.assertTrue(result[0])
 
         errors = result[1]["errors"]
 
         self.assertEqual(errors[0]["message"], "user_not_site_admin")
+
+    def test_site_settings_menu_state_normal(self):
+        request = HttpRequest()
+        request.user = self.admin
+        query = """
+        mutation UpdateFileOptions($input: editSiteSettingInput!) {
+            editSiteSetting(input: $input) {
+                siteSettings {
+                    menuState
+                    __typename
+                }
+                __typename
+            }
+        }
+        """
+        variables = {
+            'input': {
+                'menuState': 'normal',
+            }
+        }
+        success, result = graphql_sync(schema, {"query": query, "variables": variables},
+                                       context_value={"request": request})
+
+        self.assertEqual(result['data']['editSiteSetting']['siteSettings']['menuState'], 'normal', msg=result)
+
+    def test_site_settings_menu_state_compact(self):
+        request = HttpRequest()
+        request.user = self.admin
+        query = """
+        mutation UpdateFileOptions($input: editSiteSettingInput!) {
+            editSiteSetting(input: $input) {
+                siteSettings {
+                    menuState
+                    __typename
+                }
+                __typename
+            }
+        }
+        """
+        variables = {
+            'input': {
+                'menuState': 'compact',
+            }
+        }
+        success, result = graphql_sync(schema, {"query": query, "variables": variables},
+                                       context_value={"request": request})
+
+        self.assertEqual(result['data']['editSiteSetting']['siteSettings']['menuState'], 'compact', msg=result)
 
 
 class SiteSettingsIsClosedTestCase(TenantTestCase):

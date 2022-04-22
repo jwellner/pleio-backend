@@ -714,6 +714,7 @@ input editSiteSettingInput {
   showIcon: Boolean
   removeIcon: Boolean
   menu: [MenuItemInput]
+  menuState: MenuState
   numberOfFeaturedItems: Int
   enableFeedSorting: Boolean
   showExtraHomepageFilters: Boolean
@@ -1617,6 +1618,11 @@ enum Role {
   removed
 }
 
+enum MenuState {
+  normal
+  compact
+}
+
 type Row {
   guid: String!
   containerGuid: String!
@@ -1793,6 +1799,7 @@ type SiteSettings {
   icon: String
   showIcon: Boolean!
   menu: [MenuItem]
+  menuState: MenuState
   numberOfFeaturedItems: Int
   enableFeedSorting: Boolean!
   showExtraHomepageFilters: Boolean!

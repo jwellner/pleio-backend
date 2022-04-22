@@ -116,6 +116,7 @@ def resolve_edit_site_setting(_, info, input):
         'startPageCms': 'STARTPAGE_CMS',
         'showIcon': 'ICON_ENABLED',
         'iconAlt': 'ICON_ALT',
+        'menuState': 'MENU_STATE',
 
         "numberOfFeaturedItems": 'NUMBER_OF_FEATURED_ITEMS',
         "enableFeedSorting": 'ENABLE_FEED_SORTING',
@@ -136,6 +137,7 @@ def resolve_edit_site_setting(_, info, input):
         'tagCategories': 'TAG_CATEGORIES',
         'showTagsInFeed': 'SHOW_TAGS_IN_FEED',
         'showTagsInDetail': 'SHOW_TAGS_IN_DETAIL',
+
 
         'defaultEmailOverviewFrequency': 'EMAIL_OVERVIEW_DEFAULT_FREQUENCY',
         'emailOverviewSubject': 'EMAIL_OVERVIEW_SUBJECT',

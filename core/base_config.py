@@ -70,6 +70,7 @@ DEFAULT_SITE_CONFIG = {
         {"link": "/questions", "title": "Vragen", "children": [], "accessId": 2},
         {"link": "/wiki", "title": "Wiki", "children": [], "accessId": 2}
     ], 'Menu'),
+    'MENU_STATE': ('normal', "Menu state"),
 
     'PROFILE': ([], 'Profile'),
     'PROFILE_SECTIONS': ([], 'Profile sections'),
@@ -194,7 +195,6 @@ class ConfigBackend():
                     cache.set("%s%s" % (connection.schema_name, setting.key), setting.value)
         except ProgrammingError:
             pass
-
 
 
 class Config():
