@@ -1,3 +1,4 @@
+from django.core.exceptions import ValidationError
 from django.db import connection
 from django_tenants.test.cases import FastTenantTestCase
 from core.models import ProfileField, UserProfileField, Group, GroupProfileFieldSetting
@@ -12,6 +13,7 @@ from django.contrib.auth.models import AnonymousUser
 from django.http import HttpRequest
 from mixer.backend.django import mixer
 
+
 class ProfileTestCase(FastTenantTestCase):
 
     def setUp(self):
@@ -20,7 +22,8 @@ class ProfileTestCase(FastTenantTestCase):
         self.user2 = mixer.blend(User)
         self.profile_field1 = ProfileField.objects.create(
             key="profile_field1",
-            name="profile_field1_name"
+            name="profile_field1_name",
+            is_on_vcard=True
         )
         self.user_profile_field1 = UserProfileField.objects.create(
             user_profile_id=self.user1.profile.id,
@@ -31,7 +34,7 @@ class ProfileTestCase(FastTenantTestCase):
         self.profile_field2 = ProfileField.objects.create(
             key="profile_field2",
             name="profile_field2_name",
-            #category="profile_field2_category",
+            # category="profile_field2_category",
             field_type="text_field",
             is_editable_by_user=False,
             is_filter=True
@@ -45,7 +48,7 @@ class ProfileTestCase(FastTenantTestCase):
         self.profile_field3 = ProfileField.objects.create(
             key="profile_field3",
             name="profile_field3_name",
-            #category="profile_field3_category",
+            # category="profile_field3_category",
             field_type="multi_select_field",
             field_options=['option1', 'option2', 'option3'],
             is_in_overview=True
@@ -102,6 +105,13 @@ class ProfileTestCase(FastTenantTestCase):
                             isInOverview
                             __typename
                         }
+                        vcard {
+                            key
+                            name
+                            value
+                            accessId
+                            __typename
+                        }
                         fieldsInOverview(groupGuid: $groupGuid) {
                             key
                             label
@@ -132,9 +142,9 @@ class ProfileTestCase(FastTenantTestCase):
         request = HttpRequest()
         request.user = self.user1
 
-        variables = { "username": self.user1.guid}
+        variables = {"username": self.user1.guid}
 
-        result = graphql_sync(schema, { "query": self.query, "variables": variables }, context_value={ "request": request })
+        result = graphql_sync(schema, {"query": self.query, "variables": variables}, context_value={"request": request})
 
         self.assertTrue(result[0])
 
@@ -171,16 +181,20 @@ class ProfileTestCase(FastTenantTestCase):
         self.assertEqual(data["entity"]["profile"][2]["isFilterable"], True)
         self.assertEqual(data["entity"]["profile"][2]["isInOverview"], True)
 
-        self.assertEqual(data["entity"]["fieldsInOverview"][0]["key"], "profile_field3")
+        self.assertEqual(data['entity']['vcard'][0]['key'], 'profile_field1')
+        self.assertEqual(data['entity']['vcard'][0]['name'], 'profile_field1_name')
+        self.assertEqual(data['entity']['vcard'][0]['value'], 'user_profile_field1_value')
+        self.assertEqual(data['entity']['vcard'][0]['accessId'], 2)
 
+        self.assertEqual(data["entity"]["fieldsInOverview"][0]["key"], "profile_field3")
 
     def test_get_profile_items_by_logged_in_user(self):
         request = HttpRequest()
         request.user = self.user2
 
-        variables = { "username": self.user1.guid}
+        variables = {"username": self.user1.guid}
 
-        result = graphql_sync(schema, { "query": self.query, "variables": variables }, context_value={ "request": request })
+        result = graphql_sync(schema, {"query": self.query, "variables": variables}, context_value={"request": request})
 
         self.assertTrue(result[0])
 
@@ -224,9 +238,9 @@ class ProfileTestCase(FastTenantTestCase):
         request = HttpRequest()
         request.user = self.anonymousUser
 
-        variables = { "username": self.user1.guid}
+        variables = {"username": self.user1.guid}
 
-        result = graphql_sync(schema, { "query": self.query, "variables": variables }, context_value={ "request": request })
+        result = graphql_sync(schema, {"query": self.query, "variables": variables}, context_value={"request": request})
         self.assertTrue(result[0])
 
         data = result[1]["data"]
@@ -268,9 +282,9 @@ class ProfileTestCase(FastTenantTestCase):
         request = HttpRequest()
         request.user = self.user2
 
-        variables = { "username": self.user1.guid, "groupGuid": self.group.guid}
+        variables = {"username": self.user1.guid, "groupGuid": self.group.guid}
 
-        result = graphql_sync(schema, { "query": self.query, "variables": variables }, context_value={ "request": request })
+        result = graphql_sync(schema, {"query": self.query, "variables": variables}, context_value={"request": request})
 
         self.assertTrue(result[0])
 
@@ -278,3 +292,9 @@ class ProfileTestCase(FastTenantTestCase):
 
         self.assertEqual(data["entity"]["fieldsInOverview"][0]["key"], "profile_field2")
 
+    def test_profile_field_html_not_allowed_icm_vcard(self):
+        field = ProfileField.objects.create(key="demo", name="profile_field", field_type='html_field')
+
+        with self.assertRaises(ValidationError):
+            field.is_on_vcard = True
+            field.save()

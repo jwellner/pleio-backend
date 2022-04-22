@@ -20,6 +20,14 @@ from file.models import FileFolder
 from django.utils import timezone
 
 
+def get_or_create_profile_field(test_key, initial_name):
+    try:
+        return ProfileField.objects.get(key=test_key)
+    except ProfileField.DoesNotExist:
+        return ProfileField.objects.create(key=test_key,
+                                           name=initial_name)
+
+
 def save_setting(key, value):
     # pylint: disable=unused-variable
     setting, created = Setting.objects.get_or_create(key=key)
@@ -209,10 +217,11 @@ def resolve_edit_site_setting(_, info, input):
 
     if 'profile' in clean_input:
         for field in clean_input.get('profile'):
-            profile_field, created = ProfileField.objects.get_or_create(key=field['key'])
+            profile_field = get_or_create_profile_field(field['key'], field['name'])
             profile_field.name = field['name']
-            profile_field.is_filter = field['isFilter']
-            profile_field.is_in_overview = field['isInOverview']
+            profile_field.is_filter = field.get('isFilter') or False
+            profile_field.is_in_overview = field.get('isInOverview') or False
+            profile_field.is_on_vcard = field.get('isOnVcard') or False
             profile_field.save()
 
         save_setting('PROFILE', clean_input.get('profile'))
