@@ -78,6 +78,7 @@ TENANT_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.sitemaps',
+    'concierge',
     'core',
     'user',
     'mozilla_django_oidc',

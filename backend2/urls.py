@@ -14,7 +14,7 @@ from core import views as core_views
 from file import views as file_views
 from event import views as event_views
 from user import views as user_views
-
+from concierge import views as concierge_views
 
 urlpatterns = [
     path('logout', core_views.logout, name='logout'),
@@ -30,7 +30,11 @@ urlpatterns = [
     path('superadmin/tasks', core_superadmin.tasks),
     path('superadmin/scanlog', core_superadmin.ScanLog.as_view()),
     path('superadmin/auditlog', core_superadmin.AuditLog.as_view()),
-    path('graphql', GraphQLView.as_view(schema=schema, extensions=[OpenTracingExtensionSync], introspection=settings.DEBUG), name='graphql'),
+    path('graphql',
+         GraphQLView.as_view(schema=schema,
+                             extensions=[OpenTracingExtensionSync],
+                             introspection=settings.DEBUG),
+         name='graphql'),
 
     path('file/download/<uuid:file_id>', file_views.download, name='download'),
     path('file/download/<uuid:file_id>/<str:file_name>', file_views.download, name='download'),
@@ -42,7 +46,8 @@ urlpatterns = [
     path('file/featured/<uuid:entity_guid>', file_views.featured, name='featured'),
 
     path('attachment/<uuid:attachment_id>', core_views.attachment, name='attachment'),
-    path('attachment/<str:attachment_type>/<uuid:attachment_id>', core_views.attachment, name='attachment'), # old url for backwards compatability
+    # old url for backwards compatability
+    path('attachment/<str:attachment_type>/<uuid:attachment_id>', core_views.attachment, name='attachment'),
 
     path('bulk_download', file_views.bulk_download, name='bulk_download'),
 
@@ -67,6 +72,7 @@ urlpatterns = [
 
     path('flow/', include('flow.urls')),
     path('profile_sync_api/', include('profile_sync.urls')),
+    path('api/profile_updated/', concierge_views.profile_updated, name="profile_updated"),
 
     # Include elgg url's for redirects
     path('', include('elgg.urls')),
@@ -77,6 +83,7 @@ urlpatterns = [
 ]
 
 handler404 = 'core.views.default'
+
 
 def handler500(request):
     response = render(request, '500.html', {})
