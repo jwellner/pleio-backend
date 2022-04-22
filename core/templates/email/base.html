@@ -104,6 +104,7 @@
                                 <tr>
                                     <td class="header" style="color:#ffffff; font-family:Arial,sans-serif; font-size:26px; line-height:30px; text-align:left; padding:15px 50px; font-weight:bold" bgcolor="{{header_color}}">
                                         <a href="{{site_url}}" target="_blank" class="link-white" style="color:#ffffff; text-decoration:none"><span class="link-white" style="color:#ffffff; text-decoration:none">{% if title %} {{title}} {% else %} {{ site_name }} {% endif %} </span></a>
+                                        {% block header_subtitle %}{% endblock %}
                                     </td>
                                 </tr>
                                 {% endblock %}
@@ -125,7 +126,7 @@
                                                 <tr>
                                                     <td valign="top"
                                                         class="unsubscribe"
-                                                        style="padding-right: 9px; padding-left: 9px; padding-top: 0; padding-bottom: 20px; font-family:Arial,sans-serif; text-align:center; color:#c8c8c8;">
+                                                        style="padding-right: 9px; padding-left: 9px; padding-top: 0; padding-bottom: 20px; font-family:Arial,sans-serif; text-align:center; color:#737373;">
                                                         {% block footer_settings %}{% endblock %}
                                                     </td>
                                                 </tr>

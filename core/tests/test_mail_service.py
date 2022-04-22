@@ -6,13 +6,13 @@ from mixer.backend.django import mixer
 from notifications.models import Notification
 from core.models.group import Group
 
-from core.services.mail_service import MailService
+from core.services.mail_service import MailService, MailTypeEnum
 from user.models import User
 
 class MailServiceTestCase(FastTenantTestCase):
 
     def setUp(self):
-        self.mail_service = MailService()
+        self.mail_service = MailService(MailTypeEnum.DIRECT)
         self.sender = mixer.blend(User)
 
     def test_get_notification_subject_single(self):

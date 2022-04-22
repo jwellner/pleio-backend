@@ -1,7 +1,17 @@
-    
 {% extends "email/base_notification.html" %}
 {% load i18n %}
+{% load core_str %}
+
+{% block header_subtitle %}
+    {% trans "Notification for website administrator" as header_subtitle %}
+    {% include "email/element/header_subtitle.html" %}
+{% endblock %}
 
 {% block body %}
-    {% blocktrans %}The user <strong>{{ user_name }}</strong> wants his or her account removed, go <a href='{{ site_url }}/admin/users/delete-requests'>here</a> to the list of removal requests. {% endblocktrans %}
+    {% blocktrans %}The user <strong>{{ user_name }}</strong> wants his or her account removed.{% endblocktrans %}<br>
+    <div style="line-height: 45px">
+        {% concat site_url "/admin/users/delete-requests" as button_link %}
+        {% trans "View requests" as button_label %}
+        {% include "email/element/button-link.html" %}
+    </div>
 {% endblock %}

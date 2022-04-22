@@ -6,10 +6,11 @@ from django.apps import apps
 from django.utils import timezone
 from django_tenants.utils import schema_context
 from notifications.signals import notify
+
 from user.models import User
 from core.models.mixin import NotificationMixin
 from notifications.models import Notification
-from core.services.mail_service import MailService
+from core.services.mail_service import MailService, MailTypeEnum
 
 @shared_task()
 def create_notifications_for_scheduled_content(schema_name):
@@ -85,7 +86,7 @@ def create_notification(self, schema_name, verb, model_name, entity_id, sender_i
 
         # only send direct notification for content in groups
         if instance.group:
-            mail_service = MailService()
+            mail_service = MailService(MailTypeEnum.DIRECT)
             for notification in notifications:
                 recipient = User.objects.get(id=notification.recipient_id)
                 direct = False

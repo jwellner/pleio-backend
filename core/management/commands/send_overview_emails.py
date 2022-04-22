@@ -75,6 +75,9 @@ class Command(BaseCommand):
         if config.LANGUAGE:
             translation.activate(config.LANGUAGE)
 
+        if connection.schema_name == 'public':
+            return
+
         tenant = Client.objects.get(schema_name=connection.schema_name)
 
         site_url = 'https://' + tenant.domains.first().domain

@@ -2,6 +2,11 @@
 {% extends "email/base_notification.html" %}
 {% load i18n %}
 
+{% block header_subtitle %}
+    {% trans "Notification for website administrator" as header_subtitle %}
+    {% include "email/element/header_subtitle.html" %}
+{% endblock %}
+
 {% block body %}
 {% blocktrans %}
 Hi,<br><br>
