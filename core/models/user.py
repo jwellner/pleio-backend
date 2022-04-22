@@ -64,6 +64,14 @@ class UserProfile(models.Model):
         related_name='picture_file'
     )
 
+    origin_token = models.UUIDField(default=None, null=True, editable=False)
+
+    def __str__(self):
+        return f"UserProfile[{self.user.name}]"
+
+    def update_origin_token(self, token):
+        self.__class__.objects.filter(id=self.id).update(origin_token=token)
+
     def profile_field_value(self, field, current_user):
         field.value = ""
         field.read_access = []
@@ -74,9 +82,6 @@ class UserProfile(models.Model):
         except ObjectDoesNotExist:
             field.read_access = [ACCESS_TYPE.logged_in]
         return field
-
-    def __str__(self):
-        return f"UserProfile[{self.user.name}]"
 
 
 class ProfileFieldValidator(models.Model):
