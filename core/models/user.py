@@ -203,6 +203,10 @@ class ProfileField(models.Model):
     def clean(self):
         if self.field_type == 'html_field' and self.is_on_vcard:
             raise ValidationError("is_on_vcard=True is not allowed for %s" % self.field_type)
+        if self.field_type == 'html_field' and self.is_filter:
+            raise ValidationError("is_filter=True is not allowed for %s" % self.field_type)
+        if self.field_type == 'html_field' and self.is_in_overview:
+            raise ValidationError("is_in_overview=True is not allowed for %s" % self.field_type)
 
     def save(self, *args, **kwargs):
         # pylint: disable=arguments-differ

@@ -292,6 +292,18 @@ class ProfileTestCase(FastTenantTestCase):
 
         self.assertEqual(data["entity"]["fieldsInOverview"][0]["key"], "profile_field2")
 
+    def test_profile_field_html_not_allowed_icm_is_filter(self):
+        field = ProfileField.objects.create(key="demo", name="demo", field_type='html_field')
+        with self.assertRaises(ValidationError):
+            field.is_filter = True
+            field.save()
+
+    def test_profile_field_html_not_allowed_icm_in_overview(self):
+        field = ProfileField.objects.create(key="demo", name="demo", field_type='html_field')
+        with self.assertRaises(ValidationError):
+            field.is_in_overview = True
+            field.save()
+
     def test_profile_field_html_not_allowed_icm_vcard(self):
         field = ProfileField.objects.create(key="demo", name="profile_field", field_type='html_field')
 

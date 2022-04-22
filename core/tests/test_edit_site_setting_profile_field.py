@@ -1,16 +1,12 @@
-from django.db import connection
 from django_tenants.test.cases import FastTenantTestCase
 from backend2.schema import schema
 from ariadne import graphql_sync
-import json
 from django.core.cache import cache
-from core.lib import is_valid_json
 from django.contrib.auth.models import AnonymousUser
 from django.http import HttpRequest
-from core.models import Group, ProfileField, Setting, ProfileFieldValidator
+from core.models import ProfileField, ProfileFieldValidator
 from user.models import User
 from mixer.backend.django import mixer
-from graphql import GraphQLError
 
 
 class EditSiteSettingProfileFieldTestCase(FastTenantTestCase):
