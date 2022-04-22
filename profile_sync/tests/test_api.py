@@ -32,7 +32,7 @@ class ProfileSyncApiTests(TenantTestCase):
         self.group1 = mixer.blend(Group, owner=self.user3)
 
         self.profile_field1 = ProfileField.objects.create(key='occupation', name='text_name', field_type='text_field')
-        self.profile_field2 = ProfileField.objects.create(key='existing', name='text_name2', field_type='text_field2')
+        self.profile_field2 = ProfileField.objects.create(key='existing', name='text_name2', field_type='text_field')
 
         user_profile_field = UserProfileField.objects.create(
             user_profile=self.user1.profile,

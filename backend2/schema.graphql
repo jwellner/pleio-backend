@@ -1493,6 +1493,7 @@ type ProfileItem {
   isFilterable: Boolean
   isFilter: Boolean
   isInOverview: Boolean
+  isOnVcard: Boolean
   accessId: Int
   fieldType: String
   fieldOptions: [String]
@@ -1506,6 +1507,7 @@ input ProfileItemInput {
   name: String!
   isFilter: Boolean!
   isInOverview: Boolean
+  isOnVcard: Boolean
 }
 
 type ProfileOverviewItem {
@@ -2043,6 +2045,7 @@ type User implements Entity {
   getsNewsletter: Boolean
   emailOverview: EmailOverview
   profile: [ProfileItem]
+  vcard: [ProfileItem]
   missingProfileFields(groupGuid: String!): [ProfileItem]
   fieldsInOverview(groupGuid: String): [ProfileOverviewItem]
   stats: [StatsItem]
@@ -2331,6 +2334,7 @@ input addSiteSettingProfileFieldInput {
   fieldType: String!
   fieldOptions: [String]
   isInOnboarding: Boolean
+  isOnVcard: Boolean
   isMandatory: Boolean
   profileFieldValidatorId: String
 }
@@ -2346,6 +2350,7 @@ input editSiteSettingProfileFieldInput {
   isEditable: Boolean
   isFilter: Boolean
   isInOverview: Boolean
+  isOnVcard: Boolean
   fieldOptions: [String]
   isInOnboarding: Boolean
   isMandatory: Boolean

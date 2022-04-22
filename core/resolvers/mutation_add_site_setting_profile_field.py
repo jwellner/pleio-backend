@@ -5,12 +5,13 @@ from core.constances import NOT_LOGGED_IN, USER_NOT_SITE_ADMIN, USER_ROLES, COUL
 from core.lib import clean_graphql_input, generate_code
 from django.core.exceptions import ObjectDoesNotExist
 
-def create_profile_field():
+
+def create_profile_field(name):
     key = generate_code()
     try:
-        return ProfileField.objects.create(key=key)
+        return ProfileField.objects.create(key=key, name=name)
     except IntegrityError:
-        create_profile_field()
+        create_profile_field(name=name)
 
 
 def resolve_add_site_setting_profile_field(_, info, input):
@@ -28,10 +29,7 @@ def resolve_add_site_setting_profile_field(_, info, input):
     if not user.has_role(USER_ROLES.ADMIN):
         raise GraphQLError(USER_NOT_SITE_ADMIN)
 
-    profile_field = create_profile_field()
-
-    if 'name' in clean_input:
-        profile_field.name = clean_input["name"]
+    profile_field = create_profile_field(clean_input["name"])
 
     if 'isEditable' in clean_input:
         profile_field.is_editable_by_user = clean_input["isEditable"]
@@ -41,6 +39,9 @@ def resolve_add_site_setting_profile_field(_, info, input):
 
     if 'isInOverview' in clean_input:
         profile_field.is_in_overview = clean_input["isInOverview"]
+
+    if 'isOnVcard' in clean_input:
+        profile_field.is_on_vcard = clean_input['isOnVcard']
 
     if 'fieldType' in clean_input:
         profile_field.field_type = clean_input["fieldType"]

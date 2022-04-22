@@ -43,6 +43,9 @@ def resolve_edit_site_setting_profile_field(_, info, input):
     if 'isInOverview' in clean_input:
         profile_field.is_in_overview = clean_input["isInOverview"]
 
+    if 'isOnVcard' in clean_input:
+        profile_field.is_on_vcard = clean_input['isOnVcard']
+
     if 'fieldOptions' in clean_input:
         profile_field.field_options = clean_input["fieldOptions"]
 
