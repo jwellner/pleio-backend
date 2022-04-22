@@ -92,6 +92,7 @@ type addEntityPayload {
 input addFileInput {
   containerGuid: String
   file: Upload
+  richDescription: String
   accessId: Int
   writeAccessId: Int
   tags: [String]
@@ -566,6 +567,7 @@ input editFileFolderInput {
   guid: String
   title: String
   file: Upload
+  richDescription: String
   accessId: Int
   writeAccessId: Int
   isAccessRecursive: Boolean
@@ -793,6 +795,7 @@ input editSiteSettingInput {
   kalturaVideoEnabled: Boolean
   kalturaVideoPartnerId: String
   kalturaVideoPlayerId: String
+  fileDescriptionFieldEnabled: Boolean
 }
 
 type editSiteSettingPayload {
@@ -1888,6 +1891,7 @@ type SiteSettings {
   kalturaVideoEnabled: Boolean!
   kalturaVideoPartnerId: String
   kalturaVideoPlayerId: String
+  fileDescriptionFieldEnabled: Boolean
 }
 
 type StatsItem {

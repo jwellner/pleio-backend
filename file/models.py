@@ -17,6 +17,7 @@ from django.dispatch import receiver
 from django.utils.text import slugify
 from django.core.files.base import ContentFile
 
+from core.utils.convert import tiptap_to_text
 from file.helpers.access import get_read_access_weight
 
 logger = logging.getLogger(__name__)
@@ -50,6 +51,8 @@ class FileFolder(Entity, ModelWithFile, ResizedImageMixin):
     last_scan = models.DateTimeField(default=None, null=True)
 
     read_access_weight = models.IntegerField(default=0)
+
+    rich_description = models.TextField(null=True, blank=True)
 
     def __str__(self):
         return f"FileFolder[{self.title}]"
@@ -156,6 +159,10 @@ class FileFolder(Entity, ModelWithFile, ResizedImageMixin):
     @property
     def mime_type_field(self):
         return self.mime_type
+
+    @property
+    def description(self):
+        return tiptap_to_text(self.rich_description)
 
 
 class ScanIncident(models.Model):

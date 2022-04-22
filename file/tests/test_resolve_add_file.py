@@ -1,20 +1,15 @@
-from django.db import connection
 from django_tenants.test.cases import FastTenantTestCase
 from django.core.files import File
 from django.conf import settings
 from backend2.schema import schema
 from ariadne import graphql_sync
-from ariadne.file_uploads import combine_multipart_data, upload_scalar
-import json
 from django.contrib.auth.models import AnonymousUser
 from django.http import HttpRequest
 from core.models import Group
 from user.models import User
-from event.models import Event
 from file.models import FileFolder
 from core.constances import ACCESS_TYPE
 from mixer.backend.django import mixer
-from graphql import GraphQLError
 from unittest.mock import MagicMock, patch
 
 class AddFileTestCase(FastTenantTestCase):
@@ -37,8 +32,10 @@ class AddFileTestCase(FastTenantTestCase):
             group=self.group
         )
 
+        self.EXPECTED_DESCRIPTION = 'EXPECTED_DESCRIPTION'
         self.data = {
             "input": {
+                "richDescription": self.EXPECTED_DESCRIPTION,
                 "containerGuid": self.group.guid,
                 "file": "test.gif",
                 "tags": ["tag_one", "tag_two"]
@@ -47,6 +44,7 @@ class AddFileTestCase(FastTenantTestCase):
         self.mutation = """
             fragment FileFolderParts on FileFolder {
                 title
+                description
                 timeCreated
                 timeUpdated
                 accessId
@@ -92,6 +90,7 @@ class AddFileTestCase(FastTenantTestCase):
 
         self.assertEqual(data["addFile"]["entity"]["title"], file_mock.name)
         self.assertEqual(data["addFile"]["entity"]["mimeType"], file_mock.content_type)
+        self.assertEqual(data["addFile"]["entity"]["description"], self.EXPECTED_DESCRIPTION)
         self.assertEqual(data["addFile"]["entity"]["group"]["guid"], self.group.guid)
         self.assertEqual(data["addFile"]["entity"]["tags"][0], "tag_one")
         self.assertEqual(data["addFile"]["entity"]["tags"][1], "tag_two")

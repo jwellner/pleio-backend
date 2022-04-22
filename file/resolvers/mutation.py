@@ -24,6 +24,7 @@ def update_access_recursive(user, entity, access_id, write_access_id):
 
 mutation = ObjectType("Mutation")
 
+
 @mutation.field("addFile")
 def resolve_add_file(_, info, input):
     # pylint: disable=redefined-builtin
@@ -73,8 +74,11 @@ def resolve_add_file(_, info, input):
     if group:
         entity.group = group
 
-    entity.read_access =  access_id_to_acl(entity, clean_input.get("accessId", config.DEFAULT_ACCESS_ID))
+    entity.read_access = access_id_to_acl(entity, clean_input.get("accessId", config.DEFAULT_ACCESS_ID))
     entity.write_access = access_id_to_acl(entity, clean_input.get("writeAccessId"))
+
+    if 'richDescription' in clean_input:
+        entity.rich_description = clean_input.get('richDescription')
 
     if entity.scan() == FILE_SCAN.VIRUS:
         raise GraphQLError("INVALID_FILE")
@@ -128,6 +132,9 @@ def resolve_add_folder(_, info, input):
     entity.title = clean_input.get("title")
     entity.is_folder = True
 
+    if 'richDescription' in clean_input:
+        entity.rich_description = clean_input.get('richDescription')
+
     if parent:
         entity.parent = parent
 
@@ -142,6 +149,7 @@ def resolve_add_folder(_, info, input):
     return {
         "entity": entity
     }
+
 
 @mutation.field("editFileFolder")
 def resolve_edit_file_folder(_, info, input):
@@ -170,6 +178,9 @@ def resolve_edit_file_folder(_, info, input):
     if 'title' in clean_input and clean_input.get("title"):
         entity.title = clean_input.get("title")
 
+    if 'richDescription' in clean_input:
+        entity.rich_description = clean_input.get('richDescription')
+
     if 'file' in clean_input:
         entity.upload = clean_input.get("file")
         if entity.scan() == FILE_SCAN.VIRUS:
@@ -189,6 +200,7 @@ def resolve_edit_file_folder(_, info, input):
     return {
         "entity": entity
     }
+
 
 @mutation.field("moveFileFolder")
 def resolve_move_file_folder(_, info, input):
@@ -245,6 +257,7 @@ def resolve_move_file_folder(_, info, input):
     return {
         "entity": entity
     }
+
 
 @mutation.field("addImage")
 def resolve_add_image(_, info, input):
