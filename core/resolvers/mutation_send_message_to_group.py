@@ -6,7 +6,7 @@ from django.utils import timezone, translation
 from django.utils.translation import ugettext_lazy
 from django.utils.html import format_html
 from core.constances import NOT_LOGGED_IN, COULD_NOT_FIND, COULD_NOT_SAVE
-from core.lib import clean_graphql_input, get_default_email_context
+from core.lib import clean_graphql_input, get_default_email_context, get_base_url
 from datetime import timedelta
 from core.tasks import send_mail_multi
 from django_tenants.utils import parse_tenant_config_path
@@ -56,6 +56,8 @@ def resolve_send_message_to_group(_, info, input):
     context = get_default_email_context(user)
     schema_name = parse_tenant_config_path("")
     context['message'] = format_html(clean_input.get('message'))
+    context['group'] = group.name
+    context['group_url'] = get_base_url() + group.url
 
     for receiving_user in receiving_users:
         translation.activate(receiving_user.get_language())

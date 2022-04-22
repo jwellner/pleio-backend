@@ -5,7 +5,7 @@ from django_tenants.utils import parse_tenant_config_path
 from graphql import GraphQLError
 
 from core.constances import COULD_NOT_FIND, NOT_AUTHORIZED
-from core.lib import clean_graphql_input, get_default_email_context
+from core.lib import clean_graphql_input, get_default_email_context, get_base_url
 from core.tasks import send_mail_multi
 from event.models import Event, EventAttendee
 
@@ -61,6 +61,8 @@ class SendEventMessage:
         self.context = get_default_email_context(sender)
         self.schema_name = parse_tenant_config_path("")
         self.context['message'] = format_html(message)
+        self.context['event'] = event.title
+        self.context['event_url'] = get_base_url() + event.url
         self.subject = subject
 
     def send(self, receiving_user, copy: bool):

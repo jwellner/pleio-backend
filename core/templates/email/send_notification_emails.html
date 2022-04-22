@@ -3,6 +3,15 @@
 
 {% block title %}{{subject}}{% endblock %}
 
+{% block header_subtitle %}
+    {% if mail_type == 'direct' %}
+        {% trans "Direct notification" as header_subtitle %}
+    {% else %}
+        {% trans "Notification overview" as header_subtitle %}
+    {% endif %}
+    {% include "email/element/header_subtitle.html" %}
+{% endblock %}
+
 {% block link_color %}
     a { color:{{primary_color}}; text-decoration:underline }
 {% endblock %}
@@ -40,5 +49,5 @@
 
 
 {% block footer_settings %}
-    {% blocktrans %} You have received this e-mail because you registered to receive notifications.<br /> Click <a href="{{unsubscribe_url}}">here</a> to change your settings.{% endblocktrans %}
+    {% blocktrans %}Click <a href="{{ unsubscribe_url }}">here</a> to change how often you want to receive notification emails.{% endblocktrans %}
 {% endblock %}

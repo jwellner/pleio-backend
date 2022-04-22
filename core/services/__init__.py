@@ -1,1 +1,1 @@
-from core.services.mail_service import MailService
+from core.services.mail_service import MailService, MailTypeEnum
