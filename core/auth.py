@@ -83,6 +83,11 @@ class OIDCAuthBackend(OIDCAuthenticationBackend):
                 # store claims in sessions
                 self.request.session['request_access_claims'] = claims
                 raise RequestAccessException
+        else:
+            if self.request.session.get('invitecode'):
+                SiteInvitation.objects.filter(code=self.request.session.get('invitecode')).delete()
+            else:
+                SiteInvitation.objects.filter(email=claims.get('email')).delete()
 
         # create user should be done after onboarding
         if config.ONBOARDING_ENABLED:
@@ -124,6 +129,7 @@ class OIDCAuthBackend(OIDCAuthenticationBackend):
         )
 
     def update_user(self, user, claims):
+        SiteInvitation.objects.filter(email=claims.get('email')).delete()
 
         user.external_id = claims.get('sub')
 
