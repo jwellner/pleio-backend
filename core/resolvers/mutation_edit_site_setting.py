@@ -194,6 +194,7 @@ def resolve_edit_site_setting(_, info, input):
         'kalturaVideoEnabled': 'KALTURA_VIDEO_ENABLED',
         'kalturaVideoPartnerId': 'KALTURA_VIDEO_PARTNER_ID',
         'kalturaVideoPlayerId': 'KALTURA_VIDEO_PLAYER_ID',
+
     }
 
     for k, v in setting_keys.items():
@@ -329,6 +330,12 @@ def resolve_edit_site_setting(_, info, input):
             if language not in options:
                 raise GraphQLError(INVALID_VALUE)
         save_setting('EXTRA_LANGUAGES', clean_input.get('extraLanguages'))
+
+    if 'fileDescriptionFieldEnabled' in clean_input:
+        options = [m for m in config.FILE_OPTIONS if m != 'enable_file_description']
+        if clean_input.get('fileDescriptionFieldEnabled'):
+            options.append('enable_file_description')
+        save_setting("FILE_OPTIONS", options)
 
     if 'isClosed' in clean_input:
         if not config.IS_CLOSED == clean_input.get('isClosed'):

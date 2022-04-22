@@ -1,24 +1,16 @@
 from django.db import connection
-from django_tenants.test.cases import FastTenantTestCase, TenantTestCase
+from django_tenants.test.cases import TenantTestCase
 from django_tenants.test.client import TenantClient
-from django.test import override_settings, Client
-from core.models import Group, Comment, ProfileField
 from django_tenants.test.cases import FastTenantTestCase
-from django.test import override_settings
-from core.models import Group, Comment, ProfileField, SiteInvitation, SiteAccessRequest
+from core.models import ProfileField, SiteInvitation, SiteAccessRequest
 from user.models import User
-from blog.models import Blog
 from cms.models import Page
-from core.constances import ACCESS_TYPE
 from backend2.schema import schema
 from ariadne import graphql_sync
-import json
 from django.contrib.auth.models import AnonymousUser
 from django.http import HttpRequest
 from django.core.cache import cache
-from django.template.loader import render_to_string
 from mixer.backend.django import mixer
-from notifications.signals import notify
 from core.lib import get_language_options
 
 
@@ -266,7 +258,9 @@ class SiteSettingsTestCase(FastTenantTestCase):
         self.assertEqual(data["siteSettings"]["isClosed"], False)
         self.assertEqual(data["siteSettings"]["allowRegistration"], True)
         self.assertEqual(data["siteSettings"]["directRegistrationDomains"], [])
-        self.assertEqual(data["siteSettings"]["defaultAccessIdOptions"], [{'value': 0, 'label': 'Alleen eigenaar'}, {'value': 1, 'label': 'Ingelogde gebruikers'}, {'value': 2, 'label': 'Iedereen (publiek zichtbaar)'}])
+        self.assertEqual(data["siteSettings"]["defaultAccessIdOptions"],
+                         [{'value': 0, 'label': 'Alleen eigenaar'}, {'value': 1, 'label': 'Ingelogde gebruikers'},
+                          {'value': 2, 'label': 'Iedereen (publiek zichtbaar)'}])
         self.assertEqual(data["siteSettings"]["defaultAccessId"], 1)
         self.assertEqual(data["siteSettings"]["googleAnalyticsId"], "")
         self.assertEqual(data["siteSettings"]["googleSiteVerification"], "")
@@ -274,7 +268,8 @@ class SiteSettingsTestCase(FastTenantTestCase):
         self.assertEqual(data["siteSettings"]["piwikUrl"], "https://stats.pleio.nl/")
         self.assertEqual(data["siteSettings"]["piwikId"], "")
 
-        self.assertEqual(data["siteSettings"]["themeOptions"], [{"value": 'leraar', 'label': 'Standaard'}, {'value': 'rijkshuisstijl', 'label': 'Rijkshuisstijl'}])
+        self.assertEqual(data["siteSettings"]["themeOptions"], [{"value": 'leraar', 'label': 'Standaard'},
+                                                                {'value': 'rijkshuisstijl', 'label': 'Rijkshuisstijl'}])
         self.assertEqual(data["siteSettings"]["fontOptions"], [
             {"value": "Arial", "label": "Arial"},
             {"value": "Open Sans", "label": "Open Sans"},
@@ -295,7 +290,9 @@ class SiteSettingsTestCase(FastTenantTestCase):
         self.assertEqual(data["siteSettings"]["favicon"], "")
         self.assertEqual(data["siteSettings"]["likeIcon"], "heart")
 
-        self.assertEqual(data["siteSettings"]["startPageOptions"], [{"value": "activity", "label": "Activiteitenstroom"},{"value": "cms", "label": "CMS pagina"}])
+        self.assertEqual(data["siteSettings"]["startPageOptions"],
+                         [{"value": "activity", "label": "Activiteitenstroom"},
+                          {"value": "cms", "label": "CMS pagina"}])
         self.assertEqual(data["siteSettings"]["startPage"], "activity")
         self.assertEqual(data["siteSettings"]["startPageCmsOptions"], [
             {"value": self.cmsPage2.guid, 'label': self.cmsPage2.title},
@@ -330,7 +327,8 @@ class SiteSettingsTestCase(FastTenantTestCase):
         self.assertEqual(data["siteSettings"]["redirects"], [])
 
         self.assertEqual(data["siteSettings"]["profile"], [])
-        self.assertEqual(data["siteSettings"]["profileFields"], [{"key": self.profileField1.key}, {"key": self.profileField2.key}])
+        self.assertEqual(data["siteSettings"]["profileFields"],
+                         [{"key": self.profileField1.key}, {"key": self.profileField2.key}])
 
         self.assertEqual(data["siteSettings"]["tagCategories"], [])
         self.assertEqual(data["siteSettings"]["showTagsInFeed"], False)
@@ -392,7 +390,9 @@ class SiteSettingsTestCase(FastTenantTestCase):
         self.assertEqual(data["siteSettings"]["groupMemberExport"], False)
         self.assertEqual(data["siteSettings"]["siteInvites"]["edges"][0]['email'], 'a@a.nl')
         self.assertEqual(data["siteSettings"]["cookieConsent"], False)
-        self.assertEqual(data["siteSettings"]["roleOptions"], [{'value': 'ADMIN', 'label': 'Beheerder'}, {'value': 'EDITOR', 'label': 'Redacteur'}, {'value': 'QUESTION_MANAGER', 'label': 'Vraagexpert'}])
+        self.assertEqual(data["siteSettings"]["roleOptions"],
+                         [{'value': 'ADMIN', 'label': 'Beheerder'}, {'value': 'EDITOR', 'label': 'Redacteur'},
+                          {'value': 'QUESTION_MANAGER', 'label': 'Vraagexpert'}])
         self.assertEqual(data["siteSettings"]["siteAccessRequests"]["edges"][0]['email'], 'b@b.nl')
         self.assertEqual(data["siteSettings"]["deleteAccountRequests"]["edges"][0]['guid'], self.delete_user.guid)
         self.assertEqual(data["siteSettings"]["profileSyncEnabled"], False)
@@ -508,6 +508,54 @@ class SiteSettingsTestCase(FastTenantTestCase):
                                        context_value={"request": request})
 
         self.assertEqual(result['data']['editSiteSetting']['siteSettings']['menuState'], 'compact', msg=result)
+
+    def test_site_settings_file_description_enabled(self):
+        request = HttpRequest()
+        request.user = self.admin
+        query = """
+        mutation UpdateFileOptions($input: editSiteSettingInput!) {
+            editSiteSetting(input: $input) {
+                siteSettings {
+                    fileDescriptionFieldEnabled
+                    __typename
+                }
+                __typename
+            }
+        }
+        """
+        variables = {
+            'input': {
+                'fileDescriptionFieldEnabled': True,
+            }
+        }
+        success, result = graphql_sync(schema, {"query": query, "variables": variables},
+                                       context_value={"request": request})
+
+        self.assertTrue(result['data']['editSiteSetting']['siteSettings']['fileDescriptionFieldEnabled'], msg=result)
+
+    def test_site_settings_file_description_disabled(self):
+        request = HttpRequest()
+        request.user = self.admin
+        query = """
+        mutation UpdateFileOptions($input: editSiteSettingInput!) {
+            editSiteSetting(input: $input) {
+                siteSettings {
+                    fileDescriptionFieldEnabled
+                    __typename
+                }
+                __typename
+            }
+        }
+        """
+        variables = {
+            'input': {
+                'fileDescriptionFieldEnabled': False,
+            }
+        }
+        success, result = graphql_sync(schema, {"query": query, "variables": variables},
+                                       context_value={"request": request})
+
+        self.assertFalse(result['data']['editSiteSetting']['siteSettings']['fileDescriptionFieldEnabled'], msg=result)
 
 
 class SiteSettingsIsClosedTestCase(TenantTestCase):
