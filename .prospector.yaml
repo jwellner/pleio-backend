@@ -8,8 +8,31 @@ uses:
 autodetect: false
 pylint:
   run: true
-pep8:
+  disable:
+    - django-not-configured
+    - consider-using-f-string
+    - consider-using-dict-items
+    - useless-suppression
+    - raise-missing-from
+    - super-with-arguments
+    - unspecified-encoding
+    - unused-variable
+    - used-before-assignment
+    - f-string-without-interpolation
+    - inconsistent-return-statements
+    - redundant-u-string-prefix
+    - unused-import
+    - too-many-arguments
+    - too-many-locals
+    - trailing-newlines
+    - consider-using-with
+    - consider-using-in
+    - useless-super-delegation
+pycodestyle:
   run: true
+  max-line-length: 160
+  disable:
+    - N815
 mccabe:
   run: false
 dodgy:

@@ -56,7 +56,7 @@ class Command(BaseCommand):
             help='interval of overview emails(daily, weekly, or monthly)',
         )
 
-    def send_overview(self, user, entities, featured_entities, subject, site_url):
+    def send_overview(self, user, entities, featured_entities, subject):
         if entities or featured_entities:
             context = get_default_email_context(user)
             context['entities'] = get_serializable_entities(entities)
@@ -77,10 +77,6 @@ class Command(BaseCommand):
 
         if connection.schema_name == 'public':
             return
-
-        tenant = Client.objects.get(schema_name=connection.schema_name)
-
-        site_url = 'https://' + tenant.domains.first().domain
 
         interval = options['interval']
 
@@ -157,4 +153,4 @@ class Command(BaseCommand):
 
             selected_entities = selected_entities[:5]
 
-            self.send_overview(user, selected_entities, featured_entities, subject, site_url)
+            self.send_overview(user, selected_entities, featured_entities, subject)
