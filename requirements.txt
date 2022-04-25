@@ -9,7 +9,7 @@ mozilla-django-oidc==1.2.3
 Sphinx==4.1.2
 sphinx-autobuild==2021.3.14
 coverage==5.5
-prospector==1.2.0
+prospector==1.7.7
 ariadne==0.13.0
 graphql-core==3.1.7
 django-model-utils==4.1.1
