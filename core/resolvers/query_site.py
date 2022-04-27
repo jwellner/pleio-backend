@@ -129,6 +129,7 @@ def get_site_settings():
         'iconAlt': config.ICON_ALT,
         'showIcon': config.ICON_ENABLED,
         'menu': config.MENU,
+        'menuState': config.MENU_STATE,
 
         "numberOfFeaturedItems": config.NUMBER_OF_FEATURED_ITEMS,
         "enableFeedSorting": config.ENABLE_FEED_SORTING,
@@ -243,6 +244,7 @@ def get_site_settings():
         'kalturaVideoEnabled': config.KALTURA_VIDEO_ENABLED,
         'kalturaVideoPartnerId': config.KALTURA_VIDEO_PARTNER_ID,
         'kalturaVideoPlayerId': config.KALTURA_VIDEO_PLAYER_ID,
+        'fileDescriptionFieldEnabled': 'enable_file_description' in config.FILE_OPTIONS,
     }
 
     return site_settings

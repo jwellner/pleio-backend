@@ -20,6 +20,14 @@ from file.models import FileFolder
 from django.utils import timezone
 
 
+def get_or_create_profile_field(test_key, initial_name):
+    try:
+        return ProfileField.objects.get(key=test_key)
+    except ProfileField.DoesNotExist:
+        return ProfileField.objects.create(key=test_key,
+                                           name=initial_name)
+
+
 def save_setting(key, value):
     # pylint: disable=unused-variable
     setting, created = Setting.objects.get_or_create(key=key)
@@ -116,6 +124,7 @@ def resolve_edit_site_setting(_, info, input):
         'startPageCms': 'STARTPAGE_CMS',
         'showIcon': 'ICON_ENABLED',
         'iconAlt': 'ICON_ALT',
+        'menuState': 'MENU_STATE',
 
         "numberOfFeaturedItems": 'NUMBER_OF_FEATURED_ITEMS',
         "enableFeedSorting": 'ENABLE_FEED_SORTING',
@@ -136,6 +145,7 @@ def resolve_edit_site_setting(_, info, input):
         'tagCategories': 'TAG_CATEGORIES',
         'showTagsInFeed': 'SHOW_TAGS_IN_FEED',
         'showTagsInDetail': 'SHOW_TAGS_IN_DETAIL',
+
 
         'defaultEmailOverviewFrequency': 'EMAIL_OVERVIEW_DEFAULT_FREQUENCY',
         'emailOverviewSubject': 'EMAIL_OVERVIEW_SUBJECT',
@@ -192,6 +202,7 @@ def resolve_edit_site_setting(_, info, input):
         'kalturaVideoEnabled': 'KALTURA_VIDEO_ENABLED',
         'kalturaVideoPartnerId': 'KALTURA_VIDEO_PARTNER_ID',
         'kalturaVideoPlayerId': 'KALTURA_VIDEO_PLAYER_ID',
+
     }
 
     for k, v in setting_keys.items():
@@ -207,10 +218,11 @@ def resolve_edit_site_setting(_, info, input):
 
     if 'profile' in clean_input:
         for field in clean_input.get('profile'):
-            profile_field, created = ProfileField.objects.get_or_create(key=field['key'])
+            profile_field = get_or_create_profile_field(field['key'], field['name'])
             profile_field.name = field['name']
-            profile_field.is_filter = field['isFilter']
-            profile_field.is_in_overview = field['isInOverview']
+            profile_field.is_filter = field.get('isFilter') or False
+            profile_field.is_in_overview = field.get('isInOverview') or False
+            profile_field.is_on_vcard = field.get('isOnVcard') or False
             profile_field.save()
 
         save_setting('PROFILE', clean_input.get('profile'))
@@ -327,6 +339,12 @@ def resolve_edit_site_setting(_, info, input):
             if language not in options:
                 raise GraphQLError(INVALID_VALUE)
         save_setting('EXTRA_LANGUAGES', clean_input.get('extraLanguages'))
+
+    if 'fileDescriptionFieldEnabled' in clean_input:
+        options = [m for m in config.FILE_OPTIONS if m != 'enable_file_description']
+        if clean_input.get('fileDescriptionFieldEnabled'):
+            options.append('enable_file_description')
+        save_setting("FILE_OPTIONS", options)
 
     if 'isClosed' in clean_input:
         if not config.IS_CLOSED == clean_input.get('isClosed'):

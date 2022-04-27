@@ -28,7 +28,7 @@ RUN apt-get update && apt-get install --no-install-recommends -y \
     swig \
     ca-certificates \
     gnupg \
-    wget \ 
+    wget \
     lsb-release 
 
 # Install postgresql client version 12

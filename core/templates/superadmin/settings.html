@@ -4,67 +4,67 @@
 
 {% block content %}
 
-<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-    <h1 class="h2">Settings</h1>
-</div>
+    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+        <h1 class="h2">Settings</h1>
+    </div>
 
-<p>Site settings for {{ config.NAME }}</p>
+    <p>Site settings for {{ config.NAME }}</p>
 
-<form method="post">
-    {% csrf_token %}
-    <div class="card">
-        <h5 class="card-header">Login Options</h5>
-        <div class="card-body">
+    <form method="post">
+        {% csrf_token %}
+        <div class="card">
+            <h5 class="card-header">Login Options</h5>
+            <div class="card-body">
                 {% for providerOption in constants.OIDC_PROVIDER_OPTIONS %}
-                <div class="mb-2 form-check">
-                    <input type="checkbox" name="oidc_providers" value="{{ providerOption.value }}"
-                        {% if providerOption.value in config.OIDC_PROVIDERS %} checked {% endif %} />
-                    <label for="oidc_providers">{{ providerOption.label }}</label>
-                </div>
+                    <div class="mb-2 form-check">
+                        <input type="checkbox" name="oidc_providers" id="oidcp_{{ forloop.counter }}" value="{{ providerOption.value }}"
+                                {% if providerOption.value in config.OIDC_PROVIDERS %} checked {% endif %} />
+                        <label for="oidcp_{{ forloop.counter }}">{{ providerOption.label }}</label>
+                    </div>
                 {% endfor %}
                 {{ form.errors.oidc_providers }}
-        </div>
-    </div>
-    <br>
-    <div class="card">
-        <h5 class="card-header">User</h5>
-        <div class="card-body">
-            <div class="mb-2 form-check">
-                <input type="checkbox" name="edit_user_name_enabled" id="edit_user_name_enabled" {% if config.EDIT_USER_NAME_ENABLED %} checked {% endif %} />
-                <label for="edit_user_name_enabled">Enable edit name</label>
             </div>
-            {{ form.errors.edit_user_name_enabled }}
         </div>
-    </div>
-    <br />
-    <div class="card">
-        <h5 class="card-header">Custom Javascript</h5>
-        <div class="card-body">
-            <div class="mb-2 form-check">
+        <br>
+        <div class="card">
+            <h5 class="card-header">User</h5>
+            <div class="card-body">
+                <div class="mb-2 form-check">
+                <input type="checkbox" name="edit_user_name_enabled" id="edit_user_name_enabled" {% if config.EDIT_USER_NAME_ENABLED %} checked {% endif %} />
+                    <label for="edit_user_name_enabled">Enable edit name</label>
+                </div>
+                {{ form.errors.edit_user_name_enabled }}
+            </div>
+        </div>
+        <br/>
+        <div class="card">
+            <h5 class="card-header">Custom Javascript</h5>
+            <div class="card-body">
+                <div class="mb-2 form-check">
                 <textarea class="form-control" rows="4" name="custom_javascript" id="custom_javascript">{{ config.CUSTOM_JAVASCRIPT }}</textarea>
-                <div class="form-text">
-                    Add custom javascript that will be captured within a &lt;script&gt; tag.
-                    There is no syntax check, so use a tool like <a target="_blank" href="https://jshint.com/">jshint</a>
-                    to check the validity.
+                    <div class="form-text">
+                        Add custom javascript that will be captured within a &lt;script&gt; tag.
+                        There is no syntax check, so use a tool like <a target="_blank" href="https://jshint.com/">jshint</a>
+                        to check the validity.
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
-    <br>
-    <div class="card">
-        <h5 class="card-header">CSP Header exceptions</h5>
+        <br>
+        <div class="card">
+            <h5 class="card-header">CSP Header exceptions</h5>
 
-        <div class="card-body">
-            <div class="mb-2 form-check">
+            <div class="card-body">
+                <div class="mb-2 form-check">
                 <textarea class="form-control" rows="4" name="csp_header_exceptions" id="csp_header_exceptions">{{ config.CSP_HEADER_EXCEPTIONS | join:"&#10;"}}</textarea>
                 <div class="form-text">Add URL per line in this format: https://www.example.com or https://*.example.com</div>
+                </div>
+                {{ form.errors.csp_header_exceptions }}
             </div>
-            {{ form.errors.csp_header_exceptions }}
         </div>
-    </div>
 
-    <br>
-    <button type="submit" class="btn btn-primary">Save</button>
-</form>
+        <br>
+        <button type="submit" class="btn btn-primary">Save</button>
+    </form>
 
 {% endblock %}

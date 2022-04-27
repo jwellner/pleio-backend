@@ -92,6 +92,7 @@ type addEntityPayload {
 input addFileInput {
   containerGuid: String
   file: Upload
+  richDescription: String
   accessId: Int
   writeAccessId: Int
   tags: [String]
@@ -217,9 +218,13 @@ type Attendee {
 
 type AttendeesList {
   total: Int!
+  totalAccept: Int!
+  """totalGoing means having state accept, but not checked in yet."""
+  totalGoing: Int!
   totalMaybe: Int!
   totalReject: Int!
   totalWaitinglist: Int!
+  totalCheckedIn: Int!
   edges: [Attendee]
 }
 
@@ -562,6 +567,7 @@ input editFileFolderInput {
   guid: String
   title: String
   file: Upload
+  richDescription: String
   accessId: Int
   writeAccessId: Int
   isAccessRecursive: Boolean
@@ -710,6 +716,7 @@ input editSiteSettingInput {
   showIcon: Boolean
   removeIcon: Boolean
   menu: [MenuItemInput]
+  menuState: MenuState
   numberOfFeaturedItems: Int
   enableFeedSorting: Boolean
   showExtraHomepageFilters: Boolean
@@ -788,6 +795,7 @@ input editSiteSettingInput {
   kalturaVideoEnabled: Boolean
   kalturaVideoPartnerId: String
   kalturaVideoPlayerId: String
+  fileDescriptionFieldEnabled: Boolean
 }
 
 type editSiteSettingPayload {
@@ -1486,6 +1494,7 @@ type ProfileItem {
   isFilterable: Boolean
   isFilter: Boolean
   isInOverview: Boolean
+  isOnVcard: Boolean
   accessId: Int
   fieldType: String
   fieldOptions: [String]
@@ -1499,6 +1508,7 @@ input ProfileItemInput {
   name: String!
   isFilter: Boolean!
   isInOverview: Boolean
+  isOnVcard: Boolean
 }
 
 type ProfileOverviewItem {
@@ -1611,6 +1621,11 @@ enum Role {
   admin
   member
   removed
+}
+
+enum MenuState {
+  normal
+  compact
 }
 
 type Row {
@@ -1789,6 +1804,7 @@ type SiteSettings {
   icon: String
   showIcon: Boolean!
   menu: [MenuItem]
+  menuState: MenuState
   numberOfFeaturedItems: Int
   enableFeedSorting: Boolean!
   showExtraHomepageFilters: Boolean!
@@ -1875,6 +1891,7 @@ type SiteSettings {
   kalturaVideoEnabled: Boolean!
   kalturaVideoPartnerId: String
   kalturaVideoPlayerId: String
+  fileDescriptionFieldEnabled: Boolean
 }
 
 type StatsItem {
@@ -2036,6 +2053,7 @@ type User implements Entity {
   getsNewsletter: Boolean
   emailOverview: EmailOverview
   profile: [ProfileItem]
+  vcard: [ProfileItem]
   missingProfileFields(groupGuid: String!): [ProfileItem]
   fieldsInOverview(groupGuid: String): [ProfileOverviewItem]
   stats: [StatsItem]
@@ -2324,6 +2342,7 @@ input addSiteSettingProfileFieldInput {
   fieldType: String!
   fieldOptions: [String]
   isInOnboarding: Boolean
+  isOnVcard: Boolean
   isMandatory: Boolean
   profileFieldValidatorId: String
 }
@@ -2339,6 +2358,7 @@ input editSiteSettingProfileFieldInput {
   isEditable: Boolean
   isFilter: Boolean
   isInOverview: Boolean
+  isOnVcard: Boolean
   fieldOptions: [String]
   isInOnboarding: Boolean
   isMandatory: Boolean

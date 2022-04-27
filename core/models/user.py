@@ -8,17 +8,19 @@ from django.contrib.postgres.fields import ArrayField
 from django.utils import timezone
 from datetime import datetime
 from core.lib import get_acl
-from core.constances import USER_ROLES
+from core.constances import USER_ROLES, ACCESS_TYPE
 from core.exceptions import InvalidFieldException
 from core import config
 from core.utils.convert import tiptap_to_text
 from .shared import read_access_default, write_access_default
-from django.core.exceptions import ObjectDoesNotExist
+from django.core.exceptions import ObjectDoesNotExist, ValidationError
 
 logger = logging.getLogger(__name__)
 
+
 def get_overview_email_interval_default():
     return config.EMAIL_OVERVIEW_DEFAULT_FREQUENCY
+
 
 class UserProfile(models.Model):
     """
@@ -62,13 +64,31 @@ class UserProfile(models.Model):
         related_name='picture_file'
     )
 
+    origin_token = models.UUIDField(default=None, null=True, editable=False)
+
     def __str__(self):
         return f"UserProfile[{self.user.name}]"
+
+    def update_origin_token(self, token):
+        self.__class__.objects.filter(id=self.id).update(origin_token=token)
+
+    def profile_field_value(self, field, current_user):
+        field.value = ""
+        field.read_access = []
+        try:
+            user_profile_field = self.user_profile_fields.visible(current_user).get(profile_field=field)
+            field.value = user_profile_field.value
+            field.read_access = user_profile_field.read_access
+        except ObjectDoesNotExist:
+            field.read_access = [ACCESS_TYPE.logged_in]
+        return field
+
 
 class ProfileFieldValidator(models.Model):
     """
     Profile field validator
     """
+
     class Meta:
         ordering = ['created_at', 'id']
 
@@ -96,6 +116,7 @@ class ProfileFieldValidator(models.Model):
                 return True
         return False
 
+
 class ProfileFieldManager(models.Manager):
     def get_date_field(self, guid):
         try:
@@ -108,10 +129,12 @@ class ProfileFieldManager(models.Manager):
 
         return profile_field
 
+
 class ProfileField(models.Model):
     """
     Profile field types
     """
+
     class Meta:
         ordering = ['created_at', 'id']
 
@@ -140,6 +163,7 @@ class ProfileField(models.Model):
     is_filter = models.BooleanField(default=False)
     is_in_overview = models.BooleanField(default=False)
     is_in_onboarding = models.BooleanField(default=False)
+    is_on_vcard = models.BooleanField(default=False)
     is_mandatory = models.BooleanField(default=False)
 
     validators = models.ManyToManyField('core.ProfileFieldValidator', related_name="profile_fields")
@@ -176,6 +200,21 @@ class ProfileField(models.Model):
                     return False
         return True
 
+    def clean(self):
+        if self.field_type == 'html_field' and self.is_on_vcard:
+            raise ValidationError("is_on_vcard=True is not allowed for %s" % self.field_type)
+        if self.field_type == 'html_field' and self.is_filter:
+            raise ValidationError("is_filter=True is not allowed for %s" % self.field_type)
+        if self.field_type == 'html_field' and self.is_in_overview:
+            raise ValidationError("is_in_overview=True is not allowed for %s" % self.field_type)
+
+    def save(self, *args, **kwargs):
+        # pylint: disable=arguments-differ
+        self.full_clean()
+        super(ProfileField, self).save(*args, **kwargs)
+
+
+
 class UserProfileFieldManager(models.Manager):
     def visible(self, user):
         qs = self.get_queryset()
@@ -198,7 +237,6 @@ def validate_profile_sections(sections):
 
 
 class UserProfileField(models.Model):
-
     class Meta:
         unique_together = ('user_profile', 'profile_field')
 
@@ -252,6 +290,7 @@ class UserProfileField(models.Model):
     def __str__(self):
         return f"UserProfileField[{self.profile_field.name}]"
 
+
 @receiver(pre_save, sender=UserProfileField)
 def set_date_field_value(sender, instance, **kwargs):
     # pylint: disable=unused-argument
@@ -260,6 +299,7 @@ def set_date_field_value(sender, instance, **kwargs):
             instance.value_date = datetime.strptime(instance.value, '%Y-%m-%d')
         except Exception:
             instance.date_value = None
+
 
 @receiver(post_delete, sender=ProfileField)
 def validate_config_profile_sections(sender, instance, **kwargs):

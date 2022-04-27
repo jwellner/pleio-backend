@@ -1,16 +1,12 @@
-from django.db import connection
 from django_tenants.test.cases import FastTenantTestCase
 from backend2.schema import schema
 from ariadne import graphql_sync
-import json
 from django.core.cache import cache
-from core.lib import is_valid_json
 from django.contrib.auth.models import AnonymousUser
 from django.http import HttpRequest
-from core.models import Group, ProfileField, Setting, ProfileFieldValidator
+from core.models import ProfileField, ProfileFieldValidator
 from user.models import User
 from mixer.backend.django import mixer
-from graphql import GraphQLError
 
 
 class EditSiteSettingProfileFieldTestCase(FastTenantTestCase):
@@ -20,7 +16,7 @@ class EditSiteSettingProfileFieldTestCase(FastTenantTestCase):
         self.user = mixer.blend(User)
         self.admin = mixer.blend(User, roles=['ADMIN'])
         self.profileField1 = ProfileField.objects.create(key='text_key', name='text_name', field_type='text_field')
-        self.profileField2 = ProfileField.objects.create(key='text_key2', name='text_name2', field_type='text_field2')
+        self.profileField2 = ProfileField.objects.create(key='text_key2', name='text_name2', field_type='text_field')
 
         self.profileFieldValidator1 = ProfileFieldValidator.objects.create(
             name="123",
@@ -95,6 +91,7 @@ class EditSiteSettingProfileFieldTestCase(FastTenantTestCase):
                         isEditable
                         isFilter
                         isInOverview
+                        isOnVcard
                         fieldOptions
                         isInOnboarding
                         isMandatory
@@ -113,6 +110,7 @@ class EditSiteSettingProfileFieldTestCase(FastTenantTestCase):
                 "isEditable": False,
                 "isFilter": True,
                 "isInOverview": True,
+                "isOnVcard": True,
                 "fieldOptions": ["option1", "option2"],
                 "isInOnboarding": True,
                 "isMandatory": True,
@@ -132,6 +130,7 @@ class EditSiteSettingProfileFieldTestCase(FastTenantTestCase):
         self.assertEqual(data["editSiteSettingProfileField"]["profileItem"]["isEditable"], False)
         self.assertEqual(data["editSiteSettingProfileField"]["profileItem"]["isFilter"], True)
         self.assertEqual(data["editSiteSettingProfileField"]["profileItem"]["isInOverview"], True)
+        self.assertEqual(data["editSiteSettingProfileField"]["profileItem"]["isOnVcard"], True)
         self.assertEqual(data["editSiteSettingProfileField"]["profileItem"]["fieldOptions"], ["option1", "option2"])
         self.assertEqual(data["editSiteSettingProfileField"]["profileItem"]["isInOnboarding"], True)
         self.assertEqual(data["editSiteSettingProfileField"]["profileItem"]["isMandatory"], True)

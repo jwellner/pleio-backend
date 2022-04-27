@@ -99,6 +99,7 @@ class AddSiteSettingProfileFieldTestCase(FastTenantTestCase):
                         isEditable
                         isFilter
                         isInOverview
+                        isOnVcard
                         fieldType
                         fieldOptions
                         isInOnboarding
@@ -116,6 +117,7 @@ class AddSiteSettingProfileFieldTestCase(FastTenantTestCase):
                 "isEditable": False,
                 "isFilter": True,
                 "isInOverview": True,
+                "isOnVcard": True,
                 "fieldType": "date_field",
                 "fieldOptions": ["option1", "option2"],
                 "isInOnboarding": True,
@@ -135,6 +137,7 @@ class AddSiteSettingProfileFieldTestCase(FastTenantTestCase):
         self.assertEqual(data["addSiteSettingProfileField"]["profileItem"]["isEditable"], False)
         self.assertEqual(data["addSiteSettingProfileField"]["profileItem"]["isFilter"], True)
         self.assertEqual(data["addSiteSettingProfileField"]["profileItem"]["isInOverview"], True)
+        self.assertEqual(data["addSiteSettingProfileField"]["profileItem"]["isOnVcard"], True)
         self.assertEqual(data["addSiteSettingProfileField"]["profileItem"]["fieldType"], "dateField")
         self.assertEqual(data["addSiteSettingProfileField"]["profileItem"]["fieldOptions"], ["option1", "option2"])
         self.assertEqual(data["addSiteSettingProfileField"]["profileItem"]["isInOnboarding"], True)

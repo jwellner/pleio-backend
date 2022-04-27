@@ -2,6 +2,7 @@ from unittest import mock
 
 from ariadne import graphql_sync
 from django.http import HttpRequest
+from django.utils.translation import gettext as _
 from django_tenants.test.cases import FastTenantTestCase
 from mixer.backend.django import mixer
 
@@ -267,10 +268,8 @@ class EventsTestCase(FastTenantTestCase):
 
         mailer.send(self.owner, copy=False)
 
-        self.assertEqual(mocked_send_mail_multi.call_args.kwargs['subject'], "Message from event {event}: {subject}".format(
-            event=self.event.title,
-            subject=expected_subject
-        ))
+        self.assertEqual(mocked_send_mail_multi.call_args.kwargs['subject'],
+                         _("Message from event {0}: {1}").format(self.event.title, expected_subject))
 
     @mock.patch('event.resolvers.mutation_messages.send_mail_multi.delay')
     def test_event_mailer_should_give_copy_in_the_subject_of_copies(self, mocked_send_mail_multi):
@@ -283,7 +282,5 @@ class EventsTestCase(FastTenantTestCase):
 
         mailer.send(self.owner, copy=True)
 
-        self.assertEqual(mocked_send_mail_multi.call_args.kwargs['subject'], "Copy: Message from event {event}: {subject}".format(
-            event=self.event.title,
-            subject=expected_subject
-        ))
+        self.assertEqual(mocked_send_mail_multi.call_args.kwargs['subject'],
+                         _("Copy: Message from event {0}: {1}").format(self.event.title, expected_subject))

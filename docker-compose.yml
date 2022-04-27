@@ -15,7 +15,7 @@ services:
       - ./.env
     stdin_open: true
     tty: true
-    command: ["/start-dev.sh"]
+    command: [ "/start-dev.sh" ]
     volumes:
       - .:/app
       - frontend-build:/app/static-frontend
@@ -39,7 +39,7 @@ services:
     env_file:
       - ./.env
     stdin_open: true
-    command: ["/start-background.sh"]
+    command: [ "/start-background.sh" ]
     volumes:
       - .:/app
       - shared-tmp:/tmp
@@ -52,6 +52,7 @@ services:
     volumes:
       - frontend-build:/shared
     command: bash -c "cp -Rp /usr/share/nginx/html/. /shared && chown -R www-data:www-data /shared"
+
   admin:
     build: .
     restart: on-failure
@@ -63,7 +64,7 @@ services:
       - ./.env
     stdin_open: true
     tty: true
-    command: ["/start-admin-dev.sh"]
+    command: [ "/start-admin-dev.sh" ]
     volumes:
       - .:/app
     depends_on:
@@ -75,8 +76,12 @@ services:
     image: postgres:12
     environment:
       POSTGRES_PASSWORD: ${DB_PASSWORD}
+    ports:
+      - 15432:5432
     volumes:
       - postgres_data:/var/lib/postgresql/data/
+    ports:
+      - "15432:5432"
 
   elasticsearch:
     image: docker.elastic.co/elasticsearch/elasticsearch:7.16.2
@@ -120,8 +125,7 @@ services:
 
   redis:
     image: 'redis:6.2'
-    ports:
-      - '6379:6379'
+    restart: always
 
   clamav:
     image: 'mkodockx/docker-clamav:1.0.3-alpine'

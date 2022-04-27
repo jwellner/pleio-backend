@@ -1,24 +1,18 @@
-from django.db import connection
 from django_tenants.test.cases import FastTenantTestCase
 from django.core.files import File
 from django.conf import settings
 from backend2.schema import schema
 from ariadne import graphql_sync
-from ariadne.file_uploads import combine_multipart_data, upload_scalar
-import json
-import mimetypes
 from django.contrib.auth.models import AnonymousUser
-from django.core.files.uploadedfile import SimpleUploadedFile
 from django.http import HttpRequest
 from core.models import Group
 from file.helpers.compression import get_download_filename
 from user.models import User
-from event.models import Event
 from core.constances import ACCESS_TYPE
 from mixer.backend.django import mixer
-from graphql import GraphQLError
 from unittest.mock import MagicMock, patch
 from ..models import FileFolder
+
 
 class EditFileFolderTestCase(FastTenantTestCase):
 
@@ -27,10 +21,14 @@ class EditFileFolderTestCase(FastTenantTestCase):
         self.authenticatedUser = mixer.blend(User)
         self.user1 = mixer.blend(User)
 
+        self.PREVIOUS_DESCRIPTION = 'PREVIOUS_DESCRIPTION'
+        self.EXPECTED_DESCRIPTION = 'EXPECTED_DESCRIPTION'
+
         self.group = mixer.blend(Group, owner=self.authenticatedUser)
         self.group.join(self.user1, 'member')
         self.folder1 = FileFolder.objects.create(
             owner=self.authenticatedUser,
+            rich_description=self.PREVIOUS_DESCRIPTION,
             upload=None,
             is_folder=True,
             group=self.group,
@@ -40,6 +38,7 @@ class EditFileFolderTestCase(FastTenantTestCase):
         )
         self.folder2 = FileFolder.objects.create(
             owner=self.authenticatedUser,
+            rich_description=self.PREVIOUS_DESCRIPTION,
             upload=None,
             is_folder=True,
             group=self.group,
@@ -49,6 +48,7 @@ class EditFileFolderTestCase(FastTenantTestCase):
         )
         self.folder3 = FileFolder.objects.create(
             owner=self.user1,
+            rich_description=self.PREVIOUS_DESCRIPTION,
             upload=None,
             is_folder=True,
             group=self.group,
@@ -58,6 +58,7 @@ class EditFileFolderTestCase(FastTenantTestCase):
         )
         self.file = FileFolder.objects.create(
             owner=self.authenticatedUser,
+            rich_description=self.PREVIOUS_DESCRIPTION,
             upload=None,
             is_folder=False,
             group=self.group,
@@ -67,6 +68,7 @@ class EditFileFolderTestCase(FastTenantTestCase):
         )
         self.file2 = FileFolder.objects.create(
             owner=self.authenticatedUser,
+            rich_description=self.PREVIOUS_DESCRIPTION,
             upload=None,
             is_folder=False,
             group=self.group,
@@ -78,6 +80,7 @@ class EditFileFolderTestCase(FastTenantTestCase):
         self.group = mixer.blend(Group, owner=self.authenticatedUser)
         self.folder1 = FileFolder.objects.create(
             owner=self.authenticatedUser,
+            rich_description=self.PREVIOUS_DESCRIPTION,
             upload=None,
             is_folder=True,
             group=self.group,
@@ -87,6 +90,7 @@ class EditFileFolderTestCase(FastTenantTestCase):
         )
         self.folder2 = FileFolder.objects.create(
             owner=self.authenticatedUser,
+            rich_description=self.PREVIOUS_DESCRIPTION,
             upload=None,
             is_folder=True,
             group=self.group,
@@ -96,6 +100,7 @@ class EditFileFolderTestCase(FastTenantTestCase):
         )
         self.file3 = FileFolder.objects.create(
             owner=self.authenticatedUser,
+            rich_description=self.PREVIOUS_DESCRIPTION,
             upload=None,
             is_folder=False,
             group=self.group,
@@ -106,6 +111,7 @@ class EditFileFolderTestCase(FastTenantTestCase):
         )
         self.file4 = FileFolder.objects.create(
             owner=self.authenticatedUser,
+            rich_description=self.PREVIOUS_DESCRIPTION,
             upload=None,
             is_folder=False,
             group=self.group,
@@ -117,6 +123,7 @@ class EditFileFolderTestCase(FastTenantTestCase):
         self.data = {
             "input": {
                 "guid": None,
+                "richDescription": self.EXPECTED_DESCRIPTION,
                 "title": "",
                 "file": "",
             }
@@ -124,6 +131,7 @@ class EditFileFolderTestCase(FastTenantTestCase):
         self.mutation = """
             fragment FileFolderParts on FileFolder {
                 title
+                description
                 timeCreated
                 timeUpdated
                 accessId
@@ -162,6 +170,7 @@ class EditFileFolderTestCase(FastTenantTestCase):
         mock_mimetype.return_value = file_mock.content_type
 
         test_file = FileFolder.objects.create(
+            rich_description=self.PREVIOUS_DESCRIPTION,
             read_access=[ACCESS_TYPE.user.format(self.authenticatedUser.id)],
             write_access=[ACCESS_TYPE.user.format(self.authenticatedUser.id)],
             owner=self.authenticatedUser,
@@ -187,6 +196,7 @@ class EditFileFolderTestCase(FastTenantTestCase):
         test_file.refresh_from_db()
 
         self.assertEqual(data["editFileFolder"]["entity"]["title"], test_file.title)
+        self.assertEqual(data["editFileFolder"]["entity"]["description"], self.EXPECTED_DESCRIPTION)
         self.assertEqual(data["editFileFolder"]["entity"]["mimeType"], test_file.mime_type)
         self.assertEqual(data["editFileFolder"]["entity"]["tags"][0], "tag_one")
         self.assertEqual(data["editFileFolder"]["entity"]["tags"][1], "tag_two")

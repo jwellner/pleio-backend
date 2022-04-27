@@ -1,7 +1,17 @@
 {% extends "email/base_notification.html" %}
 {% load i18n %}
 
+{% block header_subtitle %}
+    {% trans "Message to event" as header_subtitle %}
+    {% include "email/element/header_subtitle.html" %}
+{% endblock %}
+
 {% block body %}
-    <div>{{message|safe}}</div> <br><br>--<br>
-    {% blocktrans %}This message is sent from <a href="{{site_url}}">{{site_url}}</a> by <a href="{{user_url}}">{{user_name}}</a>{% endblocktrans %}
+    {% include "email/element/title-link.html" with link_url=event_url link_title=event %}
+    <div>{{message|safe}}</div>
+    {% include "email/element/signature.html" with name=user_name %}
+{% endblock %}
+
+{% block footer_settings %}
+    {% include "email/element/footer-userorigin.html" %}
 {% endblock %}

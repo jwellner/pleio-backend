@@ -18,6 +18,7 @@ DEFAULT_SITE_CONFIG = {
     'PIWIK_URL': ('https://stats.pleio.nl/', 'Piwik url'),
     'PIWIK_ID': ('', 'Piwik ID'),
     'OIDC_PROVIDERS': (['pleio'], 'OIDC Providers'),
+    'FILE_OPTIONS': ([], "File options"),
     'AUTO_APPROVE_SSO': (False, 'Automatically approve users that use one of configured SSO options'),
     'CUSTOM_JAVASCRIPT': ('', 'Custom Javascript'),
 
@@ -70,6 +71,7 @@ DEFAULT_SITE_CONFIG = {
         {"link": "/questions", "title": "Vragen", "children": [], "accessId": 2},
         {"link": "/wiki", "title": "Wiki", "children": [], "accessId": 2}
     ], 'Menu'),
+    'MENU_STATE': ('normal', "Menu state"),
 
     'PROFILE': ([], 'Profile'),
     'PROFILE_SECTIONS': ([], 'Profile sections'),
@@ -194,7 +196,6 @@ class ConfigBackend():
                     cache.set("%s%s" % (connection.schema_name, setting.key), setting.value)
         except ProgrammingError:
             pass
-
 
 
 class Config():

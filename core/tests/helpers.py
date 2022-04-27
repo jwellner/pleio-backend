@@ -2,8 +2,17 @@ import unittest
 from contextlib import contextmanager
 
 import time
+from django_tenants.test.cases import FastTenantTestCase
+from django_tenants.test.client import TenantClient
 from django.db.models import QuerySet
 from collections import Counter
+
+
+class PleioTenantTestCase(FastTenantTestCase):
+
+    def setUp(self):
+        super().setUp()
+        self.client = TenantClient(self.tenant)
 
 
 class GraphqlTestMixin(unittest.TestCase):

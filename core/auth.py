@@ -1,3 +1,5 @@
+import uuid
+
 from django.core.exceptions import SuspiciousOperation
 from mozilla_django_oidc.auth import OIDCAuthenticationBackend
 from mozilla_django_oidc.views import OIDCAuthenticationCallbackView, OIDCAuthenticationRequestView
@@ -8,6 +10,7 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.db.models import Q
 from django.shortcuts import redirect
 from django.utils.http import urlencode
+
 from core import config
 from core.constances import OIDC_PROVIDER_OPTIONS
 from core.models import SiteInvitation, SiteAccessRequest
@@ -18,14 +21,18 @@ from user.models import User
 
 LOGGER = logging.getLogger(__name__)
 
+
 class RequestAccessException(Exception):
     pass
+
 
 class RequestAccessInvalidCodeException(RequestAccessException):
     pass
 
+
 class OnboardingException(Exception):
     pass
+
 
 class OIDCAuthCallbackView(OIDCAuthenticationCallbackView):
     def get(self, request):
@@ -83,6 +90,11 @@ class OIDCAuthBackend(OIDCAuthenticationBackend):
                 # store claims in sessions
                 self.request.session['request_access_claims'] = claims
                 raise RequestAccessException
+        else:
+            if self.request.session.get('invitecode'):
+                SiteInvitation.objects.filter(code=self.request.session.get('invitecode')).delete()
+            else:
+                SiteInvitation.objects.filter(email=claims.get('email')).delete()
 
         # create user should be done after onboarding
         if config.ONBOARDING_ENABLED:
@@ -106,11 +118,13 @@ class OIDCAuthBackend(OIDCAuthenticationBackend):
         """Check whether a new user needs approval of an admin before they can be given access based on their claims and the site's configuration"""
 
         return (
-            not config.ALLOW_REGISTRATION # a site that allows registration, automatically accepts new users
-            and not claims.get('is_admin', False) # Pleio admins (not site admins) do not need approval
-            and not claims.get('email').split('@')[1] in config.DIRECT_REGISTRATION_DOMAINS # Approval can be skipped for configured email domains
-            and not SiteAccessRequest.objects.filter(email=claims.get('email'), accepted=True).first() # Users that are already approved, don't require it
-            and not self.approve_by_sso(claims) # Users can be approved based on the SSO they use
+                not config.ALLOW_REGISTRATION  # a site that allows registration, automatically accepts new users
+                and not claims.get('is_admin', False)  # Pleio admins (not site admins) do not need approval
+                and not claims.get('email').split('@')[
+                            1] in config.DIRECT_REGISTRATION_DOMAINS  # Approval can be skipped for configured email domains
+                and not SiteAccessRequest.objects.filter(email=claims.get('email'),
+                                                         accepted=True).first()  # Users that are already approved, don't require it
+                and not self.approve_by_sso(claims)  # Users can be approved based on the SSO they use
         )
 
     def approve_by_sso(self, claims):
@@ -119,11 +133,12 @@ class OIDCAuthBackend(OIDCAuthenticationBackend):
             return False
 
         return (
-            set(claims.get('sso', [])) & set(config.OIDC_PROVIDERS)
-            or set(claims.get('sso', [])) & set([config.IDP_ID])
+                set(claims.get('sso', [])) & set(config.OIDC_PROVIDERS)
+                or set(claims.get('sso', [])) & set([config.IDP_ID])
         )
 
     def update_user(self, user, claims):
+        SiteInvitation.objects.filter(email=claims.get('email')).delete()
 
         user.external_id = claims.get('sub')
 
@@ -180,6 +195,20 @@ class OIDCAuthBackend(OIDCAuthenticationBackend):
             ),
         }
 
+
+        if settings.CONCIERGE_API_URL:
+            # Fresh origin token.
+            origin_token = uuid.uuid4()
+
+            url_schema = "http" if settings.ENV == 'local' else "https"
+            url_port = ":8000" if settings.ENV == 'local' else ""
+
+            token_payload['origin_name'] = request.tenant.name
+            token_payload['origin_url'] = "{}://{}{}".format(url_schema, request.tenant.primary_domain, url_port)
+            token_payload['origin_token'] = origin_token
+        else:
+            origin_token = None
+
         # Get the token
         token_info = self.get_token(token_payload)
         id_token = token_info.get('id_token')
@@ -197,12 +226,17 @@ class OIDCAuthBackend(OIDCAuthenticationBackend):
                     request.session['pleio_user_is_banned'] = True
                 elif 'pleio_user_is_banned' in request.session:
                     del request.session['pleio_user_is_banned']
+
+                if origin_token:
+                    user.profile.update_origin_token(origin_token)
+
                 return user
             except SuspiciousOperation as e:
                 LOGGER.warning('failed to get or create user: %s', e)
                 return None
 
         return None
+
 
 def oidc_provider_logout_url(request):
     return_url = request.build_absolute_uri('/')

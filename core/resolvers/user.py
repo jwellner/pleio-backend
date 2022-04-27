@@ -36,16 +36,8 @@ def resolve_profile(obj, info):
 
     for guid in profile_section_guids:
         field = ProfileField.objects.get(id=guid)
-        field.value = ""
-        field.read_access = []
-        try:
-            user_profile_field = UserProfileField.objects.visible(info.context["request"].user).get(profile_field=field,
-                                                                                                    user_profile=obj.profile)
-            field.value = user_profile_field.value
-            field.read_access = user_profile_field.read_access
-        except ObjectDoesNotExist:
-            field.read_access = [ACCESS_TYPE.logged_in]
-        user_profile_fields.append(field)
+        user_profile_fields.append(obj.profile.profile_field_value(field, info.context["request"].user))
+
     return user_profile_fields
 
 
@@ -218,6 +210,12 @@ def resolve_last_online(obj, info):
     if is_user_or_admin(obj, info):
         return obj.profile.last_online
     return None
+
+
+@user.field("vcard")
+def resolve_vcard(obj, info):
+    profile_fields = ProfileField.objects.filter(is_on_vcard=True)
+    return [obj.profile.profile_field_value(field, info.context["request"].user) for field in profile_fields]
 
 
 @user.field('missingProfileFields')
