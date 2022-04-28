@@ -1,0 +1,12 @@
+{% extends "base_closed.html" %}
+
+{% load i18n %}
+{% load custom_tags %}
+
+{% block content %}
+<div class="content">
+	<h1 class="walled-garden_title">{% blocktrans %}Already checked in{% endblocktrans %}</h1>
+	<p>{% blocktrans with check_in=check_in|date:'d-m-Y H:i' %}<strong>{{ name }}</strong> ({{ email }}) was already checked in ({{ check_in }}).{% endblocktrans %}</p>
+	<p>{% blocktrans with date=date|date:'d-m-Y H:i' %}Event: <strong>{{ event }}</strong>, {{ date }}.{% endblocktrans %}</p>
+</div>
+{% endblock %}

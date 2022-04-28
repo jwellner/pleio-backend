@@ -1,0 +1,44 @@
+{% extends "email/base_notification.html" %}
+{% load i18n %}
+
+{% block body %}
+{% blocktrans %}
+You are added as attendee for {{ title }}. For this event, you will need the QR code attached to this email.<br><br>
+{% endblocktrans %}
+
+{% if location != None and locationAddress != None and locationLink != None %}
+    {% blocktrans %}    
+    Location: <a href="{{ locationLink }}"> {{ location }}</a> - {{ locationAddress }}<br>
+    {% endblocktrans %}
+{% elif location != None and locationAddress != None %} 
+    {% blocktrans %}    
+    Location: {{ location }} - {{ locationAddress }}<br>
+    {% endblocktrans %}
+{% elif locationAddress != None and locationLink != None %}
+    {% blocktrans %} 
+    Location: <a href="{{ locationLink }}"> {{ locationAddress }}</a><br>
+    {% endblocktrans %}
+{% elif location != None and locationLink != None %}
+    {% blocktrans %}
+    Location: <a href="{{ locationLink }}"> {{ location }}</a><br>
+    {% endblocktrans %}
+{% elif location != None %} 
+    {% blocktrans %}
+    Location: {{ location }}<br>
+    {% endblocktrans %}
+{% elif locationAddress != None %} 
+    {% blocktrans %}
+    Location: {{ locationAddress }}<br>
+    {% endblocktrans %}
+{% elif locationLink != None %}
+    {% blocktrans %}
+    Location: <a href="{{ locationLink }}"> Location </a><br>
+    {% endblocktrans %}
+{% endif %}
+{% blocktrans %}
+Date: {{ startDate }}<br><br>
+
+Click on the link below to see the event.<br><br>
+<a href="{{ link }}">{{ link }}</a>
+{% endblocktrans %}
+{% endblock %}

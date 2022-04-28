@@ -83,6 +83,7 @@ input addEntityInput {
   tags: [String]
   mentions: [String]
   timePublished: DateTime
+  qrAccess: Boolean
 }
 
 type addEntityPayload {
@@ -557,6 +558,7 @@ input editEntityInput {
   timePublished: DateTime
   groupGuid: String
   ownerGuid: String
+  qrAccess: Boolean
 }
 
 type editEntityPayload {
@@ -898,6 +900,7 @@ type Event implements Entity {
   comments: [Comment]
   commentCount: Int
   isPinned: Boolean!
+  qrAccess: Boolean
 }
 
 """Show upcoming events or previous events"""

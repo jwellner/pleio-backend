@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-04-22 14:27+0200\n"
+"POT-Creation-Date: 2022-04-28 13:14+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -25,19 +25,19 @@ msgstr "status update"
 msgid "Provide a valid value."
 msgstr "Provide a valid value."
 
-#: core/forms.py:82 core/resolvers/query_site.py:163
+#: core/forms.py:82 core/resolvers/query_site.py:164
 msgid "Never"
 msgstr "Never"
 
-#: core/forms.py:83 core/resolvers/query_site.py:160
+#: core/forms.py:83 core/resolvers/query_site.py:161
 msgid "Daily"
 msgstr "Daily"
 
-#: core/forms.py:84 core/resolvers/query_site.py:161
+#: core/forms.py:84 core/resolvers/query_site.py:162
 msgid "Weekly"
 msgstr "Weekly"
 
-#: core/forms.py:85 core/resolvers/query_site.py:162
+#: core/forms.py:85 core/resolvers/query_site.py:163
 msgid "Monthly"
 msgstr "Monthly"
 
@@ -146,7 +146,7 @@ msgstr "Comments"
 msgid "Groups"
 msgstr "Groups"
 
-#: core/management/commands/send_overview_emails.py:94
+#: core/management/commands/send_overview_emails.py:90
 #, python-format
 msgid "Regular overview of %(site_name)s"
 msgstr "Regular overview of %(site_name)s"
@@ -184,15 +184,15 @@ msgstr "Account of %(name_deleted_user)s removed"
 msgid "A site administrator was removed from %(site_name)s"
 msgstr "A site administrator was removed from %(site_name)s"
 
-#: core/resolvers/mutation_edit_site_setting.py:334
+#: core/resolvers/mutation_edit_site_setting.py:352
 msgid "closed"
 msgstr "closed"
 
-#: core/resolvers/mutation_edit_site_setting.py:334
+#: core/resolvers/mutation_edit_site_setting.py:352
 msgid "public"
 msgstr "public"
 
-#: core/resolvers/mutation_edit_site_setting.py:335
+#: core/resolvers/mutation_edit_site_setting.py:353
 #, python-format
 msgid "Site access level changed for %(site_name)s"
 msgstr "Site access level changed for %(site_name)s"
@@ -293,15 +293,15 @@ msgstr "Activity stream"
 msgid "CMS page"
 msgstr "CMS page"
 
-#: core/resolvers/query_site.py:212
+#: core/resolvers/query_site.py:213
 msgid "Administrator"
 msgstr "Administrator"
 
-#: core/resolvers/query_site.py:213
+#: core/resolvers/query_site.py:214
 msgid "Editor"
 msgstr "Editor"
 
-#: core/resolvers/query_site.py:214
+#: core/resolvers/query_site.py:215
 msgid "Question expert"
 msgstr "Question expert"
 
@@ -327,6 +327,45 @@ msgstr "Import was a success"
 #: core/tasks/misc.py:123
 msgid "Import failed"
 msgstr "Import failed"
+
+#: core/templates/check_in/already_checked_in.html:8
+msgid "Already checked in"
+msgstr "Already checked in"
+
+#: core/templates/check_in/already_checked_in.html:9
+#, python-format
+msgid ""
+"<strong>%(name)s</strong> (%(email)s) was already checked in (%(check_in)s)."
+msgstr ""
+"<strong>%(name)s</strong> (%(email)s) was already checked in (%(check_in)s)."
+
+#: core/templates/check_in/already_checked_in.html:10
+#: core/templates/check_in/check_in.html:10
+#, python-format
+msgid "Event: <strong>%(event)s</strong>, %(date)s."
+msgstr "Event: <strong>%(event)s</strong>, %(date)s."
+
+#: core/templates/check_in/check_in.html:8
+msgid "Check in"
+msgstr "Check in"
+
+#: core/templates/check_in/check_in.html:9
+#, python-format
+msgid "Do you want to check in <strong>%(name)s</strong> (%(email)s)?"
+msgstr "Do you want to check in <strong>%(name)s</strong> (%(email)s)?"
+
+#: core/templates/check_in/check_in.html:14
+msgid "Yes, confirm"
+msgstr "Yes, confirm"
+
+#: core/templates/check_in/checked_in.html:8
+msgid "Checked in"
+msgstr "Checked in"
+
+#: core/templates/check_in/checked_in.html:9
+#, python-format
+msgid "You have checked in <strong>%(name)s</strong> (%(email)s)!"
+msgstr "You have checked in <strong>%(name)s</strong> (%(email)s)!"
 
 #: core/templates/edit_email_settings.html:15
 #, python-format
@@ -387,6 +426,7 @@ msgstr ""
 "You are added as attendee for %(title)s from the waitinglist.<br><br>\n"
 
 #: core/templates/email/attend_event_from_waitinglist.html:10
+#: core/templates/email/attend_event_with_qr_access.html:10
 #: core/templates/email/attend_event_without_account.html:10
 #: core/templates/email/confirm_attend_event_without_account.html:24
 #, python-format
@@ -400,6 +440,7 @@ msgstr ""
 "    "
 
 #: core/templates/email/attend_event_from_waitinglist.html:14
+#: core/templates/email/attend_event_with_qr_access.html:14
 #: core/templates/email/attend_event_without_account.html:14
 #: core/templates/email/confirm_attend_event_without_account.html:28
 #, python-format
@@ -413,6 +454,7 @@ msgstr ""
 "    "
 
 #: core/templates/email/attend_event_from_waitinglist.html:18
+#: core/templates/email/attend_event_with_qr_access.html:18
 #: core/templates/email/attend_event_without_account.html:18
 #: core/templates/email/confirm_attend_event_without_account.html:32
 #, python-format
@@ -426,6 +468,7 @@ msgstr ""
 "    "
 
 #: core/templates/email/attend_event_from_waitinglist.html:22
+#: core/templates/email/attend_event_with_qr_access.html:22
 #: core/templates/email/attend_event_without_account.html:22
 #: core/templates/email/confirm_attend_event_without_account.html:36
 #, python-format
@@ -439,6 +482,7 @@ msgstr ""
 "    "
 
 #: core/templates/email/attend_event_from_waitinglist.html:26
+#: core/templates/email/attend_event_with_qr_access.html:26
 #: core/templates/email/attend_event_without_account.html:26
 #: core/templates/email/confirm_attend_event_without_account.html:40
 #, python-format
@@ -452,6 +496,7 @@ msgstr ""
 "    "
 
 #: core/templates/email/attend_event_from_waitinglist.html:30
+#: core/templates/email/attend_event_with_qr_access.html:30
 #: core/templates/email/attend_event_without_account.html:30
 #: core/templates/email/confirm_attend_event_without_account.html:44
 #, python-format
@@ -465,6 +510,7 @@ msgstr ""
 "    "
 
 #: core/templates/email/attend_event_from_waitinglist.html:34
+#: core/templates/email/attend_event_with_qr_access.html:34
 #: core/templates/email/attend_event_without_account.html:34
 #: core/templates/email/confirm_attend_event_without_account.html:48
 #, python-format
@@ -488,6 +534,30 @@ msgid ""
 msgstr ""
 "\n"
 "Date: %(start_date)s<br><br>\n"
+"\n"
+"Click on the link below to see the event.<br><br>\n"
+"<a href=\"%(link)s\">%(link)s</a>\n"
+
+#: core/templates/email/attend_event_with_qr_access.html:5
+#, python-format
+msgid ""
+"\n"
+"You are added as attendee for %(title)s. For this event, you will need the QR code attached to this email.<br><br>\n"
+msgstr ""
+"\n"
+"You are added as attendee for %(title)s. For this event, you will need the QR code attached to this email.<br><br>\n"
+
+#: core/templates/email/attend_event_with_qr_access.html:38
+#, python-format
+msgid ""
+"\n"
+"Date: %(startDate)s<br><br>\n"
+"\n"
+"Click on the link below to see the event.<br><br>\n"
+"<a href=\"%(link)s\">%(link)s</a>\n"
+msgstr ""
+"\n"
+"Date: %(startDate)s<br><br>\n"
 "\n"
 "Click on the link below to see the event.<br><br>\n"
 "<a href=\"%(link)s\">%(link)s</a>\n"
@@ -1165,12 +1235,12 @@ msgstr "New access request for %(site_name)s"
 msgid "Saved"
 msgstr "Saved"
 
-#: event/models.py:120
+#: event/models.py:122
 #, python-format
 msgid "Added to event %s from waitinglist"
 msgstr "Added to event %s from waitinglist"
 
-#: event/resolvers/mutation.py:407 event/tests/test_resolve_copy_entity.py:149
+#: event/resolvers/mutation.py:417 event/tests/test_resolve_copy_entity.py:149
 #, python-format
 msgid "Copy %s"
 msgstr "Copy %s"
@@ -1180,7 +1250,7 @@ msgstr "Copy %s"
 msgid "Confirmation of registration %s"
 msgstr "Confirmation of registration %s"
 
-#: event/resolvers/mutation_confirm_attend_event_without_account.py:86
+#: event/resolvers/mutation_confirm_attend_event_without_account.py:88
 #, python-format
 msgid "Confirmation of registration for %s"
 msgstr "Confirmation of registration for %s"
@@ -1191,11 +1261,13 @@ msgid "Removed from event: %s"
 msgstr "Removed from event: %s"
 
 #: event/resolvers/mutation_messages.py:71
+#: event/tests/test_event_mailer.py:272
 #, python-brace-format
 msgid "Message from event {0}: {1}"
 msgstr "Message from event {0}: {1}"
 
 #: event/resolvers/mutation_messages.py:73
+#: event/tests/test_event_mailer.py:286
 #, python-brace-format
 msgid "Copy: Message from event {0}: {1}"
 msgstr "Copy: Message from event {0}: {1}"
@@ -1203,6 +1275,11 @@ msgstr "Copy: Message from event {0}: {1}"
 #: event/templates/email/send_message_to_event.html:5
 msgid "Message to event"
 msgstr "Message to event"
+
+#: event/utils.py:22
+#, python-format
+msgid "QR code for %s"
+msgstr "QR code for %s"
 
 #: file/tasks.py:63
 #, python-format

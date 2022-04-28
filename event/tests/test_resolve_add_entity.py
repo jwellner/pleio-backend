@@ -53,7 +53,8 @@ class AddEventTestCase(FastTenantTestCase):
                 "locationAddress": "Kerkstraat 10",
                 "source": "https://www.pleio.nl",
                 "attendEventWithoutAccount": True,
-                "rsvp": True
+                "rsvp": True,
+                "qrAccess": True
             }
         }
         self.mutation = """
@@ -84,6 +85,7 @@ class AddEventTestCase(FastTenantTestCase):
                 locationLink
                 locationAddress
                 maxAttendees
+                qrAccess
             }
             mutation ($input: addEntityInput!) {
                 addEntity(input: $input) {
@@ -118,6 +120,7 @@ class AddEventTestCase(FastTenantTestCase):
         self.assertEqual(data["addEntity"]["entity"]["endDate"], "2019-10-02T10:00:00+02:00")
         self.assertEqual(data["addEntity"]["entity"]["attendEventWithoutAccount"], variables["input"]["attendEventWithoutAccount"])
         self.assertEqual(data["addEntity"]["entity"]["maxAttendees"], variables["input"]["maxAttendees"])
+        self.assertEqual(data["addEntity"]["entity"]["qrAccess"], variables["input"]["qrAccess"])
 
     def test_add_event_to_group(self):
 

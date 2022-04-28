@@ -1,10 +1,15 @@
 import csv
 import io
+import qrcode
 from core.lib import datetime_isoformat
 from django.core.exceptions import ObjectDoesNotExist
 from django.http import Http404, HttpResponse, StreamingHttpResponse
 from django.utils.text import slugify
-from event.models import Event
+from core.models import Entity
+from core.lib import get_base_url, generate_code
+from event.models import EventAttendee, Event
+from django.shortcuts import render
+from django.utils import timezone
 
 class Echo:
     """An object that implements just the write method of the file-like
@@ -23,7 +28,7 @@ def export(request, event_id=None):
         raise Http404("Event not found")
 
     try:
-        event = Event.objects.get(id=event_id)
+        event = Entity.objects.get(id=event_id)
     except ObjectDoesNotExist:
         raise Http404("Event not found")
 
@@ -77,3 +82,81 @@ def export_calendar(request):
     filename = slugify(request.GET.get("text", "event"))
     response['Content-Disposition'] = f'attachment; filename="{filename}.ics"'
     return response
+
+def get_access_qr(request, entity_id, email=None):
+
+    if request.user:
+        user = request.user
+        if not user.is_authenticated:
+            raise Http404("Event not found")
+
+        try:
+            entity = Entity.objects.visible(user).get_subclass(id=entity_id)
+        except ObjectDoesNotExist:
+            raise Http404("Event not found")
+
+    if email is None:
+        attendee = EventAttendee.objects.get(user=user, event=entity)
+    else:
+        attendee = EventAttendee.objects.get(email=email, event=entity)
+
+
+    if hasattr(entity, 'title') and entity.title:
+        filename = slugify(entity.title)[:238].removesuffix("-")
+    else:
+        filename = entity.id
+    filename = f"qr_access_{filename}.png"
+
+    code = ""
+    try:
+        code = attendee.code
+    except ObjectDoesNotExist:
+        pass
+
+    if not code:
+        code = generate_code()
+        EventAttendee.code = code
+
+    url = get_base_url() + "/events/view/guest-list?code={}".format(code)
+
+    qr_code = qrcode.make(url)
+
+    response = HttpResponse(content_type='image/png')
+    qr_code.save(response, "PNG")
+    response['Content-Disposition'] = f'attachment; filename="{filename}"'
+
+    return response
+
+def check_in(request):
+
+    user = request.user
+
+    try:
+        attendee = EventAttendee.objects.get(code = request.GET.get('code'))
+    except EventAttendee.DoesNotExist:
+        raise Http404("Attendee not found")
+
+
+    event = Event.objects.get(id=attendee.event.guid)
+
+    if event.owner != user:
+        raise Http404("Not event owner")
+
+    context = {
+        'next': request.GET.get('next', ''),
+        'name': attendee.user.name,
+        'email': attendee.user.email,
+        'check_in': attendee.checked_in_at,
+        'event': event.title,
+        'date': event.start_date
+    }
+
+    if request.method == 'POST':
+        attendee.checked_in_at = timezone.now()
+        attendee.save()
+        return render(request, 'check_in/checked_in.html', context)
+
+    if attendee.checked_in_at is None:
+        return render(request, 'check_in/check_in.html', context)
+    
+    return render(request, 'check_in/already_checked_in.html', context)

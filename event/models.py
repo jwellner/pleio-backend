@@ -33,6 +33,8 @@ class Event(Entity, CommentMixin, BookmarkMixin, FollowMixin, NotificationMixin,
     rsvp = models.BooleanField(default=False)
     attend_event_without_account = models.BooleanField(default=False)
 
+    qr_access = models.BooleanField(default=False)
+
     def has_children(self):
         if self.children.count() > 0:
             return True
@@ -164,6 +166,7 @@ class EventAttendee(models.Model):
 
     name = models.CharField(max_length=256, null=True, blank=True)
     email = models.EmailField(max_length=256, null=True, blank=True)
+    code = models.CharField(max_length=36, null=True, blank=True)
 
     user = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)
 
