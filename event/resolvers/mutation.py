@@ -406,7 +406,7 @@ def copy_event(event_id, user, parent=None):
     entity.created_at = now
     entity.updated_at = now
     entity.last_action = now
-    entity.read_access = access_id_to_acl(entity, get_access_id(entity))
+    entity.read_access = access_id_to_acl(entity, get_access_id(entity.read_access))
     entity.write_access = access_id_to_acl(entity, 0)
 
     if parent:

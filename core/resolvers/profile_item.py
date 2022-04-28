@@ -49,7 +49,7 @@ def resolve_value(obj, info):
 @profile_item.field("accessId")
 def resolve_access_id(obj, info):
     # pylint: disable=unused-argument
-    return get_access_id(obj)
+    return get_access_id(obj.read_access)
 
 
 @profile_item.field("category")
