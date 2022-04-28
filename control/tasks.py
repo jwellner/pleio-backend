@@ -450,25 +450,18 @@ def get_or_create_user(copy, source_user_id):
 
     with schema_context(copy.target_tenant):
 
-        filters = Q()
-        if source_user.external_id:
-            filters.add(Q(external_id__iexact=source_user.external_id), Q.OR)
-        filters.add(Q(email__iexact=source_user.email), Q.OR)
-
-        user = User.objects.filter(filters).first()
+        user = User.objects.with_deleted().filter(email__iexact=source_user.email).first()
 
         if not user:
-            user = User.objects.create_user(
-                name=source_user.name,
-                email=source_user.email,
-                picture=source_user.picture,
-                is_government=source_user.is_government,
-                has_2fa_enabled=source_user.has_2fa_enabled,
-                password=None,
-                external_id=source_user.external_id,
-                is_superadmin=source_user.is_superadmin,
-                is_active=source_user.is_active
-            )
+            with signal_disabler.disable(): # prevent auto join in groups
+                user = User.objects.create(
+                    name=source_user.name,
+                    email=source_user.email,
+                    picture=source_user.picture,
+                    external_id=source_user.external_id,
+                    is_active=source_user.is_active,
+                    ban_reason=source_user.ban_reason
+                )
             created = True
 
     with schema_context('public'):
@@ -528,9 +521,8 @@ def copy_group_to_tenant(source_schema, action_user_id, group_id, target_schema)
 
     logger.info("Created group %s", target_group)
 
-    return copy_group_memberships.delay(copy.id)
+    return copy_group_memberships(copy.id)
 
-@shared_task(bind=False)
 def copy_group_memberships(copy_id):
     # pylint: disable=too-many-locals
     # pylint: disable=too-many-statements
@@ -538,7 +530,8 @@ def copy_group_memberships(copy_id):
     '''
     Copy group users from one tenant to another
     '''
-    copy = GroupCopy.objects.get(id=copy_id)
+    with schema_context("public"):
+        copy = GroupCopy.objects.get(id=copy_id)
 
     with schema_context(copy.source_tenant):
         memberships = list(item for item in GroupMembership.objects.filter(group__id=copy.source_id).all())
@@ -547,17 +540,16 @@ def copy_group_memberships(copy_id):
         target_group = Group.objects.get(id=copy.target_id)
 
         for m in memberships:
-            m.group = target_group
             m.user = get_or_create_user(copy, m.user_id)
+            m.group = target_group
             m.pk = None
             m.id = None
             m.save()
 
     logger.info("Inserted %i group members", len(memberships))
 
-    return copy_group_entities.delay(copy.id)
+    return copy_group_entities(copy.id)
 
-@shared_task(bind=False)
 def copy_group_entities(copy_id):
     # pylint: disable=too-many-locals
     # pylint: disable=too-many-statements
@@ -565,7 +557,8 @@ def copy_group_entities(copy_id):
     '''
     Copy entities in group from one tenant to another
     '''
-    copy = GroupCopy.objects.get(id=copy_id)
+    with schema_context("public"):
+        copy = GroupCopy.objects.get(id=copy_id)
 
     with schema_context(copy.source_tenant):
         entities = list(item for item in Entity.objects.filter(group__id=copy.source_id).select_subclasses())
