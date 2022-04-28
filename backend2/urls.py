@@ -30,11 +30,8 @@ urlpatterns = [
     path('superadmin/tasks', core_superadmin.tasks),
     path('superadmin/scanlog', core_superadmin.ScanLog.as_view()),
     path('superadmin/auditlog', core_superadmin.AuditLog.as_view()),
-    path('graphql',
-         GraphQLView.as_view(schema=schema,
-                             extensions=[OpenTracingExtensionSync],
-                             introspection=settings.DEBUG),
-         name='graphql'),
+    path('superadmin/group_copy', core_superadmin.GroupCopyView.as_view()),
+    path('graphql', GraphQLView.as_view(schema=schema, extensions=[OpenTracingExtensionSync], introspection=settings.DEBUG), name='graphql'),
 
     path('file/download/<uuid:file_id>', file_views.download, name='download'),
     path('file/download/<uuid:file_id>/<str:file_name>', file_views.download, name='download'),

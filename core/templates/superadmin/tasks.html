@@ -20,7 +20,6 @@
     </div>
   </div>
 
-
   <div class="card mt-4">
     <h5 class="card-header">Links</h5>
     <div class="card-body">
@@ -31,16 +30,13 @@
             <div class="mb-3">
                 <label for="replace_domain" class="form-label">Old domain</label>
                 <input type="text" name="replace_domain"  class="form-control" id="replace_domain" aria-describedby="replaceDomainHelp">
-                <div id="replaceDomainHelp" class="form-text">Insert the old domain name to be replaced (format: support.pleio.nl). You can leave this field empty if you only want to replace ELGG id's on the current domain.</div>
-            </div>
-            <div class="mb-3 form-check">
-                <input type="checkbox" id="replace_elgg_id" name="replace_elgg_id" class="form-check-input" aria-describedby="replaceElggHelp" value="1">
-                <label class="form-check-label" for="replace_elgg_id">Replace ELGG id's</label>
-                <div id="replaceElggHelp" class="form-text">Replace ELGG id's</div>
+                <div id="replaceDomainHelp" class="form-text">Insert the old domain name to be replaced (format: support.pleio.nl).</div>
             </div>
             <button type="submit" class="btn btn-primary">Execute replace links</button>
         </form>
     </div>
   </div>
+
+</div>
 
 {% endblock %}
