@@ -2,6 +2,7 @@ import json
 from core.utils.tiptap_parser import Tiptap
 from ariadne import ObjectType
 from django.core.exceptions import ObjectDoesNotExist
+from event.utils import send_event_qr
 from graphql import GraphQLError
 from core.constances import (
     NOT_LOGGED_IN, COULD_NOT_FIND, EVENT_IS_FULL, EVENT_INVALID_STATE,
@@ -15,6 +16,7 @@ from file.tasks import resize_featured
 from user.models import User
 from django.utils.translation import ugettext_lazy
 from django.utils import timezone
+
 
 from ..models import Event, EventAttendee
 from event.resolvers.mutation_attend_event_without_account import resolve_attend_event_without_account
@@ -34,6 +36,8 @@ mutation.set_field("sendMessageToEvent", resolve_send_message_to_event)
 @mutation.field("attendEvent")
 def resolve_attend_event(_, info, input):
     # pylint: disable=redefined-builtin
+    # pylint: disable=too-many-statements
+    # pylint: disable=too-many-branches
 
     user = info.context["request"].user
     clean_input = clean_graphql_input(input)
@@ -87,6 +91,9 @@ def resolve_attend_event(_, info, input):
 
     if clean_input.get("state") != "accept":
         event.process_waitinglist()
+
+    if event.qr_access and clean_input.get("state") == "accept":
+        send_event_qr(info, user.email, event, attendee)
 
     return {
         "entity": event
@@ -196,6 +203,7 @@ def resolve_add_event(_, info, input):
 
     entity.rsvp = clean_input.get("rsvp", False)
     entity.attend_event_without_account = clean_input.get("attendEventWithoutAccount", False)
+    entity.qr_access = clean_input.get("qrAccess", False)
 
     if 'timePublished' in clean_input:
         entity.published = clean_input.get("timePublished", None)
@@ -323,6 +331,8 @@ def resolve_edit_event(_, info, input):
         entity.rsvp = clean_input.get("rsvp")
     if 'attendEventWithoutAccount' in clean_input:
         entity.attend_event_without_account = clean_input.get("attendEventWithoutAccount")
+    if 'qrAccess' in clean_input:
+        entity.qr_access = clean_input.get("qrAccess")
 
     if 'timePublished' in clean_input:
         entity.published = clean_input.get("timePublished", None)

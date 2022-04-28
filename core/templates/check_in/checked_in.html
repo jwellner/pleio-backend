@@ -1,0 +1,11 @@
+{% extends "base_closed.html" %}
+
+{% load i18n %}
+{% load custom_tags %}
+
+{% block content %}
+<div class="content">
+	<h1 class="walled-garden_title">{% blocktrans %}Checked in{% endblocktrans %}</h1>
+	<p>{% blocktrans %}You have checked in <strong>{{ name }}</strong> ({{ email }})!{% endblocktrans %}</p>
+</div>
+{% endblock %}

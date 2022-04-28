@@ -1,6 +1,6 @@
 from graphql import GraphQLError
 from django.core.exceptions import ObjectDoesNotExist
-from core.constances import COULD_NOT_FIND, NOT_LOGGED_IN, COULD_NOT_SAVE
+from core.constances import ALREADY_CHECKED_IN, COULD_NOT_FIND, NOT_LOGGED_IN, COULD_NOT_SAVE
 from core.lib import clean_graphql_input
 from event.models import Event
 
@@ -28,7 +28,12 @@ def resolve_edit_event_attendee(_, info, input):
         raise GraphQLError(COULD_NOT_FIND)
 
     if 'timeCheckedIn' in clean_input:
-        attendee.checked_in_at = clean_input.get("timeCheckedIn")    
+        if attendee.checked_in_at is None:
+            attendee.checked_in_at = clean_input.get("timeCheckedIn")
+        elif clean_input.get("timeCheckedIn") is None:
+            attendee.checked_in_at = None
+        else:
+            raise GraphQLError(ALREADY_CHECKED_IN)    
 
     attendee.save()
 
