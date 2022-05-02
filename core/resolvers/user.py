@@ -215,7 +215,8 @@ def resolve_last_online(obj, info):
 @user.field("vcard")
 def resolve_vcard(obj, info):
     profile_fields = ProfileField.objects.filter(is_on_vcard=True)
-    return [obj.profile.profile_field_value(field, info.context["request"].user) for field in profile_fields]
+    return filter(lambda x: x.value != '',
+                  [obj.profile.profile_field_value(field, info.context["request"].user) for field in profile_fields])
 
 
 @user.field('missingProfileFields')
