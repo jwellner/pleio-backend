@@ -47,7 +47,7 @@ def resolve_edit_site_setting_profile_field(_, info, input):
         profile_field.is_on_vcard = clean_input['isOnVcard']
 
     if 'fieldOptions' in clean_input:
-        profile_field.field_options = clean_input["fieldOptions"]
+        profile_field.field_options = [x for x in filter(lambda x: x, clean_input["fieldOptions"])]
 
     if 'isInOnboarding' in clean_input:
         profile_field.is_in_onboarding = clean_input["isInOnboarding"]
