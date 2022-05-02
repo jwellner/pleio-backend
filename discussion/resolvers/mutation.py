@@ -3,11 +3,11 @@ from django.core.exceptions import ObjectDoesNotExist
 from core.lib import clean_graphql_input, access_id_to_acl, tenant_schema
 from core.constances import NOT_LOGGED_IN, COULD_NOT_SAVE, COULD_NOT_FIND, COULD_NOT_FIND_GROUP, USER_ROLES
 from core.models import Group
+from core.resolvers import shared
 from core.resolvers.shared import clean_abstract
-from file.models import FileFolder
-from file.tasks import resize_featured
 from user.models import User
 from ..models import Discussion
+
 
 def resolve_add_discussion(_, info, input):
     # pylint: disable=redefined-builtin
@@ -49,31 +49,7 @@ def resolve_add_discussion(_, info, input):
         clean_abstract(abstract)
         entity.abstract = abstract
 
-    if 'featured' in clean_input:
-        entity.featured_position_y = clean_input.get("featured").get("positionY", 0)
-        entity.featured_video = clean_input.get("featured").get("video", None)
-        entity.featured_video_title = clean_input.get("featured").get("videoTitle", "")
-        entity.featured_alt = clean_input.get("featured").get("alt", "")
-        if entity.featured_video:
-            entity.featured_image = None
-        elif clean_input.get("featured").get("image"):
-
-            imageFile = FileFolder.objects.create(
-                owner=entity.owner,
-                upload=clean_input.get("featured").get("image"),
-                read_access=entity.read_access,
-                write_access=entity.write_access
-            )
-
-            resize_featured.delay(tenant_schema(), imageFile.guid)
-
-            entity.featured_image = imageFile
-    else:
-        entity.featured_image = None
-        entity.featured_position_y = 0
-        entity.featured_video = None
-        entity.featured_video_title = ""
-        entity.featured_alt = ""
+    shared.update_featured_image(entity, clean_input)
 
     if user.has_role(USER_ROLES.ADMIN) or user.has_role(USER_ROLES.EDITOR):
         if 'isFeatured' in clean_input:
@@ -113,49 +89,25 @@ def resolve_edit_discussion(_, info, input):
 
     if 'title' in clean_input:
         entity.title = clean_input.get("title")
+
     if 'richDescription' in clean_input:
         entity.rich_description = clean_input.get("richDescription")
+
     if 'abstract' in clean_input:
         abstract = clean_input.get("abstract")
         clean_abstract(abstract)
         entity.abstract = abstract
+
     if 'tags' in clean_input:
         entity.tags = clean_input.get("tags")
+
     if 'accessId' in clean_input:
         entity.read_access = access_id_to_acl(entity, clean_input.get("accessId"))
+
     if 'writeAccessId' in clean_input:
         entity.write_access = access_id_to_acl(entity, clean_input.get("writeAccessId"))
 
-    if 'featured' in clean_input:
-        entity.featured_position_y = clean_input.get("featured").get("positionY", 0)
-        entity.featured_video = clean_input.get("featured").get("video", "")
-        entity.featured_video_title = clean_input.get("featured").get("videoTitle", "")
-        entity.featured_alt = clean_input.get("featured").get("alt", "")
-        if entity.featured_video:
-            entity.featured_image = None
-        elif clean_input.get("featured").get("image"):
-
-            if entity.featured_image:
-                imageFile = entity.featured_image
-                imageFile.resized_images.all().delete()
-            else:
-                imageFile = FileFolder()
-
-            imageFile.owner = entity.owner
-            imageFile.read_access = entity.read_access
-            imageFile.write_access = entity.write_access
-            imageFile.upload = clean_input.get("featured").get("image")
-            imageFile.save()
-
-            resize_featured.delay(tenant_schema(), imageFile.guid)
-
-            entity.featured_image = imageFile
-    else:
-        entity.featured_image = None
-        entity.featured_position_y = 0
-        entity.featured_video = None
-        entity.featured_video_title = ""
-        entity.featured_alt = ""
+    shared.update_featured_image(entity, clean_input)
 
     if 'timePublished' in clean_input:
         entity.published = clean_input.get("timePublished", None)

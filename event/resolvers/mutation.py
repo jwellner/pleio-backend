@@ -1,4 +1,6 @@
 import json
+
+from core.resolvers import shared
 from core.utils.tiptap_parser import Tiptap
 from ariadne import ObjectType
 from django.core.exceptions import ObjectDoesNotExist
@@ -6,17 +8,13 @@ from event.utils import send_event_qr
 from graphql import GraphQLError
 from core.constances import (
     NOT_LOGGED_IN, COULD_NOT_FIND, EVENT_IS_FULL, EVENT_INVALID_STATE,
-    COULD_NOT_FIND_GROUP, INVALID_DATE, COULD_NOT_SAVE, NOT_ATTENDING_PARENT_EVENT, USER_ROLES
-)
-from core.lib import get_access_id, clean_graphql_input, access_id_to_acl, tenant_schema
+    COULD_NOT_FIND_GROUP, INVALID_DATE, COULD_NOT_SAVE, NOT_ATTENDING_PARENT_EVENT, USER_ROLES)
+from core.lib import get_access_id, clean_graphql_input, access_id_to_acl
 from core.models import Group
 from core.resolvers.shared import clean_abstract
-from file.models import FileFolder
-from file.tasks import resize_featured
 from user.models import User
 from django.utils.translation import ugettext_lazy
 from django.utils import timezone
-
 
 from ..models import Event, EventAttendee
 from event.resolvers.mutation_attend_event_without_account import resolve_attend_event_without_account
@@ -32,6 +30,7 @@ mutation.set_field("confirmAttendEventWithoutAccount", resolve_confirm_attend_ev
 mutation.set_field("editEventAttendee", resolve_edit_event_attendee)
 mutation.set_field("deleteEventAttendees", resolve_delete_event_attendees)
 mutation.set_field("sendMessageToEvent", resolve_send_message_to_event)
+
 
 @mutation.field("attendEvent")
 def resolve_attend_event(_, info, input):
@@ -76,14 +75,14 @@ def resolve_attend_event(_, info, input):
 
     attendee.state = clean_input.get("state")
 
-    #When an attendee leaves/maybes the main event, also automatically leave the subevents
+    # When an attendee leaves/maybes the main event, also automatically leave the subevents
     if (attendee.state == "reject" or attendee.state == 'maybe') and event.has_children():
         for child in event.children.all():
             try:
                 sub_attendee = child.attendees.get(user=user)
             except ObjectDoesNotExist:
                 continue
-            
+
             sub_attendee.state = attendee.state
             sub_attendee.save()
 
@@ -99,11 +98,11 @@ def resolve_attend_event(_, info, input):
         "entity": event
     }
 
+
 def resolve_add_event(_, info, input):
     # pylint: disable=redefined-builtin
     # pylint: disable=too-many-branches
     # pylint: disable=too-many-statements
-
 
     user = info.context["request"].user
 
@@ -151,31 +150,7 @@ def resolve_add_event(_, info, input):
         clean_abstract(abstract)
         entity.abstract = abstract
 
-    if 'featured' in clean_input:
-        entity.featured_position_y = clean_input.get("featured").get("positionY", 0)
-        entity.featured_video = clean_input.get("featured").get("video", None)
-        entity.featured_video_title = clean_input.get("featured").get("videoTitle", "")
-        entity.featured_alt = clean_input.get("featured").get("alt", "")
-        if entity.featured_video:
-            entity.featured_image = None
-        elif clean_input.get("featured").get("image"):
-
-            imageFile = FileFolder.objects.create(
-                owner=entity.owner,
-                upload=clean_input.get("featured").get("image"),
-                read_access=entity.read_access,
-                write_access=entity.write_access
-            )
-
-            resize_featured.delay(tenant_schema(), imageFile.guid)
-
-            entity.featured_image = imageFile
-    else:
-        entity.featured_image = None
-        entity.featured_position_y = 0
-        entity.featured_video = None
-        entity.featured_video_title = ""
-        entity.featured_alt = ""
+    shared.update_featured_image(entity, clean_input)
 
     if user.has_role(USER_ROLES.ADMIN) or user.has_role(USER_ROLES.EDITOR):
         if 'isFeatured' in clean_input:
@@ -266,36 +241,7 @@ def resolve_edit_event(_, info, input):
     if 'writeAccessId' in clean_input:
         entity.write_access = access_id_to_acl(entity, clean_input.get("writeAccessId"))
 
-    if 'featured' in clean_input:
-        entity.featured_position_y = clean_input.get("featured").get("positionY", 0)
-        entity.featured_video = clean_input.get("featured").get("video", None)
-        entity.featured_video_title = clean_input.get("featured").get("videoTitle", "")
-        entity.featured_alt = clean_input.get("featured").get("alt", "")
-        if entity.featured_video:
-            entity.featured_image = None
-        elif clean_input.get("featured").get("image"):
-
-            if entity.featured_image:
-                imageFile = entity.featured_image
-                imageFile.resized_images.all().delete()
-            else:
-                imageFile = FileFolder()
-
-            imageFile.owner = entity.owner
-            imageFile.read_access = entity.read_access
-            imageFile.write_access = entity.write_access
-            imageFile.upload = clean_input.get("featured").get("image")
-            imageFile.save()
-
-            resize_featured.delay(tenant_schema(), imageFile.guid)
-
-            entity.featured_image = imageFile
-    else:
-        entity.featured_image = None
-        entity.featured_position_y = 0
-        entity.featured_video = None
-        entity.featured_video_title = ""
-        entity.featured_alt = ""
+    shared.update_featured_image(entity, clean_input)
 
     if user.has_role(USER_ROLES.ADMIN) or user.has_role(USER_ROLES.EDITOR):
         if 'isFeatured' in clean_input:
@@ -365,28 +311,29 @@ def resolve_edit_event(_, info, input):
         "entity": entity
     }
 
+
 def copy_event(event_id, user, parent=None):
     # pylint: disable=redefined-builtin
 
     entity = Event.objects.get(id=event_id)
-    
+
     now = timezone.now()
 
     attachments = entity.attachments_in_text()
     for x in attachments:
         attachment_copy = x.make_copy(user)
-        original = "/attachment/%s" %x.id
-        replacement = "/attachment/%s" %attachment_copy.id
+        original = "/attachment/%s" % x.id
+        replacement = "/attachment/%s" % attachment_copy.id
         tiptap = Tiptap(entity.rich_description)
         tiptap.replace_url(original, replacement)
-        tiptap.replace_src(original, replacement) 
+        tiptap.replace_src(original, replacement)
         entity.rich_description = json.dumps(tiptap.tiptap_json)
 
     if entity.featured_image:
         featured = entity.featured_image
         entity.featured_image = featured.make_copy(user)
 
-    #preserve time of original event
+    # preserve time of original event
     if entity.start_date:
         if entity.end_date:
             difference = entity.end_date - entity.start_date
@@ -411,10 +358,10 @@ def copy_event(event_id, user, parent=None):
 
     if parent:
         entity.parent = parent
-    
+
     # subevents keep original title
     if not parent:
-        entity.title = ugettext_lazy("Copy %s") %entity.title
+        entity.title = ugettext_lazy("Copy %s") % entity.title
 
     entity.pk = None
     entity.id = None
