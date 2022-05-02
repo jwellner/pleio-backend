@@ -261,9 +261,6 @@ BACKUP_PATH = os.getenv("BACKUP_PATH") if os.getenv("BACKUP_PATH") else os.path.
 if SWIFT_ENABLED:
     DEFAULT_FILE_STORAGE = 'core.backends.tenant_swift_storage.TenantSwiftStorage'
 
-if S3_ENABLED:
-    DEFAULT_FILE_STORAGE = 'core.backends.tenant_s3_storage.TenantS3Boto3Storage'
-
 ELASTICSEARCH_DSL_SIGNAL_PROCESSOR = 'core.elasticsearch.CustomSignalProcessor'
 DATABASE_ROUTERS = (
     'django_tenants.routers.TenantSyncRouter',
