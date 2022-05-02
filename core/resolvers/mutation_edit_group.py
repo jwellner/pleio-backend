@@ -2,9 +2,9 @@ from graphql import GraphQLError
 from django.core.exceptions import ObjectDoesNotExist, ValidationError
 from core.models import Group, ProfileField, GroupProfileFieldSetting
 from core.constances import NOT_LOGGED_IN, COULD_NOT_SAVE, COULD_NOT_FIND, USER_ROLES, INVALID_PROFILE_FIELD_GUID
-from core.lib import clean_graphql_input, ACCESS_TYPE, tenant_schema
+from core.lib import clean_graphql_input, ACCESS_TYPE
+from core.resolvers import shared
 from file.models import FileFolder
-from file.tasks import resize_featured
 
 
 def resolve_edit_group(_, info, input):
@@ -38,38 +38,9 @@ def resolve_edit_group(_, info, input):
             read_access=[ACCESS_TYPE.public],
             write_access=[ACCESS_TYPE.user.format(user.id)]
         )
-
         group.icon = icon_file
 
-    if 'featured' in clean_input:
-        group.featured_position_y = clean_input.get("featured").get("positionY", 0)
-        group.featured_video = clean_input.get("featured").get("video", None)
-        group.featured_video_title = clean_input.get("featured").get("videoTitle", "")
-        group.featured_alt = clean_input.get("featured").get("alt", "")
-        if group.featured_video:
-            group.featured_image = None
-        elif clean_input.get("featured").get("image"):
-
-            if group.featured_image:
-                imageFile = group.featured_image
-            else:
-                imageFile = FileFolder()
-
-            imageFile.owner = group.owner
-            imageFile.read_access = [ACCESS_TYPE.public]
-            imageFile.write_access = [ACCESS_TYPE.user.format(user.id)]
-            imageFile.upload = clean_input.get("featured").get("image")
-            imageFile.save()
-
-            resize_featured.delay(tenant_schema(), imageFile.guid)
-
-            group.featured_image = imageFile
-    else:
-        group.featured_image = None
-        group.featured_position_y = 0
-        group.featured_video = None
-        group.featured_video_title = ""
-        group.featured_alt = ""
+    shared.update_featured_image(group, clean_input, image_owner=user)
 
     if 'richDescription' in clean_input:
         group.rich_description = clean_input.get("richDescription")

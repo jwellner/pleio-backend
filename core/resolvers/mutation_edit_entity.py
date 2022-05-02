@@ -13,6 +13,7 @@ from wiki.resolvers.mutation import resolve_edit_wiki
 from news.resolvers.mutation import resolve_edit_news
 from question.resolvers.mutation import resolve_edit_question
 
+
 def resolve_edit_entity(_, info, input):
     # pylint: disable=redefined-builtin
 
