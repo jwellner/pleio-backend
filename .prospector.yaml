@@ -28,6 +28,7 @@ pylint:
     - consider-using-with
     - consider-using-in
     - useless-super-delegation
+    - unnecessary-comprehension
 pycodestyle:
   run: true
   max-line-length: 160
