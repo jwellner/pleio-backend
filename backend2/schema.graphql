@@ -565,6 +565,11 @@ type editEntityPayload {
   entity: Entity
 }
 
+enum UpdateOwnerRecursive {
+  updateOwnerFiles
+  updateAllFiles
+}
+
 input editFileFolderInput {
   guid: String
   title: String
@@ -574,6 +579,9 @@ input editFileFolderInput {
   writeAccessId: Int
   isAccessRecursive: Boolean
   tags: [String]
+  timePublished: DateTime
+  ownerGuid: String
+  ownerGuidRecursive: UpdateOwnerRecursive
 }
 
 type editFileFolderPayload {
