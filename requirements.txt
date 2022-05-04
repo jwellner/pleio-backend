@@ -14,7 +14,7 @@ ariadne==0.15.1
 ariadne-django==0.2.0
 simplejson==3.17.6
 graphql-core==3.2.1
-django-model-utils==4.1.1
+django-model-utils==4.2.0
 mixer==7.2.1
 django-storage-swift==1.2.19
 elastic-apm==6.3.3
