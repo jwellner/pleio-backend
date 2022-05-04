@@ -292,6 +292,36 @@ class ProfileTestCase(FastTenantTestCase):
 
         self.assertEqual(data["entity"]["fieldsInOverview"][0]["key"], "profile_field2")
 
+    def test_profile_field_is_not_on_vcard_when_empty(self):
+        clean_user = mixer.blend(User)
+        field = UserProfileField.objects.create(
+            user_profile_id=clean_user.profile.id,
+            profile_field_id=self.profile_field1.id,
+            read_access=[ACCESS_TYPE.public],
+            value="has value!",
+        )
+
+        request = HttpRequest()
+        request.user = clean_user
+
+        variables = {"username": clean_user.guid, "groupGuid": self.group.guid}
+        success, result = graphql_sync(schema, {"query": self.query, "variables": variables}, context_value={"request": request})
+
+        # Value exists, so profile_field exists.
+        data = result.get('data')
+        self.assertIsNotNone(data['entity']['vcard'])
+        self.assertIn(self.profile_field1.key, [v['key'] for v in data['entity']['vcard']])
+
+        field.value = ""
+        field.save()
+
+        # value is empty, so profile_field is not in the result.
+        variables = {"username": clean_user.guid, "groupGuid": self.group.guid}
+        success, result = graphql_sync(schema, {"query": self.query, "variables": variables}, context_value={"request": request})
+        data = result.get('data')
+        self.assertIsNotNone(data['entity']['vcard'])
+        self.assertNotIn(self.profile_field1.key, [v['key'] for v in data['entity']['vcard']])
+
     def test_profile_field_html_not_allowed_icm_is_filter(self):
         field = ProfileField.objects.create(key="demo", name="demo", field_type='html_field')
         with self.assertRaises(ValidationError):

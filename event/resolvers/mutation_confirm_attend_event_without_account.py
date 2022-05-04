@@ -1,3 +1,4 @@
+from event.utils import send_event_qr
 from graphql import GraphQLError
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.validators import validate_email
@@ -7,7 +8,7 @@ from core.constances import COULD_NOT_FIND, INVALID_EMAIL, EVENT_INVALID_STATE, 
 from core.lib import clean_graphql_input, get_base_url, get_default_email_context
 from event.models import Event, EventAttendeeRequest, EventAttendee
 from event.lib import get_url
-from core.tasks import send_mail_multi
+from core.tasks.mail_tasks import send_mail_multi
 from django_tenants.utils import parse_tenant_config_path
 
 def resolve_confirm_attend_event_without_account(_, info, input):
@@ -15,6 +16,7 @@ def resolve_confirm_attend_event_without_account(_, info, input):
     # pylint: disable=unused-argument
     # pylint: disable=too-many-statements
     # pylint: disable=too-many-branches
+    # pylint: disable=too-many-locals
 
     clean_input = clean_graphql_input(input)
 
@@ -99,6 +101,9 @@ def resolve_confirm_attend_event_without_account(_, info, input):
         context['state'] = state
 
         send_mail_multi.delay(schema_name, subject, 'email/confirm_attend_event_without_account.html', context, email)
+
+        if event.qr_access and state == "accept":
+            send_event_qr(info, email, event, attendee)
 
         if state != "accept":
             event.process_waitinglist()

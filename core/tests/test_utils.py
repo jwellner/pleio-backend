@@ -273,3 +273,43 @@ class UtilsTestCase(FastTenantTestCase):
                          '<tr><th>Column 1</th><th>Column 2</th></tr>'
                          '<tr><td>Value 1</td><td>Value 2</td></tr>'
                          '</table>', tiptap_to_html(spec))
+
+    def test_table_with_lists(self):
+        spec = json.dumps({
+            'type': 'doc',
+            'content': [
+                {'type': 'table',
+                 'content': [
+                     {'type': 'tableRow',
+                      'content': [
+                          {'type': 'tableCell',
+                           'content': [
+                               {'type': 'bulletList',
+                                'content': [
+                                    {'type': 'listItem',
+                                     'content': [
+                                         {'type': 'text', 'text': 'Bullet list item'}
+                                     ]}
+                                ]},
+                           ]},
+                      ]},
+                     {'type': 'tableRow',
+                      'content': [
+                          {'type': 'tableCell',
+                           'content': [
+                               {'type': 'orderedList',
+                                'content': [
+                                    {'type': 'listItem',
+                                     'content': [
+                                         {'type': 'text', 'text': 'Ordered list item'}
+                                     ]}
+                                ]},
+                           ]},
+                      ]},
+                 ]}
+            ]
+        })
+        self.assertEqual('<table>'
+                         '<tr><td><ul><li>Bullet list item</li></ul></td></tr>'
+                         '<tr><td><ol><li>Ordered list item</li></ol></td></tr>'
+                         '</table>', tiptap_to_html(spec))

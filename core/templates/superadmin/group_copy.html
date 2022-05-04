@@ -1,0 +1,65 @@
+{% extends "superadmin/base.html" %}
+
+{% load i18n %}
+
+{% block content %}
+
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+    <h1 class="h2">Group copy</h1>
+</div>
+
+  <div class="card mt-4">
+    <div class="card-body">
+        <form method="post">
+            {% csrf_token %}
+            <input type="hidden" name="task" value="copy_group">
+            <p>Copy group to other site</p>
+            <div class="mb-3">
+                <label for="group" class="form-label">Group</label>
+                <select name="group"  class="form-control" id="group" aria-describedby="groupHelp">
+                    <option value="">------------</option>
+                    {% for group in groups %}
+                    <option value="{{ group.guid}}">{{ group.name }} </option>
+                    {% endfor %}
+                </select>
+                <div id="groupHelp" class="form-text">Select the group to copy</div>
+            </div>
+            <div class="mb-3">
+                <label for="target_tenant" class="form-label">Target site</label>
+                <select name="target_tenant"  class="form-control" id="target_tenant" aria-describedby="targetTenantHelp">
+                    <option value="">------------</option>
+                    {% for site in sites %}
+                    <option value="{{ site.schema}}">{{ site.domain }} </option>
+                    {% endfor %}
+                </select>
+                <div id="targetTenantHelp" class="form-text">Select the target site</div>
+            </div>
+            <button type="submit" class="btn btn-primary">Start group copy</button>
+        </form>
+    </div>
+  </div>
+
+
+  <table class="table" width="100%">
+    <thead>
+      <tr>
+        <th scope="col" width=175>Date</th>
+        <th scope="col">Group ID</th>
+        <th scope="col">Target tenant</th>
+        <th scope="col">Status</th>
+        <th scope="col">Response</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for item in items %}
+      <tr>
+        <td>{{ item.created_at|date:'Y-m-d H:i' }}</td>
+        <td>{{ item.source_id }}</td>
+        <td>{{ item.target_tenant }}</td>
+        <td>{{ item.task_state }}</td>
+        <td>{{ item.task_response }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+{% endblock %}

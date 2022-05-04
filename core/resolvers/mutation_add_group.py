@@ -3,6 +3,7 @@ from core import config
 from core.models import Group, ProfileField, GroupProfileFieldSetting
 from core.constances import NOT_LOGGED_IN, COULD_NOT_SAVE, USER_ROLES, INVALID_PROFILE_FIELD_GUID
 from core.lib import clean_graphql_input, ACCESS_TYPE
+from core.resolvers import shared
 from file.models import FileFolder
 from django.core.exceptions import ValidationError
 
@@ -35,30 +36,7 @@ def resolve_add_group(_, info, input):
 
         group.icon = icon_file
 
-    if 'featured' in clean_input:
-        group.featured_position_y = clean_input.get("featured").get("positionY", 0)
-        group.featured_video = clean_input.get("featured").get("video", "")
-        group.featured_video_title = clean_input.get("featured").get("videoTitle", "")
-        group.featured_alt = clean_input.get("featured").get("alt", "")
-        if group.featured_video:
-            group.featured_image = None
-        elif clean_input.get("featured").get("image"):
-
-            image_file = FileFolder.objects.create(
-                owner=group.owner,
-                upload=clean_input.get("featured").get("image"),
-                read_access=[ACCESS_TYPE.public],
-                write_access=[ACCESS_TYPE.user.format(user.id)]
-            )
-
-            group.featured_image = image_file
-
-    else:
-        group.featured_image = None
-        group.featured_position_y = 0
-        group.featured_video = None
-        group.featured_video_title = ""
-        group.featured_alt = ""
+    shared.update_featured_image(group, clean_input, image_owner=user)
 
     group.rich_description = clean_input.get("richDescription", "")
     group.introduction = clean_input.get("introduction", "")

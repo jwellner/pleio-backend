@@ -5,6 +5,7 @@ from core import config
 from core.constances import ACCESS_TYPE, NOT_LOGGED_IN, COULD_NOT_FIND, COULD_NOT_SAVE, USER_ROLES
 from core.lib import clean_graphql_input, access_id_to_acl
 from core.models import Group
+from user.models import User
 from ..models import FileFolder, FILE_SCAN
 
 
@@ -20,6 +21,31 @@ def update_access_recursive(user, entity, access_id, write_access_id):
             file_folder.write_access = access_id_to_acl(file_folder, write_access_id)
         file_folder.save()
         update_access_recursive(user, file_folder, access_id, write_access_id)
+
+
+def update_file_folder_owner(entity, owner, new_owner, recursive, full_recursive):
+    current_owner_access = ACCESS_TYPE.user.format(entity.owner.guid)
+    new_owner_access = ACCESS_TYPE.user.format(new_owner.guid)
+
+    entity.owner = new_owner
+
+    if current_owner_access in entity.write_access:
+        new_write_access = [access for access in entity.write_access if not current_owner_access]
+        new_write_access.append(new_owner_access)
+        entity.write_access = new_write_access
+
+    if current_owner_access in entity.read_access:
+        new_read_access = [access for access in entity.read_access if not current_owner_access]
+        new_read_access.append(new_owner_access)
+        entity.read_access = new_read_access
+
+    if recursive:
+        child_filefolders = FileFolder.objects.filter(parent=entity)
+        if not full_recursive:
+            child_filefolders = child_filefolders.filter(owner=owner)
+        for file_folder in child_filefolders:
+            update_file_folder_owner(file_folder, owner, new_owner, recursive, full_recursive)
+            file_folder.save()
 
 
 mutation = ObjectType("Mutation")
@@ -186,6 +212,9 @@ def resolve_edit_file_folder(_, info, input):
         if entity.scan() == FILE_SCAN.VIRUS:
             raise GraphQLError("INVALID_FILE")
 
+    if 'timePublished' in clean_input:
+        entity.published = clean_input['timePublished']
+
     if 'accessId' in clean_input:
         entity.read_access = access_id_to_acl(entity, clean_input.get("accessId"))
 
@@ -194,6 +223,12 @@ def resolve_edit_file_folder(_, info, input):
 
     if entity.is_folder and clean_input.get("isAccessRecursive", False):
         update_access_recursive(user, entity, clean_input.get("accessId"), clean_input.get("writeAccessId"))
+
+    if 'ownerGuid' in clean_input:
+        update_file_folder_owner(entity, owner=entity.owner,
+                                 new_owner=User.objects.get(id=clean_input['ownerGuid']),
+                                 recursive='ownerGuidRecursive' in clean_input,
+                                 full_recursive=clean_input.get('ownerGuidRecursive') == 'updateAllFiles')
 
     entity.save()
 

@@ -50,7 +50,8 @@ class EditEventTestCase(FastTenantTestCase):
                 "locationAddress": "Kerkstraat 10",
                 "source": "https://www.pleio.nl",
                 "attendEventWithoutAccount": True,
-                "rsvp": True
+                "rsvp": True,
+                "qrAccess": True
             }
         }
         self.mutation = """
@@ -80,6 +81,7 @@ class EditEventTestCase(FastTenantTestCase):
                 locationLink
                 locationAddress
                 maxAttendees
+                qrAccess
             }
             mutation ($input: editEntityInput!) {
                 editEntity(input: $input) {
@@ -114,6 +116,7 @@ class EditEventTestCase(FastTenantTestCase):
         self.assertEqual(data["editEntity"]["entity"]["source"], variables["input"]["source"])
         self.assertEqual(data["editEntity"]["entity"]["attendEventWithoutAccount"], variables["input"]["attendEventWithoutAccount"])
         self.assertEqual(data["editEntity"]["entity"]["rsvp"], variables["input"]["rsvp"])
+        self.assertEqual(data["editEntity"]["entity"]["qrAccess"], variables["input"]["qrAccess"])
 
         self.eventPublic.refresh_from_db()
 
@@ -132,6 +135,7 @@ class EditEventTestCase(FastTenantTestCase):
         self.assertEqual(data["editEntity"]["entity"]["group"], None)
         self.assertEqual(data["editEntity"]["entity"]["owner"]["guid"], self.authenticatedUser.guid)
         self.assertEqual(data["editEntity"]["entity"]["timeCreated"], self.eventPublic.created_at.isoformat())
+        self.assertEqual(data["editEntity"]["entity"]["qrAccess"], self.eventPublic.qr_access)
 
 
 

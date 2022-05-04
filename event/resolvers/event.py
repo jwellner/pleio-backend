@@ -139,6 +139,11 @@ def resolve_is_attending_parent(obj, info):
         pass
     return False
 
+@event.field("qrAccess")
+def resolve_qr_access(obj, info):
+    # pylint: disable=unused-argument
+    return obj.qr_access
+
 @event.field("attendees")
 def resolve_attendees(obj, info, query=None, limit=20, offset=0, state=None,
                       orderBy=ATTENDEE_ORDER_BY.name, orderDirection=ORDER_DIRECTION.asc, isCheckedIn=None):

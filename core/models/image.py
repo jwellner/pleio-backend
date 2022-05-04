@@ -14,14 +14,15 @@ VALID_IMAGE_SIZES = [360, 414, 660, 1040]
 
 logger = logging.getLogger(__name__)
 
+
 def image_path(instance, filename):
     ext = filename.split('.')[-1]
     name = filename.split('.')[0]
     filename = "%i_%s.%s" % (instance.size, slugify(name), ext)
     return os.path.join('images', str(instance.original.id), filename)
 
-class ResizedImage(ModelWithFile):
 
+class ResizedImage(ModelWithFile):
     OK = 'OK'
     PENDING = 'PENDING'
     FAILED = 'FAILED'
@@ -48,11 +49,13 @@ class ResizedImage(ModelWithFile):
     def name(self):
         return os.path.basename(self.upload.name)
 
+
 class ResizedImageMixin(models.Model):
     class Meta:
         abstract = True
 
-    resized_images = GenericRelation(ResizedImage, object_id_field='original_object_id', content_type_field='original_content_type')
+    resized_images = GenericRelation(ResizedImage, object_id_field='original_object_id',
+                                     content_type_field='original_content_type')
 
     @property
     @abc.abstractmethod

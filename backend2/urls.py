@@ -30,11 +30,8 @@ urlpatterns = [
     path('superadmin/tasks', core_superadmin.tasks),
     path('superadmin/scanlog', core_superadmin.ScanLog.as_view()),
     path('superadmin/auditlog', core_superadmin.AuditLog.as_view()),
-    path('graphql',
-         GraphQLView.as_view(schema=schema,
-                             extensions=[OpenTracingExtensionSync],
-                             introspection=settings.DEBUG),
-         name='graphql'),
+    path('superadmin/group_copy', core_superadmin.GroupCopyView.as_view()),
+    path('graphql', GraphQLView.as_view(schema=schema, extensions=[OpenTracingExtensionSync], introspection=settings.DEBUG), name='graphql'),
 
     path('file/download/<uuid:file_id>', file_views.download, name='download'),
     path('file/download/<uuid:file_id>/<str:file_name>', file_views.download, name='download'),
@@ -51,6 +48,8 @@ urlpatterns = [
 
     path('bulk_download', file_views.bulk_download, name='bulk_download'),
 
+    path('events/view/guest-list', event_views.check_in, name='check_in'),
+
     path('exporting/content/<str:content_type>', core_views.export_content, name='content_export'),
     path('exporting/group/<uuid:group_id>', core_views.export_group_members, name='group_members_export'),
     path('exporting/event/<uuid:event_id>', event_views.export, name='event_export'),
@@ -58,6 +57,7 @@ urlpatterns = [
     path('exporting/users', user_views.export, name='users_export'),
 
     path('qr/url/<uuid:entity_id>', core_views.get_url_qr, name='url_qr'),
+    path('qr/access/<uuid:entity_id>', event_views.get_access_qr, name='access_qr'),
 
     path('comment/confirm/<uuid:entity_id>', core_views.comment_confirm, name='comment_confirm'),
 

@@ -3,9 +3,13 @@ from elasticsearch_dsl import Search
 from core.constances import ACCESS_TYPE, TEXT_TOO_LONG
 from core.models import EntityViewCount
 from django.core.exceptions import ObjectDoesNotExist
+
+from core.tasks.cleanup_tasks import cleanup_featured_image_files
 from core.utils.convert import tiptap_to_text, truncate_rich_description
 from graphql import GraphQLError
-from core.lib import html_to_text
+from core.lib import html_to_text, tenant_schema
+from file.models import FileFolder
+from file.tasks import resize_featured
 
 
 def resolve_entity_access_id(obj, info):
@@ -230,6 +234,44 @@ def resolve_entity_is_pinned(obj, info):
     if hasattr(obj, "is_pinned"):
         return obj.is_pinned
     return False
+
+
+def update_featured_image(entity, clean_input, image_owner=None):
+    if 'featured' in clean_input:
+        entity.featured_position_y = clean_input.get("featured").get("positionY", 0)
+        entity.featured_video = clean_input.get("featured").get("video", "")
+        entity.featured_video_title = clean_input.get("featured").get("videoTitle", "")
+        entity.featured_alt = clean_input.get("featured").get("alt", "")
+        if entity.featured_video:
+            cleanup_featured_image_files(entity.featured_image)
+            entity.featured_image = None
+        elif clean_input.get("featured").get("image"):
+            cleanup_featured_image_files(entity.featured_image)
+
+            entity.featured_image = FileFolder.objects.create(
+                owner=entity.owner,
+                upload=clean_input.get("featured").get("image")
+            )
+            if hasattr(entity, 'read_access'):
+                entity.featured_image.read_access = entity.read_access
+                entity.featured_image.write_access = entity.write_access
+            else:
+                entity.featured_image.read_access = [ACCESS_TYPE.public]
+                entity.featured_image.write_access = [ACCESS_TYPE.user.format(image_owner.id)]
+            entity.featured_image.save()
+
+            resize_featured.delay(tenant_schema(), entity.featured_image.id)
+        else:
+            # nothing changed.
+            pass
+    else:
+        cleanup_featured_image_files(entity.featured_image)
+
+        entity.featured_image = None
+        entity.featured_position_y = 0
+        entity.featured_video = None
+        entity.featured_video_title = ""
+        entity.featured_alt = ""
 
 
 # TODO: this function should be moved later on to a shared class

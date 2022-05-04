@@ -1,6 +1,6 @@
 from enum import Enum
 
-
+ALREADY_CHECKED_IN = "already_checked_in"
 ALREADY_MEMBER_OF_GROUP = "already_member_of_group"
 ALREADY_REGISTERED = "already_registered"
 ALREADY_VOTED = "already_voted"

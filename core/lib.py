@@ -139,10 +139,13 @@ def webpack_dev_server_is_available():
                 return False
     return False
 
-def get_access_id(obj):
-    if ACCESS_TYPE.public in obj.read_access:
+def get_access_id(acl):
+    for x in acl:
+        if x.startswith("group:"):
+            return 4
+    if ACCESS_TYPE.public in acl:
         return 2
-    if ACCESS_TYPE.logged_in in obj.read_access:
+    if ACCESS_TYPE.logged_in in acl:
         return 1
     return 0
 

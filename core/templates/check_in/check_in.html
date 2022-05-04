@@ -1,0 +1,18 @@
+{% extends "base_closed.html" %}
+
+{% load i18n %}
+{% load custom_tags %}
+
+{% block content %}
+<div class="content">
+	<h1 class="walled-garden_title">{% blocktrans %}Check in{% endblocktrans %}</h1>
+	<p>{% blocktrans %}Do you want to check in <strong>{{ name }}</strong> ({{ email }})?{% endblocktrans %}</p>
+	<p>{% blocktrans with date=date|date:'d-m-Y H:i' %}Event: <strong>{{ event }}</strong>, {{ date }}.{% endblocktrans %}</p>
+	<form method="post">
+		{% csrf_token %}
+		<div class="walled-garden_buttons">
+			<input class="button ___medium" type="submit" value="{% blocktrans %}Yes, confirm{% endblocktrans %}">
+		</div>
+	</form>
+</div>
+{% endblock %}

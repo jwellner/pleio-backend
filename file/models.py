@@ -217,4 +217,17 @@ def update_parent_timestamps(sender, instance, **kwargs):
         pass
 
 
+@receiver(pre_delete, sender=FileFolder)
+def cleanup_extra_file(sender, instance, **kwargs):
+    # pylint: disable=unused-argument
+    if instance.is_folder:
+        return
+
+    try:
+        os.unlink(f"{os.path.dirname(instance.upload.path)}/{instance.title}")
+    except (FileNotFoundError, ValueError):
+        pass
+
+
+
 auditlog.register(FileFolder)

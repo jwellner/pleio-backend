@@ -67,6 +67,9 @@ class Manager(BaseUserManager):
         if is_superadmin:
             user.is_superadmin = True
 
+        if is_active:
+            user.is_active = True
+
         user.save(using=self._db)
 
         # Site access request can only be used once

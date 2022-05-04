@@ -1,3 +1,4 @@
+from django.utils import timezone
 from django_tenants.test.cases import FastTenantTestCase
 from django.core.files import File
 from django.conf import settings
@@ -18,8 +19,9 @@ class EditFileFolderTestCase(FastTenantTestCase):
 
     def setUp(self):
         self.anonymousUser = AnonymousUser()
-        self.authenticatedUser = mixer.blend(User)
-        self.user1 = mixer.blend(User)
+        self.authenticatedUser = mixer.blend(User, name="Aut Hen Ticated")
+        self.user1 = mixer.blend(User, name="User One")
+        self.user2 = mixer.blend(User, name="Someone Else")
 
         self.PREVIOUS_DESCRIPTION = 'PREVIOUS_DESCRIPTION'
         self.EXPECTED_DESCRIPTION = 'EXPECTED_DESCRIPTION'
@@ -120,12 +122,24 @@ class EditFileFolderTestCase(FastTenantTestCase):
             read_access=[ACCESS_TYPE.public],
             write_access=[ACCESS_TYPE.user.format(self.authenticatedUser.id)]
         )
+        self.file5 = FileFolder.objects.create(
+            owner=self.user2,
+            rich_description=self.PREVIOUS_DESCRIPTION,
+            is_folder=False,
+            group=self.group,
+            parent=self.folder1,
+            title="Someone Elses file",
+            read_access=[ACCESS_TYPE.public],
+            write_access=[ACCESS_TYPE.user.format(self.user2.id)]
+        )
         self.data = {
             "input": {
                 "guid": None,
                 "richDescription": self.EXPECTED_DESCRIPTION,
                 "title": "",
                 "file": "",
+                "timePublished": "",
+                "ownerGuid": "",
             }
         }
         self.mutation = """
@@ -134,6 +148,7 @@ class EditFileFolderTestCase(FastTenantTestCase):
                 description
                 timeCreated
                 timeUpdated
+                timePublished
                 accessId
                 writeAccessId
                 canEdit
@@ -141,6 +156,9 @@ class EditFileFolderTestCase(FastTenantTestCase):
                 url
                 inGroup
                 group {
+                    guid
+                }
+                owner {
                     guid
                 }
                 mimeType
@@ -171,7 +189,7 @@ class EditFileFolderTestCase(FastTenantTestCase):
 
         test_file = FileFolder.objects.create(
             rich_description=self.PREVIOUS_DESCRIPTION,
-            read_access=[ACCESS_TYPE.user.format(self.authenticatedUser.id)],
+            read_access=[ACCESS_TYPE.logged_in],
             write_access=[ACCESS_TYPE.user.format(self.authenticatedUser.id)],
             owner=self.authenticatedUser,
             tags=["tag1", "tag2"],
@@ -180,29 +198,40 @@ class EditFileFolderTestCase(FastTenantTestCase):
 
         variables = self.data
 
+        newPublishedTime = timezone.now() + timezone.timedelta(days=-1)
+
         variables["input"]["guid"] = test_file.guid
         variables["input"]["title"] = "test123.gif"
         variables["input"]["tags"] = ["tag_one", "tag_two"]
+        variables["input"]["timePublished"] = newPublishedTime.isoformat()
+        variables["input"]["ownerGuid"] = self.user1.guid
 
         request = HttpRequest()
         request.user = self.authenticatedUser
 
-        result = graphql_sync(schema, { "query": self.mutation, "variables": variables }, context_value={ "request": request })
+        result = graphql_sync(schema, {"query": self.mutation, "variables": variables},
+                              context_value={"request": request})
 
         data = result[1]["data"]
 
-        self.assertEqual(data["editFileFolder"]["entity"]["title"], variables["input"]["title"])
+        entity = data["editFileFolder"]["entity"]
+
+        self.assertEqual(entity["title"], variables["input"]["title"])
+        self.assertEqual(entity["description"], self.EXPECTED_DESCRIPTION)
+        self.assertEqual(entity["mimeType"], test_file.mime_type)
+        self.assertEqual(entity["tags"][0], "tag_one")
+        self.assertEqual(entity["tags"][1], "tag_two")
+        self.assertEqual(entity["owner"]["guid"], self.user1.guid)
+        self.assertEqual(entity["timePublished"], newPublishedTime.isoformat())
 
         test_file.refresh_from_db()
-
-        self.assertEqual(data["editFileFolder"]["entity"]["title"], test_file.title)
-        self.assertEqual(data["editFileFolder"]["entity"]["description"], self.EXPECTED_DESCRIPTION)
-        self.assertEqual(data["editFileFolder"]["entity"]["mimeType"], test_file.mime_type)
-        self.assertEqual(data["editFileFolder"]["entity"]["tags"][0], "tag_one")
-        self.assertEqual(data["editFileFolder"]["entity"]["tags"][1], "tag_two")
+        self.assertEqual(test_file.title, variables['input']['title'])
+        self.assertEqual(test_file.tags, variables['input']['tags'])
+        self.assertEqual(test_file.published, newPublishedTime)
+        self.assertEqual(test_file.owner.guid, self.user1.guid)
+        self.assertIn(ACCESS_TYPE.user.format(self.user1.guid), test_file.write_access)
 
     def test_edit_folder_access_ids_recursive(self):
-
         mutation = """
             mutation editFileFolder($input: editFileFolderInput!) {
             editFileFolder(input: $input) {
@@ -231,7 +260,7 @@ class EditFileFolderTestCase(FastTenantTestCase):
             }
         }
 
-        result = graphql_sync(schema, { "query": mutation, "variables": variables }, context_value={ "request": request })
+        result = graphql_sync(schema, {"query": mutation, "variables": variables}, context_value={"request": request})
 
         self.assertTrue(result[0])
 
@@ -268,7 +297,7 @@ class EditFileFolderTestCase(FastTenantTestCase):
             "filter": "folders"
         }
 
-        result = graphql_sync(schema, { "query": query, "variables": variables }, context_value={ "request": request })
+        result = graphql_sync(schema, {"query": query, "variables": variables}, context_value={"request": request})
 
         self.assertTrue(result[0])
 
@@ -284,7 +313,7 @@ class EditFileFolderTestCase(FastTenantTestCase):
             "limit": 1
         }
 
-        result = graphql_sync(schema, { "query": query, "variables": variables }, context_value={ "request": request })
+        result = graphql_sync(schema, {"query": query, "variables": variables}, context_value={"request": request})
 
         self.assertTrue(result[0])
 
@@ -295,9 +324,7 @@ class EditFileFolderTestCase(FastTenantTestCase):
         self.assertEqual(data["files"]["edges"][0]["writeAccessId"], 1)
         self.assertEqual(data["files"]["total"], 2)
 
-
     def test_edit_folder_access_id_recursive(self):
-
         mutation = """
             mutation editFileFolder($input: editFileFolderInput!) {
             editFileFolder(input: $input) {
@@ -325,7 +352,7 @@ class EditFileFolderTestCase(FastTenantTestCase):
             }
         }
 
-        result = graphql_sync(schema, { "query": mutation, "variables": variables }, context_value={ "request": request })
+        result = graphql_sync(schema, {"query": mutation, "variables": variables}, context_value={"request": request})
 
         self.assertTrue(result[0])
 
@@ -361,7 +388,7 @@ class EditFileFolderTestCase(FastTenantTestCase):
             "filter": "folders"
         }
 
-        result = graphql_sync(schema, { "query": query, "variables": variables }, context_value={ "request": request })
+        result = graphql_sync(schema, {"query": query, "variables": variables}, context_value={"request": request})
 
         self.assertTrue(result[0])
 
@@ -376,7 +403,7 @@ class EditFileFolderTestCase(FastTenantTestCase):
             "filter": "files"
         }
 
-        result = graphql_sync(schema, { "query": query, "variables": variables }, context_value={ "request": request })
+        result = graphql_sync(schema, {"query": query, "variables": variables}, context_value={"request": request})
 
         self.assertTrue(result[0])
 
@@ -386,9 +413,7 @@ class EditFileFolderTestCase(FastTenantTestCase):
         self.assertEqual(data["files"]["edges"][0]["accessId"], 1)
         self.assertEqual(data["files"]["edges"][0]["writeAccessId"], 0)
 
-
     def test_edit_folder_write_access_id_recursive(self):
-
         mutation = """
             mutation editFileFolder($input: editFileFolderInput!) {
             editFileFolder(input: $input) {
@@ -416,7 +441,7 @@ class EditFileFolderTestCase(FastTenantTestCase):
             }
         }
 
-        result = graphql_sync(schema, { "query": mutation, "variables": variables }, context_value={ "request": request })
+        result = graphql_sync(schema, {"query": mutation, "variables": variables}, context_value={"request": request})
 
         self.assertTrue(result[0])
 
@@ -452,7 +477,7 @@ class EditFileFolderTestCase(FastTenantTestCase):
             "filter": "folders"
         }
 
-        result = graphql_sync(schema, { "query": query, "variables": variables }, context_value={ "request": request })
+        result = graphql_sync(schema, {"query": query, "variables": variables}, context_value={"request": request})
 
         self.assertTrue(result[0])
 
@@ -467,7 +492,7 @@ class EditFileFolderTestCase(FastTenantTestCase):
             "filter": "files"
         }
 
-        result = graphql_sync(schema, { "query": query, "variables": variables }, context_value={ "request": request })
+        result = graphql_sync(schema, {"query": query, "variables": variables}, context_value={"request": request})
 
         self.assertTrue(result[0])
 
@@ -477,9 +502,7 @@ class EditFileFolderTestCase(FastTenantTestCase):
         self.assertEqual(data["files"]["edges"][0]["accessId"], 2)
         self.assertEqual(data["files"]["edges"][0]["writeAccessId"], 1)
 
-
     def test_edit_folder_access_ids_not_recursive(self):
-
         mutation = """
             mutation editFileFolder($input: editFileFolderInput!) {
             editFileFolder(input: $input) {
@@ -508,7 +531,7 @@ class EditFileFolderTestCase(FastTenantTestCase):
             }
         }
 
-        result = graphql_sync(schema, { "query": mutation, "variables": variables }, context_value={ "request": request })
+        result = graphql_sync(schema, {"query": mutation, "variables": variables}, context_value={"request": request})
 
         self.assertTrue(result[0])
 
@@ -544,7 +567,7 @@ class EditFileFolderTestCase(FastTenantTestCase):
             "filter": "folders"
         }
 
-        result = graphql_sync(schema, { "query": query, "variables": variables }, context_value={ "request": request })
+        result = graphql_sync(schema, {"query": query, "variables": variables}, context_value={"request": request})
 
         self.assertTrue(result[0])
 
@@ -559,7 +582,7 @@ class EditFileFolderTestCase(FastTenantTestCase):
             "filter": "files"
         }
 
-        result = graphql_sync(schema, { "query": query, "variables": variables }, context_value={ "request": request })
+        result = graphql_sync(schema, {"query": query, "variables": variables}, context_value={"request": request})
 
         self.assertTrue(result[0])
 
@@ -569,9 +592,7 @@ class EditFileFolderTestCase(FastTenantTestCase):
         self.assertEqual(data["files"]["edges"][0]["accessId"], 2)
         self.assertEqual(data["files"]["edges"][0]["writeAccessId"], 0)
 
-
     def test_edit_folder_access_ids_recursive_no_read_access_file(self):
-
         mutation = """
             mutation editFileFolder($input: editFileFolderInput!) {
             editFileFolder(input: $input) {
@@ -600,7 +621,7 @@ class EditFileFolderTestCase(FastTenantTestCase):
             }
         }
 
-        result = graphql_sync(schema, { "query": mutation, "variables": variables }, context_value={ "request": request })
+        result = graphql_sync(schema, {"query": mutation, "variables": variables}, context_value={"request": request})
 
         self.assertTrue(result[0])
 
@@ -636,7 +657,7 @@ class EditFileFolderTestCase(FastTenantTestCase):
             "filter": "files"
         }
 
-        result = graphql_sync(schema, { "query": query, "variables": variables }, context_value={ "request": request })
+        result = graphql_sync(schema, {"query": query, "variables": variables}, context_value={"request": request})
 
         self.assertTrue(result[0])
 
@@ -646,12 +667,9 @@ class EditFileFolderTestCase(FastTenantTestCase):
         self.assertEqual(data["files"]["edges"][0]["accessId"], 2)
         self.assertEqual(data["files"]["edges"][0]["writeAccessId"], 0)
 
-
-
     @patch("core.lib.get_mimetype")
     @patch("{}.open".format(settings.DEFAULT_FILE_STORAGE))
     def test_get_download_filename(self, mock_open, mock_mimetype):
-
         file_mock = MagicMock(spec=File)
         file_mock.name = 'icon-name.jpg'
         file_mock.title = 'icon-name.jpg'
@@ -677,17 +695,14 @@ class EditFileFolderTestCase(FastTenantTestCase):
 
         self.assertEqual(get_download_filename(self.file), 'iconnewname.jpg')
 
-
         self.file.title = 'iconnewname.txt'
         self.file.save()
 
         self.assertEqual(get_download_filename(self.file), 'iconnewname.txt.jpg')
 
-
     @patch("core.lib.get_mimetype")
     @patch("{}.open".format(settings.DEFAULT_FILE_STORAGE))
     def test_get_download_filename_csv(self, mock_open, mock_mimetype):
-
         file_mock = MagicMock(spec=File)
         file_mock.name = 'localfile name'
         file_mock.title = 'csv-name.csv'
@@ -708,11 +723,9 @@ class EditFileFolderTestCase(FastTenantTestCase):
 
         self.assertEqual(get_download_filename(self.file), 'csv-name.csv')
 
-
     @patch("core.lib.get_mimetype")
     @patch("{}.open".format(settings.DEFAULT_FILE_STORAGE))
     def test_get_download_filename_no_mimetype(self, mock_open, mock_mimetype):
-
         file_mock = MagicMock(spec=File)
         file_mock.name = 'localfile name'
         file_mock.title = 'csv-name.weird'
@@ -732,3 +745,116 @@ class EditFileFolderTestCase(FastTenantTestCase):
         )
 
         self.assertEqual(get_download_filename(self.file), 'csv-name.weird')
+
+    def test_update_ownership_updates_only_current_file_folder(self):
+        query = """
+        mutation editFileFolder($input: editFileFolderInput!) {
+            editFileFolder(input: $input) {
+                entity {
+                    guid
+                }
+            }
+        }
+        """
+        variables = {
+            "input": {
+                "guid": self.folder1.guid,
+                "ownerGuid": self.user1.guid,
+            }
+        }
+        request = HttpRequest()
+        request.user = self.authenticatedUser
+
+        success, data = graphql_sync(schema, {"query": query, "variables": variables},
+                                     context_value={"request": request})
+
+        self.assertFalse(data.get('errors'), msg=data.get('errors'))
+
+        expected_access = ACCESS_TYPE.user.format(self.user1.guid)
+        for object, message in (
+                (self.folder2, "Folder2 %s access is unexpectedly updated"),
+                (self.file3, "File3 %s access is unexpectedly updated"),
+                (self.file4, "File4 %s access is unexpectedly updated"),
+                (self.file5, "File4 %s access is unexpectedly updated"),
+        ):
+            object.refresh_from_db()
+            self.assertNotIn(expected_access, object.write_access, msg=message % 'write')
+
+        self.folder1.refresh_from_db()
+        self.assertIn(expected_access, self.folder1.write_access, msg="Folder1 is not updated correctly")
+
+    def test_update_ownership_updates_recursive(self):
+        query = """
+        mutation editFileFolder($input: editFileFolderInput!) {
+            editFileFolder(input: $input) {
+                entity {
+                    guid
+                }
+            }
+        }
+        """
+        variables = {
+            "input": {
+                "guid": self.folder1.guid,
+                "ownerGuid": self.user1.guid,
+                "ownerGuidRecursive": 'updateAllFiles',
+            }
+        }
+        request = HttpRequest()
+        request.user = self.authenticatedUser
+
+        success, data = graphql_sync(schema, {"query": query, "variables": variables},
+                                     context_value={"request": request})
+
+        self.assertFalse(data.get('errors'), msg=data.get('errors'))
+
+        expected_access = ACCESS_TYPE.user.format(self.user1.guid)
+        for object, message in (
+                (self.folder1, "Folder1 %s access is not updated correctly"),
+                (self.folder2, "Folder2 %s access is not updated correctly"),
+                (self.file3, "File3 %s access is not updated correctly"),
+                (self.file4, "File4 %s access is not updated correctly"),
+                (self.file5, "File5 %s access is not updated correctly"),
+        ):
+            object.refresh_from_db()
+            self.assertNotIn(expected_access, object.read_access, msg=message % 'read')
+            self.assertIn(expected_access, object.write_access, msg=message % 'write')
+
+    def test_update_ownership_updates_recursive_by_owner(self):
+        query = """
+        mutation editFileFolder($input: editFileFolderInput!) {
+            editFileFolder(input: $input) {
+                entity {
+                    guid
+                }
+            }
+        }
+        """
+        variables = {
+            "input": {
+                "guid": self.folder1.guid,
+                "ownerGuid": self.user1.guid,
+                "ownerGuidRecursive": 'updateOwnerFiles',
+            }
+        }
+        request = HttpRequest()
+        request.user = self.authenticatedUser
+
+        success, data = graphql_sync(schema, {"query": query, "variables": variables},
+                                     context_value={"request": request})
+
+        self.assertFalse(data.get('errors'), msg=data.get('errors'))
+
+        expected_access = ACCESS_TYPE.user.format(self.user1.guid)
+        for object, message in (
+                (self.folder1, "Folder1 %s access is not updated correctly"),
+                (self.folder2, "Folder2 %s access is not updated correctly"),
+                (self.file3, "File3 %s access is not updated correctly"),
+                (self.file4, "File4 %s access is not updated correctly"),
+        ):
+            object.refresh_from_db()
+            self.assertNotIn(expected_access, object.read_access, msg=message % 'read')
+            self.assertIn(expected_access, object.write_access, msg=message % 'write')
+
+        self.file5.refresh_from_db()
+        self.assertNotIn(expected_access, self.file5.write_access, msg="File5 is updated unexpectedly")
