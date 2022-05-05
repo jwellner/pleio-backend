@@ -85,7 +85,6 @@ PROFILE_PICTURE_URL = os.getenv('PROFILE_PICTURE_URL')
 OIDC_OP_LOGOUT_URL_METHOD = 'core.auth.oidc_provider_logout'
 OIDC_CALLBACK_CLASS = 'core.auth.OIDCAuthCallbackView'
 OIDC_AUTHENTICATE_CLASS = 'core.auth.OIDCAuthenticateView'
-CONCIERGE_API_URL = os.getenv('CONCIERGE_API_URL')
 
 # SWIFT FILE STORAGE
 SWIFT_ENABLED = os.getenv('SWIFT_ENABLED') == 'True'

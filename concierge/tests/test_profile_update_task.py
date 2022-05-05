@@ -39,7 +39,7 @@ class TestTasksTestCase(PleioTenantTestCase):
         self.user.refresh_from_db()
 
         # Then
-        mocked_request.assert_called_with(FETCH_PROFILE_URL.format(settings.CONCIERGE_API_URL, self.USER_ID),
+        mocked_request.assert_called_with(FETCH_PROFILE_URL.format(settings.ACCOUNT_API_URL, self.USER_ID),
                                           headers={"X-Origin-Token": self.ORIGIN_TOKEN})
         self.assertEqual(self.user.name, data['name'])
         self.assertEqual(self.user.email, data['email'])

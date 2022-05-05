@@ -23,7 +23,7 @@ def profile_updated_signal(schema_name, origin_token, retry=3, retry_delay=60):
     with schema_context(schema_name):
         try:
             user = User.objects.get(_profile__origin_token=origin_token)
-            response = requests.get(FETCH_PROFILE_URL.format(str(settings.CONCIERGE_API_URL).rstrip('/'),
+            response = requests.get(FETCH_PROFILE_URL.format(str(settings.ACCOUNT_API_URL).rstrip('/'),
                                                              user.external_id),
                                     headers={'X-Origin-Token': str(user.profile.origin_token)})
 
@@ -70,7 +70,7 @@ def submit_user_token(schema, user):
         origin = Client.objects.get(schema_name=schema)
         user.profile.update_origin_token(token)
         url = "{}/api/users/register_origin_site/{}".format(
-            settings.CONCIERGE_API_URL, user.external_id,
+            settings.ACCOUNT_API_URL, user.external_id,
         )
 
         url_schema = "http" if settings.ENV == 'local' else "https"
