@@ -30,7 +30,7 @@ class TestTasksTestCase(FastTenantTestCase):
         sync_user(self.tenant.schema_name, self.user.id)
 
         mocked_post.assert_called_with(
-            "{}/api/users/register_origin_site/{}".format(settings.CONCIERGE_API_URL, self.user.external_id),
+            "{}/api/users/register_origin_site/{}".format(settings.ACCOUNT_API_URL, self.user.external_id),
             data={
                 "origin_site_url": "https://{}".format(self.tenant.primary_domain),
                 "origin_site_name": self.tenant.name,

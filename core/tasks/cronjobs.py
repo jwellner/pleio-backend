@@ -175,17 +175,17 @@ def ban_users_with_no_account(schema_name):
     Ban users with email adresses that bounce
     '''
     with schema_context(schema_name):
-        if not settings.ACCOUNT_URL or not settings.ACCOUNT_TOKEN:
+        if not settings.ACCOUNT_API_URL or not settings.ACCOUNT_API_TOKEN:
             logger.error("Could not process deleted accounts as account_url or account_token is not set")
             return
 
         try:
             headers = {
-                'Authorization': 'Token ' + settings.ACCOUNT_TOKEN,
+                'Authorization': 'Token ' + settings.ACCOUNT_API_TOKEN,
                 'Accept': 'application/json'
             }
             last_received = config.LAST_RECEIVED_DELETED_USER
-            url = settings.ACCOUNT_URL + '/api/users/deleted?event_time__gt=' + last_received
+            url = settings.ACCOUNT_API_URL + '/api/users/deleted?event_time__gt=' + last_received
             r = requests.get(url, headers=headers)
         except Exception as e:
             logger.error("Error getting deleted accounts: %s", e)
