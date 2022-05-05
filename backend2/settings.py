@@ -82,7 +82,7 @@ TENANT_APPS = [
     'core',
     'user',
     'mozilla_django_oidc',
-    'ariadne.contrib.django',
+    'ariadne_django',
     'django_elasticsearch_dsl',
     'notifications',
     'auditlog',
