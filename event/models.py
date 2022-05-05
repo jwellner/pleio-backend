@@ -45,13 +45,13 @@ class Event(Entity, CommentMixin, BookmarkMixin, FollowMixin, NotificationMixin,
             return None
 
         attendee = None
-        
+
         try:
             attendee_user = User.objects.get(email=email)
             attendee = self.attendees.get(user=attendee_user)
         except ObjectDoesNotExist:
             pass
-        
+
         try:
             attendee = self.attendees.get(email=email)
         except ObjectDoesNotExist:
@@ -60,10 +60,10 @@ class Event(Entity, CommentMixin, BookmarkMixin, FollowMixin, NotificationMixin,
         return attendee
 
     def delete_attendee(self, user, email):
-        deleted = False        
+        deleted = False
         if not user.is_authenticated:
             return None
-        
+
         # try delete attendee with account
         try:
             attendee = User.objects.get(email=email)
@@ -198,7 +198,7 @@ class EventAttendeeRequest(models.Model):
 def event_post_save(sender, instance, **kwargs):
     # pylint: disable=unused-argument
 
-    for child in Event.all_objects.filter(parent=instance):
+    for child in Event.objects.filter(parent=instance):
         child.is_archived = instance.is_archived
         child.published = instance.published
         child.read_access = instance.read_access
@@ -211,7 +211,7 @@ def event_post_save(sender, instance, **kwargs):
 @receiver(pre_save, sender=Event)
 def event_pre_save(sender, instance, **kwargs):
     # pylint: disable=unused-argument
-    
+
     if instance.parent:
         instance.is_archived = instance.parent.is_archived
         instance.published = instance.parent.published

@@ -34,7 +34,7 @@ def resolve_children(obj, info):
     """
     if obj.status_published == ENTITY_STATUS.PUBLISHED:
         return obj.children.visible(info.context["request"].user)
-    return Event.all_objects.filter(parent=obj)
+    return Event.objects.filter(parent=obj)
 
 @event.field("parent")
 def resolve_parent(obj, info):
@@ -193,7 +193,7 @@ def resolve_attendees(obj, info, query=None, limit=20, offset=0, state=None,
     elif isCheckedIn is True:
         qs = qs.filter(checked_in_at__isnull = False)
 
-    if orderBy == ATTENDEE_ORDER_BY.email: 
+    if orderBy == ATTENDEE_ORDER_BY.email:
         order_by = 'email'
     elif orderBy == ATTENDEE_ORDER_BY.timeUpdated:
         order_by = 'updated_at'
@@ -217,12 +217,12 @@ def resolve_attendees(obj, info, query=None, limit=20, offset=0, state=None,
     attendees = [
         {
         "email": get_email(item, can_write),
-        "name": item.user.name if item.user else item.name, 
+        "name": item.user.name if item.user else item.name,
         "state": item.state,
-        "icon": item.user.icon if item.user else None, 
+        "icon": item.user.icon if item.user else None,
         "url": item.user.url if item.user else None,
         "timeCheckedIn": item.checked_in_at
-        } 
+        }
         for item in qs]
 
 
