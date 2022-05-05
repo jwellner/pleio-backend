@@ -10,8 +10,10 @@ Sphinx==4.5.0
 sphinx-autobuild==2021.3.14
 coverage==5.5
 prospector==1.7.7
-ariadne==0.13.0
-graphql-core==3.1.7
+ariadne==0.15.1
+ariadne-django==0.2.0
+simplejson==3.17.6
+graphql-core==3.2.1
 django-model-utils==4.1.1
 mixer==7.2.1
 django-storage-swift==1.2.19
