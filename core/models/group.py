@@ -266,15 +266,6 @@ class GroupMembership(models.Model):
             self.group.name
         )
 
-    @property
-    def admin_weight(self):
-        """
-         Weight of the membership on administration pages. Owner on top.
-        """
-        sort_index = {'owner': 1, 'admin': 2, 'member': 3}
-        return sort_index.get(self.type) or 100
-
-
     created_at = models.DateTimeField(default=timezone.now)
 
 
