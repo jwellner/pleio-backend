@@ -36,11 +36,13 @@ def get_filter_options(key, user, group=None):
             ]))
         )
 
-    # TODO: use aggregations
     for hit in s.scan():
         for field in hit['_profile']['user_profile_fields']:
             if field['key'] == key and not set(user_acl).isdisjoint(set(field['read_access'])):
-                options.append(field['value'])
+                if field['value_list']:
+                    options.extend(field['value_list'])
+                elif field['value'] not in [None, '']:
+                    options.append(field['value'])
 
     return sorted(list(set(options)), key=str.lower)
 
