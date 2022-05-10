@@ -1,15 +1,15 @@
 from core.lib import get_acl
 from core import config
+from core.models import ProfileField
 from user.models import User
-from core.models import ProfileField, Group
-from core.constances import NOT_LOGGED_IN, COULD_NOT_FIND
+from core.constances import NOT_LOGGED_IN
 from elasticsearch_dsl import Search
 from elasticsearch_dsl import Q
 from graphql import GraphQLError
 from django_tenants.utils import parse_tenant_config_path
 
 
-def resolve_users(_, info, q="", filters=None, offset=0, limit=20, groupGuid=None):
+def resolve_users(_, info, q="", filters=None, offset=0, limit=20):
     # pylint: disable=unused-argument
     # pylint: disable=too-many-locals
     # pylint: disable=too-many-arguments
@@ -20,14 +20,6 @@ def resolve_users(_, info, q="", filters=None, offset=0, limit=20, groupGuid=Non
 
     if not user.is_authenticated:
         raise GraphQLError(NOT_LOGGED_IN)
-
-    if groupGuid:
-        try:
-            group = Group.objects.get(id=groupGuid)
-        except Group.DoesNotExist:
-            raise GraphQLError(COULD_NOT_FIND)
-    else:
-        group = None
 
     if q:
         s = Search(index='user').query(
@@ -45,7 +37,6 @@ def resolve_users(_, info, q="", filters=None, offset=0, limit=20, groupGuid=Non
         ).filter(
             'term', is_active=True
         )
-
     else:
         s = Search(index='user').filter(
             'terms', read_access=list(get_acl(user))
@@ -53,15 +44,6 @@ def resolve_users(_, info, q="", filters=None, offset=0, limit=20, groupGuid=Non
             'term', tenant_name=tenant_name
         ).filter(
             'term', is_active=True
-        )
-
-    if group:
-        s = s.filter(
-            Q('nested', path='memberships', query=Q('bool', must=[
-                Q('match', memberships__group_id=group.guid)
-            ], must_not=[
-                Q('match', memberships__type="pending")
-            ]))
         )
 
     if filters:
@@ -104,13 +86,8 @@ def resolve_users(_, info, q="", filters=None, offset=0, limit=20, groupGuid=Non
     for section in config.PROFILE_SECTIONS:
         profile_section_guids.extend(section['profileFieldGuids'])
 
-    if group:
-        for setting in group.profile_field_settings.filter(show_field=True):
-            if setting.profile_field.guid in profile_section_guids:
-                fields_in_overview.append({ 'key': setting.profile_field.key, 'label': setting.profile_field.name })
-    else:
-        for item in ProfileField.objects.filter(is_in_overview=True, id__in=profile_section_guids):
-            fields_in_overview.append({ 'key': item.key, 'label': item.name })
+    for item in ProfileField.objects.filter(is_in_overview=True, id__in=profile_section_guids):
+        fields_in_overview.append({ 'key': item.key, 'label': item.name })
 
     return {
         'total': total,

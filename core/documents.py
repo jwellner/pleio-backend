@@ -7,7 +7,6 @@ from .models.group import Group, GroupMembership
 from user.models import User
 from core.utils.convert import tiptap_to_text
 
-
 custom_asciifolding_filter = analysis.token_filter(
     "custom_asciifolding_filter",
     type="asciifolding",
@@ -28,6 +27,7 @@ custom_analyzer = analyzer(
     filter=['lowercase', custom_asciifolding_filter, custom_edge_ngram_filter]
 )
 
+
 class DefaultDocument(Document):
     tenant_name = fields.KeywordField()
     container_guid = fields.KeywordField()
@@ -41,6 +41,7 @@ class DefaultDocument(Document):
             return instance.group.id
 
         return ""
+
 
 @registry.register_document
 class UserDocument(DefaultDocument):
@@ -73,7 +74,8 @@ class UserDocument(DefaultDocument):
 
     memberships = fields.NestedField(properties={
         'group_id': fields.KeywordField(attr='group.id'),
-        'type': fields.KeywordField()
+        'type': fields.KeywordField(),
+        'admin_weight': fields.IntegerField(),
     })
 
     def prepare_last_online(self, instance):
@@ -105,6 +107,7 @@ class UserDocument(DefaultDocument):
             return related_instance.user
 
         return related_instance.user_profile.user
+
 
 @registry.register_document
 class GroupDocument(DefaultDocument):

@@ -9,7 +9,7 @@ from mixer.backend.django import mixer
 from backend2.schema import schema
 from core.constances import ACCESS_TYPE
 from core.models import Group
-from core.utils.test import suppress_stdout
+from core.tests.helpers import suppress_stdout
 from event.models import Event, EventAttendee
 from user.models import User
 
@@ -84,8 +84,7 @@ class EventsTestCase(FastTenantTestCase):
                                                     "variables": variables},
                                            context_value={"request": request})
 
-        self.assertIn('errors', result,
-                      msg="graphql geeft aan dat er geen fouten zijn, maar een attendee mag helemaal geen mail sturen.")
+        self.assertIn('errors', result, msg="Een attendee zou geen mail mogen sturen.")
 
     @mock.patch('event.resolvers.mutation_messages.SendEventMessage.populate')
     @mock.patch('event.resolvers.mutation_messages.SendEventMessage.send')
