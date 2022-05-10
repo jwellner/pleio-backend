@@ -78,7 +78,7 @@ def notification_update_handler(sender, instance, **kwargs):
 
     # check if instance has id, when copying entity, id is None
     if instance.id:
-        entity = Entity.all_objects.get(id=instance.id)
+        entity = Entity.objects.get(id=instance.id)
 
         if entity.read_access != instance.read_access:
             for notification in Notification.objects.filter(action_object_object_id=instance.id):

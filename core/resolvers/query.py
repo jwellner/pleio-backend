@@ -58,7 +58,7 @@ def resolve_entity(
     entity = None
 
     try:
-        entity = Entity.all_objects.visible(user).get_subclass(id=guid)
+        entity = Entity.objects.visible(user).get_subclass(id=guid)
 
         if entity.group and entity.group.is_closed and not entity.group.is_full_member(user) and not user.has_role(USER_ROLES.ADMIN):
             raise GraphQLError(USER_NOT_MEMBER_OF_GROUP)
@@ -86,16 +86,22 @@ def resolve_entity(
     if not entity:
         if user.is_authenticated:
             try:
-                entity = Entity.all_objects.draft(user).get_subclass(id=guid)
+                entity = Entity.objects.draft(user).get_subclass(id=guid)
             except ObjectDoesNotExist:
                 pass
+
+    if not entity:
+        try:
+            entity = Entity.objects.archived(user).get_subclass(id=guid)
+        except ObjectDoesNotExist:
+            pass
 
     if not entity:
         return None
 
     # Increase view count of entities
     try:
-        Entity.all_objects.get(id=entity.id)
+        Entity.objects.get(id=entity.id)
         try:
             view_count = EntityViewCount.objects.get(entity=entity)
         except ObjectDoesNotExist:

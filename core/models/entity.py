@@ -10,18 +10,6 @@ from .shared import read_access_default, write_access_default
 
 
 class EntityManager(InheritanceManager):
-    def __init__(self, exclude_archived = True):
-        super().__init__()
-
-        self.exclude_archived = exclude_archived
-
-    def get_queryset(self):
-        qs = super().get_queryset()
-        if(self.exclude_archived):
-            qs = qs.exclude(is_archived=True)
-
-        return qs
-
     def draft(self, user):
         qs = self.get_queryset()
         if not user.is_authenticated:
@@ -37,9 +25,17 @@ class EntityManager(InheritanceManager):
 
         return qs.filter(owner=user)
 
+    def archived(self, user):
+        qs = self.get_queryset().filter(is_archived=True)
+
+        if user.is_authenticated and user.has_role(USER_ROLES.ADMIN):
+            return qs
+
+        return qs.filter(read_access__overlap=list(get_acl(user)))
+
     def published(self):
         qs = self.get_queryset()
-        return qs.filter(published__lte=timezone.now())
+        return qs.filter(published__lte=timezone.now(), is_archived=False)
 
     def visible(self, user):
         qs = self.published()
@@ -51,7 +47,6 @@ class EntityManager(InheritanceManager):
 
 class Entity(models.Model):
     objects = EntityManager()
-    all_objects = EntityManager(exclude_archived=False)
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
 

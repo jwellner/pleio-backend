@@ -11,7 +11,7 @@ def resolve_archive_entity(_, info, guid):
         raise GraphQLError(NOT_LOGGED_IN)
 
     try:
-        entity = Entity.all_objects.get_subclass(id=guid)
+        entity = Entity.objects.get_subclass(id=guid)
     except ObjectDoesNotExist:
         raise GraphQLError(COULD_NOT_FIND)
 

@@ -290,10 +290,10 @@ class DeleteEntityTestCase(FastTenantTestCase):
         request = HttpRequest()
         request.user = self.user1
 
-        self.assertEqual(Blog.all_objects.all().count(), 2)
+        self.assertEqual(Blog.objects.all().count(), 2)
 
         result = graphql_sync(schema, {"query": mutation, "variables": variables }, context_value={ "request": request })
         data = result[1]["data"]
 
         self.assertEqual(data["deleteEntity"]["success"], True)
-        self.assertEqual(Blog.all_objects.all().count(), 1)
+        self.assertEqual(Blog.objects.all().count(), 1)
