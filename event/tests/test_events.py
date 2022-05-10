@@ -227,7 +227,7 @@ class EventsTestCase(FastTenantTestCase):
         data = result[1]["data"]
 
         self.assertEqual(data["events"]["total"], 3)
-        self.assertEqual(data["events"]["edges"][0]["attendees"]["total"], 2)
+        self.assertEqual(data["events"]["edges"][0]["attendees"]["total"], 1)
 
     def test_events_previous(self):
 
