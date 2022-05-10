@@ -158,6 +158,7 @@ class Manager(BaseUserManager):
             ),
             'value_date__month',
             'value_date__day',
+            'value_date__year',
         )
 
         ids = []

@@ -1781,6 +1781,7 @@ type Site {
   commentWithoutAccountEnabled: Boolean!
   questionLockAfterActivity: Boolean!
   questionLockAfterActivityLink: String
+  fileDescriptionFieldEnabled: Boolean
 }
 
 type SiteSettings {

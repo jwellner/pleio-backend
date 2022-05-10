@@ -146,6 +146,7 @@ class EditFileFolderTestCase(FastTenantTestCase):
             fragment FileFolderParts on FileFolder {
                 title
                 description
+                richDescription
                 timeCreated
                 timeUpdated
                 timePublished
@@ -218,6 +219,7 @@ class EditFileFolderTestCase(FastTenantTestCase):
 
         self.assertEqual(entity["title"], variables["input"]["title"])
         self.assertEqual(entity["description"], self.EXPECTED_DESCRIPTION)
+        self.assertEqual(entity["richDescription"], self.EXPECTED_DESCRIPTION)
         self.assertEqual(entity["mimeType"], test_file.mime_type)
         self.assertEqual(entity["tags"][0], "tag_one")
         self.assertEqual(entity["tags"][1], "tag_two")

@@ -45,6 +45,7 @@ class AddFileTestCase(FastTenantTestCase):
             fragment FileFolderParts on FileFolder {
                 title
                 description
+                richDescription
                 timeCreated
                 timeUpdated
                 accessId
@@ -91,6 +92,7 @@ class AddFileTestCase(FastTenantTestCase):
         self.assertEqual(data["addFile"]["entity"]["title"], file_mock.name)
         self.assertEqual(data["addFile"]["entity"]["mimeType"], file_mock.content_type)
         self.assertEqual(data["addFile"]["entity"]["description"], self.EXPECTED_DESCRIPTION)
+        self.assertEqual(data["addFile"]["entity"]["richDescription"], self.EXPECTED_DESCRIPTION)
         self.assertEqual(data["addFile"]["entity"]["group"]["guid"], self.group.guid)
         self.assertEqual(data["addFile"]["entity"]["tags"][0], "tag_one")
         self.assertEqual(data["addFile"]["entity"]["tags"][1], "tag_two")
