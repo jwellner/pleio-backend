@@ -218,15 +218,18 @@ type Attendee {
 }
 
 type AttendeesList {
-  total: Int!
-  totalAccept: Int!
-  """totalGoing means having state accept, but not checked in yet."""
-  totalGoing: Int!
-  totalMaybe: Int!
-  totalReject: Int!
-  totalWaitinglist: Int!
-  totalCheckedIn: Int!
+  total: Int
   edges: [Attendee]
+
+  totalCheckedIn: Int
+
+  totalAccept: Int
+  totalAcceptNotCheckedIn: Int
+  totalWaitinglist: Int
+  totalWaitinglistNotCheckedIn: Int
+
+  totalMaybe: Int
+  totalReject: Int
 }
 
 input attendEventInput {

@@ -1,6 +1,5 @@
 import json
 
-from core.resolvers import shared
 from core.utils.tiptap_parser import Tiptap
 from ariadne import ObjectType
 from django.core.exceptions import ObjectDoesNotExist
@@ -11,7 +10,7 @@ from core.constances import (
     COULD_NOT_FIND_GROUP, INVALID_DATE, COULD_NOT_SAVE, NOT_ATTENDING_PARENT_EVENT, USER_ROLES)
 from core.lib import get_access_id, clean_graphql_input, access_id_to_acl
 from core.models import Group
-from core.resolvers.shared import clean_abstract
+from core.resolvers.shared import clean_abstract, update_featured_image
 from user.models import User
 from django.utils.translation import ugettext_lazy
 from django.utils import timezone
@@ -150,7 +149,7 @@ def resolve_add_event(_, info, input):
         clean_abstract(abstract)
         entity.abstract = abstract
 
-    shared.update_featured_image(entity, clean_input)
+    update_featured_image(entity, clean_input)
 
     if user.has_role(USER_ROLES.ADMIN) or user.has_role(USER_ROLES.EDITOR):
         if 'isFeatured' in clean_input:
@@ -241,7 +240,7 @@ def resolve_edit_event(_, info, input):
     if 'writeAccessId' in clean_input:
         entity.write_access = access_id_to_acl(entity, clean_input.get("writeAccessId"))
 
-    shared.update_featured_image(entity, clean_input)
+    update_featured_image(entity, clean_input)
 
     if user.has_role(USER_ROLES.ADMIN) or user.has_role(USER_ROLES.EDITOR):
         if 'isFeatured' in clean_input:
