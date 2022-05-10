@@ -231,3 +231,44 @@ class ConfirmAttendEventWithoutAccountTestCase(FastTenantTestCase):
         errors = result[1]["errors"]
 
         self.assertEqual(errors[0]["message"], "not_attending_parent_event")
+
+
+    @mock.patch('event.resolvers.mutation_confirm_attend_event_without_account.send_mail_multi.delay')
+    def test_confirm_attend_event_without_account_already_registered(self, mocked_send_mail_multi):
+        
+        EventAttendeeRequest.objects.create(code='1234567890', email='registered@tenant.fast-test.com', event=self.event)
+        EventAttendee.objects.create(
+            event=self.event,
+            state='accept',
+            email='registered@tenant.fast-test.com'
+        )
+
+        mutation = """
+            mutation confirmAttendEventWithoutAccount($input: confirmAttendEventWithoutAccountInput!) {
+                confirmAttendEventWithoutAccount(input: $input) {
+                    entity {
+                        guid
+                        __typename
+                    }
+                    __typename
+                }
+            }
+        """
+
+        variables = {
+            "input": {
+                "guid": self.event.guid,
+                "code": "1234567890",
+                "email": "registered@tenant.fast-test.com",
+                "state": "accept"
+            }
+        }
+
+        request = HttpRequest()
+        request.user = self.anonymousUser
+
+        result = graphql_sync(schema, { "query": mutation, "variables": variables }, context_value={ "request": request })
+
+        errors = result[1]["errors"]
+
+        self.assertEqual(errors[0]["message"], "email_already_used")
