@@ -196,8 +196,6 @@ def resolve_edit_file_folder(_, info, input):
     if not entity.can_write(user):
         raise GraphQLError(COULD_NOT_SAVE)
 
-    entity.owner = user
-
     if 'tags' in clean_input:
         entity.tags = clean_input.get("tags")
 
