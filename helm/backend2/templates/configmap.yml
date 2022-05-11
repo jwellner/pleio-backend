@@ -14,7 +14,7 @@ data:
   OIDC_OP_USER_ENDPOINT: {{ printf "%s/openid/userinfo/" .Values.accountDomain }}
   OIDC_OP_LOGOUT_ENDPOINT: {{ printf "%s/action/logout" .Values.accountDomain }}
   PROFILE_PICTURE_URL: {{ printf "%s" .Values.accountDomain }}
-  CONCIERGE_API_URL: {{ printf "%s" .Values.accountDomain }}
+  ACCOUNT_API_URL: {{ printf "%s" .Values.accountDomain }}
   FROM_EMAIL: noreply@mail.pleio.nl
   MEDIA_ROOT: /app-data
   BACKUP_PATH: /backup-storage
