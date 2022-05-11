@@ -114,7 +114,7 @@ def resolve_search(_, info, q=None, containerGuid=None, type=None, subtype=None,
     for hit in response:
         ids.append(hit['id'])
 
-    entities = Entity.all_objects.filter(id__in=ids).select_subclasses()
+    entities = Entity.objects.filter(id__in=ids).select_subclasses()
     users = User.objects.filter(id__in=ids)
     groups = Group.objects.filter(id__in=ids)
     objects = chain(entities, users, groups)

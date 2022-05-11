@@ -218,15 +218,18 @@ type Attendee {
 }
 
 type AttendeesList {
-  total: Int!
-  totalAccept: Int!
-  """totalGoing means having state accept, but not checked in yet."""
-  totalGoing: Int!
-  totalMaybe: Int!
-  totalReject: Int!
-  totalWaitinglist: Int!
-  totalCheckedIn: Int!
+  total: Int
   edges: [Attendee]
+
+  totalCheckedIn: Int
+
+  totalAccept: Int
+  totalAcceptNotCheckedIn: Int
+  totalWaitinglist: Int
+  totalWaitinglistNotCheckedIn: Int
+
+  totalMaybe: Int
+  totalReject: Int
 }
 
 input attendEventInput {
@@ -1178,6 +1181,7 @@ type Member {
 type MemberList {
   total: Int!
   edges: [Member]
+  fieldsInOverview: [UserListOverviewItem]
 }
 
 """The type of membership."""
@@ -1539,7 +1543,8 @@ type Query {
   files(containerGuid: String, filter: String, orderBy: String, orderDirection: String, offset: Int, limit: Int): EntityList
   groups(q: String, filter: GroupFilter, tags: [String], offset: Int, limit: Int): GroupList
   events(filter: EventFilter, containerGuid: String, offset: Int, limit: Int): EventList
-  users(q: String!, offset: Int, limit: Int, filters: [FilterInput], groupGuid: String): UserList
+  users(q: String!, offset: Int, limit: Int, filters: [FilterInput]): UserList
+  members(groupGuid: String!, q: String, offset: Int, limit: Int, filters: [FilterInput]): MemberList
   entities(offset: Int, limit: Int, type: Type, subtype: String, subtypes: [String], containerGuid: String, tags: [String], tagLists: [[String]], orderBy: OrderBy, orderDirection: OrderDirection, isFeatured: Boolean, sortPinned: Boolean, isDraft: Boolean, userGuid: String): EntityList
   notifications(offset: Int, limit: Int, unread: Boolean): NotificationsList
   activities(containerGuid: String, offset: Int, limit: Int, tags: [String], tagLists: [[String]], groupFilter: [String], subtypes: [String], orderBy: OrderBy, orderDirection: OrderDirection, sortPinned: Boolean, isDraft: Boolean, userGuid: String): ActivityList
@@ -1781,6 +1786,7 @@ type Site {
   commentWithoutAccountEnabled: Boolean!
   questionLockAfterActivity: Boolean!
   questionLockAfterActivityLink: String
+  fileDescriptionFieldEnabled: Boolean
 }
 
 type SiteSettings {

@@ -196,7 +196,7 @@ class OIDCAuthBackend(OIDCAuthenticationBackend):
         }
 
 
-        if settings.CONCIERGE_API_URL:
+        if settings.ACCOUNT_SYNC_ENABLED and settings.ACCOUNT_API_URL:
             # Fresh origin token.
             origin_token = uuid.uuid4()
 

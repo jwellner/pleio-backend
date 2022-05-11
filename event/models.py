@@ -3,7 +3,8 @@ from django.db import models
 from django_tenants.utils import parse_tenant_config_path
 from django.utils.translation import ugettext_lazy
 from core.lib import get_default_email_context
-from core.models import Entity, CommentMixin, BookmarkMixin, NotificationMixin, FollowMixin, FeaturedCoverMixin, ArticleMixin, AttachmentMixin
+from core.models import Entity, CommentMixin, BookmarkMixin, NotificationMixin, FollowMixin, FeaturedCoverMixin, \
+    ArticleMixin, AttachmentMixin
 from core.tasks import send_mail_multi
 from event.lib import get_url
 from user.models import User
@@ -13,7 +14,9 @@ from django.dispatch import receiver
 from django.utils.text import slugify
 from django.utils import timezone
 
-class Event(Entity, CommentMixin, BookmarkMixin, FollowMixin, NotificationMixin, FeaturedCoverMixin, ArticleMixin, AttachmentMixin):
+
+class Event(Entity, CommentMixin, BookmarkMixin, FollowMixin, NotificationMixin, FeaturedCoverMixin, ArticleMixin,
+            AttachmentMixin):
     class Meta:
         ordering = ['-published']
 
@@ -45,13 +48,13 @@ class Event(Entity, CommentMixin, BookmarkMixin, FollowMixin, NotificationMixin,
             return None
 
         attendee = None
-        
+
         try:
             attendee_user = User.objects.get(email=email)
             attendee = self.attendees.get(user=attendee_user)
         except ObjectDoesNotExist:
             pass
-        
+
         try:
             attendee = self.attendees.get(email=email)
         except ObjectDoesNotExist:
@@ -60,10 +63,10 @@ class Event(Entity, CommentMixin, BookmarkMixin, FollowMixin, NotificationMixin,
         return attendee
 
     def delete_attendee(self, user, email):
-        deleted = False        
+        deleted = False
         if not user.is_authenticated:
             return None
-        
+
         # try delete attendee with account
         try:
             attendee = User.objects.get(email=email)
@@ -137,15 +140,16 @@ class Event(Entity, CommentMixin, BookmarkMixin, FollowMixin, NotificationMixin,
             attendee.state = 'accept'
             attendee.save()
             try:
-                send_mail_multi.delay(schema_name, subject, 'email/attend_event_from_waitinglist.html', context, attendee.user.email)
+                send_mail_multi.delay(schema_name, subject, 'email/attend_event_from_waitinglist.html', context,
+                                      attendee.user.email)
             except Exception:
-                send_mail_multi.delay(schema_name, subject, 'email/attend_event_from_waitinglist.html', context, attendee.email)
+                send_mail_multi.delay(schema_name, subject, 'email/attend_event_from_waitinglist.html', context,
+                                      attendee.email)
 
         return True
 
 
 class EventAttendee(models.Model):
-
     STATE_TYPES = (
         ('accept', 'Accept'),
         ('maybe', 'Maybe'),
@@ -177,8 +181,8 @@ class EventAttendee(models.Model):
     def __str__(self):
         return f"EventAttendee[{self.name}]"
 
-class EventAttendeeRequest(models.Model):
 
+class EventAttendeeRequest(models.Model):
     event = models.ForeignKey(
         Event,
         on_delete=models.CASCADE,
@@ -193,12 +197,13 @@ class EventAttendeeRequest(models.Model):
     def __str__(self):
         return f"EventAttendeeRequest[{self.name}]"
 
-#Subevents are dependent on the main event, so when an event is saved, its subevents are updated
+
+# Subevents are dependent on the main event, so when an event is saved, its subevents are updated
 @receiver(post_save, sender=Event)
 def event_post_save(sender, instance, **kwargs):
     # pylint: disable=unused-argument
 
-    for child in Event.all_objects.filter(parent=instance):
+    for child in Event.objects.filter(parent=instance):
         child.is_archived = instance.is_archived
         child.published = instance.published
         child.read_access = instance.read_access
@@ -207,11 +212,12 @@ def event_post_save(sender, instance, **kwargs):
         child.group = instance.group
         child.save()
 
-#When a subevent is edited and saved, the fields dependent on the parent are updated accordingly
+
+# When a subevent is edited and saved, the fields dependent on the parent are updated accordingly
 @receiver(pre_save, sender=Event)
 def event_pre_save(sender, instance, **kwargs):
     # pylint: disable=unused-argument
-    
+
     if instance.parent:
         instance.is_archived = instance.parent.is_archived
         instance.published = instance.parent.published
@@ -219,6 +225,16 @@ def event_pre_save(sender, instance, **kwargs):
         instance.write_access = instance.parent.write_access
         instance.owner = instance.parent.owner
         instance.group = instance.parent.group
+
+
+# When a subevent is edited and saved, the fields dependent on the parent are updated accordingly
+@receiver(pre_save, sender=EventAttendee)
+def event_attendee_pre_save(sender, instance, **kwargs):
+    # pylint: disable=unused-argument
+
+    if instance.user:
+        instance.name = instance.user.name
+        instance.email = instance.user.email
 
 
 auditlog.register(Event)

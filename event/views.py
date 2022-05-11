@@ -28,7 +28,7 @@ def export(request, event_id=None):
         raise Http404("Event not found")
 
     try:
-        event = Entity.objects.get(id=event_id)
+        event = Event.objects.get(id=event_id)
     except ObjectDoesNotExist:
         raise Http404("Event not found")
 

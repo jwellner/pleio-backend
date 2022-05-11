@@ -4,7 +4,7 @@ from django.urls import path, include, re_path
 from django.views.decorators.cache import cache_page
 from django.shortcuts import render
 
-from ariadne.contrib.django.views import GraphQLView
+from ariadne_django.views import GraphQLView
 from ariadne.contrib.tracing.opentracing import OpenTracingExtensionSync
 from .schema import schema
 

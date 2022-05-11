@@ -1,0 +1,33 @@
+accountDomain: https://account.pleio-test.nl
+websitesManual:
+  - domain: 'review.pleio-test.nl'
+    secretName: tls-wildcard.pleio-test.nl
+
+cspReportOnly: 'False'
+
+api:
+  replicaCount: 2
+
+background:
+  replicaCount: 2
+
+resources:
+  # We usually recommend not to specify default resources and to leave this as a conscious
+  # choice for the user. This also increases chances charts run on environments with little
+  # resources, such as Minikube. If you do want to specify resources, uncomment the following
+  # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+  # limits:
+  #   cpu: 100m
+  #   memory: 128Mi
+ requests:
+   cpu: 500m
+  # memory: 128Mi
+
+storage:
+  type: hostpath
+  existingTempStorage: /storage/_pleio2-review/tmp
+  existingDataStorage: /storage/_pleio2-review/data
+  existingBackupStorage: /storage/backup-storage
+
+tunnel:
+  hostname: admin-odcn-review.pleio-beheer.nl

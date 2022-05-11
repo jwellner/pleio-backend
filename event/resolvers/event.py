@@ -7,6 +7,7 @@ from core.lib import datetime_isoformat
 from event.models import Event, EventAttendee
 from core.constances import ATTENDEE_ORDER_BY, ORDER_DIRECTION
 
+
 def conditional_state_filter(state):
     if state:
         return Q(state=state)
@@ -16,15 +17,18 @@ def conditional_state_filter(state):
 
 event = ObjectType("Event")
 
+
 @event.field("subtype")
 def resolve_excerpt(obj, info):
     # pylint: disable=unused-argument
     return "event"
 
+
 @event.field("hasChildren")
 def resolve_has_children(obj, info):
     # pylint: disable=unused-argument
     return obj.has_children()
+
 
 @event.field("children")
 def resolve_children(obj, info):
@@ -34,27 +38,32 @@ def resolve_children(obj, info):
     """
     if obj.status_published == ENTITY_STATUS.PUBLISHED:
         return obj.children.visible(info.context["request"].user)
-    return Event.all_objects.filter(parent=obj)
+    return Event.objects.filter(parent=obj)
+
 
 @event.field("parent")
 def resolve_parent(obj, info):
     # pylint: disable=unused-argument
     return obj.parent
 
+
 @event.field("inGroup")
 def resolve_in_group(obj, info):
     # pylint: disable=unused-argument
     return obj.group is not None
+
 
 @event.field("group")
 def resolve_group(obj, info):
     # pylint: disable=unused-argument
     return obj.group
 
+
 @event.field("isFeatured")
 def resolve_is_featured(obj, info):
     # pylint: disable=unused-argument
     return obj.is_featured
+
 
 @event.field("isHighlighted")
 def resolve_is_highlighted(obj, info):
@@ -62,51 +71,61 @@ def resolve_is_highlighted(obj, info):
     """Deprecated: not used in frontend"""
     return False
 
+
 @event.field("isRecommended")
 def resolve_is_recommended(obj, info):
     # pylint: disable=unused-argument
     """Deprecated: not used in frontend"""
     return False
 
+
 @event.field("url")
 def resolve_url(obj, info):
     # pylint: disable=unused-argument
     return obj.url
+
 
 @event.field("startDate")
 def resolve_start_date(obj, info):
     # pylint: disable=unused-argument
     return datetime_isoformat(obj.start_date)
 
+
 @event.field("endDate")
 def resolve_end_date(obj, info):
     # pylint: disable=unused-argument
     return datetime_isoformat(obj.end_date)
+
 
 @event.field("source")
 def resolve_source(obj, info):
     # pylint: disable=unused-argument
     return obj.external_link
 
+
 @event.field("location")
 def resolve_location(obj, info):
     # pylint: disable=unused-argument
     return obj.location
+
 
 @event.field("locationLink")
 def resolve_location_link(obj, info):
     # pylint: disable=unused-argument
     return obj.location_link
 
+
 @event.field("locationAddress")
 def resolve_location_address(obj, info):
     # pylint: disable=unused-argument
     return obj.location_address
 
+
 @event.field("attendEventWithoutAccount")
 def resolve_attend_event_without_account(obj, info):
     # pylint: disable=unused-argument
     return obj.attend_event_without_account
+
 
 @event.field("maxAttendees")
 def resolve_max_attendees(obj, info):
@@ -114,6 +133,7 @@ def resolve_max_attendees(obj, info):
     if obj.max_attendees:
         return str(obj.max_attendees)
     return None
+
 
 @event.field("isAttending")
 def resolve_is_attending(obj, info):
@@ -127,6 +147,7 @@ def resolve_is_attending(obj, info):
 
     return None
 
+
 @event.field("isAttendingParent")
 def resolve_is_attending_parent(obj, info):
     # pylint: disable=unused-argument
@@ -139,10 +160,12 @@ def resolve_is_attending_parent(obj, info):
         pass
     return False
 
+
 @event.field("qrAccess")
 def resolve_qr_access(obj, info):
     # pylint: disable=unused-argument
     return obj.qr_access
+
 
 @event.field("attendees")
 def resolve_attendees(obj, info, query=None, limit=20, offset=0, state=None,
@@ -150,19 +173,14 @@ def resolve_attendees(obj, info, query=None, limit=20, offset=0, state=None,
     # pylint: disable=unused-argument
     # pylint: disable=too-many-arguments
 
-
     user = info.context["request"].user
 
     if not user.is_authenticated:
         return {
             "total": obj.attendees.count(),
             "totalAccept": obj.attendees.filter(state="accept").count(),
-            "totalGoing": 0,
-            "totalMaybe": 0,
-            "totalReject": 0,
-            "totalWaitinglist": 0,
-            "totalCheckedIn": 0,
-            "edges": []
+            "totalWaitinglist": obj.attendees.filter(state="waitinglist").count(),
+            "edges": [],
         }
 
     can_write = obj.can_write(user)
@@ -170,14 +188,14 @@ def resolve_attendees(obj, info, query=None, limit=20, offset=0, state=None,
 
     qs = qs.annotate(
         names=Case(
-                When(user=None, then='name'),
-                default='user__name',
-    ))
+            When(user=None, then='name'),
+            default='user__name',
+        ))
     qs = qs.annotate(
         emails=Case(
-                When(user=None, then='email'),
-                default='user__email',
-    ))
+            When(user=None, then='email'),
+            default='user__email',
+        ))
 
     if query:
         qs = qs.filter(
@@ -189,11 +207,11 @@ def resolve_attendees(obj, info, query=None, limit=20, offset=0, state=None,
     qs = qs.filter(conditional_state_filter(state))
 
     if isCheckedIn is False:
-        qs = qs.filter(checked_in_at__isnull = True)
+        qs = qs.filter(checked_in_at__isnull=True)
     elif isCheckedIn is True:
-        qs = qs.filter(checked_in_at__isnull = False)
+        qs = qs.filter(checked_in_at__isnull=False)
 
-    if orderBy == ATTENDEE_ORDER_BY.email: 
+    if orderBy == ATTENDEE_ORDER_BY.email:
         order_by = 'email'
     elif orderBy == ATTENDEE_ORDER_BY.timeUpdated:
         order_by = 'updated_at'
@@ -206,7 +224,7 @@ def resolve_attendees(obj, info, query=None, limit=20, offset=0, state=None,
         order_by = '-%s' % (order_by)
 
     qs = qs.order_by(order_by)
-    qs = qs[offset:offset+limit]
+    qs = qs[offset:offset + limit]
 
     # email adresses only for user with event write permissions
     def get_email(item, can_write):
@@ -214,27 +232,27 @@ def resolve_attendees(obj, info, query=None, limit=20, offset=0, state=None,
             return item.user.email if item.user else item.email
         return ""
 
-    attendees = [
-        {
+    attendees = [{
         "email": get_email(item, can_write),
-        "name": item.user.name if item.user else item.name, 
+        "name": item.user.name if item.user else item.name,
         "state": item.state,
-        "icon": item.user.icon if item.user else None, 
+        "icon": item.user.icon if item.user else None,
         "url": item.user.url if item.user else None,
         "timeCheckedIn": item.checked_in_at
-        } 
-        for item in qs]
+    } for item in qs]
 
+    notCheckedIn = obj.attendees.filter(checked_in_at__isnull=True)
 
     return {
-        "total": obj.attendees.count(),
+        "total": len(attendees),
+        "edges": attendees,
         "totalAccept": obj.attendees.filter(state="accept").count(),
-        "totalGoing": obj.attendees.filter(state="accept").count() - obj.attendees.filter(checked_in_at__isnull = False).count(),
+        "totalAcceptNotCheckedIn": notCheckedIn.filter(state="accept").count(),
+        "totalWaitinglist": obj.attendees.filter(state="waitinglist").count(),
+        "totalWaitinglistNotCheckedIn": notCheckedIn.filter(state="waitinglist").count(),
         "totalMaybe": obj.attendees.filter(state="maybe").count(),
         "totalReject": obj.attendees.filter(state="reject").count(),
-        "totalWaitinglist": obj.attendees.filter(state="waitinglist").count(),
-        "totalCheckedIn": obj.attendees.filter(checked_in_at__isnull = False).count(),
-        "edges": attendees
+        "totalCheckedIn": obj.attendees.filter(checked_in_at__isnull=False).count(),
     }
 
 

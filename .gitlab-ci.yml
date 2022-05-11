@@ -99,14 +99,14 @@ build-feature:
         --set frontend.tag=${FRONTEND_TAG} \
         ${HELM_NAME} helm/backend2
 
-AWS Review:
+ODCN Review:
   tags:
-    - control-aws
+    - control-odc
   only:
     - /^feature-(.*)$/
   variables:
     HELM_NAME: backend2-review
-    HELM_VALUES_FILE: helm/backend2/values.aws.review.yaml
+    HELM_VALUES_FILE: helm/backend2/values.odcn.review.yaml
     TAG_PREFIX: feature-
   extends:
     - .helm_deploy

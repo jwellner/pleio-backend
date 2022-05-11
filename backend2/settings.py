@@ -82,7 +82,7 @@ TENANT_APPS = [
     'core',
     'user',
     'mozilla_django_oidc',
-    'ariadne.contrib.django',
+    'ariadne_django',
     'django_elasticsearch_dsl',
     'notifications',
     'auditlog',
@@ -313,8 +313,9 @@ CLAMAV_HOST = os.getenv('CLAMAV_HOST', None)
 BOUNCER_URL = os.getenv('BOUNCER_URL', None)
 BOUNCER_TOKEN = os.getenv('BOUNCER_TOKEN', None)
 
-ACCOUNT_URL = os.getenv('ACCOUNT_URL', None)
-ACCOUNT_TOKEN = os.getenv('ACCOUNT_TOKEN', None)
+ACCOUNT_API_URL = os.getenv('ACCOUNT_API_URL', None)
+ACCOUNT_API_TOKEN = os.getenv('ACCOUNT_API_TOKEN', None)
+ACCOUNT_SYNC_ENABLED = os.getenv('ACCOUNT_SYNC_ENABLED') == 'True'
 
 SECURE_REFERRER_POLICY = 'origin-when-cross-origin'
 SESSION_COOKIE_SECURE = not DEBUG

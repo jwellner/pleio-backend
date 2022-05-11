@@ -77,8 +77,8 @@ class AutoBlockUsersTests(TenantTestCase):
         self.assertEqual(self.user4.is_active, False)
         self.assertEqual(self.user4.ban_reason, 'bouncing email adres')
 
-    @override_settings(ACCOUNT_URL='domain@url.nl')
-    @override_settings(ACCOUNT_TOKEN='fake_token')
+    @override_settings(ACCOUNT_API_URL='domain@url.nl')
+    @override_settings(ACCOUNT_API_TOKEN='fake_token')
     @mock.patch('requests.get')
     def test_auto_block_deleted_user_account(self, mocked_get):
 
