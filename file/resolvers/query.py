@@ -54,6 +54,8 @@ def resolve_files(
         order_by.insert(0, 'published')
     elif orderBy == 'readAccessWeight':
         order_by.insert(0, 'read_access_weight')
+    elif orderBy == 'writeAccessWeight':
+        order_by.insert(0, 'write_access_weight')
 
     if orderDirection == 'desc':
         for n, value in enumerate(order_by):
