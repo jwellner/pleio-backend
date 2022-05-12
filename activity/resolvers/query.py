@@ -11,28 +11,32 @@ def conditional_subtypes_filter(subtypes):
     if subtypes:
         for object_type in subtypes:
             if object_type == 'news':
-                q_objects.add(~Q(news__isnull = True), Q.OR)
+                q_objects.add(~Q(news__isnull=True), Q.OR)
             elif object_type == 'blog':
-                q_objects.add(~Q(blog__isnull = True), Q.OR)
+                q_objects.add(~Q(blog__isnull=True), Q.OR)
             elif object_type == 'event':
-                q_objects.add(~Q(event__isnull = True) & ~Q(event__parent__isnull = False), Q.OR)
+                q_objects.add(~Q(event__isnull=True) & ~Q(event__parent__isnull=False), Q.OR)
             elif object_type == 'discussion':
-                q_objects.add(~Q(discussion__isnull = True), Q.OR)
+                q_objects.add(~Q(discussion__isnull=True), Q.OR)
             elif object_type == 'statusupdate':
-                q_objects.add(~Q(statusupdate__isnull = True), Q.OR)
+                q_objects.add(~Q(statusupdate__isnull=True), Q.OR)
             elif object_type == 'question':
-                q_objects.add(~Q(question__isnull = True), Q.OR)
+                q_objects.add(~Q(question__isnull=True), Q.OR)
             elif object_type == 'wiki':
-                q_objects.add(~Q(wiki__isnull = True), Q.OR)
+                q_objects.add(~Q(wiki__isnull=True), Q.OR)
+            elif object_type == 'page':
+                q_objects.add(~Q(page__isnull=True) & ~Q(page__page_type='campagne'), Q.OR)
     else:
         # activities should only search for these entities:
-        q_objects.add(~Q(news__isnull = True), Q.OR)
-        q_objects.add(~Q(blog__isnull = True), Q.OR)
-        q_objects.add(~Q(event__isnull = True) & ~Q(event__parent__isnull = False), Q.OR)
-        q_objects.add(~Q(discussion__isnull = True), Q.OR)
-        q_objects.add(~Q(statusupdate__isnull = True), Q.OR)
-        q_objects.add(~Q(question__isnull = True), Q.OR)
-        q_objects.add(~Q(wiki__isnull = True), Q.OR)
+        q_objects.add(~Q(news__isnull=True), Q.OR)
+        q_objects.add(~Q(blog__isnull=True), Q.OR)
+        q_objects.add(~Q(event__isnull=True) & ~Q(event__parent__isnull=False), Q.OR)
+        q_objects.add(~Q(discussion__isnull=True), Q.OR)
+        q_objects.add(~Q(statusupdate__isnull=True), Q.OR)
+        q_objects.add(~Q(question__isnull=True), Q.OR)
+        q_objects.add(~Q(wiki__isnull=True), Q.OR)
+        q_objects.add(~Q(page__isnull=True) & ~Q(page__page_type='campagne'), Q.OR)
+
 
     return q_objects
 
@@ -40,20 +44,17 @@ def conditional_tags_filter(tags):
     if tags:
         filters = Q()
         for tag in tags:
-            filters.add(Q(tags__icontains=tag), Q.AND) # of Q.OR
-
+            filters.add(Q(tags__icontains=tag), Q.AND)  # of Q.OR
         return filters
     return Q()
-
 
 def conditional_tag_lists_filter(tag_lists):
     filters = Q()
     if tag_lists:
         for tags in tag_lists:
             if tags:
-                filters.add(Q(tags__overlap=tags), Q.AND) # of Q.OR
+                filters.add(Q(tags__overlap=tags), Q.AND)  # of Q.OR
     return filters
-
 
 def conditional_group_filter(container_guid):
     """ Filter on one group """
@@ -74,7 +75,6 @@ def conditional_groups_filter(group_filter, user):
 
     return Q()
 
-
 @query.field("activities")
 def resolve_activities(
         _,
@@ -91,10 +91,10 @@ def resolve_activities(
         sortPinned=False,
         isDraft=False,
         userGuid=None
-    ):
-    #pylint: disable=unused-argument
-    #pylint: disable=too-many-arguments
-    #pylint: disable=too-many-locals
+):
+    # pylint: disable=unused-argument
+    # pylint: disable=too-many-arguments
+    # pylint: disable=too-many-locals
 
     if orderBy == ORDER_BY.timeUpdated:
         order_by = 'updated_at'
@@ -128,17 +128,16 @@ def resolve_activities(
 
     if userGuid:
         qs = qs.filter(owner__id=userGuid)
-    
+
     qs = qs.order_by(*order).select_subclasses()
 
     total = qs.count()
 
-    qs = qs[offset:offset+limit]
+    qs = qs[offset:offset + limit]
 
     activities = []
 
-    for item in qs :
-
+    for item in qs:
         activity = {
             'guid': 'activity:%s' % (item.guid),
             'type': 'create',
