@@ -121,6 +121,12 @@ def resolve_location_address(obj, info):
     return obj.location_address
 
 
+@event.field("ticketLink")
+def resolve_ticket_link(obj, info):
+    # pylint: disable=unused-argument
+    return obj.ticket_link
+
+
 @event.field("attendEventWithoutAccount")
 def resolve_attend_event_without_account(obj, info):
     # pylint: disable=unused-argument

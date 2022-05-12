@@ -49,6 +49,7 @@ class EditEventTestCase(FastTenantTestCase):
                 "locationLink": "maps.google.nl",
                 "locationAddress": "Kerkstraat 10",
                 "source": "https://www.pleio.nl",
+                "ticketLink": "https://www.pleio-bookings.com/my-first-event",
                 "attendEventWithoutAccount": True,
                 "rsvp": True,
                 "qrAccess": True
@@ -74,6 +75,7 @@ class EditEventTestCase(FastTenantTestCase):
                 }
                 rsvp
                 source
+                ticketLink
                 attendEventWithoutAccount
                 startDate
                 endDate
@@ -114,6 +116,7 @@ class EditEventTestCase(FastTenantTestCase):
         self.assertEqual(data["editEntity"]["entity"]["locationLink"], variables["input"]["locationLink"])
         self.assertEqual(data["editEntity"]["entity"]["locationAddress"], variables["input"]["locationAddress"])
         self.assertEqual(data["editEntity"]["entity"]["source"], variables["input"]["source"])
+        self.assertEqual(data["editEntity"]["entity"]["ticketLink"], variables["input"]["ticketLink"])
         self.assertEqual(data["editEntity"]["entity"]["attendEventWithoutAccount"], variables["input"]["attendEventWithoutAccount"])
         self.assertEqual(data["editEntity"]["entity"]["rsvp"], variables["input"]["rsvp"])
         self.assertEqual(data["editEntity"]["entity"]["qrAccess"], variables["input"]["qrAccess"])
@@ -128,6 +131,7 @@ class EditEventTestCase(FastTenantTestCase):
         self.assertEqual(data["editEntity"]["entity"]["location"], self.eventPublic.location)
         self.assertEqual(data["editEntity"]["entity"]["locationLink"], self.eventPublic.location_link)
         self.assertEqual(data["editEntity"]["entity"]["locationAddress"], self.eventPublic.location_address)
+        self.assertEqual(data["editEntity"]["entity"]["ticketLink"], self.eventPublic.ticket_link)
 
         self.assertEqual(data["editEntity"]["entity"]["source"], self.eventPublic.external_link)
         self.assertEqual(data["editEntity"]["entity"]["attendEventWithoutAccount"], self.eventPublic.attend_event_without_account)
