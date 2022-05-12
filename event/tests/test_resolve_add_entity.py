@@ -47,6 +47,7 @@ class AddEventTestCase(FastTenantTestCase):
                 "tags": ["tag1", "tag2"],
                 "startDate": "2019-10-02T09:00:00+02:00",
                 "endDate": "2019-10-02T10:00:00+02:00",
+                "ticketLink": "https://www.pleio.nl",
                 "maxAttendees": "10",
                 "location": "Utrecht",
                 "locationLink": "maps.google.nl",
@@ -78,6 +79,7 @@ class AddEventTestCase(FastTenantTestCase):
                 }
                 rsvp
                 source
+                ticketLink
                 attendEventWithoutAccount
                 startDate
                 endDate
@@ -116,6 +118,7 @@ class AddEventTestCase(FastTenantTestCase):
         self.assertEqual(data["addEntity"]["entity"]["locationAddress"], variables["input"]["locationAddress"])
         self.assertEqual(data["addEntity"]["entity"]["rsvp"], variables["input"]["rsvp"])
         self.assertEqual(data["addEntity"]["entity"]["source"], variables["input"]["source"])
+        self.assertEqual(data["addEntity"]["entity"]["ticketLink"], variables["input"]["ticketLink"])
         self.assertEqual(data["addEntity"]["entity"]["startDate"], "2019-10-02T09:00:00+02:00")
         self.assertEqual(data["addEntity"]["entity"]["endDate"], "2019-10-02T10:00:00+02:00")
         self.assertEqual(data["addEntity"]["entity"]["attendEventWithoutAccount"], variables["input"]["attendEventWithoutAccount"])

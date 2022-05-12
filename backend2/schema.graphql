@@ -75,6 +75,7 @@ input addEntityInput {
   location: String
   locationLink: String
   locationAddress: String
+  ticketLink: String
   maxAttendees: String
   rsvp: Boolean
   containerGuid: String
@@ -550,6 +551,7 @@ input editEntityInput {
   location: String
   locationLink: String
   locationAddress: String
+  ticketLink: String
   maxAttendees: String
   rsvp: Boolean
   accessId: Int
@@ -886,6 +888,7 @@ type Event implements Entity {
   locationAddress: String
   locationLink: String
   source: String
+  ticketLink: String
   maxAttendees: String
   rsvp: Boolean
   isFeatured: Boolean
