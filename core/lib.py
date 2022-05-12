@@ -55,6 +55,7 @@ def get_model_by_subtype(subtype):
 
     return None
 
+
 def access_id_to_acl(obj, access_id):
     if "type_to_string" in dir(obj) and obj.type_to_string and obj.type_to_string == 'user':
         acl = [ACCESS_TYPE.user.format(obj.id)]
@@ -94,8 +95,9 @@ def get_acl(user):
 
         if user.memberships:
             groups = set(
-                ACCESS_TYPE.group.format(membership.group.id) for membership in user.memberships.filter(type__in=['admin', 'owner', 'member'])
-                )
+                ACCESS_TYPE.group.format(membership.group.id) for membership in
+                user.memberships.filter(type__in=['admin', 'owner', 'member'])
+            )
             acl = acl.union(groups)
         if user.subgroups:
             subgroups = set(
@@ -117,7 +119,8 @@ def clean_graphql_input(values, always_include=None):
         tiptap.check_for_external_urls()
 
     # Remove items with None values from dict except for timePublished data
-    return {k: v for k, v in values.items() if (v is not None) or (k == 'timePublished') or (always_include and (k in always_include))}
+    return {k: v for k, v in values.items() if
+            (v is not None) or (k == 'timePublished') or (always_include and (k in always_include))}
 
 
 def webpack_dev_server_is_available():
@@ -153,22 +156,24 @@ def get_access_id(acl):
 def get_access_ids(obj=None):
     """Return the available accessId's"""
     accessIds = []
-    accessIds.append({ 'id': 0, 'description': ugettext("Just me") })
+    accessIds.append({'id': 0, 'description': ugettext("Just me")})
 
     if isinstance(obj, apps.get_model('core.Group')):
-        accessIds.append({ 'id': 4, 'description': ugettext("Group: %(group_name)s") % {'group_name': obj.name} })
+        accessIds.append({'id': 4, 'description': ugettext("Group: %(group_name)s") % {'group_name': obj.name}})
         if obj.subgroups:
             for subgroup in obj.subgroups.all():
-                accessIds.append({ 'id': subgroup.access_id, 'description': ugettext("Subgroup: %(subgroup_name)s") % {'subgroup_name': subgroup.name} })
+                accessIds.append({'id': subgroup.access_id, 'description': ugettext("Subgroup: %(subgroup_name)s") % {
+                    'subgroup_name': subgroup.name}})
 
     if isinstance(obj, apps.get_model('core.Group')) and obj.is_closed:
         pass
     else:
-        accessIds.append({ 'id': 1, 'description': ugettext("Logged in users")})
+        accessIds.append({'id': 1, 'description': ugettext("Logged in users")})
         if not config.IS_CLOSED:
-            accessIds.append({ 'id': 2, 'description': ugettext("Public")})
+            accessIds.append({'id': 2, 'description': ugettext("Public")})
 
     return accessIds
+
 
 def get_activity_filters():
     """TODO: should only return active content"""
@@ -201,15 +206,21 @@ def get_activity_filters():
             {
                 'key': 'wiki',
                 'value': ugettext_lazy("Wiki pages")
-            }
+            },
+            {
+                'key': 'page',
+                'value': ugettext_lazy("CMS pages")
+            },
         ]
     }
+
 
 def generate_object_filename(obj, filename):
     ext = filename.split('.')[-1]
     name = filename.split('.')[0]
     filename = "%s.%s" % (slugify(name), ext)
     return os.path.join(str(obj.id), filename)
+
 
 def delete_attached_file(filefield):
     if not filefield:
@@ -218,6 +229,7 @@ def delete_attached_file(filefield):
     file_path = filefield.path
     if os.path.isfile(file_path):
         os.remove(file_path)
+
 
 def get_field_type(field_type):
     if field_type == 'select_field':
@@ -274,12 +286,13 @@ def get_default_email_context(user=None):
         'unsubscribe_url': unsubscribe_url
     }
 
+
 def obfuscate_email(email):
     # alter email: example@domain.com -> e******@domain.com
     try:
         email_splitted = email.split("@")
         nr_char = len(email_splitted[0])
-        return email_splitted[0][0] + '*'*nr_char + '@' + email_splitted[1]
+        return email_splitted[0][0] + '*' * nr_char + '@' + email_splitted[1]
     except Exception:
         pass
     return ""
@@ -306,6 +319,7 @@ def get_exportable_user_fields():
         {'field_type': 'userField', 'field': 'last_online_unix', 'label': 'last_online (U)'},
     ]
 
+
 def get_exportable_content_types():
     return [
         {"value": "statusupdate", "label": ugettext_lazy("Updates")},
@@ -323,11 +337,14 @@ def get_exportable_content_types():
         {"value": "group", "label": ugettext_lazy("Groups")}
     ]
 
+
 def get_language_options():
     return [{'value': item[0], 'label': item[1]} for item in settings.LANGUAGES]
 
+
 def tenant_schema():
     return connection.schema_name
+
 
 def html_to_text(html):
     h = html2text.HTML2Text()
@@ -336,7 +353,8 @@ def html_to_text(html):
     h.ignore_images = True
     return h.handle(html)
 
-def get_tmp_file_path(user, suffix= ""):
+
+def get_tmp_file_path(user, suffix=""):
     folder = os.path.join(tempfile.gettempdir(), tenant_schema(), str(user.id))
     try:
         os.makedirs(folder)
@@ -345,6 +363,7 @@ def get_tmp_file_path(user, suffix= ""):
     _, temp_file_path = tempfile.mkstemp(dir=folder, suffix=suffix)
 
     return temp_file_path
+
 
 def is_valid_domain(domain):
     pattern = re.compile(
@@ -358,7 +377,8 @@ def is_valid_domain(domain):
     except (UnicodeError, AttributeError):
         return None
 
-def hex_color_tint(hex_color, weight = 0.5):
+
+def hex_color_tint(hex_color, weight=0.5):
     try:
         color = Color(hex_color)
     except AttributeError:
@@ -371,10 +391,12 @@ def hex_color_tint(hex_color, weight = 0.5):
     new = Color(rgb=(newR, newG, newB))
     return new.hex
 
+
 def datetime_isoformat(obj):
     if obj:
         return obj.astimezone(timezone(settings.TIME_ZONE)).isoformat(timespec="seconds")
     return None
+
 
 def get_client_ip(request):
     x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
@@ -392,6 +414,7 @@ def get_client_ip(request):
         ip = request.META.get('REMOTE_ADDR')
     return ip
 
+
 def is_valid_url_or_path(url):
     validate = URLValidator()
     if not url.startswith('http'):
@@ -402,12 +425,14 @@ def is_valid_url_or_path(url):
     except Exception:
         return False
 
+
 def get_mimetype(filepath):
     mimetypes.init()
     mime_type, _ = mimetypes.guess_type(filepath)
     if not mime_type:
         return None
     return mime_type
+
 
 def map_notification(notification):
     """ get a mapped notification """
@@ -437,8 +462,10 @@ def map_notification(notification):
         'isUnread': notification.unread
     }
 
+
 def get_model_name(instance):
     return instance._meta.app_label + '.' + instance._meta.model_name
+
 
 def is_valid_uuid(val):
     try:
