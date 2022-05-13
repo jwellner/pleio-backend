@@ -13,7 +13,7 @@ def update_attendees_with_user_name_mail(apps, schema_editor):
 
 class Migration(migrations.Migration):
     dependencies = [
-        ('event', '0016_auto_20220422_1035'),
+        ('event', '0017_event_ticket_link'),
     ]
 
     operations = [
