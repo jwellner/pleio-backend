@@ -1,6 +1,7 @@
 import uuid
 from unittest import mock
 
+from django.test import override_settings
 from django_tenants.test.cases import FastTenantTestCase
 from mixer.backend.django import mixer
 from requests import ConnectionError as RequestConnectionError
@@ -23,6 +24,7 @@ class TestTasksTestCase(FastTenantTestCase):
 
     @mock.patch("concierge.tasks.requests.post")
     @mock.patch("concierge.tasks.uuid.uuid4")
+    @override_settings(ENV='test')
     def test_user_submit_properly_formatted_request_to_concierge(self, mocked_uuid, mocked_post):
         mocked_uuid.return_value = self.expected_uuid
 
