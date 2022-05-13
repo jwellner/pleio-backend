@@ -189,7 +189,6 @@ def resolve_attendees(obj, info, query=None, limit=20, offset=0, state=None,
             "edges": [],
         }
 
-    can_write = obj.can_write(user)
     qs = obj.attendees.all()
 
     qs = qs.annotate(
@@ -232,20 +231,7 @@ def resolve_attendees(obj, info, query=None, limit=20, offset=0, state=None,
     qs = qs.order_by(order_by)
     qs = qs[offset:offset + limit]
 
-    # email adresses only for user with event write permissions
-    def get_email(item, can_write):
-        if can_write:
-            return item.user.email if item.user else item.email
-        return ""
-
-    attendees = [{
-        "email": get_email(item, can_write),
-        "name": item.user.name if item.user else item.name,
-        "state": item.state,
-        "icon": item.user.icon if item.user else None,
-        "url": item.user.url if item.user else None,
-        "timeCheckedIn": item.checked_in_at
-    } for item in qs]
+    attendees = [item.as_attendee(user) for item in qs]
 
     notCheckedIn = obj.attendees.filter(checked_in_at__isnull=True)
 
