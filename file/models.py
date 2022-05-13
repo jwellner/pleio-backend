@@ -1,6 +1,8 @@
 import os
 import clamd
 import logging
+import signal_disabler
+
 from auditlog.registry import auditlog
 from django.urls import reverse
 from django.conf import settings
@@ -182,8 +184,11 @@ class ScanIncident(models.Model):
 
 
 def set_parent_folders_updated_at(instance):
+    if instance == instance.parent:
+        return
     if instance.parent and instance.parent.is_folder:
-        instance.parent.save()
+        with signal_disabler.disable():
+            instance.parent.save()
         set_parent_folders_updated_at(instance.parent)
 
 
@@ -204,7 +209,7 @@ def file_pre_save(sender, instance, **kwargs):
 
 
 # update parent folders updated_at when adding, moving and deleting files
-@receiver([pre_save, pre_delete], sender=FileFolder)
+@receiver([pre_save], sender=FileFolder)
 def update_parent_timestamps(sender, instance, **kwargs):
     # pylint: disable=unused-argument
 
