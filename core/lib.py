@@ -144,6 +144,8 @@ def webpack_dev_server_is_available():
 
 def get_access_id(acl):
     for x in acl:
+        if x.startswith("subgroup:"):
+            return int(x.replace("subgroup:", ""))
         if x.startswith("group:"):
             return 4
     if ACCESS_TYPE.public in acl:
