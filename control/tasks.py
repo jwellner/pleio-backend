@@ -523,6 +523,20 @@ def copy_group_to_tenant(source_schema, action_user_id, group_id, target_schema)
 
     return copy_group_memberships(copy.id)
 
+@shared_task(bind=False)
+def copy_file_from_source_tenant(source_schema, target_schema, dst_file):
+    '''
+    Separate load heavy task to copy file from source tenant to target in group copy
+    '''
+    src_file = dst_file.replace(os.path.join(settings.MEDIA_ROOT, target_schema), os.path.join(settings.MEDIA_ROOT, source_schema))
+
+    if os.path.isfile(src_file):
+        dst_folder = os.path.dirname(dst_file)
+        if not os.path.exists(dst_folder):
+            os.makedirs(dst_folder)
+
+        shutil.copy(src_file, dst_file)
+
 def copy_group_memberships(copy_id):
     # pylint: disable=too-many-locals
     # pylint: disable=too-many-statements
@@ -602,8 +616,10 @@ def copy_group_entities(copy_id):
                             target_entity.parent = None
 
                 if target_entity.__class__.__name__ in ["FileFolder"]:
-                    target_entity.upload = get_file_field_data(copy.source_tenant, target_entity.upload)
-                    target_entity.thumbnail = get_file_field_data(copy.source_tenant, target_entity.thumbnail)
+                    if target_entity.upload:
+                        copy_file_from_source_tenant.delay(copy.source_tenant, copy.target_tenant, target_entity.upload.path)
+                    if target_entity.thumbnail:
+                        copy_file_from_source_tenant.delay(copy.source_tenant, copy.target_tenant, target_entity.thumbnail.path)
 
                 if target_entity.__class__.__name__ in ["Question"]:
                     with schema_context(copy.source_tenant):
@@ -684,8 +700,10 @@ def copy_group_entities(copy_id):
                 source_id=connect.get('parent_source_id')
             ).target_id
             parent = Entity.objects.get_subclass(id=parent_id)
-            entity.parent = parent
-            entity.save()
+            if parent != entity:
+                entity.parent = parent
+            with signal_disabler.disable(): 
+                entity.save()
 
         # rebuild subcomment container relations
         for connect in connect_sub_comments:
