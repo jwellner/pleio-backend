@@ -8,7 +8,7 @@ import signal_disabler
 
 from celery import shared_task
 from celery.utils.log import get_task_logger
-from core.models import SiteStat, Attachment, Entity, CommentMixin, Comment, GroupMembership, Group
+from core.models import SiteStat, Attachment, Entity, CommentMixin, Comment, GroupMembership, Group, Subgroup
 from core.lib import ACCESS_TYPE, access_id_to_acl, get_access_id
 from core.utils.tiptap_parser import Tiptap
 from django_tenants.utils import schema_context
@@ -521,6 +521,28 @@ def copy_group_to_tenant(source_schema, action_user_id, group_id, target_schema)
 
     logger.info("Created group %s", target_group)
 
+    with schema_context(copy.source_tenant):
+        subgroups = list(item for item in Subgroup.objects.filter(group__id=copy.source_id).all())
+
+    with schema_context(copy.target_tenant):
+        target_group = Group.objects.get(id=copy.target_id)
+
+        for s in subgroups:
+            subgroup_source_id = s.id
+            s.group = target_group
+            s.pk = None
+            s.id = None
+            s.save()
+
+            GroupCopyMapping.objects.create(
+                copy=copy,
+                entity_type='Subgroup',
+                source_id=subgroup_source_id,
+                target_id=s.id
+            )
+
+    logger.info("Added %i subgroups", len(subgroups))
+
     return copy_group_memberships(copy.id)
 
 @shared_task(bind=False)
@@ -562,6 +584,28 @@ def copy_group_memberships(copy_id):
 
     logger.info("Inserted %i group members", len(memberships))
 
+    # loop over all members and set subgroup memberships
+    subgroup_memberships = []
+    with schema_context(copy.source_tenant):
+        for subgroup in Subgroup.objects.filter(group__id=copy.source_id).all():
+            for member in subgroup.members.all():
+                subgroup_memberships.append({'subgroup_id': subgroup.id, 'user_id': member.id})
+
+    with schema_context(copy.target_tenant):
+        target_group = Group.objects.get(id=copy.target_id)
+        for membership in subgroup_memberships:
+            subgroup_id = GroupCopyMapping.objects.get(
+                copy=copy,
+                entity_type='Subgroup',
+                source_id=membership.get('subgroup_id')
+            ).target_id
+
+            subgroup = Subgroup.objects.get(id=subgroup_id)
+            user = get_or_create_user(copy, membership.get('user_id'))
+            subgroup.members.add(user)
+
+    logger.info("Added %i subgroup members", len(subgroup_memberships))
+
     return copy_group_entities(copy.id)
 
 def copy_group_entities(copy_id):
@@ -571,8 +615,27 @@ def copy_group_entities(copy_id):
     '''
     Copy entities in group from one tenant to another
     '''
+
     with schema_context("public"):
         copy = GroupCopy.objects.get(id=copy_id)
+
+    def transform_acl_to_access_id(acl):
+        access_id = get_access_id(acl)
+
+        if access_id > 10000:
+            old_subgroup_id = access_id - 10000
+            subgroup_map = GroupCopyMapping.objects.filter(
+                copy=copy,
+                entity_type='Subgroup',
+                source_id=old_subgroup_id
+            ).first()
+
+            if subgroup_map:
+                access_id = subgroup_map.target_id.int + 10000
+            else:
+                access_id = 0
+
+        return access_id
 
     with schema_context(copy.source_tenant):
         entities = list(item for item in Entity.objects.filter(group__id=copy.source_id).select_subclasses())
@@ -599,8 +662,8 @@ def copy_group_entities(copy_id):
                 target_entity.owner = get_or_create_user(copy, target_entity.owner_id)
                 target_entity.is_featured = False
                 target_entity.notifications_created = True
-                target_entity.read_access = access_id_to_acl(target_entity, get_access_id(target_entity.read_access))
-                target_entity.write_access = access_id_to_acl(target_entity, get_access_id(target_entity.write_access))
+                target_entity.read_access = access_id_to_acl(target_entity, transform_acl_to_access_id(target_entity.read_access))
+                target_entity.write_access = access_id_to_acl(target_entity, transform_acl_to_access_id(target_entity.write_access))
               
                 # specific entity type stuff
                 if target_entity.__class__.__name__ in ["Blog", "Wiki", "Event"]:
