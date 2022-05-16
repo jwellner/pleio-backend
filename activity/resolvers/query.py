@@ -89,7 +89,7 @@ def resolve_activities(
         orderBy=ORDER_BY.timePublished,
         orderDirection=ORDER_DIRECTION.desc,
         sortPinned=False,
-        isDraft=False,
+        statusPublished=None,
         userGuid=None
 ):
     # pylint: disable=unused-argument
@@ -115,8 +115,8 @@ def resolve_activities(
     if sortPinned:
         order = ["-is_pinned"] + order
 
-    if isDraft:
-        qs = Entity.objects.draft(info.context["request"].user)
+    if (statusPublished is not None) and (len(statusPublished) > 0):
+        qs = Entity.objects.status_published(statusPublished, info.context["request"].user)
     else:
         qs = Entity.objects.visible(info.context["request"].user)
 

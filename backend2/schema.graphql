@@ -253,6 +253,12 @@ type attendEventWithoutAccountPayload {
   entity: Event
 }
 
+enum StatusPublished {
+  draft
+  published
+  archived
+}
+
 type Blog implements Entity {
   guid: String!
   status: Int
@@ -269,7 +275,7 @@ type Blog implements Entity {
   timeCreated: DateTime
   timeUpdated: DateTime
   timePublished: DateTime
-  statusPublished: String
+  statusPublished: StatusPublished
   isFeatured: Boolean
   isHighlighted: Boolean
   isRecommended: Boolean
@@ -484,7 +490,7 @@ type Discussion implements Entity {
   timeCreated: DateTime
   timeUpdated: DateTime
   timePublished: DateTime
-  statusPublished: String
+  statusPublished: StatusPublished
   canEdit: Boolean!
   canComment: Boolean
   canVote: Boolean
@@ -881,7 +887,7 @@ type Event implements Entity {
   timeCreated: DateTime
   timeUpdated: DateTime
   timePublished: DateTime
-  statusPublished: String
+  statusPublished: StatusPublished
   startDate: String
   endDate: String
   location: String
@@ -972,7 +978,7 @@ type FileFolder implements Entity {
   timeCreated: DateTime
   timeUpdated: DateTime
   timePublished: DateTime
-  statusPublished: String
+  statusPublished: StatusPublished
   isFeatured: Boolean
   isHighlighted: Boolean
   isRecommended: Boolean
@@ -1372,7 +1378,7 @@ type News implements Entity {
   timeCreated: DateTime
   timeUpdated: DateTime
   timePublished: DateTime
-  statusPublished: String
+  statusPublished: StatusPublished
   startDate: String
   endDate: String
   source: String
@@ -1459,7 +1465,7 @@ type Page implements Entity {
   timeCreated: DateTime
   timeUpdated: DateTime
   timePublished: DateTime
-  statusPublished: String
+  statusPublished: StatusPublished
   accessId: Int
   pageType: String
   rows: [Row]
@@ -1489,7 +1495,7 @@ type Poll implements Entity {
   timeCreated: DateTime
   timeUpdated: DateTime
   timePublished: DateTime
-  statusPublished: String
+  statusPublished: StatusPublished
   accessId: Int
   choices: [PollChoice]
   hasVoted: Boolean
@@ -1573,23 +1579,23 @@ type Query {
     orderDirection: OrderDirection
     isFeatured: Boolean
     sortPinned: Boolean
-    isDraft: Boolean
+    statusPublished: [StatusPublished]
     userGuid: String
   ): EntityList
   notifications(offset: Int, limit: Int, unread: Boolean): NotificationsList
   activities(
-      containerGuid: String
-      offset: Int
-      limit: Int
-      tags: [String]
-      tagLists: [[String]]
-      groupFilter: [String]
-      subtypes: [String]
-      orderBy: OrderBy
-      orderDirection: OrderDirection
-      sortPinned: Boolean
-      isDraft: Boolean
-      userGuid: String
+    containerGuid: String
+    offset: Int
+    limit: Int
+    tags: [String]
+    tagLists: [[String]]
+    groupFilter: [String]
+    subtypes: [String]
+    orderBy: OrderBy
+    orderDirection: OrderDirection
+    sortPinned: Boolean
+    statusPublished: [StatusPublished]
+    userGuid: String
   ): ActivityList
   bookmarks(offset: Int, limit: Int, subtype: String): EntityList
   filters: Filters
@@ -1616,7 +1622,7 @@ type Question implements Entity {
   timeCreated: DateTime
   timeUpdated: DateTime
   timePublished: DateTime
-  statusPublished: String
+  statusPublished: StatusPublished
   isFeatured: Boolean
   isHighlighted: Boolean
   isClosed: Boolean
@@ -1975,7 +1981,7 @@ type StatusUpdate implements Entity {
   timeCreated: DateTime
   timeUpdated: DateTime
   timePublished: DateTime
-  statusPublished: String
+  statusPublished: StatusPublished
   canEdit: Boolean!
   canComment: Boolean
   canVote: Boolean
@@ -2038,7 +2044,7 @@ type Task implements Entity {
   timeCreated: DateTime
   timeUpdated: DateTime
   timePublished: DateTime
-  statusPublished: String
+  statusPublished: StatusPublished
   canEdit: Boolean!
   canComment: Boolean
   canVote: Boolean
@@ -2227,7 +2233,7 @@ type Wiki implements Entity {
   timeCreated: DateTime
   timeUpdated: DateTime
   timePublished: DateTime
-  statusPublished: String
+  statusPublished: StatusPublished
   accessId: Int
   writeAccessId: Int
   isBookmarked: Boolean
