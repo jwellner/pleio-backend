@@ -1,5 +1,4 @@
 from datetime import timedelta
-from django.db import connection
 from django_tenants.test.cases import FastTenantTestCase
 from core.models import Group
 from user.models import User
@@ -10,7 +9,6 @@ from news.models import News
 from core.constances import ACCESS_TYPE
 from backend2.schema import schema
 from ariadne import graphql_sync
-import json
 from django.contrib.auth.models import AnonymousUser
 from django.http import HttpRequest
 from mixer.backend.django import mixer
@@ -106,12 +104,50 @@ class EntitiesTestCase(FastTenantTestCase):
             group=self.group,
             tags=["tag_four", "tag_three"],
             is_featured=True,
-            published=timezone.now()+timedelta(days=5)
+            published=timezone.now() + timedelta(days=5)
+        )
+        self.archived1 = Blog.objects.create(
+            title="Archived 1",
+            owner=self.authenticatedUser,
+            read_access=[ACCESS_TYPE.public],
+            group=self.group,
+            is_archived=True,
+            published=timezone.now() - timezone.timedelta(days=1)
+        )
+        self.archived2 = Blog.objects.create(
+            title="Archived 2",
+            owner=self.user2,
+            read_access=[ACCESS_TYPE.public],
+            group=self.group,
+            is_archived=True,
+            published=timezone.now() - timezone.timedelta(days=1)
         )
 
         self.query = """
-            query getEntities($subtype: String, $containerGuid: String, $tags: [String!], $tagLists: [[String]], $isFeatured: Boolean, $limit: Int, $offset: Int, $orderBy: OrderBy, $orderDirection: OrderDirection, $isDraft: Boolean, $userGuid: String) {
-                entities(subtype: $subtype, containerGuid: $containerGuid, tags: $tags, tagLists: $tagLists, isFeatured: $isFeatured, limit: $limit, offset: $offset, orderBy: $orderBy, orderDirection: $orderDirection, isDraft: $isDraft, userGuid: $userGuid) {
+            query getEntities(
+                    $subtype: String
+                    $containerGuid: String
+                    $tags: [String!]
+                    $tagLists: [[String]]
+                    $isFeatured: Boolean
+                    $limit: Int
+                    $offset: Int
+                    $orderBy: OrderBy
+                    $orderDirection: OrderDirection
+                    $statusPublished: [StatusPublished]
+                    $userGuid: String) {
+                entities(
+                        subtype: $subtype
+                        containerGuid: $containerGuid
+                        tags: $tags
+                        tagLists: $tagLists
+                        isFeatured: $isFeatured
+                        limit: $limit
+                        offset: $offset
+                        orderBy: $orderBy
+                        orderDirection: $orderDirection
+                        statusPublished: $statusPublished
+                        userGuid: $userGuid) {
                     total
                     edges {
                         guid
@@ -157,7 +193,7 @@ class EntitiesTestCase(FastTenantTestCase):
             "containerGuid": None
         }
 
-        result = graphql_sync(schema, { "query": self.query, "variables": variables }, context_value={ "request": request })
+        result = graphql_sync(schema, {"query": self.query, "variables": variables}, context_value={"request": request})
 
         self.assertTrue(result[0])
 
@@ -173,12 +209,14 @@ class EntitiesTestCase(FastTenantTestCase):
             "containerGuid": "1"
         }
 
-        result = graphql_sync(schema, { "query": self.query, "variables": variables }, context_value={ "request": request })
+        success, result = graphql_sync(schema, {"query": self.query, "variables": variables},
+                                       context_value={"request": request})
 
-        self.assertTrue(result[0])
+        self.assertTrue(success)
 
-        data = result[1]["data"]
-
+        data = result.get("data")
+        self.assertIsNotNone(data, msg=result)
+        self.assertIsNotNone(data.get('entities'), msg=result)
         self.assertEqual(data["entities"]["total"], 6)
 
     def test_entities_group(self):
@@ -189,7 +227,7 @@ class EntitiesTestCase(FastTenantTestCase):
             "containerGuid": self.group.guid
         }
 
-        result = graphql_sync(schema, { "query": self.query, "variables": variables }, context_value={ "request": request })
+        result = graphql_sync(schema, {"query": self.query, "variables": variables}, context_value={"request": request})
 
         self.assertTrue(result[0])
 
@@ -203,7 +241,7 @@ class EntitiesTestCase(FastTenantTestCase):
 
         variables = {"tags": ["tag_two"]}
 
-        result = graphql_sync(schema, { "query": self.query, "variables": variables }, context_value={ "request": request })
+        result = graphql_sync(schema, {"query": self.query, "variables": variables}, context_value={"request": request})
 
         self.assertTrue(result[0])
 
@@ -218,7 +256,7 @@ class EntitiesTestCase(FastTenantTestCase):
 
         variables = {"tags": ["tag_one"]}
 
-        result = graphql_sync(schema, { "query": self.query, "variables": variables }, context_value={ "request": request })
+        result = graphql_sync(schema, {"query": self.query, "variables": variables}, context_value={"request": request})
 
         self.assertTrue(result[0])
 
@@ -228,21 +266,19 @@ class EntitiesTestCase(FastTenantTestCase):
         self.assertEqual(data["entities"]["edges"][0]["guid"], self.blog3.guid)
         self.assertEqual(data["entities"]["edges"][1]["guid"], self.blog2.guid)
 
-
     def test_entities_filtered_by_tags_find_one_with_two_tags(self):
         request = HttpRequest()
         request.user = self.authenticatedUser
 
         variables = {"tags": ["tag_one", "tag_two"]}
 
-        result = graphql_sync(schema, { "query": self.query, "variables": variables }, context_value={ "request": request })
+        result = graphql_sync(schema, {"query": self.query, "variables": variables}, context_value={"request": request})
 
         self.assertTrue(result[0])
 
         data = result[1]["data"]
         self.assertEqual(data["entities"]["total"], 1)
         self.assertEqual(data["entities"]["edges"][0]["guid"], self.blog3.guid)
-
 
     def test_entities_all_pages_by_admin(self):
         request = HttpRequest()
@@ -252,7 +288,7 @@ class EntitiesTestCase(FastTenantTestCase):
             "subtype": "page"
         }
 
-        result = graphql_sync(schema, { "query": self.query, "variables": variables }, context_value={ "request": request })
+        result = graphql_sync(schema, {"query": self.query, "variables": variables}, context_value={"request": request})
 
         self.assertTrue(result[0])
 
@@ -260,20 +296,18 @@ class EntitiesTestCase(FastTenantTestCase):
 
         self.assertEqual(data["entities"]["total"], 1)
 
-
     def test_entities_filtered_by_tag_lists(self):
         request = HttpRequest()
         request.user = self.authenticatedUser
 
         variables = {"tagLists": [["tag_four", "tag_three"], ["tag_one"]]}
 
-        result = graphql_sync(schema, { "query": self.query, "variables": variables }, context_value={ "request": request })
+        result = graphql_sync(schema, {"query": self.query, "variables": variables}, context_value={"request": request})
 
         self.assertTrue(result[0])
 
         data = result[1]["data"]
         self.assertEqual(data["entities"]["total"], 2)
-
 
     def test_entities_filtered_is_featured(self):
         request = HttpRequest()
@@ -281,7 +315,7 @@ class EntitiesTestCase(FastTenantTestCase):
 
         variables = {"isFeatured": True}
 
-        result = graphql_sync(schema, { "query": self.query, "variables": variables }, context_value={ "request": request })
+        result = graphql_sync(schema, {"query": self.query, "variables": variables}, context_value={"request": request})
 
         self.assertTrue(result[0])
 
@@ -294,7 +328,7 @@ class EntitiesTestCase(FastTenantTestCase):
 
         variables = {"isFeatured": True, "subtype": "blog"}
 
-        result = graphql_sync(schema, { "query": self.query, "variables": variables }, context_value={ "request": request })
+        result = graphql_sync(schema, {"query": self.query, "variables": variables}, context_value={"request": request})
 
         self.assertTrue(result[0])
 
@@ -307,7 +341,7 @@ class EntitiesTestCase(FastTenantTestCase):
 
         variables = {"isFeatured": True, "subtypes": ["blog", "news"]}
 
-        result = graphql_sync(schema, { "query": self.query, "variables": variables }, context_value={ "request": request })
+        result = graphql_sync(schema, {"query": self.query, "variables": variables}, context_value={"request": request})
 
         self.assertTrue(result[0])
 
@@ -318,9 +352,9 @@ class EntitiesTestCase(FastTenantTestCase):
         request = HttpRequest()
         request.user = self.authenticatedUser
 
-        variables = { "limit": 5 }
+        variables = {"limit": 5}
 
-        result = graphql_sync(schema, { "query": self.query, "variables": variables }, context_value={ "request": request })
+        result = graphql_sync(schema, {"query": self.query, "variables": variables}, context_value={"request": request})
 
         self.assertTrue(result[0])
 
@@ -339,7 +373,7 @@ class EntitiesTestCase(FastTenantTestCase):
             "orderDirection": "asc"
         }
 
-        result = graphql_sync(schema, { "query": self.query, "variables": variables }, context_value={ "request": request })
+        result = graphql_sync(schema, {"query": self.query, "variables": variables}, context_value={"request": request})
 
         self.assertTrue(result[0])
 
@@ -358,7 +392,7 @@ class EntitiesTestCase(FastTenantTestCase):
             "subtype": "blog"
         }
 
-        result = graphql_sync(schema, { "query": self.query, "variables": variables }, context_value={ "request": request })
+        result = graphql_sync(schema, {"query": self.query, "variables": variables}, context_value={"request": request})
 
         self.assertTrue(result[0])
 
@@ -375,7 +409,7 @@ class EntitiesTestCase(FastTenantTestCase):
             "showPinned": True
         }
 
-        result = graphql_sync(schema, { "query": self.query, "variables": variables }, context_value={ "request": request })
+        result = graphql_sync(schema, {"query": self.query, "variables": variables}, context_value={"request": request})
 
         self.assertTrue(result[0])
 
@@ -389,10 +423,10 @@ class EntitiesTestCase(FastTenantTestCase):
 
         variables = {
             "containerGuid": None,
-            "isDraft": True
+            "statusPublished": 'draft'
         }
 
-        result = graphql_sync(schema, { "query": self.query, "variables": variables }, context_value={ "request": request })
+        result = graphql_sync(schema, {"query": self.query, "variables": variables}, context_value={"request": request})
 
         self.assertTrue(result[0])
 
@@ -406,14 +440,18 @@ class EntitiesTestCase(FastTenantTestCase):
 
         variables = {
             "containerGuid": None,
-            "isDraft": True
+            "statusPublished": 'draft'
         }
 
-        result = graphql_sync(schema, { "query": self.query, "variables": variables }, context_value={ "request": request })
+        success, result = graphql_sync(schema, {"query": self.query, "variables": variables},
+                                       context_value={"request": request})
 
-        self.assertTrue(result[0])
+        self.assertTrue(success, msg=result)
 
-        data = result[1]["data"]
+        data = result["data"]
+
+        self.assertIsNotNone(data, msg=result)
+        self.assertIsNotNone(data.get('entities'), msg=result)
 
         self.assertEqual(data["entities"]["total"], 2)
 
@@ -423,15 +461,18 @@ class EntitiesTestCase(FastTenantTestCase):
 
         variables = {
             "containerGuid": None,
-            "isDraft": True
+            "statusPublished": 'draft'
         }
 
-        result = graphql_sync(schema, { "query": self.query, "variables": variables }, context_value={ "request": request })
+        success, result = graphql_sync(schema, {"query": self.query, "variables": variables},
+                                       context_value={"request": request})
 
-        self.assertTrue(result[0])
+        self.assertTrue(success, msg=result)
 
-        data = result[1]["data"]
+        data = result.get("data")
 
+        self.assertIsNotNone(data, msg=result)
+        self.assertIsNotNone(data.get('entities'), msg=result)
         self.assertEqual(data["entities"]["total"], 0)
 
     def test_entities_all_draft_other(self):
@@ -440,16 +481,23 @@ class EntitiesTestCase(FastTenantTestCase):
 
         variables = {
             "containerGuid": None,
-            "isDraft": True
+            "statusPublished": ['draft']
         }
 
-        result = graphql_sync(schema, { "query": self.query, "variables": variables }, context_value={ "request": request })
+        success, result = graphql_sync(schema, {"query": self.query, "variables": variables},
+                                       context_value={"request": request})
 
-        self.assertTrue(result[0])
+        self.assertTrue(success, msg=result)
 
-        data = result[1]["data"]
+        data = result["data"]
+        self.assertIsNotNone(data, msg=result)
+        self.assertIsNotNone(data.get('entities'), msg=result)
 
-        self.assertEqual(data["entities"]["total"], 1)
+        result_guids = {e["guid"] for e in data['entities']['edges']}
+        result_msg = "Result is %s" % [e["title"] for e in data['entities']['edges']]
+        self.assertEqual(data["entities"]["total"], 1, msg=result_msg)
+        self.assertNotIn(self.blog_draft1.guid, result_guids, msg=result_msg)
+        self.assertIn(self.blog_draft2.guid, result_guids, msg=result_msg)
 
     def test_entities_all_for_user(self):
         request = HttpRequest()
@@ -460,13 +508,65 @@ class EntitiesTestCase(FastTenantTestCase):
             "userGuid": self.authenticatedUser.guid
         }
 
-        result = graphql_sync(schema, { "query": self.query, "variables": variables }, context_value={ "request": request })
+        result = graphql_sync(schema, {"query": self.query, "variables": variables}, context_value={"request": request})
 
         self.assertTrue(result[0])
 
         data = result[1]["data"]
 
+        result_guids = {e["guid"] for e in data['entities']['edges']}
+        result_msg = "Result is %s" % [e["title"] for e in data['entities']['edges']]
         self.assertEqual(data["entities"]["total"], 5)
+        self.assertIn(self.blog1.guid, result_guids, msg=result_msg)
+        self.assertIn(self.blog2.guid, result_guids, msg=result_msg)
+        self.assertIn(self.blog3.guid, result_guids, msg=result_msg)
+        self.assertIn(self.blog4.guid, result_guids, msg=result_msg)
+        self.assertIn(self.news1.guid, result_guids, msg=result_msg)
+
+    def test_entities_archived_filter(self):
+        for while_testing_with_user, user in [("while testing admin", self.admin),
+                                              ("while testing anonymous user", self.anonymousUser),
+                                              ("while testing authenticated user", self.authenticatedUser)]:
+            request = HttpRequest()
+            request.user = user
+
+            variables = {
+                "containerGuid": None,
+                "statusPublished": 'archived',
+            }
+
+            success, result = graphql_sync(schema, {"query": self.query, "variables": variables},
+                                           context_value={"request": request})
+            self.assertIsNone(result.get('errors'),
+                              msg="Errors %s %s" % (while_testing_with_user, result.get('errors')))
+            self.assertIsNotNone(result, msg="No result %s" % while_testing_with_user)
+            self.assertIsNotNone(result.get('data'), msg="Data is empty %s" % while_testing_with_user)
+
+            data = result.get("data")
+            self.assertEqual(data["entities"]["total"], 2,
+                             msg="Unexpected number of results %s" % while_testing_with_user)
+            result_guids = {e["guid"] for e in data['entities']['edges']}
+            self.assertIn(self.archived1.guid, result_guids)
+            self.assertIn(self.archived2.guid, result_guids)
+
+    def test_enities_filter_my_draft_archived_articles(self):
+        request = HttpRequest()
+        request.user = self.authenticatedUser
+
+        variables = {
+            "containerGuid": None,
+            "userGuid": self.authenticatedUser.guid,
+            "statusPublished": ['archived', 'draft'],
+        }
+
+        result = graphql_sync(schema, {"query": self.query, "variables": variables}, context_value={"request": request})
+
+        self.assertTrue(result[0])
+        data = result[1]["data"]
+        self.assertEqual(data["entities"]["total"], 2)
+        result_guids = {e["guid"] for e in data['entities']['edges']}
+        self.assertIn(self.blog_draft1.guid, result_guids)
+        self.assertIn(self.archived1.guid, result_guids)
 
     def test_entities_all_for_admin_by_user(self):
         request = HttpRequest()
@@ -477,7 +577,7 @@ class EntitiesTestCase(FastTenantTestCase):
             "userGuid": self.admin.guid
         }
 
-        result = graphql_sync(schema, { "query": self.query, "variables": variables }, context_value={ "request": request })
+        result = graphql_sync(schema, {"query": self.query, "variables": variables}, context_value={"request": request})
 
         self.assertTrue(result[0])
 
@@ -494,7 +594,7 @@ class EntitiesTestCase(FastTenantTestCase):
             "userGuid": self.admin.guid
         }
 
-        result = graphql_sync(schema, { "query": self.query, "variables": variables }, context_value={ "request": request })
+        result = graphql_sync(schema, {"query": self.query, "variables": variables}, context_value={"request": request})
 
         self.assertTrue(result[0])
 
@@ -502,9 +602,7 @@ class EntitiesTestCase(FastTenantTestCase):
 
         self.assertEqual(data["entities"]["total"], 3)
 
-
     def test_blog_draft_owner(self):
-
         query = """
             fragment BlogParts on Blog {
                 title
@@ -524,18 +622,20 @@ class EntitiesTestCase(FastTenantTestCase):
             "guid": self.blog_draft1.guid
         }
 
-        result = graphql_sync(schema, { "query": query , "variables": variables}, context_value={ "request": request })
+        success, result = graphql_sync(schema, {"query": query, "variables": variables},
+                                       context_value={"request": request})
 
-        self.assertTrue(result[0])
+        self.assertTrue(success, msg=result)
 
-        data = result[1]["data"]
+        data = result.get("data")
+
+        self.assertIsNotNone(data, msg=result)
+        self.assertIsNotNone(data.get('entity'), msg=result)
 
         self.assertEqual(data["entity"]["guid"], self.blog_draft1.guid)
         self.assertEqual(data["entity"]["title"], self.blog_draft1.title)
 
-
     def test_blog_draft_other(self):
-
         query = """
             fragment BlogParts on Blog {
                 title
@@ -555,13 +655,12 @@ class EntitiesTestCase(FastTenantTestCase):
             "guid": self.blog_draft1.guid
         }
 
-        result = graphql_sync(schema, { "query": query , "variables": variables}, context_value={ "request": request })
+        result = graphql_sync(schema, {"query": query, "variables": variables}, context_value={"request": request})
 
         self.assertTrue(result[0])
 
         data = result[1]["data"]
         self.assertIsNone(data["entity"])
-
 
     def test_entities_no_subevents(self):
         event = Event.objects.create(
@@ -578,7 +677,6 @@ class EntitiesTestCase(FastTenantTestCase):
             parent=event
         )
 
-
         request = HttpRequest()
         request.user = self.authenticatedUser
 
@@ -587,7 +685,7 @@ class EntitiesTestCase(FastTenantTestCase):
             "orderBy": "timeCreated"
         }
 
-        result = graphql_sync(schema, { "query": self.query, "variables": variables }, context_value={ "request": request })
+        result = graphql_sync(schema, {"query": self.query, "variables": variables}, context_value={"request": request})
 
         self.assertTrue(result[0])
 
