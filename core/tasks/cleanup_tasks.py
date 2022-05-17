@@ -4,7 +4,6 @@ from django.utils.timezone import timedelta
 from django_tenants.utils import schema_context
 
 from core.lib import tenant_schema
-from file.models import FileFolder
 
 
 def cleanup_featured_image_files(imageField):
@@ -19,6 +18,8 @@ def cleanup_featured_image_files(imageField):
 
 @shared_task
 def do_cleanup_featured_image_files(schema_name, imageFileId):
+    # pylint: disable=import-outside-toplevel
+    from file.models import FileFolder
     try:
         with schema_context(schema_name):
             imageFile = FileFolder.objects.get(id=imageFileId)
