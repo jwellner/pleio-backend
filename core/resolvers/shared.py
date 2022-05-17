@@ -4,7 +4,6 @@ from core.constances import ACCESS_TYPE, TEXT_TOO_LONG
 from core.models import EntityViewCount
 from django.core.exceptions import ObjectDoesNotExist
 
-from core.tasks.cleanup_tasks import cleanup_featured_image_files
 from core.utils.convert import tiptap_to_text, truncate_rich_description
 from graphql import GraphQLError
 from core.lib import html_to_text, tenant_schema
@@ -237,6 +236,9 @@ def resolve_entity_is_pinned(obj, info):
 
 
 def update_featured_image(entity, clean_input, image_owner=None):
+    # pylint: disable=import-outside-toplevel
+    from core.tasks.cleanup_tasks import cleanup_featured_image_files
+
     if 'featured' in clean_input:
         entity.featured_position_y = clean_input.get("featured").get("positionY", 0)
         entity.featured_video = clean_input.get("featured").get("video", "")

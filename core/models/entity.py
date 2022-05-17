@@ -2,11 +2,13 @@ import uuid
 from django.db import models
 from django.db.models import Q
 from django.contrib.postgres.fields import ArrayField
+from django.db.models.signals import post_delete
+from django.dispatch import receiver
 from django.utils import timezone
 from model_utils.managers import InheritanceManager
 from core.lib import get_acl
 from core.constances import ENTITY_STATUS, USER_ROLES
-from .shared import read_access_default, write_access_default
+from core.models.shared import read_access_default, write_access_default
 
 
 class EntityManager(InheritanceManager):
