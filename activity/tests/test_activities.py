@@ -1,5 +1,6 @@
-from django.db import connection
 from django_tenants.test.cases import FastTenantTestCase
+
+from cms.models import Page
 from core.models import Group, Comment
 from user.models import User
 from blog.models import Blog
@@ -7,10 +8,9 @@ from event.models import Event
 from core.constances import ACCESS_TYPE
 from backend2.schema import schema
 from ariadne import graphql_sync
-import json
-from django.contrib.auth.models import AnonymousUser
 from django.http import HttpRequest
 from mixer.backend.django import mixer
+
 
 class ActivitiesTestCase(FastTenantTestCase):
 
@@ -65,6 +65,18 @@ class ActivitiesTestCase(FastTenantTestCase):
             owner=self.user2,
             container=self.blog1,
             rich_description="Just testing"
+        )
+        self.textPage = Page.objects.create(
+            title="Textpage",
+            page_type='text',
+            owner=self.user1,
+            read_access=[ACCESS_TYPE.user.format(self.user1.id)]
+        )
+        self.campagnePage = Page.objects.create(
+            title="Campagne",
+            page_type='campagne',
+            owner=self.user1,
+            read_access=[ACCESS_TYPE.user.format(self.user1.id)]
         )
 
         self.query = """
@@ -176,7 +188,7 @@ class ActivitiesTestCase(FastTenantTestCase):
             write_access=[ACCESS_TYPE.user.format(self.user2.id)],
             group=self.group2
         )
-        result = graphql_sync(schema, { "query": self.query, "variables": variables }, context_value={ "request": request })
+        result = graphql_sync(schema, {"query": self.query, "variables": variables}, context_value={"request": request})
 
         self.assertTrue(result[0])
 
@@ -196,7 +208,7 @@ class ActivitiesTestCase(FastTenantTestCase):
             "tags": []
         }
 
-        result = graphql_sync(schema, { "query": self.query, "variables": variables }, context_value={ "request": request })
+        result = graphql_sync(schema, {"query": self.query, "variables": variables}, context_value={"request": request})
 
         self.assertTrue(result[0])
 
@@ -216,14 +228,13 @@ class ActivitiesTestCase(FastTenantTestCase):
             "tagLists": [["tag_one", "tag_three"], ["tag_two"]]
         }
 
-        result = graphql_sync(schema, { "query": self.query, "variables": variables }, context_value={ "request": request })
+        result = graphql_sync(schema, {"query": self.query, "variables": variables}, context_value={"request": request})
 
         self.assertTrue(result[0])
 
         data = result[1]["data"]
 
         self.assertEqual(data["activities"]["total"], 2)
-
 
     def test_activities_show_pinned(self):
         request = HttpRequest()
@@ -237,7 +248,7 @@ class ActivitiesTestCase(FastTenantTestCase):
             "sortPinned": True
         }
 
-        result = graphql_sync(schema, { "query": self.query, "variables": variables }, context_value={ "request": request })
+        result = graphql_sync(schema, {"query": self.query, "variables": variables}, context_value={"request": request})
 
         self.assertTrue(result[0])
 
@@ -257,7 +268,7 @@ class ActivitiesTestCase(FastTenantTestCase):
             "orderBy": "lastAction"
         }
 
-        result = graphql_sync(schema, { "query": self.query, "variables": variables }, context_value={ "request": request })
+        result = graphql_sync(schema, {"query": self.query, "variables": variables}, context_value={"request": request})
 
         self.assertTrue(result[0])
 
@@ -266,7 +277,6 @@ class ActivitiesTestCase(FastTenantTestCase):
         self.assertEqual(data["activities"]["edges"][0]["entity"]["guid"], self.blog1.guid)
 
     def test_activities_no_subevents(self):
-        
         event = Event.objects.create(
             title="event",
             owner=self.user1,
@@ -274,14 +284,14 @@ class ActivitiesTestCase(FastTenantTestCase):
             write_access=[ACCESS_TYPE.user.format(self.user1.id)],
             tags=["tag_one", "tag_two"]
         )
-       
+
         subevent = Event.objects.create(
             title="subevent",
             owner=self.user1,
             read_access=[ACCESS_TYPE.public],
             write_access=[ACCESS_TYPE.user.format(self.user1.id)],
             tags=["tag_one", "tag_two"],
-            parent = event
+            parent=event
         )
 
         variables = {
@@ -290,12 +300,11 @@ class ActivitiesTestCase(FastTenantTestCase):
             "subtypes": [],
             "containerGuid": None,
             "orderBy": "timeCreated"
-        }      
+        }
         request = HttpRequest()
         request.user = self.user2
 
-        
-        result = graphql_sync(schema, { "query": self.query, "variables": variables }, context_value={ "request": request })
+        result = graphql_sync(schema, {"query": self.query, "variables": variables}, context_value={"request": request})
 
         self.assertTrue(result[0])
 

@@ -1,15 +1,54 @@
 import uuid
+
+from django.contrib.auth.models import AnonymousUser
 from django.db import models
 from django.db.models import Q
 from django.contrib.postgres.fields import ArrayField
+from django.db.models.signals import post_delete
+from django.dispatch import receiver
 from django.utils import timezone
 from model_utils.managers import InheritanceManager
 from core.lib import get_acl
 from core.constances import ENTITY_STATUS, USER_ROLES
-from .shared import read_access_default, write_access_default
+from core.models.shared import read_access_default, write_access_default
 
 
 class EntityManager(InheritanceManager):
+
+    def status_published(self, filter_status, user=None):
+        user = user or AnonymousUser()
+        public_possible = False
+        acl = get_acl(user)
+        query = Q()
+
+        if user.is_authenticated and user.has_role(USER_ROLES.ADMIN):
+            access = Q()
+        else:
+            access = Q(read_access__overlap=list(acl))
+
+        if ENTITY_STATUS.PUBLISHED in filter_status:
+            not_archived = Q(is_archived__isnull=True) | Q(is_archived=False)
+            query.add(Q(published__lte=timezone.now()) & access & not_archived, Q.OR)
+            public_possible = True
+
+        if ENTITY_STATUS.ARCHIVED in filter_status:
+            query.add(Q(is_archived=True) & access, Q.OR)
+            public_possible = True
+
+        if not user.is_authenticated and not public_possible:
+            return self.get_queryset().none()
+
+        if ENTITY_STATUS.DRAFT in filter_status:
+            draft_query = Q(Q(published__gt=timezone.now()) |
+                            Q(published__isnull=True))
+            if not user.has_role(USER_ROLES.ADMIN):
+                draft_query.add(Q(owner=user), Q.AND)
+
+            query.add(draft_query, Q.OR)
+
+        return self.get_queryset().filter(query)
+
+
     def draft(self, user):
         qs = self.get_queryset()
         if not user.is_authenticated:
@@ -95,7 +134,8 @@ class Entity(models.Model):
         if user.is_authenticated and user.has_role(USER_ROLES.ADMIN):
             return True
 
-        if user.is_authenticated and self.group and self.group.members.filter(user=user, type__in=['admin', 'owner']).exists():
+        if user.is_authenticated and self.group and self.group.members.filter(user=user,
+                                                                              type__in=['admin', 'owner']).exists():
             return True
 
         return len(get_acl(user) & set(self.write_access)) > 0

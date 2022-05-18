@@ -39,21 +39,20 @@ def resolve_members(_, info, groupGuid, q="", filters=None, offset=0, limit=20):
         if q:
             query = query.filter(
                 Q('simple_query_string', query=q, fields=['name^3', 'email']) |
-                Q('nested', path='_profile.user_profile_fields', query=Q('bool', must=[
-                    Q('match', _profile__user_profile_fields__value=q),
-                    Q('terms', _profile__user_profile_fields__read_access=list(get_acl(user)))
+                Q('bool', must=[
+                    Q('simple_query_string', query=q, fields=['profile.user_profile_fields.value']),
+                    Q('terms', profile__user_profile_fields__read_access=list(get_acl(user)))
                 ]))
-            )
 
         if filters:
             for f in filters:
                 query = query.filter(
-                    Q('nested', path='_profile.user_profile_fields', query=Q('bool', must=[
-                        Q('match', _profile__user_profile_fields__key=f['name']) & (
-                                Q('terms', _profile__user_profile_fields__value__raw=f['values']) |
-                                Q('terms', _profile__user_profile_fields__value_list=f['values'])
+                    Q('bool', must=[
+                        Q('match', profile__user_profile_fields__key=f['name']) & (
+                                Q('terms', profile__user_profile_fields__value__raw=f['values']) |
+                                Q('terms', profile__user_profile_fields__value_list=f['values'])
                         )])
-                      )
+
                 )
 
         total = query.count()

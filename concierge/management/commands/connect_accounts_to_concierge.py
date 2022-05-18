@@ -7,7 +7,7 @@ from user.models import User
 
 
 class Command(BaseCommand):
-    help = "Schedule sending users to concierge"
+    help = "One-time use script to schedule sending users to concierge"
 
     def handle(self, *args, **options):
         from concierge.tasks import sync_user

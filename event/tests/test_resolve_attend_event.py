@@ -19,11 +19,11 @@ class AttendEventTestCase(FastTenantTestCase):
 
     def setUp(self):
         self.anonymousUser = AnonymousUser()
-        self.attendee1 = mixer.blend(User)
-        self.attendee2 = mixer.blend(User)
-        self.attendee3 = mixer.blend(User)
-        self.attendee4 = mixer.blend(User)
-        self.attendee5 = mixer.blend(User)
+        self.attendee1 = mixer.blend(User, email="attendee1@example.net")
+        self.attendee2 = mixer.blend(User, email="attendee2@example.net")
+        self.attendee3 = mixer.blend(User, email="attendee3@example.net")
+        self.attendee4 = mixer.blend(User, email="attendee4@example.net")
+        self.attendee5 = mixer.blend(User, email="attendee5@example.net")
         self.eventPublic = Event.objects.create(
             title="Test public event",
             rich_description="JSON to string",
@@ -89,6 +89,7 @@ class AttendEventTestCase(FastTenantTestCase):
                         guid
                         attendees(state: "waitinglist") {
                             edges {
+                                guid
                                 name
                                 email
                             }
@@ -121,9 +122,14 @@ class AttendEventTestCase(FastTenantTestCase):
 
         data = result[1]["data"]
 
+        guids = [r['guid'] for r in data["attendEvent"]["entity"]["attendees"]["edges"]]
+        emails = [r['email'] for r in data["attendEvent"]["entity"]["attendees"]["edges"]]
+
         self.assertEqual(data["attendEvent"]["entity"]["guid"], self.eventPublic.guid)
         self.assertEqual(len(data["attendEvent"]["entity"]["attendees"]["edges"]), 1)
-        self.assertEqual(data["attendEvent"]["entity"]["attendees"]["edges"][0]["email"], '')
+        self.assertNotIn(str(self.attendee3.id), guids)
+        self.assertIn(str(self.attendee2.id), guids)
+        self.assertEqual([''], emails)
 
 
     def test_attend_event_from_accept_to_reject(self):

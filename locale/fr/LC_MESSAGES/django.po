@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Frans\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-04-28 13:14+0200\n"
+"POT-Creation-Date: 2022-05-18 10:00+0200\n"
 "PO-Revision-Date: 2021-06-24 15:12+0200\n"
 "Last-Translator: \n"
 "Language-Team: frans\n"
@@ -50,100 +50,100 @@ msgstr "Recevoir des courriels de notification"
 msgid "Receive overview emails"
 msgstr "Recevoir des courriels de présentation"
 
-#: core/lib.py:153 core/resolvers/mutation_import_users.py:30
+#: core/lib.py:161 core/resolvers/mutation_import_users.py:30
 #: core/resolvers/query_site.py:70
 msgid "Just me"
 msgstr "Juste moi"
 
-#: core/lib.py:156
+#: core/lib.py:164
 #, python-format
 msgid "Group: %(group_name)s"
 msgstr "Groupe : %(group_name)s"
 
-#: core/lib.py:159
+#: core/lib.py:167
 #, python-format
 msgid "Subgroup: %(subgroup_name)s"
 msgstr "Sous-groupe : %(subgroup_name)s"
 
-#: core/lib.py:164 core/resolvers/mutation_import_users.py:31
+#: core/lib.py:173 core/resolvers/mutation_import_users.py:31
 #: core/resolvers/query_site.py:71
 msgid "Logged in users"
 msgstr "Utilisateurs connectés"
 
-#: core/lib.py:166 core/resolvers/mutation_import_users.py:34
+#: core/lib.py:175 core/resolvers/mutation_import_users.py:34
 #: core/resolvers/query_site.py:75
 msgid "Public"
 msgstr "Public"
 
-#: core/lib.py:176
+#: core/lib.py:186
 msgid "Event"
 msgstr "Événement"
 
-#: core/lib.py:180
+#: core/lib.py:190
 msgid "Blog"
 msgstr "Blog"
 
-#: core/lib.py:184
+#: core/lib.py:194
 msgid "Discussion"
 msgstr "Discussion"
 
-#: core/lib.py:188 core/lib.py:314
+#: core/lib.py:198 core/lib.py:333
 msgid "News"
 msgstr "Actualité"
 
-#: core/lib.py:192
+#: core/lib.py:202
 msgid "Update"
 msgstr "Mettre à jour"
 
-#: core/lib.py:196
+#: core/lib.py:206
 msgid "Question"
 msgstr "Question"
 
-#: core/lib.py:200 core/lib.py:318
+#: core/lib.py:210 core/lib.py:337
 msgid "Wiki pages"
 msgstr "Wiki pages"
 
-#: core/lib.py:308
-msgid "Updates"
-msgstr "Mises à jour"
-
-#: core/lib.py:309
-msgid "Blogs"
-msgstr "Blogs"
-
-#: core/lib.py:310
+#: core/lib.py:214 core/lib.py:329
 msgid "CMS pages"
 msgstr "Pages SGC"
 
-#: core/lib.py:311
+#: core/lib.py:327
+msgid "Updates"
+msgstr "Mises à jour"
+
+#: core/lib.py:328
+msgid "Blogs"
+msgstr "Blogs"
+
+#: core/lib.py:330
 msgid "Discussions"
 msgstr "Discussions"
 
-#: core/lib.py:312
+#: core/lib.py:331
 msgid "Events"
 msgstr "Événements"
 
-#: core/lib.py:313
+#: core/lib.py:332
 msgid "Files"
 msgstr "Fichiers"
 
-#: core/lib.py:315
+#: core/lib.py:334
 msgid "Polls"
 msgstr "Sondages"
 
-#: core/lib.py:316
+#: core/lib.py:335
 msgid "Questions"
 msgstr "Questions"
 
-#: core/lib.py:317
+#: core/lib.py:336
 msgid "Tasks"
 msgstr "Tâches"
 
-#: core/lib.py:319
+#: core/lib.py:338
 msgid "Comments"
 msgstr "Commentaires"
 
-#: core/lib.py:320
+#: core/lib.py:339
 msgid "Groups"
 msgstr "Groupes"
 
@@ -551,18 +551,12 @@ msgstr ""
 
 #: core/templates/email/attend_event_with_qr_access.html:38
 #, python-format
-msgid ""
-"\n"
-"Date: %(startDate)s<br><br>\n"
-"\n"
-"Click on the link below to see the event.<br><br>\n"
-"<a href=\"%(link)s\">%(link)s</a>\n"
-msgstr ""
-"\n"
-"Date : %(startDate)s<br><br>\n"
-"\n"
-"Cliquez sur le lien ci-dessous pour voir l'événement.<br><br>\n"
-"<a href=\"%(link)s\">%(link)s</a>\n"
+msgid "Date: %(date)s"
+msgstr "Date : %(date)s"
+
+#: core/templates/email/attend_event_with_qr_access.html:40
+msgid "Click on the link below to see the event."
+msgstr "Cliquez sur le lien ci-dessous pour voir l'événement."
 
 #: core/templates/email/attend_event_without_account.html:5
 #, python-format
@@ -1251,12 +1245,12 @@ msgstr "Nouvelle demande d’accès à %(site_name)s"
 msgid "Saved"
 msgstr "Sauvegardé"
 
-#: event/models.py:122
+#: event/models.py:127
 #, python-format
 msgid "Added to event %s from waitinglist"
 msgstr "Ajouté à l'événement %s de la liste d'attente"
 
-#: event/resolvers/mutation.py:417 event/tests/test_resolve_copy_entity.py:149
+#: event/resolvers/mutation.py:369 event/tests/test_resolve_copy_entity.py:149
 #, python-format
 msgid "Copy %s"
 msgstr "Copie %s"
@@ -1266,7 +1260,7 @@ msgstr "Copie %s"
 msgid "Confirmation of registration %s"
 msgstr "Confirmation de l’inscription %s"
 
-#: event/resolvers/mutation_confirm_attend_event_without_account.py:88
+#: event/resolvers/mutation_confirm_attend_event_without_account.py:92
 #, python-format
 msgid "Confirmation of registration for %s"
 msgstr "Confirmation de l’inscription %s"
@@ -1277,13 +1271,13 @@ msgid "Removed from event: %s"
 msgstr "Retiré de l'événement : %s"
 
 #: event/resolvers/mutation_messages.py:71
-#: event/tests/test_event_mailer.py:272
+#: event/tests/test_event_mailer.py:271
 #, python-brace-format
 msgid "Message from event {0}: {1}"
 msgstr "Message de l'événement {0} : {1}"
 
 #: event/resolvers/mutation_messages.py:73
-#: event/tests/test_event_mailer.py:286
+#: event/tests/test_event_mailer.py:285
 #, python-brace-format
 msgid "Copy: Message from event {0}: {1}"
 msgstr "Copie : Message de l'événement {0} : {1}"
@@ -1292,7 +1286,7 @@ msgstr "Copie : Message de l'événement {0} : {1}"
 msgid "Message to event"
 msgstr "Message à l'événement"
 
-#: event/utils.py:22
+#: event/utils.py:33
 #, python-format
 msgid "QR code for %s"
 msgstr "Code QR pour %s"

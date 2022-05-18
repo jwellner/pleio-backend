@@ -215,7 +215,7 @@ def ban_users_with_no_account(schema_name):
 def remove_floating_attachments(schema_name):
     with schema_context(schema_name):
         deleted = Attachment.objects.filter(attached_content_type=None).delete()
-        logger.info("%s: %d floating attachments were deleted.", schema_name, deleted)
+        logger.info("%s: %d floating attachments were deleted.", schema_name, len(deleted))
 
 @shared_task()
 def resize_pending_images(schema_name):

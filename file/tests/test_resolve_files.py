@@ -10,7 +10,7 @@ from mixer.backend.django import mixer
 from core.constances import ACCESS_TYPE
 
 
-class TestFileQueryOrderByFileWeight(FastTenantTestCase):
+class TestFileQueryOrderByAccessWeight(FastTenantTestCase):
 
     def setUp(self):
         self.owner = mixer.blend(User)
@@ -18,19 +18,29 @@ class TestFileQueryOrderByFileWeight(FastTenantTestCase):
         self.group.join(self.owner, 'owner')
         self.subgroup = mixer.blend(Subgroup, group=self.group, members=[self.owner])
 
-        self.public_file = mixer.blend(FileFolder, read_access=[ACCESS_TYPE.public],
+        self.public_file = mixer.blend(FileFolder,
+                                       read_access=[ACCESS_TYPE.public],
+                                       write_access=[ACCESS_TYPE.public],
                                        group=self.group,
                                        title="public")
-        self.authentic_file = mixer.blend(FileFolder, read_access=[ACCESS_TYPE.logged_in],
+        self.authentic_file = mixer.blend(FileFolder,
+                                          read_access=[ACCESS_TYPE.logged_in],
+                                          write_access=[ACCESS_TYPE.logged_in],
                                           group=self.group,
                                           title="logged_in")
-        self.subgroup_file = mixer.blend(FileFolder, read_access=[ACCESS_TYPE.subgroup.format(self.subgroup.access_id)],
+        self.subgroup_file = mixer.blend(FileFolder,
+                                         read_access=[ACCESS_TYPE.subgroup.format(self.subgroup.access_id)],
+                                         write_access=[ACCESS_TYPE.subgroup.format(self.subgroup.access_id)],
                                          group=self.group,
                                          title="subgroup")
-        self.group_file = mixer.blend(FileFolder, read_access=[ACCESS_TYPE.group.format(self.group.id)],
+        self.group_file = mixer.blend(FileFolder,
+                                      read_access=[ACCESS_TYPE.group.format(self.group.id)],
+                                      write_access=[ACCESS_TYPE.group.format(self.group.id)],
                                       group=self.group,
                                       title="group")
-        self.user_file = mixer.blend(FileFolder, read_access=[ACCESS_TYPE.user.format(self.owner.id)],
+        self.user_file = mixer.blend(FileFolder,
+                                     read_access=[ACCESS_TYPE.user.format(self.owner.id)],
+                                     write_access=[ACCESS_TYPE.user.format(self.owner.id)],
                                      group=self.group,
                                      title="private")
 
@@ -84,6 +94,71 @@ class TestFileQueryOrderByFileWeight(FastTenantTestCase):
         variables = {
             "containerGuid": self.group.guid,
             "orderBy": "readAccessWeight",
+            "orderDirection": "desc"
+        }
+
+        success, result = graphql_sync(schema, {"query": query, "variables": variables},
+                                       context_value={"request": request})
+
+        actual_order = [record['guid'] for record in result['data']['files']['edges']]
+        self.assertEqual(actual_order, [
+            self.public_file.guid,
+            self.authentic_file.guid,
+            self.group_file.guid,
+            self.subgroup_file.guid,
+            self.user_file.guid,
+        ])
+
+    def test_write_access_weight_of_files(self):
+        request = HttpRequest()
+        request.user = self.owner
+
+        query = """
+            query FilesQuery($containerGuid: String!, $orderBy: String) {
+                files(containerGuid: $containerGuid, orderBy: $orderBy) {
+                    total
+                    edges {
+                        guid
+                    }
+                }
+            }
+        """
+
+        variables = {
+            "containerGuid": self.group.guid,
+            "orderBy": "writeAccessWeight",
+        }
+
+        success, result = graphql_sync(schema, {"query": query, "variables": variables},
+                                       context_value={"request": request})
+
+        actual_order = [record['guid'] for record in result['data']['files']['edges']]
+        self.assertEqual(actual_order, [
+            self.user_file.guid,
+            self.subgroup_file.guid,
+            self.group_file.guid,
+            self.authentic_file.guid,
+            self.public_file.guid,
+        ])
+
+    def test_write_access_weight_of_files_reverse(self):
+        request = HttpRequest()
+        request.user = self.owner
+
+        query = """
+            query FilesQuery($containerGuid: String!, $orderBy: String, $orderDirection: String) {
+                files(containerGuid: $containerGuid, orderBy: $orderBy, orderDirection: $orderDirection) {
+                    total
+                    edges {
+                        guid
+                    }
+                }
+            }
+        """
+
+        variables = {
+            "containerGuid": self.group.guid,
+            "orderBy": "writeAccessWeight",
             "orderDirection": "desc"
         }
 

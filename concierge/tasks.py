@@ -85,10 +85,10 @@ def submit_user_token(schema, user):
             'x-oidc-client-id': settings.OIDC_RP_CLIENT_ID,
             'x-oidc-client-secret': settings.OIDC_RP_CLIENT_SECRET,
         })
-        if not response.ok:
-            logger.warning("Failed to sync a user origin_token for reason '%s'", response.reason)
-
-        profile_updated_signal.delay(schema, token)
+        if response.ok:
+            profile_updated_signal.delay(schema, token)
+        else:
+            logger.error("Failed to sync a user origin_token for reason '%s'", response.reason)
 
     except RequestConnectionError as e:
         # Allow retry next time.

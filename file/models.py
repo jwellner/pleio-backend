@@ -1,6 +1,8 @@
 import os
 import clamd
 import logging
+import signal_disabler
+
 from auditlog.registry import auditlog
 from django.urls import reverse
 from django.conf import settings
@@ -18,7 +20,7 @@ from django.utils.text import slugify
 from django.core.files.base import ContentFile
 
 from core.utils.convert import tiptap_to_text
-from file.helpers.access import get_read_access_weight
+from core.utils.access import get_read_access_weight, get_write_access_weight
 
 logger = logging.getLogger(__name__)
 
@@ -51,6 +53,7 @@ class FileFolder(Entity, ModelWithFile, ResizedImageMixin):
     last_scan = models.DateTimeField(default=None, null=True)
 
     read_access_weight = models.IntegerField(default=0)
+    write_access_weight = models.IntegerField(default=0)
 
     rich_description = models.TextField(null=True, blank=True)
 
@@ -181,8 +184,11 @@ class ScanIncident(models.Model):
 
 
 def set_parent_folders_updated_at(instance):
+    if instance == instance.parent:
+        return
     if instance.parent and instance.parent.is_folder:
-        instance.parent.save()
+        with signal_disabler.disable():
+            instance.parent.save()
         set_parent_folders_updated_at(instance.parent)
 
 
@@ -190,6 +196,7 @@ def set_parent_folders_updated_at(instance):
 def file_pre_save(sender, instance, **kwargs):
     # pylint: disable=unused-argument
     instance.read_access_weight = get_read_access_weight(instance)
+    instance.write_access_weight = get_write_access_weight(instance)
 
     if instance.upload and not instance.title:
         instance.title = instance.upload.file.name
@@ -202,7 +209,7 @@ def file_pre_save(sender, instance, **kwargs):
 
 
 # update parent folders updated_at when adding, moving and deleting files
-@receiver([pre_save, pre_delete], sender=FileFolder)
+@receiver([pre_save], sender=FileFolder)
 def update_parent_timestamps(sender, instance, **kwargs):
     # pylint: disable=unused-argument
 

@@ -32,6 +32,8 @@ class Event(Entity, CommentMixin, BookmarkMixin, FollowMixin, NotificationMixin,
     location_link = models.CharField(max_length=256, default="")
     external_link = models.TextField(default="")
 
+    ticket_link = models.TextField(blank=True, default="")
+
     max_attendees = models.PositiveIntegerField(null=True, blank=True)
     rsvp = models.BooleanField(default=False)
     attend_event_without_account = models.BooleanField(default=False)
@@ -178,8 +180,27 @@ class EventAttendee(models.Model):
     created_at = models.DateTimeField(default=timezone.now)
     updated_at = models.DateTimeField(default=timezone.now)
 
+    @property
+    def user_icon(self):
+        return self.user.icon if self.user else None
+
+    @property
+    def user_url(self):
+        return self.user.url if self.user else None
+
     def __str__(self):
         return f"EventAttendee[{self.name}]"
+
+    def as_attendee(self, access_user):
+        return {
+            "guid": self.user.id if self.user else '',
+            "email": self.email if self.event.can_write(access_user) else '',
+            "name": self.name,
+            "state": self.state,
+            "icon": self.user_icon,
+            "url": self.user_url,
+            "timeCheckedIn": self.checked_in_at
+        }
 
 
 class EventAttendeeRequest(models.Model):

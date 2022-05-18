@@ -13,40 +13,41 @@ def conditional_subtypes_filter(subtypes):
     if subtypes:
         for object_type in subtypes:
             if object_type == 'news':
-                q_objects.add(~Q(news__isnull = True), Q.OR)
+                q_objects.add(~Q(news__isnull=True), Q.OR)
             elif object_type == 'blog':
-                q_objects.add(~Q(blog__isnull = True), Q.OR)
+                q_objects.add(~Q(blog__isnull=True), Q.OR)
             elif object_type == 'event':
-                q_objects.add(~Q(event__isnull = True) & ~Q(event__parent__isnull = False), Q.OR)
+                q_objects.add(~Q(event__isnull=True) & ~Q(event__parent__isnull=False), Q.OR)
             elif object_type == 'discussion':
-                q_objects.add(~Q(discussion__isnull = True), Q.OR)
+                q_objects.add(~Q(discussion__isnull=True), Q.OR)
             elif object_type == 'statusupdate':
-                q_objects.add(~Q(statusupdate__isnull = True), Q.OR)
+                q_objects.add(~Q(statusupdate__isnull=True), Q.OR)
             elif object_type == 'question':
-                q_objects.add(~Q(question__isnull = True), Q.OR)
+                q_objects.add(~Q(question__isnull=True), Q.OR)
             elif object_type == 'poll':
-                q_objects.add(~Q(poll__isnull = True), Q.OR)
+                q_objects.add(~Q(poll__isnull=True), Q.OR)
             elif object_type == 'wiki':
-                q_objects.add(~Q(wiki__isnull = True), Q.OR)
+                q_objects.add(~Q(wiki__isnull=True), Q.OR)
             elif object_type == 'page':
-                q_objects.add(~Q(page__isnull = True), Q.OR)
+                q_objects.add(~Q(page__isnull=True), Q.OR)
             elif object_type == 'file':
-                q_objects.add(~Q(filefolder__isnull = True), Q.OR)
+                q_objects.add(~Q(filefolder__isnull=True), Q.OR)
             elif object_type == 'task':
-                q_objects.add(~Q(task__isnull = True), Q.OR)
+                q_objects.add(~Q(task__isnull=True), Q.OR)
     else:
-        q_objects.add(~Q(news__isnull = True), Q.OR)
-        q_objects.add(~Q(blog__isnull = True), Q.OR)
-        q_objects.add(~Q(event__isnull = True) & ~Q(event__parent__isnull = False), Q.OR)
-        q_objects.add(~Q(discussion__isnull = True), Q.OR)
-        q_objects.add(~Q(statusupdate__isnull = True), Q.OR)
-        q_objects.add(~Q(question__isnull = True), Q.OR)
-        q_objects.add(~Q(poll__isnull = True), Q.OR)
-        q_objects.add(~Q(wiki__isnull = True), Q.OR)
-        q_objects.add(~Q(page__isnull = True), Q.OR)
-        q_objects.add(~Q(filefolder__isnull = True), Q.OR)
-        q_objects.add(~Q(task__isnull = True), Q.OR)
+        q_objects.add(~Q(news__isnull=True), Q.OR)
+        q_objects.add(~Q(blog__isnull=True), Q.OR)
+        q_objects.add(~Q(event__isnull=True) & ~Q(event__parent__isnull=False), Q.OR)
+        q_objects.add(~Q(discussion__isnull=True), Q.OR)
+        q_objects.add(~Q(statusupdate__isnull=True), Q.OR)
+        q_objects.add(~Q(question__isnull=True), Q.OR)
+        q_objects.add(~Q(poll__isnull=True), Q.OR)
+        q_objects.add(~Q(wiki__isnull=True), Q.OR)
+        q_objects.add(~Q(page__isnull=True), Q.OR)
+        q_objects.add(~Q(filefolder__isnull=True), Q.OR)
+        q_objects.add(~Q(task__isnull=True), Q.OR)
     return q_objects
+
 
 def conditional_group_filter(container_guid):
     """
@@ -59,6 +60,7 @@ def conditional_group_filter(container_guid):
 
     return Q()
 
+
 def conditional_is_featured_filter(is_featured):
     """
     Only filter is_featured on news list
@@ -68,40 +70,43 @@ def conditional_is_featured_filter(is_featured):
 
     return Q()
 
+
 def conditional_tags_filter(tags):
     if tags:
         filters = Q()
         for tag in tags:
-            filters.add(Q(tags__overlap=[tag]), Q.AND) # of Q.OR
+            filters.add(Q(tags__overlap=[tag]), Q.AND)  # of Q.OR
 
         return filters
     return Q()
+
 
 def conditional_tag_lists_filter(tag_lists):
     filters = Q()
     if tag_lists:
         for tags in tag_lists:
             if tags:
-                filters.add(Q(tags__overlap=tags), Q.AND) # of Q.OR
+                filters.add(Q(tags__overlap=tags), Q.AND)  # of Q.OR
     return filters
 
+
 def resolve_entities(
-    _,
-    info,
-    offset=0,
-    limit=20,
-    type=None,
-    subtype=None,
-    subtypes=None,
-    containerGuid=None,
-    tags=None,
-    tagLists=None,
-    orderBy=ORDER_BY.timePublished,
-    orderDirection=ORDER_DIRECTION.desc,
-    isFeatured=None,
-    sortPinned=False,
-    isDraft=False,
-    userGuid=None
+        _,
+        info,
+        offset=0,
+        limit=20,
+        type=None,
+        subtype=None,
+        subtypes=None,
+        containerGuid=None,
+        tags=None,
+        tagLists=None,
+        orderBy=ORDER_BY.timePublished,
+        orderDirection=ORDER_DIRECTION.desc,
+        isFeatured=None,
+        sortPinned=False,
+        statusPublished=None,
+        userGuid=None
 ):
     # pylint: disable=unused-argument
     # pylint: disable=too-many-arguments
@@ -135,14 +140,16 @@ def resolve_entities(
         order_by = '-%s' % (order_by)
 
     if order_by == '-title':
-        order_by = Coalesce('news__title', 'blog__title', 'filefolder__title', 'poll__title', 'statusupdate__title', 'wiki__title',
-                                              'page__title', 'question__title', 'discussion__title', 'event__title').desc()
+        order_by = Coalesce('news__title', 'blog__title', 'filefolder__title', 'poll__title', 'statusupdate__title',
+                            'wiki__title',
+                            'page__title', 'question__title', 'discussion__title', 'event__title').desc()
     elif order_by == 'title':
-        order_by = Coalesce('news__title', 'blog__title', 'filefolder__title', 'poll__title', 'statusupdate__title', 'wiki__title',
-                                              'page__title', 'question__title', 'discussion__title', 'event__title').asc()
+        order_by = Coalesce('news__title', 'blog__title', 'filefolder__title', 'poll__title', 'statusupdate__title',
+                            'wiki__title',
+                            'page__title', 'question__title', 'discussion__title', 'event__title').asc()
 
-    if isDraft:
-        entities = Model.objects.draft(info.context["request"].user)
+    if statusPublished and len(statusPublished) > 0:
+        entities = Model.objects.status_published(statusPublished, info.context["request"].user)
     else:
         entities = Model.objects.visible(info.context["request"].user)
 
@@ -171,7 +178,7 @@ def resolve_entities(
 
     entities = entities.order_by(*order).select_subclasses()
 
-    edges = entities[offset:offset+limit]
+    edges = entities[offset:offset + limit]
 
     return {
         'total': entities.count(),
