@@ -2210,7 +2210,8 @@ type Widget {
 
 type WidgetSetting {
   key: String!
-  value: SecureRichText
+  value: String
+  richDescription: SecureRichText
 }
 
 input WidgetSettingInput {
