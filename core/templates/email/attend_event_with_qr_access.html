@@ -35,10 +35,8 @@ You are added as attendee for {{ title }}. For this event, you will need the QR 
     Location: <a href="{{ locationLink }}"> Location </a><br>
     {% endblocktrans %}
 {% endif %}
-{% blocktrans %}
-Date: {{ startDate }}<br><br>
-
-Click on the link below to see the event.<br><br>
+{% blocktrans with date=startDate %}Date: {{ date }}{% endblocktrans %}
+<img src="{{ qr_filename }}" /><br>
+{% blocktrans %}Click on the link below to see the event.{% endblocktrans %}<br><br>
 <a href="{{ link }}">{{ link }}</a>
-{% endblocktrans %}
 {% endblock %}
