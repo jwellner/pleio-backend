@@ -41,7 +41,7 @@ def send_mail_multi(self, schema_name, subject, html_template, context, email_ad
 
 
 @shared_task(bind=True, ignore_result=True)
-def send_mail_multi_with_qr_code(self, schema_name, subject, html_template, context, email_address, file_name,  url, reply_to=None, language=None):
+def send_mail_multi_with_qr_code(self, schema_name, subject, html_content, text_content, email_address, file_name,  url, reply_to=None, language=None):
     # pylint: disable=unused-argument
     # pylint: disable=too-many-arguments
     # pylint: disable=too-many-locals
@@ -50,14 +50,6 @@ def send_mail_multi_with_qr_code(self, schema_name, subject, html_template, cont
     '''
     with schema_context(schema_name):
         translation.activate(language or config.LANGUAGE)
-
-        if User.objects.filter(is_active=False, email=email_address).first():
-            # User not found
-            return
-
-        html_template = get_template(html_template)
-        html_content = html_template.render(context)
-        text_content = html_to_text(html_content)
 
         from_mail = formataddr((config.NAME, settings.FROM_EMAIL))
 
@@ -68,6 +60,7 @@ def send_mail_multi_with_qr_code(self, schema_name, subject, html_template, cont
         img_obj=stream.read()
         code_image = MIMEImage(img_obj, name = file_name, _subtype = 'png')
         code_image.add_header('Content-Disposition', f'attachment; filename="{file_name}"')
+        code_image.add_header('Content-ID', file_name)
         email = EmailMultiAlternatives(subject, text_content, from_mail, to=[email_address], reply_to=reply_to)
         email.attach_alternative(html_content, "text/html")
         email.attach(code_image)
