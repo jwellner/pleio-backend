@@ -112,12 +112,6 @@ def clean_graphql_input(values, always_include=None):
     """ Cleanup resolver input """
     # TODO: what are we going to do with values which kan be omitted or can be NULL
 
-    # Prevent external attachment URLs
-    rich_description = values.get("richDescription")
-    if rich_description:
-        tiptap = Tiptap(rich_description)
-        tiptap.check_for_external_urls()
-
     # Remove items with None values from dict except for timePublished data
     return {k: v for k, v in values.items() if
             (v is not None) or (k == 'timePublished') or (always_include and (k in always_include))}
