@@ -34,7 +34,7 @@ pytz==2022.1
 django-auditlog==1.0.0
 requests==2.26.0
 redis==3.5.3
-elasticsearch==7.13.4
+elasticsearch==7.17.3
 clamd==1.0.2
 django-csp==3.7
 prosemirror-py==0.2
