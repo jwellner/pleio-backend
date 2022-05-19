@@ -9,6 +9,16 @@ type acceptGroupInvitationPayload {
   group: Group
 }
 
+type Tag {
+  label: String!
+  synonyms: [String]
+}
+
+input tagMergeInput {
+  tag: String!
+  synonym: String!
+}
+
 input acceptMembershipRequestInput {
   """The guid of the user."""
   userGuid: String
@@ -1366,6 +1376,9 @@ type Mutation {
   """Edit username"""
   editUserName(input: editUserNameInput!): editUserNamePayload
   addCommentWithoutAccount(input: addCommentWithoutAccountInput!): addCommentWithoutAccountPayload
+
+  mergeTags(input: tagMergeInput!): [Tag]
+  extractTagSynonym(input: tagMergeInput!): [Tag]
 }
 
 type News implements Entity {
@@ -1608,6 +1621,7 @@ type Query {
   siteUsers(q: String, role: String, isDeleteRequested: Boolean, isBanned: Boolean, offset: Int, limit: Int, lastOnlineBefore: String): SiteUserList
   usersByBirthDate(profileFieldGuid: String!, futureDays: Int, offset: Int, limit: Int): SiteUserList
   siteStats: SiteStats
+  tags: [Tag]
 }
 
 type Question implements Entity {

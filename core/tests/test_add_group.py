@@ -126,8 +126,9 @@ class AddGroupCase(FastTenantTestCase):
                                        context_value={"request": request})
 
         data = result.get("data")
+        errors = result.get("errors")
 
-        self.assertTrue(success, msg="Er gaat iets mis bij het maken van een groep")
+        self.assertIsNone(errors, msg=errors)
 
         self.assertEqual(data["addGroup"]["group"]["name"], variables["group"]["name"])
         self.assertIn('/icon.png', data["addGroup"]["group"]["icon"])

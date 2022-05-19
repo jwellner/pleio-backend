@@ -28,12 +28,14 @@ pylint:
     - consider-using-with
     - consider-using-in
     - useless-super-delegation
+    - line-too-long
     - unnecessary-comprehension
+    - use-dict-literal
 pycodestyle:
   run: true
-  max-line-length: 160
   disable:
     - N815
+    - E501
 mccabe:
   run: false
 dodgy:

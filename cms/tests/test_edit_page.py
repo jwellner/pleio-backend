@@ -57,7 +57,7 @@ class EditPageTestCase(FastTenantTestCase):
                 "guid": self.page.guid,
                 "title": "test",
                 "accessId": 1,
-                "tags": [],
+                "tags": ['tag_1'],
                 "richDescription": '{"blocks":[{"key":"6sb64","text":"test","type":"unstyled","depth":0,"inlineStyleRanges":[],"entityRanges":[],"data":{}}],"entityMap":{}}'
 
             }
@@ -72,7 +72,7 @@ class EditPageTestCase(FastTenantTestCase):
 
         self.assertEqual(data["editPage"]["entity"]["title"], "test")
         self.assertEqual(data["editPage"]["entity"]["richDescription"], '{"blocks":[{"key":"6sb64","text":"test","type":"unstyled","depth":0,"inlineStyleRanges":[],"entityRanges":[],"data":{}}],"entityMap":{}}')
-        self.assertEqual(data["editPage"]["entity"]["tags"], [])
+        self.assertEqual(data["editPage"]["entity"]["tags"], ['tag_1'])
         self.assertEqual(data["editPage"]["entity"]["accessId"], 1)
         self.assertEqual(data["editPage"]["entity"]["canEdit"], True)
         self.assertEqual(data["editPage"]["entity"]["parent"], None)

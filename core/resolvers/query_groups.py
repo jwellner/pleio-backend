@@ -1,25 +1,15 @@
 from core.models import Group
-from django.db.models import Q
-
-
-def conditional_tags_filter(tags):
-    if tags:
-        filters = Q()
-        for tag in tags:
-            filters.add(Q(tags__icontains=tag), Q.AND) # of Q.OR
-
-        return filters
-    return Q()
+from core.resolvers.query_entities import conditional_tags_filter
 
 
 def resolve_groups(
-    _,
-    info,
-    q=None,
-    filter=None,
-    tags=None,
-    offset=0,
-    limit=20
+        _,
+        info,
+        q=None,
+        filter=None,
+        tags=None,
+        offset=0,
+        limit=20
 ):
     # pylint: disable=unused-argument
     # pylint: disable=too-many-arguments
@@ -38,7 +28,7 @@ def resolve_groups(
     if tags:
         groups = groups.filter(conditional_tags_filter(tags))
 
-    edges = groups.order_by('-is_featured', 'name')[offset:offset+limit]
+    edges = groups.order_by('-is_featured', 'name')[offset:offset + limit]
 
     return {
         'total': groups.count(),

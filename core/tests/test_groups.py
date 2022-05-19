@@ -1,8 +1,6 @@
-from django.db import connection
 from django_tenants.test.cases import FastTenantTestCase
 from backend2.schema import schema
 from ariadne import graphql_sync
-import json
 from django.contrib.auth.models import AnonymousUser
 from django.http import HttpRequest
 from core.models import Group
@@ -47,7 +45,9 @@ class GroupsNotEmptyTestCase(FastTenantTestCase):
     def setUp(self):
         self.anonymousUser = AnonymousUser()
         self.user = mixer.blend(User)
-        self.group1 = mixer.blend(Group, tags=["tag_one"])
+        self.group1 = mixer.blend(Group)
+        self.group1.tags=["tag_one"]
+        self.group1.save()
         self.group1.join(self.user, 'member')
         self.groups = mixer.cycle(5).blend(Group, is_closed=False)
         self.group2 = mixer.blend(Group, is_featured=True)
@@ -199,11 +199,11 @@ class GroupsNotEmptyTestCase(FastTenantTestCase):
         request = HttpRequest()
         request.user = self.user
 
-        result = graphql_sync(schema, {"query": query, "variables": variables}, context_value={ "request": request })
+        success, result = graphql_sync(schema, {"query": query, "variables": variables}, context_value={ "request": request })
 
-        self.assertTrue(result[0])
+        self.assertIsNone(result.get('errors'), msg=result)
 
-        data = result[1]["data"]
+        data = result["data"]
 
         self.assertEqual(data["groups"]["total"], 1)
         self.assertEqual(data["groups"]["edges"][0]["guid"], self.group1.guid)

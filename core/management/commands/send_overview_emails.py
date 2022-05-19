@@ -8,6 +8,8 @@ from core.lib import get_base_url, get_default_email_context
 from core.models import Entity, EntityView
 from datetime import timedelta
 from django.db import connection
+
+from core.models.tags import Tag
 from tenants.models import Client
 from user.models import User
 from core.tasks import send_mail_multi
@@ -145,10 +147,11 @@ class Command(BaseCommand):
             if not entities and not featured_entities:
                 continue
 
+            tags = Tag.translate_tags(user.profile.overview_email_tags)
             # entities with user preferred tags are first in email
-            selected_entities = list(entities.filter(tags__overlap=user.profile.overview_email_tags))
+            selected_entities = list(entities.filter(_tag_summary__overlap=tags))
             selected_entities.extend(
-                list(entities.exclude(tags__overlap=user.profile.overview_email_tags))
+                list(entities.exclude(_tag_summary__overlap=tags))
             )
 
             selected_entities = selected_entities[:5]
