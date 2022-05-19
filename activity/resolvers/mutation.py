@@ -1,7 +1,8 @@
 from graphql import GraphQLError
 from django.core.exceptions import ObjectDoesNotExist
 from core import config
-from core.constances import NOT_LOGGED_IN, COULD_NOT_FIND, COULD_NOT_FIND_GROUP, COULD_NOT_SAVE, USER_ROLES
+from core.constances import NOT_LOGGED_IN, COULD_NOT_FIND, COULD_NOT_FIND_GROUP, COULD_NOT_SAVE, USER_ROLES, \
+    COULD_NOT_ADD
 from core.lib import clean_graphql_input, access_id_to_acl
 from core.models import Group
 from user.models import User
@@ -35,6 +36,9 @@ def resolve_add_status_update(_, info, input):
 
     if group and not group.is_full_member(user) and not user.has_role(USER_ROLES.ADMIN):
         raise GraphQLError("NOT_GROUP_MEMBER")
+
+    if group and not group.is_submit_updates_enabled:
+        raise GraphQLError(COULD_NOT_ADD)
 
     entity = StatusUpdate()
 

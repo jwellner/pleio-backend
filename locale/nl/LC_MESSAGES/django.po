@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-04-28 13:14+0200\n"
+"POT-Creation-Date: 2022-05-18 10:00+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -49,100 +49,100 @@ msgstr "Ontvang notificatie emails"
 msgid "Receive overview emails"
 msgstr "Ontvang overzicht emails"
 
-#: core/lib.py:153 core/resolvers/mutation_import_users.py:30
+#: core/lib.py:161 core/resolvers/mutation_import_users.py:30
 #: core/resolvers/query_site.py:70
 msgid "Just me"
 msgstr "Alleen eigenaar"
 
-#: core/lib.py:156
+#: core/lib.py:164
 #, python-format
 msgid "Group: %(group_name)s"
 msgstr "Groep: %(group_name)s"
 
-#: core/lib.py:159
+#: core/lib.py:167
 #, python-format
 msgid "Subgroup: %(subgroup_name)s"
 msgstr "Subgroep: %(subgroup_name)s"
 
-#: core/lib.py:164 core/resolvers/mutation_import_users.py:31
+#: core/lib.py:173 core/resolvers/mutation_import_users.py:31
 #: core/resolvers/query_site.py:71
 msgid "Logged in users"
 msgstr "Ingelogde gebruikers"
 
-#: core/lib.py:166 core/resolvers/mutation_import_users.py:34
+#: core/lib.py:175 core/resolvers/mutation_import_users.py:34
 #: core/resolvers/query_site.py:75
 msgid "Public"
 msgstr "Iedereen (publiek zichtbaar)"
 
-#: core/lib.py:176
+#: core/lib.py:186
 msgid "Event"
 msgstr "Agenda-item"
 
-#: core/lib.py:180
+#: core/lib.py:190
 msgid "Blog"
 msgstr "Blog"
 
-#: core/lib.py:184
+#: core/lib.py:194
 msgid "Discussion"
 msgstr "Discussie"
 
-#: core/lib.py:188 core/lib.py:314
+#: core/lib.py:198 core/lib.py:333
 msgid "News"
 msgstr "Nieuws"
 
-#: core/lib.py:192
+#: core/lib.py:202
 msgid "Update"
 msgstr "Update"
 
-#: core/lib.py:196
+#: core/lib.py:206
 msgid "Question"
 msgstr "Vraag"
 
-#: core/lib.py:200 core/lib.py:318
+#: core/lib.py:210 core/lib.py:337
 msgid "Wiki pages"
 msgstr "Wiki pagina's"
 
-#: core/lib.py:308
-msgid "Updates"
-msgstr "Updates"
-
-#: core/lib.py:309
-msgid "Blogs"
-msgstr "Blogs"
-
-#: core/lib.py:310
+#: core/lib.py:214 core/lib.py:329
 msgid "CMS pages"
 msgstr "CMS pagina's"
 
-#: core/lib.py:311
+#: core/lib.py:327
+msgid "Updates"
+msgstr "Updates"
+
+#: core/lib.py:328
+msgid "Blogs"
+msgstr "Blogs"
+
+#: core/lib.py:330
 msgid "Discussions"
 msgstr "Discussies"
 
-#: core/lib.py:312
+#: core/lib.py:331
 msgid "Events"
 msgstr "Agenda-items"
 
-#: core/lib.py:313
+#: core/lib.py:332
 msgid "Files"
 msgstr "Bestanden"
 
-#: core/lib.py:315
+#: core/lib.py:334
 msgid "Polls"
 msgstr "Polls"
 
-#: core/lib.py:316
+#: core/lib.py:335
 msgid "Questions"
 msgstr "Vragen"
 
-#: core/lib.py:317
+#: core/lib.py:336
 msgid "Tasks"
 msgstr "Taken"
 
-#: core/lib.py:319
+#: core/lib.py:338
 msgid "Comments"
 msgstr "Reacties"
 
-#: core/lib.py:320
+#: core/lib.py:339
 msgid "Groups"
 msgstr "Groepen"
 
@@ -548,19 +548,12 @@ msgstr ""
 "U bent toegevoegd als deelnemer voor %(title)s. Voor dit evenement heeft u de QR-code nodig die bij deze e-mail is gevoegd.<br><br>\n"
 
 #: core/templates/email/attend_event_with_qr_access.html:38
-#, python-format
-msgid ""
-"\n"
-"Date: %(startDate)s<br><br>\n"
-"\n"
-"Click on the link below to see the event.<br><br>\n"
-"<a href=\"%(link)s\">%(link)s</a>\n"
-msgstr ""
-"\n"
-"Datum: %(startDate)s<br><br>\n"
-"\n"
-"Klik op de onderstaande link om het evenement te zien.<br><br>\n"
-"<a href=\"%(link)s\">%(link)s</a>\n"
+msgid "Date: %(date)s"
+msgstr "Datum: %(date)s"
+
+#: core/templates/email/attend_event_with_qr_access.html:40
+msgid "Click on the link below to see the event."
+msgstr "Klik op de onderstaande link om het evenement te zien."
 
 #: core/templates/email/attend_event_without_account.html:5
 #, python-format
@@ -1236,12 +1229,12 @@ msgstr "Nieuwe toegangsaanvraag voor %(site_name)s"
 msgid "Saved"
 msgstr "Opgeslagen"
 
-#: event/models.py:122
+#: event/models.py:127
 #, python-format
 msgid "Added to event %s from waitinglist"
 msgstr "Toegevoegd aan evenement %s van wachtlijst"
 
-#: event/resolvers/mutation.py:417 event/tests/test_resolve_copy_entity.py:149
+#: event/resolvers/mutation.py:369 event/tests/test_resolve_copy_entity.py:149
 #, python-format
 msgid "Copy %s"
 msgstr "Kopie %s"
@@ -1251,7 +1244,7 @@ msgstr "Kopie %s"
 msgid "Confirmation of registration %s"
 msgstr "Bevestiging aanmelding %s"
 
-#: event/resolvers/mutation_confirm_attend_event_without_account.py:88
+#: event/resolvers/mutation_confirm_attend_event_without_account.py:92
 #, python-format
 msgid "Confirmation of registration for %s"
 msgstr "Bevestiging aanmelding voor %s"
@@ -1262,13 +1255,13 @@ msgid "Removed from event: %s"
 msgstr "Verwijderd uit evenement: %s"
 
 #: event/resolvers/mutation_messages.py:71
-#: event/tests/test_event_mailer.py:272
+#: event/tests/test_event_mailer.py:271
 #, python-brace-format
 msgid "Message from event {0}: {1}"
 msgstr "Bericht van gebeurtenis {0}: {1}"
 
 #: event/resolvers/mutation_messages.py:73
-#: event/tests/test_event_mailer.py:286
+#: event/tests/test_event_mailer.py:285
 #, python-brace-format
 msgid "Copy: Message from event {0}: {1}"
 msgstr "Kopie: Bericht van gebeurtenis {0}: {1}"
@@ -1277,7 +1270,7 @@ msgstr "Kopie: Bericht van gebeurtenis {0}: {1}"
 msgid "Message to event"
 msgstr "Bericht naar evenement"
 
-#: event/utils.py:22
+#: event/utils.py:33
 #, python-format
 msgid "QR code for %s"
 msgstr "QR code voor %s"

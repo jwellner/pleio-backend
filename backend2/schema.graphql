@@ -119,6 +119,7 @@ input addGroupInput {
   autoNotification: Boolean
   isLeavingGroupDisabled: Boolean
   isAutoMembershipEnabled: Boolean
+  isSubmitUpdatesEnabled: Boolean
   richDescription: SecureRichText
   introduction: String
   isIntroductionPublic: Boolean
@@ -620,6 +621,7 @@ input editGroupInput {
   autoNotification: Boolean
   isLeavingGroupDisabled: Boolean
   isAutoMembershipEnabled: Boolean
+  isSubmitUpdatesEnabled: Boolean
   richDescription: SecureRichText
   introduction: String
   isIntroductionPublic: Boolean
@@ -1059,6 +1061,7 @@ type Group implements Entity {
   autoNotification: Boolean
   isLeavingGroupDisabled: Boolean
   isAutoMembershipEnabled: Boolean
+  isSubmitUpdatesEnabled: Boolean
   membership: Membership
   accessIds: [AccessId]
   defaultAccessId: Int

@@ -48,6 +48,7 @@ def resolve_add_group(_, info, input):
     group.is_hidden = clean_input.get("isHidden", False)
     group.is_membership_on_request = clean_input.get("isMembershipOnRequest", False)
     group.auto_notification = clean_input.get("autoNotification", False)
+    group.is_submit_updates_enabled = clean_input.get("isSubmitUpdatesEnabled", True)
 
     if user.has_role(USER_ROLES.ADMIN):
         group.is_featured = clean_input.get("isFeatured", False)
