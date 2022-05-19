@@ -23,6 +23,7 @@ from .mutation_edit_entity import resolve_edit_entity
 from .mutation_copy_entity import resolve_copy_entity
 from .mutation_delete_entity import resolve_delete_entity
 from .mutation_delete_user import resolve_delete_user
+from .mutation_tags import resolve_merge_tags, resolve_extract_tag_synonym
 from .mutation_toggle_user_role import resolve_toggle_user_role
 from .mutation_toggle_user_is_banned import resolve_toggle_user_is_banned
 from .mutation_edit_users import resolve_edit_users
@@ -123,3 +124,6 @@ mutation.set_field("addAttachment", resolve_add_attachment)
 mutation.set_field("toggleEntityIsPinned", resolve_toggle_entity_is_pinned)
 mutation.set_field("editUserName", resolve_edit_user_name)
 mutation.set_field("addCommentWithoutAccount", resolve_add_comment_without_account)
+
+mutation.set_field("mergeTags", resolve_merge_tags)
+mutation.set_field("extractTagSynonym", resolve_extract_tag_synonym)

@@ -16,6 +16,7 @@ from core.lib import ACCESS_TYPE, tenant_schema, get_default_email_context, get_
 from core.constances import USER_ROLES
 from core.utils.convert import tiptap_to_text
 from .rich_fields import AttachmentMixin
+from .tags import TagsMixin
 
 logger = logging.getLogger(__name__)
 
@@ -32,7 +33,7 @@ class GroupManager(models.Manager):
         return self.get_queryset().exclude(hidden_groups_where_users_isnt_a_member)
 
 
-class Group(models.Model, AttachmentMixin):
+class Group(models.Model, AttachmentMixin, TagsMixin):
     class Meta:
         ordering = ['name']
 
@@ -85,8 +86,9 @@ class Group(models.Model, AttachmentMixin):
 
     auto_notification = models.BooleanField(default=False)
 
-    tags = ArrayField(models.CharField(max_length=256),
-                      blank=True, default=list)
+    _tag_summary = ArrayField(models.CharField(max_length=256),
+                              blank=True, default=list,
+                              db_column='tags')
     plugins = ArrayField(models.CharField(
         max_length=256), blank=True, default=list)
 

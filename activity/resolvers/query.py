@@ -1,9 +1,14 @@
+import logging
+
 from ariadne import ObjectType
 from core.models import Entity
 from django.db.models import Q
 from core.constances import ORDER_BY, ORDER_DIRECTION
+from core.resolvers.query_entities import conditional_tags_filter, conditional_tag_lists_filter
 
 query = ObjectType("Query")
+
+logger = logging.getLogger(__name__)
 
 
 def conditional_subtypes_filter(subtypes):
@@ -40,28 +45,13 @@ def conditional_subtypes_filter(subtypes):
 
     return q_objects
 
-def conditional_tags_filter(tags):
-    if tags:
-        filters = Q()
-        for tag in tags:
-            filters.add(Q(tags__icontains=tag), Q.AND)  # of Q.OR
-        return filters
-    return Q()
-
-def conditional_tag_lists_filter(tag_lists):
-    filters = Q()
-    if tag_lists:
-        for tags in tag_lists:
-            if tags:
-                filters.add(Q(tags__overlap=tags), Q.AND)  # of Q.OR
-    return filters
-
 def conditional_group_filter(container_guid):
     """ Filter on one group """
     if container_guid:
         return Q(group__id=container_guid)
 
     return Q()
+
 
 def conditional_groups_filter(group_filter, user):
     """ Filter on all or mine groups """

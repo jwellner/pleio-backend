@@ -1,8 +1,14 @@
+import logging
+
 from django.db.models import Q
 from django.db.models.functions import Coalesce
 from core.constances import ORDER_DIRECTION, ORDER_BY, INVALID_SUBTYPE
 from core.models import Entity
 from graphql import GraphQLError
+
+from core.models.tags import Tag
+
+logger = logging.getLogger(__name__)
 
 
 def conditional_subtypes_filter(subtypes):
@@ -74,8 +80,8 @@ def conditional_is_featured_filter(is_featured):
 def conditional_tags_filter(tags):
     if tags:
         filters = Q()
-        for tag in tags:
-            filters.add(Q(tags__overlap=[tag]), Q.AND)  # of Q.OR
+        for tag in Tag.translate_tags(tags):
+            filters.add(Q(_tag_summary__overlap=[tag]), Q.AND)  # of Q.OR
 
         return filters
     return Q()
@@ -86,7 +92,7 @@ def conditional_tag_lists_filter(tag_lists):
     if tag_lists:
         for tags in tag_lists:
             if tags:
-                filters.add(Q(tags__overlap=tags), Q.AND)  # of Q.OR
+                filters.add(Q(_tag_summary__overlap=Tag.translate_tags(tags)), Q.AND)
     return filters
 
 

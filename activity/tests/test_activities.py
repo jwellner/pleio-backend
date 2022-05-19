@@ -26,33 +26,37 @@ class ActivitiesTestCase(FastTenantTestCase):
             title="Blog1",
             owner=self.user1,
             read_access=[ACCESS_TYPE.public],
-            write_access=[ACCESS_TYPE.user.format(self.user1.id)],
-            tags=["tag_one", "tag_two"]
+            write_access=[ACCESS_TYPE.user.format(self.user1.id)]
         )
+        self.blog1.tags = ["tag_one", "tag_two"]
+        self.blog1.save()
         self.blog2 = Blog.objects.create(
             title="Blog2",
             owner=self.user1,
             read_access=[ACCESS_TYPE.public],
             write_access=[ACCESS_TYPE.user.format(self.user1.id)],
-            group=self.group2,
-            tags=["tag_two", "tag_three"]
+            group=self.group2
         )
+        self.blog2.tags = ["tag_two", "tag_three"]
+        self.blog2.save()
         self.blog3 = Blog.objects.create(
             title="Blog3",
             owner=self.user1,
             read_access=[ACCESS_TYPE.public],
             write_access=[ACCESS_TYPE.user.format(self.user1.id)],
-            group=self.group1,
-            tags=["tag_three"]
+            group=self.group1
         )
+        self.blog3.tags = ["tag_three"]
+        self.blog3.save()
         self.blog4 = Blog.objects.create(
             title="Blog4",
             owner=self.user2,
             read_access=[ACCESS_TYPE.group.format(self.group2.id)],
             write_access=[ACCESS_TYPE.user.format(self.user1.id)],
             group=self.group2,
-            tags=["tag_four"]
         )
+        self.blog4.tags = ["tag_four"]
+        self.blog4.save()
         self.blog5 = Blog.objects.create(
             title="Blog5",
             owner=self.user1,
@@ -98,63 +102,63 @@ class ActivitiesTestCase(FastTenantTestCase):
             }
 
             fragment BlogListFragment on Blog {
-            title
-            url
-            excerpt
-            richDescription
-            isHighlighted
-            featured {
-                image
-                video
-                videoTitle
-                positionY
-                __typename
-            }
-            subtype
-            tags
-            timeCreated
-            isBookmarked
-            canBookmark
-            canEdit
-            commentCount
-            comments {
-                guid
+                title
+                url
+                excerpt
                 richDescription
+                isHighlighted
+                featured {
+                    image
+                    video
+                    videoTitle
+                    positionY
+                    __typename
+                }
+                subtype
+                tags
                 timeCreated
+                isBookmarked
+                canBookmark
                 canEdit
+                commentCount
+                comments {
+                    guid
+                    richDescription
+                    timeCreated
+                    canEdit
+                    hasVoted
+                    votes
+                    owner {
+                    guid
+                    username
+                    name
+                    icon
+                    url
+                    __typename
+                    }
+                    __typename
+                }
                 hasVoted
                 votes
                 owner {
-                guid
-                username
-                name
-                icon
-                url
-                __typename
+                    guid
+                    username
+                    name
+                    icon
+                    url
+                    __typename
+                }
+                group {
+                    guid
+                    ... on Group {
+                    name
+                    url
+                    membership
+                    __typename
+                    }
+                    __typename
                 }
                 __typename
-            }
-            hasVoted
-            votes
-            owner {
-                guid
-                username
-                name
-                icon
-                url
-                __typename
-            }
-            group {
-                guid
-                ... on Group {
-                name
-                url
-                membership
-                __typename
-                }
-                __typename
-            }
-            __typename
             }
 
         """
@@ -228,11 +232,11 @@ class ActivitiesTestCase(FastTenantTestCase):
             "tagLists": [["tag_one", "tag_three"], ["tag_two"]]
         }
 
-        result = graphql_sync(schema, {"query": self.query, "variables": variables}, context_value={"request": request})
+        success, result = graphql_sync(schema, {"query": self.query, "variables": variables}, context_value={"request": request})
 
-        self.assertTrue(result[0])
+        self.assertIsNone(result.get('errors'))
 
-        data = result[1]["data"]
+        data = result.get("data")
 
         self.assertEqual(data["activities"]["total"], 2)
 
@@ -281,18 +285,20 @@ class ActivitiesTestCase(FastTenantTestCase):
             title="event",
             owner=self.user1,
             read_access=[ACCESS_TYPE.public],
-            write_access=[ACCESS_TYPE.user.format(self.user1.id)],
-            tags=["tag_one", "tag_two"]
+            write_access=[ACCESS_TYPE.user.format(self.user1.id)]
         )
+        event.tags = ["tag_one", "tag_two"]
+        event.save()
 
         subevent = Event.objects.create(
             title="subevent",
             owner=self.user1,
             read_access=[ACCESS_TYPE.public],
             write_access=[ACCESS_TYPE.user.format(self.user1.id)],
-            tags=["tag_one", "tag_two"],
             parent=event
         )
+        subevent.tags = ["tag_one", "tag_two"]
+        subevent.save()
 
         variables = {
             "limit": 20,

@@ -1,3 +1,4 @@
+import logging
 import uuid
 
 from django.contrib.auth.models import AnonymousUser
@@ -11,6 +12,9 @@ from model_utils.managers import InheritanceManager
 from core.lib import get_acl
 from core.constances import ENTITY_STATUS, USER_ROLES
 from core.models.shared import read_access_default, write_access_default
+from .tags import TagsMixin
+
+logger = logging.getLogger(__name__)
 
 
 class EntityManager(InheritanceManager):
@@ -84,7 +88,7 @@ class EntityManager(InheritanceManager):
         return qs.filter(read_access__overlap=list(get_acl(user)))
 
 
-class Entity(models.Model):
+class Entity(models.Model, TagsMixin):
     objects = EntityManager()
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
@@ -112,8 +116,9 @@ class Entity(models.Model):
 
     published = models.DateTimeField(default=timezone.now, null=True)
     is_archived = models.BooleanField(default=False)
-    tags = ArrayField(models.CharField(max_length=256),
-                      blank=True, default=list)
+    _tag_summary = ArrayField(models.CharField(max_length=256),
+                              blank=True, default=list,
+                              db_column='tags')
 
     notifications_created = models.BooleanField(default=False)
 

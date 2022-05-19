@@ -14,6 +14,7 @@ from django.http import HttpRequest
 from mixer.backend.django import mixer
 from django.utils import timezone
 
+
 class EntitiesTestCase(FastTenantTestCase):
 
     def setUp(self):
@@ -22,36 +23,45 @@ class EntitiesTestCase(FastTenantTestCase):
         self.user2 = mixer.blend(User)
         self.admin = mixer.blend(User, roles=['ADMIN'])
         self.group = mixer.blend(Group, owner=self.authenticatedUser)
+
         self.blog1 = Blog.objects.create(
             title="Blog1",
             owner=self.authenticatedUser,
             read_access=[ACCESS_TYPE.public],
             write_access=[ACCESS_TYPE.user.format(self.authenticatedUser.id)]
         )
+
         self.blog2 = Blog.objects.create(
             title="Blog2",
             owner=self.authenticatedUser,
             read_access=[ACCESS_TYPE.public],
             write_access=[ACCESS_TYPE.user.format(self.authenticatedUser.id)],
-            tags=["tag_one", "tag_four"]
+
         )
+        self.blog2.tags = ["tag_one", "tag_four"]
+        self.blog2.save()
+
         self.blog3 = Blog.objects.create(
             title="Blog4",
             owner=self.authenticatedUser,
             read_access=[ACCESS_TYPE.public],
             write_access=[ACCESS_TYPE.user.format(self.authenticatedUser.id)],
             group=self.group,
-            tags=["tag_two", "tag_one", "tag_four"]
         )
+        self.blog3.tags = ["tag_two", "tag_one", "tag_four"]
+        self.blog3.save()
+
         self.blog4 = Blog.objects.create(
             title="Blog3",
             owner=self.authenticatedUser,
             read_access=[ACCESS_TYPE.public],
             write_access=[ACCESS_TYPE.user.format(self.authenticatedUser.id)],
             group=self.group,
-            tags=["tag_four", "tag_three", "tag_one_extra"],
             is_featured=True
         )
+        self.blog4.tags = ["tag_four", "tag_three", "tag_one_extra"]
+        self.blog4.save()
+
         self.news1 = News.objects.create(
             title="News1",
             owner=self.authenticatedUser,
@@ -92,20 +102,24 @@ class EntitiesTestCase(FastTenantTestCase):
             read_access=[ACCESS_TYPE.public],
             write_access=[ACCESS_TYPE.user.format(self.authenticatedUser.id)],
             group=self.group,
-            tags=["tag_four", "tag_three"],
             is_featured=True,
             published=None
         )
+        self.blog_draft1.tags = ["tag_four", "tag_three"]
+        self.blog_draft1.save()
+
         self.blog_draft2 = Blog.objects.create(
             title="Blog draft2",
             owner=self.user2,
             read_access=[ACCESS_TYPE.public],
             write_access=[ACCESS_TYPE.user.format(self.authenticatedUser.id)],
             group=self.group,
-            tags=["tag_four", "tag_three"],
             is_featured=True,
             published=timezone.now() + timedelta(days=5)
         )
+        self.blog_draft2.tags = ["tag_four", "tag_three"]
+        self.blog_draft2.save()
+
         self.archived1 = Blog.objects.create(
             title="Archived 1",
             owner=self.authenticatedUser,
@@ -170,7 +184,6 @@ class EntitiesTestCase(FastTenantTestCase):
             }
             fragment EventListFragment on Event {
                 title
-                guid
             }
         """
 
@@ -272,12 +285,12 @@ class EntitiesTestCase(FastTenantTestCase):
 
         variables = {"tags": ["tag_one", "tag_two"]}
 
-        result = graphql_sync(schema, {"query": self.query, "variables": variables}, context_value={"request": request})
+        success, result = graphql_sync(schema, {"query": self.query, "variables": variables}, context_value={"request": request})
 
-        self.assertTrue(result[0])
+        self.assertIsNone(result.get('errors'), msg=result.get('errors'))
 
-        data = result[1]["data"]
-        self.assertEqual(data["entities"]["total"], 1)
+        data = result.get("data")
+        self.assertEqual(data["entities"]["total"], 1, msg=[edge['title'] for edge in data["entities"]["edges"]])
         self.assertEqual(data["entities"]["edges"][0]["guid"], self.blog3.guid)
 
     def test_entities_all_pages_by_admin(self):
@@ -302,12 +315,14 @@ class EntitiesTestCase(FastTenantTestCase):
 
         variables = {"tagLists": [["tag_four", "tag_three"], ["tag_one"]]}
 
-        result = graphql_sync(schema, {"query": self.query, "variables": variables}, context_value={"request": request})
+        success, result = graphql_sync(schema, {"query": self.query, "variables": variables},
+                                       context_value={"request": request})
 
-        self.assertTrue(result[0])
+        self.assertIsNone(result.get('errors'), msg=[result.get('errors'), self.query])
 
-        data = result[1]["data"]
-        self.assertEqual(data["entities"]["total"], 2)
+        data = result.get("data")
+        status_message = "Query resutl: %s" % [d['title'] for d in data["entities"]['edges']]
+        self.assertEqual(data["entities"]["total"], 2, msg=status_message)
 
     def test_entities_filtered_is_featured(self):
         request = HttpRequest()

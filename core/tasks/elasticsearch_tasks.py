@@ -4,8 +4,12 @@ from core.lib import get_model_by_subtype
 from django_elasticsearch_dsl.registries import registry
 from django_tenants.utils import schema_context
 from elasticsearch_dsl import Search
+
+from core.models import Group, Entity
+from core.utils.entity import load_entity_by_id
 from file.models import FileFolder
 from tenants.models import Client
+from user.models import User
 
 logger = get_task_logger(__name__)
 
@@ -83,7 +87,6 @@ def elasticsearch_repopulate_index_for_tenant(self, schema_name, index_name):
         else:
             models = registry.get_models()
 
-
         for index in registry.get_indices(models):
             logger.info('elasticsearch_repopulate_index_for_tenant \'%s\' \'%s\'', index_name, schema_name)
 
@@ -122,3 +125,14 @@ def elasticsearch_index_file(self, schema_name, file_guid):
 
         except Exception as e:
             logger.error('elasticsearch_update %s %s: %s', schema_name, file_guid, e)
+
+
+@shared_task()
+def elasticsaerch_index_document(schema_name, document_guid):
+    with schema_context(schema_name):
+        try:
+            instance = load_entity_by_id(document_guid, [Group, Entity, User])
+            registry.update(instance)
+            registry.update_related(instance)
+        except Exception as e:
+            logger.error('elasticsearch_index_document %s %s: %s', schema_name, document_guid, e)

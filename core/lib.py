@@ -142,6 +142,7 @@ def webpack_dev_server_is_available():
                 return False
     return False
 
+
 def get_access_id(acl):
     for x in acl:
         if x.startswith("subgroup:"):
@@ -475,3 +476,14 @@ def is_valid_uuid(val):
         return True
     except ValueError:
         return False
+
+
+class NumberIncrement:
+    def __init__(self, n=0):
+        self.n = n
+
+    def next(self):
+        try:
+            return self.n
+        finally:
+            self.n = self.n + 1
