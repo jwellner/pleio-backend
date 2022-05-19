@@ -79,6 +79,7 @@ class Group(models.Model, AttachmentMixin):
     is_membership_on_request = models.BooleanField(default=False)
     is_leaving_group_disabled = models.BooleanField(default=False)
     is_auto_membership_enabled = models.BooleanField(default=False)
+    is_submit_updates_enabled = models.BooleanField(default=True)
 
     is_hidden = models.BooleanField(default=False)
 

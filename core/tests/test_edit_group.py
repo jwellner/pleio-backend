@@ -77,6 +77,7 @@ class EditGroupCase(FastTenantTestCase):
                         isHidden
                         isMembershipOnRequest
                         isFeatured
+                        isSubmitUpdatesEnabled
                         autoNotification
                         tags
                         isLeavingGroupDisabled
@@ -97,6 +98,7 @@ class EditGroupCase(FastTenantTestCase):
                 "isClosed": True,
                 "isMembershipOnRequest": True,
                 "isFeatured": True,
+                "isSubmitUpdatesEnabled": False,
                 "autoNotification": True,
                 "tags": ["tag_one", "tag_two"],
                 "isLeavingGroupDisabled": True,
@@ -123,6 +125,7 @@ class EditGroupCase(FastTenantTestCase):
         self.assertEqual(data["editGroup"]["group"]["isFeatured"], False)
         self.assertEqual(data["editGroup"]["group"]["isLeavingGroupDisabled"], False)
         self.assertEqual(data["editGroup"]["group"]["isAutoMembershipEnabled"], False)
+        self.assertEqual(data["editGroup"]["group"]["isSubmitUpdatesEnabled"], False)
         self.assertEqual(data["editGroup"]["group"]["autoNotification"], variables["group"]["autoNotification"])
         self.assertEqual(data["editGroup"]["group"]["tags"], ["tag_one", "tag_two"])
 

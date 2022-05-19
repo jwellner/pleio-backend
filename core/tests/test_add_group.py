@@ -56,6 +56,7 @@ class AddGroupCase(FastTenantTestCase):
                         isClosed
                         isMembershipOnRequest
                         isFeatured
+                        isSubmitUpdatesEnabled
                         autoNotification
                         tags
                         isLeavingGroupDisabled
@@ -104,6 +105,7 @@ class AddGroupCase(FastTenantTestCase):
                         isHidden
                         isMembershipOnRequest
                         isFeatured
+                        isSubmitUpdatesEnabled
                         autoNotification
                         tags
                         isLeavingGroupDisabled
@@ -142,6 +144,7 @@ class AddGroupCase(FastTenantTestCase):
         self.assertEqual(data["addGroup"]["group"]["isFeatured"], False)
         self.assertEqual(data["addGroup"]["group"]["isLeavingGroupDisabled"], False)
         self.assertEqual(data["addGroup"]["group"]["isAutoMembershipEnabled"], False)
+        self.assertEqual(data["addGroup"]["group"]["isSubmitUpdatesEnabled"], True)
         self.assertEqual(data["addGroup"]["group"]["autoNotification"], variables["group"]["autoNotification"])
         self.assertEqual(data["addGroup"]["group"]["tags"], ["tag_one", "tag_two"])
         self.assertEqual(data["addGroup"]["group"]["requiredProfileFields"], [{"guid": self.profile_field.guid}])
