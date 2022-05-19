@@ -173,7 +173,7 @@ class ProfileTestCase(FastTenantTestCase):
 
         self.assertEqual(data["entity"]["profile"][2]["key"], "profile_field3")
         self.assertEqual(data["entity"]["profile"][2]["name"], "profile_field3_name")
-        self.assertEqual(data["entity"]["profile"][2]["value"], "option1, option2")
+        self.assertEqual(data["entity"]["profile"][2]["value"], "option1,option2")
         self.assertEqual(data["entity"]["profile"][2]["category"], "section_one")
         self.assertEqual(data["entity"]["profile"][2]["accessId"], 0)
         self.assertEqual(data["entity"]["profile"][2]["fieldType"], "multiSelectField")
@@ -340,3 +340,22 @@ class ProfileTestCase(FastTenantTestCase):
         with self.assertRaises(ValidationError):
             field.is_on_vcard = True
             field.save()
+
+    def test_profile_field_when_multi_select_values_change(self):
+        self.profile_field3.field_options = ['option2', 'option3']
+        self.profile_field3.save()
+
+        request = HttpRequest()
+        request.user = self.user1
+
+        variables = {"username": self.user1.guid}
+        success, result = graphql_sync(schema, {"query": self.query, "variables": variables}, context_value={"request": request})
+
+        profile_item = UserProfileField.objects.get(user_profile=self.user1.profile, profile_field=self.profile_field3)
+        self.assertIn('option1', profile_item.value)
+        self.assertIn('option2', profile_item.value)
+
+        profile_values = {p['key']: p['value'] for p in result['data']['entity']['profile']}
+        self.assertNotIn('option1', profile_values[self.profile_field3.key])
+        self.assertIn('option2', profile_values[self.profile_field3.key])
+

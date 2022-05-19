@@ -77,7 +77,7 @@ class UserProfile(models.Model):
         field.read_access = []
         try:
             user_profile_field = self.user_profile_fields.visible(current_user).get(profile_field=field)
-            field.value = user_profile_field.value
+            field.value = field.sane_value(user_profile_field.value)
             field.read_access = user_profile_field.read_access
         except ObjectDoesNotExist:
             field.read_access = [ACCESS_TYPE.logged_in]
@@ -192,6 +192,11 @@ class ProfileField(models.Model):
 
     def __str__(self):
         return f"ProfileField[{self.name}]"
+
+    def sane_value(self, value):
+        if self.field_type == 'multi_select_field':
+            return ",".join([s.strip() for s in filter(lambda x: x.strip() in self.field_options, value.split(','))])
+        return value
 
     def validate(self, value):
         if value:
