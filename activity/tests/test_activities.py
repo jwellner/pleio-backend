@@ -311,3 +311,54 @@ class ActivitiesTestCase(FastTenantTestCase):
         data = result[1]["data"]
 
         self.assertEqual(data["activities"]["edges"][0]["entity"]["guid"], event.guid)
+
+    def test_query_cms_textpages_explicit_subtypes(self):
+        query = """
+        query ExpectTextPagesOnly($subtypes: [String]) {
+            activities(subtypes: $subtypes) {
+                edges {
+                    entity {
+                        ... on Page {
+                           title
+                        }
+                    }
+                }
+            }
+        }
+        """
+
+        variables = {
+            "subtypes": ['page'],
+        }
+
+        request = HttpRequest()
+        request.user = self.user1
+        success, result = graphql_sync(schema, {"query": query, "variables": variables},
+                                       context_value={"request": request})
+
+        titles = [e['entity']['title'] for e in result['data']['activities']['edges']]
+        self.assertIn(self.textPage.title, titles, msg="Should contain textpage cms pages")
+        self.assertNotIn(self.campagnePage.title, titles, msg="Should contain only textpage cms pages")
+
+    def test_query_cms_textpages_implicit_subtypes(self):
+        query = """
+        query ExpectTextPagesOnly {
+            activities {
+                edges {
+                    entity {
+                        ... on Page {
+                           title
+                        }
+                    }
+                }
+            }
+        }
+        """
+
+        request = HttpRequest()
+        request.user = self.user1
+        success, result = graphql_sync(schema, {"query": query, "variables": {}}, context_value={"request": request})
+
+        titles = [e['entity'].get('title') for e in result['data']['activities']['edges']]
+        self.assertIn(self.textPage.title, titles, msg="Should contain textpage cms pages")
+        self.assertNotIn(self.campagnePage.title, titles, msg="Should contain only textpage cms pages")

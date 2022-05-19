@@ -13,6 +13,7 @@ from django.contrib.auth.models import AnonymousUser
 from django.http import HttpRequest
 from mixer.backend.django import mixer
 
+
 class PageTestCase(FastTenantTestCase):
 
     def setUp(self):
@@ -33,12 +34,12 @@ class PageTestCase(FastTenantTestCase):
                                               parent=self.page_parent
                                               )
         self.page_child2 = Page.objects.create(owner=self.user2,
-                                              read_access=[ACCESS_TYPE.user.format(self.user2.id)],
-                                              write_access=[ACCESS_TYPE.user.format(self.user2.id)],
-                                              title="Test child page other user",
-                                              rich_description="JSON to string",
-                                              parent=self.page_parent
-                                              )
+                                               read_access=[ACCESS_TYPE.user.format(self.user2.id)],
+                                               write_access=[ACCESS_TYPE.user.format(self.user2.id)],
+                                               title="Test child page other user",
+                                               rich_description="JSON to string",
+                                               parent=self.page_parent
+                                               )
         self.page_child_child = Page.objects.create(owner=self.user1,
                                                     read_access=[ACCESS_TYPE.public],
                                                     write_access=[ACCESS_TYPE.user.format(self.user1.id)],
@@ -52,7 +53,6 @@ class PageTestCase(FastTenantTestCase):
         self.user1.delete()
 
     def test_parent_page_by_anonymous(self):
-
         query = """
             query PageItem($guid: String!) {
                 entity(guid: $guid) {
@@ -98,7 +98,7 @@ class PageTestCase(FastTenantTestCase):
             "guid": self.page_parent.guid
         }
 
-        result = graphql_sync(schema, { "query": query, "variables": variables }, context_value={ "request": request })
+        result = graphql_sync(schema, {"query": query, "variables": variables}, context_value={"request": request})
 
         self.assertTrue(result[0])
 
@@ -115,10 +115,7 @@ class PageTestCase(FastTenantTestCase):
         self.assertEqual(data["entity"]["children"][0]["guid"], self.page_child.guid)
         self.assertEqual(data["entity"]["children"][0]["children"][0]["guid"], self.page_child_child.guid)
 
-
-
     def test_child_page_by_owner(self):
-
         query = """
             query PageItem($guid: String!) {
                 entity(guid: $guid) {
@@ -164,7 +161,7 @@ class PageTestCase(FastTenantTestCase):
             "guid": self.page_child.guid
         }
 
-        result = graphql_sync(schema, { "query": query, "variables": variables }, context_value={ "request": request })
+        result = graphql_sync(schema, {"query": query, "variables": variables}, context_value={"request": request})
 
         self.assertTrue(result[0])
 
