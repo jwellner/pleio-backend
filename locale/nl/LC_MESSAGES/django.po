@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-05-18 10:00+0200\n"
+"POT-Creation-Date: 2022-05-18 17:06+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -102,9 +102,9 @@ msgstr "Vraag"
 msgid "Wiki pages"
 msgstr "Wiki pagina's"
 
-#: core/lib.py:214 core/lib.py:329
-msgid "CMS pages"
-msgstr "CMS pagina's"
+#: core/lib.py:214
+msgid "Pages"
+msgstr "Pagina's"
 
 #: core/lib.py:327
 msgid "Updates"
@@ -113,6 +113,10 @@ msgstr "Updates"
 #: core/lib.py:328
 msgid "Blogs"
 msgstr "Blogs"
+
+#: core/lib.py:329
+msgid "CMS pages"
+msgstr "CMS pagina's"
 
 #: core/lib.py:330
 msgid "Discussions"

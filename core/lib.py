@@ -209,6 +209,10 @@ def get_activity_filters():
                 'key': 'wiki',
                 'value': ugettext_lazy("Wiki pages")
             },
+            {
+                'key': 'page',
+                'value': ugettext_lazy("Pages")
+            },
         ]
     }
 
