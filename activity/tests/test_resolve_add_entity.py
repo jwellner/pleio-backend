@@ -8,7 +8,7 @@ from django.http import HttpRequest
 from core.models import Group
 from user.models import User
 from ..models import StatusUpdate
-from core.constances import ACCESS_TYPE
+from core.constances import ACCESS_TYPE, COULD_NOT_ADD
 from mixer.backend.django import mixer
 from graphql import GraphQLError
 from datetime import datetime
@@ -87,3 +87,18 @@ class AddStatusUpdateTestCase(FastTenantTestCase):
         self.assertEqual(data["addEntity"]["entity"]["richDescription"], variables["input"]["richDescription"])
         self.assertEqual(data["addEntity"]["entity"]["inGroup"], True)
         self.assertEqual(data["addEntity"]["entity"]["group"]["guid"], self.group.guid)
+
+    def test_add_status_update_to_updates_disabled_group(self):
+        no_updates_group = mixer.blend(Group, owner=self.authenticatedUser, is_submit_updates_enabled=False)
+        no_updates_group.join(self.authenticatedUser, 'owner')
+
+        variables = self.data
+        variables["input"]["containerGuid"] = no_updates_group.guid
+
+        request = HttpRequest()
+        request.user = self.authenticatedUser
+
+        success, result = graphql_sync(schema, { "query": self.mutation, "variables": variables }, context_value={ "request": request })
+        error = result.get("errors", [])
+        self.assertIn(COULD_NOT_ADD, [e['message'] for e in error])
+
