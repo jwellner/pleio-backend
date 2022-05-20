@@ -303,6 +303,7 @@ class GroupTestCase(FastTenantTestCase):
                 entity(guid: $guid) {
                     ... on Group {
                         canChangeOwnership
+                        memberRole
                     }
                 }
             }
@@ -315,13 +316,16 @@ class GroupTestCase(FastTenantTestCase):
             "guid": self.group.guid
         }
 
-        result = graphql_sync(schema, { "query": query, "variables": variables }, context_value={ "request": request })
+        success, result = graphql_sync(schema, { "query": query, "variables": variables }, context_value={ "request": request })
 
-        self.assertTrue(result[0])
+        self.assertTrue(success)
+        self.assertNotIn('errors', result, msg=result.get('errors'))
+        self.assertIn('data', result, msg=result)
 
-        data = result[1]["data"]
+        data = result["data"]
 
         self.assertEqual(data["entity"]["canChangeOwnership"], True)
+        self.assertEqual(data["entity"]["memberRole"], 'owner')
 
     def test_group_can_change_ownership_member_admin(self):
         query = """
@@ -329,6 +333,7 @@ class GroupTestCase(FastTenantTestCase):
                 entity(guid: $guid) {
                     ... on Group {
                         canChangeOwnership
+                        memberRole
                     }
                 }
             }
@@ -341,13 +346,16 @@ class GroupTestCase(FastTenantTestCase):
             "guid": self.group.guid
         }
 
-        result = graphql_sync(schema, { "query": query, "variables": variables }, context_value={ "request": request })
+        success, result = graphql_sync(schema, { "query": query, "variables": variables }, context_value={ "request": request })
 
-        self.assertTrue(result[0])
+        self.assertTrue(success)
+        self.assertNotIn('errors', result, msg=result.get('errors'))
+        self.assertIn('data', result, msg=result)
 
-        data = result[1]["data"]
+        data = result["data"]
 
         self.assertEqual(data["entity"]["canChangeOwnership"], False)
+        self.assertEqual(data["entity"]["memberRole"], 'admin')
 
     def test_group_can_change_ownership_site_admin(self):
         query = """
@@ -355,6 +363,7 @@ class GroupTestCase(FastTenantTestCase):
                 entity(guid: $guid) {
                     ... on Group {
                         canChangeOwnership
+                        memberRole
                     }
                 }
             }
@@ -367,13 +376,15 @@ class GroupTestCase(FastTenantTestCase):
             "guid": self.group.guid
         }
 
-        result = graphql_sync(schema, { "query": query, "variables": variables }, context_value={ "request": request })
+        success, result = graphql_sync(schema, { "query": query, "variables": variables }, context_value={ "request": request })
 
-        self.assertTrue(result[0])
+        self.assertNotIn('errors', result, msg=result.get('errors'))
+        self.assertIn('data', result, msg=result)
 
-        data = result[1]["data"]
+        data = result["data"]
 
         self.assertEqual(data["entity"]["canChangeOwnership"], True)
+        self.assertEqual(data["entity"]["memberRole"], None)
 
     inaccessible_field = ["members", "invite", "invited", "membershipRequests"]
     def test_unaccessible_data_for_unauthenticated_user(self):
