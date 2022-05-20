@@ -35,17 +35,6 @@ class TestCleanGraphQLInput(FastTenantTestCase):
         self.assertEqual(result, d)
 
     @mock.patch("core.lib.Tiptap")
-    def test_external_url_check_is_called_for_rich_description(self, mock_tiptap):
-        d = {
-            "richDescription": "foo",
-        }
-
-        clean_graphql_input(d)
-
-        mock_tiptap.assert_called_once_with("foo")
-        mock_tiptap.return_value.check_for_external_urls.assert_called_once_with()
-
-    @mock.patch("core.lib.Tiptap")
     def test_external_url_check_is_not_called_if_no_rich_description(self, mock_tiptap):
         d = {
             "key:": "value"

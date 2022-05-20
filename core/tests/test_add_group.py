@@ -1,3 +1,5 @@
+from unittest import mock
+
 from django.db import connection
 from django_tenants.test.cases import FastTenantTestCase
 from backend2.schema import schema
@@ -42,7 +44,8 @@ class AddGroupCase(FastTenantTestCase):
             }
         }
 
-    def test_add_group_anon(self):
+    @mock.patch("core.resolvers.scalar.Tiptap")
+    def test_add_group_anon(self, mock_tiptap):
         mutation = """
             mutation ($group: addGroupInput!) {
                 addGroup(input: $group) {
@@ -75,6 +78,9 @@ class AddGroupCase(FastTenantTestCase):
         errors = result[1]["errors"]
 
         self.assertEqual(errors[0]["message"], "not_logged_in")
+
+        mock_tiptap.assert_called_once_with(self.data['group']['richDescription'])
+        mock_tiptap.return_value.check_for_external_urls.assert_called_once_with()
 
     @patch("core.lib.get_mimetype")
     @patch("{}.open".format(settings.DEFAULT_FILE_STORAGE))
