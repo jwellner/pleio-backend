@@ -5,3 +5,4 @@ from .mail_tasks import send_mail_multi, send_mail_multi_with_qr_code
 from .misc import import_users, replace_domain_links, image_resize
 from .notification_tasks import create_notifications_for_scheduled_content, create_notification
 from .cleanup_tasks import do_cleanup_featured_image_files
+from .migrate_tags import migrate_tags, revert_tags
