@@ -1072,6 +1072,7 @@ type Group implements Entity {
   isAutoMembershipEnabled: Boolean
   isSubmitUpdatesEnabled: Boolean
   membership: Membership
+  memberRole: Role
   accessIds: [AccessId]
   defaultAccessId: Int
   tags: [String]

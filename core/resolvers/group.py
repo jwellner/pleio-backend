@@ -296,6 +296,20 @@ def resolve_membership(group, info):
     return MEMBERSHIP.not_joined
 
 
+@group.field('memberRole')
+def resolve_memberrole(group, info):
+    user = info.context['request'].user
+
+    if group.owner == user:
+        return 'owner'
+
+    membership = group.members.filter(user=user).first()
+    if membership:
+        return membership.type
+
+    return None
+
+
 @group.field("accessIds")
 def resolve_access_ids(group, info):
     # pylint: disable=unused-argument
