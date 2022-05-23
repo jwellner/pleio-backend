@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Duits\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-05-18 17:06+0200\n"
+"POT-Creation-Date: 2022-05-23 12:19+0200\n"
 "PO-Revision-Date: 2021-05-26 10:55+0200\n"
 "Last-Translator: \n"
 "Language-Team: \n"
@@ -50,113 +50,117 @@ msgstr "Benachrichtigungs-E-Mails erhalten"
 msgid "Receive overview emails"
 msgstr "Übersichts-E-Mails erhalten"
 
-#: core/lib.py:161 core/resolvers/mutation_import_users.py:30
+#: core/lib.py:156 core/resolvers/mutation_import_users.py:30
 #: core/resolvers/query_site.py:70
 msgid "Just me"
 msgstr "Nur ich"
 
-#: core/lib.py:164
+#: core/lib.py:159
 #, python-format
 msgid "Group: %(group_name)s"
 msgstr "Gruppe: %(group_name)s"
 
-#: core/lib.py:167
+#: core/lib.py:162
 #, python-format
 msgid "Subgroup: %(subgroup_name)s"
 msgstr "Untergruppe: %(subgroup_name)s"
 
-#: core/lib.py:173 core/resolvers/mutation_import_users.py:31
+#: core/lib.py:168 core/resolvers/mutation_import_users.py:31
 #: core/resolvers/query_site.py:71
 msgid "Logged in users"
 msgstr "Angemeldete Benutzer"
 
-#: core/lib.py:175 core/resolvers/mutation_import_users.py:34
+#: core/lib.py:170 core/resolvers/mutation_import_users.py:34
 #: core/resolvers/query_site.py:75
 msgid "Public"
 msgstr "Öffentlich"
 
-#: core/lib.py:186
+#: core/lib.py:181
 msgid "Event"
 msgstr "Event"
 
-#: core/lib.py:190
+#: core/lib.py:185
 msgid "Blog"
 msgstr "Blog"
 
-#: core/lib.py:194
+#: core/lib.py:189
 msgid "Discussion"
 msgstr "Diskussion"
 
-#: core/lib.py:198 core/lib.py:333
+#: core/lib.py:193 core/lib.py:328
 msgid "News"
 msgstr "Neuigkeiten"
 
-#: core/lib.py:202
+#: core/lib.py:197
 msgid "Update"
 msgstr "Update"
 
-#: core/lib.py:206
+#: core/lib.py:201
 msgid "Question"
 msgstr "Frage"
 
-#: core/lib.py:210 core/lib.py:337
-msgid "Wiki pages"
-msgstr "Wiki-Seiten"
+#: core/lib.py:205
+msgid "Wiki"
+msgstr "Wiki"
 
-#: core/lib.py:214
-msgid "Pages"
-msgstr "Seiten"
+#: core/lib.py:209
+msgid "Text page"
+msgstr "Text Seite"
 
-#: core/lib.py:327
+#: core/lib.py:322
 msgid "Updates"
 msgstr "Updates"
 
-#: core/lib.py:328
+#: core/lib.py:323
 msgid "Blogs"
 msgstr "Blogs"
 
-#: core/lib.py:329
+#: core/lib.py:324
 msgid "CMS pages"
 msgstr "CMS-Seiten"
 
-#: core/lib.py:330
+#: core/lib.py:325
 msgid "Discussions"
 msgstr "Diskussionen"
 
-#: core/lib.py:331
+#: core/lib.py:326
 msgid "Events"
 msgstr "Events"
 
-#: core/lib.py:332
+#: core/lib.py:327
 msgid "Files"
 msgstr "Dateien"
 
-#: core/lib.py:334
+#: core/lib.py:329
 msgid "Polls"
 msgstr "Umfragen"
 
-#: core/lib.py:335
+#: core/lib.py:330
 msgid "Questions"
 msgstr "Fragen"
 
-#: core/lib.py:336
+#: core/lib.py:331
 msgid "Tasks"
 msgstr "Aufgaben"
 
-#: core/lib.py:338
+#: core/lib.py:332
+msgid "Wiki pages"
+msgstr "Wiki-Seiten"
+
+#: core/lib.py:333
 msgid "Comments"
 msgstr "Kommentare"
 
-#: core/lib.py:339
+#: core/lib.py:334
 msgid "Groups"
 msgstr "Gruppen"
 
-#: core/management/commands/send_overview_emails.py:90
+#: core/management/commands/send_overview_emails.py:92
 #, python-format
 msgid "Regular overview of %(site_name)s"
 msgstr "Regulärer Überblick über %(site_name)s"
 
-#: core/models/group.py:187
+#: core/models/group.py:190
 #, python-format
 msgid "Welcome to %(group_name)s"
 msgstr "Wilkommen zu: %(group_name)s"
