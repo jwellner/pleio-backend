@@ -78,7 +78,7 @@ urlpatterns = [
     path('', include('elgg.urls')),
 
     # Default catch all URL's
-    re_path(r'view\/(?P<entity_id>[0-9A-Fa-f-]+)\/(?:[^\/.]+)$', core_views.entity_view, name='entity_view'),
+    re_path(r'^.*\/view\/(?P<entity_id>[0-9A-Fa-f-]+)\/(?:[^\/.]+)$', core_views.entity_view, name='entity_view'),
     re_path(r'.*', core_views.default, name='default')
 ]
 
