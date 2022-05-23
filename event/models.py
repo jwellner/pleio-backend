@@ -2,6 +2,8 @@ from auditlog.registry import auditlog
 from django.db import models
 from django_tenants.utils import parse_tenant_config_path
 from django.utils.translation import ugettext_lazy
+
+from core import config
 from core.lib import get_default_email_context
 from core.models import Entity, CommentMixin, BookmarkMixin, NotificationMixin, FollowMixin, FeaturedCoverMixin, \
     ArticleMixin, AttachmentMixin
@@ -180,6 +182,7 @@ class EventAttendee(models.Model):
     created_at = models.DateTimeField(default=timezone.now)
     updated_at = models.DateTimeField(default=timezone.now)
 
+
     @property
     def user_icon(self):
         return self.user.icon if self.user else None
@@ -187,6 +190,12 @@ class EventAttendee(models.Model):
     @property
     def user_url(self):
         return self.user.url if self.user else None
+
+    @property
+    def language(self):
+        if self.user:
+            return self.user.get_language()
+        return config.LANGUAGE
 
     def __str__(self):
         return f"EventAttendee[{self.name}]"
@@ -201,6 +210,11 @@ class EventAttendee(models.Model):
             "url": self.user_url,
             "timeCheckedIn": self.checked_in_at
         }
+
+    def as_mailinfo(self):
+        return {'name': self.name,
+                'email': self.email,
+                'language': self.language}
 
 
 class EventAttendeeRequest(models.Model):

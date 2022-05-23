@@ -53,6 +53,9 @@ class EventsTestCase(FastTenantTestCase):
         self.third_attendee = mixer.blend(EventAttendee,
                                           event=self.event, user=mixer.blend(User), state='accept')
 
+        self.fourth_attendee = mixer.blend(EventAttendee,
+                                           event=self.event, name="Hippo", email="hippo@example.com", state='accept')
+
         self.outsider = mixer.blend(User)
 
     def test_event_mail_attendees_access(self):
@@ -110,7 +113,7 @@ class EventsTestCase(FastTenantTestCase):
                                                  sender=self.owner,
                                                  message=variables['input']['message'],
                                                  subject=variables['input']['subject'])
-        mocked_sender_send.assert_called_with(receiving_user=self.owner,
+        mocked_sender_send.assert_called_with(mail_info=self.owner.as_mailinfo(),
                                               copy=False)
 
     @mock.patch('event.resolvers.mutation_messages.SendEventMessage.send')
@@ -134,7 +137,7 @@ class EventsTestCase(FastTenantTestCase):
                                        context_value={"request": request})
         self.assertTrue('errors' not in result, msg=result)
 
-        mocked_sender_send.assert_called_once_with(receiving_user=self.owner,
+        mocked_sender_send.assert_called_once_with(mail_info=self.owner.as_mailinfo(),
                                                    copy=False)
 
     @mock.patch('event.resolvers.mutation_messages.SendEventMessage.send')
@@ -158,11 +161,13 @@ class EventsTestCase(FastTenantTestCase):
                                        context_value={"request": request})
         self.assertTrue('errors' not in result, msg=result)
 
-        mocked_sender_send.assert_any_call(receiving_user=self.attending_user,
+        mocked_sender_send.assert_any_call(mail_info=self.event_attendee.as_mailinfo(),
                                            copy=False)
-        mocked_sender_send.assert_any_call(receiving_user=self.second_attendee.user,
+        mocked_sender_send.assert_any_call(mail_info=self.second_attendee.as_mailinfo(),
                                            copy=False)
-        mocked_sender_send.assert_any_call(receiving_user=self.third_attendee.user,
+        mocked_sender_send.assert_any_call(mail_info=self.third_attendee.as_mailinfo(),
+                                           copy=False)
+        mocked_sender_send.assert_any_call(mail_info=self.fourth_attendee.as_mailinfo(),
                                            copy=False)
 
     @mock.patch('event.resolvers.mutation_messages.SendEventMessage.send')
@@ -186,7 +191,7 @@ class EventsTestCase(FastTenantTestCase):
                                        context_value={"request": request})
         self.assertTrue('errors' not in result, msg=result)
 
-        mocked_sender_send.assert_called_once_with(receiving_user=self.owner,
+        mocked_sender_send.assert_called_once_with(mail_info=self.owner.as_mailinfo(),
                                                    copy=True)
 
     def test_event_mailer_should_send_one_test_message(self):
@@ -231,7 +236,7 @@ class EventsTestCase(FastTenantTestCase):
                                        context_value={"request": request})
 
         self.assertTrue('errors' not in result, msg=result)
-        self.assertEqual(result['data']['sendMessageToEvent']['messageCount'], 3)
+        self.assertEqual(result['data']['sendMessageToEvent']['messageCount'], 4)
 
     def test_event_mailer_should_give_feedback_about_multiple_attendees_and_a_copy(self):
         request = HttpRequest()
@@ -254,7 +259,7 @@ class EventsTestCase(FastTenantTestCase):
                                        context_value={"request": request})
 
         self.assertTrue('errors' not in result, msg=result)
-        self.assertEqual(result['data']['sendMessageToEvent']['messageCount'], 4)
+        self.assertEqual(result['data']['sendMessageToEvent']['messageCount'], 5)
 
     @mock.patch('event.resolvers.mutation_messages.send_mail_multi.delay')
     def test_event_mailer_should_give_event_name_and_subject_in_mail_subject(self, mocked_send_mail_multi):
@@ -265,7 +270,7 @@ class EventsTestCase(FastTenantTestCase):
         mailer = SendEventMessage()
         mailer.populate(self.event, self.owner, "", expected_subject)
 
-        mailer.send(self.owner, copy=False)
+        mailer.send(self.owner.as_mailinfo(), copy=False)
 
         self.assertEqual(mocked_send_mail_multi.call_args.kwargs['subject'],
                          _("Message from event {0}: {1}").format(self.event.title, expected_subject))
@@ -279,7 +284,7 @@ class EventsTestCase(FastTenantTestCase):
         mailer = SendEventMessage()
         mailer.populate(self.event, self.owner, "", expected_subject)
 
-        mailer.send(self.owner, copy=True)
+        mailer.send(self.owner.as_mailinfo(), copy=True)
 
         self.assertEqual(mocked_send_mail_multi.call_args.kwargs['subject'],
                          _("Copy: Message from event {0}: {1}").format(self.event.title, expected_subject))

@@ -263,6 +263,13 @@ class User(AbstractBaseUser):
             return self.profile.language
         return config.LANGUAGE
 
+    def as_mailinfo(self):
+        return {
+            'name': self.name,
+            'email': self.email,
+            'language': self.get_language(),
+        }
+
     @property
     def guid(self):
         return str(self.id)
