@@ -60,7 +60,12 @@ def resolve_members(_, info, groupGuid, q="", filters=None, offset=0, limit=20):
         # Sort on name is score is equal
         query = query.sort(
             {'memberships.admin_weight': {'order': 'asc',
-                                          'nested': {'path': 'memberships'}}},
+                                          'nested': {
+                                              'path': 'memberships',
+                                              'filter': {
+                                                  'term': {'memberships.group_id': groupGuid}
+                                              },
+                                          }}},
             '_score',
             {'name.raw': {'order': 'asc'}},
         )
