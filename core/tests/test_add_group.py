@@ -1,3 +1,5 @@
+from unittest import mock
+
 from django.db import connection
 from django_tenants.test.cases import FastTenantTestCase
 from backend2.schema import schema
@@ -42,7 +44,8 @@ class AddGroupCase(FastTenantTestCase):
             }
         }
 
-    def test_add_group_anon(self):
+    @mock.patch("core.resolvers.scalar.Tiptap")
+    def test_add_group_anon(self, mock_tiptap):
         mutation = """
             mutation ($group: addGroupInput!) {
                 addGroup(input: $group) {
@@ -56,6 +59,7 @@ class AddGroupCase(FastTenantTestCase):
                         isClosed
                         isMembershipOnRequest
                         isFeatured
+                        isSubmitUpdatesEnabled
                         autoNotification
                         tags
                         isLeavingGroupDisabled
@@ -74,6 +78,9 @@ class AddGroupCase(FastTenantTestCase):
         errors = result[1]["errors"]
 
         self.assertEqual(errors[0]["message"], "not_logged_in")
+
+        mock_tiptap.assert_called_once_with(self.data['group']['richDescription'])
+        mock_tiptap.return_value.check_for_external_urls.assert_called_once_with()
 
     @patch("core.lib.get_mimetype")
     @patch("{}.open".format(settings.DEFAULT_FILE_STORAGE))
@@ -104,6 +111,7 @@ class AddGroupCase(FastTenantTestCase):
                         isHidden
                         isMembershipOnRequest
                         isFeatured
+                        isSubmitUpdatesEnabled
                         autoNotification
                         tags
                         isLeavingGroupDisabled
@@ -124,8 +132,9 @@ class AddGroupCase(FastTenantTestCase):
                                        context_value={"request": request})
 
         data = result.get("data")
+        errors = result.get("errors")
 
-        self.assertTrue(success, msg="Er gaat iets mis bij het maken van een groep")
+        self.assertIsNone(errors, msg=errors)
 
         self.assertEqual(data["addGroup"]["group"]["name"], variables["group"]["name"])
         self.assertIn('/icon.png', data["addGroup"]["group"]["icon"])
@@ -142,6 +151,7 @@ class AddGroupCase(FastTenantTestCase):
         self.assertEqual(data["addGroup"]["group"]["isFeatured"], False)
         self.assertEqual(data["addGroup"]["group"]["isLeavingGroupDisabled"], False)
         self.assertEqual(data["addGroup"]["group"]["isAutoMembershipEnabled"], False)
+        self.assertEqual(data["addGroup"]["group"]["isSubmitUpdatesEnabled"], True)
         self.assertEqual(data["addGroup"]["group"]["autoNotification"], variables["group"]["autoNotification"])
         self.assertEqual(data["addGroup"]["group"]["tags"], ["tag_one", "tag_two"])
         self.assertEqual(data["addGroup"]["group"]["requiredProfileFields"], [{"guid": self.profile_field.guid}])

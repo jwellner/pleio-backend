@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-05-18 10:00+0200\n"
+"POT-Creation-Date: 2022-05-23 12:19+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -49,109 +49,117 @@ msgstr "Ontvang notificatie emails"
 msgid "Receive overview emails"
 msgstr "Ontvang overzicht emails"
 
-#: core/lib.py:161 core/resolvers/mutation_import_users.py:30
+#: core/lib.py:156 core/resolvers/mutation_import_users.py:30
 #: core/resolvers/query_site.py:70
 msgid "Just me"
 msgstr "Alleen eigenaar"
 
-#: core/lib.py:164
+#: core/lib.py:159
 #, python-format
 msgid "Group: %(group_name)s"
 msgstr "Groep: %(group_name)s"
 
-#: core/lib.py:167
+#: core/lib.py:162
 #, python-format
 msgid "Subgroup: %(subgroup_name)s"
 msgstr "Subgroep: %(subgroup_name)s"
 
-#: core/lib.py:173 core/resolvers/mutation_import_users.py:31
+#: core/lib.py:168 core/resolvers/mutation_import_users.py:31
 #: core/resolvers/query_site.py:71
 msgid "Logged in users"
 msgstr "Ingelogde gebruikers"
 
-#: core/lib.py:175 core/resolvers/mutation_import_users.py:34
+#: core/lib.py:170 core/resolvers/mutation_import_users.py:34
 #: core/resolvers/query_site.py:75
 msgid "Public"
 msgstr "Iedereen (publiek zichtbaar)"
 
-#: core/lib.py:186
+#: core/lib.py:181
 msgid "Event"
 msgstr "Agenda-item"
 
-#: core/lib.py:190
+#: core/lib.py:185
 msgid "Blog"
 msgstr "Blog"
 
-#: core/lib.py:194
+#: core/lib.py:189
 msgid "Discussion"
 msgstr "Discussie"
 
-#: core/lib.py:198 core/lib.py:333
+#: core/lib.py:193 core/lib.py:328
 msgid "News"
 msgstr "Nieuws"
 
-#: core/lib.py:202
+#: core/lib.py:197
 msgid "Update"
 msgstr "Update"
 
-#: core/lib.py:206
+#: core/lib.py:201
 msgid "Question"
 msgstr "Vraag"
 
-#: core/lib.py:210 core/lib.py:337
-msgid "Wiki pages"
-msgstr "Wiki pagina's"
+#: core/lib.py:205
+msgid "Wiki"
+msgstr "Wiki"
 
-#: core/lib.py:214 core/lib.py:329
-msgid "CMS pages"
-msgstr "CMS pagina's"
+#: core/lib.py:209
+msgid "Text page"
+msgstr "Tekst pagina"
 
-#: core/lib.py:327
+#: core/lib.py:322
 msgid "Updates"
 msgstr "Updates"
 
-#: core/lib.py:328
+#: core/lib.py:323
 msgid "Blogs"
 msgstr "Blogs"
 
-#: core/lib.py:330
+#: core/lib.py:324
+msgid "CMS pages"
+msgstr "CMS pagina's"
+
+#: core/lib.py:325
 msgid "Discussions"
 msgstr "Discussies"
 
-#: core/lib.py:331
+#: core/lib.py:326
 msgid "Events"
 msgstr "Agenda-items"
 
-#: core/lib.py:332
+#: core/lib.py:327
 msgid "Files"
 msgstr "Bestanden"
 
-#: core/lib.py:334
+#: core/lib.py:329
 msgid "Polls"
 msgstr "Polls"
 
-#: core/lib.py:335
+#: core/lib.py:330
 msgid "Questions"
 msgstr "Vragen"
 
-#: core/lib.py:336
+#: core/lib.py:331
 msgid "Tasks"
 msgstr "Taken"
 
-#: core/lib.py:338
+#: core/lib.py:332
+msgid "Wiki pages"
+msgstr "Wiki pagina's"
+
+#: core/lib.py:333
 msgid "Comments"
 msgstr "Reacties"
 
-#: core/lib.py:339
+#: core/lib.py:334
 msgid "Groups"
 msgstr "Groepen"
 
-#: core/management/commands/send_overview_emails.py:90
+#: core/management/commands/send_overview_emails.py:92
 #, python-format
 msgid "Regular overview of %(site_name)s"
 msgstr "Periodiek overzicht van %(site_name)s"
 
-#: core/models/group.py:187
+#: core/models/group.py:190
 #, python-format
 msgid "Welcome to %(group_name)s"
 msgstr "Welkom bij: %(group_name)s"
@@ -548,6 +556,7 @@ msgstr ""
 "U bent toegevoegd als deelnemer voor %(title)s. Voor dit evenement heeft u de QR-code nodig die bij deze e-mail is gevoegd.<br><br>\n"
 
 #: core/templates/email/attend_event_with_qr_access.html:38
+#, python-format
 msgid "Date: %(date)s"
 msgstr "Datum: %(date)s"
 

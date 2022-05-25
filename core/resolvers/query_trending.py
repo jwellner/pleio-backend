@@ -18,11 +18,11 @@ def resolve_trending(_, info):
 
     voted_object_ids = Annotation.objects.filter(key='voted')[0:250].values_list('object_id', flat=True)
 
-    entities = Entity.objects.filter(id__in=voted_object_ids).values('id', 'tags')
+    entities = Entity.objects.filter(id__in=voted_object_ids).values('id', '_tag_summary')
 
     # Create list with dictionaries: [{'id': [tags]}]
     for entity in entities:
-        entity_tags[entity['id']] = entity['tags']
+        entity_tags[entity['id']] = entity['_tag_summary']
 
     # Add all tag lists to a list
     for object_id in voted_object_ids:

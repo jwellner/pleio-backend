@@ -46,30 +46,32 @@ def resolve_search(_, info, q=None, containerGuid=None, type=None, subtype=None,
         q = '*'
 
     s = Search(index='_all').query(
-        Q('simple_query_string', query=q, fields=[
-            'title^3',
-            'name^3',
-            'email',
-            'description',
-            'tags^3',
-            'file_contents',
-            'introduction',
-            'comments.description',
-            'owner.name',
-        ])
-        | Q('bool', must=[
-            Q('simple_query_string', query=q, fields=['profile.user_profile_fields.value']),
-            Q('terms', profile__user_profile_fields__read_access=list(get_acl(user))),
-        ])
+            Q('simple_query_string', query=q, fields=[
+                    'title^3',
+                    'name^3',
+                    'email',
+                    'description',
+                    'tags^3',
+                    'tags_matches',
+                    'file_contents',
+                    'introduction',
+                    'comments.description',
+                    'owner.name'
+                ]
+            )
+            | Q('bool', must=[
+                Q('simple_query_string', query=q, fields=['profile.user_profile_fields.value']),
+                Q('terms', profile__user_profile_fields__read_access=list(get_acl(user))),
+            ])
     ).filter(
-        'terms', read_access=list(get_acl(user))
-    ).filter(
-        'term', tenant_name=tenant_name
-    ).filter(
-        'range', created_at={'gte': date_from, 'lte': date_to}
-    ).exclude(
-        'term', is_active=False
-    )
+            'terms', read_access=list(get_acl(user))
+        ).filter(
+            'term', tenant_name=tenant_name
+        ).filter(
+            'range', created_at={'gte': date_from, 'lte': date_to}
+        ).exclude(
+            'term', is_active=False
+        )
 
     s = s.query('bool', filter=[
         Q('range', published={'gt': None, 'lte': timezone.now()}) |

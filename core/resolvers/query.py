@@ -3,6 +3,7 @@ from django.core.exceptions import ObjectDoesNotExist
 from graphql import GraphQLError
 from core.models import Entity, Group, EntityView, EntityViewCount
 from user.models import User
+from .query_tags import resolve_list_tags
 from .query_bookmarks import resolve_bookmarks
 from .query_entities import resolve_entities
 from .query_filters import resolve_filters
@@ -38,6 +39,12 @@ query.set_field("top", resolve_top)
 query.set_field("trending", resolve_trending)
 query.set_field("users", resolve_users)
 query.set_field("usersByBirthDate", resolve_users_by_birth_date)
+query.set_field("notifications", resolve_notifications)
+query.set_field("trending", resolve_trending)
+query.set_field("recommended", resolve_recommended)
+query.set_field("top", resolve_top)
+query.set_field("filters", resolve_filters)
+query.set_field("tags", resolve_list_tags)
 query.set_field("viewer", resolve_viewer)
 
 

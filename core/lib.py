@@ -112,12 +112,6 @@ def clean_graphql_input(values, always_include=None):
     """ Cleanup resolver input """
     # TODO: what are we going to do with values which kan be omitted or can be NULL
 
-    # Prevent external attachment URLs
-    rich_description = values.get("richDescription")
-    if rich_description:
-        tiptap = Tiptap(rich_description)
-        tiptap.check_for_external_urls()
-
     # Remove items with None values from dict except for timePublished data
     return {k: v for k, v in values.items() if
             (v is not None) or (k == 'timePublished') or (always_include and (k in always_include))}
@@ -141,6 +135,7 @@ def webpack_dev_server_is_available():
             except Exception:
                 return False
     return False
+
 
 def get_access_id(acl):
     for x in acl:
@@ -207,7 +202,11 @@ def get_activity_filters():
             },
             {
                 'key': 'wiki',
-                'value': ugettext_lazy("Wiki pages")
+                'value': ugettext_lazy("Wiki")
+            },
+            {
+                'key': 'page',
+                'value': ugettext_lazy("Text page")
             },
         ]
     }
@@ -471,3 +470,14 @@ def is_valid_uuid(val):
         return True
     except ValueError:
         return False
+
+
+class NumberIncrement:
+    def __init__(self, n=0):
+        self.n = n
+
+    def next(self):
+        try:
+            return self.n
+        finally:
+            self.n = self.n + 1

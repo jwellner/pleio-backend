@@ -296,6 +296,20 @@ def resolve_membership(group, info):
     return MEMBERSHIP.not_joined
 
 
+@group.field('memberRole')
+def resolve_memberrole(group, info):
+    user = info.context['request'].user
+
+    if group.owner == user:
+        return 'owner'
+
+    membership = group.members.filter(user=user).first()
+    if membership:
+        return membership.type
+
+    return None
+
+
 @group.field("accessIds")
 def resolve_access_ids(group, info):
     # pylint: disable=unused-argument
@@ -335,6 +349,12 @@ def resolve_profile_fields_filter(group, info):
 def resolve_required_profile_fields_filter(group, info):
     # pylint: disable=unused-argument
     return [setting.profile_field for setting in group.profile_field_settings.filter(is_required=True)]
+
+
+@group.field("isSubmitUpdatesEnabled")
+def resolve_updates_enabled_field(obj, info):
+    # pylint: disable=unused-argument
+    return obj.is_submit_updates_enabled
 
 
 group.set_field("excerpt", shared.resolve_entity_excerpt)

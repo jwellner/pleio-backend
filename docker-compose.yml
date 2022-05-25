@@ -100,6 +100,8 @@ services:
       interval: 20s
       retries: 10
       test: curl -s http://localhost:9200/_cluster/health | grep -vq '"status":"red"'
+    ports:
+      - 19200:9200
 
   mailcatcher:
     restart: on-failure:10

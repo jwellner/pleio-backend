@@ -60,6 +60,8 @@ def resolve_edit_group(_, info, input):
         group.is_membership_on_request = clean_input.get("isMembershipOnRequest")
     if 'autoNotification' in clean_input:
         group.auto_notification = clean_input.get("autoNotification")
+    if "isSubmitUpdatesEnabled" in clean_input:
+        group.is_submit_updates_enabled = clean_input.get("isSubmitUpdatesEnabled")
 
     if user.has_role(USER_ROLES.ADMIN):
         if 'isFeatured' in clean_input:

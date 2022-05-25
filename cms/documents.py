@@ -11,6 +11,9 @@ class CmsDocument(DefaultDocument):
     tags = fields.ListField(fields.TextField(
         fields={'raw': fields.KeywordField()}
     ))
+    tags_matches = fields.ListField(fields.TextField(
+        fields={'raw': fields.KeywordField()}
+    ))
     read_access = fields.ListField(fields.KeywordField())
     type = fields.KeywordField(attr="type_to_string")
     title = fields.TextField(
@@ -29,6 +32,10 @@ class CmsDocument(DefaultDocument):
 
     def prepare_tags(self, instance):
         return [x.lower() for x in instance.tags]
+
+    def get_queryset(self):
+        qs = super(CmsDocument, self).get_queryset()
+        return qs.filter(page_type='text')
 
     class Index:
         name = 'page'

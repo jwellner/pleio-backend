@@ -2,6 +2,7 @@ from datetime import timedelta
 from django.utils import timezone
 from django_tenants.test.cases import FastTenantTestCase
 from core.models import Group, GroupInvitation, Entity
+from core.models.tags import Tag, TagSynonym
 from user.models import User
 from file.models import FileFolder
 from core.constances import ACCESS_TYPE, ENTITY_STATUS
@@ -10,6 +11,7 @@ from ariadne import graphql_sync
 from django.contrib.auth.models import AnonymousUser
 from django.http import HttpRequest
 from mixer.backend.django import mixer
+
 
 class EntityTestCase(FastTenantTestCase):
 
@@ -42,7 +44,8 @@ class EntityTestCase(FastTenantTestCase):
             read_access=[ACCESS_TYPE.public],
             write_access=[ACCESS_TYPE.user.format(self.authenticatedUser.id)]
         )
-        self.invitation = GroupInvitation.objects.create(code="7d97cea90c83722c7262", invited_user=self.user1, group=self.group)
+        self.invitation = GroupInvitation.objects.create(code="7d97cea90c83722c7262", invited_user=self.user1,
+                                                         group=self.group)
 
     def tearDown(self):
         self.group.delete()
@@ -53,7 +56,6 @@ class EntityTestCase(FastTenantTestCase):
         self.authenticatedUser.delete()
 
     def test_entity_user_anonymous(self):
-
         query = """
             query getUser($username: String!) {
                 entity(username: $username) {
@@ -73,7 +75,7 @@ class EntityTestCase(FastTenantTestCase):
             "username": self.authenticatedUser.guid
         }
 
-        result = graphql_sync(schema, { "query": query, "variables": variables }, context_value={ "request": request })
+        result = graphql_sync(schema, {"query": query, "variables": variables}, context_value={"request": request})
 
         self.assertTrue(result[0])
 
@@ -84,7 +86,6 @@ class EntityTestCase(FastTenantTestCase):
         self.assertEqual(data["entity"]["__typename"], "User")
 
     def test_entity_user_by_username(self):
-
         query = """
             query getUser($username: String!) {
                 entity(username: $username) {
@@ -104,7 +105,7 @@ class EntityTestCase(FastTenantTestCase):
             "username": self.authenticatedUser.guid
         }
 
-        result = graphql_sync(schema, { "query": query, "variables": variables }, context_value={ "request": request })
+        result = graphql_sync(schema, {"query": query, "variables": variables}, context_value={"request": request})
 
         self.assertTrue(result[0])
 
@@ -115,7 +116,6 @@ class EntityTestCase(FastTenantTestCase):
         self.assertEqual(data["entity"]["__typename"], "User")
 
     def test_entity_user_by_guid(self):
-
         query = """
             query getUser($guid: String!) {
                 entity(guid: $guid) {
@@ -132,7 +132,7 @@ class EntityTestCase(FastTenantTestCase):
             "guid": self.authenticatedUser.guid
         }
 
-        result = graphql_sync(schema, { "query": query, "variables": variables }, context_value={ "request": request })
+        result = graphql_sync(schema, {"query": query, "variables": variables}, context_value={"request": request})
 
         self.assertTrue(result[0])
 
@@ -142,7 +142,6 @@ class EntityTestCase(FastTenantTestCase):
         self.assertEqual(data["entity"]["__typename"], "User")
 
     def test_entity_group(self):
-
         query = """
             query getGroup($guid: String!) {
                 entity(guid: $guid) {
@@ -159,7 +158,7 @@ class EntityTestCase(FastTenantTestCase):
             "guid": self.group.guid
         }
 
-        result = graphql_sync(schema, { "query": query, "variables": variables }, context_value={ "request": request })
+        result = graphql_sync(schema, {"query": query, "variables": variables}, context_value={"request": request})
 
         self.assertTrue(result[0])
 
@@ -169,7 +168,6 @@ class EntityTestCase(FastTenantTestCase):
         self.assertEqual(data["entity"]["__typename"], "Group")
 
     def test_entity_file_folder(self):
-
         query = """
             query getFileFolder($guid: String!) {
                 entity(guid: $guid) {
@@ -186,7 +184,7 @@ class EntityTestCase(FastTenantTestCase):
             "guid": self.file.guid
         }
 
-        result = graphql_sync(schema, { "query": query, "variables": variables }, context_value={ "request": request })
+        result = graphql_sync(schema, {"query": query, "variables": variables}, context_value={"request": request})
 
         self.assertTrue(result[0])
 
@@ -211,14 +209,13 @@ class EntityTestCase(FastTenantTestCase):
             "guid": self.file.guid
         }
 
-        result = graphql_sync(schema, { "query": query, "variables": variables }, context_value={ "request": request })
+        result = graphql_sync(schema, {"query": query, "variables": variables}, context_value={"request": request})
 
         self.assertTrue(result[0])
         data = result[1]["data"]
         self.assertEqual(data["entity"]["guid"], self.file.guid)
 
     def test_entity_breadcrumb_file_folder(self):
-
         query = """
             query Breadcrumb($guid: String!) {
                 breadcrumb(guid: $guid) {
@@ -238,7 +235,7 @@ class EntityTestCase(FastTenantTestCase):
             "guid": self.file.guid
         }
 
-        result = graphql_sync(schema, { "query": query, "variables": variables }, context_value={ "request": request })
+        result = graphql_sync(schema, {"query": query, "variables": variables}, context_value={"request": request})
 
         self.assertTrue(result[0])
 
@@ -246,6 +243,7 @@ class EntityTestCase(FastTenantTestCase):
 
         self.assertEqual(data["breadcrumb"][0]["guid"], self.folder.guid)
         self.assertEqual(data["breadcrumb"][1]["guid"], self.subFolder.guid)
+
 
 class EntityModelTestCase(FastTenantTestCase):
 
@@ -268,3 +266,17 @@ class EntityModelTestCase(FastTenantTestCase):
                 result = entity.status_published
 
                 self.assertEqual(result, expected)
+
+
+class TagModelTestCase(FastTenantTestCase):
+
+    def test_tag_translation_table(self):
+        tag1 = Tag.objects.create(label='tag1')
+        Tag.objects.create(label='tag2')
+        Tag.objects.create(label='tag3')
+        TagSynonym.objects.create(label='tag1.1', tag=tag1)
+        TagSynonym.objects.create(label='tag1.2', tag=tag1)
+        TagSynonym.objects.create(label='tag1.3', tag=tag1)
+
+        input_tags = ['tag1.1', 'tag2', 'tag4']
+        self.assertEqual([t for t in Tag.translate_tags(input_tags)], ['tag1', 'tag2', 'tag4'])

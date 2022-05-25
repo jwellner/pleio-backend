@@ -1,9 +1,14 @@
+import logging
+
 from ariadne import ObjectType
 from core.models import Entity
 from django.db.models import Q
 from core.constances import ORDER_BY, ORDER_DIRECTION
+from core.resolvers.query_entities import conditional_tags_filter, conditional_tag_lists_filter
 
 query = ObjectType("Query")
+
+logger = logging.getLogger(__name__)
 
 
 def conditional_subtypes_filter(subtypes):
@@ -24,6 +29,8 @@ def conditional_subtypes_filter(subtypes):
                 q_objects.add(~Q(question__isnull=True), Q.OR)
             elif object_type == 'wiki':
                 q_objects.add(~Q(wiki__isnull=True), Q.OR)
+            elif object_type == 'page':
+                q_objects.add(~Q(page__isnull=True) & ~Q(page__page_type='campagne'), Q.OR)
     else:
         # activities should only search for these entities:
         q_objects.add(~Q(news__isnull=True), Q.OR)
@@ -33,25 +40,10 @@ def conditional_subtypes_filter(subtypes):
         q_objects.add(~Q(statusupdate__isnull=True), Q.OR)
         q_objects.add(~Q(question__isnull=True), Q.OR)
         q_objects.add(~Q(wiki__isnull=True), Q.OR)
+        q_objects.add(~Q(page__isnull=True) & ~Q(page__page_type='campagne'), Q.OR)
 
 
     return q_objects
-
-def conditional_tags_filter(tags):
-    if tags:
-        filters = Q()
-        for tag in tags:
-            filters.add(Q(tags__icontains=tag), Q.AND)  # of Q.OR
-        return filters
-    return Q()
-
-def conditional_tag_lists_filter(tag_lists):
-    filters = Q()
-    if tag_lists:
-        for tags in tag_lists:
-            if tags:
-                filters.add(Q(tags__overlap=tags), Q.AND)  # of Q.OR
-    return filters
 
 def conditional_group_filter(container_guid):
     """ Filter on one group """
@@ -59,6 +51,7 @@ def conditional_group_filter(container_guid):
         return Q(group__id=container_guid)
 
     return Q()
+
 
 def conditional_groups_filter(group_filter, user):
     """ Filter on all or mine groups """

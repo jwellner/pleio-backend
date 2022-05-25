@@ -19,9 +19,10 @@ from .site import site
 from .profile_field_validator import profile_field_validator
 from .attachment import attachment
 from .filters import filters
+from .scalar import secure_rich_text
 
 resolvers = [
     query, mutation, viewer, entity, user, group, member, comment, profile_item,
     profile_field_validator, widget, invite, subgroup_list, subgroup, email_overview,
-    notification, site, attachment, notifications_list, filters
+    notification, site, attachment, notifications_list, filters, secure_rich_text
 ]
