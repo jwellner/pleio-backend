@@ -17,6 +17,4 @@ data:
   FROM_EMAIL: noreply@mail.pleio.nl
   MEDIA_ROOT: /app-data
   BACKUP_PATH: /backup-storage
-  SWIFT_ENABLED: "False"
-  S3_ENABLED: "False"
   CSP_REPORT_ONLY: {{ .Values.cspReportOnly | quote }}

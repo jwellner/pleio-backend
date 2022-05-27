@@ -19,12 +19,6 @@ email:
   host:
   port:
 
-s3: {}
-# accessKeyId:
-# secretAccessKey:
-# storageBucketName:
-# endpointUrl:
-
 apm: {}
 # serviceName:
 # token:
