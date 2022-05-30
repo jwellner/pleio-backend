@@ -1,4 +1,6 @@
 import ipaddress
+
+from django_tenants.utils import parse_tenant_config_path
 from graphql import GraphQLError
 from core import config
 from core.models import Setting, ProfileField
@@ -363,6 +365,11 @@ def resolve_edit_site_setting(_, info, input):
                     language=admin_user.get_language()
                 )
             save_setting('IS_CLOSED', clean_input.get('isClosed'))
+
+    if {'favicon', 'name', 'description'} & set(clean_input.keys()):
+        # pylint: disable=import-outside-toplevel
+        from concierge.tasks import sync_site
+        sync_site.delay(parse_tenant_config_path(''))
 
     return {
         "siteSettings": get_site_settings()
