@@ -5,7 +5,7 @@ from django.conf import settings
 from django_elasticsearch_dsl.registries import registry
 from django_elasticsearch_dsl.signals import BaseSignalProcessor
 from django_tenants.utils import parse_tenant_config_path
-from core.tasks import elasticsearch_index_file
+from core.tasks.elasticsearch_tasks import elasticsearch_index_file
 
 logger = logging.getLogger(__name__)
 

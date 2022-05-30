@@ -214,7 +214,6 @@ Possible tasknames and arguments:
 - core.tasks.elasticsearch_tasks.elasticsearch_rebuild_all ["{index_name}"]
 - core.tasks.elasticsearch_tasks.elasticsearch_rebuild, ["{schema_name}"]
 - core.tasks.elasticsearch_tasks.elasticsearch_rebuild, ["{schema_name}","{index_name}"]
-- core.tasks.elasticsearch_tasks.elasticsearch_index_file, ["{schema_name}", "{file_guid}"]
 
 Some example commands:
 

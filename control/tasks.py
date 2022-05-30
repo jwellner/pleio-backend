@@ -11,6 +11,7 @@ from celery.utils.log import get_task_logger
 from core.models import SiteStat, Attachment, Entity, CommentMixin, Comment, GroupMembership, Group, Subgroup
 from core.lib import ACCESS_TYPE, access_id_to_acl, get_access_id
 from core.utils.tiptap_parser import Tiptap
+from core.tasks.elasticsearch_tasks import elasticsearch_delete_data_for_tenant
 from django_tenants.utils import schema_context
 from django.core.management import call_command
 from django.core.files.base import ContentFile
@@ -76,7 +77,11 @@ def delete_site(self, site_id):
             tenant.auto_drop_schema = True
 
             file_path = os.path.join(settings.MEDIA_ROOT, tenant.schema_name)
+            schema_name = tenant.schema_name
             tenant.delete()
+
+            # remove elasticsearch data
+            elasticsearch_delete_data_for_tenant(schema_name)
 
             # delete files
             if os.path.exists(file_path):
