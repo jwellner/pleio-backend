@@ -300,12 +300,13 @@ def resolve_membership(group, info):
 def resolve_memberrole(group, info):
     user = info.context['request'].user
 
-    if group.owner == user:
-        return 'owner'
+    if user.is_authenticated:
+        if group.owner == user:
+            return 'owner'
 
-    membership = group.members.filter(user=user).first()
-    if membership:
-        return membership.type
+        membership = group.members.filter(user=user).first()
+        if membership:
+            return membership.type
 
     return None
 
