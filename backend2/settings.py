@@ -83,7 +83,7 @@ if os.getenv('EMAIL_PORT'):
 
 if os.getenv('AWS_SES_ACCESS_KEY_ID'):
     EMAIL_BACKEND = 'django_ses.SESBackend'
-    AWS_SES_REGION_NAME = os.getenv('AWS_SES_REGION_NAME') # 'us-west-2'
+    AWS_SES_REGION_NAME = os.getenv('AWS_SES_REGION_NAME')  # 'us-west-2'
     AWS_SES_REGION_ENDPOINT = os.getenv('AWS_SES_REGION_ENDPOINT') #'email.us-west-2.amazonaws.com'
 
     AWS_SES_ACCESS_KEY_ID = os.getenv('AWS_SES_ACCESS_KEY_ID')
@@ -113,7 +113,7 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 SHARED_APPS = [
     'django_tenants',  # mandatory
-    'tenants', # you must list the app where your tenant model resides in
+    'tenants',  # you must list the app where your tenant model resides in
     'django.contrib.contenttypes',
     'django.contrib.staticfiles',
     'django.contrib.admin',
@@ -139,6 +139,7 @@ TENANT_APPS = [
     'notifications',
     'autotranslate',
     'auditlog',
+    'post_deploy',
     'concierge',
     'core',
     'user',
@@ -419,7 +420,7 @@ CSP_SCRIPT_SRC = [
     "'strict-dynamic'",
     "https:",
     "http:"
-] # for backward compatibility with older browsers that don't support strict-dynamic
+]  # for backward compatibility with older browsers that don't support strict-dynamic
 CSP_CONNECT_SRC = [
     "'self'",
     "https://stats.pleio.nl",
@@ -454,3 +455,13 @@ if DEBUG:
 
 AUTOTRANSLATE_TRANSLATOR_SERVICE = 'core.services.translate_service.DeeplTranslatorService'
 DEEPL_TOKEN = os.getenv('DEEPL_TOKEN', None)
+
+POST_DEPLOY_CELERY_APP = 'backend2.celery.app'
+POST_DEPLOY_SCHEDULER_MANAGER = 'post_deploy.plugins.scheduler.celery.CeleryScheduler'
+POST_DEPLOY_CONTEXT_MANAGER = 'post_deploy.plugins.context.tenant.TenantContext'
+
+SILENCED_SYSTEM_CHECKS = [
+    # Warning at auditlog.LogEntry.additional_data
+    # For more information: run the application without this line.
+    'django_jsonfield_backport.W001'
+]

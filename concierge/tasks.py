@@ -10,6 +10,7 @@ from django.utils import timezone
 from django_tenants.utils import schema_context
 from requests import RequestException, ConnectionError as RequestConnectionError
 
+from core.lib import tenant_summary
 from tenants.models import Client
 from user.models import User
 
@@ -73,14 +74,9 @@ def submit_user_token(schema, user):
             settings.ACCOUNT_API_URL, user.external_id,
         )
 
-        url_schema = "http" if settings.ENV == 'local' else "https"
-        url_port = ":8000" if settings.ENV == 'local' else ""
+        data = {'origin_token': token}
+        data.update({f"origin_site_{key}": value for key, value in tenant_summary().items()})
 
-        data = {
-            'origin_site_url': "{}://{}{}".format(url_schema, origin.primary_domain, url_port),
-            'origin_site_name': origin.name,
-            'origin_token': token,
-        }
         response = requests.post(url, data=data, headers={
             'x-oidc-client-id': settings.OIDC_RP_CLIENT_ID,
             'x-oidc-client-secret': settings.OIDC_RP_CLIENT_SECRET,
@@ -91,6 +87,23 @@ def submit_user_token(schema, user):
             logger.error("Failed to sync a user origin_token for reason '%s'", response.reason)
 
     except RequestConnectionError as e:
-        # Allow retry next time.
-        user.profile.update_origin_token(None)
         logger.warning("Error during submit_user_token: %s", repr(e))
+        user.profile.update_origin_token(None)
+
+
+@shared_task
+def sync_site(schema_name):
+    with schema_context(schema_name):
+        try:
+            url = f"{settings.ACCOUNT_API_URL}/api/users/update_origin_site"
+            data = {f"origin_site_{key}": value for key, value in tenant_summary().items()}
+
+            response = requests.post(url, data=data, headers={
+                'x-oidc-client-id': settings.OIDC_RP_CLIENT_ID,
+                'x-oidc-client-secret': settings.OIDC_RP_CLIENT_SECRET,
+            })
+            if not response.ok:
+                logger.error("Failed to sync new site attributes for reason: '%s'", response.reason)
+
+        except RequestConnectionError as e:
+            logger.warning("Error during sync site attributes: %s", repr(e))

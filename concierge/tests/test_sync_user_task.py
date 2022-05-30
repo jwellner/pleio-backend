@@ -1,11 +1,13 @@
 import uuid
 from unittest import mock
 
+from django.conf import settings
 from django.test import override_settings
 from django_tenants.test.cases import FastTenantTestCase
 from mixer.backend.django import mixer
 from requests import ConnectionError as RequestConnectionError
 
+from core.lib import tenant_summary
 from user.models import User
 
 
@@ -28,14 +30,18 @@ class TestTasksTestCase(FastTenantTestCase):
     def test_user_submit_properly_formatted_request_to_concierge(self, mocked_uuid, mocked_post):
         mocked_uuid.return_value = self.expected_uuid
 
-        from concierge.tasks import sync_user, settings
+        from concierge.tasks import sync_user
         sync_user(self.tenant.schema_name, self.user.id)
+
+        expected_site_config = tenant_summary()
 
         mocked_post.assert_called_with(
             "{}/api/users/register_origin_site/{}".format(settings.ACCOUNT_API_URL, self.user.external_id),
             data={
-                "origin_site_url": "https://{}".format(self.tenant.primary_domain),
-                "origin_site_name": self.tenant.name,
+                "origin_site_url": expected_site_config['url'],
+                "origin_site_name": expected_site_config['name'],
+                "origin_site_description": expected_site_config['description'],
+                "origin_site_favicon": expected_site_config['favicon'],
                 "origin_token": self.expected_uuid,
             },
             headers={

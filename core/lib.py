@@ -20,8 +20,6 @@ from django.utils.text import slugify
 from django.utils.translation import ugettext, ugettext_lazy
 from enum import Enum
 
-from core.utils.tiptap_parser import Tiptap
-
 
 class TypeModels(Enum):
     """Can be used to convert GraphQL types to Django models"""
@@ -250,10 +248,25 @@ def is_valid_json(string):
 
 def get_base_url():
     try:
+        url_schema = "http" if settings.ENV == 'local' else "https"
+        url_port = ":8000" if settings.ENV == 'local' else ""
         tenant = apps.get_model('tenants.Client').objects.get(schema_name=connection.schema_name)
-        return 'https://' + tenant.get_primary_domain().domain
+        return f'{url_schema}://{tenant.get_primary_domain().domain}{url_port}'
     except Exception:
         return ''
+
+
+def get_full_url(relative_path):
+    return f"{get_base_url()}{relative_path}"
+
+
+def tenant_summary():
+    return {
+        'url': get_base_url(),
+        'name': config.NAME,
+        'description': config.DESCRIPTION,
+        'favicon': get_full_url(config.FAVICON) if config.FAVICON else None,
+    }
 
 
 def get_default_email_context(user=None):
