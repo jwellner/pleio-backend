@@ -386,6 +386,35 @@ class GroupTestCase(FastTenantTestCase):
         self.assertEqual(data["entity"]["canChangeOwnership"], True)
         self.assertEqual(data["entity"]["memberRole"], None)
 
+    def test_group_cannot_change_ownership_anonymous(self):
+        query = """
+            query Group($guid: String!) {
+                entity(guid: $guid) {
+                    ... on Group {
+                        canChangeOwnership
+                        memberRole
+                    }
+                }
+            }
+
+        """
+        request = HttpRequest()
+        request.user = self.anonymousUser
+
+        variables = {
+            "guid": self.group.guid
+        }
+
+        success, result = graphql_sync(schema, { "query": query, "variables": variables }, context_value={ "request": request })
+
+        self.assertNotIn('errors', result, msg=result.get('errors'))
+        self.assertIn('data', result, msg=result)
+
+        data = result["data"]
+
+        self.assertEqual(data["entity"]["canChangeOwnership"], False)
+        self.assertEqual(data["entity"]["memberRole"], None)
+
     inaccessible_field = ["members", "invite", "invited", "membershipRequests"]
     def test_unaccessible_data_for_unauthenticated_user(self):
         for field in self.inaccessible_field:
