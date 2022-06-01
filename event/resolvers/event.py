@@ -159,8 +159,14 @@ def resolve_is_attending_parent(obj, info):
     # pylint: disable=unused-argument
     if obj.parent is None:
         return True
+
+    user = info.context["request"].user
+
+    if not user.is_authenticated:
+        return False
+
     try:
-        EventAttendee.objects.get(user=info.context["request"].user, event=obj.parent, state='accept')
+        EventAttendee.objects.get(user=user, event=obj.parent, state='accept')
         return True
     except ObjectDoesNotExist:
         pass

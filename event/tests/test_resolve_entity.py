@@ -66,6 +66,8 @@ class EventTestCase(FastTenantTestCase):
             attend_event_without_account=True
         )
 
+        self.anonymousUser = AnonymousUser()
+
         EventAttendee.objects.create(
             event=self.eventPrivate,
             state='accept',
@@ -281,6 +283,18 @@ class EventTestCase(FastTenantTestCase):
         data = result[1]["data"]
 
         self.assertEqual(data["entity"], None)
+
+    def test_subevent_anonymous_user(self):
+        request = HttpRequest()
+        request.user = self.anonymousUser
+
+        variables = {
+            "guid": self.subEventPublic .guid
+        }
+
+        result = graphql_sync(schema, { "query": self.query , "variables": variables}, context_value={ "request": request })
+
+        self.assertTrue(result[0])
 
     def test_subevent_attending_parent(self):
         request = HttpRequest()
