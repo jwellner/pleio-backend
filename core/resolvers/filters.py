@@ -18,9 +18,9 @@ def get_filter_options(key, user, group=None):
     user_acl = list(get_acl(user))
 
     s = Search(index='user').filter(
-        Q('bool', must=[
-            Q('terms', profile__user_profile_fields__read_access=user_acl)
-        ])
+        Q('nested', path='user_profile_fields', query=Q('bool', must=[
+            Q('terms', user_profile_fields__read_access=user_acl)
+        ]))
     ).filter(
         'term', tenant_name=tenant_name
     ).exclude(
@@ -37,7 +37,7 @@ def get_filter_options(key, user, group=None):
         )
 
     for hit in s.scan():
-        for field in hit['profile']['user_profile_fields']:
+        for field in hit['user_profile_fields']:
             if field['key'] == key and not set(user_acl).isdisjoint(set(field['read_access'])):
                 if field['value_list']:
                     options.extend(field['value_list'])

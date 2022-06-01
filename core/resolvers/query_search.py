@@ -10,9 +10,8 @@ from django_tenants.utils import parse_tenant_config_path
 from django.utils import dateparse, timezone
 
 
-def resolve_search(_, info, q=None, containerGuid=None, type=None, subtype=None, dateFrom=None, dateTo=None, offset=0,
-                   limit=20,
-                   tagLists=None, orderBy=None, orderDirection=ORDER_DIRECTION.asc):
+def resolve_search(_, info, q=None, containerGuid=None, type=None, subtype=None, dateFrom=None, dateTo=None, offset=0, limit=20,
+                    tagLists=None, orderBy=None, orderDirection=ORDER_DIRECTION.asc):
     # pylint: disable=unused-argument
     # pylint: disable=too-many-arguments
     # pylint: disable=redefined-builtin
@@ -59,11 +58,13 @@ def resolve_search(_, info, q=None, containerGuid=None, type=None, subtype=None,
                     'owner.name'
                 ]
             )
-            | Q('bool', must=[
-                Q('simple_query_string', query=q, fields=['profile.user_profile_fields.value']),
-                Q('terms', profile__user_profile_fields__read_access=list(get_acl(user))),
-            ])
-    ).filter(
+            | Q('nested', path='user_profile_fields', ignore_unmapped=True, query=Q('bool', must=[
+                    Q('match', user_profile_fields__value=q),
+                    Q('terms', user_profile_fields__read_access=list(get_acl(user)))
+                    ]
+                )
+            )
+        ).filter(
             'terms', read_access=list(get_acl(user))
         ).filter(
             'term', tenant_name=tenant_name
@@ -98,7 +99,7 @@ def resolve_search(_, info, q=None, containerGuid=None, type=None, subtype=None,
     a = A('terms', field='type')
     s.aggs.bucket('type_terms', a)
 
-    s = s[offset:offset + limit]
+    s = s[offset:offset+limit]
     response = s.execute()
 
     # TODO: maybe response can be extended, so duplicate code can be removed
@@ -106,8 +107,7 @@ def resolve_search(_, info, q=None, containerGuid=None, type=None, subtype=None,
         totals.append({"subtype": t.key, "total": t.doc_count})
         total = total + t.doc_count
 
-    if subtype and subtype in ['file', 'folder', 'blog', 'discussion', 'event', 'news', 'question', 'wiki', 'page',
-                               'user', 'group']:
+    if subtype and subtype in ['file', 'folder', 'blog', 'discussion', 'event', 'news', 'question', 'wiki', 'page', 'user', 'group']:
         s = s.filter('term', type=subtype)
         response = s.execute()
 
