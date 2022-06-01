@@ -1,4 +1,3 @@
-from django.db.models import Q
 from django_elasticsearch_dsl import Document, fields
 from django_elasticsearch_dsl.registries import registry
 from django_tenants.utils import parse_tenant_config_path
@@ -58,17 +57,20 @@ class UserDocument(DefaultDocument):
     )
     external_id = fields.KeywordField()
 
-    profile = fields.ObjectField(properties={
-        "user_profile_fields": fields.ObjectField(properties={
-            'key': fields.KeywordField(),
+    user_profile_fields = fields.NestedField(
+        attr='_profile.user_profile_fields',
+        properties={
+            'value': fields.TextField(
+                attr='value_field_indexing',
+                fields={'raw': fields.KeywordField()}
+            ),
             'name': fields.KeywordField(),
-            'value': fields.TextField(analyzer=custom_analyzer,
-                                      fields={'raw': fields.KeywordField()}),
-            'value_date': fields.DateField(),
-            'value_list': fields.ListField(fields.KeywordField()),
-            'read_access': fields.ListField(fields.KeywordField()),
-        })
-    })
+            'key': fields.KeywordField(),
+            'read_access': fields.ListField(fields.TextField(attr="read_access")),
+            'value_list': fields.ListField(fields.KeywordField(attr="value_list_field_indexing"))
+        }
+    )
+
 
     last_online = fields.DateField()
 
@@ -80,16 +82,6 @@ class UserDocument(DefaultDocument):
 
     def prepare_last_online(self, instance):
         return instance.profile.last_online
-
-    def prepare_profile(self, instance):
-        return {"user_profile_fields": [{'key': f.key,
-                                         'name': f.name,
-                                         'value': f.value_field_indexing,
-                                         'value_date': f.value_date,
-                                         'value_list': f.value_list_field_indexing,
-                                         'read_access': f.read_access} for f in
-                                        instance.profile.user_profile_fields.all()
-                                        ]}
 
     class Index:
         name = 'user'

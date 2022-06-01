@@ -273,12 +273,8 @@ class UserProfileField(models.Model):
     @property
     def value_field_indexing(self):
         """Format value according to type"""
-        if self.profile_field.field_type == "multi_select_field":
-            return ", ".join(self.value_list_field_indexing)
         if self.profile_field.field_type == "html_field":
             return tiptap_to_text(self.value)
-        if self.profile_field.field_type == "date_field":
-            return None
 
         return self.value
 
