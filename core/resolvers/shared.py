@@ -6,24 +6,14 @@ from django.core.exceptions import ObjectDoesNotExist
 
 from core.utils.convert import tiptap_to_text, truncate_rich_description
 from graphql import GraphQLError
-from core.lib import html_to_text, tenant_schema
+from core.lib import html_to_text, tenant_schema, entity_access_id
 from file.models import FileFolder
 from file.tasks import resize_featured
 
 
 def resolve_entity_access_id(obj, info):
     # pylint: disable=unused-argument
-    if obj.group and obj.group.subgroups:
-        for subgroup in obj.group.subgroups.all():
-            if ACCESS_TYPE.subgroup.format(subgroup.access_id) in obj.read_access:
-                return subgroup.access_id
-    if obj.group and ACCESS_TYPE.group.format(obj.group.id) in obj.read_access:
-        return 4
-    if ACCESS_TYPE.public in obj.read_access:
-        return 2
-    if ACCESS_TYPE.logged_in in obj.read_access:
-        return 1
-    return 0
+    return entity_access_id(obj)
 
 
 def resolve_entity_write_access_id(obj, info):
