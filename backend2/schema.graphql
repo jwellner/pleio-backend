@@ -1478,6 +1478,7 @@ type Page implements Entity {
   hasChildren: Boolean
   children: [Page]
   parent: Page
+  menu: MenuItem
   richDescription: SecureRichText
   excerpt: String
   url: String

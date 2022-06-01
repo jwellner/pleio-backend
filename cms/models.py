@@ -52,6 +52,18 @@ class Page(Entity, AttachmentMixin):
         return 'page'
 
     @property
+    def parents(self):
+        parents = []
+        child = self
+        while child.parent:
+            if child.parent in parents:
+                break
+            parents.append(child.parent)
+            child = child.parent
+        return [page for page in reversed(parents)]
+
+
+    @property
     def rich_fields(self):
         return [self.rich_description]
 

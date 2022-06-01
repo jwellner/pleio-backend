@@ -485,6 +485,20 @@ def is_valid_uuid(val):
         return False
 
 
+def entity_access_id(entity):
+    if entity.group and entity.group.subgroups:
+        for subgroup in entity.group.subgroups.all():
+            if ACCESS_TYPE.subgroup.format(subgroup.access_id) in entity.read_access:
+                return subgroup.access_id
+    if entity.group and ACCESS_TYPE.group.format(entity.group.id) in entity.read_access:
+        return 4
+    if ACCESS_TYPE.public in entity.read_access:
+        return 2
+    if ACCESS_TYPE.logged_in in entity.read_access:
+        return 1
+    return 0
+
+
 class NumberIncrement:
     def __init__(self, n=0):
         self.n = n
