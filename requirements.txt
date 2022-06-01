@@ -14,7 +14,6 @@ simplejson==3.17.6
 graphql-core==3.2.1
 django-model-utils==4.2.0
 mixer==7.2.2
-django-storage-swift==1.2.19
 elastic-apm==6.9.1
 opentracing==2.4.0
 django-notifications-hq==1.7.0
@@ -27,12 +26,12 @@ django-ses==2.6.1
 textract==1.6.3
 html2text==2020.1.16
 django-widget-tweaks==1.4.12
-pydash==5.0.2
+pydash==5.1.0
 django-signal-disabler==0.1.1
 colour==0.1.5
 pytz==2022.1
 django-auditlog==1.0.0
-requests==2.26.0
+requests==2.27.1
 redis==3.5.3
 elasticsearch==7.17.3
 clamd==1.0.2
@@ -41,3 +40,4 @@ prosemirror-py==0.2
 django-autotranslate==1.2.0
 futures==2.2.0 # remove when autotranslate dependency is fixed
 qrcode==7.3.1
+django_post_deploy==1.2.2

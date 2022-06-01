@@ -1,4 +1,6 @@
 from ariadne import ObjectType
+
+from core.lib import entity_access_id
 from core.resolvers import shared
 
 
@@ -28,6 +30,21 @@ def resolve_parent(obj, info):
 def resolve_url(obj, info):
     # pylint: disable=unused-argument
     return obj.url
+
+
+@page.field("menu")
+def resolve_menu(obj, info):
+    # pylint: disable=unused-argument
+    top_parent = obj if not obj.parent else obj.parents[0]
+    return build_menu(top_parent)
+
+
+def build_menu(page):
+    return {"title": page.title,
+            "link": page.url,
+            "children": [build_menu(c) for c in page.children.all()],
+            "accessId": entity_access_id(page)}
+
 
 @page.field("canEdit")
 def resolve_can_edit(obj, info):

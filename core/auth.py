@@ -13,6 +13,7 @@ from django.utils.http import urlencode
 
 from core import config
 from core.constances import OIDC_PROVIDER_OPTIONS
+from core.lib import tenant_summary
 from core.models import SiteInvitation, SiteAccessRequest
 
 import logging
@@ -195,16 +196,11 @@ class OIDCAuthBackend(OIDCAuthenticationBackend):
             ),
         }
 
-
         if settings.ACCOUNT_SYNC_ENABLED and settings.ACCOUNT_API_URL:
             # Fresh origin token.
             origin_token = uuid.uuid4()
 
-            url_schema = "http" if settings.ENV == 'local' else "https"
-            url_port = ":8000" if settings.ENV == 'local' else ""
-
-            token_payload['origin_name'] = request.tenant.name
-            token_payload['origin_url'] = "{}://{}{}".format(url_schema, request.tenant.primary_domain, url_port)
+            token_payload.update({f"origin_{key}": value for key, value in tenant_summary().items()})
             token_payload['origin_token'] = origin_token
         else:
             origin_token = None

@@ -14,10 +14,65 @@ import os
 from elasticapm.contrib.opentracing import Tracer
 from opentracing import set_global_tracer
 
-from .config import *  # pylint: disable=unused-wildcard-import
+SECRET_KEY = os.getenv('SECRET_KEY')
+DEBUG = os.getenv('DEBUG') == 'True'
+ENV = os.getenv('ENV')
+ALLOWED_HOSTS = [os.getenv('ALLOWED_HOST')]
 
-APM_ENABLED = os.getenv('APM_ENABLED') == 'True'
-APM_OPENTRACING_ENABLED = os.getenv('APM_OPENTRACING_ENABLED') == 'True'
+# Database
+DATABASES = {
+    'default': {
+        'ENGINE': 'django_tenants.postgresql_backend',
+        'HOST': os.getenv('DB_HOST'),
+        'USER': os.getenv('DB_USER'),
+        'PASSWORD': os.getenv('DB_PASSWORD'),
+        'NAME': os.getenv('DB_NAME'),
+    },
+}
+
+if os.getenv('DB_HOST_REPLICA'):
+    DATABASES["replica"] = {
+        'ENGINE': 'django_tenants.postgresql_backend',
+        'HOST': os.getenv('DB_HOST_REPLICA'),
+        'USER': os.getenv('DB_USER'),
+        'PASSWORD': os.getenv('DB_PASSWORD'),
+        'NAME': os.getenv('DB_NAME'),
+    }
+
+if os.getenv('ELGG_DB_HOST'):
+    DATABASES["elgg_control"] = {
+        'ENGINE': 'django.db.backends.mysql',
+        'HOST': os.getenv('ELGG_DB_HOST'),
+        'USER': os.getenv('ELGG_DB_USER'),
+        'PASSWORD': os.getenv('ELGG_DB_PASSWORD'),
+        'NAME': os.getenv('ELGG_DB_NAME')
+    }
+
+OIDC_RP_CLIENT_ID = os.getenv('OIDC_RP_CLIENT_ID')
+OIDC_RP_CLIENT_SECRET = os.getenv('OIDC_RP_CLIENT_SECRET')
+OIDC_RP_SCOPES = 'openid profile email'
+
+OIDC_OP_AUTHORIZATION_ENDPOINT = os.getenv('OIDC_OP_AUTHORIZATION_ENDPOINT')
+OIDC_OP_TOKEN_ENDPOINT = os.getenv('OIDC_OP_TOKEN_ENDPOINT')
+OIDC_OP_USER_ENDPOINT = os.getenv('OIDC_OP_USER_ENDPOINT')
+OIDC_OP_LOGOUT_ENDPOINT = os.getenv('OIDC_OP_LOGOUT_ENDPOINT')
+PROFILE_PICTURE_URL = os.getenv('PROFILE_PICTURE_URL')
+OIDC_OP_LOGOUT_URL_METHOD = 'core.auth.oidc_provider_logout'
+OIDC_CALLBACK_CLASS = 'core.auth.OIDCAuthCallbackView'
+OIDC_AUTHENTICATE_CLASS = 'core.auth.OIDCAuthenticateView'
+
+# Elasticsearch
+ELASTICSEARCH_DSL = {
+    'default': {
+        'hosts': os.getenv('ELASTICSEARCH_HOST')
+    },
+}
+
+ELASTICSEARCH_DSL_INDEX_SETTINGS = {'number_of_shards': 1,
+                                    'number_of_replicas': 0}
+
+ELASTICSEARCH_DSL_SIGNAL_PROCESSOR = 'core.elasticsearch.CustomSignalProcessor'
+
 EMAIL_DISABLED = os.getenv('EMAIL_DISABLED') == 'True'
 
 FROM_EMAIL = os.getenv('FROM_EMAIL')
@@ -28,7 +83,7 @@ if os.getenv('EMAIL_PORT'):
 
 if os.getenv('AWS_SES_ACCESS_KEY_ID'):
     EMAIL_BACKEND = 'django_ses.SESBackend'
-    AWS_SES_REGION_NAME = os.getenv('AWS_SES_REGION_NAME') # 'us-west-2'
+    AWS_SES_REGION_NAME = os.getenv('AWS_SES_REGION_NAME')  # 'us-west-2'
     AWS_SES_REGION_ENDPOINT = os.getenv('AWS_SES_REGION_ENDPOINT') #'email.us-west-2.amazonaws.com'
 
     AWS_SES_ACCESS_KEY_ID = os.getenv('AWS_SES_ACCESS_KEY_ID')
@@ -58,7 +113,7 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 SHARED_APPS = [
     'django_tenants',  # mandatory
-    'tenants', # you must list the app where your tenant model resides in
+    'tenants',  # you must list the app where your tenant model resides in
     'django.contrib.contenttypes',
     'django.contrib.staticfiles',
     'django.contrib.admin',
@@ -78,28 +133,35 @@ TENANT_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.sitemaps',
+    'django_elasticsearch_dsl',
+    'mozilla_django_oidc',
+    'ariadne_django',
+    'notifications',
+    'autotranslate',
+    'auditlog',
+    'post_deploy',
     'concierge',
     'core',
     'user',
-    'mozilla_django_oidc',
-    'ariadne_django',
-    'django_elasticsearch_dsl',
-    'notifications',
-    'auditlog',
-    'autotranslate',
     'flow',
-    'profile_sync'
-
+    'profile_sync',
+    'blog',
+    'cms',
+    'discussion',
+    'event',
+    'news',
+    'poll',
+    'question',
+    'wiki',
+    'activity',
+    'bookmark',
+    'task',
+    'file',
+    'elgg',
+    'control',
 ]
 
-if LOCAL_APPS:
-    TENANT_APPS += LOCAL_APPS
-
 INSTALLED_APPS = list(SHARED_APPS) + [app for app in TENANT_APPS if app not in SHARED_APPS]
-
-if APM_ENABLED:
-    INSTALLED_APPS += ['elasticapm.contrib.django']
-
 
 AUTHENTICATION_BACKENDS = ['core.auth.OIDCAuthBackend']
 
@@ -126,9 +188,7 @@ if not RUN_AS_ADMIN_APP:
     MIDDLEWARE.append('core.middleware.RedirectMiddleware')
     MIDDLEWARE.append('core.middleware.CustomCSPMiddleware')
     MIDDLEWARE.append('auditlog.middleware.AuditlogMiddleware')
-
-if LOCAL_MIDDLEWARE:
-    MIDDLEWARE += LOCAL_MIDDLEWARE
+    MIDDLEWARE.append('core.middleware.UserLastOnlineMiddleware')
 
 ROOT_URLCONF = 'backend2.urls'
 PUBLIC_SCHEMA_URLCONF = 'backend2.urls_public'
@@ -213,17 +273,21 @@ if os.getenv('MEMCACHE_HOST_PORT'):
         }
     }
 
-
 # Internationalization
 # https://docs.djangoproject.com/en/1.10/topics/i18n/
 
-USE_I18N = True
-
-USE_L10N = True
-
-USE_TZ = True
-
 TIME_ZONE = 'Europe/Amsterdam'
+LANGUAGE_CODE = 'nl-NL'
+LANGUAGES = [
+    ('nl', 'Nederlands'),
+    ('en', 'English'),
+    ('de', 'Deutsch'),
+    ('fr', 'Français'),
+]
+
+USE_I18N = True
+USE_L10N = True
+USE_TZ = True
 
 LOCALE_PATHS = (
     os.path.join(BASE_DIR, 'locale'),
@@ -258,10 +322,6 @@ DEFAULT_FILE_STORAGE = "django_tenants.files.storage.TenantFileSystemStorage"
 MEDIA_ROOT = os.getenv("MEDIA_ROOT") if os.getenv("MEDIA_ROOT") else os.path.join(BASE_DIR, 'media/')
 BACKUP_PATH = os.getenv("BACKUP_PATH") if os.getenv("BACKUP_PATH") else os.path.join(MEDIA_ROOT, 'backups/')
 
-if SWIFT_ENABLED:
-    DEFAULT_FILE_STORAGE = 'core.backends.tenant_swift_storage.TenantSwiftStorage'
-
-ELASTICSEARCH_DSL_SIGNAL_PROCESSOR = 'core.elasticsearch.CustomSignalProcessor'
 DATABASE_ROUTERS = (
     'django_tenants.routers.TenantSyncRouter',
     'backend2.dbrouter.PrimaryReplicaRouter',
@@ -293,7 +353,11 @@ CELERY_TASK_PUBLISH_RETRY_POLICY = {
 }
 CELERY_TIMEZONE = 'Europe/Amsterdam'
 
+APM_ENABLED = os.getenv('APM_ENABLED') == 'True'
+APM_OPENTRACING_ENABLED = os.getenv('APM_OPENTRACING_ENABLED') == 'True'
+
 if APM_ENABLED:
+    INSTALLED_APPS += ['elasticapm.contrib.django']
     ELASTIC_APM = {
         'SERVICE_NAME': os.getenv('APM_SERVICE_NAME'),
         'ENVIRONMENT': ENV,
@@ -356,7 +420,7 @@ CSP_SCRIPT_SRC = [
     "'strict-dynamic'",
     "https:",
     "http:"
-] # for backward compatibility with older browsers that don't support strict-dynamic
+]  # for backward compatibility with older browsers that don't support strict-dynamic
 CSP_CONNECT_SRC = [
     "'self'",
     "https://stats.pleio.nl",
@@ -391,3 +455,13 @@ if DEBUG:
 
 AUTOTRANSLATE_TRANSLATOR_SERVICE = 'core.services.translate_service.DeeplTranslatorService'
 DEEPL_TOKEN = os.getenv('DEEPL_TOKEN', None)
+
+POST_DEPLOY_CELERY_APP = 'backend2.celery.app'
+POST_DEPLOY_SCHEDULER_MANAGER = 'post_deploy.plugins.scheduler.celery.CeleryScheduler'
+POST_DEPLOY_CONTEXT_MANAGER = 'post_deploy.plugins.context.tenant.TenantContext'
+
+SILENCED_SYSTEM_CHECKS = [
+    # Warning at auditlog.LogEntry.additional_data
+    # For more information: run the application without this line.
+    'django_jsonfield_backport.W001'
+]

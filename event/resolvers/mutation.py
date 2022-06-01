@@ -277,6 +277,7 @@ def resolve_edit_event(_, info, input):
             entity.max_attendees = None
         else:
             entity.max_attendees = int(clean_input.get("maxAttendees"))
+        entity.process_waitinglist()
 
     if 'rsvp' in clean_input:
         entity.rsvp = clean_input.get("rsvp")

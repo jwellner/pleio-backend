@@ -23,13 +23,13 @@ def resolve_users(_, info, q="", filters=None, offset=0, limit=20):
 
     if q:
         s = Search(index='user').query(
-            Q('simple_query_string', query=q, fields=[
-                'name^3',
-                'email',
-            ])
-            | Q('bool', must=[
-                Q('simple_query_string', query=q, fields=['profile.user_profile_fields.value']),
-                Q('terms', profile__user_profile_fields__read_access=list(get_acl(user)))])
+            Q('simple_query_string', query=q, fields=['name^3', 'email']) |
+            Q('nested', path='user_profile_fields', query=Q('bool', must=[
+                    Q('match', user_profile_fields__value=q),
+                    Q('terms', user_profile_fields__read_access=list(get_acl(user)))
+                    ]
+                )
+            )
         ).filter(
             'terms', read_access=list(get_acl(user))
         ).filter(
@@ -49,11 +49,12 @@ def resolve_users(_, info, q="", filters=None, offset=0, limit=20):
     if filters:
         for f in filters:
             s = s.filter(
-                Q('bool', must=[
-                    Q('match', profile__user_profile_fields__key=f['name']) & (
-                            Q('terms', profile__user_profile_fields__value__raw=f['values']) |
-                            Q('terms', profile__user_profile_fields__value_list=f['values'])
+                Q('nested', path='user_profile_fields', query=Q('bool', must=[
+                    Q('match', user_profile_fields__key=f['name']) & (
+                        Q('terms', user_profile_fields__value__raw=f['values']) |
+                        Q('terms', user_profile_fields__value_list=f['values'])
                     )])
+                )
             )
 
     total = s.count()
@@ -64,7 +65,7 @@ def resolve_users(_, info, q="", filters=None, offset=0, limit=20):
         {'name.raw': {'order': 'asc'}}
     )
 
-    s = s[offset:offset + limit]
+    s = s[offset:offset+limit]
     response = s.execute()
 
     ids = []

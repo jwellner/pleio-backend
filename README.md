@@ -141,72 +141,10 @@ sudo bash -c 'echo "nameserver 127.0.0.1" > /etc/resolver/local'
 
 Now you have your first tenant running there are some more advanced topics:
 
-- [File storage](#file-storage)
 - [Elasticsearch](#elasticsearch)
 - [Background](#background)
 - [Translations](#translations)
 - [Import Elgg site](elgg/README.md)
-
-## File storage
-
-Right now we have 2 file storage backend options:
-
-- Swift storage
-- S3 storage
-
-They can be enabled using environment variables `SWIFT_ENABLED` and `S3_ENABLED`. Check `backend/config.py` for configuration options.
-
-You can use them both for local development. Default we use S3.
-
-### S3 storage local development
-
-Install the [aws cli client](https://docs.aws.amazon.com/cli/latest/userguide/install-cliv2.html)
-
-#### First time setup
-
-Create s3 bucket
-
-```bash
-aws --endpoint-url=http://localhost:4572 s3 mb s3://demo-bucket
-```
-
-Make bucket public
-
-```bash
-aws --endpoint-url=http://localhost:4572 s3api put-bucket-acl --bucket demo-bucket --acl public-read
-```
-
-#### More examples
-
-Copy existing files to bucket
-
-```bash
-aws --endpoint-url=http://localhost:4572 s3 cp support  s3://demo-bucket/test2/migrated/ --recursive
-```
-
-Add localstack to /etc/hosts to test from browser: `127.0.0.1 localstack`
-
-### Swift storage local development
-
-To talk with the Swift storage backend you can use swiftclient by installing it using pip:
-
-```bash
-pip install python-swiftclient
-```
-
-#### Example commands
-
-Test connection:
-
-```bash
-swift -A http://localhost:12345/auth/v1.0 -U test:tester -K testing stat
-```
-
-Create (public) container:
-
-```bash
-swift -A http://localhost:12345/auth/v1.0 -U test:tester -K testing post -r ".r:*" backend2-dev-public
-```
 
 ## Elasticsearch
 
@@ -276,7 +214,6 @@ Possible tasknames and arguments:
 - core.tasks.elasticsearch_tasks.elasticsearch_rebuild_all ["{index_name}"]
 - core.tasks.elasticsearch_tasks.elasticsearch_rebuild, ["{schema_name}"]
 - core.tasks.elasticsearch_tasks.elasticsearch_rebuild, ["{schema_name}","{index_name}"]
-- core.tasks.elasticsearch_tasks.elasticsearch_index_file, ["{schema_name}", "{file_guid}"]
 
 Some example commands:
 
