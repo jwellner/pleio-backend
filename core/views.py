@@ -17,7 +17,7 @@ from core.forms import EditEmailSettingsForm, OnboardingForm, RequestAccessForm
 from core.constances import USER_ROLES, OIDC_PROVIDER_OPTIONS
 from user.models import User
 from event.lib import get_url
-from django.utils.translation import ugettext_lazy
+from django.utils.translation import ugettext_lazy, ugettext
 from core.auth import oidc_provider_logout_url
 from django.core import signing
 from django.contrib.contenttypes.fields import GenericRelation, GenericForeignKey
@@ -479,6 +479,38 @@ def export_content(request, content_type=None):
 
     return response
 
+
+def export_groupowners(request):
+    user = request.user
+
+    if not user.is_authenticated:
+        raise Http404("Not logged in")
+
+    if not user.has_role(USER_ROLES.ADMIN):
+        raise Http404("Not admin")
+
+    def stream(groups, pseudo_buffer):
+        writer = csv.writer(pseudo_buffer, delimiter=';', quotechar='"')
+        yield writer.writerow([ugettext("Name"),
+                               ugettext("E-mail"),
+                               ugettext("Group")])
+
+        for g in groups:
+            yield writer.writerow([
+                g.owner.name,
+                g.owner.email,
+                g.name,
+            ])
+
+    response = StreamingHttpResponse(
+        streaming_content=(stream(Group.objects.all(), Echo())),
+        content_type='text/csv',
+    )
+
+    filename = 'group-owners.csv'
+    response['Content-Disposition'] = 'attachment;filename=' + filename
+
+    return response
 
 def attachment(request, attachment_id, attachment_type = None):
     # pylint: disable=unused-argument
