@@ -37,8 +37,8 @@ def get_download_filename(f):
 def add_folders_to_zip(zip_file, folders, user, file_path):
     for folder in folders:
         files = FileFolder.objects.visible(user).filter(parent=folder.id, is_folder=False)
-        file_path = path.join(file_path, folder.title)
+        prefix_path = path.join(file_path, folder.title)
         for f in files:
-            zip_file.writestr(path.join(file_path, get_download_filename(f)), f.upload.read())
+            zip_file.writestr(path.join(prefix_path, get_download_filename(f)), f.upload.read())
         sub_folders = FileFolder.objects.visible(user).filter(parent=folder.id, is_folder=True)
-        add_folders_to_zip(zip_file, sub_folders, user, file_path)
+        add_folders_to_zip(zip_file, sub_folders, user, prefix_path)
