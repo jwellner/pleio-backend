@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Duits\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-05-23 12:19+0200\n"
+"POT-Creation-Date: 2022-06-01 12:53+0200\n"
 "PO-Revision-Date: 2021-05-26 10:55+0200\n"
 "Last-Translator: \n"
 "Language-Team: \n"
@@ -50,108 +50,108 @@ msgstr "Benachrichtigungs-E-Mails erhalten"
 msgid "Receive overview emails"
 msgstr "Übersichts-E-Mails erhalten"
 
-#: core/lib.py:156 core/resolvers/mutation_import_users.py:30
+#: core/lib.py:154 core/resolvers/mutation_import_users.py:30
 #: core/resolvers/query_site.py:70
 msgid "Just me"
 msgstr "Nur ich"
 
-#: core/lib.py:159
+#: core/lib.py:157
 #, python-format
 msgid "Group: %(group_name)s"
 msgstr "Gruppe: %(group_name)s"
 
-#: core/lib.py:162
+#: core/lib.py:160
 #, python-format
 msgid "Subgroup: %(subgroup_name)s"
 msgstr "Untergruppe: %(subgroup_name)s"
 
-#: core/lib.py:168 core/resolvers/mutation_import_users.py:31
+#: core/lib.py:166 core/resolvers/mutation_import_users.py:31
 #: core/resolvers/query_site.py:71
 msgid "Logged in users"
 msgstr "Angemeldete Benutzer"
 
-#: core/lib.py:170 core/resolvers/mutation_import_users.py:34
+#: core/lib.py:168 core/resolvers/mutation_import_users.py:34
 #: core/resolvers/query_site.py:75
 msgid "Public"
 msgstr "Öffentlich"
 
-#: core/lib.py:181
+#: core/lib.py:179
 msgid "Event"
 msgstr "Event"
 
-#: core/lib.py:185
+#: core/lib.py:183
 msgid "Blog"
 msgstr "Blog"
 
-#: core/lib.py:189
+#: core/lib.py:187
 msgid "Discussion"
 msgstr "Diskussion"
 
-#: core/lib.py:193 core/lib.py:328
+#: core/lib.py:191 core/lib.py:341
 msgid "News"
 msgstr "Neuigkeiten"
 
-#: core/lib.py:197
+#: core/lib.py:195
 msgid "Update"
 msgstr "Update"
 
-#: core/lib.py:201
+#: core/lib.py:199
 msgid "Question"
 msgstr "Frage"
 
-#: core/lib.py:205
+#: core/lib.py:203
 msgid "Wiki"
 msgstr "Wiki"
 
-#: core/lib.py:209
+#: core/lib.py:207
 msgid "Text page"
 msgstr "Text Seite"
 
-#: core/lib.py:322
+#: core/lib.py:335
 msgid "Updates"
 msgstr "Updates"
 
-#: core/lib.py:323
+#: core/lib.py:336
 msgid "Blogs"
 msgstr "Blogs"
 
-#: core/lib.py:324
+#: core/lib.py:337
 msgid "CMS pages"
 msgstr "CMS-Seiten"
 
-#: core/lib.py:325
+#: core/lib.py:338
 msgid "Discussions"
 msgstr "Diskussionen"
 
-#: core/lib.py:326
+#: core/lib.py:339
 msgid "Events"
 msgstr "Events"
 
-#: core/lib.py:327
+#: core/lib.py:340
 msgid "Files"
 msgstr "Dateien"
 
-#: core/lib.py:329
+#: core/lib.py:342
 msgid "Polls"
 msgstr "Umfragen"
 
-#: core/lib.py:330
+#: core/lib.py:343
 msgid "Questions"
 msgstr "Fragen"
 
-#: core/lib.py:331
+#: core/lib.py:344
 msgid "Tasks"
 msgstr "Aufgaben"
 
-#: core/lib.py:332
+#: core/lib.py:345
 msgid "Wiki pages"
 msgstr "Wiki-Seiten"
 
-#: core/lib.py:333
+#: core/lib.py:346
 msgid "Comments"
 msgstr "Kommentare"
 
-#: core/lib.py:334
+#: core/lib.py:347
 msgid "Groups"
 msgstr "Gruppen"
 
@@ -193,15 +193,15 @@ msgstr "Konto von %(name_deleted_user)s wurde entfernt"
 msgid "A site administrator was removed from %(site_name)s"
 msgstr "Ein Site-Administrator wurde von %(site_name)s entfernt"
 
-#: core/resolvers/mutation_edit_site_setting.py:352
+#: core/resolvers/mutation_edit_site_setting.py:354
 msgid "closed"
 msgstr "geschlossen"
 
-#: core/resolvers/mutation_edit_site_setting.py:352
+#: core/resolvers/mutation_edit_site_setting.py:354
 msgid "public"
 msgstr "Öffentlich"
 
-#: core/resolvers/mutation_edit_site_setting.py:353
+#: core/resolvers/mutation_edit_site_setting.py:355
 #, python-format
 msgid "Site access level changed for %(site_name)s"
 msgstr "Site-Zugriffsebene geändert für %(site_name)s"
@@ -727,13 +727,13 @@ msgid "Blog created by"
 msgstr "Blog erstellt von"
 
 #: core/templates/email/entities/blog.html:27
-#: core/templates/email/entities/event.html:19
+#: core/templates/email/entities/event.html:26
 #: core/templates/email/entities/question.html:19
 #: core/templates/email/entities/wiki.html:26
 msgid "on"
 msgstr "am"
 
-#: core/templates/email/entities/event.html:19
+#: core/templates/email/entities/event.html:26
 msgid "Agenda item created by"
 msgstr "Kalendereintrag erstellt von"
 
@@ -1196,7 +1196,7 @@ msgstr ""
 "Um diese Site zu betreten, müssen Sie den Zugriff vom Administrator "
 "anfordern. Klicken Sie auf die Schaltfläche, um den Zugriff anzufordern."
 
-#: core/templates/registration/request.html:23
+#: core/templates/registration/request.html:23 core/views.py:494
 msgid "Name"
 msgstr "Name"
 
@@ -1230,16 +1230,24 @@ msgstr ""
 msgid "New access request for %(site_name)s"
 msgstr "Neue Zugriffsanfrage für %(site_name)s"
 
-#: core/views.py:561
+#: core/views.py:495
+msgid "E-mail"
+msgstr "E-Mail"
+
+#: core/views.py:496
+msgid "Group"
+msgstr "Gruppe"
+
+#: core/views.py:593
 msgid "Saved"
 msgstr "Gerettet"
 
-#: event/models.py:127
+#: event/models.py:129
 #, python-format
 msgid "Added to event %s from waitinglist"
 msgstr "Zum Ereignis %s von der Warteliste hinzugefügt"
 
-#: event/resolvers/mutation.py:369 event/tests/test_resolve_copy_entity.py:149
+#: event/resolvers/mutation.py:370 event/tests/test_resolve_copy_entity.py:149
 #, python-format
 msgid "Copy %s"
 msgstr "Kopie %s"
@@ -1259,14 +1267,14 @@ msgstr "Bestätigung der Registrierung für %s"
 msgid "Removed from event: %s"
 msgstr "Entfernt vom Ereignis: %s"
 
-#: event/resolvers/mutation_messages.py:71
-#: event/tests/test_event_mailer.py:271
+#: event/resolvers/mutation_messages.py:73
+#: event/tests/test_event_mailer.py:276
 #, python-brace-format
 msgid "Message from event {0}: {1}"
 msgstr "Nachricht von Ereignis {0}: {1}"
 
-#: event/resolvers/mutation_messages.py:73
-#: event/tests/test_event_mailer.py:285
+#: event/resolvers/mutation_messages.py:75
+#: event/tests/test_event_mailer.py:290
 #, python-brace-format
 msgid "Copy: Message from event {0}: {1}"
 msgstr "Kopieren: Nachricht von Ereignis {0}: {1}"
