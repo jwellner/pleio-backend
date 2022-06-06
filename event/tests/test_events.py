@@ -1,8 +1,7 @@
-from django.db import connection
+from django.core.exceptions import ValidationError
 from django_tenants.test.cases import FastTenantTestCase
 from backend2.schema import schema
 from ariadne import graphql_sync
-import json
 from django.contrib.auth.models import AnonymousUser
 from django.http import HttpRequest
 from django.utils import timezone
@@ -11,8 +10,6 @@ from user.models import User
 from event.models import Event, EventAttendee
 from mixer.backend.django import mixer
 from core.constances import ACCESS_TYPE
-from core.lib import get_acl, access_id_to_acl
-from django.utils.text import slugify
 
 
 class EventsTestCase(FastTenantTestCase):
@@ -190,9 +187,9 @@ class EventsTestCase(FastTenantTestCase):
             "filter": "upcoming"
         }
 
-        mixer.blend(EventAttendee, user=self.user2, email=None, event=self.eventFuture1, state='accept')
+        mixer.blend(EventAttendee, user=self.user2, email=self.user2.email, event=self.eventFuture1, state='accept')
         mixer.blend(EventAttendee, user=None, event=self.eventFuture1, state='reject')
-        mixer.blend(EventAttendee, user=self.user2, email=None, event=self.eventFuture2, state='accept')
+        mixer.blend(EventAttendee, user=self.user2, email=self.user2.email, event=self.eventFuture2, state='accept')
         mixer.blend(EventAttendee, user=None, event=self.eventFuture2, state='reject')
 
         result = graphql_sync(schema, { "query": self.query , "variables": variables}, context_value={ "request": request })
@@ -319,3 +316,12 @@ class EventsTestCase(FastTenantTestCase):
 
         self.assertEqual(data["events"]["total"], 3)
         self.assertTrue(subevent.guid not in [d['guid'] for d in data["events"]["edges"]])
+
+    def test_without_mail_should_result_in_error(self):
+        attendee = EventAttendee(
+            event=self.eventFuture1,
+            name="Test"
+        )
+
+        with self.assertRaises(ValidationError):
+            attendee.save()

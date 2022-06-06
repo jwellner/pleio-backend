@@ -36,7 +36,7 @@ class DeleteEventAttendeesTestCase(FastTenantTestCase):
         EventAttendee.objects.create(
             event=self.event,
             user=self.authenticatedUser,
-            email=None
+            email=self.authenticatedUser.email
         )
         EventAttendee.objects.create(
             event=self.event,
@@ -202,9 +202,13 @@ class DeleteEventAttendeesTestCase(FastTenantTestCase):
             parent = self.event
         )
 
+        attendee = mixer.blend(User)
+
         EventAttendee.objects.create(
             event=subevent,
-            user=None
+            user=None,
+            name=attendee.name,
+            email=attendee.email,
         )
 
         self.assertEqual(subevent.attendees.count(), 1)

@@ -71,7 +71,8 @@ class EventTestCase(FastTenantTestCase):
         EventAttendee.objects.create(
             event=self.eventPrivate,
             state='accept',
-            user=self.user2
+            user=self.user2,
+            email=self.user2.email
         )
 
         EventAttendee.objects.create(
@@ -93,7 +94,8 @@ class EventTestCase(FastTenantTestCase):
             event=self.eventPrivate,
             state='accept',
             name="test_name3",
-            user=self.authenticatedUser
+            user=self.authenticatedUser,
+            email=self.authenticatedUser.email
         )
 
         EventAttendee.objects.create(
@@ -315,7 +317,8 @@ class EventTestCase(FastTenantTestCase):
         EventAttendee.objects.create(
             event=self.eventPublic,
             state='accept',
-            user=self.user1
+            user=self.user1,
+            email=self.user1.email
         )
 
         result = graphql_sync(schema, { "query": self.query , "variables": variables}, context_value={ "request": request })

@@ -17,7 +17,8 @@ from django.utils.text import slugify
 from django.utils import timezone
 
 
-class Event(Entity, CommentMixin, BookmarkMixin, FollowMixin, NotificationMixin, FeaturedCoverMixin, ArticleMixin,
+class Event(Entity,
+            CommentMixin, BookmarkMixin, FollowMixin, NotificationMixin, FeaturedCoverMixin, ArticleMixin,
             AttachmentMixin):
     class Meta:
         ordering = ['-published']
@@ -169,19 +170,19 @@ class EventAttendee(models.Model):
 
     state = models.CharField(
         max_length=16,
-        choices=STATE_TYPES
+        choices=STATE_TYPES,
+        null=True, blank=True,
     )
 
     name = models.CharField(max_length=256, null=True, blank=True)
-    email = models.EmailField(max_length=256, null=True, blank=True)
+    email = models.EmailField(max_length=256, null=False, blank=False)
     code = models.CharField(max_length=36, null=True, blank=True)
 
     user = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)
 
-    checked_in_at = models.DateTimeField(default=None, null=True)
+    checked_in_at = models.DateTimeField(default=None, null=True, blank=True)
     created_at = models.DateTimeField(default=timezone.now)
     updated_at = models.DateTimeField(default=timezone.now)
-
 
     @property
     def user_icon(self):
@@ -215,6 +216,13 @@ class EventAttendee(models.Model):
         return {'name': self.name,
                 'email': self.email,
                 'language': self.language}
+
+    def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
+        self.full_clean()
+        super(EventAttendee, self).save(force_insert=force_insert,
+                                        force_update=force_update,
+                                        using=using,
+                                        update_fields=update_fields)
 
 
 class EventAttendeeRequest(models.Model):
