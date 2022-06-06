@@ -38,7 +38,7 @@ class EditEventAttendeeTestCase(FastTenantTestCase):
         self.attendee1 = EventAttendee.objects.create(
             event=self.event,
             user=self.authenticatedUser,
-            email=None,
+            email=self.authenticatedUser.email,
             checked_in_at=self.today
         )
         self.attendee2 = EventAttendee.objects.create(
