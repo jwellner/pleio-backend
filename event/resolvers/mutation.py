@@ -1,5 +1,6 @@
 import json
 
+from core.resolvers import shared
 from core.utils.tiptap_parser import Tiptap
 from ariadne import ObjectType
 from django.core.exceptions import ObjectDoesNotExist
@@ -84,6 +85,7 @@ def resolve_add_event(_, info, input):
         entity.abstract = abstract
 
     update_featured_image(entity, clean_input)
+    shared.update_publication_dates(entity, clean_input)
 
     if user.has_role(USER_ROLES.ADMIN) or user.has_role(USER_ROLES.EDITOR):
         if 'isFeatured' in clean_input:
@@ -115,9 +117,6 @@ def resolve_add_event(_, info, input):
     entity.rsvp = clean_input.get("rsvp", False)
     entity.attend_event_without_account = clean_input.get("attendEventWithoutAccount", False)
     entity.qr_access = clean_input.get("qrAccess", False)
-
-    if 'timePublished' in clean_input:
-        entity.published = clean_input.get("timePublished", None)
 
     entity.save()
 
@@ -178,6 +177,7 @@ def resolve_edit_event(_, info, input):
         entity.write_access = access_id_to_acl(entity, clean_input.get("writeAccessId"))
 
     update_featured_image(entity, clean_input)
+    shared.update_publication_dates(entity, clean_input)
 
     if user.has_role(USER_ROLES.ADMIN) or user.has_role(USER_ROLES.EDITOR):
         if 'isFeatured' in clean_input:
@@ -219,9 +219,6 @@ def resolve_edit_event(_, info, input):
         entity.attend_event_without_account = clean_input.get("attendEventWithoutAccount")
     if 'qrAccess' in clean_input:
         entity.qr_access = clean_input.get("qrAccess")
-
-    if 'timePublished' in clean_input:
-        entity.published = clean_input.get("timePublished", None)
 
     # only admins can edit these fields
     if user.has_role(USER_ROLES.ADMIN):

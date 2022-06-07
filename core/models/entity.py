@@ -116,6 +116,9 @@ class Entity(models.Model, TagsMixin):
 
     published = models.DateTimeField(default=timezone.now, null=True)
     is_archived = models.BooleanField(default=False)
+    schedule_archive_after = models.DateTimeField(null=True, blank=True)
+    schedule_delete_after = models.DateTimeField(null=True, blank=True)
+
     _tag_summary = ArrayField(models.CharField(max_length=256),
                               blank=True, default=list,
                               db_column='tags')

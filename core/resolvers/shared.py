@@ -1,6 +1,6 @@
 from elasticsearch_dsl import Search
 
-from core.constances import ACCESS_TYPE, TEXT_TOO_LONG
+from core.constances import ACCESS_TYPE, TEXT_TOO_LONG, INVALID_ARCHIVE_AFTER_DATE
 from core.models import EntityViewCount
 from django.core.exceptions import ObjectDoesNotExist
 
@@ -106,6 +106,14 @@ def resolve_entity_time_updated(obj, info):
 def resolve_entity_time_published(obj, info):
     # pylint: disable=unused-argument
     return obj.published
+
+
+def resolve_entity_schedule_archive_entity(obj, _):
+    return obj.schedule_archive_after
+
+
+def resolve_entity_schedule_delete_entity(obj, _):
+    return obj.schedule_delete_after
 
 
 def resolve_entity_status_published(obj, info):
@@ -223,6 +231,21 @@ def resolve_entity_is_pinned(obj, info):
     if hasattr(obj, "is_pinned"):
         return obj.is_pinned
     return False
+
+
+def update_publication_dates(entity, clean_input):
+    if 'timePublished' in clean_input:
+        entity.published = clean_input.get("timePublished")
+
+    if 'scheduleArchiveEntity' in clean_input:
+        entity.schedule_archive_after = clean_input.get("scheduleArchiveEntity") or None
+
+    if 'scheduleDeleteEntity' in clean_input:
+        entity.schedule_delete_after = clean_input.get("scheduleDeleteEntity") or None
+
+    if entity.schedule_delete_after and entity.schedule_archive_after:
+        if entity.schedule_delete_after < entity.schedule_archive_after:
+            raise GraphQLError(INVALID_ARCHIVE_AFTER_DATE)
 
 
 def update_featured_image(entity, clean_input, image_owner=None):

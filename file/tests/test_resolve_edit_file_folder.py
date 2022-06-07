@@ -1,12 +1,8 @@
 from django.utils import timezone
-from django_tenants.test.cases import FastTenantTestCase
 from django.core.files import File
 from django.conf import settings
-from backend2.schema import schema
-from ariadne import graphql_sync
-from django.contrib.auth.models import AnonymousUser
-from django.http import HttpRequest
 from core.models import Group
+from core.tests.helpers import PleioTenantTestCase
 from file.helpers.compression import get_download_filename
 from user.models import User
 from core.constances import ACCESS_TYPE
@@ -15,10 +11,10 @@ from unittest.mock import MagicMock, patch
 from ..models import FileFolder
 
 
-class EditFileFolderTestCase(FastTenantTestCase):
+class EditFileFolderTestCase(PleioTenantTestCase):
 
     def setUp(self):
-        self.anonymousUser = AnonymousUser()
+        super(EditFileFolderTestCase, self).setUp()
         self.authenticatedUser = mixer.blend(User, name="Aut Hen Ticated")
         self.user1 = mixer.blend(User, name="User One")
         self.user2 = mixer.blend(User, name="Someone Else")
@@ -138,8 +134,10 @@ class EditFileFolderTestCase(FastTenantTestCase):
                 "richDescription": self.EXPECTED_DESCRIPTION,
                 "title": "",
                 "file": "",
-                "timePublished": "",
                 "ownerGuid": "",
+                "timePublished": str(timezone.localtime()),
+                "scheduleArchiveEntity": str(timezone.localtime() + timezone.timedelta(days=10)),
+                "scheduleDeleteEntity": str(timezone.localtime() + timezone.timedelta(days=20)),
             }
         }
         self.mutation = """
@@ -150,6 +148,8 @@ class EditFileFolderTestCase(FastTenantTestCase):
                 timeCreated
                 timeUpdated
                 timePublished
+                scheduleArchiveEntity
+                scheduleDeleteEntity
                 accessId
                 writeAccessId
                 canEdit
@@ -207,16 +207,10 @@ class EditFileFolderTestCase(FastTenantTestCase):
         variables["input"]["timePublished"] = newPublishedTime.isoformat()
         variables["input"]["ownerGuid"] = self.user1.guid
 
-        request = HttpRequest()
-        request.user = self.authenticatedUser
+        self.graphql_client.force_login(self.authenticatedUser)
+        result = self.graphql_client.post(self.mutation, variables)
 
-        result = graphql_sync(schema, {"query": self.mutation, "variables": variables},
-                              context_value={"request": request})
-
-        data = result[1]["data"]
-
-        entity = data["editFileFolder"]["entity"]
-
+        entity = result["data"]["editFileFolder"]["entity"]
         self.assertEqual(entity["title"], variables["input"]["title"])
         self.assertEqual(entity["description"], self.EXPECTED_DESCRIPTION)
         self.assertEqual(entity["richDescription"], self.EXPECTED_DESCRIPTION)
@@ -224,7 +218,9 @@ class EditFileFolderTestCase(FastTenantTestCase):
         self.assertEqual(entity["tags"][0], "tag_one")
         self.assertEqual(entity["tags"][1], "tag_two")
         self.assertEqual(entity["owner"]["guid"], self.user1.guid)
-        self.assertEqual(entity["timePublished"], newPublishedTime.isoformat())
+        self.assertDateEqual(entity["timePublished"], str(newPublishedTime))
+        self.assertDateEqual(entity["scheduleArchiveEntity"], variables['input']['scheduleArchiveEntity'])
+        self.assertDateEqual(entity["scheduleDeleteEntity"], variables['input']['scheduleDeleteEntity'])
 
         test_file.refresh_from_db()
         self.assertEqual(test_file.title, variables['input']['title'])
@@ -250,9 +246,6 @@ class EditFileFolderTestCase(FastTenantTestCase):
             }
             }
         """
-        request = HttpRequest()
-        request.user = self.authenticatedUser
-
         variables = {
             "input": {
                 "guid": self.folder1.guid,
@@ -262,14 +255,12 @@ class EditFileFolderTestCase(FastTenantTestCase):
             }
         }
 
-        result = graphql_sync(schema, {"query": mutation, "variables": variables}, context_value={"request": request})
+        self.graphql_client.force_login(self.authenticatedUser)
+        result = self.graphql_client.post(mutation, variables)
 
-        self.assertTrue(result[0])
-
-        data = result[1]["data"]
-
-        self.assertEqual(data["editFileFolder"]["entity"]["guid"], self.folder1.guid)
-        self.assertEqual(data["editFileFolder"]["entity"]["__typename"], "FileFolder")
+        entity = result["data"]["editFileFolder"]["entity"]
+        self.assertEqual(entity["guid"], self.folder1.guid)
+        self.assertEqual(entity["__typename"], "FileFolder")
 
         query = """
             query OpenFolder($guid: String, $filter: String) {
@@ -299,15 +290,12 @@ class EditFileFolderTestCase(FastTenantTestCase):
             "filter": "folders"
         }
 
-        result = graphql_sync(schema, {"query": query, "variables": variables}, context_value={"request": request})
+        result = self.graphql_client.post(query, variables)
+        entity = result["data"]["files"]["edges"][0]
 
-        self.assertTrue(result[0])
-
-        data = result[1]["data"]
-
-        self.assertEqual(data["files"]["edges"][0]["guid"], self.folder2.guid)
-        self.assertEqual(data["files"]["edges"][0]["accessId"], 1)
-        self.assertEqual(data["files"]["edges"][0]["writeAccessId"], 1)
+        self.assertEqual(entity["guid"], self.folder2.guid)
+        self.assertEqual(entity["accessId"], 1)
+        self.assertEqual(entity["writeAccessId"], 1)
 
         variables = {
             "guid": self.folder2.guid,
@@ -315,16 +303,13 @@ class EditFileFolderTestCase(FastTenantTestCase):
             "limit": 1
         }
 
-        result = graphql_sync(schema, {"query": query, "variables": variables}, context_value={"request": request})
+        result = self.graphql_client.post(query, variables)
+        entity = result["data"]["files"]["edges"][0]
 
-        self.assertTrue(result[0])
-
-        data = result[1]["data"]
-
-        self.assertEqual(data["files"]["edges"][0]["guid"], self.file3.guid)
-        self.assertEqual(data["files"]["edges"][0]["accessId"], 1)
-        self.assertEqual(data["files"]["edges"][0]["writeAccessId"], 1)
-        self.assertEqual(data["files"]["total"], 2)
+        self.assertEqual(entity["guid"], self.file3.guid)
+        self.assertEqual(entity["accessId"], 1)
+        self.assertEqual(entity["writeAccessId"], 1)
+        self.assertEqual(result["data"]["files"]["total"], 2)
 
     def test_edit_folder_access_id_recursive(self):
         mutation = """
@@ -343,8 +328,6 @@ class EditFileFolderTestCase(FastTenantTestCase):
             }
             }
         """
-        request = HttpRequest()
-        request.user = self.authenticatedUser
 
         variables = {
             "input": {
@@ -354,14 +337,12 @@ class EditFileFolderTestCase(FastTenantTestCase):
             }
         }
 
-        result = graphql_sync(schema, {"query": mutation, "variables": variables}, context_value={"request": request})
+        self.graphql_client.force_login(self.authenticatedUser)
+        result = self.graphql_client.post(mutation, variables)
 
-        self.assertTrue(result[0])
-
-        data = result[1]["data"]
-
-        self.assertEqual(data["editFileFolder"]["entity"]["guid"], self.folder1.guid)
-        self.assertEqual(data["editFileFolder"]["entity"]["__typename"], "FileFolder")
+        entity = result["data"]["editFileFolder"]["entity"]
+        self.assertEqual(entity["guid"], self.folder1.guid)
+        self.assertEqual(entity["__typename"], "FileFolder")
 
         query = """
             query OpenFolder($guid: String, $filter: String) {
@@ -390,30 +371,24 @@ class EditFileFolderTestCase(FastTenantTestCase):
             "filter": "folders"
         }
 
-        result = graphql_sync(schema, {"query": query, "variables": variables}, context_value={"request": request})
+        result = self.graphql_client.post(query, variables)
+        entity = result["data"]["files"]["edges"][0]
 
-        self.assertTrue(result[0])
-
-        data = result[1]["data"]
-
-        self.assertEqual(data["files"]["edges"][0]["guid"], self.folder2.guid)
-        self.assertEqual(data["files"]["edges"][0]["accessId"], 1)
-        self.assertEqual(data["files"]["edges"][0]["writeAccessId"], 0)
+        self.assertEqual(entity["guid"], self.folder2.guid)
+        self.assertEqual(entity["accessId"], 1)
+        self.assertEqual(entity["writeAccessId"], 0)
 
         variables = {
             "guid": self.folder2.guid,
             "filter": "files"
         }
 
-        result = graphql_sync(schema, {"query": query, "variables": variables}, context_value={"request": request})
+        result = self.graphql_client.post(query, variables)
+        entity = result["data"]["files"]["edges"][0]
 
-        self.assertTrue(result[0])
-
-        data = result[1]["data"]
-
-        self.assertEqual(data["files"]["edges"][0]["guid"], self.file3.guid)
-        self.assertEqual(data["files"]["edges"][0]["accessId"], 1)
-        self.assertEqual(data["files"]["edges"][0]["writeAccessId"], 0)
+        self.assertEqual(entity["guid"], self.file3.guid)
+        self.assertEqual(entity["accessId"], 1)
+        self.assertEqual(entity["writeAccessId"], 0)
 
     def test_edit_folder_write_access_id_recursive(self):
         mutation = """
@@ -432,9 +407,6 @@ class EditFileFolderTestCase(FastTenantTestCase):
             }
             }
         """
-        request = HttpRequest()
-        request.user = self.authenticatedUser
-
         variables = {
             "input": {
                 "guid": self.folder1.guid,
@@ -443,14 +415,12 @@ class EditFileFolderTestCase(FastTenantTestCase):
             }
         }
 
-        result = graphql_sync(schema, {"query": mutation, "variables": variables}, context_value={"request": request})
+        self.graphql_client.force_login(self.authenticatedUser)
+        result = self.graphql_client.post(mutation, variables)
 
-        self.assertTrue(result[0])
-
-        data = result[1]["data"]
-
-        self.assertEqual(data["editFileFolder"]["entity"]["guid"], self.folder1.guid)
-        self.assertEqual(data["editFileFolder"]["entity"]["__typename"], "FileFolder")
+        entity = result["data"]["editFileFolder"]["entity"]
+        self.assertEqual(entity["guid"], self.folder1.guid)
+        self.assertEqual(entity["__typename"], "FileFolder")
 
         query = """
             query OpenFolder($guid: String, $filter: String) {
@@ -479,30 +449,24 @@ class EditFileFolderTestCase(FastTenantTestCase):
             "filter": "folders"
         }
 
-        result = graphql_sync(schema, {"query": query, "variables": variables}, context_value={"request": request})
+        result = self.graphql_client.post(query, variables)
+        entity = result["data"]["files"]["edges"][0]
 
-        self.assertTrue(result[0])
-
-        data = result[1]["data"]
-
-        self.assertEqual(data["files"]["edges"][0]["guid"], self.folder2.guid)
-        self.assertEqual(data["files"]["edges"][0]["accessId"], 2)
-        self.assertEqual(data["files"]["edges"][0]["writeAccessId"], 1)
+        self.assertEqual(entity["guid"], self.folder2.guid)
+        self.assertEqual(entity["accessId"], 2)
+        self.assertEqual(entity["writeAccessId"], 1)
 
         variables = {
             "guid": self.folder2.guid,
             "filter": "files"
         }
 
-        result = graphql_sync(schema, {"query": query, "variables": variables}, context_value={"request": request})
+        result = self.graphql_client.post(query, variables)
+        entity = result["data"]["files"]["edges"][0]
 
-        self.assertTrue(result[0])
-
-        data = result[1]["data"]
-
-        self.assertEqual(data["files"]["edges"][0]["guid"], self.file3.guid)
-        self.assertEqual(data["files"]["edges"][0]["accessId"], 2)
-        self.assertEqual(data["files"]["edges"][0]["writeAccessId"], 1)
+        self.assertEqual(entity["guid"], self.file3.guid)
+        self.assertEqual(entity["accessId"], 2)
+        self.assertEqual(entity["writeAccessId"], 1)
 
     def test_edit_folder_access_ids_not_recursive(self):
         mutation = """
@@ -521,8 +485,6 @@ class EditFileFolderTestCase(FastTenantTestCase):
             }
             }
         """
-        request = HttpRequest()
-        request.user = self.authenticatedUser
 
         variables = {
             "input": {
@@ -532,15 +494,12 @@ class EditFileFolderTestCase(FastTenantTestCase):
                 "isAccessRecursive": False
             }
         }
+        self.graphql_client.force_login(self.authenticatedUser)
+        result = self.graphql_client.post(mutation, variables)
 
-        result = graphql_sync(schema, {"query": mutation, "variables": variables}, context_value={"request": request})
-
-        self.assertTrue(result[0])
-
-        data = result[1]["data"]
-
-        self.assertEqual(data["editFileFolder"]["entity"]["guid"], self.folder1.guid)
-        self.assertEqual(data["editFileFolder"]["entity"]["__typename"], "FileFolder")
+        entity = result["data"]["editFileFolder"]["entity"]
+        self.assertEqual(entity["guid"], self.folder1.guid)
+        self.assertEqual(entity["__typename"], "FileFolder")
 
         query = """
             query OpenFolder($guid: String, $filter: String) {
@@ -569,30 +528,24 @@ class EditFileFolderTestCase(FastTenantTestCase):
             "filter": "folders"
         }
 
-        result = graphql_sync(schema, {"query": query, "variables": variables}, context_value={"request": request})
+        result = self.graphql_client.post(query, variables)
 
-        self.assertTrue(result[0])
-
-        data = result[1]["data"]
-
-        self.assertEqual(data["files"]["edges"][0]["guid"], self.folder2.guid)
-        self.assertEqual(data["files"]["edges"][0]["accessId"], 2)
-        self.assertEqual(data["files"]["edges"][0]["writeAccessId"], 0)
+        entity = result["data"]["files"]["edges"][0]
+        self.assertEqual(entity["guid"], self.folder2.guid)
+        self.assertEqual(entity["accessId"], 2)
+        self.assertEqual(entity["writeAccessId"], 0)
 
         variables = {
             "guid": self.folder2.guid,
             "filter": "files"
         }
 
-        result = graphql_sync(schema, {"query": query, "variables": variables}, context_value={"request": request})
+        result = self.graphql_client.post(query, variables)
+        entity = result["data"]["files"]["edges"][0]
 
-        self.assertTrue(result[0])
-
-        data = result[1]["data"]
-
-        self.assertEqual(data["files"]["edges"][0]["guid"], self.file3.guid)
-        self.assertEqual(data["files"]["edges"][0]["accessId"], 2)
-        self.assertEqual(data["files"]["edges"][0]["writeAccessId"], 0)
+        self.assertEqual(entity["guid"], self.file3.guid)
+        self.assertEqual(entity["accessId"], 2)
+        self.assertEqual(entity["writeAccessId"], 0)
 
     def test_edit_folder_access_ids_recursive_no_read_access_file(self):
         mutation = """
@@ -611,9 +564,6 @@ class EditFileFolderTestCase(FastTenantTestCase):
             }
             }
         """
-        request = HttpRequest()
-        request.user = self.user1
-
         variables = {
             "input": {
                 "guid": self.folder3.guid,
@@ -623,14 +573,12 @@ class EditFileFolderTestCase(FastTenantTestCase):
             }
         }
 
-        result = graphql_sync(schema, {"query": mutation, "variables": variables}, context_value={"request": request})
+        self.graphql_client.force_login(self.user1)
+        result = self.graphql_client.post(mutation, variables)
 
-        self.assertTrue(result[0])
-
-        data = result[1]["data"]
-
-        self.assertEqual(data["editFileFolder"]["entity"]["guid"], self.folder3.guid)
-        self.assertEqual(data["editFileFolder"]["entity"]["__typename"], "FileFolder")
+        entity = result["data"]["editFileFolder"]["entity"]
+        self.assertEqual(entity["guid"], self.folder3.guid)
+        self.assertEqual(entity["__typename"], "FileFolder")
 
         query = """
             query OpenFolder($guid: String, $filter: String) {
@@ -659,15 +607,12 @@ class EditFileFolderTestCase(FastTenantTestCase):
             "filter": "files"
         }
 
-        result = graphql_sync(schema, {"query": query, "variables": variables}, context_value={"request": request})
+        result = self.graphql_client.post(query, variables)
+        entity = result["data"]["files"]["edges"][0]
 
-        self.assertTrue(result[0])
-
-        data = result[1]["data"]
-
-        self.assertEqual(data["files"]["edges"][0]["guid"], self.file2.guid)
-        self.assertEqual(data["files"]["edges"][0]["accessId"], 2)
-        self.assertEqual(data["files"]["edges"][0]["writeAccessId"], 0)
+        self.assertEqual(entity["guid"], self.file2.guid)
+        self.assertEqual(entity["accessId"], 2)
+        self.assertEqual(entity["writeAccessId"], 0)
 
     @patch("core.lib.get_mimetype")
     @patch("{}.open".format(settings.DEFAULT_FILE_STORAGE))
@@ -764,23 +709,19 @@ class EditFileFolderTestCase(FastTenantTestCase):
                 "ownerGuid": self.user1.guid,
             }
         }
-        request = HttpRequest()
-        request.user = self.authenticatedUser
 
-        success, data = graphql_sync(schema, {"query": query, "variables": variables},
-                                     context_value={"request": request})
-
-        self.assertFalse(data.get('errors'), msg=data.get('errors'))
+        self.graphql_client.force_login(self.authenticatedUser)
+        self.graphql_client.post(query, variables)
 
         expected_access = ACCESS_TYPE.user.format(self.user1.guid)
-        for object, message in (
+        for entity, message in (
                 (self.folder2, "Folder2 %s access is unexpectedly updated"),
                 (self.file3, "File3 %s access is unexpectedly updated"),
                 (self.file4, "File4 %s access is unexpectedly updated"),
                 (self.file5, "File4 %s access is unexpectedly updated"),
         ):
-            object.refresh_from_db()
-            self.assertNotIn(expected_access, object.write_access, msg=message % 'write')
+            entity.refresh_from_db()
+            self.assertNotIn(expected_access, entity.write_access, msg=message % 'write')
 
         self.folder1.refresh_from_db()
         self.assertIn(expected_access, self.folder1.write_access, msg="Folder1 is not updated correctly")
@@ -802,25 +743,21 @@ class EditFileFolderTestCase(FastTenantTestCase):
                 "ownerGuidRecursive": 'updateAllFiles',
             }
         }
-        request = HttpRequest()
-        request.user = self.authenticatedUser
 
-        success, data = graphql_sync(schema, {"query": query, "variables": variables},
-                                     context_value={"request": request})
-
-        self.assertFalse(data.get('errors'), msg=data.get('errors'))
+        self.graphql_client.force_login(self.authenticatedUser)
+        self.graphql_client.post(query, variables)
 
         expected_access = ACCESS_TYPE.user.format(self.user1.guid)
-        for object, message in (
+        for entity, message in (
                 (self.folder1, "Folder1 %s access is not updated correctly"),
                 (self.folder2, "Folder2 %s access is not updated correctly"),
                 (self.file3, "File3 %s access is not updated correctly"),
                 (self.file4, "File4 %s access is not updated correctly"),
                 (self.file5, "File5 %s access is not updated correctly"),
         ):
-            object.refresh_from_db()
-            self.assertNotIn(expected_access, object.read_access, msg=message % 'read')
-            self.assertIn(expected_access, object.write_access, msg=message % 'write')
+            entity.refresh_from_db()
+            self.assertNotIn(expected_access, entity.read_access, msg=message % 'read')
+            self.assertIn(expected_access, entity.write_access, msg=message % 'write')
 
     def test_update_ownership_updates_recursive_by_owner(self):
         query = """
@@ -839,24 +776,20 @@ class EditFileFolderTestCase(FastTenantTestCase):
                 "ownerGuidRecursive": 'updateOwnerFiles',
             }
         }
-        request = HttpRequest()
-        request.user = self.authenticatedUser
 
-        success, data = graphql_sync(schema, {"query": query, "variables": variables},
-                                     context_value={"request": request})
-
-        self.assertFalse(data.get('errors'), msg=data.get('errors'))
+        self.graphql_client.force_login(self.authenticatedUser)
+        self.graphql_client.post(query, variables)
 
         expected_access = ACCESS_TYPE.user.format(self.user1.guid)
-        for object, message in (
+        for entity, message in (
                 (self.folder1, "Folder1 %s access is not updated correctly"),
                 (self.folder2, "Folder2 %s access is not updated correctly"),
                 (self.file3, "File3 %s access is not updated correctly"),
                 (self.file4, "File4 %s access is not updated correctly"),
         ):
-            object.refresh_from_db()
-            self.assertNotIn(expected_access, object.read_access, msg=message % 'read')
-            self.assertIn(expected_access, object.write_access, msg=message % 'write')
+            entity.refresh_from_db()
+            self.assertNotIn(expected_access, entity.read_access, msg=message % 'read')
+            self.assertIn(expected_access, entity.write_access, msg=message % 'write')
 
         self.file5.refresh_from_db()
         self.assertNotIn(expected_access, self.file5.write_access, msg="File5 is updated unexpectedly")

@@ -3,6 +3,7 @@ from django.core.exceptions import ObjectDoesNotExist
 from core.constances import NOT_LOGGED_IN, COULD_NOT_FIND, COULD_NOT_FIND_GROUP, COULD_NOT_SAVE, USER_ROLES
 from core.lib import clean_graphql_input, access_id_to_acl
 from core.models import Group
+from core.resolvers import shared
 from user.models import User
 from ..models import Task
 
@@ -42,8 +43,7 @@ def resolve_add_task(_, info, input):
     entity.title = clean_input.get("title", "")
     entity.rich_description = clean_input.get("richDescription", "")
 
-    if 'timePublished' in clean_input:
-        entity.published = clean_input.get("timePublished")
+    shared.update_publication_dates(entity, clean_input)
 
     entity.save()
 
@@ -85,8 +85,7 @@ def resolve_edit_task(_, info, input):
     if 'writeAccessId' in clean_input:
         entity.write_access = access_id_to_acl(entity, clean_input.get("writeAccessId"))
 
-    if 'timePublished' in clean_input:
-        entity.published = clean_input.get("timePublished")
+    shared.update_publication_dates(entity, clean_input)
 
     # only admins can edit these fields
     if user.has_role(USER_ROLES.ADMIN):

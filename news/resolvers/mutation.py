@@ -54,6 +54,7 @@ def resolve_add_news(_, info, input):
         entity.abstract = abstract
 
     shared.update_featured_image(entity, clean_input)
+    shared.update_publication_dates(entity, clean_input)
 
     if user.has_role(USER_ROLES.ADMIN) or user.has_role(USER_ROLES.EDITOR):
         if 'isFeatured' in clean_input:
@@ -61,8 +62,6 @@ def resolve_add_news(_, info, input):
 
     entity.source = clean_input.get("source", "")
 
-    if 'timePublished' in clean_input:
-        entity.published = clean_input.get("timePublished", None)
 
     entity.save()
 
@@ -114,9 +113,7 @@ def resolve_edit_news(_, info, input):
         entity.abstract = abstract
 
     shared.update_featured_image(entity, clean_input)
-
-    if 'timePublished' in clean_input:
-        entity.published = clean_input.get("timePublished", None)
+    shared.update_publication_dates(entity, clean_input)
 
     if user.has_role(USER_ROLES.ADMIN) or user.has_role(USER_ROLES.EDITOR):
         if 'isFeatured' in clean_input:

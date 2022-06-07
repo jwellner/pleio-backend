@@ -5,7 +5,7 @@ from auditlog.models import LogEntry
 from celery import shared_task
 from celery.utils.log import get_task_logger
 from core import config
-from core.models import SiteStat, Attachment, ResizedImage
+from core.models import SiteStat, Attachment, ResizedImage, Entity
 from core.tasks.notification_tasks import create_notifications_for_scheduled_content
 from django.conf import settings
 from django.core import management
@@ -15,6 +15,7 @@ from django.db.models import Sum
 from django_tenants.utils import schema_context
 from django.utils import timezone
 from datetime import timedelta
+
 from file.models import FileFolder
 from tenants.models import Client
 from user.models import User
@@ -33,6 +34,7 @@ def dispatch_crons(self, period):
         if period == 'hourly':
             create_notifications_for_scheduled_content(client.schema_name)
             send_notifications.delay(client.schema_name)
+            depublicate_content.delay(client.schema_name)
 
         if period == 'daily':
             save_db_disk_usage.delay(client.schema_name)
@@ -232,3 +234,21 @@ def cleanup_auditlog(schema_name):
     with schema_context(schema_name):
         deletedLogs = LogEntry.objects.filter(timestamp__lt=minimum_timestamp).delete()
         logger.info("%s: %d log entries were deleted", schema_name, deletedLogs[0])
+
+
+@shared_task
+def depublicate_content(schema_name):
+    now = timezone.now()
+    with schema_context(schema_name):
+        to_archive = Entity.objects.filter(schedule_archive_after__isnull=False,
+                                           schedule_archive_after__lte=now,
+                                           is_archived=False).select_subclasses()
+        for entity in to_archive:
+            entity.is_archived = True
+            entity.save()
+
+        to_delete = Entity.objects.filter(schedule_delete_after__isnull=False,
+                                          schedule_delete_after__lte=now).select_subclasses()
+        for entity in to_delete:
+            entity.delete()
+

@@ -1,21 +1,18 @@
-from django.db import connection
-from django_tenants.test.cases import FastTenantTestCase
+from django.utils import timezone
 from backend2.schema import schema
 from ariadne import graphql_sync
-import json
 from django.contrib.auth.models import AnonymousUser
 from django.http import HttpRequest
 from core.models import Group
+from core.tests.helpers import PleioTenantTestCase
 from user.models import User
-from blog.models import Blog
-from core.constances import ACCESS_TYPE
 from mixer.backend.django import mixer
-from graphql import GraphQLError
-from datetime import datetime
 
-class AddBlogTestCase(FastTenantTestCase):
+
+class AddBlogTestCase(PleioTenantTestCase):
 
     def setUp(self):
+        super(AddBlogTestCase, self).setUp()
         self.anonymousUser = AnonymousUser()
         self.authenticatedUser = mixer.blend(User)
         self.adminUser = mixer.blend(User, roles=['ADMIN'])
@@ -28,6 +25,9 @@ class AddBlogTestCase(FastTenantTestCase):
                 "subtype": "blog",
                 "title": "My first Blog",
                 "richDescription": "richDescription",
+                "timePublished": str(timezone.localtime()),
+                "scheduleArchiveEntity": str(timezone.localtime() + timezone.timedelta(days=10)),
+                "scheduleDeleteEntity": str(timezone.localtime() + timezone.timedelta(days=20)),
                 "accessId": 0,
                 "writeAccessId": 0,
                 "tags": ["tag1", "tag2"],
@@ -40,6 +40,9 @@ class AddBlogTestCase(FastTenantTestCase):
                 richDescription
                 timeCreated
                 timeUpdated
+                timePublished
+                scheduleArchiveEntity
+                scheduleDeleteEntity
                 accessId
                 writeAccessId
                 canEdit
@@ -67,18 +70,18 @@ class AddBlogTestCase(FastTenantTestCase):
 
         variables = self.data
 
-        request = HttpRequest()
-        request.user = self.authenticatedUser
+        self.graphql_client.force_login(self.authenticatedUser)
+        result = self.graphql_client.post(self.mutation, variables)
 
-        result = graphql_sync(schema, { "query": self.mutation, "variables": variables }, context_value={ "request": request })
-
-        data = result[1]["data"]
-
-        self.assertEqual(data["addEntity"]["entity"]["title"], variables["input"]["title"])
-        self.assertEqual(data["addEntity"]["entity"]["richDescription"], variables["input"]["richDescription"])
-        self.assertEqual(data["addEntity"]["entity"]["tags"], variables["input"]["tags"])
-        self.assertEqual(data["addEntity"]["entity"]["isRecommended"], False)
-        self.assertEqual(data["addEntity"]["entity"]["statusPublished"], 'published')
+        entity = result["data"]['addEntity']['entity']
+        self.assertEqual(entity["title"], variables["input"]["title"])
+        self.assertEqual(entity["richDescription"], variables["input"]["richDescription"])
+        self.assertEqual(entity["tags"], variables["input"]["tags"])
+        self.assertEqual(entity["isRecommended"], False)
+        self.assertEqual(entity["statusPublished"], 'published')
+        self.assertDateEqual(entity["timePublished"], variables['input']['timePublished'])
+        self.assertDateEqual(entity["scheduleArchiveEntity"], variables['input']['scheduleArchiveEntity'])
+        self.assertDateEqual(entity["scheduleDeleteEntity"], variables['input']['scheduleDeleteEntity'])
 
     def test_add_blog_admin(self):
 

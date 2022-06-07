@@ -1,26 +1,17 @@
-from django.db import connection
-from django_tenants.test.cases import FastTenantTestCase
-from django.test import override_settings
-from core.models import Group, Comment, ProfileField, UserProfileField
-from core.tests.helpers import GraphqlTestMixin
+from core.models import ProfileField, UserProfileField
+from core.tests.helpers import PleioTenantTestCase
 from user.models import User
-from blog.models import Blog
-from cms.models import Page
-from core.constances import ACCESS_TYPE, USER_ROLES
-from backend2.schema import schema
-from ariadne import graphql_sync
-import json
-from django.contrib.auth.models import AnonymousUser
-from django.http import HttpRequest
+from core.constances import USER_ROLES
 from mixer.backend.django import mixer
-from notifications.signals import notify
-from django.utils import dateparse, timezone
+from django.utils import timezone
 from datetime import timedelta
 from core.lib import access_id_to_acl
 
-class UsersByBirthDateTestCase(FastTenantTestCase, GraphqlTestMixin):
+
+class UsersByBirthDateTestCase(PleioTenantTestCase):
 
     def setUp(self):
+        super(UsersByBirthDateTestCase, self).setUp()
         self.user1 = mixer.blend(User, name="Tt")
         self.user2 = mixer.blend(User, name="Specific_user_name_1")
         self.user3 = mixer.blend(User, name="User3")
@@ -28,7 +19,6 @@ class UsersByBirthDateTestCase(FastTenantTestCase, GraphqlTestMixin):
         self.user5 = mixer.blend(User, name="Public birthday")
         self.user6 = mixer.blend(User, name="Private birthday")
         self.admin1 = mixer.blend(User, roles=[USER_ROLES.ADMIN], name='Yy')
-        self.anonymousUser = AnonymousUser()
 
         self.birthday_field = ProfileField.objects.create(key='birthday', name='birthday', field_type='date_field')
 
@@ -72,76 +62,55 @@ class UsersByBirthDateTestCase(FastTenantTestCase, GraphqlTestMixin):
         self.user6.delete()
 
     def test_users_by_birth_date_by_user(self):
-
-        request = HttpRequest()
-        request.user = self.user2
-
         variables = {
             "profileFieldGuid": str(self.birthday_field.guid)
         }
 
-        result = graphql_sync(schema, {"query": self.query, "variables": variables}, context_value={ "request": request })
+        self.graphql_client.force_login(self.user2)
+        result = self.graphql_client.post(self.query, variables)
 
-        self.assertGraphqlSuccess(result)
-        data = result[1]["data"]
-
+        data = result["data"]
         self.assertEqual(data["usersByBirthDate"]["total"], 3)
         self.assertEqual(data["usersByBirthDate"]["edges"][0]["name"], self.user3.name)
         self.assertEqual(len(data["usersByBirthDate"]["edges"]), 3)
 
     def test_users_by_birth_date_by_user_future(self):
-
-        request = HttpRequest()
-        request.user = self.user2
-
         variables = {
             "profileFieldGuid": str(self.birthday_field.guid),
             "futureDays": 60
         }
 
-        result = graphql_sync(schema, {"query": self.query, "variables": variables}, context_value={ "request": request })
+        self.graphql_client.force_login(self.user2)
+        result = self.graphql_client.post(self.query, variables)
 
-        self.assertGraphqlSuccess(result)
-        data = result[1]["data"]
-
+        data = result["data"]
         self.assertEqual(data["usersByBirthDate"]["total"], 4)
         self.assertEqual(data["usersByBirthDate"]["edges"][0]["name"], self.user3.name)
         self.assertEqual(len(data["usersByBirthDate"]["edges"]), 4)
 
     def test_users_by_birth_date_by_anonymous(self):
-
-        request = HttpRequest()
-        request.user = self.anonymousUser
-
         variables = {
             "profileFieldGuid": str(self.birthday_field.guid)
         }
 
-        result = graphql_sync(schema, {"query": self.query, "variables": variables}, context_value={ "request": request })
+        result = self.graphql_client.post(self.query, variables)
 
-        self.assertGraphqlSuccess(result)
-        data = result[1]["data"]
+        data = result["data"]
 
         self.assertEqual(data["usersByBirthDate"]["total"], 1)
         self.assertEqual(data["usersByBirthDate"]["edges"][0]["name"], self.user5.name)
         self.assertEqual(len(data["usersByBirthDate"]["edges"]), 1)
 
     def test_users_by_birth_date_by_admin(self):
-
-        request = HttpRequest()
-        request.user = self.admin1
-
         variables = {
             "profileFieldGuid": str(self.birthday_field.guid),
             "futureDays": 60
         }
 
-        result = graphql_sync(schema, {"query": self.query, "variables": variables}, context_value={ "request": request })
+        self.graphql_client.force_login(self.admin1)
+        result = self.graphql_client.post(self.query, variables)
 
-        self.assertGraphqlSuccess(result)
-        data = result[1]["data"]
-
+        data = result["data"]
         self.assertEqual(data["usersByBirthDate"]["total"], 5)
         self.assertEqual(data["usersByBirthDate"]["edges"][0]["name"], self.user3.name)
         self.assertEqual(len(data["usersByBirthDate"]["edges"]), 5)
-

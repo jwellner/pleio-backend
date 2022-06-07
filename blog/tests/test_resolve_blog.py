@@ -1,22 +1,15 @@
-from django.db import connection
-from django_tenants.test.cases import FastTenantTestCase
-from backend2.schema import schema
-from ariadne import graphql_sync
-import json
-from django.contrib.auth.models import AnonymousUser
-from django.http import HttpRequest
-from core.models import Group
+from core.tests.helpers import PleioTenantTestCase
 from user.models import User
 from blog.models import Blog
 from mixer.backend.django import mixer
 from core.constances import ACCESS_TYPE
-from core.lib import get_acl, access_id_to_acl
 from django.utils.text import slugify
 
-class BlogTestCase(FastTenantTestCase):
+
+class BlogTestCase(PleioTenantTestCase):
 
     def setUp(self):
-        self.anonymousUser = AnonymousUser()
+        super(BlogTestCase, self).setUp()
         self.authenticatedUser = mixer.blend(User)
         self.authenticatedAdminUser = mixer.blend(User, roles = ['ADMIN'])
 
@@ -45,13 +38,15 @@ class BlogTestCase(FastTenantTestCase):
         self.authenticatedAdminUser.delete()
 
     def test_blog_anonymous(self):
-
         query = """
             fragment BlogParts on Blog {
                 title
                 richDescription
                 accessId
                 timeCreated
+                timePublished
+                scheduleArchiveEntity
+                scheduleDeleteEntity
                 featured {
                     image
                     video
@@ -83,44 +78,39 @@ class BlogTestCase(FastTenantTestCase):
                 }
             }
         """
-        request = HttpRequest()
-        request.user = self.anonymousUser
 
         variables = {
             "guid": self.blogPublic.guid
         }
 
-        result = graphql_sync(schema, { "query": query , "variables": variables}, context_value={ "request": request })
+        result = self.graphql_client.post(query, variables)
 
-        self.assertTrue(result[0])
-
-        data = result[1]["data"]
-
-        self.assertEqual(data["entity"]["guid"], self.blogPublic.guid)
-        self.assertEqual(data["entity"]["title"], self.blogPublic.title)
-        self.assertEqual(data["entity"]["richDescription"], self.blogPublic.rich_description)
-        self.assertEqual(data["entity"]["accessId"], 2)
-        self.assertEqual(data["entity"]["timeCreated"], self.blogPublic.created_at.isoformat())
-        self.assertEqual(data["entity"]["isRecommended"], self.blogPublic.is_recommended)
-        self.assertEqual(data["entity"]["tags"], [])
-        self.assertEqual(data["entity"]["views"], 1)
-        self.assertEqual(data["entity"]["votes"], 0)
-        self.assertEqual(data["entity"]["hasVoted"], False)
-        self.assertEqual(data["entity"]["isBookmarked"], False)
-        self.assertEqual(data["entity"]["isFollowing"], False)
-        self.assertEqual(data["entity"]["canBookmark"], False)
-        self.assertEqual(data["entity"]["canEdit"], False)
-        self.assertEqual(data["entity"]["owner"]["guid"], self.blogPublic.owner.guid)
-        self.assertEqual(data["entity"]["url"], "/blog/view/{}/{}".format(self.blogPublic.guid, slugify(self.blogPublic.title)))
+        entity = result["data"]["entity"]
+        self.assertEqual(entity["guid"], self.blogPublic.guid)
+        self.assertEqual(entity["title"], self.blogPublic.title)
+        self.assertEqual(entity["richDescription"], self.blogPublic.rich_description)
+        self.assertEqual(entity["accessId"], 2)
+        self.assertEqual(entity["timeCreated"], self.blogPublic.created_at.isoformat())
+        self.assertEqual(entity["isRecommended"], self.blogPublic.is_recommended)
+        self.assertEqual(entity["tags"], [])
+        self.assertEqual(entity["views"], 1)
+        self.assertEqual(entity["votes"], 0)
+        self.assertEqual(entity["hasVoted"], False)
+        self.assertEqual(entity["isBookmarked"], False)
+        self.assertEqual(entity["isFollowing"], False)
+        self.assertEqual(entity["canBookmark"], False)
+        self.assertEqual(entity["canEdit"], False)
+        self.assertEqual(entity["owner"]["guid"], self.blogPublic.owner.guid)
+        self.assertEqual(entity["url"], "/blog/view/{}/{}".format(self.blogPublic.guid, slugify(self.blogPublic.title)))
+        self.assertDateEqual(entity['timePublished'], str(self.blogPublic.published))
+        self.assertIsNone(entity['scheduleArchiveEntity'])
+        self.assertIsNone(entity['scheduleDeleteEntity'])
 
         variables = {
             "guid": self.blogPrivate.guid
         }
 
-        result = graphql_sync(schema, { "query": query , "variables": variables}, context_value={ "request": request })
+        result = self.graphql_client.post(query, variables)
+        entity = result["data"]["entity"]
 
-        self.assertTrue(result[0])
-
-        data = result[1]["data"]
-
-        self.assertEqual(data["entity"], None)
+        self.assertIsNone(entity)
