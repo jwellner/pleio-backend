@@ -95,6 +95,8 @@ input addEntityInput {
   tags: [String]
   mentions: [String]
   timePublished: DateTime
+  scheduleArchiveEntity: DateTime
+  scheduleDeleteEntity: DateTime
   qrAccess: Boolean
 }
 
@@ -289,6 +291,8 @@ type Blog implements Entity {
   timeUpdated: DateTime
   timePublished: DateTime
   statusPublished: StatusPublished
+  scheduleArchiveEntity: DateTime
+  scheduleDeleteEntity: DateTime
   isFeatured: Boolean
   isHighlighted: Boolean
   isRecommended: Boolean
@@ -504,6 +508,8 @@ type Discussion implements Entity {
   timeUpdated: DateTime
   timePublished: DateTime
   statusPublished: StatusPublished
+  scheduleArchiveEntity: DateTime
+  scheduleDeleteEntity: DateTime
   canEdit: Boolean!
   canComment: Boolean
   canVote: Boolean
@@ -580,6 +586,8 @@ input editEntityInput {
   mentions: [String]
   timeCreated: DateTime
   timePublished: DateTime
+  scheduleArchiveEntity: DateTime
+  scheduleDeleteEntity: DateTime
   groupGuid: String
   ownerGuid: String
   qrAccess: Boolean
@@ -604,6 +612,8 @@ input editFileFolderInput {
   isAccessRecursive: Boolean
   tags: [String]
   timePublished: DateTime
+  scheduleArchiveEntity: DateTime
+  scheduleDeleteEntity: DateTime
   ownerGuid: String
   ownerGuidRecursive: UpdateOwnerRecursive
 }
@@ -904,6 +914,8 @@ type Event implements Entity {
   statusPublished: StatusPublished
   startDate: String
   endDate: String
+  scheduleArchiveEntity: DateTime
+  scheduleDeleteEntity: DateTime
   location: String
   locationAddress: String
   locationLink: String
@@ -993,6 +1005,8 @@ type FileFolder implements Entity {
   timeUpdated: DateTime
   timePublished: DateTime
   statusPublished: StatusPublished
+  scheduleArchiveEntity: DateTime
+  scheduleDeleteEntity: DateTime
   isFeatured: Boolean
   isHighlighted: Boolean
   isRecommended: Boolean
@@ -1400,6 +1414,8 @@ type News implements Entity {
   statusPublished: StatusPublished
   startDate: String
   endDate: String
+  scheduleArchiveEntity: DateTime
+  scheduleDeleteEntity: DateTime
   source: String
   isFeatured: Boolean
   isHighlighted: Boolean
@@ -1486,6 +1502,8 @@ type Page implements Entity {
   timeUpdated: DateTime
   timePublished: DateTime
   statusPublished: StatusPublished
+  scheduleArchiveEntity: DateTime
+  scheduleDeleteEntity: DateTime
   accessId: Int
   pageType: String
   rows: [Row]
@@ -1644,6 +1662,8 @@ type Question implements Entity {
   timeUpdated: DateTime
   timePublished: DateTime
   statusPublished: StatusPublished
+  scheduleArchiveEntity: DateTime
+  scheduleDeleteEntity: DateTime
   isFeatured: Boolean
   isHighlighted: Boolean
   isClosed: Boolean
@@ -2066,6 +2086,8 @@ type Task implements Entity {
   timeUpdated: DateTime
   timePublished: DateTime
   statusPublished: StatusPublished
+  scheduleArchiveEntity: DateTime
+  scheduleDeleteEntity: DateTime
   canEdit: Boolean!
   canComment: Boolean
   canVote: Boolean
@@ -2256,6 +2278,8 @@ type Wiki implements Entity {
   timeUpdated: DateTime
   timePublished: DateTime
   statusPublished: StatusPublished
+  scheduleArchiveEntity: DateTime
+  scheduleDeleteEntity: DateTime
   accessId: Int
   writeAccessId: Int
   isBookmarked: Boolean

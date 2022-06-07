@@ -1,22 +1,16 @@
-from django.db import connection
-from django_tenants.test.cases import FastTenantTestCase
-from backend2.schema import schema
-from ariadne import graphql_sync
-import json
-from django.contrib.auth.models import AnonymousUser
-from django.http import HttpRequest
-from core.models import Group
+from django.utils import timezone
+
+from core.tests.helpers import PleioTenantTestCase
 from user.models import User
 from news.models import News
 from core.constances import ACCESS_TYPE, USER_ROLES
 from mixer.backend.django import mixer
-from graphql import GraphQLError
-from datetime import datetime
 
-class EditNewsTestCase(FastTenantTestCase):
+
+class EditNewsTestCase(PleioTenantTestCase):
 
     def setUp(self):
-        self.anonymousUser = AnonymousUser()
+        super(EditNewsTestCase, self).setUp()
         self.authenticatedUser = mixer.blend(User)
         self.user2 = mixer.blend(User)
         self.editorUser = mixer.blend(User, roles=[USER_ROLES.EDITOR])
@@ -40,7 +34,10 @@ class EditNewsTestCase(FastTenantTestCase):
                 "writeAccessId": 0,
                 "tags": ["tag1", "tag2"],
                 "isFeatured": True,
-                "source": "https://www.nos.nl"
+                "source": "https://www.nos.nl",
+                "timePublished": str(timezone.localtime()),
+                "scheduleArchiveEntity": str(timezone.localtime() + timezone.timedelta(days=10)),
+                "scheduleDeleteEntity": str(timezone.localtime() + timezone.timedelta(days=20)),
             }
         }
         self.mutation = """
@@ -49,6 +46,9 @@ class EditNewsTestCase(FastTenantTestCase):
                 richDescription
                 timeCreated
                 timeUpdated
+                timePublished
+                scheduleArchiveEntity
+                scheduleDeleteEntity
                 accessId
                 writeAccessId
                 canEdit
@@ -72,87 +72,81 @@ class EditNewsTestCase(FastTenantTestCase):
         """
 
     def test_edit_news(self):
-
         variables = self.data
 
-        request = HttpRequest()
-        request.user = self.authenticatedUser
+        self.graphql_client.force_login(self.authenticatedUser)
+        result = self.graphql_client.post(self.mutation, variables)
 
-        result = graphql_sync(schema, { "query": self.mutation, "variables": variables }, context_value={ "request": request })
-
-        data = result[1]["data"]
-
-        self.assertEqual(data["editEntity"]["entity"]["title"], variables["input"]["title"])
-        self.assertEqual(data["editEntity"]["entity"]["richDescription"], variables["input"]["richDescription"])
-        self.assertEqual(data["editEntity"]["entity"]["tags"], variables["input"]["tags"])
-        self.assertEqual(data["editEntity"]["entity"]["isFeatured"], False) # Only editor or admin can set isFeatured
-        self.assertEqual(data["editEntity"]["entity"]["source"], variables["input"]["source"])
+        entity = result["data"]["editEntity"]["entity"]
+        self.assertEqual(entity["title"], variables["input"]["title"])
+        self.assertEqual(entity["richDescription"], variables["input"]["richDescription"])
+        self.assertEqual(entity["tags"], variables["input"]["tags"])
+        self.assertEqual(entity["isFeatured"], False) # Only editor or admin can set isFeatured
+        self.assertEqual(entity["source"], variables["input"]["source"])
+        self.assertDateEqual(entity["timePublished"], variables['input']['timePublished'])
+        self.assertDateEqual(entity["scheduleArchiveEntity"], variables['input']['scheduleArchiveEntity'])
+        self.assertDateEqual(entity["scheduleDeleteEntity"], variables['input']['scheduleDeleteEntity'])
 
         self.news.refresh_from_db()
 
-        self.assertEqual(data["editEntity"]["entity"]["title"], self.news.title)
-        self.assertEqual(data["editEntity"]["entity"]["richDescription"], self.news.rich_description)
-        self.assertEqual(data["editEntity"]["entity"]["tags"], self.news.tags)
-        self.assertEqual(data["editEntity"]["entity"]["isFeatured"], self.news.is_featured)
-        self.assertEqual(data["editEntity"]["entity"]["source"], self.news.source)
+        self.assertEqual(entity["title"], self.news.title)
+        self.assertEqual(entity["richDescription"], self.news.rich_description)
+        self.assertEqual(entity["tags"], self.news.tags)
+        self.assertEqual(entity["isFeatured"], self.news.is_featured)
+        self.assertEqual(entity["source"], self.news.source)
+        self.assertDateEqual(entity["timePublished"], str(self.news.published))
+        self.assertDateEqual(entity["scheduleArchiveEntity"], str(self.news.schedule_archive_after))
+        self.assertDateEqual(entity["scheduleDeleteEntity"], str(self.news.schedule_delete_after))
 
     def test_edit_news_editor(self):
 
         variables = self.data
         variables["input"]["title"] = "Update door editor"
 
-        request = HttpRequest()
-        request.user = self.editorUser
+        self.graphql_client.force_login(self.editorUser)
+        result = self.graphql_client.post(self.mutation, variables)
 
-        result = graphql_sync(schema, { "query": self.mutation, "variables": variables }, context_value={ "request": request })
-
-        data = result[1]["data"]
-
-        self.assertEqual(data["editEntity"]["entity"]["title"], variables["input"]["title"])
-        self.assertEqual(data["editEntity"]["entity"]["richDescription"], variables["input"]["richDescription"])
-        self.assertEqual(data["editEntity"]["entity"]["tags"], variables["input"]["tags"])
-        self.assertEqual(data["editEntity"]["entity"]["isFeatured"], True)
-        self.assertEqual(data["editEntity"]["entity"]["source"], variables["input"]["source"])
-        self.assertEqual(data["editEntity"]["entity"]["owner"]["guid"], self.authenticatedUser.guid)
-        self.assertEqual(data["editEntity"]["entity"]["timeCreated"], self.news.created_at.isoformat())
+        entity = result["data"]["editEntity"]["entity"]
+        self.assertEqual(entity["title"], variables["input"]["title"])
+        self.assertEqual(entity["richDescription"], variables["input"]["richDescription"])
+        self.assertEqual(entity["tags"], variables["input"]["tags"])
+        self.assertEqual(entity["isFeatured"], True)
+        self.assertEqual(entity["source"], variables["input"]["source"])
+        self.assertEqual(entity["owner"]["guid"], self.authenticatedUser.guid)
+        self.assertEqual(entity["timeCreated"], self.news.created_at.isoformat())
 
         self.news.refresh_from_db()
 
-        self.assertEqual(data["editEntity"]["entity"]["title"], self.news.title)
-        self.assertEqual(data["editEntity"]["entity"]["richDescription"], self.news.rich_description)
-        self.assertEqual(data["editEntity"]["entity"]["tags"], self.news.tags)
-        self.assertEqual(data["editEntity"]["entity"]["isFeatured"], self.news.is_featured)
-        self.assertEqual(data["editEntity"]["entity"]["source"], self.news.source)
-        self.assertEqual(data["editEntity"]["entity"]["owner"]["guid"], self.authenticatedUser.guid)
-        self.assertEqual(data["editEntity"]["entity"]["timeCreated"], self.news.created_at.isoformat())
+        self.assertEqual(entity["title"], self.news.title)
+        self.assertEqual(entity["richDescription"], self.news.rich_description)
+        self.assertEqual(entity["tags"], self.news.tags)
+        self.assertEqual(entity["isFeatured"], self.news.is_featured)
+        self.assertEqual(entity["source"], self.news.source)
+        self.assertEqual(entity["owner"]["guid"], self.authenticatedUser.guid)
+        self.assertEqual(entity["timeCreated"], self.news.created_at.isoformat())
 
     def test_edit_news_admin(self):
-
         variables = self.data
         variables["input"]["timeCreated"] = "2018-12-10T23:00:00.000Z"
         variables["input"]["ownerGuid"] = self.user2.guid
 
+        self.graphql_client.force_login(self.admin)
+        result = self.graphql_client.post(self.mutation, variables)
 
-        request = HttpRequest()
-        request.user = self.admin
-
-        result = graphql_sync(schema, { "query": self.mutation, "variables": variables }, context_value={ "request": request })
-
-        data = result[1]["data"]
-
-        self.assertEqual(data["editEntity"]["entity"]["richDescription"], variables["input"]["richDescription"])
-        self.assertEqual(data["editEntity"]["entity"]["tags"], variables["input"]["tags"])
-        self.assertEqual(data["editEntity"]["entity"]["isFeatured"], True)
-        self.assertEqual(data["editEntity"]["entity"]["source"], variables["input"]["source"])
-        self.assertEqual(data["editEntity"]["entity"]["owner"]["guid"], self.user2.guid)
-        self.assertEqual(data["editEntity"]["entity"]["timeCreated"], "2018-12-10T23:00:00+00:00")
+        entity = result["data"]["editEntity"]["entity"]
+        self.assertEqual(entity["richDescription"], variables["input"]["richDescription"])
+        self.assertEqual(entity["tags"], variables["input"]["tags"])
+        self.assertEqual(entity["isFeatured"], True)
+        self.assertEqual(entity["source"], variables["input"]["source"])
+        self.assertEqual(entity["owner"]["guid"], self.user2.guid)
+        self.assertEqual(entity["timeCreated"], "2018-12-10T23:00:00+00:00")
 
         self.news.refresh_from_db()
 
-        self.assertEqual(data["editEntity"]["entity"]["title"], self.news.title)
-        self.assertEqual(data["editEntity"]["entity"]["richDescription"], self.news.rich_description)
-        self.assertEqual(data["editEntity"]["entity"]["tags"], self.news.tags)
-        self.assertEqual(data["editEntity"]["entity"]["isFeatured"], self.news.is_featured)
-        self.assertEqual(data["editEntity"]["entity"]["source"], self.news.source)
-        self.assertEqual(data["editEntity"]["entity"]["owner"]["guid"], self.user2.guid)
-        self.assertEqual(data["editEntity"]["entity"]["timeCreated"], "2018-12-10T23:00:00+00:00")
+        self.assertEqual(entity["title"], self.news.title)
+        self.assertEqual(entity["richDescription"], self.news.rich_description)
+        self.assertEqual(entity["tags"], self.news.tags)
+        self.assertEqual(entity["isFeatured"], self.news.is_featured)
+        self.assertEqual(entity["source"], self.news.source)
+        self.assertEqual(entity["owner"]["guid"], self.user2.guid)
+        self.assertEqual(entity["timeCreated"], "2018-12-10T23:00:00+00:00")

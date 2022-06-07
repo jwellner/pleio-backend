@@ -1,27 +1,18 @@
-import json
 import os
-from django.db import connection
-from django_tenants.test.cases import FastTenantTestCase
-from backend2.schema import schema
-from ariadne import graphql_sync
-from django.contrib.auth.models import AnonymousUser
-from django.http import HttpRequest
-from django.utils import timezone
-from core.models import Group
+from core.tests.helpers import PleioTenantTestCase
 from user.models import User
 from file.models import FileFolder
 from mixer.backend.django import mixer
 from core.constances import ACCESS_TYPE
-from core.lib import get_acl, access_id_to_acl
-from django.utils.text import slugify
 from django.core.files import File
 from unittest.mock import MagicMock, patch
 from django.conf import settings
 
-class FileFolderTestCase(FastTenantTestCase):
+
+class FileFolderTestCase(PleioTenantTestCase):
 
     def setUp(self):
-        self.anonymousUser = AnonymousUser()
+        super(FileFolderTestCase, self).setUp()
         self.authenticatedUser = mixer.blend(User)
 
         self.folder = FileFolder.objects.create(
@@ -38,6 +29,9 @@ class FileFolderTestCase(FastTenantTestCase):
                 subtype
                 timeCreated
                 timeUpdated
+                timePublished
+                scheduleArchiveEntity
+                scheduleDeleteEntity
                 accessId
                 writeAccessId
                 canEdit
@@ -89,60 +83,53 @@ class FileFolderTestCase(FastTenantTestCase):
             upload=file_mock
         )
 
-        request = HttpRequest()
-        request.user = self.authenticatedUser
-
         variables = {
             "guid": self.file.guid
         }
 
-        result = graphql_sync(schema, { "query": self.query , "variables": variables}, context_value={ "request": request })
+        self.graphql_client.force_login(self.authenticatedUser)
+        result = self.graphql_client.post(self.query, variables)
+        entity = result["data"]["entity"]
 
-        self.assertTrue(result[0])
-
-        data = result[1]["data"]
-
-        self.assertEqual(data["entity"]["guid"], self.file.guid)
-        self.assertEqual(data["entity"]["title"], file_mock.name)
-        self.assertEqual(data["entity"]["accessId"], 0)
-        self.assertEqual(data["entity"]["timeCreated"], self.file.created_at.isoformat())
-        self.assertEqual(data["entity"]["tags"], self.file.tags)
-        self.assertEqual(data["entity"]["canEdit"], True)
-        self.assertEqual(data["entity"]["url"], "/files/view/{}/{}".format(self.file.guid, os.path.basename(self.file.upload.name)))
-        self.assertEqual(data["entity"]["parentFolder"], None)
-        self.assertEqual(data["entity"]["subtype"], "file")
-        self.assertEqual(data["entity"]["hasChildren"], False)
-        self.assertEqual(data["entity"]["mimeType"], file_mock.content_type)
-        self.assertEqual(data["entity"]["thumbnail"], self.file.thumbnail_url)
-        self.assertEqual(data["entity"]["download"], self.file.download_url)
+        self.assertEqual(entity["guid"], self.file.guid)
+        self.assertEqual(entity["title"], file_mock.name)
+        self.assertEqual(entity["accessId"], 0)
+        self.assertEqual(entity["timeCreated"], self.file.created_at.isoformat())
+        self.assertEqual(entity["tags"], self.file.tags)
+        self.assertEqual(entity["canEdit"], True)
+        self.assertEqual(entity["url"], "/files/view/{}/{}".format(self.file.guid, os.path.basename(self.file.upload.name)))
+        self.assertEqual(entity["parentFolder"], None)
+        self.assertEqual(entity["subtype"], "file")
+        self.assertEqual(entity["hasChildren"], False)
+        self.assertEqual(entity["mimeType"], file_mock.content_type)
+        self.assertEqual(entity["thumbnail"], self.file.thumbnail_url)
+        self.assertEqual(entity["download"], self.file.download_url)
+        self.assertIsNotNone(entity["timePublished"])
+        self.assertIsNone(entity["scheduleArchiveEntity"])
+        self.assertIsNone(entity["scheduleDeleteEntity"])
 
         mock_save.assert_called_once()
 
     def test_folder(self):
-        request = HttpRequest()
-        request.user = self.authenticatedUser
-
         variables = {
             "guid": self.folder.guid
         }
 
-        result = graphql_sync(schema, { "query": self.query , "variables": variables}, context_value={ "request": request })
+        self.graphql_client.force_login(self.authenticatedUser)
+        result = self.graphql_client.post(self.query, variables)
 
-        self.assertTrue(result[0])
-
-        data = result[1]["data"]
-
-        self.assertEqual(data["entity"]["guid"], self.folder.guid)
-        self.assertEqual(data["entity"]["title"], self.folder.title)
-        self.assertEqual(data["entity"]["accessId"], 0)
-        self.assertEqual(data["entity"]["timeCreated"], self.folder.created_at.isoformat())
-        self.assertEqual(data["entity"]["tags"], self.folder.tags)
-        self.assertEqual(data["entity"]["canEdit"], True)
-        self.assertEqual(data["entity"]["url"], "/user/{}/files/{}".format(self.folder.owner.guid, self.folder.guid))
-        self.assertEqual(data["entity"]["parentFolder"], None)
-        self.assertEqual(data["entity"]["subtype"], "folder")
-        #self.assertEqual(data["entity"]["hasChildren"], True)
-        self.assertEqual(data["entity"]["mimeType"], None)
+        entity = result["data"]["entity"]
+        self.assertEqual(entity["guid"], self.folder.guid)
+        self.assertEqual(entity["title"], self.folder.title)
+        self.assertEqual(entity["accessId"], 0)
+        self.assertEqual(entity["timeCreated"], self.folder.created_at.isoformat())
+        self.assertEqual(entity["tags"], self.folder.tags)
+        self.assertEqual(entity["canEdit"], True)
+        self.assertEqual(entity["url"], "/user/{}/files/{}".format(self.folder.owner.guid, self.folder.guid))
+        self.assertEqual(entity["parentFolder"], None)
+        self.assertEqual(entity["subtype"], "folder")
+        #self.assertEqual(entity["hasChildren"], True)
+        self.assertEqual(entity["mimeType"], None)
 
     @patch("core.lib.get_mimetype")
     @patch("{}.save".format(settings.DEFAULT_FILE_STORAGE))
@@ -165,31 +152,25 @@ class FileFolderTestCase(FastTenantTestCase):
             upload=file_mock,
             parent=self.folder
         )
-
-        request = HttpRequest()
-        request.user = self.authenticatedUser
-
         variables = {
             "guid": self.file_in_folder.guid
         }
 
-        result = graphql_sync(schema, { "query": self.query , "variables": variables}, context_value={ "request": request })
+        self.graphql_client.force_login(self.authenticatedUser)
+        result = self.graphql_client.post(self.query, variables)
+        entity = result["data"]["entity"]
 
-        self.assertTrue(result[0])
-
-        data = result[1]["data"]
-
-        self.assertEqual(data["entity"]["guid"], self.file_in_folder.guid)
-        self.assertEqual(data["entity"]["title"], file_mock.name)
-        self.assertEqual(data["entity"]["accessId"], 0)
-        self.assertEqual(data["entity"]["timeCreated"], self.file_in_folder.created_at.isoformat())
-        self.assertEqual(data["entity"]["tags"], self.file_in_folder.tags)
-        self.assertEqual(data["entity"]["canEdit"], True)
-        self.assertEqual(data["entity"]["url"], "/files/view/{}/{}".format(self.file_in_folder.guid, os.path.basename(self.file_in_folder.upload.name)))
-        self.assertEqual(data["entity"]["parentFolder"]["guid"], self.folder.guid)
-        self.assertEqual(data["entity"]["subtype"], "file")
-        self.assertEqual(data["entity"]["hasChildren"], False)
-        self.assertEqual(data["entity"]["mimeType"], file_mock.content_type)
+        self.assertEqual(entity["guid"], self.file_in_folder.guid)
+        self.assertEqual(entity["title"], file_mock.name)
+        self.assertEqual(entity["accessId"], 0)
+        self.assertEqual(entity["timeCreated"], self.file_in_folder.created_at.isoformat())
+        self.assertEqual(entity["tags"], self.file_in_folder.tags)
+        self.assertEqual(entity["canEdit"], True)
+        self.assertEqual(entity["url"], "/files/view/{}/{}".format(self.file_in_folder.guid, os.path.basename(self.file_in_folder.upload.name)))
+        self.assertEqual(entity["parentFolder"]["guid"], self.folder.guid)
+        self.assertEqual(entity["subtype"], "file")
+        self.assertEqual(entity["hasChildren"], False)
+        self.assertEqual(entity["mimeType"], file_mock.content_type)
 
         mock_save.assert_called_once()
 
@@ -214,30 +195,22 @@ class FileFolderTestCase(FastTenantTestCase):
             upload=file_mock
         )
 
-        request = HttpRequest()
-        request.user = self.authenticatedUser
-
         variables = {
             "guid": self.file.guid
         }
 
-        result = graphql_sync(schema, { "query": self.query , "variables": variables}, context_value={ "request": request })
+        self.graphql_client.force_login(self.authenticatedUser)
+        result = self.graphql_client.post(self.query, variables)
+        entity = result["data"]["entity"]
 
-        self.assertTrue(result[0])
-
-        data = result[1]["data"]
-
-        self.assertEqual(data["entity"]["guid"], self.file.guid)
-        self.assertEqual(data["entity"]["title"], file_mock.name)
-        self.assertEqual(data["entity"]["accessId"], 1)
-        self.assertEqual(data["entity"]["writeAccessId"], 1)
+        self.assertEqual(entity["guid"], self.file.guid)
+        self.assertEqual(entity["title"], file_mock.name)
+        self.assertEqual(entity["accessId"], 1)
+        self.assertEqual(entity["writeAccessId"], 1)
 
         mock_save.assert_called_once()
 
     def test_folder_access(self):
-        request = HttpRequest()
-        request.user = self.authenticatedUser
-
         folder = FileFolder.objects.create(
             read_access=[ACCESS_TYPE.public],
             write_access=[ACCESS_TYPE.logged_in],
@@ -250,13 +223,11 @@ class FileFolderTestCase(FastTenantTestCase):
             "guid": folder.guid
         }
 
-        result = graphql_sync(schema, { "query": self.query , "variables": variables}, context_value={ "request": request })
+        self.graphql_client.force_login(self.authenticatedUser)
+        result = self.graphql_client.post(self.query, variables)
+        entity = result["data"]["entity"]
 
-        self.assertTrue(result[0])
-
-        data = result[1]["data"]
-
-        self.assertEqual(data["entity"]["guid"], folder.guid)
-        self.assertEqual(data["entity"]["title"], folder.title)
-        self.assertEqual(data["entity"]["accessId"], 2)
-        self.assertEqual(data["entity"]["writeAccessId"], 1)
+        self.assertEqual(entity["guid"], folder.guid)
+        self.assertEqual(entity["title"], folder.title)
+        self.assertEqual(entity["accessId"], 2)
+        self.assertEqual(entity["writeAccessId"], 1)

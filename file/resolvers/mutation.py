@@ -5,6 +5,7 @@ from core import config
 from core.constances import ACCESS_TYPE, NOT_LOGGED_IN, COULD_NOT_FIND, COULD_NOT_SAVE, USER_ROLES
 from core.lib import clean_graphql_input, access_id_to_acl
 from core.models import Group
+from core.resolvers import shared
 from user.models import User
 from ..models import FileFolder, FILE_SCAN
 
@@ -106,8 +107,11 @@ def resolve_add_file(_, info, input):
     if 'richDescription' in clean_input:
         entity.rich_description = clean_input.get('richDescription')
 
+    shared.update_publication_dates(entity, clean_input)
+
     if entity.scan() == FILE_SCAN.VIRUS:
         raise GraphQLError("INVALID_FILE")
+
 
     entity.save()
 
@@ -161,6 +165,8 @@ def resolve_add_folder(_, info, input):
     if 'richDescription' in clean_input:
         entity.rich_description = clean_input.get('richDescription')
 
+    shared.update_publication_dates(entity, clean_input)
+
     if parent:
         entity.parent = parent
 
@@ -210,8 +216,8 @@ def resolve_edit_file_folder(_, info, input):
         if entity.scan() == FILE_SCAN.VIRUS:
             raise GraphQLError("INVALID_FILE")
 
-    if 'timePublished' in clean_input:
-        entity.published = clean_input['timePublished']
+    shared.update_publication_dates(entity, clean_input)
+
 
     if 'accessId' in clean_input:
         entity.read_access = access_id_to_acl(entity, clean_input.get("accessId"))

@@ -37,6 +37,7 @@ INVALID_SUBTYPE = "invalid_subtype"
 INVALID_TYPE = "invalid_type"
 INVALID_VALUE = "invalid_value"
 INVALID_DATE = "invalid_date"
+INVALID_ARCHIVE_AFTER_DATE = 'invalid_archive_after_date'
 INVALID_CONTENT_GUID = "invalid_content_guid"
 INVALID_PROFILE_FIELD_GUID = "invalid_profile_field_guid"
 KEY_ALREADY_IN_USE = "key_already_in_use"

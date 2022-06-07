@@ -106,9 +106,7 @@ def resolve_add_question(_, info, input):
         entity.abstract = abstract
 
     shared.update_featured_image(entity, clean_input)
-
-    if 'timePublished' in clean_input:
-        entity.published = clean_input.get("timePublished")
+    shared.update_publication_dates(entity, clean_input)
 
     if user.has_role(USER_ROLES.ADMIN) or user.has_role(USER_ROLES.EDITOR):
         if 'isFeatured' in clean_input:
@@ -164,13 +162,11 @@ def resolve_edit_question(_, info, input):
         entity.abstract = abstract
 
     shared.update_featured_image(entity, clean_input)
+    shared.update_publication_dates(entity, clean_input)
 
     if user.has_role(USER_ROLES.ADMIN) or user.has_role(USER_ROLES.EDITOR):
         if 'isFeatured' in clean_input:
             entity.is_featured = clean_input.get("isFeatured")
-
-    if 'timePublished' in clean_input:
-        entity.published = clean_input.get("timePublished")
 
     # only admins can edit these fields
     if user.has_role(USER_ROLES.ADMIN):

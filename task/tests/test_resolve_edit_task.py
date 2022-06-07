@@ -1,23 +1,16 @@
-from django.db import connection
-from django_tenants.test.cases import FastTenantTestCase
-from backend2.schema import schema
-from ariadne import graphql_sync
-import json
-from django.contrib.auth.models import AnonymousUser
-from django.http import HttpRequest
+from django.utils import timezone
 from core.models import Group
 from user.models import User
 from ..models import Task
 from core.constances import ACCESS_TYPE, USER_ROLES
 from mixer.backend.django import mixer
-from graphql import GraphQLError
-from datetime import datetime
-from core.tests.helpers import GraphqlTestMixin
+from core.tests.helpers import PleioTenantTestCase
 
-class EditTaskTestCase(FastTenantTestCase, GraphqlTestMixin):
+
+class EditTaskTestCase(PleioTenantTestCase):
 
     def setUp(self):
-        self.anonymousUser = AnonymousUser()
+        super(EditTaskTestCase, self).setUp()
         self.authenticatedUser = mixer.blend(User)
         self.user2 = mixer.blend(User)
         self.admin = mixer.blend(User, roles=[USER_ROLES.ADMIN])
@@ -36,6 +29,9 @@ class EditTaskTestCase(FastTenantTestCase, GraphqlTestMixin):
                 "guid": self.taskPublic.guid,
                 "title": "My first update",
                 "richDescription": "richDescription",
+                "timePublished": str(timezone.localtime()),
+                "scheduleArchiveEntity": str(timezone.localtime() + timezone.timedelta(days=10)),
+                "scheduleDeleteEntity": str(timezone.localtime() + timezone.timedelta(days=20)),
             }
         }
         self.mutation = """
@@ -44,6 +40,9 @@ class EditTaskTestCase(FastTenantTestCase, GraphqlTestMixin):
                 richDescription
                 timeCreated
                 timeUpdated
+                timePublished
+                scheduleArchiveEntity
+                scheduleDeleteEntity
                 accessId
                 writeAccessId
                 canEdit
@@ -70,81 +69,64 @@ class EditTaskTestCase(FastTenantTestCase, GraphqlTestMixin):
         """
 
     def test_edit_task(self):
-
         variables = self.data
 
-        request = HttpRequest()
-        request.user = self.authenticatedUser
+        self.graphql_client.force_login(self.authenticatedUser)
+        result = self.graphql_client.post(self.mutation, variables)
 
-        result = graphql_sync(schema, { "query": self.mutation, "variables": variables }, context_value={ "request": request })
-
-        data = result[1]["data"]
-
-        self.assertEqual(data["editEntity"]["entity"]["title"], variables["input"]["title"])
-        self.assertEqual(data["editEntity"]["entity"]["richDescription"], variables["input"]["richDescription"])
-        self.assertEqual(data["editEntity"]["entity"]["state"], "NEW")
-        self.assertEqual(data["editEntity"]["entity"]["group"], None)
-        self.assertEqual(data["editEntity"]["entity"]["owner"]["guid"], self.authenticatedUser.guid)
-        self.assertEqual(data["editEntity"]["entity"]["timeCreated"], self.taskPublic.created_at.isoformat())
+        entity = result["data"]["editEntity"]["entity"]
+        self.assertEqual(entity["title"], variables["input"]["title"])
+        self.assertDateEqual(entity["timeCreated"], self.taskPublic.created_at.isoformat())
+        self.assertEqual(entity["richDescription"], variables["input"]["richDescription"])
+        self.assertEqual(entity["state"], "NEW")
+        self.assertEqual(entity["group"], None)
+        self.assertEqual(entity["owner"]["guid"], self.authenticatedUser.guid)
+        self.assertDateEqual(entity["timePublished"], variables["input"]["timePublished"])
+        self.assertDateEqual(entity["scheduleArchiveEntity"], variables["input"]["scheduleArchiveEntity"])
+        self.assertDateEqual(entity["scheduleDeleteEntity"], variables["input"]["scheduleDeleteEntity"])
 
         self.taskPublic.refresh_from_db()
 
-        self.assertEqual(data["editEntity"]["entity"]["title"], self.taskPublic.title)
-        self.assertEqual(data["editEntity"]["entity"]["richDescription"], self.taskPublic.rich_description)
-        self.assertEqual(data["editEntity"]["entity"]["state"], self.taskPublic.state)
-
+        self.assertEqual(entity["title"], self.taskPublic.title)
+        self.assertEqual(entity["richDescription"], self.taskPublic.rich_description)
+        self.assertEqual(entity["state"], self.taskPublic.state)
 
     def test_edit_task_by_admin(self):
-
         variables = self.data
         variables["input"]["timeCreated"] = "2018-12-10T23:00:00.000Z"
         variables["input"]["groupGuid"] = self.group.guid
         variables["input"]["ownerGuid"] = self.user2.guid
 
-        request = HttpRequest()
-        request.user = self.admin
+        self.graphql_client.force_login(self.admin)
+        result = self.graphql_client.post(self.mutation, variables)
 
-        result = graphql_sync(schema, { "query": self.mutation, "variables": variables }, context_value={ "request": request })
-
-        data = result[1]["data"]
-
-        self.assertGraphqlSuccess(result)
-
-        self.assertEqual(data["editEntity"]["entity"]["title"], variables["input"]["title"])
-        self.assertEqual(data["editEntity"]["entity"]["richDescription"], variables["input"]["richDescription"])
-        self.assertEqual(data["editEntity"]["entity"]["state"], "NEW")
-        self.assertEqual(data["editEntity"]["entity"]["group"]["guid"], self.group.guid)
-        self.assertEqual(data["editEntity"]["entity"]["owner"]["guid"], self.user2.guid)
-        self.assertEqual(data["editEntity"]["entity"]["timeCreated"], "2018-12-10T23:00:00+00:00")
+        entity = result['data']['editEntity']['entity']
+        self.assertEqual(entity["title"], variables["input"]["title"])
+        self.assertEqual(entity["richDescription"], variables["input"]["richDescription"])
+        self.assertEqual(entity["state"], "NEW")
+        self.assertEqual(entity["group"]["guid"], self.group.guid)
+        self.assertEqual(entity["owner"]["guid"], self.user2.guid)
+        self.assertDateEqual(entity["timeCreated"], "2018-12-10T23:00:00+00:00")
 
         self.taskPublic.refresh_from_db()
 
-        self.assertEqual(data["editEntity"]["entity"]["title"], self.taskPublic.title)
-        self.assertEqual(data["editEntity"]["entity"]["richDescription"], self.taskPublic.rich_description)
-        self.assertEqual(data["editEntity"]["entity"]["state"], self.taskPublic.state)
-        self.assertEqual(data["editEntity"]["entity"]["group"]["guid"], self.group.guid)
-        self.assertEqual(data["editEntity"]["entity"]["owner"]["guid"], self.user2.guid)
-        self.assertEqual(data["editEntity"]["entity"]["timeCreated"], "2018-12-10T23:00:00+00:00")
-
+        self.assertEqual(entity["title"], self.taskPublic.title)
+        self.assertEqual(entity["richDescription"], self.taskPublic.rich_description)
+        self.assertEqual(entity["state"], self.taskPublic.state)
 
     def test_edit_task_group_null_by_admin(self):
-
         variables = self.data
         variables["input"]["groupGuid"] = self.group.guid
 
-        request = HttpRequest()
-        request.user = self.admin
+        self.graphql_client.force_login(self.admin)
+        result = self.graphql_client.post(self.mutation, variables)
 
-        result = graphql_sync(schema, { "query": self.mutation, "variables": variables }, context_value={ "request": request })
-
-        data = result[1]["data"]
-
-        self.assertEqual(data["editEntity"]["entity"]["group"]["guid"], self.group.guid)
+        entity = result['data']['editEntity']['entity']
+        self.assertEqual(entity["group"]["guid"], self.group.guid)
 
         variables["input"]["groupGuid"] = None
 
-        result = graphql_sync(schema, { "query": self.mutation, "variables": variables }, context_value={ "request": request })
+        result = self.graphql_client.post(self.mutation, variables)
 
-        data = result[1]["data"]
-
-        self.assertEqual(data["editEntity"]["entity"]["group"], None)
+        entity = result['data']['editEntity']['entity']
+        self.assertEqual(entity["group"], None)

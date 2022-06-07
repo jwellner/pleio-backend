@@ -1,22 +1,15 @@
-from django.db import connection
-from django_tenants.test.cases import FastTenantTestCase
-from backend2.schema import schema
-from ariadne import graphql_sync
-import json
-from django.contrib.auth.models import AnonymousUser
-from django.http import HttpRequest
-from core.models import Group
+from core.tests.helpers import PleioTenantTestCase
 from user.models import User
 from news.models import News
 from mixer.backend.django import mixer
 from core.constances import ACCESS_TYPE
-from core.lib import get_acl, access_id_to_acl
 from django.utils.text import slugify
 
-class NewsTestCase(FastTenantTestCase):
+
+class NewsTestCase(PleioTenantTestCase):
 
     def setUp(self):
-        self.anonymousUser = AnonymousUser()
+        super(NewsTestCase, self).setUp()
         self.authenticatedUser = mixer.blend(User)
 
         self.newsPublic = News.objects.create(
@@ -45,6 +38,9 @@ class NewsTestCase(FastTenantTestCase):
                 richDescription
                 accessId
                 timeCreated
+                timePublished
+                scheduleArchiveEntity
+                scheduleDeleteEntity
                 featured {
                     image
                     video
@@ -81,78 +77,65 @@ class NewsTestCase(FastTenantTestCase):
         self.authenticatedUser.delete()
 
     def test_news_anonymous(self):
-
-        request = HttpRequest()
-        request.user = self.anonymousUser
-
         variables = {
             "guid": self.newsPublic.guid
         }
 
-        result = graphql_sync(schema, { "query": self.query , "variables": variables}, context_value={ "request": request })
+        result = self.graphql_client.post(self.query, variables)
 
-        self.assertTrue(result[0])
-
-        data = result[1]["data"]
-
-        self.assertEqual(data["entity"]["guid"], self.newsPublic.guid)
-        self.assertEqual(data["entity"]["title"], self.newsPublic.title)
-        self.assertEqual(data["entity"]["richDescription"], self.newsPublic.rich_description)
-        self.assertEqual(data["entity"]["accessId"], 2)
-        self.assertEqual(data["entity"]["timeCreated"], self.newsPublic.created_at.isoformat())
-        self.assertEqual(data["entity"]["isFeatured"], self.newsPublic.is_featured)
-        self.assertEqual(data["entity"]["tags"], [])
-        self.assertEqual(data["entity"]["views"], 1)
-        self.assertEqual(data["entity"]["votes"], 0)
-        self.assertEqual(data["entity"]["hasVoted"], False)
-        self.assertEqual(data["entity"]["isBookmarked"], False)
-        self.assertEqual(data["entity"]["isFollowing"], False)
-        self.assertEqual(data["entity"]["canBookmark"], False)
-        self.assertEqual(data["entity"]["canEdit"], False)
-        self.assertEqual(data["entity"]["owner"]["guid"], self.newsPublic.owner.guid)
-        self.assertEqual(data["entity"]["url"], "/news/view/{}/{}".format(self.newsPublic.guid, slugify(self.newsPublic.title)))
-        self.assertEqual(data["entity"]["source"], self.newsPublic.source)
+        entity = result["data"]["entity"]
+        self.assertEqual(entity["guid"], self.newsPublic.guid)
+        self.assertEqual(entity["title"], self.newsPublic.title)
+        self.assertEqual(entity["richDescription"], self.newsPublic.rich_description)
+        self.assertEqual(entity["accessId"], 2)
+        self.assertEqual(entity["timeCreated"], self.newsPublic.created_at.isoformat())
+        self.assertEqual(entity["isFeatured"], self.newsPublic.is_featured)
+        self.assertEqual(entity["tags"], [])
+        self.assertEqual(entity["views"], 1)
+        self.assertEqual(entity["votes"], 0)
+        self.assertEqual(entity["hasVoted"], False)
+        self.assertEqual(entity["isBookmarked"], False)
+        self.assertEqual(entity["isFollowing"], False)
+        self.assertEqual(entity["canBookmark"], False)
+        self.assertEqual(entity["canEdit"], False)
+        self.assertEqual(entity["owner"]["guid"], self.newsPublic.owner.guid)
+        self.assertEqual(entity["url"], "/news/view/{}/{}".format(self.newsPublic.guid, slugify(self.newsPublic.title)))
+        self.assertEqual(entity["source"], self.newsPublic.source)
+        self.assertIsNotNone(entity["timePublished"])
+        self.assertIsNone(entity["scheduleArchiveEntity"])
+        self.assertIsNone(entity["scheduleDeleteEntity"])
 
         variables = {
             "guid": self.newsPrivate.guid
         }
 
-        result = graphql_sync(schema, { "query": self.query , "variables": variables}, context_value={ "request": request })
+        result = self.graphql_client.post(self.query, variables)
 
-        self.assertTrue(result[0])
-
-        data = result[1]["data"]
-
-        self.assertEqual(data["entity"], None)
+        self.assertEqual(result["data"]["entity"], None)
 
     def test_news_private(self):
-        request = HttpRequest()
-        request.user = self.authenticatedUser
-
         variables = {
             "guid": self.newsPrivate.guid
         }
 
-        result = graphql_sync(schema, { "query": self.query , "variables": variables}, context_value={ "request": request })
+        self.graphql_client.force_login(self.authenticatedUser)
+        result = self.graphql_client.post(self.query, variables)
 
-        self.assertTrue(result[0])
-
-        data = result[1]["data"]
-
-        self.assertEqual(data["entity"]["guid"], self.newsPrivate.guid)
-        self.assertEqual(data["entity"]["title"], self.newsPrivate.title)
-        self.assertEqual(data["entity"]["richDescription"], self.newsPrivate.rich_description)
-        self.assertEqual(data["entity"]["accessId"], 0)
-        self.assertEqual(data["entity"]["timeCreated"], self.newsPrivate.created_at.isoformat())
-        self.assertEqual(data["entity"]["isFeatured"], self.newsPrivate.is_featured)
-        self.assertEqual(data["entity"]["tags"], [])
-        self.assertEqual(data["entity"]["views"], 1)
-        self.assertEqual(data["entity"]["votes"], 0)
-        self.assertEqual(data["entity"]["hasVoted"], False)
-        self.assertEqual(data["entity"]["isBookmarked"], False)
-        self.assertEqual(data["entity"]["isFollowing"], False)
-        self.assertEqual(data["entity"]["canBookmark"], True)
-        self.assertEqual(data["entity"]["canEdit"], True)
-        self.assertEqual(data["entity"]["owner"]["guid"], self.newsPrivate.owner.guid)
-        self.assertEqual(data["entity"]["url"], "/news/view/{}/{}".format(self.newsPrivate.guid, slugify(self.newsPrivate.title)))
-        self.assertEqual(data["entity"]["source"], self.newsPrivate.source)
+        entity = result["data"]["entity"]
+        self.assertEqual(entity["guid"], self.newsPrivate.guid)
+        self.assertEqual(entity["title"], self.newsPrivate.title)
+        self.assertEqual(entity["richDescription"], self.newsPrivate.rich_description)
+        self.assertEqual(entity["accessId"], 0)
+        self.assertEqual(entity["timeCreated"], self.newsPrivate.created_at.isoformat())
+        self.assertEqual(entity["isFeatured"], self.newsPrivate.is_featured)
+        self.assertEqual(entity["tags"], [])
+        self.assertEqual(entity["views"], 1)
+        self.assertEqual(entity["votes"], 0)
+        self.assertEqual(entity["hasVoted"], False)
+        self.assertEqual(entity["isBookmarked"], False)
+        self.assertEqual(entity["isFollowing"], False)
+        self.assertEqual(entity["canBookmark"], True)
+        self.assertEqual(entity["canEdit"], True)
+        self.assertEqual(entity["owner"]["guid"], self.newsPrivate.owner.guid)
+        self.assertEqual(entity["url"], "/news/view/{}/{}".format(self.newsPrivate.guid, slugify(self.newsPrivate.title)))
+        self.assertEqual(entity["source"], self.newsPrivate.source)

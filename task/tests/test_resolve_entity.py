@@ -1,24 +1,15 @@
-from django.db import connection
-from django_tenants.test.cases import FastTenantTestCase
-from backend2.schema import schema
-from ariadne import graphql_sync
-import json
-from django.contrib.auth.models import AnonymousUser
-from django.http import HttpRequest
-from django.utils import timezone
-from core.models import Group
+from core.tests.helpers import PleioTenantTestCase
 from user.models import User
 from ..models import Task
 from mixer.backend.django import mixer
 from core.constances import ACCESS_TYPE
-from core.lib import get_acl, access_id_to_acl
 from django.utils.text import slugify
 
 
-class TaskTestCase(FastTenantTestCase):
+class TaskTestCase(PleioTenantTestCase):
 
     def setUp(self):
-        self.anonymousUser = AnonymousUser()
+        super(TaskTestCase, self).setUp()
         self.authenticatedUser = mixer.blend(User)
 
         self.taskPublic = Task.objects.create(
@@ -45,6 +36,9 @@ class TaskTestCase(FastTenantTestCase):
                 richDescription
                 timeCreated
                 timeUpdated
+                timePublished
+                scheduleArchiveEntity
+                scheduleDeleteEntity
                 accessId
                 writeAccessId
                 canEdit
@@ -71,60 +65,47 @@ class TaskTestCase(FastTenantTestCase):
         self.authenticatedUser.delete()
 
     def test_task_anonymous(self):
-
-        request = HttpRequest()
-        request.user = self.anonymousUser
-
         variables = {
             "guid": self.taskPublic.guid
         }
 
-        result = graphql_sync(schema, { "query": self.query , "variables": variables}, context_value={ "request": request })
+        result = self.graphql_client.post(self.query, variables)
 
-        self.assertTrue(result[0])
-
-        data = result[1]["data"]
-
-        self.assertEqual(data["entity"]["guid"], self.taskPublic.guid)
-        self.assertEqual(data["entity"]["title"], self.taskPublic.title)
-        self.assertEqual(data["entity"]["richDescription"], self.taskPublic.rich_description)
-        self.assertEqual(data["entity"]["accessId"], 2)
-        self.assertEqual(data["entity"]["timeCreated"], self.taskPublic.created_at.isoformat())
-        self.assertEqual(data["entity"]["tags"], [])
-        self.assertEqual(data["entity"]["url"], "/task/view/{}/{}".format(self.taskPublic.guid, slugify(self.taskPublic.title)))
-        self.assertEqual(data["entity"]["state"], self.taskPublic.state)
+        entity = result["data"]["entity"]
+        self.assertEqual(entity["guid"], self.taskPublic.guid)
+        self.assertEqual(entity["title"], self.taskPublic.title)
+        self.assertEqual(entity["richDescription"], self.taskPublic.rich_description)
+        self.assertEqual(entity["accessId"], 2)
+        self.assertEqual(entity["timeCreated"], self.taskPublic.created_at.isoformat())
+        self.assertEqual(entity["tags"], [])
+        self.assertEqual(entity["url"], "/task/view/{}/{}".format(self.taskPublic.guid, slugify(self.taskPublic.title)))
+        self.assertEqual(entity["state"], self.taskPublic.state)
+        self.assertIsNotNone(entity["timePublished"])
+        self.assertIsNone(entity["scheduleArchiveEntity"])
+        self.assertIsNone(entity["scheduleDeleteEntity"])
 
         variables = {
             "guid": self.taskPrivate.guid
         }
+        result = self.graphql_client.post(self.query, variables)
 
-        result = graphql_sync(schema, { "query": self.query , "variables": variables}, context_value={ "request": request })
-
-        self.assertTrue(result[0])
-
-        data = result[1]["data"]
-
-        self.assertEqual(data["entity"], None)
+        entity = result["data"]["entity"]
+        self.assertIsNone(entity)
 
     def test_task_private(self):
-        request = HttpRequest()
-        request.user = self.authenticatedUser
-
         variables = {
             "guid": self.taskPrivate.guid
         }
 
-        result = graphql_sync(schema, { "query": self.query , "variables": variables}, context_value={ "request": request })
+        self.graphql_client.force_login(self.authenticatedUser)
+        result = self.graphql_client.post(self.query, variables)
 
-        self.assertTrue(result[0])
-
-        data = result[1]["data"]
-
-        self.assertEqual(data["entity"]["guid"], self.taskPrivate.guid)
-        self.assertEqual(data["entity"]["title"], self.taskPrivate.title)
-        self.assertEqual(data["entity"]["richDescription"], self.taskPrivate.rich_description)
-        self.assertEqual(data["entity"]["accessId"], 0)
-        self.assertEqual(data["entity"]["timeCreated"], self.taskPrivate.created_at.isoformat())
-        self.assertEqual(data["entity"]["tags"], [])
-        self.assertEqual(data["entity"]["canEdit"], True)
-        self.assertEqual(data["entity"]["state"], self.taskPrivate.state)
+        entity = result["data"]["entity"]
+        self.assertEqual(entity["guid"], self.taskPrivate.guid)
+        self.assertEqual(entity["title"], self.taskPrivate.title)
+        self.assertEqual(entity["richDescription"], self.taskPrivate.rich_description)
+        self.assertEqual(entity["accessId"], 0)
+        self.assertEqual(entity["timeCreated"], self.taskPrivate.created_at.isoformat())
+        self.assertEqual(entity["tags"], [])
+        self.assertEqual(entity["canEdit"], True)
+        self.assertEqual(entity["state"], self.taskPrivate.state)
