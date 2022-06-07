@@ -18,6 +18,8 @@ from unittest.mock import patch, MagicMock
 class AddGroupCase(PleioTenantTestCase):
 
     def setUp(self):
+        super(AddGroupCase, self).setUp()
+
         self.anonymousUser = AnonymousUser()
         self.user = mixer.blend(User)
         self.admin = mixer.blend(User, roles=['ADMIN'])
@@ -315,12 +317,6 @@ class AddGroupCase(PleioTenantTestCase):
             }
         }
 
-        request = HttpRequest()
-        request.user = self.admin
-
-        success, result = graphql_sync(schema, {"query": mutation, "variables": variables},
-                                       context_value={"request": request})
-
-        errors = result.get("errors")
-        self.assertIsNotNone(errors, msg=errors)
-        self.assertGraphQlError(errors, "invalid_profile_field_guid")
+        with self.assertGraphQlError("invalid_profile_field_guid"):
+            self.graphql_client.force_login(self.admin)
+            self.graphql_client.post(mutation, variables)
