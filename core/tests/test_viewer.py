@@ -15,12 +15,12 @@ class ViewerTestCase(FastTenantTestCase):
 
     def setUp(self):
         self.anonymousUser = AnonymousUser()
-        self.authenticatedUser = mixer.blend(User)
+        self.authenticatedUser = mixer.blend(User, has_2fa_enabled=False)
         self.groupOwner = mixer.blend(User)
         self.groupAdmin = mixer.blend(User)
         self.groupUser = mixer.blend(User)
         self.groupUserWiki = mixer.blend(User)
-        self.authenticatedAdminUser = mixer.blend(User, roles = [USER_ROLES.ADMIN])
+        self.authenticatedAdminUser = mixer.blend(User, roles = [USER_ROLES.ADMIN], has_2fa_enabled=True)
         self.group = mixer.blend(Group, owner=self.groupOwner)
         self.group.join(self.groupOwner, 'owner')
         self.group.join(self.groupAdmin, 'owner')
@@ -42,6 +42,7 @@ class ViewerTestCase(FastTenantTestCase):
                     loggedIn
                     isSubEditor
                     isAdmin
+                    has2faEnabled
                     user {
                         guid
                         email
@@ -62,6 +63,7 @@ class ViewerTestCase(FastTenantTestCase):
         self.assertEqual(data["viewer"]["loggedIn"], False)
         self.assertEqual(data["viewer"]["isSubEditor"], False)
         self.assertEqual(data["viewer"]["isAdmin"], False)
+        self.assertEqual(data["viewer"]["has2faEnabled"], False)
         self.assertIsNone(data["viewer"]["user"])
 
     def test_viewer_loggedin(self):
@@ -73,6 +75,7 @@ class ViewerTestCase(FastTenantTestCase):
                     loggedIn
                     isSubEditor
                     isAdmin
+                    has2faEnabled
                     user {
                         guid
                         email
@@ -93,6 +96,7 @@ class ViewerTestCase(FastTenantTestCase):
         self.assertEqual(data["viewer"]["loggedIn"], True)
         self.assertEqual(data["viewer"]["isSubEditor"], self.authenticatedUser.has_role(USER_ROLES.EDITOR) or self.authenticatedUser.has_role(USER_ROLES.ADMIN))
         self.assertEqual(data["viewer"]["isAdmin"], self.authenticatedUser.has_role(USER_ROLES.ADMIN))
+        self.assertEqual(data["viewer"]["has2faEnabled"], False)
         self.assertEqual(data["viewer"]["user"]["guid"], self.authenticatedUser.guid)
         self.assertEqual(data["viewer"]["user"]["email"], self.authenticatedUser.email)
 
@@ -106,6 +110,7 @@ class ViewerTestCase(FastTenantTestCase):
                     isSubEditor
                     isAdmin
                     isBanned
+                    has2faEnabled
                     user {
                         guid
                         name
@@ -127,6 +132,7 @@ class ViewerTestCase(FastTenantTestCase):
         self.assertEqual(data["viewer"]["isSubEditor"], self.authenticatedAdminUser.has_role(USER_ROLES.EDITOR) or self.authenticatedAdminUser.has_role(USER_ROLES.ADMIN))
         self.assertEqual(data["viewer"]["isAdmin"], self.authenticatedAdminUser.has_role(USER_ROLES.ADMIN))
         self.assertEqual(data["viewer"]["isBanned"], False)
+        self.assertEqual(data["viewer"]["has2faEnabled"], True)
         self.assertEqual(data["viewer"]["user"]["name"], self.authenticatedAdminUser.name)
         self.assertEqual(data["viewer"]["user"]["guid"], self.authenticatedAdminUser.guid)
 

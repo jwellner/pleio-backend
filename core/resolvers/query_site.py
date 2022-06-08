@@ -230,6 +230,7 @@ def get_site_settings():
         'idpId': config.IDP_ID,
         'idpName': config.IDP_NAME,
         'autoApproveSSO': config.AUTO_APPROVE_SSO,
+        'require2FA': config.REQUIRE_2FA,
         # TODO: remove after flow connects to general api
         'flowEnabled': config.FLOW_ENABLED,
         'flowSubtypes': config.FLOW_SUBTYPES,
@@ -273,7 +274,7 @@ def resolve_site_stats(_, info):
 
     if not user.has_role(USER_ROLES.ADMIN):
         raise GraphQLError(USER_NOT_SITE_ADMIN)
- 
+
     try:
         db_usage =  SiteStat.objects.filter(stat_type='DB_SIZE').latest('created_at').value
     except Exception:

@@ -18,3 +18,4 @@ data:
   MEDIA_ROOT: /app-data
   BACKUP_PATH: /backup-storage
   CSP_REPORT_ONLY: {{ .Values.cspReportOnly | quote }}
+  ENDPOINT_2FA: {{ printf "%s/securitypages" .Values.accountDomain }}
