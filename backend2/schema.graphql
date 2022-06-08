@@ -1723,6 +1723,7 @@ type resendGroupInvitationPayload {
 
 """The type of role."""
 enum Role {
+  pending
   owner
   admin
   member
