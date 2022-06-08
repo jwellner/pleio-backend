@@ -1,21 +1,15 @@
-from django.contrib.auth.models import AnonymousUser
-from django.http import HttpRequest
-
-from backend2.schema import schema
 from core.models import Group, GroupProfileFieldSetting, ProfileField, UserProfile, UserProfileField
-
-from core.tests.helpers import ElasticsearchTestMixin
+from core.tests.helpers import PleioTenantTestCase, ElasticsearchTestMixin
 from user.models import User
 
-from ariadne import graphql_sync
-from django_tenants.test.cases import FastTenantTestCase
 from mixer.backend.django import mixer
 
 
-class FilterUsersTestCase(FastTenantTestCase, ElasticsearchTestMixin):
+class FilterUsersTestCase(PleioTenantTestCase, ElasticsearchTestMixin):
 
     def setUp(self):
-        self.anonymous_user = AnonymousUser()
+        super(FilterUsersTestCase, self).setUp()
+
         self.owner = mixer.blend(User, name="Owner")
         self.group = mixer.blend(Group, owner=self.owner, introduction='introductionMessage')
         self.group.join(self.owner, 'owner')
@@ -76,18 +70,9 @@ class FilterUsersTestCase(FastTenantTestCase, ElasticsearchTestMixin):
         self.not_a_member.delete()
 
     def graphql_sync_data(self, query, variables, visitor):
-        success, response = self.graphql_sync(query, variables, visitor)
-
-        errors = response.get('errors')
-        self.assertIsNone(errors, msg=errors)
-        return response.get('data')
-
-    def graphql_sync(self, query, variables, visitor):
-        request = HttpRequest()
-        request.user = visitor
-        return graphql_sync(schema, {"query": query,
-                                     "variables": variables},
-                            context_value={"request": request})
+        self.graphql_client.force_login(visitor)
+        result = self.graphql_client.post(query, variables)
+        return result.get('data')
 
     def test_query_should_give_enhanced_response(self):
         query = """
@@ -107,6 +92,8 @@ class FilterUsersTestCase(FastTenantTestCase, ElasticsearchTestMixin):
         variables = {
             "groupGuid": str(self.group.guid)
         }
+
+        self.initialize_index()
 
         data = self.graphql_sync_data(query, variables, self.owner)
 
