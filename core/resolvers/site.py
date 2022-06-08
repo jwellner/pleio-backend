@@ -32,6 +32,12 @@ def resolve_menu(obj, info):
     return config.MENU
 
 
+@site.field("menuState")
+def resolve_menu_state(obj, info):
+    # pylint: disable=unused-argument
+    return config.MENU_STATE
+
+
 @site.field("profile")
 def resolve_profile(obj, info):
     # pylint: disable=unused-argument
