@@ -1836,6 +1836,7 @@ type Site {
   name: String!
   theme: String!
   menu: [MenuItem]
+  menuState: MenuState
   profile: [ProfileItem]
   achievementsEnabled: Boolean!
   cancelMembershipEnabled: Boolean!

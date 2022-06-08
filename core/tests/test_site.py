@@ -40,6 +40,7 @@ class SiteTestCase(FastTenantTestCase):
                         }
                         accessId
                     }
+                    menuState
                     profile {
                         key
                         name
@@ -139,6 +140,7 @@ class SiteTestCase(FastTenantTestCase):
         self.assertEqual(data["site"]["guid"], "1")
         self.assertEqual(data["site"]["theme"], config.THEME)
         self.assertEqual(data["site"]["menu"], config.MENU)
+        self.assertEqual(data["site"]["menuState"], config.MENU_STATE)
         self.assertEqual(data["site"]["style"]["font"], config.FONT)
         self.assertEqual(data["site"]["style"]["colorPrimary"], config.COLOR_PRIMARY)
         self.assertEqual(data["site"]["style"]["colorSecondary"], config.COLOR_SECONDARY)
