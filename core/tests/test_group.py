@@ -1,5 +1,5 @@
-from django_tenants.test.cases import FastTenantTestCase
 from core.models import Group, GroupInvitation
+from core.tests.helpers import PleioTenantTestCase
 from user.models import User
 from file.models import FileFolder
 from core.constances import ACCESS_TYPE
@@ -9,10 +9,11 @@ from django.contrib.auth.models import AnonymousUser
 from django.http import HttpRequest
 from mixer.backend.django import mixer
 
-class GroupTestCase(FastTenantTestCase):
+class GroupTestCase(PleioTenantTestCase):
 
     def setUp(self):
-        self.anonymousUser = AnonymousUser()
+        super(GroupTestCase, self).setUp()
+
         self.authenticatedUser = mixer.blend(User, name="yy")
         self.user1 = mixer.blend(User)
         self.user2 = mixer.blend(User, name="aa")
@@ -398,22 +399,34 @@ class GroupTestCase(FastTenantTestCase):
             }
 
         """
-        request = HttpRequest()
-        request.user = self.anonymousUser
-
         variables = {
             "guid": self.group.guid
         }
 
-        success, result = graphql_sync(schema, { "query": query, "variables": variables }, context_value={ "request": request })
-
-        self.assertNotIn('errors', result, msg=result.get('errors'))
-        self.assertIn('data', result, msg=result)
-
+        result = self.graphql_client.post(query, variables)
         data = result["data"]
 
         self.assertEqual(data["entity"]["canChangeOwnership"], False)
         self.assertEqual(data["entity"]["memberRole"], None)
+
+    def test_pending_group_member_can_view_group(self):
+        query = """
+            query Group($guid: String!) {
+                entity(guid: $guid) {
+                    ... on Group {
+                        canChangeOwnership
+                        memberRole
+                    }
+                }
+            }
+        """
+        variables = {
+            "guid": self.group.guid
+        }
+
+        self.graphql_client.force_login(self.user3)
+        result = self.graphql_client.post(query, variables)
+        self.assertEqual(result['data']['entity']['memberRole'], 'pending')
 
     inaccessible_field = ["members", "invite", "invited", "membershipRequests"]
     def test_unaccessible_data_for_unauthenticated_user(self):
@@ -429,16 +442,12 @@ class GroupTestCase(FastTenantTestCase):
                     }}
                 """.format(field=field)
 
-                request = HttpRequest()
-                request.user = self.anonymousUser
-
                 variables = {
                     "guid": self.group.guid
                 }
 
-                result = graphql_sync(schema, { "query": query, "variables": variables }, context_value={ "request": request })
+                self.graphql_client.reset()
+                result = self.graphql_client.post(query, variables)
 
-                self.assertTrue(result[0])
-                self.assertNotIn("errors", result[1], f'Unexpected errors: {result[1].get("errors", [])}')
-                self.assertEqual(result[1]["data"]["entity"][field]["total"], 0)
+                self.assertEqual(result["data"]["entity"][field]["total"], 0)
 
