@@ -1,24 +1,18 @@
-from django.db import connection
-from django_tenants.test.cases import FastTenantTestCase
-from backend2.schema import schema
-from ariadne import graphql_sync
-import json
-from django.contrib.auth.models import AnonymousUser
-from django.http import HttpRequest
 from django.utils import timezone
-from core.models import Group
+
+from core.tests.helpers import PleioTenantTestCase
 from user.models import User
 from event.models import Event, EventAttendee
 from mixer.backend.django import mixer
 from core.constances import ACCESS_TYPE, ATTENDEE_ORDER_BY
-from core.lib import get_acl, access_id_to_acl, datetime_isoformat
+from core.lib import datetime_isoformat
 from django.utils.text import slugify
 
 
-class EventTestCase(FastTenantTestCase):
+class EventTestCase(PleioTenantTestCase):
 
     def setUp(self):
-        self.anonymousUser = AnonymousUser()
+        super(EventTestCase, self).setUp()
         self.authenticatedUser = mixer.blend(User, name="test_name2")
         self.user = mixer.blend(User)
         self.user1 = mixer.blend(User)
@@ -66,12 +60,11 @@ class EventTestCase(FastTenantTestCase):
             attend_event_without_account=True
         )
 
-        self.anonymousUser = AnonymousUser()
-
         EventAttendee.objects.create(
             event=self.eventPrivate,
             state='accept',
-            user=self.user2
+            user=self.user2,
+            email=self.user2.email
         )
 
         EventAttendee.objects.create(
@@ -93,7 +86,8 @@ class EventTestCase(FastTenantTestCase):
             event=self.eventPrivate,
             state='accept',
             name="test_name3",
-            user=self.authenticatedUser
+            user=self.authenticatedUser,
+            email=self.authenticatedUser.email
         )
 
         EventAttendee.objects.create(
@@ -109,6 +103,9 @@ class EventTestCase(FastTenantTestCase):
                 richDescription
                 timeCreated
                 timeUpdated
+                timePublished
+                scheduleArchiveEntity
+                scheduleDeleteEntity
                 accessId
                 writeAccessId
                 canEdit
@@ -157,191 +154,155 @@ class EventTestCase(FastTenantTestCase):
         self.authenticatedUser.delete()
 
     def test_event_anonymous(self):
-
-        request = HttpRequest()
-        request.user = self.anonymousUser
-
         variables = {
             "guid": self.eventPublic.guid
         }
 
-        result = graphql_sync(schema, { "query": self.query , "variables": variables}, context_value={ "request": request })
-        self.assertTrue(result[0])
+        result = self.graphql_client.post(self.query, variables)
+        entity = result["data"]["entity"]
 
-        data = result[1]["data"]
-
-        self.assertEqual(data["entity"]["guid"], self.eventPublic.guid)
-        self.assertEqual(data["entity"]["title"], self.eventPublic.title)
-        self.assertEqual(data["entity"]["richDescription"], self.eventPublic.rich_description)
-        self.assertEqual(data["entity"]["accessId"], 2)
-        self.assertEqual(data["entity"]["timeCreated"], self.eventPublic.created_at.isoformat())
-        self.assertEqual(data["entity"]["tags"], [])
-        self.assertEqual(data["entity"]["canEdit"], False)
-        self.assertEqual(data["entity"]["url"], "/events/view/{}/{}".format(self.eventPublic.guid, slugify(self.eventPublic.title)))
-        self.assertEqual(data["entity"]["startDate"], str(datetime_isoformat(self.eventPublic.start_date)))
-        self.assertEqual(data["entity"]["endDate"], None)
-        self.assertEqual(data["entity"]["source"], self.eventPublic.external_link)
-        self.assertEqual(data["entity"]["location"], self.eventPublic.location)
-        self.assertEqual(data["entity"]["rsvp"], self.eventPublic.rsvp)
-        self.assertEqual(data["entity"]["attendEventWithoutAccount"], self.eventPublic.attend_event_without_account)
-        self.assertEqual(len(data["entity"]["attendees"]["edges"]), 0)
+        self.assertEqual(entity["guid"], self.eventPublic.guid)
+        self.assertEqual(entity["title"], self.eventPublic.title)
+        self.assertEqual(entity["richDescription"], self.eventPublic.rich_description)
+        self.assertEqual(entity["accessId"], 2)
+        self.assertEqual(entity["timeCreated"], self.eventPublic.created_at.isoformat())
+        self.assertEqual(entity["tags"], [])
+        self.assertEqual(entity["canEdit"], False)
+        self.assertEqual(entity["url"], "/events/view/{}/{}".format(self.eventPublic.guid, slugify(self.eventPublic.title)))
+        self.assertEqual(entity["startDate"], str(datetime_isoformat(self.eventPublic.start_date)))
+        self.assertEqual(entity["endDate"], None)
+        self.assertEqual(entity["source"], self.eventPublic.external_link)
+        self.assertEqual(entity["location"], self.eventPublic.location)
+        self.assertEqual(entity["rsvp"], self.eventPublic.rsvp)
+        self.assertEqual(entity["attendEventWithoutAccount"], self.eventPublic.attend_event_without_account)
+        self.assertEqual(len(entity["attendees"]["edges"]), 0)
+        self.assertIsNotNone(entity["timePublished"])
+        self.assertIsNone(entity["scheduleArchiveEntity"])
+        self.assertIsNone(entity["scheduleDeleteEntity"])
 
         variables = {
             "guid": self.eventPrivate.guid
         }
 
-        result = graphql_sync(schema, { "query": self.query , "variables": variables}, context_value={ "request": request })
+        result = self.graphql_client.post(self.query, variables)
+        entity = result["data"]["entity"]
 
-        self.assertTrue(result[0])
-
-        data = result[1]["data"]
-
-        self.assertEqual(data["entity"], None)
+        self.assertEqual(entity, None)
 
     def test_event_private(self):
-        request = HttpRequest()
-        request.user = self.authenticatedUser
-
         variables = {
             "guid": self.eventPrivate.guid,
             "orderBy": ATTENDEE_ORDER_BY.name
         }
 
-        result = graphql_sync(schema, { "query": self.query , "variables": variables}, context_value={ "request": request })
+        self.graphql_client.force_login(self.authenticatedUser)
+        result = self.graphql_client.post(self.query, variables)
 
-        self.assertTrue(result[0])
-
-        data = result[1]["data"]
-
-        self.assertEqual(data["entity"]["guid"], self.eventPrivate.guid)
-        self.assertEqual(data["entity"]["title"], self.eventPrivate.title)
-        self.assertEqual(data["entity"]["richDescription"], self.eventPrivate.rich_description)
-        self.assertEqual(data["entity"]["accessId"], 0)
-        self.assertEqual(data["entity"]["timeCreated"], self.eventPrivate.created_at.isoformat())
-        self.assertEqual(data["entity"]["tags"], [])
-        self.assertEqual(data["entity"]["canEdit"], True)
-        self.assertEqual(data["entity"]["url"], "/events/view/{}/{}".format(self.eventPrivate.guid, slugify(self.eventPrivate.title)))
-        self.assertEqual(data["entity"]["startDate"], str(datetime_isoformat(self.eventPrivate.start_date)))
-        self.assertEqual(data["entity"]["endDate"], str(datetime_isoformat(self.eventPrivate.end_date)))
-        self.assertEqual(data["entity"]["source"], self.eventPrivate.external_link)
-        self.assertEqual(data["entity"]["location"], self.eventPrivate.location)
-        self.assertEqual(data["entity"]["rsvp"], self.eventPrivate.rsvp)
-        self.assertEqual(data["entity"]["attendEventWithoutAccount"], self.eventPrivate.attend_event_without_account)
-        self.assertEqual(data["entity"]["attendees"]["edges"][0]["name"], 'test_name1')
-        self.assertEqual(data["entity"]["attendees"]["edges"][0]["timeCheckedIn"], self.today.isoformat())
-        self.assertEqual(data["entity"]["attendees"]["edges"][0]["url"], None)
-        self.assertEqual(data["entity"]["attendees"]["edges"][0]["icon"], None)
-        self.assertEqual(data["entity"]["attendees"]["edges"][0]["state"], 'accept')
-        self.assertEqual(data["entity"]["attendees"]["edges"][1]["name"], 'test_name2')
-        self.assertEqual(data["entity"]["attendees"]["edges"][1]["url"], self.authenticatedUser.url)
-        self.assertEqual(data["entity"]["attendees"]["edges"][1]["icon"], self.authenticatedUser.icon)
-        self.assertEqual(data["entity"]["attendees"]["edges"][1]["state"], 'accept')
-        self.assertEqual(data["entity"]["attendees"]["edges"][2]["name"], 'test_name3')
-        self.assertEqual(data["entity"]["attendees"]["edges"][3]["name"], 'test_name4')
-        self.assertEqual(len(data["entity"]["attendees"]["edges"]), 4)
+        entity = result["data"]["entity"]
+        self.assertEqual(entity["guid"], self.eventPrivate.guid)
+        self.assertEqual(entity["title"], self.eventPrivate.title)
+        self.assertEqual(entity["richDescription"], self.eventPrivate.rich_description)
+        self.assertEqual(entity["accessId"], 0)
+        self.assertEqual(entity["timeCreated"], self.eventPrivate.created_at.isoformat())
+        self.assertEqual(entity["tags"], [])
+        self.assertEqual(entity["canEdit"], True)
+        self.assertEqual(entity["url"], "/events/view/{}/{}".format(self.eventPrivate.guid, slugify(self.eventPrivate.title)))
+        self.assertEqual(entity["startDate"], str(datetime_isoformat(self.eventPrivate.start_date)))
+        self.assertEqual(entity["endDate"], str(datetime_isoformat(self.eventPrivate.end_date)))
+        self.assertEqual(entity["source"], self.eventPrivate.external_link)
+        self.assertEqual(entity["location"], self.eventPrivate.location)
+        self.assertEqual(entity["rsvp"], self.eventPrivate.rsvp)
+        self.assertEqual(entity["attendEventWithoutAccount"], self.eventPrivate.attend_event_without_account)
+        self.assertEqual(entity["attendees"]["edges"][0]["name"], 'test_name1')
+        self.assertEqual(entity["attendees"]["edges"][0]["timeCheckedIn"], self.today.isoformat())
+        self.assertEqual(entity["attendees"]["edges"][0]["url"], None)
+        self.assertEqual(entity["attendees"]["edges"][0]["icon"], None)
+        self.assertEqual(entity["attendees"]["edges"][0]["state"], 'accept')
+        self.assertEqual(entity["attendees"]["edges"][1]["name"], 'test_name2')
+        self.assertEqual(entity["attendees"]["edges"][1]["url"], self.authenticatedUser.url)
+        self.assertEqual(entity["attendees"]["edges"][1]["icon"], self.authenticatedUser.icon)
+        self.assertEqual(entity["attendees"]["edges"][1]["state"], 'accept')
+        self.assertEqual(entity["attendees"]["edges"][2]["name"], 'test_name3')
+        self.assertEqual(entity["attendees"]["edges"][3]["name"], 'test_name4')
+        self.assertEqual(len(entity["attendees"]["edges"]), 4)
 
     def test_event_user(self):
-
-        request = HttpRequest()
-        request.user = self.user
-
         variables = {
             "guid": self.eventPublic.guid
         }
 
-        result = graphql_sync(schema, { "query": self.query , "variables": variables}, context_value={ "request": request })
+        self.graphql_client.force_login(self.user)
+        result = self.graphql_client.post(self.query, variables)
 
-        self.assertTrue(result[0])
-
-        data = result[1]["data"]
-
-        self.assertEqual(data["entity"]["guid"], self.eventPublic.guid)
-        self.assertEqual(data["entity"]["title"], self.eventPublic.title)
-        self.assertEqual(data["entity"]["richDescription"], self.eventPublic.rich_description)
-        self.assertEqual(data["entity"]["accessId"], 2)
-        self.assertEqual(data["entity"]["timeCreated"], self.eventPublic.created_at.isoformat())
-        self.assertEqual(data["entity"]["tags"], [])
-        self.assertEqual(data["entity"]["canEdit"], False)
-        self.assertEqual(data["entity"]["url"], "/events/view/{}/{}".format(self.eventPublic.guid, slugify(self.eventPublic.title)))
-        self.assertEqual(data["entity"]["startDate"], str(datetime_isoformat(self.eventPublic.start_date)))
-        self.assertEqual(data["entity"]["endDate"], None)
-        self.assertEqual(data["entity"]["source"], self.eventPublic.external_link)
-        self.assertEqual(data["entity"]["location"], self.eventPublic.location)
-        self.assertEqual(data["entity"]["rsvp"], self.eventPublic.rsvp)
-        self.assertEqual(data["entity"]["attendEventWithoutAccount"], self.eventPublic.attend_event_without_account)
-        self.assertEqual(data["entity"]["attendees"]["edges"][0]["name"], "test_name")
-        self.assertEqual(data["entity"]["attendees"]["edges"][0]["email"], "")
+        entity = result["data"]["entity"]
+        self.assertEqual(entity["guid"], self.eventPublic.guid)
+        self.assertEqual(entity["title"], self.eventPublic.title)
+        self.assertEqual(entity["richDescription"], self.eventPublic.rich_description)
+        self.assertEqual(entity["accessId"], 2)
+        self.assertEqual(entity["timeCreated"], self.eventPublic.created_at.isoformat())
+        self.assertEqual(entity["tags"], [])
+        self.assertEqual(entity["canEdit"], False)
+        self.assertEqual(entity["url"], "/events/view/{}/{}".format(self.eventPublic.guid, slugify(self.eventPublic.title)))
+        self.assertEqual(entity["startDate"], str(datetime_isoformat(self.eventPublic.start_date)))
+        self.assertEqual(entity["endDate"], None)
+        self.assertEqual(entity["source"], self.eventPublic.external_link)
+        self.assertEqual(entity["location"], self.eventPublic.location)
+        self.assertEqual(entity["rsvp"], self.eventPublic.rsvp)
+        self.assertEqual(entity["attendEventWithoutAccount"], self.eventPublic.attend_event_without_account)
+        self.assertEqual(entity["attendees"]["edges"][0]["name"], "test_name")
+        self.assertEqual(entity["attendees"]["edges"][0]["email"], "")
 
         variables = {
             "guid": self.eventPrivate.guid
         }
 
-        result = graphql_sync(schema, { "query": self.query , "variables": variables}, context_value={ "request": request })
+        result = self.graphql_client.post(self.query, variables)
 
-        self.assertTrue(result[0])
-
-        data = result[1]["data"]
-
-        self.assertEqual(data["entity"], None)
+        entity = result["data"]["entity"]
+        self.assertIsNone(entity, None)
 
     def test_subevent_anonymous_user(self):
-        request = HttpRequest()
-        request.user = self.anonymousUser
-
         variables = {
-            "guid": self.subEventPublic .guid
+            "guid": self.subEventPublic.guid
         }
 
-        result = graphql_sync(schema, { "query": self.query , "variables": variables}, context_value={ "request": request })
+        result = self.graphql_client.post(self.query, variables)
 
-        self.assertTrue(result[0])
+        self.assertEqual(result['data']['entity']['guid'], self.subEventPublic.guid)
 
     def test_subevent_attending_parent(self):
-        request = HttpRequest()
-        request.user = self.user1
-
         variables = {
             "guid": self.subEventPublic .guid
         }
 
-        result = graphql_sync(schema, { "query": self.query , "variables": variables}, context_value={ "request": request })
+        self.graphql_client.force_login(self.user1)
+        result = self.graphql_client.post(self.query, variables)
+        entity = result["data"]["entity"]
 
-        self.assertTrue(result[0])
-
-        data = result[1]["data"]
-
-        self.assertEqual(data["entity"]["isAttendingParent"], False)
+        self.assertEqual(entity["isAttendingParent"], False)
 
         EventAttendee.objects.create(
             event=self.eventPublic,
             state='accept',
-            user=self.user1
+            user=self.user1,
+            email=self.user1.email
         )
 
-        result = graphql_sync(schema, { "query": self.query , "variables": variables}, context_value={ "request": request })
+        result = self.graphql_client.post(self.query, variables)
 
-        self.assertTrue(result[0])
-
-        data = result[1]["data"]
-
-        self.assertEqual(data["entity"]["isAttendingParent"], True)
-
+        entity = result["data"]["entity"]
+        self.assertEqual(entity["isAttendingParent"], True)
 
     def test_event_archived(self):
-
         self.eventPublic.is_archived = True
         self.eventPublic.save()
-        request = HttpRequest()
-        request.user = self.anonymousUser
 
         variables = {
             "guid": self.eventPublic.guid
         }
 
-        result = graphql_sync(schema, { "query": self.query , "variables": variables}, context_value={ "request": request })
-        self.assertTrue(result[0])
+        result = self.graphql_client.post(self.query, variables)
+        entity = result["data"]["entity"]
 
-        data = result[1]["data"]
-
-        self.assertEqual(data["entity"]["guid"], self.eventPublic.guid)
-        self.assertEqual(data["entity"]["children"][0]["guid"], self.subEventPublic.guid)
+        self.assertEqual(entity["guid"], self.eventPublic.guid)
+        self.assertEqual(entity["children"][0]["guid"], self.subEventPublic.guid)

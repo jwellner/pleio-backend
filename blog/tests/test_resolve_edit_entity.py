@@ -1,24 +1,16 @@
-from django.db import connection
-from django_tenants.test.cases import FastTenantTestCase
-from backend2.schema import schema
-from ariadne import graphql_sync
-import json
-from django.contrib.auth.models import AnonymousUser
-from django.http import HttpRequest
 from core.models import Group
-from core.tests.helpers import GraphqlTestMixin
+from core.tests.helpers import PleioTenantTestCase
 from user.models import User
 from blog.models import Blog
 from core.constances import ACCESS_TYPE, TEXT_TOO_LONG
 from mixer.backend.django import mixer
-from graphql import GraphQLError
-from datetime import datetime
-from django.utils import dateparse
+from django.utils import timezone
 
-class EditBlogTestCase(FastTenantTestCase, GraphqlTestMixin):
+
+class EditBlogTestCase(PleioTenantTestCase):
 
     def setUp(self):
-        self.anonymousUser = AnonymousUser()
+        super(EditBlogTestCase, self).setUp()
         self.authenticatedUser = mixer.blend(User)
         self.user2 = mixer.blend(User)
 
@@ -43,13 +35,7 @@ class EditBlogTestCase(FastTenantTestCase, GraphqlTestMixin):
         self.admin.delete()
         self.group.delete()
 
-
-
     def test_edit_blog(self):
-
-
-
-
         variables = {
             "input": {
                 "guid": self.blog.guid,
@@ -62,7 +48,9 @@ class EditBlogTestCase(FastTenantTestCase, GraphqlTestMixin):
                 "timeCreated": "2018-12-10T23:00:00.000Z",
                 "groupGuid": self.group.guid,
                 "ownerGuid": self.user2.guid,
-                "timePublished": None
+                "timePublished": None,
+                "scheduleArchiveEntity": str(timezone.localtime() + timezone.timedelta(days=10)),
+                "scheduleDeleteEntity": str(timezone.localtime() + timezone.timedelta(days=20)),
             }
         }
 
@@ -72,6 +60,9 @@ class EditBlogTestCase(FastTenantTestCase, GraphqlTestMixin):
                 richDescription
                 timeCreated
                 timeUpdated
+                timePublished
+                scheduleArchiveEntity
+                scheduleDeleteEntity
                 accessId
                 writeAccessId
                 canEdit
@@ -100,35 +91,30 @@ class EditBlogTestCase(FastTenantTestCase, GraphqlTestMixin):
             }
         """
 
+        self.graphql_client.force_login(self.authenticatedUser)
+        result = self.graphql_client.post(mutation, variables)
 
-        request = HttpRequest()
-        request.user = self.authenticatedUser
-
-        result = graphql_sync(schema, { "query": mutation, "variables": variables }, context_value={ "request": request })
-
-        data = result[1]["data"]
-
-        self.assertEqual(data["editEntity"]["entity"]["title"], variables["input"]["title"])
-        self.assertEqual(data["editEntity"]["entity"]["richDescription"], variables["input"]["richDescription"])
-        self.assertEqual(data["editEntity"]["entity"]["tags"], variables["input"]["tags"])
-        self.assertEqual(data["editEntity"]["entity"]["isRecommended"], False) # only admin can set isRecommended
-        self.assertEqual(data["editEntity"]["entity"]["group"], None)
-        self.assertEqual(data["editEntity"]["entity"]["owner"]["guid"], self.authenticatedUser.guid)
-        self.assertEqual(data["editEntity"]["entity"]["timeCreated"], self.blog.created_at.isoformat())
-        self.assertEqual(data["editEntity"]["entity"]["statusPublished"], 'draft')
-        self.assertEqual(data["editEntity"]["entity"]["timePublished"], None)
+        entity = result["data"]["editEntity"]["entity"]
+        self.assertEqual(entity["title"], variables["input"]["title"])
+        self.assertEqual(entity["richDescription"], variables["input"]["richDescription"])
+        self.assertEqual(entity["tags"], variables["input"]["tags"])
+        self.assertEqual(entity["isRecommended"], False)  # only admin can set isRecommended
+        self.assertEqual(entity["group"], None)
+        self.assertEqual(entity["owner"]["guid"], self.authenticatedUser.guid)
+        self.assertEqual(entity["timeCreated"], self.blog.created_at.isoformat())
+        self.assertEqual(entity["statusPublished"], 'draft')
+        self.assertEqual(entity["timePublished"], None)
+        self.assertDateEqual(entity["scheduleArchiveEntity"], variables['input']['scheduleArchiveEntity'])
+        self.assertDateEqual(entity["scheduleDeleteEntity"], variables['input']['scheduleDeleteEntity'])
 
         self.blog.refresh_from_db()
 
-        self.assertEqual(data["editEntity"]["entity"]["title"], self.blog.title)
-        self.assertEqual(data["editEntity"]["entity"]["richDescription"], self.blog.rich_description)
-        self.assertEqual(data["editEntity"]["entity"]["tags"], self.blog.tags)
-        self.assertEqual(data["editEntity"]["entity"]["isRecommended"], self.blog.is_recommended)
-
+        self.assertEqual(entity["title"], self.blog.title)
+        self.assertEqual(entity["richDescription"], self.blog.rich_description)
+        self.assertEqual(entity["tags"], self.blog.tags)
+        self.assertEqual(entity["isRecommended"], self.blog.is_recommended)
 
     def test_edit_blog_by_admin(self):
-
-
         variables = {
             "input": {
                 "guid": self.blog.guid,
@@ -177,34 +163,30 @@ class EditBlogTestCase(FastTenantTestCase, GraphqlTestMixin):
             }
         """
 
-        request = HttpRequest()
-        request.user = self.admin
+        self.graphql_client.force_login(self.admin)
+        result = self.graphql_client.post(mutation, variables)
 
-        result = graphql_sync(schema, { "query": mutation, "variables": variables }, context_value={ "request": request })
-
-        data = result[1]["data"]
-
-        self.assertEqual(data["editEntity"]["entity"]["title"], variables["input"]["title"])
-        self.assertEqual(data["editEntity"]["entity"]["richDescription"], variables["input"]["richDescription"])
-        self.assertEqual(data["editEntity"]["entity"]["tags"], variables["input"]["tags"])
-        self.assertEqual(data["editEntity"]["entity"]["isRecommended"], True)
-        self.assertEqual(data["editEntity"]["entity"]["group"]["guid"], self.group.guid)
-        self.assertEqual(data["editEntity"]["entity"]["owner"]["guid"], self.user2.guid)
-        self.assertEqual(data["editEntity"]["entity"]["timeCreated"], "2018-12-10T23:00:00+00:00")
+        entity = result["data"]["editEntity"]["entity"]
+        self.assertEqual(entity["title"], variables["input"]["title"])
+        self.assertEqual(entity["richDescription"], variables["input"]["richDescription"])
+        self.assertEqual(entity["tags"], variables["input"]["tags"])
+        self.assertEqual(entity["isRecommended"], True)
+        self.assertEqual(entity["group"]["guid"], self.group.guid)
+        self.assertEqual(entity["owner"]["guid"], self.user2.guid)
+        self.assertEqual(entity["timeCreated"], "2018-12-10T23:00:00+00:00")
 
         self.blog.refresh_from_db()
 
-        self.assertEqual(data["editEntity"]["entity"]["title"], self.blog.title)
-        self.assertEqual(data["editEntity"]["entity"]["richDescription"], self.blog.rich_description)
-        self.assertEqual(data["editEntity"]["entity"]["tags"], self.blog.tags)
-        self.assertEqual(data["editEntity"]["entity"]["isRecommended"], self.blog.is_recommended)
-        self.assertEqual(data["editEntity"]["entity"]["group"]["guid"], self.group.guid)
-        self.assertEqual(data["editEntity"]["entity"]["owner"]["guid"], self.user2.guid)
-        self.assertEqual(data["editEntity"]["entity"]["statusPublished"], "published")
-        self.assertEqual(data["editEntity"]["entity"]["timeCreated"], "2018-12-10T23:00:00+00:00")
+        self.assertEqual(entity["title"], self.blog.title)
+        self.assertEqual(entity["richDescription"], self.blog.rich_description)
+        self.assertEqual(entity["tags"], self.blog.tags)
+        self.assertEqual(entity["isRecommended"], self.blog.is_recommended)
+        self.assertEqual(entity["group"]["guid"], self.group.guid)
+        self.assertEqual(entity["owner"]["guid"], self.user2.guid)
+        self.assertEqual(entity["statusPublished"], "published")
+        self.assertEqual(entity["timeCreated"], "2018-12-10T23:00:00+00:00")
 
     def test_edit_blog_group_null_by_admin(self):
-
         variables = {
             "input": {
                 "guid": self.blog.guid,
@@ -252,26 +234,20 @@ class EditBlogTestCase(FastTenantTestCase, GraphqlTestMixin):
             }
         """
 
-        request = HttpRequest()
-        request.user = self.admin
+        self.graphql_client.force_login(self.admin)
+        result = self.graphql_client.post(mutation, variables)
 
-        result = graphql_sync(schema, { "query": mutation, "variables": variables }, context_value={ "request": request })
-
-        data = result[1]["data"]
-
-        self.assertEqual(data["editEntity"]["entity"]["group"]["guid"], self.group.guid)
-
+        entity = result["data"]["editEntity"]["entity"]
+        self.assertEqual(entity["group"]["guid"], self.group.guid)
 
         variables["input"]["groupGuid"] = None
-        result = graphql_sync(schema, { "query": mutation, "variables": variables }, context_value={ "request": request })
 
-        data = result[1]["data"]
+        result = self.graphql_client.post(mutation, variables)
+        entity = result["data"]["editEntity"]["entity"]
 
-        self.assertEqual(data["editEntity"]["entity"]["group"], None)
-
+        self.assertIsNone(entity["group"])
 
     def test_edit_blog_set_future_published(self):
-
         variables = {
             "input": {
                 "guid": self.blog.guid,
@@ -322,30 +298,27 @@ class EditBlogTestCase(FastTenantTestCase, GraphqlTestMixin):
             }
         """
 
+        self.graphql_client.force_login(self.authenticatedUser)
 
-        request = HttpRequest()
-        request.user = self.authenticatedUser
+        result = self.graphql_client.post(mutation, variables)
+        entity = result["data"]["editEntity"]["entity"]
 
-        result = graphql_sync(schema, { "query": mutation, "variables": variables }, context_value={ "request": request })
-
-        data = result[1]["data"]
-
-        self.assertEqual(data["editEntity"]["entity"]["title"], variables["input"]["title"])
-        self.assertEqual(data["editEntity"]["entity"]["richDescription"], variables["input"]["richDescription"])
-        self.assertEqual(data["editEntity"]["entity"]["tags"], variables["input"]["tags"])
-        self.assertEqual(data["editEntity"]["entity"]["isRecommended"], False) # only admin can set isRecommended
-        self.assertEqual(data["editEntity"]["entity"]["group"], None)
-        self.assertEqual(data["editEntity"]["entity"]["owner"]["guid"], self.authenticatedUser.guid)
-        self.assertEqual(data["editEntity"]["entity"]["timeCreated"], self.blog.created_at.isoformat())
-        self.assertEqual(data["editEntity"]["entity"]["statusPublished"], 'draft')
-        self.assertEqual(data["editEntity"]["entity"]["timePublished"], "4018-12-10T23:00:00+00:00")
+        self.assertEqual(entity["title"], variables["input"]["title"])
+        self.assertEqual(entity["richDescription"], variables["input"]["richDescription"])
+        self.assertEqual(entity["tags"], variables["input"]["tags"])
+        self.assertEqual(entity["isRecommended"], False)  # only admin can set isRecommended
+        self.assertEqual(entity["group"], None)
+        self.assertEqual(entity["owner"]["guid"], self.authenticatedUser.guid)
+        self.assertEqual(entity["timeCreated"], self.blog.created_at.isoformat())
+        self.assertEqual(entity["statusPublished"], 'draft')
+        self.assertEqual(entity["timePublished"], "4018-12-10T23:00:00+00:00")
 
         self.blog.refresh_from_db()
 
-        self.assertEqual(data["editEntity"]["entity"]["title"], self.blog.title)
-        self.assertEqual(data["editEntity"]["entity"]["richDescription"], self.blog.rich_description)
-        self.assertEqual(data["editEntity"]["entity"]["tags"], self.blog.tags)
-        self.assertEqual(data["editEntity"]["entity"]["isRecommended"], self.blog.is_recommended)
+        self.assertEqual(entity["title"], self.blog.title)
+        self.assertEqual(entity["richDescription"], self.blog.rich_description)
+        self.assertEqual(entity["tags"], self.blog.tags)
+        self.assertEqual(entity["isRecommended"], self.blog.is_recommended)
 
     def test_edit_abstract(self):
         variables = {
@@ -371,15 +344,12 @@ class EditBlogTestCase(FastTenantTestCase, GraphqlTestMixin):
             }
         """
 
-        request = HttpRequest()
-        request.user = self.authenticatedUser
+        self.graphql_client.force_login(self.authenticatedUser)
+        result = self.graphql_client.post(mutation, variables)
 
-        result = graphql_sync(schema, { "query": mutation, "variables": variables }, context_value={ "request": request })
-
-        self.assertGraphqlSuccess(result)
-        data = result[1]["data"]
-        self.assertEqual(data["editEntity"]["entity"]["abstract"], "intro")
-        self.assertEqual(data["editEntity"]["entity"]["excerpt"], "intro")
+        entity = result["data"]["editEntity"]["entity"]
+        self.assertEqual(entity["abstract"], "intro")
+        self.assertEqual(entity["excerpt"], "intro")
 
     def test_edit_without_abstract(self):
         variables = {
@@ -404,15 +374,12 @@ class EditBlogTestCase(FastTenantTestCase, GraphqlTestMixin):
             }
         """
 
-        request = HttpRequest()
-        request.user = self.authenticatedUser
+        self.graphql_client.force_login(self.authenticatedUser)
+        result = self.graphql_client.post(mutation, variables)
 
-        result = graphql_sync(schema, { "query": mutation, "variables": variables }, context_value={ "request": request })
-
-        self.assertGraphqlSuccess(result)
-        data = result[1]["data"]
-        self.assertEqual(data["editEntity"]["entity"]["abstract"], None)
-        self.assertEqual(data["editEntity"]["entity"]["excerpt"], "description")
+        entity = result["data"]["editEntity"]["entity"]
+        self.assertEqual(entity["abstract"], None)
+        self.assertEqual(entity["excerpt"], "description")
 
     def test_edit_abstract_too_long(self):
         variables = {
@@ -437,9 +404,8 @@ class EditBlogTestCase(FastTenantTestCase, GraphqlTestMixin):
             }
         """
 
-        request = HttpRequest()
-        request.user = self.authenticatedUser
+        self.graphql_client.force_login(self.authenticatedUser)
 
-        result = graphql_sync(schema, { "query": mutation, "variables": variables }, context_value={ "request": request })
+        with self.assertGraphQlError(TEXT_TOO_LONG):
+            self.graphql_client.post(mutation, variables)
 
-        self.assertGraphqlError(result, TEXT_TOO_LONG)

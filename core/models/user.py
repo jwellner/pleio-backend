@@ -83,6 +83,10 @@ class UserProfile(models.Model):
             field.read_access = [ACCESS_TYPE.logged_in]
         return field
 
+    def index_instance(self):
+        """ Return the object that will put changes to me in the search index."""
+        return self.user
+
 
 class ProfileFieldValidator(models.Model):
     """
@@ -293,6 +297,9 @@ class UserProfileField(models.Model):
 
     def __str__(self):
         return f"UserProfileField[{self.profile_field.name}]"
+
+    def index_instance(self):
+        return self.user_profile.index_instance()
 
 
 @receiver(pre_save, sender=UserProfileField)

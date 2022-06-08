@@ -1,13 +1,13 @@
 import logging
-from django.apps import apps
+
 from django.db import models
 from django.conf import settings
 from django_elasticsearch_dsl.registries import registry
 from django_elasticsearch_dsl.signals import BaseSignalProcessor
 from django_tenants.utils import parse_tenant_config_path
-from core.tasks.elasticsearch_tasks import elasticsearch_index_file
 
 logger = logging.getLogger(__name__)
+
 
 class CustomSignalProcessor(BaseSignalProcessor):
     """Overwrites the default signal processor to not throw an error when elasticsearch fails to save.
@@ -17,13 +17,9 @@ class CustomSignalProcessor(BaseSignalProcessor):
         """Overwrite default handle_save and stop raising exception on error
         """
         try:
-            if isinstance(instance, apps.get_model('file.FileFolder')) and instance.group:
-                schema_name = parse_tenant_config_path("")
-                elasticsearch_index_file.delay(schema_name, instance.id)
-            else:
-                registry.update(instance)
-                registry.update_related(instance)
-
+            instance = maybe_index_instance(instance)
+            if instance.__class__ in registry.get_models():
+                schedule_index_document(instance)
         except Exception as e:
             logger.error("Error sending update task: %s", e)
 
@@ -60,3 +56,19 @@ class CustomSignalProcessor(BaseSignalProcessor):
             models.signals.post_delete.disconnect(self.handle_delete)
             models.signals.m2m_changed.disconnect(self.handle_m2m_changed)
             models.signals.pre_delete.disconnect(self.handle_pre_delete)
+
+
+def maybe_index_instance(instance):
+    try:
+        return instance.index_instance()
+    except AttributeError:
+        pass
+    return instance
+
+
+def schedule_index_document(instance):
+    # pylint: disable=import-outside-toplevel
+
+    from core.tasks.elasticsearch_tasks import elasticsearch_index_document
+    schema_name = parse_tenant_config_path("")
+    elasticsearch_index_document.delay(schema_name, instance.id, instance.__class__.__name__)

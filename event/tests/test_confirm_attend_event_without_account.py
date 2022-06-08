@@ -97,7 +97,8 @@ class ConfirmAttendEventWithoutAccountTestCase(FastTenantTestCase):
         EventAttendee.objects.create(
             event=self.event,
             state='accept',
-            user=self.authenticatedUser
+            user=self.authenticatedUser,
+            email=self.authenticatedUser.email
         )
 
         request = HttpRequest()
@@ -182,7 +183,8 @@ class ConfirmAttendEventWithoutAccountTestCase(FastTenantTestCase):
         EventAttendee.objects.create(
             event=self.event,
             state='accept',
-            user=self.authenticatedUser
+            user=self.authenticatedUser,
+            email=self.authenticatedUser.email,
         )
 
         request = HttpRequest()

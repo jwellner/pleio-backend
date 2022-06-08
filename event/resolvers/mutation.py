@@ -1,5 +1,6 @@
 import json
 
+from core.resolvers import shared
 from core.utils.tiptap_parser import Tiptap
 from ariadne import ObjectType
 from django.core.exceptions import ObjectDoesNotExist
@@ -16,7 +17,7 @@ from django.utils.translation import ugettext_lazy
 from django.utils import timezone
 
 from ..models import Event, EventAttendee
-from event.resolvers.mutation_attend_event_without_account import resolve_attend_event_without_account
+from event.resolvers.mutation_attend_event import resolve_attend_event_without_account, resolve_attend_event
 from event.resolvers.mutation_confirm_attend_event_without_account import resolve_confirm_attend_event_without_account
 from event.resolvers.mutation_edit_event_attendee import resolve_edit_event_attendee
 from event.resolvers.mutation_delete_event_attendees import resolve_delete_event_attendees
@@ -24,78 +25,12 @@ from event.resolvers.mutation_messages import resolve_send_message_to_event
 
 mutation = ObjectType("Mutation")
 
+mutation.set_field("attendEvent", resolve_attend_event)
 mutation.set_field("attendEventWithoutAccount", resolve_attend_event_without_account)
 mutation.set_field("confirmAttendEventWithoutAccount", resolve_confirm_attend_event_without_account)
 mutation.set_field("editEventAttendee", resolve_edit_event_attendee)
 mutation.set_field("deleteEventAttendees", resolve_delete_event_attendees)
 mutation.set_field("sendMessageToEvent", resolve_send_message_to_event)
-
-
-@mutation.field("attendEvent")
-def resolve_attend_event(_, info, input):
-    # pylint: disable=redefined-builtin
-    # pylint: disable=too-many-statements
-    # pylint: disable=too-many-branches
-
-    user = info.context["request"].user
-    clean_input = clean_graphql_input(input)
-
-    if not user.is_authenticated:
-        raise GraphQLError(NOT_LOGGED_IN)
-
-    try:
-        event = Event.objects.visible(user).get(id=clean_input.get("guid"))
-    except ObjectDoesNotExist:
-        raise GraphQLError(COULD_NOT_FIND)
-
-    # check if is attending parent
-    if clean_input.get("state") == "accept" and event.parent:
-        try:
-            EventAttendee.objects.get(user=user, event=event.parent, state='accept')
-        except ObjectDoesNotExist:
-            raise GraphQLError(NOT_ATTENDING_PARENT_EVENT)
-
-    try:
-        attendee = event.attendees.get(user=user)
-    except ObjectDoesNotExist:
-        attendee = None
-
-    if not attendee:
-        attendee = EventAttendee()
-        attendee.event = event
-        attendee.user = user
-
-    if clean_input.get("state") not in ["accept", "reject", "maybe", "waitinglist"]:
-        raise GraphQLError(EVENT_INVALID_STATE)
-
-    if clean_input.get("state") == "accept" and not attendee.state == "accept":
-        if event.is_full():
-            raise GraphQLError(EVENT_IS_FULL)
-
-    attendee.state = clean_input.get("state")
-
-    # When an attendee leaves/maybes the main event, also automatically leave the subevents
-    if (attendee.state == "reject" or attendee.state == 'maybe') and event.has_children():
-        for child in event.children.all():
-            try:
-                sub_attendee = child.attendees.get(user=user)
-            except ObjectDoesNotExist:
-                continue
-
-            sub_attendee.state = attendee.state
-            sub_attendee.save()
-
-    attendee.save()
-
-    if clean_input.get("state") != "accept":
-        event.process_waitinglist()
-
-    if event.qr_access and clean_input.get("state") == "accept":
-        send_event_qr(info, user.email, event, attendee)
-
-    return {
-        "entity": event
-    }
 
 
 def resolve_add_event(_, info, input):
@@ -150,6 +85,7 @@ def resolve_add_event(_, info, input):
         entity.abstract = abstract
 
     update_featured_image(entity, clean_input)
+    shared.update_publication_dates(entity, clean_input)
 
     if user.has_role(USER_ROLES.ADMIN) or user.has_role(USER_ROLES.EDITOR):
         if 'isFeatured' in clean_input:
@@ -181,9 +117,6 @@ def resolve_add_event(_, info, input):
     entity.rsvp = clean_input.get("rsvp", False)
     entity.attend_event_without_account = clean_input.get("attendEventWithoutAccount", False)
     entity.qr_access = clean_input.get("qrAccess", False)
-
-    if 'timePublished' in clean_input:
-        entity.published = clean_input.get("timePublished", None)
 
     entity.save()
 
@@ -244,6 +177,7 @@ def resolve_edit_event(_, info, input):
         entity.write_access = access_id_to_acl(entity, clean_input.get("writeAccessId"))
 
     update_featured_image(entity, clean_input)
+    shared.update_publication_dates(entity, clean_input)
 
     if user.has_role(USER_ROLES.ADMIN) or user.has_role(USER_ROLES.EDITOR):
         if 'isFeatured' in clean_input:
@@ -285,9 +219,6 @@ def resolve_edit_event(_, info, input):
         entity.attend_event_without_account = clean_input.get("attendEventWithoutAccount")
     if 'qrAccess' in clean_input:
         entity.qr_access = clean_input.get("qrAccess")
-
-    if 'timePublished' in clean_input:
-        entity.published = clean_input.get("timePublished", None)
 
     # only admins can edit these fields
     if user.has_role(USER_ROLES.ADMIN):

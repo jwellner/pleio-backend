@@ -1,21 +1,16 @@
-from django.db import connection
-from django_tenants.test.cases import FastTenantTestCase
-from backend2.schema import schema
-from ariadne import graphql_sync
-import json
-from django.contrib.auth.models import AnonymousUser
-from django.http import HttpRequest
+from django.utils import timezone
 from core.models import Group
+from core.tests.helpers import PleioTenantTestCase
 from user.models import User
 from wiki.models import Wiki
 from core.constances import ACCESS_TYPE
 from mixer.backend.django import mixer
-from graphql import GraphQLError
 
-class AddWikiCase(FastTenantTestCase):
+
+class AddWikiCase(PleioTenantTestCase):
 
     def setUp(self):
-        self.anonymousUser = AnonymousUser()
+        super(AddWikiCase, self).setUp()
         self.authenticatedUser = mixer.blend(User)
         self.group = mixer.blend(Group, owner=self.authenticatedUser, is_membership_on_request=False)
         self.group.join(self.authenticatedUser, 'owner')
@@ -53,7 +48,10 @@ class AddWikiCase(FastTenantTestCase):
                     "video": "testVideo2",
                     "videoTitle": "testVideoTitle2",
                     "alt": "testAlt2"
-                }
+                },
+                "timePublished": str(timezone.localtime()),
+                "scheduleArchiveEntity": str(timezone.localtime() + timezone.timedelta(days=10)),
+                "scheduleDeleteEntity": str(timezone.localtime() + timezone.timedelta(days=20)),
             }
         }
         self.mutation = """
@@ -62,6 +60,9 @@ class AddWikiCase(FastTenantTestCase):
                 richDescription
                 timeCreated
                 timeUpdated
+                timePublished
+                scheduleArchiveEntity
+                scheduleDeleteEntity
                 accessId
                 writeAccessId
                 canEdit
@@ -101,87 +102,76 @@ class AddWikiCase(FastTenantTestCase):
         """
 
     def test_add_wiki(self):
-
         variables = self.data
 
-        request = HttpRequest()
-        request.user = self.authenticatedUser
+        self.graphql_client.force_login(self.authenticatedUser)
+        result = self.graphql_client.post(self.mutation, variables)
+        entity = result["data"]["addEntity"]["entity"]
 
-        result = graphql_sync(schema, { "query": self.mutation, "variables": variables }, context_value={ "request": request })
-
-        data = result[1]["data"]
-
-        self.assertEqual(data["addEntity"]["entity"]["title"], variables["input"]["title"])
-        self.assertEqual(data["addEntity"]["entity"]["richDescription"], variables["input"]["richDescription"])
-        self.assertEqual(data["addEntity"]["entity"]["hasChildren"], False)
-        self.assertEqual(data["addEntity"]["entity"]["isFeatured"], False) # only with editor or admin role
-        self.assertEqual(data["addEntity"]["entity"]["featured"]["positionY"], 2)
-        self.assertEqual(data["addEntity"]["entity"]["featured"]["video"], "testVideo2")
-        self.assertEqual(data["addEntity"]["entity"]["featured"]["videoTitle"], "testVideoTitle2")
-        self.assertEqual(data["addEntity"]["entity"]["featured"]["alt"], "testAlt2")
-
+        self.assertEqual(entity["title"], variables["input"]["title"])
+        self.assertEqual(entity["richDescription"], variables["input"]["richDescription"])
+        self.assertEqual(entity["hasChildren"], False)
+        self.assertEqual(entity["isFeatured"], False) # only with editor or admin role
+        self.assertEqual(entity["featured"]["positionY"], 2)
+        self.assertEqual(entity["featured"]["video"], "testVideo2")
+        self.assertEqual(entity["featured"]["videoTitle"], "testVideoTitle2")
+        self.assertEqual(entity["featured"]["alt"], "testAlt2")
+        self.assertDateEqual(entity["timePublished"], variables['input']['timePublished'])
+        self.assertDateEqual(entity["scheduleArchiveEntity"], variables['input']['scheduleArchiveEntity'])
+        self.assertDateEqual(entity["scheduleDeleteEntity"], variables['input']['scheduleDeleteEntity'])
 
     def test_add_wiki_to_parent(self):
 
         variables = self.data
         variables["input"]["containerGuid"] = self.wikiPublic.guid
 
-        request = HttpRequest()
-        request.user = self.authenticatedUser
+        self.graphql_client.force_login(self.authenticatedUser)
+        result = self.graphql_client.post(self.mutation, variables)
+        entity = result["data"]["addEntity"]["entity"]
 
-        result = graphql_sync(schema, { "query": self.mutation, "variables": variables }, context_value={ "request": request })
-
-        data = result[1]["data"]
-
-        self.assertEqual(data["addEntity"]["entity"]["title"], variables["input"]["title"])
-        self.assertEqual(data["addEntity"]["entity"]["richDescription"], variables["input"]["richDescription"])
-        self.assertEqual(data["addEntity"]["entity"]["hasChildren"], False)
-        self.assertEqual(data["addEntity"]["entity"]["parent"]["guid"], self.wikiPublic.guid)
+        self.assertEqual(entity["title"], variables["input"]["title"])
+        self.assertEqual(entity["richDescription"], variables["input"]["richDescription"])
+        self.assertEqual(entity["hasChildren"], False)
+        self.assertEqual(entity["parent"]["guid"], self.wikiPublic.guid)
 
         self.wikiPublic.refresh_from_db()
 
         self.assertTrue(self.wikiPublic.has_children())
-        self.assertEqual(self.wikiPublic.children.first().guid, data["addEntity"]["entity"]["guid"])
+        self.assertEqual(self.wikiPublic.children.first().guid, entity["guid"])
 
     def test_add_wiki_to_group(self):
 
         variables = self.data
         variables["input"]["containerGuid"] = self.group.guid
 
-        request = HttpRequest()
-        request.user = self.authenticatedUser
+        self.graphql_client.force_login(self.authenticatedUser)
+        result = self.graphql_client.post(self.mutation, variables)
 
-        result = graphql_sync(schema, { "query": self.mutation, "variables": variables }, context_value={ "request": request })
-
-        data = result[1]["data"]
-
-        self.assertEqual(data["addEntity"]["entity"]["title"], variables["input"]["title"])
-        self.assertEqual(data["addEntity"]["entity"]["richDescription"], variables["input"]["richDescription"])
-        self.assertEqual(data["addEntity"]["entity"]["hasChildren"], False)
-        self.assertEqual(data["addEntity"]["entity"]["parent"], None)
-        self.assertEqual(data["addEntity"]["entity"]["inGroup"], True)
-        self.assertEqual(data["addEntity"]["entity"]["group"]["guid"], self.group.guid)
+        entity = result["data"]["addEntity"]["entity"]
+        self.assertEqual(entity["title"], variables["input"]["title"])
+        self.assertEqual(entity["richDescription"], variables["input"]["richDescription"])
+        self.assertEqual(entity["hasChildren"], False)
+        self.assertEqual(entity["parent"], None)
+        self.assertEqual(entity["inGroup"], True)
+        self.assertEqual(entity["group"]["guid"], self.group.guid)
 
     def test_add_wiki_to_parent_with_group(self):
 
         variables = self.data
         variables["input"]["containerGuid"] = self.wikiGroupPublic.guid
 
-        request = HttpRequest()
-        request.user = self.authenticatedUser
+        self.graphql_client.force_login(self.authenticatedUser)
+        result = self.graphql_client.post(self.mutation, variables)
+        entity = result["data"]["addEntity"]["entity"]
 
-        result = graphql_sync(schema, { "query": self.mutation, "variables": variables }, context_value={ "request": request })
-
-        data = result[1]["data"]
-
-        self.assertEqual(data["addEntity"]["entity"]["title"], variables["input"]["title"])
-        self.assertEqual(data["addEntity"]["entity"]["richDescription"], variables["input"]["richDescription"])
-        self.assertEqual(data["addEntity"]["entity"]["hasChildren"], False)
-        self.assertEqual(data["addEntity"]["entity"]["inGroup"], True)
-        self.assertEqual(data["addEntity"]["entity"]["group"]["guid"], self.group.guid)
-        self.assertEqual(data["addEntity"]["entity"]["parent"]["guid"], self.wikiGroupPublic.guid)
+        self.assertEqual(entity["title"], variables["input"]["title"])
+        self.assertEqual(entity["richDescription"], variables["input"]["richDescription"])
+        self.assertEqual(entity["hasChildren"], False)
+        self.assertEqual(entity["inGroup"], True)
+        self.assertEqual(entity["group"]["guid"], self.group.guid)
+        self.assertEqual(entity["parent"]["guid"], self.wikiGroupPublic.guid)
 
         self.wikiGroupPublic.refresh_from_db()
 
         self.assertTrue(self.wikiGroupPublic.has_children())
-        self.assertEqual(self.wikiGroupPublic.children.first().guid, data["addEntity"]["entity"]["guid"])
+        self.assertEqual(self.wikiGroupPublic.children.first().guid, entity["guid"])

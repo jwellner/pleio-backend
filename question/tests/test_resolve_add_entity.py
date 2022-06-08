@@ -1,22 +1,14 @@
-from django.db import connection
-from django_tenants.test.cases import FastTenantTestCase
-from backend2.schema import schema
-from ariadne import graphql_sync
-import json
-from django.contrib.auth.models import AnonymousUser
-from django.http import HttpRequest
 from core.models import Group
+from core.tests.helpers import PleioTenantTestCase
 from user.models import User
-from blog.models import Blog
-from core.constances import ACCESS_TYPE
 from mixer.backend.django import mixer
-from graphql import GraphQLError
-from datetime import datetime
+from django.utils import timezone
 
-class AddQuestionTestCase(FastTenantTestCase):
+
+class AddQuestionTestCase(PleioTenantTestCase):
 
     def setUp(self):
-        self.anonymousUser = AnonymousUser()
+        super(AddQuestionTestCase, self).setUp()
         self.authenticatedUser = mixer.blend(User)
         self.group = mixer.blend(Group, owner=self.authenticatedUser, is_membership_on_request=False)
         self.group.join(self.authenticatedUser, 'owner')
@@ -36,7 +28,10 @@ class AddQuestionTestCase(FastTenantTestCase):
                     "video": "testVideo",
                     "videoTitle": "testVideoTitle",
                     "alt": "testAlt"
-                }
+                },
+                "timePublished": str(timezone.localtime()),
+                "scheduleArchiveEntity": str(timezone.localtime() + timezone.timedelta(days=10)),
+                "scheduleDeleteEntity": str(timezone.localtime() + timezone.timedelta(days=20)),
             }
         }
         self.mutation = """
@@ -45,6 +40,9 @@ class AddQuestionTestCase(FastTenantTestCase):
                 richDescription
                 timeCreated
                 timeUpdated
+                timePublished
+                scheduleArchiveEntity
+                scheduleDeleteEntity
                 accessId
                 writeAccessId
                 canEdit
@@ -76,39 +74,34 @@ class AddQuestionTestCase(FastTenantTestCase):
         """
 
     def test_add_question(self):
-
         variables = self.data
 
-        request = HttpRequest()
-        request.user = self.authenticatedUser
+        self.graphql_client.force_login(self.authenticatedUser)
+        result = self.graphql_client.post(self.mutation, variables)
 
-        result = graphql_sync(schema, { "query": self.mutation, "variables": variables }, context_value={ "request": request })
-
-        data = result[1]["data"]
-
-        self.assertEqual(data["addEntity"]["entity"]["title"], variables["input"]["title"])
-        self.assertEqual(data["addEntity"]["entity"]["richDescription"], variables["input"]["richDescription"])
-        self.assertEqual(data["addEntity"]["entity"]["tags"], variables["input"]["tags"])
-        self.assertEqual(data["addEntity"]["entity"]["isClosed"], False)
-        self.assertEqual(data["addEntity"]["entity"]["isFeatured"], False) # only with editor or admin role
-        self.assertEqual(data["addEntity"]["entity"]["featured"]["positionY"], 10)
-        self.assertEqual(data["addEntity"]["entity"]["featured"]["video"], "testVideo")
-        self.assertEqual(data["addEntity"]["entity"]["featured"]["videoTitle"], "testVideoTitle")
-        self.assertEqual(data["addEntity"]["entity"]["featured"]["alt"], "testAlt")
+        entity = result["data"]["addEntity"]["entity"]
+        self.assertEqual(entity["title"], variables["input"]["title"])
+        self.assertEqual(entity["richDescription"], variables["input"]["richDescription"])
+        self.assertEqual(entity["tags"], variables["input"]["tags"])
+        self.assertEqual(entity["isClosed"], False)
+        self.assertEqual(entity["isFeatured"], False) # only with editor or admin role
+        self.assertEqual(entity["featured"]["positionY"], 10)
+        self.assertEqual(entity["featured"]["video"], "testVideo")
+        self.assertEqual(entity["featured"]["videoTitle"], "testVideoTitle")
+        self.assertEqual(entity["featured"]["alt"], "testAlt")
+        self.assertDateEqual(entity["timePublished"], variables['input']['timePublished'])
+        self.assertDateEqual(entity["scheduleArchiveEntity"], variables['input']['scheduleArchiveEntity'])
+        self.assertDateEqual(entity["scheduleDeleteEntity"], variables['input']['scheduleDeleteEntity'])
 
     def test_add_question_to_group(self):
-
         variables = self.data
         variables["input"]["containerGuid"] = self.group.guid
 
-        request = HttpRequest()
-        request.user = self.authenticatedUser
+        self.graphql_client.force_login(self.authenticatedUser)
+        result = self.graphql_client.post(self.mutation, variables)
 
-        result = graphql_sync(schema, { "query": self.mutation, "variables": variables }, context_value={ "request": request })
-
-        data = result[1]["data"]
-
-        self.assertEqual(data["addEntity"]["entity"]["title"], variables["input"]["title"])
-        self.assertEqual(data["addEntity"]["entity"]["richDescription"], variables["input"]["richDescription"])
-        self.assertEqual(data["addEntity"]["entity"]["inGroup"], True)
-        self.assertEqual(data["addEntity"]["entity"]["group"]["guid"], self.group.guid)
+        entity = result["data"]["addEntity"]["entity"]
+        self.assertEqual(entity["title"], variables["input"]["title"])
+        self.assertEqual(entity["richDescription"], variables["input"]["richDescription"])
+        self.assertEqual(entity["inGroup"], True)
+        self.assertEqual(entity["group"]["guid"], self.group.guid)

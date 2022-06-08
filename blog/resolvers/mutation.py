@@ -52,9 +52,7 @@ def resolve_add_blog(_, info, input):
         entity.abstract = abstract
 
     shared.update_featured_image(entity, clean_input)
-
-    if 'timePublished' in clean_input:
-        entity.published = clean_input.get("timePublished", None)
+    shared.update_publication_dates(entity, clean_input)
 
     if user.has_role(USER_ROLES.ADMIN) or user.has_role(USER_ROLES.EDITOR):
         entity.is_recommended = clean_input.get("isRecommended")
@@ -112,9 +110,7 @@ def resolve_edit_blog(_, info, input):
         entity.abstract = abstract
 
     shared.update_featured_image(entity, clean_input)
-
-    if 'timePublished' in clean_input:
-        entity.published = clean_input.get("timePublished", None)
+    shared.update_publication_dates(entity, clean_input)
 
     if user.has_role(USER_ROLES.ADMIN) or user.has_role(USER_ROLES.EDITOR):
         if 'isRecommended' in clean_input:

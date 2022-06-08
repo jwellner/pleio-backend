@@ -1,22 +1,14 @@
-from django.db import connection
-from django_tenants.test.cases import FastTenantTestCase
-from backend2.schema import schema
-from ariadne import graphql_sync
-import json
-from django.contrib.auth.models import AnonymousUser
-from django.http import HttpRequest
+from django.utils import timezone
 from core.models import Group
+from core.tests.helpers import PleioTenantTestCase
 from user.models import User
-from ..models import Task
-from core.constances import ACCESS_TYPE
 from mixer.backend.django import mixer
-from graphql import GraphQLError
-from datetime import datetime
 
-class AddTaskTestCase(FastTenantTestCase):
+
+class AddTaskTestCase(PleioTenantTestCase):
 
     def setUp(self):
-        self.anonymousUser = AnonymousUser()
+        super(AddTaskTestCase, self).setUp()
         self.authenticatedUser = mixer.blend(User)
         self.group = mixer.blend(Group, owner=self.authenticatedUser, is_membership_on_request=False)
         self.group.join(self.authenticatedUser, 'owner')
@@ -30,7 +22,10 @@ class AddTaskTestCase(FastTenantTestCase):
                 "tags": ["tag1", "tag2"],
                 "accessId": 1,
                 "writeAccessId": None,
-                "mentions": []
+                "mentions": [],
+                "timePublished": str(timezone.localtime()),
+                "scheduleArchiveEntity": str(timezone.localtime() + timezone.timedelta(days=10)),
+                "scheduleDeleteEntity": str(timezone.localtime() + timezone.timedelta(days=20)),
             }
         }
 
@@ -40,6 +35,9 @@ class AddTaskTestCase(FastTenantTestCase):
                 richDescription
                 timeCreated
                 timeUpdated
+                timePublished
+                scheduleArchiveEntity
+                scheduleDeleteEntity
                 accessId
                 writeAccessId
                 canEdit
@@ -66,31 +64,28 @@ class AddTaskTestCase(FastTenantTestCase):
 
         variables = self.data
 
-        request = HttpRequest()
-        request.user = self.authenticatedUser
+        self.graphql_client.force_login(self.authenticatedUser)
+        result = self.graphql_client.post(self.mutation, variables)
 
-        result = graphql_sync(schema, { "query": self.mutation, "variables": variables }, context_value={ "request": request })
-
-        data = result[1]["data"]
-
-        self.assertEqual(data["addEntity"]["entity"]["title"], variables["input"]["title"])
-        self.assertEqual(data["addEntity"]["entity"]["richDescription"], variables["input"]["richDescription"])
-        self.assertEqual(data["addEntity"]["entity"]["state"], "NEW")
+        entity = result['data']['addEntity']['entity']
+        self.assertEqual(entity["title"], variables["input"]["title"])
+        self.assertEqual(entity["richDescription"], variables["input"]["richDescription"])
+        self.assertEqual(entity["state"], "NEW")
+        self.assertDateEqual(entity["timePublished"], variables['input']['timePublished'])
+        self.assertDateEqual(entity["scheduleArchiveEntity"], variables['input']['scheduleArchiveEntity'])
+        self.assertDateEqual(entity["scheduleDeleteEntity"], variables['input']['scheduleDeleteEntity'])
 
     def test_add_task_to_group(self):
 
         variables = self.data
         variables["input"]["containerGuid"] = self.group.guid
 
-        request = HttpRequest()
-        request.user = self.authenticatedUser
+        self.graphql_client.force_login(self.authenticatedUser)
+        result = self.graphql_client.post(self.mutation, variables)
 
-        result = graphql_sync(schema, { "query": self.mutation, "variables": variables }, context_value={ "request": request })
-
-        data = result[1]["data"]
-
-        self.assertEqual(data["addEntity"]["entity"]["title"], variables["input"]["title"])
-        self.assertEqual(data["addEntity"]["entity"]["richDescription"], variables["input"]["richDescription"])
-        self.assertEqual(data["addEntity"]["entity"]["inGroup"], True)
-        self.assertEqual(data["addEntity"]["entity"]["group"]["guid"], self.group.guid)
-        self.assertEqual(data["addEntity"]["entity"]["state"], "NEW")
+        entity = result['data']['addEntity']['entity']
+        self.assertEqual(entity["title"], variables["input"]["title"])
+        self.assertEqual(entity["richDescription"], variables["input"]["richDescription"])
+        self.assertEqual(entity["inGroup"], True)
+        self.assertEqual(entity["group"]["guid"], self.group.guid)
+        self.assertEqual(entity["state"], "NEW")

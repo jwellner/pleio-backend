@@ -1,24 +1,18 @@
-from django.db import connection
 from core.models.attachment import Attachment
-from django_tenants.test.cases import FastTenantTestCase
-from backend2.schema import schema
-from ariadne import graphql_sync
 import json
-from django.contrib.auth.models import AnonymousUser
-from django.http import HttpRequest
 from core.models import Group
+from core.tests.helpers import PleioTenantTestCase
 from user.models import User
 from event.models import Event
 from core.constances import ACCESS_TYPE
-from core.lib import datetime_isoformat
 from mixer.backend.django import mixer
-from graphql import GraphQLError
 from django.utils import timezone
 
-class AddEventTestCase(FastTenantTestCase):
+
+class AddEventTestCase(PleioTenantTestCase):
 
     def setUp(self):
-        self.anonymousUser = AnonymousUser()
+        super(AddEventTestCase, self).setUp()
         self.authenticatedUser = mixer.blend(User)
         self.group = mixer.blend(Group, owner=self.authenticatedUser, is_membership_on_request=False)
         self.group.join(self.authenticatedUser, 'owner')
@@ -55,7 +49,10 @@ class AddEventTestCase(FastTenantTestCase):
                 "source": "https://www.pleio.nl",
                 "attendEventWithoutAccount": True,
                 "rsvp": True,
-                "qrAccess": True
+                "qrAccess": True,
+                "timePublished": str(timezone.localtime()),
+                "scheduleArchiveEntity": str(timezone.localtime() + timezone.timedelta(days=10)),
+                "scheduleDeleteEntity": str(timezone.localtime() + timezone.timedelta(days=20)),
             }
         }
         self.mutation = """
@@ -68,6 +65,9 @@ class AddEventTestCase(FastTenantTestCase):
                 hasChildren
                 timeCreated
                 timeUpdated
+                timePublished
+                scheduleArchiveEntity
+                scheduleDeleteEntity
                 accessId
                 writeAccessId
                 canEdit
@@ -101,68 +101,60 @@ class AddEventTestCase(FastTenantTestCase):
         """
 
     def test_add_event(self):
-
         variables = self.data
 
-        request = HttpRequest()
-        request.user = self.authenticatedUser
+        self.graphql_client.force_login(self.authenticatedUser)
+        result = self.graphql_client.post(self.mutation, variables)
 
-        result = graphql_sync(schema, { "query": self.mutation, "variables": variables }, context_value={ "request": request })
-
-        data = result[1]["data"]
-
-        self.assertEqual(data["addEntity"]["entity"]["title"], variables["input"]["title"])
-        self.assertEqual(data["addEntity"]["entity"]["richDescription"], variables["input"]["richDescription"])
-        self.assertEqual(data["addEntity"]["entity"]["location"], variables["input"]["location"])
-        self.assertEqual(data["addEntity"]["entity"]["locationLink"], variables["input"]["locationLink"])
-        self.assertEqual(data["addEntity"]["entity"]["locationAddress"], variables["input"]["locationAddress"])
-        self.assertEqual(data["addEntity"]["entity"]["rsvp"], variables["input"]["rsvp"])
-        self.assertEqual(data["addEntity"]["entity"]["source"], variables["input"]["source"])
-        self.assertEqual(data["addEntity"]["entity"]["ticketLink"], variables["input"]["ticketLink"])
-        self.assertEqual(data["addEntity"]["entity"]["startDate"], "2019-10-02T09:00:00+02:00")
-        self.assertEqual(data["addEntity"]["entity"]["endDate"], "2019-10-02T10:00:00+02:00")
-        self.assertEqual(data["addEntity"]["entity"]["attendEventWithoutAccount"], variables["input"]["attendEventWithoutAccount"])
-        self.assertEqual(data["addEntity"]["entity"]["maxAttendees"], variables["input"]["maxAttendees"])
-        self.assertEqual(data["addEntity"]["entity"]["qrAccess"], variables["input"]["qrAccess"])
+        entity = result["data"]["addEntity"]["entity"]
+        self.assertEqual(entity["title"], variables["input"]["title"])
+        self.assertEqual(entity["richDescription"], variables["input"]["richDescription"])
+        self.assertEqual(entity["location"], variables["input"]["location"])
+        self.assertEqual(entity["locationLink"], variables["input"]["locationLink"])
+        self.assertEqual(entity["locationAddress"], variables["input"]["locationAddress"])
+        self.assertEqual(entity["rsvp"], variables["input"]["rsvp"])
+        self.assertEqual(entity["source"], variables["input"]["source"])
+        self.assertEqual(entity["ticketLink"], variables["input"]["ticketLink"])
+        self.assertEqual(entity["startDate"], "2019-10-02T09:00:00+02:00")
+        self.assertEqual(entity["endDate"], "2019-10-02T10:00:00+02:00")
+        self.assertEqual(entity["attendEventWithoutAccount"], variables["input"]["attendEventWithoutAccount"])
+        self.assertEqual(entity["maxAttendees"], variables["input"]["maxAttendees"])
+        self.assertEqual(entity["qrAccess"], variables["input"]["qrAccess"])
+        self.assertDateEqual(entity['timePublished'], variables["input"]["timePublished"])
+        self.assertDateEqual(entity['scheduleArchiveEntity'], variables["input"]["scheduleArchiveEntity"])
+        self.assertDateEqual(entity['scheduleDeleteEntity'], variables["input"]["scheduleDeleteEntity"])
 
     def test_add_event_to_group(self):
-
         variables = self.data
         variables["input"]["containerGuid"] = self.group.guid
 
-        request = HttpRequest()
-        request.user = self.authenticatedUser
+        self.graphql_client.force_login(self.authenticatedUser)
+        result = self.graphql_client.post(self.mutation, variables)
 
-        result = graphql_sync(schema, { "query": self.mutation, "variables": variables }, context_value={ "request": request })
-
-        data = result[1]["data"]
-
-        self.assertEqual(data["addEntity"]["entity"]["title"], variables["input"]["title"])
-        self.assertEqual(data["addEntity"]["entity"]["richDescription"], variables["input"]["richDescription"])
-        self.assertEqual(data["addEntity"]["entity"]["inGroup"], True)
-        self.assertEqual(data["addEntity"]["entity"]["group"]["guid"], self.group.guid)
+        entity = result["data"]["addEntity"]["entity"]
+        self.assertEqual(entity["title"], variables["input"]["title"])
+        self.assertEqual(entity["richDescription"], variables["input"]["richDescription"])
+        self.assertEqual(entity["inGroup"], True)
+        self.assertEqual(entity["group"]["guid"], self.group.guid)
 
     def test_add_event_to_parent(self):
 
         variables = self.data
         variables["input"]["containerGuid"] = self.eventPublic.guid
 
-        request = HttpRequest()
-        request.user = self.authenticatedUser
+        self.graphql_client.force_login(self.authenticatedUser)
+        result = self.graphql_client.post(self.mutation, variables)
 
-        result = graphql_sync(schema, { "query": self.mutation, "variables": variables }, context_value={ "request": request })
-
-        data = result[1]["data"]
-
-        self.assertEqual(data["addEntity"]["entity"]["title"], variables["input"]["title"])
-        self.assertEqual(data["addEntity"]["entity"]["richDescription"], variables["input"]["richDescription"])
-        self.assertEqual(data["addEntity"]["entity"]["hasChildren"], False)
-        self.assertEqual(data["addEntity"]["entity"]["parent"]["guid"], self.eventPublic.guid)
+        entity = result["data"]["addEntity"]["entity"]
+        self.assertEqual(entity["title"], variables["input"]["title"])
+        self.assertEqual(entity["richDescription"], variables["input"]["richDescription"])
+        self.assertEqual(entity["hasChildren"], False)
+        self.assertEqual(entity["parent"]["guid"], self.eventPublic.guid)
 
         self.eventPublic.refresh_from_db()
 
         self.assertTrue(self.eventPublic.has_children())
-        self.assertEqual(self.eventPublic.children.first().guid, data["addEntity"]["entity"]["guid"])
+        self.assertEqual(self.eventPublic.children.first().guid, entity["guid"])
 
 
     def test_add_event_to_parent_with_group(self):
@@ -170,24 +162,21 @@ class AddEventTestCase(FastTenantTestCase):
         variables = self.data
         variables["input"]["containerGuid"] = self.eventGroupPublic.guid
 
-        request = HttpRequest()
-        request.user = self.authenticatedUser
+        self.graphql_client.force_login(self.authenticatedUser)
+        result = self.graphql_client.post(self.mutation, variables)
 
-        result = graphql_sync(schema, { "query": self.mutation, "variables": variables }, context_value={ "request": request })
-
-        data = result[1]["data"]
-
-        self.assertEqual(data["addEntity"]["entity"]["title"], variables["input"]["title"])
-        self.assertEqual(data["addEntity"]["entity"]["richDescription"], variables["input"]["richDescription"])
-        self.assertEqual(data["addEntity"]["entity"]["hasChildren"], False)
-        self.assertEqual(data["addEntity"]["entity"]["inGroup"], True)
-        self.assertEqual(data["addEntity"]["entity"]["group"]["guid"], self.group.guid)
-        self.assertEqual(data["addEntity"]["entity"]["parent"]["guid"], self.eventGroupPublic.guid)
+        entity = result["data"]["addEntity"]["entity"]
+        self.assertEqual(entity["title"], variables["input"]["title"])
+        self.assertEqual(entity["richDescription"], variables["input"]["richDescription"])
+        self.assertEqual(entity["hasChildren"], False)
+        self.assertEqual(entity["inGroup"], True)
+        self.assertEqual(entity["group"]["guid"], self.group.guid)
+        self.assertEqual(entity["parent"]["guid"], self.eventGroupPublic.guid)
 
         self.eventGroupPublic.refresh_from_db()
 
         self.assertTrue(self.eventGroupPublic.has_children())
-        self.assertEqual(self.eventGroupPublic.children.first().guid, data["addEntity"]["entity"]["guid"])
+        self.assertEqual(self.eventGroupPublic.children.first().guid, entity["guid"])
 
     def test_add_event_with_attachment(self):
         attachment = mixer.blend(Attachment)
@@ -195,12 +184,9 @@ class AddEventTestCase(FastTenantTestCase):
         variables = self.data
         variables["input"]["richDescription"] = json.dumps({ 'type': 'file', 'attrs': {'url': f"/attachment/entity/{attachment.id}" }})
 
-        request = HttpRequest()
-        request.user = self.authenticatedUser
+        self.graphql_client.force_login(self.authenticatedUser)
+        result = self.graphql_client.post(self.mutation, variables)
 
-        result = graphql_sync(schema, { "query": self.mutation, "variables": variables }, context_value={ "request": request })
-
-        data = result[1]["data"]
-        event = Event.objects.get(id=data["addEntity"]["entity"]["guid"])
-
+        entity = result["data"]["addEntity"]["entity"]
+        event = Event.objects.get(id=entity["guid"])
         self.assertTrue(event.attachments.filter(id=attachment.id).exists())

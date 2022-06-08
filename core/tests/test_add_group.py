@@ -1,7 +1,6 @@
 from unittest import mock
 
 from django.db import connection
-from django_tenants.test.cases import FastTenantTestCase
 from backend2.schema import schema
 from ariadne import graphql_sync
 from django.conf import settings
@@ -10,14 +9,17 @@ from django.core.files import File
 from django.contrib.auth.models import AnonymousUser
 from django.http import HttpRequest
 from core.models import ProfileField
+from core.tests.helpers import PleioTenantTestCase
 from user.models import User
 from mixer.backend.django import mixer
 from unittest.mock import patch, MagicMock
 
 
-class AddGroupCase(FastTenantTestCase):
+class AddGroupCase(PleioTenantTestCase):
 
     def setUp(self):
+        super(AddGroupCase, self).setUp()
+
         self.anonymousUser = AnonymousUser()
         self.user = mixer.blend(User)
         self.admin = mixer.blend(User, roles=['ADMIN'])
@@ -315,19 +317,6 @@ class AddGroupCase(FastTenantTestCase):
             }
         }
 
-        request = HttpRequest()
-        request.user = self.admin
-
-        success, result = graphql_sync(schema, {"query": mutation, "variables": variables},
-                                       context_value={"request": request})
-
-        errors = result.get("errors")
-        self.assertIsNotNone(errors, msg=errors)
-        self.assertGraphQlError(errors, "invalid_profile_field_guid")
-
-    def assertGraphQlError(self, errors, expected, msg=None):
-        if errors and len(errors) > 0:
-            for details in errors:
-                if expected in details['message']:
-                    return
-        self.fail(msg or "Did not find %s in the error message(s)" % expected)
+        with self.assertGraphQlError("invalid_profile_field_guid"):
+            self.graphql_client.force_login(self.admin)
+            self.graphql_client.post(mutation, variables)

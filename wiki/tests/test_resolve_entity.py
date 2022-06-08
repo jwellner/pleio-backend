@@ -1,22 +1,15 @@
-from django.db import connection
-from django_tenants.test.cases import FastTenantTestCase
-from backend2.schema import schema
-from ariadne import graphql_sync
-import json
-from django.contrib.auth.models import AnonymousUser
-from django.http import HttpRequest
-from core.models import Group
+from core.tests.helpers import PleioTenantTestCase
 from user.models import User
 from wiki.models import Wiki
 from mixer.backend.django import mixer
 from core.constances import ACCESS_TYPE
-from core.lib import get_acl, access_id_to_acl
 from django.utils.text import slugify
 
-class WikiTestCase(FastTenantTestCase):
+
+class WikiTestCase(PleioTenantTestCase):
 
     def setUp(self):
-        self.anonymousUser = AnonymousUser()
+        super(WikiTestCase, self).setUp()
         self.authenticatedUser = mixer.blend(User)
         self.authenticatedUser2 = mixer.blend(User)
 
@@ -54,6 +47,9 @@ class WikiTestCase(FastTenantTestCase):
                 richDescription
                 timeCreated
                 timeUpdated
+                timePublished
+                scheduleArchiveEntity
+                scheduleDeleteEntity
                 accessId
                 writeAccessId
                 canEdit
@@ -95,100 +91,81 @@ class WikiTestCase(FastTenantTestCase):
         self.authenticatedUser.delete()
 
     def test_news_anonymous(self):
-
-        request = HttpRequest()
-        request.user = self.anonymousUser
-
         variables = {
             "guid": self.wikiPublic.guid
         }
 
-        result = graphql_sync(schema, { "query": self.query , "variables": variables}, context_value={ "request": request })
+        result = self.graphql_client.post(self.query, variables)
 
-        self.assertTrue(result[0])
-
-        data = result[1]["data"]
-
-        self.assertEqual(data["entity"]["guid"], self.wikiPublic.guid)
-        self.assertEqual(data["entity"]["title"], self.wikiPublic.title)
-        self.assertEqual(data["entity"]["richDescription"], self.wikiPublic.rich_description)
-        self.assertEqual(data["entity"]["accessId"], 2)
-        self.assertEqual(data["entity"]["timeCreated"], self.wikiPublic.created_at.isoformat())
-        self.assertEqual(data["entity"]["tags"], [])
-        self.assertEqual(data["entity"]["isBookmarked"], False)
-        self.assertEqual(data["entity"]["isFeatured"], False)
-        self.assertEqual(data["entity"]["canBookmark"], False)
-        self.assertEqual(data["entity"]["canEdit"], False)
-        self.assertEqual(data["entity"]["url"], "/wiki/view/{}/{}".format(self.wikiPublic.guid, slugify(self.wikiPublic.title)))
-        self.assertEqual(data["entity"]["parent"], None)
-        self.assertEqual(data["entity"]["hasChildren"], True)
-        self.assertEqual(len(data["entity"]["children"]), 0)
-        #self.assertEqual(data["entity"]["children"][0]["guid"], self.wikiPrivate.guid)
+        entity = result["data"]["entity"]
+        self.assertEqual(entity["guid"], self.wikiPublic.guid)
+        self.assertEqual(entity["title"], self.wikiPublic.title)
+        self.assertEqual(entity["richDescription"], self.wikiPublic.rich_description)
+        self.assertEqual(entity["accessId"], 2)
+        self.assertEqual(entity["timeCreated"], self.wikiPublic.created_at.isoformat())
+        self.assertEqual(entity["tags"], [])
+        self.assertEqual(entity["isBookmarked"], False)
+        self.assertEqual(entity["isFeatured"], False)
+        self.assertEqual(entity["canBookmark"], False)
+        self.assertEqual(entity["canEdit"], False)
+        self.assertEqual(entity["url"], "/wiki/view/{}/{}".format(self.wikiPublic.guid, slugify(self.wikiPublic.title)))
+        self.assertEqual(entity["parent"], None)
+        self.assertEqual(entity["hasChildren"], True)
+        self.assertEqual(len(entity["children"]), 0)
+        self.assertIsNotNone(entity['timePublished'])
+        self.assertIsNone(entity['scheduleArchiveEntity'])
+        self.assertIsNone(entity['scheduleDeleteEntity'])
 
         variables = {
             "guid": self.wikiPrivate.guid
         }
 
-        result = graphql_sync(schema, { "query": self.query , "variables": variables}, context_value={ "request": request })
+        result = self.graphql_client.post(self.query, variables)
 
-        self.assertTrue(result[0])
-
-        data = result[1]["data"]
-
-        self.assertEqual(data["entity"], None)
+        entity = result["data"]["entity"]
+        self.assertIsNone(entity)
 
     def test_news_private(self):
-        request = HttpRequest()
-        request.user = self.authenticatedUser
-
         variables = {
             "guid": self.wikiPrivate.guid
         }
 
-        result = graphql_sync(schema, { "query": self.query , "variables": variables}, context_value={ "request": request })
+        self.graphql_client.force_login(self.authenticatedUser)
+        result = self.graphql_client.post(self.query, variables)
 
-        self.assertTrue(result[0])
-
-        data = result[1]["data"]
-
-        self.assertEqual(data["entity"]["guid"], self.wikiPrivate.guid)
-        self.assertEqual(data["entity"]["title"], self.wikiPrivate.title)
-        self.assertEqual(data["entity"]["richDescription"], self.wikiPrivate.rich_description)
-        self.assertEqual(data["entity"]["accessId"], 0)
-        self.assertEqual(data["entity"]["timeCreated"], self.wikiPrivate.created_at.isoformat())
-        self.assertEqual(data["entity"]["tags"], [])
-        self.assertEqual(data["entity"]["isBookmarked"], False)
-        self.assertEqual(data["entity"]["isFeatured"], True)
-        self.assertEqual(data["entity"]["canBookmark"], True)
-        self.assertEqual(data["entity"]["canEdit"], True)
-        self.assertEqual(data["entity"]["url"], "/wiki/view/{}/{}".format(self.wikiPrivate.guid, slugify(self.wikiPrivate.title)))
-        self.assertEqual(data["entity"]["parent"]['guid'], self.wikiPublic.guid)
-
+        entity = result["data"]["entity"]
+        self.assertEqual(entity["guid"], self.wikiPrivate.guid)
+        self.assertEqual(entity["title"], self.wikiPrivate.title)
+        self.assertEqual(entity["richDescription"], self.wikiPrivate.rich_description)
+        self.assertEqual(entity["accessId"], 0)
+        self.assertEqual(entity["timeCreated"], self.wikiPrivate.created_at.isoformat())
+        self.assertEqual(entity["tags"], [])
+        self.assertEqual(entity["isBookmarked"], False)
+        self.assertEqual(entity["isFeatured"], True)
+        self.assertEqual(entity["canBookmark"], True)
+        self.assertEqual(entity["canEdit"], True)
+        self.assertEqual(entity["url"], "/wiki/view/{}/{}".format(self.wikiPrivate.guid, slugify(self.wikiPrivate.title)))
+        self.assertEqual(entity["parent"]['guid'], self.wikiPublic.guid)
 
     def test_news_public(self):
-        request = HttpRequest()
-        request.user = self.authenticatedUser
-
         variables = {
             "guid": self.wikiPublic.guid
         }
 
-        result = graphql_sync(schema, { "query": self.query , "variables": variables}, context_value={ "request": request })
+        self.graphql_client.force_login(self.authenticatedUser)
+        result = self.graphql_client.post(self.query, variables)
 
-        self.assertTrue(result[0])
-
-        data = result[1]["data"]
-
-        self.assertEqual(data["entity"]["guid"], self.wikiPublic.guid)
-        self.assertEqual(data["entity"]["title"], self.wikiPublic.title)
-        self.assertEqual(data["entity"]["richDescription"], self.wikiPublic.rich_description)
-        self.assertEqual(data["entity"]["accessId"], 2)
-        self.assertEqual(data["entity"]["timeCreated"], self.wikiPublic.created_at.isoformat())
-        self.assertEqual(data["entity"]["tags"], [])
-        self.assertEqual(data["entity"]["isBookmarked"], False)
-        self.assertEqual(data["entity"]["isFeatured"], False)
-        self.assertEqual(data["entity"]["canBookmark"], True)
-        self.assertEqual(data["entity"]["canEdit"], True)
-        self.assertEqual(data["entity"]["url"], "/wiki/view/{}/{}".format(self.wikiPublic.guid, slugify(self.wikiPublic.title)))
-        self.assertEqual(len(data["entity"]["children"]), 1)
-        self.assertEqual(data["entity"]["children"][0]['guid'], self.wikiPrivate.guid)
+        entity = result["data"]["entity"]
+        self.assertEqual(entity["guid"], self.wikiPublic.guid)
+        self.assertEqual(entity["title"], self.wikiPublic.title)
+        self.assertEqual(entity["richDescription"], self.wikiPublic.rich_description)
+        self.assertEqual(entity["accessId"], 2)
+        self.assertEqual(entity["timeCreated"], self.wikiPublic.created_at.isoformat())
+        self.assertEqual(entity["tags"], [])
+        self.assertEqual(entity["isBookmarked"], False)
+        self.assertEqual(entity["isFeatured"], False)
+        self.assertEqual(entity["canBookmark"], True)
+        self.assertEqual(entity["canEdit"], True)
+        self.assertEqual(entity["url"], "/wiki/view/{}/{}".format(self.wikiPublic.guid, slugify(self.wikiPublic.title)))
+        self.assertEqual(len(entity["children"]), 1)
+        self.assertEqual(entity["children"][0]['guid'], self.wikiPrivate.guid)

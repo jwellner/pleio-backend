@@ -27,8 +27,8 @@ class AttendEventWithoutAccountTestCase(FastTenantTestCase):
         self.event.delete()
         self.authenticatedUser.delete()
 
-    @mock.patch('event.resolvers.mutation_attend_event_without_account.generate_code', return_value='6df8cdad5582833eeab4')
-    @mock.patch('event.resolvers.mutation_attend_event_without_account.send_mail_multi.delay')
+    @mock.patch('event.resolvers.mutation_attend_event.generate_code', return_value='6df8cdad5582833eeab4')
+    @mock.patch('event.resolvers.mutation_attend_event.send_mail_multi.delay')
     def test_attend_event_without_account(self, mocked_send_mail_multi, mocked_generate_code):
         mutation = """
             mutation RequestAttendance($input: attendEventWithoutAccountInput!) {
@@ -70,8 +70,8 @@ class AttendEventWithoutAccountTestCase(FastTenantTestCase):
         mocked_send_mail_multi.assert_called_once()
 
 
-    @mock.patch('event.resolvers.mutation_attend_event_without_account.generate_code', return_value='6df8cdad5582833eeab4')
-    @mock.patch('event.resolvers.mutation_attend_event_without_account.send_mail_multi.delay')
+    @mock.patch('event.resolvers.mutation_attend_event.generate_code', return_value='6df8cdad5582833eeab4')
+    @mock.patch('event.resolvers.mutation_attend_event.send_mail_multi.delay')
     def test_attend_event_without_account_resend(self, mocked_send_mail_multi, mocked_generate_code):
         mutation = """
             mutation RequestAttendance($input: attendEventWithoutAccountInput!) {
@@ -182,7 +182,8 @@ class AttendEventWithoutAccountTestCase(FastTenantTestCase):
         EventAttendee.objects.create(
             event=self.event,
             state='accept',
-            user=self.authenticatedUser
+            user=self.authenticatedUser,
+            email=self.authenticatedUser.email
         )
 
         request = HttpRequest()
@@ -193,8 +194,8 @@ class AttendEventWithoutAccountTestCase(FastTenantTestCase):
         self.assertTrue(result[0])
 
 
-    @mock.patch('event.resolvers.mutation_attend_event_without_account.generate_code', return_value='6df8cdad5582833eeab4')
-    @mock.patch('event.resolvers.mutation_attend_event_without_account.send_mail_multi.delay')
+    @mock.patch('event.resolvers.mutation_attend_event.generate_code', return_value='6df8cdad5582833eeab4')
+    @mock.patch('event.resolvers.mutation_attend_event.send_mail_multi.delay')
     def test_attend_event_without_account_no_name(self, mocked_send_mail_multi, mocked_generate_code):
         variables = {
             "input": {

@@ -1,21 +1,20 @@
-from django_tenants.test.cases import FastTenantTestCase
+import json
+
 from django.core.files import File
 from django.conf import settings
-from backend2.schema import schema
-from ariadne import graphql_sync
-from django.contrib.auth.models import AnonymousUser
-from django.http import HttpRequest
 from core.models import Group
+from core.tests.helpers import PleioTenantTestCase
 from user.models import User
 from file.models import FileFolder
 from core.constances import ACCESS_TYPE
 from mixer.backend.django import mixer
 from unittest.mock import MagicMock, patch
 
-class AddFileTestCase(FastTenantTestCase):
+
+class AddFileTestCase(PleioTenantTestCase):
 
     def setUp(self):
-        self.anonymousUser = AnonymousUser()
+        super(AddFileTestCase, self).setUp()
         self.authenticatedUser = mixer.blend(User)
         self.authenticatedUser2 = mixer.blend(User)
         self.authenticatedUser3 = mixer.blend(User)
@@ -32,13 +31,24 @@ class AddFileTestCase(FastTenantTestCase):
             group=self.group
         )
 
-        self.EXPECTED_DESCRIPTION = 'EXPECTED_DESCRIPTION'
+        self.RICH_DESCRIPTION = json.dumps({
+            'type': 'doc',
+            'content': [{
+                'type': "paragraph",
+                'content': [{
+                    'type': 'text',
+                    'text': 'expected text',
+                }]
+            }]
+        })
+        self.DESCRIPTION = 'expected text\n\n'
+
         self.data = {
             "input": {
-                "richDescription": self.EXPECTED_DESCRIPTION,
+                "richDescription": self.RICH_DESCRIPTION,
                 "containerGuid": self.group.guid,
                 "file": "test.gif",
-                "tags": ["tag_one", "tag_two"]
+                "tags": ["tag_one", "tag_two"],
             }
         }
         self.mutation = """
@@ -82,20 +92,17 @@ class AddFileTestCase(FastTenantTestCase):
 
         variables = self.data
 
-        request = HttpRequest()
-        request.user = self.authenticatedUser
+        self.graphql_client.force_login(self.authenticatedUser)
+        result = self.graphql_client.post(self.mutation, variables)
 
-        result = graphql_sync(schema, { "query": self.mutation, "variables": variables }, context_value={ "request": request })
-
-        data = result[1]["data"]
-
-        self.assertEqual(data["addFile"]["entity"]["title"], file_mock.name)
-        self.assertEqual(data["addFile"]["entity"]["mimeType"], file_mock.content_type)
-        self.assertEqual(data["addFile"]["entity"]["description"], self.EXPECTED_DESCRIPTION)
-        self.assertEqual(data["addFile"]["entity"]["richDescription"], self.EXPECTED_DESCRIPTION)
-        self.assertEqual(data["addFile"]["entity"]["group"]["guid"], self.group.guid)
-        self.assertEqual(data["addFile"]["entity"]["tags"][0], "tag_one")
-        self.assertEqual(data["addFile"]["entity"]["tags"][1], "tag_two")
+        entity = result["data"]['addFile']['entity']
+        self.assertEqual(entity["title"], file_mock.name)
+        self.assertEqual(entity["mimeType"], file_mock.content_type)
+        self.assertEqual(entity["description"], self.DESCRIPTION)
+        self.assertEqual(entity["richDescription"], self.RICH_DESCRIPTION)
+        self.assertEqual(entity["group"]["guid"], self.group.guid)
+        self.assertEqual(entity["tags"][0], "tag_one")
+        self.assertEqual(entity["tags"][1], "tag_two")
 
     @patch("core.lib.get_mimetype")
     @patch("{}.open".format(settings.DEFAULT_FILE_STORAGE))
@@ -109,15 +116,9 @@ class AddFileTestCase(FastTenantTestCase):
 
         variables = self.data
 
-        request = HttpRequest()
-        request.user = self.authenticatedUser2
-
-        result = graphql_sync(schema, { "query": self.mutation, "variables": variables }, context_value={ "request": request })
-
-        errors = result[1]["errors"]
-
-        self.assertEqual(errors[0]["message"], "NOT_GROUP_MEMBER")
-
+        self.graphql_client.force_login(self.authenticatedUser2)
+        with self.assertGraphQlError("NOT_GROUP_MEMBER"):
+            self.graphql_client.post(self.mutation, variables)
 
     @patch("core.lib.get_mimetype")
     @patch("{}.open".format(settings.DEFAULT_FILE_STORAGE))
@@ -137,14 +138,9 @@ class AddFileTestCase(FastTenantTestCase):
             }
         }
 
-        request = HttpRequest()
-        request.user = self.authenticatedUser3
-
-        result = graphql_sync(schema, { "query": self.mutation, "variables": variables }, context_value={ "request": request })
-
-        errors = result[1]["errors"]
-
-        self.assertEqual(errors[0]["message"], "could_not_save")
+        self.graphql_client.force_login(self.authenticatedUser3)
+        with self.assertGraphQlError("could_not_save"):
+            self.graphql_client.post(self.mutation, variables)
 
     @patch("core.lib.get_mimetype")
     @patch("{}.open".format(settings.DEFAULT_FILE_STORAGE))
@@ -178,16 +174,9 @@ class AddFileTestCase(FastTenantTestCase):
             }
         }
 
-        request = HttpRequest()
-        request.user = self.authenticatedUser2
-
-        result = graphql_sync(schema, { "query": mutation, "variables": variables }, context_value={ "request": request })
-
-        errors = result[1]["errors"]
-
-        self.assertEqual(errors[0]["message"], "NOT_GROUP_MEMBER")
-
-
+        self.graphql_client.force_login(self.authenticatedUser2)
+        with self.assertGraphQlError("NOT_GROUP_MEMBER"):
+            self.graphql_client.post(mutation, variables)
 
     @patch("core.lib.get_mimetype")
     @patch("{}.open".format(settings.DEFAULT_FILE_STORAGE))
@@ -221,15 +210,9 @@ class AddFileTestCase(FastTenantTestCase):
             }
         }
 
-        request = HttpRequest()
-        request.user = self.authenticatedUser3
-
-        result = graphql_sync(schema, { "query": mutation, "variables": variables }, context_value={ "request": request })
-
-        errors = result[1]["errors"]
-
-        self.assertEqual(errors[0]["message"], "could_not_save")
-
+        self.graphql_client.force_login(self.authenticatedUser3)
+        with self.assertGraphQlError("could_not_save"):
+            self.graphql_client.post(mutation, variables)
 
     @patch("core.lib.get_mimetype")
     @patch("{}.open".format(settings.DEFAULT_FILE_STORAGE))
@@ -266,14 +249,10 @@ class AddFileTestCase(FastTenantTestCase):
             }
         }
 
-        request = HttpRequest()
-        request.user = self.authenticatedUser3
+        self.graphql_client.force_login(self.authenticatedUser3)
+        result = self.graphql_client.post(mutation, variables)
 
-        result = graphql_sync(schema, { "query": mutation, "variables": variables }, context_value={ "request": request })
-
-        data = result[1]["data"]
-
-        self.assertEqual(data["addEntity"]["entity"]["title"], "testfolder")
+        self.assertEqual(result["data"]["addEntity"]["entity"]["title"], "testfolder")
 
     @patch("core.lib.get_mimetype")
     @patch("{}.open".format(settings.DEFAULT_FILE_STORAGE))
@@ -288,15 +267,12 @@ class AddFileTestCase(FastTenantTestCase):
         variables = self.data
         variables["input"]["containerGuid"] = self.authenticatedUser.guid
 
-        request = HttpRequest()
-        request.user = self.authenticatedUser
+        self.graphql_client.force_login(self.authenticatedUser)
+        result = self.graphql_client.post(self.mutation, variables)
 
-        result = graphql_sync(schema, { "query": self.mutation, "variables": variables }, context_value={ "request": request })
-
-        data = result[1]["data"]
-
-        self.assertEqual(data["addFile"]["entity"]["title"], file_mock.name)
-        self.assertEqual(data["addFile"]["entity"]["mimeType"], file_mock.content_type)
-        self.assertEqual(data["addFile"]["entity"]["group"], None)
-        self.assertEqual(data["addFile"]["entity"]["tags"][0], "tag_one")
-        self.assertEqual(data["addFile"]["entity"]["tags"][1], "tag_two")
+        entity = result["data"]["addFile"]["entity"]
+        self.assertEqual(entity["title"], file_mock.name)
+        self.assertEqual(entity["mimeType"], file_mock.content_type)
+        self.assertEqual(entity["group"], None)
+        self.assertEqual(entity["tags"][0], "tag_one")
+        self.assertEqual(entity["tags"][1], "tag_two")
