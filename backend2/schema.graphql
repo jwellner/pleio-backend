@@ -827,6 +827,7 @@ input editSiteSettingInput {
   idpId: String
   idpName: String
   autoApproveSSO: Boolean
+  require2FA: Boolean
   flowEnabled: Boolean
   flowSubtypes: [String]
   flowAppUrl: String
@@ -1985,6 +1986,7 @@ type SiteSettings {
   idpId: String
   idpName: String
   autoApproveSSO: Boolean
+  require2FA: Boolean
   searchEngineIndexingEnabled: Boolean!
   profileFieldValidators: [ProfileFieldValidator]
   flowEnabled: Boolean!
@@ -2215,6 +2217,7 @@ type Viewer {
   isSubEditor: Boolean!
   isAdmin: Boolean!
   isBanned: Boolean!
+  has2faEnabled: Boolean!
   tags: [String]
   canWriteToContainer(containerGuid: String, type: Type, subtype: String): Boolean!
   user: User
