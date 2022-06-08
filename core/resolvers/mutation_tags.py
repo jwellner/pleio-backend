@@ -1,11 +1,10 @@
 import uuid
 
-from django_tenants.utils import parse_tenant_config_path
-
 from core.constances import USER_ROLES
+from core.elasticsearch import schedule_index_document
 from core.models.tags import Tag, TagSynonym, EntityTag
 from core.resolvers.query_tags import resolve_list_tags
-from core.tasks.elasticsearch_tasks import elasticsearch_index_document
+
 
 
 def resolve_merge_tags(_, info, input):
@@ -42,7 +41,7 @@ def resolve_merge_tags(_, info, input):
 
     # 4) update de index van alle documenten.
     for ref in EntityTag.objects.filter(tag=tag):
-        elasticsearch_index_document.delay(parse_tenant_config_path(""), ref.entity_id)
+        schedule_index_document(ref.entity)
 
     return resolve_list_tags(_, info)
 
@@ -71,11 +70,11 @@ def resolve_extract_tag_synonym(_, info, input):
         ref.entity.save()
 
         # 4a) update de index van de gewijzigde documenten.
-        elasticsearch_index_document.delay(parse_tenant_config_path(""), ref.entity_id)
+        schedule_index_document(ref.entity)
 
     # 4b) update de index van de andere documenten.
     for ref in EntityTag.objects.filter(tag=tag):
-        elasticsearch_index_document.delay(parse_tenant_config_path(""), ref.entity_id)
+        schedule_index_document(ref.entity)
 
     return resolve_list_tags(_, info)
 
