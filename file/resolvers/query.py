@@ -48,6 +48,8 @@ def resolve_files(
 
     order_by = ['title']
 
+    if orderBy == 'size':
+        order_by.insert(0, 'size')
     if orderBy == 'timeUpdated':
         order_by.insert(0, 'updated_at')
     elif orderBy == ['timeCreated']:
