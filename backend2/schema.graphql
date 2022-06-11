@@ -1640,7 +1640,18 @@ type Query {
   filters: Filters
   site: Site
   siteSettings: SiteSettings
-  siteUsers(q: String, role: String, isDeleteRequested: Boolean, isBanned: Boolean, offset: Int, limit: Int, lastOnlineBefore: String): SiteUserList
+  siteUsers(
+    q: String
+    role: String
+    isDeleteRequested: Boolean
+    isBanned: Boolean
+    lastOnlineBefore: String
+    memberSince: DateTime
+    orderBy: String
+    orderDirection: OrderDirection
+    offset: Int
+    limit: Int
+    ): SiteUserList
   usersByBirthDate(profileFieldGuid: String!, futureDays: Int, offset: Int, limit: Int): SiteUserList
   siteStats: SiteStats
   tags: [Tag]
@@ -2179,6 +2190,7 @@ type User implements Entity {
   language: String
   languageOptions: [Option]
   lastOnline: String
+  memberSince: DateTime
 }
 
 type UserFilter {
