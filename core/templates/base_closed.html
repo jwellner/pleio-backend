@@ -48,7 +48,7 @@
 			<link href="/custom.css?v={{ config.CUSTOM_CSS_TIMESTAMP }}" rel="stylesheet" type="text/css" media="screen">
 		{% endif %}
     </head>
-	<body class="___{{ config.THEME }}">
+	<body class="___{{ config.THEME }}"{% if request.user.is_authenticated %} data-authenticated-user="{{ request.user.email }}"{% endif %}>
 		<div class="page-layout">
 			<header class="page-layout__header walled-garden_header">
 				<div class="walled-garden_header-top">
