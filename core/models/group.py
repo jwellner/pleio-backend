@@ -277,6 +277,8 @@ class GroupMembership(models.Model):
         sort_index = {'owner': 1, 'admin': 2, 'member': 3}
         return sort_index.get(self.type) or 100
 
+    def index_instance(self):
+        return self.user
 
     created_at = models.DateTimeField(default=timezone.now)
 

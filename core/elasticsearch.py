@@ -35,7 +35,9 @@ class CustomSignalProcessor(BaseSignalProcessor):
         """Overwrite default handle_pre_delete and stop raising exception on error
         """
         try:
-            registry.delete(instance, raise_on_error=False)
+            instance = maybe_index_instance(instance)
+            if instance.__class__ in registry.get_models():
+                schedule_index_document(instance)
         except Exception as e:
             logger.error("Error updating elasticsearch: %s", e)
 
