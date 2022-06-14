@@ -1,6 +1,6 @@
 {% load static %}
 <!doctype html>
-<html lang="{{ config.LANGUAGE }}">
+<html lang="{{ config.LANGUAGE }}"{% if request.user.is_authenticated %} data-authenticated-user="{{ request.user.email }}"{% endif %}>
 
 <head>
     <meta charset="utf-8">
