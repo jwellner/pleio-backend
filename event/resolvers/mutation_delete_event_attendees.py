@@ -28,7 +28,7 @@ def resolve_delete_event_attendees(_, info, input):
     if not event.can_write(user):
         raise GraphQLError(COULD_NOT_SAVE)
 
-    link = get_url(event, info.context["request"])
+    link = get_url(event)
     subject = ugettext_lazy("Removed from event: %s") % event.title
 
     for email_address in clean_input.get("emailAddresses"):
