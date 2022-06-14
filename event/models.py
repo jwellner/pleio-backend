@@ -9,6 +9,7 @@ from core.models import Entity, CommentMixin, BookmarkMixin, NotificationMixin, 
     ArticleMixin, AttachmentMixin
 from core.tasks import send_mail_multi
 from event.lib import get_url
+from event.utils import send_event_qr
 from user.models import User
 from django.core.exceptions import ObjectDoesNotExist
 from django.db.models.signals import pre_save, post_save
@@ -126,7 +127,7 @@ class Event(Entity,
         return [self.rich_description]
 
     def process_waitinglist(self):
-        link = get_url(self, None)
+        link = get_url(self)
         subject = ugettext_lazy("Added to event %s from waitinglist") % self.title
 
         schema_name = parse_tenant_config_path("")
@@ -144,6 +145,10 @@ class Event(Entity,
                 break
             attendee.state = 'accept'
             attendee.save()
+
+            if self.qr_access:
+                send_event_qr(attendee)
+
             try:
                 send_mail_multi.delay(schema_name, subject, 'email/attend_event_from_waitinglist.html', context,
                                       attendee.user.email)

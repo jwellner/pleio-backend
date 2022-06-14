@@ -10,7 +10,6 @@ from django.http import HttpRequest
 from core.models import Group
 from user.models import User
 from event.models import Event, EventAttendee
-from event.lib import get_url
 from core.constances import ACCESS_TYPE
 from mixer.backend.django import mixer
 from unittest import mock

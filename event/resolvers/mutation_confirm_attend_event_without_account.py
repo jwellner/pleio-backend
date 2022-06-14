@@ -88,7 +88,7 @@ def resolve_confirm_attend_event_without_account(_, info, input):
         leave_url = get_base_url() + '/events/confirm/' + event.guid + '?email=' + email + '&code='
         leave_link = leave_url + attendee_request.code + '&delete=true'
         
-        link = get_url(event, info.context["request"])
+        link = get_url(event)
         subject = ugettext_lazy("Confirmation of registration for %s") % event.title
 
         schema_name = parse_tenant_config_path("")
@@ -107,7 +107,7 @@ def resolve_confirm_attend_event_without_account(_, info, input):
         send_mail_multi.delay(schema_name, subject, 'email/confirm_attend_event_without_account.html', context, email)
 
         if event.qr_access and state == "accept":
-            send_event_qr(info, email, event, attendee)
+            send_event_qr(attendee)
 
         if state != "accept":
             event.process_waitinglist()

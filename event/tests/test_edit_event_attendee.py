@@ -11,7 +11,6 @@ from django.utils import timezone
 from core.models import Group
 from user.models import User
 from event.models import Event, EventAttendee, EventAttendeeRequest
-from event.lib import get_url
 from core.constances import ACCESS_TYPE
 from mixer.backend.django import mixer
 from graphql import GraphQLError
