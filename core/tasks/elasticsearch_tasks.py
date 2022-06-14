@@ -7,6 +7,7 @@ from django_tenants.utils import schema_context
 from elasticsearch_dsl import Search
 
 from core.models import Group, Entity
+from core.utils.elasticsearch import delete_document_if_found
 from core.utils.entity import load_entity_by_id
 from tenants.models import Client
 from user.models import User
@@ -110,11 +111,14 @@ def elasticsearch_repopulate_index_for_tenant(schema_name, index_name=None):
 def elasticsearch_index_document(schema_name, document_guid, document_classname):
     with schema_context(schema_name):
         try:
-            instance = load_entity_by_id(document_guid, [Group, Entity, User])
-            registry.update(instance)
-            registry.update_related(instance)
+            instance = load_entity_by_id(document_guid, [Group, Entity, User], fail_if_not_found=False)
+            if instance:
+                registry.update(instance)
+                registry.update_related(instance)
+            else:
+                delete_document_if_found(document_guid)
             return f"{schema_name}.{document_classname}.{document_guid}"
-        except (ElasticsearchConnectionError,) as known_error:
+        except ElasticsearchConnectionError as known_error:
             # Fall through for known errors.
             raise known_error
         except Exception as e:
