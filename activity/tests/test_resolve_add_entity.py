@@ -1,25 +1,18 @@
-from django.db import connection
-from django_tenants.test.cases import FastTenantTestCase
-from backend2.schema import schema
-from ariadne import graphql_sync
-import json
-from django.contrib.auth.models import AnonymousUser
-from django.http import HttpRequest
 from core.models import Group
-from user.models import User
-from ..models import StatusUpdate
-from core.constances import ACCESS_TYPE, COULD_NOT_ADD
+from core.tests.helpers import PleioTenantTestCase
+from user.factories import UserFactory
+from core.constances import COULD_NOT_ADD
 from mixer.backend.django import mixer
-from graphql import GraphQLError
-from datetime import datetime
 
-class AddStatusUpdateTestCase(FastTenantTestCase):
+
+class AddStatusUpdateTestCase(PleioTenantTestCase):
 
     def setUp(self):
-        self.anonymousUser = AnonymousUser()
-        self.authenticatedUser = mixer.blend(User)
-        self.group = mixer.blend(Group, owner=self.authenticatedUser, is_membership_on_request=False)
-        self.group.join(self.authenticatedUser, 'owner')
+        super(AddStatusUpdateTestCase, self).setUp()
+
+        self.authenticated_user = UserFactory()
+        self.group = mixer.blend(Group, owner=self.authenticated_user, is_membership_on_request=False)
+        self.group.join(self.authenticated_user, 'owner')
 
         self.data = {
             "input": {
@@ -58,47 +51,35 @@ class AddStatusUpdateTestCase(FastTenantTestCase):
         """
 
     def test_add_status_update(self):
-
         variables = self.data
 
-        request = HttpRequest()
-        request.user = self.authenticatedUser
+        self.graphql_client.force_login(self.authenticated_user)
+        result = self.graphql_client.post(self.mutation, variables)
 
-        result = graphql_sync(schema, { "query": self.mutation, "variables": variables }, context_value={ "request": request })
-
-        data = result[1]["data"]
-
-        self.assertEqual(data["addEntity"]["entity"]["title"], variables["input"]["title"])
-        self.assertEqual(data["addEntity"]["entity"]["richDescription"], variables["input"]["richDescription"])
+        entity = result["data"]["addEntity"]["entity"]
+        self.assertEqual(entity["title"], variables["input"]["title"])
+        self.assertEqual(entity["richDescription"], variables["input"]["richDescription"])
 
     def test_add_status_update_to_group(self):
-
         variables = self.data
         variables["input"]["containerGuid"] = self.group.guid
 
-        request = HttpRequest()
-        request.user = self.authenticatedUser
+        self.graphql_client.force_login(self.authenticated_user)
+        result = self.graphql_client.post(self.mutation, variables)
 
-        result = graphql_sync(schema, { "query": self.mutation, "variables": variables }, context_value={ "request": request })
-
-        data = result[1]["data"]
-
-        self.assertEqual(data["addEntity"]["entity"]["title"], variables["input"]["title"])
-        self.assertEqual(data["addEntity"]["entity"]["richDescription"], variables["input"]["richDescription"])
-        self.assertEqual(data["addEntity"]["entity"]["inGroup"], True)
-        self.assertEqual(data["addEntity"]["entity"]["group"]["guid"], self.group.guid)
+        entity = result["data"]["addEntity"]["entity"]
+        self.assertEqual(entity["title"], variables["input"]["title"])
+        self.assertEqual(entity["richDescription"], variables["input"]["richDescription"])
+        self.assertEqual(entity["inGroup"], True)
+        self.assertEqual(entity["group"]["guid"], self.group.guid)
 
     def test_add_status_update_to_updates_disabled_group(self):
-        no_updates_group = mixer.blend(Group, owner=self.authenticatedUser, is_submit_updates_enabled=False)
-        no_updates_group.join(self.authenticatedUser, 'owner')
+        no_updates_group = mixer.blend(Group, owner=self.authenticated_user, is_submit_updates_enabled=False)
+        no_updates_group.join(self.authenticated_user, 'owner')
 
         variables = self.data
         variables["input"]["containerGuid"] = no_updates_group.guid
 
-        request = HttpRequest()
-        request.user = self.authenticatedUser
-
-        success, result = graphql_sync(schema, { "query": self.mutation, "variables": variables }, context_value={ "request": request })
-        error = result.get("errors", [])
-        self.assertIn(COULD_NOT_ADD, [e['message'] for e in error])
-
+        with self.assertGraphQlError(COULD_NOT_ADD):
+            self.graphql_client.force_login(self.authenticated_user)
+            self.graphql_client.post(self.mutation, variables)
