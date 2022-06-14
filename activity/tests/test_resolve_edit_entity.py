@@ -1,33 +1,28 @@
-from django.db import connection
-from django_tenants.test.cases import FastTenantTestCase
-from backend2.schema import schema
-from ariadne import graphql_sync
-import json
-from django.contrib.auth.models import AnonymousUser
 from django.http import HttpRequest
 from core.models import Group
-from user.models import User
+from core.tests.helpers import PleioTenantTestCase
+from user.factories import UserFactory, AdminFactory
 from ..models import StatusUpdate
-from core.constances import ACCESS_TYPE, USER_ROLES
+from core.constances import ACCESS_TYPE
 from mixer.backend.django import mixer
-from graphql import GraphQLError
-from datetime import datetime
 
-class EditStatusUpdateTestCase(FastTenantTestCase):
+
+class EditStatusUpdateTestCase(PleioTenantTestCase):
 
     def setUp(self):
-        self.anonymousUser = AnonymousUser()
-        self.authenticatedUser = mixer.blend(User)
-        self.user2 = mixer.blend(User)
-        self.admin = mixer.blend(User, roles=[USER_ROLES.ADMIN])
+        super(EditStatusUpdateTestCase, self).setUp()
+
+        self.authenticated_user = UserFactory()
+        self.user2 = UserFactory()
+        self.admin = AdminFactory()
         self.group = mixer.blend(Group)
 
         self.statusPublic = StatusUpdate.objects.create(
             title="Test public update",
             rich_description="JSON to string",
             read_access=[ACCESS_TYPE.public],
-            write_access=[ACCESS_TYPE.user.format(self.authenticatedUser.id)],
-            owner=self.authenticatedUser
+            write_access=[ACCESS_TYPE.user.format(self.authenticated_user.id)],
+            owner=self.authenticated_user
         )
 
         self.data = {
@@ -69,75 +64,62 @@ class EditStatusUpdateTestCase(FastTenantTestCase):
         """
 
     def test_edit_status_update(self):
-
         variables = self.data
 
         request = HttpRequest()
-        request.user = self.authenticatedUser
+        request.user = self.authenticated_user
 
-        result = graphql_sync(schema, { "query": self.mutation, "variables": variables }, context_value={ "request": request })
+        self.graphql_client.force_login(self.authenticated_user)
+        result = self.graphql_client.post(self.mutation, variables)
 
-        data = result[1]["data"]
-
-        self.assertEqual(data["editEntity"]["entity"]["title"], variables["input"]["title"])
-        self.assertEqual(data["editEntity"]["entity"]["richDescription"], variables["input"]["richDescription"])
+        entity = result['data']['editEntity']['entity']
+        self.assertEqual(entity["title"], variables["input"]["title"])
+        self.assertEqual(entity["richDescription"], variables["input"]["richDescription"])
 
         self.statusPublic.refresh_from_db()
 
-        self.assertEqual(data["editEntity"]["entity"]["title"], self.statusPublic.title)
-        self.assertEqual(data["editEntity"]["entity"]["richDescription"], self.statusPublic.rich_description)
-        self.assertEqual(data["editEntity"]["entity"]["group"], None)
-        self.assertEqual(data["editEntity"]["entity"]["owner"]["guid"], self.authenticatedUser.guid)
-        self.assertEqual(data["editEntity"]["entity"]["timeCreated"], self.statusPublic.created_at.isoformat())
-
+        self.assertEqual(entity["title"], self.statusPublic.title)
+        self.assertEqual(entity["richDescription"], self.statusPublic.rich_description)
+        self.assertEqual(entity["group"], None)
+        self.assertEqual(entity["owner"]["guid"], self.authenticated_user.guid)
+        self.assertEqual(entity["timeCreated"], self.statusPublic.created_at.isoformat())
 
     def test_edit_status_update_by_admin(self):
-
         variables = self.data
         variables["input"]["timeCreated"] = "2018-12-10T23:00:00.000Z"
         variables["input"]["groupGuid"] = self.group.guid
         variables["input"]["ownerGuid"] = self.user2.guid
 
-        request = HttpRequest()
-        request.user = self.admin
+        self.graphql_client.force_login(self.admin)
+        result = self.graphql_client.post(self.mutation, variables)
 
-        result = graphql_sync(schema, { "query": self.mutation, "variables": variables }, context_value={ "request": request })
-
-        data = result[1]["data"]
-
-        self.assertEqual(data["editEntity"]["entity"]["title"], variables["input"]["title"])
-        self.assertEqual(data["editEntity"]["entity"]["richDescription"], variables["input"]["richDescription"])
-        self.assertEqual(data["editEntity"]["entity"]["group"]["guid"], self.group.guid)
-        self.assertEqual(data["editEntity"]["entity"]["owner"]["guid"], self.user2.guid)
-        self.assertEqual(data["editEntity"]["entity"]["timeCreated"], "2018-12-10T23:00:00+00:00")
-
+        entity = result['data']['editEntity']['entity']
+        self.assertEqual(entity["title"], variables["input"]["title"])
+        self.assertEqual(entity["richDescription"], variables["input"]["richDescription"])
+        self.assertEqual(entity["group"]["guid"], self.group.guid)
+        self.assertEqual(entity["owner"]["guid"], self.user2.guid)
+        self.assertEqual(entity["timeCreated"], "2018-12-10T23:00:00+00:00")
 
         self.statusPublic.refresh_from_db()
 
-        self.assertEqual(data["editEntity"]["entity"]["title"], self.statusPublic.title)
-        self.assertEqual(data["editEntity"]["entity"]["richDescription"], self.statusPublic.rich_description)
-        self.assertEqual(data["editEntity"]["entity"]["group"]["guid"], self.group.guid)
-        self.assertEqual(data["editEntity"]["entity"]["owner"]["guid"], self.user2.guid)
-        self.assertEqual(data["editEntity"]["entity"]["timeCreated"], "2018-12-10T23:00:00+00:00")
-
+        self.assertEqual(entity["title"], self.statusPublic.title)
+        self.assertEqual(entity["richDescription"], self.statusPublic.rich_description)
+        self.assertEqual(entity["group"]["guid"], self.group.guid)
+        self.assertEqual(entity["owner"]["guid"], self.user2.guid)
+        self.assertEqual(entity["timeCreated"], "2018-12-10T23:00:00+00:00")
 
     def test_edit_status_update_group_null_by_admin(self):
-
         variables = self.data
         variables["input"]["groupGuid"] = self.group.guid
 
-        request = HttpRequest()
-        request.user = self.admin
+        self.graphql_client.force_login(self.admin)
+        result = self.graphql_client.post(self.mutation, variables)
 
-        result = graphql_sync(schema, { "query": self.mutation, "variables": variables }, context_value={ "request": request })
-
-        data = result[1]["data"]
-
-        self.assertEqual(data["editEntity"]["entity"]["group"]["guid"], self.group.guid)
+        entity = result['data']['editEntity']['entity']
+        self.assertEqual(entity["group"]["guid"], self.group.guid)
 
         variables["input"]["groupGuid"] = None
-        result = graphql_sync(schema, { "query": self.mutation, "variables": variables }, context_value={ "request": request })
+        result = self.graphql_client.post(self.mutation, variables)
 
-        data = result[1]["data"]
-
-        self.assertEqual(data["editEntity"]["entity"]["group"], None)
+        entity = result['data']['editEntity']['entity']
+        self.assertEqual(entity["group"], None)

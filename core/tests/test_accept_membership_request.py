@@ -1,39 +1,21 @@
-from django.conf import settings
-from django.db import connection
-from django.test import override_settings
-from django.utils.text import slugify
-from django_tenants.test.cases import FastTenantTestCase
-from backend2.schema import schema
-from ariadne import graphql_sync
-import json
-from django.contrib.auth.models import AnonymousUser
-from django.http import HttpRequest
-from core.models import Group, GroupInvitation
-from user.models import User
+from core.models import Group
+from core.tests.helpers import PleioTenantTestCase
+from user.factories import UserFactory, AdminFactory
 from mixer.backend.django import mixer
-from graphql import GraphQLError
 from unittest import mock
 
-class AcceptMembershipRequestTestCase(FastTenantTestCase):
+
+class AcceptMembershipRequestTestCase(PleioTenantTestCase):
 
     def setUp(self):
-        self.anonymousUser = AnonymousUser()
-        self.user1 = mixer.blend(User)
-        self.user2 = mixer.blend(User)
-        self.user3 = mixer.blend(User)
-        self.admin = mixer.blend(User)
-        self.admin.roles = ['ADMIN']
-        self.admin.save()
+        super(AcceptMembershipRequestTestCase, self).setUp()
+
+        self.user1 = UserFactory()
+        self.user2 = UserFactory()
+        self.user3 = UserFactory()
+        self.admin = AdminFactory()
         self.group1 = mixer.blend(Group, owner=self.user1)
         self.group1.join(self.user2, 'pending')
-
-
-    def tearDown(self):
-        self.group1.delete()
-        self.admin.delete()
-        self.user3.delete()
-        self.user2.delete()
-        self.user1.delete()
 
     @mock.patch('core.resolvers.mutation_accept_membership_request.send_mail_multi.delay')
     def test_accept_group_access_request_by_group_owner(self, mocked_send_mail_multi):
@@ -65,23 +47,14 @@ class AcceptMembershipRequestTestCase(FastTenantTestCase):
             "input": {
                 "userGuid": self.user2.guid,
                 "groupGuid": self.group1.guid
-                }
             }
+        }
 
-        request = HttpRequest()
-        request.user = self.user1
+        self.graphql_client.force_login(self.user1)
+        result = self.graphql_client.post(mutation, variables)
 
-        result = graphql_sync(schema, {"query": mutation, "variables": variables}, context_value={ "request": request })
-
-        self.assertTrue(result[0])
-        data = result[1]["data"]
-
-        link = "https://tenant.fast-test.com" + "/groups/view/{}/{}".format(self.group1.guid, slugify(self.group1.name))
-        subject = f"Toegangsaanvraag voor de groep {self.group1.name} goedgekeurd"
-        user_url = 'https://tenant.fast-test.com' + self.user1.url
-
-        self.assertEqual(data["acceptMembershipRequest"]["group"]["guid"], self.group1.guid)
-        assert mocked_send_mail_multi.called_once()
+        self.assertEqual(result["data"]["acceptMembershipRequest"]["group"]["guid"], self.group1.guid)
+        mocked_send_mail_multi.assert_called_once()
 
     @mock.patch('core.resolvers.mutation_accept_membership_request.send_mail_multi.delay')
     def test_accept_group_access_request_by_admin(self, mocked_send_mail_multi):
@@ -113,23 +86,14 @@ class AcceptMembershipRequestTestCase(FastTenantTestCase):
             "input": {
                 "userGuid": self.user2.guid,
                 "groupGuid": self.group1.guid
-                }
             }
+        }
 
-        request = HttpRequest()
-        request.user = self.admin
+        self.graphql_client.force_login(self.admin)
+        result = self.graphql_client.post(mutation, variables)
 
-        result = graphql_sync(schema, {"query": mutation, "variables": variables}, context_value={ "request": request })
-
-        self.assertTrue(result[0])
-        data = result[1]["data"]
-
-        link = "https://tenant.fast-test.com" + "/groups/view/{}/{}".format(self.group1.guid, slugify(self.group1.name))
-        subject = f"Toegangsaanvraag voor de groep {self.group1.name} goedgekeurd"
-        user_url = 'https://tenant.fast-test.com' + self.admin.url
-
-        self.assertEqual(data["acceptMembershipRequest"]["group"]["guid"], self.group1.guid)
-        assert mocked_send_mail_multi.called_once()
+        self.assertEqual(result["data"]["acceptMembershipRequest"]["group"]["guid"], self.group1.guid)
+        mocked_send_mail_multi.assert_called_once()
 
     @mock.patch('core.resolvers.mutation_accept_membership_request.send_mail_multi')
     def test_accept_group_access_request_by_other_user(self, mocked_send_mail_multi):
@@ -161,18 +125,13 @@ class AcceptMembershipRequestTestCase(FastTenantTestCase):
             "input": {
                 "userGuid": self.user2.guid,
                 "groupGuid": self.group1.guid
-                }
             }
+        }
 
-        request = HttpRequest()
-        request.user = self.user3
+        with self.assertGraphQlError("could_not_save"):
+            self.graphql_client.force_login(self.user3)
+            self.graphql_client.post(mutation, variables)
 
-        result = graphql_sync(schema, {"query": mutation, "variables": variables}, context_value={ "request": request })
-
-        self.assertTrue(result[0])
-        errors = result[1]["errors"]
-
-        self.assertEqual(errors[0]["message"], "could_not_save")
         assert not mocked_send_mail_multi.called
 
     @mock.patch('core.resolvers.mutation_accept_membership_request.send_mail_multi')
@@ -205,16 +164,10 @@ class AcceptMembershipRequestTestCase(FastTenantTestCase):
             "input": {
                 "userGuid": self.user2.guid,
                 "groupGuid": self.group1.guid
-                }
             }
+        }
 
-        request = HttpRequest()
-        request.user = self.anonymousUser
+        with self.assertGraphQlError('not_logged_in'):
+            self.graphql_client.post(mutation, variables)
 
-        result = graphql_sync(schema, {"query": mutation, "variables": variables}, context_value={ "request": request })
-
-        self.assertTrue(result[0])
-        errors = result[1]["errors"]
-
-        self.assertEqual(errors[0]["message"], "not_logged_in")
         assert not mocked_send_mail_multi.called
