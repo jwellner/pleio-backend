@@ -31,6 +31,9 @@ pylint:
     - line-too-long
     - unnecessary-comprehension
     - use-dict-literal
+    # The later is a solution for the former:
+    - cyclic-import
+    - import-outside-toplevel
 pycodestyle:
   run: true
   disable:

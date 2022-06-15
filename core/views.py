@@ -623,7 +623,7 @@ def get_url_qr(request, entity_id=None):
     except ObjectDoesNotExist:
         raise Http404("Event not found")
 
-    url = get_url(entity, request)
+    url = get_url(entity)
     if hasattr(entity, 'title') and entity.title:
         filename = slugify(entity.title)[:248].removesuffix("-")
     else:

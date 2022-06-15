@@ -1,22 +1,20 @@
-from django_tenants.test.cases import FastTenantTestCase
-
 from cms.models import Page
 from core.models import Group, Comment
-from user.models import User
+from core.tests.helpers import PleioTenantTestCase
+from user.factories import UserFactory
 from blog.models import Blog
 from event.models import Event
 from core.constances import ACCESS_TYPE
-from backend2.schema import schema
-from ariadne import graphql_sync
-from django.http import HttpRequest
 from mixer.backend.django import mixer
 
 
-class ActivitiesTestCase(FastTenantTestCase):
+class ActivitiesTestCase(PleioTenantTestCase):
 
     def setUp(self):
-        self.user1 = mixer.blend(User)
-        self.user2 = mixer.blend(User)
+        super(ActivitiesTestCase, self).setUp()
+
+        self.user1 = UserFactory()
+        self.user2 = UserFactory()
         self.group1 = mixer.blend(Group, owner=self.user1)
         self.group2 = mixer.blend(Group, owner=self.user2, is_closed=True)
         self.group1.join(self.user1, 'owner')
@@ -171,13 +169,8 @@ class ActivitiesTestCase(FastTenantTestCase):
         self.blog4.delete()
         self.group1.delete()
         self.group2.delete()
-        self.user1.delete()
-        self.user2.delete()
 
     def test_activities_group_filter_all(self):
-        request = HttpRequest()
-        request.user = self.user1
-
         variables = {
             "groupFilter": ["all"],
             "limit": 20,
@@ -192,18 +185,12 @@ class ActivitiesTestCase(FastTenantTestCase):
             write_access=[ACCESS_TYPE.user.format(self.user2.id)],
             group=self.group2
         )
-        result = graphql_sync(schema, {"query": self.query, "variables": variables}, context_value={"request": request})
+        self.graphql_client.force_login(self.user1)
+        result = self.graphql_client.post(self.query, variables)
 
-        self.assertTrue(result[0])
-
-        data = result[1]["data"]
-
-        self.assertEqual(data["activities"]["total"], 47)
+        self.assertEqual(result["data"]["activities"]["total"], 47)
 
     def test_activities_group_filter_mine(self):
-        request = HttpRequest()
-        request.user = self.user1
-
         variables = {
             "groupFilter": ["mine"],
             "limit": 20,
@@ -212,18 +199,12 @@ class ActivitiesTestCase(FastTenantTestCase):
             "tags": []
         }
 
-        result = graphql_sync(schema, {"query": self.query, "variables": variables}, context_value={"request": request})
+        self.graphql_client.force_login(self.user1)
+        result = self.graphql_client.post(self.query, variables)
 
-        self.assertTrue(result[0])
-
-        data = result[1]["data"]
-
-        self.assertEqual(data["activities"]["total"], 1)
+        self.assertEqual(result["data"]["activities"]["total"], 1)
 
     def test_activities_taglists_filter(self):
-        request = HttpRequest()
-        request.user = self.user2
-
         variables = {
             "limit": 20,
             "offset": 0,
@@ -232,18 +213,12 @@ class ActivitiesTestCase(FastTenantTestCase):
             "tagLists": [["tag_one", "tag_three"], ["tag_two"]]
         }
 
-        success, result = graphql_sync(schema, {"query": self.query, "variables": variables}, context_value={"request": request})
+        self.graphql_client.force_login(self.user2)
+        result = self.graphql_client.post(self.query, variables)
 
-        self.assertIsNone(result.get('errors'))
-
-        data = result.get("data")
-
-        self.assertEqual(data["activities"]["total"], 2)
+        self.assertEqual(result["data"]["activities"]["total"], 2)
 
     def test_activities_show_pinned(self):
-        request = HttpRequest()
-        request.user = self.user2
-
         variables = {
             "limit": 20,
             "offset": 0,
@@ -252,18 +227,12 @@ class ActivitiesTestCase(FastTenantTestCase):
             "sortPinned": True
         }
 
-        result = graphql_sync(schema, {"query": self.query, "variables": variables}, context_value={"request": request})
+        self.graphql_client.force_login(self.user2)
+        result = self.graphql_client.post(self.query, variables)
 
-        self.assertTrue(result[0])
-
-        data = result[1]["data"]
-
-        self.assertEqual(data["activities"]["edges"][0]["entity"]["guid"], self.blog5.guid)
+        self.assertEqual(result["data"]["activities"]["edges"][0]["entity"]["guid"], self.blog5.guid)
 
     def test_activities_last_action(self):
-        request = HttpRequest()
-        request.user = self.user2
-
         variables = {
             "limit": 20,
             "offset": 0,
@@ -272,13 +241,10 @@ class ActivitiesTestCase(FastTenantTestCase):
             "orderBy": "lastAction"
         }
 
-        result = graphql_sync(schema, {"query": self.query, "variables": variables}, context_value={"request": request})
+        self.graphql_client.force_login(self.user2)
+        result = self.graphql_client.post(self.query, variables)
 
-        self.assertTrue(result[0])
-
-        data = result[1]["data"]
-
-        self.assertEqual(data["activities"]["edges"][0]["entity"]["guid"], self.blog1.guid)
+        self.assertEqual(result["data"]["activities"]["edges"][0]["entity"]["guid"], self.blog1.guid)
 
     def test_activities_no_subevents(self):
         event = Event.objects.create(
@@ -307,16 +273,11 @@ class ActivitiesTestCase(FastTenantTestCase):
             "containerGuid": None,
             "orderBy": "timeCreated"
         }
-        request = HttpRequest()
-        request.user = self.user2
 
-        result = graphql_sync(schema, {"query": self.query, "variables": variables}, context_value={"request": request})
+        self.graphql_client.force_login(self.user2)
+        result = self.graphql_client.post(self.query, variables)
 
-        self.assertTrue(result[0])
-
-        data = result[1]["data"]
-
-        self.assertEqual(data["activities"]["edges"][0]["entity"]["guid"], event.guid)
+        self.assertEqual(result["data"]["activities"]["edges"][0]["entity"]["guid"], event.guid)
 
     def test_query_cms_textpages_explicit_subtypes(self):
         query = """
@@ -337,10 +298,8 @@ class ActivitiesTestCase(FastTenantTestCase):
             "subtypes": ['page'],
         }
 
-        request = HttpRequest()
-        request.user = self.user1
-        success, result = graphql_sync(schema, {"query": query, "variables": variables},
-                                       context_value={"request": request})
+        self.graphql_client.force_login(self.user1)
+        result = self.graphql_client.post(query, variables)
 
         titles = [e['entity']['title'] for e in result['data']['activities']['edges']]
         self.assertIn(self.textPage.title, titles, msg="Should contain textpage cms pages")
@@ -361,9 +320,8 @@ class ActivitiesTestCase(FastTenantTestCase):
         }
         """
 
-        request = HttpRequest()
-        request.user = self.user1
-        success, result = graphql_sync(schema, {"query": query, "variables": {}}, context_value={"request": request})
+        self.graphql_client.force_login(self.user1)
+        result = self.graphql_client.post(query, {})
 
         titles = [e['entity'].get('title') for e in result['data']['activities']['edges']]
         self.assertIn(self.textPage.title, titles, msg="Should contain textpage cms pages")

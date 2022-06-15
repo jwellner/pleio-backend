@@ -188,6 +188,7 @@ def resolve_edit_site_setting(_, info, input):
         'idpId': 'IDP_ID',
         'idpName': 'IDP_NAME',
         'autoApproveSSO': 'AUTO_APPROVE_SSO',
+        'require2FA': 'REQUIRE_2FA',
 
         'flowEnabled': 'FLOW_ENABLED',
         'flowSubtypes': 'FLOW_SUBTYPES',

@@ -93,12 +93,12 @@ class Manager(BaseUserManager):
 
         return user
 
-    def get_filtered_users(self, q=None, role=None, isDeleteRequested=None, isBanned=False, last_online_before=None):
+    def get_filtered_users(self, q=None, role=None, is_delete_requested=None, is_banned=False, last_online_before=None, member_since=None):
         # pylint: disable=too-many-arguments
 
         users = User.objects.all().order_by('name')
 
-        if isBanned:
+        if is_banned:
             users = users.filter(is_active=False)
         else:
             users = users.filter(is_active=True)
@@ -117,8 +117,11 @@ class Manager(BaseUserManager):
             ROLE_FILTER = getattr(USER_ROLES, role.upper())
             users = users.filter(roles__contains=[ROLE_FILTER])
 
-        if isDeleteRequested is not None:
-            users = users.filter(is_delete_requested=isDeleteRequested)
+        if is_delete_requested is not None:
+            users = users.filter(is_delete_requested=is_delete_requested)
+
+        if member_since is not None:
+            users = users.filter(created_at__gte=member_since)
 
         return users
 
@@ -162,7 +165,7 @@ class Manager(BaseUserManager):
         )
 
         ids = []
-        selection = user_profile_fields[offset:offset+limit]
+        selection = user_profile_fields[offset:offset + limit]
         for item in selection:
             ids.append(item.user_profile.user.guid)
 
@@ -329,6 +332,7 @@ class User(AbstractBaseUser):
         self.save()
 
         return True
+
 
 @receiver(post_save, sender=User)
 def create_user_profile(sender, instance, created, **kwargs):

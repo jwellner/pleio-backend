@@ -219,6 +219,12 @@ def resolve_vcard(obj, info):
                   [obj.profile.profile_field_value(field, info.context["request"].user) for field in profile_fields])
 
 
+@user.field("memberSince")
+def resolve_created_at(obj, info):
+    # pylint: disable=unused-argument
+    return obj.created_at
+
+
 @user.field('missingProfileFields')
 def resolve_missing_profile_fields(obj, info, groupGuid):
     # pylint: disable=unused-argument

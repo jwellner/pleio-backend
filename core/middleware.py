@@ -7,7 +7,7 @@ from django.urls import get_script_prefix, is_valid_path, resolve
 from django.utils import timezone, translation
 from django.utils.cache import patch_vary_headers
 from django.utils.deprecation import MiddlewareMixin
-from django.shortcuts import redirect
+from django.shortcuts import redirect, render
 from django.contrib.auth import logout
 
 from django.template.response import TemplateResponse
@@ -256,3 +256,23 @@ class CustomCSPMiddleware:
             response._csp_update = {'img-src': config.CSP_HEADER_EXCEPTIONS, 'frame-src': config.CSP_HEADER_EXCEPTIONS}
 
         return response
+
+
+class AcrCheckMiddleware:
+    def __init__(self, get_response):
+        self.get_response = get_response
+
+    def __call__(self, request):
+        if (
+            config.REQUIRE_2FA
+            and request.user.is_authenticated
+            and not request.user.has_2fa_enabled
+        ):
+            logout(request)
+
+            context = {
+                'endpoint_2fa': settings.ENDPOINT_2FA,
+            }
+            return TemplateResponse(request, 'registration/2fa_required.html', context, status=403).render()
+
+        return self.get_response(request)

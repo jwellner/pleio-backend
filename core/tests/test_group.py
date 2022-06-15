@@ -1,13 +1,13 @@
+from unittest import mock
+
 from core.models import Group, GroupInvitation
 from core.tests.helpers import PleioTenantTestCase
+from user.factories import UserFactory
 from user.models import User
 from file.models import FileFolder
 from core.constances import ACCESS_TYPE
-from backend2.schema import schema
-from ariadne import graphql_sync
-from django.contrib.auth.models import AnonymousUser
-from django.http import HttpRequest
 from mixer.backend.django import mixer
+
 
 class GroupTestCase(PleioTenantTestCase):
 
@@ -77,23 +77,17 @@ class GroupTestCase(PleioTenantTestCase):
                 }
             }
         """
-        request = HttpRequest()
-        request.user = self.authenticatedUser
-
         variables = {
             "guid": self.group.guid
         }
 
-        result = graphql_sync(schema, { "query": query, "variables": variables }, context_value={ "request": request })
+        self.graphql_client.force_login(self.authenticatedUser)
+        result = self.graphql_client.post(query, variables)
 
-        self.assertTrue(result[0])
-
-        data = result[1]["data"]
-
+        data = result["data"]
         self.assertEqual(data["entity"]["guid"], self.group.guid)
         self.assertEqual(data["entity"]["invited"]["total"], 2)
         self.assertEqual(len(data["entity"]["invited"]["edges"]), 1)
-
 
     def test_entity_group_invite_list(self):
         query = """
@@ -122,20 +116,15 @@ class GroupTestCase(PleioTenantTestCase):
                 }
             }
         """
-        request = HttpRequest()
-        request.user = self.authenticatedUser
-
         variables = {
             "guid": self.group.guid,
             "q": ""
         }
 
-        result = graphql_sync(schema, { "query": query, "variables": variables }, context_value={ "request": request })
+        self.graphql_client.force_login(self.authenticatedUser)
+        result = self.graphql_client.post(query, variables)
 
-        self.assertTrue(result[0])
-
-        data = result[1]["data"]
-
+        data = result["data"]
         self.assertEqual(data["entity"]["guid"], self.group.guid)
         self.assertEqual(data["entity"]["__typename"], "Group")
         self.assertEqual(data["entity"]["invite"]["total"], 3)
@@ -168,20 +157,15 @@ class GroupTestCase(PleioTenantTestCase):
                 }
             }
         """
-        request = HttpRequest()
-        request.user = self.authenticatedUser
-
         variables = {
             "guid": self.group.guid,
             "q": "DFWETCCVSDFFSDGSER43254457453tqertq345"
         }
 
-        result = graphql_sync(schema, { "query": query, "variables": variables }, context_value={ "request": request })
+        self.graphql_client.force_login(self.authenticatedUser)
+        result = self.graphql_client.post(query, variables)
 
-        self.assertTrue(result[0])
-
-        data = result[1]["data"]
-
+        data = result["data"]
         self.assertEqual(data["entity"]["guid"], self.group.guid)
         self.assertEqual(data["entity"]["__typename"], "Group")
         self.assertEqual(data["entity"]["invite"]["total"], 0)
@@ -209,24 +193,18 @@ class GroupTestCase(PleioTenantTestCase):
                 }
             }
         """
-        request = HttpRequest()
-        request.user = self.authenticatedUser
-
         variables = {
             "guid": self.group.guid
         }
 
-        result = graphql_sync(schema, { "query": query, "variables": variables }, context_value={ "request": request })
+        self.graphql_client.force_login(self.authenticatedUser)
+        result = self.graphql_client.post(query, variables)
 
-        self.assertTrue(result[0])
-
-        data = result[1]["data"]
-
+        data = result["data"]
         self.assertEqual(data["entity"]["guid"], self.group.guid)
         self.assertEqual(data["entity"]["__typename"], "Group")
         self.assertEqual(data["entity"]["membershipRequests"]["total"], 1)
         self.assertEqual(data["entity"]["membershipRequests"]["edges"][0]["guid"], self.user3.guid)
-
 
     def test_entity_group_memberlist(self):
         query = """
@@ -253,19 +231,14 @@ class GroupTestCase(PleioTenantTestCase):
             }
 
         """
-        request = HttpRequest()
-        request.user = self.authenticatedUser
-
         variables = {
             "guid": self.group.guid
         }
 
-        result = graphql_sync(schema, { "query": query, "variables": variables }, context_value={ "request": request })
+        self.graphql_client.force_login(self.authenticatedUser)
+        result = self.graphql_client.post(query, variables)
 
-        self.assertTrue(result[0])
-
-        data = result[1]["data"]
-
+        data = result["data"]
         self.assertEqual(data["entity"]["guid"], self.group.guid)
         self.assertEqual(data["entity"]["members"]["total"], 4)
         self.assertEqual(len(data["entity"]["members"]["edges"]), 4)
@@ -283,19 +256,14 @@ class GroupTestCase(PleioTenantTestCase):
             }
 
         """
-        request = HttpRequest()
-        request.user = self.user5
-
         variables = {
             "guid": self.group.guid
         }
 
-        result = graphql_sync(schema, { "query": query, "variables": variables }, context_value={ "request": request })
+        self.graphql_client.force_login(self.user5)
+        result = self.graphql_client.post(query, variables)
 
-        self.assertTrue(result[0])
-
-        data = result[1]["data"]
-
+        data = result["data"]
         self.assertEqual(data["entity"]["introduction"], "")
 
     def test_group_can_change_ownership_member_owner(self):
@@ -310,21 +278,14 @@ class GroupTestCase(PleioTenantTestCase):
             }
 
         """
-        request = HttpRequest()
-        request.user = self.authenticatedUser
-
         variables = {
             "guid": self.group.guid
         }
 
-        success, result = graphql_sync(schema, { "query": query, "variables": variables }, context_value={ "request": request })
-
-        self.assertTrue(success)
-        self.assertNotIn('errors', result, msg=result.get('errors'))
-        self.assertIn('data', result, msg=result)
+        self.graphql_client.force_login(self.authenticatedUser)
+        result = self.graphql_client.post(query, variables)
 
         data = result["data"]
-
         self.assertEqual(data["entity"]["canChangeOwnership"], True)
         self.assertEqual(data["entity"]["memberRole"], 'owner')
 
@@ -340,21 +301,14 @@ class GroupTestCase(PleioTenantTestCase):
             }
 
         """
-        request = HttpRequest()
-        request.user = self.user4
-
         variables = {
             "guid": self.group.guid
         }
 
-        success, result = graphql_sync(schema, { "query": query, "variables": variables }, context_value={ "request": request })
-
-        self.assertTrue(success)
-        self.assertNotIn('errors', result, msg=result.get('errors'))
-        self.assertIn('data', result, msg=result)
+        self.graphql_client.force_login(self.user4)
+        result = self.graphql_client.post(query, variables)
 
         data = result["data"]
-
         self.assertEqual(data["entity"]["canChangeOwnership"], False)
         self.assertEqual(data["entity"]["memberRole"], 'admin')
 
@@ -370,20 +324,14 @@ class GroupTestCase(PleioTenantTestCase):
             }
 
         """
-        request = HttpRequest()
-        request.user = self.userAdmin
-
         variables = {
             "guid": self.group.guid
         }
 
-        success, result = graphql_sync(schema, { "query": query, "variables": variables }, context_value={ "request": request })
-
-        self.assertNotIn('errors', result, msg=result.get('errors'))
-        self.assertIn('data', result, msg=result)
+        self.graphql_client.force_login(self.userAdmin)
+        result = self.graphql_client.post(query, variables)
 
         data = result["data"]
-
         self.assertEqual(data["entity"]["canChangeOwnership"], True)
         self.assertEqual(data["entity"]["memberRole"], None)
 
@@ -429,6 +377,7 @@ class GroupTestCase(PleioTenantTestCase):
         self.assertEqual(result['data']['entity']['memberRole'], 'pending')
 
     inaccessible_field = ["members", "invite", "invited", "membershipRequests"]
+
     def test_unaccessible_data_for_unauthenticated_user(self):
         for field in self.inaccessible_field:
             with self.subTest():
@@ -451,3 +400,47 @@ class GroupTestCase(PleioTenantTestCase):
 
                 self.assertEqual(result["data"]["entity"][field]["total"], 0)
 
+    def test_join_a_group_triggers_refresh_index(self):
+        query = """
+        mutation AddMemberToGroup($input: joinGroupInput!) {
+            joinGroup(input: $input) {
+                group {
+                    memberRole
+                }
+            }
+        }
+        """
+
+        user = UserFactory()
+        self.graphql_client.force_login(user)
+
+        with mock.patch('core.elasticsearch.schedule_index_document') as index_document:
+            result = self.graphql_client.post(query, {'input': {
+                'guid': self.group.guid
+            }})
+
+            self.assertEqual(result['data']['joinGroup']['group']['memberRole'], 'member')
+            assert index_document.called_with(user)
+
+    def test_leave_a_group_triggers_refresh_index(self):
+        query = """
+        mutation RemoveMemberToGroup($input: leaveGroupInput!) {
+            leaveGroup(input: $input) {
+                group {
+                    memberRole
+                }
+            }
+        }
+        """
+
+        user = UserFactory()
+        self.graphql_client.force_login(user)
+        self.group.join(user)
+
+        with mock.patch('core.elasticsearch.schedule_index_document') as index_document:
+            result = self.graphql_client.post(query, {'input': {
+                'guid': self.group.guid
+            }})
+
+            self.assertIsNone(result['data']['leaveGroup']['group']['memberRole'])
+            assert index_document.called_with(user)

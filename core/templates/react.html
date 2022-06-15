@@ -40,7 +40,7 @@
     {% endif %}
 </head>
 
-<body class="___{{ config.THEME }}">
+<body class="___{{ config.THEME }}"{% if request.user.is_authenticated %} data-authenticated-user="{{ request.user.email }}"{% endif %}>
 
     <noscript class="container">
         <section class="section">

@@ -15,6 +15,7 @@ def resolve_viewer(_, info):
             'isSubEditor': False,
             'isAdmin': False,
             'isBanned': banned,
+            'has2faEnabled': False,
             'tags': [],
             'user': {
                 'guid': '0'
@@ -27,5 +28,6 @@ def resolve_viewer(_, info):
         'isSubEditor': user.has_role(USER_ROLES.EDITOR) or user.has_role(USER_ROLES.ADMIN),
         'isAdmin': user.has_role(USER_ROLES.ADMIN),
         'isBanned': banned,
+        'has2faEnabled': user.has_2fa_enabled,
         'tags': []
     }

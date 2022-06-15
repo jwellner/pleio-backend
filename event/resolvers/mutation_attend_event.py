@@ -133,7 +133,7 @@ def resolve_attend_event(_, info, input):
         event.process_waitinglist()
 
     if event.qr_access and clean_input.get("state") == "accept":
-        send_event_qr(info, user.email, event, attendee)
+        send_event_qr(attendee)
 
     return {
         "entity": event

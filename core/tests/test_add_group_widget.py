@@ -1,30 +1,17 @@
-from django.db import connection
-from django_tenants.test.cases import FastTenantTestCase
-from backend2.schema import schema
-from ariadne import graphql_sync
-import json
-from django.contrib.auth.models import AnonymousUser
-from django.http import HttpRequest
 from core.models import Group
-from user.models import User
+from core.tests.helpers import PleioTenantTestCase
+from user.factories import UserFactory, AdminFactory
 from mixer.backend.django import mixer
-from graphql import GraphQLError
 
-class AddGroupWidgetTestCase(FastTenantTestCase):
+
+class AddGroupWidgetTestCase(PleioTenantTestCase):
 
     def setUp(self):
-        self.anonymousUser = AnonymousUser()
-        self.user1 = mixer.blend(User)
-        self.admin = mixer.blend(User)
-        self.admin.roles = ['ADMIN']
-        self.admin.save()
+        super(AddGroupWidgetTestCase, self).setUp()
+
+        self.user1 = UserFactory()
+        self.admin = AdminFactory()
         self.group = mixer.blend(Group, owner=self.user1)
-
-    def tearDown(self):
-        self.group.delete()
-        self.admin.delete()
-        self.user1.delete()
-
 
     def test_add_group_widget(self):
         mutation = """
@@ -54,12 +41,10 @@ class AddGroupWidgetTestCase(FastTenantTestCase):
             }
         }
 
-        request = HttpRequest()
-        request.user = self.user1
-        result = graphql_sync(schema, { "query": mutation, "variables": variables }, context_value={ "request": request })
+        self.graphql_client.force_login(self.user1)
+        result = self.graphql_client.post(mutation, variables)
 
-        data = result[1]["data"]
-
+        data = result["data"]
         self.assertIsNotNone(data["addGroupWidget"]["entity"]["guid"])
         self.assertEqual(data["addGroupWidget"]["entity"]["containerGuid"], self.group.guid)
         self.assertEqual(data["addGroupWidget"]["entity"]["parentGuid"], self.group.guid)
