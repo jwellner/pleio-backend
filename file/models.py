@@ -9,18 +9,19 @@ from django.conf import settings
 from django.db import models
 from django.utils import timezone
 from enum import Enum
-from core.lib import generate_object_filename, get_mimetype
+from core.lib import generate_object_filename, get_mimetype, tenant_schema, get_basename, get_filesize
 from core.models import Entity
 from core.models.mixin import ModelWithFile
 from core.models.image import ResizedImageMixin
 from django.db.models import ObjectDoesNotExist
-from django.db.models.signals import pre_save, pre_delete
+from django.db.models.signals import pre_save, pre_delete, post_save
 from django.dispatch import receiver
 from django.utils.text import slugify
 from django.core.files.base import ContentFile
 
 from core.utils.convert import tiptap_to_text
 from core.utils.access import get_read_access_weight, get_write_access_weight
+from file.validators import is_upload_complete
 
 logger = logging.getLogger(__name__)
 
@@ -198,14 +199,24 @@ def file_pre_save(sender, instance, **kwargs):
     instance.read_access_weight = get_read_access_weight(instance)
     instance.write_access_weight = get_write_access_weight(instance)
 
-    if instance.upload and not instance.title:
-        instance.title = instance.upload.file.name
     if instance.upload:
-        instance.mime_type = get_mimetype(instance.upload.path)
         try:
-            instance.size = instance.upload.size
-        except Exception:
+            if not instance.title:
+                instance.title = get_basename(instance.upload.path)
+            if not instance.mime_type:
+                instance.mime_type=get_mimetype(instance.upload.path)
+            if not instance.size:
+                instance.size=get_filesize(instance.upload.path)
+        except FileNotFoundError as e:
             pass
+
+
+@receiver(post_save, sender=FileFolder)
+def file_post_save(sender, instance, **kwargs):
+    # pylint: disable=unused-argument
+    if not is_upload_complete(instance):
+        from file.tasks import post_process_file_attributes
+        post_process_file_attributes.delay(tenant_schema(), str(instance.id))
 
 
 # update parent folders updated_at when adding, moving and deleting files
@@ -234,7 +245,6 @@ def cleanup_extra_file(sender, instance, **kwargs):
         os.unlink(f"{os.path.dirname(instance.upload.path)}/{instance.title}")
     except (FileNotFoundError, ValueError):
         pass
-
 
 
 auditlog.register(FileFolder)
