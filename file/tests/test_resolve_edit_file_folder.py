@@ -614,6 +614,31 @@ class EditFileFolderTestCase(PleioTenantTestCase):
         self.assertEqual(entity["accessId"], 2)
         self.assertEqual(entity["writeAccessId"], 0)
 
+    @patch('file.tasks.post_process_file_attributes.delay')
+    @patch('file.validators.is_upload_complete')
+    @patch("{}.open".format(settings.DEFAULT_FILE_STORAGE))
+    def test_retry_if_not_ok(self, mock_open, mock_is_upload_complete, mock_post_process_file_attributes):
+        file_mock = MagicMock(spec=File)
+        file_mock.name = 'icon-name.jpg'
+        file_mock.title = 'icon-name.jpg'
+        file_mock.content_type = 'image/jpeg'
+        file_mock.size = 123
+
+        mock_open.return_value = file_mock
+
+        mock_is_upload_complete.return_value = False
+
+        self.file = FileFolder.objects.create(
+            read_access=[ACCESS_TYPE.user.format(self.authenticatedUser.id)],
+            write_access=[ACCESS_TYPE.user.format(self.authenticatedUser.id)],
+            owner=self.authenticatedUser,
+            tags=["tag1", "tag2"],
+            upload=file_mock,
+            title=file_mock.title
+        )
+
+        assert mock_post_process_file_attributes.called
+
     @patch("core.lib.get_mimetype")
     @patch("{}.open".format(settings.DEFAULT_FILE_STORAGE))
     def test_get_download_filename(self, mock_open, mock_mimetype):

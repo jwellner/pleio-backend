@@ -447,6 +447,14 @@ def get_mimetype(filepath):
     return mime_type
 
 
+def get_basename(filepath):
+    return os.path.basename(filepath)
+
+
+def get_filesize(filepath):
+    return os.path.getsize(filepath)
+
+
 def map_notification(notification):
     """ get a mapped notification """
     entity = notification.action_object

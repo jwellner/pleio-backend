@@ -7,6 +7,7 @@ from core.lib import clean_graphql_input, access_id_to_acl
 from core.models import Group
 from core.resolvers import shared
 from user.models import User
+from ..helpers.post_processing import ensure_correct_file_without_signals
 from ..models import FileFolder, FILE_SCAN
 
 
@@ -115,6 +116,8 @@ def resolve_add_file(_, info, input):
 
     entity.save()
 
+    ensure_correct_file_without_signals(entity)
+
     return {
         "entity": entity
     }
@@ -218,7 +221,6 @@ def resolve_edit_file_folder(_, info, input):
 
     shared.update_publication_dates(entity, clean_input)
 
-
     if 'accessId' in clean_input:
         entity.read_access = access_id_to_acl(entity, clean_input.get("accessId"))
 
@@ -235,6 +237,8 @@ def resolve_edit_file_folder(_, info, input):
                                  full_recursive=clean_input.get('ownerGuidRecursive') == 'updateAllFiles')
 
     entity.save()
+
+    ensure_correct_file_without_signals(entity)
 
     return {
         "entity": entity
