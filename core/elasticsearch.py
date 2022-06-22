@@ -1,5 +1,6 @@
 import logging
 
+from django.apps import apps
 from django.db import models
 from django.conf import settings
 from django_elasticsearch_dsl.registries import registry
@@ -17,10 +18,13 @@ class CustomSignalProcessor(BaseSignalProcessor):
         """Overwrite default handle_save and stop raising exception on error
         """
         try:
-            instance = maybe_index_instance(instance)
-            if instance.__class__ in registry.get_models():
+            if isinstance(instance, apps.get_model('file.FileFolder')) and instance.group:
                 schedule_index_document(instance)
+            else:
+                registry.update(instance)
+                registry.update_related(instance)
         except Exception as e:
+            retry_index_document(instance)
             logger.error("Error sending update task: %s", e)
 
     def handle_pre_delete(self, sender, instance, **kwargs):
@@ -35,9 +39,7 @@ class CustomSignalProcessor(BaseSignalProcessor):
         """Overwrite default handle_pre_delete and stop raising exception on error
         """
         try:
-            instance = maybe_index_instance(instance)
-            if instance.__class__ in registry.get_models():
-                schedule_index_document(instance)
+            registry.delete(instance)
         except Exception as e:
             logger.error("Error updating elasticsearch: %s", e)
 
@@ -60,7 +62,13 @@ class CustomSignalProcessor(BaseSignalProcessor):
             models.signals.pre_delete.disconnect(self.handle_pre_delete)
 
 
-def maybe_index_instance(instance):
+def retry_index_document(instance):
+    instance = parent_or_self(instance)
+    if instance.__class__ in registry.get_models():
+        schedule_index_document(instance)
+
+
+def parent_or_self(instance):
     try:
         return instance.index_instance()
     except AttributeError:
