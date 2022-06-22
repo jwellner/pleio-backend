@@ -114,8 +114,8 @@ class Command(BaseCommand):
                 featured_entities = Entity.objects.visible(user)
                 featured_entities = featured_entities.filter(Q(is_recommended=True) | Q(is_featured=True))
                 featured_entities = featured_entities.filter(published__gte=lower_bound)
-                featured_entities = featured_entities[:3]
                 featured_entities = featured_entities.select_subclasses()
+                featured_entities = featured_entities[:3]
 
             # get the not featured entities
             entities = Entity.objects.visible(user)
@@ -139,7 +139,7 @@ class Command(BaseCommand):
             )
             if config.EMAIL_OVERVIEW_ENABLE_FEATURED:
                 entities = entities.exclude(
-                    id__in=featured_entities.values_list('id', flat=True)
+                    id__in=[e.guid for e in featured_entities]
                 )
             entities = entities.select_subclasses()
 
