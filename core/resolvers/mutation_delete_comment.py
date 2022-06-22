@@ -12,13 +12,18 @@ def resolve_delete_comment(_, info, input):
 
     try:
         comment = Comment.objects.get(id=input.get("guid"))
+        container = comment.get_root_container()
     except ObjectDoesNotExist:
         raise GraphQLError(COULD_NOT_FIND)
 
     if not comment.can_write(user):
         raise GraphQLError(COULD_NOT_SAVE)
 
+
     comment.delete()
+
+    # trigger index update.
+    container.save()
 
     return {
         'success': True

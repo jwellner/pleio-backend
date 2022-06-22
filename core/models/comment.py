@@ -56,6 +56,9 @@ class Comment(VoteMixin, MentionMixin, AttachmentMixin, CommentMixin):
             return self.get_root_container(parent.container)
         return parent
 
+    def index_instance(self):
+        return self.get_root_container()
+
     @property
     def guid(self):
         return str(self.id)
