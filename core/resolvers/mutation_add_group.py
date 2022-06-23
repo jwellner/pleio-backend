@@ -14,8 +14,7 @@ def resolve_add_group(_, info, input):
 
     user = info.context["request"].user
 
-    if not user.is_authenticated:
-        raise GraphQLError(NOT_LOGGED_IN)
+    shared.assert_authenticated(user)
 
     if config.LIMITED_GROUP_ADD and not user.has_role(USER_ROLES.ADMIN):
         raise GraphQLError(COULD_NOT_SAVE)

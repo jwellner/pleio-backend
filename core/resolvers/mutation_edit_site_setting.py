@@ -1,25 +1,27 @@
 import ipaddress
 
+from django.core.cache import cache
+from django.db import connection
+from django.utils import timezone
+from django.utils.translation import ugettext_lazy
 from django_tenants.utils import parse_tenant_config_path
 from graphql import GraphQLError
+
 from core import config
-from core.models import Setting, ProfileField
+from core.constances import (COULD_NOT_SAVE, INVALID_VALUE,
+                             REDIRECTS_HAS_DUPLICATE_SOURCE,
+                             REDIRECTS_HAS_LOOP)
+from core.lib import (access_id_to_acl, clean_graphql_input,
+                      get_default_email_context, get_language_options,
+                      is_valid_domain, is_valid_url_or_path, tenant_schema)
+from core.models import ProfileField, Setting
 from core.models.user import validate_profile_sections
-from core.constances import (
-    COULD_NOT_SAVE, INVALID_VALUE, NOT_LOGGED_IN, REDIRECTS_HAS_DUPLICATE_SOURCE,
-    REDIRECTS_HAS_LOOP, USER_NOT_SITE_ADMIN, USER_ROLES )
-from core.lib import (
-    clean_graphql_input, access_id_to_acl, is_valid_domain, is_valid_url_or_path, get_language_options,
-    tenant_schema, get_default_email_context )
+from core.resolvers import shared
 from core.resolvers.query_site import get_site_settings
 from core.tasks import send_mail_multi
-from user.models import User
-from django.db import connection
-from django.core.cache import cache
-from django.utils.translation import ugettext_lazy
 from file.helpers.images import resize_and_save_as_png
 from file.models import FileFolder
-from django.utils import timezone
+from user.models import User
 
 
 def get_or_create_profile_field(test_key, initial_name):
@@ -96,11 +98,8 @@ def resolve_edit_site_setting(_, info, input):
     user = info.context["request"].user
     clean_input = clean_graphql_input(input)
 
-    if not user.is_authenticated:
-        raise GraphQLError(NOT_LOGGED_IN)
-
-    if not user.has_role(USER_ROLES.ADMIN):
-        raise GraphQLError(USER_NOT_SITE_ADMIN)
+    shared.assert_authenticated(user)
+    shared.assert_administrator(user)
 
     setting_keys = {
         'language': 'LANGUAGE',
@@ -208,10 +207,34 @@ def resolve_edit_site_setting(_, info, input):
 
     }
 
-    for k, v in setting_keys.items():
-        if k in clean_input:
-            save_setting(v, clean_input.get(k))
+    resolve_update_keys(setting_keys, clean_input)
+    resolve_update_menu(clean_input)
+    resolve_update_profile(clean_input)
+    resolve_update_redirects(clean_input)
+    resolve_update_logo(user, clean_input)
+    resolve_update_remove_logo(clean_input)
+    resolve_update_icon(user, clean_input)
+    resolve_update_remove_icon(clean_input)
+    resolve_update_favicon(user, clean_input)
+    resolve_update_remove_favicon(clean_input)
+    resolve_update_direct_registration_domains(clean_input)
+    resolve_update_profile_sections(clean_input)
+    resolve_update_custom_css(clean_input)
+    resolve_update_walled_garden_by_ip_enabled(clean_input)
+    resolve_update_white_listed_ip_ranges(clean_input)
+    resolve_update_extra_languages(clean_input)    
+    resolve_update_file_description_field_enabled(clean_input)
+    resolve_update_is_closed(user, clean_input)
 
+    resolve_sync_sitename(clean_input)
+
+    return {
+        "siteSettings": get_site_settings()
+    }
+
+# Sub-resolvers:
+
+def resolve_update_menu(clean_input):
     if 'menu' in clean_input:
         menu = []
         for item in clean_input.get('menu'):
@@ -219,6 +242,7 @@ def resolve_edit_site_setting(_, info, input):
                 menu.append(get_menu_item(clean_input.get('menu'), item))
         save_setting('MENU', menu)
 
+def resolve_update_profile(clean_input):
     if 'profile' in clean_input:
         for field in clean_input.get('profile'):
             profile_field = get_or_create_profile_field(field['key'], field['name'])
@@ -230,10 +254,12 @@ def resolve_edit_site_setting(_, info, input):
 
         save_setting('PROFILE', clean_input.get('profile'))
 
+def resolve_update_redirects(clean_input):
     if 'redirects' in clean_input:
         redirects = validate_redirects(clean_input.get('redirects'))
         save_setting('REDIRECTS', redirects)
 
+def resolve_update_logo(user, clean_input):
     if 'logo' in clean_input:
         if not clean_input.get("logo"):
             raise GraphQLError("NO_FILE")
@@ -251,6 +277,7 @@ def resolve_edit_site_setting(_, info, input):
 
         save_setting('LOGO', logo.embed_url)
 
+def resolve_update_remove_logo(clean_input):
     if 'removeLogo' in clean_input:
         try:
             FileFolder.objects.get(id=config.LOGO.split('/')[3]).delete()
@@ -258,6 +285,7 @@ def resolve_edit_site_setting(_, info, input):
             pass
         save_setting('LOGO', "")
 
+def resolve_update_icon(user, clean_input):
     if 'icon' in clean_input:
         if not clean_input.get("icon"):
             raise GraphQLError("NO_FILE")
@@ -275,6 +303,7 @@ def resolve_edit_site_setting(_, info, input):
 
         save_setting('ICON', icon.embed_url)
 
+def resolve_update_remove_icon(clean_input):
     if 'removeIcon' in clean_input:
         try:
             FileFolder.objects.get(id=config.ICON.split('/')[3]).delete()
@@ -282,6 +311,7 @@ def resolve_edit_site_setting(_, info, input):
             pass
         save_setting('ICON', "")
 
+def resolve_update_favicon(user, clean_input):
     if 'favicon' in clean_input:
         if not clean_input.get("favicon"):
             raise GraphQLError("NO_FILE")
@@ -301,6 +331,7 @@ def resolve_edit_site_setting(_, info, input):
 
         save_setting('FAVICON', favicon.download_url)
 
+def resolve_update_remove_favicon(clean_input):
     if 'removeFavicon' in clean_input:
         try:
             FileFolder.objects.get(id=config.FAVICON.split('/')[3]).delete()
@@ -308,19 +339,23 @@ def resolve_edit_site_setting(_, info, input):
             pass
         save_setting('FAVICON', "")
 
+def resolve_update_direct_registration_domains(clean_input):
     if 'directRegistrationDomains' in clean_input:
         for domain in clean_input.get('directRegistrationDomains'):
             if not is_valid_domain(domain):
                 raise GraphQLError(INVALID_VALUE)
         save_setting('DIRECT_REGISTRATION_DOMAINS', clean_input.get('directRegistrationDomains'))
 
+def resolve_update_profile_sections(clean_input):
     if 'profileSections' in clean_input:
         save_setting('PROFILE_SECTIONS', validate_profile_sections(clean_input.get('profileSections')))
 
+def resolve_update_custom_css(clean_input):
     if 'customCss' in clean_input:
         save_setting('CUSTOM_CSS', clean_input.get('customCss'))
         save_setting('CUSTOM_CSS_TIMESTAMP', int(timezone.now().timestamp()))
 
+def resolve_update_walled_garden_by_ip_enabled(clean_input):
     if 'walledGardenByIpEnabled' in clean_input:
         save_setting('WALLED_GARDEN_BY_IP_ENABLED', clean_input.get('walledGardenByIpEnabled'))
 
@@ -328,6 +363,7 @@ def resolve_edit_site_setting(_, info, input):
         if clean_input.get('walledGardenByIpEnabled'):
             save_setting('ENABLE_SEARCH_ENGINE_INDEXING', False)
 
+def resolve_update_white_listed_ip_ranges(clean_input):
     if 'whitelistedIpRanges' in clean_input:
         for ip_range in clean_input.get('whitelistedIpRanges'):
             try:
@@ -336,6 +372,7 @@ def resolve_edit_site_setting(_, info, input):
                 raise GraphQLError(INVALID_VALUE)
         save_setting('WHITELISTED_IP_RANGES', clean_input.get('whitelistedIpRanges'))
 
+def resolve_update_extra_languages(clean_input):
     if 'extraLanguages' in clean_input:
         options = set((i['value'] for i in get_language_options()))
         for language in clean_input.get('extraLanguages'):
@@ -343,12 +380,14 @@ def resolve_edit_site_setting(_, info, input):
                 raise GraphQLError(INVALID_VALUE)
         save_setting('EXTRA_LANGUAGES', clean_input.get('extraLanguages'))
 
+def resolve_update_file_description_field_enabled(clean_input):
     if 'fileDescriptionFieldEnabled' in clean_input:
         options = [m for m in config.FILE_OPTIONS if m != 'enable_file_description']
         if clean_input.get('fileDescriptionFieldEnabled'):
             options.append('enable_file_description')
         save_setting("FILE_OPTIONS", options)
 
+def resolve_update_is_closed(user, clean_input):
     if 'isClosed' in clean_input:
         if not config.IS_CLOSED == clean_input.get('isClosed'):
             context = get_default_email_context(user)
@@ -367,11 +406,13 @@ def resolve_edit_site_setting(_, info, input):
                 )
             save_setting('IS_CLOSED', clean_input.get('isClosed'))
 
+def resolve_update_keys(setting_keys, clean_input):
+    for k, v in setting_keys.items():
+        if k in clean_input:
+            save_setting(v, clean_input.get(k))
+
+def resolve_sync_sitename(clean_input):
     if {'favicon', 'name', 'description'} & set(clean_input.keys()):
         # pylint: disable=import-outside-toplevel
         from concierge.tasks import sync_site
         sync_site.delay(parse_tenant_config_path(''))
-
-    return {
-        "siteSettings": get_site_settings()
-    }

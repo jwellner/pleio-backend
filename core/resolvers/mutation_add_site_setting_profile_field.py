@@ -1,9 +1,11 @@
-from graphql import GraphQLError
-from django.db import IntegrityError
-from core.models import ProfileField, ProfileFieldValidator
-from core.constances import NOT_LOGGED_IN, USER_NOT_SITE_ADMIN, USER_ROLES, COULD_NOT_FIND
-from core.lib import clean_graphql_input, generate_code
 from django.core.exceptions import ObjectDoesNotExist
+from django.db import IntegrityError
+from graphql import GraphQLError
+
+from core.constances import COULD_NOT_FIND
+from core.lib import clean_graphql_input, generate_code
+from core.models import ProfileField, ProfileFieldValidator
+from core.resolvers import shared
 
 
 def create_profile_field(name):
@@ -23,47 +25,41 @@ def resolve_add_site_setting_profile_field(_, info, input):
     user = info.context["request"].user
     clean_input = clean_graphql_input(input)
 
-    if not user.is_authenticated:
-        raise GraphQLError(NOT_LOGGED_IN)
+    shared.assert_authenticated(user)
 
-    if not user.has_role(USER_ROLES.ADMIN):
-        raise GraphQLError(USER_NOT_SITE_ADMIN)
+    shared.assert_administrator(user)
 
     profile_field = create_profile_field(clean_input["name"])
 
-    if 'isEditable' in clean_input:
-        profile_field.is_editable_by_user = clean_input["isEditable"]
-
-    if 'isFilter' in clean_input:
-        profile_field.is_filter = clean_input["isFilter"]
-
-    if 'isInOverview' in clean_input:
-        profile_field.is_in_overview = clean_input["isInOverview"]
-
-    if 'isOnVcard' in clean_input:
-        profile_field.is_on_vcard = clean_input['isOnVcard']
-
-    if 'fieldType' in clean_input:
-        profile_field.field_type = clean_input["fieldType"]
-
-    if 'fieldOptions' in clean_input:
-        profile_field.field_options = clean_input["fieldOptions"]
-
-    if 'isInOnboarding' in clean_input:
-        profile_field.is_in_onboarding = clean_input["isInOnboarding"]
-
-    if 'isMandatory' in clean_input:
-        profile_field.is_mandatory = clean_input["isMandatory"]
-
-    if 'profileFieldValidatorId' in clean_input:
-        try:
-            validator = ProfileFieldValidator.objects.get(id=clean_input.get('profileFieldValidatorId'))
-            profile_field.validators.add(validator)
-        except ObjectDoesNotExist:
-            raise GraphQLError(COULD_NOT_FIND)
+    resolve_update_field_type(profile_field, clean_input)
+    resolve_update_field_options(profile_field, clean_input)
+    resolve_update_profile_field_validator_id(profile_field, clean_input)
+    
+    shared.resolve_update_is_editable(profile_field, clean_input)
+    shared.resolve_update_is_filter(profile_field, clean_input)
+    shared.resolve_update_is_in_overview(profile_field, clean_input)
+    shared.resolve_update_is_on_v_card(profile_field, clean_input)
+    shared.resolve_update_is_in_onboarding(profile_field, clean_input)
+    shared.resolve_update_is_mandatory(profile_field, clean_input)
 
     profile_field.save()
 
     return {
         "profileItem": profile_field
     }
+
+def resolve_update_field_type(profile_field, clean_input):
+    if 'fieldType' in clean_input:
+        profile_field.field_type = clean_input["fieldType"]
+
+def resolve_update_field_options(profile_field, clean_input):
+    if 'fieldOptions' in clean_input:
+        profile_field.field_options = clean_input["fieldOptions"]
+
+def resolve_update_profile_field_validator_id(profile_field, clean_input):
+    if 'profileFieldValidatorId' in clean_input:
+        try:
+            validator = ProfileFieldValidator.objects.get(id=clean_input.get('profileFieldValidatorId'))
+            profile_field.validators.add(validator)
+        except ObjectDoesNotExist:
+            raise GraphQLError(COULD_NOT_FIND)

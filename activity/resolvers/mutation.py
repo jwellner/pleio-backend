@@ -1,12 +1,13 @@
 from graphql import GraphQLError
-from django.core.exceptions import ObjectDoesNotExist
+
 from core import config
-from core.constances import NOT_LOGGED_IN, COULD_NOT_FIND, COULD_NOT_FIND_GROUP, COULD_NOT_SAVE, USER_ROLES, \
-    COULD_NOT_ADD
-from core.lib import clean_graphql_input, access_id_to_acl
-from core.models import Group
-from user.models import User
+from core.constances import COULD_NOT_ADD, USER_ROLES
+from core.lib import access_id_to_acl, clean_graphql_input
+from core.resolvers import shared
+from core.utils.entity import load_entity_by_id
+
 from ..models import StatusUpdate
+
 
 # TODO: remove after fixed in frontend
 def get_group_default_access_id(group):
@@ -23,19 +24,11 @@ def resolve_add_status_update(_, info, input):
 
     clean_input = clean_graphql_input(input)
 
-    if not user.is_authenticated:
-        raise GraphQLError(NOT_LOGGED_IN)
+    shared.assert_authenticated(user)
 
-    group = None
+    group = shared.get_group(clean_input)
 
-    if 'containerGuid' in clean_input:
-        try:
-            group = Group.objects.get(id=clean_input.get("containerGuid"))
-        except ObjectDoesNotExist:
-            raise GraphQLError(COULD_NOT_FIND_GROUP)
-
-    if group and not group.is_full_member(user) and not user.has_role(USER_ROLES.ADMIN):
-        raise GraphQLError("NOT_GROUP_MEMBER")
+    shared.assert_group_member(user, group)
 
     if group and not group.is_submit_updates_enabled:
         raise GraphQLError(COULD_NOT_ADD)
@@ -48,24 +41,13 @@ def resolve_add_status_update(_, info, input):
     if group:
         entity.group = group
 
+    resolve_update_access_id(entity, clean_input, group)
 
-    # TODO: remove this bugfix and fix it in frontend
-    if 'accessId' in clean_input:
-        entity.read_access = access_id_to_acl(entity, clean_input.get("accessId"))
-    else:
-        if group:
-            entity.read_access = access_id_to_acl(entity, get_group_default_access_id(group))
-        else:
-            entity.read_access = access_id_to_acl(entity, config.DEFAULT_ACCESS_ID)
+    shared.resolve_update_title(entity, clean_input)
 
-    entity.write_access = access_id_to_acl(entity, clean_input.get("writeAccessId"))
+    shared.resolve_update_rich_description(entity, clean_input)
 
-    entity.title = clean_input.get("title", "")
-
-    entity.rich_description = clean_input.get("richDescription", "")
-
-    if 'timePublished' in clean_input:
-        entity.published = clean_input.get("timePublished", None)
+    shared.update_publication_dates(entity, clean_input)
 
     entity.save()
 
@@ -82,57 +64,30 @@ def resolve_edit_status_update(_, info, input):
     # pylint: disable=too-many-statements
 
     user = info.context["request"].user
+    entity = load_entity_by_id(input['guid'], [StatusUpdate])
 
     clean_input = clean_graphql_input(input)
 
-    if not info.context["request"].user.is_authenticated:
-        raise GraphQLError(NOT_LOGGED_IN)
+    shared.assert_authenticated(user)
+    shared.assert_write_access(entity, user)
 
-    try:
-        entity = StatusUpdate.objects.get(id=clean_input.get("guid"))
-    except ObjectDoesNotExist:
-        raise GraphQLError(COULD_NOT_FIND)
+    shared.resolve_update_title(entity, clean_input)
 
-    if not entity.can_write(user):
-        raise GraphQLError(COULD_NOT_SAVE)
+    shared.resolve_update_rich_description(entity, clean_input)
 
-    if 'title' in clean_input:
-        entity.title = clean_input.get("title")
+    shared.resolve_update_tags(entity, clean_input)
+    
+    shared.resolve_update_access_id(entity, clean_input)
 
-    if 'richDescription' in clean_input:
-        entity.rich_description = clean_input.get("richDescription")
-
-    if 'tags' in clean_input:
-        entity.tags = clean_input.get("tags")
-    if 'accessId' in clean_input:
-        entity.read_access = access_id_to_acl(entity, clean_input.get("accessId"))
-    if 'writeAccessId' in clean_input:
-        entity.write_access = access_id_to_acl(entity, clean_input.get("writeAccessId"))
-
-    if 'timePublished' in clean_input:
-        entity.published = clean_input.get("timePublished", None)
+    shared.update_publication_dates(entity, clean_input)
 
     # only admins can edit these fields
     if user.has_role(USER_ROLES.ADMIN):
-        if 'groupGuid' in input:
-            if input.get("groupGuid") is None:
-                entity.group = None
-            else:
-                try:
-                    group = Group.objects.get(id=clean_input.get("groupGuid"))
-                    entity.group = group
-                except ObjectDoesNotExist:
-                    raise GraphQLError(COULD_NOT_FIND)
+        shared.resolve_update_group(entity, clean_input)
 
-        if 'ownerGuid' in clean_input:
-            try:
-                owner = User.objects.get(id=clean_input.get("ownerGuid"))
-                entity.owner = owner
-            except ObjectDoesNotExist:
-                raise GraphQLError(COULD_NOT_FIND)
+        shared.resolve_update_owner(entity, clean_input)
 
-        if 'timeCreated' in clean_input:
-            entity.created_at = clean_input.get("timeCreated")
+        shared.resolve_update_time_created(entity, clean_input)
 
 
     entity.save()
@@ -140,3 +95,14 @@ def resolve_edit_status_update(_, info, input):
     return {
         "entity": entity
     }
+
+def resolve_update_access_id(entity, clean_input, group): 
+    if 'accessId' in clean_input:
+        entity.read_access = access_id_to_acl(entity, clean_input.get("accessId"))
+    else:
+        if group:
+            entity.read_access = access_id_to_acl(entity, get_group_default_access_id(group))
+        else:
+            entity.read_access = access_id_to_acl(entity, config.DEFAULT_ACCESS_ID)
+    if 'writeAccessId' in clean_input:
+        entity.write_access = access_id_to_acl(entity, clean_input.get("writeAccessId"))    

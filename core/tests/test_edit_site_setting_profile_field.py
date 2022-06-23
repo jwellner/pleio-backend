@@ -1,13 +1,13 @@
-from django_tenants.test.cases import FastTenantTestCase
-from backend2.schema import schema
 from ariadne import graphql_sync
-from django.core.cache import cache
 from django.contrib.auth.models import AnonymousUser
+from django.core.cache import cache
 from django.http import HttpRequest
-from core.models import ProfileField, ProfileFieldValidator
-from user.models import User
+from django_tenants.test.cases import FastTenantTestCase
 from mixer.backend.django import mixer
 
+from backend2.schema import schema
+from core.models import ProfileField, ProfileFieldValidator
+from user.models import User
 
 class EditSiteSettingProfileFieldTestCase(FastTenantTestCase):
 
