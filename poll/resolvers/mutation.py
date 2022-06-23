@@ -1,8 +1,12 @@
-from graphql import GraphQLError
 from django.core.exceptions import ObjectDoesNotExist
-from core.constances import NOT_LOGGED_IN, COULD_NOT_SAVE, COULD_NOT_FIND, ALREADY_VOTED, INVALID_ANSWER
-from core.lib import clean_graphql_input, access_id_to_acl
+from graphql import GraphQLError
+
+from core.constances import ALREADY_VOTED, COULD_NOT_FIND, INVALID_ANSWER
+from core.lib import clean_graphql_input
+from core.resolvers import shared
+
 from ..models import Poll, PollChoice
+
 
 def resolve_add_poll(_, info, input):
     # pylint: disable=redefined-builtin
@@ -11,20 +15,17 @@ def resolve_add_poll(_, info, input):
 
     clean_input = clean_graphql_input(input)
 
-    if not user.is_authenticated:
-        raise GraphQLError(NOT_LOGGED_IN)
+    shared.assert_authenticated(user)
 
     entity = Poll()
 
     entity.owner = user
 
-    entity.read_access = access_id_to_acl(entity, clean_input.get("accessId"))
-    entity.write_access = access_id_to_acl(entity, clean_input.get("writeAccessId"))
+    shared.resolve_update_access_id(entity, clean_input)
 
-    entity.title = clean_input.get("title")
+    shared.resolve_update_title(entity, clean_input)
 
-    if 'timePublished' in clean_input:
-        entity.published = clean_input.get("timePublished", None)
+    shared.update_publication_dates(entity, clean_input)
 
     entity.save()
 
@@ -43,25 +44,20 @@ def resolve_edit_poll(_, info, input):
 
     clean_input = clean_graphql_input(input)
 
-    if not user.is_authenticated:
-        raise GraphQLError(NOT_LOGGED_IN)
+    shared.assert_authenticated(user)
 
     try:
         entity = Poll.objects.get(id=clean_input.get("guid"))
     except ObjectDoesNotExist:
         raise GraphQLError(COULD_NOT_FIND)
 
-    if not entity.can_write(user):
-        raise GraphQLError(COULD_NOT_SAVE)
+    shared.assert_write_access(entity, user)
 
-    if 'accessId' in clean_input:
-        entity.read_access = access_id_to_acl(entity, clean_input.get("accessId"))
+    shared.resolve_update_access_id(entity, clean_input)
 
-    if 'title' in clean_input:
-        entity.title = clean_input.get("title")
+    shared.resolve_update_title(entity, clean_input)
 
-    if 'timePublished' in clean_input:
-        entity.published = clean_input.get("timePublished", None)
+    shared.update_publication_dates(entity, clean_input)
 
     entity.save()
 
@@ -81,8 +77,7 @@ def resolve_vote_on_poll(_, info, input):
 
     clean_input = clean_graphql_input(input)
 
-    if not user.is_authenticated:
-        raise GraphQLError(NOT_LOGGED_IN)
+    shared.assert_authenticated(user)
 
     try:
         poll = Poll.objects.get(id=clean_input.get("guid"))

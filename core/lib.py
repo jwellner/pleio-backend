@@ -110,7 +110,8 @@ def clean_graphql_input(values, always_include=None):
     """ Cleanup resolver input """
     allow_none = ['timePublished',
                   'scheduleArchiveEntity',
-                  'scheduleDeleteEntity'] + (always_include or [])
+                  'scheduleDeleteEntity',
+                  'groupGuid'] + (always_include or [])
     # TODO: what are we going to do with values which kan be omitted or can be NULL
 
     # Remove items with None values from dict except for timePublished data

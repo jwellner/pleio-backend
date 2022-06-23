@@ -1,13 +1,12 @@
-from graphql import GraphQLError
 from django.core.exceptions import ObjectDoesNotExist
-from core.lib import clean_graphql_input, access_id_to_acl
-from core.models import Comment, Group
+from graphql import GraphQLError
+
+from core.constances import COULD_NOT_FIND, COULD_NOT_SAVE, USER_ROLES
+from core.lib import clean_graphql_input
+from core.models import Comment
 from core.resolvers import shared
-from core.resolvers.shared import clean_abstract
-from core.constances import NOT_LOGGED_IN, COULD_NOT_FIND, COULD_NOT_SAVE, COULD_NOT_FIND_GROUP, \
-    USER_NOT_MEMBER_OF_GROUP, USER_ROLES
+from core.utils.entity import load_entity_by_id
 from question.models import Question
-from user.models import User
 
 
 def resolve_toggle_best_answer(_, info, input):
@@ -16,8 +15,7 @@ def resolve_toggle_best_answer(_, info, input):
     user = info.context["request"].user
     clean_input = clean_graphql_input(input)
 
-    if not user.is_authenticated:
-        raise GraphQLError(NOT_LOGGED_IN)
+    shared.assert_authenticated(user)
 
     try:
         comment = Comment.objects.get(id=clean_input.get("guid"))
@@ -45,8 +43,7 @@ def resolve_toggle_item_closed(_, info, input):
     user = info.context["request"].user
     clean_input = clean_graphql_input(input)
 
-    if not user.is_authenticated:
-        raise GraphQLError(NOT_LOGGED_IN)
+    shared.assert_authenticated(user)
 
     try:
         question = Question.objects.visible(user).get(id=clean_input.get("guid"))
@@ -73,44 +70,26 @@ def resolve_add_question(_, info, input):
 
     clean_input = clean_graphql_input(input)
 
-    if not user.is_authenticated:
-        raise GraphQLError(NOT_LOGGED_IN)
+    shared.assert_authenticated(user)
 
-    group = None
+    group = shared.get_group(clean_input)
 
-    if 'containerGuid' in clean_input:
-        try:
-            group = Group.objects.get(id=clean_input.get("containerGuid"))
-        except ObjectDoesNotExist:
-            raise GraphQLError(COULD_NOT_FIND_GROUP)
-
-    if group and not group.is_full_member(user) and not user.has_role(USER_ROLES.ADMIN):
-        raise GraphQLError(USER_NOT_MEMBER_OF_GROUP)
+    shared.assert_group_member(user, group)
 
     entity = Question()
 
     entity.owner = user
-    entity.tags = clean_input.get("tags")
-
     entity.group = group
 
-    entity.read_access = access_id_to_acl(entity, clean_input.get("accessId"))
-    entity.write_access = access_id_to_acl(entity, clean_input.get("writeAccessId"))
-
-    entity.title = clean_input.get("title")
-    entity.rich_description = clean_input.get("richDescription")
-
-    if 'abstract' in clean_input:
-        abstract = clean_input.get("abstract")
-        clean_abstract(abstract)
-        entity.abstract = abstract
-
+    shared.resolve_update_tags(entity, clean_input)
+    shared.resolve_update_access_id(entity, clean_input)
+    shared.resolve_update_title(entity, clean_input)
+    shared.resolve_update_rich_description(entity, clean_input)
+    shared.resolve_update_abstract(entity, clean_input)
     shared.update_featured_image(entity, clean_input)
     shared.update_publication_dates(entity, clean_input)
 
-    if user.has_role(USER_ROLES.ADMIN) or user.has_role(USER_ROLES.EDITOR):
-        if 'isFeatured' in clean_input:
-            entity.is_featured = clean_input.get("isFeatured")
+    shared.resolve_update_is_featured(entity, user, clean_input)
 
     entity.save()
 
@@ -127,68 +106,29 @@ def resolve_edit_question(_, info, input):
     # pylint: disable=too-many-statements
 
     user = info.context["request"].user
+    entity = load_entity_by_id(input['guid'], [Question])
 
     clean_input = clean_graphql_input(input)
 
-    if not info.context["request"].user.is_authenticated:
-        raise GraphQLError(NOT_LOGGED_IN)
+    shared.assert_authenticated(user)
+    shared.assert_write_access(entity, user)
 
-    try:
-        entity = Question.objects.get(id=clean_input.get("guid"))
-    except ObjectDoesNotExist:
-        raise GraphQLError(COULD_NOT_FIND)
-
-    if not entity.can_write(user):
-        raise GraphQLError(COULD_NOT_SAVE)
-
-    if 'tags' in clean_input:
-        entity.tags = clean_input.get("tags")
-
-    if 'accessId' in clean_input:
-        entity.read_access = access_id_to_acl(entity, clean_input.get("accessId"))
-
-    if 'writeAccessId' in clean_input:
-        entity.write_access = access_id_to_acl(entity, clean_input.get("writeAccessId"))
-
-    if 'title' in clean_input:
-        entity.title = clean_input.get("title")
-
-    if 'richDescription' in clean_input:
-        entity.rich_description = clean_input.get("richDescription")
-
-    if 'abstract' in clean_input:
-        abstract = clean_input.get("abstract")
-        clean_abstract(abstract)
-        entity.abstract = abstract
+    shared.resolve_update_tags(entity, clean_input)
+    shared.resolve_update_access_id(entity, clean_input)
+    shared.resolve_update_title(entity, clean_input)
+    shared.resolve_update_rich_description(entity, clean_input)
+    shared.resolve_update_abstract(entity, clean_input)
 
     shared.update_featured_image(entity, clean_input)
     shared.update_publication_dates(entity, clean_input)
 
-    if user.has_role(USER_ROLES.ADMIN) or user.has_role(USER_ROLES.EDITOR):
-        if 'isFeatured' in clean_input:
-            entity.is_featured = clean_input.get("isFeatured")
+    shared.resolve_update_is_featured(entity, user, clean_input)
 
     # only admins can edit these fields
     if user.has_role(USER_ROLES.ADMIN):
-        if 'groupGuid' in input:
-            if input.get("groupGuid") is None:
-                entity.group = None
-            else:
-                try:
-                    group = Group.objects.get(id=clean_input.get("groupGuid"))
-                    entity.group = group
-                except ObjectDoesNotExist:
-                    raise GraphQLError(COULD_NOT_FIND)
-
-        if 'ownerGuid' in clean_input:
-            try:
-                owner = User.objects.get(id=clean_input.get("ownerGuid"))
-                entity.owner = owner
-            except ObjectDoesNotExist:
-                raise GraphQLError(COULD_NOT_FIND)
-
-        if 'timeCreated' in clean_input:
-            entity.created_at = clean_input.get("timeCreated")
+        shared.resolve_update_group(entity, clean_input)
+        shared.resolve_update_owner(entity, clean_input)
+        shared.resolve_update_time_created(entity, clean_input)
 
     entity.save()
 

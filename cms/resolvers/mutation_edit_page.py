@@ -1,8 +1,7 @@
-from graphql import GraphQLError
-from django.core.exceptions import ObjectDoesNotExist
-from core.lib import clean_graphql_input, access_id_to_acl
-from core.constances import NOT_LOGGED_IN, COULD_NOT_FIND, COULD_NOT_SAVE
 from cms.models import Page
+from core.lib import clean_graphql_input
+from core.resolvers import shared
+from core.utils.entity import load_entity_by_id
 
 
 def resolve_edit_page(_, info, input):
@@ -11,34 +10,22 @@ def resolve_edit_page(_, info, input):
     # pylint: disable=too-many-branches
 
     user = info.context["request"].user
+    entity = load_entity_by_id(input['guid'], [Page])
 
     clean_input = clean_graphql_input(input)
 
-    if not user.is_authenticated:
-        raise GraphQLError(NOT_LOGGED_IN)
+    shared.assert_authenticated(user)
+    shared.assert_write_access(entity, user)
 
-    try:
-        entity = Page.objects.get(id=clean_input.get("guid"))
-    except ObjectDoesNotExist:
-        raise GraphQLError(COULD_NOT_FIND)
+    shared.resolve_update_tags(entity, clean_input)
 
-    if not entity.can_write(user):
-        raise GraphQLError(COULD_NOT_SAVE)
+    shared.resolve_update_access_id(entity, clean_input)
 
-    if 'tags' in clean_input:
-        entity.tags = clean_input.get("tags")
+    shared.resolve_update_title(entity, clean_input)
 
-    if 'accessId' in clean_input:
-        entity.read_access = access_id_to_acl(entity, clean_input.get("accessId"))
+    shared.resolve_update_rich_description(entity, clean_input)
 
-    if 'title' in clean_input:
-        entity.title = clean_input.get("title")
-
-    if 'richDescription' in clean_input:
-        entity.rich_description = clean_input.get("richDescription")
-
-    if 'timePublished' in clean_input:
-        entity.published = clean_input.get("timePublished", None)
+    shared.update_publication_dates(entity, clean_input)
 
     entity.save()
 
