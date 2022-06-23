@@ -239,7 +239,7 @@ docker-compose exec background celery -A backend2.celery call core.tasks.elastic
 
 ### Search index populate 1 index of 1 tentant
 ```
-docker-compose exec background celery -A backend2.celery call core.tasks.elasticsearch_tasks.elasticsearch_rebuild_all --args='["tenant1", "blog"]'
+docker-compose exec background celery -A backend2.celery call core.tasks.elasticsearch_tasks.elasticsearch_rebuild --args='["tenant1", "blog"]'
 ```
 
 #### Run the daily cron on all tenants:
