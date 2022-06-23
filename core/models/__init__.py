@@ -13,3 +13,4 @@ from .widget import Widget
 from .rich_fields import MentionMixin, AttachmentMixin
 from .image import ResizedImage, ResizedImageMixin
 from .tags import Tag, TagSynonym, TagsMixin
+from .search import SearchQueryJournal

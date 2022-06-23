@@ -11,7 +11,7 @@ from .query_groups import resolve_groups
 from .query_members import resolve_members
 from .query_notifications import resolve_notifications
 from .query_recommended import resolve_recommended
-from .query_search import resolve_search
+from .query_search import resolve_search, resolve_search_journal
 from .query_site import resolve_site, resolve_site_settings, resolve_site_stats
 from .query_site_users import resolve_site_users
 from .query_top import resolve_top
@@ -31,6 +31,7 @@ query.set_field("members", resolve_members)
 query.set_field("notifications", resolve_notifications)
 query.set_field("recommended", resolve_recommended)
 query.set_field("search", resolve_search)
+query.set_field("searchJournal", resolve_search_journal)
 query.set_field("site", resolve_site)
 query.set_field("siteSettings", resolve_site_settings)
 query.set_field("siteStats", resolve_site_stats)

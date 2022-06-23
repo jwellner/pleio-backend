@@ -6,6 +6,7 @@ from datetime import datetime
 from ariadne import graphql_sync
 from django.contrib.auth.models import AnonymousUser
 from django.http import HttpRequest
+from django.utils.crypto import get_random_string
 
 from backend2.schema import schema
 from django_tenants.test.cases import FastTenantTestCase
@@ -68,7 +69,9 @@ class GraphQLClient():
         self.request.user = AnonymousUser()
 
     def force_login(self, user):
+        self.request = HttpRequest()
         self.request.user = user
+        self.request.COOKIES['sessionid'] = get_random_string(32)
 
     def post(self, query, variables):
         success, self.result = graphql_sync(schema, {"query": query,
