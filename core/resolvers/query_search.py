@@ -1,6 +1,6 @@
 from core.lib import get_acl
-from core.constances import INVALID_SUBTYPE, INVALID_DATE, ORDER_DIRECTION, SEARCH_ORDER_BY
-from core.models import Entity, Group
+from core.constances import INVALID_SUBTYPE, INVALID_DATE, ORDER_DIRECTION, SEARCH_ORDER_BY, NOT_LOGGED_IN, USER_ROLES, USER_NOT_SITE_ADMIN
+from core.models import Entity, Group, SearchQueryJournal
 from user.models import User
 from elasticsearch_dsl import Search
 from elasticsearch_dsl import A, Q
@@ -11,7 +11,7 @@ from django.utils import dateparse, timezone
 
 
 def resolve_search(_, info, q=None, containerGuid=None, type=None, subtype=None, dateFrom=None, dateTo=None, offset=0, limit=20,
-                    tagLists=None, orderBy=None, orderDirection=ORDER_DIRECTION.asc):
+                   tagLists=None, orderBy=None, orderDirection=ORDER_DIRECTION.asc):
     # pylint: disable=unused-argument
     # pylint: disable=too-many-arguments
     # pylint: disable=redefined-builtin
@@ -20,10 +20,20 @@ def resolve_search(_, info, q=None, containerGuid=None, type=None, subtype=None,
 
     total = 0
     totals = []
-    ids = []
 
-    user = info.context["request"].user
+    request = info.context["request"]
+
+    user = request.user
     tenant_name = parse_tenant_config_path("")
+    sessionid = request.COOKIES.get('sessionid', None)
+
+    try:
+        SearchQueryJournal.objects.maybe_log_query(
+            query=q,
+            session=sessionid,
+        )
+    except Exception as e:
+        raise Exception("%s: %s" %(e.__class__, e))
 
     if type in ['group', 'user']:
         subtype = type
@@ -45,34 +55,34 @@ def resolve_search(_, info, q=None, containerGuid=None, type=None, subtype=None,
         q = '*'
 
     s = Search(index='_all').query(
-            Q('simple_query_string', query=q, fields=[
-                    'title^3',
-                    'name^3',
-                    'email',
-                    'description',
-                    'tags^3',
-                    'tags_matches',
-                    'file_contents',
-                    'introduction',
-                    'comments.description',
-                    'owner.name'
-                ]
+        Q('simple_query_string', query=q, fields=[
+            'title^3',
+            'name^3',
+            'email',
+            'description',
+            'tags^3',
+            'tags_matches',
+            'file_contents',
+            'introduction',
+            'comments.description',
+            'owner.name'
+        ]
+          )
+        | Q('nested', path='user_profile_fields', ignore_unmapped=True, query=Q('bool', must=[
+            Q('match', user_profile_fields__value=q),
+            Q('terms', user_profile_fields__read_access=list(get_acl(user)))
+        ]
+                                                                                )
             )
-            | Q('nested', path='user_profile_fields', ignore_unmapped=True, query=Q('bool', must=[
-                    Q('match', user_profile_fields__value=q),
-                    Q('terms', user_profile_fields__read_access=list(get_acl(user)))
-                    ]
-                )
-            )
-        ).filter(
-            'terms', read_access=list(get_acl(user))
-        ).filter(
-            'term', tenant_name=tenant_name
-        ).filter(
-            'range', created_at={'gte': date_from, 'lte': date_to}
-        ).exclude(
-            'term', is_active=False
-        )
+    ).filter(
+        'terms', read_access=list(get_acl(user))
+    ).filter(
+        'term', tenant_name=tenant_name
+    ).filter(
+        'range', created_at={'gte': date_from, 'lte': date_to}
+    ).exclude(
+        'term', is_active=False
+    )
 
     s = s.query('bool', filter=[
         Q('range', published={'gt': None, 'lte': timezone.now()}) |
@@ -99,7 +109,7 @@ def resolve_search(_, info, q=None, containerGuid=None, type=None, subtype=None,
     a = A('terms', field='type')
     s.aggs.bucket('type_terms', a)
 
-    s = s[offset:offset+limit]
+    s = s[offset:offset + limit]
     response = s.execute()
 
     # TODO: maybe response can be extended, so duplicate code can be removed
@@ -128,4 +138,36 @@ def resolve_search(_, info, q=None, containerGuid=None, type=None, subtype=None,
         'total': total,
         'totals': totals,
         'edges': sorted_objects
+    }
+
+
+def resolve_search_journal(_, info, dateTimeFrom=None, dateTimeTo=None, limit=None, offset=None):
+    user = info.context["request"].user
+
+    if not user.is_authenticated:
+        raise GraphQLError(NOT_LOGGED_IN)
+
+    if not user.has_role(USER_ROLES.ADMIN):
+        raise GraphQLError(USER_NOT_SITE_ADMIN)
+
+    if dateTimeTo is None:
+        dateTimeTo = timezone.now()
+
+    if dateTimeFrom is None:
+        dateTimeFrom = dateTimeTo - timezone.timedelta(weeks=4)
+
+    if dateTimeFrom > dateTimeTo:
+        raise GraphQLError(INVALID_DATE)
+
+    summary = [s for s in SearchQueryJournal.objects.summary(
+        start=dateTimeFrom,
+        end=dateTimeTo,
+    )]
+    if offset is not None:
+        summary = summary[offset:]
+    if limit is not None:
+        summary = summary[:limit]
+    return {
+        "total": len(summary),
+        "edges": summary,
     }
