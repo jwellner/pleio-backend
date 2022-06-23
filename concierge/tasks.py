@@ -68,7 +68,6 @@ def sync_user(schema, user_id):
 def submit_user_token(schema, user):
     try:
         token = uuid.uuid4()
-        origin = Client.objects.get(schema_name=schema)
         user.profile.update_origin_token(token)
         url = "{}/api/users/register_origin_site/{}".format(
             settings.ACCOUNT_API_URL, user.external_id,
@@ -89,6 +88,38 @@ def submit_user_token(schema, user):
     except RequestConnectionError as e:
         logger.warning("Error during submit_user_token: %s", repr(e))
         user.profile.update_origin_token(None)
+
+
+@shared_task
+def sync_user_registration_date(schema_name, user_id):
+    try:
+        with schema_context(schema_name):
+            user = User.objects.get(id=user_id)
+            submit_user_registration_date(user)
+    except User.DoesNotExist:
+        pass
+
+
+def submit_user_registration_date(user):
+    try:
+        token = uuid.uuid4()
+        user.profile.update_origin_token(token)
+        url = "{}/api/users/register_origin_site/{}".format(
+            settings.ACCOUNT_API_URL, user.external_id,
+        )
+
+        data = {f"origin_site_{key}": value for key, value in tenant_summary().items()}
+        data['registration_date'] = user.created_at
+
+        response = requests.post(url, data=data, headers={
+            'x-oidc-client-id': settings.OIDC_RP_CLIENT_ID,
+            'x-oidc-client-secret': settings.OIDC_RP_CLIENT_SECRET,
+        })
+        if not response.ok:
+            logger.error("Failed to sync a user registration_date for reason '%s'", response.reason)
+
+    except RequestConnectionError as e:
+        logger.warning("Error during submit_user_registration_date: %s", repr(e))
 
 
 @shared_task
