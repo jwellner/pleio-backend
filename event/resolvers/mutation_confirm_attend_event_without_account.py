@@ -1,4 +1,3 @@
-from event.utils import send_event_qr
 from graphql import GraphQLError
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.validators import validate_email
@@ -6,6 +5,7 @@ from django.core.exceptions import ValidationError
 from django.utils.translation import ugettext_lazy
 from core.constances import COULD_NOT_FIND, EMAIL_ALREADY_USED, INVALID_EMAIL, EVENT_INVALID_STATE, EVENT_IS_FULL, COULD_NOT_SAVE, NOT_ATTENDING_PARENT_EVENT
 from core.lib import clean_graphql_input, get_base_url, get_default_email_context
+from event.mail_builders.qr_code import send_event_qr
 from event.models import Event, EventAttendeeRequest, EventAttendee
 from event.lib import get_url
 from core.tasks.mail_tasks import send_mail_multi
