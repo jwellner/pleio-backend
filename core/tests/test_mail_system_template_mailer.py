@@ -13,21 +13,21 @@ class TestMailSystemTemplateMailerTestCase(PleioTenantTestCase):
     Any change to the mail sender class must be intensional.
     """
 
-    @mock.patch('core.mail_builders.template_mailerTemplateMailer.get_context')
-    @mock.patch('core.mail_builders.template_mailerTemplateMailer.get_language')
-    @mock.patch('core.mail_builders.template_mailerTemplateMailer.get_template')
-    @mock.patch('core.mail_builders.template_mailerTemplateMailer.get_receiver')
-    @mock.patch('core.mail_builders.template_mailerTemplateMailer.get_receiver_email')
-    @mock.patch('core.mail_builders.template_mailerTemplateMailer.get_sender')
-    @mock.patch('core.mail_builders.template_mailerTemplateMailer.get_subject')
-    @mock.patch('core.mail_builders.template_mailerTemplateMailer.build_context')
-    @mock.patch('core.mail_builders.template_mailerTemplateMailer.assert_not_known_inactive_user')
-    @mock.patch('core.mail_builders.template_mailerTemplateMailer.pre_send')
-    @mock.patch('core.mail_builders.template_mailertranslation')
-    @mock.patch('core.mail_builders.template_mailerget_template')
-    @mock.patch('core.mail_builders.template_mailerhtml_to_text')
-    @mock.patch('core.mail_builders.template_mailerformataddr')
-    @mock.patch('core.mail_builders.template_mailerEmailMultiAlternatives')
+    @mock.patch('core.mail_builders.template_mailer.TemplateMailerBase.get_context')
+    @mock.patch('core.mail_builders.template_mailer.TemplateMailerBase.get_language')
+    @mock.patch('core.mail_builders.template_mailer.TemplateMailerBase.get_template')
+    @mock.patch('core.mail_builders.template_mailer.TemplateMailerBase.get_receiver')
+    @mock.patch('core.mail_builders.template_mailer.TemplateMailerBase.get_receiver_email')
+    @mock.patch('core.mail_builders.template_mailer.TemplateMailerBase.get_sender')
+    @mock.patch('core.mail_builders.template_mailer.TemplateMailerBase.get_subject')
+    @mock.patch('core.mail_builders.template_mailer.TemplateMailerBase.build_context')
+    @mock.patch('core.mail_builders.template_mailer.TemplateMailerBase.assert_not_known_inactive_user')
+    @mock.patch('core.mail_builders.template_mailer.TemplateMailerBase.pre_send')
+    @mock.patch('core.mail_builders.template_mailer.translation')
+    @mock.patch('core.mail_builders.template_mailer.get_template')
+    @mock.patch('core.mail_builders.template_mailer.html_to_text')
+    @mock.patch('core.mail_builders.template_mailer.formataddr')
+    @mock.patch('core.mail_builders.template_mailer.EmailMultiAlternatives')
     def test_template_mailer_send(self, mocked_EmailMultiAlternatives, mocked_formataddr, mocked_html_to_text,
                                   mocked_get_template, mocked_translation,
                                   pre_send, assert_not_known_inactive_user, build_context, get_subject, get_sender,
@@ -96,8 +96,8 @@ class TestMailSystemTemplateMailerTestCase(PleioTenantTestCase):
         assert len(mailer_email.send.call_args.kwargs) == 0, \
             "email.send() unexpectedly called with keyword arguments. Is this change intensional?"
 
-    @mock.patch('core.mail_builders.template_mailerTemplateMailer.get_receiver_email')
-    @mock.patch('core.mail_builders.template_mailerTemplateMailer.assert_not_known_inactive_user')
+    @mock.patch('core.mail_builders.template_mailer.TemplateMailerBase.get_receiver_email')
+    @mock.patch('core.mail_builders.template_mailer.TemplateMailerBase.assert_not_known_inactive_user')
     def test_known_inactive_user_isnt_caught(self, assert_not_known_inactive_user, get_receiver_email):
         expected_exception_class = import_string('core.mail_builders.base.MailerBase').IgnoreInactiveUserMailError
         assert_not_known_inactive_user.side_effect = expected_exception_class("Known inactive user")
