@@ -9,7 +9,6 @@ from core.tests.helpers import PleioTenantTestCase
 
 class TestMailSystemTemplateMailerTestCase(PleioTenantTestCase):
     """
-    To many mocks? Maybe. But this must be double-checked and should never fail.
     Any change to the mail sender class must be intensional.
     """
 
