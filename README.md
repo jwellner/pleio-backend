@@ -160,10 +160,26 @@ docker-compose exec api python manage.py tenant_command search_index --create --
 
 #### Rebuilding search index
 
-All tenants use the same search index. So when you want to rebuild the index for one tenant user the `--populate` argument.
+Rebuilding the index is required when the schema for a model changes at document.py.
+Rebuilding the index causes the search functionality to be unavailable until all data is indexed again.
 
 ```bash
-docker-compose exec api python manage.py tenant_command search_index --populate --schema=test1
+# Rebuild for all (Notice: search will be unavailable until an index command is completed)
+docker-compose exec backgroune celery -A backend2.celery call core.tasks.elasticsearch_tasks.elasticsearch_recreate_indices
+docker-compose exec backgroune celery -A backend2.celery call core.tasks.elasticsearch_tasks.elasticsearch_rebuild_all
+
+# Rebuild for one (Notice: all data is removed first)
+docker-compose exec backgroune celery -A backend2.celery call core.tasks.elasticsearch_tasks.elasticsearch_rebuild_for_tenant --args='["test1"]'
+```
+
+When there has been a bug that caused the content to be indexed incorrectly it is possible to index all data without search engine down-time.
+
+```bash
+# Build for all (search will be available all the time)
+docker-compose exec backgroune celery -A backend2.celery call core.tasks.elasticsearch_tasks.elasticsearch_index_data_for_all
+
+# Build for one (search will be available all the time)
+docker-compose exec backgroune celery -A backend2.celery call core.tasks.elasticsearch_tasks.elasticsearch_index_data_for_tenant --args='["test1"]'
 ```
 
 ## Translations
@@ -229,17 +245,32 @@ docker-compose exec background celery -A backend2.celery call core.tasks.elastic
 
 ### Search index populate all content for all tenants
 ```
-docker-compose exec background celery -A backend2.celery call core.tasks.elasticsearch_tasks.elasticsearch_rebuild_all
+docker-compose exec background celery -A backend2.celery call core.tasks.elasticsearch_tasks.elasticsearch_index_data_for_all
 ```
 
 ### Search index populate 1 index for all tentants
 ```
-docker-compose exec background celery -A backend2.celery call core.tasks.elasticsearch_tasks.elasticsearch_rebuild_all --args='["blog"]'
+docker-compose exec background celery -A backend2.celery call core.tasks.elasticsearch_tasks.elasticsearch_index_data_for_all --args='["blog"]'
 ```
 
 ### Search index populate 1 index of 1 tentant
 ```
-docker-compose exec background celery -A backend2.celery call core.tasks.elasticsearch_tasks.elasticsearch_rebuild --args='["tenant1", "blog"]'
+docker-compose exec background celery -A backend2.celery call core.tasks.elasticsearch_tasks.elasticsearch_index_data_for_tenant --args='["tenant1", "blog"]'
+```
+
+### Search index repopulate all content for all tenants
+```
+docker-compose exec background celery -A backend2.celery call core.tasks.elasticsearch_tasks.elasticsearch_rebuild_all
+```
+
+### Search index repopulate 1 index for all tentants
+```
+docker-compose exec background celery -A backend2.celery call core.tasks.elasticsearch_tasks.elasticsearch_rebuild_all --args='["blog"]'
+```
+
+### Search index repopulate 1 index of 1 tentant
+```
+docker-compose exec background celery -A backend2.celery call core.tasks.elasticsearch_tasks.elasticsearch_rebuild_for_tenant --args='["tenant1", "blog"]'
 ```
 
 #### Run the daily cron on all tenants:

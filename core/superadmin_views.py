@@ -13,7 +13,7 @@ from django.utils import timezone
 from celery.result import AsyncResult
 from core.constances import OIDC_PROVIDER_OPTIONS
 from core.models import Group
-from core.tasks import elasticsearch_rebuild, replace_domain_links
+from core.tasks import replace_domain_links, elasticsearch_rebuild_for_tenant
 from core.lib import tenant_schema, is_valid_domain
 from core.superadmin.forms import AuditLogFilter, SettingsForm, ScanIncidentFilter
 from control.tasks import get_db_disk_usage, get_file_disk_usage, copy_group_to_tenant
@@ -181,7 +181,7 @@ def tasks(request):
 
     if request.POST:
         if request.POST.get("task", False) == "elasticsearch_rebuild":
-            elasticsearch_rebuild.delay(tenant_schema())
+            elasticsearch_rebuild_for_tenant.delay(tenant_schema())
             messages.success(request, 'Elasticsearch rebuild started')
         elif request.POST.get("task", False) == "replace_links":
             replace_domain = request.POST.get("replace_domain") if request.POST.get("replace_domain") else current_domain

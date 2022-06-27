@@ -44,12 +44,6 @@ def elasticsearch_recreate_indices(index_name=None):
 
 
 @app.task(ignore_result=True)
-def elasticsearch_build_data_all_tenants(index_name=None):
-    for client in Client.objects.exclude(schema_name='public'):
-        elasticsearch_index_data_for_tenant.delay(client.schema_name, index_name)
-
-
-@app.task(ignore_result=True)
 def elasticsearch_rebuild_all(index_name=None):
     '''
     Delete indexes, creates indexes and populate tenants
@@ -59,36 +53,27 @@ def elasticsearch_rebuild_all(index_name=None):
 
     '''
     for client in Client.objects.exclude(schema_name='public'):
-        elasticsearch_rebuild.delay(client.schema_name, index_name)
+        elasticsearch_rebuild_for_tenant.delay(client.schema_name, index_name)
 
 
 @app.task(ignore_result=True)
-def elasticsearch_rebuild(schema_name, index_name=None):
-    # pylint: disable=unused-argument
-    # pylint: disable=protected-access
-    '''
-    Rebuild search index for tenant
-    '''
-
-    # TODO: Eigenlijk is dit een alias van elasticsearch_repopulate_index_for_tenant
-    with schema_context(schema_name):
-        logger.info('elasticsearch_rebuild \'%s\'', schema_name)
-
-        elasticsearch_repopulate_index_for_tenant.delay(schema_name, index_name)
-
-
-@app.task(ignore_result=True)
-def elasticsearch_repopulate_index_for_tenant(schema_name, index_name=None):
+def elasticsearch_rebuild_for_tenant(schema_name, index_name=None):
     # pylint: disable=unused-argument
     # pylint: disable=protected-access
     '''
     Rebuild index for tenant
     '''
     with schema_context(schema_name):
-        logger.info('elasticsearch_repopulate_index_for_tenant \'%s\' \'%s\'', index_name, schema_name)
+        logger.info('elasticsearch_rebuild_for_tenant \'%s\' \'%s\'', index_name, schema_name)
 
         elasticsearch_delete_data_for_tenant(schema_name, index_name)
         elasticsearch_index_data_for_tenant(schema_name, index_name)
+
+
+@app.task(ignore_result=True)
+def elasticsearch_index_data_for_all(index_name=None):
+    for client in Client.objects.exclude(schema_name='public'):
+        elasticsearch_index_data_for_tenant.delay(client.schema_name, index_name)
 
 
 @app.task(ignore_result=True)

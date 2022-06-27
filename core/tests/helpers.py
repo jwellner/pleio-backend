@@ -1,7 +1,8 @@
+import time
 from contextlib import contextmanager
 
-import time
 from datetime import datetime
+from unittest import mock
 
 from ariadne import graphql_sync
 from django.contrib.auth.models import AnonymousUser
@@ -84,18 +85,15 @@ class GraphQLClient():
         return self.result
 
 
-class ElasticsearchTestMixin():
+class ElasticsearchTestCase(PleioTenantTestCase):
 
     @staticmethod
     def initialize_index():
-        # pylint: disable=import-outside-toplevel
-        from core.tasks import elasticsearch_recreate_indices, elasticsearch_repopulate_index_for_tenant
-        from django_tenants.utils import parse_tenant_config_path
-
         with suppress_stdout():
-            tenant_name = parse_tenant_config_path("")
-            elasticsearch_recreate_indices(None)
-            elasticsearch_repopulate_index_for_tenant(tenant_name, None)
+            from core.lib import tenant_schema
+            from core.tasks.elasticsearch_tasks import elasticsearch_recreate_indices, elasticsearch_index_data_for_tenant
+            elasticsearch_recreate_indices()
+            elasticsearch_index_data_for_tenant(tenant_schema(), None)
             time.sleep(.200)
 
 
@@ -117,7 +115,7 @@ def suppress_stdout():
     # pylint: disable=import-outside-toplevel
     from contextlib import redirect_stderr, redirect_stdout
     from os import devnull
-
-    with open(devnull, 'w') as fnull:
-        with redirect_stderr(fnull) as err, redirect_stdout(fnull) as out:
-            yield (err, out)
+    with mock.patch('warnings.warn'):
+        with open(devnull, 'w') as fnull:
+            with redirect_stderr(fnull) as err, redirect_stdout(fnull) as out:
+                yield (err, out)
