@@ -7,13 +7,9 @@ from user.factories import UserFactory
 
 class TestQueryJournalTestCase(ElasticsearchTestCase):
 
-    @classmethod
-    def setUpClass(cls):
-        super().setUpClass()
-        cls.initialize_index()
-
     def setUp(self):
         super().setUp()
+        self.initialize_index()
 
         self.authenticated_user = UserFactory()
         self.query = """
