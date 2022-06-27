@@ -6,11 +6,9 @@ from core.constances import COULD_NOT_FIND, INVALID_EMAIL, EMAIL_ALREADY_USED, N
     NOT_LOGGED_IN, EVENT_INVALID_STATE, EVENT_IS_FULL
 from core.lib import clean_graphql_input, get_base_url, generate_code, get_default_email_context, tenant_schema
 from event.lib import validate_name
+from event.mail_builders.qr_code import send_event_qr
 from event.models import Event, EventAttendee, EventAttendeeRequest
 from core.tasks import send_mail_multi
-
-# Attend event without account
-from event.utils import send_event_qr
 
 
 def resolve_attend_event_without_account(_, info, input):
@@ -71,6 +69,7 @@ def resolve_attend_event_without_account(_, info, input):
     return {
         "entity": event
     }
+
 
 def resolve_attend_event(_, info, input):
     # pylint: disable=redefined-builtin

@@ -15,7 +15,7 @@ from core.models import (ArticleMixin, AttachmentMixin, BookmarkMixin,
                          NotificationMixin)
 from core.tasks import send_mail_multi
 from event.lib import get_url
-from event.utils import send_event_qr
+from event.mail_builders.qr_code import send_event_qr
 from user.models import User
 
 class Event(Entity,
