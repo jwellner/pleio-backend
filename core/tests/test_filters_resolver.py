@@ -1,17 +1,18 @@
 from mixer.backend.django import mixer
 from django.contrib.auth.models import AnonymousUser
-from django_tenants.test.cases import FastTenantTestCase
 
 from core.models import Group, ProfileField, GroupProfileFieldSetting, UserProfile, UserProfileField
 from core.resolvers.filters import get_filter_options
 from user.models import User
 
-from core.tests.helpers import ElasticsearchTestMixin
+from core.tests.helpers import ElasticsearchTestCase
 
 
-class FiltersResolverTestCase(FastTenantTestCase, ElasticsearchTestMixin):
+class FiltersResolverTestCase(ElasticsearchTestCase):
 
     def setUp(self):
+        super().setUp()
+
         self.cleanup = []
         self.anonymousUser = AnonymousUser()
         self.owner = mixer.blend(User)

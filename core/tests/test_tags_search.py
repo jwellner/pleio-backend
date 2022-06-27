@@ -1,15 +1,11 @@
-from ariadne import graphql_sync
-from django.http import HttpRequest
 from mixer.backend.django import mixer
 
-from backend2.schema import schema
 from core.models import Group, TagSynonym, Tag
-from core.tests.helpers import ElasticsearchTestMixin, PleioTenantTestCase
+from core.tests.helpers import ElasticsearchTestCase
 from user.factories import UserFactory
-from user.models import User
 
 
-class TestTagsSearchTestCase(PleioTenantTestCase, ElasticsearchTestMixin):
+class TestTagsSearchTestCase(ElasticsearchTestCase):
 
     def setUp(self):
         super().setUp()
