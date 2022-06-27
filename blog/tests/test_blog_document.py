@@ -1,18 +1,19 @@
-
-from django_tenants.test.cases import FastTenantTestCase
 from blog.models import Blog
-from core.tests.helpers import ElasticsearchTestMixin
+from core.tests.helpers import ElasticsearchTestCase
 from user.models import User
 from mixer.backend.django import mixer
 from elasticsearch_dsl import Search, Q
 
 
-class AddBlogTestCase(FastTenantTestCase, ElasticsearchTestMixin):
+class AddBlogTestCase(ElasticsearchTestCase):
+
     def setUp(self):
+        super().setUp()
+
         self.authenticatedUser = mixer.blend(User,
             name = "Jan de Vries"
         )
-        self.data = mixer.blend(Blog, 
+        self.data = mixer.blend(Blog,
             title = "test",
             owner = self.authenticatedUser
         )
@@ -31,4 +32,4 @@ class AddBlogTestCase(FastTenantTestCase, ElasticsearchTestMixin):
 
         self.assertTrue(response)
 
-    
+

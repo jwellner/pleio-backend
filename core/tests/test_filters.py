@@ -1,4 +1,3 @@
-from django_tenants.test.cases import FastTenantTestCase
 from backend2.schema import schema
 from ariadne import graphql_sync
 
@@ -7,14 +6,16 @@ from django.core.cache import cache
 from django.contrib.auth.models import AnonymousUser
 from django.http import HttpRequest
 from core.models import Group, ProfileField, Setting, GroupProfileFieldSetting, UserProfileField, UserProfile
-from core.tests.helpers import ElasticsearchTestMixin
+from core.tests.helpers import ElasticsearchTestCase
 from user.models import User
 from mixer.backend.django import mixer
 
 
-class FiltersTestCase(FastTenantTestCase, ElasticsearchTestMixin):
+class FiltersTestCase(ElasticsearchTestCase):
 
     def setUp(self):
+        super().setUp()
+
         self.anonymousUser = AnonymousUser()
         self.user = mixer.blend(User)
         self.other = mixer.blend(User)
@@ -44,6 +45,8 @@ class FiltersTestCase(FastTenantTestCase, ElasticsearchTestMixin):
                                )
 
     def tearDown(self):
+        super().tearDown()
+
         self.admin.delete()
         self.other.delete()
         self.user.delete()
@@ -63,6 +66,8 @@ class FiltersTestCase(FastTenantTestCase, ElasticsearchTestMixin):
                 }
             }
         """
+
+        self.initialize_index()
 
         request = HttpRequest()
         request.user = self.user

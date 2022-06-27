@@ -1,14 +1,14 @@
 from core.models import Group, GroupProfileFieldSetting, ProfileField, UserProfile, UserProfileField
-from core.tests.helpers import PleioTenantTestCase, ElasticsearchTestMixin
+from core.tests.helpers import ElasticsearchTestCase
 from user.models import User
 
 from mixer.backend.django import mixer
 
 
-class FilterUsersTestCase(PleioTenantTestCase, ElasticsearchTestMixin):
+class FilterUsersTestCase(ElasticsearchTestCase):
 
     def setUp(self):
-        super(FilterUsersTestCase, self).setUp()
+        super().setUp()
 
         self.owner = mixer.blend(User, name="Owner")
         self.group = mixer.blend(Group, owner=self.owner, introduction='introductionMessage')
@@ -54,6 +54,8 @@ class FilterUsersTestCase(PleioTenantTestCase, ElasticsearchTestMixin):
         self.not_a_member = mixer.blend(User, name="Outsider")
 
     def teardown(self):
+        super().tearDown()
+
         self.owner.delete()
         self.group.delete()
         self.admin.delete()

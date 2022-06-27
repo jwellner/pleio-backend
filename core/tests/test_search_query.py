@@ -1,14 +1,19 @@
 import faker
 
 from core.models import SearchQueryJournal
-from core.tests.helpers import PleioTenantTestCase
+from core.tests.helpers import ElasticsearchTestCase
 from user.factories import UserFactory
 
 
-class TestQueryJournalTestCase(PleioTenantTestCase):
+class TestQueryJournalTestCase(ElasticsearchTestCase):
+
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        cls.initialize_index()
 
     def setUp(self):
-        super(TestQueryJournalTestCase, self).setUp()
+        super().setUp()
 
         self.authenticated_user = UserFactory()
         self.query = """

@@ -17,7 +17,6 @@ def resolve_search(_, info, q=None, containerGuid=None, type=None, subtype=None,
     # pylint: disable=redefined-builtin
     # pylint: disable=too-many-locals
     # pylint: disable=too-many-branches
-
     total = 0
     totals = []
 
@@ -27,13 +26,10 @@ def resolve_search(_, info, q=None, containerGuid=None, type=None, subtype=None,
     tenant_name = parse_tenant_config_path("")
     sessionid = request.COOKIES.get('sessionid', None)
 
-    try:
-        SearchQueryJournal.objects.maybe_log_query(
-            query=q,
-            session=sessionid,
-        )
-    except Exception as e:
-        raise Exception("%s: %s" %(e.__class__, e))
+    SearchQueryJournal.objects.maybe_log_query(
+        query=q,
+        session=sessionid,
+    )
 
     if type in ['group', 'user']:
         subtype = type
