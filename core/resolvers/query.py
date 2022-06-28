@@ -1,5 +1,6 @@
 from ariadne import ObjectType
 from django.core.exceptions import ObjectDoesNotExist
+from django.db.models import F
 from graphql import GraphQLError
 from core.models import Entity, Group, EntityView, EntityViewCount
 from user.models import User
@@ -51,10 +52,10 @@ query.set_field("viewer", resolve_viewer)
 
 @query.field("entity")
 def resolve_entity(
-    _,
-    info,
-    guid=None,
-    username=None
+        _,
+        info,
+        guid=None,
+        username=None
 ):
     # pylint: disable=unused-argument
     # pylint: disable=too-many-arguments
@@ -107,23 +108,28 @@ def resolve_entity(
     if not entity:
         return None
 
-    # Increase view count of entities
-    try:
-        Entity.objects.get(id=entity.id)
-        try:
-            view_count = EntityViewCount.objects.get(entity=entity)
-        except ObjectDoesNotExist:
-            view_count = None
-
-        if view_count:
-            view_count.views += 1
-            view_count.save(update_fields=["views"])
-        else:
-            EntityViewCount.objects.create(entity=entity, views=1)
-
-        if user.is_authenticated:
-            EntityView.objects.create(entity=entity, viewer=user)
-    except ObjectDoesNotExist:
-        pass
+    update_view_count(entity.id, user)
 
     return entity
+
+
+def update_view_count(guid, user):
+    # Increase view count of entities
+    try:
+        entity = Entity.objects.get(pk=guid)
+
+        views = 1
+        if user.is_authenticated:
+            EntityView.objects.create(entity=entity, viewer=user)
+            views = EntityView.objects.filter(entity=entity, viewer=user).count()
+
+        if views > 1:
+            return
+
+        if EntityViewCount.objects.filter(entity_id=guid).exists():
+            EntityViewCount.objects.filter(entity_id=guid).update(views=F('views') + 1)
+        else:
+            EntityViewCount.objects.create(entity_id=guid, views=1)
+
+    except ObjectDoesNotExist:
+        pass
