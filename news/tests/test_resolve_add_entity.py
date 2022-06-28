@@ -1,5 +1,6 @@
 from django.utils import timezone
 from core.tests.helpers import PleioTenantTestCase
+from news.models import News
 from user.models import User
 from core.constances import USER_ROLES
 from mixer.backend.django import mixer
@@ -13,6 +14,8 @@ class AddNewsTestCase(PleioTenantTestCase):
         self.authenticatedUser = mixer.blend(User)
         self.adminUser = mixer.blend(User, roles=[USER_ROLES.ADMIN])
         self.editorUser = mixer.blend(User, roles=[USER_ROLES.EDITOR])
+        self.relatedNews1 = mixer.blend(News)
+        self.relatedNews2 = mixer.blend(News)
 
         self.data = {
             "input": {
@@ -28,6 +31,7 @@ class AddNewsTestCase(PleioTenantTestCase):
                 "timePublished": str(timezone.localtime()),
                 "scheduleArchiveEntity": str(timezone.localtime() + timezone.timedelta(days=10)),
                 "scheduleDeleteEntity": str(timezone.localtime() + timezone.timedelta(days=20)),
+                "relatedItems": [self.relatedNews1.guid, self.relatedNews2.guid]
             }
         }
         self.mutation = """
@@ -46,6 +50,11 @@ class AddNewsTestCase(PleioTenantTestCase):
                 url
                 isFeatured
                 source
+                relatedItems {
+                    edges {
+                        guid
+                    }
+                }
             }
             mutation ($input: addEntityInput!) {
                 addEntity(input: $input) {
@@ -82,6 +91,8 @@ class AddNewsTestCase(PleioTenantTestCase):
         self.assertDateEqual(entity["timePublished"], variables['input']['timePublished'])
         self.assertDateEqual(entity["scheduleArchiveEntity"], variables['input']['scheduleArchiveEntity'])
         self.assertDateEqual(entity["scheduleDeleteEntity"], variables['input']['scheduleDeleteEntity'])
+        self.assertEqual(entity["relatedItems"]["edges"][0]["guid"], self.relatedNews1.guid)
+        self.assertEqual(entity["relatedItems"]["edges"][1]["guid"], self.relatedNews2.guid)
 
     def test_add_news_editor(self):
         variables = self.data
@@ -98,3 +109,5 @@ class AddNewsTestCase(PleioTenantTestCase):
         self.assertDateEqual(entity["timePublished"], variables['input']['timePublished'])
         self.assertDateEqual(entity["scheduleArchiveEntity"], variables['input']['scheduleArchiveEntity'])
         self.assertDateEqual(entity["scheduleDeleteEntity"], variables['input']['scheduleDeleteEntity'])
+        self.assertEqual(entity["relatedItems"]["edges"][0]["guid"], self.relatedNews1.guid)
+        self.assertEqual(entity["relatedItems"]["edges"][1]["guid"], self.relatedNews2.guid)

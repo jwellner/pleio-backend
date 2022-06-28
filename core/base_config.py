@@ -105,6 +105,7 @@ DEFAULT_SITE_CONFIG = {
     'SUBGROUPS': (False, 'Subgroups'),
     'GROUP_MEMBER_EXPORT': (False, 'Group member export'),
     'LIMITED_GROUP_ADD': (True, 'Adding of groups limited to admins'),
+    'SHOW_RELATED_ITEMS': (False, 'Show related items'),
 
 
     'ACHIEVEMENTS_ENABLED': (True, 'Achievements enabled'),
