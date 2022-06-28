@@ -1,5 +1,6 @@
 from core.models import Group
 from core.tests.helpers import PleioTenantTestCase
+from news.models import News
 from user.models import User
 from blog.models import Blog
 from core.constances import ACCESS_TYPE, TEXT_TOO_LONG
@@ -27,6 +28,8 @@ class EditBlogTestCase(PleioTenantTestCase):
             owner=self.authenticatedUser,
             is_recommended=False
         )
+        self.relatedBlog = mixer.blend(Blog)
+        self.relatedNews = mixer.blend(News)
 
     def tearDown(self):
         self.blog.delete()
@@ -51,6 +54,7 @@ class EditBlogTestCase(PleioTenantTestCase):
                 "timePublished": None,
                 "scheduleArchiveEntity": str(timezone.localtime() + timezone.timedelta(days=10)),
                 "scheduleDeleteEntity": str(timezone.localtime() + timezone.timedelta(days=20)),
+                "relatedItems": [self.relatedBlog.guid, self.relatedNews.guid]
             }
         }
 
@@ -76,6 +80,11 @@ class EditBlogTestCase(PleioTenantTestCase):
                 }
                 owner {
                     guid
+                }
+                relatedItems {
+                    edges {
+                        guid
+                    }
                 }
 
                 isRecommended
@@ -106,6 +115,8 @@ class EditBlogTestCase(PleioTenantTestCase):
         self.assertEqual(entity["timePublished"], None)
         self.assertDateEqual(entity["scheduleArchiveEntity"], variables['input']['scheduleArchiveEntity'])
         self.assertDateEqual(entity["scheduleDeleteEntity"], variables['input']['scheduleDeleteEntity'])
+        self.assertEqual(entity["relatedItems"]["edges"][0]["guid"], self.relatedBlog.guid)
+        self.assertEqual(entity["relatedItems"]["edges"][1]["guid"], self.relatedNews.guid)
 
         self.blog.refresh_from_db()
 

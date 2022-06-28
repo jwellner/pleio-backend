@@ -2,6 +2,7 @@ from django.core.exceptions import ObjectDoesNotExist
 from elasticsearch_dsl import Search
 from graphql import GraphQLError
 
+from blog.models import Blog
 from core.constances import (ACCESS_TYPE, COULD_NOT_FIND, COULD_NOT_FIND_GROUP,
                              COULD_NOT_SAVE, INVALID_ARCHIVE_AFTER_DATE,
                              NOT_LOGGED_IN, TEXT_TOO_LONG,
@@ -11,8 +12,10 @@ from core.lib import (access_id_to_acl, entity_access_id, html_to_text,
                       tenant_schema)
 from core.models import EntityViewCount, Group
 from core.utils.convert import tiptap_to_text, truncate_rich_description
+from core.utils.entity import load_entity_by_id
 from file.models import FileFolder
 from file.tasks import resize_featured
+from news.models import News
 from user.models import User
 
 
@@ -52,6 +55,23 @@ def resolve_entity_featured(obj, info):
         'videoTitle': obj.featured_video_title,
         'positionY': obj.featured_position_y,
         'alt': obj.featured_alt
+    }
+
+def resolve_entity_related_items(obj, info):
+    # pylint: disable=unused-argument
+
+    related = []
+
+    for item in obj.related_items:
+        entity = load_entity_by_id(item, [Blog, News], fail_if_not_found=False)
+        if entity:
+            related.append(entity)
+
+    total = len(related)
+
+    return {
+        'total': total,
+        'edges': related
     }
 
 
@@ -243,6 +263,9 @@ def assert_valid_abstract(abstract):
         raise GraphQLError(TEXT_TOO_LONG)
 
 # Update
+def resolve_update_related_items(entity, clean_input):
+    if 'relatedItems' in clean_input:
+        entity.related_items = clean_input.get("relatedItems")
 
 def update_publication_dates(entity, clean_input):
     if 'timePublished' in clean_input:

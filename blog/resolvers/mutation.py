@@ -42,6 +42,8 @@ def resolve_add_blog(_, info, input):
 
     shared.resolve_update_is_featured(entity, user, clean_input)
 
+    shared.resolve_update_related_items(entity, clean_input)
+
     entity.save()
 
     entity.add_follow(user)
@@ -89,6 +91,7 @@ def resolve_edit_blog(_, info, input):
 
         shared.resolve_update_time_created(entity, clean_input)
 
+    shared.resolve_update_related_items(entity, clean_input)
 
     entity.save()
 

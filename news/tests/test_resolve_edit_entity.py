@@ -24,6 +24,8 @@ class EditNewsTestCase(PleioTenantTestCase):
             owner=self.authenticatedUser,
             is_featured=False
         )
+        self.relatedNews1 = mixer.blend(News)
+        self.relatedNews2 = mixer.blend(News)
 
         self.data = {
             "input": {
@@ -38,6 +40,7 @@ class EditNewsTestCase(PleioTenantTestCase):
                 "timePublished": str(timezone.localtime()),
                 "scheduleArchiveEntity": str(timezone.localtime() + timezone.timedelta(days=10)),
                 "scheduleDeleteEntity": str(timezone.localtime() + timezone.timedelta(days=20)),
+                "relatedItems": [self.relatedNews1.guid, self.relatedNews2.guid]
             }
         }
         self.mutation = """
@@ -58,6 +61,11 @@ class EditNewsTestCase(PleioTenantTestCase):
                 source
                 owner {
                     guid
+                }
+                relatedItems {
+                    edges {
+                        guid
+                    }
                 }
             }
             mutation ($input: editEntityInput!) {
@@ -86,6 +94,8 @@ class EditNewsTestCase(PleioTenantTestCase):
         self.assertDateEqual(entity["timePublished"], variables['input']['timePublished'])
         self.assertDateEqual(entity["scheduleArchiveEntity"], variables['input']['scheduleArchiveEntity'])
         self.assertDateEqual(entity["scheduleDeleteEntity"], variables['input']['scheduleDeleteEntity'])
+        self.assertEqual(entity["relatedItems"]["edges"][0]["guid"], self.relatedNews1.guid)
+        self.assertEqual(entity["relatedItems"]["edges"][1]["guid"], self.relatedNews2.guid)
 
         self.news.refresh_from_db()
 
