@@ -1,10 +1,10 @@
 from graphql import GraphQLError
-from django.core.exceptions import ObjectDoesNotExist
-from core.constances import NOT_LOGGED_IN, COULD_NOT_FIND, COULD_NOT_FIND_GROUP, COULD_NOT_SAVE, USER_ROLES
-from core.lib import clean_graphql_input, access_id_to_acl
-from core.models import Group
+
+from core.constances import NOT_LOGGED_IN, USER_ROLES
+from core.lib import clean_graphql_input
 from core.resolvers import shared
-from user.models import User
+from core.utils.entity import load_entity_by_id
+
 from ..models import Task
 
 
@@ -15,19 +15,11 @@ def resolve_add_task(_, info, input):
 
     clean_input = clean_graphql_input(input)
 
-    if not user.is_authenticated:
-        raise GraphQLError(NOT_LOGGED_IN)
+    shared.assert_authenticated(user)
 
-    group = None
+    group = shared.get_group(clean_input)
 
-    if 'containerGuid' in clean_input:
-        try:
-            group = Group.objects.get(id=clean_input.get("containerGuid"))
-        except ObjectDoesNotExist:
-            raise GraphQLError(COULD_NOT_FIND_GROUP)
-
-    if group and not group.is_full_member(user) and not user.has_role(USER_ROLES.ADMIN):
-        raise GraphQLError("NOT_GROUP_MEMBER")
+    shared.assert_group_member(user, group)
 
     entity = Task()
 
@@ -37,11 +29,10 @@ def resolve_add_task(_, info, input):
     if group:
         entity.group = group
 
-    entity.read_access = access_id_to_acl(entity, clean_input.get("accessId"))
-    entity.write_access = access_id_to_acl(entity, clean_input.get("writeAccessId"))
+    shared.resolve_update_access_id(entity, clean_input)
 
-    entity.title = clean_input.get("title", "")
-    entity.rich_description = clean_input.get("richDescription", "")
+    shared.resolve_update_title(entity, clean_input)
+    shared.resolve_update_rich_description(entity, clean_input)
 
     shared.update_publication_dates(entity, clean_input)
 
@@ -58,56 +49,24 @@ def resolve_edit_task(_, info, input):
     # pylint: disable=too-many-statements
 
     user = info.context["request"].user
+    entity = load_entity_by_id(input['guid'], [Task])
 
     clean_input = clean_graphql_input(input)
 
-    if not info.context["request"].user.is_authenticated:
-        raise GraphQLError(NOT_LOGGED_IN)
+    shared.assert_authenticated(user)
+    shared.assert_write_access(entity, user)
 
-    try:
-        entity = Task.objects.get(id=clean_input.get("guid"))
-    except ObjectDoesNotExist:
-        raise GraphQLError(COULD_NOT_FIND)
-
-    if not entity.can_write(user):
-        raise GraphQLError(COULD_NOT_SAVE)
-
-    if 'title' in clean_input:
-        entity.title = clean_input.get("title")
-
-    if 'richDescription' in clean_input:
-        entity.rich_description = clean_input.get("richDescription")
-
-    if 'tags' in clean_input:
-        entity.tags = clean_input.get("tags")
-    if 'accessId' in clean_input:
-        entity.read_access = access_id_to_acl(entity, clean_input.get("accessId"))
-    if 'writeAccessId' in clean_input:
-        entity.write_access = access_id_to_acl(entity, clean_input.get("writeAccessId"))
-
+    shared.resolve_update_title(entity, clean_input)
+    shared.resolve_update_rich_description(entity, clean_input)
+    shared.resolve_update_tags(entity, clean_input)
+    shared.resolve_update_access_id(entity, clean_input)
     shared.update_publication_dates(entity, clean_input)
 
     # only admins can edit these fields
     if user.has_role(USER_ROLES.ADMIN):
-        if 'groupGuid' in input:
-            if input.get("groupGuid") is None:
-                entity.group = None
-            else:
-                try:
-                    group = Group.objects.get(id=clean_input.get("groupGuid"))
-                    entity.group = group
-                except ObjectDoesNotExist:
-                    raise GraphQLError(COULD_NOT_FIND)
-
-        if 'ownerGuid' in clean_input:
-            try:
-                owner = User.objects.get(id=clean_input.get("ownerGuid"))
-                entity.owner = owner
-            except ObjectDoesNotExist:
-                raise GraphQLError(COULD_NOT_FIND)
-
-        if 'timeCreated' in clean_input:
-            entity.created_at = clean_input.get("timeCreated")
+        shared.resolve_update_group(entity, clean_input)
+        shared.resolve_update_owner(entity, clean_input)
+        shared.resolve_update_time_created(entity, clean_input)
 
     entity.save()
 
@@ -120,24 +79,21 @@ def resolve_edit_task_state(_, info, input):
     # pylint: disable=redefined-builtin
 
     user = info.context["request"].user
+    entity = load_entity_by_id(input['guid'], [Task])
 
     clean_input = clean_graphql_input(input)
 
-    if not info.context["request"].user.is_authenticated:
-        raise GraphQLError(NOT_LOGGED_IN)
+    shared.assert_authenticated(user)
+    shared.assert_write_access(entity, user)
 
-    try:
-        entity = Task.objects.get(id=clean_input.get("guid"))
-    except ObjectDoesNotExist:
-        raise GraphQLError(COULD_NOT_FIND)
+    resolve_update_state(entity, clean_input)
 
-    if not entity.can_write(user):
-        raise GraphQLError(COULD_NOT_SAVE)
-
-    if 'state' in clean_input:
-        entity.state = clean_input.get("state")
     entity.save()
 
     return {
         "entity": entity
     }
+
+def resolve_update_state(entity, clean_input):
+    if 'state' in clean_input:
+        entity.state = clean_input.get("state")

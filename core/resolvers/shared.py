@@ -1,14 +1,22 @@
-from elasticsearch_dsl import Search
-
-from core.constances import ACCESS_TYPE, TEXT_TOO_LONG, INVALID_ARCHIVE_AFTER_DATE
-from core.models import EntityViewCount
 from django.core.exceptions import ObjectDoesNotExist
-
-from core.utils.convert import tiptap_to_text, truncate_rich_description
+from elasticsearch_dsl import Search
 from graphql import GraphQLError
-from core.lib import html_to_text, tenant_schema, entity_access_id
+
+from blog.models import Blog
+from core.constances import (ACCESS_TYPE, COULD_NOT_FIND, COULD_NOT_FIND_GROUP,
+                             COULD_NOT_SAVE, INVALID_ARCHIVE_AFTER_DATE,
+                             NOT_LOGGED_IN, TEXT_TOO_LONG,
+                             USER_NOT_MEMBER_OF_GROUP, USER_NOT_SITE_ADMIN,
+                             USER_ROLES)
+from core.lib import (access_id_to_acl, entity_access_id, html_to_text,
+                      tenant_schema)
+from core.models import EntityViewCount, Group
+from core.utils.convert import tiptap_to_text, truncate_rich_description
+from core.utils.entity import load_entity_by_id
 from file.models import FileFolder
 from file.tasks import resize_featured
+from news.models import News
+from user.models import User
 
 
 def resolve_entity_access_id(obj, info):
@@ -47,6 +55,23 @@ def resolve_entity_featured(obj, info):
         'videoTitle': obj.featured_video_title,
         'positionY': obj.featured_position_y,
         'alt': obj.featured_alt
+    }
+
+def resolve_entity_related_items(obj, info):
+    # pylint: disable=unused-argument
+
+    related = []
+
+    for item in obj.related_items:
+        entity = load_entity_by_id(item, [Blog, News], fail_if_not_found=False)
+        if entity:
+            related.append(entity)
+
+    total = len(related)
+
+    return {
+        'total': total,
+        'edges': related
     }
 
 
@@ -232,6 +257,15 @@ def resolve_entity_is_pinned(obj, info):
         return obj.is_pinned
     return False
 
+def assert_valid_abstract(abstract):
+    text = html_to_text(abstract).strip()
+    if len(text) > 320:
+        raise GraphQLError(TEXT_TOO_LONG)
+
+# Update
+def resolve_update_related_items(entity, clean_input):
+    if 'relatedItems' in clean_input:
+        entity.related_items = clean_input.get("relatedItems")
 
 def update_publication_dates(entity, clean_input):
     if 'timePublished' in clean_input:
@@ -288,9 +322,112 @@ def update_featured_image(entity, clean_input, image_owner=None):
         entity.featured_video_title = ""
         entity.featured_alt = ""
 
+def resolve_update_title(entity, clean_input):
+    if 'title' in clean_input:
+        entity.title = clean_input.get("title")
 
-# TODO: this function should be moved later on to a shared class
-def clean_abstract(abstract):
-    text = html_to_text(abstract).strip()
-    if len(text) > 320:
-        raise GraphQLError(TEXT_TOO_LONG)
+def resolve_update_rich_description(entity, clean_input):
+    if 'richDescription' in clean_input:
+        entity.rich_description = clean_input.get("richDescription")
+
+def resolve_update_tags(entity, clean_input):
+    if 'tags' in clean_input:
+        entity.tags = clean_input.get("tags")
+
+def resolve_update_access_id(entity, clean_input):
+    if 'accessId' in clean_input:
+        entity.read_access = access_id_to_acl(entity, clean_input.get("accessId"))
+    if 'writeAccessId' in clean_input:
+        entity.write_access = access_id_to_acl(entity, clean_input.get("writeAccessId"))
+
+def resolve_update_group(entity, clean_input):
+    if 'groupGuid' in clean_input:
+        if clean_input["groupGuid"]:
+            try:
+                entity.group = Group.objects.get(id=clean_input["groupGuid"])
+            except Group.DoesNotExist:
+                raise GraphQLError(COULD_NOT_FIND)
+        else: 
+            entity.group = None
+
+def resolve_update_owner(entity, clean_input):
+    if 'ownerGuid' in clean_input:
+        try:
+            owner = User.objects.get(id=clean_input.get("ownerGuid"))
+            entity.owner = owner
+        except ObjectDoesNotExist:
+            raise GraphQLError(COULD_NOT_FIND)
+
+def resolve_update_time_created(entity, clean_input):
+    if 'timeCreated' in clean_input:
+        entity.created_at = clean_input.get("timeCreated")
+
+def resolve_update_abstract(entity, clean_input):
+    if 'abstract' in clean_input:
+        abstract = clean_input.get("abstract")
+        assert_valid_abstract(abstract)
+        entity.abstract = abstract
+
+def resolve_update_is_featured(entity, user, clean_input):
+    if user.has_role(USER_ROLES.ADMIN) or user.has_role(USER_ROLES.EDITOR):
+        if 'isFeatured' in clean_input:
+            entity.is_featured = clean_input.get("isFeatured")
+
+def resolve_update_is_recommended(entity, user, clean_input):
+    if user.has_role(USER_ROLES.ADMIN) or user.has_role(USER_ROLES.EDITOR):
+        if 'isRecommended' in clean_input:
+            entity.is_recommended = clean_input.get("isRecommended")
+
+# Group
+def get_group(clean_input):
+    if 'containerGuid' in clean_input:
+        try:
+            group = Group.objects.get(id=clean_input.get("containerGuid"))
+            return group
+        except ObjectDoesNotExist:
+            raise GraphQLError(COULD_NOT_FIND_GROUP)
+    else:
+        return None
+
+# Checks
+def assert_administrator(user):
+    if not user.has_role(USER_ROLES.ADMIN):
+        raise GraphQLError(USER_NOT_SITE_ADMIN)
+
+def assert_authenticated(user):
+    if not user.is_authenticated:
+        raise GraphQLError(NOT_LOGGED_IN)
+
+def assert_write_access(entity, user):
+    if not entity.can_write(user):
+        raise GraphQLError(COULD_NOT_SAVE) 
+
+def assert_group_member(user, group):
+    if group and not group.is_full_member(user) and not user.has_role(USER_ROLES.ADMIN):
+        raise GraphQLError(USER_NOT_MEMBER_OF_GROUP)
+
+# Site setting profile field
+
+def resolve_update_is_editable(profile_field, clean_input):
+    if 'isEditable' in clean_input:
+        profile_field.is_editable_by_user = clean_input["isEditable"]
+
+def resolve_update_is_filter(profile_field, clean_input):
+    if 'isFilter' in clean_input:
+        profile_field.is_filter = clean_input["isFilter"]
+
+def resolve_update_is_in_overview(profile_field, clean_input):
+    if 'isInOverview' in clean_input:
+        profile_field.is_in_overview = clean_input["isInOverview"]
+
+def resolve_update_is_on_v_card(profile_field, clean_input):
+    if 'isOnVcard' in clean_input:
+        profile_field.is_on_vcard = clean_input['isOnVcard']
+
+def resolve_update_is_in_onboarding(profile_field, clean_input):
+    if 'isInOnboarding' in clean_input:
+        profile_field.is_in_onboarding = clean_input["isInOnboarding"]
+
+def resolve_update_is_mandatory(profile_field, clean_input):
+    if 'isMandatory' in clean_input:
+        profile_field.is_mandatory = clean_input["isMandatory"]

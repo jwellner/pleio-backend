@@ -2,6 +2,8 @@ from django.db import connection
 from django.conf import settings
 from django.core.cache import cache
 from django.core.files import File
+
+from core import override_local_config
 from core.models import ProfileField
 from core.tests.helpers import PleioTenantTestCase
 from user.factories import UserFactory, AdminFactory
@@ -132,13 +134,14 @@ class AddGroupCase(PleioTenantTestCase):
         self.assertEqual(data["addGroup"]["group"]["isFeatured"], False)
         self.assertEqual(data["addGroup"]["group"]["isLeavingGroupDisabled"], False)
         self.assertEqual(data["addGroup"]["group"]["isAutoMembershipEnabled"], False)
-        self.assertEqual(data["addGroup"]["group"]["isSubmitUpdatesEnabled"], True)
+        self.assertEqual(data["addGroup"]["group"]["isSubmitUpdatesEnabled"], False)
         self.assertEqual(data["addGroup"]["group"]["autoNotification"], variables["group"]["autoNotification"])
         self.assertEqual(data["addGroup"]["group"]["tags"], ["tag_one", "tag_two"])
         self.assertEqual(data["addGroup"]["group"]["requiredProfileFields"], [{"guid": self.profile_field.guid}])
 
         cache.clear()
 
+    @override_local_config(LIMITED_GROUP_ADD=True)
     def test_add_group_limited_group_add(self):
         mutation = """
             mutation ($group: addGroupInput!) {
@@ -162,7 +165,6 @@ class AddGroupCase(PleioTenantTestCase):
             }
         """
         variables = self.data
-
         with self.assertGraphQlError('could_not_save'):
             self.graphql_client.force_login(self.user)
             self.graphql_client.post(mutation, variables)

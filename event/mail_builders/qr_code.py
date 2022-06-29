@@ -1,102 +1,89 @@
 from email.mime.image import MIMEImage
-from email.utils import formataddr
 from io import BytesIO
 
 import qrcode
-from django.conf import settings
-from django.core.mail import EmailMultiAlternatives
-from django.template.loader import get_template
+from django.utils.crypto import get_random_string
 from django.utils.text import slugify
 from django.utils.translation import gettext as _
 
-from core import config
-from core.lib import get_full_url, get_default_email_context, html_to_text, generate_code
-from core.mail_builders.base import MailerBase
+from core.lib import get_full_url, generate_code
+from core.mail_builders.template_mailer import TemplateMailerBase
 from event.lib import get_url
-from event.models import EventAttendee
 
 
-class QrMailer(MailerBase):
+class QrMailer(TemplateMailerBase):
     _html = None
     _filename = None
 
-    def __init__(self, attendee: EventAttendee):
-        self.attendee = attendee
+    def __init__(self, attendee):
+        from event.models import EventAttendee
+        self.attendee = EventAttendee.objects.get(id=attendee)
+        self.content_id = get_random_string(length=32)
 
-    @property
-    def code(self):
+    def get_code(self):
         if not self.attendee.code:
             self.attendee.code = generate_code()
             self.attendee.save()
         return self.attendee.code
 
-    @property
-    def filename(self):
-        if not self._filename:
-            if hasattr(self.attendee.event, 'title') and self.attendee.event.title:
-                file_name = slugify(self.attendee.event.title)[:238].removesuffix("-")
-            else:
-                file_name = self.attendee.event.id
-            self._filename = f"qr_access_{file_name}.png"
-        return self._filename
+    def get_filename(self):
+        if self.attendee.event.title:
+            file_name = slugify(self.attendee.event.title)[:238].removesuffix("-")
+        else:
+            file_name = self.attendee.event.id
+        return f"qr_access_{file_name}.png"
 
-    @property
-    def subject(self):
+    def get_subject(self):
         return _("QR code for %s") % self.attendee.event.title
 
-    @property
-    def attachment(self):
-        qr_code = qrcode.make(get_full_url(f"/events/view/guest-list?code={self.code}"))
-        stream = BytesIO()
-        qr_code.save(stream, format="png")
-        stream.seek(0)
-        img_obj = stream.read()
-        code_image = MIMEImage(img_obj, name=self.filename, _subtype='png')
-        code_image.add_header('Content-Disposition', f'attachment; filename="{self.filename}"')
-        code_image.add_header('Content-ID', self.filename)
-        return code_image
+    def get_qr_code_url(self):
+        return get_full_url(f"/events/view/guest-list?code={self.get_code()}")
 
-    @property
-    def html_content(self):
-        if not self._html:
-            context = get_default_email_context(self.attendee.user)
-            context['title'] = self.attendee.event.title
-            context['location'] = self.attendee.event.location
-            context['locationAddress'] = self.attendee.event.location_address
-            context['locationLink'] = self.attendee.event.location_link
-            context['startDate'] = self.attendee.event.start_date
-            context['link'] = get_url(self.attendee.event)
-            context['qr_filename'] = f"cid:{self.filename}"
+    def get_receiver_email(self):
+        return self.attendee.email
 
-            html_template = get_template('email/attend_event_with_qr_access.html')
-            self._html = html_template.render(context)
-        return self._html
+    def get_receiver(self):
+        return self.attendee.user
 
-    @property
-    def from_email(self):
-        return formataddr((config.NAME, settings.FROM_EMAIL))
-
-    @property
-    def reply_to(self):
+    def get_sender(self):
         return None
 
-    @property
-    def to(self):
-        return [self.attendee.email]
+    def get_context(self):
+        context = self.build_context(user=self.attendee.user)
+        context['title'] = self.attendee.event.title
+        context['location'] = self.attendee.event.location
+        context['locationAddress'] = self.attendee.event.location_address
+        context['locationLink'] = self.attendee.event.location_link
+        context['startDate'] = self.attendee.event.start_date
+        context['link'] = get_url(self.attendee.event)
+        context['qr_filename'] = f"cid:{self.content_id}"
+        return context
 
-    @property
-    def text_content(self):
-        return html_to_text(self.html_content)
+    def get_template(self):
+        return 'email/attend_event_with_qr_access.html'
 
-    def send(self):
-        if self.ignore_email(self.attendee.email):
-            return
+    def get_language(self):
+        return self.attendee.language
 
-        email = EmailMultiAlternatives(subject=self.subject,
-                                       body=self.text_content,
-                                       from_email=self.from_email,
-                                       to=self.to,
-                                       reply_to=self.reply_to)
-        email.attach_alternative(self.html_content, "text/html")
-        email.attach(self.attachment)
-        email.send()
+    def pre_send(self, email):
+        email.attach(self.get_attachment())
+
+    def get_attachment(self):
+        stream = BytesIO()
+        qr_code = qrcode.make(self.get_qr_code_url())
+        qr_code.save(stream, format="png")
+
+        stream.seek(0)
+        img_obj = stream.read()
+        filename = self.get_filename()
+        code_image = MIMEImage(img_obj, name=filename, _subtype='png')
+        code_image.add_header('Content-Disposition', f'attachment; filename="{filename}"')
+        code_image.add_header('Content-ID', self.content_id)
+        return code_image
+
+
+def send_event_qr(attendee):
+    from core.models import MailInstance
+    MailInstance.objects.submit(QrMailer, mailer_kwargs={
+        'attendee': attendee.id
+    })

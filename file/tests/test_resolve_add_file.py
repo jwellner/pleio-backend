@@ -3,6 +3,7 @@ import json
 from django.core.files import File
 from django.conf import settings
 from core.models import Group
+from core.constances import USER_NOT_MEMBER_OF_GROUP
 from core.tests.helpers import PleioTenantTestCase
 from user.models import User
 from file.models import FileFolder
@@ -117,7 +118,7 @@ class AddFileTestCase(PleioTenantTestCase):
         variables = self.data
 
         self.graphql_client.force_login(self.authenticatedUser2)
-        with self.assertGraphQlError("NOT_GROUP_MEMBER"):
+        with self.assertGraphQlError(USER_NOT_MEMBER_OF_GROUP):
             self.graphql_client.post(self.mutation, variables)
 
     @patch("core.lib.get_mimetype")
@@ -175,7 +176,7 @@ class AddFileTestCase(PleioTenantTestCase):
         }
 
         self.graphql_client.force_login(self.authenticatedUser2)
-        with self.assertGraphQlError("NOT_GROUP_MEMBER"):
+        with self.assertGraphQlError(USER_NOT_MEMBER_OF_GROUP):
             self.graphql_client.post(mutation, variables)
 
     @patch("core.lib.get_mimetype")

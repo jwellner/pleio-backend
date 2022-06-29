@@ -98,6 +98,7 @@ input addEntityInput {
   scheduleArchiveEntity: DateTime
   scheduleDeleteEntity: DateTime
   qrAccess: Boolean
+  relatedItems: [String]
 }
 
 type addEntityPayload {
@@ -312,6 +313,7 @@ type Blog implements Entity {
   comments: [Comment]
   commentCount: Int
   isPinned: Boolean!
+  relatedItems: EntityList
 }
 
 input bookmarkInput {
@@ -591,6 +593,7 @@ input editEntityInput {
   groupGuid: String
   ownerGuid: String
   qrAccess: Boolean
+  relatedItems: [String]
 }
 
 type editEntityPayload {
@@ -802,6 +805,7 @@ input editSiteSettingInput {
   statusUpdateGroups: Boolean
   subgroups: Boolean
   groupMemberExport: Boolean
+  showRelatedItems: Boolean
   questionLockAfterActivity: Boolean
   questionLockAfterActivityLink: String
   redirects: [RedirectInput]
@@ -1438,6 +1442,7 @@ type News implements Entity {
   comments: [Comment]
   commentCount: Int
   isPinned: Boolean!
+  relatedItems: EntityList
 }
 
 type Notification {
@@ -1596,6 +1601,12 @@ type Query {
     orderBy: SearchOrderBy
     orderDirection: OrderDirection
   ): SearchList
+  searchJournal(
+    dateTimeFrom: DateTime,
+    dateTimeTo: DateTime,
+    offset: Int
+    limit: Int
+  ): SearchJournal
   recommended(offset: Int, limit: Int): EntityList
   trending: [TrendingList]
   top: [TopItem]
@@ -1760,6 +1771,16 @@ type SearchList {
   total: Int!
   totals: [SearchTotal]
   edges: [Entity]
+}
+
+type SearchJournal {
+  total: Int
+  edges: [SearchJournalSummary]
+}
+
+type SearchJournalSummary {
+  query: String
+  count: Int
 }
 
 """
@@ -1967,6 +1988,7 @@ type SiteSettings {
   statusUpdateGroups: Boolean!
   subgroups: Boolean!
   groupMemberExport: Boolean!
+  showRelatedItems: Boolean!
   questionLockAfterActivity: Boolean!
   questionLockAfterActivityLink: String
   redirects: [Redirect]

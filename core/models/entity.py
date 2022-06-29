@@ -122,6 +122,9 @@ class Entity(models.Model, TagsMixin):
     _tag_summary = ArrayField(models.CharField(max_length=256),
                               blank=True, default=list,
                               db_column='tags')
+    
+    related_items = ArrayField (models.UUIDField(default=uuid.uuid4),
+                                blank=True, null=True)
 
     notifications_created = models.BooleanField(default=False)
 

@@ -1,22 +1,22 @@
 from auditlog.registry import auditlog
+from django.core.exceptions import ObjectDoesNotExist
 from django.db import models
-from django_tenants.utils import parse_tenant_config_path
+from django.db.models.signals import post_save, pre_save
+from django.dispatch import receiver
+from django.utils import timezone
+from django.utils.text import slugify
 from django.utils.translation import ugettext_lazy
+from django_tenants.utils import parse_tenant_config_path
 
 from core import config
 from core.lib import get_default_email_context
-from core.models import Entity, CommentMixin, BookmarkMixin, NotificationMixin, FollowMixin, FeaturedCoverMixin, \
-    ArticleMixin, AttachmentMixin
+from core.models import (ArticleMixin, AttachmentMixin, BookmarkMixin,
+                         CommentMixin, Entity, FeaturedCoverMixin, FollowMixin,
+                         NotificationMixin)
 from core.tasks import send_mail_multi
 from event.lib import get_url
-from event.utils import send_event_qr
+from event.mail_builders.qr_code import send_event_qr
 from user.models import User
-from django.core.exceptions import ObjectDoesNotExist
-from django.db.models.signals import pre_save, post_save
-from django.dispatch import receiver
-from django.utils.text import slugify
-from django.utils import timezone
-
 
 class Event(Entity,
             CommentMixin, BookmarkMixin, FollowMixin, NotificationMixin, FeaturedCoverMixin, ArticleMixin,

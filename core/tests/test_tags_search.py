@@ -1,15 +1,11 @@
-from ariadne import graphql_sync
-from django.http import HttpRequest
-from django_tenants.test.cases import FastTenantTestCase
 from mixer.backend.django import mixer
 
-from backend2.schema import schema
 from core.models import Group, TagSynonym, Tag
-from core.tests.helpers import ElasticsearchTestMixin
-from user.models import User
+from core.tests.helpers import ElasticsearchTestCase
+from user.factories import UserFactory
 
 
-class TestTagsSearchTestCase(FastTenantTestCase, ElasticsearchTestMixin):
+class TestTagsSearchTestCase(ElasticsearchTestCase):
 
     def setUp(self):
         super().setUp()
@@ -18,8 +14,7 @@ class TestTagsSearchTestCase(FastTenantTestCase, ElasticsearchTestMixin):
         self.group_f.tags = ['Fiets']
         self.group_f.save()
 
-        self.request = HttpRequest()
-        self.request.user = mixer.blend(User, name='visitor')
+        self.authenticated_user = UserFactory(name='visitor')
 
         self.query = """
         query SearchGroups($q: String!) {
@@ -42,13 +37,8 @@ class TestTagsSearchTestCase(FastTenantTestCase, ElasticsearchTestMixin):
         group_t.save()
 
         self.initialize_index()
-
-        success, result = graphql_sync(schema, {
-            "query": self.query,
-            "variables": self.variables,
-        }, context_value={"request": self.request})
-
-        self.assertNotIn('errors', result, msg=result)
+        self.graphql_client.force_login(self.authenticated_user)
+        result = self.graphql_client.post(self.query, self.variables)
         groups = [d['name'] for d in result['data']['search']['edges']]
 
         self.assertIn(self.group_f.name, groups)
@@ -61,13 +51,8 @@ class TestTagsSearchTestCase(FastTenantTestCase, ElasticsearchTestMixin):
         group_t.save()
 
         self.initialize_index()
-
-        success, result = graphql_sync(schema, {
-            "query": self.query,
-            "variables": self.variables,
-        }, context_value={"request": self.request})
-
-        self.assertNotIn('errors', result, msg=result)
+        self.graphql_client.force_login(self.authenticated_user)
+        result = self.graphql_client.post(self.query, self.variables)
         groups = [d['name'] for d in result['data']['search']['edges']]
 
         self.assertIn(self.group_f.name, groups)

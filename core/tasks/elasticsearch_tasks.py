@@ -45,8 +45,6 @@ def elasticsearch_recreate_indices(index_name=None):
 
 @app.task(ignore_result=True)
 def elasticsearch_rebuild_all(index_name=None):
-    # pylint: disable=unused-argument
-    # pylint: disable=protected-access
     '''
     Delete indexes, creates indexes and populate tenants
 
@@ -55,45 +53,36 @@ def elasticsearch_rebuild_all(index_name=None):
 
     '''
     for client in Client.objects.exclude(schema_name='public'):
-        elasticsearch_rebuild.delay(client.schema_name, index_name)
+        elasticsearch_rebuild_for_tenant.delay(client.schema_name, index_name)
 
 
 @app.task(ignore_result=True)
-def elasticsearch_rebuild(schema_name, index_name=None):
-    # pylint: disable=unused-argument
-    # pylint: disable=protected-access
-    '''
-    Rebuild search index for tenant
-    '''
-    with schema_context(schema_name):
-        logger.info('elasticsearch_rebuild \'%s\'', schema_name)
-
-        if index_name:
-            models = [get_model_by_subtype(index_name)]
-        else:
-            models = registry.get_models()
-
-        for index in registry.get_indices(models):
-            elasticsearch_repopulate_index_for_tenant.delay(schema_name, index._name)
-
-
-@app.task(ignore_result=True)
-def elasticsearch_repopulate_index_for_tenant(schema_name, index_name=None):
+def elasticsearch_rebuild_for_tenant(schema_name, index_name=None):
     # pylint: disable=unused-argument
     # pylint: disable=protected-access
     '''
     Rebuild index for tenant
     '''
     with schema_context(schema_name):
-        logger.info('elasticsearch_repopulate_index_for_tenant \'%s\' \'%s\'', index_name, schema_name)
+        logger.info('elasticsearch_rebuild_for_tenant \'%s\' \'%s\'', index_name, schema_name)
 
+        elasticsearch_delete_data_for_tenant(schema_name, index_name)
+        elasticsearch_index_data_for_tenant(schema_name, index_name)
+
+
+@app.task(ignore_result=True)
+def elasticsearch_index_data_for_all(index_name=None):
+    for client in Client.objects.exclude(schema_name='public'):
+        elasticsearch_index_data_for_tenant.delay(client.schema_name, index_name)
+
+
+@app.task(ignore_result=True)
+def elasticsearch_index_data_for_tenant(schema_name, index_name=None):
+    with schema_context(schema_name):
         if index_name:
             models = [get_model_by_subtype(index_name)]
         else:
             models = registry.get_models()
-
-        for index in registry.get_indices(models):
-            elasticsearch_delete_data_for_tenant(schema_name, index._name)
 
         for doc in registry.get_documents(models):
             logger.info("indexing %i '%s' objects",
@@ -107,30 +96,7 @@ def elasticsearch_repopulate_index_for_tenant(schema_name, index_name=None):
                 doc().update(qs, parallel=False, chunk_size=500)
 
 
-@app.task(autoretry_for=(ElasticsearchConnectionError,), retry_backoff=10, max_retries=10)
-def elasticsearch_index_document(schema_name, document_guid, document_classname):
-    with schema_context(schema_name):
-        try:
-            instance = load_entity_by_id(document_guid, [Group, Entity, User], fail_if_not_found=False)
-            if instance:
-                registry.update(instance)
-                registry.update_related(instance)
-            else:
-                delete_document_if_found(document_guid)
-            return f"{schema_name}.{document_classname}.{document_guid}"
-        except ElasticsearchConnectionError as known_error:
-            # Fall through for known errors.
-            raise known_error
-        except Exception as e:
-            logger.error(f"elasticsearch_document_index_error: %(error_class)s msg=%(error_message)s schema=%(schema_name)s document=%(document_id)s" % {
-                'error_class': e.__class__.__name__,
-                'error_message': str(e),
-                'schema_name': schema_name,
-                'document_id': f"{document_classname}.{document_guid}",
-            })
-
-
-@app.task
+@app.task(ignore_result=True)
 def elasticsearch_delete_data_for_tenant(schema_name, index_name=None):
     '''
     Delete tenant data from elasticsearch
@@ -154,3 +120,26 @@ def elasticsearch_delete_data_for_tenant(schema_name, index_name=None):
 
         logger.info('deleting %i %s objects', s.count(), index._name)
         s.delete()
+
+
+@app.task(autoretry_for=(ElasticsearchConnectionError,), retry_backoff=10, max_retries=10)
+def elasticsearch_index_document(schema_name, document_guid, document_classname):
+    with schema_context(schema_name):
+        try:
+            instance = load_entity_by_id(document_guid, [Group, Entity, User], fail_if_not_found=False)
+            if instance:
+                registry.update(instance)
+                registry.update_related(instance)
+            else:
+                delete_document_if_found(document_guid)
+            return f"{schema_name}.{document_classname}.{document_guid}"
+        except ElasticsearchConnectionError as known_error:
+            # Fall through for known errors.
+            raise known_error
+        except Exception as e:
+            logger.error(f"elasticsearch_document_index_error: %(error_class)s msg=%(error_message)s schema=%(schema_name)s document=%(document_id)s" % {
+                'error_class': e.__class__.__name__,
+                'error_message': str(e),
+                'schema_name': schema_name,
+                'document_id': f"{document_classname}.{document_guid}",
+            })

@@ -1,14 +1,17 @@
-from graphql import GraphQLError
-from django.core.exceptions import ObjectDoesNotExist
 from ariadne import ObjectType
+from django.core.exceptions import ObjectDoesNotExist
+from graphql import GraphQLError
+
 from core import config
-from core.constances import ACCESS_TYPE, NOT_LOGGED_IN, COULD_NOT_FIND, COULD_NOT_SAVE, USER_ROLES
-from core.lib import clean_graphql_input, access_id_to_acl
+from core.constances import ACCESS_TYPE, COULD_NOT_SAVE
+from core.lib import access_id_to_acl, clean_graphql_input
 from core.models import Group
 from core.resolvers import shared
+from core.utils.entity import load_entity_by_id
 from user.models import User
+
 from ..helpers.post_processing import ensure_correct_file_without_signals
-from ..models import FileFolder, FILE_SCAN
+from ..models import FILE_SCAN, FileFolder
 
 
 def update_access_recursive(user, entity, access_id, write_access_id):
@@ -61,8 +64,7 @@ def resolve_add_file(_, info, input):
 
     clean_input = clean_graphql_input(input)
 
-    if not user.is_authenticated:
-        raise GraphQLError(NOT_LOGGED_IN)
+    shared.assert_authenticated(user)
 
     group = None
     parent = None
@@ -83,8 +85,7 @@ def resolve_add_file(_, info, input):
     if parent and parent.group:
         group = parent.group
 
-    if group and not group.is_full_member(user) and not user.has_role(USER_ROLES.ADMIN):
-        raise GraphQLError("NOT_GROUP_MEMBER")
+    shared.assert_group_member(user, group)
 
     if not clean_input.get("file"):
         raise GraphQLError("NO_FILE")
@@ -105,8 +106,7 @@ def resolve_add_file(_, info, input):
     entity.read_access = access_id_to_acl(entity, clean_input.get("accessId", config.DEFAULT_ACCESS_ID))
     entity.write_access = access_id_to_acl(entity, clean_input.get("writeAccessId"))
 
-    if 'richDescription' in clean_input:
-        entity.rich_description = clean_input.get('richDescription')
+    shared.resolve_update_rich_description(entity, clean_input)
 
     shared.update_publication_dates(entity, clean_input)
 
@@ -133,8 +133,7 @@ def resolve_add_folder(_, info, input):
 
     clean_input = clean_graphql_input(input)
 
-    if not user.is_authenticated:
-        raise GraphQLError(NOT_LOGGED_IN)
+    shared.assert_authenticated(user)
 
     group = None
     parent = None
@@ -155,18 +154,17 @@ def resolve_add_folder(_, info, input):
     if parent and parent.group:
         group = parent.group
 
-    if group and not group.is_full_member(user) and not user.has_role(USER_ROLES.ADMIN):
-        raise GraphQLError("NOT_GROUP_MEMBER")
+    shared.assert_group_member(user, group)
 
     entity = FileFolder()
 
     entity.owner = user
     entity.tags = clean_input.get("tags", [])
-    entity.title = clean_input.get("title")
+    shared.resolve_update_title(entity, clean_input)
+    
     entity.is_folder = True
 
-    if 'richDescription' in clean_input:
-        entity.rich_description = clean_input.get('richDescription')
+    shared.resolve_update_rich_description(entity, clean_input)
 
     shared.update_publication_dates(entity, clean_input)
 
@@ -176,8 +174,7 @@ def resolve_add_folder(_, info, input):
     if group:
         entity.group = group
 
-    entity.read_access = access_id_to_acl(entity, clean_input.get("accessId"))
-    entity.write_access = access_id_to_acl(entity, clean_input.get("writeAccessId"))
+    shared.resolve_update_access_id(entity, clean_input)
 
     entity.save()
 
@@ -191,41 +188,24 @@ def resolve_edit_file_folder(_, info, input):
     # pylint: disable=redefined-builtin
 
     user = info.context["request"].user
+    entity = load_entity_by_id(input['guid'], [FileFolder])
 
     clean_input = clean_graphql_input(input)
 
-    if not user.is_authenticated:
-        raise GraphQLError(NOT_LOGGED_IN)
+    shared.assert_authenticated(user)
+    shared.assert_write_access(entity, user)
 
-    try:
-        entity = FileFolder.objects.get(id=clean_input.get("guid"))
-    except ObjectDoesNotExist:
-        raise GraphQLError(COULD_NOT_FIND)
+    shared.resolve_update_tags(entity, clean_input)
 
-    if not entity.can_write(user):
-        raise GraphQLError(COULD_NOT_SAVE)
+    shared.resolve_update_title(entity, clean_input)
 
-    if 'tags' in clean_input:
-        entity.tags = clean_input.get("tags")
-
-    if 'title' in clean_input and clean_input.get("title"):
-        entity.title = clean_input.get("title")
-
-    if 'richDescription' in clean_input:
-        entity.rich_description = clean_input.get('richDescription')
-
-    if 'file' in clean_input:
-        entity.upload = clean_input.get("file")
-        if entity.scan() == FILE_SCAN.VIRUS:
-            raise GraphQLError("INVALID_FILE")
+    shared.resolve_update_rich_description(entity, clean_input)
 
     shared.update_publication_dates(entity, clean_input)
 
-    if 'accessId' in clean_input:
-        entity.read_access = access_id_to_acl(entity, clean_input.get("accessId"))
-
-    if 'writeAccessId' in clean_input:
-        entity.write_access = access_id_to_acl(entity, clean_input.get("writeAccessId"))
+    shared.resolve_update_access_id(entity, clean_input)
+    
+    resolve_update_file(entity, clean_input)
 
     if entity.is_folder and clean_input.get("isAccessRecursive", False):
         update_access_recursive(user, entity, clean_input.get("accessId"), clean_input.get("writeAccessId"))
@@ -250,19 +230,12 @@ def resolve_move_file_folder(_, info, input):
     # pylint: disable=redefined-builtin
 
     user = info.context["request"].user
+    entity = load_entity_by_id(input['guid'], [FileFolder])
 
     clean_input = clean_graphql_input(input)
 
-    if not user.is_authenticated:
-        raise GraphQLError(NOT_LOGGED_IN)
-
-    try:
-        entity = FileFolder.objects.get(id=clean_input.get("guid"))
-    except ObjectDoesNotExist:
-        raise GraphQLError(COULD_NOT_FIND)
-
-    if not entity.can_write(user):
-        raise GraphQLError(COULD_NOT_SAVE)
+    shared.assert_authenticated(user)
+    shared.assert_write_access(entity, user)
 
     group = None
     parent = None
@@ -310,8 +283,7 @@ def resolve_add_image(_, info, input):
 
     clean_input = clean_graphql_input(input)
 
-    if not user.is_authenticated:
-        raise GraphQLError(NOT_LOGGED_IN)
+    shared.assert_authenticated(user)
 
     entity = FileFolder()
 
@@ -333,3 +305,9 @@ def resolve_add_image(_, info, input):
     return {
         "file": entity
     }
+
+def resolve_update_file(entity, clean_input):
+    if 'file' in clean_input:
+        entity.upload = clean_input.get("file")
+        if entity.scan() == FILE_SCAN.VIRUS:
+            raise GraphQLError("INVALID_FILE")

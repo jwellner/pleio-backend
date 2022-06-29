@@ -8,9 +8,12 @@ from django.utils import translation
 from django.template.loader import get_template
 from django_tenants.utils import schema_context
 from email.utils import formataddr
+
+from core.mail_builders.base import MailerBase
 from user.models import User
 
 logger = get_task_logger(__name__)
+
 
 @shared_task(bind=True, ignore_result=True)
 def send_mail_multi(self, schema_name, subject, html_template, context, email_address, reply_to=None, language=None):
@@ -35,3 +38,19 @@ def send_mail_multi(self, schema_name, subject, html_template, context, email_ad
                 email.send()
             except Exception as e:
                 logger.error('email sent to %s failed. Error: %s', email_address, e)
+
+
+@shared_task(ignore_result=True)
+def send_mail_by_instance(schema_name, instance_id):
+    from core.models.mail import load_mailinstance
+
+    with schema_context(schema_name):
+        try:
+            instance = load_mailinstance(instance_id)
+            instance.send()
+
+            if instance.error:
+                logger.error("background_email_error: id=%s schema=%s error=%s message=%s",
+                             instance_id, schema_name, instance.error.__class__, str(instance.error))
+        except MailerBase.IgnoreInactiveUserMailError:
+            pass
