@@ -83,3 +83,17 @@ class AddStatusUpdateTestCase(PleioTenantTestCase):
         with self.assertGraphQlError(COULD_NOT_ADD):
             self.graphql_client.force_login(self.authenticated_user)
             self.graphql_client.post(self.mutation, variables)
+
+    def test_add_minimal_entity(self):
+        variables = {
+            'input': {
+                'title': "Simple status update",
+                'subtype': "status_update",
+            }
+        }
+
+        self.graphql_client.force_login(self.authenticated_user)
+        result = self.graphql_client.post(self.mutation, variables)
+
+        entity = result["data"]["addEntity"]["entity"]
+        self.assertTrue(entity['canEdit'])

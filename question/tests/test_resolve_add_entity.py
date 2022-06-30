@@ -1,5 +1,7 @@
 from core.models import Group
 from core.tests.helpers import PleioTenantTestCase
+from question.models import Question
+from user.factories import AdminFactory
 from user.models import User
 from mixer.backend.django import mixer
 from django.utils import timezone
@@ -84,7 +86,7 @@ class AddQuestionTestCase(PleioTenantTestCase):
         self.assertEqual(entity["richDescription"], variables["input"]["richDescription"])
         self.assertEqual(entity["tags"], variables["input"]["tags"])
         self.assertEqual(entity["isClosed"], False)
-        self.assertEqual(entity["isFeatured"], False) # only with editor or admin role
+        self.assertEqual(entity["isFeatured"], False)  # only with editor or admin role
         self.assertEqual(entity["featured"]["positionY"], 10)
         self.assertEqual(entity["featured"]["video"], "testVideo")
         self.assertEqual(entity["featured"]["videoTitle"], "testVideoTitle")
@@ -105,3 +107,17 @@ class AddQuestionTestCase(PleioTenantTestCase):
         self.assertEqual(entity["richDescription"], variables["input"]["richDescription"])
         self.assertEqual(entity["inGroup"], True)
         self.assertEqual(entity["group"]["guid"], self.group.guid)
+
+    def test_add_minimal_entity(self):
+        variables = {
+            'input': {
+                'title': "Simple question",
+                'subtype': "question",
+            }
+        }
+
+        self.graphql_client.force_login(self.authenticatedUser)
+        result = self.graphql_client.post(self.mutation, variables)
+        entity = result["data"]["addEntity"]["entity"]
+
+        self.assertTrue(entity['canEdit'])

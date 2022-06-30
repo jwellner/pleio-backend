@@ -77,7 +77,6 @@ class AddBlogTestCase(PleioTenantTestCase):
         """
 
     def test_add_blog(self):
-
         variables = self.data
 
         self.graphql_client.force_login(self.authenticatedUser)
@@ -94,16 +93,14 @@ class AddBlogTestCase(PleioTenantTestCase):
         self.assertDateEqual(entity["scheduleDeleteEntity"], variables['input']['scheduleDeleteEntity'])
         self.assertEqual(entity["relatedItems"]["edges"][0]["guid"], self.relatedBlog.guid)
         self.assertEqual(entity["relatedItems"]["edges"][1]["guid"], self.relatedNews.guid)
-        
 
     def test_add_blog_admin(self):
-
         variables = self.data
 
         request = HttpRequest()
         request.user = self.adminUser
 
-        result = graphql_sync(schema, { "query": self.mutation, "variables": variables }, context_value={ "request": request })
+        result = graphql_sync(schema, {"query": self.mutation, "variables": variables}, context_value={"request": request})
 
         data = result[1]["data"]
 
@@ -112,16 +109,14 @@ class AddBlogTestCase(PleioTenantTestCase):
         self.assertEqual(data["addEntity"]["entity"]["tags"], variables["input"]["tags"])
         self.assertEqual(data["addEntity"]["entity"]["isRecommended"], True)
 
-
     def test_add_blog_to_group(self):
-
         variables = self.data
         variables["input"]["containerGuid"] = self.group.guid
 
         request = HttpRequest()
         request.user = self.authenticatedUser
 
-        result = graphql_sync(schema, { "query": self.mutation, "variables": variables }, context_value={ "request": request })
+        result = graphql_sync(schema, {"query": self.mutation, "variables": variables}, context_value={"request": request})
 
         data = result[1]["data"]
 
@@ -130,10 +125,7 @@ class AddBlogTestCase(PleioTenantTestCase):
         self.assertEqual(data["addEntity"]["entity"]["inGroup"], True)
         self.assertEqual(data["addEntity"]["entity"]["group"]["guid"], self.group.guid)
 
-
     def test_add_unpublished_blog_admin(self):
-
-
         variables = {
             "input": {
                 "type": "object",
@@ -180,7 +172,7 @@ class AddBlogTestCase(PleioTenantTestCase):
         request = HttpRequest()
         request.user = self.adminUser
 
-        result = graphql_sync(schema, { "query": mutation, "variables": variables }, context_value={ "request": request })
+        result = graphql_sync(schema, {"query": mutation, "variables": variables}, context_value={"request": request})
 
         data = result[1]["data"]
 
@@ -191,3 +183,16 @@ class AddBlogTestCase(PleioTenantTestCase):
         self.assertEqual(data["addEntity"]["entity"]["timePublished"], None)
         self.assertEqual(data["addEntity"]["entity"]["statusPublished"], 'draft')
 
+    def test_add_minimal_entity(self):
+        variables = {
+            'input': {
+                'title': "Simple blog",
+                'subtype': "blog",
+            }
+        }
+
+        self.graphql_client.force_login(self.authenticatedUser)
+        result = self.graphql_client.post(self.mutation, variables)
+        entity = result["data"]["addEntity"]["entity"]
+
+        self.assertTrue(entity['canEdit'])

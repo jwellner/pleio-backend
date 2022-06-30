@@ -1,22 +1,17 @@
-from django.db import connection
-from django_tenants.test.cases import FastTenantTestCase
 from backend2.schema import schema
 from ariadne import graphql_sync
-import json
 from django.contrib.auth.models import AnonymousUser
 from django.http import HttpRequest
-from core.models import Group
+from core.tests.helpers import PleioTenantTestCase
 from user.models import User
-from ..models import Poll
-from core.constances import ACCESS_TYPE
 from mixer.backend.django import mixer
-from graphql import GraphQLError
-from datetime import datetime
 
 
-class AddPollTestCase(FastTenantTestCase):
+class AddPollTestCase(PleioTenantTestCase):
 
     def setUp(self):
+        super().setUp()
+
         self.anonymousUser = AnonymousUser()
         self.authenticatedUser = mixer.blend(User)
 
@@ -72,3 +67,17 @@ class AddPollTestCase(FastTenantTestCase):
         self.assertEqual(data["addPoll"]["entity"]["accessId"], variables["input"]["accessId"])
         self.assertEqual(len(data["addPoll"]["entity"]["choices"]), 3)
         self.assertEqual(data["addPoll"]["entity"]["choices"][0]["text"], "answer1")
+
+    def test_add_minimal_entity(self):
+        variables = {
+            'input': {
+                'title': "Simple poll",
+                'choices': ['One', 'More']
+            }
+        }
+
+        self.graphql_client.force_login(self.authenticatedUser)
+        result = self.graphql_client.post(self.mutation, variables)
+        entity = result["data"]["addPoll"]["entity"]
+
+        self.assertTrue(entity['canEdit'])

@@ -29,8 +29,7 @@ def resolve_add_task(_, info, input):
     if group:
         entity.group = group
 
-    shared.resolve_update_access_id(entity, clean_input)
-
+    shared.resolve_add_access_id(entity, clean_input)
     shared.resolve_update_title(entity, clean_input)
     shared.resolve_update_rich_description(entity, clean_input)
 

@@ -46,7 +46,7 @@ def resolve_add_wiki(_, info, input):
     entity.group = group
     entity.parent = parent
 
-    shared.resolve_update_access_id(entity, clean_input)
+    shared.resolve_add_access_id(entity, clean_input)
 
     shared.resolve_update_title(entity, clean_input)
     shared.resolve_update_rich_description(entity, clean_input)

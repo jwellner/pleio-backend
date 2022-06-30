@@ -277,3 +277,16 @@ class AddFileTestCase(PleioTenantTestCase):
         self.assertEqual(entity["group"], None)
         self.assertEqual(entity["tags"][0], "tag_one")
         self.assertEqual(entity["tags"][1], "tag_two")
+
+    def test_add_minimal_entity(self):
+        variables = {
+            'input': {
+                'file': "image.jpg",
+            }
+        }
+
+        self.graphql_client.force_login(self.authenticatedUser)
+        result = self.graphql_client.post(self.mutation, variables)
+
+        entity = result["data"]["addFile"]["entity"]
+        self.assertTrue(entity['canEdit'])
