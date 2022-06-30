@@ -174,7 +174,7 @@ def resolve_add_folder(_, info, input):
     if group:
         entity.group = group
 
-    shared.resolve_update_access_id(entity, clean_input)
+    shared.resolve_add_access_id(entity, clean_input)
 
     entity.save()
 

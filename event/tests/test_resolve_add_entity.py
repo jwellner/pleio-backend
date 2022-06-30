@@ -1,3 +1,5 @@
+from django.utils.timezone import localtime
+
 from core.models.attachment import Attachment
 import json
 from core.models import Group
@@ -17,18 +19,18 @@ class AddEventTestCase(PleioTenantTestCase):
         self.group = mixer.blend(Group, owner=self.authenticatedUser, is_membership_on_request=False)
         self.group.join(self.authenticatedUser, 'owner')
 
-        self.eventPublic = mixer.blend(Event, 
-            owner=self.authenticatedUser, 
-            read_access=[ACCESS_TYPE.public], 
-            write_access=[ACCESS_TYPE.user.format(self.authenticatedUser.id)]
-        )
+        self.eventPublic = mixer.blend(Event,
+                                       owner=self.authenticatedUser,
+                                       read_access=[ACCESS_TYPE.public],
+                                       write_access=[ACCESS_TYPE.user.format(self.authenticatedUser.id)]
+                                       )
 
-        self.eventGroupPublic = mixer.blend(Event, 
-            owner=self.authenticatedUser, 
-            read_access=[ACCESS_TYPE.public], 
-            write_access=[ACCESS_TYPE.user.format(self.authenticatedUser.id)],
-            group=self.group
-        )
+        self.eventGroupPublic = mixer.blend(Event,
+                                            owner=self.authenticatedUser,
+                                            read_access=[ACCESS_TYPE.public],
+                                            write_access=[ACCESS_TYPE.user.format(self.authenticatedUser.id)],
+                                            group=self.group
+                                            )
 
         self.data = {
             "input": {
@@ -138,7 +140,6 @@ class AddEventTestCase(PleioTenantTestCase):
         self.assertEqual(entity["group"]["guid"], self.group.guid)
 
     def test_add_event_to_parent(self):
-
         variables = self.data
         variables["input"]["containerGuid"] = self.eventPublic.guid
 
@@ -156,9 +157,7 @@ class AddEventTestCase(PleioTenantTestCase):
         self.assertTrue(self.eventPublic.has_children())
         self.assertEqual(self.eventPublic.children.first().guid, entity["guid"])
 
-
     def test_add_event_to_parent_with_group(self):
-
         variables = self.data
         variables["input"]["containerGuid"] = self.eventGroupPublic.guid
 
@@ -182,7 +181,7 @@ class AddEventTestCase(PleioTenantTestCase):
         attachment = mixer.blend(Attachment)
 
         variables = self.data
-        variables["input"]["richDescription"] = json.dumps({ 'type': 'file', 'attrs': {'url': f"/attachment/entity/{attachment.id}" }})
+        variables["input"]["richDescription"] = json.dumps({'type': 'file', 'attrs': {'url': f"/attachment/entity/{attachment.id}"}})
 
         self.graphql_client.force_login(self.authenticatedUser)
         result = self.graphql_client.post(self.mutation, variables)
@@ -190,3 +189,19 @@ class AddEventTestCase(PleioTenantTestCase):
         entity = result["data"]["addEntity"]["entity"]
         event = Event.objects.get(id=entity["guid"])
         self.assertTrue(event.attachments.filter(id=attachment.id).exists())
+
+    def test_add_minimal_entity(self):
+        variables = {
+            'input': {
+                'title': "Simple event",
+                'subtype': "event",
+                'startDate': str(localtime()),
+                'endDate': str(localtime()),
+            }
+        }
+
+        self.graphql_client.force_login(self.authenticatedUser)
+        result = self.graphql_client.post(self.mutation, variables)
+
+        entity = result["data"]["addEntity"]["entity"]
+        self.assertTrue(entity['canEdit'])

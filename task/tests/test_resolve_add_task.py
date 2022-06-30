@@ -61,7 +61,6 @@ class AddTaskTestCase(PleioTenantTestCase):
         """
 
     def test_add_task(self):
-
         variables = self.data
 
         self.graphql_client.force_login(self.authenticatedUser)
@@ -76,7 +75,6 @@ class AddTaskTestCase(PleioTenantTestCase):
         self.assertDateEqual(entity["scheduleDeleteEntity"], variables['input']['scheduleDeleteEntity'])
 
     def test_add_task_to_group(self):
-
         variables = self.data
         variables["input"]["containerGuid"] = self.group.guid
 
@@ -89,3 +87,17 @@ class AddTaskTestCase(PleioTenantTestCase):
         self.assertEqual(entity["inGroup"], True)
         self.assertEqual(entity["group"]["guid"], self.group.guid)
         self.assertEqual(entity["state"], "NEW")
+
+    def test_add_minimal_entity(self):
+        variables = {
+            'input': {
+                'title': "Simple task",
+                'subtype': "task",
+            }
+        }
+
+        self.graphql_client.force_login(self.authenticatedUser)
+        result = self.graphql_client.post(self.mutation, variables)
+        entity = result["data"]["addEntity"]["entity"]
+
+        self.assertTrue(entity['canEdit'])

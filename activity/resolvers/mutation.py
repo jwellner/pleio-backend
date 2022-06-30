@@ -104,5 +104,5 @@ def resolve_update_access_id(entity, clean_input, group):
             entity.read_access = access_id_to_acl(entity, get_group_default_access_id(group))
         else:
             entity.read_access = access_id_to_acl(entity, config.DEFAULT_ACCESS_ID)
-    if 'writeAccessId' in clean_input:
-        entity.write_access = access_id_to_acl(entity, clean_input.get("writeAccessId"))    
+
+    entity.write_access = access_id_to_acl(entity, clean_input.get("writeAccessId", 0))

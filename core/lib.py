@@ -55,6 +55,9 @@ def get_model_by_subtype(subtype):
 
 
 def access_id_to_acl(obj, access_id):
+    """
+    @see also: get_access_id
+    """
     if "type_to_string" in dir(obj) and obj.type_to_string and obj.type_to_string == 'user':
         acl = [ACCESS_TYPE.user.format(obj.id)]
     else:
@@ -140,6 +143,14 @@ def webpack_dev_server_is_available():
 
 
 def get_access_id(acl):
+    """
+    What are the access id's?
+    0: private
+    1: logged in
+    2: public
+    4: Group
+    10000+: Subgroup
+    """
     for x in acl:
         if x.startswith("subgroup:"):
             return int(x.replace("subgroup:", ""))

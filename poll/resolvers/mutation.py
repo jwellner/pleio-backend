@@ -21,10 +21,8 @@ def resolve_add_poll(_, info, input):
 
     entity.owner = user
 
-    shared.resolve_update_access_id(entity, clean_input)
-
+    shared.resolve_add_access_id(entity, clean_input)
     shared.resolve_update_title(entity, clean_input)
-
     shared.update_publication_dates(entity, clean_input)
 
     entity.save()

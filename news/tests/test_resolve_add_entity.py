@@ -34,6 +34,12 @@ class AddNewsTestCase(PleioTenantTestCase):
                 "relatedItems": [self.relatedNews1.guid, self.relatedNews2.guid]
             }
         }
+        self.minimal_data = {
+            'input': {
+                'title': "Simple news",
+                'subtype': "news",
+            }
+        }
         self.mutation = """
             fragment NewsParts on News {
                 title
@@ -111,3 +117,17 @@ class AddNewsTestCase(PleioTenantTestCase):
         self.assertDateEqual(entity["scheduleDeleteEntity"], variables['input']['scheduleDeleteEntity'])
         self.assertEqual(entity["relatedItems"]["edges"][0]["guid"], self.relatedNews1.guid)
         self.assertEqual(entity["relatedItems"]["edges"][1]["guid"], self.relatedNews2.guid)
+
+    def test_add_minimal_entity(self):
+        for user, msg in ((self.editorUser, "Error for Editors"),
+                          (self.adminUser, "Error for Administrators")):
+            self.graphql_client.force_login(user)
+            result = self.graphql_client.post(self.mutation, self.minimal_data)
+            entity = result["data"]["addEntity"]["entity"]
+
+            self.assertTrue(entity['canEdit'], msg=msg)
+
+    def test_add_minimal_entity_as_regular_user(self):
+        with self.assertGraphQlError('could_not_add'):
+            self.graphql_client.force_login(self.authenticatedUser)
+            self.graphql_client.post(self.mutation, self.minimal_data)
