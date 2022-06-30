@@ -85,7 +85,7 @@ class AddDiscussionTestCase(PleioTenantTestCase):
         entity = result["data"]["addEntity"]["entity"]
         self.assertEqual(entity["title"], variables["input"]["title"])
         self.assertEqual(entity["richDescription"], variables["input"]["richDescription"])
-        self.assertEqual(entity["isFeatured"], False) # only editor or admin can set
+        self.assertEqual(entity["isFeatured"], False)  # only editor or admin can set
         self.assertEqual(entity["featured"]["positionY"], 10)
         self.assertEqual(entity["featured"]["video"], "testVideo")
         self.assertEqual(entity["featured"]["videoTitle"], "testTitle")
@@ -93,7 +93,6 @@ class AddDiscussionTestCase(PleioTenantTestCase):
         self.assertDateEqual(entity["timePublished"], variables['input']['timePublished'])
         self.assertDateEqual(entity["scheduleArchiveEntity"], variables['input']['scheduleArchiveEntity'])
         self.assertDateEqual(entity["scheduleDeleteEntity"], variables['input']['scheduleDeleteEntity'])
-
 
     def test_add_discussion_editor(self):
         variables = self.data
@@ -118,3 +117,17 @@ class AddDiscussionTestCase(PleioTenantTestCase):
         self.assertEqual(entity["richDescription"], variables["input"]["richDescription"])
         self.assertEqual(entity["inGroup"], True)
         self.assertEqual(entity["group"]["guid"], self.group.guid)
+
+    def test_add_minimal_entity(self):
+        variables = {
+            'input': {
+                'title': "Simple discussion",
+                'subtype': "discussion",
+            }
+        }
+
+        self.graphql_client.force_login(self.authenticatedUser)
+        result = self.graphql_client.post(self.mutation, variables)
+        entity = result["data"]["addEntity"]["entity"]
+
+        self.assertTrue(entity['canEdit'])

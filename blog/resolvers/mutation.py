@@ -31,7 +31,7 @@ def resolve_add_blog(_, info, input):
 
     shared.resolve_update_tags(entity, clean_input)
 
-    shared.resolve_update_access_id(entity, clean_input)
+    shared.resolve_add_access_id(entity, clean_input)
     shared.resolve_update_title(entity, clean_input)
     shared.resolve_update_rich_description(entity, clean_input)
     shared.resolve_update_abstract(entity, clean_input)
@@ -42,7 +42,7 @@ def resolve_add_blog(_, info, input):
 
     shared.resolve_update_is_featured(entity, user, clean_input)
 
-    shared.resolve_update_related_items(entity, clean_input)
+    shared.resolve_add_related_items(entity, clean_input)
 
     entity.save()
 

@@ -111,7 +111,7 @@ class AddWikiCase(PleioTenantTestCase):
         self.assertEqual(entity["title"], variables["input"]["title"])
         self.assertEqual(entity["richDescription"], variables["input"]["richDescription"])
         self.assertEqual(entity["hasChildren"], False)
-        self.assertEqual(entity["isFeatured"], False) # only with editor or admin role
+        self.assertEqual(entity["isFeatured"], False)  # only with editor or admin role
         self.assertEqual(entity["featured"]["positionY"], 2)
         self.assertEqual(entity["featured"]["video"], "testVideo2")
         self.assertEqual(entity["featured"]["videoTitle"], "testVideoTitle2")
@@ -121,7 +121,6 @@ class AddWikiCase(PleioTenantTestCase):
         self.assertDateEqual(entity["scheduleDeleteEntity"], variables['input']['scheduleDeleteEntity'])
 
     def test_add_wiki_to_parent(self):
-
         variables = self.data
         variables["input"]["containerGuid"] = self.wikiPublic.guid
 
@@ -140,7 +139,6 @@ class AddWikiCase(PleioTenantTestCase):
         self.assertEqual(self.wikiPublic.children.first().guid, entity["guid"])
 
     def test_add_wiki_to_group(self):
-
         variables = self.data
         variables["input"]["containerGuid"] = self.group.guid
 
@@ -156,7 +154,6 @@ class AddWikiCase(PleioTenantTestCase):
         self.assertEqual(entity["group"]["guid"], self.group.guid)
 
     def test_add_wiki_to_parent_with_group(self):
-
         variables = self.data
         variables["input"]["containerGuid"] = self.wikiGroupPublic.guid
 
@@ -175,3 +172,17 @@ class AddWikiCase(PleioTenantTestCase):
 
         self.assertTrue(self.wikiGroupPublic.has_children())
         self.assertEqual(self.wikiGroupPublic.children.first().guid, entity["guid"])
+
+    def test_add_minimal_entity(self):
+        variables = {
+            'input': {
+                'title': "Simple wiki",
+                'subtype': "wiki",
+            }
+        }
+
+        self.graphql_client.force_login(self.authenticatedUser)
+        result = self.graphql_client.post(self.mutation, variables)
+        entity = result["data"]["addEntity"]["entity"]
+
+        self.assertTrue(entity['canEdit'])

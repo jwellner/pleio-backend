@@ -70,9 +70,9 @@ def resolve_add_event(_, info, input):
     entity.owner = user
     entity.group = group
     entity.parent = parent
-    
+
+    shared.resolve_add_access_id(entity, clean_input)
     shared.resolve_update_tags(entity, clean_input)
-    shared.resolve_update_access_id(entity, clean_input)
     shared.resolve_update_title(entity, clean_input)
     shared.resolve_update_rich_description(entity, clean_input)
     shared.resolve_update_abstract(entity, clean_input)
