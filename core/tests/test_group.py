@@ -1,3 +1,4 @@
+from sysconfig import is_python_build
 from unittest import mock
 
 from core.models import Group, GroupInvitation
@@ -28,6 +29,7 @@ class GroupTestCase(PleioTenantTestCase):
         self.group.join(self.user3, 'pending')
         self.group.join(self.user4, 'admin')
         self.group.join(self.user6, 'admin')
+        self.hidden_group = mixer.blend(Group, owner=self.authenticatedUser, is_hidden=True)
 
         self.file = FileFolder.objects.create(
             owner=self.authenticatedUser,
@@ -244,6 +246,27 @@ class GroupTestCase(PleioTenantTestCase):
         self.assertEqual(len(data["entity"]["members"]["edges"]), 4)
         self.assertEqual(data["entity"]["members"]["edges"][0]["role"], "owner")
         self.assertEqual(data["entity"]["members"]["edges"][1]["role"], "admin")
+
+    def test_group_is_hidden_by_admin(self):
+        query = """
+            query Group($guid: String!) {
+                entity(guid: $guid) {
+                    ... on Group {
+                        guid
+                    }
+                }
+            }
+
+        """
+        variables = {
+            "guid": self.hidden_group.guid
+        }
+
+        self.graphql_client.force_login(self.userAdmin)
+        result = self.graphql_client.post(query, variables)
+
+        data = result["data"]
+        self.assertEqual(data["entity"]["guid"], str(self.hidden_group.id))
 
     def test_group_hidden_introduction(self):
         query = """

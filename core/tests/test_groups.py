@@ -1,16 +1,17 @@
 from django_tenants.test.cases import FastTenantTestCase
 from backend2.schema import schema
 from ariadne import graphql_sync
-from django.contrib.auth.models import AnonymousUser
+from core.tests.helpers import PleioTenantTestCase
 from django.http import HttpRequest
 from core.models import Group
+from user.factories import AdminFactory
 from user.models import User
 from mixer.backend.django import mixer
 
-class GroupsEmptyTestCase(FastTenantTestCase):
+class GroupsEmptyTestCase(PleioTenantTestCase):
 
     def setUp(self):
-        self.anonymousUser = AnonymousUser()
+        super(GroupsEmptyTestCase, self).setUp()
 
     def test_groups_empty(self):
 
@@ -26,24 +27,18 @@ class GroupsEmptyTestCase(FastTenantTestCase):
                 }
             }
         """
-        variables = {}
 
-        request = HttpRequest()
-        request.user = self.anonymousUser
+        result = self.graphql_client.post(query, {})
 
-        result = graphql_sync(schema, { "query": query, "variables": variables }, context_value={ "request": request })
-
-        self.assertTrue(result[0])
-
-        data = result[1]["data"]
+        data = result["data"]
 
         self.assertEqual(data["groups"]["total"], 0)
         self.assertEqual(data["groups"]["edges"], [])
 
-class GroupsNotEmptyTestCase(FastTenantTestCase):
+class GroupsNotEmptyTestCase(PleioTenantTestCase):
 
     def setUp(self):
-        self.anonymousUser = AnonymousUser()
+        super(GroupsNotEmptyTestCase, self).setUp()
         self.user = mixer.blend(User)
         self.group1 = mixer.blend(Group)
         self.group1.tags=["tag_one"]
@@ -73,16 +68,9 @@ class GroupsNotEmptyTestCase(FastTenantTestCase):
                 }
             }
         """
-        variables = {}
+        result = self.graphql_client.post(query, {})
 
-        request = HttpRequest()
-        request.user = self.anonymousUser
-
-        result = graphql_sync(schema, { "query": query, "variables": variables }, context_value={ "request": request })
-
-        self.assertTrue(result[0])
-
-        data = result[1]["data"]
+        data = result["data"]
 
         self.assertEqual(data["groups"]["total"], 7)
         self.assertEqual(data["groups"]["edges"][0]["guid"], self.group2.guid)
@@ -101,16 +89,9 @@ class GroupsNotEmptyTestCase(FastTenantTestCase):
                 }
             }
         """
-        variables = {}
+        result = self.graphql_client.post(query, {})
 
-        request = HttpRequest()
-        request.user = self.anonymousUser
-
-        result = graphql_sync(schema, { "query": query, "variables": variables }, context_value={ "request": request })
-
-        self.assertTrue(result[0])
-
-        data = result[1]["data"]
+        data = result["data"]
 
         self.assertEqual(data["groups"]["total"], 7)
 
@@ -148,15 +129,10 @@ class GroupsNotEmptyTestCase(FastTenantTestCase):
             "limit": 20,
             "q": ""
         }
+        self.graphql_client.force_login(self.user)
+        result = self.graphql_client.post(query, variables)
 
-        request = HttpRequest()
-        request.user = self.user
-
-        result = graphql_sync(schema, {"query": query, "variables": variables}, context_value={ "request": request })
-
-        self.assertTrue(result[0])
-
-        data = result[1]["data"]
+        data = result["data"]
 
         self.assertEqual(data["groups"]["total"], 1)
         self.assertEqual(data["groups"]["edges"][0]["guid"], self.group1.guid)
@@ -195,13 +171,8 @@ class GroupsNotEmptyTestCase(FastTenantTestCase):
             "limit": 20,
             "q": ""
         }
-
-        request = HttpRequest()
-        request.user = self.user
-
-        success, result = graphql_sync(schema, {"query": query, "variables": variables}, context_value={ "request": request })
-
-        self.assertIsNone(result.get('errors'), msg=result)
+        self.graphql_client.force_login(self.user)
+        result = self.graphql_client.post(query, variables)
 
         data = result["data"]
 
@@ -209,10 +180,10 @@ class GroupsNotEmptyTestCase(FastTenantTestCase):
         self.assertEqual(data["groups"]["edges"][0]["guid"], self.group1.guid)
 
 
-class HiddenGroupTestCase(FastTenantTestCase):
+class HiddenGroupTestCase(PleioTenantTestCase):
 
     def setUp(self):
-        self.anonymous_user = AnonymousUser()
+        super(HiddenGroupTestCase, self).setUp()
         self.authenticated_user = mixer.blend(User, name="yy")
         self.group_member_user = mixer.blend(User, name="xx")
         self.non_member_user = mixer.blend(User, name="yyy")
@@ -220,6 +191,7 @@ class HiddenGroupTestCase(FastTenantTestCase):
                                  introduction='introductionMessage',
                                  is_hidden=True)
         self.group.join(self.group_member_user, 'member')
+        self.admin = AdminFactory()
 
     def test_hidden_group_is_hidden_for_non_members(self):
         query = """
@@ -230,12 +202,11 @@ class HiddenGroupTestCase(FastTenantTestCase):
             }
         """
 
-        request = HttpRequest()
-        request.user = self.non_member_user
+        self.graphql_client.force_login(self.non_member_user)
+        result = self.graphql_client.post(query, {})
 
-        result = graphql_sync(schema, {"query": query}, context_value={"request": request})
-        self.assertTrue(result[0])
-        self.assertEqual(result[1]["data"]["groups"]["total"], 0)
+        data = result["data"]
+        self.assertEqual(data["groups"]["total"], 0)
 
     def test_hidden_group_is_visible_for_members(self):
         query = """
@@ -249,13 +220,10 @@ class HiddenGroupTestCase(FastTenantTestCase):
             }
         """
 
-        request = HttpRequest()
-        request.user = self.group_member_user
+        self.graphql_client.force_login(self.group_member_user)
+        result = self.graphql_client.post(query, {})
 
-        result = graphql_sync(schema, {"query": query}, context_value={"request": request})
-
-        self.assertTrue(result[0])
-        data = result[1]["data"]
+        data = result["data"]
         self.assertEqual(data["groups"]["total"], 1)
         self.assertEqual(data["groups"]["edges"][0]["guid"], self.group.guid)
 
@@ -267,9 +235,26 @@ class HiddenGroupTestCase(FastTenantTestCase):
                }
             }
         """
-        request = HttpRequest()
-        request.user = self.anonymous_user
+        result = self.graphql_client.post(query, {})
 
-        result = graphql_sync(schema, {"query": query}, context_value={"request": request})
-        self.assertTrue(result[0])
-        self.assertEqual(result[1]["data"]["groups"]["total"], 0)
+        data = result["data"]
+        self.assertEqual(data["groups"]["total"], 0)
+
+
+    def test_hidden_group_is_visible_for_admin_users(self):
+        query = """
+            query GroupsQuery {  
+                groups {
+                    total    
+                    edges {      
+                        guid
+                    }    
+               }
+            }
+        """
+        self.graphql_client.force_login(self.admin)
+        result = self.graphql_client.post(query, {})
+
+        data = result["data"]
+        self.assertEqual(data["groups"]["total"], 1)
+        self.assertEqual(data["groups"]["edges"][0]["guid"], self.group.guid)
