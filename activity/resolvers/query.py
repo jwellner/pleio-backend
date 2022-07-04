@@ -3,6 +3,7 @@ import logging
 from ariadne import ObjectType
 from core.models import Entity
 from django.db.models import Q
+from django.db.models.functions import Coalesce
 from core.constances import ORDER_BY, ORDER_DIRECTION
 from core.resolvers.query_entities import conditional_tags_filter, conditional_tag_lists_filter
 
@@ -99,6 +100,24 @@ def resolve_activities(
 
     if orderDirection == ORDER_DIRECTION.desc:
         order_by = '-%s' % (order_by)
+
+    title_order_by = Coalesce(
+        'news__title', 
+        'blog__title',
+        'filefolder__title',
+        'poll__title',
+        'statusupdate__title',
+        'wiki__title',
+        'page__title', 
+        'question__title', 
+        'discussion__title', 
+        'event__title'
+    )
+
+    if order_by == '-title':
+        order_by = title_order_by.desc()
+    elif order_by == 'title':
+        order_by = title_order_by.asc()
 
     order = [order_by]
 
