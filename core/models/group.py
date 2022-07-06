@@ -26,6 +26,9 @@ class GroupManager(models.Manager):
         if not user.is_authenticated:
             return self.get_queryset().exclude(is_hidden=True)
 
+        if user.is_authenticated and user.has_role(USER_ROLES.ADMIN):
+            return self.get_queryset()
+
         hidden_groups_where_users_isnt_a_member = Q()
         hidden_groups_where_users_isnt_a_member.add(Q(is_hidden=True), Q.AND)
         hidden_groups_where_users_isnt_a_member.add(~Q(members__user=user), Q.AND)

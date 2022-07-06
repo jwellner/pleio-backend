@@ -122,6 +122,7 @@ SHARED_APPS = [
     'django.contrib.messages',
     'widget_tweaks',
     'user',
+    'post_deploy',
 ]
 
 TENANT_APPS = [
@@ -139,7 +140,6 @@ TENANT_APPS = [
     'notifications',
     'autotranslate',
     'auditlog',
-    'post_deploy',
     'concierge',
     'core',
     'user',

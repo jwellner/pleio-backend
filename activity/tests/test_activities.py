@@ -246,6 +246,51 @@ class ActivitiesTestCase(PleioTenantTestCase):
 
         self.assertEqual(result["data"]["activities"]["edges"][0]["entity"]["guid"], self.blog1.guid)
 
+    def test_activities_order_by_title_asc(self):
+        self.first_blog = Blog.objects.create(
+            title="1 first blog",
+            owner=self.user1,
+            read_access=[ACCESS_TYPE.public],
+            write_access=[ACCESS_TYPE.user.format(self.user1.id)],
+            group=self.group2
+        )
+
+        variables = {
+            "limit": 20,
+            "offset": 0,
+            "subtypes": [],
+            "containerGuid": None,
+            "orderBy": "title",
+            "orderDirection": "asc"
+        }
+
+        self.graphql_client.force_login(self.user2)
+        result = self.graphql_client.post(self.query, variables)
+        self.assertEqual(result["data"]["activities"]["edges"][0]["entity"]["guid"], self.first_blog.guid)
+
+
+    def test_activities_order_by_title_desc(self):
+        self.first_blog = Blog.objects.create(
+            title="z first blog",
+            owner=self.user1,
+            read_access=[ACCESS_TYPE.public],
+            write_access=[ACCESS_TYPE.user.format(self.user1.id)],
+            group=self.group2
+        )
+
+        variables = {
+            "limit": 20,
+            "offset": 0,
+            "subtypes": [],
+            "containerGuid": None,
+            "orderBy": "title",
+            "orderDirection": "desc"
+        }
+
+        self.graphql_client.force_login(self.user2)
+        result = self.graphql_client.post(self.query, variables)
+        self.assertEqual(result["data"]["activities"]["edges"][0]["entity"]["guid"], self.first_blog.guid)
+
     def test_activities_no_subevents(self):
         event = Event.objects.create(
             title="event",
