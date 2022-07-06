@@ -22,6 +22,7 @@ class GroupTestCase(PleioTenantTestCase):
         self.user4 = mixer.blend(User, name="xx")
         self.user5 = mixer.blend(User, name="yyy")
         self.user6 = mixer.blend(User, name="zz")
+        self.inactive_user = mixer.blend(User, name="inactive", is_active=False)
         self.userAdmin = mixer.blend(User, roles=["ADMIN"])
         self.group = mixer.blend(Group, owner=self.authenticatedUser, introduction='introductionMessage')
         self.group.join(self.authenticatedUser, 'owner')
@@ -29,7 +30,9 @@ class GroupTestCase(PleioTenantTestCase):
         self.group.join(self.user3, 'pending')
         self.group.join(self.user4, 'admin')
         self.group.join(self.user6, 'admin')
+        self.group.join(self.inactive_user)
         self.hidden_group = mixer.blend(Group, owner=self.authenticatedUser, is_hidden=True)
+
 
         self.file = FileFolder.objects.create(
             owner=self.authenticatedUser,
@@ -214,6 +217,7 @@ class GroupTestCase(PleioTenantTestCase):
                 entity(guid: $guid) {
                     ... on Group {
                         guid
+                        memberCount
                         members(q: $q, offset: $offset, limit: 20) {
                             total
                             edges {
@@ -242,6 +246,7 @@ class GroupTestCase(PleioTenantTestCase):
 
         data = result["data"]
         self.assertEqual(data["entity"]["guid"], self.group.guid)
+        self.assertEqual(data["entity"]["memberCount"], 4)
         self.assertEqual(data["entity"]["members"]["total"], 4)
         self.assertEqual(len(data["entity"]["members"]["edges"]), 4)
         self.assertEqual(data["entity"]["members"]["edges"][0]["role"], "owner")

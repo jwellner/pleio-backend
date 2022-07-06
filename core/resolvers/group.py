@@ -242,9 +242,8 @@ def resolve_group_membership_requests(obj, info):
 @group.field("memberCount")
 def resolve_group_member_count(group, info):
     # pylint: disable=unused-argument
-    members = group.members.filter(type__in=['admin', 'owner', 'member'])
-
-    return members.count()
+    return group.members.filter(type__in=['admin', 'owner', 'member'],
+                                user__is_active=True).count()
 
 
 @group.field("members")
@@ -259,7 +258,8 @@ def resolve_group_members(group, info, q=None, offset=0, limit=5, inSubgroupId=N
             'edges': [],
         }
 
-    members = group.members.filter(type__in=['admin', 'owner', 'member'])
+    members = group.members.filter(type__in=['admin', 'owner', 'member'],
+                                   user__is_active=True)
 
     if inSubgroupId:
         subgroup_members = Subgroup.objects.get(id=inSubgroupId).members.all()
