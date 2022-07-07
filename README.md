@@ -65,17 +65,8 @@ This is a command that also executes when doing docker-compose up. If that was s
 #### Create admin tenant
 
 ```bash
-docker-compose exec admin /app/manage.py create_tenant
+docker-compose exec admin /app/manage.py create_tenant --noinput --schema_name=public --name=public --domain-domain=localhost
 ```
-
-Use the following parameters:
-
-- schema: public
-- name: public
-- domain: localhost
-- is_primary: True
-
-When asked for an elgg-database, please fill in `test`. Do not leave this field empty.
 
 #### Create superuser for admin
 
