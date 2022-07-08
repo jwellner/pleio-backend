@@ -22,9 +22,9 @@ from user.models import User
 
 logger = get_task_logger(__name__)
 
-@shared_task(bind=True)
-def dispatch_crons(self, period):
-    # pylint: disable=unused-argument
+
+@shared_task
+def dispatch_crons(period):
     '''
     Dispatch period cron tasks for all tenants
     '''
@@ -32,7 +32,7 @@ def dispatch_crons(self, period):
         logger.info('Schedule cron %s for %s', period, client.schema_name)
 
         if period == 'hourly':
-            create_notifications_for_scheduled_content(client.schema_name)
+            create_notifications_for_scheduled_content.delay(client.schema_name)
             send_notifications.delay(client.schema_name)
             depublicate_content.delay(client.schema_name)
 
@@ -44,9 +44,8 @@ def dispatch_crons(self, period):
             resize_pending_images.delay(client.schema_name)
             cleanup_auditlog.delay(client.schema_name)
 
-
         if period == 'weekly':
-            remove_floating_attachments(client.schema_name)
+            remove_floating_attachments.delay(client.schema_name)
 
         if period in ['daily', 'weekly', 'monthly']:
             send_overview.delay(client.schema_name, period)
@@ -54,7 +53,6 @@ def dispatch_crons(self, period):
 
 @shared_task(bind=True)
 def dispatch_task(self, task, *kwargs):
-    # pylint: disable=unused-argument
     '''
     Dispatch task for all tenants
     '''
@@ -63,25 +61,23 @@ def dispatch_task(self, task, *kwargs):
         self.app.tasks[task].delay(client.schema_name, *kwargs)
 
 
-@shared_task(bind=True)
-def send_notifications(self, schema_name):
-    # pylint: disable=unused-argument
+@shared_task
+def send_notifications(schema_name):
     '''
     Send notification mails for tenant
     '''
     management.execute_from_command_line(['manage.py', 'tenant_command', 'send_notification_emails', '--schema', schema_name])
 
 
-@shared_task(bind=True)
-def send_overview(self, schema_name, period):
-    # pylint: disable=unused-argument
+@shared_task
+def send_overview(schema_name, period):
     '''
     Send overview mails for tenant
     '''
     management.execute_from_command_line(['manage.py', 'tenant_command', 'send_overview_emails', '--schema', schema_name, '--interval', period])
 
 
-@shared_task(bind=False)
+@shared_task
 def save_db_disk_usage(schema_name):
     '''
     Save size by schema_name
@@ -98,7 +94,7 @@ def save_db_disk_usage(schema_name):
         )
 
 
-@shared_task(bind=False)
+@shared_task
 def save_file_disk_usage(schema_name):
     '''
     Save size by schema_name
@@ -126,7 +122,7 @@ def save_file_disk_usage(schema_name):
         )
 
 
-@shared_task(bind=False)
+@shared_task
 def ban_users_that_bounce(schema_name):
     '''
     Ban users with email adresses that bounce
@@ -169,9 +165,7 @@ def ban_users_that_bounce(schema_name):
         config.LAST_RECEIVED_BOUNCING_EMAIL = last_received
 
 
-
-
-@shared_task(bind=False)
+@shared_task
 def ban_users_with_no_account(schema_name):
     '''
     Ban users with email adresses that bounce
@@ -213,13 +207,15 @@ def ban_users_with_no_account(schema_name):
             logger.info("Accounts blocked beacause of deleted account in pleio: %s", count)
         config.LAST_RECEIVED_DELETED_USER = last_received
 
-@shared_task()
+
+@shared_task
 def remove_floating_attachments(schema_name):
     with schema_context(schema_name):
         deleted = Attachment.objects.filter(attached_content_type=None).delete()
         logger.info("%s: %d floating attachments were deleted.", schema_name, len(deleted))
 
-@shared_task()
+
+@shared_task
 def resize_pending_images(schema_name):
     with schema_context(schema_name):
         time_threshold = timezone.now() - timedelta(hours=1)
@@ -228,7 +224,8 @@ def resize_pending_images(schema_name):
             celery.current_app.send_task('core.tasks.misc.image_resize', (schema_name, image.id,))
         logger.info("%s: %d pending image resizes.", schema_name, pending.count())
 
-@shared_task()
+
+@shared_task
 def cleanup_auditlog(schema_name):
     minimum_timestamp = timezone.now() - timedelta(days=31)
     with schema_context(schema_name):
@@ -251,4 +248,3 @@ def depublicate_content(schema_name):
                                           schedule_delete_after__lte=now).select_subclasses()
         for entity in to_delete:
             entity.delete()
-
