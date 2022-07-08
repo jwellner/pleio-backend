@@ -1240,6 +1240,7 @@ type MembershipRequestList {
 type MenuItem {
   title: String!
   link: String
+  guid: String
   children: [MenuItem]
   accessId: Int!
 }
