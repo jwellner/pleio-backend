@@ -42,6 +42,7 @@ def resolve_menu(obj, info):
 def build_menu(page):
     return {"title": page.title,
             "link": page.url,
+            "guid": page.guid,
             "children": [build_menu(c) for c in page.children.all()],
             "accessId": entity_access_id(page)}
 
