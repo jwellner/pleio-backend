@@ -1,10 +1,11 @@
 import logging
 
 from ariadne import ObjectType
+from graphql import GraphQLError
 from core.models import Entity
 from django.db.models import Q
 from django.db.models.functions import Coalesce
-from core.constances import ORDER_BY, ORDER_DIRECTION
+from core.constances import ORDER_BY, ORDER_DIRECTION, COULD_NOT_ORDER_BY_START_DATE
 from core.resolvers.query_entities import conditional_tags_filter, conditional_tag_lists_filter
 
 query = ObjectType("Query")
@@ -86,6 +87,7 @@ def resolve_activities(
     # pylint: disable=unused-argument
     # pylint: disable=too-many-arguments
     # pylint: disable=too-many-locals
+    # pylint: disable=too-many-branches
 
     if orderBy == ORDER_BY.timeUpdated:
         order_by = 'updated_at'
@@ -95,6 +97,11 @@ def resolve_activities(
         order_by = 'last_action'
     elif orderBy == ORDER_BY.title:
         order_by = 'title'
+    elif orderBy == ORDER_BY.startDate:
+        if subtypes == ['event']:
+            order_by = 'event__start_date'
+        else:
+            raise GraphQLError(COULD_NOT_ORDER_BY_START_DATE)
     else:
         order_by = 'published'
 
@@ -113,7 +120,6 @@ def resolve_activities(
         'discussion__title', 
         'event__title'
     )
-
     if order_by == '-title':
         order_by = title_order_by.desc()
     elif order_by == 'title':

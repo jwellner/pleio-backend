@@ -1,10 +1,11 @@
 from cms.models import Page
 from core.models import Group, Comment
 from core.tests.helpers import PleioTenantTestCase
+from django.utils import timezone
 from user.factories import UserFactory
 from blog.models import Blog
 from event.models import Event
-from core.constances import ACCESS_TYPE
+from core.constances import ACCESS_TYPE, COULD_NOT_ORDER_BY_START_DATE
 from mixer.backend.django import mixer
 
 
@@ -371,3 +372,114 @@ class ActivitiesTestCase(PleioTenantTestCase):
         titles = [e['entity'].get('title') for e in result['data']['activities']['edges']]
         self.assertIn(self.textPage.title, titles, msg="Should contain textpage cms pages")
         self.assertNotIn(self.campagnePage.title, titles, msg="Should contain only textpage cms pages")
+
+
+class ActivitiesEventsTestCase(PleioTenantTestCase):
+
+    def setUp(self):
+        super(ActivitiesEventsTestCase, self).setUp()
+
+        self.user1 = UserFactory()
+        self.user2 = UserFactory()
+        self.event_in_4_days = Event.objects.create(
+            owner=self.user1,
+            read_access=[ACCESS_TYPE.public],
+            write_access=[ACCESS_TYPE.user.format(self.user1.id)],
+            start_date=timezone.now() + timezone.timedelta(days=4)
+        )
+        self.event_5_days_ago = Event.objects.create(
+            owner=self.user1,
+            read_access=[ACCESS_TYPE.public],
+            write_access=[ACCESS_TYPE.user.format(self.user1.id)],
+            start_date=timezone.now() - timezone.timedelta(days=5)
+        )        
+        self.event_in_6_days = Event.objects.create(
+            owner=self.user1,
+            read_access=[ACCESS_TYPE.public],
+            write_access=[ACCESS_TYPE.user.format(self.user1.id)],
+            start_date=timezone.now() + timezone.timedelta(days=6)
+        )
+        self.event_3_days_ago = Event.objects.create(
+            owner=self.user1,
+            read_access=[ACCESS_TYPE.public],
+            write_access=[ACCESS_TYPE.user.format(self.user1.id)],
+            start_date=timezone.now() - timezone.timedelta(days=3)
+        )
+
+        self.query = """
+            query ActivityList($offset: Int!, $limit: Int!, $subtypes: [String!], $orderBy: OrderBy, $orderDirection: OrderDirection) {
+                activities(offset: $offset, limit: $limit, subtypes: $subtypes, orderBy: $orderBy, orderDirection: $orderDirection) {
+                    total
+                    edges {
+                        guid
+                        type
+                        entity {
+                            guid
+                            ...EventListFragment
+                        }
+                    }
+                }
+            }
+            fragment EventListFragment on Event {
+                guid
+                title
+                url
+                startDate
+            }
+
+        """
+
+
+    def test_activities_order_by_title_asc(self):
+        variables = {
+            "limit": 20,
+            "offset": 0,
+            "subtypes": ['event'],
+            "orderBy": "startDate",
+            "orderDirection": "asc"
+        }
+
+        self.graphql_client.force_login(self.user2)
+        result = self.graphql_client.post(self.query, variables)
+        self.assertEqual(result["data"]["activities"]["edges"][0]["entity"]["guid"], self.event_5_days_ago.guid)
+        
+    def test_activities_order_by_start_date_desc(self):
+        variables = {
+            "limit": 20,
+            "offset": 0,
+            "subtypes": ['event'],
+            "orderBy": "startDate",
+            "orderDirection": "desc"
+        }
+
+        self.graphql_client.force_login(self.user2)
+        result = self.graphql_client.post(self.query, variables)
+        self.assertEqual(result["data"]["activities"]["edges"][0]["entity"]["guid"], self.event_in_6_days.guid)
+        
+        
+    def test_activities_order_by_start_asc(self):
+        variables = {
+            "limit": 20,
+            "offset": 0,
+            "subtypes": ['event'],
+            "orderBy": "startDate",
+            "orderDirection": "asc"
+        }
+
+        self.graphql_client.force_login(self.user2)
+        result = self.graphql_client.post(self.query, variables)
+        self.assertEqual(result["data"]["activities"]["edges"][0]["entity"]["guid"], self.event_5_days_ago.guid)
+        
+
+    def test_entities_order_blog_events_by_start_date_desc(self):
+        variables = {
+            "limit": 20,
+            "offset": 0,
+            "subtypes": ['event', 'blog'],
+            "orderBy": "startDate",
+            "orderDirection": "desc"
+        }
+
+        with self.assertGraphQlError(COULD_NOT_ORDER_BY_START_DATE):
+            self.graphql_client.force_login(self.user2)
+            self.graphql_client.post(self.query, variables)

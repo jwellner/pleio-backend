@@ -2,7 +2,7 @@ import logging
 
 from django.db.models import Q
 from django.db.models.functions import Coalesce
-from core.constances import ORDER_DIRECTION, ORDER_BY, INVALID_SUBTYPE
+from core.constances import ORDER_DIRECTION, ORDER_BY, INVALID_SUBTYPE, COULD_NOT_ORDER_BY_START_DATE
 from core.models import Entity
 from graphql import GraphQLError
 
@@ -139,6 +139,11 @@ def resolve_entities(
         order_by = 'last_action'
     elif orderBy == ORDER_BY.title:
         order_by = 'title'
+    elif orderBy == ORDER_BY.startDate:
+        if subtypes == ['event']:
+            order_by = 'event__start_date'
+        else:
+            raise GraphQLError(COULD_NOT_ORDER_BY_START_DATE)
     else:
         order_by = 'published'
 
