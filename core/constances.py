@@ -52,6 +52,7 @@ UNKNOWN_ERROR = "unknown_error"
 USER_NOT_GROUP_OWNER_OR_SITE_ADMIN = "user_not_group_owner_or_site_admin"
 USER_NOT_MEMBER_OF_GROUP = "user_not_member_of_group"
 USER_NOT_SITE_ADMIN = "user_not_site_admin"
+COULD_NOT_ORDER_BY_START_DATE = "order_by_start_date_is_only_for_events"
 EVENT_IS_FULL = "event_is_full"
 EVENT_INVALID_STATE = "event_invalid_state"
 NOT_ATTENDING_PARENT_EVENT = "not_attending_parent_event"
@@ -80,6 +81,7 @@ class ORDER_BY:
     timePublished = 'timePublished'
     lastAction = 'lastAction'
     title = 'title'
+    startDate = 'startDate'
 
 class SEARCH_ORDER_BY:
     timeCreated = 'timeCreated'
