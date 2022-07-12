@@ -74,6 +74,7 @@ def send_overview(schema_name, period):
     '''
     Send overview mails for tenant
     '''
+    logger.info('Send %s overview for %s', period, schema_name)
     management.execute_from_command_line(['manage.py', 'tenant_command', 'send_overview_emails', '--schema', schema_name, '--interval', period])
 
 
