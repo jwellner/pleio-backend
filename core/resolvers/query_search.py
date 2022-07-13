@@ -159,11 +159,12 @@ def resolve_search_journal(_, info, dateTimeFrom=None, dateTimeTo=None, limit=No
         start=dateTimeFrom,
         end=dateTimeTo,
     )]
+    total = len(summary)
     if offset is not None:
         summary = summary[offset:]
     if limit is not None:
         summary = summary[:limit]
     return {
-        "total": len(summary),
+        "total": total,
         "edges": summary,
     }

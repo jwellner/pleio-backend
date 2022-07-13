@@ -79,7 +79,8 @@ class TestQueryJournalTestCase(PleioTenantTestCase):
         })
 
         edges = result['data']['searchJournal']['edges']
-        self.assertEqual(2, result['data']['searchJournal']['total'])
+        self.assertEqual(3, result['data']['searchJournal']['total'])
+        self.assertEqual(2, len(edges))
         self.assertEqual(edges[0]['query'], self.SECOND)
         self.assertEqual(edges[1]['query'], self.THIRD)
 
@@ -91,7 +92,8 @@ class TestQueryJournalTestCase(PleioTenantTestCase):
         })
 
         edges = result['data']['searchJournal']['edges']
-        self.assertEqual(1, result['data']['searchJournal']['total'])
+        self.assertEqual(3, result['data']['searchJournal']['total'])
+        self.assertEqual(1, len(edges))
         self.assertEqual(edges[0]['query'], self.THIRD)
 
     def test_journal_factory_works(self):

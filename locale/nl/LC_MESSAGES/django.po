@@ -1177,9 +1177,9 @@ msgid ""
 "account with two-factor authentication. In case you are using the Single-"
 "Sign-On of your organisation, you will only need to log in again."
 msgstr ""
-"Om toegang te krijgen tot deze site, moet u de beveiliging van uw account "
-"verbeteren met twee-factor authenticatie. Als u gebruik maakt van de Single-"
-"Sign-On van uw organisatie, hoeft u alleen opnieuw in te loggen."
+"Om toegang te krijgen tot deze site, moet je de beveiliging van uw account "
+"verbeteren met twee-factor authenticatie. Als je gebruik maakt van de Single-"
+"Sign-On van uw organisatie, hoef je alleen opnieuw in te loggen."
 
 #: core/templates/registration/2fa_required.html:13
 msgid "Log in again"

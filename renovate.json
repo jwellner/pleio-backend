@@ -4,7 +4,10 @@
   ],
   "prConcurrentLimit": 5,
   "automerge": false,
-  "major": {
-    "automerge": false
-  }
+  "packageRules": [
+    {
+      "matchPackageNames": ["Django"],
+      "allowedVersions": "<4"
+    }
+  ]
 }
