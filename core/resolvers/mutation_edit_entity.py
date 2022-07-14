@@ -5,9 +5,9 @@ from core.constances import NOT_LOGGED_IN, INVALID_SUBTYPE
 from core.models import Entity
 from core.resolvers.mutation_edit_comment import resolve_edit_comment
 from blog.resolvers.mutation import resolve_edit_blog
-from event.resolvers.mutation import resolve_edit_event
 from discussion.resolvers.mutation import resolve_edit_discussion
 from activity.resolvers.mutation import resolve_edit_status_update
+from event.resolvers.mutation_event_edit import resolve_edit_event
 from task.resolvers.mutation import resolve_edit_task
 from wiki.resolvers.mutation import resolve_edit_wiki
 from news.resolvers.mutation import resolve_edit_news

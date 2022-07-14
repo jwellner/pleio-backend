@@ -1,18 +1,13 @@
-from django.db import connection
 from django_tenants.test.cases import FastTenantTestCase
-from django.test import override_settings
-from django.utils.text import slugify
 from backend2.schema import schema
 from ariadne import graphql_sync
-import json
 from django.contrib.auth.models import AnonymousUser
 from django.http import HttpRequest
-from core.models import Group
 from user.models import User
 from event.models import Event, EventAttendee
 from core.constances import ACCESS_TYPE
 from mixer.backend.django import mixer
-from unittest import mock
+
 
 class AttendEventTestCase(FastTenantTestCase):
 
@@ -29,7 +24,7 @@ class AttendEventTestCase(FastTenantTestCase):
             read_access=[ACCESS_TYPE.public],
             write_access=[ACCESS_TYPE.user.format(self.attendee1.id)],
             owner=self.attendee1,
-            max_attendees = 2
+            max_attendees=2
         )
         mixer.blend(
             EventAttendee,
@@ -72,13 +67,12 @@ class AttendEventTestCase(FastTenantTestCase):
         request = HttpRequest()
         request.user = self.attendee2
 
-        result = graphql_sync(schema, { "query": mutation, "variables": variables }, context_value={ "request": request })
+        result = graphql_sync(schema, {"query": mutation, "variables": variables}, context_value={"request": request})
 
         data = result[1]["data"]
 
         self.assertEqual(data["attendEvent"]["entity"]["guid"], self.eventPublic.guid)
         self.assertEqual(len(data["attendEvent"]["entity"]["attendees"]["edges"]), 2)
-
 
     def test_attend_event_waitinglist(self):
         mutation = """
@@ -117,7 +111,7 @@ class AttendEventTestCase(FastTenantTestCase):
             state='accept'
         )
 
-        result = graphql_sync(schema, { "query": mutation, "variables": variables }, context_value={ "request": request })
+        result = graphql_sync(schema, {"query": mutation, "variables": variables}, context_value={"request": request})
 
         data = result[1]["data"]
 
@@ -129,7 +123,6 @@ class AttendEventTestCase(FastTenantTestCase):
         self.assertNotIn(str(self.attendee3.id), guids)
         self.assertIn(str(self.attendee2.id), guids)
         self.assertEqual([''], emails)
-
 
     def test_attend_event_from_accept_to_reject(self):
         mutation = """
@@ -184,7 +177,7 @@ class AttendEventTestCase(FastTenantTestCase):
             state='waitinglist'
         )
 
-        result = graphql_sync(schema, { "query": mutation, "variables": variables }, context_value={ "request": request })
+        result = graphql_sync(schema, {"query": mutation, "variables": variables}, context_value={"request": request})
 
         data = result[1]["data"]
 
@@ -193,14 +186,13 @@ class AttendEventTestCase(FastTenantTestCase):
         self.assertEqual(EventAttendee.objects.filter(event=self.eventPublic, user=self.attendee3, state='accept').count(), 1)
 
     def test_not_attending_parent_event(self):
-
         subevent = Event.objects.create(
             title="Test public event",
             rich_description="JSON to string",
             read_access=[ACCESS_TYPE.public],
             write_access=[ACCESS_TYPE.user.format(self.attendee1.id)],
             owner=self.attendee1,
-            max_attendees = 2,
+            max_attendees=2,
             parent=self.eventPublic
         )
 
@@ -231,7 +223,7 @@ class AttendEventTestCase(FastTenantTestCase):
         request = HttpRequest()
         request.user = self.attendee2
 
-        result = graphql_sync(schema, { "query": mutation, "variables": variables }, context_value={ "request": request })
+        result = graphql_sync(schema, {"query": mutation, "variables": variables}, context_value={"request": request})
 
         errors = result[1]["errors"]
 
@@ -240,14 +232,14 @@ class AttendEventTestCase(FastTenantTestCase):
     def test_reject_event_with_subevent(self):
         subevent = mixer.blend(
             Event,
-            parent = self.eventPublic,
+            parent=self.eventPublic,
         )
 
         sub_attendee = mixer.blend(
             EventAttendee,
-            event = subevent,
-            user = self.attendee1,
-            state = 'accept'
+            event=subevent,
+            user=self.attendee1,
+            state='accept'
         )
 
         mutation = """
@@ -277,7 +269,7 @@ class AttendEventTestCase(FastTenantTestCase):
         request = HttpRequest()
         request.user = self.attendee1
 
-        result = graphql_sync(schema, { "query": mutation, "variables": variables }, context_value={ "request": request })
+        result = graphql_sync(schema, {"query": mutation, "variables": variables}, context_value={"request": request})
 
         data = result[1]["data"]
 
@@ -290,14 +282,14 @@ class AttendEventTestCase(FastTenantTestCase):
     def test_maybe_event_with_subevent(self):
         subevent = mixer.blend(
             Event,
-            parent = self.eventPublic,
+            parent=self.eventPublic,
         )
 
         sub_attendee = mixer.blend(
             EventAttendee,
-            event = subevent,
-            user = self.attendee1,
-            state = 'accept'
+            event=subevent,
+            user=self.attendee1,
+            state='accept'
         )
 
         mutation = """
@@ -327,7 +319,7 @@ class AttendEventTestCase(FastTenantTestCase):
         request = HttpRequest()
         request.user = self.attendee1
 
-        result = graphql_sync(schema, { "query": mutation, "variables": variables }, context_value={ "request": request })
+        result = graphql_sync(schema, {"query": mutation, "variables": variables}, context_value={"request": request})
 
         data = result[1]["data"]
 
