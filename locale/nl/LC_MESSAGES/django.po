@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-06-08 14:02+0200\n"
+"POT-Creation-Date: 2022-04-28 16:13+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -1268,12 +1268,17 @@ msgstr "Groep"
 msgid "Saved"
 msgstr "Opgeslagen"
 
-#: event/models.py:130
+#: event/models.py:123
 #, python-format
 msgid "Added to event %s from waitinglist"
 msgstr "Toegevoegd aan evenement %s van wachtlijst"
 
-#: event/resolvers/mutation.py:301 event/tests/test_resolve_copy_entity.py:149
+#: event/models.py:203
+msgid "You already signed in for another sub-event in the same slot."
+msgstr ""
+"Je hebt je al aangemeld voor een ander sub-evenement in hetzelfde slot."
+
+#: event/resolvers/mutation.py:424 event/tests/test_resolve_copy_entity.py:149
 #, python-format
 msgid "Copy %s"
 msgstr "Kopie %s"

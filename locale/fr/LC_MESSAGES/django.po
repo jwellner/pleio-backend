@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Frans\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-06-08 14:02+0200\n"
+"POT-Creation-Date: 2022-04-28 16:13+0200\n"
 "PO-Revision-Date: 2021-06-24 15:12+0200\n"
 "Last-Translator: \n"
 "Language-Team: frans\n"
@@ -1284,12 +1284,17 @@ msgstr "Groupe"
 msgid "Saved"
 msgstr "Sauvegardé"
 
-#: event/models.py:130
+#: event/models.py:123
 #, python-format
 msgid "Added to event %s from waitinglist"
 msgstr "Ajouté à l'événement %s de la liste d'attente"
 
-#: event/resolvers/mutation.py:301 event/tests/test_resolve_copy_entity.py:149
+#: event/models.py:203
+msgid "You already signed in for another sub-event in the same slot."
+msgstr ""
+"Vous vous êtes déjà inscrit à un autre sous-événement dans le même créneau."
+
+#: event/resolvers/mutation.py:424 event/tests/test_resolve_copy_entity.py:149
 #, python-format
 msgid "Copy %s"
 msgstr "Copie %s"

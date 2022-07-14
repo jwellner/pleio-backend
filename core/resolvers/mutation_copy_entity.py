@@ -1,8 +1,9 @@
 from graphql import GraphQLError
+
 from core.lib import clean_graphql_input
 from core.constances import INVALID_SUBTYPE
+from event.resolvers.mutation_event_copy import resolve_copy_event
 
-from event.resolvers.mutation import resolve_copy_event
 
 def resolve_copy_entity(_, info, input):
     # pylint: disable=redefined-builtin

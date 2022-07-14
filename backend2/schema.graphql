@@ -69,6 +69,16 @@ type addColumnPayload {
   column: Column
 }
 
+input EventSlotInput {
+  id: Int
+}
+
+input EventSlotAvailableInput {
+  id: Int
+  name: String
+  delete: Boolean
+}
+
 input addEntityInput {
   """deprecated: use subtype"""
   type: Type
@@ -83,6 +93,8 @@ input addEntityInput {
   startDate: DateTime
   endDate: DateTime
   source: String
+  slot: EventSlotInput
+  slotsAvailable: [EventSlotAvailableInput]
   location: String
   locationLink: String
   locationAddress: String
@@ -579,6 +591,8 @@ input editEntityInput {
   locationLink: String
   locationAddress: String
   ticketLink: String
+  slot: EventSlotInput
+  slotsAvailable: [EventSlotAvailableInput]
   maxAttendees: String
   rsvp: Boolean
   accessId: Int
@@ -897,6 +911,11 @@ type EntityList {
   edges: [Entity]
 }
 
+type EventSlot {
+  id: Int
+  name: String
+}
+
 type Event implements Entity {
   guid: String!
   status: Int
@@ -907,6 +926,8 @@ type Event implements Entity {
   richDescription: SecureRichText
   hasChildren: Boolean
   children: [Event]
+  slot: EventSlot
+  slotsAvailable: [EventSlot]
   parent: Event
   inGroup: Boolean
   group: Group

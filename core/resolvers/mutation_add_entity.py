@@ -3,9 +3,9 @@ from core.lib import clean_graphql_input
 from core.constances import INVALID_SUBTYPE
 from core.resolvers.mutation_add_comment import resolve_add_comment
 from blog.resolvers.mutation import resolve_add_blog
-from event.resolvers.mutation import resolve_add_event
 from discussion.resolvers.mutation import resolve_add_discussion
 from activity.resolvers.mutation import resolve_add_status_update
+from event.resolvers.mutation_event_add import resolve_add_event
 from task.resolvers.mutation import resolve_add_task
 from file.resolvers.mutation import resolve_add_folder
 from wiki.resolvers.mutation import resolve_add_wiki
