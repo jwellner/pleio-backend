@@ -99,6 +99,13 @@ def resolve_attend_event(_, info, input):
     except ObjectDoesNotExist:
         attendee = None
 
+    if not clean_input.get("state"):
+        if attendee:
+            attendee.delete()
+        return {
+            "entity": event
+        }
+
     if not attendee:
         attendee = EventAttendee()
         attendee.event = event
@@ -106,10 +113,10 @@ def resolve_attend_event(_, info, input):
         attendee.email = user.email
         attendee.name = user.name
 
-    if clean_input.get("state") not in ["accept", "reject", "maybe", "waitinglist"]:
+    if clean_input["state"] not in ["accept", "reject", "maybe", "waitinglist"]:
         raise GraphQLError(EVENT_INVALID_STATE)
 
-    if clean_input.get("state") == "accept" and not attendee.state == "accept":
+    if clean_input["state"] == "accept" and not attendee.state == "accept":
         if event.is_full():
             raise GraphQLError(EVENT_IS_FULL)
 
