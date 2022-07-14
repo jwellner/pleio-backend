@@ -30,5 +30,5 @@ class Command(BaseCommand):
         
         task.get()
 
-        self.stdout.write(f"Succesfully resored backup to {options['schema']}")
+        self.stdout.write(f"Succesfully restored backup to {options['schema']}")
 

@@ -1,13 +1,11 @@
 from graphql import GraphQLError
 from django.core.exceptions import ObjectDoesNotExist
-from django.utils.translation import ugettext_lazy
-from core.constances import COULD_NOT_FIND, NOT_LOGGED_IN, COULD_NOT_SAVE
-from core.lib import clean_graphql_input, get_default_email_context
-from user.models import User
+from core.constances import COULD_NOT_FIND
+from core.lib import clean_graphql_input
+from core.resolvers import shared
+from event.resolvers import shared as event_shared
 from event.models import Event
-from event.lib import get_url
-from core.tasks import send_mail_multi
-from django_tenants.utils import parse_tenant_config_path
+
 
 def resolve_delete_event_attendees(_, info, input):
     # pylint: disable=redefined-builtin
@@ -17,38 +15,21 @@ def resolve_delete_event_attendees(_, info, input):
 
     clean_input = clean_graphql_input(input)
 
-    if not info.context["request"].user.is_authenticated:
-        raise GraphQLError(NOT_LOGGED_IN)
+    shared.assert_authenticated(user)
 
     try:
         event = Event.objects.get(id=clean_input.get("guid"))
     except ObjectDoesNotExist:
         raise GraphQLError(COULD_NOT_FIND)
 
-    if not event.can_write(user):
-        raise GraphQLError(COULD_NOT_SAVE)
-
-    link = get_url(event)
-    subject = ugettext_lazy("Removed from event: %s") % event.title
+    shared.assert_write_access(event, user)
 
     for email_address in clean_input.get("emailAddresses"):
-        if event.delete_attendee(user, email_address):
+        attendee = event.get_attendee(email_address)
+        if not attendee:
+            continue
 
-            #Delete atttendee from subevents as well
-            if event.has_children():
-                for child in event.children.all():
-                    child.delete_attendee(user, email_address)
-
-            schema_name = parse_tenant_config_path("")
-            context = get_default_email_context()
-            context['link'] = link
-            context['title'] = event.title
-            context['removed_attendee_name']  = None
-            try:
-                context['removed_attendee_name'] = User.objects.get(email=email_address).name
-            except ObjectDoesNotExist:
-                pass
-            send_mail_multi.delay(schema_name, subject, 'email/delete_event_attendees.html', context, email_address)
+        event_shared.resolve_delete_attendee(attendee)
 
     return {
         "entity": event

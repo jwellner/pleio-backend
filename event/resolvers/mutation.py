@@ -6,8 +6,6 @@ from event.resolvers.mutation_delete_event_attendees import resolve_delete_event
 from event.resolvers.mutation_edit_event_attendee import resolve_edit_event_attendee
 from event.resolvers.mutation_messages import resolve_send_message_to_event
 
-from ..models import Event
-
 mutation = ObjectType("Mutation")
 
 mutation.set_field("attendEvent", resolve_attend_event)

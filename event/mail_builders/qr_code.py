@@ -11,6 +11,13 @@ from core.mail_builders.template_mailer import TemplateMailerBase
 from event.lib import get_url
 
 
+def submit_mail_event_qr(attendee):
+    from core.models import MailInstance
+    MailInstance.objects.submit(QrMailer, mailer_kwargs={
+        'attendee': attendee.id
+    })
+
+
 class QrMailer(TemplateMailerBase):
     _html = None
     _filename = None
@@ -80,10 +87,3 @@ class QrMailer(TemplateMailerBase):
         code_image.add_header('Content-Disposition', f'attachment; filename="{filename}"')
         code_image.add_header('Content-ID', self.content_id)
         return code_image
-
-
-def send_event_qr(attendee):
-    from core.models import MailInstance
-    MailInstance.objects.submit(QrMailer, mailer_kwargs={
-        'attendee': attendee.id
-    })

@@ -1,4 +1,3 @@
-from django.core.exceptions import ObjectDoesNotExist
 from graphql import GraphQLError
 
 from core.constances import COULD_NOT_FIND, USER_ROLES
@@ -37,7 +36,7 @@ def resolve_edit_event(_, info, input):
             entity.parent = container
             entity.group = container.group
 
-        except ObjectDoesNotExist:
+        except Event.DoesNotExist:
             raise GraphQLError(COULD_NOT_FIND)
 
     shared.resolve_update_tags(entity, clean_input)

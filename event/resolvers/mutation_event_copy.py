@@ -1,15 +1,11 @@
 import json
-from django.core.exceptions import ObjectDoesNotExist
-from django.utils import timezone
-from django.utils.translation import gettext as _
-from graphql import GraphQLError
 
-from core.constances import COULD_NOT_FIND, USER_ROLES
-from core.lib import clean_graphql_input, access_id_to_acl, get_access_id
 from core.resolvers import shared
 from core.utils.entity import load_entity_by_id
 from core.utils.tiptap_parser import Tiptap
-from event.resolvers import shared as event_shared
+from core.lib import get_access_id, clean_graphql_input, access_id_to_acl
+from django.utils.translation import ugettext as _
+from django.utils import timezone
 from event.models import Event
 
 
@@ -45,7 +41,7 @@ def copy_event(event_id, user, parent=None):
             day=now.day,
         )
         if entity.end_date:
-            entity.end_date = entity.start_date + difference if difference else entity.start_date
+            entity.end_date = entity.start_date + difference
 
     entity.owner = user
     entity.is_featured = False
@@ -91,7 +87,7 @@ def resolve_copy_event(_, info, input):
         "entity": entity
     }
 
-
+# Content property resolvers:
 def resolve_copy_subevents(entity, event, user, clean_input):
     if clean_input.get("copySubevents", True) and event.has_children():
         for child in event.children.all():

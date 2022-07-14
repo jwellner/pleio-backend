@@ -2,14 +2,14 @@ from graphql import GraphQLError
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.validators import validate_email
 from django.core.exceptions import ValidationError
-from django.utils.translation import ugettext_lazy
-from core.constances import COULD_NOT_FIND, EMAIL_ALREADY_USED, INVALID_EMAIL, EVENT_INVALID_STATE, EVENT_IS_FULL, COULD_NOT_SAVE, NOT_ATTENDING_PARENT_EVENT
-from core.lib import clean_graphql_input, get_base_url, get_default_email_context
-from event.mail_builders.qr_code import send_event_qr
+from core.constances import (COULD_NOT_FIND, COULD_NOT_SAVE,
+                             EMAIL_ALREADY_USED, INVALID_EMAIL,
+                             EVENT_INVALID_STATE, EVENT_IS_FULL, NOT_ATTENDING_PARENT_EVENT)
+from core.lib import clean_graphql_input
+from event.mail_builders.attend_event_confirm import submit_attend_event_wa_confirm
+from event.mail_builders.qr_code import submit_mail_event_qr
 from event.models import Event, EventAttendeeRequest, EventAttendee
-from event.lib import get_url
-from core.tasks.mail_tasks import send_mail_multi
-from django_tenants.utils import parse_tenant_config_path
+
 
 def resolve_confirm_attend_event_without_account(_, info, input):
     # pylint: disable=redefined-builtin
@@ -22,7 +22,7 @@ def resolve_confirm_attend_event_without_account(_, info, input):
 
     email = clean_input.get("email")
     delete = clean_input.get("delete")
-    #TODO: set default value for backwards compatibility, remove if frontend is altered
+    # TODO: set default value for backwards compatibility, remove if frontend is altered
     state = clean_input.get("state", "accept")
 
     if state not in ["accept", "reject", "maybe", "waitinglist"]:
@@ -47,7 +47,7 @@ def resolve_confirm_attend_event_without_account(_, info, input):
         raise GraphQLError(COULD_NOT_SAVE)
 
     # check if is attending parent
-    if event.parent and (state =='accept'):
+    if event.parent and (state == 'accept'):
         try:
             EventAttendee.objects.get(email=attendee_request.email, event=event.parent, state='accept')
         except ObjectDoesNotExist:
@@ -62,7 +62,7 @@ def resolve_confirm_attend_event_without_account(_, info, input):
         attendee_request.delete()
 
     # create attendee
-    else:   
+    else:
         # check if already registered as attendee
         if EventAttendee.objects.filter(email=attendee_request.email, event=event):
             raise GraphQLError(EMAIL_ALREADY_USED)
@@ -85,29 +85,10 @@ def resolve_confirm_attend_event_without_account(_, info, input):
         attendee.state = state
         attendee.save()
 
-        leave_url = get_base_url() + '/events/confirm/' + event.guid + '?email=' + email + '&code='
-        leave_link = leave_url + attendee_request.code + '&delete=true'
-        
-        link = get_url(event)
-        subject = ugettext_lazy("Confirmation of registration for %s") % event.title
-
-        schema_name = parse_tenant_config_path("")
-        context = get_default_email_context()
-        context['link'] = link
-        context['leave_link'] = leave_link
-        context['title'] = event.title
-
-        context['location'] = event.location if event.location else None
-        context['locationLink'] = event.location_link if event.location_link else None
-        context['locationAddress'] = event.location_address if event.location_address else None
-
-        context['start_date'] = event.start_date
-        context['state'] = state
-
-        send_mail_multi.delay(schema_name, subject, 'email/confirm_attend_event_without_account.html', context, email)
+        submit_attend_event_wa_confirm(attendee.id, attendee_request.code)
 
         if event.qr_access and state == "accept":
-            send_event_qr(attendee)
+            submit_mail_event_qr(attendee)
 
         if state != "accept":
             event.process_waitinglist()
