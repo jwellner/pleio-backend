@@ -9,16 +9,16 @@ from core.lib import get_default_email_context
 from core.models import (ArticleMixin, AttachmentMixin, BookmarkMixin,
                          CommentMixin, Entity, FeaturedCoverMixin, FollowMixin,
                          NotificationMixin)
-from core.tasks import send_mail_multi
 from django_tenants.utils import parse_tenant_config_path
 from event.lib import get_url
-from event.mail_builders.qr_code import send_event_qr
+from event.mail_builders.qr_code import submit_mail_event_qr
+from event.mail_builders.waitinglist import submit_mail_at_accept_from_waitinglist
 from user.models import User
-from django.core.exceptions import ObjectDoesNotExist
 from django.db.models.signals import pre_save, post_save
 from django.dispatch import receiver
 from django.utils.text import slugify
 from django.utils import timezone
+
 
 
 class Event(Entity,
@@ -53,53 +53,22 @@ class Event(Entity,
             return True
         return False
 
-    def get_attendee(self, user, email=None):
-        if not user.is_authenticated:
-            return None
-
-        attendee = None
-
+    def get_attendee(self, email):
         try:
-            attendee_user = User.objects.get(email=email)
-            attendee = self.attendees.get(user=attendee_user)
-        except ObjectDoesNotExist:
+            user = User.objects.filter(email=email).first()
+            if user:
+                return self.attendees.get(user=user)
+
+            return self.attendees.get(email=email)
+        except EventAttendee.DoesNotExist:
             pass
 
-        try:
-            attendee = self.attendees.get(email=email)
-        except ObjectDoesNotExist:
-            pass
-
-        return attendee
-
-    def delete_attendee(self, user, email):
-        deleted = False
-        if not user.is_authenticated:
-            return None
-
-        # try delete attendee with account
-        try:
-            attendee = User.objects.get(email=email)
-            self.attendees.get(user=attendee).delete()
-            deleted = True
-        except ObjectDoesNotExist:
-            pass
-
-        # try delete attendee without account
-        try:
-            attendee = self.attendees.get(email=email)
-            attendee.delete()
-            deleted = True
-        except ObjectDoesNotExist:
-            pass
-
-        # try delete attendee without account request
-        try:
-            EventAttendeeRequest.objects.get(event=self, email=email).delete()
-        except ObjectDoesNotExist:
-            pass
-
-        return deleted
+    def delete_attendee(self, email):
+        attendee = self.get_attendee(email)
+        if not attendee:
+            return False
+        attendee.delete()
+        return True
 
     def is_full(self):
         if self.max_attendees and self.attendees.filter(state="accept").count() >= self.max_attendees:
@@ -147,18 +116,14 @@ class Event(Entity,
         for attendee in self.attendees.filter(state='waitinglist').order_by('updated_at'):
             if self.is_full():
                 break
+
             attendee.state = 'accept'
             attendee.save()
 
             if self.qr_access:
-                send_event_qr(attendee)
+                submit_mail_event_qr(attendee)
 
-            try:
-                send_mail_multi.delay(schema_name, subject, 'email/attend_event_from_waitinglist.html', context,
-                                      attendee.user.email)
-            except Exception:
-                send_mail_multi.delay(schema_name, subject, 'email/attend_event_from_waitinglist.html', context,
-                                      attendee.email)
+            submit_mail_at_accept_from_waitinglist(event=self.guid, attendee=attendee.id)
 
         return True
 

@@ -155,7 +155,7 @@ def resolve_is_attending(obj, info):
     user = info.context["request"].user
 
     if user.is_authenticated:
-        attendee = obj.get_attendee(user, user.email)
+        attendee = obj.get_attendee(user.email)
         if attendee:
             return attendee.state
 

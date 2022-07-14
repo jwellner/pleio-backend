@@ -272,7 +272,9 @@ def get_base_url():
 
 
 def get_full_url(relative_path):
-    return f"{get_base_url()}{relative_path}"
+    if not re.match(r"^https?:\/\/", relative_path):
+        return f"{get_base_url()}{relative_path}"
+    return relative_path
 
 
 def tenant_summary():

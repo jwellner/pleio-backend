@@ -55,7 +55,6 @@ def resolve_add_event(_, info, input):
 
     shared.resolve_update_is_featured(entity, user, clean_input)
 
-    event_shared.resolve_assert_valid_date(clean_input)
     event_shared.resolve_update_startenddate(entity, clean_input)
     event_shared.resolve_update_source(entity, clean_input)
     event_shared.resolve_update_location(entity, clean_input)

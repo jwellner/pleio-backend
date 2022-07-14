@@ -2,11 +2,7 @@ from graphql import GraphQLError
 
 from core.constances import INVALID_DATE, COULD_NOT_ADD, SUBEVENT_OPERATION, NON_SUBEVENT_OPERATION
 from core.lib import NumberIncrement
-
-
-def resolve_assert_valid_date(clean_input):
-    if not clean_input.get("startDate", None) or not clean_input.get("endDate", None):
-        raise GraphQLError(INVALID_DATE)
+from event.mail_builders.delete_event_attendees import submit_delete_event_attendees_mail
 
 
 def resolve_update_startenddate(entity, clean_input):
@@ -14,6 +10,11 @@ def resolve_update_startenddate(entity, clean_input):
         entity.start_date = clean_input.get("startDate")
     if 'endDate' in clean_input:
         entity.end_date = clean_input.get("endDate")
+    if not entity.end_date:
+        entity.end_date = entity.start_date
+
+    if not entity.start_date or not entity.end_date:
+        raise GraphQLError(INVALID_DATE)
     if entity.start_date > entity.end_date:
         raise GraphQLError(INVALID_DATE)
 
@@ -74,7 +75,6 @@ def resolve_update_slot(entity, clean_input):
             entity.slot = None
 
 
-
 def resolve_update_slots_available(entity, clean_input):
     if 'slotsAvailable' in clean_input:
         # not allowed for sub-events
@@ -101,3 +101,20 @@ def resolve_update_slots_available(entity, clean_input):
 
             slot.index = increment.next()
             slot.save()
+
+
+def resolve_delete_attendee(attendee):
+    event = attendee.event
+
+    if attendee.event.has_children():
+        for child in event.children.all():
+            child.delete_attendee(attendee.email)
+
+    mail_info = attendee.as_mailinfo()
+    mail_user = attendee.user
+
+    attendee.delete()
+
+    submit_delete_event_attendees_mail(event=event,
+                                       mail_info=mail_info,
+                                       user=mail_user)
