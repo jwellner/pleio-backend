@@ -45,7 +45,10 @@ class MailerBase:
             context['user_name'] = mail_info['name']
         return context
 
-    class IgnoreInactiveUserMailError(Exception):
+    class FailSilentlyError(Exception):
+        pass
+
+    class IgnoreInactiveUserMailError(FailSilentlyError):
         pass
 
     @staticmethod
