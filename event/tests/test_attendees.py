@@ -1,7 +1,10 @@
 from django.core.exceptions import ValidationError
 from django_tenants.test.cases import FastTenantTestCase
 from mixer.backend.django import mixer
+
+from core.tests.helpers import PleioTenantTestCase
 from event.models import Event, EventAttendee
+from user.factories import AdminFactory, UserFactory
 from user.models import User
 from django.http import HttpRequest
 from django.utils import timezone
@@ -165,31 +168,55 @@ class AttendeesTestCase(FastTenantTestCase):
 
         self.assertEqual([d['name'] for d in data["entity"]["attendees"]["edges"]], ['Bb', 'Dd'])
 
+
+class TestAttendeesSigningUpForSubevents(PleioTenantTestCase):
+
+    def setUp(self):
+        super().setUp()
+        self.admin = AdminFactory()
+        self.event = Event.objects.create(title="Parent event",
+                                          owner=self.admin,
+                                          start_date=timezone.now(),
+                                          end_date=timezone.now() + timezone.timedelta(hours=8))
+
+    def test_allow_signup_for_multiple_sub_events_outside_slots(self):
+        session1 = Event.objects.create(parent=self.event,
+                                        title="Session 1",
+                                        start_date=self.event.start_date,
+                                        end_date=self.event.end_date)
+        session2 = Event.objects.create(parent=self.event,
+                                        title="Session2 same time",
+                                        start_date=self.event.start_date,
+                                        end_date=self.event.end_date)
+
+        user = UserFactory(email='user@example.com')
+
+        self.event.attendees.create(email=user.email, user=user, state='accept')
+
+        session1.attendees.create(email=user.email, user=user, state='accept')
+        session2.attendees.create(email=user.email, user=user, state='accept')
+
     def test_disallow_signup_for_multiple_sub_events_at_the_same_slot(self):
-        parentEvent = Event.objects.create(title="Parent event",
-                                           owner=self.admin,
-                                           start_date=timezone.now(),
-                                           end_date=timezone.now() + timezone.timedelta(hours=8))
-        slot1 = parentEvent.slots_available.create(name="slot1", index=0)
-        slot2 = parentEvent.slots_available.create(name="slot2", index=1)
-        slot1session1 = Event.objects.create(parent=parentEvent,
+        slot1 = self.event.slots_available.create(name="slot1", index=0)
+        slot2 = self.event.slots_available.create(name="slot2", index=1)
+        slot1session1 = Event.objects.create(parent=self.event,
                                              slot=slot1,
                                              title="Session 1",
-                                             start_date=parentEvent.start_date,
-                                             end_date=parentEvent.start_date + timezone.timedelta(hours=2))
-        slot1session2 = Event.objects.create(parent=parentEvent,
+                                             start_date=self.event.start_date,
+                                             end_date=self.event.start_date + timezone.timedelta(hours=2))
+        slot1session2 = Event.objects.create(parent=self.event,
                                              slot=slot1,
                                              title="Session2 same time",
                                              start_date=slot1session1.start_date,
                                              end_date=slot1session1.end_date)
-        slot2session1 = Event.objects.create(parent=parentEvent,
+        slot2session1 = Event.objects.create(parent=self.event,
                                              slot=slot2,
                                              title="Session 1",
                                              start_date=slot1session1.end_date,
                                              end_date=slot1session1.end_date + timezone.timedelta(hours=2))
 
-        user1 = mixer.blend(User, name="User one")
-        user2 = mixer.blend(User, name="Another user")
+        user1 = UserFactory(name="User one")
+        user2 = UserFactory(name="Another user")
         email1 = "User1@example.com"
         email2 = "User2@example.com"
         EventAttendee.objects.create(event=slot1session1,

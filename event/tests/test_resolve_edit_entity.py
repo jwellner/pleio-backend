@@ -261,8 +261,6 @@ class EditEventTestCase(PleioTenantTestCase):
                 }
             })
 
-
-
     def test_assign_subevent_to_slot(self):
         primary_slot = EventSlot.objects.create(container=self.eventPublic, name="primary")
         event = mixer.blend(Event,
