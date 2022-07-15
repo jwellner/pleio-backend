@@ -190,7 +190,7 @@ class EventAttendee(models.Model):
     def clean_event(self):
         if not self.event.parent or self.state != 'accept' \
                 or self.event.start_date is None \
-                or self.event.slot == '':
+                or not self.event.slot:
             return
 
         user_attendees = EventAttendee.objects.filter(user__isnull=False, user=self.user)
