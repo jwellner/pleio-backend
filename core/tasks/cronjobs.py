@@ -5,6 +5,7 @@ from auditlog.models import LogEntry
 from celery import shared_task
 from celery.utils.log import get_task_logger
 from core import config
+from core.mail_builders.frequent_overview import schedule_frequent_overview_mail
 from core.models import SiteStat, Attachment, ResizedImage, Entity
 from core.tasks.notification_tasks import create_notifications_for_scheduled_content
 from django.conf import settings
@@ -24,31 +25,46 @@ logger = get_task_logger(__name__)
 
 
 @shared_task
-def dispatch_crons(period):
-    '''
-    Dispatch period cron tasks for all tenants
-    '''
+def dispatch_hourly_cron():
     for client in Client.objects.exclude(schema_name='public'):
-        logger.info('Schedule cron %s for %s', period, client.schema_name)
+        logger.info('Schedule hourly cron for %s', client.schema_name)
 
-        if period == 'hourly':
-            create_notifications_for_scheduled_content.delay(client.schema_name)
-            send_notifications.delay(client.schema_name)
-            depublicate_content.delay(client.schema_name)
+        create_notifications_for_scheduled_content.delay(client.schema_name)
+        send_notifications.delay(client.schema_name)
+        depublicate_content.delay(client.schema_name)
 
-        if period == 'daily':
-            save_db_disk_usage.delay(client.schema_name)
-            save_file_disk_usage.delay(client.schema_name)
-            ban_users_that_bounce.delay(client.schema_name)
-            ban_users_with_no_account.delay(client.schema_name)
-            resize_pending_images.delay(client.schema_name)
-            cleanup_auditlog.delay(client.schema_name)
 
-        if period == 'weekly':
-            remove_floating_attachments.delay(client.schema_name)
+@shared_task
+def dispatch_daily_cron():
+    for client in Client.objects.exclude(schema_name='public'):
+        logger.info('Schedule daily cron for %s', client.schema_name)
 
-        if period in ['daily', 'weekly', 'monthly']:
-            send_overview.delay(client.schema_name, period)
+        save_db_disk_usage.delay(client.schema_name)
+        save_file_disk_usage.delay(client.schema_name)
+        ban_users_that_bounce.delay(client.schema_name)
+        ban_users_with_no_account.delay(client.schema_name)
+        resize_pending_images.delay(client.schema_name)
+        cleanup_auditlog.delay(client.schema_name)
+        send_overview.delay(client.schema_name, 'daily')
+
+
+@shared_task
+def dispatch_weekly_cron():
+    # pylint: disable=unused-argument
+    for client in Client.objects.exclude(schema_name='public'):
+        logger.info('Schedule weekly cron for %s', client.schema_name)
+
+        remove_floating_attachments.delay(client.schema_name)
+        send_overview.delay(client.schema_name, 'weekly')
+
+
+@shared_task
+def dispatch_monthly_cron():
+    for client in Client.objects.exclude(schema_name='public'):
+        logger.info('Schedule weekly cron for %s', client.schema_name)
+
+        remove_floating_attachments.delay(client.schema_name)
+        send_overview.delay(client.schema_name, "monthly")
 
 
 @shared_task(bind=True)
@@ -66,6 +82,7 @@ def send_notifications(schema_name):
     '''
     Send notification mails for tenant
     '''
+    logger.info('Schedule send notifications for %s', schema_name)
     management.execute_from_command_line(['manage.py', 'tenant_command', 'send_notification_emails', '--schema', schema_name])
 
 
@@ -75,7 +92,13 @@ def send_overview(schema_name, period):
     Send overview mails for tenant
     '''
     logger.info('Send %s overview for %s', period, schema_name)
-    management.execute_from_command_line(['manage.py', 'tenant_command', 'send_overview_emails', '--schema', schema_name, '--interval', period])
+
+    with schema_context(schema_name):
+        users = User.objects.filter(is_active=True,
+                                    _profile__receive_notification_email=True,
+                                    _profile__overview_email_interval=period)
+        for user in users:
+            schedule_frequent_overview_mail(user, period)
 
 
 @shared_task
@@ -213,7 +236,7 @@ def ban_users_with_no_account(schema_name):
 def remove_floating_attachments(schema_name):
     with schema_context(schema_name):
         deleted = Attachment.objects.filter(attached_content_type=None).delete()
-        logger.info("%s: %d floating attachments were deleted.", schema_name, len(deleted))
+        logger.info("%s: %d floating attachments were deleted.", schema_name, deleted[0])
 
 
 @shared_task

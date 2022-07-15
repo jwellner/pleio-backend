@@ -1,5 +1,5 @@
-from .cronjobs import (dispatch_crons, dispatch_task,
-                       send_notifications, send_overview,
+from .cronjobs import (dispatch_hourly_cron, dispatch_daily_cron, dispatch_weekly_cron, dispatch_monthly_cron,
+                       dispatch_task, send_notifications, send_overview,
                        save_db_disk_usage, save_file_disk_usage,
                        ban_users_that_bounce, ban_users_with_no_account,
                        remove_floating_attachments, resize_pending_images,

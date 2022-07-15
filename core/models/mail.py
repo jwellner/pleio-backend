@@ -46,7 +46,7 @@ class MailInstance(models.Model):
         try:
             self.error = None
             result = mailer.send()
-        except MailerBase.IgnoreInactiveUserMailError:
+        except MailerBase.FailSilentlyError:
             return
         except Exception as e:
             self.error = e

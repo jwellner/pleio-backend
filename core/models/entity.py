@@ -171,7 +171,7 @@ class Entity(models.Model, TagsMixin):
 
 class EntityView(models.Model):
     entity = models.ForeignKey('core.Entity', on_delete=models.CASCADE, related_name="views")
-    viewer = models.ForeignKey('user.User', on_delete=models.CASCADE)
+    viewer = models.ForeignKey('user.User', on_delete=models.CASCADE, related_name="viewed_entities")
     created_at = models.DateTimeField(default=timezone.now)
 
 

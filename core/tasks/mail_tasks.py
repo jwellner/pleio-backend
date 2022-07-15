@@ -52,5 +52,5 @@ def send_mail_by_instance(schema_name, instance_id):
             if instance.error:
                 logger.error("background_email_error: id=%s schema=%s error=%s message=%s",
                              instance_id, schema_name, instance.error.__class__, str(instance.error))
-        except MailerBase.IgnoreInactiveUserMailError:
+        except MailerBase.FailSilentlyError:
             pass
