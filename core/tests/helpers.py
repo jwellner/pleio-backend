@@ -1,3 +1,4 @@
+import os
 import time
 from contextlib import contextmanager
 
@@ -6,8 +7,10 @@ from unittest import mock
 
 from ariadne import graphql_sync
 from django.contrib.auth.models import AnonymousUser
+from django.core.files.base import ContentFile
 from django.http import HttpRequest
 from django.utils.crypto import get_random_string
+from mixer.backend.django import mixer
 
 from backend2.schema import schema
 from django_tenants.test.cases import FastTenantTestCase
@@ -22,6 +25,32 @@ class PleioTenantTestCase(FastTenantTestCase):
         super().setUp()
         self.client = TenantClient(self.tenant)
         self.graphql_client = GraphQLClient()
+        self.file_cleanup = []
+
+    def file_factory(self, filepath):
+        from file.models import FileFolder
+        filename = os.path.basename(filepath)
+        upload = None
+        if os.path.exists(filepath):
+            with open(filepath, 'rb') as fh:
+                upload = ContentFile(fh.read(), filename)
+        file = mixer.blend(FileFolder,
+                           is_folder=False,
+                           upload=upload)
+        if upload:
+            upload_dir = os.path.dirname(file.upload.path)
+            self.file_cleanup.append(os.path.join(upload_dir, filename))
+            self.file_cleanup.append(file.upload.path)
+            if file.thumbnail.name:
+                self.file_cleanup.append(file.thumbnail.path)
+
+        return file
+
+    def tearDown(self):
+        for file in self.file_cleanup:
+            cleanup_path(file)
+
+        super().tearDown()
 
     @contextmanager
     def assertGraphQlError(self, expected=None, msg=None):
@@ -119,3 +148,21 @@ def suppress_stdout():
         with open(devnull, 'w') as fnull:
             with redirect_stderr(fnull) as err, redirect_stdout(fnull) as out:
                 yield (err, out)
+
+
+def cleanup_path(path):
+    if path == get_system_root():
+        return
+    try:
+        if os.path.isfile(path):
+            os.unlink(path)
+        else:
+            os.rmdir(path)
+    except Exception:
+        return
+
+    cleanup_path(os.path.dirname(path))
+
+
+def get_system_root():
+    return os.path.abspath(os.path.sep)

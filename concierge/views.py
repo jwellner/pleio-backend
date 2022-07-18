@@ -3,9 +3,10 @@ import logging
 from django.http import JsonResponse, HttpResponseBadRequest
 from django.views.decorators.csrf import csrf_exempt
 
-from core.lib import tenant_schema
+from core.lib import tenant_schema, tenant_summary, require_tenant_api_token
 
 logger = logging.getLogger(__name__)
+
 
 @csrf_exempt
 def profile_updated(request):
@@ -16,3 +17,8 @@ def profile_updated(request):
         return JsonResponse({'result': 'ok'})
 
     return HttpResponseBadRequest()
+
+
+@require_tenant_api_token
+def get_site_info(request):
+    return JsonResponse(tenant_summary(with_favicon=True))

@@ -223,7 +223,7 @@ def resolve_edit_site_setting(_, info, input):
     resolve_update_custom_css(clean_input)
     resolve_update_walled_garden_by_ip_enabled(clean_input)
     resolve_update_white_listed_ip_ranges(clean_input)
-    resolve_update_extra_languages(clean_input)    
+    resolve_update_extra_languages(clean_input)
     resolve_update_file_description_field_enabled(clean_input)
     resolve_update_is_closed(user, clean_input)
 
@@ -278,13 +278,15 @@ def resolve_update_logo(user, clean_input):
 
         save_setting('LOGO', logo.embed_url)
 
+
 def resolve_update_remove_logo(clean_input):
     if 'removeLogo' in clean_input:
         try:
-            FileFolder.objects.get(id=config.LOGO.split('/')[3]).delete()
+            FileFolder.objects.file_by_path(config.LOGO).delete()
         except Exception:
             pass
         save_setting('LOGO', "")
+
 
 def resolve_update_icon(user, clean_input):
     if 'icon' in clean_input:
@@ -304,13 +306,15 @@ def resolve_update_icon(user, clean_input):
 
         save_setting('ICON', icon.embed_url)
 
+
 def resolve_update_remove_icon(clean_input):
     if 'removeIcon' in clean_input:
         try:
-            FileFolder.objects.get(id=config.ICON.split('/')[3]).delete()
+            FileFolder.objects.file_by_path(config.ICON).delete()
         except Exception:
             pass
         save_setting('ICON', "")
+
 
 def resolve_update_favicon(user, clean_input):
     if 'favicon' in clean_input:
@@ -332,13 +336,15 @@ def resolve_update_favicon(user, clean_input):
 
         save_setting('FAVICON', favicon.download_url)
 
+
 def resolve_update_remove_favicon(clean_input):
     if 'removeFavicon' in clean_input:
         try:
-            FileFolder.objects.get(id=config.FAVICON.split('/')[3]).delete()
+            FileFolder.objects.file_by_path(config.FAVICON).delete()
         except Exception:
             pass
         save_setting('FAVICON', "")
+
 
 def resolve_update_direct_registration_domains(clean_input):
     if 'directRegistrationDomains' in clean_input:

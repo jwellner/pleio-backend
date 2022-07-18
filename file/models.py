@@ -11,6 +11,7 @@ from django.utils import timezone
 from enum import Enum
 from core.lib import generate_object_filename, get_mimetype, tenant_schema, get_basename, get_filesize
 from core.models import Entity
+from core.models.entity import EntityManager
 from core.models.mixin import ModelWithFile
 from core.models.image import ResizedImageMixin
 from django.db.models import ObjectDoesNotExist
@@ -40,7 +41,22 @@ class FILE_SCAN(Enum):
     UNKNOWN = 'UNKNOWN'
 
 
+class FileFolderManager(EntityManager):
+
+    def file_by_path(self, path):
+        for maybe_guid in path.split('/'):
+            try:
+                qs = self.get_queryset().filter(pk=maybe_guid, is_folder=False)
+                if qs.exists():
+                    return qs.first()
+            except Exception:
+                pass
+        return None
+
+
 class FileFolder(Entity, ModelWithFile, ResizedImageMixin):
+    objects = FileFolderManager()
+
     title = models.CharField(max_length=256)
 
     parent = models.ForeignKey('self', blank=True, null=True, related_name='children', on_delete=models.CASCADE)
@@ -57,6 +73,15 @@ class FileFolder(Entity, ModelWithFile, ResizedImageMixin):
     write_access_weight = models.IntegerField(default=0)
 
     rich_description = models.TextField(null=True, blank=True)
+
+    def get_content(self, wrap=None):
+        if os.path.exists(self.upload.path):
+            with open(self.upload.path, 'rb') as fh:
+                data = fh.read()
+                if callable(wrap):
+                    return wrap(data)
+                return data
+        return None
 
     def __str__(self):
         return f"FileFolder[{self.title}]"
@@ -204,9 +229,9 @@ def file_pre_save(sender, instance, **kwargs):
             if not instance.title:
                 instance.title = get_basename(instance.upload.path)
             if not instance.mime_type:
-                instance.mime_type=get_mimetype(instance.upload.path)
+                instance.mime_type = get_mimetype(instance.upload.path)
             if not instance.size:
-                instance.size=get_filesize(instance.upload.path)
+                instance.size = get_filesize(instance.upload.path)
         except FileNotFoundError as e:
             pass
 

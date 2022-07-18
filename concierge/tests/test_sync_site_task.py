@@ -24,7 +24,7 @@ class TestSyncSiteTestCase(FastTenantTestCase):
                 "origin_site_url": expected_site_config['url'],
                 "origin_site_name": expected_site_config['name'],
                 "origin_site_description": expected_site_config['description'],
-                "origin_site_favicon": expected_site_config['favicon'],
+                "origin_site_api_token": expected_site_config['api_token'],
             },
             headers={
                 "x-oidc-client-id": settings.OIDC_RP_CLIENT_ID,

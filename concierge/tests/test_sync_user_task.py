@@ -35,19 +35,21 @@ class TestTasksTestCase(FastTenantTestCase):
 
         expected_site_config = tenant_summary()
 
-        mocked_post.assert_called_with(
-            "{}/api/users/register_origin_site/{}".format(settings.ACCOUNT_API_URL, self.user.external_id),
-            data={
+        self.assertEqual(mocked_post.call_args.args,
+                         ("{}/api/users/register_origin_site/{}".format(settings.ACCOUNT_API_URL, self.user.external_id),))
+        self.assertDictEqual(mocked_post.call_args.kwargs, {
+            'data': {
                 "origin_site_url": expected_site_config['url'],
                 "origin_site_name": expected_site_config['name'],
                 "origin_site_description": expected_site_config['description'],
-                "origin_site_favicon": expected_site_config['favicon'],
+                "origin_site_api_token": expected_site_config['api_token'],
                 "origin_token": self.expected_uuid,
             },
-            headers={
+            'headers': {
                 "x-oidc-client-id": settings.OIDC_RP_CLIENT_ID,
                 "x-oidc-client-secret": settings.OIDC_RP_CLIENT_SECRET,
-            })
+            }
+        })
 
     @mock.patch("concierge.tasks.requests.post")
     def test_should_not_sync_inactive_users(self, mocked_post):
