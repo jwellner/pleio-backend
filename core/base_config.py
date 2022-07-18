@@ -66,12 +66,12 @@ DEFAULT_SITE_CONFIG = {
     'REDIRECTS': ({}, 'Redirects'),
 
     'MENU': ([
-        {"link": "/blog", "title": "Blog", "children": [], "accessId": 2},
-        {"link": "/news", "title": "Nieuws", "children": [], "accessId": 2},
-        {"link": "/groups", "title": "Groepen", "children": [], "accessId": 2},
-        {"link": "/questions", "title": "Vragen", "children": [], "accessId": 2},
-        {"link": "/wiki", "title": "Wiki", "children": [], "accessId": 2}
-    ], 'Menu'),
+                 {"link": "/blog", "title": "Blog", "children": [], "accessId": 2},
+                 {"link": "/news", "title": "Nieuws", "children": [], "accessId": 2},
+                 {"link": "/groups", "title": "Groepen", "children": [], "accessId": 2},
+                 {"link": "/questions", "title": "Vragen", "children": [], "accessId": 2},
+                 {"link": "/wiki", "title": "Wiki", "children": [], "accessId": 2}
+             ], 'Menu'),
     'MENU_STATE': ('normal', "Menu state"),
 
     'PROFILE': ([], 'Profile'),
@@ -81,7 +81,7 @@ DEFAULT_SITE_CONFIG = {
     'SHOW_TAGS_IN_FEED': (False, 'Show tags in feed'),
     'SHOW_TAGS_IN_DETAIL': (False, 'Show tags in detail'),
 
-    'EMAIL_OVERVIEW_DEFAULT_FREQUENCY':  ("weekly", 'Email overview default frequency'),
+    'EMAIL_OVERVIEW_DEFAULT_FREQUENCY': ("weekly", 'Email overview default frequency'),
     'EMAIL_OVERVIEW_SUBJECT': ("", "Email overview subject"),
     'EMAIL_OVERVIEW_TITLE': ("Pleio 2.0", "Email overview title"),
     'EMAIL_OVERVIEW_INTRO': ("", "Email overview intro"),
@@ -107,7 +107,6 @@ DEFAULT_SITE_CONFIG = {
     'LIMITED_GROUP_ADD': (True, 'Adding of groups limited to admins'),
     'SHOW_RELATED_ITEMS': (False, 'Show related items'),
 
-
     'ACHIEVEMENTS_ENABLED': (True, 'Achievements enabled'),
     'MAIL_REPLY_TO': ('noreply@pleio.nl', 'default reply-to mail address'),
     'ENABLE_SEARCH_ENGINE_INDEXING': (False, 'Enable indexing by search engines'),
@@ -121,6 +120,8 @@ DEFAULT_SITE_CONFIG = {
 
     'PROFILE_SYNC_ENABLED': (False, 'Profile sync api enabled'),
     'PROFILE_SYNC_TOKEN': ("", 'Profile sync api token'),
+
+    'TENANT_API_TOKEN': (None, "Tenant API token"),
 
     'CUSTOM_CSS': ("", 'Custom Css'),
     'CUSTOM_CSS_TIMESTAMP': ("", 'Custom Css timestamp'),
@@ -160,6 +161,7 @@ Valid JSONFields types:
 - dict
 - list
 """
+
 
 class ConfigBackend():
     def __init__(self):
