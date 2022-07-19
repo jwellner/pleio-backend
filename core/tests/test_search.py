@@ -1,10 +1,9 @@
-from core.tests.helpers import PleioTenantTestCase
+from core.tests.helpers import ElasticsearchTestCase
 from user.factories import UserFactory
-from core.tests.helpers import ElasticsearchTestMixin
 from blog.models import Blog
 from mixer.backend.django import mixer
 
-class SearchTestCase(PleioTenantTestCase, ElasticsearchTestMixin):
+class SearchTestCase(ElasticsearchTestCase):
 
     def setUp(self):
         super().setUp()
