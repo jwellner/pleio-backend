@@ -7,6 +7,8 @@ from django_elasticsearch_dsl.registries import registry
 from django_elasticsearch_dsl.signals import BaseSignalProcessor
 from django_tenants.utils import parse_tenant_config_path
 
+from core.lib import tenant_schema
+
 logger = logging.getLogger(__name__)
 
 
@@ -25,7 +27,8 @@ class CustomSignalProcessor(BaseSignalProcessor):
                 registry.update_related(instance)
         except Exception as e:
             retry_index_document(instance)
-            logger.error("Error sending update task: %s", e)
+            logger.error("Elasticsearch error sending update task: %s %s/%s (%s)",
+                         e, instance.__class__.__name__, instance.pk, tenant_schema())
 
     def handle_pre_delete(self, sender, instance, **kwargs):
         """Overwrite default handle_pre_delete and stop raising exception on error
@@ -33,7 +36,8 @@ class CustomSignalProcessor(BaseSignalProcessor):
         try:
             registry.delete_related(instance)
         except Exception as e:
-            logger.error("Error updating elasticsearch: %s", e)
+            logger.error("Elasticsearch error sending pre-delete task: %s %s/%s (%s)",
+                         e, instance.__class__.__name__, instance.pk, tenant_schema())
 
     def handle_delete(self, sender, instance, **kwargs):
         """Overwrite default handle_pre_delete and stop raising exception on error
@@ -41,7 +45,8 @@ class CustomSignalProcessor(BaseSignalProcessor):
         try:
             registry.delete(instance)
         except Exception as e:
-            logger.error("Error updating elasticsearch: %s", e)
+            logger.error("Elasticsearch error sending delete task: %s %s/%s (%s)",
+                         e, instance.__class__.__name__, instance.pk, tenant_schema())
 
     def setup(self):
         if not settings.RUN_AS_ADMIN_APP:

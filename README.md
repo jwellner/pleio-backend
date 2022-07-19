@@ -156,21 +156,21 @@ Rebuilding the index causes the search functionality to be unavailable until all
 
 ```bash
 # Rebuild for all (Notice: search will be unavailable until an index command is completed)
-docker-compose exec backgroune celery -A backend2.celery call core.tasks.elasticsearch_tasks.elasticsearch_recreate_indices
-docker-compose exec backgroune celery -A backend2.celery call core.tasks.elasticsearch_tasks.elasticsearch_rebuild_all
+docker-compose exec background celery -A backend2.celery call core.tasks.elasticsearch_tasks.elasticsearch_recreate_indices
+docker-compose exec background celery -A backend2.celery call core.tasks.elasticsearch_tasks.elasticsearch_rebuild_all
 
 # Rebuild for one (Notice: all data is removed first)
-docker-compose exec backgroune celery -A backend2.celery call core.tasks.elasticsearch_tasks.elasticsearch_rebuild_for_tenant --args='["test1"]'
+docker-compose exec background celery -A backend2.celery call core.tasks.elasticsearch_tasks.elasticsearch_rebuild_for_tenant --args='["test1"]'
 ```
 
 When there has been a bug that caused the content to be indexed incorrectly it is possible to index all data without search engine down-time.
 
 ```bash
 # Build for all (search will be available all the time)
-docker-compose exec backgroune celery -A backend2.celery call core.tasks.elasticsearch_tasks.elasticsearch_index_data_for_all
+docker-compose exec background celery -A backend2.celery call core.tasks.elasticsearch_tasks.elasticsearch_index_data_for_all
 
 # Build for one (search will be available all the time)
-docker-compose exec backgroune celery -A backend2.celery call core.tasks.elasticsearch_tasks.elasticsearch_index_data_for_tenant --args='["test1"]'
+docker-compose exec background celery -A backend2.celery call core.tasks.elasticsearch_tasks.elasticsearch_index_data_for_tenant --args='["test1"]'
 ```
 
 ## Translations
