@@ -1,100 +1,109 @@
-from django.conf import settings
-from django.db import connection
-from django.test import override_settings
-from django_tenants.test.cases import FastTenantTestCase
-from backend2.schema import schema
-from ariadne import graphql_sync
-import json
-from django.contrib.auth.models import AnonymousUser
-from django.http import HttpRequest
-from core.models import Group
-from user.models import User
-from mixer.backend.django import mixer
-from graphql import GraphQLError
+
 from unittest import mock
 
+from django.contrib.auth.models import AnonymousUser
+from mixer.backend.django import mixer
 
-class ToggleRequestDeleteUserTestCase(FastTenantTestCase):
+from core.tests.helpers import PleioTenantTestCase
+from user.models import User
+
+
+class ToggleRequestDeleteUserTestCase(PleioTenantTestCase):
 
     def setUp(self):
-        self.anonymousUser = AnonymousUser()
+        super(ToggleRequestDeleteUserTestCase, self).setUp()
+
         self.user1 = mixer.blend(User)
         self.admin = mixer.blend(User, roles=['ADMIN'])
+
+        self.mutation = """
+            mutation toggleRequestDeleteUser($input: toggleRequestDeleteUserInput!) {
+                toggleRequestDeleteUser(input: $input) {
+                    viewer {
+                        guid
+                    }
+                }
+            }
+        """
 
     def tearDown(self):
         self.user1.delete()
         self.admin.delete()
 
-    def test_send_message_to_user_anon(self):
-        mutation = """
-            mutation toggleRequestDeleteUser($input: toggleRequestDeleteUserInput!) {
-                toggleRequestDeleteUser(input: $input) {
-                    viewer {
-                        guid
-                    }
-                }
-            }
-        """
+    def test_toggle_request_delete_not_logged_in(self):
+        
         variables = {
             "input": {
                 "guid": self.user1.guid
             }
         }
 
-        request = HttpRequest()
-        request.user = self.anonymousUser
+        with self.assertGraphQlError('not_logged_in'):
+            self.graphql_client.post(self.mutation, variables)
 
-        result = graphql_sync(schema, {"query": mutation, "variables": variables}, context_value={ "request": request })
+    def test_toggle_request_delete_could_not_save(self):
 
-        errors = result[1]["errors"]
+        variables = {
+            "input": {
+                "guid": self.admin.guid
+            }
+        }
 
-        self.assertEqual(errors[0]["message"], "not_logged_in")
+        with self.assertGraphQlError('could_not_save'):
+            self.graphql_client.force_login(self.user1)
+            self.graphql_client.post(self.mutation, variables)
+
+    def test_toggle_request_delete_could_not_find(self):
+
+        variables = {
+            "input": {
+                "guid": "43ee295a-5950-4330-8f0e-372f9f4caddf"
+            }
+        }
+
+        with self.assertGraphQlError('could_not_find'):
+            self.graphql_client.force_login(self.user1)
+            self.graphql_client.post(self.mutation, variables)
 
     def test_toggle_request_delete_user(self):
-        mutation = """
-            mutation toggleRequestDeleteUser($input: toggleRequestDeleteUserInput!) {
-                toggleRequestDeleteUser(input: $input) {
-                    viewer {
-                        guid
-                    }
-                }
-            }
-        """
         variables = {
             "input": {
                 "guid": self.user1.guid
             }
         }
 
-        request = HttpRequest()
-        request.user = self.user1
-
-        result = graphql_sync(schema, {"query": mutation, "variables": variables}, context_value={ "request": request })
-
-        data = result[1]["data"]
+        self.graphql_client.force_login(self.user1)
+        result = self.graphql_client.post(self.mutation, variables)
+        
+        data = result["data"]
 
         self.assertEqual(data["toggleRequestDeleteUser"]["viewer"]["guid"], self.user1.guid)
 
     @mock.patch('core.resolvers.mutation_toggle_request_delete_user.send_mail_multi.delay')
     def test_call_send_email(self, mocked_send_mail_multi):
-        mutation = """
-            mutation toggleRequestDeleteUser($input: toggleRequestDeleteUserInput!) {
-                toggleRequestDeleteUser(input: $input) {
-                    viewer {
-                        guid
-                    }
-                }
-            }
-        """
         variables = {
             "input": {
                 "guid": self.user1.guid
             }
         }
 
-        request = HttpRequest()
-        request.user = self.user1
+        self.graphql_client.force_login(self.user1)
+        self.graphql_client.post(self.mutation, variables)
 
-        result = graphql_sync(schema, {"query": mutation, "variables": variables}, context_value={ "request": request })
+        assert mocked_send_mail_multi.called
+
+    @mock.patch('core.resolvers.mutation_toggle_request_delete_user.send_mail_multi.delay')
+    def test_call_send_email(self, mocked_send_mail_multi):
+
+        self.user1.is_delete_requested = True
+        
+        variables = {
+            "input": {
+                "guid": self.user1.guid
+            }
+        }
+
+        self.graphql_client.force_login(self.user1)
+        self.graphql_client.post(self.mutation, variables)
 
         assert mocked_send_mail_multi.called
