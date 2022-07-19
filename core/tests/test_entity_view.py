@@ -24,13 +24,11 @@ class EntityViewTestCase(PleioTenantTestCase):
             write_access=[ACCESS_TYPE.user.format(self.owner.id)]
         )
 
-    def test_entity_view_blog(self):
-        query = """
-            query BlogItem($guid: String!) {
-                entity(guid: $guid) {
+        self.query = """
+            query ViewBlog($guid: String!, $incrementViewCount: Boolean) {
+                entity(guid: $guid, incrementViewCount: $incrementViewCount) {
                     guid
                     ...BlogDetailFragment
-                    __typename
                 }
             }
             fragment BlogDetailFragment on Blog {
@@ -38,26 +36,72 @@ class EntityViewTestCase(PleioTenantTestCase):
             }
         """
 
-        variables = {
-            "guid": self.blog1.guid
+        self.variables = {
+            "guid": self.blog1.guid,
+            "incrementViewCount": True,
         }
 
-        self.graphql_client.post(query, variables)
-        self.graphql_client.post(query, variables)
-        self.graphql_client.post(query, variables)
-        result = self.graphql_client.post(query, variables)
+    def test_entity_load_blog(self):
+        self.graphql_client.force_login(self.owner)
+        self.variables['incrementViewCount'] = False
 
-        data = result["data"]
-        self.assertEqual(data["entity"]["guid"], self.blog1.guid)
-        self.assertEqual(data["entity"]["views"], 4)
+        self.graphql_client.post(self.query, self.variables)
+        self.graphql_client.post(self.query, self.variables)
+        self.graphql_client.post(self.query, self.variables)
+        result = self.graphql_client.post(self.query, self.variables)
 
+        data = result["data"]["entity"]
+        self.assertEqual(data["guid"], self.blog1.guid)
+        self.assertEqual(data["views"], 0)
+
+    def test_entity_view_blog(self):
         self.graphql_client.force_login(self.owner)
 
-        self.graphql_client.post(query, variables)
-        self.graphql_client.post(query, variables)
-        self.graphql_client.post(query, variables)
-        result = self.graphql_client.post(query, variables)
+        self.graphql_client.post(self.query, self.variables)
+        self.graphql_client.post(self.query, self.variables)
+        self.graphql_client.post(self.query, self.variables)
+        result = self.graphql_client.post(self.query, self.variables)
 
-        data = result["data"]
-        self.assertEqual(data["entity"]["guid"], self.blog1.guid)
-        self.assertEqual(data["entity"]["views"], 5)
+        data = result["data"]["entity"]
+        self.assertEqual(data["guid"], self.blog1.guid)
+        self.assertEqual(data["views"], 1)
+
+    def test_entity_view_blog_anonymous(self):
+        self.graphql_client.post(self.query, self.variables)
+        self.graphql_client.post(self.query, self.variables)
+        self.graphql_client.post(self.query, self.variables)
+        result = self.graphql_client.post(self.query, self.variables)
+
+        data = result["data"]["entity"]
+        self.assertEqual(data["guid"], self.blog1.guid)
+        self.assertEqual(data["views"], 1)
+
+    def test_entity_view_blog_multiple_anonymous(self):
+        self.graphql_client.reset()
+        self.graphql_client.post(self.query, self.variables)
+        self.graphql_client.post(self.query, self.variables)
+        self.graphql_client.post(self.query, self.variables)
+
+        self.graphql_client.reset()
+        self.graphql_client.post(self.query, self.variables)
+        self.graphql_client.post(self.query, self.variables)
+        result = self.graphql_client.post(self.query, self.variables)
+
+        data = result["data"]["entity"]
+        self.assertEqual(data["guid"], self.blog1.guid)
+        self.assertEqual(data["views"], 2)
+
+    def test_entity_view_blog_mixed_anonymous(self):
+        self.graphql_client.reset()
+        self.graphql_client.post(self.query, self.variables)
+        self.graphql_client.post(self.query, self.variables)
+        self.graphql_client.post(self.query, self.variables)
+
+        self.graphql_client.force_login(self.owner)
+        self.graphql_client.post(self.query, self.variables)
+        self.graphql_client.post(self.query, self.variables)
+        result = self.graphql_client.post(self.query, self.variables)
+
+        data = result["data"]["entity"]
+        self.assertEqual(data["guid"], self.blog1.guid)
+        self.assertEqual(data["views"], 2)

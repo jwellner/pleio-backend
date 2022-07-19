@@ -169,7 +169,9 @@ class Entity(models.Model, TagsMixin):
 
 class EntityView(models.Model):
     entity = models.ForeignKey('core.Entity', on_delete=models.CASCADE, related_name="views")
-    viewer = models.ForeignKey('user.User', on_delete=models.CASCADE, related_name="viewed_entities")
+    viewer = models.ForeignKey('user.User', on_delete=models.CASCADE, related_name="viewed_entities",
+                               null=True, blank=True, default=None)
+    session = models.TextField(max_length=128, null=True, blank=True, default=None)
     created_at = models.DateTimeField(default=timezone.now)
 
 

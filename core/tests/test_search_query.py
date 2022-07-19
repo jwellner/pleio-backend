@@ -57,11 +57,11 @@ class TestQueryJournalTestCase(ElasticsearchTestCase):
         record = SearchQueryJournal.objects.all().first()
         self.assertIsNotNone(record)
         self.assertIsNotNone(record.query)
-        self.assertIsNone(record.session)
+        self.assertIsNotNone(record.session)
 
     def test_anonymous_query_creates_multiple_journal_records(self):
         self.graphql_client.post(self.query, self.variables)
         self.graphql_client.post(self.query, self.variables)
         self.graphql_client.post(self.query, self.variables)
 
-        self.assertEqual(SearchQueryJournal.objects.all().count(), 3)
+        self.assertEqual(SearchQueryJournal.objects.all().count(), 1)
