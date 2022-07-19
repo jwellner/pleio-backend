@@ -55,7 +55,8 @@ def resolve_entity(
         _,
         info,
         guid=None,
-        username=None
+        username=None,
+        incrementViewCount=False
 ):
     # pylint: disable=unused-argument
     # pylint: disable=too-many-arguments
@@ -108,28 +109,28 @@ def resolve_entity(
     if not entity:
         return None
 
-    update_view_count(entity.id, user)
+    if incrementViewCount:
+        increment_view_count(entity, info.context["request"])
 
     return entity
 
 
-def update_view_count(guid, user):
+def increment_view_count(entity, request):
     # Increase view count of entities
-    try:
-        entity = Entity.objects.get(pk=guid)
+    user = request.user
 
-        views = 1
-        if user.is_authenticated:
-            EntityView.objects.create(entity=entity, viewer=user)
-            views = EntityView.objects.filter(entity=entity, viewer=user).count()
+    if user.is_authenticated:
+        EntityView.objects.create(entity=entity, viewer=user)
+        views = EntityView.objects.filter(entity=entity, viewer=user).count()
+    else:
+        sessionid = request.COOKIES.get('sessionid', None)
+        EntityView.objects.create(entity=entity, session=sessionid)
+        views = EntityView.objects.filter(entity=entity, session=sessionid).count()
 
-        if views > 1:
-            return
-
-        if EntityViewCount.objects.filter(entity_id=guid).exists():
-            EntityViewCount.objects.filter(entity_id=guid).update(views=F('views') + 1)
+    if views == 1:
+        if EntityViewCount.objects.filter(entity_id=entity.guid).exists():
+            EntityViewCount.objects.filter(entity_id=entity.guid).update(views=F('views') + 1)
         else:
-            EntityViewCount.objects.create(entity_id=guid, views=1)
+            EntityViewCount.objects.create(entity_id=entity.guid, views=1)
 
-    except ObjectDoesNotExist:
-        pass
+    entity.save()

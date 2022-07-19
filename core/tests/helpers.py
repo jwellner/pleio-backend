@@ -66,8 +66,7 @@ class GraphQLClient():
         self.reset()
 
     def reset(self):
-        self.request = HttpRequest()
-        self.request.user = AnonymousUser()
+        self.force_login(AnonymousUser())
 
     def force_login(self, user):
         self.request = HttpRequest()
