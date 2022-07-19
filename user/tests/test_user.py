@@ -2,15 +2,31 @@ from core.lib import access_id_to_acl
 from core.models import ProfileField, UserProfileField
 from datetime import datetime
 from django.contrib.auth.models import AnonymousUser
-from django_tenants.test.cases import FastTenantTestCase
+from core.tests.helpers import PleioTenantTestCase
 from mixer.backend.django import mixer
 from user.models import User
+from core.tests.helpers import ElasticsearchTestMixin
 
 
-class UserTestCase(FastTenantTestCase):
+class UserTestCase(PleioTenantTestCase, ElasticsearchTestMixin):
     def setUp(self):
+        super(UserTestCase, self).setUp()
+
         self.birthday_field = ProfileField.objects.create(key='birthday', name='birthday', field_type='date_field')
         self.user = AnonymousUser()
+        self.user1 = mixer.blend(User, name="Aa")
+        self.user2 = mixer.blend(User, name="Bb")
+
+        self.query = """
+            query UserList($query: String!, $offset: Int, $limit: Int) {
+                users(q: $query, offset: $offset, limit: $limit) {
+                    total
+                    edges {
+                        guid
+                    }
+                }
+            }
+        """
 
     def create_user_with_bday(self, date):
         user = mixer.blend(User, email=date)
@@ -86,3 +102,44 @@ class UserTestCase(FastTenantTestCase):
             self.birthday_field.guid, self.user, start_date, end_date, 0, 5).edges
 
         self.assertListEqual(expected_users, users)
+
+    def test_user_query_not_logged_in(self):
+   
+        variables = {
+            "query": "",
+            "offset": 0,
+            "limit": 20
+        }
+
+        with self.assertGraphQlError('not_logged_in'):
+            self.graphql_client.post(self.query, variables)
+
+    def test_users_query(self):
+
+        variables = {
+            "query": "Aa",
+            "offset": 0,
+            "limit": 20
+        }
+
+        self.initialize_index()
+
+        self.graphql_client.force_login(self.user1)
+        result = self.graphql_client.post(self.query, variables)
+
+        self.assertEqual(result["data"]["users"]["edges"][0]["guid"], self.user1.guid)
+
+    def test_users_no_query(self):
+
+        variables = {
+            "query": "",
+            "offset": 0,
+            "limit": 20
+        }
+
+        self.initialize_index()
+
+        self.graphql_client.force_login(self.user1)
+        result = self.graphql_client.post(self.query, variables)
+
+        self.assertEqual(result["data"]["users"]["total"], 2)

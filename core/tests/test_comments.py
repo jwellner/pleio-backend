@@ -1,17 +1,14 @@
-from django.utils import timezone
-from django_tenants.test.cases import FastTenantTestCase
-from backend2.schema import schema
-from ariadne import graphql_sync
 from django.contrib.auth.models import AnonymousUser
-from django.http import HttpRequest
-from core.models import Comment
-from user.models import User
-from blog.models import Blog
+from django.utils import timezone
 from mixer.backend.django import mixer
+
+from blog.models import Blog
 from core.constances import ACCESS_TYPE
+from core.models import Comment
+from core.tests.helpers import PleioTenantTestCase
+from user.models import User
 
-
-class CommentTestCase(FastTenantTestCase):
+class CommentTestCase(PleioTenantTestCase):
 
     def setUp(self):
         super().setUp()
@@ -49,6 +46,24 @@ class CommentTestCase(FastTenantTestCase):
             rich_description="reply to just testing 2"
         )
 
+        self.mutation1 = """
+            mutation ($input: editEntityInput!) {
+                editEntity(input: $input) {
+                    entity {
+                        guid
+                    }
+                }
+            }
+        """
+
+        self.mutation2 = """
+            mutation ($input: deleteEntityInput!) {
+                deleteEntity(input: $input) {
+                    success
+                }
+            }
+        """
+
     def tearDown(self):
         self.blogPublic.delete()
         self.authenticatedUser.delete()
@@ -80,18 +95,14 @@ class CommentTestCase(FastTenantTestCase):
                 }
             }
         """
-        request = HttpRequest()
-        request.user = self.anonymousUser
 
         variables = {
             "guid": self.blogPublic.guid
         }
 
-        result = graphql_sync(schema, {"query": query, "variables": variables}, context_value={"request": request})
+        result = self.graphql_client.post(query, variables)
 
-        self.assertTrue(result[0])
-
-        data = result[1]["data"]
+        data = result["data"]
 
         self.assertEqual(data["entity"]["guid"], self.blogPublic.guid)
         self.assertEqual(data["entity"]["commentCount"], 8)
@@ -129,18 +140,15 @@ class CommentTestCase(FastTenantTestCase):
                 }
             }
         """
-        request = HttpRequest()
-        request.user = self.authenticatedUser
 
         variables = {
             "guid": self.blogPublic.guid
         }
 
-        result = graphql_sync(schema, {"query": query, "variables": variables}, context_value={"request": request})
+        self.graphql_client.force_login(self.authenticatedUser)
+        result = self.graphql_client.post(query, variables)
 
-        self.assertTrue(result[0])
-
-        data = result[1]["data"]
+        data = result["data"]
 
         self.assertEqual(data["entity"]["guid"], self.blogPublic.guid)
         self.assertEqual(data["entity"]["commentCount"], 8)
@@ -153,6 +161,57 @@ class CommentTestCase(FastTenantTestCase):
         self.assertEqual(data["entity"]["comments"][0]['comments'][0]['guid'], self.lastCommentSub.guid)
         self.assertEqual(data["entity"]["comments"][0]['comments'][0]['canComment'], False)
         self.assertEqual(data["entity"]["comments"][1]['ownerName'], self.anonComment.name)
+
+    def test_edit_comment_not_logged_in(self):
+
+        variables = {
+            "input": {
+                "guid": self.anonComment.guid
+            }
+        }
+
+        with self.assertGraphQlError('not_logged_in'):
+            self.graphql_client.post(self.mutation1, variables)
+
+    def test_edit_comment_could_not_find(self):
+
+        variables = {
+            "input": {
+                "guid": "43ee295a-5950-4330-8f0e-372f9f4caddf"
+            }
+        }
+
+        with self.assertGraphQlError('could_not_find'):
+            self.graphql_client.force_login(self.authenticatedUser)
+            self.graphql_client.post(self.mutation1, variables)
+
+    def test_edit_comment_could_not_save(self):
+
+        variables = {
+            "input": {
+                "guid": self.anonComment.guid
+            }
+        }
+
+        with self.assertGraphQlError('could_not_save'):
+            self.graphql_client.force_login(self.authenticatedUser)
+            self.graphql_client.post(self.mutation1, variables)
+
+    def test_edit_comment(self):
+
+        variables = {
+            "input": {
+                "guid": self.lastComment.guid,
+                "richDescription": "test"
+            }
+        }
+
+        self.graphql_client.force_login(self.authenticatedUser)
+        self.graphql_client.post(self.mutation1, variables)
+
+        self.lastComment.refresh_from_db()
+
+        self.assertEqual(self.lastComment.rich_description, variables["input"]["richDescription"])
 
     def test_add_comment(self):
         blog = Blog.objects.create(
@@ -182,14 +241,10 @@ class CommentTestCase(FastTenantTestCase):
             }
         }
 
-        request = HttpRequest()
-        request.user = self.authenticatedUser
+        self.graphql_client.force_login(self.authenticatedUser)
+        result = self.graphql_client.post(mutation, variables)
 
-        result = graphql_sync(schema, {"query": mutation, "variables": variables}, context_value={"request": request})
-
-        self.assertTrue(result[0])
-
-        data = result[1]["data"]
+        data = result["data"]
 
         self.assertEqual(blog.comments.count(), 1)
 
@@ -202,11 +257,11 @@ class CommentTestCase(FastTenantTestCase):
                 "richDescription": ""
             }
         }
-        result = graphql_sync(schema, {"query": mutation, "variables": variables}, context_value={"request": request})
+        
+        self.graphql_client.force_login(self.authenticatedUser)
+        result = self.graphql_client.post(mutation, variables)
 
-        self.assertTrue(result[0])
-
-        data = result[1]["data"]
+        data = result["data"]
 
         self.assertEqual(blog.comments.count(), 1)
         self.assertEqual(blog.comments.first().comments.count(), 1)
@@ -220,11 +275,10 @@ class CommentTestCase(FastTenantTestCase):
                 "richDescription": ""
             }
         }
-        result = graphql_sync(schema, {"query": mutation, "variables": variables}, context_value={"request": request})
 
-        errors = result[1]["errors"]
-
-        self.assertEqual(errors[0]["message"], "could_not_add")
+        with self.assertGraphQlError('could_not_add'):
+            self.graphql_client.force_login(self.authenticatedUser)
+            self.graphql_client.post(mutation, variables)
 
         self.assertEqual(blog.comments.count(), 1)
         self.assertEqual(blog.comments.first().comments.count(), 1)
@@ -260,9 +314,55 @@ class CommentTestCase(FastTenantTestCase):
             'query': instance.guid
         }
 
-        request = HttpRequest()
-        request.user = owner
-        success, result = graphql_sync(schema, {"query": query, "variables": variables},
-                                       context_value={"request": request})
+        self.graphql_client.force_login(owner)
+        result = self.graphql_client.post(query, variables)
 
         self.assertEqual(result['data']['entity']['commentCount'], 2)
+
+    def test_delete_comment_not_logged_in(self):
+
+        variables = {
+            "input": {
+                "guid": self.anonComment.guid
+            }
+        }
+
+        with self.assertGraphQlError('not_logged_in'):
+            self.graphql_client.post(self.mutation2, variables)
+
+    def test_delete_comment_could_not_find(self):
+
+        variables = {
+            "input": {
+                "guid": "43ee295a-5950-4330-8f0e-372f9f4caddf"
+            }
+        }
+
+        with self.assertGraphQlError('could_not_find'):
+            self.graphql_client.force_login(self.authenticatedUser)
+            self.graphql_client.post(self.mutation2, variables)
+
+    def test_delete_comment_could_not_save(self):
+
+        variables = {
+            "input": {
+                "guid": self.anonComment.guid
+            }
+        }
+
+        with self.assertGraphQlError('could_not_save'):
+            self.graphql_client.force_login(self.authenticatedUser)
+            self.graphql_client.post(self.mutation2, variables)
+
+    def test_delete_comment(self):
+
+        variables = {
+            "input": {
+                "guid": self.lastComment.guid
+            }
+        }
+
+        self.graphql_client.force_login(self.authenticatedUser)
+        result = self.graphql_client.post(self.mutation2, variables)
+
+        self.assertTrue(result["data"]["deleteEntity"]["success"])
