@@ -78,6 +78,7 @@ def elasticsearch_index_data_for_all(index_name=None):
 
 @app.task(ignore_result=True)
 def elasticsearch_index_data_for_tenant(schema_name, index_name=None):
+    logger.info('elasticsearch_index_data_for_tenant \'%s\' \'%s\'', index_name, schema_name)
     with schema_context(schema_name):
         if index_name:
             models = [get_model_by_subtype(index_name)]
