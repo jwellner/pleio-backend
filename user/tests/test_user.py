@@ -2,13 +2,12 @@ from core.lib import access_id_to_acl
 from core.models import ProfileField, UserProfileField
 from datetime import datetime
 from django.contrib.auth.models import AnonymousUser
-from core.tests.helpers import PleioTenantTestCase
+from core.tests.helpers import ElasticsearchTestCase
 from mixer.backend.django import mixer
 from user.models import User
-from core.tests.helpers import ElasticsearchTestMixin
 
 
-class UserTestCase(PleioTenantTestCase, ElasticsearchTestMixin):
+class UserTestCase(ElasticsearchTestCase):
     def setUp(self):
         super(UserTestCase, self).setUp()
 
