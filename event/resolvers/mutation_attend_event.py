@@ -1,14 +1,16 @@
 from graphql import GraphQLError
 from django.core.exceptions import ObjectDoesNotExist, ValidationError
 from django.core.validators import validate_email
-from django.utils.translation import ugettext_lazy
+
+from core import config
 from core.constances import COULD_NOT_FIND, INVALID_EMAIL, EMAIL_ALREADY_USED, NOT_ATTENDING_PARENT_EVENT, \
     NOT_LOGGED_IN, EVENT_INVALID_STATE, EVENT_IS_FULL
-from core.lib import clean_graphql_input, get_base_url, generate_code, get_default_email_context, tenant_schema
+from core.lib import clean_graphql_input, generate_code, get_full_url
 from event.lib import validate_name
-from event.mail_builders.qr_code import send_event_qr
+from event.mail_builders.attend_event_request import submit_attend_event_wa_request
+from event.mail_builders.qr_code import submit_mail_event_qr
 from event.models import Event, EventAttendee, EventAttendeeRequest
-from core.tasks import send_mail_multi
+from event.resolvers import shared as event_shared
 
 
 def resolve_attend_event_without_account(_, info, input):
@@ -36,9 +38,6 @@ def resolve_attend_event_without_account(_, info, input):
     except ValidationError:
         raise GraphQLError(INVALID_EMAIL)
 
-    url = get_base_url() + '/events/confirm/' + event.guid + '?email=' + email + '&code='
-    subject = ugettext_lazy("Confirmation of registration %s") % event.title
-
     code = ""
     try:
         code = EventAttendeeRequest.objects.get(email=email, event=event).code
@@ -52,19 +51,12 @@ def resolve_attend_event_without_account(_, info, input):
         code = generate_code()
         EventAttendeeRequest.objects.create(code=code, email=email, event=event, name=name)
 
-    link = url + code
-
-    context = get_default_email_context()
-    context['link'] = link
-    context['title'] = event.title
-
-    context['location'] = event.location if event.location else None
-    context['locationLink'] = event.location_link if event.location_link else None
-    context['locationAddress'] = event.location_address if event.location_address else None
-
-    context['start_date'] = event.start_date
-
-    send_mail_multi.delay(tenant_schema(), subject, 'email/attend_event_without_account.html', context, email)
+    submit_attend_event_wa_request({
+        'event': event.guid,
+        'email': email,
+        'language': config.LANGUAGE,
+        'link': get_full_url(f"/events/confirm/{event.guid}?email={email}&code={code}"),
+    })
 
     return {
         "entity": event
@@ -99,6 +91,13 @@ def resolve_attend_event(_, info, input):
     except ObjectDoesNotExist:
         attendee = None
 
+    if not clean_input.get("state"):
+        if attendee:
+            event_shared.resolve_delete_attendee(attendee)
+        return {
+            "entity": event
+        }
+
     if not attendee:
         attendee = EventAttendee()
         attendee.event = event
@@ -106,10 +105,10 @@ def resolve_attend_event(_, info, input):
         attendee.email = user.email
         attendee.name = user.name
 
-    if clean_input.get("state") not in ["accept", "reject", "maybe", "waitinglist"]:
+    if clean_input["state"] not in ["accept", "reject", "maybe", "waitinglist"]:
         raise GraphQLError(EVENT_INVALID_STATE)
 
-    if clean_input.get("state") == "accept" and not attendee.state == "accept":
+    if clean_input["state"] == "accept" and not attendee.state == "accept":
         if event.is_full():
             raise GraphQLError(EVENT_IS_FULL)
 
@@ -132,7 +131,7 @@ def resolve_attend_event(_, info, input):
         event.process_waitinglist()
 
     if event.qr_access and clean_input.get("state") == "accept":
-        send_event_qr(attendee)
+        submit_mail_event_qr(attendee)
 
     return {
         "entity": event

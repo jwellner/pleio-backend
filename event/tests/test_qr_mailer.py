@@ -11,6 +11,7 @@ from mixer.backend.django import mixer
 from core.constances import ACCESS_TYPE
 from core.models import Group
 from core.tests.helpers import PleioTenantTestCase
+from event.mail_builders.qr_code import submit_mail_event_qr
 from event.models import Event, EventAttendee
 from user.factories import UserFactory
 from user.models import User
@@ -61,14 +62,14 @@ class TestQrMailerTestCase(PleioTenantTestCase):
 
     @mock.patch('core.models.mail.MailInstanceManager.submit')
     def test_schedule_qr_code_mail(self, mailer_submit):
-        from event.mail_builders.qr_code import send_event_qr, QrMailer
-        send_event_qr(self.attendee)
+        from event.mail_builders.qr_code import QrMailer
+        submit_mail_event_qr(self.attendee)
 
         assert mailer_submit.called, "MailInstance.objects.submit unexpectedly not called."
         self.assertEqual(mailer_submit.call_args.args, (QrMailer,))
         self.assertEqual(mailer_submit.call_args.kwargs, {'mailer_kwargs': {"attendee": self.attendee.id}})
 
-    @mock.patch('event.resolvers.mutation_attend_event.send_event_qr')
+    @mock.patch('event.resolvers.mutation_attend_event.submit_mail_event_qr')
     def test_attendee_got_mail_scheduled_for_him(self, mocked_send_event_qr):
         attending_user: User = mixer.blend(User)
         self.group.join(attending_user)
@@ -76,18 +77,18 @@ class TestQrMailerTestCase(PleioTenantTestCase):
         self.graphql_client.force_login(attending_user)
         self.graphql_client.post(self.mutation, self.variables)
 
-        assert mocked_send_event_qr.called, "send_event_qr unexpectedly not called."
+        assert mocked_send_event_qr.called, "submit_mail_event_qr unexpectedly not called."
 
         (attendee,) = mocked_send_event_qr.call_args.args
         self.assertEqual(attendee.email, attending_user.email)
 
-    @mock.patch('event.models.send_event_qr')
+    @mock.patch('event.models.submit_mail_event_qr')
     def test_attendee_from_waitinglist_to_accepted_got_mail_scheduled_for_him(self, mocked_send_event_qr):
         EventAttendee.objects.filter(id=self.attendee.id).update(state='waitinglist')
 
         self.event.process_waitinglist()
 
-        assert mocked_send_event_qr.called, "send_event_qr unexpectedly not called."
+        assert mocked_send_event_qr.called, "submit_mail_event_qr unexpectedly not called."
 
     def test_mail_builder_parameters_not_yet_code(self):
         from event.mail_builders.qr_code import QrMailer

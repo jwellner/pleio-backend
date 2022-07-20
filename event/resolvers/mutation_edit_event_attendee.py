@@ -2,6 +2,7 @@ from graphql import GraphQLError
 from django.core.exceptions import ObjectDoesNotExist
 from core.constances import ALREADY_CHECKED_IN, COULD_NOT_FIND, NOT_LOGGED_IN, COULD_NOT_SAVE
 from core.lib import clean_graphql_input
+from core.resolvers import shared
 from event.models import Event
 
 def resolve_edit_event_attendee(_, info, input):
@@ -12,8 +13,7 @@ def resolve_edit_event_attendee(_, info, input):
 
     clean_input = clean_graphql_input(input, ["timeCheckedIn"])
 
-    if not info.context["request"].user.is_authenticated:
-        raise GraphQLError(NOT_LOGGED_IN)
+    shared.assert_authenticated(user)
 
     try:
         event = Event.objects.get(id=clean_input.get("guid"))
@@ -23,7 +23,7 @@ def resolve_edit_event_attendee(_, info, input):
     if not event.can_write(user):
         raise GraphQLError(COULD_NOT_SAVE)
 
-    attendee = event.get_attendee(user, clean_input.get("emailAddress"))
+    attendee = event.get_attendee(clean_input.get("emailAddress"))
     if not attendee:
         raise GraphQLError(COULD_NOT_FIND)
 

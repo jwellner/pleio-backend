@@ -28,6 +28,14 @@ class EditBlogTestCase(PleioTenantTestCase):
             owner=self.authenticatedUser,
             is_recommended=False
         )
+        self.blog_multiple_read_access = Blog.objects.create(
+            title="Test private blog",
+            rich_description="JSON to string",
+            read_access=[ACCESS_TYPE.user.format(self.authenticatedUser.id), ACCESS_TYPE.public],
+            write_access=[ACCESS_TYPE.user.format(self.authenticatedUser.id)],
+            owner=self.authenticatedUser,
+            is_recommended=False
+        )
         self.relatedBlog = mixer.blend(Blog)
         self.relatedNews = mixer.blend(News)
 
@@ -420,3 +428,37 @@ class EditBlogTestCase(PleioTenantTestCase):
         with self.assertGraphQlError(TEXT_TOO_LONG):
             self.graphql_client.post(mutation, variables)
 
+    def test_edit_owner_of_blog_by_admin(self):
+        variables = {
+            "input": {
+                "guid": self.blog_multiple_read_access.guid,
+                "ownerGuid": self.user2.guid,
+            }
+        }
+
+        mutation = """
+            fragment BlogParts on Blog {
+                owner {
+                    guid
+                }
+            }
+            mutation ($input: editEntityInput!) {
+                editEntity(input: $input) {
+                    entity {
+                    guid
+                    status
+                    ...BlogParts
+                    }
+                }
+            }
+        """
+
+        self.graphql_client.force_login(self.admin)
+        result = self.graphql_client.post(mutation, variables)
+
+        entity = result["data"]["editEntity"]["entity"]
+        self.assertEqual(entity["owner"]["guid"], self.user2.guid)
+        
+        self.blog_multiple_read_access.refresh_from_db()    
+        self.assertEqual(self.blog_multiple_read_access.read_access, [ACCESS_TYPE.public, ACCESS_TYPE.user.format(self.user2.id)])
+        self.assertEqual(self.blog_multiple_read_access.write_access, [ACCESS_TYPE.user.format(self.user2.id)])

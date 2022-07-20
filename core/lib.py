@@ -1,3 +1,4 @@
+import base64
 import ipaddress
 import json
 import os
@@ -6,6 +7,9 @@ import secrets
 import tempfile
 import mimetypes
 import uuid
+from functools import wraps
+
+from django.http import HttpRequest, HttpResponseForbidden
 import html2text
 from pytz import timezone
 from colour import Color
@@ -272,16 +276,35 @@ def get_base_url():
 
 
 def get_full_url(relative_path):
-    return f"{get_base_url()}{relative_path}"
+    if not re.match(r"^https?:\/\/", relative_path):
+        return f"{get_base_url()}{relative_path}"
+    return relative_path
 
 
-def tenant_summary():
-    return {
+def tenant_api_token():
+    if not config.TENANT_API_TOKEN:
+        config.TENANT_API_TOKEN = str(uuid.uuid4())
+    return config.TENANT_API_TOKEN
+
+
+def tenant_summary(with_favicon=False):
+    summary = {
         'url': get_base_url(),
         'name': config.NAME,
         'description': config.DESCRIPTION,
-        'favicon': get_full_url(config.FAVICON) if config.FAVICON else None,
+        'api_token': tenant_api_token(),
     }
+
+    if with_favicon and config.FAVICON:
+        try:
+            from file.models import FileFolder
+            file = FileFolder.objects.file_by_path(config.FAVICON)
+            summary['favicon'] = os.path.basename(file.upload.path)
+            summary['favicon_data'] = file.get_content(wrap=lambda content: base64.encodebytes(content).decode())
+        except AttributeError:
+            pass
+
+    return summary
 
 
 def get_default_email_context(user=None):
@@ -531,3 +554,14 @@ class NumberIncrement:
             return self.n
         finally:
             self.n = self.n + 1
+
+
+def require_tenant_api_token(f):
+    @wraps(f)
+    def test_api_token(request: HttpRequest, *args, **kwargs):
+        if request.headers.get('x-origin-site-api-token') != tenant_api_token():
+            return HttpResponseForbidden()
+        return f(request, *args, **kwargs)
+
+
+    return test_api_token

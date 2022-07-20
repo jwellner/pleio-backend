@@ -93,7 +93,7 @@ class BlogTestCase(PleioTenantTestCase):
         self.assertEqual(entity["timeCreated"], self.blogPublic.created_at.isoformat())
         self.assertEqual(entity["isRecommended"], self.blogPublic.is_recommended)
         self.assertEqual(entity["tags"], [])
-        self.assertEqual(entity["views"], 1)
+        self.assertEqual(entity["views"], 0)
         self.assertEqual(entity["votes"], 0)
         self.assertEqual(entity["hasVoted"], False)
         self.assertEqual(entity["isBookmarked"], False)

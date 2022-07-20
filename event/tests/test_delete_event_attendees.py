@@ -1,41 +1,32 @@
-from django.db import connection
-from django_tenants.test.cases import FastTenantTestCase
-from django.test import override_settings
-from django.utils.text import slugify
-from backend2.schema import schema
-from ariadne import graphql_sync
-import json
-from django.contrib.auth.models import AnonymousUser
-from django.http import HttpRequest
-from core.models import Group
+from core.tests.helpers import PleioTenantTestCase
 from user.models import User
-from event.models import Event, EventAttendee, EventAttendeeRequest
+from event.models import Event, EventAttendee
 from core.constances import ACCESS_TYPE
 from mixer.backend.django import mixer
-from graphql import GraphQLError
-from datetime import datetime
 from unittest import mock
 
-class DeleteEventAttendeesTestCase(FastTenantTestCase):
+
+class DeleteEventAttendeesTestCase(PleioTenantTestCase):
 
     def setUp(self):
-        self.anonymousUser = AnonymousUser()
-        self.authenticatedUser = mixer.blend(User)
-        self.eventOwner = mixer.blend(User)
+        super().setUp()
+
+        self.attendee_user = mixer.blend(User)
+        self.owner = mixer.blend(User)
         self.admin = mixer.blend(User)
         self.admin.roles = ['ADMIN']
         self.admin.save()
         self.event = mixer.blend(Event)
-        self.event.owner = self.eventOwner
+        self.event.owner = self.owner
         self.event.read_access = [ACCESS_TYPE.public]
-        self.event.write_access=[ACCESS_TYPE.user.format(self.eventOwner.id)]
+        self.event.write_access = [ACCESS_TYPE.user.format(self.owner.id)]
         self.event.attend_event_without_account = True
         self.event.save()
 
         EventAttendee.objects.create(
             event=self.event,
-            user=self.authenticatedUser,
-            email=self.authenticatedUser.email
+            user=self.attendee_user,
+            email=self.attendee_user.email
         )
         EventAttendee.objects.create(
             event=self.event,
@@ -48,13 +39,8 @@ class DeleteEventAttendeesTestCase(FastTenantTestCase):
             email="test2@test.nl"
         )
 
-    def tearDown(self):
-        self.event.delete()
-        self.authenticatedUser.delete()
-        self.eventOwner.delete()
-
-    @mock.patch('event.resolvers.mutation_confirm_attend_event_without_account.send_mail_multi.delay')
-    def test_delete_attendees_from_event_by_admin(self, mocked_send_mail_multi):
+    @mock.patch('event.resolvers.shared.submit_delete_event_attendees_mail')
+    def test_delete_attendees_from_event_by_admin(self, mocked_send_mail):
         mutation = """
             mutation deleteEventAttendees($input: deleteEventAttendeesInput!) {
                 deleteEventAttendees(input: $input) {
@@ -70,26 +56,21 @@ class DeleteEventAttendeesTestCase(FastTenantTestCase):
         variables = {
             "input": {
                 "guid": self.event.guid,
-                "emailAddresses": ["test2@test.nl", self.authenticatedUser.email]
+                "emailAddresses": ["test2@test.nl", self.attendee_user.email]
             }
         }
 
-        request = HttpRequest()
-        request.user = self.admin
+        self.graphql_client.force_login(self.admin)
+        result = self.graphql_client.post(mutation, variables)
 
-        result = graphql_sync(schema, { "query": mutation, "variables": variables }, context_value={ "request": request })
-
-        data = result[1]["data"]
-        
+        data = result["data"]
         self.event.refresh_from_db()
-
         self.assertEqual(self.event.attendees.count(), 1)
         self.assertEqual(data["deleteEventAttendees"]["entity"]["guid"], self.event.guid)
-        self.assertEqual(mocked_send_mail_multi.call_count, 2)
+        self.assertEqual(mocked_send_mail.call_count, 2)
 
-
-    @mock.patch('event.resolvers.mutation_confirm_attend_event_without_account.send_mail_multi.delay')
-    def test_delete_attendees_from_event_by_owner(self, mocked_send_mail_multi):
+    @mock.patch('event.resolvers.shared.submit_delete_event_attendees_mail')
+    def test_delete_attendees_from_event_by_owner(self, mocked_send_mail):
         mutation = """
             mutation deleteEventAttendees($input: deleteEventAttendeesInput!) {
                 deleteEventAttendees(input: $input) {
@@ -105,25 +86,21 @@ class DeleteEventAttendeesTestCase(FastTenantTestCase):
         variables = {
             "input": {
                 "guid": self.event.guid,
-                "emailAddresses": ["test2@test.nl", self.authenticatedUser.email]
+                "emailAddresses": ["test2@test.nl", self.attendee_user.email]
             }
         }
 
-        request = HttpRequest()
-        request.user = self.eventOwner
+        self.graphql_client.force_login(self.owner)
+        result = self.graphql_client.post(mutation, variables)
 
-        result = graphql_sync(schema, { "query": mutation, "variables": variables }, context_value={ "request": request })
-
-        data = result[1]["data"]
-        
+        data = result["data"]
         self.event.refresh_from_db()
-
         self.assertEqual(self.event.attendees.count(), 1)
         self.assertEqual(data["deleteEventAttendees"]["entity"]["guid"], self.event.guid)
-        self.assertEqual(mocked_send_mail_multi.call_count, 2)
+        self.assertEqual(mocked_send_mail.call_count, 2)
 
-    @mock.patch('event.resolvers.mutation_confirm_attend_event_without_account.send_mail_multi.delay')
-    def test_delete_attendees_from_event_by_user(self, mocked_send_mail_multi):
+    @mock.patch('event.mail_builders.delete_event_attendees.submit_delete_event_attendees_mail')
+    def test_delete_attendees_from_event_by_user(self, mocked_send_mail):
         mutation = """
             mutation deleteEventAttendees($input: deleteEventAttendeesInput!) {
                 deleteEventAttendees(input: $input) {
@@ -139,28 +116,23 @@ class DeleteEventAttendeesTestCase(FastTenantTestCase):
         variables = {
             "input": {
                 "guid": self.event.guid,
-                "emailAddresses": ["test2@test.nl", self.authenticatedUser.email]
+                "emailAddresses": ["test2@test.nl", self.attendee_user.email]
             }
         }
 
-        request = HttpRequest()
-        request.user = self.authenticatedUser
-
-        result = graphql_sync(schema, { "query": mutation, "variables": variables }, context_value={ "request": request })
-
-        errors = result[1]["errors"]
-
-        self.assertEqual(errors[0]["message"], "could_not_save")
+        with self.assertGraphQlError("could_not_save"):
+            self.graphql_client.force_login(self.attendee_user)
+            self.graphql_client.post(mutation, variables)
 
     def test_delete_attendees_from_event_with_subevent(self):
         subevent = mixer.blend(Event,
-            parent = self.event
-        )
+                               parent=self.event
+                               )
 
-        mixer.blend(EventAttendee, 
-            user = self.authenticatedUser,
-            event = subevent
-        )
+        mixer.blend(EventAttendee,
+                    user=self.attendee_user,
+                    event=subevent
+                    )
 
         self.assertEqual(subevent.attendees.count(), 1)
 
@@ -179,27 +151,23 @@ class DeleteEventAttendeesTestCase(FastTenantTestCase):
         variables = {
             "input": {
                 "guid": self.event.guid,
-                "emailAddresses": ["test2@test.nl", self.authenticatedUser.email]
+                "emailAddresses": ["test2@test.nl", self.attendee_user.email]
             }
         }
 
-        request = HttpRequest()
-        request.user = self.admin
+        self.graphql_client.force_login(self.admin)
+        result = self.graphql_client.post(mutation, variables)
 
-        result = graphql_sync(schema, { "query": mutation, "variables": variables }, context_value={ "request": request })
-
-        data = result[1]["data"]
-        
+        data = result["data"]
         self.event.refresh_from_db()
-
         self.assertEqual(self.event.attendees.count(), 1)
         self.assertEqual(data["deleteEventAttendees"]["entity"]["guid"], self.event.guid)
         self.assertEqual(subevent.attendees.count(), 0)
 
     def test_delete_attendees_from_event(self):
         subevent = mixer.blend(Event,
-            parent = self.event
-        )
+                               parent=self.event
+                               )
 
         attendee = mixer.blend(User)
 
@@ -227,19 +195,15 @@ class DeleteEventAttendeesTestCase(FastTenantTestCase):
         variables = {
             "input": {
                 "guid": self.event.guid,
-                "emailAddresses": ["test2@test.nl", self.authenticatedUser.email]
+                "emailAddresses": ["test2@test.nl", self.attendee_user.email]
             }
         }
 
-        request = HttpRequest()
-        request.user = self.admin
+        self.graphql_client.force_login(self.admin)
+        result = self.graphql_client.post(mutation, variables)
 
-        result = graphql_sync(schema, { "query": mutation, "variables": variables }, context_value={ "request": request })
-
-        data = result[1]["data"]
-        
+        data = result["data"]
         self.event.refresh_from_db()
-
         self.assertEqual(self.event.attendees.count(), 1)
         self.assertEqual(data["deleteEventAttendees"]["entity"]["guid"], self.event.guid)
         self.assertEqual(subevent.attendees.count(), 1)

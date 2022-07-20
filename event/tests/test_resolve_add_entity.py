@@ -15,22 +15,20 @@ class AddEventTestCase(PleioTenantTestCase):
 
     def setUp(self):
         super(AddEventTestCase, self).setUp()
-        self.authenticatedUser = mixer.blend(User)
-        self.group = mixer.blend(Group, owner=self.authenticatedUser, is_membership_on_request=False)
-        self.group.join(self.authenticatedUser, 'owner')
+        self.authenticated_user = mixer.blend(User)
+        self.group = mixer.blend(Group, owner=self.authenticated_user, is_membership_on_request=False)
+        self.group.join(self.authenticated_user, 'owner')
 
         self.eventPublic = mixer.blend(Event,
-                                       owner=self.authenticatedUser,
+                                       owner=self.authenticated_user,
                                        read_access=[ACCESS_TYPE.public],
-                                       write_access=[ACCESS_TYPE.user.format(self.authenticatedUser.id)]
-                                       )
+                                       write_access=[ACCESS_TYPE.user.format(self.authenticated_user.id)])
 
         self.eventGroupPublic = mixer.blend(Event,
-                                            owner=self.authenticatedUser,
+                                            owner=self.authenticated_user,
                                             read_access=[ACCESS_TYPE.public],
-                                            write_access=[ACCESS_TYPE.user.format(self.authenticatedUser.id)],
-                                            group=self.group
-                                            )
+                                            write_access=[ACCESS_TYPE.user.format(self.authenticated_user.id)],
+                                            group=self.group)
 
         self.data = {
             "input": {
@@ -63,6 +61,13 @@ class AddEventTestCase(PleioTenantTestCase):
                 richDescription
                 parent {
                     guid
+                }
+                slot {
+                    name,
+                }
+                slotsAvailable {
+                    id
+                    name
                 }
                 hasChildren
                 timeCreated
@@ -105,7 +110,7 @@ class AddEventTestCase(PleioTenantTestCase):
     def test_add_event(self):
         variables = self.data
 
-        self.graphql_client.force_login(self.authenticatedUser)
+        self.graphql_client.force_login(self.authenticated_user)
         result = self.graphql_client.post(self.mutation, variables)
 
         entity = result["data"]["addEntity"]["entity"]
@@ -130,7 +135,7 @@ class AddEventTestCase(PleioTenantTestCase):
         variables = self.data
         variables["input"]["containerGuid"] = self.group.guid
 
-        self.graphql_client.force_login(self.authenticatedUser)
+        self.graphql_client.force_login(self.authenticated_user)
         result = self.graphql_client.post(self.mutation, variables)
 
         entity = result["data"]["addEntity"]["entity"]
@@ -143,7 +148,7 @@ class AddEventTestCase(PleioTenantTestCase):
         variables = self.data
         variables["input"]["containerGuid"] = self.eventPublic.guid
 
-        self.graphql_client.force_login(self.authenticatedUser)
+        self.graphql_client.force_login(self.authenticated_user)
         result = self.graphql_client.post(self.mutation, variables)
 
         entity = result["data"]["addEntity"]["entity"]
@@ -161,7 +166,7 @@ class AddEventTestCase(PleioTenantTestCase):
         variables = self.data
         variables["input"]["containerGuid"] = self.eventGroupPublic.guid
 
-        self.graphql_client.force_login(self.authenticatedUser)
+        self.graphql_client.force_login(self.authenticated_user)
         result = self.graphql_client.post(self.mutation, variables)
 
         entity = result["data"]["addEntity"]["entity"]
@@ -181,14 +186,23 @@ class AddEventTestCase(PleioTenantTestCase):
         attachment = mixer.blend(Attachment)
 
         variables = self.data
-        variables["input"]["richDescription"] = json.dumps({'type': 'file', 'attrs': {'url': f"/attachment/entity/{attachment.id}"}})
+        variables["input"]["richDescription"] = json.dumps(
+            {'type': 'file', 'attrs': {'url': f"/attachment/entity/{attachment.id}"}})
 
-        self.graphql_client.force_login(self.authenticatedUser)
+        self.graphql_client.force_login(self.authenticated_user)
         result = self.graphql_client.post(self.mutation, variables)
 
         entity = result["data"]["addEntity"]["entity"]
         event = Event.objects.get(id=entity["guid"])
         self.assertTrue(event.attachments.filter(id=attachment.id).exists())
+
+    def test_add_main_event_with_slot_should_fail(self):
+        variables = self.data
+        variables['input']['slot'] = {'id': 1}
+
+        with self.assertGraphQlError('subevent_only_operation'):
+            self.graphql_client.force_login(self.authenticated_user)
+            self.graphql_client.post(self.mutation, variables)
 
     def test_add_minimal_entity(self):
         variables = {
@@ -200,7 +214,7 @@ class AddEventTestCase(PleioTenantTestCase):
             }
         }
 
-        self.graphql_client.force_login(self.authenticatedUser)
+        self.graphql_client.force_login(self.authenticated_user)
         result = self.graphql_client.post(self.mutation, variables)
 
         entity = result["data"]["addEntity"]["entity"]

@@ -74,6 +74,7 @@ urlpatterns = [
     path('flow/', include('flow.urls')),
     path('profile_sync_api/', include('profile_sync.urls')),
     path('api/profile_updated/', concierge_views.profile_updated, name="profile_updated"),
+    path('api/site_info/', concierge_views.get_site_info, name="site_info"),
 
     # Include elgg url's for redirects
     path('', include('elgg.urls')),

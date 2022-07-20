@@ -1,22 +1,25 @@
-from auditlog.registry import auditlog
-from django.core.exceptions import ObjectDoesNotExist
-from django.db import models
-from django.db.models.signals import post_save, pre_save
-from django.dispatch import receiver
-from django.utils import timezone
-from django.utils.text import slugify
-from django.utils.translation import ugettext_lazy
-from django_tenants.utils import parse_tenant_config_path
+from django.core.exceptions import ValidationError
 
 from core import config
+from django.utils.translation import gettext as _
+
+from auditlog.registry import auditlog
+from django.db import models
 from core.lib import get_default_email_context
 from core.models import (ArticleMixin, AttachmentMixin, BookmarkMixin,
                          CommentMixin, Entity, FeaturedCoverMixin, FollowMixin,
                          NotificationMixin)
-from core.tasks import send_mail_multi
+from django_tenants.utils import parse_tenant_config_path
 from event.lib import get_url
-from event.mail_builders.qr_code import send_event_qr
+from event.mail_builders.qr_code import submit_mail_event_qr
+from event.mail_builders.waitinglist import submit_mail_at_accept_from_waitinglist
 from user.models import User
+from django.db.models.signals import pre_save, post_save
+from django.dispatch import receiver
+from django.utils.text import slugify
+from django.utils import timezone
+
+
 
 class Event(Entity,
             CommentMixin, BookmarkMixin, FollowMixin, NotificationMixin, FeaturedCoverMixin, ArticleMixin,
@@ -27,6 +30,7 @@ class Event(Entity,
     title = models.CharField(max_length=256)
 
     parent = models.ForeignKey('self', blank=True, null=True, related_name='children', on_delete=models.CASCADE)
+    slot = models.ForeignKey("event.EventSlot", on_delete=models.CASCADE, blank=True, null=True)
 
     start_date = models.DateTimeField(null=True, blank=True)
     end_date = models.DateTimeField(null=True, blank=True)
@@ -49,53 +53,22 @@ class Event(Entity,
             return True
         return False
 
-    def get_attendee(self, user, email=None):
-        if not user.is_authenticated:
-            return None
-
-        attendee = None
-
+    def get_attendee(self, email):
         try:
-            attendee_user = User.objects.get(email=email)
-            attendee = self.attendees.get(user=attendee_user)
-        except ObjectDoesNotExist:
+            user = User.objects.filter(email=email).first()
+            if user:
+                return self.attendees.get(user=user)
+
+            return self.attendees.get(email=email)
+        except EventAttendee.DoesNotExist:
             pass
 
-        try:
-            attendee = self.attendees.get(email=email)
-        except ObjectDoesNotExist:
-            pass
-
-        return attendee
-
-    def delete_attendee(self, user, email):
-        deleted = False
-        if not user.is_authenticated:
-            return None
-
-        # try delete attendee with account
-        try:
-            attendee = User.objects.get(email=email)
-            self.attendees.get(user=attendee).delete()
-            deleted = True
-        except ObjectDoesNotExist:
-            pass
-
-        # try delete attendee without account
-        try:
-            attendee = self.attendees.get(email=email)
-            attendee.delete()
-            deleted = True
-        except ObjectDoesNotExist:
-            pass
-
-        # try delete attendee without account request
-        try:
-            EventAttendeeRequest.objects.get(event=self, email=email).delete()
-        except ObjectDoesNotExist:
-            pass
-
-        return deleted
+    def delete_attendee(self, email):
+        attendee = self.get_attendee(email)
+        if not attendee:
+            return False
+        attendee.delete()
+        return True
 
     def is_full(self):
         if self.max_attendees and self.attendees.filter(state="accept").count() >= self.max_attendees:
@@ -128,7 +101,7 @@ class Event(Entity,
 
     def process_waitinglist(self):
         link = get_url(self)
-        subject = ugettext_lazy("Added to event %s from waitinglist") % self.title
+        subject = _("Added to event %s from waitinglist") % self.title
 
         schema_name = parse_tenant_config_path("")
         context = get_default_email_context()
@@ -143,20 +116,25 @@ class Event(Entity,
         for attendee in self.attendees.filter(state='waitinglist').order_by('updated_at'):
             if self.is_full():
                 break
+
             attendee.state = 'accept'
             attendee.save()
 
             if self.qr_access:
-                send_event_qr(attendee)
+                submit_mail_event_qr(attendee)
 
-            try:
-                send_mail_multi.delay(schema_name, subject, 'email/attend_event_from_waitinglist.html', context,
-                                      attendee.user.email)
-            except Exception:
-                send_mail_multi.delay(schema_name, subject, 'email/attend_event_from_waitinglist.html', context,
-                                      attendee.email)
+            submit_mail_at_accept_from_waitinglist(event=self.guid, attendee=attendee.id)
 
         return True
+
+
+class EventSlot(models.Model):
+    class Meta:
+        ordering = ('index',)
+
+    container = models.ForeignKey('event.Event', on_delete=models.CASCADE, related_name='slots_available')
+    name = models.CharField(max_length=255)
+    index = models.IntegerField(default=0)
 
 
 class EventAttendee(models.Model):
@@ -174,9 +152,9 @@ class EventAttendee(models.Model):
     )
 
     state = models.CharField(
+        null=True, blank=True,
         max_length=16,
         choices=STATE_TYPES,
-        null=True, blank=True,
     )
 
     name = models.CharField(max_length=256, null=True, blank=True)
@@ -206,6 +184,28 @@ class EventAttendee(models.Model):
     def __str__(self):
         return f"EventAttendee[{self.name}]"
 
+    def clean(self):
+        self.clean_event()
+
+    def clean_event(self):
+        if not self.event.parent or self.state != 'accept' \
+                or self.event.start_date is None \
+                or not self.event.slot:
+            return
+
+        user_attendees = EventAttendee.objects.filter(user__isnull=False, user=self.user)
+        email_attendees = EventAttendee.objects.filter(email__isnull=False, email=self.email)
+        for qs in [user_attendees, email_attendees]:
+            qs = qs.exclude(id=self.id)
+            qs = qs.filter(event__parent=self.event.parent, state='accept')
+            qs = qs.filter(event__slot=self.event.slot)
+            if qs.count() > 0:
+                raise ValidationError(_("You already signed in for another sub-event in the same slot."))
+
+    def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
+        self.full_clean()
+        super(EventAttendee, self).save(force_insert, force_update, using, update_fields)
+
     def as_attendee(self, access_user):
         return {
             "guid": self.user.id if self.user else '',
@@ -221,13 +221,6 @@ class EventAttendee(models.Model):
         return {'name': self.name,
                 'email': self.email,
                 'language': self.language}
-
-    def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
-        self.full_clean()
-        super(EventAttendee, self).save(force_insert=force_insert,
-                                        force_update=force_update,
-                                        using=using,
-                                        update_fields=update_fields)
 
 
 class EventAttendeeRequest(models.Model):
@@ -246,7 +239,7 @@ class EventAttendeeRequest(models.Model):
         return f"EventAttendeeRequest[{self.name}]"
 
 
-# Subevents are dependent on the main event, so when an event is saved, its subevents are updated
+# Subevents are dependent on the main event, so when an event is saved, its subevents are updated.
 @receiver(post_save, sender=Event)
 def event_post_save(sender, instance, **kwargs):
     # pylint: disable=unused-argument
@@ -261,7 +254,7 @@ def event_post_save(sender, instance, **kwargs):
         child.save()
 
 
-# When a subevent is edited and saved, the fields dependent on the parent are updated accordingly
+# When a subevent is edited and saved, the fields dependent on the parent are updated accordingly.
 @receiver(pre_save, sender=Event)
 def event_pre_save(sender, instance, **kwargs):
     # pylint: disable=unused-argument

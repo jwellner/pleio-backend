@@ -5,8 +5,6 @@ from django.contrib.auth.models import AnonymousUser
 from django.db import models
 from django.db.models import Q
 from django.contrib.postgres.fields import ArrayField
-from django.db.models.signals import post_delete
-from django.dispatch import receiver
 from django.utils import timezone
 from model_utils.managers import InheritanceManager
 from core.lib import get_acl
@@ -171,7 +169,9 @@ class Entity(models.Model, TagsMixin):
 
 class EntityView(models.Model):
     entity = models.ForeignKey('core.Entity', on_delete=models.CASCADE, related_name="views")
-    viewer = models.ForeignKey('user.User', on_delete=models.CASCADE)
+    viewer = models.ForeignKey('user.User', on_delete=models.CASCADE, related_name="viewed_entities",
+                               null=True, blank=True, default=None)
+    session = models.TextField(max_length=128, null=True, blank=True, default=None)
     created_at = models.DateTimeField(default=timezone.now)
 
 

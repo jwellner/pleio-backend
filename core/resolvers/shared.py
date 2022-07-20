@@ -374,8 +374,16 @@ def resolve_update_group(entity, clean_input):
 def resolve_update_owner(entity, clean_input):
     if 'ownerGuid' in clean_input:
         try:
+            previous_owner_formatted = ACCESS_TYPE.user.format(entity.owner.id)
             owner = User.objects.get(id=clean_input.get("ownerGuid"))
             entity.owner = owner
+            owner_formatted = ACCESS_TYPE.user.format(owner.id)
+            if previous_owner_formatted in entity.read_access:
+                entity.read_access = [i for i in entity.read_access if i != previous_owner_formatted]
+                entity.read_access.append(owner_formatted)
+            if previous_owner_formatted in entity.write_access:
+                entity.write_access = [i for i in entity.write_access if i != previous_owner_formatted]
+                entity.write_access.append(owner_formatted)
         except ObjectDoesNotExist:
             raise GraphQLError(COULD_NOT_FIND)
 

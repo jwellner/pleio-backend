@@ -37,14 +37,22 @@ def resolve_children(obj, info):
     Children fields published and isArchived are kept in sync with the parent event, see signals in event/models.py
     """
     if obj.status_published == ENTITY_STATUS.PUBLISHED:
-        return obj.children.visible(info.context["request"].user)
-    return Event.objects.filter(parent=obj)
+        qs = obj.children.visible(info.context["request"].user)
+    else:
+        qs = Event.objects.filter(parent=obj)
+    return qs.order_by('start_date', 'created_at')
 
 
 @event.field("parent")
 def resolve_parent(obj, info):
     # pylint: disable=unused-argument
     return obj.parent
+
+
+@event.field('slotsAvailable')
+def resolve_slots_available(obj, info):
+    # pylint: disable=unused-argument
+    return obj.slots_available.all()
 
 
 @event.field("inGroup")
@@ -147,7 +155,7 @@ def resolve_is_attending(obj, info):
     user = info.context["request"].user
 
     if user.is_authenticated:
-        attendee = obj.get_attendee(user, user.email)
+        attendee = obj.get_attendee(user.email)
         if attendee:
             return attendee.state
 
