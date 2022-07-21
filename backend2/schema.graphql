@@ -1639,7 +1639,14 @@ type Query {
     top: [TopItem]
     breadcrumb(guid: String): [Entity]
     files(containerGuid: String, filter: String, orderBy: String, orderDirection: String, offset: Int, limit: Int): EntityList
-    groups(q: String, filter: GroupFilter, tags: [String], offset: Int, limit: Int): GroupList
+    groups(
+        q: String
+        filter: GroupFilter
+        tags: [String]
+        tagsAny: Boolean
+        offset: Int
+        limit: Int
+    ): GroupList
     events(filter: EventFilter, containerGuid: String, offset: Int, limit: Int): EventList
     users(q: String!, offset: Int, limit: Int, filters: [FilterInput]): UserList
     members(groupGuid: String!, q: String, offset: Int, limit: Int, filters: [FilterInput]): MemberList
@@ -1651,6 +1658,7 @@ type Query {
         subtypes: [String]
         containerGuid: String
         tags: [String]
+        tagsAny: Boolean
         tagLists: [[String]]
         orderBy: OrderBy
         orderDirection: OrderDirection
@@ -1665,6 +1673,7 @@ type Query {
         offset: Int
         limit: Int
         tags: [String]
+        tagsAny: Boolean
         tagLists: [[String]]
         groupFilter: [String]
         subtypes: [String]

@@ -77,11 +77,14 @@ def conditional_is_featured_filter(is_featured):
     return Q()
 
 
-def conditional_tags_filter(tags):
+def conditional_tags_filter(tags, tags_any):
     if tags:
         filters = Q()
-        for tag in Tag.translate_tags(tags):
-            filters.add(Q(_tag_summary__overlap=[tag]), Q.AND)  # of Q.OR
+        if tags_any:
+            filters.add(Q(_tag_summary__overlap=Tag.translate_tags(tags)), Q.AND)
+        else:
+            for tag in Tag.translate_tags(tags):
+                filters.add(Q(_tag_summary__overlap=[tag]), Q.AND)  # of Q.OR
 
         return filters
     return Q()
@@ -106,6 +109,7 @@ def resolve_entities(
         subtypes=None,
         containerGuid=None,
         tags=None,
+        tagsAny=False,
         tagLists=None,
         orderBy=ORDER_BY.timePublished,
         orderDirection=ORDER_DIRECTION.desc,
@@ -167,7 +171,7 @@ def resolve_entities(
     entities = entities.filter(conditional_is_featured_filter(isFeatured) &
                                conditional_group_filter(containerGuid) &
                                conditional_subtypes_filter(subtypes) &
-                               conditional_tags_filter(tags) &
+                               conditional_tags_filter(tags, tagsAny) &
                                conditional_tag_lists_filter(tagLists))
 
     if userGuid:

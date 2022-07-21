@@ -1,5 +1,4 @@
 from datetime import timedelta
-from django_tenants.test.cases import FastTenantTestCase
 from core.models import Group
 from core.tests.helpers import PleioTenantTestCase
 from user.factories import UserFactory
@@ -9,76 +8,70 @@ from cms.models import Page
 from event.models import Event
 from news.models import News
 from core.constances import ACCESS_TYPE, COULD_NOT_ORDER_BY_START_DATE
-from backend2.schema import schema
-from ariadne import graphql_sync
 from django.contrib.auth.models import AnonymousUser
-from django.http import HttpRequest
 from mixer.backend.django import mixer
 from django.utils import timezone
 
 
-class EntitiesTestCase(FastTenantTestCase):
+class EntitiesTestCase(PleioTenantTestCase):
 
     def setUp(self):
-        self.anonymousUser = AnonymousUser()
-        self.authenticatedUser = mixer.blend(User)
-        self.user2 = mixer.blend(User)
-        self.admin = mixer.blend(User, roles=['ADMIN'])
-        self.group = mixer.blend(Group, owner=self.authenticatedUser)
+        super().setUp()
 
-        self.blog1 = Blog.objects.create(
+        self.user: User = mixer.blend(User)
+        self.user2: User = mixer.blend(User)
+        self.admin: User = mixer.blend(User, roles=['ADMIN'])
+        self.group: Group = mixer.blend(Group, owner=self.user)
+
+        self.blog1: Blog = Blog.objects.create(
             title="Blog1",
-            owner=self.authenticatedUser,
+            owner=self.user,
             read_access=[ACCESS_TYPE.public],
-            write_access=[ACCESS_TYPE.user.format(self.authenticatedUser.id)]
+            write_access=[ACCESS_TYPE.user.format(self.user.id)]
         )
 
-        self.blog2 = Blog.objects.create(
+        self.blog2: Blog = Blog.objects.create(
             title="Blog2",
-            owner=self.authenticatedUser,
+            owner=self.user,
             read_access=[ACCESS_TYPE.public],
-            write_access=[ACCESS_TYPE.user.format(self.authenticatedUser.id)],
-
+            write_access=[ACCESS_TYPE.user.format(self.user.id)],
+            tags=["tag_one", "tag_four"]
         )
-        self.blog2.tags = ["tag_one", "tag_four"]
-        self.blog2.save()
 
-        self.blog3 = Blog.objects.create(
-            title="Blog4",
-            owner=self.authenticatedUser,
-            read_access=[ACCESS_TYPE.public],
-            write_access=[ACCESS_TYPE.user.format(self.authenticatedUser.id)],
-            group=self.group,
-        )
-        self.blog3.tags = ["tag_two", "tag_one", "tag_four"]
-        self.blog3.save()
-
-        self.blog4 = Blog.objects.create(
+        self.blog3: Blog = Blog.objects.create(
             title="Blog3",
-            owner=self.authenticatedUser,
+            owner=self.user,
             read_access=[ACCESS_TYPE.public],
-            write_access=[ACCESS_TYPE.user.format(self.authenticatedUser.id)],
+            write_access=[ACCESS_TYPE.user.format(self.user.id)],
             group=self.group,
-            is_featured=True
+            tags=["tag_two", "tag_one", "tag_four"]
         )
-        self.blog4.tags = ["tag_four", "tag_three", "tag_one_extra"]
-        self.blog4.save()
 
-        self.news1 = News.objects.create(
-            title="News1",
-            owner=self.authenticatedUser,
+        self.blog4: Blog = Blog.objects.create(
+            title="Blog4",
+            owner=self.user,
             read_access=[ACCESS_TYPE.public],
-            write_access=[ACCESS_TYPE.user.format(self.authenticatedUser.id)],
+            write_access=[ACCESS_TYPE.user.format(self.user.id)],
+            group=self.group,
+            tags=["tag_four", "tag_three", "tag_one_extra"],
             is_featured=True
         )
-        self.page1 = mixer.blend(
+
+        self.news1: News = News.objects.create(
+            title="News1",
+            owner=self.user,
+            read_access=[ACCESS_TYPE.public],
+            write_access=[ACCESS_TYPE.user.format(self.user.id)],
+            is_featured=True
+        )
+        self.page1: Page = mixer.blend(
             Page,
             title="Page1",
             owner=self.admin,
             read_access=[ACCESS_TYPE.public],
             write_access=[ACCESS_TYPE.user.format(self.admin.id)]
         )
-        self.page2 = mixer.blend(
+        self.page2: Page = mixer.blend(
             Page,
             title="Page2",
             position=0,
@@ -87,7 +80,7 @@ class EntitiesTestCase(FastTenantTestCase):
             write_access=[ACCESS_TYPE.user.format(self.admin.id)],
             parent=self.page1
         )
-        self.page3 = mixer.blend(
+        self.page3: Page = mixer.blend(
             Page,
             title="Page3",
             is_pinned=True,
@@ -98,39 +91,37 @@ class EntitiesTestCase(FastTenantTestCase):
             write_access=[ACCESS_TYPE.user.format(self.admin.id)]
         )
 
-        self.blog_draft1 = Blog.objects.create(
+        self.blog_draft1: Blog = Blog.objects.create(
             title="Blog draft1",
-            owner=self.authenticatedUser,
+            owner=self.user,
             read_access=[ACCESS_TYPE.public],
-            write_access=[ACCESS_TYPE.user.format(self.authenticatedUser.id)],
+            write_access=[ACCESS_TYPE.user.format(self.user.id)],
             group=self.group,
             is_featured=True,
-            published=None
+            published=None,
+            tags=["tag_four", "tag_three"]
         )
-        self.blog_draft1.tags = ["tag_four", "tag_three"]
-        self.blog_draft1.save()
 
-        self.blog_draft2 = Blog.objects.create(
+        self.blog_draft2: Blog = Blog.objects.create(
             title="Blog draft2",
             owner=self.user2,
             read_access=[ACCESS_TYPE.public],
-            write_access=[ACCESS_TYPE.user.format(self.authenticatedUser.id)],
+            write_access=[ACCESS_TYPE.user.format(self.user.id)],
             group=self.group,
             is_featured=True,
-            published=timezone.now() + timedelta(days=5)
+            published=timezone.now() + timedelta(days=5),
+            tags=["tag_four", "tag_three"]
         )
-        self.blog_draft2.tags = ["tag_four", "tag_three"]
-        self.blog_draft2.save()
 
-        self.archived1 = Blog.objects.create(
+        self.archived1: Blog = Blog.objects.create(
             title="Archived 1",
-            owner=self.authenticatedUser,
+            owner=self.user,
             read_access=[ACCESS_TYPE.public],
             group=self.group,
             is_archived=True,
             published=timezone.now() - timezone.timedelta(days=1)
         )
-        self.archived2 = Blog.objects.create(
+        self.archived2: Blog = Blog.objects.create(
             title="Archived 2",
             owner=self.user2,
             read_access=[ACCESS_TYPE.public],
@@ -144,6 +135,7 @@ class EntitiesTestCase(FastTenantTestCase):
                     $subtype: String
                     $containerGuid: String
                     $tags: [String!]
+                    $tagsAny: Boolean
                     $tagLists: [[String]]
                     $isFeatured: Boolean
                     $limit: Int
@@ -156,6 +148,7 @@ class EntitiesTestCase(FastTenantTestCase):
                         subtype: $subtype
                         containerGuid: $containerGuid
                         tags: $tags
+                        tagsAny: $tagsAny
                         tagLists: $tagLists
                         isFeatured: $isFeatured
                         limit: $limit
@@ -198,210 +191,171 @@ class EntitiesTestCase(FastTenantTestCase):
         self.blog3.delete()
         self.group.delete()
         self.admin.delete()
-        self.authenticatedUser.delete()
+        self.user.delete()
+        self.user2.delete()
 
     def test_entities_all(self):
-        request = HttpRequest()
-        request.user = self.authenticatedUser
-
         variables = {
             "containerGuid": None
         }
 
-        result = graphql_sync(schema, {"query": self.query, "variables": variables}, context_value={"request": request})
+        self.graphql_client.force_login(self.user)
+        result = self.graphql_client.post(self.query, variables)
 
-        self.assertTrue(result[0])
-
-        data = result[1]["data"]
-
-        self.assertEqual(data["entities"]["total"], 8)
+        data = result["data"]["entities"]
+        self.assertEqual(data["total"], 8)
 
     def test_entities_site(self):
-        request = HttpRequest()
-        request.user = self.authenticatedUser
-
         variables = {
             "containerGuid": "1"
         }
-
-        success, result = graphql_sync(schema, {"query": self.query, "variables": variables},
-                                       context_value={"request": request})
-
-        self.assertTrue(success)
+        self.graphql_client.force_login(self.user)
+        result = self.graphql_client.post(self.query, variables)
 
         data = result.get("data")
         self.assertIsNotNone(data, msg=result)
         self.assertIsNotNone(data.get('entities'), msg=result)
         self.assertEqual(data["entities"]["total"], 6)
 
-    def test_entities_group(self):
-        request = HttpRequest()
-        request.user = self.authenticatedUser
+    def test_tags_match_all(self):
+        result = self.graphql_client.post(self.query, {
+            'tags': ["tag_one", "tag_two"]
+        })
+        blogs = [e['title'] for e in result['data']['entities']['edges']]
+        self.assertEqual(1, len(blogs))
+        self.assertIn(self.blog3.title, blogs)
 
+    def test_tags_match_any(self):
+        result = self.graphql_client.post(self.query, {
+            'tags': ["tag_one", "tag_two"],
+            'tagsAny': True,
+        })
+        blogs = [e['title'] for e in result['data']['entities']['edges']]
+        self.assertEqual(2, len(blogs))
+        self.assertIn(self.blog2.title, blogs)
+        self.assertIn(self.blog3.title, blogs)
+
+    def test_entities_group(self):
         variables = {
             "containerGuid": self.group.guid
         }
 
-        result = graphql_sync(schema, {"query": self.query, "variables": variables}, context_value={"request": request})
+        self.graphql_client.force_login(self.user)
+        result = self.graphql_client.post(self.query, variables)
 
-        self.assertTrue(result[0])
-
-        data = result[1]["data"]
-
+        data = result["data"]
         self.assertEqual(data["entities"]["total"], 2)
 
     def test_entities_filtered_by_tags_find_one(self):
-        request = HttpRequest()
-        request.user = self.authenticatedUser
-
         variables = {"tags": ["tag_two"]}
 
-        result = graphql_sync(schema, {"query": self.query, "variables": variables}, context_value={"request": request})
+        self.graphql_client.force_login(self.user)
+        result = self.graphql_client.post(self.query, variables)
 
-        self.assertTrue(result[0])
-
-        data = result[1]["data"]
-
+        data = result["data"]
         self.assertEqual(data["entities"]["total"], 1)
         self.assertEqual(data["entities"]["edges"][0]["guid"], self.blog3.guid)
 
     def test_entities_filtered_by_tags_find_two(self):
-        request = HttpRequest()
-        request.user = self.authenticatedUser
-
         variables = {"tags": ["tag_one"]}
 
-        result = graphql_sync(schema, {"query": self.query, "variables": variables}, context_value={"request": request})
+        self.graphql_client.force_login(self.user)
+        result = self.graphql_client.post(self.query, variables)
 
-        self.assertTrue(result[0])
-
-        data = result[1]["data"]
-
+        data = result["data"]
         self.assertEqual(data["entities"]["total"], 2)
         self.assertEqual(data["entities"]["edges"][0]["guid"], self.blog3.guid)
         self.assertEqual(data["entities"]["edges"][1]["guid"], self.blog2.guid)
 
     def test_entities_filtered_by_tags_find_one_with_two_tags(self):
-        request = HttpRequest()
-        request.user = self.authenticatedUser
-
         variables = {"tags": ["tag_one", "tag_two"]}
 
-        success, result = graphql_sync(schema, {"query": self.query, "variables": variables}, context_value={"request": request})
-
-        self.assertIsNone(result.get('errors'), msg=result.get('errors'))
+        self.graphql_client.force_login(self.user)
+        result = self.graphql_client.post(self.query, variables)
 
         data = result.get("data")
         self.assertEqual(data["entities"]["total"], 1, msg=[edge['title'] for edge in data["entities"]["edges"]])
         self.assertEqual(data["entities"]["edges"][0]["guid"], self.blog3.guid)
 
     def test_entities_all_pages_by_admin(self):
-        request = HttpRequest()
-        request.user = self.admin
-
         variables = {
             "subtype": "page"
         }
 
-        result = graphql_sync(schema, {"query": self.query, "variables": variables}, context_value={"request": request})
+        self.graphql_client.force_login(self.admin)
+        result = self.graphql_client.post(self.query, variables)
 
-        self.assertTrue(result[0])
-
-        data = result[1]["data"]
-
+        data = result["data"]
         self.assertEqual(data["entities"]["total"], 1)
 
     def test_entities_filtered_by_tag_lists(self):
-        request = HttpRequest()
-        request.user = self.authenticatedUser
-
         variables = {"tagLists": [["tag_four", "tag_three"], ["tag_one"]]}
 
-        success, result = graphql_sync(schema, {"query": self.query, "variables": variables},
-                                       context_value={"request": request})
-
-        self.assertIsNone(result.get('errors'), msg=[result.get('errors'), self.query])
+        self.graphql_client.force_login(self.user)
+        result = self.graphql_client.post(self.query, variables)
 
         data = result.get("data")
         status_message = "Query resutl: %s" % [d['title'] for d in data["entities"]['edges']]
         self.assertEqual(data["entities"]["total"], 2, msg=status_message)
 
     def test_entities_filtered_is_featured(self):
-        request = HttpRequest()
-        request.user = self.authenticatedUser
-
         variables = {"isFeatured": True}
 
-        result = graphql_sync(schema, {"query": self.query, "variables": variables}, context_value={"request": request})
+        self.graphql_client.force_login(self.user)
+        result = self.graphql_client.post(self.query, variables)
 
-        self.assertTrue(result[0])
-
-        data = result[1]["data"]
+        data = result["data"]
         self.assertEqual(data["entities"]["total"], 2)
 
     def test_entities_single_filtered_is_featured(self):
-        request = HttpRequest()
-        request.user = self.authenticatedUser
-
         variables = {"isFeatured": True, "subtype": "blog"}
 
-        result = graphql_sync(schema, {"query": self.query, "variables": variables}, context_value={"request": request})
+        self.graphql_client.force_login(self.user)
+        result = self.graphql_client.post(self.query, variables)
 
-        self.assertTrue(result[0])
-
-        data = result[1]["data"]
+        data = result["data"]
         self.assertEqual(data["entities"]["total"], 1)
 
     def test_entities_multiple_filtered_is_featured(self):
-        request = HttpRequest()
-        request.user = self.authenticatedUser
-
         variables = {"isFeatured": True, "subtypes": ["blog", "news"]}
 
-        result = graphql_sync(schema, {"query": self.query, "variables": variables}, context_value={"request": request})
+        self.graphql_client.force_login(self.user)
+        result = self.graphql_client.post(self.query, variables)
 
-        self.assertTrue(result[0])
-
-        data = result[1]["data"]
+        data = result["data"]
         self.assertEqual(data["entities"]["total"], 2)
 
     def test_entities_limit(self):
-        request = HttpRequest()
-        request.user = self.authenticatedUser
-
         variables = {"limit": 5}
 
-        result = graphql_sync(schema, {"query": self.query, "variables": variables}, context_value={"request": request})
+        self.graphql_client.force_login(self.user)
+        result = self.graphql_client.post(self.query, variables)
 
-        self.assertTrue(result[0])
-
-        data = result[1]["data"]
-
+        data = result["data"]
         self.assertEqual(len(data["entities"]["edges"]), 5)
         self.assertEqual(data["entities"]["total"], 8)
 
     def test_entities_all_order_by_title_asc(self):
-        request = HttpRequest()
-        request.user = self.authenticatedUser
-
         variables = {
             "containerGuid": None,
             "orderBy": "title",
             "orderDirection": "asc"
         }
 
-        result = graphql_sync(schema, {"query": self.query, "variables": variables}, context_value={"request": request})
+        self.graphql_client.force_login(self.user)
+        result = self.graphql_client.post(self.query, variables)
 
-        self.assertTrue(result[0])
-
-        data = result[1]["data"]
-
-        self.assertEqual(data["entities"]["edges"][2]["guid"], self.blog4.guid)
+        titles = [e['title'] for e in result['data']['entities']['edges']]
+        self.assertEqual([self.blog1.title,
+                          self.blog2.title,
+                          self.blog3.title,
+                          self.blog4.title,
+                          self.news1.title,
+                          self.page1.title,
+                          self.page2.title,
+                          self.page3.title], titles)
 
     def test_entities_blogs_order_by_title_desc(self):
-        request = HttpRequest()
-        request.user = self.authenticatedUser
-
         variables = {
             "containerGuid": None,
             "orderBy": "title",
@@ -409,102 +363,75 @@ class EntitiesTestCase(FastTenantTestCase):
             "subtype": "blog"
         }
 
-        result = graphql_sync(schema, {"query": self.query, "variables": variables}, context_value={"request": request})
+        self.graphql_client.force_login(self.user)
+        result = self.graphql_client.post(self.query, variables)
 
-        self.assertTrue(result[0])
-
-        data = result[1]["data"]
-
-        self.assertEqual(data["entities"]["edges"][0]["guid"], self.blog3.guid)
+        titles = [e['title'] for e in result['data']['entities']['edges']]
+        self.assertEqual([self.blog4.title,
+                          self.blog3.title,
+                          self.blog2.title,
+                          self.blog1.title], titles)
 
     def test_entities_show_pinned(self):
-        request = HttpRequest()
-        request.user = self.authenticatedUser
-
         variables = {
             "containerGuid": None,
             "showPinned": True
         }
 
-        result = graphql_sync(schema, {"query": self.query, "variables": variables}, context_value={"request": request})
+        self.graphql_client.force_login(self.user)
+        result = self.graphql_client.post(self.query, variables)
 
-        self.assertTrue(result[0])
-
-        data = result[1]["data"]
-
+        data = result["data"]
         self.assertEqual(data["entities"]["edges"][0]["guid"], self.page3.guid)
 
     def test_entities_all_draft(self):
-        request = HttpRequest()
-        request.user = self.authenticatedUser
-
         variables = {
             "containerGuid": None,
             "statusPublished": 'draft'
         }
 
-        result = graphql_sync(schema, {"query": self.query, "variables": variables}, context_value={"request": request})
+        self.graphql_client.force_login(self.user)
+        result = self.graphql_client.post(self.query, variables)
 
-        self.assertTrue(result[0])
-
-        data = result[1]["data"]
-
+        data = result["data"]
         self.assertEqual(data["entities"]["total"], 1)
 
     def test_entities_all_draft_admin(self):
-        request = HttpRequest()
-        request.user = self.admin
-
         variables = {
             "containerGuid": None,
             "statusPublished": 'draft'
         }
 
-        success, result = graphql_sync(schema, {"query": self.query, "variables": variables},
-                                       context_value={"request": request})
-
-        self.assertTrue(success, msg=result)
+        self.graphql_client.force_login(self.admin)
+        result = self.graphql_client.post(self.query, variables)
 
         data = result["data"]
-
         self.assertIsNotNone(data, msg=result)
         self.assertIsNotNone(data.get('entities'), msg=result)
 
         self.assertEqual(data["entities"]["total"], 2)
 
     def test_entities_all_draft_anon(self):
-        request = HttpRequest()
-        request.user = self.anonymousUser
-
         variables = {
             "containerGuid": None,
             "statusPublished": 'draft'
         }
 
-        success, result = graphql_sync(schema, {"query": self.query, "variables": variables},
-                                       context_value={"request": request})
-
-        self.assertTrue(success, msg=result)
+        result = self.graphql_client.post(self.query, variables)
 
         data = result.get("data")
-
         self.assertIsNotNone(data, msg=result)
         self.assertIsNotNone(data.get('entities'), msg=result)
         self.assertEqual(data["entities"]["total"], 0)
 
     def test_entities_all_draft_other(self):
-        request = HttpRequest()
-        request.user = self.user2
-
         variables = {
             "containerGuid": None,
             "statusPublished": ['draft']
         }
 
-        success, result = graphql_sync(schema, {"query": self.query, "variables": variables},
-                                       context_value={"request": request})
-
-        self.assertTrue(success, msg=result)
+        self.graphql_client.force_login(self.user2)
+        result = self.graphql_client.post(self.query, variables)
 
         data = result["data"]
         self.assertIsNotNone(data, msg=result)
@@ -517,20 +444,15 @@ class EntitiesTestCase(FastTenantTestCase):
         self.assertIn(self.blog_draft2.guid, result_guids, msg=result_msg)
 
     def test_entities_all_for_user(self):
-        request = HttpRequest()
-        request.user = self.authenticatedUser
-
         variables = {
             "containerGuid": None,
-            "userGuid": self.authenticatedUser.guid
+            "userGuid": self.user.guid
         }
 
-        result = graphql_sync(schema, {"query": self.query, "variables": variables}, context_value={"request": request})
+        self.graphql_client.force_login(self.user)
+        result = self.graphql_client.post(self.query, variables)
 
-        self.assertTrue(result[0])
-
-        data = result[1]["data"]
-
+        data = result["data"]
         result_guids = {e["guid"] for e in data['entities']['edges']}
         result_msg = "Result is %s" % [e["title"] for e in data['entities']['edges']]
         self.assertEqual(data["entities"]["total"], 5)
@@ -542,20 +464,16 @@ class EntitiesTestCase(FastTenantTestCase):
 
     def test_entities_archived_filter(self):
         for while_testing_with_user, user in [("while testing admin", self.admin),
-                                              ("while testing anonymous user", self.anonymousUser),
-                                              ("while testing authenticated user", self.authenticatedUser)]:
-            request = HttpRequest()
-            request.user = user
-
+                                              ("while testing anonymous user", AnonymousUser()),
+                                              ("while testing authenticated user", self.user)]:
             variables = {
                 "containerGuid": None,
                 "statusPublished": 'archived',
             }
 
-            success, result = graphql_sync(schema, {"query": self.query, "variables": variables},
-                                           context_value={"request": request})
-            self.assertIsNone(result.get('errors'),
-                              msg="Errors %s %s" % (while_testing_with_user, result.get('errors')))
+            self.graphql_client.force_login(user)
+            result = self.graphql_client.post(self.query, variables)
+
             self.assertIsNotNone(result, msg="No result %s" % while_testing_with_user)
             self.assertIsNotNone(result.get('data'), msg="Data is empty %s" % while_testing_with_user)
 
@@ -567,56 +485,43 @@ class EntitiesTestCase(FastTenantTestCase):
             self.assertIn(self.archived2.guid, result_guids)
 
     def test_enities_filter_my_draft_archived_articles(self):
-        request = HttpRequest()
-        request.user = self.authenticatedUser
-
         variables = {
             "containerGuid": None,
-            "userGuid": self.authenticatedUser.guid,
+            "userGuid": self.user.guid,
             "statusPublished": ['archived', 'draft'],
         }
 
-        result = graphql_sync(schema, {"query": self.query, "variables": variables}, context_value={"request": request})
+        self.graphql_client.force_login(self.user)
+        result = self.graphql_client.post(self.query, variables)
 
-        self.assertTrue(result[0])
-        data = result[1]["data"]
+        data = result["data"]
         self.assertEqual(data["entities"]["total"], 2)
         result_guids = {e["guid"] for e in data['entities']['edges']}
         self.assertIn(self.blog_draft1.guid, result_guids)
         self.assertIn(self.archived1.guid, result_guids)
 
     def test_entities_all_for_admin_by_user(self):
-        request = HttpRequest()
-        request.user = self.authenticatedUser
-
         variables = {
             "containerGuid": None,
             "userGuid": self.admin.guid
         }
 
-        result = graphql_sync(schema, {"query": self.query, "variables": variables}, context_value={"request": request})
+        self.graphql_client.force_login(self.user)
+        result = self.graphql_client.post(self.query, variables)
 
-        self.assertTrue(result[0])
-
-        data = result[1]["data"]
-
+        data = result["data"]
         self.assertEqual(data["entities"]["total"], 3)
 
     def test_entities_all_for_admin(self):
-        request = HttpRequest()
-        request.user = self.admin
-
         variables = {
             "containerGuid": None,
             "userGuid": self.admin.guid
         }
 
-        result = graphql_sync(schema, {"query": self.query, "variables": variables}, context_value={"request": request})
+        self.graphql_client.force_login(self.admin)
+        result = self.graphql_client.post(self.query, variables)
 
-        self.assertTrue(result[0])
-
-        data = result[1]["data"]
-
+        data = result["data"]
         self.assertEqual(data["entities"]["total"], 3)
 
     def test_blog_draft_owner(self):
@@ -632,20 +537,15 @@ class EntitiesTestCase(FastTenantTestCase):
                 }
             }
         """
-        request = HttpRequest()
-        request.user = self.authenticatedUser
 
         variables = {
             "guid": self.blog_draft1.guid
         }
 
-        success, result = graphql_sync(schema, {"query": query, "variables": variables},
-                                       context_value={"request": request})
-
-        self.assertTrue(success, msg=result)
+        self.graphql_client.force_login(self.user)
+        result = self.graphql_client.post(query, variables)
 
         data = result.get("data")
-
         self.assertIsNotNone(data, msg=result)
         self.assertIsNotNone(data.get('entity'), msg=result)
 
@@ -665,52 +565,42 @@ class EntitiesTestCase(FastTenantTestCase):
                 }
             }
         """
-        request = HttpRequest()
-        request.user = self.user2
 
         variables = {
             "guid": self.blog_draft1.guid
         }
 
-        result = graphql_sync(schema, {"query": query, "variables": variables}, context_value={"request": request})
+        self.graphql_client.force_login(self.user2)
+        result = self.graphql_client.post(query, variables)
 
-        self.assertTrue(result[0])
-
-        data = result[1]["data"]
+        data = result["data"]
         self.assertIsNone(data["entity"])
 
     def test_entities_no_subevents(self):
         event = Event.objects.create(
             title="Event1",
-            owner=self.authenticatedUser,
+            owner=self.user,
             read_access=[ACCESS_TYPE.public],
-            write_access=[ACCESS_TYPE.user.format(self.authenticatedUser.id)]
+            write_access=[ACCESS_TYPE.user.format(self.user.id)]
         )
-        subevent = Event.objects.create(
+        Event.objects.create(
             title="Subevent1",
-            owner=self.authenticatedUser,
+            owner=self.user,
             read_access=[ACCESS_TYPE.public],
-            write_access=[ACCESS_TYPE.user.format(self.authenticatedUser.id)],
+            write_access=[ACCESS_TYPE.user.format(self.user.id)],
             parent=event
         )
-
-        request = HttpRequest()
-        request.user = self.authenticatedUser
 
         variables = {
             "containerGuid": None,
             "orderBy": "timeCreated"
         }
 
-        result = graphql_sync(schema, {"query": self.query, "variables": variables}, context_value={"request": request})
+        self.graphql_client.force_login(self.user)
+        result = self.graphql_client.post(self.query, variables)
 
-        self.assertTrue(result[0])
-
-        data = result[1]["data"]
-
+        data = result["data"]
         self.assertEqual(data["entities"]["edges"][0]["guid"], event.guid)
-
-
 
 
 class EntitiesEventsTestCase(PleioTenantTestCase):
@@ -731,7 +621,7 @@ class EntitiesEventsTestCase(PleioTenantTestCase):
             read_access=[ACCESS_TYPE.public],
             write_access=[ACCESS_TYPE.user.format(self.user1.id)],
             start_date=timezone.now() - timezone.timedelta(days=5)
-        )        
+        )
         self.event_in_6_days = Event.objects.create(
             owner=self.user1,
             read_access=[ACCESS_TYPE.public],
@@ -785,7 +675,6 @@ class EntitiesEventsTestCase(PleioTenantTestCase):
             }
         """
 
-
     def test_entities_order_events_by_start_date_asc(self):
         variables = {
             "limit": 20,
@@ -799,7 +688,7 @@ class EntitiesEventsTestCase(PleioTenantTestCase):
         result = self.graphql_client.post(self.query, variables)
 
         self.assertEqual(result["data"]["entities"]["edges"][0]["guid"], self.event_5_days_ago.guid)
-        
+
     def test_entities_order_events_by_start_date_desc(self):
         variables = {
             "limit": 20,
@@ -812,7 +701,7 @@ class EntitiesEventsTestCase(PleioTenantTestCase):
         self.graphql_client.force_login(self.user2)
         result = self.graphql_client.post(self.query, variables)
         self.assertEqual(result["data"]["entities"]["edges"][0]["guid"], self.event_in_6_days.guid)
-        
+
     def test_entities_order_blog_events_by_start_date_desc(self):
         variables = {
             "limit": 20,
