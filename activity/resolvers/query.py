@@ -75,6 +75,7 @@ def resolve_activities(
         offset=0,
         limit=20,
         tags=None,
+        tagsAny=False,
         tagLists=None,
         groupFilter=None,
         subtypes=None,
@@ -136,7 +137,7 @@ def resolve_activities(
         qs = Entity.objects.visible(info.context["request"].user)
 
     qs = qs.filter(conditional_subtypes_filter(subtypes) &
-                   conditional_tags_filter(tags) &
+                   conditional_tags_filter(tags, tagsAny) &
                    conditional_tag_lists_filter(tagLists) &
                    conditional_group_filter(containerGuid) &
                    conditional_groups_filter(groupFilter, info.context["request"].user))

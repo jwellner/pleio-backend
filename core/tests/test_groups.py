@@ -1,12 +1,9 @@
-from django_tenants.test.cases import FastTenantTestCase
-from backend2.schema import schema
-from ariadne import graphql_sync
 from core.tests.helpers import PleioTenantTestCase
-from django.http import HttpRequest
 from core.models import Group
 from user.factories import AdminFactory
 from user.models import User
 from mixer.backend.django import mixer
+
 
 class GroupsEmptyTestCase(PleioTenantTestCase):
 
@@ -14,7 +11,6 @@ class GroupsEmptyTestCase(PleioTenantTestCase):
         super(GroupsEmptyTestCase, self).setUp()
 
     def test_groups_empty(self):
-
         query = """
             {
                 groups {
@@ -35,17 +31,43 @@ class GroupsEmptyTestCase(PleioTenantTestCase):
         self.assertEqual(data["groups"]["total"], 0)
         self.assertEqual(data["groups"]["edges"], [])
 
+
 class GroupsNotEmptyTestCase(PleioTenantTestCase):
 
     def setUp(self):
         super(GroupsNotEmptyTestCase, self).setUp()
         self.user = mixer.blend(User)
-        self.group1 = mixer.blend(Group)
-        self.group1.tags=["tag_one"]
-        self.group1.save()
+        self.group1 = mixer.blend(Group,
+                                  name="Group 1",
+                                  tags=['tag_one'])
         self.group1.join(self.user, 'member')
         self.groups = mixer.cycle(5).blend(Group, is_closed=False)
-        self.group2 = mixer.blend(Group, is_featured=True)
+        self.group2 = mixer.blend(Group, is_featured=True,
+                                  name="Group 2",
+                                  tags=['tag_one', 'tag_two'])
+        self.query = """
+            query GroupsQuery(
+                    $filter: GroupFilter
+                    $tags: [String]
+                    $tagsAny: Boolean
+                    $offset: Int
+                    $limit: Int
+                    $q: String) {
+                groups(
+                        filter: $filter
+                        tags: $tags
+                        tagsAny: $tagsAny
+                        offset: $offset
+                        limit: $limit
+                        q: $q) {
+                    total
+                    edges {
+                        guid
+                        name
+                    }
+                }
+            }
+        """
 
     def tearDown(self):
         for group in self.groups:
@@ -55,20 +77,7 @@ class GroupsNotEmptyTestCase(PleioTenantTestCase):
         self.user.delete()
 
     def test_groups_default(self):
-
-        query = """
-            {
-                groups {
-                    total
-                    edges {
-                        guid
-                        name
-                        tags
-                    }
-                }
-            }
-        """
-        result = self.graphql_client.post(query, {})
+        result = self.graphql_client.post(self.query, {})
 
         data = result["data"]
 
@@ -76,53 +85,13 @@ class GroupsNotEmptyTestCase(PleioTenantTestCase):
         self.assertEqual(data["groups"]["edges"][0]["guid"], self.group2.guid)
 
     def test_groups_limit(self):
-
-        query = """
-            {
-                groups(limit:1) {
-                    total
-                    edges {
-                        guid
-                        name
-                        tags
-                    }
-                }
-            }
-        """
-        result = self.graphql_client.post(query, {})
+        result = self.graphql_client.post(self.query, {'limit': 1})
 
         data = result["data"]
 
         self.assertEqual(data["groups"]["total"], 7)
 
     def test_groups_mine(self):
-
-        query = """
-            query GroupsQuery($filter: GroupFilter, $offset: Int!, $limit: Int!, $q: String!) {
-                groups(filter: $filter, offset: $offset, limit: $limit, q: $q) {
-                    total
-                    edges {
-                        guid
-                        name
-                        richDescription
-                        canEdit
-                        excerpt
-                        isMembershipOnRequest
-                        isClosed
-                        isFeatured
-                        membership
-                        members {
-                            total
-                            __typename
-                        }
-                        icon
-                        url
-                        __typename
-                    }
-                    __typename
-                }
-            }
-        """
         variables = {
             "filter": "mine",
             "offset": 0,
@@ -130,54 +99,30 @@ class GroupsNotEmptyTestCase(PleioTenantTestCase):
             "q": ""
         }
         self.graphql_client.force_login(self.user)
-        result = self.graphql_client.post(query, variables)
+        result = self.graphql_client.post(self.query, variables)
 
         data = result["data"]
 
         self.assertEqual(data["groups"]["total"], 1)
         self.assertEqual(data["groups"]["edges"][0]["guid"], self.group1.guid)
 
-    def test_groups_filtered_on_tag(self):
+    def test_tags_match_all(self):
+        result = self.graphql_client.post(self.query, {
+            'tags': ["tag_one", "tag_two"]
+        })
+        groups = [e['name'] for e in result['data']['groups']['edges']]
+        self.assertEqual(1, len(groups), msg=groups)
+        self.assertIn(self.group2.name, groups, msg=groups)
 
-        query = """
-            query GroupsQuery($tags: [String], $offset: Int!, $limit: Int!, $q: String!) {
-                groups(tags: $tags, offset: $offset, limit: $limit, q: $q) {
-                    total
-                    edges {
-                        guid
-                        name
-                        richDescription
-                        canEdit
-                        excerpt
-                        isMembershipOnRequest
-                        isClosed
-                        isFeatured
-                        membership
-                        members {
-                            total
-                            __typename
-                        }
-                        icon
-                        url
-                        __typename
-                    }
-                    __typename
-                }
-            }
-        """
-        variables = {
-            "tags": ["tag_one"],
-            "offset": 0,
-            "limit": 20,
-            "q": ""
-        }
-        self.graphql_client.force_login(self.user)
-        result = self.graphql_client.post(query, variables)
-
-        data = result["data"]
-
-        self.assertEqual(data["groups"]["total"], 1)
-        self.assertEqual(data["groups"]["edges"][0]["guid"], self.group1.guid)
+    def test_tags_match_any(self):
+        result = self.graphql_client.post(self.query, {
+            'tags': ["tag_one", "tag_two"],
+            'tagsAny': True,
+        })
+        groups = [e['name'] for e in result['data']['groups']['edges']]
+        self.assertEqual(2, len(groups), msg=groups)
+        self.assertIn(self.group2.name, groups, msg=groups)
+        self.assertIn(self.group1.name, groups, msg=groups)
 
 
 class HiddenGroupTestCase(PleioTenantTestCase):
@@ -239,7 +184,6 @@ class HiddenGroupTestCase(PleioTenantTestCase):
 
         data = result["data"]
         self.assertEqual(data["groups"]["total"], 0)
-
 
     def test_hidden_group_is_visible_for_admin_users(self):
         query = """

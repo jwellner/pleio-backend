@@ -25,37 +25,33 @@ class ActivitiesTestCase(PleioTenantTestCase):
             title="Blog1",
             owner=self.user1,
             read_access=[ACCESS_TYPE.public],
-            write_access=[ACCESS_TYPE.user.format(self.user1.id)]
+            write_access=[ACCESS_TYPE.user.format(self.user1.id)],
+            tags=["tag_one", "tag_two"]
         )
-        self.blog1.tags = ["tag_one", "tag_two"]
-        self.blog1.save()
         self.blog2 = Blog.objects.create(
             title="Blog2",
             owner=self.user1,
             read_access=[ACCESS_TYPE.public],
             write_access=[ACCESS_TYPE.user.format(self.user1.id)],
-            group=self.group2
+            group=self.group2,
+            tags=["tag_two", "tag_three"]
         )
-        self.blog2.tags = ["tag_two", "tag_three"]
-        self.blog2.save()
         self.blog3 = Blog.objects.create(
             title="Blog3",
             owner=self.user1,
             read_access=[ACCESS_TYPE.public],
             write_access=[ACCESS_TYPE.user.format(self.user1.id)],
-            group=self.group1
+            group=self.group1,
+            tags=["tag_three"]
         )
-        self.blog3.tags = ["tag_three"]
-        self.blog3.save()
         self.blog4 = Blog.objects.create(
             title="Blog4",
             owner=self.user2,
             read_access=[ACCESS_TYPE.group.format(self.group2.id)],
             write_access=[ACCESS_TYPE.user.format(self.user1.id)],
             group=self.group2,
+            tags=["tag_four"]
         )
-        self.blog4.tags = ["tag_four"]
-        self.blog4.save()
         self.blog5 = Blog.objects.create(
             title="Blog5",
             owner=self.user1,
@@ -83,18 +79,38 @@ class ActivitiesTestCase(PleioTenantTestCase):
         )
 
         self.query = """
-            query ActivityList($offset: Int!, $limit: Int!, $subtypes: [String!], $groupFilter: [String!], $tags: [String!], $tagLists: [[String]], $orderBy: OrderBy, $orderDirection: OrderDirection, $sortPinned: Boolean) {
-                activities(offset: $offset, limit: $limit, tags: $tags, tagLists: $tagLists, subtypes: $subtypes, groupFilter: $groupFilter, orderBy: $orderBy, orderDirection: $orderDirection, sortPinned: $sortPinned) {
+            query ActivityList(
+                    $offset: Int
+                    $limit: Int
+                    $subtypes: [String!]
+                    $groupFilter: [String!]
+                    $tags: [String!]
+                    $tagsAny: Boolean
+                    $tagLists: [[String]]
+                    $orderBy: OrderBy
+                    $orderDirection: OrderDirection
+                    $sortPinned: Boolean) {
+                activities(
+                        offset: $offset
+                        limit: $limit
+                        subtypes: $subtypes
+                        groupFilter: $groupFilter
+                        tags: $tags
+                        tagsAny: $tagsAny
+                        tagLists: $tagLists
+                        orderBy: $orderBy
+                        orderDirection: $orderDirection
+                        sortPinned: $sortPinned) {
                     total
                     edges {
-                    guid
-                    type
-                    entity {
                         guid
-                        ...BlogListFragment
+                        type
+                        entity {
+                            guid
+                            ...BlogListFragment
+                            __typename
+                        }
                         __typename
-                    }
-                    __typename
                     }
                     __typename
                 }
@@ -102,62 +118,6 @@ class ActivitiesTestCase(PleioTenantTestCase):
 
             fragment BlogListFragment on Blog {
                 title
-                url
-                excerpt
-                richDescription
-                isHighlighted
-                featured {
-                    image
-                    video
-                    videoTitle
-                    positionY
-                    __typename
-                }
-                subtype
-                tags
-                timeCreated
-                isBookmarked
-                canBookmark
-                canEdit
-                commentCount
-                comments {
-                    guid
-                    richDescription
-                    timeCreated
-                    canEdit
-                    hasVoted
-                    votes
-                    owner {
-                    guid
-                    username
-                    name
-                    icon
-                    url
-                    __typename
-                    }
-                    __typename
-                }
-                hasVoted
-                votes
-                owner {
-                    guid
-                    username
-                    name
-                    icon
-                    url
-                    __typename
-                }
-                group {
-                    guid
-                    ... on Group {
-                    name
-                    url
-                    membership
-                    __typename
-                    }
-                    __typename
-                }
-                __typename
             }
 
         """
@@ -170,6 +130,24 @@ class ActivitiesTestCase(PleioTenantTestCase):
         self.blog4.delete()
         self.group1.delete()
         self.group2.delete()
+
+    def test_tags_match_all(self):
+        result = self.graphql_client.post(self.query, {
+            'tags': ["tag_one", "tag_two"]
+        })
+        blogs = [e['entity']['title'] for e in result['data']['activities']['edges']]
+        self.assertEqual(1, len(blogs))
+        self.assertIn(self.blog1.title, blogs)
+
+    def test_tags_match_any(self):
+        result = self.graphql_client.post(self.query, {
+            'tags': ["tag_one", "tag_two"],
+            'tagsAny': True,
+        })
+        blogs = [e['entity']['title'] for e in result['data']['activities']['edges']]
+        self.assertEqual(2, len(blogs))
+        self.assertIn(self.blog1.title, blogs)
+        self.assertIn(self.blog2.title, blogs)
 
     def test_activities_group_filter_all(self):
         variables = {
@@ -268,7 +246,6 @@ class ActivitiesTestCase(PleioTenantTestCase):
         self.graphql_client.force_login(self.user2)
         result = self.graphql_client.post(self.query, variables)
         self.assertEqual(result["data"]["activities"]["edges"][0]["entity"]["guid"], self.first_blog.guid)
-
 
     def test_activities_order_by_title_desc(self):
         self.first_blog = Blog.objects.create(
@@ -392,7 +369,7 @@ class ActivitiesEventsTestCase(PleioTenantTestCase):
             read_access=[ACCESS_TYPE.public],
             write_access=[ACCESS_TYPE.user.format(self.user1.id)],
             start_date=timezone.now() - timezone.timedelta(days=5)
-        )        
+        )
         self.event_in_6_days = Event.objects.create(
             owner=self.user1,
             read_access=[ACCESS_TYPE.public],
@@ -429,7 +406,6 @@ class ActivitiesEventsTestCase(PleioTenantTestCase):
 
         """
 
-
     def test_activities_order_by_title_asc(self):
         variables = {
             "limit": 20,
@@ -442,7 +418,7 @@ class ActivitiesEventsTestCase(PleioTenantTestCase):
         self.graphql_client.force_login(self.user2)
         result = self.graphql_client.post(self.query, variables)
         self.assertEqual(result["data"]["activities"]["edges"][0]["entity"]["guid"], self.event_5_days_ago.guid)
-        
+
     def test_activities_order_by_start_date_desc(self):
         variables = {
             "limit": 20,
@@ -455,8 +431,7 @@ class ActivitiesEventsTestCase(PleioTenantTestCase):
         self.graphql_client.force_login(self.user2)
         result = self.graphql_client.post(self.query, variables)
         self.assertEqual(result["data"]["activities"]["edges"][0]["entity"]["guid"], self.event_in_6_days.guid)
-        
-        
+
     def test_activities_order_by_start_asc(self):
         variables = {
             "limit": 20,
@@ -469,7 +444,6 @@ class ActivitiesEventsTestCase(PleioTenantTestCase):
         self.graphql_client.force_login(self.user2)
         result = self.graphql_client.post(self.query, variables)
         self.assertEqual(result["data"]["activities"]["edges"][0]["entity"]["guid"], self.event_5_days_ago.guid)
-        
 
     def test_entities_order_blog_events_by_start_date_desc(self):
         variables = {
