@@ -49,14 +49,14 @@ class GroupsNotEmptyTestCase(PleioTenantTestCase):
             query GroupsQuery(
                     $filter: GroupFilter
                     $tags: [String]
-                    $tagsAny: Boolean
+                    $matchStrategy: MatchStrategy
                     $offset: Int
                     $limit: Int
                     $q: String) {
                 groups(
                         filter: $filter
                         tags: $tags
-                        tagsAny: $tagsAny
+                        matchStrategy: $matchStrategy
                         offset: $offset
                         limit: $limit
                         q: $q) {
@@ -117,7 +117,7 @@ class GroupsNotEmptyTestCase(PleioTenantTestCase):
     def test_tags_match_any(self):
         result = self.graphql_client.post(self.query, {
             'tags': ["tag_one", "tag_two"],
-            'tagsAny': True,
+            'matchStrategy': 'any',
         })
         groups = [e['name'] for e in result['data']['groups']['edges']]
         self.assertEqual(2, len(groups), msg=groups)

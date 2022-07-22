@@ -85,7 +85,7 @@ class ActivitiesTestCase(PleioTenantTestCase):
                     $subtypes: [String!]
                     $groupFilter: [String!]
                     $tags: [String!]
-                    $tagsAny: Boolean
+                    $matchStrategy: MatchStrategy
                     $tagLists: [[String]]
                     $orderBy: OrderBy
                     $orderDirection: OrderDirection
@@ -96,7 +96,7 @@ class ActivitiesTestCase(PleioTenantTestCase):
                         subtypes: $subtypes
                         groupFilter: $groupFilter
                         tags: $tags
-                        tagsAny: $tagsAny
+                        matchStrategy: $matchStrategy
                         tagLists: $tagLists
                         orderBy: $orderBy
                         orderDirection: $orderDirection
@@ -142,7 +142,7 @@ class ActivitiesTestCase(PleioTenantTestCase):
     def test_tags_match_any(self):
         result = self.graphql_client.post(self.query, {
             'tags': ["tag_one", "tag_two"],
-            'tagsAny': True,
+            'matchStrategy': 'any',
         })
         blogs = [e['entity']['title'] for e in result['data']['activities']['edges']]
         self.assertEqual(2, len(blogs))

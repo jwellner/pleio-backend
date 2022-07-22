@@ -75,8 +75,8 @@ def resolve_activities(
         offset=0,
         limit=20,
         tags=None,
-        tagsAny=False,
         tagLists=None,
+        matchStrategy='legacy',
         groupFilter=None,
         subtypes=None,
         orderBy=ORDER_BY.timePublished,
@@ -137,8 +137,8 @@ def resolve_activities(
         qs = Entity.objects.visible(info.context["request"].user)
 
     qs = qs.filter(conditional_subtypes_filter(subtypes) &
-                   conditional_tags_filter(tags, tagsAny) &
-                   conditional_tag_lists_filter(tagLists) &
+                   conditional_tags_filter(tags, matchStrategy == 'any') &
+                   conditional_tag_lists_filter(tagLists, matchStrategy != 'all') &
                    conditional_group_filter(containerGuid) &
                    conditional_groups_filter(groupFilter, info.context["request"].user))
 
