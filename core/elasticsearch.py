@@ -6,10 +6,19 @@ from django.conf import settings
 from django_elasticsearch_dsl.registries import registry
 from django_elasticsearch_dsl.signals import BaseSignalProcessor
 from django_tenants.utils import parse_tenant_config_path
+from elasticsearch.helpers import BulkIndexError
 
 from core.lib import tenant_schema
 
 logger = logging.getLogger(__name__)
+
+
+def log_elasticsearch_error(msg, e, instance, alternative_logger=None):
+    _logger = alternative_logger or logger
+    _logger.error("Elasticsearch error %s@%s: %s/%s %s/%s",
+                  msg, tenant_schema(),
+                  e.__class__.__qualname__, e,
+                  instance.__class__.__name__, instance.pk)
 
 
 class CustomSignalProcessor(BaseSignalProcessor):
@@ -27,8 +36,7 @@ class CustomSignalProcessor(BaseSignalProcessor):
                 registry.update_related(instance)
         except Exception as e:
             retry_index_document(instance)
-            logger.error("Elasticsearch error sending update task: %s %s/%s (%s)",
-                         e, instance.__class__.__name__, instance.pk, tenant_schema())
+            log_elasticsearch_error('sending update task', e, instance)
 
     def handle_pre_delete(self, sender, instance, **kwargs):
         """Overwrite default handle_pre_delete and stop raising exception on error
@@ -36,8 +44,7 @@ class CustomSignalProcessor(BaseSignalProcessor):
         try:
             registry.delete_related(instance)
         except Exception as e:
-            logger.error("Elasticsearch error sending pre-delete task: %s %s/%s (%s)",
-                         e, instance.__class__.__name__, instance.pk, tenant_schema())
+            log_elasticsearch_error('sending pre-delete task', e, instance)
 
     def handle_delete(self, sender, instance, **kwargs):
         """Overwrite default handle_pre_delete and stop raising exception on error
@@ -45,8 +52,9 @@ class CustomSignalProcessor(BaseSignalProcessor):
         try:
             registry.delete(instance)
         except Exception as e:
-            logger.error("Elasticsearch error sending delete task: %s %s/%s (%s)",
-                         e, instance.__class__.__name__, instance.pk, tenant_schema())
+            if isinstance(e, BulkIndexError) and 'not_found' in str(e):
+                return
+            log_elasticsearch_error('sending delete task', e, instance)
 
     def setup(self):
         if not settings.RUN_AS_ADMIN_APP:
