@@ -1,6 +1,7 @@
 from celery.utils.log import get_task_logger
 from elasticsearch import ConnectionError as ElasticsearchConnectionError
 
+from core.elasticsearch import log_elasticsearch_error
 from core.lib import get_model_by_subtype
 from django_elasticsearch_dsl.registries import registry
 from django_tenants.utils import schema_context
@@ -138,9 +139,4 @@ def elasticsearch_index_document(schema_name, document_guid, document_classname)
             # Fall through for known errors.
             raise known_error
         except Exception as e:
-            logger.error(f"elasticsearch_document_index_error: %(error_class)s msg=%(error_message)s schema=%(schema_name)s document=%(document_id)s" % {
-                'error_class': e.__class__.__name__,
-                'error_message': str(e),
-                'schema_name': schema_name,
-                'document_id': f"{document_classname}.{document_guid}",
-            })
+            log_elasticsearch_error('sending scheduled index task', e, instance, logger)
