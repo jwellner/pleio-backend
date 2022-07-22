@@ -135,7 +135,7 @@ class EntitiesTestCase(PleioTenantTestCase):
                     $subtype: String
                     $containerGuid: String
                     $tags: [String!]
-                    $tagsAny: Boolean
+                    $matchStrategy: MatchStrategy
                     $tagLists: [[String]]
                     $isFeatured: Boolean
                     $limit: Int
@@ -148,7 +148,7 @@ class EntitiesTestCase(PleioTenantTestCase):
                         subtype: $subtype
                         containerGuid: $containerGuid
                         tags: $tags
-                        tagsAny: $tagsAny
+                        matchStrategy: $matchStrategy
                         tagLists: $tagLists
                         isFeatured: $isFeatured
                         limit: $limit
@@ -228,7 +228,7 @@ class EntitiesTestCase(PleioTenantTestCase):
     def test_tags_match_any(self):
         result = self.graphql_client.post(self.query, {
             'tags': ["tag_one", "tag_two"],
-            'tagsAny': True,
+            'matchStrategy': 'any',
         })
         blogs = [e['title'] for e in result['data']['entities']['edges']]
         self.assertEqual(2, len(blogs))

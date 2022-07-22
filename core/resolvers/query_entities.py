@@ -77,10 +77,10 @@ def conditional_is_featured_filter(is_featured):
     return Q()
 
 
-def conditional_tags_filter(tags, tags_any):
+def conditional_tags_filter(tags, match_any):
     if tags:
         filters = Q()
-        if tags_any:
+        if match_any:
             filters.add(Q(_tag_summary__overlap=Tag.translate_tags(tags)), Q.AND)
         else:
             for tag in Tag.translate_tags(tags):
@@ -90,12 +90,16 @@ def conditional_tags_filter(tags, tags_any):
     return Q()
 
 
-def conditional_tag_lists_filter(tag_lists):
+def conditional_tag_lists_filter(tag_lists, match_any):
     filters = Q()
     if tag_lists:
         for tags in tag_lists:
             if tags:
-                filters.add(Q(_tag_summary__overlap=Tag.translate_tags(tags)), Q.AND)
+                if match_any:
+                    filters.add(Q(_tag_summary__overlap=Tag.translate_tags(tags)), Q.AND)
+                else:
+                    for tag in Tag.translate_tags(tags):
+                        filters.add(Q(_tag_summary__overlap=[tag]), Q.AND)
     return filters
 
 
@@ -109,8 +113,8 @@ def resolve_entities(
         subtypes=None,
         containerGuid=None,
         tags=None,
-        tagsAny=False,
         tagLists=None,
+        matchStrategy='legacy',
         orderBy=ORDER_BY.timePublished,
         orderDirection=ORDER_DIRECTION.desc,
         isFeatured=None,
@@ -171,8 +175,8 @@ def resolve_entities(
     entities = entities.filter(conditional_is_featured_filter(isFeatured) &
                                conditional_group_filter(containerGuid) &
                                conditional_subtypes_filter(subtypes) &
-                               conditional_tags_filter(tags, tagsAny) &
-                               conditional_tag_lists_filter(tagLists))
+                               conditional_tags_filter(tags, matchStrategy == 'any') &
+                               conditional_tag_lists_filter(tagLists, matchStrategy != 'all'))
 
     if userGuid:
         entities = entities.filter(owner__id=userGuid)
