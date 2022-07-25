@@ -172,25 +172,29 @@ MIDDLEWARE = [
     'backend2.middleware.ReadReplicaTenantMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
-    'core.middleware.CustomLocaleMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
-    'core.middleware.AnonymousVisitorSessionMiddleware',
-    'core.middleware.AcrCheckMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'csp.middleware.CSPMiddleware',
 ]
 
+TENANT_MIDDLEWARE = [
+    'core.middleware.CustomLocaleMiddleware',
+    'core.middleware.AnonymousVisitorSessionMiddleware',
+    'core.middleware.AcrCheckMiddleware',
+    'core.middleware.UnsupportedBrowserMiddleware',
+    'core.middleware.WalledGardenMiddleware',
+    'core.middleware.OnboardingMiddleware',
+    'core.middleware.RedirectMiddleware',
+    'core.middleware.CustomCSPMiddleware',
+    'auditlog.middleware.AuditlogMiddleware',
+    'core.middleware.UserLastOnlineMiddleware',
+]
+
 if not RUN_AS_ADMIN_APP:
-    MIDDLEWARE.append('core.middleware.UnsupportedBrowserMiddleware')
-    MIDDLEWARE.append('core.middleware.WalledGardenMiddleware')
-    MIDDLEWARE.append('core.middleware.OnboardingMiddleware')
-    MIDDLEWARE.append('core.middleware.RedirectMiddleware')
-    MIDDLEWARE.append('core.middleware.CustomCSPMiddleware')
-    MIDDLEWARE.append('auditlog.middleware.AuditlogMiddleware')
-    MIDDLEWARE.append('core.middleware.UserLastOnlineMiddleware')
+    MIDDLEWARE.extend(TENANT_MIDDLEWARE)
 
 ROOT_URLCONF = 'backend2.urls'
 PUBLIC_SCHEMA_URLCONF = 'backend2.urls_public'
