@@ -1,9 +1,10 @@
 from graphql import GraphQLError
 from django.core.exceptions import ObjectDoesNotExist
 from core.lib import clean_graphql_input
-from core.constances import NOT_LOGGED_IN, COULD_NOT_FIND, COULD_NOT_SAVE
+from core.constances import NOT_LOGGED_IN, COULD_NOT_FIND
 from cms.models import Column, Row
 from cms.utils import reorder_positions
+from core.resolvers import shared
 
 
 def resolve_edit_column(_, info, input):
@@ -23,28 +24,40 @@ def resolve_edit_column(_, info, input):
     except ObjectDoesNotExist:
         raise GraphQLError(COULD_NOT_FIND)
 
-    if not column.page.can_write(user):
-        raise GraphQLError(COULD_NOT_SAVE)
+    shared.assert_write_access(column.page, user)
 
+    old_position = update_position(column, clean_input)
+
+    update_row(column, clean_input)
+
+    update_width(column, clean_input)
+
+    column.save()
+
+    reorder_positions(column, old_position, clean_input.get('position'))
+
+    return {
+        "column": column
+    }
+
+
+def update_position(column, clean_input):
     old_position = column.position
-    new_position = clean_input.get("position")
 
     if 'position' in clean_input:
         column.position = clean_input.get("position")
 
+    return old_position
+
+
+def update_row(column, clean_input):
     if 'parentGuid' in clean_input:
         try:
             column.row = Row.objects.get(id=clean_input.get("parentGuid"))
         except ObjectDoesNotExist:
             raise GraphQLError(COULD_NOT_FIND)
 
+
+def update_width(column, clean_input):
     if 'width' in clean_input:
-        column.is_full_width = clean_input.get("width")
-
-    column.save()
-
-    reorder_positions(column, old_position, new_position)
-
-    return {
-        "column": column
-    }
+        column.width = clean_input.get("width")

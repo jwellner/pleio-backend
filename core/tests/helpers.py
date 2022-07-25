@@ -54,12 +54,16 @@ class PleioTenantTestCase(FastTenantTestCase):
 
     @contextmanager
     def assertGraphQlError(self, expected=None, msg=None):
+        fail_reason = False
         try:
             yield
-            raise Exception("Unexpectedly didn't find any errors in graphql result")
+            fail_reason = "Unexpectedly didn't find any errors in graphql result"
         except GraphQlError as e:
             if not e.has_message(expected):
-                self.fail(msg or f"Didn't find [{expected}] in {e.messages}")
+                fail_reason = msg or f"Didn't find [{expected}] in {e.messages}"
+
+        if fail_reason:
+            self.fail(fail_reason)
 
     def assertDateEqual(self, left_date_string, right_date_string, *args, **kwargs):
         assert isinstance(left_date_string, str), "left_date_string should be a string. Is now %s." % type(
