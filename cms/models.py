@@ -62,7 +62,6 @@ class Page(Entity, AttachmentMixin):
             child = child.parent
         return [page for page in reversed(parents)]
 
-
     @property
     def rich_fields(self):
         return [self.rich_description]
@@ -89,6 +88,7 @@ class Row(models.Model):
 
     def __str__(self):
         return f"Row[{self.guid}]"
+
 
 class Column(models.Model):
     """
