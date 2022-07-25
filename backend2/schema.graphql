@@ -1422,6 +1422,7 @@ type Mutation {
 
     mergeTags(input: tagMergeInput!): [Tag]
     extractTagSynonym(input: tagMergeInput!): [Tag]
+    signSiteAgreementVersion(input: signSiteAgreementVersionInput!): signSiteAgreementVersionPayload
 }
 
 type News implements Entity {
@@ -1708,6 +1709,7 @@ type Query {
     usersByBirthDate(profileFieldGuid: String!, futureDays: Int, offset: Int, limit: Int): SiteUserList
     siteStats: SiteStats
     tags: [Tag]
+    siteAgreements: [SiteAgreement]
 }
 
 type Question implements Entity {
@@ -2603,6 +2605,23 @@ type SiteStats {
     fileDiskUsage: Float!
 }
 
+type SiteAgreement {
+  id: String!
+  name: String!
+  description: String
+  accepted: Boolean!
+  versions: [SiteAgreementVersion]
+}
+
+type SiteAgreementVersion {
+  id: String!
+  version: String!
+  document: String!
+  accepted: Boolean!
+  accepted_by: String
+  accepted_date: DateTime
+}
+
 input ProfileFieldValidatorInput {
     type: ProfileFieldValidatorType!
     name: String!
@@ -2695,4 +2714,13 @@ input addCommentWithoutAccountInput {
 
 type addCommentWithoutAccountPayload {
     success: Boolean
+}
+
+input signSiteAgreementVersionInput {
+  id: String!
+  accept: Boolean!
+}
+
+type signSiteAgreementVersionPayload {
+  siteAgreementVersion: SiteAgreementVersion
 }
