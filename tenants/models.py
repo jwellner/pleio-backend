@@ -1,8 +1,10 @@
 import uuid
 
-from django.db import models
+from django.db import models, connection
 from django_tenants.models import TenantMixin, DomainMixin
 from django.utils import timezone
+from django.urls import reverse
+from uuslug import uuslug
 
 
 class Client(TenantMixin):
@@ -78,3 +80,59 @@ class GroupCopyMapping(models.Model):
     created = models.BooleanField(default=True)
 
     created_at = models.DateTimeField(default=timezone.now)
+
+
+class Agreement(models.Model):
+    name = models.CharField(max_length=100, unique=True)
+    description = models.TextField()
+
+    def __str__(self):
+        return self.name
+
+class AgreementVersion(models.Model):
+    class Meta:
+        ordering = ['created_at']
+    agreement = models.ForeignKey(
+        'tenants.Agreement',
+        on_delete=models.CASCADE,
+        related_name='versions'
+    )
+    version = models.CharField(max_length=100)
+    slug = models.SlugField(null=False, unique=True)
+    document = models.FileField(upload_to='agreements')
+    created_at = models.DateTimeField(default=timezone.now)
+
+    @property
+    def accepted_for_tenant(self):
+        tenant = Client.objects.get(schema_name=connection.schema_name)
+        return self.accepted.filter(client=tenant).first()
+
+    def __str__(self):
+        return f"{self.agreement.name} {self.version}"
+
+    def get_absolute_url(self):
+        return reverse("agreement", kwargs={"slug": self.slug})
+    
+    def save(self, *args, **kwargs):
+        self.slug = uuslug(str(self), instance=self)
+        super(AgreementVersion, self).save(*args, **kwargs)
+
+class AgreementAccept(models.Model):
+    client = models.ForeignKey(
+        'tenants.Client',
+        on_delete=models.CASCADE,
+    )
+
+    agreement_version = models.ForeignKey(
+        'tenants.AgreementVersion',
+        on_delete=models.CASCADE,
+        related_name='accepted'
+    )
+
+    accept_name = models.CharField(max_length=100)
+    accept_user_id = models.UUIDField(default=uuid.uuid4, editable=False)
+
+    created_at = models.DateTimeField(default=timezone.now)
+
+    def __str__(self):
+        return f"{self.client.name} {self.accept_name}"

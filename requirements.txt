@@ -41,3 +41,4 @@ django-autotranslate==1.2.0
 futures==2.2.0 # remove when autotranslate dependency is fixed
 qrcode==7.3.1
 django_post_deploy==1.2.4
+django-uuslug==2.0.0

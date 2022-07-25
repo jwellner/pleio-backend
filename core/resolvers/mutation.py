@@ -54,6 +54,7 @@ from .mutation_add_attachment import resolve_add_attachment
 from .mutation_toggle_entity_is_pinned import resolve_toggle_entity_is_pinned
 from .mutation_edit_user_name import resolve_edit_user_name
 from .mutation_add_comment_without_account import resolve_add_comment_without_account
+from .mutation_sign_site_agreement_version import resolve_sign_site_agreement_version
 
 mutation = ObjectType("Mutation")
 mutation.set_field("addGroup", resolve_add_group)
@@ -127,3 +128,5 @@ mutation.set_field("addCommentWithoutAccount", resolve_add_comment_without_accou
 
 mutation.set_field("mergeTags", resolve_merge_tags)
 mutation.set_field("extractTagSynonym", resolve_extract_tag_synonym)
+
+mutation.set_field("signSiteAgreementVersion", resolve_sign_site_agreement_version)
