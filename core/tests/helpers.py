@@ -13,17 +13,16 @@ from django.utils.crypto import get_random_string
 from mixer.backend.django import mixer
 
 from backend2.schema import schema
-from django_tenants.test.cases import FastTenantTestCase
-from django_tenants.test.client import TenantClient
 from django.db.models import QuerySet
 from collections import Counter
+
+from tenants.helpers import FastTenantTestCase
 
 
 class PleioTenantTestCase(FastTenantTestCase):
 
     def setUp(self):
         super().setUp()
-        self.client = TenantClient(self.tenant)
         self.graphql_client = GraphQLClient()
         self.file_cleanup = []
 
