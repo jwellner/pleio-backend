@@ -26,13 +26,6 @@ def resolve_attend_event_without_account(_, info, input):
     except ObjectDoesNotExist:
         raise GraphQLError(COULD_NOT_FIND)
 
-    # check if is attending parent
-    if event.parent:
-        try:
-            EventAttendee.objects.get(email=email, event=event.parent, state='accept')
-        except ObjectDoesNotExist:
-            raise GraphQLError(NOT_ATTENDING_PARENT_EVENT)
-
     try:
         validate_email(email)
     except ValidationError:
