@@ -15,6 +15,7 @@ from file import views as file_views
 from event import views as event_views
 from user import views as user_views
 from concierge import views as concierge_views
+from tenants import views as tenants_views
 
 urlpatterns = [
     path('logout', core_views.logout, name='logout'),
@@ -45,6 +46,8 @@ urlpatterns = [
     path('attachment/<uuid:attachment_id>', core_views.attachment, name='attachment'),
     # old url for backwards compatability
     path('attachment/<str:attachment_type>/<uuid:attachment_id>', core_views.attachment, name='attachment'),
+
+    path('agreement/<slug:slug>', tenants_views.site_agreement_version_document, name="agreement"),
 
     path('bulk_download', file_views.bulk_download, name='bulk_download'),
 

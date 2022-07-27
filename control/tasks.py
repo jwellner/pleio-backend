@@ -17,7 +17,6 @@ from django.core.management import call_command
 from django.core.files.base import ContentFile
 from django.conf import settings
 from django.db import connection
-from django.db.models import Q
 from django.utils import timezone
 from file.models import FileFolder
 from tenants.models import Client, Domain, GroupCopy, GroupCopyMapping
@@ -25,24 +24,27 @@ from user.models import User
 
 logger = get_task_logger(__name__)
 
+
 @shared_task(bind=True)
 def get_sites(self):
     # pylint: disable=unused-argument
     '''
     Used to sync sites to control
     '''
-    clients = Client.objects.exclude(schema_name='public')
+    with schema_context('public'):
+        clients = Client.objects.exclude(schema_name='public')
 
-    sites = []
-    for client in clients:
-        sites.append({
-            'id': client.id,
-            'name': client.schema_name,
-            'is_active': client.is_active,
-            'domain': client.get_primary_domain().domain
-        })
+        sites = []
+        for client in clients:
+            sites.append({
+                'id': client.id,
+                'name': client.schema_name,
+                'is_active': client.is_active,
+                'domain': client.get_primary_domain().domain
+            })
 
-    return sites
+        return sites
+
 
 @shared_task(bind=True)
 def add_site(self, schema_name, domain):
@@ -65,8 +67,10 @@ def add_site(self, schema_name, domain):
 
         return tenant.id
 
+
 @shared_task(bind=True)
 def delete_site(self, site_id):
+    # pragma: no cover
     # pylint: disable=unused-argument
     '''
     Delete site from control
@@ -93,6 +97,7 @@ def delete_site(self, site_id):
 
     return True
 
+
 @shared_task(bind=True)
 def get_sites_admin(self):
     # pylint: disable=unused-argument
@@ -116,6 +121,7 @@ def get_sites_admin(self):
                 })
 
     return admins
+
 
 @shared_task(bind=True)
 def backup_site(self, backup_site_id, skip_files=False, backup_folder=None):
@@ -164,9 +170,9 @@ def backup_site(self, backup_site_id, skip_files=False, backup_folder=None):
     # get psycopg2 cursor
     cursor = connection.cursor()
 
-    cursor.execute( "SELECT table_name FROM information_schema.tables " +
-                    "WHERE ( table_schema = %s ) " +
-                    "ORDER BY table_name;", (backup_site.schema_name, ))
+    cursor.execute("SELECT table_name FROM information_schema.tables " +
+                   "WHERE ( table_schema = %s ) " +
+                   "ORDER BY table_name;", (backup_site.schema_name,))
     tables = cursor.fetchall()
 
     cursor.execute(f"SET search_path TO '{backup_site.schema_name}';")
@@ -186,6 +192,7 @@ def backup_site(self, backup_site_id, skip_files=False, backup_folder=None):
         shutil.copytree(os.path.join(settings.MEDIA_ROOT, backup_site.schema_name), backup_files_folder)
 
     return backup_folder
+
 
 @shared_task(bind=True)
 def restore_site(self, restore_folder, schema_name, domain):
@@ -305,7 +312,6 @@ end $$;"""
     if os.path.exists(os.path.join(backup_base_path, "files")):
         shutil.copytree(os.path.join(backup_base_path, "files"), os.path.join(settings.MEDIA_ROOT, schema_name))
 
-
     # create new tenant if everyting is successfull
     with schema_context('public'):
         tenant = Client(schema_name=schema_name, name=schema_name)
@@ -320,6 +326,7 @@ end $$;"""
     call_command('migrate_schemas', f'--schema={schema_name}')
 
     return tenant.id
+
 
 @shared_task(bind=True)
 def get_sites_by_email(self, email):
@@ -347,6 +354,7 @@ def get_sites_by_email(self, email):
 
     return data
 
+
 @shared_task(bind=False)
 def get_db_disk_usage(schema_name):
     '''
@@ -358,6 +366,7 @@ def get_db_disk_usage(schema_name):
         except Exception:
             return 0
 
+
 @shared_task(bind=False)
 def get_file_disk_usage(schema_name):
     '''
@@ -368,6 +377,7 @@ def get_file_disk_usage(schema_name):
             return SiteStat.objects.filter(stat_type='DISK_SIZE').latest('created_at').value
         except Exception:
             return 0
+
 
 @shared_task(bind=True)
 def update_site(self, site_id, data):
@@ -390,6 +400,7 @@ def update_site(self, site_id, data):
 
     return True
 
+
 def get_file_field_data(source_schema_name, file_field):
     file_data = None
     with schema_context(source_schema_name):
@@ -400,6 +411,7 @@ def get_file_field_data(source_schema_name, file_field):
             pass
     return file_data
 
+
 def copy_entity_file(source_schema, target_schema, target_entity, file_attribute):
     """
     Copy a file connected to an entity
@@ -408,7 +420,6 @@ def copy_entity_file(source_schema, target_schema, target_entity, file_attribute
         source_file = getattr(target_entity, file_attribute)
 
     if source_file:
-        
         file_contents = get_file_field_data(source_schema, source_file.upload)
 
         with schema_context(target_schema):
@@ -420,6 +431,7 @@ def copy_entity_file(source_schema, target_schema, target_entity, file_attribute
             )
 
         setattr(target_entity, file_attribute, target_file)
+
 
 def copy_attachments(source_schema, target_schema, target_entity, rich_fields):
     """
@@ -445,8 +457,9 @@ def copy_attachments(source_schema, target_schema, target_entity, rich_fields):
             logger.info("replace in %s from %s to %s", rich_field, original, replacement)
             tiptap = Tiptap(getattr(target_entity, rich_field))
             tiptap.replace_url(original, replacement)
-            tiptap.replace_src(original, replacement) 
+            tiptap.replace_src(original, replacement)
             setattr(target_entity, rich_field, json.dumps(tiptap.tiptap_json))
+
 
 def get_or_create_user(copy, source_user_id):
     created = False
@@ -454,11 +467,10 @@ def get_or_create_user(copy, source_user_id):
         source_user = User.objects.with_deleted().get(id=source_user_id)
 
     with schema_context(copy.target_tenant):
-
         user = User.objects.with_deleted().filter(email__iexact=source_user.email).first()
 
         if not user:
-            with signal_disabler.disable(): # prevent auto join in groups
+            with signal_disabler.disable():  # prevent auto join in groups
                 user = User.objects.create(
                     name=source_user.name,
                     email=source_user.email,
@@ -480,6 +492,7 @@ def get_or_create_user(copy, source_user_id):
 
     return user
 
+
 @shared_task(bind=False)
 def copy_group_to_tenant(source_schema, action_user_id, group_id, target_schema):
     # pylint: disable=too-many-locals
@@ -494,7 +507,7 @@ def copy_group_to_tenant(source_schema, action_user_id, group_id, target_schema)
         source_id=group_id,
         task_id=copy_group_to_tenant.request.id
     )
-   
+
     copy.task_id = copy_group_to_tenant.request.id
     copy.save()
 
@@ -503,7 +516,6 @@ def copy_group_to_tenant(source_schema, action_user_id, group_id, target_schema)
         group = Group.objects.get(id=group_id)
 
     with schema_context(target_schema):
-
         target_group = group
         target_group.owner = get_or_create_user(copy, group.owner_id)
         target_group.created_at = now
@@ -550,6 +562,7 @@ def copy_group_to_tenant(source_schema, action_user_id, group_id, target_schema)
 
     return copy_group_memberships(copy.id)
 
+
 @shared_task(bind=False)
 def copy_file_from_source_tenant(source_schema, target_schema, dst_file):
     '''
@@ -563,6 +576,7 @@ def copy_file_from_source_tenant(source_schema, target_schema, dst_file):
             os.makedirs(dst_folder)
 
         shutil.copy(src_file, dst_file)
+
 
 def copy_group_memberships(copy_id):
     # pylint: disable=too-many-locals
@@ -612,6 +626,7 @@ def copy_group_memberships(copy_id):
     logger.info("Added %i subgroup members", len(subgroup_memberships))
 
     return copy_group_entities(copy.id)
+
 
 def copy_group_entities(copy_id):
     # pylint: disable=too-many-locals
@@ -669,7 +684,7 @@ def copy_group_entities(copy_id):
                 target_entity.notifications_created = True
                 target_entity.read_access = access_id_to_acl(target_entity, transform_acl_to_access_id(target_entity.read_access))
                 target_entity.write_access = access_id_to_acl(target_entity, transform_acl_to_access_id(target_entity.write_access))
-              
+
                 # specific entity type stuff
                 if target_entity.__class__.__name__ in ["Blog", "Wiki", "Event"]:
                     copy_entity_file(copy.source_tenant, copy.target_tenant, target_entity, "featured_image")
@@ -715,12 +730,12 @@ def copy_group_entities(copy_id):
                     source_id=source_entity_id,
                     target_id=target_entity.id
                 )
- 
+
                 if parent_source_id:
-                    connect_parent.append({ 'entity_id': target_entity.id, 'parent_source_id': parent_source_id})
+                    connect_parent.append({'entity_id': target_entity.id, 'parent_source_id': parent_source_id})
 
                 if best_answer_source_id:
-                    connect_best_answers.append({ 'entity_id': target_entity.id, 'best_answer_source_id': best_answer_source_id})
+                    connect_best_answers.append({'entity_id': target_entity.id, 'best_answer_source_id': best_answer_source_id})
 
                 for comment in comments:
                     container_source_id = None
@@ -731,9 +746,9 @@ def copy_group_entities(copy_id):
                     comment.id = None
                     with schema_context(copy.source_tenant):
                         if comment.container:
-                            if comment.container.__class__.__name__ == 'Comment': # is subcomment, for now set container to target_entity
+                            if comment.container.__class__.__name__ == 'Comment':  # is subcomment, for now set container to target_entity
                                 container_source_id = comment.container.id
-                    
+
                     comment.container = target_entity
 
                     with signal_disabler.disable():
@@ -770,7 +785,7 @@ def copy_group_entities(copy_id):
             parent = Entity.objects.get_subclass(id=parent_id)
             if parent != entity:
                 entity.parent = parent
-            with signal_disabler.disable(): 
+            with signal_disabler.disable():
                 entity.save()
 
         # rebuild subcomment container relations

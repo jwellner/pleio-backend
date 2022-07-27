@@ -8,6 +8,7 @@ def resolve_groups(
         q=None,
         filter=None,
         tags=None,
+        matchStrategy='legacy',
         offset=0,
         limit=20
 ):
@@ -26,7 +27,7 @@ def resolve_groups(
         groups = groups.filter(id__in=group_ids)
 
     if tags:
-        groups = groups.filter(conditional_tags_filter(tags))
+        groups = groups.filter(conditional_tags_filter(tags, matchStrategy == 'any'))
 
     edges = groups.order_by('-is_featured', 'name')[offset:offset + limit]
 

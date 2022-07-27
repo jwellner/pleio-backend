@@ -1,21 +1,15 @@
-from django.db import connection
-from django_tenants.test.cases import FastTenantTestCase
-from backend2.schema import schema
-from ariadne import graphql_sync
-import json
-from django.contrib.auth.models import AnonymousUser
-from django.http import HttpRequest
-from core.models import Group
+from core.tests.helpers import PleioTenantTestCase
 from user.models import User
 from core.constances import ACCESS_TYPE, USER_ROLES
 from mixer.backend.django import mixer
-from graphql import GraphQLError
 from cms.models import Page, Row, Column
 
-class EditColumnTestCase(FastTenantTestCase):
+
+class EditColumnTestCase(PleioTenantTestCase):
 
     def setUp(self):
-        self.anonymousUser = AnonymousUser()
+        super().setUp()
+
         self.user = mixer.blend(User)
         self.admin = mixer.blend(User, roles=[USER_ROLES.ADMIN])
         self.editor = mixer.blend(User, roles=[USER_ROLES.EDITOR])
@@ -26,6 +20,7 @@ class EditColumnTestCase(FastTenantTestCase):
                                 write_access=[ACCESS_TYPE.user.format(self.user.id)]
                                 )
         self.row = mixer.blend(Row, position=0, page=self.page)
+        self.other_row = mixer.blend(Row, position=1, page=self.page)
 
         self.column1 = mixer.blend(Column, position=0, row=self.row, page=self.page, width=[3])
         self.column2 = mixer.blend(Column, position=1, row=self.row, page=self.page, width=[3])
@@ -33,64 +28,44 @@ class EditColumnTestCase(FastTenantTestCase):
         self.column4 = mixer.blend(Column, position=3, row=self.row, page=self.page, width=[3])
         self.column5 = mixer.blend(Column, position=4, row=self.row, page=self.page, width=[3])
 
-    def test_edit_column_move_up_positions_by_admin(self):
-
-        mutation = """
+        self.mutation = """
             mutation EditColumn($input: editColumnInput!) {
                 editColumn(input: $input) {
                     column {
                         guid
-                        position
+                        parentGuid
+                        position,
+                        width
                     }
                 }
             }
         """
-        variables = {
+        self.variables = {
             "input": {
                 "guid": self.column2.guid,
-                "position": 3
+                "position": 3,
+                "width": [2],
             }
         }
 
-        request = HttpRequest()
-        request.user = self.admin
+    def test_edit_column_move_up_positions_by_admin(self):
+        self.graphql_client.force_login(self.admin)
+        result = self.graphql_client.post(self.mutation, self.variables)
 
-        result = graphql_sync(schema, {"query": mutation, "variables": variables }, context_value={ "request": request })
+        column = result["data"]["editColumn"]["column"]
+        self.assertEqual(column["position"], self.variables['input']['position'])
+        self.assertEqual(column["width"], self.variables['input']['width'])
 
-        data = result[1]["data"]
-
-        self.assertEqual(data["editColumn"]["column"]["position"], 3)
         self.assertEqual(Column.objects.get(id=self.column1.id).position, 0)
         self.assertEqual(Column.objects.get(id=self.column3.id).position, 1)
         self.assertEqual(Column.objects.get(id=self.column4.id).position, 2)
         self.assertEqual(Column.objects.get(id=self.column5.id).position, 4)
 
     def test_edit_column_move_up_positions_by_editor(self):
+        self.graphql_client.force_login(self.editor)
+        result = self.graphql_client.post(self.mutation, self.variables)
 
-        mutation = """
-            mutation EditColumn($input: editColumnInput!) {
-                editColumn(input: $input) {
-                    column {
-                        guid
-                        position
-                    }
-                }
-            }
-        """
-        variables = {
-            "input": {
-                "guid": self.column2.guid,
-                "position": 3
-            }
-        }
-
-        request = HttpRequest()
-        request.user = self.editor
-
-        result = graphql_sync(schema, {"query": mutation, "variables": variables }, context_value={ "request": request })
-
-        data = result[1]["data"]
-
+        data = result["data"]
         self.assertEqual(data["editColumn"]["column"]["position"], 3)
         self.assertEqual(Column.objects.get(id=self.column1.id).position, 0)
         self.assertEqual(Column.objects.get(id=self.column3.id).position, 1)
@@ -98,17 +73,6 @@ class EditColumnTestCase(FastTenantTestCase):
         self.assertEqual(Column.objects.get(id=self.column5.id).position, 4)
 
     def test_edit_column_move_down_positions_by_admin(self):
-
-        mutation = """
-            mutation EditColumn($input: editColumnInput!) {
-                editColumn(input: $input) {
-                    column {
-                        guid
-                        position
-                    }
-                }
-            }
-        """
         variables = {
             "input": {
                 "guid": self.column4.guid,
@@ -116,72 +80,54 @@ class EditColumnTestCase(FastTenantTestCase):
             }
         }
 
-        request = HttpRequest()
-        request.user = self.admin
+        self.graphql_client.force_login(self.admin)
+        result = self.graphql_client.post(self.mutation, variables)
 
-        result = graphql_sync(schema, {"query": mutation, "variables": variables }, context_value={ "request": request })
-        data = result[1]["data"]
-
+        data = result["data"]
         self.assertEqual(data["editColumn"]["column"]["position"], 1)
         self.assertEqual(Column.objects.get(id=self.column1.id).position, 0)
         self.assertEqual(Column.objects.get(id=self.column2.id).position, 2)
         self.assertEqual(Column.objects.get(id=self.column3.id).position, 3)
         self.assertEqual(Column.objects.get(id=self.column5.id).position, 4)
 
-
     def test_edit_column_move_up_positions_by_anonymous(self):
-
-        mutation = """
-            mutation EditColumn($input: editColumnInput!) {
-                editColumn(input: $input) {
-                    column {
-                        guid
-                        position
-                    }
-                }
-            }
-        """
-        variables = {
-            "input": {
-                "guid": self.column2.guid,
-                "position": 3
-            }
-        }
-
-        request = HttpRequest()
-        request.user = self.anonymousUser
-
-        result = graphql_sync(schema, {"query": mutation, "variables": variables }, context_value={ "request": request })
-
-        errors = result[1]["errors"]
-
-        self.assertEqual(errors[0]["message"], "not_logged_in")
-
+        with self.assertGraphQlError('not_logged_in'):
+            self.graphql_client.post(self.mutation, self.variables)
 
     def test_edit_column_move_up_positions_by_user(self):
+        with self.assertGraphQlError('could_not_save'):
+            self.graphql_client.force_login(self.user)
+            self.graphql_client.post(self.mutation, self.variables)
 
-        mutation = """
-            mutation EditColumn($input: editColumnInput!) {
-                editColumn(input: $input) {
-                    column {
-                        guid
-                        position
-                    }
-                }
-            }
-        """
+    def test_edit_column_that_does_not_exists(self):
+        self.column2.delete()
+        with self.assertGraphQlError('could_not_find'):
+            self.graphql_client.force_login(self.admin)
+            self.graphql_client.post(self.mutation, self.variables)
+
+    def test_move_to_another_row(self):
         variables = {
             "input": {
-                "guid": self.column2.guid,
-                "position": 3
+                "guid": self.column4.guid,
+                "parentGuid": self.other_row.guid,
             }
         }
+        self.graphql_client.force_login(self.admin)
+        result = self.graphql_client.post(self.mutation, variables)
 
-        request = HttpRequest()
-        request.user = self.user
+        column = result['data']['editColumn']['column']
+        self.assertEqual(column['parentGuid'], self.other_row.guid)
 
-        result = graphql_sync(schema, {"query": mutation, "variables": variables }, context_value={ "request": request })
+    def test_move_to_nonexistent_row(self):
+        variables = {
+            "input": {
+                "guid": self.column4.guid,
+                "parentGuid": self.other_row.guid,
+                "position": 1
+            }
+        }
+        self.other_row.delete()
 
-        errors = result[1]["errors"]
-
-        self.assertEqual(errors[0]["message"], "could_not_save")
+        with self.assertGraphQlError('could_not_find'):
+            self.graphql_client.force_login(self.admin)
+            self.graphql_client.post(self.mutation, variables)

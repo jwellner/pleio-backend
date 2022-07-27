@@ -1422,6 +1422,7 @@ type Mutation {
 
     mergeTags(input: tagMergeInput!): [Tag]
     extractTagSynonym(input: tagMergeInput!): [Tag]
+    signSiteAgreementVersion(input: signSiteAgreementVersionInput!): signSiteAgreementVersionPayload
 }
 
 type News implements Entity {
@@ -1608,6 +1609,12 @@ type ProfileOverviewItem {
     value: String
 }
 
+enum MatchStrategy {
+    legacy
+    any
+    all
+}
+
 type Query {
     viewer: Viewer
     entity(
@@ -1639,7 +1646,14 @@ type Query {
     top: [TopItem]
     breadcrumb(guid: String): [Entity]
     files(containerGuid: String, filter: String, orderBy: String, orderDirection: String, offset: Int, limit: Int): EntityList
-    groups(q: String, filter: GroupFilter, tags: [String], offset: Int, limit: Int): GroupList
+    groups(
+        q: String
+        filter: GroupFilter
+        tags: [String]
+        matchStrategy: MatchStrategy
+        offset: Int
+        limit: Int
+    ): GroupList
     events(filter: EventFilter, containerGuid: String, offset: Int, limit: Int): EventList
     users(q: String!, offset: Int, limit: Int, filters: [FilterInput]): UserList
     members(groupGuid: String!, q: String, offset: Int, limit: Int, filters: [FilterInput]): MemberList
@@ -1652,6 +1666,7 @@ type Query {
         containerGuid: String
         tags: [String]
         tagLists: [[String]]
+        matchStrategy: MatchStrategy
         orderBy: OrderBy
         orderDirection: OrderDirection
         isFeatured: Boolean
@@ -1666,6 +1681,7 @@ type Query {
         limit: Int
         tags: [String]
         tagLists: [[String]]
+        matchStrategy: MatchStrategy
         groupFilter: [String]
         subtypes: [String]
         orderBy: OrderBy
@@ -1693,6 +1709,7 @@ type Query {
     usersByBirthDate(profileFieldGuid: String!, futureDays: Int, offset: Int, limit: Int): SiteUserList
     siteStats: SiteStats
     tags: [Tag]
+    siteAgreements: [SiteAgreement]
 }
 
 type Question implements Entity {
@@ -2588,6 +2605,23 @@ type SiteStats {
     fileDiskUsage: Float!
 }
 
+type SiteAgreement {
+  id: String!
+  name: String!
+  description: String
+  accepted: Boolean!
+  versions: [SiteAgreementVersion]
+}
+
+type SiteAgreementVersion {
+  id: String!
+  version: String!
+  document: String!
+  accepted: Boolean!
+  accepted_by: String
+  accepted_date: DateTime
+}
+
 input ProfileFieldValidatorInput {
     type: ProfileFieldValidatorType!
     name: String!
@@ -2680,4 +2714,13 @@ input addCommentWithoutAccountInput {
 
 type addCommentWithoutAccountPayload {
     success: Boolean
+}
+
+input signSiteAgreementVersionInput {
+  id: String!
+  accept: Boolean!
+}
+
+type signSiteAgreementVersionPayload {
+  siteAgreementVersion: SiteAgreementVersion
 }

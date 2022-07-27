@@ -16,6 +16,8 @@ from .email_overview import email_overview
 from .notification import notification
 from .notifications_list import notifications_list
 from .site import site
+from .site_agreement import site_agreement
+from .site_agreement_version import site_agreement_version
 from .profile_field_validator import profile_field_validator
 from .attachment import attachment
 from .filters import filters
@@ -24,5 +26,6 @@ from .scalar import secure_rich_text
 resolvers = [
     query, mutation, viewer, entity, user, group, member, comment, profile_item,
     profile_field_validator, widget, invite, subgroup_list, subgroup, email_overview,
-    notification, site, attachment, notifications_list, filters, secure_rich_text
+    notification, site, attachment, notifications_list, filters, secure_rich_text,
+    site_agreement, site_agreement_version
 ]
