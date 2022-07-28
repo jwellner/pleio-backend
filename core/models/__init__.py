@@ -15,3 +15,4 @@ from .image import ResizedImage, ResizedImageMixin
 from .tags import Tag, TagSynonym, TagsMixin
 from .search import SearchQueryJournal
 from .mail import MailInstance, MailLog
+from .revision import Revision

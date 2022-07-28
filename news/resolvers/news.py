@@ -3,10 +3,12 @@ from core.resolvers import shared
 
 news = ObjectType("News")
 
+
 @news.field("subtype")
 def resolve_excerpt(obj, info):
     # pylint: disable=unused-argument
     return obj.type_to_string
+
 
 @news.field("startDate")
 def resolve_start_date(obj, info):
@@ -14,21 +16,25 @@ def resolve_start_date(obj, info):
     """Deprecated: not used in news"""
     return None
 
+
 @news.field("endDate")
 def resolve_end_date(obj, info):
     # pylint: disable=unused-argument
     """Deprecated: not used in news"""
     return None
 
+
 @news.field("source")
 def resolve_source(obj, info):
     # pylint: disable=unused-argument
     return obj.source
 
+
 @news.field("isFeatured")
 def resolve_is_featured(obj, info):
     # pylint: disable=unused-argument
     return obj.is_featured
+
 
 @news.field("isHighlighted")
 def resolve_is_highlighted(obj, info):
@@ -36,11 +42,13 @@ def resolve_is_highlighted(obj, info):
     """Deprecated: not used in frontend"""
     return False
 
+
 @news.field("isRecommended")
 def resolve_is_recommended(obj, info):
     # pylint: disable=unused-argument
     """Deprecated: not by news"""
     return False
+
 
 @news.field("url")
 def resolve_url(obj, info):
@@ -80,3 +88,4 @@ news.set_field("views", shared.resolve_entity_views)
 news.set_field("owner", shared.resolve_entity_owner)
 news.set_field("isPinned", shared.resolve_entity_is_pinned)
 news.set_field("relatedItems", shared.resolve_entity_related_items)
+news.set_field("revision", shared.resolve_entity_revision)

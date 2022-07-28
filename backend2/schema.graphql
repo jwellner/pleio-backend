@@ -70,13 +70,13 @@ type addColumnPayload {
 }
 
 input EventSlotInput {
-  id: Int
+    id: Int
 }
 
 input EventSlotAvailableInput {
-  id: Int
-  name: String
-  delete: Boolean
+    id: Int
+    name: String
+    delete: Boolean
 }
 
 input addEntityInput {
@@ -326,6 +326,7 @@ type Blog implements Entity {
     commentCount: Int
     isPinned: Boolean!
     relatedItems: EntityList
+    revision: Revision
 }
 
 input bookmarkInput {
@@ -912,8 +913,8 @@ type EntityList {
 }
 
 type EventSlot {
-  id: Int
-  name: String
+    id: Int
+    name: String
 }
 
 type Event implements Entity {
@@ -1291,10 +1292,16 @@ type moveFileFolderPayload {
     entity: Entity
 }
 
+input publishContentInput {
+    guid: String
+    revisionGuid: String
+    description: String
+}
+
 type Mutation {
     editSiteSetting(input: editSiteSettingInput!): editSiteSettingPayload
     addEntity(input: addEntityInput!): addEntityPayload
-    editEntity(input: editEntityInput!): editEntityPayload
+    editEntity(input: editEntityInput!, draft: Boolean): editEntityPayload
     """Currently only implemented for events"""
     copyEntity(input: copyEntityInput!): copyEntityPayload
     deleteEntity(input: deleteEntityInput!): deleteEntityPayload
@@ -1303,7 +1310,7 @@ type Mutation {
     editFileFolder(input: editFileFolderInput!): editFileFolderPayload
     moveFileFolder(input: moveFileFolderInput!): moveFileFolderPayload
     addPage(input: addPageInput!): addPagePayload
-    editPage(input: editPageInput!): editPagePayload
+    editPage(input: editPageInput!, draft: Boolean): editPagePayload
     addRow(input: addRowInput!): addRowPayload
     editRow(input: editRowInput!): editRowPayload
     deleteRow(input: deleteRowInput!): deleteRowPayload
@@ -1423,6 +1430,8 @@ type Mutation {
     mergeTags(input: tagMergeInput!): [Tag]
     extractTagSynonym(input: tagMergeInput!): [Tag]
     signSiteAgreementVersion(input: signSiteAgreementVersionInput!): signSiteAgreementVersionPayload
+
+    publishContent(input: publishContentInput!): publishContentPayload
 }
 
 type News implements Entity {
@@ -1466,6 +1475,7 @@ type News implements Entity {
     commentCount: Int
     isPinned: Boolean!
     relatedItems: EntityList
+    revision: Revision
 }
 
 type Notification {
@@ -1541,6 +1551,7 @@ type Page implements Entity {
     widgets: [Widget]
     tags: [String]
     isPinned: Boolean!
+    revision: Revision
 }
 
 """The available plugins."""
@@ -1710,6 +1721,11 @@ type Query {
     siteStats: SiteStats
     tags: [Tag]
     siteAgreements: [SiteAgreement]
+    revisions(
+        objectGuid: String!
+        offset: Int
+        limit: Int
+    ): RevisionList
 }
 
 type Question implements Entity {
@@ -1786,6 +1802,18 @@ input resendGroupInvitationInput {
 
 type resendGroupInvitationPayload {
     group: Group
+}
+
+type ContentVersion {
+    richDescription: SecureRichText
+}
+
+type Revision {
+    object: String!
+    description: String
+    content: ContentVersion
+    timeCreated: DateTime
+    timeUpdated: DateTime
 }
 
 """The type of role."""
@@ -2217,6 +2245,11 @@ type TrendingList {
     likes: Int
 }
 
+type RevisionList {
+    total: Int!
+    edges: [Revision]
+}
+
 """The type of entity"""
 enum Type {
     user
@@ -2375,6 +2408,7 @@ type Wiki implements Entity {
     owner: User
     isPinned: Boolean!
     featured: Featured
+    revision: Revision
 }
 
 type SiteAccessRequest {
@@ -2723,4 +2757,7 @@ input signSiteAgreementVersionInput {
 
 type signSiteAgreementVersionPayload {
   siteAgreementVersion: SiteAgreementVersion
+}
+type publishContentPayload {
+    success: Boolean
 }
