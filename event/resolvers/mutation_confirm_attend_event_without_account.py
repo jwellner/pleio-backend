@@ -4,7 +4,7 @@ from django.core.validators import validate_email
 from django.core.exceptions import ValidationError
 from core.constances import (COULD_NOT_FIND, COULD_NOT_SAVE,
                              EMAIL_ALREADY_USED, INVALID_EMAIL,
-                             EVENT_INVALID_STATE, EVENT_IS_FULL, NOT_ATTENDING_PARENT_EVENT)
+                             EVENT_INVALID_STATE, EVENT_IS_FULL)
 from core.lib import clean_graphql_input
 from event.mail_builders.attend_event_confirm import submit_attend_event_wa_confirm
 from event.mail_builders.qr_code import submit_mail_event_qr
@@ -45,13 +45,6 @@ def resolve_confirm_attend_event_without_account(_, info, input):
 
     if not event.attend_event_without_account:
         raise GraphQLError(COULD_NOT_SAVE)
-
-    # check if is attending parent
-    if event.parent and (state == 'accept'):
-        try:
-            EventAttendee.objects.get(email=attendee_request.email, event=event.parent, state='accept')
-        except ObjectDoesNotExist:
-            raise GraphQLError(NOT_ATTENDING_PARENT_EVENT)
 
     # delete attendee and attendee request
     if delete:
