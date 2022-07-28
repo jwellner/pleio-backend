@@ -1,13 +1,15 @@
-from graphql import GraphQLError
 from django.core.exceptions import ObjectDoesNotExist, ValidationError
 from django.core.validators import validate_email
+from graphql import GraphQLError
 
 from core import config
-from core.constances import COULD_NOT_FIND, INVALID_EMAIL, EMAIL_ALREADY_USED, NOT_ATTENDING_PARENT_EVENT, \
-    NOT_LOGGED_IN, EVENT_INVALID_STATE, EVENT_IS_FULL
+from core.constances import (COULD_NOT_FIND, EMAIL_ALREADY_USED,
+                             EVENT_INVALID_STATE, EVENT_IS_FULL, INVALID_EMAIL,
+                             NOT_LOGGED_IN)
 from core.lib import clean_graphql_input, generate_code, get_full_url
 from event.lib import validate_name
-from event.mail_builders.attend_event_request import submit_attend_event_wa_request
+from event.mail_builders.attend_event_request import \
+    submit_attend_event_wa_request
 from event.mail_builders.qr_code import submit_mail_event_qr
 from event.models import Event, EventAttendee, EventAttendeeRequest
 from event.resolvers import shared as event_shared
@@ -71,13 +73,6 @@ def resolve_attend_event(_, info, input):
         event = Event.objects.visible(user).get(id=clean_input.get("guid"))
     except ObjectDoesNotExist:
         raise GraphQLError(COULD_NOT_FIND)
-
-    # check if is attending parent
-    if clean_input.get("state") == "accept" and event.parent:
-        try:
-            EventAttendee.objects.get(user=user, event=event.parent, state='accept')
-        except ObjectDoesNotExist:
-            raise GraphQLError(NOT_ATTENDING_PARENT_EVENT)
 
     try:
         attendee = event.attendees.get(user=user)
