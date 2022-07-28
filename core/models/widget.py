@@ -7,6 +7,8 @@ from django.contrib.postgres.fields import ArrayField
 from core.models.rich_fields import AttachmentMixin
 
 
+
+
 class Widget(AttachmentMixin, models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     group = models.ForeignKey(
@@ -61,7 +63,16 @@ class Widget(AttachmentMixin, models.Model):
 
     @property
     def rich_fields(self):
-        return [setting.get('value', '') for setting in self.settings if setting.get('key', '') == 'richDescription']
+
+        def get_value(setting):
+            return setting.get('richDescription', '') or setting.get('value', '')
+
+        def is_rich_field(setting):
+            if setting.get('key', '') == 'richDescription':
+                return True
+            return False
+
+        return [get_value(setting) for setting in self.settings if is_rich_field(setting)]
 
 
 auditlog.register(Widget)
