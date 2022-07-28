@@ -123,25 +123,6 @@ class ConfirmAttendEventWithoutAccountTestCase(PleioTenantTestCase):
         self.graphql_client.post(self.mutation, variables)
         self.assertEqual(self.event.attendees.filter(state='waitinglist').count(), 1)
 
-    def test_confirm_attend_event_without_account_subevent_without_parent(self):
-        subevent = mixer.blend(Event)
-        subevent.parent = self.event
-        subevent.attend_event_without_account = True
-        subevent.save()
-        EventAttendeeRequest.objects.create(code='1234567890', email='pete@tenant.fast-test.com', event=subevent)
-
-        variables = {
-            "input": {
-                "guid": subevent.guid,
-                "code": "1234567890",
-                "email": "pete@tenant.fast-test.com",
-                "state": "accept"
-            }
-        }
-
-        with self.assertGraphQlError("not_attending_parent_event"):
-            self.graphql_client.post(self.mutation, variables)
-
     def test_confirm_attend_event_without_account_already_registered(self):
         EventAttendeeRequest.objects.create(code='1234567890', email='registered@tenant.fast-test.com', event=self.event)
         EventAttendee.objects.create(
