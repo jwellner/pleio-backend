@@ -55,7 +55,6 @@ def resolve_edit_event(_, info, input):
     event_shared.resolve_update_rsvp(entity, clean_input)
     event_shared.resolve_update_attend_without_account(entity, clean_input)
     event_shared.resolve_update_qr_access(entity, clean_input)
-    event_shared.resolve_update_slot(entity, clean_input)
     event_shared.resolve_update_slots_available(entity, clean_input)
 
     # only admins can edit these fields

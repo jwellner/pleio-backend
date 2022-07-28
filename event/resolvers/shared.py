@@ -62,19 +62,6 @@ def resolve_update_qr_access(entity, clean_input):
         entity.qr_access = clean_input.get("qrAccess")
 
 
-def resolve_update_slot(entity, clean_input):
-    if 'slot' in clean_input:
-        # only allowed for sub-events.
-        if not entity.parent:
-            raise GraphQLError(SUBEVENT_OPERATION)
-
-        value = clean_input['slot']
-        if value.get('id', None):
-            entity.slot = entity.parent.slots_available.get(pk=value.get('id', None))
-        else:
-            entity.slot = None
-
-
 def resolve_update_slots_available(entity, clean_input):
     if 'slotsAvailable' in clean_input:
         # not allowed for sub-events
@@ -84,23 +71,7 @@ def resolve_update_slots_available(entity, clean_input):
         if not entity.id:
             raise GraphQLError(COULD_NOT_ADD)
 
-        increment = NumberIncrement()
-        for value in clean_input['slotsAvailable']:
-            slot = entity.slots_available.filter(pk=value.get('id')).first()
-
-            if value.get('delete', False):
-                if slot:
-                    slot.delete()
-                continue
-
-            if value.get('name', ''):
-                if not slot:
-                    slot = entity.slots_available.create(name=value.get('name'))
-                else:
-                    slot.name = value.get('name')
-
-            slot.index = increment.next()
-            slot.save()
+        entity.slots_available = clean_input['slotsAvailable']
 
 
 def resolve_delete_attendee(attendee):

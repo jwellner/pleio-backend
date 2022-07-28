@@ -63,7 +63,6 @@ def resolve_add_event(_, info, input):
     event_shared.resolve_update_rsvp(entity, clean_input)
     event_shared.resolve_update_attend_without_account(entity, clean_input)
     event_shared.resolve_update_qr_access(entity, clean_input)
-    event_shared.resolve_update_slot(entity, clean_input)
 
     entity.save()
     entity.add_follow(user)

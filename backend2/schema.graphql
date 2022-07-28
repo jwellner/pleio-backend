@@ -69,14 +69,14 @@ type addColumnPayload {
     column: Column
 }
 
-input EventSlotInput {
-    id: Int
+type EventSlot {
+    name: String
+    subEventGuids: [String]
 }
 
-input EventSlotAvailableInput {
-    id: Int
+input EventSlotInput {
     name: String
-    delete: Boolean
+    subEventGuids: [String]
 }
 
 input addEntityInput {
@@ -93,8 +93,6 @@ input addEntityInput {
     startDate: DateTime
     endDate: DateTime
     source: String
-    slot: EventSlotInput
-    slotsAvailable: [EventSlotAvailableInput]
     location: String
     locationLink: String
     locationAddress: String
@@ -592,8 +590,7 @@ input editEntityInput {
     locationLink: String
     locationAddress: String
     ticketLink: String
-    slot: EventSlotInput
-    slotsAvailable: [EventSlotAvailableInput]
+    slotsAvailable: [EventSlotInput]
     maxAttendees: String
     rsvp: Boolean
     accessId: Int
@@ -912,11 +909,6 @@ type EntityList {
     edges: [Entity]
 }
 
-type EventSlot {
-    id: Int
-    name: String
-}
-
 type Event implements Entity {
     guid: String!
     status: Int
@@ -927,7 +919,7 @@ type Event implements Entity {
     richDescription: SecureRichText
     hasChildren: Boolean
     children: [Event]
-    slot: EventSlot
+    slots: [String]
     slotsAvailable: [EventSlot]
     parent: Event
     inGroup: Boolean
