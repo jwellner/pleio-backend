@@ -1,7 +1,8 @@
 from core.models import Group
 from core.tests.helpers import PleioTenantTestCase
+from event.factories import EventFactory
 from user.models import User
-from event.models import Event, EventSlot
+from event.models import Event
 from core.lib import datetime_isoformat
 from core.constances import ACCESS_TYPE, USER_ROLES
 from mixer.backend.django import mixer
@@ -64,8 +65,8 @@ class EditEventTestCase(PleioTenantTestCase):
                 accessId
                 writeAccessId
                 slotsAvailable {
-                    id
                     name
+                    subEventGuids
                 }
                 canEdit
                 tags
@@ -125,13 +126,11 @@ class EditEventTestCase(PleioTenantTestCase):
         self.assertDateEqual(entity['scheduleDeleteEntity'], variables["input"]["scheduleDeleteEntity"])
 
         self.assertEqual(entity["slotsAvailable"][0]['name'], variables["input"]["slotsAvailable"][0]['name'])
-        self.assertIsNotNone(entity["slotsAvailable"][0]['id'])
 
         self.eventPublic.refresh_from_db()
 
         self.assertEqual(entity["title"], self.eventPublic.title)
-        self.assertEqual(entity['slotsAvailable'][0]['name'], self.eventPublic.slots_available.first().name)
-        self.assertEqual(entity['slotsAvailable'][0]['id'], self.eventPublic.slots_available.first().id)
+        self.assertEqual(entity['slotsAvailable'][0]['name'], self.eventPublic.slots_available[0]['name'])
         self.assertEqual(entity["richDescription"], self.eventPublic.rich_description)
         self.assertEqual(entity["startDate"], str(datetime_isoformat(self.eventPublic.start_date)))
         self.assertEqual(entity["endDate"], str(datetime_isoformat(self.eventPublic.end_date)))
@@ -204,9 +203,8 @@ class EditEventTestCase(PleioTenantTestCase):
         self.eventPublic.refresh_from_db()
         self.assertEqual(entity["group"], None)
 
-    def test_free_event_from_slots_available(self):
-        primary_slot = EventSlot.objects.create(container=self.eventPublic, name="primary")
-        secondary_slot = EventSlot.objects.create(container=self.eventPublic, name="secondary")
+    def test_assign_subevent_to_slot(self):
+        subevent: Event = EventFactory(parent=self.eventPublic)
         mutation = """
             mutation ($input: editEntityInput!) {
                 editEntity(input: $input) {
@@ -214,116 +212,38 @@ class EditEventTestCase(PleioTenantTestCase):
                         ... on Event {
                             guid
                             slotsAvailable {
-                                id
                                 name
+                                subEventGuids
                             }
                         }
                     }
                 }
             }
         """
-        self.graphql_client.force_login(self.admin)
-        response = self.graphql_client.post(mutation, {
+        self.graphql_client.force_login(self.eventPublic.owner)
+
+        # assign to slot
+        self.graphql_client.post(mutation, {
             'input': {
                 'guid': self.eventPublic.guid,
-                'slotsAvailable': [{'id': primary_slot.id,
-                                    'delete': True}],
-            }
+                'slotsAvailable': [
+                    {
+                        'name': "Some slot",
+                        'subEventGuids': [subevent.guid]
+                    },
+                ],
+            },
         })
-        self.assertEqual(response['data']['editEntity']['entity']['guid'], self.eventPublic.guid)
-        self.assertEqual(response['data']['editEntity']['entity']['slotsAvailable'][0]['id'], secondary_slot.id)
-        self.assertEqual(response['data']['editEntity']['entity']['slotsAvailable'][0]['name'], secondary_slot.name)
-        self.assertEqual(len(response['data']['editEntity']['entity']['slotsAvailable']), 1)
+        self.eventPublic.refresh_from_db()
+        self.assertDictEqual({"content": [{"id": 0, "name": "Some slot"}]},
+                             {"content": list(subevent.get_slots())})
 
-    def test_assign_main_event_to_slot(self):
-        mutation = """
-            mutation ($input: editEntityInput!) {
-                editEntity(input: $input) {
-                    entity {
-                        ... on Event {
-                            guid
-                            slot {
-                                id
-                                name
-                            }
-                        }
-                    }
-                }
-            }
-        """
-
-        with self.assertGraphQlError('subevent_only_operation'):
-            self.graphql_client.force_login(self.admin)
-            self.graphql_client.post(mutation, {
-                'input': {
-                    'guid': self.eventPublic.guid,
-                    'slot': {'id': 1}
-                }
-            })
-
-    def test_assign_subevent_to_slot(self):
-        primary_slot = EventSlot.objects.create(container=self.eventPublic, name="primary")
-        event = mixer.blend(Event,
-                            parent=self.eventPublic,
-                            start_date=self.eventPublic.start_date,
-                            end_date=self.eventPublic.end_date)
-
-        mutation = """
-            mutation ($input: editEntityInput!) {
-                editEntity(input: $input) {
-                    entity {
-                        ... on Event {
-                            guid
-                            slot {
-                                id
-                                name
-                            }
-                        }
-                    }
-                }
-            }
-        """
-        self.graphql_client.force_login(self.admin)
-        response = self.graphql_client.post(mutation, {
+        # Remove from slot
+        self.graphql_client.post(mutation, {
             'input': {
-                'guid': event.guid,
-                'slot': {'id': primary_slot.id}
-            }
+                'guid': self.eventPublic.guid,
+                'slotsAvailable': [],
+            },
         })
-
-        self.assertEqual(response['data']['editEntity']['entity']['slot']['id'], primary_slot.id)
-        self.assertEqual(response['data']['editEntity']['entity']['slot']['name'], primary_slot.name)
-
-    def test_free_subevent_from_slot(self):
-        primary_slot = EventSlot.objects.create(container=self.eventPublic, name="primary")
-        subevent = mixer.blend(Event,
-                               parent=self.eventPublic,
-                               slot=primary_slot,
-                               start_date=self.eventPublic.start_date,
-                               end_date=self.eventPublic.end_date)
-
-        mutation = """
-            mutation ($input: editEntityInput!) {
-                editEntity(input: $input) {
-                    entity {
-                        ... on Event {
-                            guid
-                            slot {
-                                id
-                                name
-                            }
-                        }
-                    }
-                }
-            }
-        """
-        self.graphql_client.force_login(self.admin)
-        response = self.graphql_client.post(mutation, {
-            'input': {
-                'guid': subevent.guid,
-                'slot': {'id': None}
-            }
-        })
-
-        self.assertEqual(response['data']['editEntity']['entity']['guid'], subevent.guid)
-        self.assertEqual(response['data']['editEntity']['entity']['slot'], None)
+        self.eventPublic.refresh_from_db()
+        self.assertEqual([], [slot for slot in subevent.get_slots()])

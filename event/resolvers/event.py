@@ -50,9 +50,15 @@ def resolve_parent(obj, info):
 
 
 @event.field('slotsAvailable')
-def resolve_slots_available(obj, info):
+def resolve_slots_available(obj: Event, info):
     # pylint: disable=unused-argument
-    return obj.slots_available.all()
+    return obj.slots_available
+
+
+@event.field('slots')
+def resolve_slots(obj: Event, info):
+    # pylint: disable=unused-argument
+    return [slot['name'] for slot in obj.get_slots()]
 
 
 @event.field("inGroup")

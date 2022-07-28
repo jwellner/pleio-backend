@@ -18,7 +18,7 @@ class TestAttendEventWithoutAccountConfirmMailerTestCase(PleioTenantTestCase):
     def setUp(self):
         super().setUp()
 
-        self.event = EventFactory(UserFactory(),
+        self.event = EventFactory(owner=UserFactory(),
                                   title="Test event",
                                   location=Faker().sentence(),
                                   location_link=Faker().url(),

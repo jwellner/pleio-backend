@@ -20,7 +20,6 @@ from django.utils.text import slugify
 from django.utils import timezone
 
 
-
 class Event(Entity,
             CommentMixin, BookmarkMixin, FollowMixin, NotificationMixin, FeaturedCoverMixin, ArticleMixin,
             AttachmentMixin):
@@ -30,7 +29,7 @@ class Event(Entity,
     title = models.CharField(max_length=256)
 
     parent = models.ForeignKey('self', blank=True, null=True, related_name='children', on_delete=models.CASCADE)
-    slot = models.ForeignKey("event.EventSlot", on_delete=models.CASCADE, blank=True, null=True)
+    slots_available = models.JSONField(default=list)
 
     start_date = models.DateTimeField(null=True, blank=True)
     end_date = models.DateTimeField(null=True, blank=True)
@@ -127,14 +126,19 @@ class Event(Entity,
 
         return True
 
+    def get_slots(self):
+        if not self.parent:
+            return
+        for n, slot in enumerate(self.parent.slots_available):
+            if self.guid in slot.get('subEventGuids', []):
+                yield {"id": n, "name": slot['name']}
 
-class EventSlot(models.Model):
-    class Meta:
-        ordering = ('index',)
+    def get_slot_ids(self):
+        for slot in self.get_slots():
+            yield f"{slot['id']}:{slot['name']}"
 
-    container = models.ForeignKey('event.Event', on_delete=models.CASCADE, related_name='slots_available')
-    name = models.CharField(max_length=255)
-    index = models.IntegerField(default=0)
+    def is_in_same_slot(self, other):
+        return bool([x for x in self.get_slot_ids() if x in other.get_slot_ids()])
 
 
 class EventAttendee(models.Model):
@@ -190,7 +194,7 @@ class EventAttendee(models.Model):
     def clean_event(self):
         if not self.event.parent or self.state != 'accept' \
                 or self.event.start_date is None \
-                or not self.event.slot:
+                or not self.event.get_slots():
             return
 
         user_attendees = EventAttendee.objects.filter(user__isnull=False, user=self.user)
@@ -198,9 +202,9 @@ class EventAttendee(models.Model):
         for qs in [user_attendees, email_attendees]:
             qs = qs.exclude(id=self.id)
             qs = qs.filter(event__parent=self.event.parent, state='accept')
-            qs = qs.filter(event__slot=self.event.slot)
-            if qs.count() > 0:
-                raise ValidationError(_("You already signed in for another sub-event in the same slot."))
+            for maybe_match in qs:
+                if self.event.is_in_same_slot(maybe_match.event):
+                    raise ValidationError(_("You already signed in for another sub-event in the same slot."))
 
     def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
         self.full_clean()

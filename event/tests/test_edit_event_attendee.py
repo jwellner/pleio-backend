@@ -14,7 +14,7 @@ class EditEventAttendeeTestCase(PleioTenantTestCase):
         self.attendee_user = UserFactory()
         self.owner = UserFactory()
         self.admin = AdminFactory()
-        self.event = EventFactory(self.owner,
+        self.event = EventFactory(owner=self.owner,
                                   attend_event_without_account=True)
 
         self.attendee1 = EventAttendee.objects.create(

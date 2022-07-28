@@ -1,11 +1,17 @@
 from django.utils.timezone import localtime
-from mixer.backend.django import mixer
 
-from core.constances import ACCESS_TYPE
 from core.tests.helpers import PleioTenantTestCase
-from event.models import Event, EventSlot
+from event.factories import EventFactory
+from event.models import Event
 from user.factories import UserFactory
 from user.models import User
+
+
+def create_slot(name, *events):
+    return {
+        'name': name,
+        'subEventGuids': [e.guid for e in events]
+    }
 
 
 class TestSlotsAvailableTestCase(PleioTenantTestCase):
@@ -14,75 +20,58 @@ class TestSlotsAvailableTestCase(PleioTenantTestCase):
         super().setUp()
 
         self.owner: User = UserFactory(email="owner@localhost")
-        self.event: Event = mixer.blend(Event,
-                                        title="Test event",
-                                        owner=self.owner,
-                                        start_date=localtime(),
-                                        end_date=localtime(),
-                                        write_access=[ACCESS_TYPE.user.format(self.owner.guid)],
-                                        read_access=[ACCESS_TYPE.logged_in])
+        self.event: Event = EventFactory(owner=self.owner,
+                                         title="Test event",
+                                         start_date=localtime())
+        self.subevent1: Event = EventFactory(title='SubEvent1',
+                                             start_date=localtime(),
+                                             parent=self.event)
+        self.subevent2: Event = EventFactory(title='SubEvent2',
+                                             owner=self.owner,
+                                             start_date=localtime(),
+                                             parent=self.event)
 
-        self.primary_slot: EventSlot = EventSlot.objects.create(container=self.event, name="primary", index=0)
-        self.secondary_slot: EventSlot = EventSlot.objects.create(container=self.event, name="secondary", index=1)
+        self.SLOTS_AVAILABLE = [
+            create_slot("Slot 1", self.subevent1),
+            create_slot("Slot 2", self.subevent1, self.subevent2),
+        ]
 
-        self.mutation = """
-            mutation ($input: editEntityInput!) {
-                editEntity(input: $input) {
-                    entity {
-                        ... on Event {
-                            guid
-                            slotsAvailable {
-                                name
-                            }
+        self.event.slots_available = self.SLOTS_AVAILABLE
+        self.event.save()
+
+        self.query = """
+            query ($guid: String!) {
+                entity(guid: $guid) {
+                    ... on Event {
+                        guid
+                        slots
+                        slotsAvailable {
+                            name
+                            subEventGuids
                         }
                     }
                 }
             }
         """
 
-    @staticmethod
-    def buildInput(**kwargs):
-        return {
-            'input': kwargs
-        }
-
-    def test_reorder_slots_available(self):
+    def test_slots_available(self):
         self.graphql_client.force_login(self.owner)
-        response = self.graphql_client.post(self.mutation, self.buildInput(
-            guid=self.event.guid,
-            slotsAvailable=[{'id': self.secondary_slot.pk},
-                            {'id': self.primary_slot.pk}]
-        ))
-        slots_available = response['data']['editEntity']['entity']['slotsAvailable']
-        self.assertEqual([self.secondary_slot.name, self.primary_slot.name],
-                         [s['name'] for s in slots_available])
 
-    def test_add_available_slot(self):
-        self.graphql_client.force_login(self.owner)
-        result = self.graphql_client.post(self.mutation, self.buildInput(
-            guid=self.event.guid,
-            slotsAvailable=[
-                {'id': self.primary_slot.pk},
-                {'id': self.secondary_slot.pk},
-                {'name': "New slot"},
-            ]
-        ))
+        response = self.graphql_client.post(self.query, {'guid': self.event.guid})
+        entity = response['data']['entity']
+        self.assertEqual(entity['guid'], self.event.guid)
+        self.assertEqual(entity['slots'], [])
+        self.assertDictEqual({'content': self.SLOTS_AVAILABLE},
+                             {'content': entity['slotsAvailable']})
 
-        slots_available = result['data']['editEntity']['entity']['slotsAvailable']
-        self.assertEqual(['primary', 'secondary', 'New slot'],
-                         [s['name'] for s in slots_available])
+        response = self.graphql_client.post(self.query, {'guid': self.subevent1.guid})
+        entity = response['data']['entity']
+        self.assertEqual(entity['guid'], self.subevent1.guid)
+        self.assertEqual(entity['slots'], ["Slot 1", "Slot 2"])
+        self.assertEqual(entity['slotsAvailable'], [])
 
-    def test_rename_slot(self):
-        self.graphql_client.force_login(self.owner)
-        result = self.graphql_client.post(self.mutation, self.buildInput(
-            guid=self.event.guid,
-            slotsAvailable=[
-                {'id': self.primary_slot.pk},
-                {'id': self.secondary_slot.pk,
-                 'name': 'Not secondary'},
-            ]
-        ))
-
-        slots_available = result['data']['editEntity']['entity']['slotsAvailable']
-        self.assertEqual(['primary', 'Not secondary'],
-                         [s['name'] for s in slots_available])
+        response = self.graphql_client.post(self.query, {'guid': self.subevent2.guid})
+        entity = response['data']['entity']
+        self.assertEqual(entity['guid'], self.subevent2.guid)
+        self.assertEqual(entity['slots'], ["Slot 2"])
+        self.assertEqual(entity['slotsAvailable'], [])

@@ -118,13 +118,6 @@ class EventTestCase(PleioTenantTestCase):
                 startDate
                 endDate
                 location
-                slot {
-                    name
-                }
-                slotsAvailable {
-                    id
-                    name
-                }
                 source
                 rsvp
                 isAttending

@@ -15,7 +15,7 @@ class TestDeleteAttendeeMailerTestCase(PleioTenantTestCase):
         super(TestDeleteAttendeeMailerTestCase, self).setUp()
 
         self.participant = UserFactory(name="Participant")
-        self.event = EventFactory(UserFactory(), title="Test event")
+        self.event = EventFactory(owner=UserFactory(), title="Test event")
         self.attendee = mixer.blend(EventAttendee,
                                     event=self.event,
                                     user=self.participant)
