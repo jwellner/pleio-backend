@@ -57,7 +57,6 @@ EVENT_IS_FULL = "event_is_full"
 EVENT_INVALID_STATE = "event_invalid_state"
 SUBEVENT_OPERATION = 'subevent_only_operation'
 NON_SUBEVENT_OPERATION = 'non_subevent_operation'
-NOT_ATTENDING_PARENT_EVENT = "not_attending_parent_event"
 REDIRECTS_HAS_LOOP = "redirects_has_loop"
 REDIRECTS_HAS_DUPLICATE_SOURCE = "redirects_has_duplicate_source"
 OIDC_PROVIDER_OPTIONS = [
