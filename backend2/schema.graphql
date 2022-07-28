@@ -1664,6 +1664,7 @@ type Query {
         subtype: String
         subtypes: [String]
         containerGuid: String
+        eventFilter: EventFilter
         tags: [String]
         tagLists: [[String]]
         matchStrategy: MatchStrategy
@@ -1683,6 +1684,7 @@ type Query {
         tagLists: [[String]]
         matchStrategy: MatchStrategy
         groupFilter: [String]
+        eventFilter: EventFilter
         subtypes: [String]
         orderBy: OrderBy
         orderDirection: OrderDirection

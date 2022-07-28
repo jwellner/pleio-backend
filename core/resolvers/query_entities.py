@@ -2,7 +2,10 @@ import logging
 
 from django.db.models import Q
 from django.db.models.functions import Coalesce
-from core.constances import ORDER_DIRECTION, ORDER_BY, INVALID_SUBTYPE, COULD_NOT_ORDER_BY_START_DATE
+from core.constances import (
+    ORDER_DIRECTION, ORDER_BY, INVALID_SUBTYPE, COULD_NOT_ORDER_BY_START_DATE, COULD_NOT_USE_EVENT_FILTER
+)
+from core.lib import early_this_morning
 from core.models import Entity
 from graphql import GraphQLError
 
@@ -103,6 +106,12 @@ def conditional_tag_lists_filter(tag_lists, match_any):
     return filters
 
 
+def conditional_event_filter(date_filter):
+    if date_filter == 'previous':
+        return Q(event__start_date__lt=early_this_morning())
+    return Q(event__start_date__gte=early_this_morning())
+
+
 def resolve_entities(
         _,
         info,
@@ -112,6 +121,7 @@ def resolve_entities(
         subtype=None,
         subtypes=None,
         containerGuid=None,
+        eventFilter=None,
         tags=None,
         tagLists=None,
         matchStrategy='legacy',
@@ -180,6 +190,12 @@ def resolve_entities(
 
     if userGuid:
         entities = entities.filter(owner__id=userGuid)
+
+    if eventFilter:
+        if subtypes == ['event']:
+            entities = entities.filter(conditional_event_filter(eventFilter))
+        else:
+            raise GraphQLError(COULD_NOT_USE_EVENT_FILTER)
 
     # when page is selected change sorting and only return pages without parent
     if subtype and subtype == 'page':

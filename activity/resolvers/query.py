@@ -2,10 +2,11 @@ import logging
 
 from ariadne import ObjectType
 from graphql import GraphQLError
+from core.lib import early_this_morning
 from core.models import Entity
 from django.db.models import Q
 from django.db.models.functions import Coalesce
-from core.constances import ORDER_BY, ORDER_DIRECTION, COULD_NOT_ORDER_BY_START_DATE
+from core.constances import ORDER_BY, ORDER_DIRECTION, COULD_NOT_ORDER_BY_START_DATE, COULD_NOT_USE_EVENT_FILTER
 from core.resolvers.query_entities import conditional_tags_filter, conditional_tag_lists_filter
 
 query = ObjectType("Query")
@@ -67,6 +68,13 @@ def conditional_groups_filter(group_filter, user):
 
     return Q()
 
+
+def conditional_event_filter(date_filter):
+    if date_filter == 'previous':
+        return Q(event__start_date__lt=early_this_morning())
+    return Q(event__start_date__gte=early_this_morning())
+
+
 @query.field("activities")
 def resolve_activities(
         _,
@@ -78,6 +86,7 @@ def resolve_activities(
         tagLists=None,
         matchStrategy='legacy',
         groupFilter=None,
+        eventFilter=None,
         subtypes=None,
         orderBy=ORDER_BY.timePublished,
         orderDirection=ORDER_DIRECTION.desc,
@@ -144,6 +153,12 @@ def resolve_activities(
 
     if userGuid:
         qs = qs.filter(owner__id=userGuid)
+
+    if eventFilter:
+        if subtypes == ['event']:
+            qs = qs.filter(conditional_event_filter(eventFilter))
+        else:
+            raise GraphQLError(COULD_NOT_USE_EVENT_FILTER)
 
     qs = qs.order_by(*order).select_subclasses()
 

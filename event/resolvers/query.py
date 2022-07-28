@@ -1,26 +1,9 @@
 from ariadne import ObjectType
+from core.lib import early_this_morning
 from event.models import Event
 from django.db.models import Q
-from django.utils import timezone
 
 query = ObjectType("Query")
-
-
-def early_this_morning():
-    now = timezone.now()
-    return timezone.datetime(year=now.year,
-                             month=now.month,
-                             day=now.day,
-                             hour=0,
-                             minute=0,
-                             second=0,
-                             tzinfo=now.tzinfo)
-
-
-def conditional_date_filter(date_filter):
-    if date_filter == 'previous':
-        return Q(start_date__lt=early_this_morning())
-    return Q(start_date__gte=early_this_morning())
 
 
 def conditional_group_filter(container_guid):
@@ -29,6 +12,12 @@ def conditional_group_filter(container_guid):
     if container_guid:
         return Q(group__id=container_guid)
     return Q()
+
+
+def conditional_date_filter(date_filter):
+    if date_filter == 'previous':
+        return Q(start_date__lt=early_this_morning())
+    return Q(start_date__gte=early_this_morning())
 
 
 @query.field("events")
