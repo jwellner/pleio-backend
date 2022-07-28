@@ -1,5 +1,3 @@
-from graphql import GraphQLError
-
 from blog.models import Blog
 from core.constances import USER_ROLES
 from core.lib import clean_graphql_input
@@ -52,7 +50,8 @@ def resolve_add_blog(_, info, input):
         "entity": entity
     }
 
-def resolve_edit_blog(_, info, input):
+
+def resolve_edit_blog(_, info, input, draft=False):
     # pylint: disable=redefined-builtin
     # pylint: disable=too-many-branches
     # pylint: disable=too-many-statements
@@ -64,14 +63,16 @@ def resolve_edit_blog(_, info, input):
 
     shared.assert_authenticated(user)
     shared.assert_write_access(entity, user)
-    
+
+    shared.resolve_start_revision(entity)
+
     shared.resolve_update_tags(entity, clean_input)
 
     shared.resolve_update_access_id(entity, clean_input)
 
     shared.resolve_update_title(entity, clean_input)
 
-    shared.resolve_update_rich_description(entity, clean_input)
+    shared.resolve_update_rich_description(entity, clean_input, revision=True)
 
     shared.resolve_update_abstract(entity, clean_input)
 
@@ -92,6 +93,12 @@ def resolve_edit_blog(_, info, input):
         shared.resolve_update_time_created(entity, clean_input)
 
     shared.resolve_update_related_items(entity, clean_input)
+
+    shared.resolve_store_revision(entity)
+
+    if not draft:
+        shared.resolve_apply_revision(entity, entity.last_revision)
+
 
     entity.save()
 

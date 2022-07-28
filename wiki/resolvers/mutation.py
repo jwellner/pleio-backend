@@ -41,11 +41,10 @@ def resolve_add_wiki(_, info, input):
     entity = Wiki()
 
     entity.owner = user
-    shared.resolve_update_tags(entity, clean_input)
-
     entity.group = group
     entity.parent = parent
 
+    shared.resolve_update_tags(entity, clean_input)
     shared.resolve_add_access_id(entity, clean_input)
 
     shared.resolve_update_title(entity, clean_input)
@@ -64,7 +63,8 @@ def resolve_add_wiki(_, info, input):
         "entity": entity
     }
 
-def resolve_edit_wiki(_, info, input):
+
+def resolve_edit_wiki(_, info, input, draft=False):
     # pylint: disable=redefined-builtin
     # pylint: disable=too-many-branches
     # pylint: disable=too-many-statements
@@ -77,10 +77,12 @@ def resolve_edit_wiki(_, info, input):
     shared.assert_authenticated(user)
     shared.assert_write_access(entity, user)
 
+    shared.resolve_start_revision(entity)
+
     shared.resolve_update_tags(entity, clean_input)
     shared.resolve_update_access_id(entity, clean_input)
     shared.resolve_update_title(entity, clean_input)
-    shared.resolve_update_rich_description(entity, clean_input)
+    shared.resolve_update_rich_description(entity, clean_input, revision=True)
     shared.resolve_update_abstract(entity, clean_input)
 
     if 'containerGuid' in clean_input:
@@ -104,6 +106,11 @@ def resolve_edit_wiki(_, info, input):
         shared.resolve_update_owner(entity, clean_input)
 
         shared.resolve_update_time_created(entity, clean_input)
+
+    shared.resolve_store_revision(entity)
+
+    if not draft:
+        shared.resolve_apply_revision(entity, entity.last_revision)
 
     entity.save()
 

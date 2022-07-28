@@ -66,6 +66,10 @@ class Page(Entity, AttachmentMixin):
     def rich_fields(self):
         return [self.rich_description]
 
+    @property
+    def has_revisions(self):
+        return self.page_type == 'text'
+
 
 class Row(models.Model):
     """

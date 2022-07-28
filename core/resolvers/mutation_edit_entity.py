@@ -14,7 +14,7 @@ from news.resolvers.mutation import resolve_edit_news
 from question.resolvers.mutation import resolve_edit_question
 
 
-def resolve_edit_entity(_, info, input):
+def resolve_edit_entity(_, info, input, draft=False):
     # pylint: disable=redefined-builtin
 
     clean_input = clean_graphql_input(input)
@@ -29,7 +29,7 @@ def resolve_edit_entity(_, info, input):
         return resolve_edit_comment(_, info, input)
 
     if entity._meta.model_name == "blog":
-        return resolve_edit_blog(_, info, input)
+        return resolve_edit_blog(_, info, input, draft)
 
     if entity._meta.model_name == "event":
         return resolve_edit_event(_, info, input)
@@ -44,10 +44,10 @@ def resolve_edit_entity(_, info, input):
         return resolve_edit_task(_, info, input)
 
     if entity._meta.model_name == "wiki":
-        return resolve_edit_wiki(_, info, input)
+        return resolve_edit_wiki(_, info, input, draft)
 
     if entity._meta.model_name == "news":
-        return resolve_edit_news(_, info, input)
+        return resolve_edit_news(_, info, input, draft)
 
     if entity._meta.model_name == "question":
         return resolve_edit_question(_, info, input)

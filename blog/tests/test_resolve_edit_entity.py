@@ -39,34 +39,7 @@ class EditBlogTestCase(PleioTenantTestCase):
         self.relatedBlog = mixer.blend(Blog)
         self.relatedNews = mixer.blend(News)
 
-    def tearDown(self):
-        self.blog.delete()
-        self.authenticatedUser.delete()
-        self.user2.delete()
-        self.admin.delete()
-        self.group.delete()
-
-    def test_edit_blog(self):
-        variables = {
-            "input": {
-                "guid": self.blog.guid,
-                "title": "My first Event",
-                "richDescription": "richDescription",
-                "accessId": 0,
-                "writeAccessId": 0,
-                "tags": ["tag1", "tag2"],
-                "isRecommended": True,
-                "timeCreated": "2018-12-10T23:00:00.000Z",
-                "groupGuid": self.group.guid,
-                "ownerGuid": self.user2.guid,
-                "timePublished": None,
-                "scheduleArchiveEntity": str(timezone.localtime() + timezone.timedelta(days=10)),
-                "scheduleDeleteEntity": str(timezone.localtime() + timezone.timedelta(days=20)),
-                "relatedItems": [self.relatedBlog.guid, self.relatedNews.guid]
-            }
-        }
-
-        mutation = """
+        self.mutation = """
             fragment BlogParts on Blog {
                 title
                 richDescription
@@ -94,11 +67,15 @@ class EditBlogTestCase(PleioTenantTestCase):
                         guid
                     }
                 }
-
                 isRecommended
+                revision {
+                    content {
+                        richDescription
+                    }
+                }
             }
-            mutation ($input: editEntityInput!) {
-                editEntity(input: $input) {
+            mutation ($input: editEntityInput!, $draft: Boolean) {
+                editEntity(input: $input, draft: $draft) {
                     entity {
                     guid
                     status
@@ -108,12 +85,53 @@ class EditBlogTestCase(PleioTenantTestCase):
             }
         """
 
+        self.variables = {
+            "input": {
+                "guid": self.blog.guid,
+                "title": "My first Event",
+                "richDescription": "richDescription",
+                "accessId": 0,
+                "writeAccessId": 0,
+                "tags": ["tag1", "tag2"],
+                "isRecommended": True,
+                "timeCreated": "2018-12-10T23:00:00.000Z",
+                "groupGuid": self.group.guid,
+                "ownerGuid": self.user2.guid
+            }
+        }
+
+    def tearDown(self):
+        self.blog.delete()
+        self.authenticatedUser.delete()
+        self.user2.delete()
+        self.admin.delete()
+        self.group.delete()
+
+    def test_edit_blog(self):
+        variables = {
+            "input": {
+                "guid": self.blog.guid,
+                "title": "My first Event",
+                "richDescription": "richDescription",
+                "accessId": 0,
+                "writeAccessId": 0,
+                "tags": ["tag1", "tag2"],
+                "isRecommended": True,
+                "timeCreated": "2018-12-10T23:00:00.000Z",
+                "groupGuid": self.group.guid,
+                "ownerGuid": self.user2.guid,
+                "timePublished": None,
+                "scheduleArchiveEntity": str(timezone.localtime() + timezone.timedelta(days=10)),
+                "scheduleDeleteEntity": str(timezone.localtime() + timezone.timedelta(days=20)),
+                "relatedItems": [self.relatedBlog.guid, self.relatedNews.guid]
+            }
+        }
         self.graphql_client.force_login(self.authenticatedUser)
-        result = self.graphql_client.post(mutation, variables)
+        result = self.graphql_client.post(self.mutation, variables)
 
         entity = result["data"]["editEntity"]["entity"]
         self.assertEqual(entity["title"], variables["input"]["title"])
-        self.assertEqual(entity["richDescription"], variables["input"]["richDescription"])
+        self.assertEqual(entity["richDescription"], variables['input']['richDescription'])
         self.assertEqual(entity["tags"], variables["input"]["tags"])
         self.assertEqual(entity["isRecommended"], False)  # only admin can set isRecommended
         self.assertEqual(entity["group"], None)
@@ -133,61 +151,27 @@ class EditBlogTestCase(PleioTenantTestCase):
         self.assertEqual(entity["tags"], self.blog.tags)
         self.assertEqual(entity["isRecommended"], self.blog.is_recommended)
 
+    def test_edit_blog_draft(self):
+        self.variables['draft'] = True
+
+        self.graphql_client.force_login(self.authenticatedUser)
+        result = self.graphql_client.post(self.mutation, self.variables)
+        entity = result['data']['editEntity']['entity']
+
+        # not stored on the entity itself
+        self.assertNotEqual(entity['richDescription'], self.variables['input']['richDescription'])
+
+        # but in a revision
+        self.assertEqual(entity['revision']['content']['richDescription'], self.variables['input']['richDescription'])
+
     def test_edit_blog_by_admin(self):
-        variables = {
-            "input": {
-                "guid": self.blog.guid,
-                "title": "My first Event",
-                "richDescription": "richDescription",
-                "accessId": 0,
-                "writeAccessId": 0,
-                "tags": ["tag1", "tag2"],
-                "isRecommended": True,
-                "timeCreated": "2018-12-10T23:00:00.000Z",
-                "groupGuid": self.group.guid,
-                "ownerGuid": self.user2.guid
-            }
-        }
-
-        mutation = """
-            fragment BlogParts on Blog {
-                title
-                richDescription
-                timeCreated
-                timeUpdated
-                accessId
-                writeAccessId
-                canEdit
-                tags
-                url
-                inGroup
-                statusPublished
-                group {
-                    guid
-                }
-                owner {
-                    guid
-                }
-
-                isRecommended
-            }
-            mutation ($input: editEntityInput!) {
-                editEntity(input: $input) {
-                    entity {
-                    guid
-                    status
-                    ...BlogParts
-                    }
-                }
-            }
-        """
-
+        variables = self.variables
         self.graphql_client.force_login(self.admin)
-        result = self.graphql_client.post(mutation, variables)
+        result = self.graphql_client.post(self.mutation, variables)
 
         entity = result["data"]["editEntity"]["entity"]
         self.assertEqual(entity["title"], variables["input"]["title"])
-        self.assertEqual(entity["richDescription"], variables["input"]["richDescription"])
+        self.assertEqual(entity["richDescription"], variables['input']['richDescription'])
         self.assertEqual(entity["tags"], variables["input"]["tags"])
         self.assertEqual(entity["isRecommended"], True)
         self.assertEqual(entity["group"]["guid"], self.group.guid)
@@ -206,124 +190,30 @@ class EditBlogTestCase(PleioTenantTestCase):
         self.assertEqual(entity["timeCreated"], "2018-12-10T23:00:00+00:00")
 
     def test_edit_blog_group_null_by_admin(self):
-        variables = {
-            "input": {
-                "guid": self.blog.guid,
-                "title": "My first Event",
-                "richDescription": "richDescription",
-                "accessId": 0,
-                "writeAccessId": 0,
-                "tags": ["tag1", "tag2"],
-                "isRecommended": True,
-                "timeCreated": "2018-12-10T23:00:00.000Z",
-                "groupGuid": self.group.guid,
-                "ownerGuid": self.user2.guid
-            }
-        }
-
-        mutation = """
-            fragment BlogParts on Blog {
-                title
-                richDescription
-                timeCreated
-                timeUpdated
-                accessId
-                writeAccessId
-                canEdit
-                tags
-                url
-                inGroup
-                group {
-                    guid
-                }
-                owner {
-                    guid
-                }
-
-                isRecommended
-            }
-            mutation ($input: editEntityInput!) {
-                editEntity(input: $input) {
-                    entity {
-                    guid
-                    status
-                    ...BlogParts
-                    }
-                }
-            }
-        """
-
         self.graphql_client.force_login(self.admin)
-        result = self.graphql_client.post(mutation, variables)
+        result = self.graphql_client.post(self.mutation, self.variables)
 
         entity = result["data"]["editEntity"]["entity"]
         self.assertEqual(entity["group"]["guid"], self.group.guid)
 
-        variables["input"]["groupGuid"] = None
+        self.variables["input"]["groupGuid"] = None
 
-        result = self.graphql_client.post(mutation, variables)
+        result = self.graphql_client.post(self.mutation, self.variables)
         entity = result["data"]["editEntity"]["entity"]
 
         self.assertIsNone(entity["group"])
 
     def test_edit_blog_set_future_published(self):
-        variables = {
-            "input": {
-                "guid": self.blog.guid,
-                "title": "My first Event",
-                "richDescription": "richDescription",
-                "accessId": 0,
-                "writeAccessId": 0,
-                "tags": ["tag1", "tag2"],
-                "isRecommended": True,
-                "timeCreated": "2018-12-10T23:00:00.000Z",
-                "groupGuid": self.group.guid,
-                "ownerGuid": self.user2.guid,
-                "timePublished": "4018-12-10T23:00:00.000Z"
-            }
-        }
-
-        mutation = """
-            fragment BlogParts on Blog {
-                title
-                richDescription
-                timeCreated
-                timeUpdated
-                accessId
-                writeAccessId
-                canEdit
-                tags
-                timePublished
-                statusPublished
-                url
-                inGroup
-                group {
-                    guid
-                }
-                owner {
-                    guid
-                }
-
-                isRecommended
-            }
-            mutation ($input: editEntityInput!) {
-                editEntity(input: $input) {
-                    entity {
-                    guid
-                    status
-                    ...BlogParts
-                    }
-                }
-            }
-        """
+        variables = self.variables
+        variables["input"]["timePublished"] = "4018-12-10T23:00:00.000Z"
 
         self.graphql_client.force_login(self.authenticatedUser)
 
-        result = self.graphql_client.post(mutation, variables)
+        result = self.graphql_client.post(self.mutation, variables)
         entity = result["data"]["editEntity"]["entity"]
 
         self.assertEqual(entity["title"], variables["input"]["title"])
-        self.assertEqual(entity["richDescription"], variables["input"]["richDescription"])
+        self.assertEqual(entity["richDescription"], variables['input']['richDescription'])
         self.assertEqual(entity["tags"], variables["input"]["tags"])
         self.assertEqual(entity["isRecommended"], False)  # only admin can set isRecommended
         self.assertEqual(entity["group"], None)
@@ -398,7 +288,7 @@ class EditBlogTestCase(PleioTenantTestCase):
 
         entity = result["data"]["editEntity"]["entity"]
         self.assertEqual(entity["abstract"], None)
-        self.assertEqual(entity["excerpt"], "description")
+        self.assertEqual(entity["excerpt"], variables['input']['richDescription'])
 
     def test_edit_abstract_too_long(self):
         variables = {
@@ -458,7 +348,7 @@ class EditBlogTestCase(PleioTenantTestCase):
 
         entity = result["data"]["editEntity"]["entity"]
         self.assertEqual(entity["owner"]["guid"], self.user2.guid)
-        
-        self.blog_multiple_read_access.refresh_from_db()    
+
+        self.blog_multiple_read_access.refresh_from_db()
         self.assertEqual(self.blog_multiple_read_access.read_access, [ACCESS_TYPE.public, ACCESS_TYPE.user.format(self.user2.id)])
         self.assertEqual(self.blog_multiple_read_access.write_access, [ACCESS_TYPE.user.format(self.user2.id)])

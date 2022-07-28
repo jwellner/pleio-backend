@@ -67,9 +67,14 @@ class EditNewsTestCase(PleioTenantTestCase):
                         guid
                     }
                 }
+                revision {
+                    content {
+                        richDescription
+                    }
+                }
             }
-            mutation ($input: editEntityInput!) {
-                editEntity(input: $input) {
+            mutation ($input: editEntityInput!, $draft: Boolean) {
+                editEntity(input: $input, draft: $draft) {
                     entity {
                     guid
                     status
@@ -87,7 +92,7 @@ class EditNewsTestCase(PleioTenantTestCase):
 
         entity = result["data"]["editEntity"]["entity"]
         self.assertEqual(entity["title"], variables["input"]["title"])
-        self.assertEqual(entity["richDescription"], variables["input"]["richDescription"])
+        self.assertEqual(entity["richDescription"], variables["input"]['richDescription']) #rich_description is changed when published
         self.assertEqual(entity["tags"], variables["input"]["tags"])
         self.assertEqual(entity["isFeatured"], False) # Only editor or admin can set isFeatured
         self.assertEqual(entity["source"], variables["input"]["source"])
@@ -108,8 +113,20 @@ class EditNewsTestCase(PleioTenantTestCase):
         self.assertDateEqual(entity["scheduleArchiveEntity"], str(self.news.schedule_archive_after))
         self.assertDateEqual(entity["scheduleDeleteEntity"], str(self.news.schedule_delete_after))
 
-    def test_edit_news_editor(self):
+    def test_edit_news_draft(self):
+        self.data['draft'] = True
 
+        self.graphql_client.force_login(self.authenticatedUser)
+        result = self.graphql_client.post(self.mutation, self.data)
+        entity = result["data"]["editEntity"]["entity"]
+
+        # Not stored on the entity.
+        self.assertNotEqual(entity['richDescription'], self.data['input']['richDescription'])
+
+        # But at the revision.
+        self.assertEqual(entity['revision']['content']['richDescription'], self.data['input']['richDescription'])
+
+    def test_edit_news_editor(self):
         variables = self.data
         variables["input"]["title"] = "Update door editor"
 
@@ -118,7 +135,7 @@ class EditNewsTestCase(PleioTenantTestCase):
 
         entity = result["data"]["editEntity"]["entity"]
         self.assertEqual(entity["title"], variables["input"]["title"])
-        self.assertEqual(entity["richDescription"], variables["input"]["richDescription"])
+        self.assertEqual(entity["richDescription"], variables["input"]['richDescription'])
         self.assertEqual(entity["tags"], variables["input"]["tags"])
         self.assertEqual(entity["isFeatured"], True)
         self.assertEqual(entity["source"], variables["input"]["source"])
@@ -144,7 +161,7 @@ class EditNewsTestCase(PleioTenantTestCase):
         result = self.graphql_client.post(self.mutation, variables)
 
         entity = result["data"]["editEntity"]["entity"]
-        self.assertEqual(entity["richDescription"], variables["input"]["richDescription"])
+        self.assertEqual(entity["richDescription"], variables["input"]['richDescription'])
         self.assertEqual(entity["tags"], variables["input"]["tags"])
         self.assertEqual(entity["isFeatured"], True)
         self.assertEqual(entity["source"], variables["input"]["source"])
