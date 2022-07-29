@@ -3,6 +3,7 @@ from graphql import GraphQLError
 from core.constances import INVALID_NAME
 from core.lib import get_base_url
 
+
 def get_url(obj):
     prefix = ''
 

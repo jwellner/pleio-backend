@@ -176,10 +176,42 @@ class TestAttendeesSigningUpForSubevents(PleioTenantTestCase):
     def setUp(self):
         super().setUp()
         self.admin = AdminFactory()
-        self.event = Event.objects.create(title="Parent event",
-                                          owner=self.admin,
-                                          start_date=timezone.now(),
-                                          end_date=timezone.now() + timezone.timedelta(hours=8))
+        self.event = EventFactory(title="Parent event",
+                                  owner=self.admin,
+                                  start_date=timezone.now(),
+                                  end_date=timezone.now() + timezone.timedelta(hours=8))
+
+        self.slot1session1 = EventFactory(parent=self.event,
+                                          title="Session 1",
+                                          start_date=self.event.start_date)
+        self.slot1session2 = EventFactory(parent=self.event,
+                                          title="Session2 same time",
+                                          start_date=self.slot1session1.start_date)
+        self.slot2session1 = EventFactory(parent=self.event,
+                                          title="Session 1",
+                                          start_date=self.slot1session1.end_date)
+
+        self.event.slots_available = [
+            create_slot("Slot 1", self.slot1session1, self.slot1session2),
+            create_slot("Slot 2", self.slot2session1)
+        ]
+        self.event.save()
+
+        self.query = """
+        query ParentEventQuery($guid: String) {
+            entity(guid: $guid) {
+                ... on Event {                
+                    slotsAvailable {
+                        name
+                        alreadySignedUpInSlot
+                    }
+                }
+            }
+        }
+        """
+        self.variables = {
+            'guid': self.event.guid
+        }
 
     def test_allow_signup_for_multiple_sub_events_outside_slots(self):
         session1 = Event.objects.create(parent=self.event,
@@ -199,65 +231,72 @@ class TestAttendeesSigningUpForSubevents(PleioTenantTestCase):
         session2.attendees.create(email=user.email, user=user, state='accept')
 
     def test_disallow_signup_for_multiple_sub_events_at_the_same_slot(self):
-        slot1session1 = EventFactory(parent=self.event,
-                                     title="Session 1",
-                                     start_date=self.event.start_date)
-        slot1session2 = EventFactory(parent=self.event,
-                                     title="Session2 same time",
-                                     start_date=slot1session1.start_date)
-        slot2session1 = EventFactory(parent=self.event,
-                                     title="Session 1",
-                                     start_date=slot1session1.end_date)
-        self.event.slots_available = [
-            create_slot("Slot 1", slot1session1, slot1session2),
-            create_slot("Slot 2", slot2session1)
-        ]
-        self.event.save()
-
         user1 = UserFactory(name="User one")
         user2 = UserFactory(name="Another user")
         email1 = "User1@example.com"
         email2 = "User2@example.com"
-        EventAttendee.objects.create(event=slot1session1,
+        EventAttendee.objects.create(event=self.slot1session1,
                                      email=user1.email,
                                      user=user1,
                                      state="accept")
-        EventAttendee.objects.create(event=slot1session1,
+        EventAttendee.objects.create(event=self.slot1session1,
                                      email=email1,
                                      state="accept")
 
         # another user is allowed to signup.
-        EventAttendee.objects.create(event=slot1session1,
+        EventAttendee.objects.create(event=self.slot1session1,
                                      email=user2.email,
                                      user=user2,
                                      state="accept")
-        EventAttendee.objects.create(event=slot1session1,
+        EventAttendee.objects.create(event=self.slot1session1,
                                      email=email2,
                                      state="accept")
 
         # I am not allowed to signup for another session at the same slot.
         try:
-            EventAttendee.objects.create(event=slot1session2,
+            EventAttendee.objects.create(event=self.slot1session2,
                                          email=user1.email,
                                          user=user1,
                                          state="accept")
-            self.fail("Unexpectedly not raising an exception for user at session %s" % slot1session2.title)
+            self.fail("Unexpectedly not raising an exception for user at session %s" % self.slot1session2.title)
         except ValidationError as e:
             pass
 
         try:
-            EventAttendee.objects.create(event=slot1session2,
+            EventAttendee.objects.create(event=self.slot1session2,
                                          email=email1,
                                          state="accept")
-            self.fail("Unexpectedly not raising an exception for email at session %s" % slot1session2.title)
+            self.fail("Unexpectedly not raising an exception for email at session %s" % self.slot1session2.title)
         except ValidationError as e:
             pass
 
         # I am allowed to signup for a session at another block
-        EventAttendee.objects.create(event=slot2session1,
+        EventAttendee.objects.create(event=self.slot2session1,
                                      email=user1.email,
                                      user=user1,
                                      state="accept")
-        EventAttendee.objects.create(event=slot2session1,
+        EventAttendee.objects.create(event=self.slot2session1,
                                      email=email1,
                                      state="accept")
+
+    def test_already_signed_up_in_slot(self):
+        # Given.
+        user1 = UserFactory(name="User one")
+        user2 = UserFactory(name="Another user")
+
+        # When.
+        EventAttendee.objects.create(event=self.slot1session2,
+                                     email=user1.email,
+                                     user=user1,
+                                     state="accept")
+
+        # Then.
+        self.graphql_client.force_login(user1)
+        result = self.graphql_client.post(self.query, self.variables)
+        self.assertTrue(result['data']['entity']['slotsAvailable'][0]['alreadySignedUpInSlot'])
+        self.assertFalse(result['data']['entity']['slotsAvailable'][1]['alreadySignedUpInSlot'])
+
+        self.graphql_client.force_login(user2)
+        result = self.graphql_client.post(self.query, self.variables)
+        self.assertFalse(result['data']['entity']['slotsAvailable'][0]['alreadySignedUpInSlot'])
+        self.assertFalse(result['data']['entity']['slotsAvailable'][1]['alreadySignedUpInSlot'])
