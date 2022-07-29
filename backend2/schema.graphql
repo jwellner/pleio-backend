@@ -72,6 +72,7 @@ type addColumnPayload {
 type EventSlot {
     name: String
     subEventGuids: [String]
+    alreadySignedUpInSlot: Boolean
 }
 
 input EventSlotInput {
