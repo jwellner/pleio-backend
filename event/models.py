@@ -1,3 +1,4 @@
+from django.contrib.postgres import fields
 from django.core.exceptions import ValidationError
 
 from core import config
@@ -30,6 +31,7 @@ class Event(Entity,
 
     parent = models.ForeignKey('self', blank=True, null=True, related_name='children', on_delete=models.CASCADE)
     slots_available = models.JSONField(default=list)
+    shared_via_slot = fields.ArrayField(models.CharField(max_length=40), default=list)
 
     start_date = models.DateTimeField(null=True, blank=True)
     end_date = models.DateTimeField(null=True, blank=True)
@@ -139,6 +141,36 @@ class Event(Entity,
 
     def is_in_same_slot(self, other):
         return bool([x for x in self.get_slot_ids() if x in other.get_slot_ids()])
+
+    def finalize_subevent(self):
+        if not self.parent:
+            return
+
+        self.is_archived = self.parent.is_archived
+        self.published = self.parent.published
+        self.read_access = self.parent.read_access
+        self.write_access = self.parent.write_access
+        self.owner = self.parent.owner
+        self.group = self.parent.group
+
+    def finalize_slots_available(self):
+        if self.parent:
+            return
+        shared_slots = {}
+        for slot in self.slots_available:
+            if 'subEventGuids' not in slot:
+                continue
+            for guid in slot['subEventGuids']:
+                shared_slots[guid] = []
+                for shared_with in slot['subEventGuids']:
+                    shared_slots[guid].append(shared_with)
+
+        # Reset previous setting
+        Event.objects.filter(parent=self).update(shared_via_slot=[])
+
+        # Apply new setting
+        for guid, shared_via_slot in shared_slots.items():
+            Event.objects.filter(id=guid).update(shared_via_slot=shared_via_slot)
 
 
 class EventAttendee(models.Model):
@@ -262,14 +294,8 @@ def event_post_save(sender, instance, **kwargs):
 @receiver(pre_save, sender=Event)
 def event_pre_save(sender, instance, **kwargs):
     # pylint: disable=unused-argument
-
-    if instance.parent:
-        instance.is_archived = instance.parent.is_archived
-        instance.published = instance.parent.published
-        instance.read_access = instance.parent.read_access
-        instance.write_access = instance.parent.write_access
-        instance.owner = instance.parent.owner
-        instance.group = instance.parent.group
+    instance.finalize_subevent()
+    instance.finalize_slots_available()
 
 
 # When a subevent is edited and saved, the fields dependent on the parent are updated accordingly

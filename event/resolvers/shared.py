@@ -1,8 +1,8 @@
 from graphql import GraphQLError
 
 from core.constances import INVALID_DATE, COULD_NOT_ADD, SUBEVENT_OPERATION, NON_SUBEVENT_OPERATION
-from core.lib import NumberIncrement
 from event.mail_builders.delete_event_attendees import submit_delete_event_attendees_mail
+from event.models import Event, EventAttendee
 
 
 def resolve_update_startenddate(entity, clean_input):
@@ -89,3 +89,11 @@ def resolve_delete_attendee(attendee):
     submit_delete_event_attendees_mail(event=event,
                                        mail_info=mail_info,
                                        user=mail_user)
+
+
+def attending_events(info):
+    user = info.context["request"].user
+    if user.is_authenticated:
+        return [str(pk) for pk in EventAttendee.objects.filter(user=user).values_list('event__id', flat=True)]
+    # TODO: read from stored email in session?
+    return []

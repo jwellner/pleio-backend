@@ -5,7 +5,7 @@ from core.constances import ACCESS_TYPE
 from event.models import Event
 
 
-def EventFactory(**kwargs):
+def EventFactory(**kwargs) -> Event:
     if 'owner' not in kwargs:
         assert ('parent' in kwargs) and kwargs['parent'].owner, "Provide an owner for the event."
         kwargs['owner'] = kwargs['parent'].owner
