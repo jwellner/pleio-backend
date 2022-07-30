@@ -922,6 +922,7 @@ type Event implements Entity {
     children: [Event]
     slots: [String]
     slotsAvailable: [EventSlot]
+    alreadySignedUpInSlot: Boolean
     parent: Event
     inGroup: Boolean
     group: Group

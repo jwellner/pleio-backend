@@ -182,13 +182,13 @@ class TestAttendeesSigningUpForSubevents(PleioTenantTestCase):
                                   end_date=timezone.now() + timezone.timedelta(hours=8))
 
         self.slot1session1 = EventFactory(parent=self.event,
-                                          title="Session 1",
+                                          title="Slot 1 Session 1",
                                           start_date=self.event.start_date)
         self.slot1session2 = EventFactory(parent=self.event,
-                                          title="Session2 same time",
+                                          title="Slot 1 Session2",
                                           start_date=self.slot1session1.start_date)
         self.slot2session1 = EventFactory(parent=self.event,
-                                          title="Session 1",
+                                          title="Slot 2 Session 1",
                                           start_date=self.slot1session1.end_date)
 
         self.event.slots_available = [
@@ -197,10 +197,19 @@ class TestAttendeesSigningUpForSubevents(PleioTenantTestCase):
         ]
         self.event.save()
 
+        self.slot1session1.refresh_from_db()
+        self.slot1session2.refresh_from_db()
+        self.slot2session1.refresh_from_db()
+
         self.query = """
         query ParentEventQuery($guid: String) {
             entity(guid: $guid) {
-                ... on Event {                
+                ... on Event {
+                    children {
+                        guid
+                        title
+                        alreadySignedUpInSlot
+                    }                
                     slotsAvailable {
                         name
                         alreadySignedUpInSlot
@@ -284,19 +293,32 @@ class TestAttendeesSigningUpForSubevents(PleioTenantTestCase):
         user1 = UserFactory(name="User one")
         user2 = UserFactory(name="Another user")
 
-        # When.
+        # When a user attends a subevent
         EventAttendee.objects.create(event=self.slot1session2,
                                      email=user1.email,
                                      user=user1,
                                      state="accept")
 
-        # Then.
+        # And the attending user requests the event list
         self.graphql_client.force_login(user1)
         result = self.graphql_client.post(self.query, self.variables)
+        children = {c['title']: c['alreadySignedUpInSlot'] for c in result['data']['entity']['children']}
+
+        # Then: slot1 sessions no longer available
         self.assertTrue(result['data']['entity']['slotsAvailable'][0]['alreadySignedUpInSlot'])
         self.assertFalse(result['data']['entity']['slotsAvailable'][1]['alreadySignedUpInSlot'])
+        self.assertTrue(children[self.slot1session1.title])
+        self.assertTrue(children[self.slot1session2.title])
+        self.assertFalse(children[self.slot2session1.title])
 
+        # When logged in as another user
         self.graphql_client.force_login(user2)
         result = self.graphql_client.post(self.query, self.variables)
+        children = {c['title']: c['alreadySignedUpInSlot'] for c in result['data']['entity']['children']}
+
+        # Then all is clear.
         self.assertFalse(result['data']['entity']['slotsAvailable'][0]['alreadySignedUpInSlot'])
         self.assertFalse(result['data']['entity']['slotsAvailable'][1]['alreadySignedUpInSlot'])
+        self.assertFalse(children[self.slot1session1.title])
+        self.assertFalse(children[self.slot1session2.title])
+        self.assertFalse(children[self.slot2session1.title])
