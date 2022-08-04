@@ -5,6 +5,7 @@ from django.db.models import Q, Case, When
 from core.constances import ENTITY_STATUS
 from core.lib import datetime_isoformat
 from event.models import Event, EventAttendee
+from event.resolvers import shared as event_shared
 from core.constances import ATTENDEE_ORDER_BY, ORDER_DIRECTION
 
 
@@ -50,9 +51,24 @@ def resolve_parent(obj, info):
 
 
 @event.field('slotsAvailable')
-def resolve_slots_available(obj, info):
+def resolve_slots_available(obj: Event, info):
     # pylint: disable=unused-argument
-    return obj.slots_available.all()
+    return obj.slots_available
+
+
+@event.field('slots')
+def resolve_slots(obj: Event, info):
+    # pylint: disable=unused-argument
+    return [slot['name'] for slot in obj.get_slots()]
+
+
+@event.field('alreadySignedUpInSlot')
+def resolve_slot_already_signed_in_for_slot(obj, info):
+    if not obj.parent:
+        return None
+
+    attending_events = event_shared.attending_events(info)
+    return bool([n for n in obj.shared_via_slot if n in attending_events])
 
 
 @event.field("inGroup")

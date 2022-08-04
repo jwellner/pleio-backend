@@ -5,7 +5,7 @@ from django.utils import timezone
 from user.factories import UserFactory
 from blog.models import Blog
 from event.models import Event
-from core.constances import ACCESS_TYPE, COULD_NOT_ORDER_BY_START_DATE
+from core.constances import ACCESS_TYPE, COULD_NOT_ORDER_BY_START_DATE, COULD_NOT_USE_EVENT_FILTER
 from mixer.backend.django import mixer
 
 
@@ -384,8 +384,22 @@ class ActivitiesEventsTestCase(PleioTenantTestCase):
         )
 
         self.query = """
-            query ActivityList($offset: Int!, $limit: Int!, $subtypes: [String!], $orderBy: OrderBy, $orderDirection: OrderDirection) {
-                activities(offset: $offset, limit: $limit, subtypes: $subtypes, orderBy: $orderBy, orderDirection: $orderDirection) {
+            query ActivityList(
+                $offset: Int!,
+                $limit: Int!,
+                $subtypes: [String!],
+                $orderBy: OrderBy,
+                $orderDirection: OrderDirection,
+                $eventFilter: EventFilter
+            ) {
+                activities(
+                    offset: $offset,
+                    limit: $limit,
+                    subtypes: $subtypes,
+                    orderBy: $orderBy,
+                    orderDirection: $orderDirection,
+                    eventFilter: $eventFilter) 
+                {
                     total
                     edges {
                         guid
@@ -445,7 +459,7 @@ class ActivitiesEventsTestCase(PleioTenantTestCase):
         result = self.graphql_client.post(self.query, variables)
         self.assertEqual(result["data"]["activities"]["edges"][0]["entity"]["guid"], self.event_5_days_ago.guid)
 
-    def test_entities_order_blog_events_by_start_date_desc(self):
+    def test_entities_blog_event_order_by_start_date_desc(self):
         variables = {
             "limit": 20,
             "offset": 0,
@@ -455,5 +469,46 @@ class ActivitiesEventsTestCase(PleioTenantTestCase):
         }
 
         with self.assertGraphQlError(COULD_NOT_ORDER_BY_START_DATE):
+            self.graphql_client.force_login(self.user2)
+            self.graphql_client.post(self.query, variables)
+
+
+    def test_entities_filter_by_upcoming(self):
+        variables = {
+            "limit": 20,
+            "offset": 0,
+            "subtypes": ['event'],
+            "eventFilter": 'upcoming'
+        }
+
+        self.graphql_client.force_login(self.user2)
+        result = self.graphql_client.post(self.query, variables)
+        self.assertEqual(len(result["data"]["activities"]["edges"]), 2)
+        self.assertEqual(result["data"]["activities"]["edges"][0]["entity"]["guid"], self.event_in_6_days.guid)
+
+
+    def test_entities_filter_by_previous(self):
+        variables = {
+            "limit": 20,
+            "offset": 0,
+            "subtypes": ['event'],
+            "eventFilter": 'previous'
+        }
+
+        self.graphql_client.force_login(self.user2)
+        result = self.graphql_client.post(self.query, variables)
+        self.assertEqual(len(result["data"]["activities"]["edges"]), 2)
+        self.assertEqual(result["data"]["activities"]["edges"][0]["entity"]["guid"], self.event_3_days_ago.guid)
+
+
+    def test_entities_blog_event_filter_by_previous(self):
+        variables = {
+            "limit": 20,
+            "offset": 0,
+            "subtypes": ['event', 'blog'],
+            "eventFilter": 'previous'
+        }
+
+        with self.assertGraphQlError(COULD_NOT_USE_EVENT_FILTER):
             self.graphql_client.force_login(self.user2)
             self.graphql_client.post(self.query, variables)

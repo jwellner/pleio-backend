@@ -21,6 +21,7 @@ from .query_trending import resolve_trending
 from .query_users import resolve_users
 from .query_users_by_birth_date import resolve_users_by_birth_date
 from .query_viewer import resolve_viewer
+from .query_revisions import resolve_revisions
 from core.constances import USER_NOT_MEMBER_OF_GROUP, USER_ROLES
 
 query = ObjectType("Query")
@@ -50,6 +51,7 @@ query.set_field("top", resolve_top)
 query.set_field("filters", resolve_filters)
 query.set_field("tags", resolve_list_tags)
 query.set_field("viewer", resolve_viewer)
+query.set_field("revisions", resolve_revisions)
 
 
 @query.field("entity")

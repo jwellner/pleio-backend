@@ -62,13 +62,6 @@ class AddEventTestCase(PleioTenantTestCase):
                 parent {
                     guid
                 }
-                slot {
-                    name,
-                }
-                slotsAvailable {
-                    id
-                    name
-                }
                 hasChildren
                 timeCreated
                 timeUpdated
@@ -195,14 +188,6 @@ class AddEventTestCase(PleioTenantTestCase):
         entity = result["data"]["addEntity"]["entity"]
         event = Event.objects.get(id=entity["guid"])
         self.assertTrue(event.attachments.filter(id=attachment.id).exists())
-
-    def test_add_main_event_with_slot_should_fail(self):
-        variables = self.data
-        variables['input']['slot'] = {'id': 1}
-
-        with self.assertGraphQlError('subevent_only_operation'):
-            self.graphql_client.force_login(self.authenticated_user)
-            self.graphql_client.post(self.mutation, variables)
 
     def test_add_minimal_entity(self):
         variables = {

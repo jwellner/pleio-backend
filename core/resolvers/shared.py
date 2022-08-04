@@ -11,6 +11,7 @@ from core.constances import (ACCESS_TYPE, COULD_NOT_FIND, COULD_NOT_FIND_GROUP,
 from core.lib import (access_id_to_acl, entity_access_id, html_to_text,
                       tenant_schema)
 from core.models import EntityViewCount, Group
+from core.models.revision import Revision
 from core.utils.convert import tiptap_to_text, truncate_rich_description
 from core.utils.entity import load_entity_by_id
 from file.models import FileFolder
@@ -60,16 +61,14 @@ def resolve_entity_featured(obj, info):
 
 def resolve_entity_related_items(obj, info):
     # pylint: disable=unused-argument
-
     related = []
-
-    for item in obj.related_items:
-        entity = load_entity_by_id(item, [Blog, News], fail_if_not_found=False)
-        if entity:
-            related.append(entity)
+    if obj.related_items:
+        for item in obj.related_items:
+            entity = load_entity_by_id(item, [Blog, News], fail_if_not_found=False)
+            if entity:
+                related.append(entity)
 
     total = len(related)
-
     return {
         'total': total,
         'edges': related
@@ -270,6 +269,29 @@ def resolve_add_related_items(entity, clean_input):
     resolve_update_related_items(entity, clean_input)
 
 
+def resolve_entity_revision(obj, info):
+    # pylint: disable=unused-argument
+    return obj.last_revision
+
+
+def resolve_start_revision(entity):
+    if not entity.last_revision:
+        revision = Revision()
+        revision.object = entity
+        entity.last_revision = revision
+
+
+def resolve_store_revision(entity):
+    revision = entity.last_revision
+    revision.save()
+
+
+def resolve_apply_revision(entity, revision):
+    if revision:
+        entity.rich_description = revision.content.get("richDescription")
+        entity.last_revision = None
+
+
 # Update
 def resolve_update_related_items(entity, clean_input):
     if 'relatedItems' in clean_input:
@@ -337,9 +359,16 @@ def resolve_update_title(entity, clean_input):
         entity.title = clean_input.get("title")
 
 
-def resolve_update_rich_description(entity, clean_input):
+def resolve_update_rich_description(entity, clean_input, revision=False):
     if 'richDescription' in clean_input:
-        entity.rich_description = clean_input.get("richDescription")
+        if revision:
+            active_revision = entity.last_revision
+            if active_revision.content:
+                active_revision.content["richDescription"] = clean_input.get("richDescription")
+            else:
+                active_revision.content = {"richDescription": clean_input.get("richDescription")}
+        else:
+            entity.rich_description = clean_input.get("richDescription")
 
 
 def resolve_update_tags(entity, clean_input):

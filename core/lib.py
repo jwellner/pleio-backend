@@ -20,6 +20,8 @@ from django.conf import settings
 from django.core import signing
 from django.core.validators import URLValidator
 from django.db import connection
+from django.db.models import Q
+from django.utils import timezone as django_timezone
 from django.utils.text import slugify
 from django.utils.translation import ugettext, ugettext_lazy
 from enum import Enum
@@ -565,3 +567,14 @@ def require_tenant_api_token(f):
 
 
     return test_api_token
+
+
+def early_this_morning():
+    localtime = django_timezone.localtime()
+    return django_timezone.datetime(year=localtime.year,
+                             month=localtime.month,
+                             day=localtime.day,
+                             hour=0,
+                             minute=0,
+                             second=0,
+                             tzinfo=localtime.tzinfo)

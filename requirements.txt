@@ -6,7 +6,7 @@ django-elasticsearch-dsl==7.2.2
 Celery==5.2.7
 uwsgi==2.0.20
 mozilla-django-oidc==2.0.0
-coverage==6.4.1
+coverage==6.4.2
 prospector==1.7.7
 ariadne==0.15.1
 ariadne-django==0.2.0
@@ -14,7 +14,7 @@ simplejson==3.17.6
 graphql-core==3.2.1
 django-model-utils==4.2.0
 mixer==7.2.2
-elastic-apm==6.9.1
+elastic-apm==6.10.1
 opentracing==2.4.0
 django-notifications-hq==1.7.0
 django-tenants==3.4.2

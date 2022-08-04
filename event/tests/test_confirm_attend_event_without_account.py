@@ -12,7 +12,7 @@ class ConfirmAttendEventWithoutAccountTestCase(PleioTenantTestCase):
         super().setUp()
 
         self.authenticated_user = UserFactory()
-        self.event = EventFactory(UserFactory(),
+        self.event = EventFactory(owner=UserFactory(),
                                   location="place",
                                   location_link="test.com",
                                   location_address="Straat 10",

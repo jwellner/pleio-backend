@@ -130,6 +130,8 @@ class Entity(models.Model, TagsMixin):
     is_featured = models.BooleanField(default=False)
     is_recommended = models.BooleanField(default=False)
 
+    last_revision = models.ForeignKey('core.Revision', null=True, on_delete=models.SET_NULL, default=None)
+
     def can_read(self, user):
         if user.is_authenticated and user.has_role(USER_ROLES.ADMIN):
             return True

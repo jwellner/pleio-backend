@@ -83,6 +83,7 @@ class AddBlogTestCase(PleioTenantTestCase):
         result = self.graphql_client.post(self.mutation, variables)
 
         entity = result["data"]['addEntity']['entity']
+
         self.assertEqual(entity["title"], variables["input"]["title"])
         self.assertEqual(entity["richDescription"], variables["input"]["richDescription"])
         self.assertEqual(entity["tags"], variables["input"]["tags"])
