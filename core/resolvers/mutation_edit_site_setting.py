@@ -205,7 +205,8 @@ def resolve_edit_site_setting(_, info, input):
         'kalturaVideoEnabled': 'KALTURA_VIDEO_ENABLED',
         'kalturaVideoPartnerId': 'KALTURA_VIDEO_PARTNER_ID',
         'kalturaVideoPlayerId': 'KALTURA_VIDEO_PLAYER_ID',
-
+        
+        'pdfCheckerEnabled': 'PDF_CHECKER_ENABLED',
     }
 
     resolve_update_keys(setting_keys, clean_input)

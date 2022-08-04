@@ -859,6 +859,7 @@ input editSiteSettingInput {
     kalturaVideoPartnerId: String
     kalturaVideoPlayerId: String
     fileDescriptionFieldEnabled: Boolean
+    pdfCheckerEnabled: Boolean
 }
 
 type editSiteSettingPayload {
@@ -1980,6 +1981,7 @@ type Site {
     questionLockAfterActivity: Boolean!
     questionLockAfterActivityLink: String
     fileDescriptionFieldEnabled: Boolean
+    pdfCheckerEnabled: Boolean!
 }
 
 type SiteSettings {
@@ -2104,6 +2106,7 @@ type SiteSettings {
     kalturaVideoPartnerId: String
     kalturaVideoPlayerId: String
     fileDescriptionFieldEnabled: Boolean
+    pdfCheckerEnabled: Boolean!
 }
 
 type StatsItem {
