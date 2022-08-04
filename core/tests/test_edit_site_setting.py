@@ -189,6 +189,8 @@ class EditSiteSettingTestCase(FastTenantTestCase):
                         kalturaVideoEnabled
                         kalturaVideoPartnerId
                         kalturaVideoPlayerId
+
+                        pdfCheckerEnabled
                     }
                 }
             }
@@ -317,6 +319,8 @@ class EditSiteSettingTestCase(FastTenantTestCase):
                 "kalturaVideoEnabled": True,
                 "kalturaVideoPartnerId": "123",
                 "kalturaVideoPlayerId": "456",
+
+                "pdfCheckerEnabled": False,
 
             }
         }
@@ -459,6 +463,8 @@ class EditSiteSettingTestCase(FastTenantTestCase):
         self.assertEqual(data["editSiteSetting"]["siteSettings"]["kalturaVideoEnabled"], True)
         self.assertEqual(data["editSiteSetting"]["siteSettings"]["kalturaVideoPartnerId"], "123")
         self.assertEqual(data["editSiteSetting"]["siteSettings"]["kalturaVideoPlayerId"], "456")
+        
+        self.assertEqual(data["editSiteSetting"]["siteSettings"]["pdfCheckerEnabled"], False)
 
     @patch("core.lib.get_mimetype")
     @patch("{}.open".format(settings.DEFAULT_FILE_STORAGE))
