@@ -103,8 +103,11 @@ class AgreementVersion(models.Model):
     created_at = models.DateTimeField(default=timezone.now)
 
     @property
-    def accepted_for_tenant(self):
-        tenant = Client.objects.get(schema_name=connection.schema_name)
+    def accepted_for_current_tenant(self):
+        return self.accepted_for_tenant(connection.schema_name)
+
+    def accepted_for_tenant(self, tenant):
+        tenant = Client.objects.get(schema_name=tenant)
         return self.accepted.filter(client=tenant).first()
 
     def __str__(self):
