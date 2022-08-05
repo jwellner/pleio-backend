@@ -18,14 +18,14 @@ def resolve_document(obj, info):
 @site_agreement_version.field("accepted")
 def resolve_accepted(obj, info):
     # pylint: disable=unused-argument
-    return bool(obj.accepted_for_tenant)
+    return bool(obj.accepted_for_current_tenant)
 
 
 @site_agreement_version.field("accepted_by")
 def resolve_accepted_by(obj, info):
     # pylint: disable=unused-argument
-    if obj.accepted_for_tenant:
-        return obj.accepted_for_tenant.accept_name
+    if obj.accepted_for_current_tenant:
+        return obj.accepted_for_current_tenant.accept_name
 
     return None
 
@@ -33,7 +33,7 @@ def resolve_accepted_by(obj, info):
 @site_agreement_version.field("accepted_date")
 def resolve_accepted_date(obj, info):
     # pylint: disable=unused-argument
-    if obj.accepted_for_tenant:
-        return obj.accepted_for_tenant.accept_date
+    if obj.accepted_for_current_tenant:
+        return obj.accepted_for_current_tenant.accept_date
 
     return None

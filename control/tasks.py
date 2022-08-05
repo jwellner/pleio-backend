@@ -19,7 +19,7 @@ from django.conf import settings
 from django.db import connection
 from django.utils import timezone
 from file.models import FileFolder
-from tenants.models import Client, Domain, GroupCopy, GroupCopyMapping
+from tenants.models import Client, Domain, GroupCopy, GroupCopyMapping, Agreement, AgreementVersion
 from user.models import User
 
 logger = get_task_logger(__name__)
@@ -36,11 +36,18 @@ def get_sites(self):
 
         sites = []
         for client in clients:
+
+            agreements_accepted = True
+            for version in AgreementVersion.objects.all():
+                if not version.accepted_for_tenant(client.schema_name):
+                    agreements_accepted = False
+
             sites.append({
                 'id': client.id,
                 'name': client.schema_name,
                 'is_active': client.is_active,
-                'domain': client.get_primary_domain().domain
+                'domain': client.get_primary_domain().domain,
+                'agreements_accepted': agreements_accepted
             })
 
         return sites
@@ -816,3 +823,62 @@ def copy_group_entities(copy_id):
     logger.info("Rebuild %i relations", len(connect_parent) + len(connect_sub_comments) + len(connect_best_answers))
 
     return copy.id
+
+
+@shared_task(bind=True)
+def get_agreements(self):
+    # pylint: disable=unused-argument
+    '''
+    Get agreements
+    '''
+    result = []
+
+    with schema_context('public'):
+        agreements = Agreement.objects.all()
+        for agreement in agreements:
+            result.append({
+                'id': agreement.id,
+                'name': agreement.name,
+                'versions': [{
+                    'id': version.id,
+                    'version': version.version,
+                    'document': version.get_absolute_url(),
+                    'created_at': version.created_at
+                    } for version in agreement.versions.all()]
+            })
+
+    return result
+
+
+@shared_task(bind=True)
+def add_agreement(self, name):
+    # pylint: disable=unused-argument
+    agreement = Agreement.objects.create(
+        name=name
+    )
+
+    return {
+        'id': agreement.id,
+        'name': agreement.name
+    }
+
+
+@shared_task(bind=True)
+def add_agreement_version(self, agreement_id, version, document_path):
+    # pylint: disable=unused-argument
+    agreement = Agreement.objects.get(id=agreement_id)
+
+    document = open(document_path, 'r')
+
+    AgreementVersion.objects.create(
+        agreement=agreement,
+        version=version,
+        document=document
+    )
+
+    return {
+        'id': agreement.id,
+        'version': agreement.version,
+        'document': agreement.get_absolute_url()
+    }
+
