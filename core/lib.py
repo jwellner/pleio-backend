@@ -495,7 +495,7 @@ def get_filesize(filepath):
 def map_notification(notification):
     """ get a mapped notification """
     entity = notification.action_object
-    performer = apps.get_model('user.User').objects.get(id=notification.actor_object_id)
+    performer = apps.get_model('user.User').objects.with_deleted().get(id=notification.actor_object_id)
     entity_group = False
     entity_group_name = ""
     entity_group_url = ""
