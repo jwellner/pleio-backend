@@ -1,16 +1,23 @@
 from graphql import GraphQLError
-from django.core.exceptions import ObjectDoesNotExist
+from django.core.exceptions import ObjectDoesNotExist, ValidationError
 from core.constances import NOT_LOGGED_IN, COULD_NOT_FIND, COULD_NOT_SAVE, INVALID_VALUE, USER_ROLES
 from core.models import UserProfileField, ProfileField
 from user.models import User
 from core.lib import clean_graphql_input, access_id_to_acl, is_valid_json
+from core.resolvers.scalar import secure_prosemirror_value_parser
 from datetime import datetime
 
 def validate_profile_field(string, field):
     if not isinstance(string, str):
         return False
-    if field.field_type == 'html_field' and not is_valid_json(string):
-        return False
+
+    if field.field_type == 'html_field':
+        if not is_valid_json(string):
+            return False
+        try:
+            secure_prosemirror_value_parser(string)
+        except ValidationError:
+            return False
     
     if not string == "":
         if field.field_type == 'select_field' and string not in field.field_options:
