@@ -22,7 +22,7 @@ def resolve_sign_site_agreement_version(_, info, input):
     except ObjectDoesNotExist:
         raise GraphQLError(COULD_NOT_FIND)
 
-    if agreement_version.accepted_for_tenant:
+    if agreement_version.accepted_for_current_tenant:
         raise GraphQLError("already_accepted")
 
     if not clean_input.get("accept"):

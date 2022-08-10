@@ -19,7 +19,7 @@ def resolve_description(obj, info):
 def resolve_accepted(obj, info):
     # pylint: disable=unused-argument
     for version in obj.versions.all():
-        if not version.accepted_for_tenant:
+        if not version.accepted_for_current_tenant:
             return False
 
     return True

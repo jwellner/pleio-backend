@@ -149,6 +149,8 @@ DEFAULT_SITE_CONFIG = {
     'KALTURA_VIDEO_ENABLED': (False, 'Allow adding Kaltura videos'),
     'KALTURA_VIDEO_PARTNER_ID': ('', 'Partner ID for Kaltura video urls'),
     'KALTURA_VIDEO_PLAYER_ID': ('', 'Player ID for Kaltura video urls'),
+
+    'PDF_CHECKER_ENABLED': (True, 'PDFChecker enabled')
 }
 """
 Default site configuration

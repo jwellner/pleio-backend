@@ -262,6 +262,88 @@ class EditProfileFieldTestCase(FastTenantTestCase):
         self.assertEqual(errors[0]["message"], "invalid_value")
 
 
+    def test_edit_profile_field_invalid_html_field_by_user(self):
+
+        mutation = """
+            mutation editProfileField($input: editProfileFieldInput!) {
+                editProfileField(input: $input) {
+                    user {
+                    guid
+                    name
+                    profile {
+                        key
+                        name
+                        value
+                        category
+                        accessId
+                        __typename
+                    }
+                    __typename
+                    }
+                    __typename
+                }
+            }
+        """
+        variables = {
+            "input": {
+                "accessId": 2,
+                "guid": self.user.guid,
+                "key": "html_key",
+                "value": '{"type":"doc","content":[{"type":"file","attrs":{"name":"panic.jpeg","mimeType":"image/jpeg","url":"http://somesite.com/scam.exe","size":78256}}]}'
+            }
+        }
+
+        request = HttpRequest()
+        request.user = self.user
+
+        result = graphql_sync(schema, { "query": mutation, "variables": variables }, context_value={ "request": request })
+
+        errors = result[1]["errors"]
+
+        self.assertEqual(errors[0]["message"], "invalid_value")
+
+    def test_edit_profile_field_valid_html_field_by_user(self):
+
+        mutation = """
+            mutation editProfileField($input: editProfileFieldInput!) {
+                editProfileField(input: $input) {
+                    user {
+                    guid
+                    name
+                    profile {
+                        key
+                        name
+                        value
+                        category
+                        accessId
+                        __typename
+                    }
+                    __typename
+                    }
+                    __typename
+                }
+            }
+        """
+        variables = {
+            "input": {
+                "accessId": 2,
+                "guid": self.user.guid,
+                "key": "html_key",
+                "value": '{"type":"doc","content":[{"type":"file","attrs":{"name":"panic.jpeg","mimeType":"image/jpeg","url":"/valid_url","size":78256}}]}'
+            }
+        }
+
+        request = HttpRequest()
+        request.user = self.user
+
+        result = graphql_sync(schema, { "query": mutation, "variables": variables }, context_value={ "request": request })
+
+        data = result[1]["data"]
+
+        self.assertEqual(data["editProfileField"]["user"]["guid"], self.user.guid)
+        self.assertEqual(data["editProfileField"]["user"]["profile"][1]["key"], 'html_key')
+
+
     def test_edit_profile_select_field_not_in_options_by_user(self):
 
         mutation = """
