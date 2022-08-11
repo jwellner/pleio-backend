@@ -64,6 +64,7 @@ def get_settings():
         'kalturaVideoPlayerId': config.KALTURA_VIDEO_PLAYER_ID,
         'showRelatedItems': config.SHOW_RELATED_ITEMS,
         'pdfCheckerEnabled': config.PDF_CHECKER_ENABLED,
+        'maxCharactersInAbstract': config.MAX_CHARACTERS_IN_ABSTRACT,
     }
 
 
@@ -250,6 +251,7 @@ def get_site_settings():
         'kalturaVideoPlayerId': config.KALTURA_VIDEO_PLAYER_ID,
         'fileDescriptionFieldEnabled': 'enable_file_description' in config.FILE_OPTIONS,
         'pdfCheckerEnabled': config.PDF_CHECKER_ENABLED,
+        'maxCharactersInAbstract': config.MAX_CHARACTERS_IN_ABSTRACT,
     }
 
     return site_settings
