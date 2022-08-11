@@ -227,6 +227,7 @@ def resolve_edit_site_setting(_, info, input):
     resolve_update_extra_languages(clean_input)
     resolve_update_file_description_field_enabled(clean_input)
     resolve_update_is_closed(user, clean_input)
+    resolve_update_max_characters_in_abstract(clean_input)
 
     resolve_sync_sitename(clean_input)
 
@@ -424,3 +425,9 @@ def resolve_sync_sitename(clean_input):
         # pylint: disable=import-outside-toplevel
         from concierge.tasks import sync_site
         sync_site.delay(parse_tenant_config_path(''))
+
+def resolve_update_max_characters_in_abstract(clean_input):
+    if 'maxCharactersInAbstract' in clean_input:
+        if int(clean_input.get('maxCharactersInAbstract')) > 1000:
+            raise GraphQLError(INVALID_VALUE)
+        save_setting('MAX_CHARACTERS_IN_ABSTRACT', clean_input.get('maxCharactersInAbstract'))

@@ -191,6 +191,8 @@ class EditSiteSettingTestCase(FastTenantTestCase):
                         kalturaVideoPlayerId
 
                         pdfCheckerEnabled
+
+                        maxCharactersInAbstract
                     }
                 }
             }
@@ -321,6 +323,8 @@ class EditSiteSettingTestCase(FastTenantTestCase):
                 "kalturaVideoPlayerId": "456",
 
                 "pdfCheckerEnabled": False,
+
+                "maxCharactersInAbstract": 500
 
             }
         }
@@ -465,6 +469,8 @@ class EditSiteSettingTestCase(FastTenantTestCase):
         self.assertEqual(data["editSiteSetting"]["siteSettings"]["kalturaVideoPlayerId"], "456")
         
         self.assertEqual(data["editSiteSetting"]["siteSettings"]["pdfCheckerEnabled"], False)
+
+        self.assertEqual(data["editSiteSetting"]["siteSettings"]["maxCharactersInAbstract"], 500)
 
     @patch("core.lib.get_mimetype")
     @patch("{}.open".format(settings.DEFAULT_FILE_STORAGE))
@@ -769,6 +775,33 @@ class EditSiteSettingTestCase(FastTenantTestCase):
         variables = {
             "input": {
                 "extraLanguages": ['invalidlanguage']
+            }
+        }
+
+        request = HttpRequest()
+        request.user = self.admin
+        result = graphql_sync(schema, {"query": mutation, "variables": variables}, context_value={"request": request})
+
+        self.assertTrue(result[0])
+
+        errors = result[1]["errors"]
+
+        self.assertEqual(errors[0]["message"], "invalid_value")
+
+    def test_edit_site_setting_invalid_max_characters(self):
+        mutation = """
+            mutation EditSiteSetting($input: editSiteSettingInput!) {
+                editSiteSetting(input: $input) {
+                    siteSettings {
+                        maxCharactersInAbstract
+                    }
+                }
+            }
+        """
+
+        variables = {
+            "input": {
+                "maxCharactersInAbstract": 1001
             }
         }
 

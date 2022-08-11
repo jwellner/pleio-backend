@@ -3,6 +3,7 @@ from elasticsearch_dsl import Search
 from graphql import GraphQLError
 
 from blog.models import Blog
+from core import config
 from core.constances import (ACCESS_TYPE, COULD_NOT_FIND, COULD_NOT_FIND_GROUP,
                              COULD_NOT_SAVE, INVALID_ARCHIVE_AFTER_DATE,
                              NOT_LOGGED_IN, TEXT_TOO_LONG,
@@ -260,7 +261,7 @@ def resolve_entity_is_pinned(obj, info):
 
 def assert_valid_abstract(abstract):
     text = html_to_text(abstract).strip()
-    if len(text) > 320:
+    if len(text) > config.MAX_CHARACTERS_IN_ABSTRACT:
         raise GraphQLError(TEXT_TOO_LONG)
 
 
