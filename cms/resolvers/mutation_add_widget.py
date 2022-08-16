@@ -1,6 +1,6 @@
 from graphql import GraphQLError
 from django.core.exceptions import ObjectDoesNotExist
-from core.models import Widget
+from core.models import Widget, Attachment
 from core.constances import NOT_LOGGED_IN, COULD_NOT_FIND, COULD_NOT_SAVE
 from core.lib import clean_graphql_input
 from cms.models import Page, Column
@@ -37,7 +37,11 @@ def resolve_add_widget(_, info, input):
     widget.position = clean_input.get("position")
 
     if 'settings' in clean_input:
-        widget.settings = clean_input.get("settings")
+        for setting in clean_input.get('settings'):
+            if setting.get("attachment"):
+                attachment = Attachment.objects.create(upload=setting.get("attachment"), owner=user)
+                setting["attachment"] = str(attachment.id)
+            widget.settings.append(setting)
 
     widget.type = clean_input.get("type")
 
