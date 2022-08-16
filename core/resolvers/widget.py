@@ -1,6 +1,8 @@
 from ariadne import ObjectType
+from core.models import Attachment
 
 widget = ObjectType("Widget")
+widget_setting = ObjectType("WidgetSetting")
 
 
 @widget.field("guid")
@@ -39,3 +41,8 @@ def resolve_parent_guid(obj, info):
     if obj.group:
         return obj.group.guid
     return obj.column.guid
+
+@widget_setting.field("attachment")
+def resolve_attachment(obj, info):
+    # pylint: disable=unused-argument
+    return Attachment.objects.filter(id=obj.get('attachment', None)).first()

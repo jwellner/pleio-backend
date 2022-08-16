@@ -2371,12 +2371,14 @@ type WidgetSetting {
     key: String!
     value: String
     richDescription: SecureRichText
+    attachment: Attachment
 }
 
 input WidgetSettingInput {
     key: String
     value: String
     richDescription: SecureRichText
+    attachment: Upload
 }
 
 type Wiki implements Entity {

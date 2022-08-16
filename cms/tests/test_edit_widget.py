@@ -27,7 +27,10 @@ class EditWidgetTestCase(PleioTenantTestCase):
         self.widget2 = mixer.blend(Widget, position=1, column=self.column, page=self.page)
         self.widget3 = mixer.blend(Widget, position=2, column=self.column, page=self.page)
         self.widget4 = mixer.blend(Widget, position=3, column=self.column, page=self.page)
-        self.widget5 = mixer.blend(Widget, position=4, column=self.column, page=self.page)
+        self.widget5 = mixer.blend(Widget, position=4, column=self.column, page=self.page, settings=[
+            {"key": "test", "value": "123"},
+            {"key": "tags", "value": "[]"}
+        ])
 
         self.mutation = """
             mutation EditWidget($input: editWidgetInput!) {
@@ -40,6 +43,12 @@ class EditWidgetTestCase(PleioTenantTestCase):
                             key
                             value
                             richDescription
+                            attachment {
+                                id
+                                mimeType
+                                url
+                                name
+                            }
                         }
                     }
                 }
@@ -48,12 +57,7 @@ class EditWidgetTestCase(PleioTenantTestCase):
         self.variables = {
             "input": {
                 "guid": self.widget2.guid,
-                "position": 3,
-                "settings": [{
-                    'key': 'tags',
-                    'value': "['foo', 'bar']",
-                    'richDescription': None,
-                }]
+                "position": 3
             }
         }
 
@@ -64,7 +68,6 @@ class EditWidgetTestCase(PleioTenantTestCase):
             result = self.graphql_client.post(self.mutation, self.variables)
 
             widget = result["data"]["editWidget"]["widget"]
-            self.assertDictEqual(widget['settings'][0], self.variables['input']['settings'][0], msg=message)
             self.assertEqual(widget["position"], self.variables['input']['position'], msg=message)
             self.assertEqual(widget["guid"], self.variables['input']['guid'], msg=message)
             self.assertEqual(Widget.objects.get(id=self.widget1.id).position, 0, msg=message)
@@ -126,3 +129,25 @@ class EditWidgetTestCase(PleioTenantTestCase):
             widget = response['data']['editWidget']['widget']
             self.assertEqual(widget['guid'], self.widget1.guid, msg=message)
             self.assertEqual(widget['parentGuid'], self.other_column.guid, msg=message)
+
+    def test_edit_setting(self):
+        variables = {
+            "input": {
+                "guid": self.widget5.guid,
+                "settings": [{
+                    'key': 'tags',
+                    'value': "['foo', 'bar']",
+                    'richDescription': None,
+                    'attachment': None,
+                }]
+            }
+        }
+
+        for (user, message) in [(self.admin, "as admin"),
+                                (self.editor, 'as editor')]:
+            self.graphql_client.force_login(user)
+            result = self.graphql_client.post(self.mutation, variables)
+
+            widget = result["data"]["editWidget"]["widget"]
+            self.assertDictEqual(widget['settings'][0], {"key": "test", "value": "123", "richDescription": None, "attachment": None}, msg=message)
+            self.assertDictEqual(widget['settings'][1], variables['input']['settings'][0], msg=message)
