@@ -150,7 +150,9 @@ DEFAULT_SITE_CONFIG = {
     'KALTURA_VIDEO_PARTNER_ID': ('', 'Partner ID for Kaltura video urls'),
     'KALTURA_VIDEO_PLAYER_ID': ('', 'Player ID for Kaltura video urls'),
 
-    'PDF_CHECKER_ENABLED': (True, 'PDFChecker enabled')
+    'PDF_CHECKER_ENABLED': (True, 'PDFChecker enabled'),
+
+    'MAX_CHARACTERS_IN_ABSTRACT': (320, 'Maximum characters in abstract'),
 }
 """
 Default site configuration

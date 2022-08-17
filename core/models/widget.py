@@ -4,10 +4,7 @@ from auditlog.registry import auditlog
 from django.db import models
 from django.contrib.postgres.fields import ArrayField
 
-from core.models.rich_fields import AttachmentMixin
-
-
-
+from core.models.rich_fields import AttachmentMixin, Attachment
 
 class Widget(AttachmentMixin, models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
@@ -73,6 +70,14 @@ class Widget(AttachmentMixin, models.Model):
             return False
 
         return [get_value(setting) for setting in self.settings if is_rich_field(setting)]
+
+    def attachments_in_fields(self):
+        """
+        Override AttachmentMixin method
+        """
+        attachment_ids = [setting.get('attachment') for setting in self.settings if setting.get('attachment', None)]
+
+        return Attachment.objects.filter(id__in=attachment_ids)
 
 
 auditlog.register(Widget)

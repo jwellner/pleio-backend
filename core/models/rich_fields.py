@@ -1,4 +1,5 @@
 import abc
+from django.apps import apps
 from core.models.attachment import Attachment
 from core.models.shared import AbstractModelMeta
 from core.utils.tiptap_parser import Tiptap
@@ -38,20 +39,29 @@ class AttachmentMixin(RichFieldsMixin, metaclass=AbstractModelMeta):
 
     attachments = GenericRelation(Attachment, object_id_field='attached_object_id', content_type_field='attached_content_type')
 
+    def attachments_in_fields(self):
+        """ Can be overridden in parent Model """
+        return Attachment.objects.none()
+
     def attachments_in_text(self):
         sources = set()
-        for tiptap in self.rich_fields:
+        tiptaps = self.rich_fields
+        for tiptap in tiptaps:
             parser = Tiptap(tiptap)
             sources.update(parser.attached_sources)
 
-        return self.sources_to_attachments(sources)
+        attachments = self.sources_to_attachments(sources)
+
+        return attachments
 
     def update_attachments_links(self):
-        from_text = self.attachments_in_text()
+        attachments_found = self.attachments_in_text()
+        attachments_found = attachments_found.union(self.attachments_in_fields())
+
         current = self.attachments.get_queryset()
 
-        new = from_text.difference(current)
-        removed = current.difference(from_text)
+        new = attachments_found.difference(current)
+        removed = current.difference(attachments_found)
 
         for x in new:
             x.attached = self
