@@ -58,6 +58,7 @@ urlpatterns = [
     path('exporting/event/<uuid:event_id>', event_views.export, name='event_export'),
     path('exporting/calendar/', event_views.export_calendar, name='event_calendar_export'),
     path('exporting/users', user_views.export, name='users_export'),
+    path('exporting/avatars', user_views.export_avatars, name='users_export_avatars'),
     path('exporting/group-owners', core_views.export_groupowners, name='group_owners_export'),
 
     path('qr/url/<uuid:entity_id>', core_views.get_url_qr, name='url_qr'),
