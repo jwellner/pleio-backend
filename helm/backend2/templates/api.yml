@@ -20,6 +20,7 @@ spec:
       name: {{ include "backend2.apiName" . }}
       labels:
         {{- include "backend2.selectorLabels" $labelData | nindent 8 }}
+        environment: {{ .Values.env }}
     spec:
       initContainers:
       - name: {{ include "backend2.frontendName" . }}

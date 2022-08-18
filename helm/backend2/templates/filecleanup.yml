@@ -12,6 +12,7 @@ spec:
       name: {{ include "backend2.filecleanup" . }}
       labels:
         {{- include "backend2.labels" $labelData | nindent 8 }}
+        environment: {{ .Values.env }}
     spec:
       backoffLimit: 0
       template:
