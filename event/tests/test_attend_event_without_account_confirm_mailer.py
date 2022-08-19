@@ -87,9 +87,9 @@ class TestLeaveUrlTestCase(FastTenantTestCase):
     def test_url_with_mail(self):
         email = Faker().email()
         self.leave_url.add_email(email)
-        self.assertEqual(f'/events/confirm/demo?email={email}?delete=true', self.leave_url.get_url())
+        self.assertEqual(f'/events/confirm/demo?delete=true&email={email}', self.leave_url.get_url())
 
     def test_url_with_code(self):
         code = get_random_string(10)
         self.leave_url.add_code(code)
-        self.assertEqual(f'/events/confirm/demo?code={code}?delete=true', self.leave_url.get_url())
+        self.assertEqual(f'/events/confirm/demo?delete=true&code={code}', self.leave_url.get_url())
