@@ -110,6 +110,7 @@ class SiteTestCase(FastTenantTestCase):
                     commentWithoutAccountEnabled
                     questionLockAfterActivity
                     questionLockAfterActivityLink
+                    maxCharactersInAbstract
                 }
             }
         """
@@ -158,6 +159,7 @@ class SiteTestCase(FastTenantTestCase):
         self.assertEqual(data["site"]["commentWithoutAccountEnabled"], config.COMMENT_WITHOUT_ACCOUNT_ENABLED)
         self.assertEqual(data["site"]["questionLockAfterActivity"], config.QUESTION_LOCK_AFTER_ACTIVITY)
         self.assertEqual(data["site"]["questionLockAfterActivityLink"], config.QUESTION_LOCK_AFTER_ACTIVITY_LINK)
+        self.assertEqual(data["site"]["maxCharactersInAbstract"], config.MAX_CHARACTERS_IN_ABSTRACT)
 
     def test_site_closed(self):
 
