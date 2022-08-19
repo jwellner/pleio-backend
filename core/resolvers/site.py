@@ -287,3 +287,8 @@ def resolve_question_lock_after_activity_link(obj, info):
 def resolve_file_description_enabled(obj, info):
     # pylint: disable=unused-argument
     return 'enable_file_description' in config.FILE_OPTIONS
+
+@site.field("maxCharactersInAbstract")
+def resolve_max_characters_in_abstract(obj, info):
+    # pylint: disable=unused-argument
+    return config.MAX_CHARACTERS_IN_ABSTRACT
