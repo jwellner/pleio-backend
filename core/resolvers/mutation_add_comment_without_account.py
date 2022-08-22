@@ -39,8 +39,7 @@ def resolve_add_comment_without_account(_, info, input):
         GraphQLError(COULD_NOT_ADD)
 
     code = generate_code()
-
-    CommentRequest.objects.create(
+    comment_request = CommentRequest.objects.create(
         code=code,
         email=email,
         name=name,
@@ -48,17 +47,9 @@ def resolve_add_comment_without_account(_, info, input):
         rich_description=input.get("richDescription")
     )
 
-    confirm_url = get_base_url() + '/comment/confirm/' + entity.guid + '?email=' + email + '&code=' + code
-
-    context = get_default_email_context()
-    context['confirm_url'] = confirm_url
-    context['comment'] = input.get("description", "")
-    context['entity_title'] = entity.title
-    context['entity_url'] = get_base_url() + entity.url
-
-    subject = ugettext_lazy("Confirm comment on %(site_name)s") % {'site_name': context["site_name"]}
-
-    send_mail_multi.delay(tenant_schema(), subject, 'email/confirm_add_comment_without_account.html', context, email)
+    from core.mail_builders.group_comment_without_account import submit_group_comment_without_account_mail
+    submit_group_comment_without_account_mail(comment_request=comment_request,
+                                              entity=entity)
 
     return {
         'success': True

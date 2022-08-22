@@ -8,15 +8,18 @@ import json
 from django.contrib.auth.models import AnonymousUser
 from django.http import HttpRequest
 from core.models import Group
+from core.tests.helpers import PleioTenantTestCase
 from user.models import User
 from mixer.backend.django import mixer
 from graphql import GraphQLError
 from unittest import mock
 
 
-class InviteToGroupTestCase(FastTenantTestCase):
+class InviteToGroupTestCase(PleioTenantTestCase):
 
     def setUp(self):
+        super().setUp()
+
         self.anonymousUser = AnonymousUser()
         self.user1 = mixer.blend(User)
         self.user2 = mixer.blend(User)
@@ -31,6 +34,8 @@ class InviteToGroupTestCase(FastTenantTestCase):
         self.admin.delete()
         self.user2.delete()
         self.user1.delete()
+
+        super().tearDown()
 
     @mock.patch('core.resolvers.mutation_invite_to_group.generate_code', return_value='6df8cdad5582833eeab4')
     @mock.patch('core.resolvers.mutation_invite_to_group.send_mail_multi.delay')
@@ -56,13 +61,13 @@ class InviteToGroupTestCase(FastTenantTestCase):
                 "directAdd": False,
                 "guid": self.group1.guid,
                 "users": [{"guid": self.user2.guid}]
-                }
             }
+        }
 
         request = HttpRequest()
         request.user = self.user1
 
-        result = graphql_sync(schema, {"query": mutation, "variables": variables}, context_value={ "request": request })
+        result = graphql_sync(schema, {"query": mutation, "variables": variables}, context_value={"request": request})
 
         self.assertTrue(result[0])
         data = result[1]["data"]
@@ -94,13 +99,13 @@ class InviteToGroupTestCase(FastTenantTestCase):
                 "directAdd": False,
                 "guid": self.group1.guid,
                 "users": [{"email": self.user2.email}]
-                }
             }
+        }
 
         request = HttpRequest()
         request.user = self.user1
 
-        result = graphql_sync(schema, {"query": mutation, "variables": variables}, context_value={ "request": request })
+        result = graphql_sync(schema, {"query": mutation, "variables": variables}, context_value={"request": request})
 
         self.assertTrue(result[0])
         data = result[1]["data"]
@@ -110,7 +115,6 @@ class InviteToGroupTestCase(FastTenantTestCase):
 
     @mock.patch('core.resolvers.mutation_invite_to_group.send_mail_multi.delay')
     def test_add_all_users_to_group_by_admin(self, mocked_send_mail_multi):
-
         user = mixer.blend(User)
         user.delete()
 
@@ -135,13 +139,13 @@ class InviteToGroupTestCase(FastTenantTestCase):
                 "directAdd": False,
                 "guid": self.group1.guid,
                 "users": [{"guid": self.user2.guid}]
-                }
             }
+        }
 
         request = HttpRequest()
         request.user = self.admin
 
-        result = graphql_sync(schema, {"query": mutation, "variables": variables}, context_value={ "request": request })
+        result = graphql_sync(schema, {"query": mutation, "variables": variables}, context_value={"request": request})
 
         self.assertTrue(result[0])
         data = result[1]["data"]
@@ -150,8 +154,7 @@ class InviteToGroupTestCase(FastTenantTestCase):
         self.assertEqual(len(self.group1.members.all()), 3)
         assert not mocked_send_mail_multi.called
 
-    @mock.patch('core.resolvers.mutation_accept_membership_request.send_mail_multi.delay')
-    def test_add_all_users_to_group_by_group_owner(self, mocked_send_mail_multi):
+    def test_add_all_users_to_group_by_group_owner(self):
         mutation = """
             mutation InviteItem($input: inviteToGroupInput!) {
                 inviteToGroup(input: $input) {
@@ -173,22 +176,14 @@ class InviteToGroupTestCase(FastTenantTestCase):
                 "directAdd": False,
                 "guid": self.group1.guid,
                 "users": [{"guid": self.user2.guid}]
-                }
             }
+        }
 
-        request = HttpRequest()
-        request.user = self.user1
+        with self.assertGraphQlError("user_not_site_admin"):
+            self.graphql_client.force_login(self.user1)
+            self.graphql_client.post(mutation, variables)
 
-        result = graphql_sync(schema, {"query": mutation, "variables": variables}, context_value={ "request": request })
-
-        self.assertTrue(result[0])
-        errors = result[1]["errors"]
-
-        self.assertEqual(errors[0]["message"], "user_not_site_admin")
-        assert not mocked_send_mail_multi.called
-
-    @mock.patch('core.resolvers.mutation_accept_membership_request.send_mail_multi.delay')
-    def test_direct_add_users_to_group_by_group_owner(self, mocked_send_mail_multi):
+    def test_direct_add_users_to_group_by_group_owner(self):
         mutation = """
             mutation InviteItem($input: inviteToGroupInput!) {
                 inviteToGroup(input: $input) {
@@ -210,22 +205,14 @@ class InviteToGroupTestCase(FastTenantTestCase):
                 "directAdd": True,
                 "guid": self.group1.guid,
                 "users": [{"guid": self.user2.guid}]
-                }
             }
+        }
 
-        request = HttpRequest()
-        request.user = self.user1
+        with self.assertGraphQlError("user_not_site_admin"):
+            self.graphql_client.force_login(self.user1)
+            self.graphql_client.post(mutation, variables)
 
-        result = graphql_sync(schema, {"query": mutation, "variables": variables}, context_value={ "request": request })
-
-        self.assertTrue(result[0])
-        errors = result[1]["errors"]
-
-        self.assertEqual(errors[0]["message"], "user_not_site_admin")
-        assert not mocked_send_mail_multi.called
-
-    @mock.patch('core.resolvers.mutation_accept_membership_request.send_mail_multi.delay')
-    def test_direct_add_users_to_group_by_admin(self, mocked_send_mail_multi):
+    def test_direct_add_users_to_group_by_admin(self):
         mutation = """
             mutation InviteItem($input: inviteToGroupInput!) {
                 inviteToGroup(input: $input) {
@@ -247,21 +234,15 @@ class InviteToGroupTestCase(FastTenantTestCase):
                 "directAdd": True,
                 "guid": self.group1.guid,
                 "users": [{"guid": self.user2.guid}]
-                }
             }
+        }
 
-        request = HttpRequest()
-        request.user = self.admin
+        self.graphql_client.force_login(self.admin)
+        result = self.graphql_client.post(mutation, variables)
 
-        result = graphql_sync(schema, {"query": mutation, "variables": variables}, context_value={ "request": request })
-
-        self.assertTrue(result[0])
-        data = result[1]["data"]
-
+        data = result["data"]
         self.assertEqual(data["inviteToGroup"]["group"]["guid"], self.group1.guid)
         self.assertEqual(len(self.group1.members.all()), 2)
-        assert not mocked_send_mail_multi.called
-
 
     @mock.patch('core.resolvers.mutation_invite_to_group.generate_code', return_value='6df8cdad5582833eeab4')
     @mock.patch('core.resolvers.mutation_invite_to_group.send_mail_multi.delay')
@@ -287,13 +268,13 @@ class InviteToGroupTestCase(FastTenantTestCase):
                 "directAdd": False,
                 "guid": self.group1.guid,
                 "users": [{"email": "test@test.nl"}]
-                }
             }
+        }
 
         request = HttpRequest()
         request.user = self.user1
 
-        result = graphql_sync(schema, {"query": mutation, "variables": variables}, context_value={ "request": request })
+        result = graphql_sync(schema, {"query": mutation, "variables": variables}, context_value={"request": request})
 
         self.assertTrue(result[0])
         data = result[1]["data"]
