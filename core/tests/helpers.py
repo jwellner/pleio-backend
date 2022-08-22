@@ -1,3 +1,4 @@
+import json
 import os
 import time
 from contextlib import contextmanager
@@ -73,6 +74,18 @@ class PleioTenantTestCase(FastTenantTestCase):
         left = datetime.fromisoformat(left_date_string)
         right = datetime.fromisoformat(right_date_string)
         self.assertEqual(left, right, *args, **kwargs)
+
+    def tiptap_paragraph(self, *paragraphs):
+        return json.dumps({
+            'type': 'doc',
+            'content': [{
+                'type': "paragraph",
+                'content': [{
+                    'type': 'text',
+                    'text': p,
+                }]
+            } for p in paragraphs]
+        })
 
 
 class GraphQlError(Exception):

@@ -1,13 +1,10 @@
 from graphql import GraphQLError
 from django.core.exceptions import ObjectDoesNotExist
-from django.utils import translation
-from django.utils.translation import ugettext_lazy
 from core.models import Group
 from user.models import User
 from core.constances import NOT_LOGGED_IN, COULD_NOT_FIND, COULD_NOT_SAVE
-from core.lib import clean_graphql_input, get_base_url, get_default_email_context
-from core.tasks import send_mail_multi
-from django_tenants.utils import parse_tenant_config_path
+from core.lib import clean_graphql_input
+
 
 def resolve_accept_membership_request(_, info, input):
     # pylint: disable=redefined-builtin
@@ -34,26 +31,10 @@ def resolve_accept_membership_request(_, info, input):
             "group": group
         }
 
-    schema_name = parse_tenant_config_path("")
     group.join(requesting_user, 'member')
 
-    translation.activate(requesting_user.get_language())
-
-    subject = ugettext_lazy("Request for access to the %(group_name)s group has been approved") % {'group_name': group.name}
-    link = get_base_url() + group.url
-
-    context = get_default_email_context(user)
-    context['group_name'] = group.name
-    context['link'] = link
-
-    send_mail_multi.delay(
-        schema_name,
-        subject,
-        'email/accept_membership_request.html',
-        context,
-        requesting_user.email,
-        language=requesting_user.get_language()
-    )
+    from core.mail_builders.group_membership_approved import submit_group_membership_approved_mail
+    submit_group_membership_approved_mail(group=group, user=requesting_user)
 
     return {
         "group": group

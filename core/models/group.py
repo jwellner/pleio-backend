@@ -6,13 +6,12 @@ from django.contrib.postgres.fields import ArrayField
 from django.core.exceptions import ObjectDoesNotExist, ValidationError
 from django.db import models
 from django.db.models import Q
-from django.db.models.signals import pre_save, post_delete
+from django.db.models.signals import pre_save
 from django.dispatch import receiver
 from django.utils.text import slugify
 from django.utils import timezone
 from django.urls import reverse
-from django.utils.translation import ugettext_lazy
-from core.lib import ACCESS_TYPE, tenant_schema, get_default_email_context, get_base_url, html_to_text
+from core.lib import ACCESS_TYPE
 from core.constances import USER_ROLES
 from core.utils.convert import tiptap_to_text
 from .rich_fields import AttachmentMixin
@@ -151,7 +150,9 @@ class Group(models.Model, AttachmentMixin, TagsMixin):
 
         # send welcome message for new members
         if obj.type == 'member' and not already_member:
-            self._send_welcome_message(user)
+            from core.mail_builders.group_welcome import submit_group_welcome_mail
+            submit_group_welcome_mail(group=self,
+                                      user=user)
 
         return obj
 
@@ -172,28 +173,6 @@ class Group(models.Model, AttachmentMixin, TagsMixin):
             member.save()
             return True
         return False
-
-    def _send_welcome_message(self, user):
-        # pylint: disable=cyclic-import
-        # pylint: disable=import-outside-toplevel
-
-        # strip tags and trim spaces
-        has_message = html_to_text(self.welcome_message)
-        if has_message:
-            has_message = has_message.strip()
-
-        if has_message:
-            context = get_default_email_context(user)
-            context['welcome_message'] = self.welcome_message
-            context['welcome_message'] = context['welcome_message'].replace("[name]", user.name)
-            context['welcome_message'] = context['welcome_message'].replace("[group_name]", self.name)
-            context['welcome_message'] = context['welcome_message'].replace("[group_url]",
-                                                                            f"{get_base_url()}{self.url}")
-
-            subject = ugettext_lazy("Welcome to %(group_name)s") % {'group_name': self.name}
-
-            from core.tasks import send_mail_multi
-            send_mail_multi.delay(tenant_schema(), subject, 'email/group_welcome.html', context, user.email)
 
     @property
     def guid(self):
