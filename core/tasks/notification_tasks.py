@@ -1,3 +1,4 @@
+import logging
 from celery import shared_task
 from core.models.entity import Entity
 from core.models.group import GroupMembership
@@ -11,6 +12,8 @@ from user.models import User
 from core.models.mixin import NotificationMixin
 from notifications.models import Notification
 from core.services.mail_service import MailService, MailTypeEnum
+
+LOGGER = logging.getLogger(__name__)
 
 @shared_task()
 def create_notifications_for_scheduled_content(schema_name):
@@ -50,8 +53,16 @@ def create_notification(self, schema_name, verb, model_name, entity_id, sender_i
     '''
     with schema_context(schema_name):
         Model = apps.get_model(model_name)
-        instance = Model.objects.get(id=entity_id)
-        sender = User.objects.get(id=sender_id)
+        instance = Model.objects.filter(id=entity_id).first()
+        sender = User.objects.filter(id=sender_id).first()
+
+        if not instance:
+            LOGGER.warning('Entity with id %s does not exist.')
+            return
+
+        if not sender: # sender is probably no active user don't create notifications for inactive users
+            LOGGER.warning('Sender with id %s is not active.')
+            return
 
         if verb == "created":
             recipients = []
