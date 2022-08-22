@@ -15,6 +15,9 @@ class Command(BaseCommand):
         self.mail_service = MailService(MailTypeEnum.COLLECTED)
 
     def handle(self, *args, **options):
+        if connection.schema_name == 'public':
+            return
+
         users = User.objects.filter(is_active=True, _profile__receive_notification_email=True)
 
         for user in users:

@@ -65,11 +65,8 @@ class SignalsTestCase(FastTenantTestCase):
     @mock.patch('core.tasks.create_notification.delay')
     def test_comment_handler(self, mocked_create_notification):
         comment_handler(self.user1, self.comment1, True, action_object=self.blog1)
-        mocked_create_notification.has_calls([
-            mock.call(connection.schema_name, 'commented', 'blog.blog', self.blog1.id, self.comment1.owner.id),
-            mock.call(connection.schema_name, 'mentioned', 'blog.blog', self.comment1.id, self.comment1.owner.id),
 
-        ])
+        mocked_create_notification.assert_called_once_with(connection.schema_name, 'commented', 'blog.blog', self.blog1.id, self.comment1.owner.id)
 
     @mock.patch('core.tasks.create_notification.delay')
     def test_follow_after_comment(self, __):
@@ -93,14 +90,25 @@ class SignalsTestCase(FastTenantTestCase):
     @mock.patch('core.tasks.create_notification.delay')
     def test_notification_handler(self, mocked_create_notification):
         notification_handler(self.user1, self.blog2, True, action_object=self.blog2)
-        mocked_create_notification.has_calls([
-            mock.call(connection.schema_name, 'created', 'blog.blog', self.blog2.id, self.blog2.owner.id),
-            mock.call(connection.schema_name, 'mentioned', 'blog.blog', self.blog2.id, self.blog2.owner.id),
-        ])
+
+        mocked_create_notification.assert_called_once_with(connection.schema_name, 'created', 'blog.blog', self.blog2.id, self.blog2.owner.id)
 
     @mock.patch('core.tasks.create_notification.delay')
     def test_mention_handler(self, mocked_create_notification):
-        mentionObj = Blog(owner=self.user1)
+        tiptap = {
+            'type': 'doc',
+            'content': [
+                {
+                    'type': 'mention',
+                    'attrs': {
+                        'id': '1234-1234-1234-12',
+                        'label': 'user X'
+                    },
+                }
+            ],
+        }
+
+        mentionObj = Blog(owner=self.user1, rich_description=json.dumps(tiptap))
 
         mention_handler(self.user1, mentionObj, True)
         mocked_create_notification.assert_called_once_with(connection.schema_name, 'mentioned', 'blog.blog', mentionObj.id, self.user1.id)
