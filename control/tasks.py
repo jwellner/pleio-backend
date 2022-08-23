@@ -14,7 +14,7 @@ from core.utils.tiptap_parser import Tiptap
 from core.tasks.elasticsearch_tasks import elasticsearch_delete_data_for_tenant
 from django_tenants.utils import schema_context
 from django.core.management import call_command
-from django.core.files.base import ContentFile
+from django.core.files.base import ContentFile, File
 from django.conf import settings
 from django.db import connection
 from django.utils import timezone
@@ -868,12 +868,12 @@ def add_agreement_version(self, agreement_id, version, document_path):
     # pylint: disable=unused-argument
     agreement = Agreement.objects.get(id=agreement_id)
 
-    document = open(document_path, 'r')
+    document = open(document_path)
 
     AgreementVersion.objects.create(
         agreement=agreement,
         version=version,
-        document=document
+        document=File(document)
     )
 
     return {
