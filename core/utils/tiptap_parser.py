@@ -2,6 +2,7 @@ import json
 import logging
 from urllib.parse import urlparse
 from django.core.exceptions import ValidationError
+from core.lib import get_base_url
 
 LOGGER = logging.getLogger(__name__)
 
@@ -69,7 +70,20 @@ class Tiptap:
             if self.get_field(x, 'src') == original:
                 x['attrs']['src'] = replacement
 
+    def replace_local_absolute_urls(self):
+        match = "%s/" % get_base_url()
+
+        for x in self.get_nodes('file'):
+            if self.get_field(x, 'url') == match :
+                x['attrs']['url'] = x['attrs']['url'].replace(match, "/")
+
+        for x in self.get_nodes('image'):
+            if self.get_field(x, 'src') == match:
+                x['attrs']['src'] = x['attrs']['src'].replace(match, "/")
+
     def check_for_external_urls(self):
+        self.replace_local_absolute_urls()
+
         content = self.tiptap_json.get("content", [])
 
         for item in content:
