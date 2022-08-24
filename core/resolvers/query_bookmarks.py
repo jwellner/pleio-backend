@@ -18,7 +18,13 @@ def conditional_subtype_filter(subtype):
     
     raise GraphQLError(INVALID_SUBTYPE)
 
-def resolve_bookmarks(_, info, subtype=None, offset=0, limit=20):
+def resolve_bookmarks(
+        _, 
+        info, 
+        offset=0, 
+        limit=20, 
+        subtype=None
+):
     # pylint: disable=unused-argument
 
     user = info.context["request"].user
@@ -29,11 +35,12 @@ def resolve_bookmarks(_, info, subtype=None, offset=0, limit=20):
     qs = Annotation.objects
     qs = qs.filter(user=user, key='bookmarked')
     qs = qs.filter(conditional_subtype_filter(subtype))
+    total = qs.count()
     qs = qs[offset:offset+limit]
 
     entities = [item.content_object for item in qs]
 
     return {
-        'total': qs.count(),
+        'total': total,
         'edges': entities,
     }

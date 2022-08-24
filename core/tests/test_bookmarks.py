@@ -1,21 +1,18 @@
-from django.db import connection
-from django_tenants.test.cases import FastTenantTestCase
-from backend2.schema import schema
-from ariadne import graphql_sync
-import json
 from django.contrib.auth.models import AnonymousUser
 from django.http import HttpRequest
-from core.models import Group
-from user.models import User
-from blog.models import Blog
 from mixer.backend.django import mixer
+
+from blog.models import Blog
 from core.constances import ACCESS_TYPE
-from core.lib import get_acl, access_id_to_acl
-from django.utils.text import slugify
+from core.tests.helpers import PleioTenantTestCase
+from user.models import User
 
-class BookmarkTestCase(FastTenantTestCase):
 
-    def setUp(self):        
+class BookmarkTestCase(PleioTenantTestCase):
+
+    def setUp(self):
+        super().setUp()
+
         self.anonymousUser = AnonymousUser()
         self.authenticatedUser = mixer.blend(User)
 
@@ -40,7 +37,6 @@ class BookmarkTestCase(FastTenantTestCase):
         self.bookmark1 = self.blog1.add_bookmark(self.authenticatedUser)
         self.bookmark2 = self.blog2.add_bookmark(self.authenticatedUser)
 
-
     def tearDown(self):
         self.bookmark1.delete()
         self.bookmark2.delete()
@@ -52,7 +48,7 @@ class BookmarkTestCase(FastTenantTestCase):
 
         query = """
             {
-                bookmarks {
+                bookmarks (limit: 1){
                     total
                     edges {
                         guid
@@ -60,20 +56,16 @@ class BookmarkTestCase(FastTenantTestCase):
                 }
             }
         """
-        request = HttpRequest()
-        request.user = self.authenticatedUser
 
-        variables = {
-            "limit": 1
-        }
+        variables = {}
 
-        result = graphql_sync(schema, { "query": query , "variables": variables}, context_value={ "request": request })
+        self.graphql_client.force_login(self.authenticatedUser)
+        result = result = self.graphql_client.post(query, variables)
 
-        self.assertTrue(result[0])
-
-        data = result[1]["data"]
+        data = result["data"]
        
         self.assertEqual(data["bookmarks"]["total"], 2)
+        self.assertEqual(len(data["bookmarks"]["edges"]), 1)
         self.assertEqual(data["bookmarks"]["edges"][0]["guid"], self.bookmark2.content_object.guid)
 
     def test_bookmark_list_filter(self):
@@ -88,16 +80,13 @@ class BookmarkTestCase(FastTenantTestCase):
                 }
             }
         """
-        request = HttpRequest()
-        request.user = self.authenticatedUser
 
         variables = {}
 
-        result = graphql_sync(schema, { "query": query , "variables": variables}, context_value={ "request": request })
+        self.graphql_client.force_login(self.authenticatedUser)
+        result = result = self.graphql_client.post(query, variables)
 
-        self.assertTrue(result[0])
-
-        data = result[1]["data"]
+        data = result["data"]
        
         self.assertEqual(data["bookmarks"]["total"], 0)
 
@@ -113,9 +102,6 @@ class BookmarkTestCase(FastTenantTestCase):
             }
         """
 
-        request = HttpRequest()
-        request.user = self.authenticatedUser
-
         variables = {
             "bookmark": {
                 "guid": self.blog1.guid,
@@ -123,11 +109,10 @@ class BookmarkTestCase(FastTenantTestCase):
             }
         }
 
-        result = graphql_sync(schema, { "query": query , "variables": variables}, context_value={ "request": request })
+        self.graphql_client.force_login(self.authenticatedUser)
+        result = result = self.graphql_client.post(query, variables)
 
-        self.assertTrue(result[0])
-
-        data = result[1]["data"]
+        data = result["data"]
        
         self.assertEqual(data["bookmark"]["object"]["guid"], self.blog1.guid)
 
@@ -146,11 +131,10 @@ class BookmarkTestCase(FastTenantTestCase):
 
         variables = {}
 
-        result = graphql_sync(schema, { "query": query , "variables": variables}, context_value={ "request": request })
+        self.graphql_client.force_login(self.authenticatedUser)
+        result = result = self.graphql_client.post(query, variables)
 
-        self.assertTrue(result[0])
-
-        data = result[1]["data"]
+        data = result["data"]
        
         self.assertEqual(data["bookmarks"]["total"], 1)
         self.assertEqual(data["bookmarks"]["edges"][0]["guid"], self.blog2.guid)
