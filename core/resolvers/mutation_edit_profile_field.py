@@ -1,42 +1,41 @@
 from graphql import GraphQLError
 from django.core.exceptions import ObjectDoesNotExist, ValidationError
-from core.constances import NOT_LOGGED_IN, COULD_NOT_FIND, COULD_NOT_SAVE, INVALID_VALUE, USER_ROLES
+from core.constances import NOT_LOGGED_IN, COULD_NOT_FIND, COULD_NOT_SAVE, USER_ROLES, INVALID_VALUE
 from core.models import UserProfileField, ProfileField
 from user.models import User
 from core.lib import clean_graphql_input, access_id_to_acl, is_valid_json
 from core.resolvers.scalar import secure_prosemirror_value_parser
 from datetime import datetime
 
-def validate_profile_field(string, field):
-    if not isinstance(string, str):
+def validate_profile_field(value, field):
+    if not isinstance(value, str):
         return False
 
     if field.field_type == 'html_field':
-        if not is_valid_json(string):
-            return False
-        try:
-            secure_prosemirror_value_parser(string)
-        except ValidationError:
-            return False
+        if not is_valid_json(value):
+            raise ValidationError(f"Invalid JSON")
+
+        secure_prosemirror_value_parser(value)
     
-    if not string == "":
-        if field.field_type == 'select_field' and string not in field.field_options:
-            return False
+    if not value == "":
+        if field.field_type == 'select_field' and value not in field.field_options:
+            raise ValidationError(f"Value is not in field options")
         if field.field_type == 'date_field':
             try:
-                datetime.strptime(string, "%Y-%m-%d")
+                datetime.strptime(value, "%Y-%m-%d")
             except Exception:
-                return False
+                raise ValidationError(f"Invalid date format expecting Y-m-d")
+
         if field.field_type == 'multi_select_field':
-            for selected in string.split(","):
+            for selected in value.split(","):
                 if selected not in field.field_options:
-                    return False
+                    raise ValidationError(f"Selected option is not in field options")
 
     # run trough field validators
-    if not field.validate(string):
-        return False
+    if not field.validate(value):
+        raise ValidationError(f"Custom field validator error")
 
-    return True
+    return value
 
 
 def resolve_edit_profile_field(_, info, input):
@@ -67,8 +66,12 @@ def resolve_edit_profile_field(_, info, input):
     except Exception:
         raise GraphQLError(COULD_NOT_FIND)
 
-    if not validate_profile_field(clean_input.get('value'), profile_field):
+    try:
+        validate_profile_field(clean_input.get('value'), profile_field)
+    except ValidationError:
+        # TODO: not sure is frontend is ready for custom errors
         raise GraphQLError(INVALID_VALUE)
+
 
     user_profile_field, created = UserProfileField.objects.get_or_create(user_profile=requested_user.profile, profile_field=profile_field)
     user_profile_field.read_access = read_access

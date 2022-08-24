@@ -2,12 +2,11 @@
 {% load i18n %}
 
 {% block body %}
-{% blocktrans %}
-This is a request to confirm your comment on <a href="{{ entity_url }}">{{ entity_title }}</a>.<br><br>
+{% blocktrans %}This is a request to confirm your comment on <a href="{{ entity_url }}">{{ entity_title }}</a>.{% endblocktrans %}<br><br>
+{% trans "Comment:" %}<br><br>
+{{ comment|safe }}<br>
+<br>
+{% trans "Click on the link below to confirm the comment." %}<br><br>
+<a href="{{ confirm_url }}">{{ confirm_url }}</a><br>
 
-Comment: {{ comment }}<br>
-
-Click on the link below to confirm the comment.<br><br>
-<a href="{{ confirm_url }}">{{ confirm_url }}</a>
-{% endblocktrans %}
 {% endblock %}

@@ -15,7 +15,7 @@ from os import path
 def download(request, file_id=None, file_name=None):
     # pylint: disable=unused-argument
     user = request.user
-    
+
     size = request.GET.get('size', None)
 
     if not file_id:
@@ -49,10 +49,11 @@ def download(request, file_id=None, file_name=None):
     except ObjectDoesNotExist:
         raise Http404("File not found")
 
+
 @cache_control(public=True, max_age=15724800)
 def embed(request, file_id=None, file_name=None):
     # pylint: disable=unused-argument
-    user = request.user   
+    user = request.user
     size = request.GET.get('size', None)
 
     if not file_id:
@@ -84,9 +85,9 @@ def embed(request, file_id=None, file_name=None):
     except ObjectDoesNotExist:
         raise Http404("File not found")
 
+
 @cache_control(public=True, max_age=15724800)
 def featured(request, entity_guid=None):
-
     size = request.GET.get('size', None)
 
     if not entity_guid:
@@ -119,6 +120,7 @@ def featured(request, entity_guid=None):
 
     raise Http404("File not found")
 
+
 def bulk_download(request):
     user = request.user
 
@@ -150,6 +152,7 @@ def bulk_download(request):
     response['Content-Disposition'] = "attachment; filename=file_contents.zip"
 
     return response
+
 
 @cache_control(public=True, max_age=15724800)
 def thumbnail(request, file_id=None):

@@ -17,6 +17,7 @@ spec:
       name: {{ include "backend2.adminName" . }}
       labels:
         {{- include "backend2.selectorLabels" $labelData | nindent 8 }}
+        environment: {{ .Values.env }}
     spec:
       initContainers:
         - name: init-container

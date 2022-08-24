@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Duits\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-04-28 16:13+0200\n"
+"POT-Creation-Date: 2022-07-21 15:30+0200\n"
 "PO-Revision-Date: 2021-05-26 10:55+0200\n"
 "Last-Translator: \n"
 "Language-Team: \n"
@@ -26,19 +26,19 @@ msgstr "Statusaktualisierung"
 msgid "Provide a valid value."
 msgstr "Geben Sie einen gültigen Wert an."
 
-#: core/forms.py:82 core/resolvers/query_site.py:164
+#: core/forms.py:82 core/resolvers/query_site.py:165
 msgid "Never"
 msgstr "Nie"
 
-#: core/forms.py:83 core/resolvers/query_site.py:161
+#: core/forms.py:83 core/resolvers/query_site.py:162
 msgid "Daily"
 msgstr "Täglich"
 
-#: core/forms.py:84 core/resolvers/query_site.py:162
+#: core/forms.py:84 core/resolvers/query_site.py:163
 msgid "Weekly"
 msgstr "Wöchentlich"
 
-#: core/forms.py:85 core/resolvers/query_site.py:163
+#: core/forms.py:85 core/resolvers/query_site.py:164
 msgid "Monthly"
 msgstr "Monatlich"
 
@@ -50,117 +50,122 @@ msgstr "Benachrichtigungs-E-Mails erhalten"
 msgid "Receive overview emails"
 msgstr "Übersichts-E-Mails erhalten"
 
-#: core/lib.py:157 core/resolvers/mutation_import_users.py:30
-#: core/resolvers/query_site.py:70
+#: core/lib.py:173 core/resolvers/mutation_import_users.py:30
+#: core/resolvers/query_site.py:71
 msgid "Just me"
 msgstr "Nur ich"
 
-#: core/lib.py:160
+#: core/lib.py:176
 #, python-format
 msgid "Group: %(group_name)s"
 msgstr "Gruppe: %(group_name)s"
 
-#: core/lib.py:163
+#: core/lib.py:179
 #, python-format
 msgid "Subgroup: %(subgroup_name)s"
 msgstr "Untergruppe: %(subgroup_name)s"
 
-#: core/lib.py:169 core/resolvers/mutation_import_users.py:31
-#: core/resolvers/query_site.py:71
+#: core/lib.py:185 core/resolvers/mutation_import_users.py:31
+#: core/resolvers/query_site.py:72
 msgid "Logged in users"
 msgstr "Angemeldete Benutzer"
 
-#: core/lib.py:171 core/resolvers/mutation_import_users.py:34
-#: core/resolvers/query_site.py:75
+#: core/lib.py:187 core/resolvers/mutation_import_users.py:34
+#: core/resolvers/query_site.py:76
 msgid "Public"
 msgstr "Öffentlich"
 
-#: core/lib.py:182
+#: core/lib.py:198
 msgid "Event"
 msgstr "Event"
 
-#: core/lib.py:186
+#: core/lib.py:202
 msgid "Blog"
 msgstr "Blog"
 
-#: core/lib.py:190
+#: core/lib.py:206
 msgid "Discussion"
 msgstr "Diskussion"
 
-#: core/lib.py:194 core/lib.py:344
+#: core/lib.py:210 core/lib.py:379
 msgid "News"
 msgstr "Neuigkeiten"
 
-#: core/lib.py:198
+#: core/lib.py:214
 msgid "Update"
 msgstr "Update"
 
-#: core/lib.py:202
+#: core/lib.py:218
 msgid "Question"
 msgstr "Frage"
 
-#: core/lib.py:206
+#: core/lib.py:222
 msgid "Wiki"
 msgstr "Wiki"
 
-#: core/lib.py:210
+#: core/lib.py:226
 msgid "Text page"
 msgstr "Text Seite"
 
-#: core/lib.py:338
+#: core/lib.py:373
 msgid "Updates"
 msgstr "Updates"
 
-#: core/lib.py:339
+#: core/lib.py:374
 msgid "Blogs"
 msgstr "Blogs"
 
-#: core/lib.py:340
+#: core/lib.py:375
 msgid "CMS pages"
 msgstr "CMS-Seiten"
 
-#: core/lib.py:341
+#: core/lib.py:376
 msgid "Discussions"
 msgstr "Diskussionen"
 
-#: core/lib.py:342
+#: core/lib.py:377
 msgid "Events"
 msgstr "Events"
 
-#: core/lib.py:343
+#: core/lib.py:378
 msgid "Files"
 msgstr "Dateien"
 
-#: core/lib.py:345
+#: core/lib.py:380
 msgid "Polls"
 msgstr "Umfragen"
 
-#: core/lib.py:346
+#: core/lib.py:381
 msgid "Questions"
 msgstr "Fragen"
 
-#: core/lib.py:347
+#: core/lib.py:382
 msgid "Tasks"
 msgstr "Aufgaben"
 
-#: core/lib.py:348
+#: core/lib.py:383
 msgid "Wiki pages"
 msgstr "Wiki-Seiten"
 
-#: core/lib.py:349
+#: core/lib.py:384
 msgid "Comments"
 msgstr "Kommentare"
 
-#: core/lib.py:350
+#: core/lib.py:385
 msgid "Groups"
 msgstr "Gruppen"
 
-#: core/management/commands/send_overview_emails.py:92
+#: core/mail_builders/frequent_overview.py:58
 #, python-format
 msgid "Regular overview of %(site_name)s"
 msgstr "Regulärer Überblick über %(site_name)s"
 
-#: core/models/group.py:190
+#: core/mail_builders/group_comment_without_account.py:52
+#, python-format
+msgid "Confirm comment on %(site_name)s"
+msgstr "Bestätigen Sie den Kommentar zu %(site_name)s"
+
+#: core/mail_builders/group_welcome.py:57
 #, python-format
 msgid "Welcome to %(group_name)s"
 msgstr "Wilkommen zu: %(group_name)s"
@@ -169,11 +174,6 @@ msgstr "Wilkommen zu: %(group_name)s"
 #, python-format
 msgid "Request for access to the %(group_name)s group has been approved"
 msgstr "Der Antrag auf Zugang zur %(group_name)s-Gruppe wurde genehmigt"
-
-#: core/resolvers/mutation_add_comment_without_account.py:59
-#, python-format
-msgid "Confirm comment on %(site_name)s"
-msgstr "Bestätigen Sie den Kommentar zu %(site_name)s"
 
 #: core/resolvers/mutation_change_group_role.py:43
 #, python-format
@@ -193,15 +193,15 @@ msgstr "Konto von %(name_deleted_user)s wurde entfernt"
 msgid "A site administrator was removed from %(site_name)s"
 msgstr "Ein Site-Administrator wurde von %(site_name)s entfernt"
 
-#: core/resolvers/mutation_edit_site_setting.py:355
+#: core/resolvers/mutation_edit_site_setting.py:401
 msgid "closed"
 msgstr "geschlossen"
 
-#: core/resolvers/mutation_edit_site_setting.py:355
+#: core/resolvers/mutation_edit_site_setting.py:401
 msgid "public"
 msgstr "Öffentlich"
 
-#: core/resolvers/mutation_edit_site_setting.py:356
+#: core/resolvers/mutation_edit_site_setting.py:402
 #, python-format
 msgid "Site access level changed for %(site_name)s"
 msgstr "Site-Zugriffsebene geändert für %(site_name)s"
@@ -294,23 +294,23 @@ msgstr "Ein neuer Site-Administrator wurde %(site_name)s zugewiesen"
 msgid "You're granted site administrator right on %(site_name)s"
 msgstr "Ihnen wurden Site-Administratorrechte auf %(site_name)s gewährt"
 
-#: core/resolvers/query_site.py:123
+#: core/resolvers/query_site.py:124
 msgid "Activity stream"
 msgstr "Aktivitäten-Stream"
 
-#: core/resolvers/query_site.py:123
+#: core/resolvers/query_site.py:124
 msgid "CMS page"
 msgstr "CMS-Seite"
 
-#: core/resolvers/query_site.py:213
+#: core/resolvers/query_site.py:215
 msgid "Administrator"
 msgstr "Administrator"
 
-#: core/resolvers/query_site.py:214
+#: core/resolvers/query_site.py:216
 msgid "Editor"
 msgstr "Editor"
 
-#: core/resolvers/query_site.py:215
+#: core/resolvers/query_site.py:217
 msgid "Question expert"
 msgstr "Experten fragen"
 
@@ -426,292 +426,23 @@ msgstr ""
 "\n"
 "Das Konto von %(name_deleted_user)s ist gelöscht. Diese Aktion wurde von %(user_name)sdurchgeführt.\n"
 
-#: core/templates/email/attend_event_from_waitinglist.html:5
-#, python-format
-msgid ""
-"\n"
-"You are added as attendee for %(title)s from the waitinglist.<br><br>\n"
-msgstr ""
-"\n"
-"Sie werden als Teilnehmer für %(title)s von der Warteliste hinzugefügt.<br><br>\n"
-
-#: core/templates/email/attend_event_from_waitinglist.html:10
-#: core/templates/email/attend_event_with_qr_access.html:10
-#: core/templates/email/attend_event_without_account.html:10
-#: core/templates/email/confirm_attend_event_without_account.html:24
-#, python-format
-msgid ""
-"    \n"
-"    Location: <a href=\"%(locationLink)s\"> %(location)s</a> - %(locationAddress)s<br>\n"
-"    "
-msgstr ""
-"    \n"
-"    Standort: <a href=\"%(locationLink)s\"> %(location)s</a> - %(locationAddress)s<br>\n"
-"    "
-
-#: core/templates/email/attend_event_from_waitinglist.html:14
-#: core/templates/email/attend_event_with_qr_access.html:14
-#: core/templates/email/attend_event_without_account.html:14
-#: core/templates/email/confirm_attend_event_without_account.html:28
-#, python-format
-msgid ""
-"    \n"
-"    Location: %(location)s - %(locationAddress)s<br>\n"
-"    "
-msgstr ""
-"    \n"
-"    Standort: %(location)s - %(locationAddress)s<br>\n"
-"    "
-
-#: core/templates/email/attend_event_from_waitinglist.html:18
-#: core/templates/email/attend_event_with_qr_access.html:18
-#: core/templates/email/attend_event_without_account.html:18
-#: core/templates/email/confirm_attend_event_without_account.html:32
-#, python-format
-msgid ""
-" \n"
-"    Location: <a href=\"%(locationLink)s\"> %(locationAddress)s</a><br>\n"
-"    "
-msgstr ""
-" \n"
-"    Standort: <a href=\"%(locationLink)s\"> %(locationAddress)s</a><br>\n"
-"    "
-
-#: core/templates/email/attend_event_from_waitinglist.html:22
-#: core/templates/email/attend_event_with_qr_access.html:22
-#: core/templates/email/attend_event_without_account.html:22
-#: core/templates/email/confirm_attend_event_without_account.html:36
-#, python-format
-msgid ""
-"\n"
-"    Location: <a href=\"%(locationLink)s\"> %(location)s</a><br>\n"
-"    "
-msgstr ""
-"\n"
-"    Standort: <a href=\"%(locationLink)s\"> %(location)s</a><br>\n"
-"    "
-
-#: core/templates/email/attend_event_from_waitinglist.html:26
-#: core/templates/email/attend_event_with_qr_access.html:26
-#: core/templates/email/attend_event_without_account.html:26
-#: core/templates/email/confirm_attend_event_without_account.html:40
-#, python-format
-msgid ""
-"\n"
-"    Location: %(location)s<br>\n"
-"    "
-msgstr ""
-"\n"
-"    Standort: %(location)s<br>\n"
-"    "
-
-#: core/templates/email/attend_event_from_waitinglist.html:30
-#: core/templates/email/attend_event_with_qr_access.html:30
-#: core/templates/email/attend_event_without_account.html:30
-#: core/templates/email/confirm_attend_event_without_account.html:44
-#, python-format
-msgid ""
-"\n"
-"    Location: %(locationAddress)s<br>\n"
-"    "
-msgstr ""
-"\n"
-"    Standort: %(locationAddress)s<br>\n"
-"    "
-
-#: core/templates/email/attend_event_from_waitinglist.html:34
-#: core/templates/email/attend_event_with_qr_access.html:34
-#: core/templates/email/attend_event_without_account.html:34
-#: core/templates/email/confirm_attend_event_without_account.html:48
-#, python-format
-msgid ""
-"\n"
-"    Location: <a href=\"%(locationLink)s\"> Location </a><br>\n"
-"    "
-msgstr ""
-"\n"
-"    Standort: <a href=\"%(locationLink)s\"> Standort </a><br>\n"
-"    "
-
-#: core/templates/email/attend_event_from_waitinglist.html:39
-#, python-format
-msgid ""
-"\n"
-"Date: %(start_date)s<br><br>\n"
-"\n"
-"Click on the link below to see the event.<br><br>\n"
-"<a href=\"%(link)s\">%(link)s</a>\n"
-msgstr ""
-"\n"
-"Datum: %(start_date)s<br><br>\n"
-"\n"
-"Klicken Sie auf den untenstehenden Link, um die Veranstaltung zu sehen.<br><br>\n"
-"<a href=\"%(link)s\">%(link)s</a>\n"
-
-#: core/templates/email/attend_event_with_qr_access.html:5
-#, python-format
-msgid ""
-"\n"
-"You are added as attendee for %(title)s. For this event, you will need the QR code attached to this email.<br><br>\n"
-msgstr ""
-"\n"
-"Sie sind als Teilnehmer für %(title)shinzugefügt. Für diese Veranstaltung benötigen Sie den an diese E-Mail angehängten QR-Code.<br><br>\n"
-
-#: core/templates/email/attend_event_with_qr_access.html:38
-#, python-format
-msgid "Date: %(date)s"
-msgstr "Datum: %(date)s"
-
-#: core/templates/email/attend_event_with_qr_access.html:40
-msgid "Click on the link below to see the event."
-msgstr ""
-"Klicken Sie auf den unten stehenden Link, um die Veranstaltung zu sehen."
-
-#: core/templates/email/attend_event_without_account.html:5
-#, python-format
-msgid ""
-"\n"
-"Confirm your registration for %(title)s.<br><br>\n"
-msgstr ""
-"\n"
-"Bestätigen Sie Ihre Anmeldung für %(title)s.<br><br>\n"
-
-#: core/templates/email/attend_event_without_account.html:39
-#, python-format
-msgid ""
-"\n"
-"Date: %(start_date)s<br><br>\n"
-"\n"
-"Click on the link below to confirm.<br><br>\n"
-"<a href=\"%(link)s\">%(link)s</a>\n"
-msgstr ""
-"\n"
-"Datum: %(start_date)s<br><br>\n"
-"\n"
-"Klicken Sie auf den untenstehenden Link, um zu bestätigen.<br><br>\n"
-"<a href=\"%(link)s\">%(link)s</a>\n"
-
 #: core/templates/email/confirm_add_comment_without_account.html:5
 #, python-format
 msgid ""
-"\n"
-"This is a request to confirm your comment on <a href=\"%(entity_url)s\">%(entity_title)s</a>.<br><br>\n"
-"\n"
-"Comment: %(comment)s<br>\n"
-"\n"
-"Click on the link below to confirm the comment.<br><br>\n"
-"<a href=\"%(confirm_url)s\">%(confirm_url)s</a>\n"
+"This is a request to confirm your comment on <a "
+"href=\"%(entity_url)s\">%(entity_title)s</a>."
 msgstr ""
-"\n"
-"Dies ist eine Anfrage zur Bestätigung Ihres Kommentars zu <a href=\"%(entity_url)s\">%(entity_title)s</a>.<br><br>\n"
-"\n"
-"Kommentar: %(comment)s<br>\n"
-"\n"
-"Klicken Sie auf den untenstehenden Link, um den Kommentar zu bestätigen.<br><br>\n"
-"<a href=\"%(confirm_url)s\">%(confirm_url)s</a>\n"
+"Dies ist eine Anfrage zur Bestätigung Ihres Kommentars zu <a "
+"href=\"%(entity_url)s\">%(entity_title)s</a>."
 
-#: core/templates/email/confirm_attend_event_without_account.html:6
-#, python-format
-msgid ""
-"\n"
-"        This is confirmation of your registration for the <em>waitinglist</em> of %(title)s.<br><br>\n"
-"    "
-msgstr ""
-"\n"
-"        Dies ist die Bestätigung Ihrer Anmeldung für die <em>Warteliste</em> von %(title)s.<br><br>\n"
-"    "
+#: core/templates/email/confirm_add_comment_without_account.html:6
+msgid "Comment:"
+msgstr "Kommentar:"
 
-#: core/templates/email/confirm_attend_event_without_account.html:10
-#, python-format
-msgid ""
-"\n"
-"        This is confirmation of your registration for %(title)s.<br><br>\n"
-"    "
+#: core/templates/email/confirm_add_comment_without_account.html:9
+msgid "Click on the link below to confirm the comment."
 msgstr ""
-"\n"
-"        Dies ist die Bestätigung Ihrer Anmeldung für %(title)s.<br><br>\n"
-"    "
-
-#: core/templates/email/confirm_attend_event_without_account.html:14
-#, python-format
-msgid ""
-"\n"
-"        The state for registration for %(title)s changed to <em>maybe</em>.<br><br>\n"
-"    "
-msgstr ""
-"\n"
-"        Der Status für die Registrierung von %(title)s wurde auf <em>maybe</em> geändert.<br><br>\n"
-"    "
-
-#: core/templates/email/confirm_attend_event_without_account.html:18
-#, python-format
-msgid ""
-"\n"
-"        The state for registration for %(title)s changed to <em>rejected</em>.<br><br>\n"
-"    "
-msgstr ""
-"\n"
-"        Der Status für die Registrierung von %(title)s wurde auf <em>abgelehnt</em> geändert.<br><br>\n"
-"    "
-
-#: core/templates/email/confirm_attend_event_without_account.html:53
-#, python-format
-msgid ""
-"\n"
-"Date: %(start_date)s<br><br>\n"
-"\n"
-"Click on the link below to see your registration and to add this appointment to your agenda.<br><br>\n"
-"<a href=\"%(link)s\">%(link)s</a><br><br>\n"
-"\n"
-"If you want to cancel your registration of the event, use <a href=\"%(leave_link)s\">%(leave_link)s</a>\n"
-msgstr ""
-"\n"
-"Datum: %(start_date)s<br><br>\n"
-"\n"
-"Klicken Sie auf den untenstehenden Link, um Ihre Anmeldung zu sehen und diesen Termin in Ihre Agenda aufzunehmen.<br><br>\n"
-"<a href=\"%(link)s\">%(link)s</a><br><br>\n"
-"\n"
-"Wenn Sie Ihre Anmeldung für die Veranstaltung stornieren möchten, verwenden Sie <a href=\"%(leave_link)s\">%(leave_link)s</a>\n"
-
-#: core/templates/email/delete_event_attendees.html:7
-#, python-format
-msgid ""
-"\n"
-"        Dear %(removed_attendee_name)s,\n"
-"    "
-msgstr ""
-"\n"
-"        Sehr geehrter %(removed_attendee_name)s,\n"
-"    "
-
-#: core/templates/email/delete_event_attendees.html:11
-msgid ""
-"\n"
-"        Dear user,\n"
-"    "
-msgstr ""
-"\n"
-"        Lieber Benutzer,\n"
-"    "
-
-#: core/templates/email/delete_event_attendees.html:16
-#, python-format
-msgid ""
-"\n"
-"You are removed as attendee from %(title)s.<br><br>\n"
-"\n"
-"If you have questions, please contact the event organizer.\n"
-"\n"
-"Click on the link below to see the event.<br><br>\n"
-"<a href=\"%(link)s\">%(link)s</a>\n"
-msgstr ""
-"\n"
-"Sie werden als Teilnehmer von %(title)sentfernt.<br><br>\n"
-"\n"
-"Wenn Sie Fragen haben, wenden Sie sich bitte an den Organisator der Veranstaltung.\n"
-"\n"
-"Klicken Sie auf den untenstehenden Link, um die Veranstaltung zu sehen.<br><br>\n"
-"<a href=\"%(link)s\">%(link)s</a>\n"
+"Klicken Sie auf den untenstehenden Link, um den Kommentar zu bestätigen."
 
 #: core/templates/email/element/footer-userorigin.html:2
 #, python-format
@@ -1265,7 +996,38 @@ msgstr "Gruppe"
 msgid "Saved"
 msgstr "Gerettet"
 
-#: event/models.py:123
+#: event/mail_builders/attend_event_confirm.py:59
+#, python-format
+msgid "Confirmation of registration for %s"
+msgstr "Bestätigung der Registrierung für %s"
+
+#: event/mail_builders/attend_event_request.py:22
+#, python-format
+msgid "Confirmation of registration %s"
+msgstr "Anmeldungsbestätigung %s"
+
+#: event/mail_builders/custom_message.py:39
+#: event/tests/test_custom_mailer.py:275
+#, python-brace-format
+msgid "Copy: Message from event {0}: {1}"
+msgstr "Kopieren: Nachricht von Ereignis {0}: {1}"
+
+#: event/mail_builders/custom_message.py:40
+#, python-brace-format
+msgid "Message from event {0}: {1}"
+msgstr "Nachricht von Ereignis {0}: {1}"
+
+#: event/mail_builders/delete_event_attendees.py:48
+#, python-format
+msgid "Removed from event: %s"
+msgstr "Entfernt vom Ereignis: %s"
+
+#: event/mail_builders/qr_code.py:44
+#, python-format
+msgid "QR code for %s"
+msgstr "QR-Code für %s"
+
+#: event/mail_builders/waitinglist.py:22 event/models.py:104
 #, python-format
 msgid "Added to event %s from waitinglist"
 msgstr "Zum Ereignis %s von der Warteliste hinzugefügt"
@@ -1276,48 +1038,285 @@ msgstr ""
 "Sie haben sich bereits für eine andere Unterveranstaltung auf demselben "
 "Platz angemeldet."
 
-#: event/resolvers/mutation.py:424 event/tests/test_resolve_copy_entity.py:149
+#: event/resolvers/mutation_event_copy.py:62
+#: event/tests/test_resolve_copy_entity.py:149
 #, python-format
 msgid "Copy %s"
 msgstr "Kopie %s"
 
-#: event/resolvers/mutation_attend_event.py:42
+#: event/templates/email/attend_event_from_waitinglist.html:5
 #, python-format
-msgid "Confirmation of registration %s"
-msgstr "Anmeldungsbestätigung %s"
+msgid ""
+"\n"
+"You are added as attendee for %(title)s from the waitinglist.<br><br>\n"
+msgstr ""
+"\n"
+"Sie werden als Teilnehmer für %(title)s von der Warteliste hinzugefügt.<br><br>\n"
 
-#: event/resolvers/mutation_confirm_attend_event_without_account.py:92
+#: event/templates/email/attend_event_from_waitinglist.html:10
+#: event/templates/email/attend_event_with_qr_access.html:10
+#: event/templates/email/attend_event_without_account.html:10
+#: event/templates/email/attend_event_without_account_confirm.html:24
 #, python-format
-msgid "Confirmation of registration for %s"
-msgstr "Bestätigung der Registrierung für %s"
+msgid ""
+"    \n"
+"    Location: <a href=\"%(locationLink)s\"> %(location)s</a> - %(locationAddress)s<br>\n"
+"    "
+msgstr ""
+"    \n"
+"    Standort: <a href=\"%(locationLink)s\"> %(location)s</a> - %(locationAddress)s<br>\n"
+"    "
 
-#: event/resolvers/mutation_delete_event_attendees.py:32
+#: event/templates/email/attend_event_from_waitinglist.html:14
+#: event/templates/email/attend_event_with_qr_access.html:14
+#: event/templates/email/attend_event_without_account.html:14
+#: event/templates/email/attend_event_without_account_confirm.html:28
 #, python-format
-msgid "Removed from event: %s"
-msgstr "Entfernt vom Ereignis: %s"
+msgid ""
+"    \n"
+"    Location: %(location)s - %(locationAddress)s<br>\n"
+"    "
+msgstr ""
+"    \n"
+"    Standort: %(location)s - %(locationAddress)s<br>\n"
+"    "
 
-#: event/resolvers/mutation_messages.py:73
-#: event/tests/test_event_mailer.py:276
-#, python-brace-format
-msgid "Message from event {0}: {1}"
-msgstr "Nachricht von Ereignis {0}: {1}"
+#: event/templates/email/attend_event_from_waitinglist.html:18
+#: event/templates/email/attend_event_with_qr_access.html:18
+#: event/templates/email/attend_event_without_account.html:18
+#: event/templates/email/attend_event_without_account_confirm.html:32
+#, python-format
+msgid ""
+" \n"
+"    Location: <a href=\"%(locationLink)s\"> %(locationAddress)s</a><br>\n"
+"    "
+msgstr ""
+" \n"
+"    Standort: <a href=\"%(locationLink)s\"> %(locationAddress)s</a><br>\n"
+"    "
 
-#: event/resolvers/mutation_messages.py:75
-#: event/tests/test_event_mailer.py:290
-#, python-brace-format
-msgid "Copy: Message from event {0}: {1}"
-msgstr "Kopieren: Nachricht von Ereignis {0}: {1}"
+#: event/templates/email/attend_event_from_waitinglist.html:22
+#: event/templates/email/attend_event_with_qr_access.html:22
+#: event/templates/email/attend_event_without_account.html:22
+#: event/templates/email/attend_event_without_account_confirm.html:36
+#, python-format
+msgid ""
+"\n"
+"    Location: <a href=\"%(locationLink)s\"> %(location)s</a><br>\n"
+"    "
+msgstr ""
+"\n"
+"    Standort: <a href=\"%(locationLink)s\"> %(location)s</a><br>\n"
+"    "
+
+#: event/templates/email/attend_event_from_waitinglist.html:26
+#: event/templates/email/attend_event_with_qr_access.html:26
+#: event/templates/email/attend_event_without_account.html:26
+#: event/templates/email/attend_event_without_account_confirm.html:40
+#, python-format
+msgid ""
+"\n"
+"    Location: %(location)s<br>\n"
+"    "
+msgstr ""
+"\n"
+"    Standort: %(location)s<br>\n"
+"    "
+
+#: event/templates/email/attend_event_from_waitinglist.html:30
+#: event/templates/email/attend_event_with_qr_access.html:30
+#: event/templates/email/attend_event_without_account.html:30
+#: event/templates/email/attend_event_without_account_confirm.html:44
+#, python-format
+msgid ""
+"\n"
+"    Location: %(locationAddress)s<br>\n"
+"    "
+msgstr ""
+"\n"
+"    Standort: %(locationAddress)s<br>\n"
+"    "
+
+#: event/templates/email/attend_event_from_waitinglist.html:34
+#: event/templates/email/attend_event_with_qr_access.html:34
+#: event/templates/email/attend_event_without_account.html:34
+#: event/templates/email/attend_event_without_account_confirm.html:48
+#, python-format
+msgid ""
+"\n"
+"    Location: <a href=\"%(locationLink)s\"> Location </a><br>\n"
+"    "
+msgstr ""
+"\n"
+"    Standort: <a href=\"%(locationLink)s\"> Standort </a><br>\n"
+"    "
+
+#: event/templates/email/attend_event_from_waitinglist.html:39
+#, python-format
+msgid ""
+"\n"
+"Date: %(start_date)s<br><br>\n"
+"\n"
+"Click on the link below to see the event.<br><br>\n"
+"<a href=\"%(link)s\">%(link)s</a>\n"
+msgstr ""
+"\n"
+"Datum: %(start_date)s<br><br>\n"
+"\n"
+"Klicken Sie auf den untenstehenden Link, um die Veranstaltung zu sehen.<br><br>\n"
+"<a href=\"%(link)s\">%(link)s</a>\n"
+
+#: event/templates/email/attend_event_with_qr_access.html:5
+#, python-format
+msgid ""
+"\n"
+"You are added as attendee for %(title)s. For this event, you will need the QR code attached to this email.<br><br>\n"
+msgstr ""
+"\n"
+"Sie sind als Teilnehmer für %(title)shinzugefügt. Für diese Veranstaltung benötigen Sie den an diese E-Mail angehängten QR-Code.<br><br>\n"
+
+#: event/templates/email/attend_event_with_qr_access.html:38
+#, python-format
+msgid "Date: %(date)s"
+msgstr "Datum: %(date)s"
+
+#: event/templates/email/attend_event_with_qr_access.html:40
+msgid "Click on the link below to see the event."
+msgstr ""
+"Klicken Sie auf den unten stehenden Link, um die Veranstaltung zu sehen."
+
+#: event/templates/email/attend_event_without_account.html:5
+#, python-format
+msgid ""
+"\n"
+"Confirm your registration for %(title)s.<br><br>\n"
+msgstr ""
+"\n"
+"Bestätigen Sie Ihre Anmeldung für %(title)s.<br><br>\n"
+
+#: event/templates/email/attend_event_without_account.html:39
+#, python-format
+msgid ""
+"\n"
+"Date: %(start_date)s<br><br>\n"
+"\n"
+"Click on the link below to confirm.<br><br>\n"
+"<a href=\"%(link)s\">%(link)s</a>\n"
+msgstr ""
+"\n"
+"Datum: %(start_date)s<br><br>\n"
+"\n"
+"Klicken Sie auf den untenstehenden Link, um zu bestätigen.<br><br>\n"
+"<a href=\"%(link)s\">%(link)s</a>\n"
+
+#: event/templates/email/attend_event_without_account_confirm.html:6
+#, python-format
+msgid ""
+"\n"
+"        This is confirmation of your registration for the <em>waitinglist</em> of %(title)s.<br><br>\n"
+"    "
+msgstr ""
+"\n"
+"        Dies ist die Bestätigung Ihrer Anmeldung für die <em>Warteliste</em> von %(title)s.<br><br>\n"
+"    "
+
+#: event/templates/email/attend_event_without_account_confirm.html:10
+#, python-format
+msgid ""
+"\n"
+"        This is confirmation of your registration for %(title)s.<br><br>\n"
+"    "
+msgstr ""
+"\n"
+"        Dies ist die Bestätigung Ihrer Anmeldung für %(title)s.<br><br>\n"
+"    "
+
+#: event/templates/email/attend_event_without_account_confirm.html:14
+#, python-format
+msgid ""
+"\n"
+"        The state for registration for %(title)s changed to <em>maybe</em>.<br><br>\n"
+"    "
+msgstr ""
+"\n"
+"        Der Status für die Registrierung von %(title)s wurde auf <em>maybe</em> geändert.<br><br>\n"
+"    "
+
+#: event/templates/email/attend_event_without_account_confirm.html:18
+#, python-format
+msgid ""
+"\n"
+"        The state for registration for %(title)s changed to <em>rejected</em>.<br><br>\n"
+"    "
+msgstr ""
+"\n"
+"        Der Status für die Registrierung von %(title)s wurde auf <em>abgelehnt</em> geändert.<br><br>\n"
+"    "
+
+#: event/templates/email/attend_event_without_account_confirm.html:53
+#, python-format
+msgid ""
+"\n"
+"Date: %(start_date)s<br><br>\n"
+"\n"
+"Click on the link below to see your registration and to add this appointment to your agenda.<br><br>\n"
+"<a href=\"%(link)s\">%(link)s</a><br><br>\n"
+"\n"
+"If you want to cancel your registration of the event, use <a href=\"%(leave_link)s\">%(leave_link)s</a>\n"
+msgstr ""
+"\n"
+"Datum: %(start_date)s<br><br>\n"
+"\n"
+"Klicken Sie auf den untenstehenden Link, um Ihre Anmeldung zu sehen und diesen Termin in Ihre Agenda aufzunehmen.<br><br>\n"
+"<a href=\"%(link)s\">%(link)s</a><br><br>\n"
+"\n"
+"Wenn Sie Ihre Anmeldung für die Veranstaltung stornieren möchten, verwenden Sie <a href=\"%(leave_link)s\">%(leave_link)s</a>\n"
+
+#: event/templates/email/delete_event_attendees.html:7
+#, python-format
+msgid ""
+"\n"
+"        Dear %(removed_attendee_name)s,\n"
+"    "
+msgstr ""
+"\n"
+"        Sehr geehrter %(removed_attendee_name)s,\n"
+"    "
+
+#: event/templates/email/delete_event_attendees.html:11
+msgid ""
+"\n"
+"        Dear user,\n"
+"    "
+msgstr ""
+"\n"
+"        Lieber Benutzer,\n"
+"    "
+
+#: event/templates/email/delete_event_attendees.html:16
+#, python-format
+msgid ""
+"\n"
+"You are removed as attendee from %(title)s.<br><br>\n"
+"\n"
+"If you have questions, please contact the event organizer.\n"
+"\n"
+"Click on the link below to see the event.<br><br>\n"
+"<a href=\"%(link)s\">%(link)s</a>\n"
+msgstr ""
+"\n"
+"Sie werden als Teilnehmer von %(title)sentfernt.<br><br>\n"
+"\n"
+"Wenn Sie Fragen haben, wenden Sie sich bitte an den Organisator der Veranstaltung.\n"
+"\n"
+"Klicken Sie auf den untenstehenden Link, um die Veranstaltung zu sehen.<br><br>\n"
+"<a href=\"%(link)s\">%(link)s</a>\n"
 
 #: event/templates/email/send_message_to_event.html:5
 msgid "Message to event"
 msgstr "Nachricht an die Veranstaltung"
 
-#: event/utils.py:33
-#, python-format
-msgid "QR code for %s"
-msgstr "QR-Code für %s"
-
-#: file/tasks.py:63
+#: file/tasks.py:68
 #, python-format
 msgid "Filescan found suspicous files on %(site_url)s"
 msgstr "Filescan hat verdächtige Dateien auf %(site_url)sgefunden"

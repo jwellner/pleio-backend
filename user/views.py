@@ -1,7 +1,13 @@
 import csv
-from django.http import Http404, StreamingHttpResponse
+import mimetypes
+import os
+import zipfile
+
+import requests
+from django.http import Http404, StreamingHttpResponse, FileResponse
 from django.utils.dateformat import format as dateformat
-from core.lib import get_exportable_user_fields, datetime_isoformat
+
+from core.lib import get_exportable_user_fields, datetime_isoformat, get_tmp_file_path
 from core.models.group import GroupMembership
 from core.models.user import UserProfileField, ProfileField
 from core.constances import USER_ROLES
@@ -12,14 +18,17 @@ class Echo:
     """An object that implements just the write method of the file-like
     interface.
     """
+
     def write(self, value):
         """Write the value by returning it, instead of storing in a buffer."""
         return value
+
 
 def get_user_field(user, field):
     field_object = User._meta.get_field(field)
     value = field_object.value_from_object(user)
     return value
+
 
 def get_fields(user, user_fields, profile_field_guids):
     # pylint: disable=too-many-branches
@@ -72,6 +81,7 @@ def get_fields(user, user_fields, profile_field_guids):
 
     return fields
 
+
 def get_headers(user_fields, profile_field_guids):
     profile_field_names = []
     for guid in profile_field_guids:
@@ -82,8 +92,10 @@ def get_headers(user_fields, profile_field_guids):
 
     return user_fields + profile_field_names
 
+
 def get_data(user, user_fields, profile_field_guids):
     return get_fields(user, user_fields, profile_field_guids)
+
 
 def iter_items(items, pseudo_buffer, user_fields, profile_field_guids):
     writer = csv.writer(pseudo_buffer, delimiter=';', quotechar='"')
@@ -91,6 +103,7 @@ def iter_items(items, pseudo_buffer, user_fields, profile_field_guids):
 
     for item in items:
         yield writer.writerow(get_data(item, user_fields, profile_field_guids))
+
 
 def export(request):
     user = request.user
@@ -121,3 +134,59 @@ def export(request):
     response['Content-Disposition'] = 'attachment;filename=exported_users.csv'
 
     return response
+
+
+def export_avatars(request):
+    user = request.user
+
+    if not user.is_authenticated:
+        raise Http404("Not logged in")
+
+    if not user.has_role(USER_ROLES.ADMIN):
+        raise Http404("Not admin")
+
+    zip_path = get_tmp_file_path(user, "avatar_export.zip")
+    csv_path = get_tmp_file_path(user, "avatar_export.csv")
+
+    zip_file = zipfile.ZipFile(zip_path, mode='w', compression=zipfile.ZIP_DEFLATED)
+
+    with open(csv_path, 'w') as fh:
+        writer = csv.writer(fh, delimiter=';', quotechar='"')
+        writer.writerow(['name', 'email', 'avatar'])
+        for user in User.objects.filter(is_active=True):
+            picture = None
+
+            if user.picture:
+                try:
+                    data, extension = _fetch_avatar(user.picture)
+                    picture = f"{user.guid}{extension}"
+                    zip_file.writestr(picture, data)
+                except Exception:
+                    picture = None
+
+            writer.writerow([user.name, user.email, picture])
+
+    with open(csv_path, 'r') as fh:
+        zip_file.writestr("summary.csv", fh.read())
+
+    zip_file.close()
+    os.unlink(csv_path)
+
+    response = FileResponse(open(zip_path, 'rb'))
+    response['Content-Disposition'] = "attachment; filename=export_avatars.zip"
+
+    return response
+
+
+class CouldNotLoadPictureError(Exception):
+    pass
+
+
+def _fetch_avatar(url):
+    response = requests.get(url)
+    if not response.ok:
+        raise CouldNotLoadPictureError()
+
+    extension = mimetypes.guess_extension(response.headers['content-type'])
+
+    return (response.content, extension)

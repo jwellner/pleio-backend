@@ -8,15 +8,18 @@ from .mixin import VoteMixin, CommentMixin
 from .rich_fields import MentionMixin, AttachmentMixin
 from core.constances import USER_ROLES
 
+
 class CommentManager(models.Manager):
     def visible(self):
         queryset = self.get_queryset()
 
         return queryset
 
+
 class Comment(VoteMixin, MentionMixin, AttachmentMixin, CommentMixin):
     class Meta:
         ordering = ['-created_at']
+
     objects = CommentManager()
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
@@ -96,7 +99,6 @@ class Comment(VoteMixin, MentionMixin, AttachmentMixin, CommentMixin):
 
 
 class CommentRequest(models.Model):
-
     code = models.CharField(max_length=36)
 
     name = models.CharField(max_length=256, null=True, blank=True)
@@ -109,6 +111,9 @@ class CommentRequest(models.Model):
     content_type = models.ForeignKey(ContentType, on_delete=models.PROTECT)
     object_id = models.UUIDField(default=uuid.uuid4)
     container = GenericForeignKey('content_type', 'object_id')
+
+    def __str__(self):
+        return f"CommentRequest[{self.name} commented on {self.container}]"
 
 
 auditlog.register(Comment)

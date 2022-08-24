@@ -868,17 +868,20 @@ def add_agreement_version(self, agreement_id, version, document_path):
     # pylint: disable=unused-argument
     agreement = Agreement.objects.get(id=agreement_id)
 
-    document = open(document_path, 'r')
+    fd = open(document_path, "rb")
 
-    AgreementVersion.objects.create(
+    save_as = ContentFile(fd.read())
+    save_as.name = os.path.basename(fd.name)
+
+    version = AgreementVersion.objects.create(
         agreement=agreement,
         version=version,
-        document=document
+        document=save_as
     )
 
     return {
-        'id': agreement.id,
-        'version': agreement.version,
-        'document': agreement.get_absolute_url()
+        'id': version.id,
+        'version': version.version,
+        'document': version.get_absolute_url()
     }
 

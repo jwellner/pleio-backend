@@ -62,15 +62,15 @@ class AttendEventWithoutAccountConfirmMailer(TemplateMailerBase):
 class LeaveUrl:
 
     def __init__(self, event):
-        self.url = '/events/confirm/' + event.guid
+        self.url = '/events/confirm/' + event.guid + '?delete=true'
 
     def add_email(self, email):
-        self.url = self.url + '?email=' + email
+        self.url = self.url + '&email=' + email
         return self
 
     def add_code(self, code):
-        self.url = self.url + '?code=' + code
+        self.url = self.url + '&code=' + code
         return self
 
     def get_url(self):
-        return self.url + '?delete=true'
+        return self.url

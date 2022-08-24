@@ -103,10 +103,13 @@ def mention_handler(sender, instance, created, **kwargs):
     if not issubclass(type(instance), MentionMixin):
         return
 
-    if not instance.owner: # extra robustness for when tests don't assign an owner
+    # extra robustness for when tests don't assign an owner also don't send as deleted user
+    # also don't try to create notifications when user is inactive
+    if not instance.owner or not instance.owner.is_active:
         return
 
-    create_notification.delay(tenant_schema(), 'mentioned', get_model_name(instance), instance.id, instance.owner.id)
+    if instance.mentioned_users:
+        create_notification.delay(tenant_schema(), 'mentioned', get_model_name(instance), instance.id, instance.owner.id)
 
 def file_delete_handler(sender, instance, using, **kwargs):
     # pylint: disable=unused-argument
