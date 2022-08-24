@@ -873,15 +873,15 @@ def add_agreement_version(self, agreement_id, version, document_path):
     save_as = ContentFile(fd.read())
     save_as.name = os.path.basename(fd.name)
 
-    AgreementVersion.objects.create(
+    version = AgreementVersion.objects.create(
         agreement=agreement,
         version=version,
         document=save_as
     )
 
     return {
-        'id': agreement.id,
-        'version': agreement.version,
-        'document': agreement.get_absolute_url()
+        'id': version.id,
+        'version': version.version,
+        'document': version.get_absolute_url()
     }
 
