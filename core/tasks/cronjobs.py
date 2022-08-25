@@ -4,9 +4,11 @@ import celery
 from auditlog.models import LogEntry
 from celery import shared_task
 from celery.utils.log import get_task_logger
+from django.utils.timezone import localtime
+
 from core import config
 from core.mail_builders.frequent_overview import schedule_frequent_overview_mail
-from core.models import SiteStat, Attachment, ResizedImage, Entity
+from core.models import SiteStat, Attachment, ResizedImage, Entity, AvatarExport
 from core.tasks.notification_tasks import create_notifications_for_scheduled_content
 from django.conf import settings
 from django.core import management
@@ -46,6 +48,7 @@ def dispatch_daily_cron():
         resize_pending_images.delay(client.schema_name)
         cleanup_auditlog.delay(client.schema_name)
         send_overview.delay(client.schema_name, 'daily')
+        cleanup_exports.delay(client.schema_name)
 
 
 @shared_task
@@ -99,6 +102,16 @@ def send_overview(schema_name, period):
                                     _profile__overview_email_interval=period)
         for user in users:
             schedule_frequent_overview_mail(user, period)
+
+
+@shared_task
+def cleanup_exports(schema_name):
+    with schema_context(schema_name):
+        due_datetime = localtime() - timedelta(days=30)
+        for export in AvatarExport.objects.filter(updated_at__lte=due_datetime):
+            if export.file:
+                export.file.delete()
+            export.delete()
 
 
 @shared_task
