@@ -1,0 +1,9 @@
+{% extends "email/base_notification.html" %}
+{% load i18n %}
+
+{% block body %}
+    <p><strong>{% trans "The export file you requested is ready for download." %}</strong></p>
+    <p>{% trans "Follow the link below to download the export." %}</p>
+    <p>{% trans "This link expires in 30 days." %}</p>
+    <p><a href="{{ site_url }}{{ download_url }}">{{ filename }}</a></p>
+{% endblock %}
