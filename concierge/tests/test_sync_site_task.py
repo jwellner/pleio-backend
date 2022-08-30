@@ -29,4 +29,5 @@ class TestSyncSiteTestCase(FastTenantTestCase):
             headers={
                 "x-oidc-client-id": settings.OIDC_RP_CLIENT_ID,
                 "x-oidc-client-secret": settings.OIDC_RP_CLIENT_SECRET,
-            })
+            }, 
+            timeout=10)

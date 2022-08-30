@@ -26,7 +26,8 @@ def profile_updated_signal(schema_name, origin_token, retry=3, retry_delay=60):
             user = User.objects.get(_profile__origin_token=origin_token)
             response = requests.get(FETCH_PROFILE_URL.format(str(settings.ACCOUNT_API_URL).rstrip('/'),
                                                              user.external_id),
-                                    headers={'X-Origin-Token': str(user.profile.origin_token)})
+                                    headers={'X-Origin-Token': str(user.profile.origin_token)},
+                                    timeout=10)
 
             assert response.ok, response.reason
 
@@ -79,7 +80,7 @@ def submit_user_token(schema, user):
         response = requests.post(url, data=data, headers={
             'x-oidc-client-id': settings.OIDC_RP_CLIENT_ID,
             'x-oidc-client-secret': settings.OIDC_RP_CLIENT_SECRET,
-        })
+        }, timeout=10)
         if response.ok:
             profile_updated_signal.delay(schema, token)
         else:
@@ -114,7 +115,7 @@ def submit_user_registration_date(user):
         response = requests.post(url, data=data, headers={
             'x-oidc-client-id': settings.OIDC_RP_CLIENT_ID,
             'x-oidc-client-secret': settings.OIDC_RP_CLIENT_SECRET,
-        })
+        }, timeout=10)
         if not response.ok:
             logger.error("Failed to sync a user registration_date for reason '%s'", response.reason)
 
@@ -132,7 +133,7 @@ def sync_site(schema_name):
             response = requests.post(url, data=data, headers={
                 'x-oidc-client-id': settings.OIDC_RP_CLIENT_ID,
                 'x-oidc-client-secret': settings.OIDC_RP_CLIENT_SECRET,
-            })
+            }, timeout=10)
             if not response.ok:
                 logger.error("Failed to sync new site attributes for reason: '%s'", response.reason)
 

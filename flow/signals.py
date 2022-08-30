@@ -51,7 +51,7 @@ def object_handler(sender, instance, created, **kwargs):
             'tags': []
         }
 
-        r = requests.post(url, headers=headers, json=json)
+        r = requests.post(url, headers=headers, json=json, timeout=30)
         FlowId.objects.create(flow_id=r.json()['id'], object_id=instance.id)
 
     except Exception as e:
@@ -89,7 +89,7 @@ def comment_handler(sender, instance, created, **kwargs):
             'description': tiptap_to_html(instance.rich_description)
         }
 
-        requests.post(url, headers=headers, json=json)
+        requests.post(url, headers=headers, json=json, timeout=30)
     except Exception as e:
         logger.error("Error saving comment on connected flow app: %s", e)
 

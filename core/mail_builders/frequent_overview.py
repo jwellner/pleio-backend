@@ -177,6 +177,7 @@ class EntityCollection:
 
     @staticmethod
     def _filter_valid_content_type(qs):
+        # pylint: disable=unsupported-binary-operation
         return qs.filter(
             ~Q(news__isnull=True) |
             ~Q(blog__isnull=True) |

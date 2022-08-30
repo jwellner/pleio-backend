@@ -176,7 +176,7 @@ def ban_users_that_bounce(schema_name):
             }
             last_received = config.LAST_RECEIVED_BOUNCING_EMAIL
             url = settings.BOUNCER_URL + '/api/orphans?last_received__gt=' + last_received
-            r = requests.get(url, headers=headers)
+            r = requests.get(url, headers=headers, timeout=30)
         except Exception as e:
             logger.error("Error getting bouncing email adresses: %s", e)
 
@@ -219,7 +219,7 @@ def ban_users_with_no_account(schema_name):
             }
             last_received = config.LAST_RECEIVED_DELETED_USER
             url = settings.ACCOUNT_API_URL + '/api/users/deleted?event_time__gt=' + last_received
-            r = requests.get(url, headers=headers)
+            r = requests.get(url, headers=headers, timeout=30)
         except Exception as e:
             logger.error("Error getting deleted accounts: %s", e)
 

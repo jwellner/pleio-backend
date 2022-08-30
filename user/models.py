@@ -95,6 +95,7 @@ class Manager(BaseUserManager):
 
     def get_filtered_users(self, q=None, role=None, is_delete_requested=None, is_banned=False, last_online_before=None, member_since=None):
         # pylint: disable=too-many-arguments
+        # pylint: disable=unsupported-binary-operation
 
         users = User.objects.all().order_by('name')
 

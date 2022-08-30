@@ -49,7 +49,7 @@ class CouldNotLoadPictureError(Exception):
 
 
 def _fetch_avatar(url):
-    response = requests.get(url)
+    response = requests.get(url, timeout=10)
     if not response.ok:
         raise CouldNotLoadPictureError()
 
