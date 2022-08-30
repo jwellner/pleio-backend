@@ -208,6 +208,7 @@ def resolve_attendees(obj, info, query=None, limit=20, offset=0, state=None,
                       orderBy=ATTENDEE_ORDER_BY.name, orderDirection=ORDER_DIRECTION.asc, isCheckedIn=None):
     # pylint: disable=unused-argument
     # pylint: disable=too-many-arguments
+    # pylint: disable=unsupported-binary-operation
 
     user = info.context["request"].user
 

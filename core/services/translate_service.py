@@ -24,7 +24,7 @@ class DeeplTranslatorService(BaseTranslatorService):
                 'target_lang': target_language.upper(),
             }
 
-            response = requests.get(self.BASE_URL, data=conf)
+            response = requests.get(self.BASE_URL, data=conf, timeout=10)
             response.raise_for_status()
             print("TRANSLATION", response.text, response.status_code)
             return json.loads(response.text)['translations'][0]['text']
