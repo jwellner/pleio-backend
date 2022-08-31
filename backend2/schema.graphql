@@ -964,7 +964,6 @@ type Event implements Entity {
     views: Int
     owner: User
     isAttending: String
-    isAttendingParent: Boolean
     attendees(query: String, offset: Int, limit: Int, state: String, orderBy: AttendeeOrderBy, orderDirection: OrderDirection, isCheckedIn: Boolean): AttendeesList
     comments: [Comment]
     commentCount: Int
