@@ -177,26 +177,6 @@ def resolve_is_attending(obj, info):
 
     return None
 
-
-@event.field("isAttendingParent")
-def resolve_is_attending_parent(obj, info):
-    # pylint: disable=unused-argument
-    if obj.parent is None:
-        return True
-
-    user = info.context["request"].user
-
-    if not user.is_authenticated:
-        return False
-
-    try:
-        EventAttendee.objects.get(user=user, event=obj.parent, state='accept')
-        return True
-    except ObjectDoesNotExist:
-        pass
-    return False
-
-
 @event.field("qrAccess")
 def resolve_qr_access(obj, info):
     # pylint: disable=unused-argument
