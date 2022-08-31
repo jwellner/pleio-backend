@@ -20,6 +20,7 @@ class Echo:
         return value
 
 def export(request, event_id=None):
+    # pylint: disable=too-many-branches
     # TODO: add check if setting for exporting is set
     # TODO: add tests
     user = request.user
@@ -35,25 +36,43 @@ def export(request, event_id=None):
     if not event.can_write(user):
         raise Http404("Event not found")
 
-    headers = ['guid', 'name', 'email', 'status', 'datetime']
-    rows = [headers]
-    for attendee in event.attendees.all():
-        if attendee.user:
-            email = attendee.user.email
-        else:
-            email = attendee.email
-        if attendee.user:
-            guid = attendee.user.guid
-            name = attendee.user.name
-        else:
-            guid = ''
-            name = attendee.name
+    rows = []
+    rows.append([event.title, datetime_isoformat(event.start_date)])
 
-        rows.append([guid, name, email, attendee.state, datetime_isoformat(attendee.updated_at)])
+    for state in ['accept', 'waitinglist']:
+        for attendee in event.attendees.all():
+            if attendee.state == state:
+                if attendee.user:
+                    email = attendee.user.email
+                else:
+                    email = attendee.email
+                if attendee.user:
+                    name = attendee.user.name
+                else:
+                    name = attendee.name
+
+                rows.append([state, datetime_isoformat(attendee.updated_at), name, email])
+
+    for child in event.children.all():
+        rows.append([])
+        rows.append([child.title, datetime_isoformat(child.start_date)])
+
+        for state in ['accept', 'waitinglist']:
+            for attendee in child.attendees.all():
+                if attendee.state == state:
+                    if attendee.user:
+                        email = attendee.user.email
+                    else:
+                        email = attendee.email
+                    if attendee.user:
+                        name = attendee.user.name
+                    else:
+                        name = attendee.name
+
+                    rows.append([state, datetime_isoformat(attendee.updated_at), name, email])
 
     pseudo_buffer = Echo()
     writer = csv.writer(pseudo_buffer, delimiter=';', quotechar='"')
-    writer.writerow(headers)
     response = StreamingHttpResponse((writer.writerow(row) for row in rows),
                                      content_type="text/csv")
     filename = slugify(event.title)

@@ -1,6 +1,7 @@
 from ariadne import ObjectType
 
 from .mutation_archive_entity import resolve_archive_entity
+from .mutation_avatar_exports import resolve_export_avatars
 from .mutation_publish_content import resolve_publish_content
 from .mutation_add_group import resolve_add_group
 from .mutation_edit_group import resolve_edit_group
@@ -133,3 +134,4 @@ mutation.set_field("extractTagSynonym", resolve_extract_tag_synonym)
 mutation.set_field("signSiteAgreementVersion", resolve_sign_site_agreement_version)
 
 mutation.set_field("publishContent", resolve_publish_content)
+mutation.set_field("exportAvatars", resolve_export_avatars)

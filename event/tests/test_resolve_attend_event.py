@@ -233,7 +233,7 @@ class AttendEventTestCase(FastTenantTestCase):
 
         self.assertEqual(data["attendEvent"]["entity"]["guid"], self.eventPublic.guid)
         self.assertEqual(len(data["attendEvent"]["entity"]["attendees"]["edges"]), 1)
-        self.assertEqual(sub_attendee.state, 'reject')
+        self.assertEqual(sub_attendee.state, 'accept')
 
     def test_maybe_event_with_subevent(self):
         subevent = mixer.blend(
@@ -283,4 +283,4 @@ class AttendEventTestCase(FastTenantTestCase):
 
         self.assertEqual(data["attendEvent"]["entity"]["guid"], self.eventPublic.guid)
         self.assertEqual(len(data["attendEvent"]["entity"]["attendees"]["edges"]), 1)
-        self.assertEqual(sub_attendee.state, 'maybe')
+        self.assertEqual(sub_attendee.state, 'accept')

@@ -7,6 +7,7 @@ from file.models import FileFolder
 
 @post_deploy_action
 def fix_broken_filenames():
+    # pylint: disable=unsupported-binary-operation
     if tenant_schema() == 'public':
         return
 

@@ -1,4 +1,3 @@
-from ariadne import ObjectType, InterfaceType
 from .mutation import mutation
 from .query import query
 from .user import user

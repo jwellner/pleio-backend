@@ -1,13 +1,9 @@
 import csv
-import mimetypes
-import os
-import zipfile
 
-import requests
-from django.http import Http404, StreamingHttpResponse, FileResponse
+from django.http import Http404, StreamingHttpResponse
 from django.utils.dateformat import format as dateformat
 
-from core.lib import get_exportable_user_fields, datetime_isoformat, get_tmp_file_path
+from core.lib import get_exportable_user_fields, datetime_isoformat
 from core.models.group import GroupMembership
 from core.models.user import UserProfileField, ProfileField
 from core.constances import USER_ROLES
@@ -134,59 +130,3 @@ def export(request):
     response['Content-Disposition'] = 'attachment;filename=exported_users.csv'
 
     return response
-
-
-def export_avatars(request):
-    user = request.user
-
-    if not user.is_authenticated:
-        raise Http404("Not logged in")
-
-    if not user.has_role(USER_ROLES.ADMIN):
-        raise Http404("Not admin")
-
-    zip_path = get_tmp_file_path(user, "avatar_export.zip")
-    csv_path = get_tmp_file_path(user, "avatar_export.csv")
-
-    zip_file = zipfile.ZipFile(zip_path, mode='w', compression=zipfile.ZIP_DEFLATED)
-
-    with open(csv_path, 'w') as fh:
-        writer = csv.writer(fh, delimiter=';', quotechar='"')
-        writer.writerow(['name', 'email', 'avatar'])
-        for user in User.objects.filter(is_active=True):
-            picture = None
-
-            if user.picture:
-                try:
-                    data, extension = _fetch_avatar(user.picture)
-                    picture = f"{user.guid}{extension}"
-                    zip_file.writestr(picture, data)
-                except Exception:
-                    picture = None
-
-            writer.writerow([user.name, user.email, picture])
-
-    with open(csv_path, 'r') as fh:
-        zip_file.writestr("summary.csv", fh.read())
-
-    zip_file.close()
-    os.unlink(csv_path)
-
-    response = FileResponse(open(zip_path, 'rb'))
-    response['Content-Disposition'] = "attachment; filename=export_avatars.zip"
-
-    return response
-
-
-class CouldNotLoadPictureError(Exception):
-    pass
-
-
-def _fetch_avatar(url):
-    response = requests.get(url)
-    if not response.ok:
-        raise CouldNotLoadPictureError()
-
-    extension = mimetypes.guess_extension(response.headers['content-type'])
-
-    return (response.content, extension)

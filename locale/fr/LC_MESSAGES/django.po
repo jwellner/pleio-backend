@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Frans\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-07-21 15:30+0200\n"
+"POT-Creation-Date: 2022-08-25 15:25+0200\n"
 "PO-Revision-Date: 2021-06-24 15:12+0200\n"
 "Last-Translator: \n"
 "Language-Team: frans\n"
@@ -26,19 +26,19 @@ msgstr "mise à jour du statut"
 msgid "Provide a valid value."
 msgstr "Fournissez une valeur valide."
 
-#: core/forms.py:82 core/resolvers/query_site.py:165
+#: core/forms.py:82 core/resolvers/query_site.py:167
 msgid "Never"
 msgstr "Jamais"
 
-#: core/forms.py:83 core/resolvers/query_site.py:162
+#: core/forms.py:83 core/resolvers/query_site.py:164
 msgid "Daily"
 msgstr "Quotidien"
 
-#: core/forms.py:84 core/resolvers/query_site.py:163
+#: core/forms.py:84 core/resolvers/query_site.py:165
 msgid "Weekly"
 msgstr "Hebdomadaire"
 
-#: core/forms.py:85 core/resolvers/query_site.py:164
+#: core/forms.py:85 core/resolvers/query_site.py:166
 msgid "Monthly"
 msgstr "Mensuel"
 
@@ -50,130 +50,147 @@ msgstr "Recevoir des courriels de notification"
 msgid "Receive overview emails"
 msgstr "Recevoir des courriels de présentation"
 
-#: core/lib.py:173 core/resolvers/mutation_import_users.py:30
-#: core/resolvers/query_site.py:71
+#: core/lib.py:175 core/resolvers/mutation_import_users.py:30
+#: core/resolvers/query_site.py:73
 msgid "Just me"
 msgstr "Juste moi"
 
-#: core/lib.py:176
+#: core/lib.py:178
 #, python-format
 msgid "Group: %(group_name)s"
 msgstr "Groupe : %(group_name)s"
 
-#: core/lib.py:179
+#: core/lib.py:181
 #, python-format
 msgid "Subgroup: %(subgroup_name)s"
 msgstr "Sous-groupe : %(subgroup_name)s"
 
-#: core/lib.py:185 core/resolvers/mutation_import_users.py:31
-#: core/resolvers/query_site.py:72
+#: core/lib.py:187 core/resolvers/mutation_import_users.py:31
+#: core/resolvers/query_site.py:74
 msgid "Logged in users"
 msgstr "Utilisateurs connectés"
 
-#: core/lib.py:187 core/resolvers/mutation_import_users.py:34
-#: core/resolvers/query_site.py:76
+#: core/lib.py:189 core/resolvers/mutation_import_users.py:34
+#: core/resolvers/query_site.py:78
 msgid "Public"
 msgstr "Public"
 
-#: core/lib.py:198
+#: core/lib.py:200
 msgid "Event"
 msgstr "Événement"
 
-#: core/lib.py:202
+#: core/lib.py:204
 msgid "Blog"
 msgstr "Blog"
 
-#: core/lib.py:206
+#: core/lib.py:208
 msgid "Discussion"
 msgstr "Discussion"
 
-#: core/lib.py:210 core/lib.py:379
+#: core/lib.py:212 core/lib.py:381
 msgid "News"
 msgstr "Actualité"
 
-#: core/lib.py:214
+#: core/lib.py:216
 msgid "Update"
 msgstr "Mettre à jour"
 
-#: core/lib.py:218
+#: core/lib.py:220
 msgid "Question"
 msgstr "Question"
 
-#: core/lib.py:222
+#: core/lib.py:224
 msgid "Wiki"
 msgstr "Wiki"
 
-#: core/lib.py:226
+#: core/lib.py:228
 msgid "Text page"
 msgstr "Page de texte"
 
-#: core/lib.py:373
+#: core/lib.py:375
 msgid "Updates"
 msgstr "Mises à jour"
 
-#: core/lib.py:374
+#: core/lib.py:376
 msgid "Blogs"
 msgstr "Blogs"
 
-#: core/lib.py:375
+#: core/lib.py:377
 msgid "CMS pages"
 msgstr "Pages SGC"
 
-#: core/lib.py:376
+#: core/lib.py:378
 msgid "Discussions"
 msgstr "Discussions"
 
-#: core/lib.py:377
+#: core/lib.py:379
 msgid "Events"
 msgstr "Événements"
 
-#: core/lib.py:378
+#: core/lib.py:380
 msgid "Files"
 msgstr "Fichiers"
 
-#: core/lib.py:380
+#: core/lib.py:382
 msgid "Polls"
 msgstr "Sondages"
 
-#: core/lib.py:381
+#: core/lib.py:383
 msgid "Questions"
 msgstr "Questions"
 
-#: core/lib.py:382
+#: core/lib.py:384
 msgid "Tasks"
 msgstr "Tâches"
 
-#: core/lib.py:383
+#: core/lib.py:385
 msgid "Wiki pages"
 msgstr "Wiki pages"
 
-#: core/lib.py:384
+#: core/lib.py:386
 msgid "Comments"
 msgstr "Commentaires"
 
-#: core/lib.py:385
+#: core/lib.py:387
 msgid "Groups"
 msgstr "Groupes"
+
+#: core/mail_builders/avatar_export_ready.py:41
+#: core/tests/test_avatar_export_notification.py:34
+msgid "Avatar export is ready"
+msgstr "L'exportation des avatars est prête"
 
 #: core/mail_builders/frequent_overview.py:58
 #, python-format
 msgid "Regular overview of %(site_name)s"
 msgstr "Aperçu régulier de %(site_name)s"
 
-#: core/mail_builders/group_comment_without_account.py:52
+#: core/mail_builders/group_comment_without_account.py:51
 #, python-format
 msgid "Confirm comment on %(site_name)s"
 msgstr "Confirmer le commentaire sur %(site_name)s"
+
+#: core/mail_builders/group_membership_approved.py:47
+#, python-format
+msgid "Request for access to the %(group_name)s group has been approved"
+msgstr "La demande d’accès au groupe %(group_name)s) a été approuvée"
 
 #: core/mail_builders/group_welcome.py:57
 #, python-format
 msgid "Welcome to %(group_name)s"
 msgstr "Bienvenue dans %(group_name)s"
 
-#: core/resolvers/mutation_accept_membership_request.py:42
-#, python-format
-msgid "Request for access to the %(group_name)s group has been approved"
-msgstr "La demande d’accès au groupe %(group_name)s) a été approuvée"
+#: core/models/export.py:13
+msgid "Pending"
+msgstr "En attente"
+
+#: core/models/export.py:14
+msgid "In progress"
+msgstr "En cours"
+
+#: core/models/export.py:15
+msgid "Ready"
+msgstr "Prêt"
 
 #: core/resolvers/mutation_change_group_role.py:43
 #, python-format
@@ -193,15 +210,15 @@ msgstr "Compte de %(name_deleted_user)s supprimé"
 msgid "A site administrator was removed from %(site_name)s"
 msgstr "Un administrateur de site a été supprimé de %(site_name)s"
 
-#: core/resolvers/mutation_edit_site_setting.py:401
+#: core/resolvers/mutation_edit_site_setting.py:403
 msgid "closed"
 msgstr "fermé"
 
-#: core/resolvers/mutation_edit_site_setting.py:401
+#: core/resolvers/mutation_edit_site_setting.py:403
 msgid "public"
 msgstr "public"
 
-#: core/resolvers/mutation_edit_site_setting.py:402
+#: core/resolvers/mutation_edit_site_setting.py:404
 #, python-format
 msgid "Site access level changed for %(site_name)s"
 msgstr "Nouvelle demande d’accès à %(site_name)s"
@@ -295,23 +312,23 @@ msgstr "Un nouvel administrateur de site a été désigné pour %(site_name)s"
 msgid "You're granted site administrator right on %(site_name)s"
 msgstr "Vous avez le droit d’administrateur de site sur %(site_name)s"
 
-#: core/resolvers/query_site.py:124
+#: core/resolvers/query_site.py:126
 msgid "Activity stream"
 msgstr "Flux d’activité"
 
-#: core/resolvers/query_site.py:124
+#: core/resolvers/query_site.py:126
 msgid "CMS page"
 msgstr "Page SGC"
 
-#: core/resolvers/query_site.py:215
+#: core/resolvers/query_site.py:217
 msgid "Administrator"
 msgstr "Administrateur"
 
-#: core/resolvers/query_site.py:216
+#: core/resolvers/query_site.py:218
 msgid "Editor"
 msgstr "Éditeur"
 
-#: core/resolvers/query_site.py:217
+#: core/resolvers/query_site.py:219
 msgid "Question expert"
 msgstr "Expert en questions"
 
@@ -425,6 +442,19 @@ msgstr ""
 "Bonjour, <br><br>\n"
 "\n"
 "Le compte de %(name_deleted_user)s est supprimé. Cette action a été effectuée par %(user_name)s.\n"
+
+#: core/templates/email/avatar_export_ready.html:5
+msgid "The export file you requested is ready for download."
+msgstr ""
+"Le fichier d'exportation que vous avez demandé est prêt à être téléchargé."
+
+#: core/templates/email/avatar_export_ready.html:6
+msgid "Follow the link below to download the export."
+msgstr "Suivez le lien ci-dessous pour télécharger l'exportation."
+
+#: core/templates/email/avatar_export_ready.html:7
+msgid "This link expires in 30 days."
+msgstr "Ce lien expire dans 30 jours."
 
 #: core/templates/email/confirm_add_comment_without_account.html:5
 #, python-format
@@ -1044,12 +1074,12 @@ msgstr "Retiré de l'événement : %s"
 msgid "QR code for %s"
 msgstr "Code QR pour %s"
 
-#: event/mail_builders/waitinglist.py:22 event/models.py:104
+#: event/mail_builders/waitinglist.py:22 event/models.py:105
 #, python-format
 msgid "Added to event %s from waitinglist"
 msgstr "Ajouté à l'événement %s de la liste d'attente"
 
-#: event/models.py:203
+#: event/models.py:239
 msgid "You already signed in for another sub-event in the same slot."
 msgstr ""
 "Vous vous êtes déjà inscrit à un autre sous-événement dans le même créneau."

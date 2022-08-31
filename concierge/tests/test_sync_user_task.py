@@ -48,7 +48,8 @@ class TestTasksTestCase(FastTenantTestCase):
             'headers': {
                 "x-oidc-client-id": settings.OIDC_RP_CLIENT_ID,
                 "x-oidc-client-secret": settings.OIDC_RP_CLIENT_SECRET,
-            }
+            },
+            'timeout': 10
         })
 
     @mock.patch("concierge.tasks.requests.post")

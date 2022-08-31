@@ -121,7 +121,6 @@ class EventTestCase(PleioTenantTestCase):
                 source
                 rsvp
                 isAttending
-                isAttendingParent
                 location
                 attendEventWithoutAccount
                 attendees {
@@ -269,29 +268,6 @@ class EventTestCase(PleioTenantTestCase):
         result = self.graphql_client.post(self.query, variables)
 
         self.assertEqual(result['data']['entity']['guid'], self.subEventPublic.guid)
-
-    def test_subevent_attending_parent(self):
-        variables = {
-            "guid": self.subEventPublic .guid
-        }
-
-        self.graphql_client.force_login(self.user1)
-        result = self.graphql_client.post(self.query, variables)
-        entity = result["data"]["entity"]
-
-        self.assertEqual(entity["isAttendingParent"], False)
-
-        EventAttendee.objects.create(
-            event=self.eventPublic,
-            state='accept',
-            user=self.user1,
-            email=self.user1.email
-        )
-
-        result = self.graphql_client.post(self.query, variables)
-
-        entity = result["data"]["entity"]
-        self.assertEqual(entity["isAttendingParent"], True)
 
     def test_event_archived(self):
         self.eventPublic.is_archived = True

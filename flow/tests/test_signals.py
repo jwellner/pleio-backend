@@ -78,7 +78,7 @@ class SignalsTestCase(FastTenantTestCase):
             'tags': []
         }
 
-        mocked_post.assert_called_with(url, headers=headers, json=json_data)
+        mocked_post.assert_called_with(url, headers=headers, json=json_data, timeout=30)
 
         self.comment1 = Comment.objects.create(
             rich_description="commenDescription1",
@@ -96,7 +96,7 @@ class SignalsTestCase(FastTenantTestCase):
             'description': self.comment1.rich_description
         }
 
-        mocked_post.assert_called_with(url, headers=headers, json=json_data)
+        mocked_post.assert_called_with(url, headers=headers, json=json_data, timeout=30)
 
 
 

@@ -964,7 +964,6 @@ type Event implements Entity {
     views: Int
     owner: User
     isAttending: String
-    isAttendingParent: Boolean
     attendees(query: String, offset: Int, limit: Int, state: String, orderBy: AttendeeOrderBy, orderDirection: OrderDirection, isCheckedIn: Boolean): AttendeesList
     comments: [Comment]
     commentCount: Int
@@ -1427,7 +1426,14 @@ type Mutation {
     extractTagSynonym(input: tagMergeInput!): [Tag]
     signSiteAgreementVersion(input: signSiteAgreementVersionInput!): signSiteAgreementVersionPayload
 
+    exportAvatars: exportAvatarsPayload
+
     publishContent(input: publishContentInput!): publishContentPayload
+}
+
+type exportAvatarsPayload {
+    guid: String
+    status: String
 }
 
 type News implements Entity {
@@ -2644,20 +2650,20 @@ type SiteStats {
 }
 
 type SiteAgreement {
-  id: String!
-  name: String!
-  description: String
-  accepted: Boolean!
-  versions: [SiteAgreementVersion]
+    id: String!
+    name: String!
+    description: String
+    accepted: Boolean!
+    versions: [SiteAgreementVersion]
 }
 
 type SiteAgreementVersion {
-  id: String!
-  version: String!
-  document: String!
-  accepted: Boolean!
-  accepted_by: String
-  accepted_date: DateTime
+    id: String!
+    version: String!
+    document: String!
+    accepted: Boolean!
+    accepted_by: String
+    accepted_date: DateTime
 }
 
 input ProfileFieldValidatorInput {
@@ -2755,12 +2761,12 @@ type addCommentWithoutAccountPayload {
 }
 
 input signSiteAgreementVersionInput {
-  id: String!
-  accept: Boolean!
+    id: String!
+    accept: Boolean!
 }
 
 type signSiteAgreementVersionPayload {
-  siteAgreementVersion: SiteAgreementVersion
+    siteAgreementVersion: SiteAgreementVersion
 }
 type publishContentPayload {
     success: Boolean
