@@ -283,7 +283,8 @@ class User(AbstractBaseUser):
         try:
             return self._profile
         except UserProfile.DoesNotExist:
-            if not settings.RUN_AS_ADMIN_APP:
+            from core.lib import tenant_schema
+            if tenant_schema() != 'public':
                 return UserProfile.objects.create(
                     user=self
                 )

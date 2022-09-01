@@ -1640,6 +1640,7 @@ type Query {
         containerGuid: String
         type: Type
         subtype: String
+        subtypes: [String]
         dateFrom: String
         dateTo: String
         offset: Int
