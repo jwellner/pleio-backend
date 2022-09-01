@@ -1,6 +1,7 @@
 from django.core.management.base import BaseCommand
 from django.db import connection
 
+from core.lib import is_schema_public
 from core.tasks import send_overview
 
 
@@ -14,7 +15,7 @@ class Command(BaseCommand):
         )
 
     def handle(self, *args, **options):
-        if connection.schema_name == 'public':
+        if is_schema_public():
             return
 
         send_overview.delay(connection.schema_name, options['interval'])

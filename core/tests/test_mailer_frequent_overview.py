@@ -121,7 +121,6 @@ class TestFrequentOverviewMailerTestCase(FastTenantTestCase):
             mocked_schedule_mail.reset_mock()
 
     def test_serialize_entities(self):
-        from core.mail_builders.frequent_overview import FrequentOverviewMailer
         subset = [self.content[0],
                   self.content[1]]
         expected_result = [

@@ -3,8 +3,10 @@ from django.utils.timezone import timedelta, localtime
 from django.utils.translation import gettext as _
 
 from core import config
+from core.lib import get_full_url
 from core.mail_builders.template_mailer import TemplateMailerBase
 from core.utils.entity import load_entity_by_id
+from core.utils.mail import UnsubscribeTokenizer
 
 
 def schedule_frequent_overview_mail(user, interval):
@@ -38,6 +40,16 @@ class FrequentOverviewMailer(TemplateMailerBase):
         context['featured_title'] = config.EMAIL_OVERVIEW_FEATURED_TITLE
         context['subject'] = self.get_subject()
         return context
+
+    def get_headers(self):
+        headers = super().get_headers()
+        headers['List-Unsubscribe'] = self._create_unsubscribe_header()
+        return headers
+
+    def _create_unsubscribe_header(self):
+        tokenizer = UnsubscribeTokenizer()
+        url = tokenizer.create_url(self.user, tokenizer.TYPE_OVERVIEW)
+        return get_full_url(url)
 
     def get_language(self):
         return self.user.get_language()

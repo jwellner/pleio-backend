@@ -1,8 +1,6 @@
 from django.core.management import BaseCommand
-from django_tenants.utils import tenant_context
-from django.db import connection
 
-from tenants.models import Client
+from core.lib import is_schema_public, tenant_schema
 from user.models import User
 
 
@@ -12,8 +10,8 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         from concierge.tasks import sync_user
 
-        if connection.schema_name == 'public':
+        if is_schema_public():
             return
 
         for user in User.objects.all():
-            sync_user.delay(connection.schema_name, user.id)
+            sync_user.delay(tenant_schema(), user.id)

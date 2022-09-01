@@ -2,6 +2,7 @@ import uuid
 from core import config
 from core.constances import USER_ROLES
 from core.data.paginate_result import PaginateResult
+from core.lib import is_schema_public
 from core.models import UserProfile, ProfileField, UserProfileField, SiteAccessRequest
 from datetime import timedelta
 from django.db.models import Case, Q, Value, When
@@ -283,8 +284,7 @@ class User(AbstractBaseUser):
         try:
             return self._profile
         except UserProfile.DoesNotExist:
-            from core.lib import tenant_schema
-            if tenant_schema() != 'public':
+            if not is_schema_public():
                 return UserProfile.objects.create(
                     user=self
                 )

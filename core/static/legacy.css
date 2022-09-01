@@ -270,3 +270,27 @@ small {
 .wallet-garden_content  {
   margin: 0;
 }
+.messagelist {
+  box-sizing: border-box;
+  margin: -1rem 0 0 0;
+}
+.messagelist .message {
+  box-sizing: border-box;
+  margin: 1rem 0;
+  padding: .375rem 1rem;
+  background-color: #e5f8fc;
+  border: 1px solid #0077b6;
+  border-radius: 5px;
+}
+.message.success {
+  background-color: #c7f9cc;
+  border: 1px solid #57cc99;
+}
+.message.error {
+  background-color: #ffdfd6;
+  border: 1px solid #a02703;
+}
+.message.warning {
+  background-color: #feffe2;
+  border: 1px solid #8c8900;
+}

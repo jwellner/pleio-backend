@@ -11,9 +11,9 @@ from notifications.signals import notify
 from user.models import User
 from core.models.mixin import NotificationMixin
 from notifications.models import Notification
-from core.services.mail_service import MailService, MailTypeEnum
 
 LOGGER = logging.getLogger(__name__)
+
 
 @shared_task()
 def create_notifications_for_scheduled_content(schema_name):
@@ -60,7 +60,7 @@ def create_notification(self, schema_name, verb, model_name, entity_id, sender_i
             LOGGER.warning('Entity with id %s does not exist.')
             return
 
-        if not sender: # sender is probably no active user don't create notifications for inactive users
+        if not sender:  # sender is probably no active user don't create notifications for inactive users
             LOGGER.warning('Sender with id %s is not active.')
             return
 
@@ -97,10 +97,10 @@ def create_notification(self, schema_name, verb, model_name, entity_id, sender_i
 
         # only send direct notification for content in groups
         if instance.group:
-            mail_service = MailService(MailTypeEnum.DIRECT)
+            from core.mail_builders.notifications import send_notifications, MailTypeEnum
             for notification in notifications:
                 recipient = User.objects.get(id=notification.recipient_id)
-                direct = False
+
                 # get direct setting
                 try:
                     direct = GroupMembership.objects.get(user=recipient, group=instance.group).notification_mode == 'direct'
@@ -109,4 +109,4 @@ def create_notification(self, schema_name, verb, model_name, entity_id, sender_i
 
                 # send email direct and mark emailed as True
                 if direct:
-                    mail_service.send_notification_email(schema_name, recipient, [notification])
+                    send_notifications(recipient, [notification], MailTypeEnum.DIRECT)

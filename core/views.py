@@ -1,6 +1,7 @@
 import csv
 import json
 import logging
+
 import core.tasks
 import qrcode
 from core.resolvers.query_site import get_settings
@@ -11,13 +12,14 @@ from core.models import (
 )
 from core.lib import (
     access_id_to_acl, get_default_email_context, tenant_schema,
-    get_exportable_content_types, get_model_by_subtype, datetime_isoformat, get_base_url
+    get_exportable_content_types, get_model_by_subtype, datetime_isoformat, get_base_url, is_schema_public
 )
 from core.forms import EditEmailSettingsForm, OnboardingForm, RequestAccessForm
 from core.constances import USER_ROLES, OIDC_PROVIDER_OPTIONS
+from core.utils.mail import UnsubscribeTokenizer, EmailSettingsTokenizer
 from user.models import User
 from event.lib import get_url
-from django.utils.translation import ugettext_lazy, ugettext
+from django.utils.translation import gettext as _
 from core.auth import oidc_provider_logout_url
 from django.core import signing
 from django.contrib.contenttypes.fields import GenericRelation, GenericForeignKey
@@ -32,21 +34,22 @@ from django.utils.http import urlencode
 from django.urls import reverse
 from django.views.decorators.cache import cache_control
 from django.views.decorators.http import require_GET
-from django.http import Http404, HttpResponse, HttpResponseRedirect, StreamingHttpResponse
+from django.http import Http404, HttpResponse, HttpResponseRedirect, StreamingHttpResponse, HttpResponseNotFound
 from django.contrib.auth import login as auth_login
 from datetime import datetime
 
 logger = logging.getLogger(__name__)
 
+
 def default(request, exception=None):
     # pylint: disable=unused-argument
 
-    if tenant_schema() == 'public':
+    if is_schema_public():
         return render(request, 'domain_placeholder.html', status=404)
 
     metadata = {
-        "description" : config.DESCRIPTION,
-        "og:title" : config.NAME,
+        "description": config.DESCRIPTION,
+        "og:title": config.NAME,
         "og:description": config.DESCRIPTION
     }
 
@@ -58,6 +61,7 @@ def default(request, exception=None):
 
     return render(request, 'react.html', context)
 
+
 def entity_view(request, entity_id=None, entity_title=None):
     # pylint: disable=unused-argument
     user = request.user
@@ -65,8 +69,8 @@ def entity_view(request, entity_id=None, entity_title=None):
     entity = None
 
     metadata = {
-        "description" : config.DESCRIPTION,
-        "og:title" : config.NAME,
+        "description": config.DESCRIPTION,
+        "og:title": config.NAME,
         "og:description": config.DESCRIPTION
     }
 
@@ -104,7 +108,6 @@ def entity_view(request, entity_id=None, entity_title=None):
         except ObjectDoesNotExist:
             status_code = 404
 
-
     context = {
         'webpack_dev_server': settings.WEBPACK_DEV_SERVER,
         'json_settings': json.dumps(get_settings()),
@@ -113,18 +116,20 @@ def entity_view(request, entity_id=None, entity_title=None):
 
     return render(request, 'react.html', context, status=status_code)
 
+
 def logout(request):
     # should find out how we can make this better. OIDC logout only allows POST
     LogoutView.as_view()(request)
 
     return redirect(oidc_provider_logout_url(request))
 
+
 def login(request):
     if request.GET.get('invitecode', None):
         request.session['invitecode'] = request.GET.get('invitecode')
 
     query_args = {}
-    redirect_url= None
+    redirect_url = None
 
     if config.IDP_ID and not request.GET.get('login_credentials'):
         query_args["idp"] = config.IDP_ID
@@ -135,7 +140,7 @@ def login(request):
     if len(config.OIDC_PROVIDERS) == 1:
         query_args["provider"] = config.OIDC_PROVIDERS[0]
         # only redirect when there is a single provider configured otherwise show login page
-        redirect_url = reverse('oidc_authentication_init') + '?' +  urlencode(query_args)
+        redirect_url = reverse('oidc_authentication_init') + '?' + urlencode(query_args)
 
     if redirect_url:
         return redirect(redirect_url)
@@ -148,8 +153,10 @@ def login(request):
     }
     return render(request, 'registration/login.html', context)
 
+
 def oidc_failure(request):
     return redirect(settings.OIDC_OP_LOGOUT_ENDPOINT)
+
 
 def request_access(request):
     # pylint: disable=too-many-nested-blocks
@@ -182,7 +189,7 @@ def request_access(request):
                 context = get_default_email_context()
                 context['request_name'] = claims.get('name')
                 context['site_admin_url'] = context['site_url'] + '/admin/users/access-requests'
-                subject = ugettext_lazy("New access request for %(site_name)s") % {'site_name': context["site_name"]}
+                subject = _("New access request for %(site_name)s") % {'site_name': context["site_name"]}
 
                 for admin in admins:
                     context['admin_name'] = admin.name
@@ -200,8 +207,10 @@ def request_access(request):
 
     return render(request, 'registration/request.html', context)
 
+
 def access_requested(request):
     return render(request, 'registration/requested.html')
+
 
 def onboarding(request):
     # pylint: disable=too-many-branches
@@ -306,11 +315,13 @@ def onboarding(request):
 def custom_css(request):
     return HttpResponse(config.CUSTOM_CSS, content_type="text/css")
 
+
 @cache_control(public=True)
 def favicon(request):
     if config.FAVICON:
         return redirect(config.FAVICON)
     return redirect("/static/apple-touch-icon.png")
+
 
 @require_GET
 def robots_txt(request):
@@ -337,6 +348,7 @@ class Echo:
     """An object that implements just the write method of the file-like
     interface.
     """
+
     def write(self, value):
         """Write the value by returning it, instead of storing in a buffer."""
         return value
@@ -429,8 +441,8 @@ def export_content(request, content_type=None):
         field_names = []
         for field in Model._meta.get_fields():
             if (
-                type(field) in [models.OneToOneRel, models.ForeignKey, models.ManyToOneRel, GenericRelation, GenericForeignKey]
-                and not is_included_related_field(field)
+                    type(field) in [models.OneToOneRel, models.ForeignKey, models.ManyToOneRel, GenericRelation, GenericForeignKey]
+                    and not is_included_related_field(field)
             ):
                 continue
             fields.append(field)
@@ -468,7 +480,6 @@ def export_content(request, content_type=None):
         for item in items:
             yield writer.writerow(get_data(item, fields))
 
-
     response = StreamingHttpResponse(
         streaming_content=(stream(entities, Echo(), Model)),
         content_type='text/csv',
@@ -491,9 +502,9 @@ def export_groupowners(request):
 
     def stream(groups, pseudo_buffer):
         writer = csv.writer(pseudo_buffer, delimiter=';', quotechar='"')
-        yield writer.writerow([ugettext("Name"),
-                               ugettext("E-mail"),
-                               ugettext("Group")])
+        yield writer.writerow([_("Name"),
+                               _("E-mail"),
+                               _("Group")])
 
         for g in groups:
             yield writer.writerow([
@@ -512,7 +523,8 @@ def export_groupowners(request):
 
     return response
 
-def attachment(request, attachment_id, attachment_type = None):
+
+def attachment(request, attachment_id, attachment_type=None):
     # pylint: disable=unused-argument
     user = request.user
 
@@ -523,7 +535,7 @@ def attachment(request, attachment_id, attachment_type = None):
 
         if not attachment.can_read(user):
             raise Http404("File not found")
-        
+
         return_file = attachment
 
         if size:
@@ -546,7 +558,6 @@ def attachment(request, attachment_id, attachment_type = None):
 
 
 def comment_confirm(request, entity_id):
-
     try:
         entity = Entity.objects.select_subclasses().get(id=entity_id)
     except ObjectDoesNotExist:
@@ -575,11 +586,8 @@ def edit_email_settings(request, token):
     user = None
 
     try:
-        signer = signing.TimestampSigner()
-        data = signer.unsign_object(token, max_age=360000)
-
-        user = User.objects.get(id=data['id'], email=data['email'])
-
+        tokenizer = EmailSettingsTokenizer()
+        user = tokenizer.unpack(token)
     except (signing.BadSignature, ObjectDoesNotExist):
         return HttpResponseRedirect('/')
 
@@ -590,14 +598,15 @@ def edit_email_settings(request, token):
             user.profile.receive_notification_email = form.cleaned_data['notifications_email_enabled']
             user.profile.overview_email_interval = form.cleaned_data['overview_email_enabled']
             user.profile.save()
-            messages.success(request, ugettext_lazy('Saved'))
+            messages.success(request, _('Your changes are saved'))
+            return HttpResponseRedirect(request.path)
 
     initial_dict = {
         'notifications_email_enabled': user.profile.receive_notification_email,
         'overview_email_enabled': user.profile.overview_email_interval,
     }
 
-    form = EditEmailSettingsForm(initial = initial_dict)
+    form = EditEmailSettingsForm(initial=initial_dict)
 
     context = {
         'user_name': user.name,
@@ -608,11 +617,13 @@ def edit_email_settings(request, token):
 
     return render(request, 'edit_email_settings.html', context)
 
+
 def unsupported_browser(request):
     return render(request, 'unsupported_browser.html')
 
+
 def get_url_qr(request, entity_id=None):
-    #Only implemented for Events. Can be adjusted to be used for other entities
+    # Only implemented for Events. Can be adjusted to be used for other entities
     user = request.user
 
     if not user.is_authenticated:
@@ -636,3 +647,32 @@ def get_url_qr(request, entity_id=None):
     response['Content-Disposition'] = f'attachment; filename="qr_{filename}.png"'
 
     return response
+
+
+def unsubscribe(request, token):
+    try:
+        user, mail_id, is_expired = UnsubscribeTokenizer().unpack(token)
+        list_name = None
+        if mail_id == UnsubscribeTokenizer.TYPE_OVERVIEW:
+            user.profile.overview_email_interval = 'never'
+            list_name = _("Periodic overview")
+        elif mail_id == UnsubscribeTokenizer.TYPE_NOTIFICATIONS:
+            user.profile.receive_notification_email = False
+            list_name = _("Notification overview")
+        user.profile.save()
+
+        msg = _("Successfully unsubscribed %(email)s from %(list_name)s") % {
+            'email': user.email,
+            'list_name': list_name
+        }
+
+        if not is_expired:
+            messages.success(request, msg)
+            return HttpResponseRedirect(EmailSettingsTokenizer().create_url(user))
+
+        return render(request, "unsubscribe.html", {
+            "msg": msg
+        })
+    except Exception as e:
+        logger.error("unsubscribe_error: schema=%s, error=%s, type=%s, token=%s", tenant_schema(), str(e), e.__class__, token)
+        return HttpResponseNotFound()

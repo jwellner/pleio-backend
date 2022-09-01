@@ -2,6 +2,7 @@ from django.core import signing
 from django.utils.module_loading import import_string
 
 from core import config
+from core.utils.mail import EmailSettingsTokenizer
 
 
 class MailerBase:
@@ -34,12 +35,8 @@ class MailerBase:
         }
         if user:
             mail_info = user.as_mailinfo()
-            signer = signing.TimestampSigner()
-            token = signer.sign_object({
-                "id": str(user.id),
-                "email": user.email
-            })
-            context['unsubscribe_url'] = get_full_url('/edit_email_settings/' + token)
+            tokenizer = EmailSettingsTokenizer()
+            context['mail_settings_url'] = get_full_url(tokenizer.create_url(user))
             context['user_url'] = get_full_url(user.url)
         if mail_info:
             context['user_name'] = mail_info['name']

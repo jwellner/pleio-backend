@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-08-25 15:25+0200\n"
+"POT-Creation-Date: 2022-08-30 16:12+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -49,108 +49,108 @@ msgstr "Ontvang notificatie emails"
 msgid "Receive overview emails"
 msgstr "Ontvang overzicht emails"
 
-#: core/lib.py:175 core/resolvers/mutation_import_users.py:30
+#: core/lib.py:176 core/resolvers/mutation_import_users.py:30
 #: core/resolvers/query_site.py:73
 msgid "Just me"
 msgstr "Alleen eigenaar"
 
-#: core/lib.py:178
+#: core/lib.py:179
 #, python-format
 msgid "Group: %(group_name)s"
 msgstr "Groep: %(group_name)s"
 
-#: core/lib.py:181
+#: core/lib.py:182
 #, python-format
 msgid "Subgroup: %(subgroup_name)s"
 msgstr "Subgroep: %(subgroup_name)s"
 
-#: core/lib.py:187 core/resolvers/mutation_import_users.py:31
+#: core/lib.py:188 core/resolvers/mutation_import_users.py:31
 #: core/resolvers/query_site.py:74
 msgid "Logged in users"
 msgstr "Ingelogde gebruikers"
 
-#: core/lib.py:189 core/resolvers/mutation_import_users.py:34
+#: core/lib.py:190 core/resolvers/mutation_import_users.py:34
 #: core/resolvers/query_site.py:78
 msgid "Public"
 msgstr "Iedereen (publiek zichtbaar)"
 
-#: core/lib.py:200
+#: core/lib.py:201
 msgid "Event"
 msgstr "Agenda-item"
 
-#: core/lib.py:204
+#: core/lib.py:205
 msgid "Blog"
 msgstr "Blog"
 
-#: core/lib.py:208
+#: core/lib.py:209
 msgid "Discussion"
 msgstr "Discussie"
 
-#: core/lib.py:212 core/lib.py:381
+#: core/lib.py:213 core/lib.py:378
 msgid "News"
 msgstr "Nieuws"
 
-#: core/lib.py:216
+#: core/lib.py:217
 msgid "Update"
 msgstr "Update"
 
-#: core/lib.py:220
+#: core/lib.py:221
 msgid "Question"
 msgstr "Vraag"
 
-#: core/lib.py:224
+#: core/lib.py:225
 msgid "Wiki"
 msgstr "Wiki"
 
-#: core/lib.py:228
+#: core/lib.py:229
 msgid "Text page"
 msgstr "Tekst pagina"
 
-#: core/lib.py:375
+#: core/lib.py:372
 msgid "Updates"
 msgstr "Updates"
 
-#: core/lib.py:376
+#: core/lib.py:373
 msgid "Blogs"
 msgstr "Blogs"
 
-#: core/lib.py:377
+#: core/lib.py:374
 msgid "CMS pages"
 msgstr "CMS pagina's"
 
-#: core/lib.py:378
+#: core/lib.py:375
 msgid "Discussions"
 msgstr "Discussies"
 
-#: core/lib.py:379
+#: core/lib.py:376
 msgid "Events"
 msgstr "Agenda-items"
 
-#: core/lib.py:380
+#: core/lib.py:377
 msgid "Files"
 msgstr "Bestanden"
 
-#: core/lib.py:382
+#: core/lib.py:379
 msgid "Polls"
 msgstr "Polls"
 
-#: core/lib.py:383
+#: core/lib.py:380
 msgid "Questions"
 msgstr "Vragen"
 
-#: core/lib.py:384
+#: core/lib.py:381
 msgid "Tasks"
 msgstr "Taken"
 
-#: core/lib.py:385
+#: core/lib.py:382
 msgid "Wiki pages"
 msgstr "Wiki pagina's"
 
-#: core/lib.py:386
+#: core/lib.py:383
 msgid "Comments"
 msgstr "Reacties"
 
-#: core/lib.py:387
+#: core/lib.py:384
 msgid "Groups"
 msgstr "Groepen"
 
@@ -159,7 +159,7 @@ msgstr "Groepen"
 msgid "Avatar export is ready"
 msgstr "Avatar export is klaar"
 
-#: core/mail_builders/frequent_overview.py:58
+#: core/mail_builders/frequent_overview.py:70
 #, python-format
 msgid "Regular overview of %(site_name)s"
 msgstr "Periodiek overzicht van %(site_name)s"
@@ -178,6 +178,22 @@ msgstr "Toegangsaanvraag voor de groep %(group_name)s goedgekeurd"
 #, python-format
 msgid "Welcome to %(group_name)s"
 msgstr "Welkom bij: %(group_name)s"
+
+#: core/mail_builders/notifications.py:60
+#: core/mail_builders/notifications.py:69
+#, python-format
+msgid "Notification on %(entity_title)s"
+msgstr "Notificatie op %(entity_title)s"
+
+#: core/mail_builders/notifications.py:64
+#, python-format
+msgid "Notification on %(entity_type)s in group %(entity_group_name)s"
+msgstr "Notificatie op %(entity_type)s in groep %(entity_group_name)s"
+
+#: core/mail_builders/notifications.py:72
+#, python-format
+msgid "New notifications at %(site_name)s"
+msgstr "Nieuwe notificaties op %(site_name)s"
 
 #: core/models/export.py:13
 msgid "Pending"
@@ -330,21 +346,6 @@ msgstr "Redacteur"
 msgid "Question expert"
 msgstr "Vraagexpert"
 
-#: core/services/mail_service.py:39 core/services/mail_service.py:49
-#, python-format
-msgid "Notification on %(entity_title)s"
-msgstr "Notificatie op %(entity_title)s"
-
-#: core/services/mail_service.py:43
-#, python-format
-msgid "Notification on %(entity_type)s in group %(entity_group_name)s"
-msgstr "Notificatie op %(entity_type)s in groep %(entity_group_name)s"
-
-#: core/services/mail_service.py:52
-#, python-format
-msgid "New notifications at %(site_name)s"
-msgstr "Nieuwe notificaties op %(site_name)s"
-
 #: core/tasks/misc.py:123
 msgid "Import was a success"
 msgstr "Import afgerond"
@@ -392,16 +393,16 @@ msgstr "Ingecheckt."
 msgid "You have checked in <strong>%(name)s</strong> (%(email)s)!"
 msgstr "U heeft <strong>%(name)s</strong> (%(email)s) ingecheckt!"
 
-#: core/templates/edit_email_settings.html:15
+#: core/templates/edit_email_settings.html:17
 #, python-format
 msgid "Email preferences %(user_name)s:"
 msgstr "Email voorkeuren %(user_name)s "
 
-#: core/templates/edit_email_settings.html:20
+#: core/templates/edit_email_settings.html:22
 msgid "Save"
 msgstr "Opslaan"
 
-#: core/templates/edit_email_settings.html:28
+#: core/templates/edit_email_settings.html:30
 #: core/templates/email/send_overview_emails.html:99
 #, python-format
 msgid "Go to %(site_name)s"
@@ -637,7 +638,7 @@ msgstr "Persoonlijk bericht"
 msgid "Direct notification"
 msgstr "Directe notificatie"
 
-#: core/templates/email/send_notification_emails.html:10
+#: core/templates/email/send_notification_emails.html:10 core/views.py:660
 msgid "Notification overview"
 msgstr "Notificaties overzicht"
 
@@ -648,13 +649,13 @@ msgstr " heeft je genoemd bij: "
 #: core/templates/email/send_notification_emails.html:52
 #, python-format
 msgid ""
-"Click <a href=\"%(unsubscribe_url)s\">here</a> to change how often you want "
-"to receive notification emails."
+"Click <a href=\"%(mail_settings_url)s\">here</a> to change how often you "
+"want to receive notification emails."
 msgstr ""
-"Klik <a href=\"%(unsubscribe_url)s\">hier</a> om om in te stellen hoe vaak "
-"je e-mail ontvangt voor nieuwe notificaties."
+"Klik <a href=\"%(mail_settings_url)s\">hier</a> om om in te stellen hoe vaak"
+" je e-mail ontvangt voor nieuwe notificaties."
 
-#: core/templates/email/send_overview_emails.html:22
+#: core/templates/email/send_overview_emails.html:22 core/views.py:657
 msgid "Periodic overview"
 msgstr "Periodiek overzicht"
 
@@ -671,11 +672,11 @@ msgstr "Voor alle nieuwe berichten bekijk %(site_name)s"
 #: core/templates/email/send_overview_emails.html:120
 #, python-format
 msgid ""
-"Click <a href=\"%(unsubscribe_url)s\">here</a> to change how often you want "
-"to receive notifications about new content."
+"Click <a href=\"%(mail_settings_url)s\">here</a> to change how often you "
+"want to receive notifications about new content."
 msgstr ""
-"Klik <a href=\"%(unsubscribe_url)s\">hier</a> om in te stellen hoe vaak je "
-"e-mail ontvangt voor nieuwe content."
+"Klik <a href=\"%(mail_settings_url)s\">hier</a> om in te stellen hoe vaak je"
+" e-mail ontvangt voor nieuwe content."
 
 #: core/templates/email/site_access_changed.html:11
 #, python-format
@@ -982,7 +983,7 @@ msgstr ""
 "Om toegang tot deze site te krijgen dient u toestemming te hebben van de "
 "beheerder. Vraag toestemming aan door op de knop hieronder te drukken."
 
-#: core/templates/registration/request.html:23 core/views.py:494
+#: core/templates/registration/request.html:23 core/views.py:505
 msgid "Name"
 msgstr "Naam"
 
@@ -1011,22 +1012,27 @@ msgstr ""
 "De toegang is aangevraagd. Je ontvangt een e-mail wanneer de toegang door de"
 " beheerder wordt toegewezen."
 
-#: core/views.py:185
+#: core/views.py:192
 #, python-format
 msgid "New access request for %(site_name)s"
 msgstr "Nieuwe toegangsaanvraag voor %(site_name)s"
 
-#: core/views.py:495
+#: core/views.py:506
 msgid "E-mail"
 msgstr "E-mail"
 
-#: core/views.py:496
+#: core/views.py:507
 msgid "Group"
 msgstr "Groep"
 
-#: core/views.py:593
-msgid "Saved"
-msgstr "Opgeslagen"
+#: core/views.py:601
+msgid "Your changes are saved"
+msgstr "Je wijzigingen zijn opgeslagen"
+
+#: core/views.py:663
+#, python-format
+msgid "Successfully unsubscribed %(email)s from %(list_name)s"
+msgstr "%(email)s Succesvol uitgeschreven uit %(list_name)s"
 
 #: event/mail_builders/attend_event_confirm.py:59
 #, python-format
@@ -1350,21 +1356,3 @@ msgstr "Bericht naar evenement"
 #, python-format
 msgid "Filescan found suspicous files on %(site_url)s"
 msgstr "Filescan heeft verdachte bestanden gevonden op %(site_url)s"
-
-#, python-format
-#~ msgid ""
-#~ "\n"
-#~ "This is a request to confirm your comment on <a href=\"%(entity_url)s\">%(entity_title)s</a>.<br><br>\n"
-#~ "\n"
-#~ "Comment: %(comment)s<br>\n"
-#~ "\n"
-#~ "Click on the link below to confirm the comment.<br><br>\n"
-#~ "<a href=\"%(confirm_url)s\">%(confirm_url)s</a>\n"
-#~ msgstr ""
-#~ "\n"
-#~ "Dit is een verzoek om uw reactie op <a href=\"%(entity_url)s\">%(entity_title)s</a> te bevestigen.<br><br>\n"
-#~ "\n"
-#~ "Commentaar: %(comment)s<br>\n"
-#~ "\n"
-#~ "Klik op de onderstaande link om uw reactie te bevestigen.<br><br>\n"
-#~ "<a href=\"%(confirm_url)s\">%(confirm_url)s</a>\n"

@@ -5,9 +5,11 @@
 {% block content %}
 
     {% if messages %}
-    {% for message in messages %}
-    <div><strong>{{ message }}</strong></div>
-    {% endfor %}
+    <div class="messagelist">
+        {% for message in messages %}
+        <div class="message {{ message.tags }}"><strong>{{ message }}</strong></div>
+        {% endfor %}
+    </div>
     {% endif %}
 
 	<div class="form">
