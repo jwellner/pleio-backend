@@ -10,7 +10,7 @@ from django_tenants.utils import parse_tenant_config_path
 from django.utils import dateparse, timezone
 
 
-def resolve_search(_, info, q=None, containerGuid=None, type=None, subtype=None, dateFrom=None, dateTo=None, offset=0, limit=20,
+def resolve_search(_, info, q=None, containerGuid=None, type=None, subtype=None, subtypes=None, dateFrom=None, dateTo=None, offset=0, limit=20,
                    tagLists=None, orderBy=None, orderDirection=ORDER_DIRECTION.asc):
     # pylint: disable=unused-argument
     # pylint: disable=too-many-arguments
@@ -34,9 +34,12 @@ def resolve_search(_, info, q=None, containerGuid=None, type=None, subtype=None,
     if type in ['group', 'user']:
         subtype = type
 
-    subtypes = ['user', 'group', 'file', 'folder', 'blog', 'discussion', 'event', 'news', 'question', 'wiki', 'page']
+    subtypes_available = ['user', 'group', 'file', 'folder', 'blog', 'discussion', 'event', 'news', 'question', 'wiki', 'page']
 
-    if subtype and subtype not in subtypes:
+    if subtypes and [type for type in subtypes if type not in subtypes_available]:
+        raise GraphQLError(INVALID_SUBTYPE)
+
+    if subtype and subtype not in subtypes_available:
         raise GraphQLError(INVALID_SUBTYPE)
 
     # TODO: Check what happens if site alters default ACL (IE: from default "logged_in" to "public")
@@ -80,6 +83,9 @@ def resolve_search(_, info, q=None, containerGuid=None, type=None, subtype=None,
         'term', is_active=False
     )
 
+    if subtypes:
+        s = s.query('terms', type=subtypes)
+
     s = s.query('bool', filter=[
         Q('range', published={'gt': None, 'lte': timezone.now()}) |
         Q('terms', type=['group', 'user'])
@@ -113,7 +119,7 @@ def resolve_search(_, info, q=None, containerGuid=None, type=None, subtype=None,
         totals.append({"subtype": t.key, "total": t.doc_count})
         total = total + t.doc_count
 
-    if subtype and subtype in ['file', 'folder', 'blog', 'discussion', 'event', 'news', 'question', 'wiki', 'page', 'user', 'group']:
+    if subtype:
         s = s.filter('term', type=subtype)
         response = s.execute()
 
