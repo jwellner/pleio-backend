@@ -19,7 +19,7 @@ class TestMailSystemBaseMailerTestCase(PleioTenantTestCase):
         self.assertEqual(context['site_name'], 'Pleio 2.0')
         self.assertEqual(context['primary_color'], '#0e2f56')
         self.assertEqual(context['header_color'], '#0e2f56')
-        self.assertIn("http://tenant.fast-test.com:8000/edit_email_settings/", context['unsubscribe_url'])
+        self.assertIn("http://tenant.fast-test.com:8000/edit_email_settings/", context['mail_settings_url'])
         self.assertIn(user.url, context['user_url'])
         self.assertIn(context['user_name'], user.name)
 

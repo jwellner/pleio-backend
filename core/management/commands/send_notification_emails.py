@@ -1,21 +1,17 @@
 from django.core.management.base import BaseCommand
 from django.db import connection
 
+from core.lib import is_schema_public
 from user.models import User
 from datetime import timedelta
 from django.utils import timezone
-from core.services import MailService, MailTypeEnum
 
 
 class Command(BaseCommand):
     help = 'Send notification emails'
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.mail_service = MailService(MailTypeEnum.COLLECTED)
-
     def handle(self, *args, **options):
-        if connection.schema_name == 'public':
+        if is_schema_public():
             return
 
         users = User.objects.filter(is_active=True, _profile__receive_notification_email=True)
@@ -35,5 +31,7 @@ class Command(BaseCommand):
             if notifications_emailed_in_last_interval_hours:
                 continue
 
-            self.mail_service.send_notification_email(connection.schema_name, user, notifications)
+            from core.mail_builders.notifications import send_notifications, MailTypeEnum
+            send_notifications(user, notifications, MailTypeEnum.COLLECTED)
+
             user.notifications.mark_as_sent()

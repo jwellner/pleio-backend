@@ -1,14 +1,14 @@
 from django.db.models import Q
 from post_deploy import post_deploy_action
 
-from core.lib import tenant_schema
+from core.lib import tenant_schema, is_schema_public
 from file.models import FileFolder
 
 
 @post_deploy_action
 def fix_broken_filenames():
     # pylint: disable=unsupported-binary-operation
-    if tenant_schema() == 'public':
+    if is_schema_public():
         return
 
     retry_files = FileFolder.objects.filter(Q(title__isnull=True)

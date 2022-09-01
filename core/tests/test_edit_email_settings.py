@@ -1,14 +1,12 @@
-from django.contrib.auth.models import AnonymousUser
 from django_tenants.test.client import TenantClient
 from django_tenants.test.cases import FastTenantTestCase
-from django.core import signing
 from django.core.cache import cache
 from django.db import connection
-from django.test import override_settings
+
+from core.utils.mail import EmailSettingsTokenizer
 from user.models import User
-from core.models import ProfileField, Setting, UserProfileField
 from mixer.backend.django import mixer
-from importlib import import_module
+
 
 class EditEmailSettingsTestCase(FastTenantTestCase):
 
@@ -23,47 +21,32 @@ class EditEmailSettingsTestCase(FastTenantTestCase):
 
         self.client = TenantClient(self.tenant)
 
-
     def test_edit_site_settings(self):
-
-        signer = signing.TimestampSigner()
-        token = signer.sign_object({
-            "id": str(self.user.id),
-            "email": self.user.email
-        })
-
-        response = self.client.get('/edit_email_settings/' + token, follow=True)
+        signer = EmailSettingsTokenizer()
+        response = self.client.get(signer.create_url(self.user))
 
         self.assertTemplateUsed(response, 'edit_email_settings.html')
 
-
     def test_edit_site_settings_false_token(self):
+        signer = EmailSettingsTokenizer()
+        url = signer.create_url(self.user)
 
-        signer = signing.TimestampSigner()
-        token = signer.sign_object({
-            "id": str(self.user.id),
-            "email": self.user.email
-        })
-
-        response = self.client.get('/edit_email_settings/' + token + 'a', follow=True)
-
+        response = self.client.get(url + 'a')
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response.url, '/')
 
     def test_edit_site_settings_change_settings(self):
-
-        signer = signing.TimestampSigner()
-        token = signer.sign_object({
-            "id": str(self.user.id),
-            "email": self.user.email
-        })
+        signer = EmailSettingsTokenizer()
+        url = signer.create_url(self.user)
 
         data = {
             "overview_email_enabled": "monthly"
         }
-        response = self.client.post(
-            '/edit_email_settings/' + token, data=data
-        )
-        
+        response = self.client.post(url, data=data)
+
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response.url, url)
+
         self.user.refresh_from_db()
-        self.assertTemplateUsed(response, 'edit_email_settings.html')
         self.assertEqual(self.user.profile.receive_notification_email, False)
         self.assertEqual(self.user.profile.overview_email_interval, 'monthly')

@@ -5,7 +5,7 @@ from post_deploy import post_deploy_action
 from core import config
 from core.constances import ACCESS_TYPE
 from core.elasticsearch import schedule_index_document
-from core.lib import tenant_schema
+from core.lib import tenant_schema, is_schema_public
 from core.models import Group, Entity, Widget
 from core.utils.entity import load_entity_by_id
 from user.models import User
@@ -17,7 +17,7 @@ LOGGER = logging.getLogger(__name__)
 
 @post_deploy_action
 def schedule_index_users():
-    if tenant_schema() == 'public':
+    if is_schema_public():
         return
 
     for user in User.objects.filter(is_active=True):
@@ -29,7 +29,7 @@ def sync_is_submit_updates_enabled_group_setting():
     """
     Copy the site setting for submit-updates in groups into the group setting.
     """
-    if tenant_schema() == 'public':
+    if is_schema_public():
         return
 
     site_setting = config.STATUS_UPDATE_GROUPS
@@ -40,7 +40,7 @@ def sync_is_submit_updates_enabled_group_setting():
 
 @post_deploy_action
 def fix_write_access_for_several_entity_types():
-    if tenant_schema() == 'public':
+    if is_schema_public():
         return
 
     for pk, write_access, owner, in Entity.objects.all().values_list('id', 'write_access', 'owner'):
@@ -52,7 +52,7 @@ def fix_write_access_for_several_entity_types():
 
 @post_deploy_action(auto=False)
 def remove_notifications_with_broken_relation():
-    if tenant_schema() == 'public':
+    if is_schema_public():
         return
 
     count=0
@@ -70,7 +70,7 @@ def remove_notifications_with_broken_relation():
 
 @post_deploy_action
 def migrate_widgets_that_have_sorting_enabled():
-    if tenant_schema() == 'public':
+    if is_schema_public():
         return
 
     for record in Widget.objects.all():

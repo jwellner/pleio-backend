@@ -21,6 +21,9 @@ class TemplateMailerBase(MailerBase):
     def get_template(self):
         raise NotImplementedError(f"Please implement 'get_template()' for {self}")
 
+    def get_headers(self):
+        return {}
+
     def pre_send(self, email):
         pass
 
@@ -38,7 +41,8 @@ class TemplateMailerBase(MailerBase):
         email = EmailMultiAlternatives(subject=self.get_subject(),
                                        body=text_content,
                                        from_email=from_mail,
-                                       to=[self.get_receiver_email()])
+                                       to=[self.get_receiver_email()],
+                                       headers=self.get_headers())
         email.attach_alternative(html_content, "text/html")
 
         self.pre_send(email)

@@ -20,11 +20,12 @@ from django.conf import settings
 from django.core import signing
 from django.core.validators import URLValidator
 from django.db import connection
-from django.db.models import Q
 from django.utils import timezone as django_timezone
 from django.utils.text import slugify
 from django.utils.translation import ugettext, ugettext_lazy
 from enum import Enum
+
+from core.utils.mail import EmailSettingsTokenizer
 
 
 class TypeModels(Enum):
@@ -317,14 +318,10 @@ def get_default_email_context(user=None):
     primary_color = config.COLOR_PRIMARY
     header_color = config.COLOR_HEADER if config.COLOR_HEADER else config.COLOR_PRIMARY
     if user:
-        signer = signing.TimestampSigner()
-        token = signer.sign_object({
-            "id": str(user.id),
-            "email": user.email
-        })
-        unsubscribe_url = site_url + '/edit_email_settings/' + token
+        tokenizer = EmailSettingsTokenizer()
+        mail_settings_url = get_full_url(tokenizer.create_url(user))
     else:
-        unsubscribe_url = ''
+        mail_settings_url = ''
 
     return {
         'user_name': user_name,
@@ -333,7 +330,7 @@ def get_default_email_context(user=None):
         'site_name': site_name,
         'primary_color': primary_color,
         'header_color': header_color,
-        'unsubscribe_url': unsubscribe_url
+        'mail_settings_url': mail_settings_url
     }
 
 
@@ -394,6 +391,10 @@ def get_language_options():
 
 def tenant_schema():
     return connection.schema_name
+
+
+def is_schema_public():
+    return connection.schema_name == 'public'
 
 
 def html_to_text(html):
@@ -492,35 +493,6 @@ def get_filesize(filepath):
     return os.path.getsize(filepath)
 
 
-def map_notification(notification):
-    """ get a mapped notification """
-    entity = notification.action_object
-    performer = apps.get_model('user.User').objects.with_deleted().get(id=notification.actor_object_id)
-    entity_group = False
-    entity_group_name = ""
-    entity_group_url = ""
-    if hasattr(entity, 'group') and entity.group:
-        entity_group = True
-        entity_group_name = entity.group.name
-        entity_group_url = entity.group.url
-
-    return {
-        'id': notification.id,
-        'action': notification.verb,
-        'performer_name': performer.name,
-        'entity_title': entity.title if hasattr(entity, 'title') else "",
-        'entity_description': entity.description if hasattr(entity, 'description') else "",
-        'entity_type': entity._meta.verbose_name,
-        'entity_group': entity_group,
-        'entity_group_name': entity_group_name,
-        'entity_group_url': entity_group_url,
-        'entity_url': entity.url,
-        'type_to_string': entity.type_to_string,
-        'timeCreated': notification.timestamp,
-        'isUnread': notification.unread
-    }
-
-
 def get_model_name(instance):
     return instance._meta.app_label + '.' + instance._meta.model_name
 
@@ -565,16 +537,15 @@ def require_tenant_api_token(f):
             return HttpResponseForbidden()
         return f(request, *args, **kwargs)
 
-
     return test_api_token
 
 
 def early_this_morning():
     localtime = django_timezone.localtime()
     return django_timezone.datetime(year=localtime.year,
-                             month=localtime.month,
-                             day=localtime.day,
-                             hour=0,
-                             minute=0,
-                             second=0,
-                             tzinfo=localtime.tzinfo)
+                                    month=localtime.month,
+                                    day=localtime.day,
+                                    hour=0,
+                                    minute=0,
+                                    second=0,
+                                    tzinfo=localtime.tzinfo)
