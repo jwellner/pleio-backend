@@ -1,13 +1,8 @@
 import uuid
-
-import requests
-from requests import RequestException
-
-from concierge.constances import FETCH_PROFILE_URL
 from core import config
 from core.constances import USER_ROLES
 from core.data.paginate_result import PaginateResult
-from core.lib import is_schema_public, get_account_url
+from core.lib import is_schema_public
 from core.models import UserProfile, ProfileField, UserProfileField, SiteAccessRequest
 from datetime import timedelta
 from django.db.models import Case, Q, Value, When
@@ -339,16 +334,6 @@ class User(AbstractBaseUser):
         self.save()
 
         return True
-
-    def get_external_data(self):
-        try:
-            response = requests.get(get_account_url(FETCH_PROFILE_URL.format(self.external_id)),
-                                    headers={'X-Origin-Token': str(self.profile.origin_token)},
-                                    timeout=10)
-            assert response.ok, response.reason
-            return response.json()
-        except (AssertionError, RequestException) as e:
-            return {"error": str(e)}
 
 
 @receiver(post_save, sender=User)

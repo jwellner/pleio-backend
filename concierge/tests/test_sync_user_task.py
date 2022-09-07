@@ -7,8 +7,7 @@ from django_tenants.test.cases import FastTenantTestCase
 from mixer.backend.django import mixer
 from requests import ConnectionError as RequestConnectionError
 
-from concierge.constances import REGISTER_ORIGIN_SITE_URL
-from core.lib import tenant_summary, get_account_url
+from core.lib import tenant_summary
 from user.models import User
 
 
@@ -37,7 +36,7 @@ class TestTasksTestCase(FastTenantTestCase):
         expected_site_config = tenant_summary()
 
         self.assertEqual(mocked_post.call_args.args,
-                         (get_account_url(REGISTER_ORIGIN_SITE_URL.format(self.user.external_id)),))
+                         ("{}/api/users/register_origin_site/{}".format(settings.ACCOUNT_API_URL, self.user.external_id),))
         self.assertDictEqual(mocked_post.call_args.kwargs, {
             'data': {
                 "origin_site_url": expected_site_config['url'],

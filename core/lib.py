@@ -8,7 +8,6 @@ import tempfile
 import mimetypes
 import uuid
 from functools import wraps
-from urllib.parse import urljoin
 
 from django.http import HttpRequest, HttpResponseForbidden
 import html2text
@@ -283,11 +282,6 @@ def get_full_url(relative_path):
     if not re.match(r"^https?:\/\/", relative_path):
         return f"{get_base_url()}{relative_path}"
     return relative_path
-
-
-def get_account_url(relative_path):
-    prefix = str(settings.ACCOUNT_API_URL).rstrip('/')
-    return urljoin(prefix, relative_path)
 
 
 def tenant_api_token():

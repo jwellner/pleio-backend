@@ -1,16 +1,13 @@
 import json
-from unittest import mock
 
-from core.tests.helpers import PleioTenantTestCase
 from core.utils.convert import is_tiptap, tiptap_to_text, tiptap_to_html
-from core.utils.export import fetch_avatar, CouldNotLoadPictureError
-from user.factories import UserFactory
+
+from django_tenants.test.cases import FastTenantTestCase
 
 
-class TestUtilsTipTapIOTestCase(PleioTenantTestCase):
+class UtilsTestCase(FastTenantTestCase):
 
     def setUp(self):
-        super().setUp()
         self.tiptap_json = {
             'type': 'doc',
             'content': [
@@ -50,21 +47,16 @@ class TestUtilsTipTapIOTestCase(PleioTenantTestCase):
             "entityMap": {}
         }
 
+    def tearDown(self):
+        pass
+
     def test_is_tiptap(self):
-        # Has tiptapjson
-        # Has draftjson
         self.assertTrue(is_tiptap(json.dumps(self.tiptap_json)))
         self.assertFalse(is_tiptap(json.dumps(self.draft_json)))
 
     def test_tiptap_to_text(self):
-        # Has tiptapjson
         result = tiptap_to_text(json.dumps(self.tiptap_json))
         self.assertIn("Dit is een paragraph", result)
-
-    def test_tiptap_to_html(self):
-        # Has tiptapjson
-        result = tiptap_to_html(json.dumps(self.tiptap_json))
-        self.assertIn("<p>Dit is een <strong>paragraph</strong></p>", result)
 
     def test_tiptap_to_text_with_mention(self):
         tiptap = {
@@ -83,6 +75,10 @@ class TestUtilsTipTapIOTestCase(PleioTenantTestCase):
         result = tiptap_to_text(json.dumps(tiptap))
 
         self.assertIn("user X", result)
+
+    def test_tiptap_to_html(self):
+        result = tiptap_to_html(json.dumps(self.tiptap_json))
+        self.assertIn("<p>Dit is een <strong>paragraph</strong></p>", result)
 
     def test_blockquote_to_html(self):
         spec = json.dumps({
@@ -317,80 +313,3 @@ class TestUtilsTipTapIOTestCase(PleioTenantTestCase):
                          '<tr><td><ul><li>Bullet list item</li></ul></td></tr>'
                          '<tr><td><ol><li>Ordered list item</li></ol></td></tr>'
                          '</table>', tiptap_to_html(spec))
-
-
-class TestFetchAvatarTestCase(PleioTenantTestCase):
-    PICTURE_URL = 'https://picture.jpg'
-    THUMBNAIL_URL = 'https://thumbnail.jpg'
-    ORIGINAL_URL = 'https://original.jpg'
-
-    def setUp(self):
-        from requests import Response
-        super().setUp()
-        self.user = UserFactory(picture=self.PICTURE_URL)
-        self.response = mock.MagicMock(spec=Response)
-        self.response.ok = True
-        self.response.content = open(self.relative_path(__file__, 'assets', 'avatar.jpg'), 'rb').read()
-        self.response.headers = {"content-type": "image/jpeg"}
-
-    @mock.patch("user.models.User.get_external_data")
-    @mock.patch("user.models.requests.get")
-    def test_fetch_avatar_with_external_original_url(self, mocked_get, mocked_get_data):
-        mocked_get_data.return_value = {'originalAvatarUrl': self.ORIGINAL_URL,
-                                        'avatarUrl': self.THUMBNAIL_URL}
-        mocked_get.return_value = self.response
-
-        response = fetch_avatar(self.user)
-
-        self.assertTrue(mocked_get.called)
-        self.assertEqual(mocked_get.call_args.args, (self.ORIGINAL_URL,))
-        self.assertEqual((self.response.content, '.jpg'), response)
-
-    @mock.patch("user.models.User.get_external_data")
-    @mock.patch("user.models.requests.get")
-    def test_fetch_avatar_with_external_thumbnail_only(self, mocked_get, mocked_get_data):
-        mocked_get_data.return_value = {'avatarUrl': self.THUMBNAIL_URL}
-        mocked_get.return_value = self.response
-
-        response = fetch_avatar(self.user)
-
-        self.assertTrue(mocked_get.called)
-        self.assertEqual(mocked_get.call_args.args, (self.THUMBNAIL_URL,))
-        self.assertEqual((self.response.content, '.jpg'), response)
-
-    @mock.patch("user.models.User.get_external_data")
-    @mock.patch("user.models.requests.get")
-    def test_fetch_avatar_without_external_urls(self, mocked_get, mocked_get_data):
-        mocked_get_data.return_value = {}
-        mocked_get.return_value = self.response
-
-        response = fetch_avatar(self.user)
-
-        self.assertTrue(mocked_get.called)
-        self.assertEqual(mocked_get.call_args.args, (self.PICTURE_URL,))
-        self.assertEqual((self.response.content, '.jpg'), response)
-
-    @mock.patch("user.models.User.get_external_data")
-    @mock.patch("user.models.requests.get")
-    def test_fetch_avatar_with_error(self, mocked_get, mocked_get_data):
-        mocked_get_data.return_value = {'error': 'some error message'}
-        mocked_get.return_value = self.response
-
-        response = fetch_avatar(self.user)
-
-        self.assertTrue(mocked_get.called)
-        self.assertEqual(mocked_get.call_args.args, (self.PICTURE_URL,))
-        self.assertEqual((self.response.content, '.jpg'), response)
-
-    @mock.patch("user.models.User.get_external_data")
-    @mock.patch("user.models.requests.get")
-    def test_fetch_avatar_without_any_url(self, mocked_get, mocked_get_data):
-        self.user.picture = ''
-        self.user.save()
-        mocked_get_data.return_value = {'originalAvatarUrl': None,
-                                        'avatarUrl': None}
-
-        with self.assertRaises(CouldNotLoadPictureError):
-            fetch_avatar(self.user)
-
-        self.assertFalse(mocked_get.called)

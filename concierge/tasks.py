@@ -10,11 +10,13 @@ from django.utils import timezone
 from django_tenants.utils import schema_context
 from requests import RequestException, ConnectionError as RequestConnectionError
 
-from concierge.constances import REGISTER_ORIGIN_SITE_URL, UPDATE_ORIGIN_SITE_URL
-from core.lib import tenant_summary, get_account_url
+from core.lib import tenant_summary
+from tenants.models import Client
 from user.models import User
 
 logger = logging.getLogger(__name__)
+
+FETCH_PROFILE_URL = "{}/api/users/fetch_profile/{}"
 
 
 @shared_task
@@ -22,10 +24,14 @@ def profile_updated_signal(schema_name, origin_token, retry=3, retry_delay=60):
     with schema_context(schema_name):
         try:
             user = User.objects.get(_profile__origin_token=origin_token)
-            data = user.get_external_data()
+            response = requests.get(FETCH_PROFILE_URL.format(str(settings.ACCOUNT_API_URL).rstrip('/'),
+                                                             user.external_id),
+                                    headers={'X-Origin-Token': str(user.profile.origin_token)},
+                                    timeout=10)
 
-            assert "error" not in data, data['error']
+            assert response.ok, response.reason
 
+            data = response.json()
             user.name = data['name']
             user.email = data['email']
             user.picture = data['avatarUrl']
@@ -64,7 +70,9 @@ def submit_user_token(schema, user):
     try:
         token = uuid.uuid4()
         user.profile.update_origin_token(token)
-        url = get_account_url(REGISTER_ORIGIN_SITE_URL.format(user.external_id))
+        url = "{}/api/users/register_origin_site/{}".format(
+            settings.ACCOUNT_API_URL, user.external_id,
+        )
 
         data = {'origin_token': token}
         data.update({f"origin_site_{key}": value for key, value in tenant_summary().items()})
@@ -97,7 +105,9 @@ def submit_user_registration_date(user):
     try:
         token = uuid.uuid4()
         user.profile.update_origin_token(token)
-        url = get_account_url(REGISTER_ORIGIN_SITE_URL.format(user.external_id))
+        url = "{}/api/users/register_origin_site/{}".format(
+            settings.ACCOUNT_API_URL, user.external_id,
+        )
 
         data = {f"origin_site_{key}": value for key, value in tenant_summary().items()}
         data['registration_date'] = user.created_at
@@ -117,7 +127,7 @@ def submit_user_registration_date(user):
 def sync_site(schema_name):
     with schema_context(schema_name):
         try:
-            url = get_account_url(UPDATE_ORIGIN_SITE_URL)
+            url = f"{settings.ACCOUNT_API_URL}/api/users/update_origin_site"
             data = {f"origin_site_{key}": value for key, value in tenant_summary().items()}
 
             response = requests.post(url, data=data, headers={
