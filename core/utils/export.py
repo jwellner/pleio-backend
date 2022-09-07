@@ -24,7 +24,7 @@ def build_avatar_export(user):
 
                 if record.picture:
                     try:
-                        data, extension = _fetch_avatar(record.picture)
+                        data, extension = fetch_avatar(record)
                         picture = f"{record.guid}{extension}"
                         zip_file.writestr(picture, data)
                     except Exception:
@@ -48,11 +48,19 @@ class CouldNotLoadPictureError(Exception):
     pass
 
 
-def _fetch_avatar(url):
-    response = requests.get(url, timeout=10)
-    if not response.ok:
+def fetch_avatar(user: User):
+    try:
+        data = user.get_external_data()
+        url = user.picture
+        if 'error' not in data:
+            url = data.get('originalAvatarUrl') or data.get('avatarUrl') or url
+
+        assert url, "No url found"
+
+        response = requests.get(url, timeout=10)
+        assert response.ok, response.reason
+
+        return (response.content,
+                mimetypes.guess_extension(response.headers['content-type']))
+    except Exception:
         raise CouldNotLoadPictureError()
-
-    extension = mimetypes.guess_extension(response.headers['content-type'])
-
-    return (response.content, extension)
