@@ -153,7 +153,7 @@ class EditSiteSettingTestCase(FastTenantTestCase):
                         statusUpdateGroups
                         subgroups
                         groupMemberExport
-                        showRelatedItems
+                        showSuggestedItems
 
                         onboardingEnabled
                         onboardingForceExistingUsers
@@ -284,7 +284,7 @@ class EditSiteSettingTestCase(FastTenantTestCase):
                 'statusUpdateGroups': False,
                 'subgroups': True,
                 'groupMemberExport': True,
-                'showRelatedItems': True,
+                'showSuggestedItems': True,
 
                 'onboardingEnabled': True,
                 'onboardingForceExistingUsers': True,
@@ -430,7 +430,7 @@ class EditSiteSettingTestCase(FastTenantTestCase):
         self.assertEqual(data["editSiteSetting"]["siteSettings"]["statusUpdateGroups"], False)
         self.assertEqual(data["editSiteSetting"]["siteSettings"]["subgroups"], True)
         self.assertEqual(data["editSiteSetting"]["siteSettings"]["groupMemberExport"], True)
-        self.assertEqual(data["editSiteSetting"]["siteSettings"]["showRelatedItems"], True)
+        self.assertEqual(data["editSiteSetting"]["siteSettings"]["showSuggestedItems"], True)
 
 
         self.assertEqual(data["editSiteSetting"]["siteSettings"]["onboardingEnabled"], True)

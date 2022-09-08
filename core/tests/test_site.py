@@ -111,6 +111,7 @@ class SiteTestCase(FastTenantTestCase):
                     questionLockAfterActivity
                     questionLockAfterActivityLink
                     maxCharactersInAbstract
+                    showSuggestedItems
                 }
             }
         """
@@ -160,6 +161,7 @@ class SiteTestCase(FastTenantTestCase):
         self.assertEqual(data["site"]["questionLockAfterActivity"], config.QUESTION_LOCK_AFTER_ACTIVITY)
         self.assertEqual(data["site"]["questionLockAfterActivityLink"], config.QUESTION_LOCK_AFTER_ACTIVITY_LINK)
         self.assertEqual(data["site"]["maxCharactersInAbstract"], config.MAX_CHARACTERS_IN_ABSTRACT)
+        self.assertEqual(data["site"]["showSuggestedItems"], config.SHOW_SUGGESTED_ITEMS)
 
     def test_site_closed(self):
 

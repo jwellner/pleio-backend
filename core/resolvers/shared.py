@@ -60,20 +60,17 @@ def resolve_entity_featured(obj, info):
     }
 
 
-def resolve_entity_related_items(obj, info):
+def resolve_entity_suggested_items(obj, info):
     # pylint: disable=unused-argument
-    related = []
-    if obj.related_items:
-        for item in obj.related_items:
-            entity = load_entity_by_id(item, [Blog, News], fail_if_not_found=False)
-            if entity:
-                related.append(entity)
 
-    total = len(related)
-    return {
-        'total': total,
-        'edges': related
-    }
+    suggested = []
+    if obj.suggested_items:
+        for item in obj.suggested_items:
+            entity = load_entity_by_id(item, ['blog.Blog', 'news.News'], fail_if_not_found=False)
+            if entity:
+                suggested.append(entity)
+
+    return suggested
 
 
 def resolve_entity_guid(obj, info):
@@ -265,9 +262,9 @@ def assert_valid_abstract(abstract):
         raise GraphQLError(TEXT_TOO_LONG)
 
 
-def resolve_add_related_items(entity, clean_input):
-    clean_input.setdefault('relatedItems', [])
-    resolve_update_related_items(entity, clean_input)
+def resolve_add_suggested_items(entity, clean_input):
+    clean_input.setdefault('suggestedItems', [])
+    resolve_update_suggested_items(entity, clean_input)
 
 
 def resolve_entity_revision(obj, info):
@@ -294,9 +291,9 @@ def resolve_apply_revision(entity, revision):
 
 
 # Update
-def resolve_update_related_items(entity, clean_input):
-    if 'relatedItems' in clean_input:
-        entity.related_items = clean_input.get("relatedItems")
+def resolve_update_suggested_items(entity, clean_input):
+    if 'suggestedItems' in clean_input:
+        entity.suggested_items = clean_input.get("suggestedItems")
 
 
 def update_publication_dates(entity, clean_input):

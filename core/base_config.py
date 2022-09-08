@@ -105,7 +105,7 @@ DEFAULT_SITE_CONFIG = {
     'SUBGROUPS': (False, 'Subgroups'),
     'GROUP_MEMBER_EXPORT': (False, 'Group member export'),
     'LIMITED_GROUP_ADD': (True, 'Adding of groups limited to admins'),
-    'SHOW_RELATED_ITEMS': (False, 'Show related items'),
+    'SHOW_SUGGESTED_ITEMS': (False, 'Show suggested items'),
 
     'ACHIEVEMENTS_ENABLED': (True, 'Achievements enabled'),
     'MAIL_REPLY_TO': ('noreply@pleio.nl', 'default reply-to mail address'),

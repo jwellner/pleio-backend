@@ -172,7 +172,7 @@ def resolve_edit_site_setting(_, info, input):
         'subgroups': 'SUBGROUPS',
         'groupMemberExport': 'GROUP_MEMBER_EXPORT',
         'limitedGroupAdd': 'LIMITED_GROUP_ADD',
-        'showRelatedItems': 'SHOW_RELATED_ITEMS',
+        'showSuggestedItems': 'SHOW_SUGGESTED_ITEMS',
 
         'onboardingEnabled': 'ONBOARDING_ENABLED',
         'onboardingForceExistingUsers': 'ONBOARDING_FORCE_EXISTING_USERS',

@@ -20,8 +20,8 @@ class AddBlogTestCase(PleioTenantTestCase):
         self.adminUser = mixer.blend(User, roles=['ADMIN'])
         self.group = mixer.blend(Group, owner=self.authenticatedUser, is_membership_on_request=False)
         self.group.join(self.authenticatedUser, 'owner')
-        self.relatedBlog = mixer.blend(Blog)
-        self.relatedNews = mixer.blend(News)
+        self.suggestedBlog = mixer.blend(Blog)
+        self.suggestedNews = mixer.blend(News)
 
         self.data = {
             "input": {
@@ -36,7 +36,7 @@ class AddBlogTestCase(PleioTenantTestCase):
                 "writeAccessId": 0,
                 "tags": ["tag1", "tag2"],
                 "isRecommended": True,
-                "relatedItems": [self.relatedBlog.guid, self.relatedNews.guid]
+                "suggestedItems": [self.suggestedBlog.guid, self.suggestedNews.guid]
             }
         }
         self.mutation = """
@@ -59,10 +59,8 @@ class AddBlogTestCase(PleioTenantTestCase):
                     guid
                 }
                 isRecommended
-                relatedItems {
-                    edges {
-                        guid
-                    }
+                suggestedItems {
+                    guid
                 }
             }
             mutation ($input: addEntityInput!) {
@@ -92,8 +90,8 @@ class AddBlogTestCase(PleioTenantTestCase):
         self.assertDateEqual(entity["timePublished"], variables['input']['timePublished'])
         self.assertDateEqual(entity["scheduleArchiveEntity"], variables['input']['scheduleArchiveEntity'])
         self.assertDateEqual(entity["scheduleDeleteEntity"], variables['input']['scheduleDeleteEntity'])
-        self.assertEqual(entity["relatedItems"]["edges"][0]["guid"], self.relatedBlog.guid)
-        self.assertEqual(entity["relatedItems"]["edges"][1]["guid"], self.relatedNews.guid)
+        self.assertEqual(entity["suggestedItems"][0]["guid"], self.suggestedBlog.guid)
+        self.assertEqual(entity["suggestedItems"][1]["guid"], self.suggestedNews.guid)
 
     def test_add_blog_admin(self):
         variables = self.data
