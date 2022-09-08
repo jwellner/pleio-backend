@@ -8,6 +8,7 @@ import tempfile
 import mimetypes
 import uuid
 from functools import wraps
+from urllib.parse import urljoin
 
 from django.http import HttpRequest, HttpResponseForbidden
 import html2text
@@ -283,6 +284,11 @@ def get_full_url(relative_path):
     return relative_path
 
 
+def get_account_url(relative_path):
+    prefix = str(settings.ACCOUNT_API_URL).rstrip('/')
+    return urljoin(prefix, relative_path)
+
+
 def tenant_api_token():
     if not config.TENANT_API_TOKEN:
         config.TENANT_API_TOKEN = str(uuid.uuid4())
@@ -390,6 +396,10 @@ def get_exportable_content_types():
 
 def get_language_options():
     return [{'value': item[0], 'label': item[1]} for item in settings.LANGUAGES]
+
+
+def is_schema_public():
+    return connection.schema_name == 'public'
 
 
 def tenant_schema():
@@ -565,16 +575,15 @@ def require_tenant_api_token(f):
             return HttpResponseForbidden()
         return f(request, *args, **kwargs)
 
-
     return test_api_token
 
 
 def early_this_morning():
     localtime = django_timezone.localtime()
     return django_timezone.datetime(year=localtime.year,
-                             month=localtime.month,
-                             day=localtime.day,
-                             hour=0,
-                             minute=0,
-                             second=0,
-                             tzinfo=localtime.tzinfo)
+                                    month=localtime.month,
+                                    day=localtime.day,
+                                    hour=0,
+                                    minute=0,
+                                    second=0,
+                                    tzinfo=localtime.tzinfo)
