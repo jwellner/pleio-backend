@@ -40,7 +40,7 @@ def resolve_add_blog(_, info, input):
 
     shared.resolve_update_is_featured(entity, user, clean_input)
 
-    shared.resolve_add_related_items(entity, clean_input)
+    shared.resolve_add_suggested_items(entity, clean_input)
 
     entity.save()
 
@@ -92,7 +92,7 @@ def resolve_edit_blog(_, info, input, draft=False):
 
         shared.resolve_update_time_created(entity, clean_input)
 
-    shared.resolve_update_related_items(entity, clean_input)
+    shared.resolve_update_suggested_items(entity, clean_input)
 
     shared.resolve_store_revision(entity)
 

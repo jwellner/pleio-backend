@@ -2,14 +2,17 @@ import logging
 import uuid
 
 from django.contrib.auth.models import AnonymousUser
+from django.contrib.postgres.fields import ArrayField
 from django.db import models
 from django.db.models import Q
-from django.contrib.postgres.fields import ArrayField
 from django.utils import timezone
 from model_utils.managers import InheritanceManager
-from core.lib import get_acl
+
 from core.constances import ENTITY_STATUS, USER_ROLES
+from core.lib import get_acl
 from core.models.shared import read_access_default, write_access_default
+from core.utils.entity import load_entity_by_id
+
 from .tags import TagsMixin
 
 logger = logging.getLogger(__name__)
@@ -121,7 +124,7 @@ class Entity(models.Model, TagsMixin):
                               blank=True, default=list,
                               db_column='tags')
     
-    related_items = ArrayField (models.UUIDField(default=uuid.uuid4),
+    suggested_items = ArrayField (models.UUIDField(default=uuid.uuid4),
                                 blank=True, null=True)
 
     notifications_created = models.BooleanField(default=False)

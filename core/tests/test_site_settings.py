@@ -176,7 +176,7 @@ class SiteSettingsTestCase(FastTenantTestCase):
                     statusUpdateGroups
                     subgroups
                     groupMemberExport
-                    showRelatedItems
+                    showSuggestedItems
 
                     onboardingEnabled
                     onboardingForceExistingUsers
@@ -391,7 +391,7 @@ class SiteSettingsTestCase(FastTenantTestCase):
         self.assertEqual(data["siteSettings"]["statusUpdateGroups"], True)
         self.assertEqual(data["siteSettings"]["subgroups"], False)
         self.assertEqual(data["siteSettings"]["groupMemberExport"], False)
-        self.assertEqual(data["siteSettings"]["showRelatedItems"], False)
+        self.assertEqual(data["siteSettings"]["showSuggestedItems"], False)
         self.assertEqual(data["siteSettings"]["siteInvites"]["edges"][0]['email'], 'a@a.nl')
         self.assertEqual(data["siteSettings"]["cookieConsent"], False)
         self.assertEqual(data["siteSettings"]["roleOptions"],

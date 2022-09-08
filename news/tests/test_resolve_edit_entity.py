@@ -40,7 +40,7 @@ class EditNewsTestCase(PleioTenantTestCase):
                 "timePublished": str(timezone.localtime()),
                 "scheduleArchiveEntity": str(timezone.localtime() + timezone.timedelta(days=10)),
                 "scheduleDeleteEntity": str(timezone.localtime() + timezone.timedelta(days=20)),
-                "relatedItems": [self.relatedNews1.guid, self.relatedNews2.guid]
+                "suggestedItems": [self.relatedNews1.guid, self.relatedNews2.guid]
             }
         }
         self.mutation = """
@@ -62,10 +62,8 @@ class EditNewsTestCase(PleioTenantTestCase):
                 owner {
                     guid
                 }
-                relatedItems {
-                    edges {
-                        guid
-                    }
+                suggestedItems {
+                    guid
                 }
                 revision {
                     content {
@@ -99,8 +97,8 @@ class EditNewsTestCase(PleioTenantTestCase):
         self.assertDateEqual(entity["timePublished"], variables['input']['timePublished'])
         self.assertDateEqual(entity["scheduleArchiveEntity"], variables['input']['scheduleArchiveEntity'])
         self.assertDateEqual(entity["scheduleDeleteEntity"], variables['input']['scheduleDeleteEntity'])
-        self.assertEqual(entity["relatedItems"]["edges"][0]["guid"], self.relatedNews1.guid)
-        self.assertEqual(entity["relatedItems"]["edges"][1]["guid"], self.relatedNews2.guid)
+        self.assertEqual(entity["suggestedItems"][0]["guid"], self.relatedNews1.guid)
+        self.assertEqual(entity["suggestedItems"][1]["guid"], self.relatedNews2.guid)
 
         self.news.refresh_from_db()
 

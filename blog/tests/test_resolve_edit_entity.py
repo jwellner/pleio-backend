@@ -36,8 +36,8 @@ class EditBlogTestCase(PleioTenantTestCase):
             owner=self.authenticatedUser,
             is_recommended=False
         )
-        self.relatedBlog = mixer.blend(Blog)
-        self.relatedNews = mixer.blend(News)
+        self.suggestedBlog = mixer.blend(Blog)
+        self.suggestedNews = mixer.blend(News)
 
         self.mutation = """
             fragment BlogParts on Blog {
@@ -62,10 +62,8 @@ class EditBlogTestCase(PleioTenantTestCase):
                 owner {
                     guid
                 }
-                relatedItems {
-                    edges {
-                        guid
-                    }
+                suggestedItems {
+                    guid
                 }
                 isRecommended
                 revision {
@@ -123,7 +121,7 @@ class EditBlogTestCase(PleioTenantTestCase):
                 "timePublished": None,
                 "scheduleArchiveEntity": str(timezone.localtime() + timezone.timedelta(days=10)),
                 "scheduleDeleteEntity": str(timezone.localtime() + timezone.timedelta(days=20)),
-                "relatedItems": [self.relatedBlog.guid, self.relatedNews.guid]
+                "suggestedItems": [self.suggestedBlog.guid, self.suggestedNews.guid]
             }
         }
         self.graphql_client.force_login(self.authenticatedUser)
@@ -141,8 +139,8 @@ class EditBlogTestCase(PleioTenantTestCase):
         self.assertEqual(entity["timePublished"], None)
         self.assertDateEqual(entity["scheduleArchiveEntity"], variables['input']['scheduleArchiveEntity'])
         self.assertDateEqual(entity["scheduleDeleteEntity"], variables['input']['scheduleDeleteEntity'])
-        self.assertEqual(entity["relatedItems"]["edges"][0]["guid"], self.relatedBlog.guid)
-        self.assertEqual(entity["relatedItems"]["edges"][1]["guid"], self.relatedNews.guid)
+        self.assertEqual(entity["suggestedItems"][0]["guid"], self.suggestedBlog.guid)
+        self.assertEqual(entity["suggestedItems"][1]["guid"], self.suggestedNews.guid)
 
         self.blog.refresh_from_db()
 

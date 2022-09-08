@@ -62,7 +62,7 @@ def get_settings():
         'kalturaVideoEnabled': config.KALTURA_VIDEO_ENABLED,
         'kalturaVideoPartnerId': config.KALTURA_VIDEO_PARTNER_ID,
         'kalturaVideoPlayerId': config.KALTURA_VIDEO_PLAYER_ID,
-        'showRelatedItems': config.SHOW_RELATED_ITEMS,
+        'showSuggestedItems': config.SHOW_SUGGESTED_ITEMS,
         'pdfCheckerEnabled': config.PDF_CHECKER_ENABLED,
         'maxCharactersInAbstract': config.MAX_CHARACTERS_IN_ABSTRACT,
     }
@@ -194,7 +194,7 @@ def get_site_settings():
         'subgroups': config.SUBGROUPS,
         'groupMemberExport': config.GROUP_MEMBER_EXPORT,
         'limitedGroupAdd': config.LIMITED_GROUP_ADD,
-        'showRelatedItems': config.SHOW_RELATED_ITEMS,
+        'showSuggestedItems': config.SHOW_SUGGESTED_ITEMS,
 
         'accessIds': get_access_ids(),
         'startpage': config.STARTPAGE,

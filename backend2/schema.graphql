@@ -109,7 +109,7 @@ input addEntityInput {
     scheduleArchiveEntity: DateTime
     scheduleDeleteEntity: DateTime
     qrAccess: Boolean
-    relatedItems: [String]
+    suggestedItems: [String]
 }
 
 type addEntityPayload {
@@ -324,7 +324,7 @@ type Blog implements Entity {
     comments: [Comment]
     commentCount: Int
     isPinned: Boolean!
-    relatedItems: EntityList
+    suggestedItems: [Entity]
     revision: Revision
 }
 
@@ -606,7 +606,7 @@ input editEntityInput {
     groupGuid: String
     ownerGuid: String
     qrAccess: Boolean
-    relatedItems: [String]
+    suggestedItems: [String]
 }
 
 type editEntityPayload {
@@ -818,7 +818,7 @@ input editSiteSettingInput {
     statusUpdateGroups: Boolean
     subgroups: Boolean
     groupMemberExport: Boolean
-    showRelatedItems: Boolean
+    showSuggestedItems: Boolean
     questionLockAfterActivity: Boolean
     questionLockAfterActivityLink: String
     redirects: [RedirectInput]
@@ -1476,7 +1476,7 @@ type News implements Entity {
     comments: [Comment]
     commentCount: Int
     isPinned: Boolean!
-    relatedItems: EntityList
+    suggestedItems: [Entity]
     revision: Revision
 }
 
@@ -1991,6 +1991,7 @@ type Site {
     fileDescriptionFieldEnabled: Boolean
     pdfCheckerEnabled: Boolean!
     maxCharactersInAbstract: Int
+    showSuggestedItems: Boolean!
 }
 
 type SiteSettings {
@@ -2067,7 +2068,7 @@ type SiteSettings {
     statusUpdateGroups: Boolean!
     subgroups: Boolean!
     groupMemberExport: Boolean!
-    showRelatedItems: Boolean!
+    showSuggestedItems: Boolean!
     questionLockAfterActivity: Boolean!
     questionLockAfterActivityLink: String
     redirects: [Redirect]

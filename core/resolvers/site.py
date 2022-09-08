@@ -292,3 +292,8 @@ def resolve_file_description_enabled(obj, info):
 def resolve_max_characters_in_abstract(obj, info):
     # pylint: disable=unused-argument
     return config.MAX_CHARACTERS_IN_ABSTRACT
+
+@site.field("showSuggestedItems")
+def resolve_show_suggested_items(obj, info):
+    # pylint: disable=unused-argument
+    return config.SHOW_SUGGESTED_ITEMS
