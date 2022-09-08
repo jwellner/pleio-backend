@@ -395,6 +395,10 @@ def get_language_options():
     return [{'value': item[0], 'label': item[1]} for item in settings.LANGUAGES]
 
 
+def is_schema_public():
+    return connection.schema_name == 'public'
+
+
 def tenant_schema():
     return connection.schema_name
 
