@@ -5,6 +5,7 @@ import zipfile
 
 import requests
 
+from concierge.api import fetch_avatar
 from core.lib import get_tmp_file_path
 from user.models import User
 
@@ -20,15 +21,12 @@ def build_avatar_export(user):
             writer = csv.writer(fh, delimiter=';', quotechar='"')
             writer.writerow(['name', 'email', 'avatar'])
             for record in User.objects.filter(is_active=True):
-                picture = None
-
-                if record.picture:
-                    try:
-                        data, extension = _fetch_avatar(record.picture)
-                        picture = f"{record.guid}{extension}"
-                        zip_file.writestr(picture, data)
-                    except Exception:
-                        picture = None
+                try:
+                    data, extension = fetch_avatar_image(record)
+                    picture = f"{record.guid}{extension}"
+                    zip_file.writestr(picture, data)
+                except Exception:
+                    picture = None
 
                 writer.writerow([record.name, record.email, picture])
 
@@ -48,11 +46,17 @@ class CouldNotLoadPictureError(Exception):
     pass
 
 
-def _fetch_avatar(url):
-    response = requests.get(url, timeout=10)
-    if not response.ok:
+def fetch_avatar_image(user: User):
+    try:
+        data = fetch_avatar(user) or {}
+        url = data.get('originalAvatarUrl')
+
+        assert url, "No url found"
+
+        response = requests.get(url, timeout=3600)
+        assert response.ok, response.reason
+
+        return (response.content,
+                mimetypes.guess_extension(response.headers['content-type']))
+    except Exception:
         raise CouldNotLoadPictureError()
-
-    extension = mimetypes.guess_extension(response.headers['content-type'])
-
-    return (response.content, extension)

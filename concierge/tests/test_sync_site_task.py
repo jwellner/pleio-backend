@@ -4,7 +4,8 @@ from django.conf import settings
 from django.test import override_settings
 from django_tenants.test.cases import FastTenantTestCase
 
-from core.lib import tenant_summary
+from concierge.constances import UPDATE_ORIGIN_SITE_URL
+from core.lib import tenant_summary, get_account_url
 
 
 class TestSyncSiteTestCase(FastTenantTestCase):
@@ -19,7 +20,7 @@ class TestSyncSiteTestCase(FastTenantTestCase):
         expected_site_config = tenant_summary()
 
         mocked_post.assert_called_with(
-            "{}/api/users/update_origin_site".format(settings.ACCOUNT_API_URL),
+            get_account_url(UPDATE_ORIGIN_SITE_URL),
             data={
                 "origin_site_url": expected_site_config['url'],
                 "origin_site_name": expected_site_config['name'],
