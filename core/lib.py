@@ -403,10 +403,6 @@ def tenant_schema():
     return connection.schema_name
 
 
-def is_schema_public():
-    return connection.schema_name == 'public'
-
-
 def html_to_text(html):
     h = html2text.HTML2Text()
     h.ignore_links = True
