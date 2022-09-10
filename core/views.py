@@ -1,6 +1,7 @@
 import csv
 import json
 import logging
+from core.models.agreement import CustomAgreement
 
 import core.tasks
 import qrcode
@@ -676,3 +677,27 @@ def unsubscribe(request, token):
     except Exception as e:
         logger.error("unsubscribe_error: schema=%s, error=%s, type=%s, token=%s", tenant_schema(), str(e), e.__class__, token)
         return HttpResponseNotFound()
+
+
+def site_custom_agreement(request, custom_agreement_id):
+    # pylint: disable=unused-argument
+    user = request.user
+
+    if not user.is_authenticated:
+        raise Http404("Not logged in")
+
+    if not user.has_role(USER_ROLES.ADMIN):
+        raise Http404("Not admin")
+
+    try:
+        custom_agreement = CustomAgreement.objects.get(id=custom_agreement_id)
+
+        return_file = custom_agreement
+
+        response = StreamingHttpResponse(streaming_content=return_file.document.open(), content_type='application/pdf')
+        response['Content-Length'] = return_file.document.size
+        response['Content-Disposition'] = "filename=%s" % return_file.name
+        return response
+
+    except ObjectDoesNotExist:
+        raise Http404("File not found")

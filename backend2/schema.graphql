@@ -1726,6 +1726,7 @@ type Query {
     siteStats: SiteStats
     tags: [Tag]
     siteAgreements: [SiteAgreement]
+    siteCustomAgreements: [SiteCustomAgreement]
     revisions(
         objectGuid: String!
         offset: Int
@@ -2666,6 +2667,13 @@ type SiteAgreementVersion {
     accepted: Boolean!
     accepted_by: String
     accepted_date: DateTime
+}
+
+type SiteCustomAgreement {
+    id: String!
+    name: String!
+    fileName: String!
+    url: String!
 }
 
 input ProfileFieldValidatorInput {

@@ -1,3 +1,4 @@
+from core.models.agreement import CustomAgreement
 import django_filters
 
 from auditlog.models import LogEntry
@@ -62,3 +63,8 @@ class AuditLogFilter(django_filters.FilterSet):
     class Meta:
         model = LogEntry
         fields = []
+
+class CustomAgreementForm(forms.ModelForm):
+    class Meta:
+        model=CustomAgreement  
+        fields = ['name', 'document']

@@ -33,6 +33,7 @@ urlpatterns = [
     path('superadmin/scanlog', core_superadmin.ScanLog.as_view()),
     path('superadmin/auditlog', core_superadmin.AuditLog.as_view()),
     path('superadmin/group_copy', core_superadmin.GroupCopyView.as_view()),
+    path('superadmin/agreements', core_superadmin.agreements),
     path('graphql', GraphQLView.as_view(schema=schema, extensions=[OpenTracingExtensionSync], introspection=settings.DEBUG), name='graphql'),
 
     path('file/download/<uuid:file_id>', file_views.download, name='download'),
@@ -49,6 +50,7 @@ urlpatterns = [
     path('attachment/<str:attachment_type>/<uuid:attachment_id>', core_views.attachment, name='attachment'),
 
     path('agreement/<slug:slug>', tenants_views.site_agreement_version_document, name="agreement"),
+    path('custom_agreement/<int:custom_agreement_id>', core_views.site_custom_agreement, name="custom_agreement"),
 
     path('bulk_download', file_views.bulk_download, name='bulk_download'),
 
