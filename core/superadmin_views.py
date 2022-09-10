@@ -1,5 +1,6 @@
 import json
 import logging
+import os
 
 from auditlog.models import LogEntry
 from datetime import timedelta
@@ -13,9 +14,10 @@ from django.utils import timezone
 from celery.result import AsyncResult
 from core.constances import OIDC_PROVIDER_OPTIONS
 from core.models import Group
+from core.models.agreement import CustomAgreement
 from core.tasks import replace_domain_links, elasticsearch_rebuild_for_tenant
 from core.lib import tenant_schema, is_valid_domain
-from core.superadmin.forms import AuditLogFilter, SettingsForm, ScanIncidentFilter
+from core.superadmin.forms import AuditLogFilter, CustomAgreementForm, SettingsForm, ScanIncidentFilter
 from control.tasks import get_db_disk_usage, get_file_disk_usage, copy_group_to_tenant
 from file.models import ScanIncident
 from tenants.models import Client, GroupCopy
@@ -198,3 +200,25 @@ def tasks(request):
         return redirect('/superadmin/tasks')
 
     return render(request, 'superadmin/tasks.html', context)
+
+@login_required
+@user_passes_test(lambda u: u.is_superadmin, login_url='/', redirect_field_name=None)
+def agreements(request):
+    if request.method == 'POST':
+        form = CustomAgreementForm(request.POST, request.FILES)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Custom agreement saved')
+            form = CustomAgreementForm()
+    else:
+        form = CustomAgreementForm()
+    agreements = CustomAgreement.objects.all()
+    custom_agreements = []
+    for agreement in agreements:
+        custom_agreements.append({
+            'name': agreement.name,
+            'file_name': os.path.basename(agreement.document.name),
+            'url': agreement.url
+        })
+
+    return render(request, 'superadmin/agreements.html', {'form': form, 'custom_agreements': custom_agreements})
