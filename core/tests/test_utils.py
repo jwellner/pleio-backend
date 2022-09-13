@@ -1,10 +1,14 @@
 import json
 from unittest import mock
+import os.path
 
 from core.tests.helpers import PleioTenantTestCase
 from core.utils.convert import is_tiptap, tiptap_to_text, tiptap_to_html
 from core.utils.export import fetch_avatar_image, CouldNotLoadPictureError
 from user.factories import UserFactory
+
+
+from core.utils.export import compress_path
 
 
 class TestUtilsTipTapIOTestCase(PleioTenantTestCase):
@@ -391,3 +395,19 @@ class TestFetchAvatarTestCase(PleioTenantTestCase):
             fetch_avatar_image(self.user)
 
         self.assertFalse(mocked_get.called)
+
+
+class TestUtilsCompressPathTestCase(PleioTenantTestCase):
+
+    def setUp(self):
+        super().setUp()
+        self.base_file = self.file_factory(self.relative_path(__file__, 'assets', 'text_file.txt'))
+
+    def test_correctly_created_zip_object(self):
+        zipfile = None
+        try:
+            zipfile = compress_path(self.base_file.upload.path)
+            self.assertTrue(os.path.exists(zipfile))
+        finally:
+            if zipfile and os.path.exists(zipfile):
+                os.unlink(zipfile)
