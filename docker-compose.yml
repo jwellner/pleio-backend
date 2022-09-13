@@ -127,7 +127,7 @@ services:
     image: 'redis:6.2'
     restart: always
     ports:
-      - '6379:6379'
+      - '16379:6379'
 
   clamav:
     image: 'mkodockx/docker-clamav:1.0.3-alpine'

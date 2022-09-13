@@ -60,3 +60,26 @@ def fetch_avatar_image(user: User):
                 mimetypes.guess_extension(response.headers['content-type']))
     except Exception:
         raise CouldNotLoadPictureError()
+
+
+def compress_path(path):
+    target_path = os.path.join(os.path.dirname(path), os.path.basename(path) + '.zip')
+
+    zip_file = zipfile.ZipFile(target_path, mode='w', compression=zipfile.ZIP_DEFLATED)
+    add_to_zip_recursive(path, '', zip_file)
+    zip_file.close()
+
+    return target_path
+
+
+def add_to_zip_recursive(root, path, zip_file):
+    try:
+        for filename in os.listdir(os.path.join(root, path)):
+            add_to_zip_recursive(root=root,
+                                 path=os.path.join(path, filename),
+                                 zip_file=zip_file)
+    except NotADirectoryError:
+        if path == '':
+            zip_file.write(root, arcname=os.path.basename(root))
+        else:
+            zip_file.write(os.path.join(root, path), arcname=path)

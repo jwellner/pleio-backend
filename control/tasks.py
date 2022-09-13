@@ -10,6 +10,7 @@ from celery import shared_task
 from celery.utils.log import get_task_logger
 from core.models import SiteStat, Attachment, Entity, CommentMixin, Comment, GroupMembership, Group, Subgroup
 from core.lib import ACCESS_TYPE, access_id_to_acl, get_access_id
+from core.utils.export import compress_path
 from core.utils.tiptap_parser import Tiptap
 from core.tasks.elasticsearch_tasks import elasticsearch_delete_data_for_tenant
 from django_tenants.utils import schema_context
@@ -131,7 +132,7 @@ def get_sites_admin(self):
 
 
 @shared_task(bind=True)
-def backup_site(self, backup_site_id, skip_files=False, backup_folder=None):
+def backup_site(self, backup_site_id, skip_files=False, backup_folder=None, compress=False):
     # pylint: disable=unused-argument
     # pylint: disable=too-many-locals
     '''
@@ -197,6 +198,12 @@ def backup_site(self, backup_site_id, skip_files=False, backup_folder=None):
     if not skip_files:
         backup_files_folder = os.path.join(backup_base_path, "files")
         shutil.copytree(os.path.join(settings.MEDIA_ROOT, backup_site.schema_name), backup_files_folder)
+
+    if compress:
+        filename = compress_path(backup_base_path)
+        if os.path.exists(filename):
+            shutil.rmtree(backup_base_path, ignore_errors=True)
+            return os.path.basename(filename)
 
     return backup_folder
 
@@ -844,7 +851,7 @@ def get_agreements(self):
                     'version': version.version,
                     'document': version.get_absolute_url(),
                     'created_at': version.created_at
-                    } for version in agreement.versions.all()]
+                } for version in agreement.versions.all()]
             })
 
     return result
@@ -884,4 +891,3 @@ def add_agreement_version(self, agreement_id, version, document_path):
         'version': version.version,
         'document': version.get_absolute_url()
     }
-
