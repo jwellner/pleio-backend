@@ -143,6 +143,7 @@ class OIDCAuthBackend(OIDCAuthenticationBackend):
 
         user.external_id = claims.get('sub')
 
+        # user.name is managed localy and should not be overwritten.
         if not config.EDIT_USER_NAME_ENABLED:
             user.name = claims.get('name')
 
@@ -235,6 +236,6 @@ class OIDCAuthBackend(OIDCAuthenticationBackend):
 
 
 def oidc_provider_logout_url(request):
-    return_url = request.build_absolute_uri('/')
+    return_url = absolutify(request, '/')
     query_params = urlencode({'post_logout_redirect_uri': return_url})
     return f"{settings.OIDC_OP_LOGOUT_ENDPOINT}?{query_params}"
