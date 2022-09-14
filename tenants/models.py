@@ -40,7 +40,7 @@ class GroupCopy(models.Model):
         ('SUCCESS', 'SUCCESS'),
     )
 
-    source_tenant =  models.CharField(max_length=200)
+    source_tenant = models.CharField(max_length=200)
     target_tenant = models.CharField(max_length=200)
 
     action_user_id = models.UUIDField(default=uuid.uuid4, editable=False)
@@ -61,9 +61,7 @@ class GroupCopy(models.Model):
         ordering = ['-created_at']
 
 
-
 class GroupCopyMapping(models.Model):
-    
     copy = models.ForeignKey(
         'tenants.GroupCopy',
         on_delete=models.CASCADE,
@@ -89,9 +87,11 @@ class Agreement(models.Model):
     def __str__(self):
         return self.name
 
+
 class AgreementVersion(models.Model):
     class Meta:
         ordering = ['created_at']
+
     agreement = models.ForeignKey(
         'tenants.Agreement',
         on_delete=models.CASCADE,
@@ -115,10 +115,11 @@ class AgreementVersion(models.Model):
 
     def get_absolute_url(self):
         return reverse("agreement", kwargs={"slug": self.slug})
-    
+
     def save(self, *args, **kwargs):
         self.slug = uuslug(str(self), instance=self)
         super(AgreementVersion, self).save(*args, **kwargs)
+
 
 class AgreementAccept(models.Model):
     client = models.ForeignKey(
