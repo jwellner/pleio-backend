@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Duits\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-09-15 10:31+0200\n"
+"POT-Creation-Date: 2022-09-15 12:48+0200\n"
 "PO-Revision-Date: 2021-05-26 10:55+0200\n"
 "Last-Translator: \n"
 "Language-Team: \n"
@@ -165,7 +165,7 @@ msgstr "Avatar-Export ist bereit"
 msgid "Confirm comment on %(site_name)s"
 msgstr "Bestätigen Sie den Kommentar zu %(site_name)s"
 
-#: core/mail_builders/frequent_overview.py:70
+#: core/mail_builders/frequent_overview.py:76
 #, python-format
 msgid "Regular overview of %(site_name)s"
 msgstr "Regulärer Überblick über %(site_name)s"
@@ -220,18 +220,18 @@ msgstr "Wilkommen zu: %(group_name)s"
 msgid "You are invited to join site %(site_name)s"
 msgstr "Sie sind eingeladen, sich bei der Site %(site_name)s anzumelden"
 
-#: core/mail_builders/notifications.py:60
-#: core/mail_builders/notifications.py:69
+#: core/mail_builders/notifications.py:66
+#: core/mail_builders/notifications.py:75
 #, python-format
 msgid "Notification on %(entity_title)s"
 msgstr "Benachrichtigung über %(entity_title)s"
 
-#: core/mail_builders/notifications.py:64
+#: core/mail_builders/notifications.py:70
 #, python-format
 msgid "Notification on %(entity_type)s in group %(entity_group_name)s"
 msgstr "Benachrichtigung über %(entity_type)s in Gruppe %(entity_group_name)s"
 
-#: core/mail_builders/notifications.py:72
+#: core/mail_builders/notifications.py:78
 #, python-format
 msgid "New notifications at %(site_name)s"
 msgstr "Neue Benachrichtigungen bei %(site_name)s"
@@ -655,13 +655,14 @@ msgid " has mentioned you at: "
 msgstr " hat Sie erwähnt bei:"
 
 #: core/templates/email/send_notification_emails.html:52
-#, python-format
-msgid ""
-"Click <a href=\"%(mail_settings_url)s\">here</a> to change how often you "
-"want to receive notification emails."
-msgstr ""
-"Klicken Sie <a href=\"%(mail_settings_url)s\">hier</a>, um zu ändern, wie "
-"oft Sie Benachrichtigungs-E-Mails erhalten möchten."
+#: core/templates/email/send_overview_emails.html:120
+msgid "Unsubscribe"
+msgstr "Abbestellen"
+
+#: core/templates/email/send_notification_emails.html:52
+#: core/templates/email/send_overview_emails.html:120
+msgid "Adjust your email settings"
+msgstr "Passen Sie Ihre E-Mail-Einstellungen an"
 
 #: core/templates/email/send_overview_emails.html:22 core/views.py:644
 msgid "Periodic overview"
@@ -676,15 +677,6 @@ msgstr "%(featured_title)s"
 #, python-format
 msgid "For all new messages visit %(site_name)s"
 msgstr "Für alle neuen Nachrichten besuchen Sie %(site_name)s"
-
-#: core/templates/email/send_overview_emails.html:120
-#, python-format
-msgid ""
-"Click <a href=\"%(mail_settings_url)s\">here</a> to change how often you "
-"want to receive notifications about new content."
-msgstr ""
-"Klicken Sie <a href=\"%(mail_settings_url)s\">hier</a>, um zu ändern, wie "
-"oft Sie Benachrichtigungen über neue Inhalte erhalten möchten."
 
 #: core/templates/email/site_access_changed.html:11
 #, python-format

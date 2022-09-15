@@ -24,6 +24,8 @@ def schedule_notification_mail(user, notifications, mail_type):
 
 class NotificationsMailer(TemplateMailerBase):
 
+    _unsubscribe_url = None
+
     def __init__(self, **kwargs):
         from user.models import User
         super().__init__(**kwargs)
@@ -41,17 +43,21 @@ class NotificationsMailer(TemplateMailerBase):
         context['show_excerpt'] = config.EMAIL_NOTIFICATION_SHOW_EXCERPT
         context['notifications'] = self.notifications
         context['mail_type'] = self.mail_type
+        context['unsubscribe_url'] = self.unsubscribe_url
         return context
 
     def get_headers(self):
         headers = super().get_headers()
-        headers['List-Unsubscribe'] = self._create_unsubscribe_header()
+        headers['List-Unsubscribe'] = self.unsubscribe_url
         return headers
 
-    def _create_unsubscribe_header(self):
-        tokenizer = UnsubscribeTokenizer()
-        url = tokenizer.create_url(self.user, tokenizer.TYPE_NOTIFICATIONS)
-        return get_full_url(url)
+    @property
+    def unsubscribe_url(self):
+        if not self._unsubscribe_url:
+            tokenizer = UnsubscribeTokenizer()
+            url = tokenizer.create_url(self.user, tokenizer.TYPE_NOTIFICATIONS)
+            self._unsubscribe_url = get_full_url(url)
+        return self._unsubscribe_url
 
     def get_subject(self):
         if len(self.notifications) == 1:

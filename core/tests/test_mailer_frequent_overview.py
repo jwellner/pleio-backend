@@ -1,4 +1,5 @@
 import faker
+from faker import Faker
 from mixer.backend.django import mixer
 from unittest import mock
 
@@ -74,16 +75,19 @@ class TestFrequentOverviewMailerTestCase(FastTenantTestCase):
                            EMAIL_OVERVIEW_TITLE="Overview email title",
                            EMAIL_OVERVIEW_ENABLE_FEATURED=True,
                            EMAIL_OVERVIEW_FEATURED_TITLE="Featured content")
+    @mock.patch("core.mail_builders.frequent_overview.UnsubscribeTokenizer.create_url")
+    @mock.patch("core.mail_builders.frequent_overview.get_full_url")
     @mock.patch('core.mail_builders.base.MailerBase.build_context')
     @mock.patch('core.mail_builders.frequent_overview.FrequentOverviewMailer.serialize_entities')
-    def test_mailer_context(self, mocked_serialize_entities, mocked_build_context):
+    def test_mailer_context(self, mocked_serialize_entities, mocked_build_context, get_full_url, create_url):
         mocked_build_context.return_value = {}
         mocked_serialize_entities.return_value = ["Entities"]
+        get_full_url.return_value = Faker().url()
 
         context = self.mailer.get_context()
 
         self.assertEqual(mocked_build_context.call_args[1], {"user": self.user})
-        self.assertEqual(7, len(context))
+        self.assertEqual(8, len(context))
 
         self.assertEqual("Overview intro", context['intro_text'])
         self.assertEqual("Overview email title", context['title'])
@@ -92,6 +96,7 @@ class TestFrequentOverviewMailerTestCase(FastTenantTestCase):
         self.assertEqual("Overview email subject", context['subject'])
         self.assertEqual(["Entities"], context['entities'])
         self.assertEqual(["Entities"], context['featured'])
+        self.assertEqual(get_full_url.return_value, context['unsubscribe_url'])
 
     def test_mailer_properties(self):
         self.assertEqual(self.user.get_language(), self.mailer.get_language())
