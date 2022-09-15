@@ -1,11 +1,12 @@
 from core.lib import get_acl
-from core import config
-from core.models import ProfileField, Group, GroupMembership
+from core.models import Group, GroupMembership
 from core.constances import NOT_LOGGED_IN, COULD_NOT_FIND
 from elasticsearch_dsl import Search
 from elasticsearch_dsl import Q
 from graphql import GraphQLError
 from django_tenants.utils import parse_tenant_config_path
+
+from core.resolvers import shared
 
 
 def resolve_members(_, info, groupGuid, q="", filters=None, offset=0, limit=20):
@@ -21,6 +22,8 @@ def resolve_members(_, info, groupGuid, q="", filters=None, offset=0, limit=20):
             raise GraphQLError(NOT_LOGGED_IN)
 
         group = Group.objects.get(id=groupGuid)
+
+        shared.assert_group_member(user, group)
 
         query = Search(index='user').filter(
             'terms', read_access=list(get_acl(user))

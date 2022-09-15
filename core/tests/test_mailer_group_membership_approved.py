@@ -15,7 +15,9 @@ class TestGroupMembershipApprovedMailerTestCase(PleioTenantTestCase):
         self.owner = UserFactory(email="owner@example.com")
         self.group = GroupFactory(owner=self.owner)
 
-        self.mailer = GroupMembershipApprovedMailer(user=self.user.guid, group=self.group.guid)
+        self.mailer = GroupMembershipApprovedMailer(user=self.user.guid,
+                                                    group=self.group.guid,
+                                                    sender=self.owner.guid)
 
         self.query = """
         mutation ApproveMembership($input: acceptMembershipRequestInput!){
@@ -34,7 +36,7 @@ class TestGroupMembershipApprovedMailerTestCase(PleioTenantTestCase):
             }
         }
 
-    @mock.patch('core.mail_builders.group_membership_approved.submit_group_membership_approved_mail')
+    @mock.patch('core.mail_builders.group_membership_approved.schedule_group_membership_approved_mail')
     def test_submit_approve_membership_mail(self, mocked_send_mail):
         self.graphql_client.force_login(self.owner)
         self.graphql_client.post(self.query, self.variables)
@@ -42,6 +44,7 @@ class TestGroupMembershipApprovedMailerTestCase(PleioTenantTestCase):
         self.assertEqual(mocked_send_mail.call_count, 1)
         self.assertDictEqual(mocked_send_mail.call_args.kwargs, {
             'group': self.group,
+            'sender': self.owner,
             'user': self.user,
         })
 
@@ -58,6 +61,7 @@ class TestGroupMembershipApprovedMailerTestCase(PleioTenantTestCase):
         self.assertDictEqual(calls[0], {
             'mailer_kwargs': {
                 'group': self.group.guid,
+                'sender': self.owner.guid,
                 'user': self.user.guid
             }
         })
@@ -70,7 +74,7 @@ class TestGroupMembershipApprovedMailerTestCase(PleioTenantTestCase):
 
         self.assertTrue(mocked_build_context.called)
         self.assertDictEqual(mocked_build_context.call_args.kwargs, {
-            'user': self.user,
+            'user': self.owner,
         })
         self.assertEqual(context['group_name'], self.group.name)
         self.assertIn(self.group.url, context['link'])
@@ -80,5 +84,5 @@ class TestGroupMembershipApprovedMailerTestCase(PleioTenantTestCase):
         self.assertEqual(self.mailer.get_template(), 'email/accept_membership_request.html')
         self.assertEqual(self.mailer.get_receiver(), self.user)
         self.assertEqual(self.mailer.get_receiver_email(), self.user.email)
-        self.assertEqual(self.mailer.get_sender(), None)
+        self.assertEqual(self.mailer.get_sender(), self.owner)
         self.assertIn(self.group.name, self.mailer.get_subject())

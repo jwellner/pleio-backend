@@ -1,32 +1,21 @@
-from django.conf import settings
-from django.db import connection
-from django.test import override_settings
-from django_tenants.test.cases import FastTenantTestCase
-from backend2.schema import schema
-from ariadne import graphql_sync
-import json
-from django.utils.text import slugify
-from django.contrib.auth.models import AnonymousUser
-from django.http import HttpRequest
-from core.models import Group, GroupMembership
-from user.models import User
-from mixer.backend.django import mixer
-from graphql import GraphQLError
+from core.factories import GroupFactory
+from core.models import GroupMembership
+from core.tests.helpers import PleioTenantTestCase
+from user.factories import UserFactory, AdminFactory
 from unittest import mock
 
 
-class ChangeGroupRoleTestCase(FastTenantTestCase):
+class ChangeGroupRoleTestCase(PleioTenantTestCase):
 
     def setUp(self):
-        self.anonymousUser = AnonymousUser()
-        self.user1 = mixer.blend(User)
-        self.user2 = mixer.blend(User)
-        self.user3 = mixer.blend(User)
-        self.user4 = mixer.blend(User)
-        self.admin = mixer.blend(User)
-        self.admin.roles = ['ADMIN']
-        self.admin.save()
-        self.group1 = mixer.blend(Group, owner=self.user1)
+        super().setUp()
+
+        self.user1 = UserFactory(email='user1@example.com')
+        self.user2 = UserFactory(email='user2@example.com')
+        self.user3 = UserFactory(email='user3@example.com')
+        self.user4 = UserFactory(email='user4@example.com')
+        self.admin = AdminFactory(email='admin@example.com')
+        self.group1 = GroupFactory(name="Group1", owner=self.user1)
         self.group1.join(self.user2, 'member')
         self.group1.join(self.user4, 'admin')
 
@@ -38,8 +27,10 @@ class ChangeGroupRoleTestCase(FastTenantTestCase):
         self.user2.delete()
         self.user1.delete()
 
-    @mock.patch('core.resolvers.mutation_change_group_role.send_mail_multi.delay')
-    def test_change_group_role_to_owner_by_group_owner(self, mocked_send_mail_multi):
+        super().tearDown()
+
+    @mock.patch('core.resolvers.mutation_change_group_role.schedule_change_group_ownership_mail')
+    def test_change_group_role_to_owner_by_group_owner(self, mocked_send_mail):
         mutation = """
             mutation MemberItem($input: changeGroupRoleInput!) {
                 changeGroupRole(input: $input) {
@@ -60,21 +51,19 @@ class ChangeGroupRoleTestCase(FastTenantTestCase):
                 "guid": self.group1.guid,
                 "userGuid": self.user2.guid,
                 "role": "owner"
-                }
             }
+        }
 
-        request = HttpRequest()
-        request.user = self.user1
+        self.graphql_client.force_login(self.user1)
+        result = self.graphql_client.post(mutation, variables)
+        data = result["data"]["changeGroupRole"]
 
-        result = graphql_sync(schema, {"query": mutation, "variables": variables}, context_value={ "request": request })
+        self.assertEqual(data["group"]["guid"], self.group1.guid)
+        self.assertEqual(mocked_send_mail.call_count, 1)
+        self.assertEqual(self.group1.members.get(user=self.user2).type, 'owner')
+        self.assertEqual(self.group1.members.get(user=self.user1).type, 'admin')
 
-        self.assertTrue(result[0])
-        data = result[1]["data"]
-
-        self.assertEqual(data["changeGroupRole"]["group"]["guid"], self.group1.guid)
-        mocked_send_mail_multi.assert_called_once()
-
-    @mock.patch('core.resolvers.mutation_change_group_role.send_mail_multi.delay')
+    @mock.patch('core.resolvers.mutation_change_group_role.schedule_change_group_ownership_mail')
     def test_change_group_role_to_member_by_group_owner(self, mocked_send_mail_multi):
         mutation = """
             mutation MemberItem($input: changeGroupRoleInput!) {
@@ -83,12 +72,6 @@ class ChangeGroupRoleTestCase(FastTenantTestCase):
                     ... on Group {
                         guid
                         __typename
-                    }
-                    members {
-                        total
-                        edges {
-                            role
-                        }
                     }
                     __typename
                     }
@@ -102,24 +85,18 @@ class ChangeGroupRoleTestCase(FastTenantTestCase):
                 "guid": self.group1.guid,
                 "userGuid": self.user4.guid,
                 "role": "member"
-                }
             }
+        }
 
-        request = HttpRequest()
-        request.user = self.user1
+        self.graphql_client.force_login(self.user1)
+        result = self.graphql_client.post(mutation, variables)
+        data = result["data"]["changeGroupRole"]
 
-        result = graphql_sync(schema, {"query": mutation, "variables": variables}, context_value={ "request": request })
+        self.assertFalse(mocked_send_mail_multi.called)
+        self.assertEqual(data["group"]["guid"], self.group1.guid)
+        self.assertEqual(self.group1.members.get(user=self.user4).type, 'member')
 
-        self.assertTrue(result[0])
-        data = result[1]["data"]
-
-        self.assertEqual(data["changeGroupRole"]["group"]["guid"], self.group1.guid)
-        self.assertEqual(data["changeGroupRole"]["group"]["members"]["total"], 2)
-        self.assertEqual(data["changeGroupRole"]["group"]["members"]["edges"][1]["role"], "member")
-        assert not mocked_send_mail_multi.called
-
-
-    @mock.patch('core.resolvers.mutation_change_group_role.send_mail_multi.delay')
+    @mock.patch('core.resolvers.mutation_change_group_role.schedule_change_group_ownership_mail')
     def test_change_group_role_to_removed_by_group_owner(self, mocked_send_mail_multi):
         mutation = """
             mutation MemberItem($input: changeGroupRoleInput!) {
@@ -147,24 +124,18 @@ class ChangeGroupRoleTestCase(FastTenantTestCase):
                 "guid": self.group1.guid,
                 "userGuid": self.user4.guid,
                 "role": "removed"
-                }
             }
+        }
 
-        request = HttpRequest()
-        request.user = self.user1
+        self.graphql_client.force_login(self.user1)
+        result = self.graphql_client.post(mutation, variables)
+        data = result["data"]["changeGroupRole"]
 
-        result = graphql_sync(schema, {"query": mutation, "variables": variables}, context_value={ "request": request })
+        self.assertEqual(data["group"]["guid"], self.group1.guid)
+        self.assertFalse(mocked_send_mail_multi.called)
+        self.assertFalse(self.group1.members.filter(user=self.user4).exists())
 
-        self.assertTrue(result[0])
-        data = result[1]["data"]
-
-        self.assertEqual(data["changeGroupRole"]["group"]["guid"], self.group1.guid)
-        self.assertEqual(data["changeGroupRole"]["group"]["members"]["total"], 1)
-        assert not mocked_send_mail_multi.called
-
-
-    @mock.patch('core.resolvers.mutation_change_group_role.send_mail_multi.delay')
-    def test_change_group_role_to_admin_by_group_owner(self, mocked_send_mail_multi):
+    def test_change_group_role_to_admin_by_group_owner(self):
         mutation = """
             mutation MemberItem($input: changeGroupRoleInput!) {
                 changeGroupRole(input: $input) {
@@ -190,23 +161,19 @@ class ChangeGroupRoleTestCase(FastTenantTestCase):
                 "guid": self.group1.guid,
                 "userGuid": self.user2.guid,
                 "role": "admin"
-                }
             }
+        }
 
-        request = HttpRequest()
-        request.user = self.user1
+        self.graphql_client.force_login(self.user1)
+        result = self.graphql_client.post(mutation, variables)
+        data = result["data"]["changeGroupRole"]
 
-        result = graphql_sync(schema, {"query": mutation, "variables": variables}, context_value={ "request": request })
+        self.assertEqual(data["group"]["guid"], self.group1.guid)
+        self.assertEqual(self.group1.members.get(user=self.user2).type, 'admin')
+        self.assertEqual(self.group1.members.get(user=self.user1).type, 'owner')
 
-        self.assertTrue(result[0])
-        data = result[1]["data"]
-
-        self.assertEqual(data["changeGroupRole"]["group"]["guid"], self.group1.guid)
-        self.assertEqual(data["changeGroupRole"]["group"]["members"]["edges"][0]["role"], "admin")
-        assert not mocked_send_mail_multi.called
-
-    @mock.patch('core.resolvers.mutation_change_group_role.send_mail_multi.delay')
-    def test_change_group_role_to_owner_by_admin(self, mocked_send_mail_multi):
+    @mock.patch('core.resolvers.mutation_change_group_role.schedule_change_group_ownership_mail')
+    def test_change_group_role_to_owner_by_admin(self, mocked_send_mail):
         mutation = """
             mutation MemberItem($input: changeGroupRoleInput!) {
                 changeGroupRole(input: $input) {
@@ -227,21 +194,19 @@ class ChangeGroupRoleTestCase(FastTenantTestCase):
                 "guid": self.group1.guid,
                 "userGuid": self.user2.guid,
                 "role": "owner"
-                }
             }
+        }
 
-        request = HttpRequest()
-        request.user = self.admin
+        self.graphql_client.force_login(self.admin)
+        result = self.graphql_client.post(mutation, variables)
+        data = result["data"]["changeGroupRole"]
 
-        result = graphql_sync(schema, {"query": mutation, "variables": variables}, context_value={ "request": request })
+        self.assertEqual(data["group"]["guid"], self.group1.guid)
+        self.assertEqual(mocked_send_mail.call_count, 1)
+        self.assertEqual(self.group1.members.get(user=self.user2).type, 'owner')
+        self.assertEqual(self.group1.members.get(user=self.user1).type, 'admin')
 
-        self.assertTrue(result[0])
-        data = result[1]["data"]
-
-        self.assertEqual(data["changeGroupRole"]["group"]["guid"], self.group1.guid)
-        mocked_send_mail_multi.assert_called_once()
-
-    @mock.patch('core.resolvers.mutation_change_group_role.send_mail_multi.delay')
+    @mock.patch('core.resolvers.mutation_change_group_role.schedule_change_group_ownership_mail')
     def test_change_group_role_to_owner_by_other_user(self, mocked_send_mail_multi):
         mutation = """
             mutation MemberItem($input: changeGroupRoleInput!) {
@@ -263,21 +228,17 @@ class ChangeGroupRoleTestCase(FastTenantTestCase):
                 "guid": self.group1.guid,
                 "userGuid": self.user2.guid,
                 "role": "owner"
-                }
             }
+        }
 
-        request = HttpRequest()
-        request.user = self.user3
+        with self.assertGraphQlError("could_not_save"):
+            self.graphql_client.force_login(self.user3)
+            self.graphql_client.post(mutation, variables)
 
-        result = graphql_sync(schema, {"query": mutation, "variables": variables}, context_value={ "request": request })
+        self.assertFalse(mocked_send_mail_multi.called)
+        self.assertEqual(self.group1.members.get(user=self.user2).type, 'member')
 
-        self.assertTrue(result[0])
-        errors = result[1]["errors"]
-
-        self.assertEqual(errors[0]["message"], "could_not_save")
-        assert not mocked_send_mail_multi.called
-
-    @mock.patch('core.resolvers.mutation_change_group_role.send_mail_multi.delay')
+    @mock.patch('core.resolvers.mutation_change_group_role.schedule_change_group_ownership_mail')
     def test_change_group_role_to_owner_by_anonymous(self, mocked_send_mail_multi):
         mutation = """
             mutation MemberItem($input: changeGroupRoleInput!) {
@@ -299,16 +260,11 @@ class ChangeGroupRoleTestCase(FastTenantTestCase):
                 "guid": self.group1.guid,
                 "userGuid": self.user2.guid,
                 "role": "owner"
-                }
             }
+        }
 
-        request = HttpRequest()
-        request.user = self.anonymousUser
+        with self.assertGraphQlError("not_logged_in"):
+            self.graphql_client.post(mutation, variables)
 
-        result = graphql_sync(schema, {"query": mutation, "variables": variables}, context_value={ "request": request })
-
-        self.assertTrue(result[0])
-        errors = result[1]["errors"]
-
-        self.assertEqual(errors[0]["message"], "not_logged_in")
-        assert not mocked_send_mail_multi.called
+        self.assertFalse(mocked_send_mail_multi.called)
+        self.assertEqual(self.group1.members.get(user=self.user2).type, 'member')

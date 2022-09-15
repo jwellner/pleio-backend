@@ -9,6 +9,7 @@ from core.lib import clean_graphql_input, get_default_email_context
 from core.tasks import send_mail_multi
 from django_tenants.utils import parse_tenant_config_path
 
+
 def resolve_send_message_to_user(_, info, input):
     # pylint: disable=redefined-builtin
 
@@ -52,5 +53,5 @@ def resolve_send_message_to_user(_, info, input):
         )
 
     return {
-          "success": True
+        "success": True
     }

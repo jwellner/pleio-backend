@@ -5,7 +5,7 @@ from core.mail_builders.template_mailer import TemplateMailerBase
 from core.utils.entity import load_entity_by_id
 
 
-def submit_group_welcome_mail(user, group):
+def schedule_group_welcome_mail(user, group):
     from core.models import MailInstance
     MailInstance.objects.submit(GroupWelcomeMailer,
                                 mailer_kwargs={
@@ -22,12 +22,11 @@ class GroupWelcomeMailer(TemplateMailerBase):
         self.user = load_entity_by_id(kwargs['user'], ['user.User'])
 
     def get_context(self):
-        message = self._get_message()
-        if not message:
+        if not self.group.welcome_message:
             raise self.FailSilentlyError()
 
-        context = self.build_context(self.user)
-        context['welcome_message'] = message
+        context = self.build_context(user=self.user)
+        context['welcome_message'] = self._get_message()
         context['welcome_message'] = context['welcome_message'].replace("[name]", self.user.name)
         context['welcome_message'] = context['welcome_message'].replace("[group_name]", self.group.name)
         context['welcome_message'] = context['welcome_message'].replace("[group_url]", get_full_url(self.group.url))

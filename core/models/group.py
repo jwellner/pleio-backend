@@ -150,9 +150,9 @@ class Group(models.Model, AttachmentMixin, TagsMixin):
 
         # send welcome message for new members
         if obj.type == 'member' and not already_member:
-            from core.mail_builders.group_welcome import submit_group_welcome_mail
-            submit_group_welcome_mail(group=self,
-                                      user=user)
+            from core.mail_builders.group_welcome import schedule_group_welcome_mail
+            schedule_group_welcome_mail(group=self,
+                                        user=user)
 
         return obj
 
@@ -246,7 +246,7 @@ class GroupMembership(models.Model):
 
     def __str__(self):
         return "GroupMembership[{}:{}:{}]".format(
-            self.user.name,
+            self.user.email,
             self.type,
             self.group.name
         )

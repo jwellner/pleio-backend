@@ -29,7 +29,7 @@ class TestGroupWelcomeMailerTestCase(PleioTenantTestCase):
 
         self.mailer = GroupWelcomeMailer(user=self.user.guid, group=self.group.guid)
 
-    @mock.patch("core.mail_builders.group_welcome.submit_group_welcome_mail")
+    @mock.patch("core.mail_builders.group_welcome.schedule_group_welcome_mail")
     def test_submit_mail(self, mocked_send_welcome_mail):
         self.group.join(self.user)
 
@@ -37,7 +37,7 @@ class TestGroupWelcomeMailerTestCase(PleioTenantTestCase):
         self.assertDictEqual({'user': self.user,
                               'group': self.group}, mocked_send_welcome_mail.call_args.kwargs)
 
-    @mock.patch("core.mail_builders.group_welcome.submit_group_welcome_mail")
+    @mock.patch("core.mail_builders.group_welcome.schedule_group_welcome_mail")
     def test_not_submit_mail_if_already_member(self, mocked_send_welcome_mail):
         self.group.join(self.member)
 
@@ -49,7 +49,7 @@ class TestGroupWelcomeMailerTestCase(PleioTenantTestCase):
 
         context = self.mailer.get_context()
 
-        self.assertEqual(mocked_build_context.call_args.args[0], self.user)
+        self.assertEqual(mocked_build_context.call_args.kwargs['user'], self.user)
         self.assertEqual(mocked_build_context.call_count, 1)
         self.assertIn(self.user.name, context['welcome_message'])
         self.assertIn(self.group.name, context['welcome_message'])

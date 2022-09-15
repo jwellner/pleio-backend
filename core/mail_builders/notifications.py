@@ -13,7 +13,7 @@ class MailTypeEnum:
     COLLECTED = 'collected'
 
 
-def send_notifications(user, notifications, mail_type):
+def schedule_notification_mail(user, notifications, mail_type):
     from core.models import MailInstance
     MailInstance.objects.submit(NotificationsMailer, {
         'user': user.guid,

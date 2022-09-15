@@ -18,6 +18,7 @@ from user.models import User
 
 logger = get_task_logger(__name__)
 
+
 @shared_task(bind=True, ignore_result=True)
 def import_users(self, schema_name, fields, csv_location, performing_user_guid):
     # pylint: disable=unused-argument
@@ -138,6 +139,7 @@ def import_users(self, schema_name, fields, csv_location, performing_user_guid):
 
         send_mail_multi.delay(schema_name, subject, template, context, performing_user.email)
 
+
 @shared_task(bind=True, ignore_result=True)
 @signal_disabler.disable()
 def replace_domain_links(self, schema_name, replace_domain=None):
@@ -145,7 +147,6 @@ def replace_domain_links(self, schema_name, replace_domain=None):
     # pylint: disable=too-many-locals
     # pylint: disable=too-many-statements
     # pylint: disable=too-many-branches
-
 
     '''
     Replace all links with old domain to new
@@ -215,9 +216,8 @@ def replace_domain_links(self, schema_name, replace_domain=None):
             welcome_message = _replace_links(group.welcome_message)
 
             if rich_description != group.rich_description or \
-                introduction != group.introduction or \
-                welcome_message != group.welcome_message:
-
+                    introduction != group.introduction or \
+                    welcome_message != group.welcome_message:
                 group.rich_description = rich_description
                 group.introduction = introduction
                 group.welcome_message = welcome_message
@@ -250,6 +250,7 @@ def replace_domain_links(self, schema_name, replace_domain=None):
                 widget.save()
 
     logger.info("Done replacing links")
+
 
 @shared_task(bind=True)
 def image_resize(self, schema_name, resize_image_id):

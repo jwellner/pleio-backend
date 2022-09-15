@@ -88,6 +88,7 @@ def validate_redirects(redirects):
         raise GraphQLError(REDIRECTS_HAS_LOOP)
     return redirects_dict
 
+
 def resolve_edit_site_setting(_, info, input):
     # pylint: disable=redefined-builtin
     # pylint: disable=unused-variable
@@ -147,7 +148,6 @@ def resolve_edit_site_setting(_, info, input):
         'showTagsInFeed': 'SHOW_TAGS_IN_FEED',
         'showTagsInDetail': 'SHOW_TAGS_IN_DETAIL',
 
-
         'defaultEmailOverviewFrequency': 'EMAIL_OVERVIEW_DEFAULT_FREQUENCY',
         'emailOverviewSubject': 'EMAIL_OVERVIEW_SUBJECT',
         'emailOverviewTitle': 'EMAIL_OVERVIEW_TITLE',
@@ -205,7 +205,7 @@ def resolve_edit_site_setting(_, info, input):
         'kalturaVideoEnabled': 'KALTURA_VIDEO_ENABLED',
         'kalturaVideoPartnerId': 'KALTURA_VIDEO_PARTNER_ID',
         'kalturaVideoPlayerId': 'KALTURA_VIDEO_PLAYER_ID',
-        
+
         'pdfCheckerEnabled': 'PDF_CHECKER_ENABLED',
     }
 
@@ -235,6 +235,7 @@ def resolve_edit_site_setting(_, info, input):
         "siteSettings": get_site_settings()
     }
 
+
 # Sub-resolvers:
 
 def resolve_update_menu(clean_input):
@@ -244,6 +245,7 @@ def resolve_update_menu(clean_input):
             if item['parentId'] is None:
                 menu.append(get_menu_item(clean_input.get('menu'), item))
         save_setting('MENU', menu)
+
 
 def resolve_update_profile(clean_input):
     if 'profile' in clean_input:
@@ -257,10 +259,12 @@ def resolve_update_profile(clean_input):
 
         save_setting('PROFILE', clean_input.get('profile'))
 
+
 def resolve_update_redirects(clean_input):
     if 'redirects' in clean_input:
         redirects = validate_redirects(clean_input.get('redirects'))
         save_setting('REDIRECTS', redirects)
+
 
 def resolve_update_logo(user, clean_input):
     if 'logo' in clean_input:
@@ -355,14 +359,17 @@ def resolve_update_direct_registration_domains(clean_input):
                 raise GraphQLError(INVALID_VALUE)
         save_setting('DIRECT_REGISTRATION_DOMAINS', clean_input.get('directRegistrationDomains'))
 
+
 def resolve_update_profile_sections(clean_input):
     if 'profileSections' in clean_input:
         save_setting('PROFILE_SECTIONS', validate_profile_sections(clean_input.get('profileSections')))
+
 
 def resolve_update_custom_css(clean_input):
     if 'customCss' in clean_input:
         save_setting('CUSTOM_CSS', clean_input.get('customCss'))
         save_setting('CUSTOM_CSS_TIMESTAMP', int(timezone.now().timestamp()))
+
 
 def resolve_update_walled_garden_by_ip_enabled(clean_input):
     if 'walledGardenByIpEnabled' in clean_input:
@@ -371,6 +378,7 @@ def resolve_update_walled_garden_by_ip_enabled(clean_input):
         # if walled garden by ip is enabled, turn of indexing
         if clean_input.get('walledGardenByIpEnabled'):
             save_setting('ENABLE_SEARCH_ENGINE_INDEXING', False)
+
 
 def resolve_update_white_listed_ip_ranges(clean_input):
     if 'whitelistedIpRanges' in clean_input:
@@ -381,6 +389,7 @@ def resolve_update_white_listed_ip_ranges(clean_input):
                 raise GraphQLError(INVALID_VALUE)
         save_setting('WHITELISTED_IP_RANGES', clean_input.get('whitelistedIpRanges'))
 
+
 def resolve_update_extra_languages(clean_input):
     if 'extraLanguages' in clean_input:
         options = set((i['value'] for i in get_language_options()))
@@ -389,12 +398,14 @@ def resolve_update_extra_languages(clean_input):
                 raise GraphQLError(INVALID_VALUE)
         save_setting('EXTRA_LANGUAGES', clean_input.get('extraLanguages'))
 
+
 def resolve_update_file_description_field_enabled(clean_input):
     if 'fileDescriptionFieldEnabled' in clean_input:
         options = [m for m in config.FILE_OPTIONS if m != 'enable_file_description']
         if clean_input.get('fileDescriptionFieldEnabled'):
             options.append('enable_file_description')
         save_setting("FILE_OPTIONS", options)
+
 
 def resolve_update_is_closed(user, clean_input):
     if 'isClosed' in clean_input:
@@ -415,16 +426,19 @@ def resolve_update_is_closed(user, clean_input):
                 )
             save_setting('IS_CLOSED', clean_input.get('isClosed'))
 
+
 def resolve_update_keys(setting_keys, clean_input):
     for k, v in setting_keys.items():
         if k in clean_input:
             save_setting(v, clean_input.get(k))
+
 
 def resolve_sync_sitename(clean_input):
     if {'favicon', 'name', 'description'} & set(clean_input.keys()):
         # pylint: disable=import-outside-toplevel
         from concierge.tasks import sync_site
         sync_site.delay(parse_tenant_config_path(''))
+
 
 def resolve_update_max_characters_in_abstract(clean_input):
     if 'maxCharactersInAbstract' in clean_input:

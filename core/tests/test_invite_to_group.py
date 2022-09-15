@@ -1,17 +1,8 @@
-from django.conf import settings
-from django.db import connection
-from django.test import override_settings
-from django_tenants.test.cases import FastTenantTestCase
-from backend2.schema import schema
-from ariadne import graphql_sync
-import json
 from django.contrib.auth.models import AnonymousUser
-from django.http import HttpRequest
 from core.models import Group
 from core.tests.helpers import PleioTenantTestCase
 from user.models import User
 from mixer.backend.django import mixer
-from graphql import GraphQLError
 from unittest import mock
 
 
@@ -38,7 +29,7 @@ class InviteToGroupTestCase(PleioTenantTestCase):
         super().tearDown()
 
     @mock.patch('core.resolvers.mutation_invite_to_group.generate_code', return_value='6df8cdad5582833eeab4')
-    @mock.patch('core.resolvers.mutation_invite_to_group.send_mail_multi.delay')
+    @mock.patch('core.resolvers.mutation_invite_to_group.schedule_invite_to_group_mail')
     def test_invite_to_group_by_guid_by_group_owner(self, mocked_send_mail_multi, mocked_generate_code):
         mutation = """
             mutation InviteItem($input: inviteToGroupInput!) {
@@ -64,19 +55,15 @@ class InviteToGroupTestCase(PleioTenantTestCase):
             }
         }
 
-        request = HttpRequest()
-        request.user = self.user1
-
-        result = graphql_sync(schema, {"query": mutation, "variables": variables}, context_value={"request": request})
-
-        self.assertTrue(result[0])
-        data = result[1]["data"]
+        self.graphql_client.force_login(self.user1)
+        result = self.graphql_client.post(mutation, variables)
+        data = result['data']
 
         self.assertEqual(data["inviteToGroup"]["group"]["guid"], self.group1.guid)
         mocked_send_mail_multi.assert_called_once()
 
     @mock.patch('core.resolvers.mutation_invite_to_group.generate_code', return_value='6df8cdad5582833eeab4')
-    @mock.patch('core.resolvers.mutation_invite_to_group.send_mail_multi.delay')
+    @mock.patch('core.resolvers.mutation_invite_to_group.schedule_invite_to_group_mail')
     def test_invite_to_group_by_email_by_group_owner(self, mocked_send_mail_multi, mocked_generate_code):
         mutation = """
             mutation InviteItem($input: inviteToGroupInput!) {
@@ -102,18 +89,14 @@ class InviteToGroupTestCase(PleioTenantTestCase):
             }
         }
 
-        request = HttpRequest()
-        request.user = self.user1
-
-        result = graphql_sync(schema, {"query": mutation, "variables": variables}, context_value={"request": request})
-
-        self.assertTrue(result[0])
-        data = result[1]["data"]
+        self.graphql_client.force_login(self.user1)
+        result = self.graphql_client.post(mutation, variables)
+        data = result['data']
 
         self.assertEqual(data["inviteToGroup"]["group"]["guid"], self.group1.guid)
         mocked_send_mail_multi.assert_called_once()
 
-    @mock.patch('core.resolvers.mutation_invite_to_group.send_mail_multi.delay')
+    @mock.patch('core.resolvers.mutation_invite_to_group.schedule_invite_to_group_mail')
     def test_add_all_users_to_group_by_admin(self, mocked_send_mail_multi):
         user = mixer.blend(User)
         user.delete()
@@ -142,13 +125,9 @@ class InviteToGroupTestCase(PleioTenantTestCase):
             }
         }
 
-        request = HttpRequest()
-        request.user = self.admin
-
-        result = graphql_sync(schema, {"query": mutation, "variables": variables}, context_value={"request": request})
-
-        self.assertTrue(result[0])
-        data = result[1]["data"]
+        self.graphql_client.force_login(self.admin)
+        result = self.graphql_client.post(mutation, variables)
+        data = result['data']
 
         self.assertEqual(data["inviteToGroup"]["group"]["guid"], self.group1.guid)
         self.assertEqual(len(self.group1.members.all()), 3)
@@ -245,7 +224,7 @@ class InviteToGroupTestCase(PleioTenantTestCase):
         self.assertEqual(len(self.group1.members.all()), 2)
 
     @mock.patch('core.resolvers.mutation_invite_to_group.generate_code', return_value='6df8cdad5582833eeab4')
-    @mock.patch('core.resolvers.mutation_invite_to_group.send_mail_multi.delay')
+    @mock.patch('core.resolvers.mutation_invite_to_group.schedule_invite_to_group_mail')
     def test_invite_non_site_member_to_group_by_guid_by_group_owner(self, mocked_send_mail_multi, mocked_generate_code):
         mutation = """
             mutation InviteItem($input: inviteToGroupInput!) {
@@ -271,13 +250,9 @@ class InviteToGroupTestCase(PleioTenantTestCase):
             }
         }
 
-        request = HttpRequest()
-        request.user = self.user1
-
-        result = graphql_sync(schema, {"query": mutation, "variables": variables}, context_value={"request": request})
-
-        self.assertTrue(result[0])
-        data = result[1]["data"]
+        self.graphql_client.force_login(self.user1)
+        result = self.graphql_client.post(mutation, variables)
+        data = result['data']
 
         self.assertEqual(data["inviteToGroup"]["group"]["guid"], self.group1.guid)
         mocked_send_mail_multi.assert_called_once()

@@ -1,12 +1,10 @@
 from graphql import GraphQLError
 from django.core.exceptions import ObjectDoesNotExist, ValidationError
 from django.core.validators import validate_email
-from django.utils.translation import ugettext_lazy
-from core.lib import generate_code, get_base_url, get_default_email_context, tenant_schema
+from core.lib import generate_code
 from core.constances import COULD_NOT_FIND, COULD_NOT_ADD, INVALID_EMAIL, INVALID_VALUE
 from core.models import Entity, CommentRequest
 from core import config
-from core.tasks import send_mail_multi
 
 
 def resolve_add_comment_without_account(_, info, input):
@@ -47,9 +45,9 @@ def resolve_add_comment_without_account(_, info, input):
         rich_description=input.get("richDescription")
     )
 
-    from core.mail_builders.group_comment_without_account import submit_group_comment_without_account_mail
-    submit_group_comment_without_account_mail(comment_request=comment_request,
-                                              entity=entity)
+    from core.mail_builders.comment_without_account import schedule_comment_without_account_mail
+    schedule_comment_without_account_mail(comment_request=comment_request,
+                                          entity=entity)
 
     return {
         'success': True

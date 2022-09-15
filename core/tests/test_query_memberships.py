@@ -1,5 +1,6 @@
 from core.models import Group, GroupProfileFieldSetting, ProfileField, UserProfile, UserProfileField
 from core.tests.helpers import ElasticsearchTestCase
+from user.factories import UserFactory
 from user.models import User
 
 from mixer.backend.django import mixer
@@ -75,6 +76,51 @@ class FilterUsersTestCase(ElasticsearchTestCase):
         self.graphql_client.force_login(visitor)
         result = self.graphql_client.post(query, variables)
         return result.get('data')
+
+    def test_query_should_fail_for_anonymous_visitors(self):
+        query = """
+            query MembersQuery ($groupGuid: String!) {
+                members(groupGuid: $groupGuid) {
+                    total
+                    edges {
+                        role
+                        user {
+                            guid
+                        }
+                    }
+                }
+            }
+        """
+
+        variables = {
+            "groupGuid": str(self.group.guid)
+        }
+
+        with self.assertGraphQlError("not_logged_in"):
+            self.graphql_client.post(query, variables)
+
+    def test_query_should_fail_for_non_members(self):
+        query = """
+            query MembersQuery ($groupGuid: String!) {
+                members(groupGuid: $groupGuid) {
+                    total
+                    edges {
+                        role
+                        user {
+                            guid
+                        }
+                    }
+                }
+            }
+        """
+
+        variables = {
+            "groupGuid": str(self.group.guid)
+        }
+
+        with self.assertGraphQlError("user_not_member_of_group"):
+            self.graphql_client.force_login(self.not_a_member)
+            self.graphql_client.post(query, variables)
 
     def test_query_should_give_enhanced_response(self):
         query = """

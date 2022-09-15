@@ -4,12 +4,13 @@ from core.lib import get_full_url
 from core.mail_builders.template_mailer import TemplateMailerBase
 
 
-def submit_group_membership_approved_mail(group, user):
+def schedule_group_membership_approved_mail(group, user, sender):
     from core.models import MailInstance
     MailInstance.objects.submit(GroupMembershipApprovedMailer,
                                 mailer_kwargs={
                                     'group': group.guid,
                                     'user': user.guid,
+                                    'sender': sender.guid
                                 })
 
 
@@ -20,10 +21,11 @@ class GroupMembershipApprovedMailer(TemplateMailerBase):
         from user.models import User
         self.group: Group = Group.objects.get(pk=kwargs['group'])
         self.user: User = User.objects.get(pk=kwargs['user'])
+        self.sender: User = User.objects.get(pk=kwargs['sender']) if kwargs.get('sender') else None
         super().__init__(**kwargs)
 
     def get_context(self):
-        context = self.build_context(user=self.user)
+        context = self.build_context(user=self.sender)
         context['group_name'] = self.group.name
         context['link'] = get_full_url(self.group.url)
         return context
@@ -41,7 +43,7 @@ class GroupMembershipApprovedMailer(TemplateMailerBase):
         return self.user.email
 
     def get_sender(self):
-        return None
+        return self.sender
 
     def get_subject(self):
         return _("Request for access to the %(group_name)s group has been approved") % {'group_name': self.group.name}

@@ -7,7 +7,7 @@ from blog.models import Blog
 from core import override_local_config
 from core.constances import ACCESS_TYPE
 from core.lib import generate_code
-from core.mail_builders.group_comment_without_account import GroupCommentWithoutAccountMailer
+from core.mail_builders.comment_without_account import CommentWithoutAccountMailer
 from core.models import CommentRequest
 from core.tests.helpers import PleioTenantTestCase
 from core.utils.convert import tiptap_to_html
@@ -26,8 +26,8 @@ class TestGroupCommentWithoutAccountMailer(PleioTenantTestCase):
                                            code=generate_code(),
                                            email=faker.Faker().email(),
                                            rich_description=self.COMMENT)
-        self.mailer = GroupCommentWithoutAccountMailer(comment_request=self.pending_comment.pk,
-                                                       entity=self.entity.guid)
+        self.mailer = CommentWithoutAccountMailer(comment_request=self.pending_comment.pk,
+                                                  entity=self.entity.guid)
 
         self.query = """
         mutation AddComment($input: addCommentWithoutAccountInput!) {
@@ -47,7 +47,7 @@ class TestGroupCommentWithoutAccountMailer(PleioTenantTestCase):
         }
 
     @override_local_config(COMMENT_WITHOUT_ACCOUNT_ENABLED=True)
-    @mock.patch("core.mail_builders.group_comment_without_account.submit_group_comment_without_account_mail")
+    @mock.patch("core.mail_builders.comment_without_account.schedule_comment_without_account_mail")
     def test_submit_comment_without_account_mail(self, mocked_send_mail):
         self.graphql_client.post(self.query, self.variables)
         comment_request = CommentRequest.objects.filter(email=self.EMAIL).first()
@@ -65,7 +65,7 @@ class TestGroupCommentWithoutAccountMailer(PleioTenantTestCase):
         comment_request = CommentRequest.objects.filter(email=self.EMAIL).first()
 
         # the submit method of MailInstanceManager may be called more times.
-        calls = [c.kwargs for c in mocked_submit_mail.mock_calls if len(c.args) > 0 and c.args[0] == GroupCommentWithoutAccountMailer]
+        calls = [c.kwargs for c in mocked_submit_mail.mock_calls if len(c.args) > 0 and c.args[0] == CommentWithoutAccountMailer]
 
         self.assertTrue(comment_request)
         self.assertEqual(len(calls), 1)

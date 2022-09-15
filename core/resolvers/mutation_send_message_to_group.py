@@ -1,15 +1,13 @@
 from graphql import GraphQLError
 from django.core.exceptions import ObjectDoesNotExist
+
+from core.mail_builders.group_message import schedule_group_message_mail
 from core.models import Group, Subgroup
 from user.models import User
-from django.utils import timezone, translation
-from django.utils.translation import ugettext_lazy
-from django.utils.html import format_html
+from django.utils import timezone
 from core.constances import NOT_LOGGED_IN, COULD_NOT_FIND, COULD_NOT_SAVE
-from core.lib import clean_graphql_input, get_default_email_context, get_base_url
+from core.lib import clean_graphql_input
 from datetime import timedelta
-from core.tasks import send_mail_multi
-from django_tenants.utils import parse_tenant_config_path
 
 
 def resolve_send_message_to_group(_, info, input):
@@ -53,35 +51,21 @@ def resolve_send_message_to_group(_, info, input):
                 continue
             receiving_users.append(receiving_user)
 
-    context = get_default_email_context(user)
-    schema_name = parse_tenant_config_path("")
-    context['message'] = format_html(clean_input.get('message'))
-    context['group'] = group.name
-    context['group_url'] = get_base_url() + group.url
-
     for receiving_user in receiving_users:
-        translation.activate(receiving_user.get_language())
-        subject = ugettext_lazy("Message from group {0}: {1}").format(group.name, clean_input.get('subject'))
-        send_mail_multi.delay(
-            schema_name,
-            subject,
-            'email/send_message_to_group.html',
-            context,
-            receiving_user.email,
-            language=receiving_user.get_language()
-        )
+        schedule_group_message_mail(message=clean_input.get('message'),
+                                    subject=clean_input.get('subject'),
+                                    receiver=receiving_user,
+                                    sender=user,
+                                    group=group,
+                                    copy=False)
 
-    if clean_input.get('sendCopyToSender', False) and user not in receiving_users:
-        translation.activate(user.get_language())
-        subject = ugettext_lazy("Copy: Message from group {0}: {1}").format(group.name, clean_input.get('subject'))
-        send_mail_multi.delay(
-            schema_name,
-            subject,
-            'email/send_message_to_group.html',
-            context,
-            user.email,
-            language=user.get_language()
-        )
+    if bool(clean_input.get('sendCopyToSender')) and user not in receiving_users:
+        schedule_group_message_mail(message=clean_input.get('message'),
+                                    subject=clean_input.get('subject'),
+                                    receiver=user,
+                                    sender=user,
+                                    group=group,
+                                    copy=True)
 
     return {
         'group': group
