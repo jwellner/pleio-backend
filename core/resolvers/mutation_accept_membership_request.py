@@ -33,8 +33,10 @@ def resolve_accept_membership_request(_, info, input):
 
     group.join(requesting_user, 'member')
 
-    from core.mail_builders.group_membership_approved import submit_group_membership_approved_mail
-    submit_group_membership_approved_mail(group=group, user=requesting_user)
+    from core.mail_builders.group_membership_approved import schedule_group_membership_approved_mail
+    schedule_group_membership_approved_mail(group=group,
+                                            user=requesting_user,
+                                            sender=user)
 
     return {
         "group": group

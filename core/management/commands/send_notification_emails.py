@@ -1,5 +1,4 @@
 from django.core.management.base import BaseCommand
-from django.db import connection
 
 from core.lib import is_schema_public
 from user.models import User
@@ -31,7 +30,7 @@ class Command(BaseCommand):
             if notifications_emailed_in_last_interval_hours:
                 continue
 
-            from core.mail_builders.notifications import send_notifications, MailTypeEnum
-            send_notifications(user, notifications, MailTypeEnum.COLLECTED)
+            from core.mail_builders.notifications import schedule_notification_mail, MailTypeEnum
+            schedule_notification_mail(user, notifications, MailTypeEnum.COLLECTED)
 
             user.notifications.mark_as_sent()

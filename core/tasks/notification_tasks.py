@@ -97,7 +97,7 @@ def create_notification(self, schema_name, verb, model_name, entity_id, sender_i
 
         # only send direct notification for content in groups
         if instance.group:
-            from core.mail_builders.notifications import send_notifications, MailTypeEnum
+            from core.mail_builders.notifications import schedule_notification_mail, MailTypeEnum
             for notification in notifications:
                 recipient = User.objects.get(id=notification.recipient_id)
 
@@ -109,4 +109,4 @@ def create_notification(self, schema_name, verb, model_name, entity_id, sender_i
 
                 # send email direct and mark emailed as True
                 if direct:
-                    send_notifications(recipient, [notification], MailTypeEnum.DIRECT)
+                    schedule_notification_mail(recipient, [notification], MailTypeEnum.DIRECT)

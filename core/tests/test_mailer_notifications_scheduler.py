@@ -21,9 +21,9 @@ class TestNotificationMailerSchedulerTestCase(PleioTenantTestCase):
 
     @mock.patch("core.models.mail.MailInstanceManager.submit")
     def test_scheduler_args(self, mocked_submit):
-        from core.mail_builders.notifications import send_notifications, MailTypeEnum, NotificationsMailer
+        from core.mail_builders.notifications import schedule_notification_mail, MailTypeEnum, NotificationsMailer
 
-        send_notifications(self.recipient, self.notifications, MailTypeEnum.COLLECTED)
+        schedule_notification_mail(self.recipient, self.notifications, MailTypeEnum.COLLECTED)
 
         self.assertEqual(mocked_submit.call_args.args[0], NotificationsMailer)
         self.assertDictEqual(mocked_submit.call_args.args[1], {

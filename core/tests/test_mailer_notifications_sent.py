@@ -56,13 +56,13 @@ class SendNotificationEmailsTestCase(PleioTenantTestCase):
         self.user3.delete()
         self.group.delete()
 
-    @mock.patch('core.mail_builders.notifications.send_notifications')
+    @mock.patch('core.mail_builders.notifications.schedule_notification_mail')
     def test_command_do_not_send_welcome_notification(self, mocked_send_notifications):
         """ Welcome notification is created on user creation, this should not be send """
         call_command('send_notification_emails')
         self.assertEqual(mocked_send_notifications.call_count, 0)
 
-    @mock.patch('core.mail_builders.notifications.send_notifications')
+    @mock.patch('core.mail_builders.notifications.schedule_notification_mail')
     def test_command_send_5_notifications(self, mocked_send_notifications):
         i = 0
         while i < 5:
@@ -77,7 +77,7 @@ class SendNotificationEmailsTestCase(PleioTenantTestCase):
                          [self.blog1, self.blog1, self.blog1, self.blog1, self.blog1])
         self.assertEqual(args[2], MailTypeEnum.COLLECTED)
 
-    @mock.patch('core.mail_builders.notifications.send_notifications')
+    @mock.patch('core.mail_builders.notifications.schedule_notification_mail')
     def test_notifications_marked_as_sent(self, mocked_send_notifications):
         i = 0
         while i < 10:
@@ -88,7 +88,7 @@ class SendNotificationEmailsTestCase(PleioTenantTestCase):
         self.assertEqual(mocked_send_notifications.call_count, 1)
         self.assertEqual(len(self.user2.notifications.filter(emailed=False)), 0)
 
-    @mock.patch('core.mail_builders.notifications.send_notifications')
+    @mock.patch('core.mail_builders.notifications.schedule_notification_mail')
     def test_notifications_not_sent_to_banned_users(self, mocked_send_notifications):
         create_notification.s(connection.schema_name, 'commented', 'blog.blog', self.blog1.id, self.user1.id).apply()
         self.user2.is_active = False
@@ -96,7 +96,7 @@ class SendNotificationEmailsTestCase(PleioTenantTestCase):
         call_command('send_notification_emails')
         self.assertEqual(mocked_send_notifications.call_count, 0)
 
-    @mock.patch('core.mail_builders.notifications.send_notifications')
+    @mock.patch('core.mail_builders.notifications.schedule_notification_mail')
     def test_notifications_not_sent_notifications_off(self, mocked_send_notifications):
         create_notification.s(connection.schema_name, 'commented', 'blog.blog', self.blog1.id, self.user1.id).apply()
         self.user2.profile.receive_notification_email = False
@@ -106,7 +106,7 @@ class SendNotificationEmailsTestCase(PleioTenantTestCase):
         call_command('send_notification_emails')
         self.assertEqual(mocked_send_notifications.call_count, 0)
 
-    @mock.patch('core.mail_builders.notifications.send_notifications')
+    @mock.patch('core.mail_builders.notifications.schedule_notification_mail')
     def test_template_context_of_created_notification(self, mocked_send_notifications):
         blog2 = Blog.objects.create(
             title='Blog2',
@@ -128,7 +128,7 @@ class SendNotificationEmailsTestCase(PleioTenantTestCase):
 
         blog2.delete()
 
-    @mock.patch('core.mail_builders.notifications.send_notifications')
+    @mock.patch('core.mail_builders.notifications.schedule_notification_mail')
     def test_command_notifications_disabled(self, mocked_send_notifications):
         i = 0
         while i < 5:

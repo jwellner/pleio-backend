@@ -1,6 +1,7 @@
+from core.factories import GroupFactory
 from core.tests.helpers import PleioTenantTestCase
 from core.models import Group
-from user.factories import AdminFactory
+from user.factories import AdminFactory, UserFactory
 from user.models import User
 from mixer.backend.django import mixer
 

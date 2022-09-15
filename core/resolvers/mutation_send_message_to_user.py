@@ -6,6 +6,7 @@ from user.models import User
 from core.constances import NOT_LOGGED_IN, COULD_NOT_FIND
 from core.lib import clean_graphql_input
 
+
 def resolve_send_message_to_user(_, info, input):
     # pylint: disable=redefined-builtin
 
@@ -33,5 +34,5 @@ def resolve_send_message_to_user(_, info, input):
                                         copy=True)
 
     return {
-          "success": True
+        "success": True
     }

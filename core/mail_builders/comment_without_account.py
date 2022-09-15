@@ -7,16 +7,16 @@ from core.utils.convert import tiptap_to_html
 from core.utils.entity import load_entity_by_id
 
 
-def submit_group_comment_without_account_mail(comment_request, entity):
+def schedule_comment_without_account_mail(comment_request, entity):
     from core.models import MailInstance
-    MailInstance.objects.submit(GroupCommentWithoutAccountMailer,
+    MailInstance.objects.submit(CommentWithoutAccountMailer,
                                 mailer_kwargs={
                                     'comment_request': comment_request.pk,
                                     'entity': entity.guid,
                                 })
 
 
-class GroupCommentWithoutAccountMailer(TemplateMailerBase):
+class CommentWithoutAccountMailer(TemplateMailerBase):
 
     def __init__(self, **kwargs):
         from core.models import CommentRequest
