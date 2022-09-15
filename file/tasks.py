@@ -1,4 +1,3 @@
-# Create your tasks here
 from __future__ import absolute_import, unicode_literals
 
 import signal_disabler
@@ -9,13 +8,11 @@ from datetime import timedelta
 from django.db.models import Q, F
 from django_tenants.utils import schema_context
 from django.utils import timezone
-from django.utils.translation import ugettext_lazy
 
 from file.helpers.post_processing import ensure_correct_file_without_signals
+from file.mail_builders.file_scan_found import schedule_file_scan_found_mail
 from file.models import FileFolder, FILE_SCAN
 from file.helpers.images import resize_and_update_image
-from core.lib import get_default_email_context
-from core.tasks import send_mail_multi
 from file.validators import is_upload_complete
 from user.models import User
 
@@ -39,9 +36,6 @@ def resize_featured(self, schema_name, file_guid):
 @shared_task(bind=True, ignore_result=True)
 def scan(self, schema_name, limit=1000):
     # pylint: disable=unused-argument
-    '''
-    Scan files
-    '''
     with schema_context(schema_name):
         time_threshold = timezone.now() - timedelta(days=7)
 
@@ -64,20 +58,9 @@ def scan(self, schema_name, limit=1000):
                 file.save()
 
         if virus_count > 0:
-            context = get_default_email_context()
-            subject = ugettext_lazy("Filescan found suspicous files on %(site_url)s") % {'site_url': context["site_url"]}
-            context['virus_count'] = virus_count
-
-            # mail to superadmins to notify about site access change
             for admin_user in User.objects.filter(is_superadmin=True):
-                send_mail_multi.delay(
-                    schema_name,
-                    subject,
-                    'email/file_scan_found.html',
-                    context,
-                    admin_user.email,
-                    language=admin_user.get_language()
-                )
+                schedule_file_scan_found_mail(virus_count=virus_count,
+                                              admin=admin_user)
 
         logger.info("Scanned %i and found %i virusses and %i errors @%s", file_count, virus_count, errors_count, schema_name)
 

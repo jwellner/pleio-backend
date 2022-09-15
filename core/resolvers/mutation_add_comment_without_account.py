@@ -3,6 +3,7 @@ from django.core.exceptions import ObjectDoesNotExist, ValidationError
 from django.core.validators import validate_email
 from core.lib import generate_code
 from core.constances import COULD_NOT_FIND, COULD_NOT_ADD, INVALID_EMAIL, INVALID_VALUE
+from core.mail_builders.comment_without_account import schedule_comment_without_account_mail
 from core.models import Entity, CommentRequest
 from core import config
 
@@ -45,7 +46,6 @@ def resolve_add_comment_without_account(_, info, input):
         rich_description=input.get("richDescription")
     )
 
-    from core.mail_builders.comment_without_account import schedule_comment_without_account_mail
     schedule_comment_without_account_mail(comment_request=comment_request,
                                           entity=entity)
 

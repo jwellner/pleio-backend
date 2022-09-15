@@ -1,11 +1,12 @@
 from graphql import GraphQLError
 from django.core.exceptions import ObjectDoesNotExist
-from django.utils.translation import ugettext_lazy
+
+from core.mail_builders.site_access_request_accepted import schedule_site_access_request_accepted_mail
+from core.mail_builders.site_access_request_denied import schedule_site_access_request_denied_mail
 from core.models import SiteAccessRequest
 from core.constances import NOT_LOGGED_IN, USER_NOT_SITE_ADMIN, USER_ROLES
-from core.lib import clean_graphql_input, tenant_schema, get_default_email_context
-from core.tasks import send_mail_multi
-from core import config
+from core.lib import clean_graphql_input
+
 
 def resolve_handle_site_access_request(_, info, input):
     # pylint: disable=redefined-builtin
@@ -28,23 +29,19 @@ def resolve_handle_site_access_request(_, info, input):
         }
 
     accepted = clean_input.get("accept")
-    silent = clean_input.get("silent", False)
 
-    if not silent:
-        context = get_default_email_context(user)
-        context['request_name'] = access_request.claims.get('name')
-
+    if not clean_input.get("silent", False):
         if accepted:
-            subject = ugettext_lazy("You are now member of: %(site_name)s") % {'site_name': config.NAME }
-            context['intro'] = config.SITE_MEMBERSHIP_ACCEPTED_INTRO
-            send_mail_multi.delay(tenant_schema(), subject, 'email/site_access_request_accepted.html', context, access_request.claims.get('email'))
+            schedule_site_access_request_accepted_mail(sender=user,
+                                                       name=access_request.claims.get('name'),
+                                                       email=access_request.claims.get('email'))
         else:
-            subject = ugettext_lazy("Membership request declined for: %(site_name)s") % {'site_name': config.NAME }
-            context['intro'] = config.SITE_MEMBERSHIP_DENIED_INTRO
-            send_mail_multi.delay(tenant_schema(), subject, 'email/site_access_request_denied.html', context, access_request.claims.get('email'))
+            schedule_site_access_request_denied_mail(sender=user,
+                                                     name=access_request.claims.get('name'),
+                                                     email=access_request.claims.get('email'))
 
     if accepted:
-        access_request.accepted=True
+        access_request.accepted = True
         access_request.save()
     else:
         access_request.delete()

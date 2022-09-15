@@ -31,8 +31,8 @@ class HandleSiteAccessRequestTestCase(FastTenantTestCase):
         self.admin.delete()
         self.user.delete()
 
-    @mock.patch('core.resolvers.mutation_handle_site_access_request.send_mail_multi.delay')
-    def test_handle_access_request_by_admin(self, mocked_send_mail_multi):
+    @mock.patch('core.resolvers.mutation_handle_site_access_request.schedule_site_access_request_accepted_mail')
+    def test_handle_access_request_by_admin(self, mocked_send_mail):
 
         variables = {
             "input": {
@@ -54,10 +54,10 @@ class HandleSiteAccessRequestTestCase(FastTenantTestCase):
         self.assertTrue(SiteAccessRequest.objects.filter(email=self.request1.email, accepted=True).exists())
         self.assertFalse(User.objects.filter(email=self.request1.email).exists())
 
-        mocked_send_mail_multi.assert_called_once()
+        self.assertEqual(mocked_send_mail.call_count, 1)
 
-    @mock.patch('core.resolvers.mutation_handle_site_access_request.send_mail_multi.delay')
-    def test_handle_access_request_deny_by_admin(self, mocked_send_mail_multi):
+    @mock.patch('core.resolvers.mutation_handle_site_access_request.schedule_site_access_request_denied_mail')
+    def test_handle_access_request_deny_by_admin(self, mocked_send_mail):
 
         variables = {
             "input": {
@@ -78,10 +78,10 @@ class HandleSiteAccessRequestTestCase(FastTenantTestCase):
         self.assertEqual(data["handleSiteAccessRequest"]["success"], True)
         self.assertFalse(User.objects.filter(email=self.request1.email).exists())
 
-        mocked_send_mail_multi.assert_called_once()
+        self.assertEqual(mocked_send_mail.call_count, 1)
 
-    @mock.patch('core.resolvers.mutation_handle_site_access_request.send_mail_multi.delay')
-    def test_handle_access_request_deny_silent_by_admin(self, mocked_send_mail_multi):
+    @mock.patch('core.resolvers.mutation_handle_site_access_request.schedule_site_access_request_denied_mail')
+    def test_handle_access_request_deny_silent_by_admin(self, mocked_send_mail):
 
         variables = {
             "input": {
@@ -102,8 +102,7 @@ class HandleSiteAccessRequestTestCase(FastTenantTestCase):
 
         self.assertEqual(data["handleSiteAccessRequest"]["success"], True)
         self.assertFalse(User.objects.filter(email=self.request1.email).exists())
-
-        mocked_send_mail_multi.assert_not_called()
+        self.assertFalse(mocked_send_mail.called)
 
     def test_handle_access_request_by_user(self):
 

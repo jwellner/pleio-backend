@@ -13,7 +13,7 @@ from core.tests.helpers import PleioTenantTestCase
 from core.utils.convert import tiptap_to_html
 
 
-class TestGroupCommentWithoutAccountMailer(PleioTenantTestCase):
+class TestCommentWithoutAccountMailer(PleioTenantTestCase):
 
     def setUp(self):
         super().setUp()
@@ -47,7 +47,7 @@ class TestGroupCommentWithoutAccountMailer(PleioTenantTestCase):
         }
 
     @override_local_config(COMMENT_WITHOUT_ACCOUNT_ENABLED=True)
-    @mock.patch("core.mail_builders.comment_without_account.schedule_comment_without_account_mail")
+    @mock.patch("core.resolvers.mutation_add_comment_without_account.schedule_comment_without_account_mail")
     def test_submit_comment_without_account_mail(self, mocked_send_mail):
         self.graphql_client.post(self.query, self.variables)
         comment_request = CommentRequest.objects.filter(email=self.EMAIL).first()

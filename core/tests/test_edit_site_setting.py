@@ -591,8 +591,8 @@ class EditSiteSettingTestCase(FastTenantTestCase):
 
         self.assertEqual(errors[0]["message"], "invalid_value")
 
-    @patch('core.resolvers.mutation_edit_site_setting.send_mail_multi.delay')
-    def test_edit_site_setting_is_closed_default_access(self, mocked_send_mail_multi):
+    @patch('core.resolvers.mutation_edit_site_setting.schedule_site_access_changed_mail')
+    def test_edit_site_setting_is_closed_default_access(self, mocked_send_mail):
         mutation = """
             mutation EditSiteSetting($input: editSiteSettingInput!) {
                 editSiteSetting(input: $input) {
@@ -620,7 +620,7 @@ class EditSiteSettingTestCase(FastTenantTestCase):
         self.assertEqual(data["editSiteSetting"]["siteSettings"]["isClosed"], False)
         self.assertEqual(data["editSiteSetting"]["siteSettings"]["defaultAccessId"], 2)
 
-        self.assertEqual(mocked_send_mail_multi.call_count, 1)
+        self.assertEqual(mocked_send_mail.call_count, 1)
 
         variables = {
             "input": {
@@ -637,7 +637,7 @@ class EditSiteSettingTestCase(FastTenantTestCase):
         self.assertEqual(data["editSiteSetting"]["siteSettings"]["isClosed"], True)
         self.assertEqual(data["editSiteSetting"]["siteSettings"]["defaultAccessId"], 1)
 
-        self.assertEqual(mocked_send_mail_multi.call_count, 2)
+        self.assertEqual(mocked_send_mail.call_count, 2)
 
     def test_edit_site_setting_wrong_whitelisted_ip_range(self):
         mutation = """

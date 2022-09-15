@@ -3,7 +3,6 @@ import ipaddress
 from django.core.cache import cache
 from django.db import connection
 from django.utils import timezone
-from django.utils.translation import ugettext_lazy
 from django_tenants.utils import parse_tenant_config_path
 from graphql import GraphQLError
 
@@ -11,14 +10,13 @@ from core import config
 from core.constances import (COULD_NOT_SAVE, INVALID_VALUE,
                              REDIRECTS_HAS_DUPLICATE_SOURCE,
                              REDIRECTS_HAS_LOOP)
-from core.lib import (access_id_to_acl, clean_graphql_input,
-                      get_default_email_context, get_language_options,
-                      is_valid_domain, is_valid_url_or_path, tenant_schema)
+from core.lib import (access_id_to_acl, clean_graphql_input, get_language_options,
+                      is_valid_domain, is_valid_url_or_path)
+from core.mail_builders.site_access_changed import schedule_site_access_changed_mail
 from core.models import ProfileField, Setting
 from core.models.user import validate_profile_sections
 from core.resolvers import shared
 from core.resolvers.query_site import get_site_settings
-from core.tasks import send_mail_multi
 from file.helpers.images import resize_and_save_as_png
 from file.models import FileFolder
 from user.models import User
@@ -410,20 +408,11 @@ def resolve_update_file_description_field_enabled(clean_input):
 def resolve_update_is_closed(user, clean_input):
     if 'isClosed' in clean_input:
         if not config.IS_CLOSED == clean_input.get('isClosed'):
-            context = get_default_email_context(user)
-            context['access_level'] = ugettext_lazy("closed") if clean_input.get('isClosed') else ugettext_lazy("public")
-            subject = ugettext_lazy("Site access level changed for %(site_name)s") % {'site_name': context["site_name"]}
-
             # mail to admins to notify about site access change
             for admin_user in User.objects.filter(roles__contains=['ADMIN']):
-                send_mail_multi.delay(
-                    tenant_schema(),
-                    subject,
-                    'email/site_access_changed.html',
-                    context,
-                    admin_user.email,
-                    language=admin_user.get_language()
-                )
+                schedule_site_access_changed_mail(is_closed=clean_input.get('isClosed'),
+                                                  admin=admin_user,
+                                                  sender=user)
             save_setting('IS_CLOSED', clean_input.get('isClosed'))
 
 
