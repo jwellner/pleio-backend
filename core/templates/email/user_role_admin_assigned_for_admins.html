@@ -11,8 +11,8 @@
 {% blocktrans %}Hi,<br><br>
 
 The user {{ name_of_user_admin_role_changed }} was assigned as a new site administrator by {{ user_name }}.<br>
-Check out the profile of the new site administrator here {{ link }} .<br><br>
+    Check out the profile of the new site administrator here <a href="{{ link }}">{{ link }}</a>.<br><br>
 
-If you believe this was done in error, please login here {{ site_url }} and undo this action.
+    If you believe this was done in error, please login here <a href="{{ site_url }}">{{ site_url }}</a> and undo this action.
 {% endblocktrans %}
 {% endblock %}

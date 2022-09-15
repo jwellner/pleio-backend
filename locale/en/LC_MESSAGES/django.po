@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-08-30 16:12+0200\n"
+"POT-Creation-Date: 2022-09-13 17:46+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -49,108 +49,108 @@ msgstr "Receive notification emails"
 msgid "Receive overview emails"
 msgstr "Receive overview emails"
 
-#: core/lib.py:176 core/resolvers/mutation_import_users.py:30
+#: core/lib.py:177 core/resolvers/mutation_import_users.py:30
 #: core/resolvers/query_site.py:73
 msgid "Just me"
 msgstr "Just me"
 
-#: core/lib.py:179
+#: core/lib.py:180
 #, python-format
 msgid "Group: %(group_name)s"
 msgstr "Group: %(group_name)s"
 
-#: core/lib.py:182
+#: core/lib.py:183
 #, python-format
 msgid "Subgroup: %(subgroup_name)s"
 msgstr "Subgroup: %(subgroup_name)s"
 
-#: core/lib.py:188 core/resolvers/mutation_import_users.py:31
+#: core/lib.py:189 core/resolvers/mutation_import_users.py:31
 #: core/resolvers/query_site.py:74
 msgid "Logged in users"
 msgstr "Logged in users"
 
-#: core/lib.py:190 core/resolvers/mutation_import_users.py:34
+#: core/lib.py:191 core/resolvers/mutation_import_users.py:34
 #: core/resolvers/query_site.py:78
 msgid "Public"
 msgstr "Public"
 
-#: core/lib.py:201
+#: core/lib.py:202
 msgid "Event"
 msgstr "Event"
 
-#: core/lib.py:205
+#: core/lib.py:206
 msgid "Blog"
 msgstr "Blog"
 
-#: core/lib.py:209
+#: core/lib.py:210
 msgid "Discussion"
 msgstr "Discussion"
 
-#: core/lib.py:213 core/lib.py:378
+#: core/lib.py:214 core/lib.py:384
 msgid "News"
 msgstr "News"
 
-#: core/lib.py:217
+#: core/lib.py:218
 msgid "Update"
 msgstr "Update"
 
-#: core/lib.py:221
+#: core/lib.py:222
 msgid "Question"
 msgstr "Question"
 
-#: core/lib.py:225
+#: core/lib.py:226
 msgid "Wiki"
 msgstr "Wiki"
 
-#: core/lib.py:229
+#: core/lib.py:230
 msgid "Text page"
 msgstr "Text page"
 
-#: core/lib.py:372
+#: core/lib.py:378
 msgid "Updates"
 msgstr "Updates"
 
-#: core/lib.py:373
+#: core/lib.py:379
 msgid "Blogs"
 msgstr "Blogs"
 
-#: core/lib.py:374
+#: core/lib.py:380
 msgid "CMS pages"
 msgstr "CMS pages"
 
-#: core/lib.py:375
+#: core/lib.py:381
 msgid "Discussions"
 msgstr "Discussions"
 
-#: core/lib.py:376
+#: core/lib.py:382
 msgid "Events"
 msgstr "Events"
 
-#: core/lib.py:377
+#: core/lib.py:383
 msgid "Files"
 msgstr "Files"
 
-#: core/lib.py:379
+#: core/lib.py:385
 msgid "Polls"
 msgstr "Polls"
 
-#: core/lib.py:380
+#: core/lib.py:386
 msgid "Questions"
 msgstr "Questions"
 
-#: core/lib.py:381
+#: core/lib.py:387
 msgid "Tasks"
 msgstr "Tasks"
 
-#: core/lib.py:382
+#: core/lib.py:388
 msgid "Wiki pages"
 msgstr "Wiki pages"
 
-#: core/lib.py:383
+#: core/lib.py:389
 msgid "Comments"
 msgstr "Comments"
 
-#: core/lib.py:384
+#: core/lib.py:390
 msgid "Groups"
 msgstr "Groups"
 
@@ -195,6 +195,52 @@ msgstr "Notification on %(entity_type)s in group %(entity_group_name)s"
 msgid "New notifications at %(site_name)s"
 msgstr "New notifications at %(site_name)s"
 
+#: core/mail_builders/user_assign_admin_for_admin.py:48
+#, python-format
+msgid "A new site administrator was assigned for %(site_name)s"
+msgstr "A new site administrator was assigned for %(site_name)s"
+
+#: core/mail_builders/user_assign_admin_for_user.py:46
+#, python-format
+msgid "You're granted site administrator right on %(site_name)s"
+msgstr "You're granted site administrator right on %(site_name)s"
+
+#: core/mail_builders/user_cancel_delete_for_admin.py:42
+#: core/mail_builders/user_cancel_delete_for_user.py:40
+msgid "Request to remove account cancelled"
+msgstr "Request to remove account cancelled"
+
+#: core/mail_builders/user_delete_complete.py:50
+#: core/mail_builders/user_revoke_admin_for_admin.py:48
+#, python-format
+msgid "A site administrator was removed from %(site_name)s"
+msgstr "A site administrator was removed from %(site_name)s"
+
+#: core/mail_builders/user_delete_complete.py:53
+#, python-format
+msgid "Account of %(name_deleted_user)s removed"
+msgstr "Account of %(name_deleted_user)s removed"
+
+#: core/mail_builders/user_request_delete_for_admin.py:42
+#: core/mail_builders/user_request_delete_for_user.py:40
+msgid "Request to remove account"
+msgstr "Request to remove account"
+
+#: core/mail_builders/user_revoke_admin_for_user.py:46
+#, python-format
+msgid "Your site administrator rights for %(site_name)s were removed"
+msgstr "Your site administrator rights for %(site_name)s were removed"
+
+#: core/mail_builders/user_send_message.py:53
+#, python-brace-format
+msgid "Copy: Message from {0}: {1}"
+msgstr "Copy: Message from {0}: {1}"
+
+#: core/mail_builders/user_send_message.py:54
+#, python-brace-format
+msgid "Message from {0}: {1}"
+msgstr "Message from {0}: {1}"
+
 #: core/models/export.py:13
 msgid "Pending"
 msgstr "Pending"
@@ -211,19 +257,6 @@ msgstr "Ready"
 #, python-format
 msgid "Ownership of the %(group_name)s group has been transferred"
 msgstr "Ownership of the %(group_name)s group has been transferred"
-
-#: core/resolvers/mutation_delete_user.py:39
-#: core/resolvers/mutation_handle_delete_account_request.py:42
-#, python-format
-msgid "Account of %(name_deleted_user)s removed"
-msgstr "Account of %(name_deleted_user)s removed"
-
-#: core/resolvers/mutation_delete_user.py:55
-#: core/resolvers/mutation_handle_delete_account_request.py:58
-#: core/resolvers/mutation_toggle_user_role.py:48
-#, python-format
-msgid "A site administrator was removed from %(site_name)s"
-msgstr "A site administrator was removed from %(site_name)s"
 
 #: core/resolvers/mutation_edit_site_setting.py:403
 msgid "closed"
@@ -290,41 +323,6 @@ msgstr "Message from group {0}: {1}"
 #, python-brace-format
 msgid "Copy: Message from group {0}: {1}"
 msgstr "Copy: Message from group {0}: {1}"
-
-#: core/resolvers/mutation_send_message_to_user.py:31
-#, python-brace-format
-msgid "Message from {0}: {1}"
-msgstr "Message from {0}: {1}"
-
-#: core/resolvers/mutation_send_message_to_user.py:44
-#, python-brace-format
-msgid "Copy: Message from {0}: {1}"
-msgstr "Copy: Message from {0}: {1}"
-
-#: core/resolvers/mutation_toggle_request_delete_user.py:38
-#: core/resolvers/mutation_toggle_request_delete_user.py:52
-msgid "Request to remove account cancelled"
-msgstr "Request to remove account cancelled"
-
-#: core/resolvers/mutation_toggle_request_delete_user.py:66
-#: core/resolvers/mutation_toggle_request_delete_user.py:80
-msgid "Request to remove account"
-msgstr "Request to remove account"
-
-#: core/resolvers/mutation_toggle_user_role.py:59
-#, python-format
-msgid "Your site administrator rights for %(site_name)s were removed"
-msgstr "Your site administrator rights for %(site_name)s were removed"
-
-#: core/resolvers/mutation_toggle_user_role.py:80
-#, python-format
-msgid "A new site administrator was assigned for %(site_name)s"
-msgstr "A new site administrator was assigned for %(site_name)s"
-
-#: core/resolvers/mutation_toggle_user_role.py:91
-#, python-format
-msgid "You're granted site administrator right on %(site_name)s"
-msgstr "You're granted site administrator right on %(site_name)s"
 
 #: core/resolvers/query_site.py:126
 msgid "Activity stream"
@@ -638,7 +636,7 @@ msgstr "Personal message"
 msgid "Direct notification"
 msgstr "Direct notification"
 
-#: core/templates/email/send_notification_emails.html:10 core/views.py:660
+#: core/templates/email/send_notification_emails.html:10 core/views.py:662
 msgid "Notification overview"
 msgstr "Notification overview"
 
@@ -655,7 +653,7 @@ msgstr ""
 "Click <a href=\"%(mail_settings_url)s\">here</a> to change how often you "
 "want to receive notification emails."
 
-#: core/templates/email/send_overview_emails.html:22 core/views.py:657
+#: core/templates/email/send_overview_emails.html:22 core/views.py:659
 msgid "Periodic overview"
 msgstr "Periodic overview"
 
@@ -853,16 +851,16 @@ msgid ""
 "Hi,<br><br>\n"
 "\n"
 "The user %(name_of_user_admin_role_changed)s was assigned as a new site administrator by %(user_name)s.<br>\n"
-"Check out the profile of the new site administrator here %(link)s .<br><br>\n"
+"    Check out the profile of the new site administrator here <a href=\"%(link)s\">%(link)s</a>.<br><br>\n"
 "\n"
-"If you believe this was done in error, please login here %(site_url)s and undo this action.\n"
+"    If you believe this was done in error, please login here <a href=\"%(site_url)s\">%(site_url)s</a> and undo this action.\n"
 msgstr ""
 "Hi,<br><br>\n"
 "\n"
 "The user %(name_of_user_admin_role_changed)s was assigned as a new site administrator by %(user_name)s.<br>\n"
-"Check out the profile of the new site administrator here %(link)s .<br><br>\n"
+"    Check out the profile of the new site administrator here <a href=\"%(link)s\">%(link)s</a>.<br><br>\n"
 "\n"
-"If you believe this was done in error, please login here %(site_url)s and undo this action.\n"
+"    If you believe this was done in error, please login here <a href=\"%(site_url)s\">%(site_url)s</a> and undo this action.\n"
 
 #: core/templates/email/user_role_admin_assigned_for_user.html:6
 #, python-format
@@ -871,7 +869,7 @@ msgid ""
 "\n"
 "You've been assigned as a new site administrator by %(user_name)s.<br><br>\n"
 "\n"
-"Enjoy your new found rights by logging in here %(site_url)s.<br><br>\n"
+"Enjoy your new found rights by logging in here <a href=\"%(site_url)s\">%(site_url)s</a>.<br><br>\n"
 "\n"
 "If you believe this was done in error, please contact one of the other site administrators.\n"
 msgstr ""
@@ -879,7 +877,7 @@ msgstr ""
 "\n"
 "You've been assigned as a new site administrator by %(user_name)s.<br><br>\n"
 "\n"
-"Enjoy your new found rights by logging in here %(site_url)s.<br><br>\n"
+"Enjoy your new found rights by logging in here <a href=\"%(site_url)s\">%(site_url)s</a>.<br><br>\n"
 "\n"
 "If you believe this was done in error, please contact one of the other site administrators.\n"
 
@@ -888,17 +886,19 @@ msgstr ""
 msgid ""
 "Hi,<br><br>\n"
 "\n"
-"The user %(name_of_user_admin_role_changed)s is no longer a site administrator. This action was taken by %(user_name)s.<br>\n"
-"Check out the profile of the old site administrator here %(link)s.<br><br>\n"
+"        The user %(name_of_user_admin_role_changed)s is no longer a site administrator. This action was taken by %(user_name)s.<br>\n"
+"        Check out the profile of the old site administrator here <a href=\"%(link)s\">%(link)s</a>.<br><br>\n"
 "\n"
-"If you believe this was done in error, please login here %(site_url)s and undo this action.\n"
+"        If you believe this was done in error, please login here <a href=\"%(site_url)s\">%(site_url)s</a> and undo this action.\n"
+"    "
 msgstr ""
 "Hi,<br><br>\n"
 "\n"
-"The user %(name_of_user_admin_role_changed)s is no longer a site administrator. This action was taken by %(user_name)s.<br>\n"
-"Check out the profile of the old site administrator here %(link)s.<br><br>\n"
+"        The user %(name_of_user_admin_role_changed)s is no longer a site administrator. This action was taken by %(user_name)s.<br>\n"
+"        Check out the profile of the old site administrator here <a href=\"%(link)s\">%(link)s</a>.<br><br>\n"
 "\n"
-"If you believe this was done in error, please login here %(site_url)s and undo this action.\n"
+"        If you believe this was done in error, please login here <a href=\"%(site_url)s\">%(site_url)s</a> and undo this action.\n"
+"    "
 
 #: core/templates/email/user_role_admin_removed_for_user.html:6
 #, python-format
@@ -982,7 +982,7 @@ msgstr ""
 "To enter this site, you must request access from the admin. Click the button"
 " to request access."
 
-#: core/templates/registration/request.html:23 core/views.py:505
+#: core/templates/registration/request.html:23 core/views.py:506
 msgid "Name"
 msgstr "Name"
 
@@ -1011,24 +1011,24 @@ msgstr ""
 "Access is requested. You will receive an e-mail when the request is "
 "accepted."
 
-#: core/views.py:192
+#: core/views.py:193
 #, python-format
 msgid "New access request for %(site_name)s"
 msgstr "New access request for %(site_name)s"
 
-#: core/views.py:506
+#: core/views.py:507
 msgid "E-mail"
 msgstr "E-mail"
 
-#: core/views.py:507
+#: core/views.py:508
 msgid "Group"
 msgstr "Group"
 
-#: core/views.py:601
+#: core/views.py:602
 msgid "Your changes are saved"
 msgstr "Your changes are saved"
 
-#: core/views.py:663
+#: core/views.py:665
 #, python-format
 msgid "Successfully unsubscribed %(email)s from %(list_name)s"
 msgstr "Successfully unsubscribed %(email)s from %(list_name)s"

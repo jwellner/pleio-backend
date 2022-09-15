@@ -1,11 +1,7 @@
-
 from unittest import mock
 
-from django.contrib.auth.models import AnonymousUser
-from mixer.backend.django import mixer
-
 from core.tests.helpers import PleioTenantTestCase
-from user.models import User
+from user.factories import UserFactory, AdminFactory
 
 
 class ToggleRequestDeleteUserTestCase(PleioTenantTestCase):
@@ -13,8 +9,8 @@ class ToggleRequestDeleteUserTestCase(PleioTenantTestCase):
     def setUp(self):
         super(ToggleRequestDeleteUserTestCase, self).setUp()
 
-        self.user1 = mixer.blend(User)
-        self.admin = mixer.blend(User, roles=['ADMIN'])
+        self.user1 = UserFactory(is_delete_requested=False)
+        self.admin = AdminFactory()
 
         self.mutation = """
             mutation toggleRequestDeleteUser($input: toggleRequestDeleteUserInput!) {
@@ -79,8 +75,9 @@ class ToggleRequestDeleteUserTestCase(PleioTenantTestCase):
 
         self.assertEqual(data["toggleRequestDeleteUser"]["viewer"]["guid"], self.user1.guid)
 
-    @mock.patch('core.resolvers.mutation_toggle_request_delete_user.send_mail_multi.delay')
-    def test_call_send_email(self, mocked_send_mail_multi):
+    @mock.patch('core.resolvers.mutation_toggle_request_delete_user.schedule_user_request_delete_for_user_mail')
+    @mock.patch('core.resolvers.mutation_toggle_request_delete_user.schedule_user_request_delete_for_admin_mail')
+    def test_call_send_email_on_toggle_on(self, mail_for_admin, mail_for_user):
         variables = {
             "input": {
                 "guid": self.user1.guid
@@ -89,13 +86,19 @@ class ToggleRequestDeleteUserTestCase(PleioTenantTestCase):
 
         self.graphql_client.force_login(self.user1)
         self.graphql_client.post(self.mutation, variables)
+        self.user1.refresh_from_db()
 
-        assert mocked_send_mail_multi.called
+        self.assertTrue(self.user1.is_delete_requested)
+        self.assertTrue(mail_for_user.called)
+        self.assertTrue(mail_for_admin.called)
 
-    @mock.patch('core.resolvers.mutation_toggle_request_delete_user.send_mail_multi.delay')
-    def test_call_send_email(self, mocked_send_mail_multi):
+    # Hier moet nog iets gebeuren
+    @mock.patch('core.resolvers.mutation_toggle_request_delete_user.schedule_user_cancel_delete_for_user_mail')
+    @mock.patch('core.resolvers.mutation_toggle_request_delete_user.schedule_user_cancel_delete_for_admin_mail')
+    def test_call_send_email_on_untoggle(self, mail_for_admin, mail_for_user):
 
         self.user1.is_delete_requested = True
+        self.user1.save()
         
         variables = {
             "input": {
@@ -105,5 +108,8 @@ class ToggleRequestDeleteUserTestCase(PleioTenantTestCase):
 
         self.graphql_client.force_login(self.user1)
         self.graphql_client.post(self.mutation, variables)
+        self.user1.refresh_from_db()
 
-        assert mocked_send_mail_multi.called
+        self.assertFalse(self.user1.is_delete_requested)
+        self.assertTrue(mail_for_user.called)
+        self.assertTrue(mail_for_admin.called)

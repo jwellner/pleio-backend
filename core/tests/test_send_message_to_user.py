@@ -1,34 +1,27 @@
-from django.conf import settings
 from django.db import connection
-from django.test import override_settings
-from django_tenants.test.cases import FastTenantTestCase
-from backend2.schema import schema
-from ariadne import graphql_sync
-import json
 from django.core.cache import cache
-from django.contrib.auth.models import AnonymousUser
-from django.http import HttpRequest
-from core.models import Group
+from core.tests.helpers import PleioTenantTestCase
 from user.models import User
 from mixer.backend.django import mixer
-from graphql import GraphQLError
 from unittest import mock
 
 
-class SendMessageToUserTestCase(FastTenantTestCase):
+class SendMessageToUserTestCase(PleioTenantTestCase):
 
     def setUp(self):
-        self.anonymousUser = AnonymousUser()
+        super().setUp()
+
         self.user1 = mixer.blend(User)
         self.user2 = mixer.blend(User)
         self.user1.profile.language = 'en'
         self.user1.profile.save()
         cache.set("%s%s" % (connection.schema_name, 'EXTRA_LANGUAGES'), ['en'])
 
-
     def tearDown(self):
         self.user1.delete()
         self.user2.delete()
+
+        super().tearDown()
 
     def test_send_message_to_user_anon(self):
         mutation = """
@@ -46,14 +39,8 @@ class SendMessageToUserTestCase(FastTenantTestCase):
             }
         }
 
-        request = HttpRequest()
-        request.user = self.anonymousUser
-
-        result = graphql_sync(schema, {"query": mutation, "variables": variables}, context_value={ "request": request })
-
-        errors = result[1]["errors"]
-
-        self.assertEqual(errors[0]["message"], "not_logged_in")
+        with self.assertGraphQlError("not_logged_in"):
+            self.graphql_client.post(mutation, variables)
 
     def test_send_message_to_user(self):
         mutation = """
@@ -71,11 +58,9 @@ class SendMessageToUserTestCase(FastTenantTestCase):
             }
         }
 
-        request = HttpRequest()
-        request.user = self.user1
-
-        result = graphql_sync(schema, {"query": mutation, "variables": variables}, context_value={ "request": request })
-        data = result[1]["data"]
+        self.graphql_client.force_login(self.user1)
+        result = self.graphql_client.post(mutation, variables)
+        data = result['data']
 
         self.assertEqual(data["sendMessageToUser"]["success"], True)
 
@@ -95,16 +80,11 @@ class SendMessageToUserTestCase(FastTenantTestCase):
             }
         }
 
-        request = HttpRequest()
-        request.user = self.user1
+        with self.assertGraphQlError("could_not_find"):
+            self.graphql_client.force_login(self.user1)
+            self.graphql_client.post(mutation, variables)
 
-        result = graphql_sync(schema, {"query": mutation, "variables": variables}, context_value={ "request": request })
-
-        errors = result[1]["errors"]
-
-        self.assertEqual(errors[0]["message"], "could_not_find")
-
-    @mock.patch('core.resolvers.mutation_send_message_to_user.send_mail_multi.delay')
+    @mock.patch('core.resolvers.mutation_send_message_to_user.schedule_user_send_message_mail')
     def test_call_send_email(self, mocked_send_mail_multi):
         mutation = """
             mutation SendMessageModal($input: sendMessageToUserInput!) {
@@ -121,14 +101,12 @@ class SendMessageToUserTestCase(FastTenantTestCase):
             }
         }
 
-        request = HttpRequest()
-        request.user = self.user1
-
-        result = graphql_sync(schema, {"query": mutation, "variables": variables}, context_value={ "request": request })
+        self.graphql_client.force_login(self.user1)
+        self.graphql_client.post(mutation, variables)
 
         mocked_send_mail_multi.assert_called_once()
 
-    @mock.patch('core.resolvers.mutation_send_message_to_user.send_mail_multi.delay')
+    @mock.patch('core.resolvers.mutation_send_message_to_user.schedule_user_send_message_mail')
     def test_call_send_email_with_copy_to_self(self, mocked_send_mail_multi):
         mutation = """
             mutation SendMessageModal($input: sendMessageToUserInput!) {
@@ -146,14 +124,12 @@ class SendMessageToUserTestCase(FastTenantTestCase):
             }
         }
 
-        request = HttpRequest()
-        request.user = self.user1
-
-        result = graphql_sync(schema, {"query": mutation, "variables": variables}, context_value={ "request": request })
+        self.graphql_client.force_login(self.user1)
+        self.graphql_client.post(mutation, variables)
 
         assert mocked_send_mail_multi.called
 
-    @mock.patch('core.resolvers.mutation_send_message_to_user.send_mail_multi.delay')
+    @mock.patch('core.resolvers.mutation_send_message_to_user.schedule_user_send_message_mail')
     def test_call_not_send_email_with_copy_to_self(self, mocked_send_mail_multi):
         mutation = """
             mutation SendMessageModal($input: sendMessageToUserInput!) {
@@ -171,9 +147,7 @@ class SendMessageToUserTestCase(FastTenantTestCase):
             }
         }
 
-        request = HttpRequest()
-        request.user = self.user1
-
-        result = graphql_sync(schema, {"query": mutation, "variables": variables}, context_value={ "request": request })
+        self.graphql_client.force_login(self.user1)
+        self.graphql_client.post(mutation, variables)
 
         mocked_send_mail_multi.assert_called_once()

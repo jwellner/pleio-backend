@@ -31,7 +31,7 @@ class HandleDeleteAccountRequestTestCase(FastTenantTestCase):
         self.admin.delete()
         self.user.delete()
 
-    @mock.patch('core.resolvers.mutation_handle_delete_account_request.send_mail_multi.delay')
+    @mock.patch('core.resolvers.mutation_handle_delete_account_request.schedule_user_delete_complete_mail')
     def test_handle_delete_account_request_by_admin(self, mocked_send_mail_multi):
 
         variables = {
@@ -60,7 +60,7 @@ class HandleDeleteAccountRequestTestCase(FastTenantTestCase):
 
         mocked_send_mail_multi.assert_called_once()
 
-    @mock.patch('core.resolvers.mutation_handle_delete_account_request.send_mail_multi.delay')
+    @mock.patch('core.resolvers.mutation_handle_delete_account_request.schedule_user_delete_complete_mail')
     def test_handle_delete_account_request_deny_by_admin(self, mocked_send_mail_multi):
 
         variables = {

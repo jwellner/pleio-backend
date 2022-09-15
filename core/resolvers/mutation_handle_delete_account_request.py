@@ -1,11 +1,10 @@
 from graphql import GraphQLError
 from django.core.exceptions import ObjectDoesNotExist
-from django.utils import translation
-from django.utils.translation import ugettext_lazy
 from core.constances import NOT_LOGGED_IN, USER_NOT_SITE_ADMIN, USER_ROLES, INVALID_KEY
-from core.lib import clean_graphql_input, tenant_schema, get_default_email_context
-from core.tasks import send_mail_multi
+from core.lib import clean_graphql_input
+from core.mail_builders.user_delete_complete import schedule_user_delete_complete_mail
 from user.models import User
+
 
 def resolve_handle_delete_account_request(_, info, input):
     # pylint: disable=redefined-builtin
@@ -29,43 +28,27 @@ def resolve_handle_delete_account_request(_, info, input):
 
     if accepted:
         is_deleted_user_admin = user_to_delete.has_role(USER_ROLES.ADMIN)
-        language = user_to_delete.get_language()
-        email_deleted_user = user_to_delete.email
-        name_deleted_user = user_to_delete.name
+        user_mailinfo = user_to_delete.as_mailinfo()
         user_to_delete.delete()
 
         # Send email to user which is deleted
-        context = get_default_email_context(performing_user)
-        context['name_deleted_user'] = name_deleted_user
-
-        translation.activate(language)
-        subject = ugettext_lazy("Account of %(name_deleted_user)s removed") % {'name_deleted_user': name_deleted_user}
-
-        send_mail_multi.delay(
-            tenant_schema(),
-            subject,
-            'email/admin_user_deleted.html',
-            context,
-            email_deleted_user,
-            language=language
+        schedule_user_delete_complete_mail(
+            user_info=user_mailinfo,
+            receiver_info=user_mailinfo,
+            sender=performing_user,
+            to_admin=False
         )
 
         # Send email to admins if user which is deleted is also an admin
         if is_deleted_user_admin:
             admin_users = User.objects.filter(roles__contains=['ADMIN'])
             for admin_user in admin_users:
-                translation.activate(admin_user.get_language())
-                subject = ugettext_lazy("A site administrator was removed from %(site_name)s") % {'site_name': context["site_name"]}
-
-                send_mail_multi.delay(
-                    tenant_schema(),
-                    subject,
-                    'email/admin_user_deleted.html',
-                    context,
-                    admin_user.email,
-                    language=admin_user.get_language()
+                schedule_user_delete_complete_mail(
+                    user_info=user_mailinfo,
+                    receiver_info=admin_user.as_mailinfo(),
+                    sender=performing_user,
+                    to_admin=True
                 )
-
     else:
         user_to_delete.is_delete_requested = False
         user_to_delete.save()
