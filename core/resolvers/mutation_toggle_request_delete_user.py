@@ -1,11 +1,14 @@
 from graphql import GraphQLError
 from django.core.exceptions import ObjectDoesNotExist
-from django.utils import translation
-from django.utils.translation import ugettext_lazy
+
+from core.mail_builders.user_cancel_delete_for_admin import schedule_user_cancel_delete_for_admin_mail
+from core.mail_builders.user_cancel_delete_for_user import schedule_user_cancel_delete_for_user_mail
+from core.mail_builders.user_request_delete_for_admin import schedule_user_request_delete_for_admin_mail
+from core.mail_builders.user_request_delete_for_user import schedule_user_request_delete_for_user_mail
 from user.models import User
 from core.constances import NOT_LOGGED_IN, COULD_NOT_FIND, COULD_NOT_SAVE
-from core.lib import clean_graphql_input, get_default_email_context, tenant_schema
-from core.tasks import send_mail_multi
+from core.lib import clean_graphql_input
+
 
 def resolve_toggle_request_delete_user(_, info, input):
     # pylint: disable=redefined-builtin
@@ -24,69 +27,28 @@ def resolve_toggle_request_delete_user(_, info, input):
     if not requested_user == user:
         raise GraphQLError(COULD_NOT_SAVE)
 
-    context = get_default_email_context(user)
-
-    language = requested_user.get_language()
-    translation.activate(language)
-
     admin_users = User.objects.filter(roles__contains=['ADMIN'])
-
     if user.is_delete_requested:
         user.is_delete_requested = False
         user.save()
 
-        subject = ugettext_lazy("Request to remove account cancelled")
-
-        send_mail_multi.delay(
-            tenant_schema(),
-            subject,
-            'email/toggle_request_delete_user_cancelled.html',
-            context,
-            user.email,
-            language=language
-        )
+        schedule_user_cancel_delete_for_user_mail(user=user)
 
         # mail to admins to notify about removed admin
         for admin_user in admin_users:
-            translation.activate(admin_user.get_language())
-            subject = ugettext_lazy("Request to remove account cancelled")
-            send_mail_multi.delay(
-                tenant_schema(),
-                subject,
-                'email/toggle_request_delete_user_cancelled_admin.html',
-                context,
-                admin_user.email,
-                language=admin_user.get_language()
-            )
+            schedule_user_cancel_delete_for_admin_mail(user=user, admin=admin_user)
 
     else:
         user.is_delete_requested = True
         user.save()
 
-        subject = ugettext_lazy("Request to remove account")
-
-        send_mail_multi.delay(
-            tenant_schema(),
-            subject,
-            'email/toggle_request_delete_user_requested.html',
-            context,
-            user.email,
-            language=language
-        )
+        schedule_user_request_delete_for_user_mail(user=user)
 
         # mail to admins to notify about removed admin
         for admin_user in admin_users:
-            translation.activate(admin_user.get_language())
-            subject = ugettext_lazy("Request to remove account")
-            send_mail_multi.delay(
-                tenant_schema(),
-                subject,
-                'email/toggle_request_delete_user_requested_admin.html',
-                context,
-                admin_user.email,
-                language=admin_user.get_language()
-            )
+            schedule_user_request_delete_for_admin_mail(user=user,
+                                                       admin=admin_user)
 
     return {
-          "viewer": user
+        "viewer": user
     }

@@ -1,12 +1,14 @@
 from graphql import GraphQLError
 from django.core.exceptions import ObjectDoesNotExist
-from django.utils import translation
-from django.utils.translation import ugettext_lazy
+
+from core.mail_builders.user_assign_admin_for_admin import schedule_assign_admin_for_admin_mail
+from core.mail_builders.user_assign_admin_for_user import schedule_assign_admin_for_user_mail
+from core.mail_builders.user_revoke_admin_for_admin import schedule_revoke_admin_for_admin_mail
+from core.mail_builders.user_revoke_admin_for_user import schedule_revoke_admin_for_user_mail
 from user.models import User
 from core.constances import NOT_LOGGED_IN, COULD_NOT_FIND, COULD_NOT_SAVE, USER_ROLES
-from core.lib import clean_graphql_input, get_default_email_context
-from core.tasks import send_mail_multi
-from django_tenants.utils import parse_tenant_config_path
+from core.lib import clean_graphql_input
+
 
 def resolve_toggle_user_role(_, info, input):
     # pylint: disable=redefined-builtin
@@ -30,11 +32,6 @@ def resolve_toggle_user_role(_, info, input):
     else:
         raise GraphQLError(COULD_NOT_SAVE)
 
-    schema_name = parse_tenant_config_path("")
-    context = get_default_email_context(performing_user)
-    context['name_of_user_admin_role_changed'] = user.name
-    context['link'] = context['site_url'] + user.url
-
     if toggle_role in user.roles:
         user.roles.remove(toggle_role)
         user.save()
@@ -44,29 +41,13 @@ def resolve_toggle_user_role(_, info, input):
 
             # mail to admins to notify about removed admin
             for admin_user in admin_users:
-                translation.activate(admin_user.get_language())
-                subject = ugettext_lazy("A site administrator was removed from %(site_name)s") % {'site_name': context["site_name"]}
-                send_mail_multi.delay(
-                    schema_name,
-                    subject,
-                    'email/user_role_admin_removed_for_admins.html',
-                    context,
-                    admin_user.email,
-                    language=admin_user.get_language()
-                )
+                schedule_revoke_admin_for_admin_mail(user=user,
+                                                     sender=performing_user,
+                                                     admin=admin_user)
 
-            translation.activate(user.get_language())
-            subject = ugettext_lazy("Your site administrator rights for %(site_name)s were removed") % {'site_name': context["site_name"]}
             # mail to user to notify about removed rigths
-            send_mail_multi.delay(
-                schema_name,
-                subject,
-                'email/user_role_admin_removed_for_user.html',
-                context,
-                user.email,
-                language=user.get_language()
-            )
-
+            schedule_revoke_admin_for_user_mail(user=user,
+                                                sender=performing_user)
     else:
         admin_users = list(User.objects.filter(roles__contains=['ADMIN']))
 
@@ -76,29 +57,13 @@ def resolve_toggle_user_role(_, info, input):
         if toggle_role == USER_ROLES.ADMIN:
             # mail to admins to notify about added admin
             for admin_user in admin_users:
-                translation.activate(admin_user.get_language())
-                subject = ugettext_lazy("A new site administrator was assigned for %(site_name)s") % {'site_name': context["site_name"]}
-                send_mail_multi.delay(
-                    schema_name,
-                    subject,
-                    'email/user_role_admin_assigned_for_admins.html',
-                    context,
-                    admin_user.email,
-                    language=admin_user.get_language()
-                )
-
-            translation.activate(user.get_language())
-            subject = ugettext_lazy("You're granted site administrator right on %(site_name)s") % {'site_name': context["site_name"]}
+                schedule_assign_admin_for_admin_mail(user=user,
+                                                     admin=admin_user,
+                                                     sender=performing_user)
 
             # mail to user to notify about added rigths
-            send_mail_multi.delay(
-                schema_name,
-                subject,
-                'email/user_role_admin_assigned_for_user.html',
-                context,
-                user.email,
-                language=user.get_language()
-            )
+            schedule_assign_admin_for_user_mail(user=user,
+                                                sender=performing_user)
 
     return {
         'success': True
