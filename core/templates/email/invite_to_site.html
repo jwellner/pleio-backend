@@ -1,9 +1,9 @@
-
 {% extends "email/base_notification.html" %}
 {% load i18n %}
 
 {% block body %}
-{% blocktrans %}You have been invited by {{ user_name }} to join the site {{ site_name }}. Follow the link below to become a member of the site: <br /><a href="{{ link }}">{{ link }}</a> {% endblocktrans %}
-<br><br> {{ message|safe }}
-
+    {% blocktrans %}You have been invited by {{ user_name }} to join the site {{ site_name }}.{% endblocktrans %}
+    {% blocktrans %}Follow the link below to become a member of the site.{% endblocktrans %}<br><br>
+    <a href="{{ link }}">{{ link }}</a><br><br>
+    {{ message|safe }}
 {% endblock %}

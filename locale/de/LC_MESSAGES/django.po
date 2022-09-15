@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Duits\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-09-13 17:46+0200\n"
+"POT-Creation-Date: 2022-09-15 10:31+0200\n"
 "PO-Revision-Date: 2021-05-26 10:55+0200\n"
 "Last-Translator: \n"
 "Language-Team: \n"
@@ -160,25 +160,65 @@ msgstr "Gruppen"
 msgid "Avatar export is ready"
 msgstr "Avatar-Export ist bereit"
 
+#: core/mail_builders/comment_without_account.py:51
+#, python-format
+msgid "Confirm comment on %(site_name)s"
+msgstr "Bestätigen Sie den Kommentar zu %(site_name)s"
+
 #: core/mail_builders/frequent_overview.py:70
 #, python-format
 msgid "Regular overview of %(site_name)s"
 msgstr "Regulärer Überblick über %(site_name)s"
 
-#: core/mail_builders/group_comment_without_account.py:51
+#: core/mail_builders/group_access_request.py:48
 #, python-format
-msgid "Confirm comment on %(site_name)s"
-msgstr "Bestätigen Sie den Kommentar zu %(site_name)s"
+msgid "Access request for the %(group_name)s group"
+msgstr "Zugriffsanfrage für die %(group_name)s-Gruppe"
 
-#: core/mail_builders/group_membership_approved.py:47
+#: core/mail_builders/group_change_ownership.py:46
+#, python-format
+msgid "Ownership of the %(group_name)s group has been transferred"
+msgstr "Das Eigentum an der %(group_name)s-Gruppe wurde übertragen"
+
+#: core/mail_builders/group_invite_to_group.py:51
+#, python-format
+msgid "Invitation to become a member of the %(group_name)s group"
+msgstr "Einladung, um Mitglied der %(group_name)s-Gruppe zu werden"
+
+#: core/mail_builders/group_membership_approved.py:49
 #, python-format
 msgid "Request for access to the %(group_name)s group has been approved"
 msgstr "Der Antrag auf Zugang zur %(group_name)s-Gruppe wurde genehmigt"
 
-#: core/mail_builders/group_welcome.py:57
+#: core/mail_builders/group_message.py:57
+#, python-brace-format
+msgid "Copy: Message from group {0}: {1}"
+msgstr "Kopieren: Nachricht von Gruppe {0}: {1}"
+
+#: core/mail_builders/group_message.py:58
+#, python-brace-format
+msgid "Message from group {0}: {1}"
+msgstr "Nachricht von der Gruppe {0}: {1}"
+
+#: core/mail_builders/group_reject_membership.py:46
+#, python-format
+msgid "Request for access to the %(group_name)s group has been refused"
+msgstr "Der Antrag auf Zugang zur %(group_name)s-Gruppe wurde abgelehnt"
+
+#: core/mail_builders/group_resend_invitation.py:46
+#, python-format
+msgid "Reminder to become a member of the %(group_name)s group"
+msgstr "Erinnerung, um Mitglied der %(group_name)s-Gruppe zu werden"
+
+#: core/mail_builders/group_welcome.py:56
 #, python-format
 msgid "Welcome to %(group_name)s"
 msgstr "Wilkommen zu: %(group_name)s"
+
+#: core/mail_builders/invite_to_site.py:53
+#, python-format
+msgid "You are invited to join site %(site_name)s"
+msgstr "Sie sind eingeladen, sich bei der Site %(site_name)s anzumelden"
 
 #: core/mail_builders/notifications.py:60
 #: core/mail_builders/notifications.py:69
@@ -195,6 +235,34 @@ msgstr "Benachrichtigung über %(entity_type)s in Gruppe %(entity_group_name)s"
 #, python-format
 msgid "New notifications at %(site_name)s"
 msgstr "Neue Benachrichtigungen bei %(site_name)s"
+
+#: core/mail_builders/site_access_changed.py:27
+msgid "closed"
+msgstr "geschlossen"
+
+#: core/mail_builders/site_access_changed.py:27
+msgid "public"
+msgstr "Öffentlich"
+
+#: core/mail_builders/site_access_changed.py:46
+#, python-format
+msgid "Site access level changed for %(site_name)s"
+msgstr "Site-Zugriffsebene geändert für %(site_name)s"
+
+#: core/mail_builders/site_access_request.py:46
+#, python-format
+msgid "New access request for %(site_name)s"
+msgstr "Neue Zugriffsanfrage für %(site_name)s"
+
+#: core/mail_builders/site_access_request_accepted.py:46
+#, python-format
+msgid "You are now member of: %(site_name)s"
+msgstr "Sie sind jetzt Mitglied von: %(site_name)s"
+
+#: core/mail_builders/site_access_request_denied.py:46
+#, python-format
+msgid "Membership request declined for: %(site_name)s"
+msgstr "Der Antrag auf Mitgliedschaft wurde abgelehnt für: %(site_name)s"
 
 #: core/mail_builders/user_assign_admin_for_admin.py:48
 #, python-format
@@ -221,6 +289,14 @@ msgstr "Ein Site-Administrator wurde von %(site_name)s entfernt"
 #, python-format
 msgid "Account of %(name_deleted_user)s removed"
 msgstr "Konto von %(name_deleted_user)s wurde entfernt"
+
+#: core/mail_builders/user_import_failed_mailer.py:50
+msgid "Import failed"
+msgstr "Import fehlgeschlagen"
+
+#: core/mail_builders/user_import_success_mailer.py:47
+msgid "Import was a success"
+msgstr "Import war erfolgreich"
 
 #: core/mail_builders/user_request_delete_for_admin.py:42
 #: core/mail_builders/user_request_delete_for_user.py:40
@@ -254,34 +330,6 @@ msgstr "In Arbeit"
 msgid "Ready"
 msgstr "Bereit"
 
-#: core/resolvers/mutation_change_group_role.py:43
-#, python-format
-msgid "Ownership of the %(group_name)s group has been transferred"
-msgstr "Das Eigentum an der %(group_name)s-Gruppe wurde übertragen"
-
-#: core/resolvers/mutation_edit_site_setting.py:403
-msgid "closed"
-msgstr "geschlossen"
-
-#: core/resolvers/mutation_edit_site_setting.py:403
-msgid "public"
-msgstr "Öffentlich"
-
-#: core/resolvers/mutation_edit_site_setting.py:404
-#, python-format
-msgid "Site access level changed for %(site_name)s"
-msgstr "Site-Zugriffsebene geändert für %(site_name)s"
-
-#: core/resolvers/mutation_handle_site_access_request.py:38
-#, python-format
-msgid "You are now member of: %(site_name)s"
-msgstr "Sie sind jetzt Mitglied von: %(site_name)s"
-
-#: core/resolvers/mutation_handle_site_access_request.py:42
-#, python-format
-msgid "Membership request declined for: %(site_name)s"
-msgstr "Der Antrag auf Mitgliedschaft wurde abgelehnt für: %(site_name)s"
-
 #: core/resolvers/mutation_import_users.py:17
 msgid "email"
 msgstr "E-Mail-Adresse"
@@ -289,41 +337,6 @@ msgstr "E-Mail-Adresse"
 #: core/resolvers/mutation_import_users.py:18
 msgid "name"
 msgstr "Name"
-
-#: core/resolvers/mutation_invite_to_group.py:93
-#, python-format
-msgid "Invitation to become a member of the %(group_name)s group"
-msgstr "Einladung, um Mitglied der %(group_name)s-Gruppe zu werden"
-
-#: core/resolvers/mutation_invite_to_site.py:51
-#, python-format
-msgid "You are invited to join site %(site_name)s"
-msgstr "Sie sind eingeladen, sich bei der Site %(site_name)s anzumelden"
-
-#: core/resolvers/mutation_join_group.py:42
-#, python-format
-msgid "Access request for the %(group_name)s group"
-msgstr "Zugriffsanfrage für die %(group_name)s-Gruppe"
-
-#: core/resolvers/mutation_reject_membership_request.py:42
-#, python-format
-msgid "Request for access to the %(group_name)s group has been refused"
-msgstr "Der Antrag auf Zugang zur %(group_name)s-Gruppe wurde abgelehnt"
-
-#: core/resolvers/mutation_resend_group_invitation.py:36
-#, python-format
-msgid "Reminder to become a member of the %(group_name)s group"
-msgstr "Erinnerung, um Mitglied der %(group_name)s-Gruppe zu werden"
-
-#: core/resolvers/mutation_send_message_to_group.py:64
-#, python-brace-format
-msgid "Message from group {0}: {1}"
-msgstr "Nachricht von der Gruppe {0}: {1}"
-
-#: core/resolvers/mutation_send_message_to_group.py:76
-#, python-brace-format
-msgid "Copy: Message from group {0}: {1}"
-msgstr "Kopieren: Nachricht von Gruppe {0}: {1}"
 
 #: core/resolvers/query_site.py:126
 msgid "Activity stream"
@@ -344,14 +357,6 @@ msgstr "Editor"
 #: core/resolvers/query_site.py:219
 msgid "Question expert"
 msgstr "Experten fragen"
-
-#: core/tasks/misc.py:123
-msgid "Import was a success"
-msgstr "Import war erfolgreich"
-
-#: core/tasks/misc.py:123
-msgid "Import failed"
-msgstr "Import fehlgeschlagen"
 
 #: core/templates/check_in/already_checked_in.html:8
 msgid "Already checked in"
@@ -425,7 +430,7 @@ msgstr ""
 #: core/templates/email/toggle_request_delete_user_cancelled_admin.html:6
 #: core/templates/email/toggle_request_delete_user_requested_admin.html:6
 #: core/templates/email/user_role_admin_assigned_for_admins.html:6
-#: core/templates/email/user_role_admin_removed_for_admins.html:6
+#: core/templates/email/user_role_admin_removed_for_admins.html:5
 msgid "Notification for website administrator"
 msgstr "Benachrichtigung für Website-Administrator"
 
@@ -525,6 +530,17 @@ msgstr ""
 "Bitte besuchen Sie die <a href=\"%(site_url)s/superadmin/scanlog\">Dateiscanprotokolle</a> zur Überprüfung.\n"
 "\n"
 
+#: core/templates/email/group_access_request.html:6
+#, python-format
+msgid ""
+"The user %(user_name)s (%(user_obfuscated_email)s) has requested access to "
+"the group %(group_name)s. Follow the link below to review the request: <br "
+"/><a href=\"%(link)s\">%(link)s</a> "
+msgstr ""
+"Der Benutzer %(user_name)s (%(user_obfuscated_email)s) hat den Zugriff auf "
+"die Gruppe %(group_name)s angefordert. Folgen Sie dem untenstehenden Link, "
+"um den Antrag zu überprüfen: <br /><a href=“%(link)s”>%(link)s</a> "
+
 #: core/templates/email/group_ownership_transferred.html:6
 #, python-format
 msgid ""
@@ -547,27 +563,17 @@ msgstr ""
 "beizutreten. Folgen Sie dem unten stehenden Link, um Mitglied der Gruppe zu "
 "werden: <br /><a href=“%(link)s”>%(link)s</a> "
 
-#: core/templates/email/invite_to_site.html:6
+#: core/templates/email/invite_to_site.html:5
 #, python-format
-msgid ""
-"You have been invited by %(user_name)s to join the site %(site_name)s. "
-"Follow the link below to become a member of the site: <br /><a "
-"href=\"%(link)s\">%(link)s</a> "
+msgid "You have been invited by %(user_name)s to join the site %(site_name)s."
 msgstr ""
 "Sie wurden von %(user_name)s eingeladen, der Website %(site_name)s "
-"beizutreten. Folgen Sie dem unten stehenden Link, um Mitglied der Website zu"
-" werden: <br /><a href=“%(link)s”>%(link)s</a> "
+"%(site_name)sbeizutreten."
 
-#: core/templates/email/join_group.html:6
-#, python-format
-msgid ""
-"The user %(user_name)s (%(user_obfuscated_email)s) has requested access to "
-"the group %(group_name)s. Follow the link below to review the request: <br "
-"/><a href=\"%(link)s\">%(link)s</a> "
+#: core/templates/email/invite_to_site.html:6
+msgid "Follow the link below to become a member of the site."
 msgstr ""
-"Der Benutzer %(user_name)s (%(user_obfuscated_email)s) hat den Zugriff auf "
-"die Gruppe %(group_name)s angefordert. Folgen Sie dem untenstehenden Link, "
-"um den Antrag zu überprüfen: <br /><a href=“%(link)s”>%(link)s</a> "
+"Folgen Sie dem unten stehenden Link, um Mitglied der Website zu werden."
 
 #: core/templates/email/notifications/blog.html:3
 msgid " has posted a new Blog: "
@@ -640,7 +646,7 @@ msgstr "Persönliche Nachricht"
 msgid "Direct notification"
 msgstr "Direkte Benachrichtigung"
 
-#: core/templates/email/send_notification_emails.html:10 core/views.py:662
+#: core/templates/email/send_notification_emails.html:10 core/views.py:647
 msgid "Notification overview"
 msgstr "Übersicht über die Benachrichtigung"
 
@@ -657,7 +663,7 @@ msgstr ""
 "Klicken Sie <a href=\"%(mail_settings_url)s\">hier</a>, um zu ändern, wie "
 "oft Sie Benachrichtigungs-E-Mails erhalten möchten."
 
-#: core/templates/email/send_overview_emails.html:22 core/views.py:659
+#: core/templates/email/send_overview_emails.html:22 core/views.py:644
 msgid "Periodic overview"
 msgstr "Regelmäßige Übersicht"
 
@@ -718,18 +724,15 @@ msgstr ""
 #: core/templates/email/site_access_request_accepted.html:7
 #, python-format
 msgid ""
-"Hello %(request_name)s, <br><br>\n"
+"Hello %(request_name)s,<br><br>\n"
 "\n"
-"    The administrator approved your access request to %(site_name)s . Go to this link to get access to the site:<br><br>\n"
-"\n"
-"    %(site_url)s<br>\n"
+"    The administrator approved your access request to %(site_name)s. Go to this link to get access to the site:<br><br>\n"
 "    "
 msgstr ""
-"Hallo %(request_name)s, <br><br>\n"
+"Hallo %(request_name)s,<br><br>\n"
 "\n"
-" der Administrator hat Ihre Zugriffsanfrage für %(site_name)s genehmigt. Gehen Sie zu diesem Link, um Zugriff auf die Site zu erhalten:<br><br>\n"
-"\n"
-"%(site_url)s<br>"
+"    der Administrator hat Ihre Zugriffsanfrage für %(site_name)s genehmigt. Gehen Sie zu diesem Link, um Zugriff auf die Site zu erhalten:<br><br>\n"
+"    "
 
 #: core/templates/email/site_access_request_denied.html:6
 #, python-format
@@ -878,7 +881,7 @@ msgstr ""
 "\n"
 "Wenn Sie glauben, dass dies irrtümlich geschehen ist, wenden Sie sich bitte an einen der anderen Website-Administratoren.\n"
 
-#: core/templates/email/user_role_admin_removed_for_admins.html:11
+#: core/templates/email/user_role_admin_removed_for_admins.html:10
 #, python-format
 msgid ""
 "Hi,<br><br>\n"
@@ -980,7 +983,7 @@ msgstr ""
 "Um diese Site zu betreten, müssen Sie den Zugriff vom Administrator "
 "anfordern. Klicken Sie auf die Schaltfläche, um den Zugriff anzufordern."
 
-#: core/templates/registration/request.html:23 core/views.py:506
+#: core/templates/registration/request.html:23 core/views.py:491
 msgid "Name"
 msgstr "Name"
 
@@ -1009,24 +1012,19 @@ msgstr ""
 "Zugang wird angefordert. Sie erhalten eine E-Mail, wenn die Anfrage "
 "angenommen wird."
 
-#: core/views.py:193
-#, python-format
-msgid "New access request for %(site_name)s"
-msgstr "Neue Zugriffsanfrage für %(site_name)s"
-
-#: core/views.py:507
+#: core/views.py:492
 msgid "E-mail"
 msgstr "E-Mail"
 
-#: core/views.py:508
+#: core/views.py:493
 msgid "Group"
 msgstr "Gruppe"
 
-#: core/views.py:602
+#: core/views.py:587
 msgid "Your changes are saved"
 msgstr "Ihre Änderungen werden gespeichert"
 
-#: core/views.py:665
+#: core/views.py:650
 #, python-format
 msgid "Successfully unsubscribed %(email)s from %(list_name)s"
 msgstr "Erfolgreich abbestellt %(email)s von %(list_name)s"
@@ -1351,7 +1349,7 @@ msgstr ""
 msgid "Message to event"
 msgstr "Nachricht an die Veranstaltung"
 
-#: file/tasks.py:68
+#: file/mail_builders/file_scan_found.py:45
 #, python-format
 msgid "Filescan found suspicous files on %(site_url)s"
 msgstr "Filescan hat verdächtige Dateien auf %(site_url)sgefunden"

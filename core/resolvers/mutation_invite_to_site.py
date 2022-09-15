@@ -1,14 +1,12 @@
 from graphql import GraphQLError
 from django.core.exceptions import ValidationError, ObjectDoesNotExist
 from django.core.validators import validate_email
-from django.utils.html import format_html
-from django.utils.translation import ugettext_lazy
+
+from core.mail_builders.invite_to_site import schedule_invite_to_site_mail
 from core.models import SiteInvitation
-from core import config
 from core.constances import NOT_LOGGED_IN, INVALID_EMAIL, USER_NOT_SITE_ADMIN, USER_ROLES
-from core.lib import clean_graphql_input, get_base_url, generate_code, get_default_email_context
-from core.tasks import send_mail_multi
-from django_tenants.utils import parse_tenant_config_path
+from core.lib import clean_graphql_input, generate_code
+
 
 def validate_email_addresses(email_addresses):
     if not email_addresses:
@@ -19,6 +17,7 @@ def validate_email_addresses(email_addresses):
         except ValidationError:
             return False
     return True
+
 
 def resolve_invite_to_site(_, info, input):
     # pylint: disable=redefined-builtin
@@ -37,8 +36,6 @@ def resolve_invite_to_site(_, info, input):
     if not validate_email_addresses(email_addresses):
         raise GraphQLError(INVALID_EMAIL)
 
-    site_name = config.NAME
-
     for email in email_addresses:
         code = generate_code()
         try:
@@ -46,23 +43,11 @@ def resolve_invite_to_site(_, info, input):
             invite.code = code
             invite.save()
         except ObjectDoesNotExist:
-            invite = SiteInvitation.objects.create(email=email, code=code)
+            SiteInvitation.objects.create(email=email, code=code)
 
-        subject = ugettext_lazy("You are invited to join site %(site_name)s") % {'site_name': site_name}
-        url = get_base_url() + '/login?invitecode='
-
-        try:
-            schema_name = parse_tenant_config_path("")
-            context = get_default_email_context(user)
-            link = url + code
-            context['link'] = link
-            context['message'] = ""
-            if 'message' in clean_input:
-                context['message'] = format_html(clean_input.get('message'))
-            send_mail_multi.delay(schema_name, subject, 'email/invite_to_site.html', context, email)
-        except Exception:
-            # TODO: logging
-            raise Exception
+        schedule_invite_to_site_mail(email=email,
+                                     sender=user,
+                                     message=clean_input.get('message'))
 
     return {
         "success": True

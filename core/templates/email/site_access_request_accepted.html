@@ -4,14 +4,14 @@
 
 {% block body %}
 
-    {% blocktrans %}Hello {{ request_name }}, <br><br>
+    {% blocktrans %}Hello {{ request_name }},<br><br>
 
-    The administrator approved your access request to {{ site_name }} . Go to this link to get access to the site:<br><br>
-
-    {{ site_url }}<br>
+    The administrator approved your access request to {{ site_name }}. Go to this link to get access to the site:<br><br>
     {% endblocktrans %}
 
-    <br>{{ intro|linebreaks }}
+    <a href="{{ site_url }}">{{ site_url }}</a><br><br>
+
+    {{ intro|linebreaks }}
     <br><br>
 
 {% endblock %}

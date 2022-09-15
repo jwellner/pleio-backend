@@ -1,9 +1,10 @@
 import csv
 import json
 import logging
+
+from core.mail_builders.site_access_request import schedule_site_access_request_mail
 from core.models.agreement import CustomAgreement
 
-import core.tasks
 import qrcode
 from core.resolvers.query_site import get_settings
 from core import config
@@ -12,7 +13,7 @@ from core.models import (
     CommentRequest, Comment
 )
 from core.lib import (
-    access_id_to_acl, get_default_email_context, tenant_schema,
+    access_id_to_acl, tenant_schema,
     get_exportable_content_types, get_model_by_subtype, datetime_isoformat, get_base_url, is_schema_public
 )
 from core.forms import EditEmailSettingsForm, OnboardingForm, RequestAccessForm
@@ -170,31 +171,15 @@ def request_access(request):
         form = RequestAccessForm(request.POST)
 
         if form.is_valid():
-            send_notification = False
-
-            try:
-                access_request = SiteAccessRequest.objects.get(email=claims.get('email'))
-            except ObjectDoesNotExist:
-                access_request = SiteAccessRequest(
+            if not SiteAccessRequest.objects.filter(email=claims.get('email')).exists():
+                SiteAccessRequest.objects.create(
                     email=claims.get('email'),
                     name=claims.get('name'),
                     claims=claims
                 )
-                access_request.save()
-                send_notification = True
-
-                # Only send admin mail on first request.
-                admins = User.objects.filter(roles__contains=[USER_ROLES.ADMIN])
-
-            if send_notification:
-                context = get_default_email_context()
-                context['request_name'] = claims.get('name')
-                context['site_admin_url'] = context['site_url'] + '/admin/users/access-requests'
-                subject = _("New access request for %(site_name)s") % {'site_name': context["site_name"]}
-
-                for admin in admins:
-                    context['admin_name'] = admin.name
-                    core.tasks.send_mail_multi.delay(tenant_schema(), subject, 'email/site_access_request.html', context, admin.email)
+                for admin in User.objects.filter(roles__contains=[USER_ROLES.ADMIN]):
+                    schedule_site_access_request_mail(name=claims.get('name'),
+                                                      admin=admin)
 
             return redirect('access_requested')
 
