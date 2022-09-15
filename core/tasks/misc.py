@@ -4,19 +4,21 @@ import signal_disabler
 from PIL import Image
 from io import BytesIO
 from django.core.files.base import ContentFile
+from django_tenants.utils import schema_context
+from django.utils import translation
 from celery import shared_task
 from celery.utils.log import get_task_logger
+
 from core import config
 from core.lib import access_id_to_acl
-from core.tasks.mail_tasks import send_mail_multi
+from core.mail_builders.user_import_failed_mailer import schedule_user_import_failed
+from core.mail_builders.user_import_success_mailer import schedule_user_import_success
 from core.models import Group, Entity, Widget, Comment, ProfileField, UserProfileField, ResizedImage
-from django.utils import translation
-from django.utils.translation import ugettext_lazy
-from django_tenants.utils import schema_context
 from tenants.models import Client
 from user.models import User
 
 logger = get_task_logger(__name__)
+
 
 @shared_task(bind=True, ignore_result=True)
 def import_users(self, schema_name, fields, csv_location, performing_user_guid):
@@ -25,28 +27,6 @@ def import_users(self, schema_name, fields, csv_location, performing_user_guid):
     '''
     Import users
     '''
-
-    def get_import_users_data(fields, row):
-        data = {}
-        for field in fields:
-            field['value'] = row[field['csvColumn']]
-            data[field['userField']] = field
-        return data
-
-    def get_import_users_user(data):
-
-        if 'id' in data:
-            try:
-                return User.objects.get(id=data['id']['value'])
-            except Exception:
-                pass
-        if 'email' in data:
-            try:
-                return User.objects.get(email=data['email']['value'])
-            except Exception:
-                pass
-
-        return False
 
     with schema_context(schema_name):
         if config.LANGUAGE:
@@ -70,41 +50,9 @@ def import_users(self, schema_name, fields, csv_location, performing_user_guid):
             with open(csv_location) as csvfile:
                 reader = csv.DictReader(csvfile, delimiter=';')
                 for row in reader:
-                    data = get_import_users_data(fields, row)
-                    user = get_import_users_user(data)
 
-                    if not user:
-                        if 'name' in data and 'email' in data:
-                            try:
-                                user = User.objects.create(email=data['email']['value'], name=data['name']['value'])
-                                stats['created'] += 1
-                            except Exception:
-                                stats['error'] += 1
-                        else:
-                            stats['error'] += 1
-                    else:
-                        stats['updated'] += 1
-
-                    if user:
-                        # create profile fields
-                        for field, values in {d: data[d] for d in data if d not in ['id', 'email', 'name']}.items():
-
-                            profile_field = ProfileField.objects.get(id=field)
-
-                            if profile_field:
-                                user_profile_field, created = UserProfileField.objects.get_or_create(
-                                    profile_field=profile_field,
-                                    user_profile=user.profile
-                                )
-
-                                user_profile_field.value = values['value']
-
-                                if created:
-                                    user_profile_field.read_access = access_id_to_acl(user, values['accessId'])
-                                elif values['forceAccess']:
-                                    user_profile_field.read_access = access_id_to_acl(user, values['accessId'])
-
-                                user_profile_field.save()
+                    result = UserCsvRowImporter(row, fields).apply()
+                    stats[result] += 1
 
                     stats['processed'] += 1
 
@@ -120,23 +68,76 @@ def import_users(self, schema_name, fields, csv_location, performing_user_guid):
             error_message = "Import failed with message %s" % e
             logger.error(error_message)
 
-        subject = ugettext_lazy("Import was a success") if success else ugettext_lazy("Import failed")
-        template = "email/user_import_success.html" if success else "email/user_import_failed.html"
+        if success:
+            schedule_user_import_success(performing_user, stats)
+        else:
+            schedule_user_import_failed(performing_user, stats, error_message)
 
-        tenant = Client.objects.get(schema_name=schema_name)
-        context = {
-            'site_name': config.NAME,
-            'site_url': 'https://' + tenant.domains.first().domain,
-            'primary_color': config.COLOR_PRIMARY,
-            'header_color': config.COLOR_HEADER if config.COLOR_HEADER else config.COLOR_PRIMARY,
-            'user_name': performing_user.name,
-            'stats_created': stats.get('created', 0),
-            'stats_updated': stats.get('updated', 0),
-            'stats_error': stats.get('error', 0),
-            'error_message': error_message
-        }
 
-        send_mail_multi.delay(schema_name, subject, template, context, performing_user.email)
+class UserCsvRowImporter():
+    def __init__(self, record, fields):
+        self.record = record
+        self.fields = fields
+
+    def apply(self):
+        data = self.get_import_users_data()
+        user: User = self.get_import_users_user(data)
+
+        if not user:
+            if 'name' in data and 'email' in data:
+                try:
+                    user = User.objects.create(email=data['email']['value'], name=data['name']['value'])
+                    status = 'created'
+                except Exception:
+                    status = 'error'
+            else:
+                status = 'error'
+        else:
+            status = 'updated'
+
+        if user:
+            # create profile fields
+            for field, values in {d: data[d] for d in data if d not in ['id', 'email', 'name']}.items():
+
+                profile_field = ProfileField.objects.get(id=field)
+
+                if profile_field:
+                    user_profile_field, created = UserProfileField.objects.get_or_create(
+                        profile_field=profile_field,
+                        user_profile=user.profile
+                    )
+
+                    user_profile_field.value = values['value']
+
+                    if created:
+                        user_profile_field.read_access = access_id_to_acl(user, values['accessId'])
+                    elif values['forceAccess']:
+                        user_profile_field.read_access = access_id_to_acl(user, values['accessId'])
+
+                    user_profile_field.save()
+
+        return status
+
+    def get_import_users_data(self):
+        data = {}
+        for field in self.fields:
+            field['value'] = self.record[field['csvColumn']]
+            data[field['userField']] = field
+        return data
+
+    @staticmethod
+    def get_import_users_user(data):
+        if 'id' in data:
+            try:
+                return User.objects.get(id=data['id']['value'])
+            except Exception:
+                pass
+        if 'email' in data:
+            try:
+                return User.objects.get(email=data['email']['value'])
+            except Exception:
+                pass
+
 
 @shared_task(bind=True, ignore_result=True)
 @signal_disabler.disable()
@@ -145,7 +146,6 @@ def replace_domain_links(self, schema_name, replace_domain=None):
     # pylint: disable=too-many-locals
     # pylint: disable=too-many-statements
     # pylint: disable=too-many-branches
-
 
     '''
     Replace all links with old domain to new
@@ -215,9 +215,8 @@ def replace_domain_links(self, schema_name, replace_domain=None):
             welcome_message = _replace_links(group.welcome_message)
 
             if rich_description != group.rich_description or \
-                introduction != group.introduction or \
-                welcome_message != group.welcome_message:
-
+                    introduction != group.introduction or \
+                    welcome_message != group.welcome_message:
                 group.rich_description = rich_description
                 group.introduction = introduction
                 group.welcome_message = welcome_message
@@ -250,6 +249,7 @@ def replace_domain_links(self, schema_name, replace_domain=None):
                 widget.save()
 
     logger.info("Done replacing links")
+
 
 @shared_task(bind=True)
 def image_resize(self, schema_name, resize_image_id):
