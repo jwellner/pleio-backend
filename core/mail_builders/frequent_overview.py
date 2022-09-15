@@ -19,6 +19,8 @@ def schedule_frequent_overview_mail(user, interval):
 
 class FrequentOverviewMailer(TemplateMailerBase):
 
+    _unsubscribe_url = None
+
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.user = load_entity_by_id(kwargs['user'], ['user.User'])
@@ -39,17 +41,21 @@ class FrequentOverviewMailer(TemplateMailerBase):
         context['featured_enabled'] = config.EMAIL_OVERVIEW_ENABLE_FEATURED
         context['featured_title'] = config.EMAIL_OVERVIEW_FEATURED_TITLE
         context['subject'] = self.get_subject()
+        context['unsubscribe_url'] = self.unsubscribe_url
         return context
 
     def get_headers(self):
         headers = super().get_headers()
-        headers['List-Unsubscribe'] = self._create_unsubscribe_header()
+        headers['List-Unsubscribe'] = self.unsubscribe_url
         return headers
 
-    def _create_unsubscribe_header(self):
-        tokenizer = UnsubscribeTokenizer()
-        url = tokenizer.create_url(self.user, tokenizer.TYPE_OVERVIEW)
-        return get_full_url(url)
+    @property
+    def unsubscribe_url(self):
+        if not self._unsubscribe_url:
+            tokenizer = UnsubscribeTokenizer()
+            url = tokenizer.create_url(self.user, tokenizer.TYPE_OVERVIEW)
+            self._unsubscribe_url = get_full_url(url)
+        return self._unsubscribe_url
 
     def get_language(self):
         return self.user.get_language()

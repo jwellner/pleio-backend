@@ -46,20 +46,24 @@ class TestNotificationsMailerTestCase(PleioTenantTestCase):
         return notification, serialize_notification(notification)
 
     @override_local_config(EMAIL_NOTIFICATION_SHOW_EXCERPT=True)
+    @mock.patch("core.mail_builders.notifications.UnsubscribeTokenizer.create_url")
+    @mock.patch("core.mail_builders.notifications.get_full_url")
     @mock.patch("core.mail_builders.base.MailerBase.build_context")
-    def test_mailer_context(self, mocked_build_context):
+    def test_mailer_context(self, mocked_build_context, get_full_url, create_url):
         mocked_build_context.return_value = {}
+        get_full_url.return_value = Faker().url()
         self.mailer.notifications = self.notifications
 
         self.assertDictEqual(self.mailer.get_context(), {
             'mail_type': self.mail_type,
             'notifications': self.notifications,
             'show_excerpt': True,
+            'unsubscribe_url': get_full_url.return_value
         })
         self.assertEqual(mocked_build_context.called, True)
         self.assertEqual(mocked_build_context.call_args.kwargs['user'], self.recipient)
 
-    @mock.patch("core.utils.mail.UnsubscribeTokenizer.create_url")
+    @mock.patch("core.mail_builders.notifications.UnsubscribeTokenizer.create_url")
     @mock.patch("core.mail_builders.notifications.get_full_url")
     def test_mailer_headers(self, mocked_get_full_url, mocked_create_unsubscribe_url):
         mocked_create_unsubscribe_url.return_value = Faker().url()

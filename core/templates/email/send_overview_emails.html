@@ -117,5 +117,5 @@
 {% endblock %}
 
 {% block footer_settings %}
-    {% blocktrans %}Click <a href="{{mail_settings_url}}">here</a> to change how often you want to receive notifications about new content.{% endblocktrans %}
+    <a href="{{ unsubscribe_url }}" style="color: #606160;">{% trans "Unsubscribe" %}</a> | <a href="{{ mail_settings_url }}" style="color: #606160">{% trans "Adjust your email settings" %}</a>
 {% endblock %}
