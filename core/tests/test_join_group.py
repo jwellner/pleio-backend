@@ -91,7 +91,7 @@ class JoinGroupTestCase(PleioTenantTestCase):
         self.assertEqual(self.user2.memberships.filter(group=self.group, type="member").count(), 1)
 
     @mock.patch('core.resolvers.mutation_join_group.schedule_group_access_request_mail')
-    def test_join_group_on_request(self, mocked_send_mail_multi):
+    def test_join_group_on_request(self, mocked_mail):
         variables = {"group": {"guid": self.group_on_request.guid}}
 
         self.graphql_client.force_login(self.user2)
@@ -100,7 +100,7 @@ class JoinGroupTestCase(PleioTenantTestCase):
 
         self.assertEqual(data["group"]["memberCount"], 3)
         self.assertEqual(data["group"]["members"]["total"], 3)
-        self.assertEqual(mocked_send_mail_multi.call_count, 3)
+        self.assertEqual(mocked_mail.call_count, 3)
 
         self.graphql_client.force_login(self.user3)
         result = self.graphql_client.post(self.mutation, variables)

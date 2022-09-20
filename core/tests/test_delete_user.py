@@ -28,7 +28,7 @@ class DeleteUserTestCase(PleioTenantTestCase):
         super().tearDown()
 
     @mock.patch('core.resolvers.mutation_delete_user.schedule_user_delete_complete_mail')
-    def test_delete_admin_by_admin(self, mocked_send_mail_multi):
+    def test_delete_admin_by_admin(self, mocked_mail):
         self.variables['input']['guid'] = self.admin2.guid
 
         self.graphql_client.force_login(self.admin)
@@ -36,16 +36,16 @@ class DeleteUserTestCase(PleioTenantTestCase):
         data = result["data"]
 
         self.assertEqual(data["deleteUser"]["success"], True)
-        self.assertEqual(mocked_send_mail_multi.call_count, 2)
+        self.assertEqual(mocked_mail.call_count, 2)
 
     @mock.patch('core.resolvers.mutation_delete_user.schedule_user_delete_complete_mail')
-    def test_delete_user_by_admin(self, mocked_send_mail_multi):
+    def test_delete_user_by_admin(self, mocked_mail):
         self.graphql_client.force_login(self.admin)
         result = self.graphql_client.post(self.mutation, self.variables)
         data = result["data"]
 
         self.assertEqual(data["deleteUser"]["success"], True)
-        mocked_send_mail_multi.assert_called_once()
+        self.assertEqual(mocked_mail.call_count, 1)
 
     def test_delete_user_by_user(self):
         with self.assertGraphQlError("could_not_delete"):
