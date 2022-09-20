@@ -177,7 +177,7 @@ class ImportUsersTestCase(PleioTenantTestCase):
             self.graphql_client.post(mutation, variables)
 
     @patch('core.tasks.misc.schedule_user_import_success')
-    def test_import_user_step2_success_mail(self, mocked_send_mail_multi):
+    def test_import_user_step2_success_mail(self, mocked_mail):
         fields = [
             {"csvColumn": "column2", "userField": 'email'},
             {"csvColumn": "column3", "userField": 'name'},
@@ -187,10 +187,10 @@ class ImportUsersTestCase(PleioTenantTestCase):
 
         import_users.s(connection.schema_name, fields, self.usersCsv, self.admin.guid).apply()
 
-        self.assertEqual(mocked_send_mail_multi.call_count, 1)
+        self.assertEqual(mocked_mail.call_count, 1)
 
     @patch('core.tasks.misc.schedule_user_import_failed')
-    def test_import_user_step2_error_mail(self, mocked_send_mail_multi):
+    def test_import_user_step2_error_mail(self, mocked_mail):
         fields = [
             {"csvColumn": "column2", "userField": 'email'},
             {"csvColumn": "column3", "userField": 'name'},
@@ -200,4 +200,4 @@ class ImportUsersTestCase(PleioTenantTestCase):
 
         import_users.s(connection.schema_name, fields, '/tmp/does/not/exist.csv', self.admin.guid).apply()
 
-        self.assertEqual(mocked_send_mail_multi.call_count, 1)
+        self.assertEqual(mocked_mail.call_count, 1)

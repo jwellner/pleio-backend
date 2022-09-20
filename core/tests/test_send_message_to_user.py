@@ -85,7 +85,7 @@ class SendMessageToUserTestCase(PleioTenantTestCase):
             self.graphql_client.post(mutation, variables)
 
     @mock.patch('core.resolvers.mutation_send_message_to_user.schedule_user_send_message_mail')
-    def test_call_send_email(self, mocked_send_mail_multi):
+    def test_call_send_email(self, mocked_mail):
         mutation = """
             mutation SendMessageModal($input: sendMessageToUserInput!) {
                 sendMessageToUser(input: $input) {
@@ -104,10 +104,10 @@ class SendMessageToUserTestCase(PleioTenantTestCase):
         self.graphql_client.force_login(self.user1)
         self.graphql_client.post(mutation, variables)
 
-        mocked_send_mail_multi.assert_called_once()
+        self.assertEqual(mocked_mail.call_count, 1)
 
     @mock.patch('core.resolvers.mutation_send_message_to_user.schedule_user_send_message_mail')
-    def test_call_send_email_with_copy_to_self(self, mocked_send_mail_multi):
+    def test_call_send_email_with_copy_to_self(self, mocked_mail):
         mutation = """
             mutation SendMessageModal($input: sendMessageToUserInput!) {
                 sendMessageToUser(input: $input) {
@@ -127,10 +127,10 @@ class SendMessageToUserTestCase(PleioTenantTestCase):
         self.graphql_client.force_login(self.user1)
         self.graphql_client.post(mutation, variables)
 
-        assert mocked_send_mail_multi.called
+        self.assertTrue(mocked_mail.called)
 
     @mock.patch('core.resolvers.mutation_send_message_to_user.schedule_user_send_message_mail')
-    def test_call_not_send_email_with_copy_to_self(self, mocked_send_mail_multi):
+    def test_call_not_send_email_with_copy_to_self(self, mocked_mail):
         mutation = """
             mutation SendMessageModal($input: sendMessageToUserInput!) {
                 sendMessageToUser(input: $input) {
@@ -150,4 +150,4 @@ class SendMessageToUserTestCase(PleioTenantTestCase):
         self.graphql_client.force_login(self.user1)
         self.graphql_client.post(mutation, variables)
 
-        mocked_send_mail_multi.assert_called_once()
+        self.assertEqual(mocked_mail.call_count, 1)

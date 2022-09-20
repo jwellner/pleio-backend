@@ -32,7 +32,7 @@ class HandleSiteAccessRequestTestCase(FastTenantTestCase):
         self.user.delete()
 
     @mock.patch('core.resolvers.mutation_handle_site_access_request.schedule_site_access_request_accepted_mail')
-    def test_handle_access_request_by_admin(self, mocked_send_mail):
+    def test_handle_access_request_by_admin(self, mocked_mail):
 
         variables = {
             "input": {
@@ -54,10 +54,10 @@ class HandleSiteAccessRequestTestCase(FastTenantTestCase):
         self.assertTrue(SiteAccessRequest.objects.filter(email=self.request1.email, accepted=True).exists())
         self.assertFalse(User.objects.filter(email=self.request1.email).exists())
 
-        self.assertEqual(mocked_send_mail.call_count, 1)
+        self.assertEqual(mocked_mail.call_count, 1)
 
     @mock.patch('core.resolvers.mutation_handle_site_access_request.schedule_site_access_request_denied_mail')
-    def test_handle_access_request_deny_by_admin(self, mocked_send_mail):
+    def test_handle_access_request_deny_by_admin(self, mocked_mail):
 
         variables = {
             "input": {
@@ -78,10 +78,10 @@ class HandleSiteAccessRequestTestCase(FastTenantTestCase):
         self.assertEqual(data["handleSiteAccessRequest"]["success"], True)
         self.assertFalse(User.objects.filter(email=self.request1.email).exists())
 
-        self.assertEqual(mocked_send_mail.call_count, 1)
+        self.assertEqual(mocked_mail.call_count, 1)
 
     @mock.patch('core.resolvers.mutation_handle_site_access_request.schedule_site_access_request_denied_mail')
-    def test_handle_access_request_deny_silent_by_admin(self, mocked_send_mail):
+    def test_handle_access_request_deny_silent_by_admin(self, mocked_mail):
 
         variables = {
             "input": {
@@ -102,7 +102,7 @@ class HandleSiteAccessRequestTestCase(FastTenantTestCase):
 
         self.assertEqual(data["handleSiteAccessRequest"]["success"], True)
         self.assertFalse(User.objects.filter(email=self.request1.email).exists())
-        self.assertFalse(mocked_send_mail.called)
+        self.assertFalse(mocked_mail.called)
 
     def test_handle_access_request_by_user(self):
 

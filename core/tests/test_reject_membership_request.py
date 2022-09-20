@@ -31,7 +31,7 @@ class RejectMembershipRequestTestCase(PleioTenantTestCase):
         super().tearDown()
 
     @mock.patch('core.resolvers.mutation_reject_membership_request.schedule_reject_membership_mail')
-    def test_reject_group_access_request_by_group_owner(self, mocked_send_mail_multi):
+    def test_reject_group_access_request_by_group_owner(self, mocked_mail):
         mutation = """
             mutation MembershipRequestsList($input: rejectMembershipRequestInput!) {
                 rejectMembershipRequest(input: $input) {
@@ -69,10 +69,10 @@ class RejectMembershipRequestTestCase(PleioTenantTestCase):
 
         self.assertEqual(data["group"]["guid"], self.group1.guid)
         self.assertEqual(data["group"]["guid"], self.group1.guid)
-        mocked_send_mail_multi.assert_called_once()
+        self.assertEqual(mocked_mail.call_count, 1)
 
     @mock.patch('core.resolvers.mutation_reject_membership_request.schedule_reject_membership_mail')
-    def test_reject_group_access_request_by_admin(self, mocked_send_mail_multi):
+    def test_reject_group_access_request_by_admin(self, mocked_mail):
         mutation = """
             mutation MembershipRequestsList($input: rejectMembershipRequestInput!) {
                 rejectMembershipRequest(input: $input) {
@@ -109,10 +109,10 @@ class RejectMembershipRequestTestCase(PleioTenantTestCase):
         data = result['data']['rejectMembershipRequest']
 
         self.assertEqual(data["group"]["guid"], self.group1.guid)
-        mocked_send_mail_multi.assert_called_once()
+        self.assertEqual(mocked_mail.call_count, 1)
 
     @mock.patch('core.resolvers.mutation_reject_membership_request.schedule_reject_membership_mail')
-    def test_reject_group_access_request_by_other_user(self, mocked_send_mail_multi):
+    def test_reject_group_access_request_by_other_user(self, mocked_mail):
         mutation = """
             mutation MembershipRequestsList($input: rejectMembershipRequestInput!) {
                 rejectMembershipRequest(input: $input) {
@@ -148,10 +148,10 @@ class RejectMembershipRequestTestCase(PleioTenantTestCase):
             self.graphql_client.force_login(self.user3)
             self.graphql_client.post(mutation, variables)
 
-        assert not mocked_send_mail_multi.called
+        self.assertFalse(mocked_mail.called)
 
     @mock.patch('core.resolvers.mutation_reject_membership_request.schedule_reject_membership_mail')
-    def test_reject_group_access_request_by_anonymous(self, mocked_send_mail_multi):
+    def test_reject_group_access_request_by_anonymous(self, mocked_mail):
         mutation = """
             mutation MembershipRequestsList($input: rejectMembershipRequestInput!) {
                 rejectMembershipRequest(input: $input) {
@@ -186,4 +186,4 @@ class RejectMembershipRequestTestCase(PleioTenantTestCase):
         with self.assertGraphQlError("not_logged_in"):
             self.graphql_client.post(mutation, variables)
 
-        assert not mocked_send_mail_multi.called
+        self.assertFalse(mocked_mail.called)

@@ -57,7 +57,7 @@ class SendMessageToGroupTestCase(FastTenantTestCase):
         self.user5.delete()
 
     @mock.patch('core.resolvers.mutation_send_message_to_group.schedule_group_message_mail')
-    def test_send_message_to_group_by_group_owner(self, mocked_send_mail_multi):
+    def test_send_message_to_group_by_group_owner(self, mocked_mail):
         mutation = """
             mutation SendMessageModal($input: sendMessageToGroupInput!) {
                 sendMessageToGroup(input: $input) {
@@ -89,13 +89,13 @@ class SendMessageToGroupTestCase(FastTenantTestCase):
 
         self.assertEqual(data["sendMessageToGroup"]["group"]["guid"], self.group1.guid)
 
-        mails = [a.kwargs['receiver'].email for a in mocked_send_mail_multi.call_args_list]
+        mails = [a.kwargs['receiver'].email for a in mocked_mail.call_args_list]
         self.assertEqual(mails, [self.user2.email,
                                   self.user3.email],
                          msg="Expected to be send to two users with the initiator in the reply-to argument")
 
     @mock.patch('core.resolvers.mutation_send_message_to_group.schedule_group_message_mail')
-    def test_send_message_to_group_by_admin(self, mocked_send_mail_multi):
+    def test_send_message_to_group_by_admin(self, mocked_mail):
         mutation = """
             mutation SendMessageModal($input: sendMessageToGroupInput!) {
                 sendMessageToGroup(input: $input) {
@@ -124,10 +124,10 @@ class SendMessageToGroupTestCase(FastTenantTestCase):
 
         result = graphql_sync(schema, {"query": mutation, "variables": variables}, context_value={"request": request})
 
-        self.assertEqual(mocked_send_mail_multi.call_count, 2)
+        self.assertEqual(mocked_mail.call_count, 2)
 
     @mock.patch('core.resolvers.mutation_send_message_to_group.schedule_group_message_mail')
-    def test_send_message_to_group_by_group_member(self, mocked_send_mail_multi):
+    def test_send_message_to_group_by_group_member(self, mocked_mail):
         mutation = """
             mutation SendMessageModal($input: sendMessageToGroupInput!) {
                 sendMessageToGroup(input: $input) {
@@ -159,10 +159,10 @@ class SendMessageToGroupTestCase(FastTenantTestCase):
         errors = result[1]["errors"]
 
         self.assertEqual(errors[0]["message"], "could_not_save")
-        assert not mocked_send_mail_multi.called
+        self.assertFalse(mocked_mail.called)
 
     @mock.patch('core.resolvers.mutation_send_message_to_group.schedule_group_message_mail')
-    def test_send_message_to_group_by_other_user(self, mocked_send_mail_multi):
+    def test_send_message_to_group_by_other_user(self, mocked_mail):
         mutation = """
             mutation SendMessageModal($input: sendMessageToGroupInput!) {
                 sendMessageToGroup(input: $input) {
@@ -194,10 +194,10 @@ class SendMessageToGroupTestCase(FastTenantTestCase):
         errors = result[1]["errors"]
 
         self.assertEqual(errors[0]["message"], "could_not_save")
-        assert not mocked_send_mail_multi.called
+        self.assertFalse(mocked_mail.called)
 
     @mock.patch('core.resolvers.mutation_send_message_to_group.schedule_group_message_mail')
-    def test_send_message_to_group_by_anonymous(self, mocked_send_mail_multi):
+    def test_send_message_to_group_by_anonymous(self, mocked_mail):
         mutation = """
             mutation SendMessageModal($input: sendMessageToGroupInput!) {
                 sendMessageToGroup(input: $input) {
@@ -229,10 +229,10 @@ class SendMessageToGroupTestCase(FastTenantTestCase):
         errors = result[1]["errors"]
 
         self.assertEqual(errors[0]["message"], "not_logged_in")
-        assert not mocked_send_mail_multi.called
+        self.assertFalse(mocked_mail.called)
 
     @mock.patch('core.resolvers.mutation_send_message_to_group.schedule_group_message_mail')
-    def test_send_message_as_test_by_group_owner(self, mocked_send_mail_multi):
+    def test_send_message_as_test_by_group_owner(self, mocked_mail):
         mutation = """
             mutation SendMessageModal($input: sendMessageToGroupInput!) {
                 sendMessageToGroup(input: $input) {
@@ -262,10 +262,10 @@ class SendMessageToGroupTestCase(FastTenantTestCase):
 
         graphql_sync(schema, {"query": mutation, "variables": variables}, context_value={"request": request})
 
-        self.assertEqual(mocked_send_mail_multi.call_count, 1)
+        self.assertEqual(mocked_mail.call_count, 1)
 
     @mock.patch('core.resolvers.mutation_send_message_to_group.schedule_group_message_mail')
-    def test_send_message_to_all_members_by_group_owner(self, mocked_send_mail_multi):
+    def test_send_message_to_all_members_by_group_owner(self, mocked_mail):
         mutation = """
             mutation SendMessageModal($input: sendMessageToGroupInput!) {
                 sendMessageToGroup(input: $input) {
@@ -294,10 +294,10 @@ class SendMessageToGroupTestCase(FastTenantTestCase):
 
         graphql_sync(schema, {"query": mutation, "variables": variables}, context_value={"request": request})
 
-        self.assertEqual(mocked_send_mail_multi.call_count, 2)
+        self.assertEqual(mocked_mail.call_count, 2)
 
     @mock.patch('core.resolvers.mutation_send_message_to_group.schedule_group_message_mail')
-    def test_send_message_to_group_with_copy(self, mocked_send_mail_multi):
+    def test_send_message_to_group_with_copy(self, mocked_mail):
         mutation = """
             mutation SendMessageModal($input: sendMessageToGroupInput!) {
                 sendMessageToGroup(input: $input) {
@@ -327,10 +327,10 @@ class SendMessageToGroupTestCase(FastTenantTestCase):
 
         graphql_sync(schema, {"query": mutation, "variables": variables}, context_value={"request": request})
 
-        self.assertEqual(mocked_send_mail_multi.call_count, 2)
+        self.assertEqual(mocked_mail.call_count, 2)
 
     @mock.patch('core.resolvers.mutation_send_message_to_group.schedule_group_message_mail')
-    def test_send_message_to_group_including_self_with_copy(self, mocked_send_mail_multi):
+    def test_send_message_to_group_including_self_with_copy(self, mocked_mail):
         mutation = """
             mutation SendMessageModal($input: sendMessageToGroupInput!) {
                 sendMessageToGroup(input: $input) {
@@ -360,10 +360,10 @@ class SendMessageToGroupTestCase(FastTenantTestCase):
 
         graphql_sync(schema, {"query": mutation, "variables": variables}, context_value={"request": request})
 
-        self.assertEqual(mocked_send_mail_multi.call_count, 2)
+        self.assertEqual(mocked_mail.call_count, 2)
 
     @mock.patch('core.resolvers.mutation_send_message_to_group.schedule_group_message_mail')
-    def test_send_message_as_test_with_copy(self, mocked_send_mail_multi):
+    def test_send_message_as_test_with_copy(self, mocked_mail):
         mutation = """
             mutation SendMessageModal($input: sendMessageToGroupInput!) {
                 sendMessageToGroup(input: $input) {
@@ -394,10 +394,10 @@ class SendMessageToGroupTestCase(FastTenantTestCase):
 
         graphql_sync(schema, {"query": mutation, "variables": variables}, context_value={"request": request})
 
-        self.assertEqual(mocked_send_mail_multi.call_count, 1)
+        self.assertEqual(mocked_mail.call_count, 1)
 
     @mock.patch('core.resolvers.mutation_send_message_to_group.schedule_group_message_mail')
-    def test_send_message_to_all_members_with_copy(self, mocked_send_mail_multi):
+    def test_send_message_to_all_members_with_copy(self, mocked_mail):
         mutation = """
             mutation SendMessageModal($input: sendMessageToGroupInput!) {
                 sendMessageToGroup(input: $input) {
@@ -427,10 +427,10 @@ class SendMessageToGroupTestCase(FastTenantTestCase):
 
         graphql_sync(schema, {"query": mutation, "variables": variables}, context_value={"request": request})
 
-        self.assertEqual(mocked_send_mail_multi.call_count, 3)
+        self.assertEqual(mocked_mail.call_count, 3)
 
     @mock.patch('core.resolvers.mutation_send_message_to_group.schedule_group_message_mail')
-    def test_send_message_to_all_members_including_self_with_copy(self, mocked_send_mail_multi):
+    def test_send_message_to_all_members_including_self_with_copy(self, mocked_mail):
         self.group1.join(self.user1, 'member')
         mutation = """
             mutation SendMessageModal($input: sendMessageToGroupInput!) {
@@ -461,10 +461,10 @@ class SendMessageToGroupTestCase(FastTenantTestCase):
 
         graphql_sync(schema, {"query": mutation, "variables": variables}, context_value={"request": request})
 
-        self.assertEqual(mocked_send_mail_multi.call_count, 3)
+        self.assertEqual(mocked_mail.call_count, 3)
 
     @mock.patch('core.resolvers.mutation_send_message_to_group.schedule_group_message_mail')
-    def test_send_message_to_subgroup_subset_members(self, mocked_send_mail_multi):
+    def test_send_message_to_subgroup_subset_members(self, mocked_mail):
         self.group1.join(self.user1, 'member')
         mutation = """
             mutation SendMessageModal($input: sendMessageToGroupInput!) {
@@ -494,8 +494,8 @@ class SendMessageToGroupTestCase(FastTenantTestCase):
 
         graphql_sync(schema, {"query": mutation, "variables": variables}, context_value={"request": request})
 
-        mails = [a.kwargs['receiver'].email for a in mocked_send_mail_multi.call_args_list]
+        mails = [a.kwargs['receiver'].email for a in mocked_mail.call_args_list]
         self.assertIn(self.user2.email, mails)
         self.assertIn(self.user3.email, mails)
         self.assertNotIn(self.user4.email, mails)
-        self.assertEqual(mocked_send_mail_multi.call_count, 2, msg="Expect only members of the group AND the subgroup")
+        self.assertEqual(mocked_mail.call_count, 2, msg="Expect only members of the group AND the subgroup")

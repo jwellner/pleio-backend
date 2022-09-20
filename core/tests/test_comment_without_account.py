@@ -85,7 +85,7 @@ class CommentWithoutAccountTestCase(PleioTenantTestCase):
             self.graphql_client.post(mutation, variables)
 
     @mock.patch('core.resolvers.mutation_add_comment_without_account.schedule_comment_without_account_mail')
-    def test_add_comment(self, mocked_send_mail):
+    def test_add_comment(self, mocked_mail):
         mutation = """
             mutation ($input: addCommentWithoutAccountInput!) {
                 addCommentWithoutAccount(input: $input) {
@@ -107,7 +107,7 @@ class CommentWithoutAccountTestCase(PleioTenantTestCase):
 
         # check request
         self.assertEqual(data["addCommentWithoutAccount"]["success"], True)
-        mocked_send_mail.assert_called_once()
+        self.assertEqual(mocked_mail.call_count, 1)
 
         comment_request = CommentRequest.objects.filter(email="test@test.com").first()
         self.assertEqual(comment_request.name, "Unit Tester")

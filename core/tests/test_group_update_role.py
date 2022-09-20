@@ -64,7 +64,7 @@ class ChangeGroupRoleTestCase(PleioTenantTestCase):
         self.assertEqual(self.group1.members.get(user=self.user1).type, 'admin')
 
     @mock.patch('core.resolvers.mutation_change_group_role.schedule_change_group_ownership_mail')
-    def test_change_group_role_to_member_by_group_owner(self, mocked_send_mail_multi):
+    def test_change_group_role_to_member_by_group_owner(self, mocked_mail):
         mutation = """
             mutation MemberItem($input: changeGroupRoleInput!) {
                 changeGroupRole(input: $input) {
@@ -92,12 +92,12 @@ class ChangeGroupRoleTestCase(PleioTenantTestCase):
         result = self.graphql_client.post(mutation, variables)
         data = result["data"]["changeGroupRole"]
 
-        self.assertFalse(mocked_send_mail_multi.called)
+        self.assertFalse(mocked_mail.called)
         self.assertEqual(data["group"]["guid"], self.group1.guid)
         self.assertEqual(self.group1.members.get(user=self.user4).type, 'member')
 
     @mock.patch('core.resolvers.mutation_change_group_role.schedule_change_group_ownership_mail')
-    def test_change_group_role_to_removed_by_group_owner(self, mocked_send_mail_multi):
+    def test_change_group_role_to_removed_by_group_owner(self, mocked_mail):
         mutation = """
             mutation MemberItem($input: changeGroupRoleInput!) {
                 changeGroupRole(input: $input) {
@@ -132,7 +132,7 @@ class ChangeGroupRoleTestCase(PleioTenantTestCase):
         data = result["data"]["changeGroupRole"]
 
         self.assertEqual(data["group"]["guid"], self.group1.guid)
-        self.assertFalse(mocked_send_mail_multi.called)
+        self.assertFalse(mocked_mail.called)
         self.assertFalse(self.group1.members.filter(user=self.user4).exists())
 
     def test_change_group_role_to_admin_by_group_owner(self):
@@ -207,7 +207,7 @@ class ChangeGroupRoleTestCase(PleioTenantTestCase):
         self.assertEqual(self.group1.members.get(user=self.user1).type, 'admin')
 
     @mock.patch('core.resolvers.mutation_change_group_role.schedule_change_group_ownership_mail')
-    def test_change_group_role_to_owner_by_other_user(self, mocked_send_mail_multi):
+    def test_change_group_role_to_owner_by_other_user(self, mocked_mail):
         mutation = """
             mutation MemberItem($input: changeGroupRoleInput!) {
                 changeGroupRole(input: $input) {
@@ -235,11 +235,11 @@ class ChangeGroupRoleTestCase(PleioTenantTestCase):
             self.graphql_client.force_login(self.user3)
             self.graphql_client.post(mutation, variables)
 
-        self.assertFalse(mocked_send_mail_multi.called)
+        self.assertFalse(mocked_mail.called)
         self.assertEqual(self.group1.members.get(user=self.user2).type, 'member')
 
     @mock.patch('core.resolvers.mutation_change_group_role.schedule_change_group_ownership_mail')
-    def test_change_group_role_to_owner_by_anonymous(self, mocked_send_mail_multi):
+    def test_change_group_role_to_owner_by_anonymous(self, mocked_mail):
         mutation = """
             mutation MemberItem($input: changeGroupRoleInput!) {
                 changeGroupRole(input: $input) {
@@ -266,5 +266,5 @@ class ChangeGroupRoleTestCase(PleioTenantTestCase):
         with self.assertGraphQlError("not_logged_in"):
             self.graphql_client.post(mutation, variables)
 
-        self.assertFalse(mocked_send_mail_multi.called)
+        self.assertFalse(mocked_mail.called)
         self.assertEqual(self.group1.members.get(user=self.user2).type, 'member')

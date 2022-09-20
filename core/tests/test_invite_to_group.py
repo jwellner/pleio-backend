@@ -30,7 +30,7 @@ class InviteToGroupTestCase(PleioTenantTestCase):
 
     @mock.patch('core.resolvers.mutation_invite_to_group.generate_code', return_value='6df8cdad5582833eeab4')
     @mock.patch('core.resolvers.mutation_invite_to_group.schedule_invite_to_group_mail')
-    def test_invite_to_group_by_guid_by_group_owner(self, mocked_send_mail_multi, mocked_generate_code):
+    def test_invite_to_group_by_guid_by_group_owner(self, mocked_mail, mocked_generate_code):
         mutation = """
             mutation InviteItem($input: inviteToGroupInput!) {
                 inviteToGroup(input: $input) {
@@ -60,11 +60,11 @@ class InviteToGroupTestCase(PleioTenantTestCase):
         data = result['data']
 
         self.assertEqual(data["inviteToGroup"]["group"]["guid"], self.group1.guid)
-        mocked_send_mail_multi.assert_called_once()
+        self.assertEqual(mocked_mail.call_count, 1)
 
     @mock.patch('core.resolvers.mutation_invite_to_group.generate_code', return_value='6df8cdad5582833eeab4')
     @mock.patch('core.resolvers.mutation_invite_to_group.schedule_invite_to_group_mail')
-    def test_invite_to_group_by_email_by_group_owner(self, mocked_send_mail_multi, mocked_generate_code):
+    def test_invite_to_group_by_email_by_group_owner(self, mocked_mail, mocked_generate_code):
         mutation = """
             mutation InviteItem($input: inviteToGroupInput!) {
                 inviteToGroup(input: $input) {
@@ -94,10 +94,10 @@ class InviteToGroupTestCase(PleioTenantTestCase):
         data = result['data']
 
         self.assertEqual(data["inviteToGroup"]["group"]["guid"], self.group1.guid)
-        mocked_send_mail_multi.assert_called_once()
+        self.assertEqual(mocked_mail.call_count, 1)
 
     @mock.patch('core.resolvers.mutation_invite_to_group.schedule_invite_to_group_mail')
-    def test_add_all_users_to_group_by_admin(self, mocked_send_mail_multi):
+    def test_add_all_users_to_group_by_admin(self, mocked_mail):
         user = mixer.blend(User)
         user.delete()
 
@@ -131,7 +131,7 @@ class InviteToGroupTestCase(PleioTenantTestCase):
 
         self.assertEqual(data["inviteToGroup"]["group"]["guid"], self.group1.guid)
         self.assertEqual(len(self.group1.members.all()), 3)
-        assert not mocked_send_mail_multi.called
+        self.assertFalse(mocked_mail.called)
 
     def test_add_all_users_to_group_by_group_owner(self):
         mutation = """
@@ -225,7 +225,7 @@ class InviteToGroupTestCase(PleioTenantTestCase):
 
     @mock.patch('core.resolvers.mutation_invite_to_group.generate_code', return_value='6df8cdad5582833eeab4')
     @mock.patch('core.resolvers.mutation_invite_to_group.schedule_invite_to_group_mail')
-    def test_invite_non_site_member_to_group_by_guid_by_group_owner(self, mocked_send_mail_multi, mocked_generate_code):
+    def test_invite_non_site_member_to_group_by_guid_by_group_owner(self, mocked_mail, mocked_generate_code):
         mutation = """
             mutation InviteItem($input: inviteToGroupInput!) {
                 inviteToGroup(input: $input) {
@@ -255,4 +255,4 @@ class InviteToGroupTestCase(PleioTenantTestCase):
         data = result['data']
 
         self.assertEqual(data["inviteToGroup"]["group"]["guid"], self.group1.guid)
-        mocked_send_mail_multi.assert_called_once()
+        self.assertEqual(mocked_mail.call_count, 1)

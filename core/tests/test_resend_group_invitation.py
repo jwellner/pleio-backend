@@ -32,7 +32,7 @@ class ResendGroupInvitationTestCase(PleioTenantTestCase):
         super().tearDown()
 
     @mock.patch('core.resolvers.mutation_resend_group_invitation.schedule_resend_group_invitation_mail')
-    def test_resend_group_invitation_by_group_owner(self, mocked_send_mail_multi):
+    def test_resend_group_invitation_by_group_owner(self, mocked_mail):
         mutation = """
             mutation InvitedList($input: resendGroupInvitationInput!) {
                 resendGroupInvitation(input: $input) {
@@ -75,10 +75,10 @@ class ResendGroupInvitationTestCase(PleioTenantTestCase):
         data = result["data"]["resendGroupInvitation"]
 
         self.assertEqual(data["group"]["guid"], self.group1.guid)
-        mocked_send_mail_multi.assert_called_once()
+        self.assertEqual(mocked_mail.call_count, 1)
 
     @mock.patch('core.resolvers.mutation_resend_group_invitation.schedule_resend_group_invitation_mail')
-    def test_resend_group_invitation_by_admin(self, mocked_send_mail_multi):
+    def test_resend_group_invitation_by_admin(self, mocked_mail):
         mutation = """
             mutation InvitedList($input: resendGroupInvitationInput!) {
                 resendGroupInvitation(input: $input) {
@@ -121,10 +121,10 @@ class ResendGroupInvitationTestCase(PleioTenantTestCase):
         data = result["data"]["resendGroupInvitation"]
 
         self.assertEqual(data["group"]["guid"], self.group1.guid)
-        mocked_send_mail_multi.assert_called_once()
+        self.assertEqual(mocked_mail.call_count, 1)
 
     @mock.patch('core.resolvers.mutation_resend_group_invitation.schedule_resend_group_invitation_mail')
-    def test_resend_group_invitation_by_non_group_member(self, mocked_send_mail_multi):
+    def test_resend_group_invitation_by_non_group_member(self, mocked_mail):
         mutation = """
             mutation InvitedList($input: resendGroupInvitationInput!) {
                 resendGroupInvitation(input: $input) {
@@ -167,7 +167,7 @@ class ResendGroupInvitationTestCase(PleioTenantTestCase):
             self.graphql_client.post(mutation, variables)
 
     @mock.patch('core.resolvers.mutation_resend_group_invitation.schedule_resend_group_invitation_mail')
-    def test_resend_group_invitation_by_anonymous_user(self, mocked_send_mail_multi):
+    def test_resend_group_invitation_by_anonymous_user(self, mocked_mail):
         mutation = """
             mutation InvitedList($input: resendGroupInvitationInput!) {
                 resendGroupInvitation(input: $input) {
