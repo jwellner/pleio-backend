@@ -85,7 +85,7 @@ def resolve_members(_, info, groupGuid, q="", filters=None, offset=0, limit=20):
 
         # use elasticsearch ordering on objects
         id_dict = {str(d.user.id): d for d in objects}
-        sorted_objects = [id_dict.get(id) for id in ids]
+        sorted_objects = [id_dict.get(id) for id in ids if id_dict.get(id)]
 
         fields_in_overview = []
 
