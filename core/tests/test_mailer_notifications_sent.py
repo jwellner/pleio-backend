@@ -86,7 +86,7 @@ class SendNotificationEmailsTestCase(PleioTenantTestCase):
         call_command('send_notification_emails')
 
         self.assertEqual(mocked_send_notifications.call_count, 1)
-        self.assertEqual(len(self.user2.notifications.filter(emailed=False)), 0)
+        self.assertEqual(len(self.user2.notifications.filter(emailed=False, verb__in=['created', 'commented', 'mentioned'])), 0)
 
     @mock.patch('core.mail_builders.notifications.schedule_notification_mail')
     def test_notifications_not_sent_to_banned_users(self, mocked_send_notifications):
