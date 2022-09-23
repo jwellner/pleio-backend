@@ -14,7 +14,7 @@ from django.conf import settings
 from django.core import management
 from django.core.exceptions import ObjectDoesNotExist
 from django.db import connection
-from django.db.models import Sum
+from django.db.models import Sum, F
 from django_tenants.utils import schema_context
 from django.utils import timezone
 from datetime import timedelta
@@ -34,6 +34,7 @@ def dispatch_hourly_cron():
         create_notifications_for_scheduled_content.delay(client.schema_name)
         send_notifications.delay(client.schema_name)
         depublicate_content.delay(client.schema_name)
+        catchup_with_last_action.delay(client.schema_name)
 
 
 @shared_task
@@ -285,3 +286,13 @@ def depublicate_content(schema_name):
                                           schedule_delete_after__lte=now).select_subclasses()
         for entity in to_delete:
             entity.delete()
+
+
+@shared_task
+def catchup_with_last_action(schema_name):
+    with schema_context(schema_name):
+        entities = Entity.objects.filter(last_action__isnull=False)
+
+        qs = entities.filter(published__lt=localtime())
+        qs = qs.filter(published__gt=F('last_action'))
+        qs.update(last_action=F('published'))
