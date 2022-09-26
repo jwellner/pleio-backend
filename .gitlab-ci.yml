@@ -42,6 +42,7 @@ prospector:
 
 test:
   stage: test
+  coverage: '/TOTAL.*\s+(\d+%)/'
   tags:
     - docker
   script:
