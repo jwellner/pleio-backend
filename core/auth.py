@@ -102,17 +102,10 @@ class OIDCAuthBackend(OIDCAuthenticationBackend):
             self.request.session['onboarding_claims'] = claims
             raise OnboardingException
 
-        user = User.objects.create_user(
-            name=claims.get('name'),
-            email=claims.get('email'),
-            picture=claims.get('picture', None),
-            is_government=claims.get('is_government'),
-            has_2fa_enabled=claims.get('has_2fa_enabled'),
-            password=None,
-            external_id=claims.get('sub'),
-            is_superadmin=claims.get('is_admin', False)
-        )
-
+        user = User.objects.create_user(email=claims['email'],
+                                        name=claims['name'])
+        user.apply_claims(claims)
+        user.save()
         return user
 
     def requires_approval(self, claims):
@@ -139,33 +132,9 @@ class OIDCAuthBackend(OIDCAuthenticationBackend):
         )
 
     def update_user(self, user, claims):
-        SiteInvitation.objects.filter(email=claims.get('email')).delete()
-
-        user.external_id = claims.get('sub')
-
-        # user.name is managed localy and should not be overwritten.
-        if not config.EDIT_USER_NAME_ENABLED:
-            user.name = claims.get('name')
-
-        user.email = claims.get('email')
-
-        # if user profile picture file exists, do not change to picture from account
-        if claims.get('picture'):
-            user.picture = claims.get('picture')
-        else:
-            user.picture = None
-
-        user.is_government = claims.get('is_government')
-        user.has_2fa_enabled = claims.get('has_2fa_enabled')
-
-        # Get and set superadmin
-        if claims.get('is_admin'):
-            user.is_superadmin = True
-        else:
-            user.is_superadmin = False
-
+        user.apply_claims(claims)
         user.save()
-
+        SiteInvitation.objects.filter(email=user.email).delete()
         return user
 
     def authenticate(self, request, **kwargs):

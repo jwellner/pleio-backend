@@ -16,7 +16,18 @@ from django.dispatch import receiver
 from django.utils import timezone
 
 
-class Manager(BaseUserManager):
+class UserManager(BaseUserManager):
+
+    def get_or_create_claims(self, claims):
+        try:
+            user = self.get(email=claims.get('email'))
+        except User.DoesNotExist:
+            user = self.create_user(email=claims['email'],
+                                    name=claims['name'])
+        user.apply_claims(claims)
+        user.save()
+        return user
+
     def get_queryset(self):
         return super().get_queryset().exclude(is_active=False, name="Verwijderde gebruiker")
 
@@ -30,70 +41,26 @@ class Manager(BaseUserManager):
         """
         return self.get_queryset()
 
-    def create_user(
-            self,
-            email,
-            name,
-            password=None,
-            external_id=None,
-            is_active=False,
-            is_superadmin=False,
-            picture=None,
-            is_government=False,
-            has_2fa_enabled=False):
-        # pylint: disable=too-many-arguments
-        # pylint: disable=unused-argument
+    def create_user(self, email, name, password=None, **kwargs):
         if not email:
             raise ValueError('Users must have an email address')
 
-        user = self.model(
-            email=self.normalize_email(email),
-            name=name
-        )
-
+        user = self.create(email=email, name=name, **kwargs)
         if password:
             user.set_password(password)
+            user.save()
 
-        if external_id:
-            user.external_id = external_id
-
-        if picture:
-            user.picture = picture
-
-        if is_government:
-            user.is_government = is_government
-
-        if has_2fa_enabled:
-            user.has_2fa_enabled = has_2fa_enabled
-
-        if is_superadmin:
-            user.is_superadmin = True
-
-        if is_active:
-            user.is_active = True
-
-        user.save(using=self._db)
-
-        # Site access request can only be used once
-        try:
-            SiteAccessRequest.objects.get(email=email).delete()
-        except Exception:
-            pass
-
+        SiteAccessRequest.objects.filter(email=email).delete()
         return user
 
     def create_superuser(self, email, name, password):
-        user = self.create_user(
+        return self.create_user(
             email=self.normalize_email(email),
             name=name,
-            password=password
+            password=password,
+            is_superadmin=True,
+            is_active=True
         )
-
-        user.is_superadmin = True
-        user.is_active = True
-        user.save(using=self._db)
-
-        return user
 
     def get_filtered_users(self, q=None, role=None, is_delete_requested=None, is_banned=False, last_online_before=None, member_since=None):
         # pylint: disable=too-many-arguments
@@ -182,7 +149,7 @@ class Manager(BaseUserManager):
 
 
 class User(AbstractBaseUser):
-    objects = Manager()
+    objects = UserManager()
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
 
@@ -335,6 +302,18 @@ class User(AbstractBaseUser):
         self.save()
 
         return True
+
+    def apply_claims(self, claims):
+        assert claims.get('email'), "Email not found in claims"
+        if not config.EDIT_USER_NAME_ENABLED:
+            self.name = claims.get('name')
+        self.email = claims.get('email')
+        self.picture = claims.get('picture') or None
+        self.is_government = bool(claims.get('is_government'))
+        self.has_2fa_enabled = bool(claims.get('has_2fa_enabled'))
+        self.external_id = claims.get('sub')
+        self.is_superadmin = bool(claims.get('is_admin'))
+        return self
 
 
 @receiver(post_save, sender=User)
