@@ -8,6 +8,7 @@ from core import override_local_config
 from core.auth import RequestAccessInvalidCodeException, RequestAccessException, OnboardingException
 from core.models import SiteInvitation
 from core.tests.helpers_oidc import BaseOIDCAuthBackendTestCase
+from user.models import User
 
 
 @tag("OIDCAuthBackend")
@@ -23,62 +24,54 @@ class TestAuthUserCreateTestCase(BaseOIDCAuthBackendTestCase):
             'email': faker.Faker().email(),
         }
 
-    @mock.patch("user.models.Manager.create_user")
+    def assertValidHandleCreateUser(self, result, mocked_create_user):
+        mocked_user = mocked_create_user.return_value
+        self.assertEqual(result, mocked_create_user.return_value)
+        self.assertTrue(mocked_create_user.called)
+        self.assertDictEqual(mocked_create_user.call_args.kwargs, {
+            'email': self.claims['email'],
+            'name': self.claims['name'],
+        })
+        self.assertTrue(mocked_user.apply_claims.called)
+        self.assertEqual(mocked_user.apply_claims.call_args.args[0], self.claims)
+
+    @mock.patch("user.models.UserManager.create_user")
     @mock.patch("core.auth.OIDCAuthBackend.requires_approval")
     def test_create_user(self, mocked_requires_approval, mocked_create_user):
         mocked_requires_approval.return_value = False
-        mocked_create_user.return_value = mock.MagicMock()
+        mocked_create_user.return_value  = mock.MagicMock(spec=User)
 
         # When.
         result = self.backend.create_user(self.claims)
 
         # Then.
-        self.assertEqual(result, mocked_create_user.return_value)
-        self.assertTrue(mocked_create_user.called)
-        self.assertDictEqual(mocked_create_user.call_args.kwargs, {
-            'name': self.claims['name'],
-            'email': self.claims['email'],
-            'picture': None,
-            'is_government': None,
-            'has_2fa_enabled': None,
-            'password': None,
-            'external_id': None,
-            'is_superadmin': False,
-        })
+        self.assertValidHandleCreateUser(result, mocked_create_user)
 
-    @mock.patch("user.models.Manager.create_user")
+    @mock.patch("user.models.UserManager.create_user")
     @mock.patch("core.auth.OIDCAuthBackend.requires_approval")
     def test_without_approval_with_code(self, mocked_requires_approval, mocked_create_user):
         mocked_requires_approval.return_value = False
-        mocked_create_user.return_value = mock.MagicMock()
+        mocked_create_user.return_value = mock.MagicMock(spec=User)
         self.request.session['invitecode'] = get_random_string()
 
         # When.
         result = self.backend.create_user(self.claims)
 
-        self.assertEqual(result, mocked_create_user.return_value)
-        self.assertTrue(mocked_create_user.called)
-        self.assertDictEqual(mocked_create_user.call_args.kwargs, {
-            'name': self.claims['name'],
-            'email': self.claims['email'],
-            'picture': None,
-            'is_government': None,
-            'has_2fa_enabled': None,
-            'password': None,
-            'external_id': None,
-            'is_superadmin': False,
-        })
+        # Then.
+        self.assertValidHandleCreateUser(result, mocked_create_user)
 
-    @mock.patch("user.models.Manager.create_user")
+    @mock.patch("user.models.UserManager.create_user")
     @mock.patch("core.auth.OIDCAuthBackend.requires_approval")
-    def test_with_approval(self, mocked_create_user, mocked_requires_approval):
+    def test_with_approval(self, mocked_requires_approval, mocked_create_user):
         mocked_requires_approval.return_value = True
         invitation = SiteInvitation.objects.create(code=get_random_string())
+        mocked_create_user.return_value = mock.MagicMock(spec=User)
         self.request.session['invitecode'] = invitation.code
 
-        self.backend.create_user(self.claims)
+        result = self.backend.create_user(self.claims)
         self.assertFalse(SiteInvitation.objects.filter(id=invitation.id).exists())
-        self.assertTrue(mocked_create_user.called)
+
+        self.assertValidHandleCreateUser(result, mocked_create_user)
 
     @mock.patch("core.auth.OIDCAuthBackend.requires_approval")
     def test_with_nonexistent_invitecode(self, mocked_requires_approval):

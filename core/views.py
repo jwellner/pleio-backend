@@ -217,16 +217,7 @@ def onboarding(request):
             data = form.cleaned_data
 
             if not user.is_authenticated and claims:
-                user = User.objects.create_user(
-                    name=claims.get('name'),
-                    email=claims.get('email'),
-                    picture=claims.get('picture', None),
-                    is_government=claims.get('is_government'),
-                    has_2fa_enabled=claims.get('has_2fa_enabled'),
-                    password=None,
-                    external_id=claims.get('sub'),
-                    is_superadmin=claims.get('is_admin', False)
-                )
+                user = User.objects.get_or_create_claims(claims)
 
                 logger.info("Onboarding is valid, new user %s created", user.email)
 
