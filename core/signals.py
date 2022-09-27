@@ -25,8 +25,8 @@ def comment_handler(sender, instance, created, **kwargs):
         return
 
     container = instance.get_root_container()
-    container.last_action = instance.created_at
-    container.save()
+    if container.update_last_action(instance.created_at):
+        container.save()
 
     if hasattr(container, 'add_follow'):
         container.add_follow(instance.owner)

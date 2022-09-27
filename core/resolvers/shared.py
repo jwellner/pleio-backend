@@ -2,7 +2,6 @@ from django.core.exceptions import ObjectDoesNotExist
 from elasticsearch_dsl import Search
 from graphql import GraphQLError
 
-from blog.models import Blog
 from core import config
 from core.constances import (ACCESS_TYPE, COULD_NOT_FIND, COULD_NOT_FIND_GROUP,
                              COULD_NOT_SAVE, INVALID_ARCHIVE_AFTER_DATE,
@@ -17,7 +16,6 @@ from core.utils.convert import tiptap_to_text, truncate_rich_description
 from core.utils.entity import load_entity_by_id
 from file.models import FileFolder
 from file.tasks import resize_featured
-from news.models import News
 from user.models import User
 
 
@@ -299,6 +297,7 @@ def resolve_update_suggested_items(entity, clean_input):
 def update_publication_dates(entity, clean_input):
     if 'timePublished' in clean_input:
         entity.published = clean_input.get("timePublished")
+        entity.update_last_action(entity.published)
 
     if 'scheduleArchiveEntity' in clean_input:
         entity.schedule_archive_after = clean_input.get("scheduleArchiveEntity") or None

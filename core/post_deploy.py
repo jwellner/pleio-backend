@@ -1,5 +1,7 @@
 import logging
 import json
+
+from django.utils.timezone import localtime
 from post_deploy import post_deploy_action
 
 from core import config
@@ -10,7 +12,7 @@ from core.models import Group, Entity, Widget
 from core.utils.entity import load_entity_by_id
 from user.models import User
 from notifications.models import Notification
-from django.db.models import Prefetch
+from django.db.models import Prefetch, F
 
 LOGGER = logging.getLogger(__name__)
 
@@ -55,17 +57,16 @@ def remove_notifications_with_broken_relation():
     if is_schema_public():
         return
 
-    count=0
+    count = 0
 
     queryset = Notification.objects.prefetch_related(Prefetch('action_object'))
 
     for notification in queryset.iterator(chunk_size=10000):  # using iterator for large datasets memory consumption
         if not notification.action_object:
             notification.delete()
-            count+=1
+            count += 1
 
     LOGGER.info("Deleted %s broken notifications", count)
-
 
 
 @post_deploy_action
@@ -89,3 +90,12 @@ def _update_widget(record):
         record.save()
     except Exception:
         pass
+
+
+@post_deploy_action
+def migrate_entities():
+    if is_schema_public():
+        return
+
+    Entity.objects.filter(last_action__isnull=False,
+                          published__gt=F('last_action')).update(last_action=F('published'))
