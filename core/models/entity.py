@@ -53,7 +53,6 @@ class EntityManager(InheritanceManager):
 
         return self.get_queryset().filter(query)
 
-
     def draft(self, user):
         qs = self.get_queryset()
         if not user.is_authenticated:
@@ -123,9 +122,9 @@ class Entity(models.Model, TagsMixin):
     _tag_summary = ArrayField(models.CharField(max_length=256),
                               blank=True, default=list,
                               db_column='tags')
-    
-    suggested_items = ArrayField (models.UUIDField(default=uuid.uuid4),
-                                blank=True, null=True)
+
+    suggested_items = ArrayField(models.UUIDField(default=uuid.uuid4),
+                                 blank=True, null=True)
 
     notifications_created = models.BooleanField(default=False)
 
@@ -167,6 +166,12 @@ class Entity(models.Model, TagsMixin):
             return ENTITY_STATUS.PUBLISHED
 
         return ENTITY_STATUS.DRAFT
+
+    def update_last_action(self, new_value):
+        if new_value and new_value > self.last_action:
+            self.last_action = new_value
+            return True
+        return False
 
     class Meta:
         ordering = ['published']

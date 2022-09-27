@@ -50,7 +50,7 @@ def copy_event(event_id, user, parent=None):
     entity.published = None
     entity.created_at = now
     entity.updated_at = now
-    entity.last_action = now
+    entity.update_last_action(entity.published)
     entity.read_access = access_id_to_acl(entity, get_access_id(entity.read_access))
     entity.write_access = access_id_to_acl(entity, 0)
 
@@ -86,6 +86,7 @@ def resolve_copy_event(_, info, input):
     return {
         "entity": entity
     }
+
 
 # Content property resolvers:
 def resolve_copy_subevents(entity, event, user, clean_input):
