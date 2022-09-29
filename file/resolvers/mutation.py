@@ -196,13 +196,10 @@ def resolve_edit_file_folder(_, info, input):
     shared.assert_write_access(entity, user)
 
     shared.resolve_update_tags(entity, clean_input)
-
     shared.resolve_update_title(entity, clean_input)
-
     shared.resolve_update_rich_description(entity, clean_input)
 
     shared.update_publication_dates(entity, clean_input)
-
     shared.resolve_update_access_id(entity, clean_input)
     
     resolve_update_file(entity, clean_input)

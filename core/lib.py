@@ -18,7 +18,6 @@ from core.constances import ACCESS_TYPE
 from core import config
 from django.apps import apps
 from django.conf import settings
-from django.core import signing
 from django.core.validators import URLValidator
 from django.db import connection
 from django.utils import timezone as django_timezone
@@ -64,7 +63,20 @@ def get_model_by_subtype(subtype):
 
 def access_id_to_acl(obj, access_id):
     """
-    @see also: get_access_id
+    @tag: acl_methods
+
+    @see also
+      * access_id_to_acl(obj: *, access_id: int)
+      - get_acl(user: User)
+      - get_access_id(acl: [str])
+      - get_access_ids(obj: *)
+
+    What are the access id's?
+    0: private
+    1: logged in
+    2: public
+    4: Group
+    10000+: Subgroup
     """
     if "type_to_string" in dir(obj) and obj.type_to_string and obj.type_to_string == 'user':
         acl = [ACCESS_TYPE.user.format(obj.id)]
@@ -94,7 +106,15 @@ def access_id_to_acl(obj, access_id):
 
 
 def get_acl(user):
-    """Get user Access List"""
+    """
+    @tag: acl_methods
+
+    @see also
+      - access_id_to_acl(obj: *, access_id: int)
+      * get_acl(user: User)
+      - get_access_id(acl: [str])
+      - get_access_ids(obj: *)
+    """
 
     acl = set([ACCESS_TYPE.public])
 
@@ -152,12 +172,13 @@ def webpack_dev_server_is_available():
 
 def get_access_id(acl):
     """
-    What are the access id's?
-    0: private
-    1: logged in
-    2: public
-    4: Group
-    10000+: Subgroup
+    @tag: acl_methods
+
+    @see also
+      - access_id_to_acl(obj: *, access_id: int)
+      - get_acl(user: User)
+      * get_access_id(acl: [str])
+      - get_access_ids(obj: *)
     """
     for x in acl:
         if x.startswith("subgroup:"):
@@ -172,7 +193,15 @@ def get_access_id(acl):
 
 
 def get_access_ids(obj=None):
-    """Return the available accessId's"""
+    """
+    @tag: acl_methods
+
+    @see also
+      - access_id_to_acl(obj: *, access_id: int)
+      - get_acl(user: User)
+      - get_access_id(acl: [str])
+      * get_access_ids(obj: *)
+    """
     accessIds = []
     accessIds.append({'id': 0, 'description': ugettext("Just me")})
 
@@ -511,20 +540,6 @@ def is_valid_uuid(val):
         return False
 
 
-def entity_access_id(entity):
-    if entity.group and entity.group.subgroups:
-        for subgroup in entity.group.subgroups.all():
-            if ACCESS_TYPE.subgroup.format(subgroup.access_id) in entity.read_access:
-                return subgroup.access_id
-    if entity.group and ACCESS_TYPE.group.format(entity.group.id) in entity.read_access:
-        return 4
-    if ACCESS_TYPE.public in entity.read_access:
-        return 2
-    if ACCESS_TYPE.logged_in in entity.read_access:
-        return 1
-    return 0
-
-
 class NumberIncrement:
     def __init__(self, n=0):
         self.n = n
@@ -555,3 +570,12 @@ def early_this_morning():
                                     minute=0,
                                     second=0,
                                     tzinfo=localtime.tzinfo)
+
+
+def str_to_datetime(datetime_str):
+    if not datetime_str:
+        return None
+    result = django_timezone.datetime.fromisoformat(datetime_str)
+    if django_timezone.is_aware(result):
+        return result.astimezone(django_timezone.get_current_timezone())
+    return django_timezone.make_aware(result).astimezone(django_timezone.get_current_timezone())

@@ -12,14 +12,14 @@ class TestAvatarExportCleanupTestCase(PleioTenantTestCase):
         super().setUp()
 
         self.owner = UserFactory()
-        self.new_file = self.file_factory(self.relative_path(__file__, 'assets', 'avatar_export.zip'))
+        self.new_file = self.file_factory(self.relative_path(__file__, ['assets', 'avatar_export.zip']))
         self.new_export = AvatarExport.objects.create(
             initiator=self.owner,
             status='ready',
             file=self.new_file,
         )
 
-        self.old_file = self.file_factory(self.relative_path(__file__, 'assets', 'avatar_export.zip'))
+        self.old_file = self.file_factory(self.relative_path(__file__, ['assets', 'avatar_export.zip']))
         self.old_export = AvatarExport.objects.create(
             initiator=self.owner,
             status='ready',

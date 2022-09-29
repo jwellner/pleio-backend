@@ -1,3 +1,6 @@
+from django.utils.timezone import localtime
+
+from core.models import Revision
 from core.tests.helpers import PleioTenantTestCase
 from user.models import User
 from core.constances import ACCESS_TYPE, USER_ROLES
@@ -25,8 +28,8 @@ class EditPageTestCase(PleioTenantTestCase):
                                           write_access=[ACCESS_TYPE.user.format(self.user.id)])
 
         self.mutation = """
-            mutation EditPage($input: editPageInput!, $draft: Boolean) {
-                editPage(input: $input, draft: $draft) {
+            mutation EditPage($input: editPageInput!) {
+                editPage(input: $input) {
                     entity {
                     guid
                     ...PageDetailFragment
@@ -47,11 +50,6 @@ class EditPageTestCase(PleioTenantTestCase):
                     guid
                 }
                 accessId
-                revision {
-                    content {
-                        richDescription
-                    }
-                }
             }
         """
         self.variables = {
@@ -64,57 +62,24 @@ class EditPageTestCase(PleioTenantTestCase):
             }
         }
 
+    def assert_text_page_update_ok(self):
+        result = self.graphql_client.post(self.mutation, self.variables)
+        entity = result['data']["editPage"]["entity"]
+
+        self.assertEqual(entity["title"], self.variables['input']['title'])
+        self.assertEqual(entity["richDescription"], self.variables['input']['richDescription'])
+        self.assertEqual(entity["tags"], self.variables['input']['tags'])
+        self.assertEqual(entity["accessId"], 1)
+        self.assertEqual(entity["canEdit"], True)
+        self.assertEqual(entity["parent"], None)
+
     def test_edit_page_by_admin(self):
         self.graphql_client.force_login(self.admin)
-        result = self.graphql_client.post(self.mutation, self.variables)
-
-        data = result["data"]
-        self.assertEqual(data["editPage"]["entity"]["title"], self.variables['input']['title'])
-        self.assertEqual(data["editPage"]["entity"]["richDescription"], self.variables['input']['richDescription'])
-        self.assertEqual(data["editPage"]["entity"]["tags"], self.variables['input']['tags'])
-        self.assertEqual(data["editPage"]["entity"]["accessId"], 1)
-        self.assertEqual(data["editPage"]["entity"]["canEdit"], True)
-        self.assertEqual(data["editPage"]["entity"]["parent"], None)
+        self.assert_text_page_update_ok()
 
     def test_edit_page_by_editor(self):
         self.graphql_client.force_login(self.editor)
-        result = self.graphql_client.post(self.mutation, self.variables)
-
-        data = result["data"]
-
-        self.assertEqual(data["editPage"]["entity"]["title"], self.variables['input']['title'])
-        self.assertEqual(data["editPage"]["entity"]["richDescription"], self.variables['input']['richDescription'])
-        self.assertEqual(data["editPage"]["entity"]["tags"], self.variables['input']['tags'])
-        self.assertEqual(data["editPage"]["entity"]["accessId"], 1)
-        self.assertEqual(data["editPage"]["entity"]["canEdit"], True)
-        self.assertEqual(data["editPage"]["entity"]["parent"], None)
-
-    def test_edit_page_draft(self):
-        self.variables['draft'] = True
-
-        self.graphql_client.force_login(self.editor)
-        result = self.graphql_client.post(self.mutation, self.variables)
-        entity = result["data"]["editPage"]["entity"]
-
-        # Not stored on the entity.
-        self.assertNotEqual(entity['richDescription'], self.variables['input']['richDescription'])
-
-        # But at the revision.
-        self.assertEqual(entity['revision']['content']['richDescription'], self.variables['input']['richDescription'])
-
-    def test_edit_campagne_page_draft(self):
-        self.variables['draft'] = True
-        self.variables['input']['guid'] = self.campagne.guid
-
-        self.graphql_client.force_login(self.editor)
-        result = self.graphql_client.post(self.mutation, self.variables)
-        entity = result["data"]["editPage"]["entity"]
-
-        # Is stored on the entity.
-        self.assertEqual(entity['richDescription'], self.variables['input']['richDescription'])
-
-        # And revision is empty.
-        self.assertIsNone(entity['revision'])
+        self.assert_text_page_update_ok()
 
     def test_edit_page_by_anonymous(self):
         with self.assertGraphQlError("not_logged_in"):

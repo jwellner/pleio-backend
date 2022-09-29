@@ -2,7 +2,7 @@ import core.models.django_auditlog
 from .user import UserProfile, ProfileField, UserProfileField, ProfileFieldValidator
 from .group import Group, GroupMembership, GroupInvitation, Subgroup, GroupProfileFieldSetting
 from .annotation import Annotation
-from .mixin import VoteMixin, BookmarkMixin, FollowMixin, NotificationMixin, FeaturedCoverMixin, ArticleMixin
+from .mixin import VoteMixin, BookmarkMixin, FollowMixin, NotificationMixin, ArticleMixin
 from .comment import Comment, CommentMixin, CommentRequest
 from .entity import Entity, EntityView, EntityViewCount
 from .attachment import Attachment

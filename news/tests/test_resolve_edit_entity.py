@@ -65,14 +65,9 @@ class EditNewsTestCase(PleioTenantTestCase):
                 suggestedItems {
                     guid
                 }
-                revision {
-                    content {
-                        richDescription
-                    }
-                }
             }
-            mutation ($input: editEntityInput!, $draft: Boolean) {
-                editEntity(input: $input, draft: $draft) {
+            mutation ($input: editEntityInput!) {
+                editEntity(input: $input) {
                     entity {
                     guid
                     status
@@ -110,19 +105,6 @@ class EditNewsTestCase(PleioTenantTestCase):
         self.assertDateEqual(entity["timePublished"], str(self.news.published))
         self.assertDateEqual(entity["scheduleArchiveEntity"], str(self.news.schedule_archive_after))
         self.assertDateEqual(entity["scheduleDeleteEntity"], str(self.news.schedule_delete_after))
-
-    def test_edit_news_draft(self):
-        self.data['draft'] = True
-
-        self.graphql_client.force_login(self.authenticatedUser)
-        result = self.graphql_client.post(self.mutation, self.data)
-        entity = result["data"]["editEntity"]["entity"]
-
-        # Not stored on the entity.
-        self.assertNotEqual(entity['richDescription'], self.data['input']['richDescription'])
-
-        # But at the revision.
-        self.assertEqual(entity['revision']['content']['richDescription'], self.data['input']['richDescription'])
 
     def test_edit_news_editor(self):
         variables = self.data

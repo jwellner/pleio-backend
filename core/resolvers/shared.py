@@ -8,10 +8,11 @@ from core.constances import (ACCESS_TYPE, COULD_NOT_FIND, COULD_NOT_FIND_GROUP,
                              NOT_LOGGED_IN, TEXT_TOO_LONG,
                              USER_NOT_MEMBER_OF_GROUP, USER_NOT_SITE_ADMIN,
                              USER_ROLES)
-from core.lib import (access_id_to_acl, entity_access_id, html_to_text,
-                      tenant_schema)
+from core.lib import (access_id_to_acl, html_to_text,
+                      tenant_schema, get_access_id)
 from core.models import EntityViewCount, Group
 from core.models.revision import Revision
+from core.tasks.cleanup_tasks import cleanup_featured_image_files
 from core.utils.convert import tiptap_to_text, truncate_rich_description
 from core.utils.entity import load_entity_by_id
 from file.models import FileFolder
@@ -21,7 +22,8 @@ from user.models import User
 
 def resolve_entity_access_id(obj, info):
     # pylint: disable=unused-argument
-    return entity_access_id(obj)
+    # EM: HIER (2)
+    return get_access_id(obj.read_access)
 
 
 def resolve_entity_write_access_id(obj, info):
@@ -51,6 +53,7 @@ def resolve_entity_featured(obj, info):
 
     return {
         'image': obj.featured_image_url,
+        'imageGuid': obj.featured_image_guid,
         'video': obj.featured_video,
         'videoTitle': obj.featured_video_title,
         'positionY': obj.featured_position_y,
@@ -265,27 +268,22 @@ def resolve_add_suggested_items(entity, clean_input):
     resolve_update_suggested_items(entity, clean_input)
 
 
-def resolve_entity_revision(obj, info):
-    # pylint: disable=unused-argument
-    return obj.last_revision
-
-
-def resolve_start_revision(entity):
-    if not entity.last_revision:
+def resolve_start_revision(entity, user):
+    if entity.has_revisions():
         revision = Revision()
-        revision.object = entity
-        entity.last_revision = revision
+        revision.author = user
+        revision.start_tracking_changes(entity)
+        return revision
 
 
-def resolve_store_revision(entity):
-    revision = entity.last_revision
-    revision.save()
-
-
-def resolve_apply_revision(entity, revision):
+def store_update_revision(revision, container):
     if revision:
-        entity.rich_description = revision.content.get("richDescription")
-        entity.last_revision = None
+        revision.store_update_revision(container)
+
+
+def store_initial_revision(container):
+    if container.has_revisions():
+        Revision().store_initial_version(container)
 
 
 # Update
@@ -311,44 +309,41 @@ def update_publication_dates(entity, clean_input):
 
 
 def update_featured_image(entity, clean_input, image_owner=None):
-    # pylint: disable=import-outside-toplevel
-    from core.tasks.cleanup_tasks import cleanup_featured_image_files
+    if 'featured' not in clean_input:
+        return
 
-    if 'featured' in clean_input:
-        entity.featured_position_y = clean_input.get("featured").get("positionY", 0)
-        entity.featured_video = clean_input.get("featured").get("video", "")
-        entity.featured_video_title = clean_input.get("featured").get("videoTitle", "")
-        entity.featured_alt = clean_input.get("featured").get("alt", "")
-        if entity.featured_video:
-            cleanup_featured_image_files(entity.featured_image)
-            entity.featured_image = None
-        elif clean_input.get("featured").get("image"):
-            cleanup_featured_image_files(entity.featured_image)
-
-            entity.featured_image = FileFolder.objects.create(
-                owner=entity.owner,
-                upload=clean_input.get("featured").get("image")
-            )
-            if hasattr(entity, 'read_access'):
-                entity.featured_image.read_access = entity.read_access
-                entity.featured_image.write_access = entity.write_access
-            else:
-                entity.featured_image.read_access = [ACCESS_TYPE.public]
-                entity.featured_image.write_access = [ACCESS_TYPE.user.format(image_owner.id)]
-            entity.featured_image.save()
-
-            resize_featured.delay(tenant_schema(), entity.featured_image.id)
+    featured = clean_input["featured"]
+    if featured.get("video", ""):
+        featured['imageGuid'] = None
+    elif featured.get("image"):
+        featured_image = FileFolder.objects.create(
+            owner=entity.owner,
+            upload=featured.get("image")
+        )
+        if hasattr(entity, 'read_access'):
+            featured_image.read_access = entity.read_access
+            featured_image.write_access = entity.write_access
         else:
-            # nothing changed.
-            pass
-    else:
-        cleanup_featured_image_files(entity.featured_image)
+            featured_image.read_access = [ACCESS_TYPE.public]
+            featured_image.write_access = [ACCESS_TYPE.user.format(image_owner.id)]
+        featured_image.save()
+        resize_featured.delay(tenant_schema(), featured_image.id)
+        featured['imageGuid'] = featured_image.guid
+        featured.pop('image', None)
+    elif not featured.get("imageGuid"):
+        # No image, no guid, no video: cleanup.
+        featured['imageGuid'] = None
+        featured['positionY'] = 0
+        featured['video'] = None
+        featured['videoTitle'] = ""
+        featured['alt'] = ""
 
-        entity.featured_image = None
-        entity.featured_position_y = 0
-        entity.featured_video = None
-        entity.featured_video_title = ""
-        entity.featured_alt = ""
+    original = entity.serialize_featured()
+    entity.unserialize_featured(featured)
+
+    if not hasattr(entity, 'has_revisions') or not entity.has_revisions():
+        if entity.is_featured_image_changed(original):
+            cleanup_featured_image_files(original['image'])
 
 
 def resolve_update_title(entity, clean_input):
@@ -356,16 +351,9 @@ def resolve_update_title(entity, clean_input):
         entity.title = clean_input.get("title")
 
 
-def resolve_update_rich_description(entity, clean_input, revision=False):
+def resolve_update_rich_description(entity, clean_input):
     if 'richDescription' in clean_input:
-        if revision:
-            active_revision = entity.last_revision
-            if active_revision.content:
-                active_revision.content["richDescription"] = clean_input.get("richDescription")
-            else:
-                active_revision.content = {"richDescription": clean_input.get("richDescription")}
-        else:
-            entity.rich_description = clean_input.get("richDescription")
+        entity.rich_description = clean_input.get("richDescription")
 
 
 def resolve_update_tags(entity, clean_input):
@@ -400,23 +388,25 @@ def resolve_update_group(entity, clean_input):
 def resolve_update_owner(entity, clean_input):
     if 'ownerGuid' in clean_input:
         try:
-            previous_owner_formatted = ACCESS_TYPE.user.format(entity.owner.id)
-            owner = User.objects.get(id=clean_input.get("ownerGuid"))
-            entity.owner = owner
-            owner_formatted = ACCESS_TYPE.user.format(owner.id)
-            if previous_owner_formatted in entity.read_access:
-                entity.read_access = [i for i in entity.read_access if i != previous_owner_formatted]
-                entity.read_access.append(owner_formatted)
-            if previous_owner_formatted in entity.write_access:
-                entity.write_access = [i for i in entity.write_access if i != previous_owner_formatted]
-                entity.write_access.append(owner_formatted)
+            currentOwnerGuid = entity.owner.guid if entity.owner else None
+            if clean_input['ownerGuid'] != currentOwnerGuid:
+                previous_owner_formatted = ACCESS_TYPE.user.format(entity.owner.id)
+                owner = User.objects.get(id=clean_input.get("ownerGuid"))
+                entity.owner = owner
+                owner_formatted = ACCESS_TYPE.user.format(owner.id)
+                if previous_owner_formatted in entity.read_access:
+                    entity.read_access = [i for i in entity.read_access if i != previous_owner_formatted]
+                    entity.read_access.append(owner_formatted)
+                if previous_owner_formatted in entity.write_access:
+                    entity.write_access = [i for i in entity.write_access if i != previous_owner_formatted]
+                    entity.write_access.append(owner_formatted)
         except ObjectDoesNotExist:
             raise GraphQLError(COULD_NOT_FIND)
 
 
 def resolve_update_time_created(entity, clean_input):
     if 'timeCreated' in clean_input:
-        entity.created_at = clean_input.get("timeCreated")
+        entity.created_at = clean_input["timeCreated"]
 
 
 def resolve_update_abstract(entity, clean_input):
@@ -426,16 +416,14 @@ def resolve_update_abstract(entity, clean_input):
         entity.abstract = abstract
 
 
-def resolve_update_is_featured(entity, user, clean_input):
-    if user.has_role(USER_ROLES.ADMIN) or user.has_role(USER_ROLES.EDITOR):
-        if 'isFeatured' in clean_input:
-            entity.is_featured = clean_input.get("isFeatured")
+def update_is_featured(entity, user, clean_input):
+    if 'isFeatured' in clean_input and (user.has_role(USER_ROLES.ADMIN) or user.has_role(USER_ROLES.EDITOR)):
+        entity.is_featured = clean_input.get("isFeatured")
 
 
-def resolve_update_is_recommended(entity, user, clean_input):
-    if user.has_role(USER_ROLES.ADMIN) or user.has_role(USER_ROLES.EDITOR):
-        if 'isRecommended' in clean_input:
-            entity.is_recommended = clean_input.get("isRecommended")
+def update_is_recommended(entity, user, clean_input):
+    if 'isRecommended' in clean_input and (user.has_role(USER_ROLES.ADMIN) or user.has_role(USER_ROLES.EDITOR)):
+        entity.is_recommended = clean_input.get("isRecommended")
 
 
 # Group

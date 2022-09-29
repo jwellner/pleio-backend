@@ -44,9 +44,7 @@ def resolve_add_status_update(_, info, input):
     resolve_update_access_id(entity, clean_input, group)
 
     shared.resolve_update_title(entity, clean_input)
-
     shared.resolve_update_rich_description(entity, clean_input)
-
     shared.update_publication_dates(entity, clean_input)
 
     entity.save()
@@ -70,25 +68,19 @@ def resolve_edit_status_update(_, info, input):
 
     shared.assert_authenticated(user)
     shared.assert_write_access(entity, user)
+    shared.resolve_update_access_id(entity, clean_input)
 
     shared.resolve_update_title(entity, clean_input)
-
     shared.resolve_update_rich_description(entity, clean_input)
-
     shared.resolve_update_tags(entity, clean_input)
-    
-    shared.resolve_update_access_id(entity, clean_input)
 
     shared.update_publication_dates(entity, clean_input)
 
     # only admins can edit these fields
     if user.has_role(USER_ROLES.ADMIN):
         shared.resolve_update_group(entity, clean_input)
-
         shared.resolve_update_owner(entity, clean_input)
-
         shared.resolve_update_time_created(entity, clean_input)
-
 
     entity.save()
 
@@ -96,7 +88,8 @@ def resolve_edit_status_update(_, info, input):
         "entity": entity
     }
 
-def resolve_update_access_id(entity, clean_input, group): 
+
+def resolve_update_access_id(entity, clean_input, group):
     if 'accessId' in clean_input:
         entity.read_access = access_id_to_acl(entity, clean_input.get("accessId"))
     else:

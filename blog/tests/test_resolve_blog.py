@@ -13,13 +13,16 @@ class BlogTestCase(PleioTenantTestCase):
         self.authenticatedUser = mixer.blend(User)
         self.authenticatedAdminUser = mixer.blend(User, roles = ['ADMIN'])
 
+        self.featured_file = self.file_factory(self.relative_path(__file__, ['assets', 'featured.jpeg']))
+
         self.blogPublic = Blog.objects.create(
             title="Test public blog",
             rich_description="JSON to string",
             read_access=[ACCESS_TYPE.public],
             write_access=[ACCESS_TYPE.user.format(self.authenticatedUser.id)],
             owner=self.authenticatedUser,
-            is_recommended=True
+            is_recommended=True,
+            featured_image = self.featured_file,
         )
 
         self.blogPrivate = Blog.objects.create(
@@ -49,9 +52,11 @@ class BlogTestCase(PleioTenantTestCase):
                 scheduleDeleteEntity
                 featured {
                     image
+                    imageGuid
                     video
                     videoTitle
                     positionY
+                    alt
                 }
                 isRecommended
                 canEdit
@@ -105,6 +110,7 @@ class BlogTestCase(PleioTenantTestCase):
         self.assertDateEqual(entity['timePublished'], str(self.blogPublic.published))
         self.assertIsNone(entity['scheduleArchiveEntity'])
         self.assertIsNone(entity['scheduleDeleteEntity'])
+        self.assertEqual(entity['featured']['imageGuid'], self.featured_file.guid)
 
         variables = {
             "guid": self.blogPrivate.guid

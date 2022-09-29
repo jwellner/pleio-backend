@@ -10,9 +10,9 @@ from django.db.models.signals import pre_save
 from django.dispatch import receiver
 from django.utils.text import slugify
 from django.utils import timezone
-from django.urls import reverse
 from core.lib import ACCESS_TYPE
 from core.constances import USER_ROLES
+from core.models.featured import FeaturedCoverMixin
 from core.utils.convert import tiptap_to_text
 from .rich_fields import AttachmentMixin
 from .tags import TagsMixin
@@ -35,7 +35,7 @@ class GroupManager(models.Manager):
         return self.get_queryset().exclude(hidden_groups_where_users_isnt_a_member)
 
 
-class Group(models.Model, AttachmentMixin, TagsMixin):
+class Group(FeaturedCoverMixin, AttachmentMixin, TagsMixin):
     class Meta:
         ordering = ['name']
 
@@ -73,10 +73,6 @@ class Group(models.Model, AttachmentMixin, TagsMixin):
         null=True,
         related_name='group_featured_image'
     )
-    featured_video = models.TextField(null=True, blank=True)
-    featured_video_title = models.CharField(max_length=256, default="")
-    featured_position_y = models.IntegerField(null=True)
-    featured_alt = models.CharField(max_length=256, default="")
 
     is_closed = models.BooleanField(default=False)
     is_membership_on_request = models.BooleanField(default=False)
@@ -185,13 +181,6 @@ class Group(models.Model, AttachmentMixin, TagsMixin):
     @property
     def type_to_string(self):
         return 'group'
-
-    @property
-    def featured_image_url(self):
-        if self.featured_image:
-            return '%s?cache=%i' % (
-                reverse('featured', args=[self.id]), int(self.featured_image.updated_at.timestamp()))
-        return None
 
     @property
     def rich_fields(self):

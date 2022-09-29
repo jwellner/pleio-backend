@@ -3,25 +3,30 @@ from core.resolvers import shared
 
 blog = ObjectType("Blog")
 
+
 @blog.field("subtype")
 def resolve_excerpt(obj, info):
     # pylint: disable=unused-argument
     return "blog"
+
 
 @blog.field("inGroup")
 def resolve_in_group(obj, info):
     # pylint: disable=unused-argument
     return obj.group is not None
 
+
 @blog.field("group")
 def resolve_group(obj, info):
     # pylint: disable=unused-argument
     return obj.group
 
+
 @blog.field("isFeatured")
 def resolve_is_featured(obj, info):
     # pylint: disable=unused-argument
     return obj.is_featured
+
 
 @blog.field("isHighlighted")
 def resolve_is_highlighted(obj, info):
@@ -29,10 +34,12 @@ def resolve_is_highlighted(obj, info):
     """Deprecated: not used in frontend"""
     return False
 
+
 @blog.field("isRecommended")
 def resolve_is_recommended(obj, info):
     # pylint: disable=unused-argument
     return obj.is_recommended
+
 
 @blog.field("url")
 def resolve_url(obj, info):
@@ -72,4 +79,3 @@ blog.set_field("views", shared.resolve_entity_views)
 blog.set_field("owner", shared.resolve_entity_owner)
 blog.set_field("isPinned", shared.resolve_entity_is_pinned)
 blog.set_field("suggestedItems", shared.resolve_entity_suggested_items)
-blog.set_field("revision", shared.resolve_entity_revision)

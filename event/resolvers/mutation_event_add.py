@@ -53,7 +53,7 @@ def resolve_add_event(_, info, input):
     shared.update_featured_image(entity, clean_input)
     shared.update_publication_dates(entity, clean_input)
 
-    shared.resolve_update_is_featured(entity, user, clean_input)
+    shared.update_is_featured(entity, user, clean_input)
 
     event_shared.resolve_update_startenddate(entity, clean_input)
     event_shared.resolve_update_source(entity, clean_input)

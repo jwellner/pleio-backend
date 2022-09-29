@@ -46,8 +46,9 @@ class PleioTenantTestCase(FastTenantTestCase):
 
         return file
 
-    def relative_path(self, reference_file, *path):
-        return os.path.join(os.path.dirname(reference_file), *path)
+    @staticmethod
+    def relative_path(root, path):
+        return os.path.join(os.path.dirname(root), *path)
 
     def tearDown(self):
         for file in self.file_cleanup:

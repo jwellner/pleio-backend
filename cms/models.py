@@ -1,6 +1,8 @@
 import uuid
 from auditlog.registry import auditlog
 from django.db import models
+
+from core.lib import get_access_id
 from core.models import Entity, AttachmentMixin
 from core.constances import USER_ROLES
 from django.contrib.postgres.fields import ArrayField
@@ -38,6 +40,9 @@ class Page(Entity, AttachmentMixin):
             return True
         return False
 
+    def has_revisions(self):
+        return self.page_type == 'text'
+
     def __str__(self):
         return f"Page[{self.title}]"
 
@@ -66,9 +71,15 @@ class Page(Entity, AttachmentMixin):
     def rich_fields(self):
         return [self.rich_description]
 
-    @property
-    def has_revisions(self):
-        return self.page_type == 'text'
+    def serialize(self):
+        if self.has_revisions():
+            return {
+                'title': self.title or '',
+                'richDescription': self.rich_description or '',
+                'tags': sorted(self.tags) or [],
+                'accessId': get_access_id(self.read_access),
+            }
+        return {}
 
 
 class Row(models.Model):

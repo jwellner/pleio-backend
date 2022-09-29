@@ -27,22 +27,19 @@ def resolve_add_blog(_, info, input):
     if group:
         entity.group = group
 
-    shared.resolve_update_tags(entity, clean_input)
-
     shared.resolve_add_access_id(entity, clean_input)
+    shared.resolve_update_tags(entity, clean_input)
     shared.resolve_update_title(entity, clean_input)
     shared.resolve_update_rich_description(entity, clean_input)
     shared.resolve_update_abstract(entity, clean_input)
     shared.update_featured_image(entity, clean_input)
-    shared.update_publication_dates(entity, clean_input)
-
-    shared.resolve_update_is_recommended(entity, user, clean_input)
-
-    shared.resolve_update_is_featured(entity, user, clean_input)
-
     shared.resolve_add_suggested_items(entity, clean_input)
+    shared.update_publication_dates(entity, clean_input)
+    shared.update_is_recommended(entity, user, clean_input)
+    shared.update_is_featured(entity, user, clean_input)
 
     entity.save()
+    shared.store_initial_revision(entity)
 
     entity.add_follow(user)
 
@@ -51,7 +48,7 @@ def resolve_add_blog(_, info, input):
     }
 
 
-def resolve_edit_blog(_, info, input, draft=False):
+def resolve_edit_blog(_, info, input):
     # pylint: disable=redefined-builtin
     # pylint: disable=too-many-branches
     # pylint: disable=too-many-statements
@@ -64,43 +61,27 @@ def resolve_edit_blog(_, info, input, draft=False):
     shared.assert_authenticated(user)
     shared.assert_write_access(entity, user)
 
-    shared.resolve_start_revision(entity)
-
-    shared.resolve_update_tags(entity, clean_input)
+    revision = shared.resolve_start_revision(entity, user)
 
     shared.resolve_update_access_id(entity, clean_input)
-
+    shared.resolve_update_tags(entity, clean_input)
     shared.resolve_update_title(entity, clean_input)
-
-    shared.resolve_update_rich_description(entity, clean_input, revision=True)
-
+    shared.resolve_update_rich_description(entity, clean_input)
     shared.resolve_update_abstract(entity, clean_input)
-
     shared.update_featured_image(entity, clean_input)
-
+    shared.resolve_update_suggested_items(entity, clean_input)
+    shared.update_is_recommended(entity, user, clean_input)
+    shared.update_is_featured(entity, user, clean_input)
     shared.update_publication_dates(entity, clean_input)
-
-    shared.resolve_update_is_recommended(entity, user, clean_input)
-
-    shared.resolve_update_is_featured(entity, user, clean_input)
 
     # only admins can edit these fields
     if user.has_role(USER_ROLES.ADMIN):
         shared.resolve_update_group(entity, clean_input)
-
         shared.resolve_update_owner(entity, clean_input)
-
         shared.resolve_update_time_created(entity, clean_input)
 
-    shared.resolve_update_suggested_items(entity, clean_input)
-
-    shared.resolve_store_revision(entity)
-
-    if not draft:
-        shared.resolve_apply_revision(entity, entity.last_revision)
-
-
     entity.save()
+    shared.store_update_revision(revision, entity)
 
     return {
         "entity": entity

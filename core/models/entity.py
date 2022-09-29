@@ -89,6 +89,7 @@ class EntityManager(InheritanceManager):
 
 
 class Entity(models.Model, TagsMixin):
+    # During unsaved state of the Entity instance the (unsaved) last revision may help.
     objects = EntityManager()
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
@@ -122,7 +123,7 @@ class Entity(models.Model, TagsMixin):
     _tag_summary = ArrayField(models.CharField(max_length=256),
                               blank=True, default=list,
                               db_column='tags')
-
+    
     suggested_items = ArrayField(models.UUIDField(default=uuid.uuid4),
                                  blank=True, null=True)
 
@@ -132,7 +133,8 @@ class Entity(models.Model, TagsMixin):
     is_featured = models.BooleanField(default=False)
     is_recommended = models.BooleanField(default=False)
 
-    last_revision = models.ForeignKey('core.Revision', null=True, on_delete=models.SET_NULL, default=None)
+    def has_revisions(self):
+        return False
 
     def can_read(self, user):
         if user.is_authenticated and user.has_role(USER_ROLES.ADMIN):
@@ -173,6 +175,14 @@ class Entity(models.Model, TagsMixin):
             return True
         return False
 
+    def serialize(self):
+        """
+        Result is a dict that contains all values that can be updated
+          on the entity, in such a way that comparing the values before
+          and after update can be done. @see core.Revision.
+        """
+        raise NotImplementedError()
+
     class Meta:
         ordering = ['published']
 
@@ -190,3 +200,8 @@ class EntityViewCount(models.Model):
     views = models.IntegerField(default=0)
     created_at = models.DateTimeField(default=timezone.now)
     updated_at = models.DateTimeField(default=timezone.now)
+
+
+def str_datetime(value: timezone.datetime):
+    if value:
+        return str(value.astimezone(timezone.utc))

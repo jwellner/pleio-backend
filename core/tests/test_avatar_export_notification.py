@@ -16,7 +16,7 @@ class TestAvatarExportNotificationTestCase(PleioTenantTestCase):
         super().setUp()
 
         self.initiator = AdminFactory()
-        self.file = self.file_factory(self.relative_path(__file__, "assets", "avatar_export.zip"))
+        self.file = self.file_factory(self.relative_path(__file__, ["assets", "avatar_export.zip"]))
         self.avatar_export: AvatarExport = mixer.blend(AvatarExport,
                                                        initiator=self.initiator,
                                                        file=self.file)

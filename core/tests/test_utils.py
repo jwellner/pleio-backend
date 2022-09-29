@@ -334,7 +334,7 @@ class TestFetchAvatarTestCase(PleioTenantTestCase):
         self.user = UserFactory(picture=self.PICTURE_URL)
         self.response = mock.MagicMock(spec=Response)
         self.response.ok = True
-        self.response.content = open(self.relative_path(__file__, 'assets', 'avatar.jpg'), 'rb').read()
+        self.response.content = open(self.relative_path(__file__, ['assets', 'avatar.jpg']), 'rb').read()
         self.response.headers = {"content-type": "image/jpeg"}
 
     @mock.patch("core.utils.export.fetch_avatar")
@@ -401,7 +401,7 @@ class TestUtilsCompressPathTestCase(PleioTenantTestCase):
 
     def setUp(self):
         super().setUp()
-        self.base_file = self.file_factory(self.relative_path(__file__, 'assets', 'text_file.txt'))
+        self.base_file = self.file_factory(self.relative_path(__file__, ['assets', 'text_file.txt']))
 
     def test_correctly_created_zip_object(self):
         zipfile = None

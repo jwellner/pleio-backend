@@ -1,5 +1,4 @@
 import abc
-from django.apps import apps
 from core.models.attachment import Attachment
 from core.models.shared import AbstractModelMeta
 from core.utils.tiptap_parser import Tiptap
@@ -10,6 +9,7 @@ from urllib.parse import unquote, urlparse
 
 from .mixin import NotificationMixin
 
+
 class RichFieldsMixin(metaclass=AbstractModelMeta):
     class Meta:
         abstract = True
@@ -19,8 +19,8 @@ class RichFieldsMixin(metaclass=AbstractModelMeta):
     def rich_fields(self):
         """ Return a list of Tiptap objects e.g. [self.rich_description]. These are parsed and used to find mentioned users """
 
-class MentionMixin(NotificationMixin, RichFieldsMixin):
 
+class MentionMixin(NotificationMixin, RichFieldsMixin):
     class Meta:
         abstract = True
 
@@ -33,6 +33,7 @@ class MentionMixin(NotificationMixin, RichFieldsMixin):
 
         return user_ids
 
+
 class AttachmentMixin(RichFieldsMixin, metaclass=AbstractModelMeta):
     class Meta:
         abstract = True
@@ -43,10 +44,18 @@ class AttachmentMixin(RichFieldsMixin, metaclass=AbstractModelMeta):
         """ Can be overridden in parent Model """
         return Attachment.objects.none()
 
+    def get_rich_fields(self):
+        yield from self.rich_fields
+        yield from self.revision_rich_fields()
+
+    def revision_rich_fields(self):
+        if hasattr(self, 'has_revisions') and self.has_revisions():
+            for revision in self.revision_set.all():
+                yield from revision.rich_fields
+
     def attachments_in_text(self):
         sources = set()
-        tiptaps = self.rich_fields
-        for tiptap in tiptaps:
+        for tiptap in self.get_rich_fields():
             parser = Tiptap(tiptap)
             sources.update(parser.attached_sources)
 

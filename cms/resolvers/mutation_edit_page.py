@@ -4,7 +4,7 @@ from core.resolvers import shared
 from core.utils.entity import load_entity_by_id
 
 
-def resolve_edit_page(_, info, input, draft=False):
+def resolve_edit_page(_, info, input):
     # pylint: disable=redefined-builtin
     # pylint: disable=too-many-statements
     # pylint: disable=too-many-branches
@@ -17,27 +17,16 @@ def resolve_edit_page(_, info, input, draft=False):
     shared.assert_authenticated(user)
     shared.assert_write_access(entity, user)
 
-    if entity.has_revisions:
-        shared.resolve_start_revision(entity)
+    revision = shared.resolve_start_revision(entity, user)
 
     shared.resolve_update_tags(entity, clean_input)
-
-    shared.resolve_update_access_id(entity, clean_input)
-
     shared.resolve_update_title(entity, clean_input)
-
-    shared.resolve_update_rich_description(entity, clean_input, revision=entity.has_revisions)
-
+    shared.resolve_update_rich_description(entity, clean_input)
+    shared.resolve_update_access_id(entity, clean_input)
     shared.update_publication_dates(entity, clean_input)
 
-    if entity.has_revisions:
-        shared.resolve_store_revision(entity)
-
-    if not draft and entity.has_revisions:
-        shared.resolve_apply_revision(entity, entity.last_revision)
-
-
     entity.save()
+    shared.store_update_revision(revision, entity)
 
     return {
         "entity": entity
