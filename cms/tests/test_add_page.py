@@ -1,29 +1,19 @@
-from django.db import connection
-from django_tenants.test.cases import FastTenantTestCase
-from backend2.schema import schema
-from ariadne import graphql_sync
-import json
-from django.contrib.auth.models import AnonymousUser
-from django.http import HttpRequest
-from core.models import Group
-from user.models import User
+from core.tests.helpers import PleioTenantTestCase
+from user.factories import EditorFactory, AdminFactory, UserFactory
 from mixer.backend.django import mixer
-from graphql import GraphQLError
 from cms.models import Page
-from core.constances import USER_ROLES
 
-class AddPageTestCase(FastTenantTestCase):
+
+class AddPageTestCase(PleioTenantTestCase):
 
     def setUp(self):
-        self.anonymousUser = AnonymousUser()
-        self.user = mixer.blend(User)
-        self.admin = mixer.blend(User, roles=[USER_ROLES.ADMIN])
-        self.editor = mixer.blend(User, roles=[USER_ROLES.EDITOR])
+        super().setUp()
+        self.user = UserFactory()
+        self.admin = AdminFactory()
+        self.editor = EditorFactory()
         self.page = mixer.blend(Page)
 
-    def test_add_campaign_page_by_admin(self):
-
-        mutation = """
+        self.mutation = """
             mutation AddPage($input: addPageInput!) {
                 addPage(input: $input) {
                     entity {
@@ -48,281 +38,66 @@ class AddPageTestCase(FastTenantTestCase):
                 accessId
             }
         """
-        variables = {
+
+        self.variables = {
             "input": {
                 "title": "test",
                 "pageType": "campagne",
                 "accessId": 1,
                 "tags": [],
+                "richDescription": '{"blocks":[{"key":"6sb64","text":"test","type":"unstyled","depth":0,"inlineStyleRanges":[],"entityRanges":[],"data":{}}],"entityMap":{}}',
+            }
+        }
+        self.variables_text = {
+            "input": {
+                "title": "text",
+                "pageType": "text",
+                "containerGuid": self.page.guid,
+                "accessId": 1,
+                "tags": [],
                 "richDescription": '{"blocks":[{"key":"6sb64","text":"test","type":"unstyled","depth":0,"inlineStyleRanges":[],"entityRanges":[],"data":{}}],"entityMap":{}}'
-
             }
         }
 
-        request = HttpRequest()
-        request.user = self.admin
+    def test_add_campaign_page_by_admin(self):
+        for user, msg in ((self.admin, 'as admin'),
+                          (self.editor, 'as editor')):
+            self.graphql_client.force_login(user)
+            result = self.graphql_client.post(self.mutation, self.variables)
+            entity = result['data']['addPage']['entity']
 
-        result = graphql_sync(schema, {"query": mutation, "variables": variables }, context_value={ "request": request })
-        data = result[1]["data"]
-
-        self.assertEqual(data["addPage"]["entity"]["title"], "test")
-        self.assertEqual(data["addPage"]["entity"]["richDescription"], '{"blocks":[{"key":"6sb64","text":"test","type":"unstyled","depth":0,"inlineStyleRanges":[],"entityRanges":[],"data":{}}],"entityMap":{}}')
-        self.assertEqual(data["addPage"]["entity"]["pageType"], "campagne")
-        self.assertEqual(data["addPage"]["entity"]["tags"], [])
-        self.assertEqual(data["addPage"]["entity"]["accessId"], 1)
-        self.assertEqual(data["addPage"]["entity"]["canEdit"], True)
-        self.assertEqual(data["addPage"]["entity"]["parent"], None)
+            self.assertEqual(entity["title"], "test", msg=msg)
+            self.assertEqual(entity["richDescription"],
+                             '{"blocks":[{"key":"6sb64","text":"test","type":"unstyled","depth":0,"inlineStyleRanges":[],"entityRanges":[],"data":{}}],"entityMap":{}}',
+                             msg=msg)
+            self.assertEqual(entity["pageType"], "campagne", msg=msg)
+            self.assertEqual(entity["tags"], [], msg=msg)
+            self.assertEqual(entity["accessId"], 1, msg=msg)
+            self.assertEqual(entity["canEdit"], True, msg=msg)
+            self.assertEqual(entity["parent"], None, msg=msg)
 
     def test_add_text_sub_page_by_admin(self):
+        for user, msg in ((self.admin, 'as admin'),
+                          (self.editor, 'as editor')):
+            self.graphql_client.force_login(user)
+            result = self.graphql_client.post(self.mutation, self.variables_text)
+            entity = result['data']['addPage']['entity']
 
-        mutation = """
-            mutation AddPage($input: addPageInput!) {
-                addPage(input: $input) {
-                    entity {
-                    guid
-                    ...PageDetailFragment
-                    __typename
-                    }
-                    __typename
-                }
-            }
-
-            fragment PageDetailFragment on Page {
-                pageType
-                canEdit
-                title
-                url
-                richDescription
-                tags
-                parent {
-                    guid
-                }
-                accessId
-            }
-        """
-        variables = {
-            "input": {
-                "title": "text",
-                "pageType": "text",
-                "containerGuid": self.page.guid,
-                "accessId": 1,
-                "tags": [],
-                "richDescription": '{"blocks":[{"key":"6sb64","text":"test","type":"unstyled","depth":0,"inlineStyleRanges":[],"entityRanges":[],"data":{}}],"entityMap":{}}'
-
-            }
-        }
-
-        request = HttpRequest()
-        request.user = self.admin
-
-        result = graphql_sync(schema, {"query": mutation, "variables": variables }, context_value={ "request": request })
-        data = result[1]["data"]
-
-        self.assertEqual(data["addPage"]["entity"]["title"], "text")
-        self.assertEqual(data["addPage"]["entity"]["richDescription"], '{"blocks":[{"key":"6sb64","text":"test","type":"unstyled","depth":0,"inlineStyleRanges":[],"entityRanges":[],"data":{}}],"entityMap":{}}')
-        self.assertEqual(data["addPage"]["entity"]["pageType"], "text")
-        self.assertEqual(data["addPage"]["entity"]["tags"], [])
-        self.assertEqual(data["addPage"]["entity"]["accessId"], 1)
-        self.assertEqual(data["addPage"]["entity"]["canEdit"], True)
-        self.assertEqual(data["addPage"]["entity"]["parent"]["guid"], self.page.guid)
-
-    def test_add_campaign_page_by_editor(self):
-
-        mutation = """
-            mutation AddPage($input: addPageInput!) {
-                addPage(input: $input) {
-                    entity {
-                    guid
-                    ...PageDetailFragment
-                    __typename
-                    }
-                    __typename
-                }
-            }
-
-            fragment PageDetailFragment on Page {
-                pageType
-                canEdit
-                title
-                url
-                richDescription
-                tags
-                parent {
-                    guid
-                }
-                accessId
-            }
-        """
-        variables = {
-            "input": {
-                "title": "test",
-                "pageType": "campagne",
-                "accessId": 1,
-                "tags": [],
-                "richDescription": '{"blocks":[{"key":"6sb64","text":"test","type":"unstyled","depth":0,"inlineStyleRanges":[],"entityRanges":[],"data":{}}],"entityMap":{}}'
-
-            }
-        }
-
-        request = HttpRequest()
-        request.user = self.editor
-
-        result = graphql_sync(schema, {"query": mutation, "variables": variables }, context_value={ "request": request })
-        data = result[1]["data"]
-
-        self.assertEqual(data["addPage"]["entity"]["title"], "test")
-        self.assertEqual(data["addPage"]["entity"]["richDescription"], '{"blocks":[{"key":"6sb64","text":"test","type":"unstyled","depth":0,"inlineStyleRanges":[],"entityRanges":[],"data":{}}],"entityMap":{}}')
-        self.assertEqual(data["addPage"]["entity"]["pageType"], "campagne")
-        self.assertEqual(data["addPage"]["entity"]["tags"], [])
-        self.assertEqual(data["addPage"]["entity"]["accessId"], 1)
-        self.assertEqual(data["addPage"]["entity"]["canEdit"], True)
-        self.assertEqual(data["addPage"]["entity"]["parent"], None)
-
-    def test_add_text_sub_page_by_editor(self):
-
-        mutation = """
-            mutation AddPage($input: addPageInput!) {
-                addPage(input: $input) {
-                    entity {
-                    guid
-                    ...PageDetailFragment
-                    __typename
-                    }
-                    __typename
-                }
-            }
-
-            fragment PageDetailFragment on Page {
-                pageType
-                canEdit
-                title
-                url
-                richDescription
-                tags
-                parent {
-                    guid
-                }
-                accessId
-            }
-        """
-        variables = {
-            "input": {
-                "title": "text",
-                "pageType": "text",
-                "containerGuid": self.page.guid,
-                "accessId": 1,
-                "tags": [],
-                "richDescription": '{"blocks":[{"key":"6sb64","text":"test","type":"unstyled","depth":0,"inlineStyleRanges":[],"entityRanges":[],"data":{}}],"entityMap":{}}'
-
-            }
-        }
-
-        request = HttpRequest()
-        request.user = self.editor
-
-        result = graphql_sync(schema, {"query": mutation, "variables": variables }, context_value={ "request": request })
-        data = result[1]["data"]
-
-        self.assertEqual(data["addPage"]["entity"]["title"], "text")
-        self.assertEqual(data["addPage"]["entity"]["richDescription"], '{"blocks":[{"key":"6sb64","text":"test","type":"unstyled","depth":0,"inlineStyleRanges":[],"entityRanges":[],"data":{}}],"entityMap":{}}')
-        self.assertEqual(data["addPage"]["entity"]["pageType"], "text")
-        self.assertEqual(data["addPage"]["entity"]["tags"], [])
-        self.assertEqual(data["addPage"]["entity"]["accessId"], 1)
-        self.assertEqual(data["addPage"]["entity"]["canEdit"], True)
-        self.assertEqual(data["addPage"]["entity"]["parent"]["guid"], self.page.guid)
+            self.assertEqual(entity["title"], "text", msg=msg)
+            self.assertEqual(entity["richDescription"],
+                             '{"blocks":[{"key":"6sb64","text":"test","type":"unstyled","depth":0,"inlineStyleRanges":[],"entityRanges":[],"data":{}}],"entityMap":{}}',
+                             msg=msg)
+            self.assertEqual(entity["pageType"], "text", msg=msg)
+            self.assertEqual(entity["tags"], [], msg=msg)
+            self.assertEqual(entity["accessId"], 1, msg=msg)
+            self.assertEqual(entity["canEdit"], True, msg=msg)
+            self.assertEqual(entity["parent"]["guid"], self.page.guid, msg=msg)
 
     def test_add_campaign_page_by_anonymous(self):
-
-        mutation = """
-            mutation AddPage($input: addPageInput!) {
-                addPage(input: $input) {
-                    entity {
-                    guid
-                    ...PageDetailFragment
-                    __typename
-                    }
-                    __typename
-                }
-            }
-
-            fragment PageDetailFragment on Page {
-                pageType
-                canEdit
-                title
-                url
-                richDescription
-                tags
-                parent {
-                    guid
-                }
-                accessId
-            }
-        """
-        variables = {
-            "input": {
-                "title": "test",
-                "pageType": "campagne",
-                "accessId": 1,
-                "tags": [],
-                "richDescription": '{"blocks":[{"key":"6sb64","text":"test","type":"unstyled","depth":0,"inlineStyleRanges":[],"entityRanges":[],"data":{}}],"entityMap":{}}'
-
-            }
-        }
-
-        request = HttpRequest()
-        request.user = self.anonymousUser
-
-        result = graphql_sync(schema, {"query": mutation, "variables": variables }, context_value={ "request": request })
-
-        errors = result[1]["errors"]
-
-        self.assertEqual(errors[0]["message"], "not_logged_in")
-
+        with self.assertGraphQlError('not_logged_in'):
+            self.graphql_client.post(self.mutation, self.variables)
 
     def test_add_campaign_page_by_user(self):
-
-        mutation = """
-            mutation AddPage($input: addPageInput!) {
-                addPage(input: $input) {
-                    entity {
-                    guid
-                    ...PageDetailFragment
-                    __typename
-                    }
-                    __typename
-                }
-            }
-
-            fragment PageDetailFragment on Page {
-                pageType
-                canEdit
-                title
-                url
-                richDescription
-                tags
-                parent {
-                    guid
-                }
-                accessId
-            }
-        """
-        variables = {
-            "input": {
-                "title": "test",
-                "pageType": "campagne",
-                "accessId": 1,
-                "tags": [],
-                "richDescription": '{"blocks":[{"key":"6sb64","text":"test","type":"unstyled","depth":0,"inlineStyleRanges":[],"entityRanges":[],"data":{}}],"entityMap":{}}'
-
-            }
-        }
-
-        request = HttpRequest()
-        request.user = self.user
-
-        result = graphql_sync(schema, {"query": mutation, "variables": variables }, context_value={ "request": request })
-
-        errors = result[1]["errors"]
-
-        self.assertEqual(errors[0]["message"], "could_not_save")
-
+        with self.assertGraphQlError('could_not_save'):
+            self.graphql_client.force_login(self.user)
+            self.graphql_client.post(self.mutation, self.variables)

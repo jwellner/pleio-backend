@@ -994,6 +994,7 @@ type Featured {
     video: String
     videoTitle: String
     image: String
+    imageGuid: String
     positionY: Int
     alt: String
 }
@@ -1002,6 +1003,7 @@ input FeaturedInput {
     video: String
     videoTitle: String
     image: Upload
+    imageGuid: String
     positionY: Int
     alt: String
 }
@@ -1287,16 +1289,15 @@ type moveFileFolderPayload {
     entity: Entity
 }
 
-input publishContentInput {
+input updateRevisionInput {
     guid: String
-    revisionGuid: String
     description: String
 }
 
 type Mutation {
     editSiteSetting(input: editSiteSettingInput!): editSiteSettingPayload
     addEntity(input: addEntityInput!): addEntityPayload
-    editEntity(input: editEntityInput!, draft: Boolean): editEntityPayload
+    editEntity(input: editEntityInput!): editEntityPayload
     """Currently only implemented for events"""
     copyEntity(input: copyEntityInput!): copyEntityPayload
     deleteEntity(input: deleteEntityInput!): deleteEntityPayload
@@ -1305,7 +1306,7 @@ type Mutation {
     editFileFolder(input: editFileFolderInput!): editFileFolderPayload
     moveFileFolder(input: moveFileFolderInput!): moveFileFolderPayload
     addPage(input: addPageInput!): addPagePayload
-    editPage(input: editPageInput!, draft: Boolean): editPagePayload
+    editPage(input: editPageInput!): editPagePayload
     addRow(input: addRowInput!): addRowPayload
     editRow(input: editRowInput!): editRowPayload
     deleteRow(input: deleteRowInput!): deleteRowPayload
@@ -1428,7 +1429,7 @@ type Mutation {
 
     exportAvatars: exportAvatarsPayload
 
-    publishContent(input: publishContentInput!): publishContentPayload
+    updateRevision(input: updateRevisionInput!): Revision
 }
 
 type exportAvatarsPayload {
@@ -1553,7 +1554,6 @@ type Page implements Entity {
     widgets: [Widget]
     tags: [String]
     isPinned: Boolean!
-    revision: Revision
 }
 
 """The available plugins."""
@@ -1728,7 +1728,7 @@ type Query {
     siteAgreements: [SiteAgreement]
     siteCustomAgreements: [SiteCustomAgreement]
     revisions(
-        objectGuid: String!
+        containerGuid: String!
         offset: Int
         limit: Int
     ): RevisionList
@@ -1810,16 +1810,41 @@ type resendGroupInvitationPayload {
     group: Group
 }
 
-type ContentVersion {
-    richDescription: SecureRichText
+enum RevisionType {
+    create
+    update
 }
 
 type Revision {
-    object: String!
+    guid: String
+    author: User
+    container: Entity
     description: String
     content: ContentVersion
+    changedFields: [String]
     timeCreated: DateTime
-    timeUpdated: DateTime
+    type: RevisionType
+}
+
+type ContentVersion {
+    title: String
+    featured: Featured
+    abstract: String
+    richDescription: SecureRichText
+    tags: [String]
+    suggestedItems: [Entity]
+    source: String
+    isRecommended: Boolean
+    isFeatured: Boolean
+    group: Group
+    parent: Entity
+    owner: User
+    accessId: Int
+    writeAccessId: Int
+    timeCreated: DateTime
+    timePublished: DateTime
+    scheduleArchiveEntity: DateTime
+    scheduleDeleteEntity: DateTime
 }
 
 """The type of role."""
@@ -2421,7 +2446,6 @@ type Wiki implements Entity {
     owner: User
     isPinned: Boolean!
     featured: Featured
-    revision: Revision
 }
 
 type SiteAccessRequest {
@@ -2777,7 +2801,4 @@ input signSiteAgreementVersionInput {
 
 type signSiteAgreementVersionPayload {
     siteAgreementVersion: SiteAgreementVersion
-}
-type publishContentPayload {
-    success: Boolean
 }

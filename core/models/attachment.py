@@ -15,11 +15,13 @@ from core.models.image import ResizedImageMixin
 
 logger = logging.getLogger(__name__)
 
+
 def attachment_path(instance, filename):
     ext = filename.split('.')[-1]
     name = filename.split('.')[0]
     filename = "%s.%s" % (slugify(name), ext)
     return os.path.join('attachments', str(instance.id), filename)
+
 
 class Attachment(ModelWithFile, ResizedImageMixin):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
@@ -39,7 +41,7 @@ class Attachment(ModelWithFile, ResizedImageMixin):
             return user == self.owner
 
         if not hasattr(self.attached, 'can_read'):
-            return True # Groups don't have the function implemented
+            return True  # Groups don't have the function implemented
 
         return self.attached.can_read(user)
 
@@ -76,6 +78,7 @@ class Attachment(ModelWithFile, ResizedImageMixin):
 
     def __str__(self):
         return f"{self._meta.object_name}[{self.upload.name}]"
+
 
 @receiver(models.signals.pre_save, sender=Attachment)
 def attachment_mimetype_size(sender, instance, **kwargs):

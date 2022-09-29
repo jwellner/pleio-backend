@@ -89,7 +89,7 @@ def resolve_add_question(_, info, input):
     shared.update_featured_image(entity, clean_input)
     shared.update_publication_dates(entity, clean_input)
 
-    shared.resolve_update_is_featured(entity, user, clean_input)
+    shared.update_is_featured(entity, user, clean_input)
 
     entity.save()
 
@@ -122,7 +122,7 @@ def resolve_edit_question(_, info, input):
     shared.update_featured_image(entity, clean_input)
     shared.update_publication_dates(entity, clean_input)
 
-    shared.resolve_update_is_featured(entity, user, clean_input)
+    shared.update_is_featured(entity, user, clean_input)
 
     # only admins can edit these fields
     if user.has_role(USER_ROLES.ADMIN):

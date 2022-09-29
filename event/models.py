@@ -7,10 +7,11 @@ from django.utils.translation import gettext as _
 from auditlog.registry import auditlog
 from django.db import models
 from core.lib import get_default_email_context
-from core.models import (ArticleMixin, AttachmentMixin, BookmarkMixin,
-                         CommentMixin, Entity, FeaturedCoverMixin, FollowMixin,
+from core.models import (ArticleMixin, AttachmentMixin, BookmarkMixin, CommentMixin, Entity, FollowMixin,
                          NotificationMixin)
 from django_tenants.utils import parse_tenant_config_path
+
+from core.models.featured import FeaturedCoverMixin
 from event.lib import get_url
 from event.mail_builders.qr_code import submit_mail_event_qr
 from event.mail_builders.waitinglist import submit_mail_at_accept_from_waitinglist

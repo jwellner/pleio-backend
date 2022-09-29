@@ -1,6 +1,7 @@
 from core.tests.helpers import PleioTenantTestCase
+from user.factories import EditorFactory, AdminFactory
 from user.models import User
-from wiki.models import Wiki
+from wiki.factories import WikiFactory
 from mixer.backend.django import mixer
 from core.constances import ACCESS_TYPE
 from django.utils.text import slugify
@@ -13,29 +14,25 @@ class WikiTestCase(PleioTenantTestCase):
         self.authenticatedUser = mixer.blend(User)
         self.authenticatedUser2 = mixer.blend(User)
 
-        self.wikiPublic = Wiki.objects.create(
+        self.wikiPublic = WikiFactory(
             title="Test public wiki",
             rich_description="JSON to string",
-            read_access=[ACCESS_TYPE.public],
-            write_access=[ACCESS_TYPE.user.format(self.authenticatedUser.id)],
             owner=self.authenticatedUser
         )
 
-        self.wikiPrivate = Wiki.objects.create(
+        self.wikiPrivate = WikiFactory(
             title="Test private wiki",
             rich_description="JSON to string",
             read_access=[ACCESS_TYPE.user.format(self.authenticatedUser.id)],
-            write_access=[ACCESS_TYPE.user.format(self.authenticatedUser.id)],
             owner=self.authenticatedUser,
             parent=self.wikiPublic,
             is_featured=True
         )
 
-        self.wikiPrivate2 = Wiki.objects.create(
+        self.wikiPrivate2 = WikiFactory(
             title="Test private wiki 2",
             rich_description="JSON to string",
             read_access=[ACCESS_TYPE.user.format(self.authenticatedUser2.id)],
-            write_access=[ACCESS_TYPE.user.format(self.authenticatedUser2.id)],
             owner=self.authenticatedUser2,
             parent=self.wikiPublic,
             is_featured=True
@@ -147,7 +144,7 @@ class WikiTestCase(PleioTenantTestCase):
         self.assertEqual(entity["url"], "/wiki/view/{}/{}".format(self.wikiPrivate.guid, slugify(self.wikiPrivate.title)))
         self.assertEqual(entity["parent"]['guid'], self.wikiPublic.guid)
 
-    def test_news_public(self):
+    def test_wiki_public(self):
         variables = {
             "guid": self.wikiPublic.guid
         }
@@ -169,3 +166,21 @@ class WikiTestCase(PleioTenantTestCase):
         self.assertEqual(entity["url"], "/wiki/view/{}/{}".format(self.wikiPublic.guid, slugify(self.wikiPublic.title)))
         self.assertEqual(len(entity["children"]), 1)
         self.assertEqual(entity["children"][0]['guid'], self.wikiPrivate.guid)
+
+    def test_wiki_editor(self):
+        variables = {
+            'guid': self.wikiPublic.guid
+        }
+
+        self.graphql_client.force_login(EditorFactory())
+        result = self.graphql_client.post(self.query, variables)
+        self.assertFalse(result['data']['entity']['canEdit'])
+
+    def test_wiki_admin(self):
+        variables = {
+            'guid': self.wikiPublic.guid
+        }
+
+        self.graphql_client.force_login(AdminFactory())
+        result = self.graphql_client.post(self.query, variables)
+        self.assertTrue(result['data']['entity']['canEdit'])

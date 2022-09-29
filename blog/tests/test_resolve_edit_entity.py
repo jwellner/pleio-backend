@@ -11,7 +11,7 @@ from django.utils import timezone
 class EditBlogTestCase(PleioTenantTestCase):
 
     def setUp(self):
-        super(EditBlogTestCase, self).setUp()
+        super().setUp()
         self.authenticatedUser = mixer.blend(User)
         self.user2 = mixer.blend(User)
 
@@ -19,6 +19,7 @@ class EditBlogTestCase(PleioTenantTestCase):
         self.admin.roles = ['ADMIN']
         self.admin.save()
 
+        self.featured_file = self.file_factory(self.relative_path(__file__, ['assets', 'featured.jpeg']))
         self.group = mixer.blend(Group)
         self.blog = Blog.objects.create(
             title="Test public event",
@@ -26,7 +27,8 @@ class EditBlogTestCase(PleioTenantTestCase):
             read_access=[ACCESS_TYPE.public],
             write_access=[ACCESS_TYPE.user.format(self.authenticatedUser.id)],
             owner=self.authenticatedUser,
-            is_recommended=False
+            is_recommended=False,
+            featured_image=self.featured_file,
         )
         self.blog_multiple_read_access = Blog.objects.create(
             title="Test private blog",
@@ -66,14 +68,13 @@ class EditBlogTestCase(PleioTenantTestCase):
                     guid
                 }
                 isRecommended
-                revision {
-                    content {
-                        richDescription
-                    }
+                featured {
+                    imageGuid
+                    alt
                 }
             }
-            mutation ($input: editEntityInput!, $draft: Boolean) {
-                editEntity(input: $input, draft: $draft) {
+            mutation ($input: editEntityInput!) {
+                editEntity(input: $input) {
                     entity {
                     guid
                     status
@@ -94,11 +95,13 @@ class EditBlogTestCase(PleioTenantTestCase):
                 "isRecommended": True,
                 "timeCreated": "2018-12-10T23:00:00.000Z",
                 "groupGuid": self.group.guid,
-                "ownerGuid": self.user2.guid
+                "ownerGuid": self.user2.guid,
             }
         }
 
     def tearDown(self):
+        super().tearDown()
+
         self.blog.delete()
         self.authenticatedUser.delete()
         self.user2.delete()
@@ -141,6 +144,7 @@ class EditBlogTestCase(PleioTenantTestCase):
         self.assertDateEqual(entity["scheduleDeleteEntity"], variables['input']['scheduleDeleteEntity'])
         self.assertEqual(entity["suggestedItems"][0]["guid"], self.suggestedBlog.guid)
         self.assertEqual(entity["suggestedItems"][1]["guid"], self.suggestedNews.guid)
+        self.assertEqual(entity["featured"]['imageGuid'], self.featured_file.guid)
 
         self.blog.refresh_from_db()
 
@@ -148,19 +152,6 @@ class EditBlogTestCase(PleioTenantTestCase):
         self.assertEqual(entity["richDescription"], self.blog.rich_description)
         self.assertEqual(entity["tags"], self.blog.tags)
         self.assertEqual(entity["isRecommended"], self.blog.is_recommended)
-
-    def test_edit_blog_draft(self):
-        self.variables['draft'] = True
-
-        self.graphql_client.force_login(self.authenticatedUser)
-        result = self.graphql_client.post(self.mutation, self.variables)
-        entity = result['data']['editEntity']['entity']
-
-        # not stored on the entity itself
-        self.assertNotEqual(entity['richDescription'], self.variables['input']['richDescription'])
-
-        # but in a revision
-        self.assertEqual(entity['revision']['content']['richDescription'], self.variables['input']['richDescription'])
 
     def test_edit_blog_by_admin(self):
         variables = self.variables
@@ -350,3 +341,26 @@ class EditBlogTestCase(PleioTenantTestCase):
         self.blog_multiple_read_access.refresh_from_db()
         self.assertEqual(self.blog_multiple_read_access.read_access, [ACCESS_TYPE.public, ACCESS_TYPE.user.format(self.user2.id)])
         self.assertEqual(self.blog_multiple_read_access.write_access, [ACCESS_TYPE.user.format(self.user2.id)])
+
+    def test_remove_featured_image(self):
+        self.graphql_client.force_login(self.authenticatedUser)
+        response = self.graphql_client.post(self.mutation, {"input": {
+            'guid': self.blog.guid,
+            'featured': {}
+        }})
+        entity = response['data']['editEntity']['entity']
+        self.assertIsNone(entity['featured']['imageGuid'])
+        self.assertEqual(entity['featured']['alt'], '')
+
+    def test_update_featured_alt(self):
+        self.graphql_client.force_login(self.authenticatedUser)
+        response = self.graphql_client.post(self.mutation, {"input": {
+            'guid': self.blog.guid,
+            'featured': {
+                "imageGuid": self.featured_file.guid,
+                "alt": "Next Alt text",
+            },
+        }})
+        entity = response['data']['editEntity']['entity']
+        self.assertEqual(entity['featured']['imageGuid'], self.featured_file.guid)
+        self.assertEqual(entity['featured']['alt'], "Next Alt text")

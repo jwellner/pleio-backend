@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-09-15 12:48+0200\n"
+"POT-Creation-Date: 2022-09-20 17:19+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -49,108 +49,108 @@ msgstr "Receive notification emails"
 msgid "Receive overview emails"
 msgstr "Receive overview emails"
 
-#: core/lib.py:177 core/resolvers/mutation_import_users.py:30
+#: core/lib.py:206 core/resolvers/mutation_import_users.py:30
 #: core/resolvers/query_site.py:73
 msgid "Just me"
 msgstr "Just me"
 
-#: core/lib.py:180
+#: core/lib.py:209
 #, python-format
 msgid "Group: %(group_name)s"
 msgstr "Group: %(group_name)s"
 
-#: core/lib.py:183
+#: core/lib.py:212
 #, python-format
 msgid "Subgroup: %(subgroup_name)s"
 msgstr "Subgroup: %(subgroup_name)s"
 
-#: core/lib.py:189 core/resolvers/mutation_import_users.py:31
+#: core/lib.py:218 core/resolvers/mutation_import_users.py:31
 #: core/resolvers/query_site.py:74
 msgid "Logged in users"
 msgstr "Logged in users"
 
-#: core/lib.py:191 core/resolvers/mutation_import_users.py:34
+#: core/lib.py:220 core/resolvers/mutation_import_users.py:34
 #: core/resolvers/query_site.py:78
 msgid "Public"
 msgstr "Public"
 
-#: core/lib.py:202
+#: core/lib.py:231
 msgid "Event"
 msgstr "Event"
 
-#: core/lib.py:206
+#: core/lib.py:235
 msgid "Blog"
 msgstr "Blog"
 
-#: core/lib.py:210
+#: core/lib.py:239
 msgid "Discussion"
 msgstr "Discussion"
 
-#: core/lib.py:214 core/lib.py:384
+#: core/lib.py:243 core/lib.py:413
 msgid "News"
 msgstr "News"
 
-#: core/lib.py:218
+#: core/lib.py:247
 msgid "Update"
 msgstr "Update"
 
-#: core/lib.py:222
+#: core/lib.py:251
 msgid "Question"
 msgstr "Question"
 
-#: core/lib.py:226
+#: core/lib.py:255
 msgid "Wiki"
 msgstr "Wiki"
 
-#: core/lib.py:230
+#: core/lib.py:259
 msgid "Text page"
 msgstr "Text page"
 
-#: core/lib.py:378
+#: core/lib.py:407
 msgid "Updates"
 msgstr "Updates"
 
-#: core/lib.py:379
+#: core/lib.py:408
 msgid "Blogs"
 msgstr "Blogs"
 
-#: core/lib.py:380
+#: core/lib.py:409
 msgid "CMS pages"
 msgstr "CMS pages"
 
-#: core/lib.py:381
+#: core/lib.py:410
 msgid "Discussions"
 msgstr "Discussions"
 
-#: core/lib.py:382
+#: core/lib.py:411
 msgid "Events"
 msgstr "Events"
 
-#: core/lib.py:383
+#: core/lib.py:412
 msgid "Files"
 msgstr "Files"
 
-#: core/lib.py:385
+#: core/lib.py:414
 msgid "Polls"
 msgstr "Polls"
 
-#: core/lib.py:386
+#: core/lib.py:415
 msgid "Questions"
 msgstr "Questions"
 
-#: core/lib.py:387
+#: core/lib.py:416
 msgid "Tasks"
 msgstr "Tasks"
 
-#: core/lib.py:388
+#: core/lib.py:417
 msgid "Wiki pages"
 msgstr "Wiki pages"
 
-#: core/lib.py:389
+#: core/lib.py:418
 msgid "Comments"
 msgstr "Comments"
 
-#: core/lib.py:390
+#: core/lib.py:419
 msgid "Groups"
 msgstr "Groups"
 
@@ -328,6 +328,10 @@ msgstr "In progress"
 #: core/models/export.py:15
 msgid "Ready"
 msgstr "Ready"
+
+#: core/post_deploy.py:84
+msgid "Automatically generated initial revision"
+msgstr "Automatically generated initial revision"
 
 #: core/resolvers/mutation_import_users.py:17
 msgid "email"

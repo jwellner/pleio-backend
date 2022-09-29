@@ -44,27 +44,26 @@ def resolve_add_wiki(_, info, input):
     entity.group = group
     entity.parent = parent
 
-    shared.resolve_update_tags(entity, clean_input)
     shared.resolve_add_access_id(entity, clean_input)
-
+    shared.resolve_update_tags(entity, clean_input)
     shared.resolve_update_title(entity, clean_input)
     shared.resolve_update_rich_description(entity, clean_input)
-
     shared.resolve_update_abstract(entity, clean_input)
-
     shared.update_featured_image(entity, clean_input)
-    shared.update_publication_dates(entity, clean_input)
 
-    shared.resolve_update_is_featured(entity, user, clean_input)
+    shared.update_publication_dates(entity, clean_input)
+    shared.update_is_featured(entity, user, clean_input)
 
     entity.save()
+    shared.store_initial_revision(entity)
+
 
     return {
         "entity": entity
     }
 
 
-def resolve_edit_wiki(_, info, input, draft=False):
+def resolve_edit_wiki(_, info, input):
     # pylint: disable=redefined-builtin
     # pylint: disable=too-many-branches
     # pylint: disable=too-many-statements
@@ -72,47 +71,43 @@ def resolve_edit_wiki(_, info, input, draft=False):
     user = info.context["request"].user
     entity = load_entity_by_id(input['guid'], [Wiki])
 
-    clean_input = clean_graphql_input(input)
+    clean_input = clean_graphql_input(input, ['containerGuid'])
 
     shared.assert_authenticated(user)
     shared.assert_write_access(entity, user)
 
-    shared.resolve_start_revision(entity)
+    revision = shared.resolve_start_revision(entity, user)
 
     shared.resolve_update_tags(entity, clean_input)
-    shared.resolve_update_access_id(entity, clean_input)
     shared.resolve_update_title(entity, clean_input)
-    shared.resolve_update_rich_description(entity, clean_input, revision=True)
+    shared.resolve_update_rich_description(entity, clean_input)
     shared.resolve_update_abstract(entity, clean_input)
+    shared.update_featured_image(entity, clean_input)
 
     if 'containerGuid' in clean_input:
+        container = None
         try:
             container = Wiki.objects.get_subclass(id=clean_input.get("containerGuid"))
         except ObjectDoesNotExist:
             GraphQLError(COULD_NOT_FIND)
 
+        revision.content['parent'] = clean_input['containerGuid']
+
         entity.parent = container
-        entity.group = container.group
+        entity.group = container.group if container else None
 
-    shared.update_featured_image(entity, clean_input)
     shared.update_publication_dates(entity, clean_input)
-
-    shared.resolve_update_is_featured(entity, user, clean_input)
+    shared.update_is_featured(entity, user, clean_input)
+    shared.resolve_update_access_id(entity, clean_input)
 
     # only admins can edit these fields
     if user.has_role(USER_ROLES.ADMIN):
         shared.resolve_update_group(entity, clean_input)
-
         shared.resolve_update_owner(entity, clean_input)
-
         shared.resolve_update_time_created(entity, clean_input)
 
-    shared.resolve_store_revision(entity)
-
-    if not draft:
-        shared.resolve_apply_revision(entity, entity.last_revision)
-
     entity.save()
+    shared.store_update_revision(revision, entity)
 
     return {
         "entity": entity

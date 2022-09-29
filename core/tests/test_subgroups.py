@@ -303,7 +303,6 @@ class SubgroupsTestCase(FastTenantTestCase):
         self.assertEqual(data["entity"]["writeAccessId"], 10001)
 
     def test_edit_blog_in_subgroup_by_subgroup_member(self):
-
         data = {
             "input": {
                 "guid": self.blog2.guid,

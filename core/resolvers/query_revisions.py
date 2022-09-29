@@ -5,7 +5,7 @@ from core.constances import NOT_LOGGED_IN
 def resolve_revisions(
         _,
         info,
-        objectGuid,
+        containerGuid,
         offset=0,
         limit=20,
 ):
@@ -14,7 +14,7 @@ def resolve_revisions(
     if not user.is_authenticated:
         raise GraphQLError(NOT_LOGGED_IN)
 
-    entity = Entity.objects.get(id=objectGuid)
+    entity = Entity.objects.get(id=containerGuid)
     if not entity.can_write(user):
         return {
             'total' : 0,
@@ -22,7 +22,7 @@ def resolve_revisions(
         }
 
     revisions = Revision.objects.get_queryset()
-    revisions = revisions.filter(object=objectGuid)
+    revisions = revisions.filter(_container=containerGuid)
 
     edges = revisions[offset:offset + limit]
 

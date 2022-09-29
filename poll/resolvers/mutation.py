@@ -52,9 +52,7 @@ def resolve_edit_poll(_, info, input):
     shared.assert_write_access(entity, user)
 
     shared.resolve_update_access_id(entity, clean_input)
-
     shared.resolve_update_title(entity, clean_input)
-
     shared.update_publication_dates(entity, clean_input)
 
     entity.save()

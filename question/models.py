@@ -3,8 +3,9 @@ from django.db import models
 from django.utils.text import slugify
 from core import config
 from core.lib import get_acl
-from core.models import Entity, VoteMixin, CommentMixin, BookmarkMixin, FollowMixin, Comment, MentionMixin, FeaturedCoverMixin, ArticleMixin, AttachmentMixin
+from core.models import Entity, VoteMixin, CommentMixin, BookmarkMixin, FollowMixin, Comment, MentionMixin, ArticleMixin, AttachmentMixin
 from core.constances import USER_ROLES
+from core.models.featured import FeaturedCoverMixin
 
 
 class Question(Entity, VoteMixin, BookmarkMixin, FollowMixin, CommentMixin, MentionMixin, FeaturedCoverMixin, ArticleMixin, AttachmentMixin):

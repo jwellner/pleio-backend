@@ -12,33 +12,31 @@ def resolve_add_page(_, info, input):
     # pylint: disable=too-many-statements
     # pylint: disable=too-many-branches
 
-    user = info.context["request"].user
-    entity = Page()
-
     clean_input = clean_graphql_input(input)
-    
+    user = info.context["request"].user
+
+    entity = Page()
+    entity.page_type = clean_input['pageType']
+
     shared.assert_authenticated(user)
     shared.assert_write_access(entity, user)
-    
+
     entity.owner = user
 
     shared.resolve_update_tags(entity, clean_input)
     shared.resolve_update_title(entity, clean_input)
     shared.resolve_update_rich_description(entity, clean_input)
     shared.update_publication_dates(entity, clean_input)
-    
     resolve_update_access(entity, clean_input)
     resolve_update_parent(entity, clean_input)
-    resolve_update_page_type(entity, clean_input)
 
     entity.save()
+    shared.store_initial_revision(entity)
 
     return {
         "entity": entity
     }
 
-def resolve_update_page_type(entity, clean_input):
-    entity.page_type = clean_input.get("pageType")
 
 def resolve_update_parent(entity, clean_input):
     if 'containerGuid' in clean_input:
@@ -46,6 +44,7 @@ def resolve_update_parent(entity, clean_input):
             entity.parent = Page.objects.get(id=clean_input.get("containerGuid"))
         except ObjectDoesNotExist:
             raise GraphQLError(COULD_NOT_FIND)
+
 
 def resolve_update_access(entity, clean_input):
     if 'accessId' in clean_input:

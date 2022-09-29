@@ -1,14 +1,14 @@
 import logging
 import json
 
-from django.utils.timezone import localtime
+from django.utils.translation import gettext, activate
 from post_deploy import post_deploy_action
 
 from core import config
 from core.constances import ACCESS_TYPE
 from core.elasticsearch import schedule_index_document
-from core.lib import tenant_schema, is_schema_public
-from core.models import Group, Entity, Widget
+from core.lib import is_schema_public
+from core.models import Group, Entity, Revision, Widget
 from core.utils.entity import load_entity_by_id
 from user.models import User
 from notifications.models import Notification
@@ -67,6 +67,24 @@ def remove_notifications_with_broken_relation():
             count += 1
 
     LOGGER.info("Deleted %s broken notifications", count)
+
+
+@post_deploy_action
+def create_initial_revisions():
+    if is_schema_public():
+        return
+
+    activate(config.LANGUAGE)
+    Revision.objects.all().delete()
+    for entity in Entity.objects.select_subclasses():
+        if entity.has_revisions():
+            try:
+                revision = Revision()
+                revision.store_initial_version(entity)
+                revision.description = gettext("Automatically generated initial revision")
+                revision.save()
+            except Exception:
+                pass
 
 
 @post_deploy_action

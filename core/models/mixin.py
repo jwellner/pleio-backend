@@ -13,6 +13,7 @@ from core.utils.convert import truncate_rich_description, tiptap_to_text
 from core.lib import delete_attached_file
 from core.constances import USER_ROLES
 
+
 class VoteMixin(models.Model):
     def vote_count(self):
 
@@ -54,7 +55,7 @@ class VoteMixin(models.Model):
         if not user.is_authenticated:
             return None
 
-        if score in [-1,1]:
+        if score in [-1, 1]:
             return Annotation.objects.create(
                 user=user,
                 content_object=self,
@@ -74,10 +75,12 @@ class VoteMixin(models.Model):
     class Meta:
         abstract = True
 
+
 class BookmarkMixin(models.Model):
     """
     BookmarkMixin add to model to implement Bookmarks
     """
+
     class Meta:
         abstract = True
 
@@ -118,10 +121,12 @@ class BookmarkMixin(models.Model):
             if vote:
                 vote.delete()
 
+
 class FollowMixin(models.Model):
     """
     FollowMixin add to model to implement Follow
     """
+
     class Meta:
         abstract = True
 
@@ -179,6 +184,7 @@ class NotificationMixin(models.Model):
     """
     NotificationMixin add to model to implement notification on 'created'
     """
+
     class Meta:
         abstract = True
 
@@ -188,36 +194,6 @@ class NotificationMixin(models.Model):
         object_id_field='action_object_object_id'
     )
 
-class FeaturedCoverMixin(models.Model):
-    """
-    FeaturedCoverMixin add to model to implement featured cover fields
-    """
-    class Meta:
-        abstract = True
-
-    featured_image = models.ForeignKey(
-        "file.FileFolder",
-        on_delete=models.PROTECT,
-        blank=True,
-        null=True
-    )
-    featured_video = models.TextField(null=True, blank=True)
-    featured_video_title = models.CharField(max_length=256, default="")
-    featured_position_y = models.IntegerField(default=0, null=False)
-    featured_alt = models.CharField(max_length=256, default="")
-
-    @property
-    def featured_image_url(self):
-        if self.featured_image:
-            timestamp = self.featured_image.updated_at.timestamp()
-            try:
-                latest = self.featured_image.resized_images.latest('updated_at')
-                timestamp = latest.updated_at.timestamp()
-            except Exception:
-                pass
-
-            return '%s?cache=%i' % (reverse('featured', args=[self.id]), int(timestamp))
-        return None
 
 class ArticleMixin(models.Model):
     class Meta:
@@ -251,6 +227,7 @@ class ModelWithFile(models.Model, metaclass=AbstractModelMeta):
         for field in self.file_fields:
             delete_attached_file(field)
 
+
 class CommentMixin(models.Model):
     comments = GenericRelation('core.Comment')
 
@@ -259,7 +236,7 @@ class CommentMixin(models.Model):
             return False
 
         if isinstance(self, apps.get_model('core', 'Comment')) and \
-            isinstance(self.container, apps.get_model('core', 'Comment')):
+                isinstance(self.container, apps.get_model('core', 'Comment')):
             return False
 
         if self.group and not self.group.is_full_member(user) and not user.has_role(USER_ROLES.ADMIN):
@@ -278,4 +255,13 @@ class CommentMixin(models.Model):
 
     class Meta:
         abstract = True
-            
+
+
+def default_featured_image_properties(entity):
+    return {
+        "image": entity.featured_image.guid if entity.featured_image else None,
+        "video": entity.featured_video,
+        "position_y": entity.featured_position_y,
+        "title": entity.featured_video_title,
+        "alt": entity.featured_alt,
+    }

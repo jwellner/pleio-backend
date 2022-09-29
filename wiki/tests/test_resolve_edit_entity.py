@@ -1,4 +1,5 @@
 from django.utils import timezone
+
 from core.models import Group
 from core.tests.helpers import PleioTenantTestCase
 from user.models import User
@@ -83,14 +84,9 @@ class AddWikiCase(PleioTenantTestCase):
                     positionY
                     alt
                 }
-                revision {
-                    content {
-                        richDescription
-                    }
-                }
             }
-            mutation ($input: editEntityInput!, $draft: Boolean) {
-                editEntity(input: $input, draft: $draft) {
+            mutation ($input: editEntityInput!) {
+                editEntity(input: $input) {
                     entity {
                     guid
                     status
@@ -123,28 +119,12 @@ class AddWikiCase(PleioTenantTestCase):
         self.assertDateEqual(entity["scheduleArchiveEntity"], variables['input']['scheduleArchiveEntity'])
         self.assertDateEqual(entity["scheduleDeleteEntity"], variables['input']['scheduleDeleteEntity'])
 
-        # Not revisionized.
-        self.assertIsNone(entity['revision'])
-
         self.wikiPublic.refresh_from_db()
 
         self.assertEqual(entity["title"], self.wikiPublic.title)
         self.assertEqual(entity["richDescription"], self.wikiPublic.rich_description)
         self.assertEqual(entity["hasChildren"], self.wikiPublic.has_children())
         self.assertEqual(entity["isFeatured"], self.wikiPublic.is_featured)
-
-    def test_edit_wiki_draft(self):
-        self.data['draft'] = True
-
-        self.graphql_client.force_login(self.authenticatedUser)
-        result = self.graphql_client.post(self.mutation, self.data)
-        entity = result["data"]["editEntity"]["entity"]
-
-        # Not stored on the entity.
-        self.assertNotEqual(entity['richDescription'], self.data['input']['richDescription'])
-
-        # But at the revision.
-        self.assertEqual(entity['revision']['content']['richDescription'], self.data['input']['richDescription'])
 
     def test_edit_wiki_by_admin(self):
         variables = self.data

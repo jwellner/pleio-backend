@@ -72,49 +72,32 @@ class AddNewsTestCase(PleioTenantTestCase):
         """
 
     def test_add_news(self):
-        variables = self.data
-
-        self.graphql_client.force_login(self.authenticatedUser)
         with self.assertGraphQlError("could_not_add"):
-            self.graphql_client.post(self.mutation, variables)
+            self.graphql_client.force_login(self.authenticatedUser)
+            self.graphql_client.post(self.mutation, self.data)
 
         self.assertEqual(self.graphql_client.result["data"]["addEntity"], None)
 
-    def test_add_news_admin(self):
+    def test_add_news_as_authorized_user(self):
         variables = self.data
 
-        self.graphql_client.force_login(self.adminUser)
-        result = self.graphql_client.post(self.mutation, variables)
+        for user, msg in ((self.adminUser, "as admin"),
+                          (self.editorUser, "as editor")):
 
-        entity = result["data"]["addEntity"]["entity"]
-        self.assertEqual(entity["title"], variables["input"]["title"])
-        self.assertEqual(entity["richDescription"], variables["input"]["richDescription"])
-        self.assertEqual(entity["tags"], variables["input"]["tags"])
-        self.assertEqual(entity["isFeatured"], True)
-        self.assertEqual(entity["source"], variables["input"]["source"])
-        self.assertDateEqual(entity["timePublished"], variables['input']['timePublished'])
-        self.assertDateEqual(entity["scheduleArchiveEntity"], variables['input']['scheduleArchiveEntity'])
-        self.assertDateEqual(entity["scheduleDeleteEntity"], variables['input']['scheduleDeleteEntity'])
-        self.assertEqual(entity["suggestedItems"][0]["guid"], self.relatedNews1.guid)
-        self.assertEqual(entity["suggestedItems"][1]["guid"], self.relatedNews2.guid)
+            self.graphql_client.force_login(user)
+            result = self.graphql_client.post(self.mutation, variables)
 
-    def test_add_news_editor(self):
-        variables = self.data
-
-        self.graphql_client.force_login(self.editorUser)
-        result = self.graphql_client.post(self.mutation, variables)
-
-        entity = result["data"]["addEntity"]["entity"]
-        self.assertEqual(entity["title"], variables["input"]["title"])
-        self.assertEqual(entity["richDescription"], variables["input"]["richDescription"])
-        self.assertEqual(entity["tags"], variables["input"]["tags"])
-        self.assertEqual(entity["isFeatured"], True)
-        self.assertEqual(entity["source"], variables["input"]["source"])
-        self.assertDateEqual(entity["timePublished"], variables['input']['timePublished'])
-        self.assertDateEqual(entity["scheduleArchiveEntity"], variables['input']['scheduleArchiveEntity'])
-        self.assertDateEqual(entity["scheduleDeleteEntity"], variables['input']['scheduleDeleteEntity'])
-        self.assertEqual(entity["suggestedItems"][0]["guid"], self.relatedNews1.guid)
-        self.assertEqual(entity["suggestedItems"][1]["guid"], self.relatedNews2.guid)
+            entity = result["data"]["addEntity"]["entity"]
+            self.assertEqual(entity["title"], variables["input"]["title"], msg=msg)
+            self.assertEqual(entity["richDescription"], variables["input"]["richDescription"], msg=msg)
+            self.assertEqual(entity["tags"], variables["input"]["tags"], msg=msg)
+            self.assertEqual(entity["isFeatured"], True, msg=msg)
+            self.assertEqual(entity["source"], variables["input"]["source"], msg=msg)
+            self.assertDateEqual(entity["timePublished"], variables['input']['timePublished'], msg=msg)
+            self.assertDateEqual(entity["scheduleArchiveEntity"], variables['input']['scheduleArchiveEntity'], msg=msg)
+            self.assertDateEqual(entity["scheduleDeleteEntity"], variables['input']['scheduleDeleteEntity'], msg=msg)
+            self.assertEqual(entity["suggestedItems"][0]["guid"], self.relatedNews1.guid, msg=msg)
+            self.assertEqual(entity["suggestedItems"][1]["guid"], self.relatedNews2.guid, msg=msg)
 
     def test_add_minimal_entity(self):
         for user, msg in ((self.editorUser, "Error for Editors"),
