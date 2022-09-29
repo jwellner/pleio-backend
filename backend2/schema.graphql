@@ -171,14 +171,6 @@ type addGroupWidgetPayload {
     entity: Widget
 }
 
-input addImageInput {
-    image: Upload!
-}
-
-type addImagePayload {
-    file: FileFolder
-}
-
 input addPageInput {
     title: String
     richDescription: SecureRichText
@@ -861,6 +853,7 @@ input editSiteSettingInput {
     fileDescriptionFieldEnabled: Boolean
     pdfCheckerEnabled: Boolean
     maxCharactersInAbstract: Int
+    preserveFileExif: Boolean
 }
 
 type editSiteSettingPayload {
@@ -1324,7 +1317,6 @@ type Mutation {
     follow(input: followInput!): followPayload
     editAvatar(input: editAvatarInput!): editAvatarPayload
     editProfileField(input: editProfileFieldInput!): editProfileFieldPayload
-    addImage(input: addImageInput!): addImagePayload
     addGroup(input: addGroupInput!): addGroupPayload
     editGroup(input: editGroupInput!): editGroupPayload
     addSubgroup(input: addSubgroupInput!): addSubgroupPayload
@@ -2018,6 +2010,7 @@ type Site {
     pdfCheckerEnabled: Boolean!
     maxCharactersInAbstract: Int
     showSuggestedItems: Boolean!
+    preserveFileExif: Boolean!
 }
 
 type SiteSettings {
@@ -2144,6 +2137,7 @@ type SiteSettings {
     fileDescriptionFieldEnabled: Boolean
     pdfCheckerEnabled: Boolean!
     maxCharactersInAbstract: Int
+    preserveFileExif: Boolean!
 }
 
 type StatsItem {

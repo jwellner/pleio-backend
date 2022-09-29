@@ -9,7 +9,8 @@ from django.utils import timezone
 from django.utils.text import slugify
 from django.core.files.base import ContentFile
 from django.urls import reverse
-from core.lib import get_mimetype
+
+from core.lib import get_mimetype, strip_exif
 from core.models.mixin import ModelWithFile
 from core.models.image import ResizedImageMixin
 
@@ -91,3 +92,10 @@ def attachment_mimetype_size(sender, instance, **kwargs):
             instance.size = instance.upload.size
         except Exception:
             pass
+
+
+@receiver(models.signals.post_save, sender=Attachment)
+def attachment_strip_exif(sender, instance, **kwargs):
+    # pylint: disable=unused-argument
+    if instance.is_image():
+        strip_exif(instance.upload)

@@ -191,8 +191,9 @@ class EditSiteSettingTestCase(FastTenantTestCase):
                         kalturaVideoPlayerId
 
                         pdfCheckerEnabled
-
                         maxCharactersInAbstract
+                        preserveFileExif
+
                     }
                 }
             }
@@ -324,7 +325,8 @@ class EditSiteSettingTestCase(FastTenantTestCase):
 
                 "pdfCheckerEnabled": False,
 
-                "maxCharactersInAbstract": 500
+                "maxCharactersInAbstract": 500,
+                "preserveFileExif": True,
 
             }
         }
@@ -471,6 +473,7 @@ class EditSiteSettingTestCase(FastTenantTestCase):
         self.assertEqual(data["editSiteSetting"]["siteSettings"]["pdfCheckerEnabled"], False)
 
         self.assertEqual(data["editSiteSetting"]["siteSettings"]["maxCharactersInAbstract"], 500)
+        self.assertEqual(data["editSiteSetting"]["siteSettings"]["preserveFileExif"], True)
 
     @patch("core.lib.get_mimetype")
     @patch("{}.open".format(settings.DEFAULT_FILE_STORAGE))

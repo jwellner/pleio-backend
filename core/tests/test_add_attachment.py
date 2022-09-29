@@ -5,6 +5,7 @@ from core.tests.helpers import PleioTenantTestCase
 from user.factories import UserFactory
 from unittest.mock import MagicMock, patch
 
+
 class AddAttachmentTestCase(PleioTenantTestCase):
 
     def setUp(self):
@@ -45,10 +46,10 @@ class AddAttachmentTestCase(PleioTenantTestCase):
         with self.assertGraphQlError('not_logged_in'):
             self.graphql_client.post(self.mutation, variables)
 
-
+    @patch("core.models.attachment.strip_exif")
     @patch("core.lib.get_mimetype")
     @patch("{}.open".format(settings.DEFAULT_FILE_STORAGE))
-    def test_add_attachment(self, mock_open, mock_mimetype):
+    def test_add_attachment(self, mock_open, mock_mimetype, mocked_strip_exif):
         file_mock = MagicMock(spec=File)
         file_mock.name = 'test.gif'
         file_mock.content_type = 'image/gif'
@@ -71,3 +72,4 @@ class AddAttachmentTestCase(PleioTenantTestCase):
         self.assertEqual(data["addAttachment"]["attachment"]["url"], attachment.url)
         self.assertEqual(data["addAttachment"]["attachment"]["mimeType"], attachment.mime_type)
         self.assertEqual(data["addAttachment"]["attachment"]["name"], file_mock.name)
+        self.assertTrue(mocked_strip_exif.called)

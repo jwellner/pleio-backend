@@ -205,6 +205,8 @@ def resolve_edit_site_setting(_, info, input):
         'kalturaVideoPlayerId': 'KALTURA_VIDEO_PLAYER_ID',
 
         'pdfCheckerEnabled': 'PDF_CHECKER_ENABLED',
+
+        'preserveFileExif': 'PRESERVE_FILE_EXIF',
     }
 
     resolve_update_keys(setting_keys, clean_input)
