@@ -175,10 +175,11 @@ class EditFileFolderTestCase(PleioTenantTestCase):
             }
         """
 
+    @patch("file.resolvers.mutation.strip_exif")
     @patch("core.lib.get_mimetype")
     @patch("{}.save".format(settings.DEFAULT_FILE_STORAGE))
     @patch("{}.open".format(settings.DEFAULT_FILE_STORAGE))
-    def test_edit_file_title(self, mock_open, mock_save, mock_mimetype):
+    def test_edit_file_title(self, mock_open, mock_save, mock_mimetype, mocked_strip_exif):
         file_mock = MagicMock(spec=File)
         file_mock.name = 'test.gif'
         file_mock.content_type = 'image/gif'
@@ -221,6 +222,7 @@ class EditFileFolderTestCase(PleioTenantTestCase):
         self.assertDateEqual(entity["timePublished"], str(newPublishedTime))
         self.assertDateEqual(entity["scheduleArchiveEntity"], variables['input']['scheduleArchiveEntity'])
         self.assertDateEqual(entity["scheduleDeleteEntity"], variables['input']['scheduleDeleteEntity'])
+        self.assertTrue(mocked_strip_exif.called)
 
         test_file.refresh_from_db()
         self.assertEqual(test_file.title, variables['input']['title'])

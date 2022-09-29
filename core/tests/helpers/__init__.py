@@ -6,6 +6,7 @@ from contextlib import contextmanager
 from datetime import datetime
 from unittest import mock
 
+from PIL import Image, UnidentifiedImageError
 from ariadne import graphql_sync
 from django.contrib.auth.models import AnonymousUser
 from django.core.files.base import ContentFile
@@ -50,6 +51,10 @@ class PleioTenantTestCase(FastTenantTestCase):
     def relative_path(root, path):
         return os.path.join(os.path.dirname(root), *path)
 
+    def build_contentfile(self, path):
+        content = open(path, 'rb').read()
+        return ContentFile(content, os.path.basename(path))
+
     def tearDown(self):
         for file in self.file_cleanup:
             cleanup_path(file)
@@ -90,6 +95,21 @@ class PleioTenantTestCase(FastTenantTestCase):
                 }]
             } for p in paragraphs]
         })
+
+    def assertExif(self, fp, msg=None):
+        image = None
+        try:
+            image = Image.open(fp)
+        except UnidentifiedImageError:
+            pass
+        assert image and image.getexif(), msg or "Unexpectedly no exif data found."
+
+    def assertNotExif(self, fp, msg=None):
+        try:
+            image = Image.open(fp)
+            assert not image.getexif(), msg or "Unexpectedly found exif data."
+        except UnidentifiedImageError:
+            pass
 
 
 class GraphQlError(Exception):

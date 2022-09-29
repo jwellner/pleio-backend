@@ -4,7 +4,7 @@ from graphql import GraphQLError
 
 from core import config
 from core.constances import ACCESS_TYPE, COULD_NOT_SAVE
-from core.lib import access_id_to_acl, clean_graphql_input
+from core.lib import access_id_to_acl, clean_graphql_input, strip_exif
 from core.models import Group
 from core.resolvers import shared
 from core.utils.entity import load_entity_by_id
@@ -53,10 +53,10 @@ def update_file_folder_owner(entity, owner, new_owner, recursive, full_recursive
             file_folder.save()
 
 
-mutation = ObjectType("Mutation")
+mutation_resolver = ObjectType("Mutation")
 
 
-@mutation.field("addFile")
+@mutation_resolver.field("addFile")
 def resolve_add_file(_, info, input):
     # pylint: disable=redefined-builtin
 
@@ -113,8 +113,10 @@ def resolve_add_file(_, info, input):
     if entity.scan() == FILE_SCAN.VIRUS:
         raise GraphQLError("INVALID_FILE")
 
-
     entity.save()
+
+    if not config.PRESERVE_FILE_EXIF:
+        strip_exif(entity.upload)
 
     ensure_correct_file_without_signals(entity)
 
@@ -161,7 +163,7 @@ def resolve_add_folder(_, info, input):
     entity.owner = user
     entity.tags = clean_input.get("tags", [])
     shared.resolve_update_title(entity, clean_input)
-    
+
     entity.is_folder = True
 
     shared.resolve_update_rich_description(entity, clean_input)
@@ -183,7 +185,7 @@ def resolve_add_folder(_, info, input):
     }
 
 
-@mutation.field("editFileFolder")
+@mutation_resolver.field("editFileFolder")
 def resolve_edit_file_folder(_, info, input):
     # pylint: disable=redefined-builtin
 
@@ -201,7 +203,7 @@ def resolve_edit_file_folder(_, info, input):
 
     shared.update_publication_dates(entity, clean_input)
     shared.resolve_update_access_id(entity, clean_input)
-    
+
     resolve_update_file(entity, clean_input)
 
     if entity.is_folder and clean_input.get("isAccessRecursive", False):
@@ -222,7 +224,7 @@ def resolve_edit_file_folder(_, info, input):
     }
 
 
-@mutation.field("moveFileFolder")
+@mutation_resolver.field("moveFileFolder")
 def resolve_move_file_folder(_, info, input):
     # pylint: disable=redefined-builtin
 
@@ -272,39 +274,10 @@ def resolve_move_file_folder(_, info, input):
     }
 
 
-@mutation.field("addImage")
-def resolve_add_image(_, info, input):
-    # pylint: disable=redefined-builtin
-
-    user = info.context["request"].user
-
-    clean_input = clean_graphql_input(input)
-
-    shared.assert_authenticated(user)
-
-    entity = FileFolder()
-
-    entity.owner = user
-
-    if not clean_input.get("image"):
-        raise GraphQLError("NO_FILE")
-
-    entity.read_access = [ACCESS_TYPE.public]
-    entity.write_access = access_id_to_acl(entity, 0)
-
-    entity.upload = clean_input.get("image")
-
-    if entity.scan() == FILE_SCAN.VIRUS:
-        raise GraphQLError("INVALID_FILE")
-
-    entity.save()
-
-    return {
-        "file": entity
-    }
-
 def resolve_update_file(entity, clean_input):
     if 'file' in clean_input:
         entity.upload = clean_input.get("file")
         if entity.scan() == FILE_SCAN.VIRUS:
             raise GraphQLError("INVALID_FILE")
+        if not config.PRESERVE_FILE_EXIF:
+            strip_exif(entity.upload)

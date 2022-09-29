@@ -297,3 +297,8 @@ def resolve_max_characters_in_abstract(obj, info):
 def resolve_show_suggested_items(obj, info):
     # pylint: disable=unused-argument
     return config.SHOW_SUGGESTED_ITEMS
+
+@site.field("preserveFileExif")
+def resolve_preserve_file_exif(obj, info):
+    # pylint: disable=unused-argument
+    return config.PRESERVE_FILE_EXIF

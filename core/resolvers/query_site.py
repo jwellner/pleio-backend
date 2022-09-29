@@ -65,6 +65,7 @@ def get_settings():
         'showSuggestedItems': config.SHOW_SUGGESTED_ITEMS,
         'pdfCheckerEnabled': config.PDF_CHECKER_ENABLED,
         'maxCharactersInAbstract': config.MAX_CHARACTERS_IN_ABSTRACT,
+        'preserveFileExif': config.PRESERVE_FILE_EXIF,
     }
 
 
@@ -252,6 +253,7 @@ def get_site_settings():
         'fileDescriptionFieldEnabled': 'enable_file_description' in config.FILE_OPTIONS,
         'pdfCheckerEnabled': config.PDF_CHECKER_ENABLED,
         'maxCharactersInAbstract': config.MAX_CHARACTERS_IN_ABSTRACT,
+        'preserveFileExif': config.PRESERVE_FILE_EXIF,
     }
 
     return site_settings

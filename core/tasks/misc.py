@@ -1,19 +1,21 @@
 import csv
 import os
+
 import signal_disabler
 from PIL import Image
 from io import BytesIO
 from django.core.files.base import ContentFile
-from django_tenants.utils import schema_context
-from django.utils import translation
 from celery import shared_task
 from celery.utils.log import get_task_logger
-
 from core import config
-from core.lib import access_id_to_acl
+from core.lib import access_id_to_acl, strip_exif
 from core.mail_builders.user_import_failed_mailer import schedule_user_import_failed
 from core.mail_builders.user_import_success_mailer import schedule_user_import_success
-from core.models import Group, Entity, Widget, Comment, ProfileField, UserProfileField, ResizedImage
+from core.models import Group, Entity, Widget, Comment, ProfileField, UserProfileField, ResizedImage, Attachment
+from django.utils import translation
+from django_tenants.utils import schema_context
+
+from file.models import FileFolder
 from tenants.models import Client
 from user.models import User
 
@@ -137,6 +139,7 @@ class UserCsvRowImporter():
                 return User.objects.get(email=data['email']['value'])
             except Exception:
                 pass
+
 
 
 
@@ -290,3 +293,15 @@ def image_resize(self, schema_name, resize_image_id):
             resized_image.message = str(e)
             resized_image.save()
             logger.error(e)
+
+
+@shared_task
+def strip_exif_from_file(schema, file_folder_guid=None, attachment_guid=None):
+    with schema_context(schema):
+        if file_folder_guid:
+            instance = FileFolder.objects.get(id=file_folder_guid)
+        if attachment_guid:
+            instance = Attachment.objects.get(id=attachment_guid)
+        if instance:
+            logger.info("Strip exif from %s", instance.upload.path)
+            strip_exif(instance.upload)

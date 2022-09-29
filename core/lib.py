@@ -10,6 +10,7 @@ import uuid
 from functools import wraps
 from urllib.parse import urljoin
 
+from PIL import Image, UnidentifiedImageError
 from django.http import HttpRequest, HttpResponseForbidden
 import html2text
 from pytz import timezone
@@ -579,3 +580,14 @@ def str_to_datetime(datetime_str):
     if django_timezone.is_aware(result):
         return result.astimezone(django_timezone.get_current_timezone())
     return django_timezone.make_aware(result).astimezone(django_timezone.get_current_timezone())
+
+
+def strip_exif(upload_field):
+    try:
+        filepath = upload_field.path
+        image = Image.open(filepath)
+        if image.getexif():
+            image.save(filepath)
+    except (FileNotFoundError, ValueError,
+            UnidentifiedImageError):
+        pass

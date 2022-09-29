@@ -1,5 +1,5 @@
-import logging
 import json
+import logging
 
 from django.utils.translation import gettext, activate
 from post_deploy import post_deploy_action
@@ -7,8 +7,10 @@ from post_deploy import post_deploy_action
 from core import config
 from core.constances import ACCESS_TYPE
 from core.elasticsearch import schedule_index_document
-from core.lib import is_schema_public
+from core.lib import tenant_schema, is_schema_public
 from core.models import Group, Entity, Revision, Widget
+from core.models.attachment import Attachment
+from core.tasks import strip_exif_from_file
 from core.utils.entity import load_entity_by_id
 from user.models import User
 from notifications.models import Notification
@@ -117,3 +119,18 @@ def migrate_entities():
 
     Entity.objects.filter(last_action__isnull=False,
                           published__gt=F('last_action')).update(last_action=F('published'))
+
+
+@post_deploy_action(auto=False)
+def strip_article_images_of_exif_data():
+    # pylint: disable=no-value-for-parameter
+    if is_schema_public():
+        return
+
+    for attachment_guid in Attachment.objects.all().values_list('id', flat=True):
+        strip_exif_from_file.delay(schema=tenant_schema(),
+                                   attachment_guid=str(attachment_guid))
+
+    for entity in Entity.objects.all().select_subclasses():
+        if hasattr(entity, 'featured_image') and entity.featured_image:
+            strip_exif_from_file(file_folder_guid=entity.featured_image)

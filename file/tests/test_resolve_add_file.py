@@ -81,9 +81,10 @@ class AddFileTestCase(PleioTenantTestCase):
             }
         """
 
+    @patch("file.resolvers.mutation.strip_exif")
     @patch("core.lib.get_mimetype")
     @patch("{}.open".format(settings.DEFAULT_FILE_STORAGE))
-    def test_add_file(self, mock_open, mock_mimetype):
+    def test_add_file(self, mock_open, mock_mimetype, mocked_strip_exif):
         file_mock = MagicMock(spec=File)
         file_mock.name = 'test.gif'
         file_mock.content_type = 'image/gif'
@@ -104,6 +105,7 @@ class AddFileTestCase(PleioTenantTestCase):
         self.assertEqual(entity["group"]["guid"], self.group.guid)
         self.assertEqual(entity["tags"][0], "tag_one")
         self.assertEqual(entity["tags"][1], "tag_two")
+        self.assertTrue(mocked_strip_exif.called)
 
     @patch("core.lib.get_mimetype")
     @patch("{}.open".format(settings.DEFAULT_FILE_STORAGE))
