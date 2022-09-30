@@ -143,7 +143,7 @@ def save_file_disk_usage(schema_name):
         file_folder_size = 0
         attachment_size = 0
 
-        f = FileFolder.objects.filter(is_folder=False).aggregate(total_size=Sum('size'))
+        f = FileFolder.objects.filter(type=FileFolder.Types.FILE).aggregate(total_size=Sum('size'))
         if f.get('total_size', 0):
             file_folder_size = f.get('total_size', 0)
 

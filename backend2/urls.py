@@ -33,6 +33,7 @@ urlpatterns = [
     path('superadmin/scanlog', core_superadmin.ScanLog.as_view()),
     path('superadmin/auditlog', core_superadmin.AuditLog.as_view()),
     path('superadmin/group_copy', core_superadmin.GroupCopyView.as_view()),
+    path('superadmin/optional_features', core_superadmin.OptionalFeatures.as_view()),
     path('superadmin/agreements', core_superadmin.agreements),
     path('graphql', GraphQLView.as_view(schema=schema, extensions=[OpenTracingExtensionSync], introspection=settings.DEBUG), name='graphql'),
 

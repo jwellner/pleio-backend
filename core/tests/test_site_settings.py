@@ -229,6 +229,7 @@ class SiteSettingsTestCase(FastTenantTestCase):
                     kalturaVideoPlayerId
 
                     pdfCheckerEnabled
+                    collabEditingEnabled
                 }
             }
         """
@@ -421,6 +422,7 @@ class SiteSettingsTestCase(FastTenantTestCase):
         self.assertEqual(data["siteSettings"]["kalturaVideoPartnerId"], "")
         self.assertEqual(data["siteSettings"]["kalturaVideoPlayerId"], "")
         self.assertEqual(data["siteSettings"]["pdfCheckerEnabled"], True)
+        self.assertEqual(data["siteSettings"]["collabEditingEnabled"], False)
 
     def test_site_settings_by_anonymous(self):
         request = HttpRequest()

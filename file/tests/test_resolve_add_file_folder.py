@@ -19,29 +19,44 @@ class AddFileTestCase(PleioTenantTestCase):
 
         self.authenticatedUser = mixer.blend(User)
         self.mutation = """
-            fragment FileFolderParts on FileFolder {
-                title
-                description
-                richDescription
-                timeCreated
-                timeUpdated
-                accessId
-                writeAccessId
-                canEdit
-                tags
-                url
-                inGroup
-                group {
-                    guid
-                }
-                mimeType
-            }
             mutation ($input: addEntityInput!) {
                 addEntity(input: $input) {
                     entity {
                         guid
                         status
-                        ...FileFolderParts
+                        ... on File {
+                            title
+                            description
+                            richDescription
+                            timeCreated
+                            timeUpdated
+                            accessId
+                            writeAccessId
+                            canEdit
+                            tags
+                            url
+                            inGroup
+                            group {
+                                guid
+                            }
+                            mimeType
+                        }
+                        ... on Folder {
+                            title
+                            description
+                            richDescription
+                            timeCreated
+                            timeUpdated
+                            accessId
+                            writeAccessId
+                            canEdit
+                            tags
+                            url
+                            inGroup
+                            group {
+                                guid
+                            }
+                        }
                     }
                 }
             }

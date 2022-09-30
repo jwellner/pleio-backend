@@ -260,6 +260,10 @@ class CustomCSPMiddleware:
 
     def __call__(self, request):
         response = self.get_response(request)
+
+        scheme = 'wss' if request.is_secure() else 'ws'
+        response._csp_update = {'connect-src': "%s://%s" % (scheme, request.get_host())}
+
         if config.CSP_HEADER_EXCEPTIONS:
             response._csp_update = {'img-src': config.CSP_HEADER_EXCEPTIONS, 'frame-src': config.CSP_HEADER_EXCEPTIONS}
 

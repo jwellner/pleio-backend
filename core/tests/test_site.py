@@ -23,6 +23,9 @@ class SiteTestCase(FastTenantTestCase):
         cache.set("%s%s" % (connection.schema_name, 'PROFILE_SECTIONS'),
             [{"name": "section_one", "profileFieldGuids": [self.profileField1.guid, self.profileField2.guid]}]
         )
+        cache.set("%s%s" % (connection.schema_name, 'COLLAB_EDITING_ENABLED'),
+            True
+        )
 
         self.query = """
             query testSite {
@@ -112,6 +115,7 @@ class SiteTestCase(FastTenantTestCase):
                     questionLockAfterActivityLink
                     maxCharactersInAbstract
                     showSuggestedItems
+                    collabEditingEnabled
                     preserveFileExif
                 }
             }
@@ -163,6 +167,7 @@ class SiteTestCase(FastTenantTestCase):
         self.assertEqual(data["site"]["questionLockAfterActivityLink"], config.QUESTION_LOCK_AFTER_ACTIVITY_LINK)
         self.assertEqual(data["site"]["maxCharactersInAbstract"], config.MAX_CHARACTERS_IN_ABSTRACT)
         self.assertEqual(data["site"]["showSuggestedItems"], config.SHOW_SUGGESTED_ITEMS)
+        self.assertEqual(data["site"]["collabEditingEnabled"], config.COLLAB_EDITING_ENABLED)
         self.assertEqual(data["site"]["preserveFileExif"], config.PRESERVE_FILE_EXIF)
 
     def test_site_closed(self):

@@ -25,17 +25,6 @@
                 {{ form.errors.oidc_providers }}
             </div>
         </div>
-        <br>
-        <div class="card">
-            <h5 class="card-header">User</h5>
-            <div class="card-body">
-                <div class="mb-2 form-check">
-                <input type="checkbox" name="edit_user_name_enabled" id="edit_user_name_enabled" {% if config.EDIT_USER_NAME_ENABLED %} checked {% endif %} />
-                    <label for="edit_user_name_enabled">Enable edit name</label>
-                </div>
-                {{ form.errors.edit_user_name_enabled }}
-            </div>
-        </div>
         <br/>
         <div class="card">
             <h5 class="card-header">Custom Javascript</h5>

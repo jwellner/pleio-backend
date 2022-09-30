@@ -188,14 +188,14 @@ class FilesCase(FastTenantTestCase):
             read_access=[ACCESS_TYPE.user.format(self.authenticatedUser.id)],
             write_access=[ACCESS_TYPE.user.format(self.authenticatedUser.id)],
             owner=self.authenticatedUser,
-            is_folder=True
+            type=FileFolder.Types.FOLDER
         )
 
         self.file1 = FileFolder.objects.create(
             owner=self.authenticatedUser,
             upload=None,
             title="file1",
-            is_folder=False,
+            type=FileFolder.Types.FILE,
             group=None,
             parent=None,
             read_access=[ACCESS_TYPE.user.format(self.authenticatedUser.id)],
@@ -205,7 +205,7 @@ class FilesCase(FastTenantTestCase):
             owner=self.authenticatedUser,
             upload=None,
             title="file2",
-            is_folder=False,
+            type=FileFolder.Types.FILE,
             group=None,
             parent=self.folder,
             read_access=[ACCESS_TYPE.user.format(self.authenticatedUser.id)],
@@ -216,7 +216,7 @@ class FilesCase(FastTenantTestCase):
             owner=self.authenticatedUser,
             upload=None,
             title="file3",
-            is_folder=False,
+            type=FileFolder.Types.FILE,
             group=self.group,
             parent=None,
             read_access=[ACCESS_TYPE.user.format(self.authenticatedUser.id)],
@@ -224,15 +224,17 @@ class FilesCase(FastTenantTestCase):
         )
 
         self.query = """
-            fragment FileParts on FileFolder {
-                title
-            }
             query FilesQuery($containerGuid: String!) {
                 files(containerGuid: $containerGuid) {
                     total
                     edges {
                         guid
-                        ...FileParts
+                        ... on File {
+                            title
+                        }
+                        ... on Folder {
+                            title
+                        }
                     }
                 }
             }

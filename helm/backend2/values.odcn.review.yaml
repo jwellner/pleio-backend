@@ -2,6 +2,8 @@ accountDomain: https://account.pleio-test.nl
 websitesManual:
   - domain: 'review.pleio-test.nl'
     secretName: tls-wildcard.pleio-test.nl
+  - domain: 'collab.pleio-test.nl'
+    secretName: tls-wildcard.pleio-test.nl
 
 cspReportOnly: 'False'
 
@@ -31,3 +33,6 @@ storage:
 
 tunnel:
   hostname: admin-odcn-review.pleio-beheer.nl
+
+collab:
+  backend: collab-backend-test

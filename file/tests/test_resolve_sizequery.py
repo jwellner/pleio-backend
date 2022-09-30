@@ -14,40 +14,46 @@ class TestResolveSizeQueryTestCase(PleioTenantTestCase):
 
         self.authenticatedUser = mixer.blend(User)
 
-        self.file1 = mixer.blend(FileFolder, title="File1", size=80, is_folder=False,
+        self.file1 = mixer.blend(FileFolder, title="File1", size=80, type=FileFolder.Types.FILE,
                                  time_created=timezone.now() - timezone.timedelta(days=6),
                                  owner=self.authenticatedUser,
                                  read_access=[ACCESS_TYPE.user.format(self.authenticatedUser.id)])
-        self.file2 = mixer.blend(FileFolder, title="File2", size=40, is_folder=False,
+        self.file2 = mixer.blend(FileFolder, title="File2", size=40, type=FileFolder.Types.FILE,
                                  time_created=timezone.now() - timezone.timedelta(days=8),
                                  owner=self.authenticatedUser,
                                  read_access=[ACCESS_TYPE.user.format(self.authenticatedUser.id)])
-        self.file3 = mixer.blend(FileFolder, title="File3", size=20, is_folder=False,
+        self.file3 = mixer.blend(FileFolder, title="File3", size=20, type=FileFolder.Types.FILE,
                                  time_created=timezone.now() - timezone.timedelta(days=10),
                                  owner=self.authenticatedUser,
                                  read_access=[ACCESS_TYPE.user.format(self.authenticatedUser.id)])
 
-        self.folder1 = mixer.blend(FileFolder, title="Folder1", is_folder=True,
+        self.folder1 = mixer.blend(FileFolder, title="Folder1", type=FileFolder.Types.FOLDER,
                                    owner=self.authenticatedUser,
                                    read_access=[ACCESS_TYPE.user.format(self.authenticatedUser.id)])
 
-        self.file4 = mixer.blend(FileFolder, title="File4", size=60, is_folder=False, parent=self.folder1,
+        self.file4 = mixer.blend(FileFolder, title="File4", size=60, type=FileFolder.Types.FILE, parent=self.folder1,
                                  time_created=timezone.now() - timezone.timedelta(days=4),
                                  owner=self.authenticatedUser,
                                  read_access=[ACCESS_TYPE.user.format(self.authenticatedUser.id)])
-        self.file5 = mixer.blend(FileFolder, title="File5", size=100, is_folder=False, parent=self.folder1,
+        self.file5 = mixer.blend(FileFolder, title="File5", size=100, type=FileFolder.Types.FILE, parent=self.folder1,
                                  time_created=timezone.now() - timezone.timedelta(days=2),
                                  owner=self.authenticatedUser,
                                  read_access=[ACCESS_TYPE.user.format(self.authenticatedUser.id)])
 
         self.query = """
         query FileSummary(
-                  $filter: String
+                  $typeFilter: [String]
                   $orderBy: String
                   $dir: String) {
-            files(filter: $filter, orderBy: $orderBy, orderDirection: $dir) {
+            files(typeFilter: $typeFilter, orderBy: $orderBy, orderDirection: $dir) {
                 edges {
-                   ... on FileFolder {
+                   ... on File {
+                       title
+                       parentFolder {
+                         title
+                       }
+                   }
+                   ... on Folder {
                        title
                        parentFolder {
                          title
@@ -61,7 +67,7 @@ class TestResolveSizeQueryTestCase(PleioTenantTestCase):
     def test_order_by_size(self):
         self.graphql_client.force_login(self.authenticatedUser)
         result = self.graphql_client.post(self.query, {
-            'filter': 'files',
+            'typeFilter': ['file'],
             'orderBy': 'size',
             'dir': 'asc',
         })
@@ -72,7 +78,7 @@ class TestResolveSizeQueryTestCase(PleioTenantTestCase):
     def test_order_by_size_desc(self):
         self.graphql_client.force_login(self.authenticatedUser)
         result = self.graphql_client.post(self.query, {
-            'filter': 'files',
+            'typeFilter': ['file'],
             'orderBy': 'size',
             'dir': 'desc'
         })

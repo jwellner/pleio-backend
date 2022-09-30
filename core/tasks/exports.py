@@ -18,7 +18,7 @@ def export_avatars(schema, avatar_export_id):
         zip_file_contents = build_avatar_export(avatar_export.initiator)
 
         avatar_export.file = FileFolder.objects.create(
-            is_folder=False,
+            type=FileFolder.Types.FILE,
             owner=avatar_export.initiator,
             upload=ContentFile(zip_file_contents, 'avatar_export.zip'),
             read_access=[ACCESS_TYPE.user.format(avatar_export.initiator.guid)],

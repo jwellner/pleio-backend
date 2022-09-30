@@ -48,6 +48,7 @@ class TypeModels(Enum):
     comment = "core.Comment"
     file = "file.FileFolder"
     folder = "file.FileFolder"
+    pad = "file.FileFolder"
 
 
 def get_model_by_subtype(subtype):

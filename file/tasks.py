@@ -39,7 +39,7 @@ def scan(self, schema_name, limit=1000):
     with schema_context(schema_name):
         time_threshold = timezone.now() - timedelta(days=7)
 
-        files = FileFolder.objects.filter(is_folder=False)
+        files = FileFolder.objects.filter(type=FileFolder.Types.FILE)
         files = files.filter(Q(last_scan__isnull=True) | Q(last_scan__lt=time_threshold))
         files = files.order_by(F("last_scan").desc(nulls_first=True))[:limit]
 

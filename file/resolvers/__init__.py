@@ -1,6 +1,5 @@
-from ariadne import ObjectType, InterfaceType
-from .filefolder import filefolder
+from .filefolder import file, folder, filefolder
 from .mutation import mutation_resolver
 from .query import query
 
-resolvers = [filefolder, mutation_resolver, query]
+resolvers = [filefolder, file, folder, mutation_resolver, query]

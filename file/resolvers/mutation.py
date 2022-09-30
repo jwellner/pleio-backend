@@ -164,7 +164,7 @@ def resolve_add_folder(_, info, input):
     entity.tags = clean_input.get("tags", [])
     shared.resolve_update_title(entity, clean_input)
 
-    entity.is_folder = True
+    entity.type = FileFolder.Types.FOLDER
 
     shared.resolve_update_rich_description(entity, clean_input)
 
@@ -206,7 +206,7 @@ def resolve_edit_file_folder(_, info, input):
 
     resolve_update_file(entity, clean_input)
 
-    if entity.is_folder and clean_input.get("isAccessRecursive", False):
+    if entity.type == FileFolder.Types.FOLDER and clean_input.get("isAccessRecursive", False):
         update_access_recursive(user, entity, clean_input.get("accessId"), clean_input.get("writeAccessId"))
 
     if 'ownerGuid' in clean_input:

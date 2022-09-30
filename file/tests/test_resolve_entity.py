@@ -20,40 +20,61 @@ class FileFolderTestCase(PleioTenantTestCase):
             read_access=[ACCESS_TYPE.user.format(self.authenticatedUser.id)],
             write_access=[ACCESS_TYPE.user.format(self.authenticatedUser.id)],
             owner=self.authenticatedUser,
-            is_folder=True
+            type=FileFolder.Types.FOLDER,
         )
 
         self.query = """
-            fragment FileParts on FileFolder {
-                title
-                subtype
-                timeCreated
-                timeUpdated
-                timePublished
-                scheduleArchiveEntity
-                scheduleDeleteEntity
-                accessId
-                writeAccessId
-                canEdit
-                tags
-                url
-                inGroup
-                parentFolder {
-                    guid
-                }
-                group {
-                    guid
-                }
-                hasChildren
-                mimeType
-                download
-                thumbnail
-            }
             query GetFile($guid: String!) {
                 entity(guid: $guid) {
                     guid
                     status
-                    ...FileParts
+                    ... on File {
+                        title
+                        subtype
+                        timeCreated
+                        timeUpdated
+                        timePublished
+                        scheduleArchiveEntity
+                        scheduleDeleteEntity
+                        accessId
+                        writeAccessId
+                        canEdit
+                        tags
+                        url
+                        inGroup
+                        parentFolder {
+                            guid
+                        }
+                        group {
+                            guid
+                        }
+                        hasChildren
+                        mimeType
+                        thumbnail
+                        download
+                    }
+                    ... on Folder {
+                        title
+                        subtype
+                        timeCreated
+                        timeUpdated
+                        timePublished
+                        scheduleArchiveEntity
+                        scheduleDeleteEntity
+                        accessId
+                        writeAccessId
+                        canEdit
+                        tags
+                        url
+                        inGroup
+                        parentFolder {
+                            guid
+                        }
+                        group {
+                            guid
+                        }
+                        hasChildren
+                    }
                 }
             }
         """
@@ -129,7 +150,7 @@ class FileFolderTestCase(PleioTenantTestCase):
         self.assertEqual(entity["parentFolder"], None)
         self.assertEqual(entity["subtype"], "folder")
         #self.assertEqual(entity["hasChildren"], True)
-        self.assertEqual(entity["mimeType"], None)
+        #self.assertEqual(entity["mimeType"], None)
 
     @patch("core.lib.get_mimetype")
     @patch("{}.save".format(settings.DEFAULT_FILE_STORAGE))
@@ -216,7 +237,7 @@ class FileFolderTestCase(PleioTenantTestCase):
             write_access=[ACCESS_TYPE.logged_in],
             owner=self.authenticatedUser,
             tags=["tag1", "tag2"],
-            is_folder=True
+            type=FileFolder.Types.FOLDER,
         )
 
         variables = {

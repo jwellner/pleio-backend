@@ -94,7 +94,11 @@ class NotificationsTestCase(FastTenantTestCase):
                         title
                         url
                         }
-                        ... on FileFolder {
+                        ... on File {
+                        title
+                        url
+                        }
+                        ... on Folder {
                         title
                         url
                         }

@@ -14,7 +14,7 @@ def fix_broken_filenames():
     retry_files = FileFolder.objects.filter(Q(title__isnull=True)
                                             | Q(title__startswith='/')
                                             | Q(mime_type__isnull=True)
-                                            | Q(size__lt=1)).filter(is_folder=False)
+                                            | Q(size__lt=1)).filter(type=FileFolder.Types.FILE)
 
     for file in retry_files:
         from file.tasks import post_process_file_attributes

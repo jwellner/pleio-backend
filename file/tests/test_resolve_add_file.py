@@ -28,7 +28,7 @@ class AddFileTestCase(PleioTenantTestCase):
             read_access=[ACCESS_TYPE.public],
             write_access=[ACCESS_TYPE.user.format(self.authenticatedUser.id)],
             owner=self.authenticatedUser,
-            is_folder=True,
+            type=FileFolder.Types.FILE,
             group=self.group
         )
 
@@ -53,29 +53,44 @@ class AddFileTestCase(PleioTenantTestCase):
             }
         }
         self.mutation = """
-            fragment FileFolderParts on FileFolder {
-                title
-                description
-                richDescription
-                timeCreated
-                timeUpdated
-                accessId
-                writeAccessId
-                canEdit
-                tags
-                url
-                inGroup
-                group {
-                    guid
-                }
-                mimeType
-            }
             mutation ($input: addFileInput!) {
                 addFile(input: $input) {
                     entity {
-                    guid
-                    status
-                    ...FileFolderParts
+                        guid
+                        status
+                        ... on File {
+                            title
+                            description
+                            richDescription
+                            timeCreated
+                            timeUpdated
+                            accessId
+                            writeAccessId
+                            canEdit
+                            tags
+                            url
+                            inGroup
+                            group {
+                                guid
+                            }
+                            mimeType
+                        }
+                        ... on Folder {
+                            title
+                            description
+                            richDescription
+                            timeCreated
+                            timeUpdated
+                            accessId
+                            writeAccessId
+                            canEdit
+                            tags
+                            url
+                            inGroup
+                            group {
+                                guid
+                            }
+                        }
                     }
                 }
             }
@@ -232,7 +247,10 @@ class AddFileTestCase(PleioTenantTestCase):
                 addEntity(input: $input) {
                     entity {
                         guid
-                        ...on FileFolder {
+                        ...on File {
+                            title
+                        }
+                        ...on Folder {
                             title
                         }
                         __typename
