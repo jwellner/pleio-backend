@@ -20,7 +20,6 @@ class SettingsForm(forms.Form):
         choices=map(option_to_choice, OIDC_PROVIDER_OPTIONS),
         error_messages={'required': 'Choose at least one option'})
 
-    edit_user_name_enabled = forms.BooleanField(required=False)
     custom_javascript = forms.CharField(required=False)
     csp_header_exceptions = forms.CharField(required=False)
 
@@ -37,7 +36,6 @@ class SettingsForm(forms.Form):
         data = self.cleaned_data
 
         config.OIDC_PROVIDERS = data['oidc_providers']
-        config.EDIT_USER_NAME_ENABLED = data['edit_user_name_enabled']
         config.CUSTOM_JAVASCRIPT = data['custom_javascript']
         config.CSP_HEADER_EXCEPTIONS = data['csp_header_exceptions'].splitlines(False)
 
@@ -68,3 +66,11 @@ class CustomAgreementForm(forms.ModelForm):
     class Meta:
         model=CustomAgreement  
         fields = ['name', 'document']
+class OptionalFeaturesForm(forms.Form):
+    collab_editing_enabled = forms.BooleanField(required=False)
+    edit_user_name_enabled = forms.BooleanField(required=False)
+
+    def save(self):
+        data = self.cleaned_data
+        config.COLLAB_EDITING_ENABLED = data['collab_editing_enabled']
+        config.EDIT_USER_NAME_ENABLED = data['edit_user_name_enabled']

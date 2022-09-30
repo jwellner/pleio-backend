@@ -31,3 +31,6 @@ storage:
 
 tunnel:
   hostname: admin-odcn-test.pleio-beheer.nl
+
+collab:
+  backend: collab-backend-test

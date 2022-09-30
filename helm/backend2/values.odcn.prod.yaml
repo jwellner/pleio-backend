@@ -34,3 +34,6 @@ storage:
 
 tunnel:
   hostname: admin-odcn-prod.pleio-beheer.nl
+
+collab:
+  backend: collab-backend

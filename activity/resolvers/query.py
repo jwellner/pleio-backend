@@ -16,6 +16,7 @@ logger = logging.getLogger(__name__)
 
 def conditional_subtypes_filter(subtypes):
     q_objects = Q()
+
     if subtypes:
         for object_type in subtypes:
             if object_type == 'news':

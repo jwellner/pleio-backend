@@ -31,7 +31,7 @@ class MoveFileFolderTestCase(FastTenantTestCase):
             read_access=[ACCESS_TYPE.user.format(self.authenticatedUser.id)],
             write_access=[ACCESS_TYPE.user.format(self.authenticatedUser.id)],
             owner=self.authenticatedUser,
-            is_folder=True
+            type=FileFolder.Types.FOLDER,
         )
 
         self.folder = FileFolder.objects.create(
@@ -39,7 +39,7 @@ class MoveFileFolderTestCase(FastTenantTestCase):
             read_access=[ACCESS_TYPE.user.format(self.authenticatedUser.id)],
             write_access=[ACCESS_TYPE.user.format(self.authenticatedUser.id)],
             owner=self.authenticatedUser,
-            is_folder=True,
+            type=FileFolder.Types.FOLDER,
             parent=self.folder_root
         )
 
@@ -58,21 +58,29 @@ class MoveFileFolderTestCase(FastTenantTestCase):
             }
         }
         self.mutation = """
-            fragment FileFolderParts on FileFolder {
-                title
-                parentFolder {
-                    guid
-                }
-                group {
-                    guid
-                }
-            }
             mutation ($input: moveFileFolderInput!) {
                 moveFileFolder(input: $input) {
                     entity {
                         guid
                         status
-                        ...FileFolderParts
+                        ... on File {
+                            title
+                            parentFolder {
+                                guid
+                            }
+                            group {
+                                guid
+                            }
+                        }
+                        ... on Folder {
+                            title
+                            parentFolder {
+                                guid
+                            }
+                            group {
+                                guid
+                            }
+                        }
                     }
                 }
             }

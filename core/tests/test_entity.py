@@ -23,7 +23,7 @@ class EntityTestCase(FastTenantTestCase):
         self.folder = FileFolder.objects.create(
             owner=self.authenticatedUser,
             upload=None,
-            is_folder=True,
+            type=FileFolder.Types.FOLDER,
             parent=None,
             read_access=[ACCESS_TYPE.public],
             write_access=[ACCESS_TYPE.user.format(self.authenticatedUser.id)]
@@ -31,7 +31,7 @@ class EntityTestCase(FastTenantTestCase):
         self.subFolder = FileFolder.objects.create(
             owner=self.authenticatedUser,
             upload=None,
-            is_folder=True,
+            type=FileFolder.Types.FOLDER,
             parent=self.folder,
             read_access=[ACCESS_TYPE.public],
             write_access=[ACCESS_TYPE.user.format(self.authenticatedUser.id)]
@@ -39,7 +39,7 @@ class EntityTestCase(FastTenantTestCase):
         self.file = FileFolder.objects.create(
             owner=self.authenticatedUser,
             upload=None,
-            is_folder=False,
+            type=FileFolder.Types.FILE,
             parent=self.subFolder,
             read_access=[ACCESS_TYPE.public],
             write_access=[ACCESS_TYPE.user.format(self.authenticatedUser.id)]
@@ -191,7 +191,7 @@ class EntityTestCase(FastTenantTestCase):
         data = result[1]["data"]
 
         self.assertEqual(data["entity"]["guid"], self.file.guid)
-        self.assertEqual(data["entity"]["__typename"], "FileFolder")
+        self.assertEqual(data["entity"]["__typename"], "File")
 
     def test_entity_archived(self):
         query = """
@@ -219,7 +219,12 @@ class EntityTestCase(FastTenantTestCase):
         query = """
             query Breadcrumb($guid: String!) {
                 breadcrumb(guid: $guid) {
-                    ... on FileFolder {
+                    ... on File {
+                        guid
+                        title
+                        __typename
+                    }
+                    ... on Folder {
                         guid
                         title
                         __typename

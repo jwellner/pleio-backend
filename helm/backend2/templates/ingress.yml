@@ -25,6 +25,15 @@ spec:
                   name: http
             path: '/'
             pathType: Prefix
+          {{- if $.Values.collab.backend }}
+          - backend:
+              service:
+                name: {{ $.Values.collab.backend }}
+                port:
+                  name: http
+            path: '/collab'
+            pathType: Prefix
+          {{- end }}
   {{- end }}
   {{- if .Values.adminDomain }}
     - host: {{ .Values.adminDomain }}
@@ -76,6 +85,15 @@ spec:
                   name: http
             path: '/'
             pathType: Prefix
+          {{- if $.Values.collab.backend }}
+          - backend:
+              service:
+                name: {{ $.Values.collab.backend }}
+                port:
+                  name: http
+            path: '/collab'
+            pathType: Prefix
+          {{- end }}
   {{- end }}
   tls:
   {{- range .Values.websitesManual }}

@@ -41,7 +41,7 @@ class FileDocument(DefaultDocument):
         file_contents = ''
         try:
             # copy file to temp folder to process
-            if not instance.is_folder and instance.upload:
+            if not instance.type == FileFolder.Types.FILE and instance.upload:
                 extension = os.path.splitext(instance.upload.name)[1]
                 if extension in ['.pdf', '.doc', '.docx', '.pptx', '.txt']:
                     with instance.upload.open() as f:

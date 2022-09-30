@@ -4,7 +4,7 @@ from django.core.exceptions import ObjectDoesNotExist
 from core.models import Group, Entity
 from file.models import FileFolder
 from user.models import User
-from django.db.models import Q
+from django.db.models import Q, Case, When
 
 query = ObjectType("Query")
 
@@ -21,21 +21,26 @@ def conditional_group_folder_user_container_filter(container_guid, is_folder, is
 
     return Q()
 
-def conditional_filter_subtype(subtype):
+def conditional_filter_subtypes(subtypes):
+    q_objects = Q()
+    if subtypes:
+        for subtype in subtypes:
+            if subtype.lower() == "file":
+                q_objects.add(Q(type=FileFolder.Types.FILE), Q.OR)
 
-    if subtype == "files":
-        return Q(is_folder=False)
+            if subtype.lower() == "folder":
+                q_objects.add(Q(type=FileFolder.Types.FOLDER), Q.OR)
 
-    if subtype == "folders":
-        return Q(is_folder=True)
+            if subtype.lower() == "pad":
+                q_objects.add(Q(type=FileFolder.Types.PAD), Q.OR)
 
-    return Q()
+    return q_objects
 
 @query.field("files")
 def resolve_files(
         _,
         info,
-        filter="all",
+        typeFilter=None,
         containerGuid=None,
         offset=0,
         limit=20,
@@ -82,8 +87,8 @@ def resolve_files(
                     raise GraphQLError("INVALID_CONTAINER_GUID")
 
     qs = FileFolder.objects.visible(info.context["request"].user)
-    qs = qs.filter(conditional_group_folder_user_container_filter(containerGuid, is_folder, is_user) & conditional_filter_subtype(filter))
-    qs = qs.order_by('-is_folder', *order_by)
+    qs = qs.filter(conditional_group_folder_user_container_filter(containerGuid, is_folder, is_user) & conditional_filter_subtypes(typeFilter))
+    qs = qs.order_by(Case(When(type=FileFolder.Types.FOLDER, then=0), default=1), *order_by)
 
     edges = qs[offset:offset+limit]
 

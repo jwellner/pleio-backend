@@ -153,6 +153,7 @@ DEFAULT_SITE_CONFIG = {
     'PDF_CHECKER_ENABLED': (True, 'PDFChecker enabled'),
 
     'MAX_CHARACTERS_IN_ABSTRACT': (320, 'Maximum characters in abstract'),
+    'COLLAB_EDITING_ENABLED': (False, 'Is collaborative editing enabled'),
 
     'PRESERVE_FILE_EXIF': (False, 'Preserve the EXIF data of uploaded files'),
 }

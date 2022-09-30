@@ -1,3 +1,5 @@
+import logging
+
 from django.core.exceptions import ObjectDoesNotExist
 from elasticsearch_dsl import Search
 from graphql import GraphQLError
@@ -7,7 +9,7 @@ from core.constances import (ACCESS_TYPE, COULD_NOT_FIND, COULD_NOT_FIND_GROUP,
                              COULD_NOT_SAVE, INVALID_ARCHIVE_AFTER_DATE,
                              NOT_LOGGED_IN, TEXT_TOO_LONG,
                              USER_NOT_MEMBER_OF_GROUP, USER_NOT_SITE_ADMIN,
-                             USER_ROLES)
+                             USER_ROLES, INVALID_VALUE)
 from core.lib import (access_id_to_acl, html_to_text,
                       tenant_schema, get_access_id)
 from core.models import EntityViewCount, Group
@@ -18,6 +20,8 @@ from core.utils.entity import load_entity_by_id
 from file.models import FileFolder
 from file.tasks import resize_featured
 from user.models import User
+
+LOGGER = logging.getLogger(__name__)
 
 
 def resolve_entity_access_id(obj, info):
@@ -212,12 +216,15 @@ def resolve_entity_comment_count(obj, info):
 
 
 def _comment_count_from_index(obj):
-    query = Search(index='_all') \
-        .query('match', id=obj.guid) \
-        .source(['id', 'comments'])
-    for match in query.execute():
-        if match.id == obj.guid:
-            return len(match.comments)
+    try:
+        query = Search(index='_all') \
+            .query('match', id=obj.guid) \
+            .source(['id', 'comments'])
+        for match in query.execute():
+            if match.id == obj.guid:
+                return len(match.comments)
+    except Exception as e:
+        LOGGER.error(e);
     return None
 
 
@@ -255,12 +262,6 @@ def resolve_entity_is_pinned(obj, info):
     if hasattr(obj, "is_pinned"):
         return obj.is_pinned
     return False
-
-
-def assert_valid_abstract(abstract):
-    text = html_to_text(abstract).strip()
-    if len(text) > config.MAX_CHARACTERS_IN_ABSTRACT:
-        raise GraphQLError(TEXT_TOO_LONG)
 
 
 def resolve_add_suggested_items(entity, clean_input):
@@ -348,7 +349,9 @@ def update_featured_image(entity, clean_input, image_owner=None):
 
 def resolve_update_title(entity, clean_input):
     if 'title' in clean_input:
-        entity.title = clean_input.get("title")
+        title = clean_input.get("title").strip()
+        assert_valid_title(title)
+        entity.title = title
 
 
 def resolve_update_rich_description(entity, clean_input):
@@ -458,6 +461,16 @@ def assert_group_member(user, group):
     if group and not group.is_full_member(user) and not user.has_role(USER_ROLES.ADMIN):
         raise GraphQLError(USER_NOT_MEMBER_OF_GROUP)
 
+
+def assert_valid_title(title):
+    if len(title) == 0 or len(title) > 256:
+        raise GraphQLError(INVALID_VALUE)
+
+
+def assert_valid_abstract(abstract):
+    text = html_to_text(abstract).strip()
+    if len(text) > config.MAX_CHARACTERS_IN_ABSTRACT:
+        raise GraphQLError(TEXT_TOO_LONG)
 
 # Site setting profile field
 

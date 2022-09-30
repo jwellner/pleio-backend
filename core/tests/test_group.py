@@ -37,7 +37,7 @@ class GroupTestCase(PleioTenantTestCase):
         self.file = FileFolder.objects.create(
             owner=self.authenticatedUser,
             upload=None,
-            is_folder=False,
+            type=FileFolder.Types.FILE,
             parent=None,
             read_access=[ACCESS_TYPE.public],
             write_access=[ACCESS_TYPE.user.format(self.authenticatedUser.id)]

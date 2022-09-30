@@ -24,11 +24,12 @@ class EditFileFolderTestCase(PleioTenantTestCase):
 
         self.group = mixer.blend(Group, owner=self.authenticatedUser)
         self.group.join(self.user1, 'member')
+
         self.folder1 = FileFolder.objects.create(
             owner=self.authenticatedUser,
             rich_description=self.PREVIOUS_DESCRIPTION,
             upload=None,
-            is_folder=True,
+            type=FileFolder.Types.FOLDER,
             group=self.group,
             parent=None,
             read_access=[ACCESS_TYPE.public],
@@ -38,7 +39,7 @@ class EditFileFolderTestCase(PleioTenantTestCase):
             owner=self.authenticatedUser,
             rich_description=self.PREVIOUS_DESCRIPTION,
             upload=None,
-            is_folder=True,
+            type=FileFolder.Types.FOLDER,
             group=self.group,
             parent=self.folder1,
             read_access=[ACCESS_TYPE.public],
@@ -48,51 +49,20 @@ class EditFileFolderTestCase(PleioTenantTestCase):
             owner=self.user1,
             rich_description=self.PREVIOUS_DESCRIPTION,
             upload=None,
-            is_folder=True,
+            type=FileFolder.Types.FOLDER,
             group=self.group,
             parent=None,
             read_access=[ACCESS_TYPE.public],
             write_access=[ACCESS_TYPE.user.format(self.user1.id)]
         )
-        self.file = FileFolder.objects.create(
-            owner=self.authenticatedUser,
-            rich_description=self.PREVIOUS_DESCRIPTION,
-            upload=None,
-            is_folder=False,
-            group=self.group,
-            parent=self.folder2,
-            read_access=[ACCESS_TYPE.public],
-            write_access=[ACCESS_TYPE.user.format(self.authenticatedUser.id)]
-        )
+
         self.file2 = FileFolder.objects.create(
             owner=self.authenticatedUser,
             rich_description=self.PREVIOUS_DESCRIPTION,
             upload=None,
-            is_folder=False,
+            type=FileFolder.Types.FILE,
             group=self.group,
             parent=self.folder3,
-            read_access=[ACCESS_TYPE.public],
-            write_access=[ACCESS_TYPE.user.format(self.authenticatedUser.id)]
-        )
-
-        self.group = mixer.blend(Group, owner=self.authenticatedUser)
-        self.folder1 = FileFolder.objects.create(
-            owner=self.authenticatedUser,
-            rich_description=self.PREVIOUS_DESCRIPTION,
-            upload=None,
-            is_folder=True,
-            group=self.group,
-            parent=None,
-            read_access=[ACCESS_TYPE.public],
-            write_access=[ACCESS_TYPE.user.format(self.authenticatedUser.id)]
-        )
-        self.folder2 = FileFolder.objects.create(
-            owner=self.authenticatedUser,
-            rich_description=self.PREVIOUS_DESCRIPTION,
-            upload=None,
-            is_folder=True,
-            group=self.group,
-            parent=self.folder1,
             read_access=[ACCESS_TYPE.public],
             write_access=[ACCESS_TYPE.user.format(self.authenticatedUser.id)]
         )
@@ -100,7 +70,7 @@ class EditFileFolderTestCase(PleioTenantTestCase):
             owner=self.authenticatedUser,
             rich_description=self.PREVIOUS_DESCRIPTION,
             upload=None,
-            is_folder=False,
+            type=FileFolder.Types.FILE,
             group=self.group,
             parent=self.folder2,
             title="a file",
@@ -111,7 +81,7 @@ class EditFileFolderTestCase(PleioTenantTestCase):
             owner=self.authenticatedUser,
             rich_description=self.PREVIOUS_DESCRIPTION,
             upload=None,
-            is_folder=False,
+            type=FileFolder.Types.FILE,
             group=self.group,
             parent=self.folder2,
             title="b file",
@@ -121,7 +91,7 @@ class EditFileFolderTestCase(PleioTenantTestCase):
         self.file5 = FileFolder.objects.create(
             owner=self.user2,
             rich_description=self.PREVIOUS_DESCRIPTION,
-            is_folder=False,
+            type=FileFolder.Types.FILE,
             group=self.group,
             parent=self.folder1,
             title="Someone Elses file",
@@ -141,35 +111,56 @@ class EditFileFolderTestCase(PleioTenantTestCase):
             }
         }
         self.mutation = """
-            fragment FileFolderParts on FileFolder {
-                title
-                description
-                richDescription
-                timeCreated
-                timeUpdated
-                timePublished
-                scheduleArchiveEntity
-                scheduleDeleteEntity
-                accessId
-                writeAccessId
-                canEdit
-                tags
-                url
-                inGroup
-                group {
-                    guid
-                }
-                owner {
-                    guid
-                }
-                mimeType
-            }
-            mutation ($input: editFileFolderInput!) {
+             mutation ($input: editFileFolderInput!) {
                 editFileFolder(input: $input) {
                     entity {
                     guid
                     status
-                    ...FileFolderParts
+                    ... on File {
+                        title
+                        description
+                        richDescription
+                        timeCreated
+                        timeUpdated
+                        timePublished
+                        scheduleArchiveEntity
+                        scheduleDeleteEntity
+                        accessId
+                        writeAccessId
+                        canEdit
+                        tags
+                        url
+                        inGroup
+                        group {
+                            guid
+                        }
+                        owner {
+                            guid
+                        }
+                        mimeType
+                    }
+                    ... on Folder {
+                        title
+                        description
+                        richDescription
+                        timeCreated
+                        timeUpdated
+                        timePublished
+                        scheduleArchiveEntity
+                        scheduleDeleteEntity
+                        accessId
+                        writeAccessId
+                        canEdit
+                        tags
+                        url
+                        inGroup
+                        group {
+                            guid
+                        }
+                        owner {
+                            guid
+                        }
+                    }
                     }
                 }
             }
@@ -237,7 +228,12 @@ class EditFileFolderTestCase(PleioTenantTestCase):
             editFileFolder(input: $input) {
                 entity {
                 guid
-                ... on FileFolder {
+                ... on File {
+                    accessId
+                    writeAccessId
+                    __typename
+                }
+                ... on Folder {
                     accessId
                     writeAccessId
                     __typename
@@ -262,15 +258,15 @@ class EditFileFolderTestCase(PleioTenantTestCase):
 
         entity = result["data"]["editFileFolder"]["entity"]
         self.assertEqual(entity["guid"], self.folder1.guid)
-        self.assertEqual(entity["__typename"], "FileFolder")
+        self.assertEqual(entity["__typename"], "Folder")
 
         query = """
-            query OpenFolder($guid: String, $filter: String) {
-                files(containerGuid: $guid, filter: $filter) {
+            query OpenFolder($guid: String, $typeFilter: [String]) {
+                files(containerGuid: $guid, typeFilter: $typeFilter) {
                     total
                     edges {
                         guid
-                        ... on FileFolder {
+                        ... on File {
                             hasChildren
                             title
                             subtype
@@ -278,6 +274,15 @@ class EditFileFolderTestCase(PleioTenantTestCase):
                             accessId
                             writeAccessId
                             mimeType
+                            __typename
+                        }
+                        ... on Folder {
+                            hasChildren
+                            title
+                            subtype
+                            url
+                            accessId
+                            writeAccessId
                             __typename
                         }
                     __typename
@@ -289,7 +294,7 @@ class EditFileFolderTestCase(PleioTenantTestCase):
 
         variables = {
             "guid": self.folder1.guid,
-            "filter": "folders"
+            "typeFilter": ["folder"]
         }
 
         result = self.graphql_client.post(query, variables)
@@ -301,7 +306,7 @@ class EditFileFolderTestCase(PleioTenantTestCase):
 
         variables = {
             "guid": self.folder2.guid,
-            "filter": "files",
+            "typeFilter": ["file"],
             "limit": 1
         }
 
@@ -319,7 +324,12 @@ class EditFileFolderTestCase(PleioTenantTestCase):
             editFileFolder(input: $input) {
                 entity {
                 guid
-                ... on FileFolder {
+                ... on File {
+                    accessId
+                    writeAccessId
+                    __typename
+                }
+                ... on Folder {
                     accessId
                     writeAccessId
                     __typename
@@ -344,14 +354,24 @@ class EditFileFolderTestCase(PleioTenantTestCase):
 
         entity = result["data"]["editFileFolder"]["entity"]
         self.assertEqual(entity["guid"], self.folder1.guid)
-        self.assertEqual(entity["__typename"], "FileFolder")
+        self.assertEqual(entity["__typename"], "Folder")
 
         query = """
-            query OpenFolder($guid: String, $filter: String) {
-                files(containerGuid: $guid, filter: $filter) {
+            query OpenFolder($guid: String, $typeFilter: [String]) {
+                files(containerGuid: $guid, typeFilter: $typeFilter) {
                     edges {
                         guid
-                        ... on FileFolder {
+                        ... on File {
+                            hasChildren
+                            title
+                            subtype
+                            url
+                            accessId
+                            writeAccessId
+                            mimeType
+                            __typename
+                        }
+                        ... on Folder {
                             hasChildren
                             title
                             subtype
@@ -370,7 +390,7 @@ class EditFileFolderTestCase(PleioTenantTestCase):
 
         variables = {
             "guid": self.folder1.guid,
-            "filter": "folders"
+            "typeFilter": ["folder"]
         }
 
         result = self.graphql_client.post(query, variables)
@@ -382,7 +402,7 @@ class EditFileFolderTestCase(PleioTenantTestCase):
 
         variables = {
             "guid": self.folder2.guid,
-            "filter": "files"
+            "typeFilter": ["file"]
         }
 
         result = self.graphql_client.post(query, variables)
@@ -398,7 +418,12 @@ class EditFileFolderTestCase(PleioTenantTestCase):
             editFileFolder(input: $input) {
                 entity {
                 guid
-                ... on FileFolder {
+                ... on File {
+                    accessId
+                    writeAccessId
+                    __typename
+                }
+                ... on Folder {
                     accessId
                     writeAccessId
                     __typename
@@ -422,14 +447,24 @@ class EditFileFolderTestCase(PleioTenantTestCase):
 
         entity = result["data"]["editFileFolder"]["entity"]
         self.assertEqual(entity["guid"], self.folder1.guid)
-        self.assertEqual(entity["__typename"], "FileFolder")
+        self.assertEqual(entity["__typename"], "Folder")
 
         query = """
-            query OpenFolder($guid: String, $filter: String) {
-                files(containerGuid: $guid, filter: $filter) {
+            query OpenFolder($guid: String, $typeFilter: [String]) {
+                files(containerGuid: $guid, typeFilter: $typeFilter) {
                     edges {
                         guid
-                        ... on FileFolder {
+                        ... on File {
+                            hasChildren
+                            title
+                            subtype
+                            url
+                            accessId
+                            writeAccessId
+                            mimeType
+                            __typename
+                        }
+                        ... on Folder {
                             hasChildren
                             title
                             subtype
@@ -448,7 +483,7 @@ class EditFileFolderTestCase(PleioTenantTestCase):
 
         variables = {
             "guid": self.folder1.guid,
-            "filter": "folders"
+            "typeFilter": ["folder"]
         }
 
         result = self.graphql_client.post(query, variables)
@@ -460,7 +495,7 @@ class EditFileFolderTestCase(PleioTenantTestCase):
 
         variables = {
             "guid": self.folder2.guid,
-            "filter": "files"
+            "typeFilter": ["file"]
         }
 
         result = self.graphql_client.post(query, variables)
@@ -476,7 +511,12 @@ class EditFileFolderTestCase(PleioTenantTestCase):
             editFileFolder(input: $input) {
                 entity {
                 guid
-                ... on FileFolder {
+                ... on File {
+                    accessId
+                    writeAccessId
+                    __typename
+                }
+                ... on Folder {
                     accessId
                     writeAccessId
                     __typename
@@ -501,14 +541,14 @@ class EditFileFolderTestCase(PleioTenantTestCase):
 
         entity = result["data"]["editFileFolder"]["entity"]
         self.assertEqual(entity["guid"], self.folder1.guid)
-        self.assertEqual(entity["__typename"], "FileFolder")
+        self.assertEqual(entity["__typename"], "Folder")
 
         query = """
-            query OpenFolder($guid: String, $filter: String) {
-                files(containerGuid: $guid, filter: $filter) {
+            query OpenFolder($guid: String, $typeFilter: [String]) {
+                files(containerGuid: $guid, typeFilter: $typeFilter) {
                     edges {
                         guid
-                        ... on FileFolder {
+                        ... on File {
                             hasChildren
                             title
                             subtype
@@ -516,6 +556,15 @@ class EditFileFolderTestCase(PleioTenantTestCase):
                             accessId
                             writeAccessId
                             mimeType
+                            __typename
+                        }
+                        ... on Folder {
+                            hasChildren
+                            title
+                            subtype
+                            url
+                            accessId
+                            writeAccessId
                             __typename
                         }
                     __typename
@@ -527,7 +576,7 @@ class EditFileFolderTestCase(PleioTenantTestCase):
 
         variables = {
             "guid": self.folder1.guid,
-            "filter": "folders"
+            "typeFilter": ["folder"]
         }
 
         result = self.graphql_client.post(query, variables)
@@ -539,7 +588,7 @@ class EditFileFolderTestCase(PleioTenantTestCase):
 
         variables = {
             "guid": self.folder2.guid,
-            "filter": "files"
+            "typeFilter": ["file"]
         }
 
         result = self.graphql_client.post(query, variables)
@@ -555,7 +604,12 @@ class EditFileFolderTestCase(PleioTenantTestCase):
             editFileFolder(input: $input) {
                 entity {
                 guid
-                ... on FileFolder {
+                ... on File {
+                    accessId
+                    writeAccessId
+                    __typename
+                }
+                ... on Folder {
                     accessId
                     writeAccessId
                     __typename
@@ -580,14 +634,14 @@ class EditFileFolderTestCase(PleioTenantTestCase):
 
         entity = result["data"]["editFileFolder"]["entity"]
         self.assertEqual(entity["guid"], self.folder3.guid)
-        self.assertEqual(entity["__typename"], "FileFolder")
+        self.assertEqual(entity["__typename"], "Folder")
 
         query = """
-            query OpenFolder($guid: String, $filter: String) {
-                files(containerGuid: $guid, filter: $filter) {
+            query OpenFolder($guid: String, $typeFilter: [String]) {
+                files(containerGuid: $guid, typeFilter: $typeFilter) {
                     edges {
                         guid
-                        ... on FileFolder {
+                        ... on File {
                             hasChildren
                             title
                             subtype
@@ -595,6 +649,15 @@ class EditFileFolderTestCase(PleioTenantTestCase):
                             accessId
                             writeAccessId
                             mimeType
+                            __typename
+                        }
+                        ... on Folder {
+                            hasChildren
+                            title
+                            subtype
+                            url
+                            accessId
+                            writeAccessId
                             __typename
                         }
                     __typename
@@ -606,7 +669,7 @@ class EditFileFolderTestCase(PleioTenantTestCase):
 
         variables = {
             "guid": self.folder3.guid,
-            "filter": "files"
+            "typeFilter": ["file"]
         }
 
         result = self.graphql_client.post(query, variables)

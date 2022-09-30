@@ -13,11 +13,13 @@ from core.lib import generate_object_filename, get_mimetype, tenant_schema, get_
 from core.models import Entity
 from core.models.entity import EntityManager
 from core.models.mixin import ModelWithFile
+from core.models.rich_fields import AttachmentMixin
 from core.models.image import ResizedImageMixin
 from django.db.models import ObjectDoesNotExist
 from django.db.models.signals import pre_save, pre_delete, post_save
 from django.dispatch import receiver
 from django.utils.text import slugify
+from django.utils.translation import gettext_lazy as _
 from django.core.files.base import ContentFile
 
 from core.utils.convert import tiptap_to_text
@@ -46,21 +48,31 @@ class FileFolderManager(EntityManager):
     def file_by_path(self, path):
         for maybe_guid in path.split('/'):
             try:
-                qs = self.get_queryset().filter(pk=maybe_guid, is_folder=False)
+                qs = self.get_queryset().filter(pk=maybe_guid, type=FileFolder.Types.FILE)
                 if qs.exists():
                     return qs.first()
             except Exception:
                 pass
         return None
 
+class FileFolder(Entity, ModelWithFile, ResizedImageMixin, AttachmentMixin):
 
-class FileFolder(Entity, ModelWithFile, ResizedImageMixin):
+    class Types(models.TextChoices):
+        FILE = "File", _("File")
+        FOLDER = "Folder", _("Folder")
+        PAD = "Pad", _("Pad")
+
     objects = FileFolderManager()
 
     title = models.CharField(max_length=256)
-
     parent = models.ForeignKey('self', blank=True, null=True, related_name='children', on_delete=models.CASCADE)
-    is_folder = models.BooleanField(default=False)
+
+    type = models.CharField(
+        max_length=36,
+        choices=Types.choices,
+        default=Types.FILE
+    )
+
     upload = models.FileField(upload_to=generate_object_filename, blank=True, null=True, max_length=512)
     thumbnail = models.FileField(upload_to='thumbnails/', blank=True, null=True)
 
@@ -73,6 +85,7 @@ class FileFolder(Entity, ModelWithFile, ResizedImageMixin):
     write_access_weight = models.IntegerField(default=0)
 
     rich_description = models.TextField(null=True, blank=True)
+    pad_state = models.TextField(null=True, blank=True)
 
     def get_content(self, wrap=None):
         if os.path.exists(self.upload.path):
@@ -99,15 +112,13 @@ class FileFolder(Entity, ModelWithFile, ResizedImageMixin):
 
     @property
     def type_to_string(self):
-        if self.is_folder:
-            return 'folder'
-        return 'file'
+        return self.type.lower()
 
     @property
     def url(self):
         prefix = ''
 
-        if self.is_folder:
+        if self.type == self.Types.FOLDER:
             if self.group:
                 prefix = '/groups/view/{}/{}'.format(
                     self.group.guid, slugify(self.group.name)
@@ -119,20 +130,31 @@ class FileFolder(Entity, ModelWithFile, ResizedImageMixin):
                 prefix, self.guid
             ).lower()
 
+        if self.type == self.Types.FILE:
+            return '{}/files/view/{}/{}'.format(
+                prefix, self.guid, os.path.basename(self.upload.name)
+            ).lower()
+
         return '{}/files/view/{}/{}'.format(
-            prefix, self.guid, os.path.basename(self.upload.name)
+            prefix, self.guid, slugify(self.title)
         ).lower()
 
     @property
     def download_url(self):
+        if self.type != self.Types.FILE:
+            return None
         return reverse('download', args=[self.id, os.path.basename(self.upload.name)])
 
     @property
     def embed_url(self):
+        if self.type != self.Types.FILE:
+            return None
         return reverse('embed', args=[self.id, os.path.basename(self.upload.name)])
 
     @property
     def thumbnail_url(self):
+        if self.type != self.Types.FILE:
+            return None
         return reverse('thumbnail', args=[self.id])
 
     @property
@@ -193,6 +215,10 @@ class FileFolder(Entity, ModelWithFile, ResizedImageMixin):
     def description(self):
         return tiptap_to_text(self.rich_description)
 
+    @property
+    def rich_fields(self):
+        return [self.rich_description]
+
 
 class ScanIncident(models.Model):
     date = models.DateTimeField(default=timezone.now)
@@ -212,7 +238,7 @@ class ScanIncident(models.Model):
 def set_parent_folders_updated_at(instance):
     if instance == instance.parent:
         return
-    if instance.parent and instance.parent.is_folder:
+    if instance.parent and instance.parent.type == FileFolder.Types.FOLDER:
         with signal_disabler.disable():
             instance.parent.save()
         set_parent_folders_updated_at(instance.parent)
@@ -263,7 +289,7 @@ def update_parent_timestamps(sender, instance, **kwargs):
 @receiver(pre_delete, sender=FileFolder)
 def cleanup_extra_file(sender, instance, **kwargs):
     # pylint: disable=unused-argument
-    if instance.is_folder:
+    if instance.type == FileFolder.Types.FOLDER:
         return
 
     try:

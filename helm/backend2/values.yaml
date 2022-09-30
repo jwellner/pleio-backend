@@ -74,3 +74,6 @@ ingress:
 memcached:
   persistence:
     enabled: false
+
+collab:
+  backend:

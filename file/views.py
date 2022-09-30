@@ -134,7 +134,7 @@ def bulk_download(request):
     zipf = zipfile.ZipFile(temp_file_path, 'w', zipfile.ZIP_DEFLATED)
 
     # Add selected files to zip
-    files = FileFolder.objects.visible(user).filter(id__in=file_ids, is_folder=False)
+    files = FileFolder.objects.visible(user).filter(id__in=file_ids, type=FileFolder.Types.FILE)
     for f in files:
         if f.group and f.group.is_closed and not f.group.is_full_member(user) and not user.has_role(USER_ROLES.ADMIN):
             continue
@@ -143,7 +143,7 @@ def bulk_download(request):
         zipf.writestr(path.basename(get_download_filename(f)), f.upload.read())
 
     # Add selected folders to zip
-    folders = FileFolder.objects.visible(user).filter(id__in=folder_ids, is_folder=True)
+    folders = FileFolder.objects.visible(user).filter(id__in=folder_ids, type=FileFolder.Types.FOLDER)
     add_folders_to_zip(zipf, folders, user, '')
 
     zipf.close()

@@ -36,7 +36,7 @@ class PleioTenantTestCase(FastTenantTestCase):
             with open(filepath, 'rb') as fh:
                 upload = ContentFile(fh.read(), filename)
         file = mixer.blend(FileFolder,
-                           is_folder=False,
+                           type=FileFolder.Types.FILE,
                            upload=upload)
         if upload:
             upload_dir = os.path.dirname(file.upload.path)

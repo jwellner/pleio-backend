@@ -17,7 +17,7 @@ from core.models import Group
 from core.models.agreement import CustomAgreement
 from core.tasks import replace_domain_links, elasticsearch_rebuild_for_tenant
 from core.lib import tenant_schema, is_valid_domain
-from core.superadmin.forms import AuditLogFilter, CustomAgreementForm, SettingsForm, ScanIncidentFilter
+from core.superadmin.forms import AuditLogFilter, CustomAgreementForm, SettingsForm, ScanIncidentFilter, OptionalFeaturesForm
 from control.tasks import get_db_disk_usage, get_file_disk_usage, copy_group_to_tenant
 from file.models import ScanIncident
 from tenants.models import Client, GroupCopy
@@ -222,3 +222,19 @@ def agreements(request):
         })
 
     return render(request, 'superadmin/agreements.html', {'form': form, 'custom_agreements': custom_agreements})
+
+class OptionalFeatures(SuperAdminView):
+    http_method_names = ['post', 'get']
+
+    def post(self, request):
+        form = OptionalFeaturesForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect('/superadmin/optional_features')
+
+        context = {'form': form}
+
+        return render(request, 'superadmin/optional_features.html', context)
+
+    def get(self, request):
+        return render(request, 'superadmin/optional_features.html')

@@ -1,0 +1,1 @@
+# For now we use the FileFolder type, maybe refactor and create new Model that extends FileFolder?

@@ -298,6 +298,11 @@ def resolve_show_suggested_items(obj, info):
     # pylint: disable=unused-argument
     return config.SHOW_SUGGESTED_ITEMS
 
+@site.field("collabEditingEnabled")
+def resolve_collab_editing_enabled(obj, info):
+    # pylint: disable=unused-argument
+    return config.COLLAB_EDITING_ENABLED
+
 @site.field("preserveFileExif")
 def resolve_preserve_file_exif(obj, info):
     # pylint: disable=unused-argument

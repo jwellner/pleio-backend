@@ -184,6 +184,16 @@ type addPagePayload {
     entity: Entity
 }
 
+input addPadInput {
+  title: String
+  containerGuid: String!
+  richDescription: SecureRichText!
+}
+
+type addPadPayload {
+  entity: Pad
+}
+
 input addPollInput {
     title: String!
     choices: [String]!
@@ -627,7 +637,7 @@ input editFileFolderInput {
 }
 
 type editFileFolderPayload {
-    entity: Entity
+    entity: FileFolder
 }
 
 input editGroupInput {
@@ -708,6 +718,17 @@ input editPageInput {
 
 type editPagePayload {
     entity: Entity
+}
+
+input editPadInput {
+  guid: String!
+  title: String
+  richDescription: SecureRichText
+  state: String
+}
+
+type editPadPayload {
+  entity: Pad
 }
 
 input editPollInput {
@@ -1001,7 +1022,47 @@ input FeaturedInput {
     alt: String
 }
 
-type FileFolder implements Entity {
+interface FileFolder implements Entity {
+    guid: String!
+    status: Int
+    subtype: String
+    title: String
+    description: String
+    richDescription: SecureRichText
+    inGroup: Boolean
+    group: Group
+    parentFolder: Folder
+    excerpt: String
+    url: String
+    tags: [String]
+    timeCreated: DateTime
+    timeUpdated: DateTime
+    timePublished: DateTime
+    statusPublished: StatusPublished
+    scheduleArchiveEntity: DateTime
+    scheduleDeleteEntity: DateTime
+    isFeatured: Boolean
+    isHighlighted: Boolean
+    isRecommended: Boolean
+    featured: Featured
+    canEdit: Boolean!
+    canComment: Boolean
+    canVote: Boolean
+    accessId: Int
+    writeAccessId: Int
+    isBookmarked: Boolean
+    isFollowing: Boolean
+    canBookmark: Boolean
+    hasVoted: Boolean
+    votes: Int
+    views: Int
+    owner: User
+    comments: [Comment]
+    commentCount: Int
+    isPinned: Boolean!
+}
+
+type File implements Entity & FileFolder {
     guid: String!
     status: Int
     subtype: String
@@ -1011,7 +1072,7 @@ type FileFolder implements Entity {
     hasChildren: Boolean
     inGroup: Boolean
     group: Group
-    parentFolder: FileFolder
+    parentFolder: Folder
     excerpt: String
     mimeType: String
     thumbnail: String
@@ -1044,6 +1105,91 @@ type FileFolder implements Entity {
     commentCount: Int
     isPinned: Boolean!
     size: Int
+}
+
+type Folder implements Entity & FileFolder {
+    guid: String!
+    status: Int
+    subtype: String
+    title: String
+    description: String
+    richDescription: SecureRichText
+    hasChildren: Boolean
+    inGroup: Boolean
+    group: Group
+    parentFolder: Folder
+    excerpt: String
+    mimeType: String
+    url: String
+    tags: [String]
+    timeCreated: DateTime
+    timeUpdated: DateTime
+    timePublished: DateTime
+    statusPublished: StatusPublished
+    scheduleArchiveEntity: DateTime
+    scheduleDeleteEntity: DateTime
+    isFeatured: Boolean
+    isHighlighted: Boolean
+    isRecommended: Boolean
+    featured: Featured
+    canEdit: Boolean!
+    canComment: Boolean
+    canVote: Boolean
+    accessId: Int
+    writeAccessId: Int
+    isBookmarked: Boolean
+    isFollowing: Boolean
+    canBookmark: Boolean
+    hasVoted: Boolean
+    votes: Int
+    views: Int
+    owner: User
+    comments: [Comment]
+    commentCount: Int
+    isPinned: Boolean!
+    size: Int
+}
+
+type Pad implements Entity & FileFolder {
+    guid: String!
+    status: Int
+    subtype: String
+    title: String
+    description: String
+    richDescription: SecureRichText
+    inGroup: Boolean
+    group: Group
+    parentFolder: Folder
+    excerpt: String
+    url: String
+    tags: [String]
+    timeCreated: DateTime
+    timeUpdated: DateTime
+    timePublished: DateTime
+    statusPublished: StatusPublished
+    scheduleArchiveEntity: DateTime
+    scheduleDeleteEntity: DateTime
+    isFeatured: Boolean
+    isHighlighted: Boolean
+    isRecommended: Boolean
+    featured: Featured
+    canEdit: Boolean!
+    canComment: Boolean
+    canVote: Boolean
+    accessId: Int
+    writeAccessId: Int
+    isBookmarked: Boolean
+    isFollowing: Boolean
+    canBookmark: Boolean
+    hasVoted: Boolean
+    votes: Int
+    views: Int
+    owner: User
+    comments: [Comment]
+    commentCount: Int
+    isPinned: Boolean!
+    size: Int
+    state: String
 }
 
 input FilterInput {
@@ -1300,6 +1446,8 @@ type Mutation {
     moveFileFolder(input: moveFileFolderInput!): moveFileFolderPayload
     addPage(input: addPageInput!): addPagePayload
     editPage(input: editPageInput!): editPagePayload
+    addPad(input: addPadInput!): addPadPayload
+    editPad(input: editPadInput!): editPadPayload
     addRow(input: addRowInput!): addRowPayload
     editRow(input: editRowInput!): editRowPayload
     deleteRow(input: deleteRowInput!): deleteRowPayload
@@ -1651,7 +1799,7 @@ type Query {
     trending: [TrendingList]
     top: [TopItem]
     breadcrumb(guid: String): [Entity]
-    files(containerGuid: String, filter: String, orderBy: String, orderDirection: String, offset: Int, limit: Int): EntityList
+    files(containerGuid: String, typeFilter: [String], orderBy: String, orderDirection: String, offset: Int, limit: Int): EntityList
     groups(
         q: String
         filter: GroupFilter
@@ -2010,6 +2158,7 @@ type Site {
     pdfCheckerEnabled: Boolean!
     maxCharactersInAbstract: Int
     showSuggestedItems: Boolean!
+    collabEditingEnabled: Boolean!
     preserveFileExif: Boolean!
 }
 
@@ -2137,6 +2286,7 @@ type SiteSettings {
     fileDescriptionFieldEnabled: Boolean
     pdfCheckerEnabled: Boolean!
     maxCharactersInAbstract: Int
+    collabEditingEnabled: Boolean!
     preserveFileExif: Boolean!
 }
 

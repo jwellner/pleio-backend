@@ -1,40 +1,49 @@
-from ariadne import ObjectType
+from ariadne import ObjectType, InterfaceType
 from core.resolvers import shared
 
-filefolder = ObjectType("FileFolder")
+file = ObjectType("File")
+folder = ObjectType("Folder")
+filefolder = InterfaceType("FileFolder")
 
+@filefolder.type_resolver
+def resolve_filefolder_type(obj, *_):
+    return obj.type
 
-@filefolder.field("subtype")
+@file.field("subtype")
+@folder.field("subtype")
 def resolve_subtype(obj, info):
     # pylint: disable=unused-argument
     return obj.type_to_string
 
 
-@filefolder.field("parentFolder")
+@file.field("parentFolder")
+@folder.field("parentFolder")
 def resolve_parent_folder(obj, info):
     # pylint: disable=unused-argument
     return obj.parent
 
 
-@filefolder.field("mimeType")
+@file.field("mimeType")
 def resolve_mimetype(obj, info):
     # pylint: disable=unused-argument
     return obj.mime_type
 
 
-@filefolder.field("hasChildren")
+@file.field("hasChildren")
+@folder.field("hasChildren")
 def resolve_has_children(obj, info):
     # pylint: disable=unused-argument
     return obj.has_children()
 
 
-@filefolder.field("url")
+@file.field("url")
+@folder.field("url")
 def resolve_url(obj, info):
     # pylint: disable=unused-argument
     return obj.url
 
 
-@filefolder.field("thumbnail")
+@file.field("thumbnail")
 def resolve_thumbnail(obj, info):
     # pylint: disable=unused-argument
     mime_types = [
@@ -51,39 +60,51 @@ def resolve_thumbnail(obj, info):
     return obj.thumbnail_url
 
 
-@filefolder.field("download")
+@file.field("download")
 def resolve_download(obj, info):
     # pylint: disable=unused-argument
-
-    if obj.is_folder:
-        return None
-
     return obj.download_url
 
 
-@filefolder.field("size")
+@file.field("size")
 def resolve_size(obj, info):
     # pylint: disable=unused-argument
-    if obj.is_folder:
-        return 0
-
     return obj.size
 
 
-filefolder.set_field("guid", shared.resolve_entity_guid)
-filefolder.set_field("status", shared.resolve_entity_status)
-filefolder.set_field("title", shared.resolve_entity_title)
-filefolder.set_field("tags", shared.resolve_entity_tags)
-filefolder.set_field("timeCreated", shared.resolve_entity_time_created)
-filefolder.set_field("timeUpdated", shared.resolve_entity_time_updated)
-filefolder.set_field("timePublished", shared.resolve_entity_time_published)
-filefolder.set_field("scheduleArchiveEntity", shared.resolve_entity_schedule_archive_entity)
-filefolder.set_field("scheduleDeleteEntity", shared.resolve_entity_schedule_delete_entity)
-filefolder.set_field("canEdit", shared.resolve_entity_can_edit)
-filefolder.set_field("accessId", shared.resolve_entity_access_id)
-filefolder.set_field("writeAccessId", shared.resolve_entity_write_access_id)
-filefolder.set_field("views", shared.resolve_entity_views)
-filefolder.set_field("owner", shared.resolve_entity_owner)
-filefolder.set_field("isPinned", shared.resolve_entity_is_pinned)
-filefolder.set_field("tags", shared.resolve_entity_tags)
-filefolder.set_field("richDescription", shared.resolve_entity_rich_description)
+file.set_field("guid", shared.resolve_entity_guid)
+file.set_field("status", shared.resolve_entity_status)
+file.set_field("title", shared.resolve_entity_title)
+file.set_field("tags", shared.resolve_entity_tags)
+file.set_field("timeCreated", shared.resolve_entity_time_created)
+file.set_field("timeUpdated", shared.resolve_entity_time_updated)
+file.set_field("timePublished", shared.resolve_entity_time_published)
+file.set_field("scheduleArchiveEntity", shared.resolve_entity_schedule_archive_entity)
+file.set_field("scheduleDeleteEntity", shared.resolve_entity_schedule_delete_entity)
+file.set_field("canEdit", shared.resolve_entity_can_edit)
+file.set_field("accessId", shared.resolve_entity_access_id)
+file.set_field("writeAccessId", shared.resolve_entity_write_access_id)
+file.set_field("views", shared.resolve_entity_views)
+file.set_field("owner", shared.resolve_entity_owner)
+file.set_field("isPinned", shared.resolve_entity_is_pinned)
+file.set_field("tags", shared.resolve_entity_tags)
+file.set_field("richDescription", shared.resolve_entity_rich_description)
+
+folder.set_field("guid", shared.resolve_entity_guid)
+folder.set_field("status", shared.resolve_entity_status)
+folder.set_field("title", shared.resolve_entity_title)
+folder.set_field("tags", shared.resolve_entity_tags)
+folder.set_field("timeCreated", shared.resolve_entity_time_created)
+folder.set_field("timeUpdated", shared.resolve_entity_time_updated)
+folder.set_field("timePublished", shared.resolve_entity_time_published)
+folder.set_field("scheduleArchiveEntity", shared.resolve_entity_schedule_archive_entity)
+folder.set_field("scheduleDeleteEntity", shared.resolve_entity_schedule_delete_entity)
+folder.set_field("canEdit", shared.resolve_entity_can_edit)
+folder.set_field("accessId", shared.resolve_entity_access_id)
+folder.set_field("writeAccessId", shared.resolve_entity_write_access_id)
+folder.set_field("views", shared.resolve_entity_views)
+folder.set_field("owner", shared.resolve_entity_owner)
+folder.set_field("isPinned", shared.resolve_entity_is_pinned)
+folder.set_field("tags", shared.resolve_entity_tags)
+folder.set_field("richDescription", shared.resolve_entity_rich_description)
+
