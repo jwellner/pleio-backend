@@ -1,31 +1,26 @@
-from django_tenants.test.cases import FastTenantTestCase
-from backend2.schema import schema
-from ariadne import graphql_sync
 from django.contrib.auth.models import AnonymousUser
-from django.http import HttpRequest
-from user.models import User
-from event.models import Event, EventAttendee
-from core.constances import ACCESS_TYPE
 from mixer.backend.django import mixer
 
+from core.tests.helpers import PleioTenantTestCase
+from event.factories import EventFactory
+from event.models import Event, EventAttendee
+from user.models import User
 
-class AttendEventTestCase(FastTenantTestCase):
+class AttendEventTestCase(PleioTenantTestCase):
 
     def setUp(self):
+        super().setUp()
+
         self.anonymousUser = AnonymousUser()
         self.attendee1 = mixer.blend(User, email="attendee1@example.net")
         self.attendee2 = mixer.blend(User, email="attendee2@example.net")
         self.attendee3 = mixer.blend(User, email="attendee3@example.net")
         self.attendee4 = mixer.blend(User, email="attendee4@example.net")
         self.attendee5 = mixer.blend(User, email="attendee5@example.net")
-        self.eventPublic = Event.objects.create(
-            title="Test public event",
-            rich_description="JSON to string",
-            read_access=[ACCESS_TYPE.public],
-            write_access=[ACCESS_TYPE.user.format(self.attendee1.id)],
-            owner=self.attendee1,
-            max_attendees=2
-        )
+
+        self.eventPublic = EventFactory(owner=self.attendee1,
+                                        max_attendees=2)
+        
         mixer.blend(
             EventAttendee,
             user=self.attendee1,
@@ -33,14 +28,7 @@ class AttendEventTestCase(FastTenantTestCase):
             state='accept'
         )
 
-    def tearDown(self):
-        self.eventPublic.delete()
-        self.attendee1.delete()
-        self.attendee2.delete()
-        self.attendee3.delete()
-
-    def test_attend_event_accept(self):
-        mutation = """
+        self.mutation = """
             mutation AttendEvent($input: attendEventInput!) {
                 attendEvent(input: $input) {
                     entity {
@@ -57,6 +45,15 @@ class AttendEventTestCase(FastTenantTestCase):
             }
         """
 
+
+    def tearDown(self):
+        self.eventPublic.delete()
+        self.attendee1.delete()
+        self.attendee2.delete()
+        self.attendee3.delete()
+
+    def test_attend_event_accept(self):
+
         variables = {
             "input": {
                 "guid": self.eventPublic.guid,
@@ -64,12 +61,10 @@ class AttendEventTestCase(FastTenantTestCase):
             }
         }
 
-        request = HttpRequest()
-        request.user = self.attendee2
+        self.graphql_client.force_login(self.attendee2)
+        result = self.graphql_client.post(self.mutation, variables)
 
-        result = graphql_sync(schema, {"query": mutation, "variables": variables}, context_value={"request": request})
-
-        data = result[1]["data"]
+        data = result["data"]
 
         self.assertEqual(data["attendEvent"]["entity"]["guid"], self.eventPublic.guid)
         self.assertEqual(len(data["attendEvent"]["entity"]["attendees"]["edges"]), 2)
@@ -101,9 +96,6 @@ class AttendEventTestCase(FastTenantTestCase):
             }
         }
 
-        request = HttpRequest()
-        request.user = self.attendee2
-
         mixer.blend(
             EventAttendee,
             user=self.attendee3,
@@ -111,9 +103,10 @@ class AttendEventTestCase(FastTenantTestCase):
             state='accept'
         )
 
-        result = graphql_sync(schema, {"query": mutation, "variables": variables}, context_value={"request": request})
+        self.graphql_client.force_login(self.attendee2)
+        result = self.graphql_client.post(mutation, variables)
 
-        data = result[1]["data"]
+        data = result["data"]
 
         guids = [r['guid'] for r in data["attendEvent"]["entity"]["attendees"]["edges"]]
         emails = [r['email'] for r in data["attendEvent"]["entity"]["attendees"]["edges"]]
@@ -125,22 +118,6 @@ class AttendEventTestCase(FastTenantTestCase):
         self.assertEqual([''], emails)
 
     def test_attend_event_from_accept_to_reject(self):
-        mutation = """
-            mutation AttendEvent($input: attendEventInput!) {
-                attendEvent(input: $input) {
-                    entity {
-                        guid
-                        attendees(state: "accept") {
-                            edges {
-                                name
-                            }
-                        }
-                        __typename
-                    }
-                    __typename
-                }
-            }
-        """
 
         variables = {
             "input": {
@@ -148,9 +125,6 @@ class AttendEventTestCase(FastTenantTestCase):
                 "state": 'maybe'
             }
         }
-
-        request = HttpRequest()
-        request.user = self.attendee1
 
         mixer.blend(
             EventAttendee,
@@ -177,9 +151,10 @@ class AttendEventTestCase(FastTenantTestCase):
             state='waitinglist'
         )
 
-        result = graphql_sync(schema, {"query": mutation, "variables": variables}, context_value={"request": request})
+        self.graphql_client.force_login(self.attendee1)
+        result = self.graphql_client.post(self.mutation, variables)
 
-        data = result[1]["data"]
+        data = result["data"]
 
         self.assertEqual(data["attendEvent"]["entity"]["guid"], self.eventPublic.guid)
         self.assertEqual(len(data["attendEvent"]["entity"]["attendees"]["edges"]), 2)
@@ -222,12 +197,10 @@ class AttendEventTestCase(FastTenantTestCase):
             }
         }
 
-        request = HttpRequest()
-        request.user = self.attendee1
+        self.graphql_client.force_login(self.attendee1)
+        result = self.graphql_client.post(mutation, variables)
 
-        result = graphql_sync(schema, {"query": mutation, "variables": variables}, context_value={"request": request})
-
-        data = result[1]["data"]
+        data = result["data"]
 
         sub_attendee.refresh_from_db()
 
@@ -272,12 +245,10 @@ class AttendEventTestCase(FastTenantTestCase):
             }
         }
 
-        request = HttpRequest()
-        request.user = self.attendee1
+        self.graphql_client.force_login(self.attendee1)
+        result = self.graphql_client.post(mutation, variables)
 
-        result = graphql_sync(schema, {"query": mutation, "variables": variables}, context_value={"request": request})
-
-        data = result[1]["data"]
+        data = result["data"]
 
         sub_attendee.refresh_from_db()
 

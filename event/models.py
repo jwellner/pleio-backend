@@ -174,6 +174,12 @@ class Event(Entity,
 
 
 class EventAttendee(models.Model):
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=['event', 'email'], name="unique_email"),
+            models.UniqueConstraint(fields=['event', 'user'], name="unique_user")
+        ]
+
     STATE_TYPES = (
         ('accept', 'Accept'),
         ('maybe', 'Maybe'),
