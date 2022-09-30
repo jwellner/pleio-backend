@@ -1,22 +1,22 @@
-from django.core.exceptions import ValidationError
-from django_tenants.test.cases import FastTenantTestCase
-from backend2.schema import schema
-from ariadne import graphql_sync
 from django.contrib.auth.models import AnonymousUser
-from django.http import HttpRequest
+from django.core.exceptions import ValidationError
 from django.utils import timezone
-from core.models import Group
-from user.models import User
-from event.models import Event, EventAttendee
 from mixer.backend.django import mixer
+
 from core.constances import ACCESS_TYPE
+from core.models import Group
+from core.tests.helpers import PleioTenantTestCase
+from event.factories import EventFactory
+from event.models import EventAttendee
+from user.models import User
 
 
-class EventsTestCase(FastTenantTestCase):
+class EventsTestCase(PleioTenantTestCase):
 
     def setUp(self):
+        super().setUp()
+
         tomorrow = timezone.now() + timezone.timedelta(days=1)
-        day_after_tomorrow = timezone.now() + timezone.timedelta(days=2)
         yesterday = timezone.now() - timezone.timedelta(days=1)
         hours_ago_1 = timezone.now() - timezone.timedelta(hours=1)
         self.anonymousUser = AnonymousUser()
@@ -24,71 +24,22 @@ class EventsTestCase(FastTenantTestCase):
         self.user2 = mixer.blend(User)
         self.group = mixer.blend(Group, owner=self.user1)
 
-        self.eventOneHourAgo = Event.objects.create(
-            title="Test past event 1 hour ago",
-            rich_description="JSON to string",
-            read_access=[ACCESS_TYPE.public],
-            write_access=[ACCESS_TYPE.user.format(self.user1.id)],
-            owner=self.user1,
-            start_date=hours_ago_1,
-            location="Utrecht",
-            external_link="https://www.pleio.nl",
-            rsvp=True,
-            max_attendees=None
-        )
+        self.eventOneHourAgo = EventFactory(owner=self.user1,
+                                            start_date=hours_ago_1)
 
-        self.eventFuture1 = Event.objects.create(
-            title="Test future event 1",
-            rich_description="JSON to string",
-            read_access=[ACCESS_TYPE.logged_in],
-            write_access=[ACCESS_TYPE.user.format(self.user1.id)],
-            owner=self.user1,
-            start_date=tomorrow,
-            location="Utrecht",
-            external_link="https://www.pleio.nl",
-            rsvp=True,
-            max_attendees=None
-        )
+        self.eventFuture1 = EventFactory(owner=self.user1,
+                                         start_date=tomorrow,
+                                         read_access=[ACCESS_TYPE.logged_in])
 
-        self.eventFuture2 = Event.objects.create(
-            title="Test future event 2",
-            rich_description="JSON to string",
-            read_access=[ACCESS_TYPE.public],
-            write_access=[ACCESS_TYPE.user.format(self.user1.id)],
-            owner=self.user1,
-            start_date=tomorrow,
-            location="Utrecht",
-            external_link="https://www.pleio.nl",
-            rsvp=True,
-            max_attendees=None
-        )
+        self.eventFuture2 = EventFactory(owner=self.user1,
+                                         start_date=tomorrow)
 
-        self.eventPast1 = Event.objects.create(
-            title="Test past event 1",
-            rich_description="JSON to string",
-            read_access=[ACCESS_TYPE.public],
-            write_access=[ACCESS_TYPE.user.format(self.user1.id)],
-            owner=self.user1,
-            start_date=yesterday,
-            location="Utrecht",
-            external_link="https://www.pleio.nl",
-            rsvp=True,
-            max_attendees=None
-        )
+        self.eventPast1 = EventFactory(owner=self.user1,
+                                         start_date=yesterday)
 
-        self.eventFutureGroup = Event.objects.create(
-            title="Test future event in group",
-            rich_description="JSON to string",
-            read_access=[ACCESS_TYPE.public],
-            write_access=[ACCESS_TYPE.user.format(self.user1.id)],
-            owner=self.user1,
-            start_date=tomorrow,
-            location="Utrecht",
-            external_link="https://www.pleio.nl",
-            rsvp=True,
-            max_attendees=None,
-            group=self.group
-        )
+        self.eventFutureGroup = EventFactory(owner=self.user1,
+                                         start_date=tomorrow,
+                                         group=self.group)
 
         self.query = """
             query EventsList($filter: EventFilter, $containerGuid: String, $offset: Int, $limit: Int) {
@@ -177,9 +128,6 @@ class EventsTestCase(FastTenantTestCase):
 
     def test_events_anonymous(self):
 
-        request = HttpRequest()
-        request.user = self.anonymousUser
-
         variables = {
             "limit": 20,
             "offset": 0,
@@ -192,20 +140,15 @@ class EventsTestCase(FastTenantTestCase):
         mixer.blend(EventAttendee, user=self.user2, email=self.user2.email, event=self.eventFuture2, state='accept')
         mixer.blend(EventAttendee, user=None, event=self.eventFuture2, state='reject')
 
-        result = graphql_sync(schema, { "query": self.query , "variables": variables}, context_value={ "request": request })
+        result = self.graphql_client.post(self.query, variables)
 
-        self.assertTrue(result[0])
-
-        data = result[1]["data"]
+        data = result["data"]
         self.assertEqual(data["events"]["total"], 2)
         self.assertEqual(data["events"]["edges"][1]["guid"], self.eventFuture2.guid)
         self.assertEqual(data["events"]["edges"][1]["attendees"]["total"], 2)
         self.assertEqual(len(data["events"]["edges"][0]["attendees"]["edges"]), 0)
 
     def test_events_upcoming(self):
-
-        request = HttpRequest()
-        request.user = self.user2
 
         variables = {
             "limit": 1,
@@ -217,19 +160,15 @@ class EventsTestCase(FastTenantTestCase):
         # this is the first in upcoming list because it is still today.
         mixer.cycle(2).blend(EventAttendee, event=self.eventOneHourAgo, state='accept')
 
-        result = graphql_sync(schema, { "query": self.query , "variables": variables}, context_value={ "request": request })
+        self.graphql_client.force_login(self.user2)
+        result = self.graphql_client.post(self.query, variables)
 
-        self.assertTrue(result[0])
-
-        data = result[1]["data"]
+        data = result["data"]
 
         self.assertEqual(data["events"]["total"], 3)
         self.assertEqual(data["events"]["edges"][0]["attendees"]["total"], 1)
 
     def test_events_previous(self):
-
-        request = HttpRequest()
-        request.user = self.user2
 
         variables = {
             "limit": 20,
@@ -237,17 +176,13 @@ class EventsTestCase(FastTenantTestCase):
             "filter": "previous"
         }
 
-        result = graphql_sync(schema, { "query": self.query , "variables": variables}, context_value={ "request": request })
-
-        self.assertTrue(result[0])
-
-        data = result[1]["data"]
+        self.graphql_client.force_login(self.user2)
+        result = self.graphql_client.post(self.query, variables)
+        
+        data = result["data"]
         self.assertEqual(data["events"]["total"], 1)
 
     def test_events_no_filter(self):
-
-        request = HttpRequest()
-        request.user = self.user2
 
         variables = {
             "limit": 20,
@@ -255,18 +190,11 @@ class EventsTestCase(FastTenantTestCase):
             "filter": ""
         }
 
-        result = graphql_sync(schema, { "query": self.query , "variables": variables}, context_value={ "request": request })
-
-        self.assertTrue(result[0])
-
-        errors = result[1]["errors"]
-
-        self.assertEqual(errors[0]["message"], "Variable '$filter' got invalid value ''; Value '' does not exist in 'EventFilter' enum.")
+        with self.assertGraphQlError(msg="Variable '$filter' got invalid value ''; Value '' does not exist in 'EventFilter' enum."):
+            self.graphql_client.force_login(self.user2)
+            self.graphql_client.post(self.query, variables)
 
     def test_events_in_group(self):
-
-        request = HttpRequest()
-        request.user = self.user2
 
         variables = {
             "limit": 20,
@@ -274,32 +202,18 @@ class EventsTestCase(FastTenantTestCase):
             "containerGuid": self.group.guid
         }
 
-        result = graphql_sync(schema, { "query": self.query , "variables": variables}, context_value={ "request": request })
-
-        self.assertTrue(result[0])
-
-        data = result[1]["data"]
+        self.graphql_client.force_login(self.user2)
+        result = self.graphql_client.post(self.query, variables)
+        
+        data = result["data"]
         self.assertEqual(data["events"]["total"], 1)
 
 
     def test_events_no_subevent(self):
 
-        subevent = Event.objects.create(
-            title="Test sub event",
-            rich_description="JSON to string",
-            read_access=[ACCESS_TYPE.public],
-            write_access=[ACCESS_TYPE.user.format(self.user1.id)],
-            owner=self.user1,
-            start_date=timezone.now() + timezone.timedelta(days=1),
-            location="Utrecht",
-            external_link="https://www.pleio.nl",
-            rsvp=True,
-            max_attendees=None,
-            parent=self.eventFuture2
-        )
-
-        request = HttpRequest()
-        request.user = self.user2
+        subevent = EventFactory(owner=self.user1,
+                                start_date=timezone.now() + timezone.timedelta(days=1),
+                                parent=self.eventFuture2)
 
         variables = {
             "limit": 20,
@@ -308,11 +222,10 @@ class EventsTestCase(FastTenantTestCase):
             "filter": "upcoming"
         }
 
-        result = graphql_sync(schema, { "query": self.query , "variables": variables}, context_value={ "request": request })
-
-        self.assertTrue(result[0])
-
-        data = result[1]["data"]
+        self.graphql_client.force_login(self.user2)
+        result = self.graphql_client.post(self.query, variables)
+        
+        data = result["data"]
 
         self.assertEqual(data["events"]["total"], 3)
         self.assertTrue(subevent.guid not in [d['guid'] for d in data["events"]["edges"]])

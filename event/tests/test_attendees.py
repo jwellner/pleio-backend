@@ -1,18 +1,19 @@
+from ariadne import graphql_sync
 from django.core.exceptions import ValidationError
+from django.http import HttpRequest
+from django.utils import timezone
 from django_tenants.test.cases import FastTenantTestCase
+from django.test import override_settings
 from mixer.backend.django import mixer
 
+from backend2.schema import schema
+from core.constances import ATTENDEE_ORDER_BY, ORDER_DIRECTION, USER_ROLES
 from core.tests.helpers import PleioTenantTestCase
 from event.factories import EventFactory
 from event.models import Event, EventAttendee
 from event.tests.test_slots_available import create_slot
 from user.factories import AdminFactory, UserFactory
 from user.models import User
-from django.http import HttpRequest
-from django.utils import timezone
-from ariadne import graphql_sync
-from backend2.schema import schema
-from core.constances import USER_ROLES, ATTENDEE_ORDER_BY, ORDER_DIRECTION
 
 
 class AttendeesTestCase(FastTenantTestCase):
@@ -69,6 +70,45 @@ class AttendeesTestCase(FastTenantTestCase):
                 }
             }
         """
+
+    @override_settings(LANGUAGE_CODE='en')
+    def test_attendee_unique_email_constraint(self):
+
+        EventAttendee.objects.create(
+            event=self.eventPublic,
+            state='accept',
+            name='user1',
+            email='test@test.nl'
+        )
+        
+        with self.assertRaises(ValidationError) as context:
+            EventAttendee.objects.create(
+                event=self.eventPublic,
+                state='accept',
+                name='user2',
+                email='test@test.nl'
+            )
+        self.assertTrue('Event attendee with this Event and Email already exists.' in str(context.exception))
+
+    @override_settings(LANGUAGE_CODE='en')
+    def test_attendee_unique_user_constraint(self):
+        EventAttendee.objects.create(
+            event=self.eventPublic,
+            state='accept',
+            name='user1',
+            user=self.admin,
+            email='test1@test.nl'
+        )
+        
+        with self.assertRaises(ValidationError) as context:
+            EventAttendee.objects.create(
+                event=self.eventPublic,
+                state='accept',
+                name='user1',
+                user=self.admin,
+                email='test2@test.nl'
+            )
+        self.assertTrue('Event attendee with this Event and User already exists.' in str(context.exception))
 
     def test_order_attendees_name(self):
         request = HttpRequest()
