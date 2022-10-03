@@ -873,18 +873,19 @@ def add_agreement(self, name):
 @shared_task(bind=True)
 def add_agreement_version(self, agreement_id, version, document_path):
     # pylint: disable=unused-argument
-    agreement = Agreement.objects.get(id=agreement_id)
+    with schema_context('public'):
+        agreement = Agreement.objects.get(id=agreement_id)
 
-    fd = open(document_path, "rb")
+        fd = open(document_path, "rb")
 
-    save_as = ContentFile(fd.read())
-    save_as.name = os.path.basename(fd.name)
+        save_as = ContentFile(fd.read())
+        save_as.name = os.path.basename(fd.name)
 
-    version = AgreementVersion.objects.create(
-        agreement=agreement,
-        version=version,
-        document=save_as
-    )
+        version = AgreementVersion.objects.create(
+            agreement=agreement,
+            version=version,
+            document=save_as
+        )
 
     return {
         'id': version.id,
