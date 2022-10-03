@@ -2833,8 +2833,8 @@ type SiteAgreementVersion {
     version: String!
     document: String!
     accepted: Boolean!
-    accepted_by: String
-    accepted_date: DateTime
+    acceptedBy: String
+    acceptedDate: DateTime
 }
 
 type SiteCustomAgreement {

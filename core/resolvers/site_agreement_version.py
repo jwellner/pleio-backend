@@ -21,7 +21,7 @@ def resolve_accepted(obj, info):
     return bool(obj.accepted_for_current_tenant)
 
 
-@site_agreement_version.field("accepted_by")
+@site_agreement_version.field("acceptedBy")
 def resolve_accepted_by(obj, info):
     # pylint: disable=unused-argument
     if obj.accepted_for_current_tenant:
@@ -30,10 +30,10 @@ def resolve_accepted_by(obj, info):
     return None
 
 
-@site_agreement_version.field("accepted_date")
+@site_agreement_version.field("acceptedDate")
 def resolve_accepted_date(obj, info):
     # pylint: disable=unused-argument
     if obj.accepted_for_current_tenant:
-        return obj.accepted_for_current_tenant.accept_date
+        return obj.accepted_for_current_tenant.created_at
 
     return None

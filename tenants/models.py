@@ -84,13 +84,23 @@ class Agreement(models.Model):
     name = models.CharField(max_length=100, unique=True)
     description = models.TextField()
 
+    @property
+    def latest_accepted_for_current_tenant(self):
+        return self.latest_accepted_for_tenant(connection.schema_name)
+
+    def latest_accepted_for_tenant(self, tenant):
+        latest = self.versions.first()
+        if latest:
+            return bool(latest.accepted_for_tenant(tenant))
+        return True
+
     def __str__(self):
         return self.name
 
 
 class AgreementVersion(models.Model):
     class Meta:
-        ordering = ['created_at']
+        ordering = ['-created_at']
 
     agreement = models.ForeignKey(
         'tenants.Agreement',

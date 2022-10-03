@@ -18,11 +18,7 @@ def resolve_description(obj, info):
 @site_agreement.field("accepted")
 def resolve_accepted(obj, info):
     # pylint: disable=unused-argument
-    for version in obj.versions.all():
-        if not version.accepted_for_current_tenant:
-            return False
-
-    return True
+    return obj.latest_accepted_for_current_tenant
 
 
 @site_agreement.field("versions")

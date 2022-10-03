@@ -39,8 +39,8 @@ def get_sites(self):
         for client in clients:
 
             agreements_accepted = True
-            for version in AgreementVersion.objects.all():
-                if not version.accepted_for_tenant(client.schema_name):
+            for agreement in Agreement.objects.all():
+                if not agreement.latest_accepted_for_tenant(client):
                     agreements_accepted = False
 
             sites.append({
