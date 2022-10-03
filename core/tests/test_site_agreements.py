@@ -37,8 +37,8 @@ class SiteAgreementsTestCase(FastTenantTestCase):
                         version
                         document
                         accepted
-                        accepted_by
-                        accepted_date
+                        acceptedBy
+                        acceptedDate
                     }
                 }
             }
@@ -52,8 +52,8 @@ class SiteAgreementsTestCase(FastTenantTestCase):
                         version
                         document
                         accepted
-                        accepted_by
-                        accepted_date
+                        acceptedBy
+                        acceptedDate
                     }
                 }
             }
@@ -92,12 +92,12 @@ class SiteAgreementsTestCase(FastTenantTestCase):
         self.assertEqual(data["siteAgreements"][0]["name"], "Agreement")
         self.assertEqual(data["siteAgreements"][0]["description"], "Agreement description")
         self.assertEqual(data["siteAgreements"][0]["accepted"], False)
-        self.assertEqual(data["siteAgreements"][0]["versions"][0]["version"], "1.0")
+        self.assertEqual(data["siteAgreements"][0]["versions"][0]["version"], "1.1")
         self.assertEqual(data["siteAgreements"][0]["versions"][0]["accepted"], False)
-        self.assertEqual(data["siteAgreements"][0]["versions"][0]["document"], "/agreement/agreement-1-0")
-        self.assertEqual(data["siteAgreements"][0]["versions"][1]["version"], "1.1")
+        self.assertEqual(data["siteAgreements"][0]["versions"][0]["document"], "/agreement/agreement-1-1")
+        self.assertEqual(data["siteAgreements"][0]["versions"][1]["version"], "1.0")
         self.assertEqual(data["siteAgreements"][0]["versions"][1]["accepted"], False)
-        self.assertEqual(data["siteAgreements"][0]["versions"][1]["document"], "/agreement/agreement-1-1")
+        self.assertEqual(data["siteAgreements"][0]["versions"][1]["document"], "/agreement/agreement-1-0")
 
     def test_fail_accept_by_admin(self):
 
@@ -151,10 +151,10 @@ class SiteAgreementsTestCase(FastTenantTestCase):
         self.assertEqual(data["siteAgreements"][0]["name"], "Agreement")
         self.assertEqual(data["siteAgreements"][0]["description"], "Agreement description")
         self.assertEqual(data["siteAgreements"][0]["accepted"], False)
-        self.assertEqual(data["siteAgreements"][0]["versions"][0]["version"], "1.0")
-        self.assertEqual(data["siteAgreements"][0]["versions"][0]["accepted"], True)
-        self.assertEqual(data["siteAgreements"][0]["versions"][1]["version"], "1.1")
-        self.assertEqual(data["siteAgreements"][0]["versions"][1]["accepted"], False)
+        self.assertEqual(data["siteAgreements"][0]["versions"][0]["version"], "1.1")
+        self.assertEqual(data["siteAgreements"][0]["versions"][0]["accepted"], False)
+        self.assertEqual(data["siteAgreements"][0]["versions"][1]["version"], "1.0")
+        self.assertEqual(data["siteAgreements"][0]["versions"][1]["accepted"], True)
 
         variables = {
             "input": {
@@ -183,7 +183,7 @@ class SiteAgreementsTestCase(FastTenantTestCase):
         self.assertEqual(data["siteAgreements"][0]["name"], "Agreement")
         self.assertEqual(data["siteAgreements"][0]["description"], "Agreement description")
         self.assertEqual(data["siteAgreements"][0]["accepted"], True)
-        self.assertEqual(data["siteAgreements"][0]["versions"][0]["version"], "1.0")
+        self.assertEqual(data["siteAgreements"][0]["versions"][0]["version"], "1.1")
         self.assertEqual(data["siteAgreements"][0]["versions"][0]["accepted"], True)
-        self.assertEqual(data["siteAgreements"][0]["versions"][1]["version"], "1.1")
+        self.assertEqual(data["siteAgreements"][0]["versions"][1]["version"], "1.0")
         self.assertEqual(data["siteAgreements"][0]["versions"][1]["accepted"], True)
