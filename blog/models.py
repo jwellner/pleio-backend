@@ -62,7 +62,7 @@ class Blog(Entity, FeaturedCoverMixin, VoteMixin, BookmarkMixin, FollowMixin, Co
             'featured': self.serialize_featured(),
             'groupGuid': self.group.guid if self.group else None,
             'ownerGuid': self.owner.guid if self.owner else None,
-            'suggestedItems': self.suggested_items or [],
+            'suggestedItems': [str(item) for item in self.suggested_items] or [],
         }
 
 
