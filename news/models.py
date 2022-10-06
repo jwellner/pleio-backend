@@ -61,7 +61,7 @@ class News(Entity, VoteMixin, BookmarkMixin, FollowMixin, CommentMixin, Featured
             'isFeatured': bool(self.is_featured),
             'featured': self.serialize_featured(),
             'ownerGuid': self.owner.guid if self.owner else None,
-            'suggestedItems': [str(item) for item in self.suggested_items] or [],
+            'suggestedItems': [str(item) for item in self.suggested_items or []],
         }
 
 
