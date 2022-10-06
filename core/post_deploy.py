@@ -90,6 +90,23 @@ def create_initial_revisions():
 
 
 @post_deploy_action
+def create_initial_revisions_for_left_over_entities():
+    if is_schema_public():
+        return
+
+    activate(config.LANGUAGE)
+    for entity in Entity.objects.select_subclasses():
+        if entity.has_revisions() and not Revision.objects.filter(_container=entity).exists():
+            try:
+                revision = Revision()
+                revision.store_initial_version(entity)
+                revision.description = gettext("Automatically generated initial revision")
+                revision.save()
+            except Exception:
+                pass
+
+
+@post_deploy_action
 def migrate_widgets_that_have_sorting_enabled():
     if is_schema_public():
         return
