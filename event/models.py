@@ -57,10 +57,6 @@ class Event(Entity,
 
     def get_attendee(self, email):
         try:
-            user = User.objects.filter(email=email).first()
-            if user:
-                return self.attendees.get(user=user)
-
             return self.attendees.get(email=email)
         except EventAttendee.DoesNotExist:
             pass
