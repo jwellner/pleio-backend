@@ -189,9 +189,8 @@ def backup_site(self, backup_site_id, skip_files=False, backup_folder=None, comp
     for row in tables:
         table = f"{row[0]}"
         file_path = f"{backup_data_folder}/{row[0]}.csv"
-        f = open(file_path, 'wb+')
-
-        cursor.copy_to(f, table)
+        with open(file_path, 'wb+') as f:
+            cursor.copy_to(f, table)
         logger.info("Copy %s data to %s", table, file_path)
 
     # copy files
