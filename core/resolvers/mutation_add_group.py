@@ -1,11 +1,14 @@
+from django.core.exceptions import ValidationError
 from graphql import GraphQLError
+
 from core import config
-from core.models import Group, ProfileField, GroupProfileFieldSetting
-from core.constances import NOT_LOGGED_IN, COULD_NOT_SAVE, USER_ROLES, INVALID_PROFILE_FIELD_GUID
-from core.lib import clean_graphql_input, ACCESS_TYPE
+from core.constances import (COULD_NOT_SAVE, INVALID_PROFILE_FIELD_GUID,
+                             USER_ROLES)
+from core.lib import ACCESS_TYPE, clean_graphql_input
+from core.models import Group, GroupProfileFieldSetting, ProfileField
 from core.resolvers import shared
 from file.models import FileFolder
-from django.core.exceptions import ValidationError
+from user.models import User
 
 
 def resolve_add_group(_, info, input):
@@ -58,6 +61,12 @@ def resolve_add_group(_, info, input):
     group.tags = clean_input.get("tags", [])
 
     group.save()
+
+    if user.has_role(USER_ROLES.ADMIN) and group.is_auto_membership_enabled:
+        users = User.objects.filter(is_active=True)
+        for u in users:
+            if not group.is_full_member(u):
+                group.join(u, 'member')
 
     if 'showMemberProfileFieldGuids' in clean_input:
         _update_profile_field_show_field(group, clean_input.get("showMemberProfileFieldGuids"))
