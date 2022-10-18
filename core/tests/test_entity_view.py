@@ -33,6 +33,7 @@ class EntityViewTestCase(PleioTenantTestCase):
             }
             fragment BlogDetailFragment on Blog {
                 views
+                lastSeen
             }
         """
 
@@ -64,6 +65,7 @@ class EntityViewTestCase(PleioTenantTestCase):
 
         data = result["data"]["entity"]
         self.assertEqual(data["guid"], self.blog1.guid)
+        self.assertIsNotNone(data["lastSeen"])
         self.assertEqual(data["views"], 1)
 
     def test_entity_view_blog_anonymous(self):

@@ -63,6 +63,8 @@ def resolve_files(
         order_by.insert(0, 'read_access_weight')
     elif orderBy == 'writeAccessWeight':
         order_by.insert(0, 'write_access_weight')
+    elif orderBy == ['lastDownload']:
+        order_by.insert(0, 'last_download')
 
     if orderDirection == 'desc':
         for n, value in enumerate(order_by):

@@ -214,6 +214,9 @@ def resolve_entity_comment_count(obj, info):
         return _comment_count_from_object(obj)
     return count
 
+def resolve_entity_last_seen(obj, info):
+    # pylint: disable=unused-argument
+    return obj.last_seen
 
 def _comment_count_from_index(obj):
     try:

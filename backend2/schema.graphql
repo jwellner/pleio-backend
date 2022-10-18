@@ -328,6 +328,7 @@ type Blog implements Entity {
     isPinned: Boolean!
     suggestedItems: [Entity]
     revision: Revision
+    lastSeen: DateTime
 }
 
 input bookmarkInput {
@@ -430,7 +431,15 @@ input deleteEntityInput {
     guid: String!
 }
 
+input deleteEntitiesInput {
+    guids: [String]
+}
+
 type deleteEntityPayload {
+    success: Boolean
+}
+
+type deleteEntitiesPayload {
     success: Boolean
 }
 
@@ -543,6 +552,7 @@ type Discussion implements Entity {
     commentCount: Int
     featured: Featured
     isPinned: Boolean!
+    lastSeen: DateTime
 }
 
 input editAvatarInput {
@@ -983,6 +993,7 @@ type Event implements Entity {
     commentCount: Int
     isPinned: Boolean!
     qrAccess: Boolean
+    lastSeen: DateTime
 }
 
 """Show upcoming events or previous events"""
@@ -1105,6 +1116,7 @@ type File implements Entity & FileFolder {
     commentCount: Int
     isPinned: Boolean!
     size: Int
+    lastDownload: DateTime
 }
 
 type Folder implements Entity & FileFolder {
@@ -1148,6 +1160,7 @@ type Folder implements Entity & FileFolder {
     commentCount: Int
     isPinned: Boolean!
     size: Int
+    lastDownload: DateTime
 }
 
 type Pad implements Entity & FileFolder {
@@ -1440,6 +1453,7 @@ type Mutation {
     """Currently only implemented for events"""
     copyEntity(input: copyEntityInput!): copyEntityPayload
     deleteEntity(input: deleteEntityInput!): deleteEntityPayload
+    deleteEntities(input: deleteEntitiesInput!): deleteEntitiesPayload
     toggleEntityArchived(guid: String!): archiveEntityPayload
     addFile(input: addFileInput!): addFilePayload
     editFileFolder(input: editFileFolderInput!): editFileFolderPayload
@@ -1619,6 +1633,7 @@ type News implements Entity {
     isPinned: Boolean!
     suggestedItems: [Entity]
     revision: Revision
+    lastSeen: DateTime
 }
 
 type Notification {
@@ -1694,6 +1709,7 @@ type Page implements Entity {
     widgets: [Widget]
     tags: [String]
     isPinned: Boolean!
+    lastSeen: DateTime
 }
 
 """The available plugins."""
@@ -1917,6 +1933,7 @@ type Question implements Entity {
     commentCount: Int
     isPinned: Boolean!
     isLocked: Boolean!
+    lastSeen: DateTime
 }
 
 input rejectMembershipRequestInput {
@@ -2327,6 +2344,7 @@ type StatusUpdate implements Entity {
     comments: [Comment]
     commentCount: Int
     isPinned: Boolean!
+    lastSeen: DateTime
 }
 
 type Style {
@@ -2590,6 +2608,7 @@ type Wiki implements Entity {
     owner: User
     isPinned: Boolean!
     featured: Featured
+    lastSeen: DateTime
 }
 
 type SiteAccessRequest {

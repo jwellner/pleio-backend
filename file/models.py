@@ -80,6 +80,7 @@ class FileFolder(Entity, ModelWithFile, ResizedImageMixin, AttachmentMixin):
     size = models.IntegerField(default=0)
 
     last_scan = models.DateTimeField(default=None, null=True)
+    last_download = models.DateTimeField(default=None, null=True)
 
     read_access_weight = models.IntegerField(default=0)
     write_access_weight = models.IntegerField(default=0)

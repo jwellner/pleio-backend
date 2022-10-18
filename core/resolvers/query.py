@@ -1,10 +1,13 @@
 from ariadne import ObjectType
 from django.core.exceptions import ObjectDoesNotExist
 from django.db.models import F
+from django.utils import timezone
 from graphql import GraphQLError
-from core.models import Entity, Group, EntityView, EntityViewCount
+
+from core.constances import USER_NOT_MEMBER_OF_GROUP, USER_ROLES
+from core.models import Entity, EntityView, EntityViewCount, Group
 from user.models import User
-from .query_tags import resolve_list_tags
+
 from .query_bookmarks import resolve_bookmarks
 from .query_entities import resolve_entities
 from .query_filters import resolve_filters
@@ -12,17 +15,18 @@ from .query_groups import resolve_groups
 from .query_members import resolve_members
 from .query_notifications import resolve_notifications
 from .query_recommended import resolve_recommended
+from .query_revisions import resolve_revisions
 from .query_search import resolve_search, resolve_search_journal
 from .query_site import resolve_site, resolve_site_settings, resolve_site_stats
-from .query_site_agreements import resolve_site_agreements, resolve_site_custom_agreements
+from .query_site_agreements import (resolve_site_agreements,
+                                    resolve_site_custom_agreements)
 from .query_site_users import resolve_site_users
+from .query_tags import resolve_list_tags
 from .query_top import resolve_top
 from .query_trending import resolve_trending
 from .query_users import resolve_users
 from .query_users_by_birth_date import resolve_users_by_birth_date
 from .query_viewer import resolve_viewer
-from .query_revisions import resolve_revisions
-from core.constances import USER_NOT_MEMBER_OF_GROUP, USER_ROLES
 
 query = ObjectType("Query")
 

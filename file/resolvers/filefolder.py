@@ -42,6 +42,11 @@ def resolve_url(obj, info):
     # pylint: disable=unused-argument
     return obj.url
 
+@file.field("lastDownload")
+@folder.field("lastDownload")
+def resolve_last_download(obj, info):
+    # pylint: disable=unused-argument
+    return obj.last_download
 
 @file.field("thumbnail")
 def resolve_thumbnail(obj, info):
@@ -70,6 +75,7 @@ def resolve_download(obj, info):
 def resolve_size(obj, info):
     # pylint: disable=unused-argument
     return obj.size
+
 
 
 file.set_field("guid", shared.resolve_entity_guid)
