@@ -1319,9 +1319,6 @@ input inviteToGroupInput {
 
     """Directly add the users to the group without sending an invite"""
     directAdd: Boolean
-
-    """Add all site users to group. Admin only and no invites wil be send!"""
-    addAllUsers: Boolean
 }
 
 type inviteToGroupPayload {
