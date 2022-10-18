@@ -52,6 +52,7 @@ class FileFolderTestCase(PleioTenantTestCase):
                         mimeType
                         thumbnail
                         download
+                        lastDownload
                     }
                     ... on Folder {
                         title
@@ -74,6 +75,7 @@ class FileFolderTestCase(PleioTenantTestCase):
                             guid
                         }
                         hasChildren
+                        lastDownload
                     }
                 }
             }
@@ -128,6 +130,7 @@ class FileFolderTestCase(PleioTenantTestCase):
         self.assertIsNotNone(entity["timePublished"])
         self.assertIsNone(entity["scheduleArchiveEntity"])
         self.assertIsNone(entity["scheduleDeleteEntity"])
+        self.assertIsNone(entity["lastDownload"])
 
         mock_save.assert_called_once()
 
@@ -151,6 +154,8 @@ class FileFolderTestCase(PleioTenantTestCase):
         self.assertEqual(entity["subtype"], "folder")
         #self.assertEqual(entity["hasChildren"], True)
         #self.assertEqual(entity["mimeType"], None)
+        self.assertIsNone(entity["lastDownload"])
+
 
     @patch("core.lib.get_mimetype")
     @patch("{}.save".format(settings.DEFAULT_FILE_STORAGE))

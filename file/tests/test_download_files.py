@@ -1,16 +1,18 @@
-from http import HTTPStatus
 import io
+from http import HTTPStatus
+from zipfile import ZipFile
+
+from django.core.files.uploadedfile import SimpleUploadedFile
 from django_tenants.test.cases import TenantTestCase
 from django_tenants.test.client import TenantClient
-from django.core.cache import cache
-from django.db import connection
-from ..models import FileFolder
+from mixer.backend.django import mixer
+
+from core.constances import ACCESS_TYPE
 from core.models import Group
 from user.models import User
-from core.constances import ACCESS_TYPE
-from mixer.backend.django import mixer
-from django.core.files.uploadedfile import SimpleUploadedFile
-from zipfile import ZipFile
+
+from ..models import FileFolder
+
 
 class DownloadFiles(TenantTestCase):
     def setUp(self):
@@ -74,7 +76,7 @@ class DownloadFiles(TenantTestCase):
 
     def test_bulk_download(self):
 
-        path = '/bulk_download?folder_guids[]=' + str(self.folder1.id) + '&folder_guids[]=' + str(self.folder2.id)
+        path = '/bulk_download?folder_guids[]=' + str(self.folder1.id) + '&folder_guids[]=' + str(self.folder2.id) + '&file_guids[]=' + str(self.file.id)
         self.c.force_login(self.authenticatedUser)
         response = self.c.get(path)
 
@@ -83,9 +85,11 @@ class DownloadFiles(TenantTestCase):
 
         with ZipFile(zip_file, 'r') as zip:
             names = zip.namelist()
-            self.assertEqual(names[0], 'folder1/test.csv')
-            self.assertEqual(names[1], 'folder2/test.csv')
-            
+            self.assertEqual(names[0], 'test.csv')
+            self.assertEqual(names[1], 'folder1/test.csv')
+            self.assertEqual(names[2], 'folder2/test.csv')
+            self.file.refresh_from_db()
+            self.assertIsNotNone(self.file.last_download)            
 
     def test_bulk_download_anonymous(self):
 

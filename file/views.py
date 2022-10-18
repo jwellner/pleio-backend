@@ -10,6 +10,7 @@ from file.models import FileFolder
 from file.helpers.compression import add_folders_to_zip, get_download_filename
 from file.helpers.images import generate_thumbnail
 from os import path
+from django.utils import timezone
 
 
 def download(request, file_id=None, file_name=None):
@@ -39,6 +40,9 @@ def download(request, file_id=None, file_name=None):
                 return_file = resized_image
             else:
                 return redirect(entity.download_url)
+
+        entity.last_download = timezone.now()
+        entity.save()
 
         attachment_or_inline = "attachment" if not return_file.mime_type else "inline"
         response = StreamingHttpResponse(streaming_content=return_file.upload.open(), content_type=return_file.mime_type)
@@ -141,6 +145,8 @@ def bulk_download(request):
         if f.scan_incidents.count() > 0:
             continue
         zipf.writestr(path.basename(get_download_filename(f)), f.upload.read())
+        f.last_download = timezone.now()
+        f.save()
 
     # Add selected folders to zip
     folders = FileFolder.objects.visible(user).filter(id__in=folder_ids, type=FileFolder.Types.FOLDER)
