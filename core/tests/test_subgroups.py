@@ -1,21 +1,16 @@
-from django.db import connection
-from django_tenants.test.cases import FastTenantTestCase
-from backend2.schema import schema
-from ariadne import graphql_sync
-import json
-from django.contrib.auth.models import AnonymousUser
-from django.http import HttpRequest
-from core.models import Group, Subgroup
-from user.models import User
-from blog.models import Blog
 from mixer.backend.django import mixer
-from graphql import GraphQLError
-from core.constances import ACCESS_TYPE
 
-class SubgroupsTestCase(FastTenantTestCase):
+from blog.models import Blog
+from core.constances import ACCESS_TYPE
+from core.models import Group, Subgroup
+from core.tests.helpers import PleioTenantTestCase
+from user.models import User
+
+
+class SubgroupsTestCase(PleioTenantTestCase):
 
     def setUp(self):
-        self.anonymousUser = AnonymousUser()
+        super().setUp()
         self.admin = mixer.blend(User, roles=['ADMIN'])
         self.user1 = mixer.blend(User)
         self.user2 = mixer.blend(User, name='test_na')
@@ -63,7 +58,6 @@ class SubgroupsTestCase(FastTenantTestCase):
             is_recommended=False
         )
 
-
     def tearDown(self):
         self.blog.delete()
         self.subgroup1.delete()
@@ -75,9 +69,9 @@ class SubgroupsTestCase(FastTenantTestCase):
         self.user5.delete()
         self.user6.delete()
         self.admin.delete()
+        super().tearDown()
 
     def test_query_subgroups_by_group_owner(self):
-
         query = """
             query SubgroupsList($guid: String!) {
                 entity(guid: $guid) {
@@ -104,20 +98,16 @@ class SubgroupsTestCase(FastTenantTestCase):
         """
         variables = {"guid": self.group.guid}
 
-        request = HttpRequest()
-        request.user = self.user1
+        self.graphql_client.force_login(self.user1)
+        result = self.graphql_client.post(query, variables)
 
-        result = graphql_sync(schema, { "query": query, "variables": variables }, context_value={ "request": request })
-
-        data = result[1]["data"]
-
+        data = result["data"]
         self.assertEqual(data["entity"]["guid"], self.group.guid)
         self.assertEqual(data["entity"]["subgroups"]["total"], 1)
         self.assertEqual(data["entity"]["subgroups"]["edges"][0]["id"], self.subgroup1.id)
         self.assertEqual(data["entity"]["subgroups"]["edges"][0]["name"], self.subgroup1.name)
 
     def test_query_subgroups_memberlist_by_group_owner(self):
-
         query = """
             query SubgroupMembersList($guid: String!, $subgroupId: Int, $q: String, $offsetInSubgroup: Int, $offsetNotInSubgroup: Int) {
                 inSubgroup: entity(guid: $guid) {
@@ -180,18 +170,14 @@ class SubgroupsTestCase(FastTenantTestCase):
             "q": ""
         }
 
-        request = HttpRequest()
-        request.user = self.user1
+        self.graphql_client.force_login(self.user1)
+        result = self.graphql_client.post(query, variables)
 
-        result = graphql_sync(schema, { "query": query, "variables": variables }, context_value={ "request": request })
-
-        data = result[1]["data"]
-
+        data = result["data"]
         self.assertEqual(data["inSubgroup"]["guid"], self.group.guid)
         self.assertEqual(data["inSubgroup"]["members"]["total"], 2)
         self.assertEqual(data["notInSubgroup"]["guid"], self.group.guid)
         self.assertEqual(data["notInSubgroup"]["members"]["total"], 3)
-
 
     def test_query_subgroup_access_fields(self):
         query = """
@@ -213,19 +199,15 @@ class SubgroupsTestCase(FastTenantTestCase):
         """
         variables = {"guid": self.group.guid}
 
-        request = HttpRequest()
-        request.user = self.user1
+        self.graphql_client.force_login(self.user1)
+        result = self.graphql_client.post(query, variables)
 
-        result = graphql_sync(schema, { "query": query, "variables": variables }, context_value={ "request": request })
-
-        data = result[1]["data"]
-
+        data = result["data"]
         self.assertEqual(data["entity"]["guid"], self.group.guid)
         self.assertEqual(data["entity"]["defaultAccessId"], 1)
         self.assertEqual(data["entity"]["accessIds"][2]["id"], 10001)
 
     def test_blog_in_subgroup_by_subgroup_member(self):
-
         query = """
             fragment BlogParts on Blog {
                 title
@@ -246,25 +228,19 @@ class SubgroupsTestCase(FastTenantTestCase):
                 }
             }
         """
-        request = HttpRequest()
-        request.user = self.user2
-
         variables = {
             "guid": self.blog.guid
         }
 
-        result = graphql_sync(schema, { "query": query , "variables": variables}, context_value={ "request": request })
+        self.graphql_client.force_login(self.user2)
+        result = self.graphql_client.post(query, variables)
 
-        self.assertTrue(result[0])
-
-        data = result[1]["data"]
-
+        data = result["data"]
         self.assertEqual(data["entity"]["guid"], self.blog.guid)
         self.assertEqual(data["entity"]["accessId"], 10001)
         self.assertEqual(data["entity"]["writeAccessId"], 0)
 
     def test_blog2_in_subgroup_by_subgroup_member(self):
-
         query = """
             fragment BlogParts on Blog {
                 title
@@ -285,30 +261,19 @@ class SubgroupsTestCase(FastTenantTestCase):
                 }
             }
         """
-        request = HttpRequest()
-        request.user = self.user2
-
         variables = {
             "guid": self.blog2.guid
         }
 
-        result = graphql_sync(schema, { "query": query , "variables": variables}, context_value={ "request": request })
+        self.graphql_client.force_login(self.user2)
+        result = self.graphql_client.post(query, variables)
 
-        self.assertTrue(result[0])
-
-        data = result[1]["data"]
-
+        data = result["data"]
         self.assertEqual(data["entity"]["guid"], self.blog2.guid)
         self.assertEqual(data["entity"]["accessId"], 10001)
         self.assertEqual(data["entity"]["writeAccessId"], 10001)
 
     def test_edit_blog_in_subgroup_by_subgroup_member(self):
-        data = {
-            "input": {
-                "guid": self.blog2.guid,
-                "title": "Update blog title",
-            }
-        }
         mutation = """
             fragment BlogParts on Blog {
                 title
@@ -336,28 +301,23 @@ class SubgroupsTestCase(FastTenantTestCase):
                 }
             }
         """
-        request = HttpRequest()
-        request.user = self.user2
+        variables = {
+            "input": {
+                "guid": self.blog2.guid,
+                "title": "Update blog title",
+            }
+        }
 
-        result = graphql_sync(schema, { "query": mutation , "variables": data}, context_value={ "request": request })
+        self.graphql_client.force_login(self.user2)
+        result = self.graphql_client.post(mutation, variables)
 
-        self.assertTrue(result[0])
-
-        data = result[1]["data"]
-
+        data = result["data"]
         self.assertEqual(data["editEntity"]["entity"]["guid"], self.blog2.guid)
         self.assertEqual(data["editEntity"]["entity"]["title"], "Update blog title")
         self.assertEqual(data["editEntity"]["entity"]["accessId"], 10001)
         self.assertEqual(data["editEntity"]["entity"]["writeAccessId"], 10001)
 
     def test_edit_blog_in_subgroup_by_non_subgroup_member(self):
-
-        data = {
-            "input": {
-                "guid": self.blog2.guid,
-                "title": "Update blog title",
-            }
-        }
         mutation = """
             fragment BlogParts on Blog {
                 title
@@ -385,22 +345,20 @@ class SubgroupsTestCase(FastTenantTestCase):
                 }
             }
         """
-        request = HttpRequest()
-        request.user = self.user5
+        variables = {
+            "input": {
+                "guid": self.blog2.guid,
+                "title": "Update blog title",
+            }
+        }
 
-        result = graphql_sync(schema, { "query": mutation , "variables": data}, context_value={ "request": request })
+        with self.assertGraphQlError("could_not_save"):
+            self.graphql_client.force_login(self.user5)
+            self.graphql_client.post(mutation, variables)
 
-        self.assertTrue(result[0])
-
-        data = result[1]["data"]
-        errors = result[1]["errors"]
-
-        self.assertEqual(data["editEntity"], None)
-        self.assertEqual(errors[0]["message"], "could_not_save")
-
+        self.assertEqual(self.graphql_client.result['data']["editEntity"], None)
 
     def test_blog_in_subgroup_by_non_subgroup_member(self):
-
         query = """
             fragment BlogParts on Blog {
                 title
@@ -421,24 +379,17 @@ class SubgroupsTestCase(FastTenantTestCase):
                 }
             }
         """
-        request = HttpRequest()
-        request.user = self.user5
-
         variables = {
             "guid": self.blog2.guid
         }
 
-        result = graphql_sync(schema, { "query": query , "variables": variables}, context_value={ "request": request })
+        self.graphql_client.force_login(self.user5)
+        result = self.graphql_client.post(query, variables)
 
-        self.assertTrue(result[0])
-
-        data = result[1]["data"]
-
+        data = result["data"]
         self.assertEqual(data["entity"], None)
 
-
     def test_blog_in_subgroup_by_subgroup_member_which_left_group(self):
-
         query = """
             fragment BlogParts on Blog {
                 title
@@ -458,24 +409,17 @@ class SubgroupsTestCase(FastTenantTestCase):
                 }
             }
         """
-        request = HttpRequest()
-        request.user = self.user6
-
         variables = {
             "guid": self.blog.guid
         }
 
-        result = graphql_sync(schema, { "query": query , "variables": variables}, context_value={ "request": request })
+        self.graphql_client.force_login(self.user6)
+        result = self.graphql_client.post(query, variables)
 
-        self.assertTrue(result[0])
-
-        data = result[1]["data"]
-
+        data = result["data"]
         self.assertEqual(data["entity"], None)
 
-
     def test_query_subgroups_memberlist_with_filter(self):
-
         query = """
             query SubgroupMembersList($guid: String!, $subgroupId: Int, $q: String, $offsetInSubgroup: Int, $offsetNotInSubgroup: Int) {
                 inSubgroup: entity(guid: $guid) {
@@ -538,15 +482,11 @@ class SubgroupsTestCase(FastTenantTestCase):
             "q": "test_na"
         }
 
-        request = HttpRequest()
-        request.user = self.user1
+        self.graphql_client.force_login(self.user1)
+        result = self.graphql_client.post(query, variables)
 
-        result = graphql_sync(schema, { "query": query, "variables": variables }, context_value={ "request": request })
-
-        data = result[1]["data"]
-
+        data = result["data"]
         self.assertEqual(data["inSubgroup"]["guid"], self.group.guid)
         self.assertEqual(data["inSubgroup"]["members"]["total"], 1)
         self.assertEqual(data["notInSubgroup"]["guid"], self.group.guid)
         self.assertEqual(data["notInSubgroup"]["members"]["total"], 0)
-

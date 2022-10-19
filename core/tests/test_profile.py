@@ -1,23 +1,17 @@
 from django.core.exceptions import ValidationError
 from django.db import connection
-from django_tenants.test.cases import FastTenantTestCase
 from core.models import ProfileField, UserProfileField, Group, GroupProfileFieldSetting
+from core.tests.helpers import PleioTenantTestCase
 from user.models import User
-from blog.models import Blog
 from django.core.cache import cache
 from core.constances import ACCESS_TYPE
-from backend2.schema import schema
-from ariadne import graphql_sync
-import json
-from django.contrib.auth.models import AnonymousUser
-from django.http import HttpRequest
 from mixer.backend.django import mixer
 
 
-class ProfileTestCase(FastTenantTestCase):
+class ProfileTestCase(PleioTenantTestCase):
 
     def setUp(self):
-        self.anonymousUser = AnonymousUser()
+        super().setUp()
         self.user1 = mixer.blend(User)
         self.user2 = mixer.blend(User)
         self.profile_field1 = ProfileField.objects.create(
@@ -137,19 +131,15 @@ class ProfileTestCase(FastTenantTestCase):
         self.user2.delete()
         self.user1.delete()
         cache.clear()
+        super().tearDown()
 
     def test_get_profile_items_by_owner(self):
-        request = HttpRequest()
-        request.user = self.user1
-
         variables = {"username": self.user1.guid}
 
-        result = graphql_sync(schema, {"query": self.query, "variables": variables}, context_value={"request": request})
+        self.graphql_client.force_login(self.user1)
+        result = self.graphql_client.post(self.query, variables)
 
-        self.assertTrue(result[0])
-
-        data = result[1]["data"]
-
+        data = result["data"]
         self.assertEqual(len(data["entity"]["profile"]), 4)
         self.assertEqual(data["entity"]["profile"][0]["key"], "profile_field1")
         self.assertEqual(data["entity"]["profile"][0]["name"], "profile_field1_name")
@@ -189,17 +179,12 @@ class ProfileTestCase(FastTenantTestCase):
         self.assertEqual(data["entity"]["fieldsInOverview"][0]["key"], "profile_field3")
 
     def test_get_profile_items_by_logged_in_user(self):
-        request = HttpRequest()
-        request.user = self.user2
-
         variables = {"username": self.user1.guid}
 
-        result = graphql_sync(schema, {"query": self.query, "variables": variables}, context_value={"request": request})
+        self.graphql_client.force_login(self.user2)
+        result = self.graphql_client.post(self.query, variables)
 
-        self.assertTrue(result[0])
-
-        data = result[1]["data"]
-
+        data = result["data"]
         self.assertEqual(len(data["entity"]["profile"]), 4)
         self.assertEqual(data["entity"]["profile"][0]["key"], "profile_field1")
         self.assertEqual(data["entity"]["profile"][0]["name"], "profile_field1_name")
@@ -235,16 +220,11 @@ class ProfileTestCase(FastTenantTestCase):
         self.assertEqual(data["entity"]["fieldsInOverview"][0]["key"], "profile_field3")
 
     def test_get_profile_items_by_anonymous_user(self):
-        request = HttpRequest()
-        request.user = self.anonymousUser
-
         variables = {"username": self.user1.guid}
 
-        result = graphql_sync(schema, {"query": self.query, "variables": variables}, context_value={"request": request})
-        self.assertTrue(result[0])
+        result = self.graphql_client.post(self.query, variables)
 
-        data = result[1]["data"]
-
+        data = result["data"]
         # should be able to view public provile data
         self.assertEqual(len(data["entity"]["profile"]), 4)
         self.assertEqual(data["entity"]["profile"][0]["key"], "profile_field1")
@@ -279,17 +259,12 @@ class ProfileTestCase(FastTenantTestCase):
         self.assertEqual(data["entity"]["profile"][2]["isInOverview"], True)
 
     def test_user_fields_in_group_overview(self):
-        request = HttpRequest()
-        request.user = self.user2
-
         variables = {"username": self.user1.guid, "groupGuid": self.group.guid}
 
-        result = graphql_sync(schema, {"query": self.query, "variables": variables}, context_value={"request": request})
+        self.graphql_client.force_login(self.user2)
+        result = self.graphql_client.post(self.query, variables)
 
-        self.assertTrue(result[0])
-
-        data = result[1]["data"]
-
+        data = result["data"]
         self.assertEqual(data["entity"]["fieldsInOverview"][0]["key"], "profile_field2")
 
     def test_profile_field_is_not_on_vcard_when_empty(self):
@@ -301,11 +276,9 @@ class ProfileTestCase(FastTenantTestCase):
             value="has value!",
         )
 
-        request = HttpRequest()
-        request.user = clean_user
-
+        self.graphql_client.force_login(clean_user)
         variables = {"username": clean_user.guid, "groupGuid": self.group.guid}
-        success, result = graphql_sync(schema, {"query": self.query, "variables": variables}, context_value={"request": request})
+        result = self.graphql_client.post(self.query, variables)
 
         # Value exists, so profile_field exists.
         data = result.get('data')
@@ -317,7 +290,8 @@ class ProfileTestCase(FastTenantTestCase):
 
         # value is empty, so profile_field is not in the result.
         variables = {"username": clean_user.guid, "groupGuid": self.group.guid}
-        success, result = graphql_sync(schema, {"query": self.query, "variables": variables}, context_value={"request": request})
+        result = self.graphql_client.post(self.query, variables)
+
         data = result.get('data')
         self.assertIsNotNone(data['entity']['vcard'])
         self.assertNotIn(self.profile_field1.key, [v['key'] for v in data['entity']['vcard']])
@@ -345,11 +319,9 @@ class ProfileTestCase(FastTenantTestCase):
         self.profile_field3.field_options = ['option2', 'option3']
         self.profile_field3.save()
 
-        request = HttpRequest()
-        request.user = self.user1
-
+        self.graphql_client.force_login(self.user1)
         variables = {"username": self.user1.guid}
-        success, result = graphql_sync(schema, {"query": self.query, "variables": variables}, context_value={"request": request})
+        result = self.graphql_client.post(self.query, variables)
 
         profile_item = UserProfileField.objects.get(user_profile=self.user1.profile, profile_field=self.profile_field3)
         self.assertIn('option1', profile_item.value)
@@ -358,4 +330,3 @@ class ProfileTestCase(FastTenantTestCase):
         profile_values = {p['key']: p['value'] for p in result['data']['entity']['profile']}
         self.assertNotIn('option1', profile_values[self.profile_field3.key])
         self.assertIn('option2', profile_values[self.profile_field3.key])
-

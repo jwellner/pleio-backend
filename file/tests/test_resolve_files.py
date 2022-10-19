@@ -1,21 +1,18 @@
-from django_tenants.test.cases import FastTenantTestCase
-from backend2.schema import schema
-from ariadne import graphql_sync
-from django.contrib.auth.models import AnonymousUser
-from django.http import HttpRequest
+from core.factories import GroupFactory
 from core.models import Group, Subgroup
+from core.tests.helpers import PleioTenantTestCase
 from user.models import User
 from file.models import FileFolder
 from mixer.backend.django import mixer
 from core.constances import ACCESS_TYPE
 
 
-class TestFileQueryOrderByAccessWeight(FastTenantTestCase):
+class TestFileQueryOrderByAccessWeight(PleioTenantTestCase):
 
     def setUp(self):
+        super().setUp()
         self.owner = mixer.blend(User)
-        self.group = mixer.blend(Group, owner=self.owner)
-        self.group.join(self.owner, 'owner')
+        self.group = GroupFactory(owner=self.owner)
         self.subgroup = mixer.blend(Subgroup, group=self.group, members=[self.owner])
 
         self.public_file = mixer.blend(FileFolder,
@@ -43,14 +40,9 @@ class TestFileQueryOrderByAccessWeight(FastTenantTestCase):
                                      write_access=[ACCESS_TYPE.user.format(self.owner.id)],
                                      group=self.group,
                                      title="private")
-
-    def test_read_access_weight_of_files(self):
-        request = HttpRequest()
-        request.user = self.owner
-
-        query = """
-            query FilesQuery($containerGuid: String!, $orderBy: String) {
-                files(containerGuid: $containerGuid, orderBy: $orderBy) {
+        self.query = """
+            query FilesQuery($containerGuid: String!, $orderBy: String, $orderDirection: String) {
+                files(containerGuid: $containerGuid, orderBy: $orderBy, orderDirection: $orderDirection) {
                     total
                     edges {
                         guid
@@ -59,13 +51,14 @@ class TestFileQueryOrderByAccessWeight(FastTenantTestCase):
             }
         """
 
+    def test_read_access_weight_of_files(self):
         variables = {
             "containerGuid": self.group.guid,
             "orderBy": "readAccessWeight",
         }
 
-        success, result = graphql_sync(schema, {"query": query, "variables": variables},
-                                       context_value={"request": request})
+        self.graphql_client.force_login(self.owner)
+        result = self.graphql_client.post(self.query, variables)
 
         actual_order = [record['guid'] for record in result['data']['files']['edges']]
         self.assertEqual(actual_order, [
@@ -77,28 +70,14 @@ class TestFileQueryOrderByAccessWeight(FastTenantTestCase):
         ])
 
     def test_read_access_weight_of_files_reverse(self):
-        request = HttpRequest()
-        request.user = self.owner
-
-        query = """
-            query FilesQuery($containerGuid: String!, $orderBy: String, $orderDirection: String) {
-                files(containerGuid: $containerGuid, orderBy: $orderBy, orderDirection: $orderDirection) {
-                    total
-                    edges {
-                        guid
-                    }
-                }
-            }
-        """
-
         variables = {
             "containerGuid": self.group.guid,
             "orderBy": "readAccessWeight",
             "orderDirection": "desc"
         }
 
-        success, result = graphql_sync(schema, {"query": query, "variables": variables},
-                                       context_value={"request": request})
+        self.graphql_client.force_login(self.owner)
+        result = self.graphql_client.post(self.query, variables)
 
         actual_order = [record['guid'] for record in result['data']['files']['edges']]
         self.assertEqual(actual_order, [
@@ -110,27 +89,13 @@ class TestFileQueryOrderByAccessWeight(FastTenantTestCase):
         ])
 
     def test_write_access_weight_of_files(self):
-        request = HttpRequest()
-        request.user = self.owner
-
-        query = """
-            query FilesQuery($containerGuid: String!, $orderBy: String) {
-                files(containerGuid: $containerGuid, orderBy: $orderBy) {
-                    total
-                    edges {
-                        guid
-                    }
-                }
-            }
-        """
-
         variables = {
             "containerGuid": self.group.guid,
             "orderBy": "writeAccessWeight",
         }
 
-        success, result = graphql_sync(schema, {"query": query, "variables": variables},
-                                       context_value={"request": request})
+        self.graphql_client.force_login(self.owner)
+        result = self.graphql_client.post(self.query, variables)
 
         actual_order = [record['guid'] for record in result['data']['files']['edges']]
         self.assertEqual(actual_order, [
@@ -142,28 +107,14 @@ class TestFileQueryOrderByAccessWeight(FastTenantTestCase):
         ])
 
     def test_write_access_weight_of_files_reverse(self):
-        request = HttpRequest()
-        request.user = self.owner
-
-        query = """
-            query FilesQuery($containerGuid: String!, $orderBy: String, $orderDirection: String) {
-                files(containerGuid: $containerGuid, orderBy: $orderBy, orderDirection: $orderDirection) {
-                    total
-                    edges {
-                        guid
-                    }
-                }
-            }
-        """
-
         variables = {
             "containerGuid": self.group.guid,
             "orderBy": "writeAccessWeight",
             "orderDirection": "desc"
         }
 
-        success, result = graphql_sync(schema, {"query": query, "variables": variables},
-                                       context_value={"request": request})
+        self.graphql_client.force_login(self.owner)
+        result = self.graphql_client.post(self.query, variables)
 
         actual_order = [record['guid'] for record in result['data']['files']['edges']]
         self.assertEqual(actual_order, [
@@ -175,10 +126,10 @@ class TestFileQueryOrderByAccessWeight(FastTenantTestCase):
         ])
 
 
-class FilesCase(FastTenantTestCase):
+class FilesCase(PleioTenantTestCase):
 
     def setUp(self):
-        self.anonymousUser = AnonymousUser()
+        super().setUp()
         self.authenticatedUser = mixer.blend(User)
 
         self.group = mixer.blend(Group, owner=self.authenticatedUser)
@@ -243,55 +194,41 @@ class FilesCase(FastTenantTestCase):
     def tearDown(self):
         FileFolder.objects.all().delete()
         self.authenticatedUser.delete()
+        super().tearDown()
 
     def test_user_container(self):
-        request = HttpRequest()
-        request.user = self.authenticatedUser
-
         variables = {
             "containerGuid": self.authenticatedUser.guid
         }
 
-        result = graphql_sync(schema, {"query": self.query, "variables": variables}, context_value={"request": request})
+        self.graphql_client.force_login(self.authenticatedUser)
+        result = self.graphql_client.post(self.query, variables)
 
-        self.assertTrue(result[0])
-
-        data = result[1]["data"]
-
+        data = result['data']
         self.assertEqual(data["files"]["total"], 2)
         self.assertEqual(data["files"]["edges"][0]["title"], "images")
         self.assertEqual(data["files"]["edges"][1]["title"], "file1")
 
     def test_folder_container(self):
-        request = HttpRequest()
-        request.user = self.authenticatedUser
-
         variables = {
             "containerGuid": self.folder.guid
         }
 
-        result = graphql_sync(schema, {"query": self.query, "variables": variables}, context_value={"request": request})
+        self.graphql_client.force_login(self.authenticatedUser)
+        result = self.graphql_client.post(self.query, variables)
 
-        self.assertTrue(result[0])
-
-        data = result[1]["data"]
-
+        data = result['data']
         self.assertEqual(data["files"]["total"], 1)
         self.assertEqual(data["files"]["edges"][0]["title"], "file2")
 
     def test_group_container(self):
-        request = HttpRequest()
-        request.user = self.authenticatedUser
-
         variables = {
             "containerGuid": self.group.guid
         }
 
-        result = graphql_sync(schema, {"query": self.query, "variables": variables}, context_value={"request": request})
+        self.graphql_client.force_login(self.authenticatedUser)
+        result = self.graphql_client.post(self.query, variables)
 
-        self.assertTrue(result[0])
-
-        data = result[1]["data"]
-
+        data = result['data']
         self.assertEqual(data["files"]["total"], 1)
         self.assertEqual(data["files"]["edges"][0]["title"], "file3")

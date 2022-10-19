@@ -8,7 +8,7 @@ from core.models import Group, GroupInvitation
 from user.models import User
 from core import config
 from core.constances import NOT_LOGGED_IN, COULD_NOT_FIND, COULD_NOT_INVITE, USER_NOT_SITE_ADMIN, USER_ROLES
-from core.lib import clean_graphql_input, get_base_url, generate_code, tenant_schema
+from core.lib import clean_graphql_input, generate_code, tenant_schema
 
 logger = logging.getLogger(__name__)
 
@@ -35,65 +35,54 @@ def resolve_invite_to_group(_, info, input):
     if clean_input.get("directAdd") and not user.has_role(USER_ROLES.ADMIN):
         raise GraphQLError(USER_NOT_SITE_ADMIN)
 
-    if clean_input.get("addAllUsers") and not user.has_role(USER_ROLES.ADMIN):
-        raise GraphQLError(USER_NOT_SITE_ADMIN)
-
-    # Add all users without sending email
-    if clean_input.get("addAllUsers"):
-        users = User.objects.filter(is_active=True)
-        for u in users:
-            if not group.is_full_member(u):
-                group.join(u, 'member')
-
-    if not clean_input.get("addAllUsers"):
-        for user_input in clean_input.get("users"):
-            if 'guid' in user_input:
-                try:
-                    receiving_user = User.objects.get(id=user_input['guid'])
-                    email = receiving_user.email
-                except ObjectDoesNotExist:
-                    raise GraphQLError(COULD_NOT_FIND)
-            elif 'email' in user_input:
-                try:
-                    receiving_user = User.objects.get(email=user_input['email'])
-                    email = receiving_user.email
-                except Exception:
-                    receiving_user = None
-                    email = user_input['email']
-
-            if clean_input.get("directAdd"):
-                if not group.is_full_member(receiving_user):
-                    group.join(receiving_user, 'member')
-                continue
-
-            code = None
-
+    for user_input in clean_input.get("users"):
+        if 'guid' in user_input:
             try:
-                if receiving_user:
-                    code = GroupInvitation.objects.get(invited_user=receiving_user, group=group).code
+                receiving_user = User.objects.get(id=user_input['guid'])
+                email = receiving_user.email
             except ObjectDoesNotExist:
-                pass
-
+                raise GraphQLError(COULD_NOT_FIND)
+        elif 'email' in user_input:
             try:
-                code = GroupInvitation.objects.get(email=email, group=group).code
-            except ObjectDoesNotExist:
-                pass
+                receiving_user = User.objects.get(email=user_input['email'])
+                email = receiving_user.email
+            except Exception:
+                receiving_user = None
+                email = user_input['email']
 
-            if not code:
-                code = generate_code()
-                GroupInvitation.objects.create(code=code, invited_user=receiving_user, group=group, email=email)
+        if clean_input.get("directAdd"):
+            if not group.is_full_member(receiving_user):
+                group.join(receiving_user, 'member')
+            continue
 
-            try:
-                schedule_invite_to_group_mail(
-                    user=receiving_user,
-                    sender=user,
-                    group=group,
-                    language=config.LANGUAGE if not receiving_user else None,
-                    email=email if not receiving_user else None
-                )
-            except Exception as e:
-                logger.error("Error while sending invite to group mail %s %s %s",
-                             tenant_schema(), e.__class__, str(e))
+        code = None
+
+        try:
+            if receiving_user:
+                code = GroupInvitation.objects.get(invited_user=receiving_user, group=group).code
+        except ObjectDoesNotExist:
+            pass
+
+        try:
+            code = GroupInvitation.objects.get(email=email, group=group).code
+        except ObjectDoesNotExist:
+            pass
+
+        if not code:
+            code = generate_code()
+            GroupInvitation.objects.create(code=code, invited_user=receiving_user, group=group, email=email)
+
+        try:
+            schedule_invite_to_group_mail(
+                user=receiving_user,
+                sender=user,
+                group=group,
+                language=config.LANGUAGE if not receiving_user else None,
+                email=email if not receiving_user else None
+            )
+        except Exception as e:
+            logger.error("Error while sending invite to group mail %s %s %s",
+                            tenant_schema(), e.__class__, str(e))
 
     return {
         "group": group

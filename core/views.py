@@ -1,44 +1,44 @@
 import csv
 import json
 import logging
-
-from core.mail_builders.site_access_request import schedule_site_access_request_mail
-from core.models.agreement import CustomAgreement
+import zipfile
+from datetime import datetime
 
 import qrcode
-from core.resolvers.query_site import get_settings
-from core import config
-from core.models import (
-    Entity, Group, UserProfileField, SiteAccessRequest, ProfileField, Attachment,
-    CommentRequest, Comment
-)
-from core.lib import (
-    access_id_to_acl, tenant_schema,
-    get_exportable_content_types, get_model_by_subtype, datetime_isoformat, get_base_url, is_schema_public
-)
-from core.forms import EditEmailSettingsForm, OnboardingForm, RequestAccessForm
-from core.constances import USER_ROLES, OIDC_PROVIDER_OPTIONS
-from core.utils.mail import UnsubscribeTokenizer, EmailSettingsTokenizer
-from user.models import User
-from event.lib import get_url
-from django.utils.translation import gettext as _
-from core.auth import oidc_provider_logout_url
-from django.core import signing
-from django.contrib.contenttypes.fields import GenericRelation, GenericForeignKey
-from django.contrib import messages
-from django.contrib.auth.views import LogoutView
-from django.shortcuts import redirect, render
 from django.conf import settings
+from django.contrib import messages
+from django.contrib.auth import login as auth_login
+from django.contrib.auth.views import LogoutView
+from django.core import signing
 from django.core.exceptions import ObjectDoesNotExist
-from django.db import models
-from django.utils.text import Truncator, slugify
-from django.utils.http import urlencode
+from django.http import (FileResponse, Http404, HttpResponse,
+                         HttpResponseNotFound, HttpResponseRedirect,
+                         StreamingHttpResponse)
+from django.shortcuts import redirect, render
 from django.urls import reverse
+from django.utils.http import urlencode
+from django.utils.text import Truncator, slugify
+from django.utils.translation import gettext as _
 from django.views.decorators.cache import cache_control
 from django.views.decorators.http import require_GET
-from django.http import Http404, HttpResponse, HttpResponseRedirect, StreamingHttpResponse, HttpResponseNotFound
-from django.contrib.auth import login as auth_login
-from datetime import datetime
+
+from core import config
+from core.auth import oidc_provider_logout_url
+from core.constances import OIDC_PROVIDER_OPTIONS, USER_ROLES
+from core.forms import EditEmailSettingsForm, OnboardingForm, RequestAccessForm
+from core.lib import (access_id_to_acl, get_base_url,
+                      get_exportable_content_types, get_model_by_subtype,
+                      get_tmp_file_path, is_schema_public, tenant_schema)
+from core.mail_builders.site_access_request import \
+    schedule_site_access_request_mail
+from core.models import (Attachment, Comment, CommentRequest, Entity, Group,
+                         ProfileField, SiteAccessRequest, UserProfileField)
+from core.models.agreement import CustomAgreement
+from core.resolvers.query_site import get_settings
+from core.utils.export import stream
+from core.utils.mail import EmailSettingsTokenizer, UnsubscribeTokenizer
+from event.lib import get_url
+from user.models import User
 
 logger = logging.getLogger(__name__)
 
@@ -386,6 +386,37 @@ def export_group_members(request, group_id=None):
 
     return response
 
+def export_selected_content(request):
+    user = request.user
+
+    if not user.is_authenticated:
+        raise Http404("Not logged in")
+
+    if not user.has_role(USER_ROLES.ADMIN):
+        raise Http404("Not admin")
+
+    content_ids = request.GET.getlist('content_guids[]')
+
+    exportable_content_types = [d['value'] for d in get_exportable_content_types()]
+
+    domain = request.tenant.get_primary_domain().domain
+
+    temp_file_path = get_tmp_file_path(user, ".zip")
+    zipf = zipfile.ZipFile(temp_file_path, 'w', zipfile.ZIP_DEFLATED)
+    
+    for content_type in exportable_content_types:
+        Model = get_model_by_subtype(content_type)
+        entities = Model.objects.filter(id__in=content_ids)
+        if entities:
+            csv = stream(entities, Echo(), domain, Model)
+            zipf.writestr('{}-export.csv'.format(content_type), ''.join(csv))
+
+    zipf.close()
+
+    response = FileResponse(open(temp_file_path, 'rb'))
+    response['Content-Disposition'] = "attachment; filename=content_export.zip"
+ 
+    return response
 
 def export_content(request, content_type=None):
     user = request.user
@@ -407,58 +438,10 @@ def export_content(request, content_type=None):
     Model = get_model_by_subtype(content_type)
     entities = Model.objects.all()
 
-    def is_included_related_field(field):
-        if field.name == 'owner':
-            return True
-        return False
-
-    def stream(items, pseudo_buffer, Model):
-        # pylint: disable=unidiomatic-typecheck
-        fields = []
-        field_names = []
-        for field in Model._meta.get_fields():
-            if (
-                    type(field) in [models.OneToOneRel, models.ForeignKey, models.ManyToOneRel, GenericRelation, GenericForeignKey]
-                    and not is_included_related_field(field)
-            ):
-                continue
-            fields.append(field)
-            field_names.append(field.name)
-
-        # if more fields needed, refactor
-        field_names.append('url')
-        field_names.append('owner_url')
-
-        writer = csv.writer(pseudo_buffer, delimiter=';', quotechar='"')
-        yield writer.writerow(field_names)
-
-        def get_data(entity, fields):
-            field_values = []
-            for field in fields:
-                field_value = field.value_from_object(entity)
-                if field.get_internal_type() == 'DateTimeField':
-                    try:
-                        field_value = datetime_isoformat(field_value)
-                    except Exception:
-                        pass
-                field_values.append(field_value)
-
-            # if more fields needed, refactor
-            domain = request.tenant.get_primary_domain().domain
-
-            url = entity.url if hasattr(entity, 'url') else ''
-            field_values.append(f"https://{domain}{url}")
-
-            owner_url = f"{entity.owner.url}" if hasattr(entity, 'owner') else ''
-            field_values.append(f"https://{domain}{owner_url}")
-
-            return field_values
-
-        for item in items:
-            yield writer.writerow(get_data(item, fields))
+    domain = request.tenant.get_primary_domain().domain
 
     response = StreamingHttpResponse(
-        streaming_content=(stream(entities, Echo(), Model)),
+        streaming_content=(stream(entities, Echo(), domain, Model)),
         content_type='text/csv',
     )
 

@@ -1,31 +1,21 @@
-from django.db import connection
-from django_tenants.test.cases import FastTenantTestCase
-from backend2.schema import schema
-from ariadne import graphql_sync
-import json
-from django.contrib.auth.models import AnonymousUser
-from django.http import HttpRequest
-from core.models import Group
 from core.constances import USER_ROLES
+from core.tests.helpers import PleioTenantTestCase
 from user.models import User
 from mixer.backend.django import mixer
-from graphql import GraphQLError
 from cms.models import Page, Row
 
-class AddColumnTestCase(FastTenantTestCase):
+
+class AddColumnTestCase(PleioTenantTestCase):
 
     def setUp(self):
-        self.anonymousUser = AnonymousUser()
+        super().setUp()
         self.admin = mixer.blend(User, roles=[USER_ROLES.ADMIN])
         self.editor = mixer.blend(User, roles=[USER_ROLES.EDITOR])
         self.user = mixer.blend(User)
         self.page = mixer.blend(Page)
         self.row1 = mixer.blend(Row, position=0, page=self.page)
         self.row2 = mixer.blend(Row, position=1, page=self.page)
-
-    def test_add_column_to_row_by_admin(self):
-
-        mutation = """
+        self.mutation = """
             mutation AddColumn($columnInput: addColumnInput!) {
                 addColumn(input: $columnInput) {
                     column {
@@ -41,7 +31,7 @@ class AddColumnTestCase(FastTenantTestCase):
                 }
             }
         """
-        variables = {
+        self.variables = {
             "columnInput": {
                 "containerGuid": self.page.guid,
                 "parentGuid": self.row1.guid,
@@ -50,13 +40,11 @@ class AddColumnTestCase(FastTenantTestCase):
             }
         }
 
-        request = HttpRequest()
-        request.user = self.admin
+    def test_add_column_to_row_by_admin(self):
+        self.graphql_client.force_login(self.admin)
+        result = self.graphql_client.post(self.mutation, self.variables)
 
-        result = graphql_sync(schema, {"query": mutation, "variables": variables }, context_value={ "request": request })
-
-        data = result[1]["data"]
-
+        data = result["data"]
         self.assertEqual(data["addColumn"]["column"]["position"], 1)
         self.assertEqual(data["addColumn"]["column"]["containerGuid"], self.page.guid)
         self.assertEqual(data["addColumn"]["column"]["parentGuid"], self.row1.guid)
@@ -64,39 +52,10 @@ class AddColumnTestCase(FastTenantTestCase):
         self.assertEqual(data["addColumn"]["column"]["width"][0], 6)
 
     def test_add_column_to_row_by_editor(self):
+        self.graphql_client.force_login(self.editor)
+        result = self.graphql_client.post(self.mutation, self.variables)
 
-        mutation = """
-            mutation AddColumn($columnInput: addColumnInput!) {
-                addColumn(input: $columnInput) {
-                    column {
-                        guid
-                        position
-                        containerGuid
-                        parentGuid
-                        canEdit
-                        width
-                        __typename
-                    }
-                    __typename
-                }
-            }
-        """
-        variables = {
-            "columnInput": {
-                "containerGuid": self.page.guid,
-                "parentGuid": self.row1.guid,
-                "position": 1,
-                "width": [6]
-            }
-        }
-
-        request = HttpRequest()
-        request.user = self.editor
-
-        result = graphql_sync(schema, {"query": mutation, "variables": variables }, context_value={ "request": request })
-
-        data = result[1]["data"]
-
+        data = result["data"]
         self.assertEqual(data["addColumn"]["column"]["position"], 1)
         self.assertEqual(data["addColumn"]["column"]["containerGuid"], self.page.guid)
         self.assertEqual(data["addColumn"]["column"]["parentGuid"], self.row1.guid)
@@ -104,74 +63,10 @@ class AddColumnTestCase(FastTenantTestCase):
         self.assertEqual(data["addColumn"]["column"]["width"][0], 6)
 
     def test_add_column_to_row_by_anonymous(self):
-
-        mutation = """
-            mutation AddColumn($columnInput: addColumnInput!) {
-                addColumn(input: $columnInput) {
-                    column {
-                        guid
-                        position
-                        containerGuid
-                        parentGuid
-                        canEdit
-                        width
-                        __typename
-                    }
-                    __typename
-                }
-            }
-        """
-        variables = {
-            "columnInput": {
-                "containerGuid": self.page.guid,
-                "parentGuid": self.row1.guid,
-                "position": 1,
-                "width": [6]
-            }
-        }
-
-        request = HttpRequest()
-        request.user = self.anonymousUser
-
-        result = graphql_sync(schema, {"query": mutation, "variables": variables }, context_value={ "request": request })
-
-        errors = result[1]["errors"]
-
-        self.assertEqual(errors[0]["message"], "not_logged_in")
-
+        with self.assertGraphQlError("not_logged_in"):
+            self.graphql_client.post(self.mutation, self.variables)
 
     def test_add_column_to_row_by_user(self):
-
-        mutation = """
-            mutation AddColumn($columnInput: addColumnInput!) {
-                addColumn(input: $columnInput) {
-                    column {
-                        guid
-                        position
-                        containerGuid
-                        parentGuid
-                        canEdit
-                        width
-                        __typename
-                    }
-                    __typename
-                }
-            }
-        """
-        variables = {
-            "columnInput": {
-                "containerGuid": self.page.guid,
-                "parentGuid": self.row1.guid,
-                "position": 1,
-                "width": [6]
-            }
-        }
-
-        request = HttpRequest()
-        request.user = self.user
-
-        result = graphql_sync(schema, {"query": mutation, "variables": variables }, context_value={ "request": request })
-
-        errors = result[1]["errors"]
-
-        self.assertEqual(errors[0]["message"], "could_not_save")
+        with self.assertGraphQlError("could_not_save"):
+            self.graphql_client.force_login(self.user)
+            self.graphql_client.post(self.mutation, self.variables)

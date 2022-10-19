@@ -1,31 +1,21 @@
-from django.db import connection
-from django_tenants.test.cases import FastTenantTestCase
-from backend2.schema import schema
-from ariadne import graphql_sync
-import json
-from django.contrib.auth.models import AnonymousUser
-from django.http import HttpRequest
 from core.constances import USER_ROLES
-from core.models import Group
+from core.tests.helpers import PleioTenantTestCase
 from user.models import User
 from mixer.backend.django import mixer
-from graphql import GraphQLError
 from cms.models import Page, Row
 
-class AddRowTestCase(FastTenantTestCase):
+
+class AddRowTestCase(PleioTenantTestCase):
 
     def setUp(self):
-        self.anonymousUser = AnonymousUser()
+        super().setUp()
         self.admin = mixer.blend(User, roles=[USER_ROLES.ADMIN])
         self.editor = mixer.blend(User, roles=[USER_ROLES.EDITOR])
         self.user = mixer.blend(User)
         self.page = mixer.blend(Page)
         self.row1 = mixer.blend(Row, position=0, parent_id=self.page.guid, page=self.page)
         self.row2 = mixer.blend(Row, position=1, parent_id=self.page.guid, page=self.page)
-
-    def test_add_row_to_page_by_admin(self):
-
-        mutation = """
+        self.mutation = """
             mutation AddRow($rowInput: addRowInput!) {
                 addRow(input: $rowInput) {
                     row {
@@ -41,6 +31,8 @@ class AddRowTestCase(FastTenantTestCase):
                 }
             }
         """
+
+    def test_add_row_to_page_by_admin(self):
         variables = {
             "rowInput": {
                 "containerGuid": self.page.guid,
@@ -50,13 +42,10 @@ class AddRowTestCase(FastTenantTestCase):
             }
         }
 
-        request = HttpRequest()
-        request.user = self.admin
+        self.graphql_client.force_login(self.admin)
+        result = self.graphql_client.post(self.mutation, variables)
 
-        result = graphql_sync(schema, {"query": mutation, "variables": variables }, context_value={ "request": request })
-
-        data = result[1]["data"]
-
+        data = result["data"]
         self.assertEqual(data["addRow"]["row"]["position"], 1)
         self.assertEqual(data["addRow"]["row"]["containerGuid"], self.page.guid)
         self.assertEqual(data["addRow"]["row"]["parentGuid"], self.page.guid)
@@ -66,7 +55,6 @@ class AddRowTestCase(FastTenantTestCase):
         self.assertEqual(Row.objects.get(id=self.row2.id).position, 2)
 
     def test_add_row_to_page_by_editor(self):
-
         mutation = """
             mutation AddRow($rowInput: addRowInput!) {
                 addRow(input: $rowInput) {
@@ -92,13 +80,10 @@ class AddRowTestCase(FastTenantTestCase):
             }
         }
 
-        request = HttpRequest()
-        request.user = self.editor
+        self.graphql_client.force_login(self.editor)
+        result = self.graphql_client.post(mutation, variables)
 
-        result = graphql_sync(schema, {"query": mutation, "variables": variables }, context_value={ "request": request })
-
-        data = result[1]["data"]
-
+        data = result["data"]
         self.assertEqual(data["addRow"]["row"]["position"], 0)
         self.assertEqual(data["addRow"]["row"]["containerGuid"], self.page.guid)
         self.assertEqual(data["addRow"]["row"]["parentGuid"], self.page.guid)
@@ -109,7 +94,6 @@ class AddRowTestCase(FastTenantTestCase):
         self.assertEqual(Row.objects.get(id=self.row2.id).position, 2)
 
     def test_add_row_to_page_by_anonymous(self):
-
         mutation = """
             mutation AddRow($rowInput: addRowInput!) {
                 addRow(input: $rowInput) {
@@ -135,17 +119,10 @@ class AddRowTestCase(FastTenantTestCase):
             }
         }
 
-        request = HttpRequest()
-        request.user = self.anonymousUser
-
-        result = graphql_sync(schema, {"query": mutation, "variables": variables }, context_value={ "request": request })
-
-        errors = result[1]["errors"]
-
-        self.assertEqual(errors[0]["message"], "not_logged_in")
+        with self.assertGraphQlError("not_logged_in"):
+            self.graphql_client.post(mutation, variables)
 
     def test_add_row_to_page_by_user(self):
-
         mutation = """
             mutation AddRow($rowInput: addRowInput!) {
                 addRow(input: $rowInput) {
@@ -171,11 +148,5 @@ class AddRowTestCase(FastTenantTestCase):
             }
         }
 
-        request = HttpRequest()
-        request.user = self.user
-
-        result = graphql_sync(schema, {"query": mutation, "variables": variables }, context_value={ "request": request })
-
-        errors = result[1]["errors"]
-
-        self.assertEqual(errors[0]["message"], "could_not_save")
+        with self.assertGraphQlError("not_logged_in"):
+            self.graphql_client.post(mutation, variables)

@@ -1,109 +1,28 @@
-from django.db import connection
-from django_tenants.test.cases import FastTenantTestCase
+from core.factories import GroupFactory
 from core.models import Group
-from user.models import User
-from wiki.models import Wiki
-from backend2.schema import schema
-from ariadne import graphql_sync
-import json
-from django.contrib.auth.models import AnonymousUser
-from django.http import HttpRequest
-from mixer.backend.django import mixer
+from core.tests.helpers import PleioTenantTestCase
+from user.factories import AdminFactory, UserFactory
+from wiki.factories import WikiFactory
 from core.constances import USER_ROLES
 
-class ViewerTestCase(FastTenantTestCase):
+
+class ViewerTestCase(PleioTenantTestCase):
 
     def setUp(self):
-        self.anonymousUser = AnonymousUser()
-        self.authenticatedUser = mixer.blend(User, has_2fa_enabled=False)
-        self.groupOwner = mixer.blend(User)
-        self.groupAdmin = mixer.blend(User)
-        self.groupUser = mixer.blend(User)
-        self.groupUserWiki = mixer.blend(User)
-        self.authenticatedAdminUser = mixer.blend(User, roles = [USER_ROLES.ADMIN], has_2fa_enabled=True)
-        self.group = mixer.blend(Group, owner=self.groupOwner)
-        self.group.join(self.groupOwner, 'owner')
-        self.group.join(self.groupAdmin, 'owner')
-        self.group.join(self.groupUser, 'member')
-        self.wiki = mixer.blend(Wiki, owner=self.groupUserWiki, group=self.group)
-
-    def tearDown(self):
-        self.group.delete()
-        self.groupUser.delete()
-        self.authenticatedUser.delete()
-        self.authenticatedAdminUser.delete()
-
-    def test_viewer_anonymous(self):
-
-        query = """
-            {
-                viewer {
-                    guid
-                    loggedIn
-                    isSubEditor
-                    isAdmin
-                    has2faEnabled
-                    user {
-                        guid
-                        email
-                    }
-                }
-            }
-        """
-        request = HttpRequest()
-        request.user = self.anonymousUser
-
-        result = graphql_sync(schema, { "query": query }, context_value={ "request": request })
-
-        self.assertTrue(result[0])
-
-        data = result[1]["data"]
-
-        self.assertEqual(data["viewer"]["guid"], "viewer:0")
-        self.assertEqual(data["viewer"]["loggedIn"], False)
-        self.assertEqual(data["viewer"]["isSubEditor"], False)
-        self.assertEqual(data["viewer"]["isAdmin"], False)
-        self.assertEqual(data["viewer"]["has2faEnabled"], False)
-        self.assertIsNone(data["viewer"]["user"])
-
-    def test_viewer_loggedin(self):
-
-        query = """
-            {
-                viewer {
-                    guid
-                    loggedIn
-                    isSubEditor
-                    isAdmin
-                    has2faEnabled
-                    user {
-                        guid
-                        email
-                    }
-                }
-            }
-        """
-        request = HttpRequest()
-        request.user = self.authenticatedUser
-
-        result = graphql_sync(schema, { "query": query }, context_value={ "request": request })
-
-        self.assertTrue(result[0])
-
-        data = result[1]["data"]
-
-        self.assertEqual(data["viewer"]["guid"], "viewer:{}".format(self.authenticatedUser.id))
-        self.assertEqual(data["viewer"]["loggedIn"], True)
-        self.assertEqual(data["viewer"]["isSubEditor"], self.authenticatedUser.has_role(USER_ROLES.EDITOR) or self.authenticatedUser.has_role(USER_ROLES.ADMIN))
-        self.assertEqual(data["viewer"]["isAdmin"], self.authenticatedUser.has_role(USER_ROLES.ADMIN))
-        self.assertEqual(data["viewer"]["has2faEnabled"], False)
-        self.assertEqual(data["viewer"]["user"]["guid"], self.authenticatedUser.guid)
-        self.assertEqual(data["viewer"]["user"]["email"], self.authenticatedUser.email)
-
-    def test_viewer_loggedin_admin(self):
-
-        query = """
-            {
+        super().setUp()
+        self.authenticatedUser = UserFactory(has_2fa_enabled=False)
+        self.groupOwner = UserFactory()
+        self.groupAdmin = UserFactory()
+        self.groupUser = UserFactory()
+        self.groupUserWiki = UserFactory()
+        self.authenticatedAdminUser = AdminFactory(has_2fa_enabled=True)
+        self.group: Group = GroupFactory(owner=self.groupOwner)
+        self.group.join(self.groupAdmin, 'admin')
+        self.group.join(self.groupUserWiki)
+        self.group.join(self.groupUser)
+        self.wiki = WikiFactory(owner=self.groupUserWiki, group=self.group)
+        self.query = """
+            query viewer($container: String, $wikiGuid: String){
                 viewer {
                     guid
                     loggedIn
@@ -113,300 +32,171 @@ class ViewerTestCase(FastTenantTestCase):
                     has2faEnabled
                     user {
                         guid
+                        email
                         name
                     }
                 }
+                blog: viewer {
+                    canWriteToContainer(subtype: "blog")
+                }
+                groupBlog: viewer {
+                    canWriteToContainer(subtype: "blog", containerGuid: $container)
+                }
+                news: viewer {
+                    canWriteToContainer(subtype: "news")
+                }
+                groupNews: viewer {
+                    canWriteToContainer(subtype: "news", containerGuid: $container)
+                }
+                specificGroupWiki: viewer {
+                    canWriteToContainer(subtype: "wiki", containerGuid: $wikiGuid)
+                }
             }
         """
-        request = HttpRequest()
-        request.user = self.authenticatedAdminUser
+        self.variables = {
+            "container": self.group.guid,
+            "wikiGuid": self.wiki.guid,
+        }
+        self.query_container = """
+            query canWriteToContainer($guid: String, $subtype: String){
+                viewer {
+                    canWriteToContainer(
+                        containerGuid: $guid
+                        subtype: $subtype
+                    )
+                }
+            }
+        """
+        self.container_variables = {
+            "guid": self.group.guid,
+            "subtype": "blog",
+        }
 
-        result = graphql_sync(schema, { "query": query }, context_value={ "request": request })
+    def tearDown(self):
+        self.group.delete()
+        self.groupUser.delete()
+        self.authenticatedUser.delete()
+        self.authenticatedAdminUser.delete()
+        super().tearDown()
 
-        self.assertTrue(result[0])
+    def test_viewer_anonymous(self):
+        result = self.graphql_client.post(self.query, self.variables)
 
-        data = result[1]["data"]
+        data = result["data"]
+        self.assertEqual(data["viewer"]["guid"], "viewer:0")
+        self.assertEqual(data["viewer"]["loggedIn"], False)
+        self.assertEqual(data["viewer"]["isSubEditor"], False)
+        self.assertEqual(data["viewer"]["isAdmin"], False)
+        self.assertEqual(data["viewer"]["has2faEnabled"], False)
+        self.assertIsNone(data["viewer"]["user"])
 
+        self.assertEqual(data['blog']['canWriteToContainer'], False)
+        self.assertEqual(data['news']['canWriteToContainer'], False)
+        self.assertEqual(data['groupBlog']['canWriteToContainer'], False)
+        self.assertEqual(data['groupNews']['canWriteToContainer'], False)
+        self.assertEqual(data['specificGroupWiki']['canWriteToContainer'], False)
+
+    def test_viewer_loggedin(self):
+        self.graphql_client.force_login(self.authenticatedUser)
+        result = self.graphql_client.post(self.query, self.variables)
+
+        data = result["data"]
+        self.assertEqual(data["viewer"]["guid"], "viewer:{}".format(self.authenticatedUser.id))
+        self.assertEqual(data["viewer"]["loggedIn"], True)
+        self.assertEqual(data["viewer"]["isSubEditor"], self.authenticatedUser.has_role(USER_ROLES.EDITOR) or self.authenticatedUser.has_role(USER_ROLES.ADMIN))
+        self.assertEqual(data["viewer"]["isAdmin"], self.authenticatedUser.has_role(USER_ROLES.ADMIN))
+        self.assertEqual(data["viewer"]["has2faEnabled"], False)
+        self.assertEqual(data["viewer"]["user"]["guid"], self.authenticatedUser.guid)
+        self.assertEqual(data["viewer"]["user"]["email"], self.authenticatedUser.email)
+
+        self.assertEqual(data['blog']['canWriteToContainer'], True)
+        self.assertEqual(data['news']['canWriteToContainer'], False)
+        self.assertEqual(data['groupBlog']['canWriteToContainer'], False)
+        self.assertEqual(data['groupNews']['canWriteToContainer'], False)
+        self.assertEqual(data['specificGroupWiki']['canWriteToContainer'], False)
+
+    def test_viewer_loggedin_admin(self):
+        self.graphql_client.force_login(self.authenticatedAdminUser)
+        result = self.graphql_client.post(self.query, self.variables)
+
+        data = result["data"]
         self.assertEqual(data["viewer"]["guid"], "viewer:{}".format(self.authenticatedAdminUser.id))
         self.assertEqual(data["viewer"]["loggedIn"], True)
-        self.assertEqual(data["viewer"]["isSubEditor"], self.authenticatedAdminUser.has_role(USER_ROLES.EDITOR) or self.authenticatedAdminUser.has_role(USER_ROLES.ADMIN))
+        self.assertEqual(data["viewer"]["isSubEditor"],
+                         self.authenticatedAdminUser.has_role(USER_ROLES.EDITOR) or self.authenticatedAdminUser.has_role(USER_ROLES.ADMIN))
         self.assertEqual(data["viewer"]["isAdmin"], self.authenticatedAdminUser.has_role(USER_ROLES.ADMIN))
         self.assertEqual(data["viewer"]["isBanned"], False)
         self.assertEqual(data["viewer"]["has2faEnabled"], True)
         self.assertEqual(data["viewer"]["user"]["name"], self.authenticatedAdminUser.name)
         self.assertEqual(data["viewer"]["user"]["guid"], self.authenticatedAdminUser.guid)
 
-    def test_viewer_can_write_to_container_anonymous(self):
-        query = """
-            {
-                viewer {
-                    canWriteToContainer(subtype: "news")
-                }
-            }
-        """
-        request = HttpRequest()
-        request.user = self.anonymousUser
+        self.assertEqual(data['blog']['canWriteToContainer'], True)
+        self.assertEqual(data['news']['canWriteToContainer'], True)
+        self.assertEqual(data['groupBlog']['canWriteToContainer'], True)
+        self.assertEqual(data['groupNews']['canWriteToContainer'], True)
+        self.assertEqual(data['specificGroupWiki']['canWriteToContainer'], True)
 
-        result = graphql_sync(schema, { "query": query}, context_value={ "request": request })
+    def test_viewer_loggedin_group_user(self):
+        self.graphql_client.force_login(self.groupUser)
+        result = self.graphql_client.post(self.query, self.variables)
 
-        self.assertTrue(result[0])
+        data = result["data"]
+        self.assertEqual(data['blog']['canWriteToContainer'], True)
+        self.assertEqual(data['news']['canWriteToContainer'], False)
+        self.assertEqual(data['groupBlog']['canWriteToContainer'], True)
+        self.assertEqual(data['groupNews']['canWriteToContainer'], True)
+        self.assertEqual(data['specificGroupWiki']['canWriteToContainer'], False)
 
-        data = result[1]["data"]
+    def test_viewer_can_write_to_container_groupwikiowner(self):
+        self.graphql_client.force_login(self.groupUserWiki)
+        result = self.graphql_client.post(self.query, self.variables)
 
-        self.assertEqual(data["viewer"]["canWriteToContainer"], False)
+        data = result["data"]
+        self.assertEqual(data['blog']['canWriteToContainer'], True)
+        self.assertEqual(data['news']['canWriteToContainer'], False)
+        self.assertEqual(data['groupBlog']['canWriteToContainer'], True)
+        self.assertEqual(data['groupNews']['canWriteToContainer'], True)
 
-    def test_viewer_can_write_to_container_user(self):
-        query = """
-            {
-                viewer {
-                    canWriteToContainer(subtype: "news")
-                }
-            }
-        """
-        request = HttpRequest()
-        request.user = self.authenticatedUser
-
-        result = graphql_sync(schema, { "query": query}, context_value={ "request": request })
-
-        self.assertTrue(result[0])
-
-        data = result[1]["data"]
-
-        self.assertEqual(data["viewer"]["canWriteToContainer"], False)
-
-        query = """
-            {
-                viewer {
-                    canWriteToContainer(subtype: "blog")
-                }
-            }
-        """
-
-        result = graphql_sync(schema, { "query": query}, context_value={ "request": request })
-
-        self.assertTrue(result[0])
-
-        data = result[1]["data"]
-
-        self.assertEqual(data["viewer"]["canWriteToContainer"], True)
-
-    def test_viewer_can_write_to_container_group_user(self):
-        query = """
-            {
-                viewer {
-                    canWriteToContainer(subtype: "news")
-                }
-            }
-        """
-        request = HttpRequest()
-        request.user = self.authenticatedUser
-
-        result = graphql_sync(schema, { "query": query}, context_value={ "request": request })
-
-        self.assertTrue(result[0])
-
-        data = result[1]["data"]
-
-        self.assertEqual(data["viewer"]["canWriteToContainer"], False)
+        # Klopt dit? Hij zou toch moeten kunnen schrijven?
+        self.assertEqual(data['specificGroupWiki']['canWriteToContainer'], True)
 
     def test_viewer_can_write_to_container_admin(self):
-        query = """
-            {
-                viewer {
-                    canWriteToContainer(subtype: "news")
-                }
-            }
-        """
-        request = HttpRequest()
-        request.user = self.authenticatedAdminUser
+        self.graphql_client.force_login(self.groupAdmin)
+        result = self.graphql_client.post(self.query, self.variables)
 
-        result = graphql_sync(schema, { "query": query}, context_value={ "request": request })
-
-        self.assertTrue(result[0])
-
-        data = result[1]["data"]
-
-        self.assertEqual(data["viewer"]["canWriteToContainer"], True)
-
-    def test_viewer_can_write_to_container_group_nonmember(self):
-        query = f"""
-            {{
-                viewer {{
-                    canWriteToContainer(
-                        containerGuid: "{self.group.id}"
-                        subtype: "blog"
-                    )
-                }}
-            }}
-        """
-        request = HttpRequest()
-        request.user = self.authenticatedUser
-
-        result = graphql_sync(schema, { "query": query}, context_value={ "request": request })
-
-        self.assertTrue(result[0])
-
-        data = result[1]["data"]
-
-        self.assertEqual(data["viewer"]["canWriteToContainer"], False)
-
-    def test_viewer_can_write_to_container_group_member(self):
-        query = f"""
-            {{
-                viewer {{
-                    canWriteToContainer(
-                        containerGuid: "{self.group.id}"
-                        subtype: "blog"
-                    )
-                }}
-            }}
-        """
-
-        request = HttpRequest()
-        request.user = self.groupUser
-
-        result = graphql_sync(schema, { "query": query}, context_value={ "request": request })
-
-        self.assertTrue(result[0])
-
-        data = result[1]["data"]
-
-        self.assertEqual(data["viewer"]["canWriteToContainer"], True)
-
-    def test_viewer_can_write_to_container_wiki_group_user(self):
-        query = f"""
-            {{
-                viewer {{
-                    canWriteToContainer(
-                        containerGuid: "{self.wiki.id}"
-                        subtype: "wiki"
-                    )
-                }}
-            }}
-        """
-
-        request = HttpRequest()
-        request.user = self.groupUser
-
-        result = graphql_sync(schema, { "query": query}, context_value={ "request": request })
-
-        self.assertTrue(result[0])
-
-        data = result[1]["data"]
-
-        self.assertEqual(data["viewer"]["canWriteToContainer"], False)
-
-    def test_viewer_can_write_to_container_wiki_group_owner(self):
-        query = f"""
-            {{
-                viewer {{
-                    canWriteToContainer(
-                        containerGuid: "{self.wiki.id}"
-                        subtype: "wiki"
-                    )
-                }}
-            }}
-        """
-
-        request = HttpRequest()
-        request.user = self.groupOwner
-
-        result = graphql_sync(schema, { "query": query}, context_value={ "request": request })
-
-        self.assertTrue(result[0])
-
-        data = result[1]["data"]
-
-        self.assertEqual(data["viewer"]["canWriteToContainer"], True)
-
-    def test_viewer_can_write_to_container_wiki_group_admin(self):
-        query = f"""
-            {{
-                viewer {{
-                    canWriteToContainer(
-                        containerGuid: "{self.wiki.id}"
-                        subtype: "wiki"
-                    )
-                }}
-            }}
-        """
-
-        request = HttpRequest()
-        request.user = self.groupAdmin
-
-        result = graphql_sync(schema, { "query": query}, context_value={ "request": request })
-
-        self.assertTrue(result[0])
-
-        data = result[1]["data"]
-
-        self.assertEqual(data["viewer"]["canWriteToContainer"], True)
+        data = result["data"]
+        self.assertEqual(data['blog']['canWriteToContainer'], True)
+        self.assertEqual(data['news']['canWriteToContainer'], False)
+        self.assertEqual(data['groupBlog']['canWriteToContainer'], True)
+        self.assertEqual(data['groupNews']['canWriteToContainer'], True)
+        self.assertEqual(data['specificGroupWiki']['canWriteToContainer'], True)
 
     def test_viewer_can_write_to_container_user_self(self):
-        query = f"""
-            {{
-                viewer {{
-                    canWriteToContainer(
-                        containerGuid: "{self.authenticatedUser.guid}"
-                        subtype: "file"
-                    )
-                }}
-            }}
-        """
+        self.container_variables['guid'] = self.authenticatedUser.guid
+        self.container_variables['subype'] = "file"
 
-        request = HttpRequest()
-        request.user = self.authenticatedUser
+        self.graphql_client.force_login(self.authenticatedUser)
+        result = self.graphql_client.post(self.query_container, self.container_variables)
 
-        result = graphql_sync(schema, { "query": query}, context_value={ "request": request })
-
-        self.assertTrue(result[0])
-
-        data = result[1]["data"]
-
+        data = result["data"]
         self.assertEqual(data["viewer"]["canWriteToContainer"], True)
 
-    def test_viewer_can_write_to_container_user_other(self):
-        query = f"""
-            {{
-                viewer {{
-                    canWriteToContainer(
-                        containerGuid: "{self.groupOwner.guid}"
-                        subtype: "file"
-                    )
-                }}
-            }}
-        """
+    def test_viewer_can_not_write_to_container_user_other(self):
+        self.container_variables['guid'] = self.groupOwner.guid
+        self.container_variables['subype'] = "file"
 
-        request = HttpRequest()
-        request.user = self.authenticatedUser
+        self.graphql_client.force_login(self.authenticatedUser)
+        result = self.graphql_client.post(self.query_container, self.container_variables)
 
-        result = graphql_sync(schema, { "query": query}, context_value={ "request": request })
-
-        self.assertTrue(result[0])
-
-        data = result[1]["data"]
-
+        data = result["data"]
         self.assertEqual(data["viewer"]["canWriteToContainer"], False)
 
-    def test_viewer_can_write_to_container_user_admin(self):
-        query = f"""
-            {{
-                viewer {{
-                    canWriteToContainer(
-                        containerGuid: "{self.authenticatedUser.guid}"
-                        subtype: "file"
-                    )
-                }}
-            }}
-        """
+    def test_admin_viewer_can_write_to_user_container(self):
+        self.container_variables['guid'] = self.authenticatedUser.guid
+        self.container_variables['subype'] = "file"
 
-        request = HttpRequest()
-        request.user = self.authenticatedAdminUser
+        self.graphql_client.force_login(self.authenticatedAdminUser)
+        result = self.graphql_client.post(self.query_container, self.container_variables)
 
-        result = graphql_sync(schema, { "query": query}, context_value={ "request": request })
-
-        self.assertTrue(result[0])
-
-        data = result[1]["data"]
-
+        data = result["data"]
         self.assertEqual(data["viewer"]["canWriteToContainer"], True)

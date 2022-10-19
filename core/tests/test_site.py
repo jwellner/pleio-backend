@@ -1,31 +1,27 @@
-from django_tenants.test.cases import FastTenantTestCase
 from core import config
+from core.tests.helpers import PleioTenantTestCase
 from user.models import User
-from core.models import ProfileField, Setting
-from backend2.schema import schema
-from ariadne import graphql_sync
+from core.models import ProfileField
 from mixer.backend.django import mixer
-from django.contrib.auth.models import AnonymousUser
-from django.http import HttpRequest
 from django.core.cache import cache
 from django.db import connection
 
-class SiteTestCase(FastTenantTestCase):
+
+class SiteTestCase(PleioTenantTestCase):
 
     def setUp(self):
         super().setUp()
         self.user = mixer.blend(User)
-        self.anonymousUser = AnonymousUser()
 
         self.profileField1 = ProfileField.objects.create(key='text_key1', name='text_name', field_type='text_field')
         self.profileField2 = ProfileField.objects.create(key='text_key2', name='text_name', field_type='date_field')
 
         cache.set("%s%s" % (connection.schema_name, 'PROFILE_SECTIONS'),
-            [{"name": "section_one", "profileFieldGuids": [self.profileField1.guid, self.profileField2.guid]}]
-        )
+                  [{"name": "section_one", "profileFieldGuids": [self.profileField1.guid, self.profileField2.guid]}]
+                  )
         cache.set("%s%s" % (connection.schema_name, 'COLLAB_EDITING_ENABLED'),
-            True
-        )
+                  True
+                  )
 
         self.query = """
             query testSite {
@@ -129,20 +125,12 @@ class SiteTestCase(FastTenantTestCase):
         cache.clear()
 
     def test_site(self):
-
-        request = HttpRequest()
-        request.user = self.user
-
-        variables = {
-        }
-
         cache.set("%s%s" % (connection.schema_name, 'IS_CLOSED'), False)
 
-        result = graphql_sync(schema, {"query": self.query, "variables": variables}, context_value={ "request": request })
+        self.graphql_client.force_login(self.user)
+        result = self.graphql_client.post(self.query, {})
 
-        self.assertTrue(result[0])
-        data = result[1]["data"]
-
+        data = result["data"]
         self.assertEqual(data["site"]["name"], config.NAME)
         self.assertEqual(data["site"]["guid"], "1")
         self.assertEqual(data["site"]["theme"], config.THEME)
@@ -171,20 +159,12 @@ class SiteTestCase(FastTenantTestCase):
         self.assertEqual(data["site"]["preserveFileExif"], config.PRESERVE_FILE_EXIF)
 
     def test_site_closed(self):
-
-        request = HttpRequest()
-        request.user = self.user
-
-        variables = {
-        }
-
         cache.set("%s%s" % (connection.schema_name, 'IS_CLOSED'), True)
 
-        result = graphql_sync(schema, {"query": self.query, "variables": variables}, context_value={ "request": request })
+        self.graphql_client.force_login(self.user)
+        result = self.graphql_client.post(self.query, {})
 
-        self.assertTrue(result[0])
-        data = result[1]["data"]
-
+        data = result["data"]
         self.assertEqual(data["site"]["accessIds"], [
             {'id': 0, 'description': 'Alleen eigenaar'},
             {'id': 1, 'description': 'Ingelogde gebruikers'},

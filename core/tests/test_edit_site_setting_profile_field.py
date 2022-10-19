@@ -1,18 +1,15 @@
-from ariadne import graphql_sync
-from django.contrib.auth.models import AnonymousUser
 from django.core.cache import cache
-from django.http import HttpRequest
-from django_tenants.test.cases import FastTenantTestCase
 from mixer.backend.django import mixer
 
-from backend2.schema import schema
 from core.models import ProfileField, ProfileFieldValidator
+from core.tests.helpers import PleioTenantTestCase
 from user.models import User
 
-class EditSiteSettingProfileFieldTestCase(FastTenantTestCase):
+
+class EditSiteSettingProfileFieldTestCase(PleioTenantTestCase):
 
     def setUp(self):
-        self.anonymousUser = AnonymousUser()
+        super().setUp()
         self.user = mixer.blend(User)
         self.admin = mixer.blend(User, roles=['ADMIN'])
         self.profileField1 = ProfileField.objects.create(key='text_key', name='text_name', field_type='text_field')
@@ -29,6 +26,7 @@ class EditSiteSettingProfileFieldTestCase(FastTenantTestCase):
         self.profileField1.delete()
         self.user.delete()
         cache.clear()
+        super().tearDown()
 
     def test_edit_site_setting_profile_field_by_anonymous(self):
         mutation = """
@@ -46,14 +44,8 @@ class EditSiteSettingProfileFieldTestCase(FastTenantTestCase):
             }
         }
 
-        request = HttpRequest()
-        request.user = self.anonymousUser
-
-        result = graphql_sync(schema, {"query": mutation, "variables": variables}, context_value={"request": request})
-
-        errors = result[1]["errors"]
-
-        self.assertEqual(errors[0]["message"], "not_logged_in")
+        with self.assertGraphQlError("not_logged_in"):
+            self.graphql_client.post(mutation, variables)
 
     def test_edit_profile_field_by_user(self):
         mutation = """
@@ -70,14 +62,10 @@ class EditSiteSettingProfileFieldTestCase(FastTenantTestCase):
                 "guid": str(self.profileField1.id)
             }
         }
-        request = HttpRequest()
-        request.user = self.user
 
-        result = graphql_sync(schema, {"query": mutation, "variables": variables}, context_value={"request": request})
-
-        errors = result[1]["errors"]
-
-        self.assertEqual(errors[0]["message"], "user_not_site_admin")
+        with self.assertGraphQlError("user_not_site_admin"):
+            self.graphql_client.force_login(self.user)
+            self.graphql_client.post(mutation, variables)
 
     def test_edit_profile_field_by_admin(self):
         mutation = """
@@ -117,13 +105,11 @@ class EditSiteSettingProfileFieldTestCase(FastTenantTestCase):
                 "profileFieldValidatorId": str(self.profileFieldValidator1.id)
             }
         }
-        request = HttpRequest()
-        request.user = self.admin
 
-        result = graphql_sync(schema, {"query": mutation, "variables": variables}, context_value={"request": request})
+        self.graphql_client.force_login(self.admin)
+        result = self.graphql_client.post(mutation, variables)
 
-        data = result[1]["data"]
-
+        data = result["data"]
         self.assertEqual(data["editSiteSettingProfileField"]["profileItem"]["guid"], str(self.profileField1.id))
         self.assertEqual(data["editSiteSettingProfileField"]["profileItem"]["name"], "new_name_1")
         self.assertEqual(data["editSiteSettingProfileField"]["profileItem"]["key"], "readable_key")
@@ -153,11 +139,7 @@ class EditSiteSettingProfileFieldTestCase(FastTenantTestCase):
                 "key": "text_key"
             }
         }
-        request = HttpRequest()
-        request.user = self.admin
 
-        result = graphql_sync(schema, {"query": mutation, "variables": variables}, context_value={"request": request})
-
-        errors = result[1]["errors"]
-
-        self.assertEqual(errors[0]["message"], "key_already_in_use")
+        with self.assertGraphQlError("key_already_in_use"):
+            self.graphql_client.force_login(self.admin)
+            self.graphql_client.post(mutation, variables)

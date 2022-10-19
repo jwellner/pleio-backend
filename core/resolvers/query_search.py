@@ -11,7 +11,7 @@ from django.utils import dateparse, timezone
 
 
 def resolve_search(_, info, q=None, containerGuid=None, type=None, subtype=None, subtypes=None, dateFrom=None, dateTo=None, offset=0, limit=20,
-                   tagLists=None, orderBy=None, orderDirection=ORDER_DIRECTION.asc):
+                   tagLists=None, orderBy=None, orderDirection=ORDER_DIRECTION.asc, userGuid=None):
     # pylint: disable=unused-argument
     # pylint: disable=too-many-arguments
     # pylint: disable=redefined-builtin
@@ -85,6 +85,9 @@ def resolve_search(_, info, q=None, containerGuid=None, type=None, subtype=None,
 
     if subtypes:
         s = s.query('terms', type=subtypes)
+
+    if userGuid:
+        s = s.filter(owner__id=userGuid)
 
     s = s.query('bool', filter=[
         Q('range', published={'gt': None, 'lte': timezone.now()}) |

@@ -5,13 +5,13 @@ from django.contrib.auth.models import AnonymousUser
 from django.contrib.postgres.fields import ArrayField
 from django.db import models
 from django.db.models import Q
+from django.core.exceptions import ObjectDoesNotExist
 from django.utils import timezone
 from model_utils.managers import InheritanceManager
 
 from core.constances import ENTITY_STATUS, USER_ROLES
 from core.lib import get_acl
 from core.models.shared import read_access_default, write_access_default
-from core.utils.entity import load_entity_by_id
 
 from .tags import TagsMixin
 
@@ -182,6 +182,14 @@ class Entity(models.Model, TagsMixin):
           and after update can be done. @see core.Revision.
         """
         raise NotImplementedError()
+
+    @property
+    def last_seen(self):
+        try:
+            view_count = EntityViewCount.objects.get(entity_id=self.guid)
+            return view_count.updated_at
+        except ObjectDoesNotExist:
+            return None
 
     class Meta:
         ordering = ['published']

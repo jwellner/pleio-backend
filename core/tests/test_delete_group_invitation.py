@@ -1,23 +1,13 @@
-from django.conf import settings
-from django.db import connection
-from django.test import override_settings
-from django_tenants.test.cases import FastTenantTestCase
-from backend2.schema import schema
-from ariadne import graphql_sync
-import json
-from django.contrib.auth.models import AnonymousUser
-from django.http import HttpRequest
 from core.models import Group, GroupInvitation
+from core.tests.helpers import PleioTenantTestCase
 from user.models import User
 from mixer.backend.django import mixer
-from graphql import GraphQLError
-from unittest import mock
 
 
-class DeleteGroupInvitationTestCase(FastTenantTestCase):
+class DeleteGroupInvitationTestCase(PleioTenantTestCase):
 
     def setUp(self):
-        self.anonymousUser = AnonymousUser()
+        super().setUp()
         self.user1 = mixer.blend(User)
         self.user2 = mixer.blend(User)
         self.user3 = mixer.blend(User)
@@ -34,7 +24,7 @@ class DeleteGroupInvitationTestCase(FastTenantTestCase):
         self.user3.delete()
         self.user2.delete()
         self.user1.delete()
-
+        super().tearDown()
 
     def test_delete_group_invitation_by_group_owner(self):
         mutation = """
@@ -71,17 +61,13 @@ class DeleteGroupInvitationTestCase(FastTenantTestCase):
         variables = {
             "input": {
                 "id": self.invitation.id,
-                }
             }
+        }
 
-        request = HttpRequest()
-        request.user = self.user1
+        self.graphql_client.force_login(self.user1)
+        result = self.graphql_client.post(mutation, variables)
 
-        result = graphql_sync(schema, {"query": mutation, "variables": variables}, context_value={ "request": request })
-
-        self.assertTrue(result[0])
-        data = result[1]["data"]
-
+        data = result["data"]
         self.assertEqual(data["deleteGroupInvitation"]["group"]["guid"], self.group1.guid)
 
     def test_delete_group_invitation_by_admin(self):
@@ -119,17 +105,13 @@ class DeleteGroupInvitationTestCase(FastTenantTestCase):
         variables = {
             "input": {
                 "id": self.invitation.id,
-                }
             }
+        }
 
-        request = HttpRequest()
-        request.user = self.admin
+        self.graphql_client.force_login(self.admin)
+        result = self.graphql_client.post(mutation, variables)
 
-        result = graphql_sync(schema, {"query": mutation, "variables": variables}, context_value={ "request": request })
-
-        self.assertTrue(result[0])
-        data = result[1]["data"]
-
+        data = result["data"]
         self.assertEqual(data["deleteGroupInvitation"]["group"]["guid"], self.group1.guid)
 
     def test_delete_group_invitation_by_non_group_member(self):
@@ -167,18 +149,12 @@ class DeleteGroupInvitationTestCase(FastTenantTestCase):
         variables = {
             "input": {
                 "id": self.invitation.id,
-                }
             }
+        }
 
-        request = HttpRequest()
-        request.user = self.user3
-
-        result = graphql_sync(schema, {"query": mutation, "variables": variables}, context_value={ "request": request })
-
-        self.assertTrue(result[0])
-        errors = result[1]["errors"]
-
-        self.assertEqual(errors[0]["message"], "could_not_invite")
+        with self.assertGraphQlError("could_not_invite"):
+            self.graphql_client.force_login(self.user3)
+            self.graphql_client.post(mutation, variables)
 
     def test_delete_group_invitation_by_anonymous_user(self):
         mutation = """
@@ -215,15 +191,8 @@ class DeleteGroupInvitationTestCase(FastTenantTestCase):
         variables = {
             "input": {
                 "id": self.invitation.id,
-                }
             }
+        }
 
-        request = HttpRequest()
-        request.user = self.anonymousUser
-
-        result = graphql_sync(schema, {"query": mutation, "variables": variables}, context_value={ "request": request })
-
-        self.assertTrue(result[0])
-        errors = result[1]["errors"]
-
-        self.assertEqual(errors[0]["message"], "not_logged_in")
+        with self.assertGraphQlError("not_logged_in"):
+            self.graphql_client.post(mutation, variables)

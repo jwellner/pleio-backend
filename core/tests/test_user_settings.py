@@ -1,22 +1,15 @@
-from core.resolvers.group import auto_notification
 from django.db import connection
-from django_tenants.test.cases import FastTenantTestCase
-from core.models import Group, UserProfile, ProfileField, UserProfileField
+from core.models import Group
+from core.tests.helpers import PleioTenantTestCase
 from user.models import User
-from blog.models import Blog
-from core.constances import ACCESS_TYPE
 from django.core.cache import cache
-from backend2.schema import schema
-from ariadne import graphql_sync
-import json
-from django.contrib.auth.models import AnonymousUser
-from django.http import HttpRequest
 from mixer.backend.django import mixer
 
-class UserSettingsTestCase(FastTenantTestCase):
+
+class UserSettingsTestCase(PleioTenantTestCase):
 
     def setUp(self):
-        self.anonymousUser = AnonymousUser()
+        super().setUp()
         self.user1 = mixer.blend(User)
         self.user2 = mixer.blend(User)
         self.admin = mixer.blend(User)
@@ -68,7 +61,7 @@ class UserSettingsTestCase(FastTenantTestCase):
         self.group2.delete()
         self.user2.delete()
         self.user1.delete()
-
+        super().tearDown()
 
     def test_get_user_settings_by_owner(self):
         """
@@ -77,17 +70,12 @@ class UserSettingsTestCase(FastTenantTestCase):
 
         cache.set("%s%s" % (connection.schema_name, 'EXTRA_LANGUAGES'), ['en'])
 
-        request = HttpRequest()
-        request.user = self.user1
+        variables = {"username": self.user1.guid}
 
-        variables = { "username": self.user1.guid}
+        self.graphql_client.force_login(self.user1)
+        result = self.graphql_client.post(self.query, variables)
 
-        result = graphql_sync(schema, { "query": self.query, "variables": variables }, context_value={ "request": request })
-
-        self.assertTrue(result[0])
-
-        data = result[1]["data"]
-
+        data = result["data"]
         self.assertEqual(data["entity"]["canEdit"], True)
         self.assertEqual(data["entity"]["username"], self.user1.guid)
         self.assertEqual(data["entity"]["emailNotifications"], True)
@@ -102,22 +90,18 @@ class UserSettingsTestCase(FastTenantTestCase):
         self.assertEqual(data["entity"]["groupNotifications"][1]["notificationMode"], 'disable')
         cache.clear()
 
-
     def test_get_user_settings_by_admin(self):
         """
             Admins can see settings of other user
         """
-        request = HttpRequest()
-        request.user = self.admin
+        variables = {
+            "username": self.user1.guid
+        }
 
-        variables = { "username": self.user1.guid}
+        self.graphql_client.force_login(self.admin)
+        result = self.graphql_client.post(self.query, variables)
 
-        result = graphql_sync(schema, { "query": self.query, "variables": variables }, context_value={ "request": request })
-
-        self.assertTrue(result[0])
-
-        data = result[1]["data"]
-
+        data = result["data"]
         self.assertEqual(data["entity"]["canEdit"], True)
         self.assertEqual(data["entity"]["username"], self.user1.guid)
         self.assertEqual(data["entity"]["emailNotifications"], True)
@@ -135,17 +119,14 @@ class UserSettingsTestCase(FastTenantTestCase):
         """
             User can not see settings of other user
         """
-        request = HttpRequest()
-        request.user = self.user2
+        variables = {
+            "username": self.user1.guid
+        }
 
-        variables = { "username": self.user1.guid}
+        self.graphql_client.force_login(self.user2)
+        result = self.graphql_client.post(self.query, variables)
 
-        result = graphql_sync(schema, { "query": self.query, "variables": variables }, context_value={ "request": request })
-
-        self.assertTrue(result[0])
-
-        data = result[1]["data"]
-
+        data = result["data"]
         self.assertEqual(data["entity"]["canEdit"], False)
         self.assertEqual(data["entity"]["username"], self.user1.guid)
         self.assertEqual(data["entity"]["emailNotifications"], None)
@@ -158,17 +139,13 @@ class UserSettingsTestCase(FastTenantTestCase):
         """
             Not logged in user can not access User objects
         """
-        request = HttpRequest()
-        request.user = self.anonymousUser
+        variables = {
+            "username": self.user1.guid
+        }
 
-        variables = { "username": self.user1.guid}
+        result = self.graphql_client.post(self.query, variables)
 
-        result = graphql_sync(schema, { "query": self.query, "variables": variables }, context_value={ "request": request })
-
-        self.assertTrue(result[0])
-
-        data = result[1]["data"]
-
+        data = result["data"]
         self.assertEqual(data["entity"]["canEdit"], False)
         self.assertEqual(data["entity"]["username"], self.user1.guid)
         self.assertEqual(data["entity"]["emailNotifications"], None)

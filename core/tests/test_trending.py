@@ -1,22 +1,13 @@
-from django.db import connection
-from django_tenants.test.cases import FastTenantTestCase
-from backend2.schema import schema
-from ariadne import graphql_sync
-import json
-from django.contrib.auth.models import AnonymousUser
-from django.http import HttpRequest
-from core.models import Group
+from core.tests.helpers import PleioTenantTestCase
 from user.models import User
 from blog.models import Blog
 from mixer.backend.django import mixer
 from core.constances import ACCESS_TYPE
-from core.lib import get_acl, access_id_to_acl
-from django.utils.text import slugify
 
-class TrendingTestCase(FastTenantTestCase):
+class TrendingTestCase(PleioTenantTestCase):
 
     def setUp(self):
-        self.anonymousUser = AnonymousUser()
+        super().setUp()
         self.user1 = mixer.blend(User)
         self.user2 = mixer.blend(User)
 
@@ -89,9 +80,9 @@ class TrendingTestCase(FastTenantTestCase):
         self.blog5.delete()
         self.user1.delete()
         self.user2.delete()
+        super().tearDown()
     
     def test_trending(self):
-
         query = """
             query Trending {
                 trending {
@@ -102,17 +93,10 @@ class TrendingTestCase(FastTenantTestCase):
             }
         """
 
-        request = HttpRequest()
-        request.user = self.user1
+        self.graphql_client.force_login(self.user1)
+        result = self.graphql_client.post(query, {})
 
-        variables = {}
-
-        result = graphql_sync(schema, {"query": query , "variables": variables}, context_value={ "request": request })
-
-        self.assertTrue(result[0])
-
-        data = result[1]["data"]
-
+        data = result["data"]
         self.assertEqual(len(data["trending"]), 3)
         self.assertEqual(data["trending"][0]["tag"], "tag_two")
         self.assertEqual(data["trending"][0]["likes"], 6)

@@ -1,10 +1,14 @@
-from graphql import GraphQLError
 from django.core.exceptions import ObjectDoesNotExist, ValidationError
-from core.models import Group, ProfileField, GroupProfileFieldSetting
-from core.constances import NOT_LOGGED_IN, COULD_NOT_SAVE, COULD_NOT_FIND, USER_ROLES, INVALID_PROFILE_FIELD_GUID
-from core.lib import clean_graphql_input, ACCESS_TYPE
+from graphql import GraphQLError
+
+from core.constances import (COULD_NOT_FIND, COULD_NOT_SAVE,
+                             INVALID_PROFILE_FIELD_GUID, NOT_LOGGED_IN,
+                             USER_ROLES)
+from core.lib import ACCESS_TYPE, clean_graphql_input
+from core.models import Group, GroupProfileFieldSetting, ProfileField
 from core.resolvers import shared
 from file.models import FileFolder
+from user.models import User
 
 
 def resolve_edit_group(_, info, input):
@@ -69,7 +73,14 @@ def resolve_edit_group(_, info, input):
         if 'isLeavingGroupDisabled' in clean_input:
             group.is_leaving_group_disabled = clean_input.get("isLeavingGroupDisabled")
         if 'isAutoMembershipEnabled' in clean_input:
+            if not group.is_auto_membership_enabled and clean_input.get("isAutoMembershipEnabled"):
+                users = User.objects.filter(is_active=True)
+                for u in users:
+                    if not group.is_full_member(u):
+                        group.join(u, 'member')
+
             group.is_auto_membership_enabled = clean_input.get("isAutoMembershipEnabled")
+
         if 'isHidden' in clean_input:
             group.is_hidden = clean_input.get("isHidden")
 

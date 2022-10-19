@@ -48,7 +48,6 @@ class InviteToGroupTestCase(PleioTenantTestCase):
 
         variables = {
             "input": {
-                "addAllUsers": False,
                 "directAdd": False,
                 "guid": self.group1.guid,
                 "users": [{"guid": self.user2.guid}]
@@ -82,7 +81,6 @@ class InviteToGroupTestCase(PleioTenantTestCase):
 
         variables = {
             "input": {
-                "addAllUsers": False,
                 "directAdd": False,
                 "guid": self.group1.guid,
                 "users": [{"email": self.user2.email}]
@@ -95,72 +93,6 @@ class InviteToGroupTestCase(PleioTenantTestCase):
 
         self.assertEqual(data["inviteToGroup"]["group"]["guid"], self.group1.guid)
         self.assertEqual(mocked_mail.call_count, 1)
-
-    @mock.patch('core.resolvers.mutation_invite_to_group.schedule_invite_to_group_mail')
-    def test_add_all_users_to_group_by_admin(self, mocked_mail):
-        user = mixer.blend(User)
-        user.delete()
-
-        mutation = """
-            mutation InviteItem($input: inviteToGroupInput!) {
-                inviteToGroup(input: $input) {
-                    group {
-                    ... on Group {
-                            guid
-                            __typename
-                    }
-                    __typename
-                    }
-                    __typename
-                }
-            }
-        """
-
-        variables = {
-            "input": {
-                "addAllUsers": True,
-                "directAdd": False,
-                "guid": self.group1.guid,
-                "users": [{"guid": self.user2.guid}]
-            }
-        }
-
-        self.graphql_client.force_login(self.admin)
-        result = self.graphql_client.post(mutation, variables)
-        data = result['data']
-
-        self.assertEqual(data["inviteToGroup"]["group"]["guid"], self.group1.guid)
-        self.assertEqual(len(self.group1.members.all()), 3)
-        self.assertFalse(mocked_mail.called)
-
-    def test_add_all_users_to_group_by_group_owner(self):
-        mutation = """
-            mutation InviteItem($input: inviteToGroupInput!) {
-                inviteToGroup(input: $input) {
-                    group {
-                    ... on Group {
-                            guid
-                            __typename
-                    }
-                    __typename
-                    }
-                    __typename
-                }
-            }
-        """
-
-        variables = {
-            "input": {
-                "addAllUsers": True,
-                "directAdd": False,
-                "guid": self.group1.guid,
-                "users": [{"guid": self.user2.guid}]
-            }
-        }
-
-        with self.assertGraphQlError("user_not_site_admin"):
-            self.graphql_client.force_login(self.user1)
-            self.graphql_client.post(mutation, variables)
 
     def test_direct_add_users_to_group_by_group_owner(self):
         mutation = """
@@ -180,7 +112,6 @@ class InviteToGroupTestCase(PleioTenantTestCase):
 
         variables = {
             "input": {
-                "addAllUsers": False,
                 "directAdd": True,
                 "guid": self.group1.guid,
                 "users": [{"guid": self.user2.guid}]
@@ -209,7 +140,6 @@ class InviteToGroupTestCase(PleioTenantTestCase):
 
         variables = {
             "input": {
-                "addAllUsers": False,
                 "directAdd": True,
                 "guid": self.group1.guid,
                 "users": [{"guid": self.user2.guid}]
@@ -243,7 +173,6 @@ class InviteToGroupTestCase(PleioTenantTestCase):
 
         variables = {
             "input": {
-                "addAllUsers": False,
                 "directAdd": False,
                 "guid": self.group1.guid,
                 "users": [{"email": "test@test.nl"}]

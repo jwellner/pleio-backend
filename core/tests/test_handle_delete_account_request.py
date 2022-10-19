@@ -1,20 +1,14 @@
-from django_tenants.test.cases import FastTenantTestCase
-from django.contrib.auth.models import AnonymousUser
+from core.tests.helpers import PleioTenantTestCase
 from user.models import User
-from core.models import SiteAccessRequest
 from core.constances import USER_ROLES
 from mixer.backend.django import mixer
-from backend2.schema import schema
-from ariadne import graphql_sync
-from django.http import HttpRequest
 from unittest import mock
-from django.test import override_settings
 
 
-class HandleDeleteAccountRequestTestCase(FastTenantTestCase):
+class HandleDeleteAccountRequestTestCase(PleioTenantTestCase):
 
     def setUp(self):
-        self.anonymousUser = AnonymousUser()
+        super().setUp()
         self.user = mixer.blend(User)
         self.admin = mixer.blend(User, roles=[USER_ROLES.ADMIN])
         self.delete_user = mixer.blend(User, is_delete_requested=True)
@@ -30,6 +24,7 @@ class HandleDeleteAccountRequestTestCase(FastTenantTestCase):
     def tearDown(self):
         self.admin.delete()
         self.user.delete()
+        super().tearDown()
 
     @mock.patch('core.resolvers.mutation_handle_delete_account_request.schedule_user_delete_complete_mail')
     def test_handle_delete_account_request_by_admin(self, mocked_mail):
@@ -40,19 +35,13 @@ class HandleDeleteAccountRequestTestCase(FastTenantTestCase):
             }
         }
 
-        request = HttpRequest()
-        request.user = self.admin
+        self.graphql_client.force_login(self.admin)
+        result = self.graphql_client.post(self.mutation, variables)
 
-        result = graphql_sync(schema, {"query": self.mutation, "variables": variables}, context_value={"request": request})
-
-        self.assertTrue(result[0])
-
-        data = result[1]["data"]
-
+        data = result["data"]
         self.assertEqual(data["handleDeleteAccountRequest"]["success"], True)
 
         self.delete_user.refresh_from_db()
-
         self.assertEqual(self.delete_user.name, "Verwijderde gebruiker")
         self.assertEqual(self.delete_user.is_delete_requested, False)
         self.assertEqual(self.delete_user.is_active, False)
@@ -67,19 +56,13 @@ class HandleDeleteAccountRequestTestCase(FastTenantTestCase):
             }
         }
 
-        request = HttpRequest()
-        request.user = self.admin
+        self.graphql_client.force_login(self.admin)
+        result = self.graphql_client.post(self.mutation, variables)
 
-        result = graphql_sync(schema, {"query": self.mutation, "variables": variables}, context_value={"request": request})
-
-        self.assertTrue(result[0])
-
-        data = result[1]["data"]
-
+        data = result["data"]
         self.assertEqual(data["handleDeleteAccountRequest"]["success"], True)
 
         self.delete_user.refresh_from_db()
-
         self.assertEqual(self.delete_user.is_delete_requested, False)
         self.assertEqual(self.delete_user.is_active, True)
         self.assertFalse(mocked_mail.called)
@@ -92,15 +75,9 @@ class HandleDeleteAccountRequestTestCase(FastTenantTestCase):
             }
         }
 
-        request = HttpRequest()
-        request.user = self.user
-
-        result = graphql_sync(schema, {"query": self.mutation, "variables": variables}, context_value={"request": request})
-
-        self.assertTrue(result[0])
-        errors = result[1]["errors"]
-
-        self.assertEqual(errors[0]["message"], "user_not_site_admin")
+        with self.assertGraphQlError("user_not_site_admin"):
+            self.graphql_client.force_login(self.user)
+            self.graphql_client.post(self.mutation, variables)
 
     def test_handle_delete_account_request_by_anonymous(self):
         variables = {
@@ -110,12 +87,5 @@ class HandleDeleteAccountRequestTestCase(FastTenantTestCase):
             }
         }
 
-        request = HttpRequest()
-        request.user = self.anonymousUser
-
-        result = graphql_sync(schema, {"query": self.mutation, "variables": variables}, context_value={"request": request})
-
-        self.assertTrue(result[0])
-        errors = result[1]["errors"]
-
-        self.assertEqual(errors[0]["message"], "not_logged_in")
+        with self.assertGraphQlError("not_logged_in"):
+            self.graphql_client.post(self.mutation, variables)

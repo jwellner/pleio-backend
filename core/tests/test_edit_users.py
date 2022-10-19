@@ -1,23 +1,12 @@
-from django.conf import settings
-from django.db import connection
-from django.test import override_settings
-from django_tenants.test.cases import FastTenantTestCase
-from backend2.schema import schema
-from ariadne import graphql_sync
-import json
-from django.contrib.auth.models import AnonymousUser
-from django.http import HttpRequest
-from core.models import Group
+from core.tests.helpers import PleioTenantTestCase
 from user.models import User
 from mixer.backend.django import mixer
-from graphql import GraphQLError
-from unittest import mock
 
 
-class EditUsersTestCase(FastTenantTestCase):
+class EditUsersTestCase(PleioTenantTestCase):
 
     def setUp(self):
-        self.anonymousUser = AnonymousUser()
+        super().setUp()
         self.user1 = mixer.blend(User)
         self.user2 = mixer.blend(User)
         self.user3 = mixer.blend(User)
@@ -29,6 +18,7 @@ class EditUsersTestCase(FastTenantTestCase):
     def tearDown(self):
         self.user1.delete()
         self.admin.delete()
+        super().tearDown()
 
     def test_edit_users_by_anonymous(self):
         mutation = """
@@ -45,15 +35,8 @@ class EditUsersTestCase(FastTenantTestCase):
             }
         }
 
-        request = HttpRequest()
-        request.user = self.anonymousUser
-
-        result = graphql_sync(schema, {"query": mutation, "variables": variables}, context_value={ "request": request })
-
-        errors = result[1]["errors"]
-
-        self.assertEqual(errors[0]["message"], "not_logged_in")
-
+        with self.assertGraphQlError("not_logged_in"):
+            self.graphql_client.post(mutation, variables)
 
     def test_edit_users_by_user(self):
         mutation = """
@@ -70,15 +53,9 @@ class EditUsersTestCase(FastTenantTestCase):
             }
         }
 
-        request = HttpRequest()
-        request.user = self.user1
-
-        result = graphql_sync(schema, {"query": mutation, "variables": variables}, context_value={ "request": request })
-
-        errors = result[1]["errors"]
-
-        self.assertEqual(errors[0]["message"], "could_not_save")
-
+        with self.assertGraphQlError("could_not_save"):
+            self.graphql_client.force_login(self.user1)
+            self.graphql_client.post(mutation, variables)
 
     def test_ban_users_by_admin(self):
         mutation = """
@@ -95,16 +72,14 @@ class EditUsersTestCase(FastTenantTestCase):
             }
         }
 
-        request = HttpRequest()
-        request.user = self.admin
+        self.assertEqual(User.objects.filter(is_active=False).count(), 2)
 
-        self.assertEqual(User.objects.filter(is_active=False).count(), 2) 
+        self.graphql_client.force_login(self.admin)
+        result = self.graphql_client.post(mutation, variables)
 
-        result = graphql_sync(schema, {"query": mutation, "variables": variables}, context_value={ "request": request })
-        data = result[1]["data"]
+        data = result["data"]
         self.assertEqual(data["editUsers"]["success"], True)
-
-        self.assertEqual(User.objects.filter(is_active=False).count(), 4)        
+        self.assertEqual(User.objects.filter(is_active=False).count(), 4)
 
     def test_unban_users_by_admin(self):
         mutation = """
@@ -121,18 +96,14 @@ class EditUsersTestCase(FastTenantTestCase):
             }
         }
 
-        request = HttpRequest()
-        request.user = self.admin
+        self.assertEqual(User.objects.filter(is_active=False).count(), 2)
 
-        self.assertEqual(User.objects.filter(is_active=False).count(), 2) 
+        self.graphql_client.force_login(self.admin)
+        result = self.graphql_client.post(mutation, variables)
 
-        result = graphql_sync(schema, {"query": mutation, "variables": variables}, context_value={ "request": request })
-
-        data = result[1]["data"]
+        data = result["data"]
         self.assertEqual(data["editUsers"]["success"], True)
-
-        self.assertEqual(User.objects.filter(is_active=False).count(), 1)   
-
+        self.assertEqual(User.objects.filter(is_active=False).count(), 1)
 
     def test_ban_yourself(self):
         mutation = """
@@ -148,11 +119,7 @@ class EditUsersTestCase(FastTenantTestCase):
                 "action": "ban"
             }
         }
-        request = HttpRequest()
-        request.user = self.admin
 
-        result = graphql_sync(schema, {"query": mutation, "variables": variables}, context_value={ "request": request })
-
-        errors = result[1]["errors"]
-
-        self.assertEqual(errors[0]["message"], "could_not_save")
+        with self.assertGraphQlError("could_not_save"):
+            self.graphql_client.force_login(self.admin)
+            self.graphql_client.post(mutation, variables)

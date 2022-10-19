@@ -1,22 +1,13 @@
-from django.db import connection
-from django_tenants.test.cases import FastTenantTestCase
-from backend2.schema import schema
-from ariadne import graphql_sync
-import json
-from django.core.cache import cache
-from core import config
-from core.lib import is_valid_json
-from django.contrib.auth.models import AnonymousUser
-from django.http import HttpRequest
-from core.models import Group, ProfileField, Setting, UserProfileField, ProfileFieldValidator
+from core.models import ProfileField, ProfileFieldValidator
+from core.tests.helpers import PleioTenantTestCase
 from user.models import User
 from mixer.backend.django import mixer
-from graphql import GraphQLError
 
-class DeleteSiteSettingProfileFieldValidatorTestCase(FastTenantTestCase):
+
+class DeleteSiteSettingProfileFieldValidatorTestCase(PleioTenantTestCase):
 
     def setUp(self):
-        self.anonymousUser = AnonymousUser()
+        super().setUp()
         self.user1 = mixer.blend(User)
         self.admin = mixer.blend(User, roles=['ADMIN'])
         self.profileFieldValidator1 = ProfileFieldValidator.objects.create(name='beconnummer', validator_type='inList', validator_data=['123', '452'])
@@ -31,10 +22,9 @@ class DeleteSiteSettingProfileFieldValidatorTestCase(FastTenantTestCase):
         self.profileFieldValidator1.delete()
         self.profileFieldValidator2.delete()
         self.user1.delete()
-
+        super().tearDown()
 
     def test_delete_site_setting_profile_field_validator_by_anonymous(self):
-
         mutation = """
             mutation deleteSiteSettingProfileFieldValidator($input: deleteSiteSettingProfileFieldValidatorInput!) {
                 deleteSiteSettingProfileFieldValidator(input: $input) {
@@ -48,19 +38,10 @@ class DeleteSiteSettingProfileFieldValidatorTestCase(FastTenantTestCase):
             }
         }
 
-        request = HttpRequest()
-        request.user = self.anonymousUser
-
-        result = graphql_sync(schema, { "query": mutation, "variables": variables }, context_value={ "request": request })
-
-        errors = result[1]["errors"]
-
-        self.assertEqual(errors[0]["message"], "not_logged_in")
-
+        with self.assertGraphQlError("not_logged_in"):
+            self.graphql_client.post(mutation, variables)
 
     def test_delete_profile_field_validator_by_user(self):
-
-
         mutation = """
             mutation deleteSiteSettingProfileFieldValidator($input: deleteSiteSettingProfileFieldValidatorInput!) {
                 deleteSiteSettingProfileFieldValidator(input: $input) {
@@ -74,19 +55,11 @@ class DeleteSiteSettingProfileFieldValidatorTestCase(FastTenantTestCase):
             }
         }
 
-        request = HttpRequest()
-        request.user = self.user1
-
-        result = graphql_sync(schema, { "query": mutation, "variables": variables }, context_value={ "request": request })
-
-        errors = result[1]["errors"]
-
-        self.assertEqual(errors[0]["message"], "user_not_site_admin")
-
+        with self.assertGraphQlError("user_not_site_admin"):
+            self.graphql_client.force_login(self.user1)
+            self.graphql_client.post(mutation, variables)
 
     def test_delete_site_setting_profile_field_validator_by_admin(self):
-
-
         mutation = """
             mutation deleteSiteSettingProfileFieldValidator($input: deleteSiteSettingProfileFieldValidatorInput!) {
                 deleteSiteSettingProfileFieldValidator(input: $input) {
@@ -100,13 +73,10 @@ class DeleteSiteSettingProfileFieldValidatorTestCase(FastTenantTestCase):
             }
         }
 
-        request = HttpRequest()
-        request.user = self.admin
+        self.graphql_client.force_login(self.admin)
+        result = self.graphql_client.post(mutation, variables)
 
-        result = graphql_sync(schema, { "query": mutation, "variables": variables }, context_value={ "request": request })
-        data = result[1]["data"]
-
+        data = result["data"]
         self.assertEqual(data["deleteSiteSettingProfileFieldValidator"]["success"], True)
         self.assertEqual(ProfileFieldValidator.objects.all().count(), 1)
         self.assertEqual(self.profileField1.validators.all().count(), 1)
-
