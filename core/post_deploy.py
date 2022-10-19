@@ -150,4 +150,4 @@ def strip_article_images_of_exif_data():
 
     for entity in Entity.objects.all().select_subclasses():
         if hasattr(entity, 'featured_image') and entity.featured_image:
-            strip_exif_from_file(file_folder_guid=entity.featured_image)
+            strip_exif_from_file(schema=tenant_schema(), file_folder_guid=entity.featured_image)
