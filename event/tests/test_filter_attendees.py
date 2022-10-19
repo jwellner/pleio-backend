@@ -1,18 +1,16 @@
-from django.contrib.auth.models import AnonymousUser
-from django_tenants.test.cases import FastTenantTestCase
 from mixer.backend.django import mixer
+
+from core.tests.helpers import PleioTenantTestCase
 from event.models import Event, EventAttendee
 from user.models import User
-from django.http import HttpRequest
-from ariadne import graphql_sync
-from backend2.schema import schema
 from core.constances import USER_ROLES, ACCESS_TYPE
 from django.utils import timezone
 
 
-class AttendeesTestCase(FastTenantTestCase):
+class AttendeesTestCase(PleioTenantTestCase):
 
     def setUp(self):
+        super().setUp()
         self.eventPublic = mixer.blend(Event,
                                        read_access=[ACCESS_TYPE.public])
         self.today = timezone.now()
@@ -80,20 +78,15 @@ class AttendeesTestCase(FastTenantTestCase):
         """
 
     def test_query_attendees_get_all(self):
-        request = HttpRequest()
-        request.user = self.admin
-
         variables = {
             "guid": self.eventPublic.guid,
             "query": ""
         }
 
-        success, result = graphql_sync(schema, {"query": self.query, "variables": variables},
-                                       context_value={"request": request})
+        self.graphql_client.force_login(self.admin)
+        result = self.graphql_client.post(self.query, variables)
 
-        self.assertIsNone(result.get('errors'), msg=result.get('errors'))
         data = result["data"]
-
         self.assertEqual(len(data["entity"]["attendees"]["edges"]), 6)
         self.assertEqual(data["entity"]["attendees"]["total"], 6)
         self.assertEqual(data["entity"]["attendees"]["totalCheckedIn"], 2)
@@ -107,33 +100,23 @@ class AttendeesTestCase(FastTenantTestCase):
         self.assertEqual(data["entity"]["attendees"]["totalReject"], 1)
 
     def test_query_attendees_filter_name(self):
-        request = HttpRequest()
-        request.user = self.admin
-
         variables = {
             "query": "Peter",
             "guid": self.eventPublic.guid
         }
 
-        success, result = graphql_sync(schema, {"query": self.query, "variables": variables},
-                                       context_value={"request": request})
-        self.assertNotIn('errors', result, msg=result.get('errors'))
+        self.graphql_client.force_login(self.admin)
+        result = self.graphql_client.post(self.query, variables)
 
-        data = result.get("data")
+        data = result["data"]
         self.assertEqual(data["entity"]["attendees"]["total"], 1)
         self.assertEqual(len(data["entity"]["attendees"]["edges"]), 1)
         self.assertEqual(data["entity"]["attendees"]["edges"][0]["name"], self.attendee1.name)
 
     def test_unauthenticated_hides_protected_info(self):
-        request = HttpRequest()
-        request.user = AnonymousUser()
-        variables = {"guid": self.eventPublic.guid}
+        result = self.graphql_client.post(self.query, {"guid": self.eventPublic.guid})
 
-        success, result = graphql_sync(schema, {"query": self.query, "variables": variables},
-                                       context_value={"request": request})
-        self.assertNotIn('errors', result, msg=result.get('errors'))
-
-        data = result.get('data')
+        data = result["data"]
         # Available:
         self.assertEqual(data['entity']['attendees']['total'], 6)
         self.assertEqual(data['entity']['attendees']['totalAccept'], 2)

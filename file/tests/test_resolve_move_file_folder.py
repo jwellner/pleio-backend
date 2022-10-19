@@ -1,26 +1,15 @@
-from django.db import connection
-from django_tenants.test.cases import FastTenantTestCase
-from django.core.files import File
-from django.conf import settings
-from backend2.schema import schema
-from ariadne import graphql_sync
-from ariadne.file_uploads import combine_multipart_data, upload_scalar
-import json
-from django.contrib.auth.models import AnonymousUser
-from django.http import HttpRequest
 from core.models import Group
+from core.tests.helpers import PleioTenantTestCase
 from user.models import User
-from event.models import Event
 from core.constances import ACCESS_TYPE
 from mixer.backend.django import mixer
-from graphql import GraphQLError
-from unittest.mock import MagicMock, patch
 from ..models import FileFolder
 
-class MoveFileFolderTestCase(FastTenantTestCase):
+
+class MoveFileFolderTestCase(PleioTenantTestCase):
 
     def setUp(self):
-        self.anonymousUser = AnonymousUser()
+        super().setUp()
         self.authenticatedUser = mixer.blend(User)
 
         self.group = mixer.blend(Group, owner=self.authenticatedUser, is_membership_on_request=False)
@@ -49,7 +38,6 @@ class MoveFileFolderTestCase(FastTenantTestCase):
             write_access=[ACCESS_TYPE.user.format(self.authenticatedUser.id)],
             owner=self.authenticatedUser,
         )
-
 
         self.data = {
             "input": {
@@ -87,100 +75,59 @@ class MoveFileFolderTestCase(FastTenantTestCase):
         """
 
     def test_move_file_to_folder(self):
-
         variables = self.data
 
         variables["input"]["guid"] = self.file.guid
         variables["input"]["containerGuid"] = self.folder.guid
 
-        request = HttpRequest()
-        request.user = self.authenticatedUser
+        self.graphql_client.force_login(self.authenticatedUser)
+        result = self.graphql_client.post(self.mutation, variables)
 
-        result = graphql_sync(schema, { "query": self.mutation, "variables": variables }, context_value={ "request": request })
-
-        data = result[1]["data"]
-
+        data = result['data']
         self.assertEqual(data["moveFileFolder"]["entity"]["parentFolder"]["guid"], self.folder.guid)
 
     def test_move_file_to_group(self):
-
         variables = self.data
 
         variables["input"]["guid"] = self.file.guid
         variables["input"]["containerGuid"] = self.group.guid
 
-        request = HttpRequest()
-        request.user = self.authenticatedUser
+        self.graphql_client.force_login(self.authenticatedUser)
+        result = self.graphql_client.post(self.mutation, variables)
 
-        result = graphql_sync(schema, { "query": self.mutation, "variables": variables }, context_value={ "request": request })
-
-        data = result[1]["data"]
-
+        data = result['data']
         self.assertEqual(data["moveFileFolder"]["entity"]["parentFolder"], None)
         self.assertEqual(data["moveFileFolder"]["entity"]["group"]["guid"], self.group.guid)
 
     def test_move_folder_to_group(self):
-
         variables = self.data
 
         variables["input"]["guid"] = self.folder.guid
         variables["input"]["containerGuid"] = self.group.guid
 
-        request = HttpRequest()
-        request.user = self.authenticatedUser
+        self.graphql_client.force_login(self.authenticatedUser)
+        result = self.graphql_client.post(self.mutation, variables)
 
-        result = graphql_sync(schema, { "query": self.mutation, "variables": variables }, context_value={ "request": request })
-
-        data = result[1]["data"]
-
+        data = result['data']
         self.assertEqual(data["moveFileFolder"]["entity"]["parentFolder"], None)
         self.assertEqual(data["moveFileFolder"]["entity"]["group"]["guid"], self.group.guid)
 
     def test_move_folder_to_self(self):
-
         variables = self.data
 
         variables["input"]["guid"] = self.folder.guid
         variables["input"]["containerGuid"] = self.folder.guid
 
-        request = HttpRequest()
-        request.user = self.authenticatedUser
+        with self.assertGraphQlError("INVALID_CONTAINER_GUID"):
+            self.graphql_client.force_login(self.authenticatedUser)
+            self.graphql_client.post(self.mutation, variables)
 
-        result = graphql_sync(schema, { "query": self.mutation, "variables": variables }, context_value={ "request": request })
-
-        errors = result[1]["errors"]
-
-        self.assertEqual(errors[0]["message"], "INVALID_CONTAINER_GUID")
-
-    def test_move_folder_to_descendant_self(self):
-
-        variables = self.data
-
-        variables["input"]["guid"] = self.folder.guid
-        variables["input"]["containerGuid"] = self.folder.guid
-
-        request = HttpRequest()
-        request.user = self.authenticatedUser
-
-        result = graphql_sync(schema, { "query": self.mutation, "variables": variables }, context_value={ "request": request })
-
-        errors = result[1]["errors"]
-
-        self.assertEqual(errors[0]["message"], "INVALID_CONTAINER_GUID")
-
-    def test_move_folder_to_descendant_self(self):
-
+    def test_move_folder_to_descendant_folder(self):
         variables = self.data
 
         variables["input"]["guid"] = self.folder_root.guid
         variables["input"]["containerGuid"] = self.folder.guid
 
-        request = HttpRequest()
-        request.user = self.authenticatedUser
-
-        result = graphql_sync(schema, { "query": self.mutation, "variables": variables }, context_value={ "request": request })
-
-        errors = result[1]["errors"]
-
-        self.assertEqual(errors[0]["message"], "INVALID_CONTAINER_GUID")
-
+        with self.assertGraphQlError("INVALID_CONTAINER_GUID"):
+            self.graphql_client.force_login(self.authenticatedUser)
+            self.graphql_client.post(self.mutation, variables)

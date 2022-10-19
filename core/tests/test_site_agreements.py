@@ -1,18 +1,11 @@
-from django.db import connection
-from django_tenants.test.client import TenantClient
-from django_tenants.test.cases import FastTenantTestCase
-from tenants.models import Agreement, AgreementAccept, AgreementVersion
+from core.tests.helpers import PleioTenantTestCase
+from tenants.models import Agreement, AgreementVersion
 from user.models import User
 
-from backend2.schema import schema
-from ariadne import graphql_sync
-from core.tasks import save_db_disk_usage,save_file_disk_usage
-from django.http import HttpRequest
 from mixer.backend.django import mixer
-from django.core.files.uploadedfile import SimpleUploadedFile
 
 
-class SiteAgreementsTestCase(FastTenantTestCase):
+class SiteAgreementsTestCase(PleioTenantTestCase):
 
     def setUp(self):
         super().setUp()
@@ -59,35 +52,16 @@ class SiteAgreementsTestCase(FastTenantTestCase):
             }
         """
 
-    def tearDown(self):
-        pass
-
     def test_by_user(self):
-        request = HttpRequest()
-        request.user = self.user
-
-        variables = {
-        }
-
-        result = graphql_sync(schema, {"query": self.query, "variables": variables}, context_value={ "request": request })
-
-        errors = result[1]["errors"]
-
-        self.assertEqual(errors[0]["message"], "user_not_site_admin")
+        with self.assertGraphQlError("user_not_site_admin"):
+            self.graphql_client.force_login(self.user)
+            self.graphql_client.post(self.query, {})
 
     def test_by_admin(self):
+        self.graphql_client.force_login(self.admin)
+        result = self.graphql_client.post(self.query, {})
 
-        request = HttpRequest()
-        request.user = self.admin
-
-        variables = {
-        }
-
-        result = graphql_sync(schema, {"query": self.query, "variables": variables}, context_value={ "request": request })
-
-        self.assertTrue(result[0])
-        data = result[1]["data"]
-
+        data = result["data"]
         self.assertEqual(len(data["siteAgreements"]), 1)
         self.assertEqual(data["siteAgreements"][0]["name"], "Agreement")
         self.assertEqual(data["siteAgreements"][0]["description"], "Agreement description")
@@ -100,10 +74,6 @@ class SiteAgreementsTestCase(FastTenantTestCase):
         self.assertEqual(data["siteAgreements"][0]["versions"][1]["document"], "/agreement/agreement-1-0")
 
     def test_fail_accept_by_admin(self):
-
-        request = HttpRequest()
-        request.user = self.admin
-
         variables = {
             "input": {
                 "id": str(self.version1.id),
@@ -111,19 +81,11 @@ class SiteAgreementsTestCase(FastTenantTestCase):
             }
         }
 
-        result = graphql_sync(schema, {"query": self.mutation, "variables": variables}, context_value={ "request": request })
-
-        self.assertTrue(result[0])
-        errors = result[1]["errors"]
-
-        self.assertEqual(errors[0]["message"], "not_accepted")
-
+        with self.assertGraphQlError("not_accepted"):
+            self.graphql_client.force_login(self.admin)
+            self.graphql_client.post(self.mutation, variables)
 
     def test_accept_by_admin(self):
-
-        request = HttpRequest()
-        request.user = self.admin
-
         variables = {
             "input": {
                 "id": str(self.version1.id),
@@ -131,22 +93,16 @@ class SiteAgreementsTestCase(FastTenantTestCase):
             }
         }
 
-        result = graphql_sync(schema, {"query": self.mutation, "variables": variables}, context_value={ "request": request })
+        self.graphql_client.force_login(self.admin)
+        result = self.graphql_client.post(self.mutation, variables)
 
-        self.assertTrue(result[0])
-        data = result[1]["data"]
-
+        data = result["data"]
         self.assertEqual(data["signSiteAgreementVersion"]["siteAgreementVersion"]["version"], "1.0")
         self.assertEqual(data["signSiteAgreementVersion"]["siteAgreementVersion"]["accepted"], True)
 
-        variables = {
-        }
+        result = self.graphql_client.post(self.query, {})
 
-        result = graphql_sync(schema, {"query": self.query, "variables": variables}, context_value={ "request": request })
-
-        self.assertTrue(result[0])
-        data = result[1]["data"]
-
+        data = result["data"]
         self.assertEqual(len(data["siteAgreements"]), 1)
         self.assertEqual(data["siteAgreements"][0]["name"], "Agreement")
         self.assertEqual(data["siteAgreements"][0]["description"], "Agreement description")
@@ -162,23 +118,15 @@ class SiteAgreementsTestCase(FastTenantTestCase):
                 "accept": True
             }
         }
+        result = self.graphql_client.post(self.mutation, variables)
 
-        result = graphql_sync(schema, {"query": self.mutation, "variables": variables}, context_value={ "request": request })
-
-        self.assertTrue(result[0])
-        data = result[1]["data"]
-
+        data = result["data"]
         self.assertEqual(data["signSiteAgreementVersion"]["siteAgreementVersion"]["version"], "1.1")
         self.assertEqual(data["signSiteAgreementVersion"]["siteAgreementVersion"]["accepted"], True)
 
-        variables = {
-        }
+        result = self.graphql_client.post(self.query, {})
 
-        result = graphql_sync(schema, {"query": self.query, "variables": variables}, context_value={ "request": request })
-
-        self.assertTrue(result[0])
-        data = result[1]["data"]
-
+        data = result["data"]
         self.assertEqual(len(data["siteAgreements"]), 1)
         self.assertEqual(data["siteAgreements"][0]["name"], "Agreement")
         self.assertEqual(data["siteAgreements"][0]["description"], "Agreement description")

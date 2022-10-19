@@ -1,21 +1,18 @@
-from ariadne import graphql_sync
 from django.contrib.auth.models import AnonymousUser
-from django.http import HttpRequest
 from django_tenants.test.cases import FastTenantTestCase
 from mixer.backend.django import mixer
-from time import sleep
 
-from backend2.schema import schema
 from core.constances import USER_ROLES
 from core.models import Entity
 from core.models.tags import Tag, TagSynonym, EntityTag
+from core.tests.helpers import PleioTenantTestCase
 from user.models import User
 
 
 class TestTagsTestCase(FastTenantTestCase):
 
     def setUp(self):
-        super(TestTagsTestCase, self).setUp()
+        super().setUp()
 
         self.owner = mixer.blend(User)
         self.entity = Entity.objects.create(owner=self.owner, is_archived=False)
@@ -89,32 +86,9 @@ class TestTagsTestCase(FastTenantTestCase):
         self.assertEqual(self.entity.tags, ['Tag2.1'])
 
 
-class TestTagAdministrationTestCase(FastTenantTestCase):
-
-    def assertGraphQlErrorMessage(self, errors, expected_message, msg=None):
-        if not errors:
-            self.fail("Expected %s error message. Got none." % expected_message)
-        messages = [e['message'] for e in errors]
-        self.assertIn(expected_message, messages, msg=msg or messages)
-
-    def assertGraphQlNoErrors(self, errors, msg=None):
-        if errors:
-            self.fail(msg or [e['message'] for e in errors])
-
-    def graphql_sync(self, query, variables, user) -> dict:
-        request = HttpRequest()
-        request.user = user
-
-        success, result = graphql_sync(schema, {'query': query, 'variables': variables},
-                                       context_value={'request': request})
-
-        return result
-
-    def graphql_sync_error(self, query, variables, user):
-        result = self.graphql_sync(query, variables, user)
-        return result.get('errors')
-
-    def setUp(self) -> None:
+class TestTagAdministrationTestCase(PleioTenantTestCase):
+    def setUp(self):
+        super().setUp()
         self.owner = mixer.blend(User)
         self.admin = mixer.blend(User, roles=[USER_ROLES.ADMIN])
         self.entity = mixer.blend(Entity, owner=self.owner)
@@ -134,9 +108,8 @@ class TestTagAdministrationTestCase(FastTenantTestCase):
         }
         """
 
-        result = self.graphql_sync(query, None, self.owner)
-
-        self.assertGraphQlNoErrors(result.get('errors'))
+        self.graphql_client.force_login(self.owner)
+        result = self.graphql_client.post(query, {})
 
         data = result.get("data")
         labels = [tag['label'] for tag in data['tags']]
@@ -159,34 +132,37 @@ class TestTagAdministrationTestCase(FastTenantTestCase):
         }
         """
 
+        variables = {
+            'input': {
+                'tag': 'tag1',
+                'synonym': 'tag1.1',
+            }
+        }
+
         # authenticated users are not allowed to alter the tags:
         for message, account in [("Content eigenaar heeft onterecht toegang", self.owner),
                                  ("Anonieme bezoeker heeft onterecht toegang", AnonymousUser())]:
-            errors = self.graphql_sync_error(query, {
-                'input': {
-                    'tag': 'tag1',
-                    'synonym': 'tag1.1',
-                }
-            }, account)
-            self.assertIsNotNone(errors, msg=message)
-            self.assertGraphQlErrorMessage(errors, "Not allowed")
+            with self.assertGraphQlError("Not allowed", message):
+                self.graphql_client.force_login(account)
+                self.graphql_client.post(query, variables)
 
     def test_merge_tag_results_in_one_less_tag(self):
         query = """
-        mutation ($input: tagMergeInput!) {
-            mergeTags(input: $input) {
-                label
-                synonyms
+            mutation ($input: tagMergeInput!) {
+                mergeTags(input: $input) {
+                    label
+                    synonyms
+                }
             }
-        }
-        """
-        result = self.graphql_sync(query, {
+            """
+        variables = {
             'input': {
                 'tag': 'tag2',
                 'synonym': 'tag3',
             }
-        }, self.admin)
-        self.assertGraphQlNoErrors(result.get('errors'))
+        }
+        self.graphql_client.force_login(self.admin)
+        result = self.graphql_client.post(query, variables)
 
         data = result.get('data')
         labelSynonym = {record['label']: record['synonyms'] for record in data['mergeTags']}
@@ -202,20 +178,21 @@ class TestTagAdministrationTestCase(FastTenantTestCase):
 
     def test_merge_tags_preserves_all_synonyms(self):
         query = """
-        mutation ($input: tagMergeInput!) {
-            mergeTags(input: $input) {
-                label
-                synonyms
+            mutation ($input: tagMergeInput!) {
+                mergeTags(input: $input) {
+                    label
+                    synonyms
+                }
             }
-        }
-        """
-        result = self.graphql_sync(query, {
+            """
+        variables = {
             'input': {
                 'tag': 'tag one',
                 'synonym': 'tag1',
             }
-        }, self.admin)
-        self.assertGraphQlNoErrors(result.get('errors'))
+        }
+        self.graphql_client.force_login(self.admin)
+        result = self.graphql_client.post(query, variables)
 
         data = result.get('data')
         labelSynonym = {record['label']: record['synonyms'] for record in data['mergeTags']}
@@ -226,41 +203,44 @@ class TestTagAdministrationTestCase(FastTenantTestCase):
 
     def test_extract_synonym_restricted_access(self):
         query = """
-        mutation ($input: tagMergeInput!) {
-            extractTagSynonym(input: $input) {
-              __typename
+            mutation ($input: tagMergeInput!) {
+                extractTagSynonym(input: $input) {
+                  __typename
+                }
             }
-        }
-        """
-        errors = self.graphql_sync_error(query, {
+            """
+        variables = {
             'input': {
                 'tag': 'tag1',
                 'synonym': 'tag1.1',
             }
-        }, self.owner)
-        self.assertIsNotNone(errors, msg="Gebruiker heeft onterecht toegang.")
-        self.assertGraphQlErrorMessage(errors, "Not allowed")
+        }
+
+        with self.assertGraphQlError("Not allowed", msg="Gebruiker heeft onterecht toegang"):
+            self.graphql_client.force_login(self.owner)
+            self.graphql_client.post(query, variables)
 
     def test_extract_synonym_results_in_one_extra_tag(self):
         # Start with 4.
         self.assertEqual(4, Tag.objects.count())
 
         query = """
-        mutation ($input: tagMergeInput!) {
-            extractTagSynonym(input: $input) {
-                label
-                synonyms
-                __typename
+            mutation ($input: tagMergeInput!) {
+                extractTagSynonym(input: $input) {
+                    label
+                    synonyms
+                    __typename
+                }
             }
-        }
         """
-        result = self.graphql_sync(query, {
+        variables = {
             'input': {
                 'tag': 'tag1',
                 'synonym': 'tag1.1',
             }
-        }, self.admin)
-        self.assertGraphQlNoErrors(result.get('errors'))
+        }
+        self.graphql_client.force_login(self.admin)
+        result = self.graphql_client.post(query, variables)
 
         data = result.get('data')
         self.assertEqual(len(data['extractTagSynonym']), 5)
@@ -277,21 +257,22 @@ class TestTagAdministrationTestCase(FastTenantTestCase):
         self.assertEqual(other_entity.tags, ['Tag one', 'Tag two'])
 
         query = """
-        mutation ($input: tagMergeInput!) {
-            extractTagSynonym(input: $input) {
-                label
-                synonyms
-                __typename
+            mutation ($input: tagMergeInput!) {
+                extractTagSynonym(input: $input) {
+                    label
+                    synonyms
+                    __typename
+                }
             }
-        }
-        """
-        result = self.graphql_sync(query, {
+            """
+        variables = {
             'input': {
                 'tag': 'tag2',
                 'synonym': 'tag two',
             }
-        }, self.admin)
-        self.assertGraphQlNoErrors(result.get('errors'))
+        }
+        self.graphql_client.force_login(self.admin)
+        self.graphql_client.post(query, variables)
 
         other_entity.refresh_from_db()
         self.assertNotIn("tag2", other_entity._tag_summary)

@@ -1,33 +1,23 @@
-from django.conf import settings
-from django.db import connection
-from django_tenants.test.cases import FastTenantTestCase
-from backend2.schema import schema
-from ariadne import graphql_sync
-import json
-from django.contrib.auth.models import AnonymousUser
-from django.http import HttpRequest
-from core.models import Group
+from core.tests.helpers import PleioTenantTestCase
 from user.models import User
 from mixer.backend.django import mixer
-from graphql import GraphQLError
-from unittest import mock
 
 
-class EditEmailOverviewTestCase(FastTenantTestCase):
+class EditEmailOverviewTestCase(PleioTenantTestCase):
 
     def setUp(self):
-        self.anonymousUser = AnonymousUser()
+        super().setUp()
         self.user1 = mixer.blend(User)
         self.user2 = mixer.blend(User)
         self.admin = mixer.blend(User)
         self.admin.roles = ['ADMIN']
         self.admin.save()
 
-
     def tearDown(self):
         self.admin.delete()
         self.user2.delete()
         self.user1.delete()
+        super().tearDown()
 
     def test_edit_email_overview_by_owner(self):
         mutation = """
@@ -46,23 +36,18 @@ class EditEmailOverviewTestCase(FastTenantTestCase):
         """
 
         variables = {
-            "input":  {
+            "input": {
                 "guid": self.user1.guid,
                 "frequency": "monthly"
-                }
             }
+        }
 
-        request = HttpRequest()
-        request.user = self.user1
+        self.graphql_client.force_login(self.user1)
+        result = self.graphql_client.post(mutation, variables)
 
-        result = graphql_sync(schema, {"query": mutation, "variables": variables}, context_value={ "request": request })
-
-        self.assertTrue(result[0])
-        data = result[1]["data"]
-
+        data = result["data"]
         self.assertEqual(data["editEmailOverview"]["user"]["guid"], self.user1.guid)
         self.assertEqual(data["editEmailOverview"]["user"]["emailOverview"]["frequency"], "monthly")
-
 
     def test_edit_email_overview_by_admin(self):
         mutation = """
@@ -81,20 +66,16 @@ class EditEmailOverviewTestCase(FastTenantTestCase):
         """
 
         variables = {
-            "input":  {
+            "input": {
                 "guid": self.user1.guid,
                 "frequency": "monthly"
-                }
             }
+        }
 
-        request = HttpRequest()
-        request.user = self.admin
+        self.graphql_client.force_login(self.admin)
+        result = self.graphql_client.post(mutation, variables)
 
-        result = graphql_sync(schema, {"query": mutation, "variables": variables}, context_value={ "request": request })
-
-        self.assertTrue(result[0])
-        data = result[1]["data"]
-
+        data = result["data"]
         self.assertEqual(data["editEmailOverview"]["user"]["guid"], self.user1.guid)
         self.assertEqual(data["editEmailOverview"]["user"]["emailOverview"]["frequency"], "monthly")
 
@@ -113,24 +94,16 @@ class EditEmailOverviewTestCase(FastTenantTestCase):
                 }
             }
         """
-
         variables = {
-            "input":  {
+            "input": {
                 "guid": self.user1.guid,
                 "frequency": "monthly"
-                }
             }
+        }
 
-        request = HttpRequest()
-        request.user = self.user2
-
-        result = graphql_sync(schema, {"query": mutation, "variables": variables}, context_value={ "request": request })
-
-        self.assertTrue(result[0])
-
-        errors = result[1]["errors"]
-
-        self.assertEqual(errors[0]["message"], "could_not_save")
+        with self.assertGraphQlError("could_not_save"):
+            self.graphql_client.force_login(self.user2)
+            self.graphql_client.post(mutation, variables)
 
     def test_edit_email_overview_by_anonymous(self):
         mutation = """
@@ -149,23 +122,14 @@ class EditEmailOverviewTestCase(FastTenantTestCase):
         """
 
         variables = {
-            "input":  {
+            "input": {
                 "guid": self.user1.guid,
                 "frequency": "monthly"
-                }
             }
+        }
 
-        request = HttpRequest()
-        request.user = self.anonymousUser
-
-        result = graphql_sync(schema, {"query": mutation, "variables": variables}, context_value={ "request": request })
-
-        self.assertTrue(result[0])
-
-        errors = result[1]["errors"]
-
-        self.assertEqual(errors[0]["message"], "not_logged_in")
-
+        with self.assertGraphQlError("not_logged_in"):
+            self.graphql_client.post(mutation, variables)
 
     def test_edit_email_overview_by_owner_add_tag(self):
         mutation = """
@@ -185,19 +149,15 @@ class EditEmailOverviewTestCase(FastTenantTestCase):
         """
 
         variables = {
-            "input":  {
+            "input": {
                 "guid": self.user1.guid,
                 "tags": ['tag_one']
-                }
             }
+        }
 
-        request = HttpRequest()
-        request.user = self.user1
+        self.graphql_client.force_login(self.user1)
+        result = self.graphql_client.post(mutation, variables)
 
-        result = graphql_sync(schema, {"query": mutation, "variables": variables}, context_value={ "request": request })
-
-        self.assertTrue(result[0])
-        data = result[1]["data"]
-
+        data = result["data"]
         self.assertEqual(data["editEmailOverview"]["user"]["guid"], self.user1.guid)
         self.assertEqual(data["editEmailOverview"]["user"]["emailOverview"]["tags"][0], 'tag_one')

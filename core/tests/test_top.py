@@ -1,22 +1,14 @@
-from django.db import connection
-from django_tenants.test.cases import FastTenantTestCase
-from backend2.schema import schema
-from ariadne import graphql_sync
-import json
-from django.contrib.auth.models import AnonymousUser
-from django.http import HttpRequest
-from core.models import Group
+from core.tests.helpers import PleioTenantTestCase
 from user.models import User
 from blog.models import Blog
 from mixer.backend.django import mixer
 from core.constances import ACCESS_TYPE
-from core.lib import get_acl, access_id_to_acl
-from django.utils.text import slugify
 
-class TopTestCase(FastTenantTestCase):
+
+class TopTestCase(PleioTenantTestCase):
 
     def setUp(self):
-        self.anonymousUser = AnonymousUser()
+        super().setUp()
         self.user1 = mixer.blend(User)
         self.user2 = mixer.blend(User)
         self.user3 = mixer.blend(User)
@@ -81,7 +73,6 @@ class TopTestCase(FastTenantTestCase):
         self.blog6.add_vote(user=self.user2, score=1)
         self.blog3.delete()
 
-
     def tearDown(self):
         self.blog1.delete()
         self.blog2.delete()
@@ -91,9 +82,9 @@ class TopTestCase(FastTenantTestCase):
         self.user1.delete()
         self.user2.delete()
         self.user3.delete()
+        super().tearDown()
 
     def test_top(self):
-
         query = """
             query Top {
                 top {
@@ -111,22 +102,13 @@ class TopTestCase(FastTenantTestCase):
             }
         """
 
-        request = HttpRequest()
-        request.user = self.user2
+        self.graphql_client.force_login(self.user2)
+        result = self.graphql_client.post(query, {})
 
-        variables = {}
-
-        result = graphql_sync(schema, {"query": query , "variables": variables}, context_value={ "request": request })
-
-        self.assertTrue(result[0])
-
-        data = result[1]["data"]
-
+        data = result["data"]
+        # votes > entities, gebruikers met meeste votes
         self.assertEqual(len(data["top"]), 2)
         self.assertEqual(data["top"][0]["user"]["guid"], self.user1.guid)
         self.assertEqual(data["top"][0]["likes"], 5)
         self.assertEqual(data["top"][1]["user"]["guid"], self.user3.guid)
         self.assertEqual(data["top"][1]["likes"], 1)
-
-
-# votes > entities, gebruikers met meeste votes

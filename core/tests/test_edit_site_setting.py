@@ -1,22 +1,18 @@
 from django.db import connection
 from django.core.files import File
-from django_tenants.test.cases import FastTenantTestCase
-from backend2.schema import schema
 from django.conf import settings
-from ariadne import graphql_sync
 from django.core.cache import cache
-from django.contrib.auth.models import AnonymousUser
-from django.http import HttpRequest
 from core.models import Setting, ProfileField
+from core.tests.helpers import PleioTenantTestCase
 from user.models import User
 from mixer.backend.django import mixer
 from unittest.mock import patch, MagicMock
 
 
-class EditSiteSettingTestCase(FastTenantTestCase):
+class EditSiteSettingTestCase(PleioTenantTestCase):
 
     def setUp(self):
-        self.anonymousUser = AnonymousUser()
+        super().setUp()
         self.user = mixer.blend(User)
         self.admin = mixer.blend(User, roles=['ADMIN'])
         self.profileField1 = ProfileField.objects.create(key='text_key1', name='text_name', field_type='text_field')
@@ -34,6 +30,7 @@ class EditSiteSettingTestCase(FastTenantTestCase):
 
         Setting.objects.all().delete()
         cache.clear()
+        super().tearDown()
 
     def test_edit_site_setting_by_admin(self):
         mutation = """
@@ -244,8 +241,9 @@ class EditSiteSettingTestCase(FastTenantTestCase):
                 "initiativeImageAlt": "inimagealt1",
                 "initiativeLink": "https://link.nl",
 
-                "directLinks": [{"title":"extern","link":"https://nos.nl"},{"title":"intern","link":"/news"},{"title":"intern lang","link":"https://nieuw-template.pleio-test.nl/news"}],
-                "footer": [{"link":"https://www.nieuw.nl","title":"Nieuwe link"},{"link":"https://wnas.nl","title":"wnas"}],
+                "directLinks": [{"title": "extern", "link": "https://nos.nl"}, {"title": "intern", "link": "/news"},
+                                {"title": "intern lang", "link": "https://nieuw-template.pleio-test.nl/news"}],
+                "footer": [{"link": "https://www.nieuw.nl", "title": "Nieuwe link"}, {"link": "https://wnas.nl", "title": "wnas"}],
 
                 "redirects": [{"source": "/path1", "destination": "/path2"},
                               {"source": "/path3", "destination": "/path4"},
@@ -331,13 +329,10 @@ class EditSiteSettingTestCase(FastTenantTestCase):
             }
         }
 
-        request = HttpRequest()
-        request.user = self.admin
-        result = graphql_sync(schema, { "query": mutation, "variables": variables }, context_value={ "request": request })
+        self.graphql_client.force_login(self.admin)
+        result = self.graphql_client.post(mutation, variables)
 
-        data = result[1]["data"]
-        self.assertNotIn("errors", result[1], f'Unexpected errors: {result[1].get("errors", [])}')
-
+        data = result["data"]
         self.assertEqual(data["editSiteSetting"]["siteSettings"]["language"], "en")
         self.assertEqual(data["editSiteSetting"]["siteSettings"]["extraLanguages"], ["nl"])
         self.assertEqual(data["editSiteSetting"]["siteSettings"]["name"], "name2")
@@ -346,7 +341,8 @@ class EditSiteSettingTestCase(FastTenantTestCase):
         self.assertEqual(data["editSiteSetting"]["siteSettings"]["allowRegistration"], False)
         self.assertEqual(data["editSiteSetting"]["siteSettings"]["directRegistrationDomains"], ['a.nl', 'b.nl'])
         self.assertEqual(data["editSiteSetting"]["siteSettings"]["defaultAccessId"], 0)
-        self.assertEqual(data["editSiteSetting"]["siteSettings"]["defaultAccessIdOptions"], [{'value': 0, 'label': 'Alleen eigenaar'}, {'value': 1, 'label': 'Ingelogde gebruikers'}])
+        self.assertEqual(data["editSiteSetting"]["siteSettings"]["defaultAccessIdOptions"],
+                         [{'value': 0, 'label': 'Alleen eigenaar'}, {'value': 1, 'label': 'Ingelogde gebruikers'}])
         self.assertEqual(data["editSiteSetting"]["siteSettings"]["googleAnalyticsId"], "123")
         self.assertEqual(data["editSiteSetting"]["siteSettings"]["googleSiteVerification"], "code1")
         self.assertEqual(data["editSiteSetting"]["siteSettings"]["searchEngineIndexingEnabled"], True)
@@ -390,11 +386,14 @@ class EditSiteSettingTestCase(FastTenantTestCase):
         self.assertEqual(data["editSiteSetting"]["siteSettings"]["initiativeImage"], "https://test2.nl")
         self.assertEqual(data["editSiteSetting"]["siteSettings"]["initiativeImageAlt"], "inimagealt1")
         self.assertEqual(data["editSiteSetting"]["siteSettings"]["initiativeLink"], "https://link.nl")
-        self.assertEqual(data["editSiteSetting"]["siteSettings"]["directLinks"], [{"title":"extern","link":"https://nos.nl"},{"title":"intern","link":"/news"},{"title":"intern lang","link":"https://nieuw-template.pleio-test.nl/news"}])
-        self.assertEqual(data["editSiteSetting"]["siteSettings"]["footer"], [{"title":"Nieuwe link","link":"https://www.nieuw.nl"},{"title":"wnas","link":"https://wnas.nl"}])
+        self.assertEqual(data["editSiteSetting"]["siteSettings"]["directLinks"],
+                         [{"title": "extern", "link": "https://nos.nl"}, {"title": "intern", "link": "/news"},
+                          {"title": "intern lang", "link": "https://nieuw-template.pleio-test.nl/news"}])
+        self.assertEqual(data["editSiteSetting"]["siteSettings"]["footer"],
+                         [{"title": "Nieuwe link", "link": "https://www.nieuw.nl"}, {"title": "wnas", "link": "https://wnas.nl"}])
         self.assertEqual(data["editSiteSetting"]["siteSettings"]["redirects"], [{"source": "/path1", "destination": "/path2"},
-                          {"source": "/path3", "destination": "/path4"},
-                          {"source": "/path5", "destination": "/path6"}])
+                                                                                {"source": "/path3", "destination": "/path4"},
+                                                                                {"source": "/path5", "destination": "/path6"}])
 
         self.assertEqual(data["editSiteSetting"]["siteSettings"]["profile"],
                          [{"isFilter": False, "isInOverview": False, "key": "key1", "name": "name1", "isOnVcard": True},
@@ -402,12 +401,13 @@ class EditSiteSettingTestCase(FastTenantTestCase):
                            "isOnVcard": False},
                           {"isFilter": True, "isInOverview": True, "key": "key3", "name": "name3", "isOnVcard": False}])
 
-        self.assertEqual(data["editSiteSetting"]["siteSettings"]["profileSections"], [{"name": "section_one", "profileFieldGuids": [str(self.profileField1.id), str(self.profileField3.id)]},
-            {"name": "section_two", "profileFieldGuids": [str(self.profileField4.id)]},
-            {"name": "section_three", "profileFieldGuids": []}])
+        self.assertEqual(data["editSiteSetting"]["siteSettings"]["profileSections"],
+                         [{"name": "section_one", "profileFieldGuids": [str(self.profileField1.id), str(self.profileField3.id)]},
+                          {"name": "section_two", "profileFieldGuids": [str(self.profileField4.id)]},
+                          {"name": "section_three", "profileFieldGuids": []}])
 
         self.assertEqual(data["editSiteSetting"]["siteSettings"]["tagCategories"], [{"name": "cat1", "values": ["tag1", "tag2"]},
-                          {"name": "cat2", "values": ["tag3", "tag4"]}])
+                                                                                    {"name": "cat2", "values": ["tag3", "tag4"]}])
         self.assertEqual(data["editSiteSetting"]["siteSettings"]["showTagsInFeed"], True)
         self.assertEqual(data["editSiteSetting"]["siteSettings"]["showTagsInDetail"], True)
 
@@ -433,7 +433,6 @@ class EditSiteSettingTestCase(FastTenantTestCase):
         self.assertEqual(data["editSiteSetting"]["siteSettings"]["subgroups"], True)
         self.assertEqual(data["editSiteSetting"]["siteSettings"]["groupMemberExport"], True)
         self.assertEqual(data["editSiteSetting"]["siteSettings"]["showSuggestedItems"], True)
-
 
         self.assertEqual(data["editSiteSetting"]["siteSettings"]["onboardingEnabled"], True)
         self.assertEqual(data["editSiteSetting"]["siteSettings"]["onboardingForceExistingUsers"], True)
@@ -469,7 +468,7 @@ class EditSiteSettingTestCase(FastTenantTestCase):
         self.assertEqual(data["editSiteSetting"]["siteSettings"]["kalturaVideoEnabled"], True)
         self.assertEqual(data["editSiteSetting"]["siteSettings"]["kalturaVideoPartnerId"], "123")
         self.assertEqual(data["editSiteSetting"]["siteSettings"]["kalturaVideoPlayerId"], "456")
-        
+
         self.assertEqual(data["editSiteSetting"]["siteSettings"]["pdfCheckerEnabled"], False)
 
         self.assertEqual(data["editSiteSetting"]["siteSettings"]["maxCharactersInAbstract"], 500)
@@ -504,12 +503,10 @@ class EditSiteSettingTestCase(FastTenantTestCase):
             }
         }
 
-        request = HttpRequest()
-        request.user = self.admin
-        result = graphql_sync(schema, {"query": mutation, "variables": variables}, context_value={"request": request})
+        self.graphql_client.force_login(self.admin)
+        result = self.graphql_client.post(mutation, variables)
 
-        data = result[1]["data"]
-
+        data = result["data"]
         self.assertIsNotNone(data["editSiteSetting"]["siteSettings"]["logo"])
         self.assertIsNotNone(data["editSiteSetting"]["siteSettings"]["icon"])
 
@@ -530,15 +527,8 @@ class EditSiteSettingTestCase(FastTenantTestCase):
             }
         }
 
-        request = HttpRequest()
-        request.user = self.anonymousUser
-        result = graphql_sync(schema, {"query": mutation, "variables": variables}, context_value={"request": request})
-
-        self.assertTrue(result[0])
-
-        errors = result[1]["errors"]
-
-        self.assertEqual(errors[0]["message"], "not_logged_in")
+        with self.assertGraphQlError("not_logged_in"):
+            self.graphql_client.post(mutation, variables)
 
     def test_edit_site_setting_by_user(self):
         mutation = """
@@ -557,15 +547,9 @@ class EditSiteSettingTestCase(FastTenantTestCase):
             }
         }
 
-        request = HttpRequest()
-        request.user = self.user
-        result = graphql_sync(schema, {"query": mutation, "variables": variables}, context_value={"request": request})
-
-        self.assertTrue(result[0])
-
-        errors = result[1]["errors"]
-
-        self.assertEqual(errors[0]["message"], "user_not_site_admin")
+        with self.assertGraphQlError("user_not_site_admin"):
+            self.graphql_client.force_login(self.user)
+            self.graphql_client.post(mutation, variables)
 
     def test_edit_site_setting_invalid_domain(self):
         mutation = """
@@ -584,15 +568,9 @@ class EditSiteSettingTestCase(FastTenantTestCase):
             }
         }
 
-        request = HttpRequest()
-        request.user = self.admin
-        result = graphql_sync(schema, {"query": mutation, "variables": variables}, context_value={"request": request})
-
-        self.assertTrue(result[0])
-
-        errors = result[1]["errors"]
-
-        self.assertEqual(errors[0]["message"], "invalid_value")
+        with self.assertGraphQlError("invalid_value"):
+            self.graphql_client.force_login(self.admin)
+            self.graphql_client.post(mutation, variables)
 
     @patch('core.resolvers.mutation_edit_site_setting.schedule_site_access_changed_mail')
     def test_edit_site_setting_is_closed_default_access(self, mocked_mail):
@@ -614,15 +592,12 @@ class EditSiteSettingTestCase(FastTenantTestCase):
             }
         }
 
-        request = HttpRequest()
-        request.user = self.admin
-        result = graphql_sync(schema, {"query": mutation, "variables": variables}, context_value={"request": request})
+        self.graphql_client.force_login(self.admin)
+        result = self.graphql_client.post(mutation, variables)
 
-        data = result[1]["data"]
-
+        data = result["data"]
         self.assertEqual(data["editSiteSetting"]["siteSettings"]["isClosed"], False)
         self.assertEqual(data["editSiteSetting"]["siteSettings"]["defaultAccessId"], 2)
-
         self.assertEqual(mocked_mail.call_count, 1)
 
         variables = {
@@ -630,16 +605,11 @@ class EditSiteSettingTestCase(FastTenantTestCase):
                 "isClosed": True
             }
         }
+        result = self.graphql_client.post(mutation, variables)
 
-        request = HttpRequest()
-        request.user = self.admin
-        result = graphql_sync(schema, {"query": mutation, "variables": variables}, context_value={"request": request})
-
-        data = result[1]["data"]
-
+        data = result["data"]
         self.assertEqual(data["editSiteSetting"]["siteSettings"]["isClosed"], True)
         self.assertEqual(data["editSiteSetting"]["siteSettings"]["defaultAccessId"], 1)
-
         self.assertEqual(mocked_mail.call_count, 2)
 
     def test_edit_site_setting_wrong_whitelisted_ip_range(self):
@@ -659,15 +629,9 @@ class EditSiteSettingTestCase(FastTenantTestCase):
             }
         }
 
-        request = HttpRequest()
-        request.user = self.admin
-        result = graphql_sync(schema, {"query": mutation, "variables": variables}, context_value={"request": request})
-
-        self.assertTrue(result[0])
-
-        errors = result[1]["errors"]
-
-        self.assertEqual(errors[0]["message"], "invalid_value")
+        with self.assertGraphQlError("invalid_value"):
+            self.graphql_client.force_login(self.admin)
+            self.graphql_client.post(mutation, variables)
 
     def test_edit_site_setting_redirects_loop(self):
         mutation = """
@@ -691,15 +655,9 @@ class EditSiteSettingTestCase(FastTenantTestCase):
             }
         }
 
-        request = HttpRequest()
-        request.user = self.admin
-        result = graphql_sync(schema, {"query": mutation, "variables": variables}, context_value={"request": request})
-
-        self.assertTrue(result[0])
-
-        errors = result[1]["errors"]
-
-        self.assertEqual(errors[0]["message"], "redirects_has_loop")
+        with self.assertGraphQlError("redirects_has_loop"):
+            self.graphql_client.force_login(self.admin)
+            self.graphql_client.post(mutation, variables)
 
     def test_edit_site_setting_redirects_invalid_url(self):
         mutation = """
@@ -723,15 +681,9 @@ class EditSiteSettingTestCase(FastTenantTestCase):
             }
         }
 
-        request = HttpRequest()
-        request.user = self.admin
-        result = graphql_sync(schema, {"query": mutation, "variables": variables}, context_value={"request": request})
-
-        self.assertTrue(result[0])
-
-        errors = result[1]["errors"]
-
-        self.assertEqual(errors[0]["message"], "invalid_value")
+        with self.assertGraphQlError("invalid_value"):
+            self.graphql_client.force_login(self.admin)
+            self.graphql_client.post(mutation, variables)
 
     def test_edit_site_setting_walled_garden_by_ip(self):
         cache.set("%s%s" % (connection.schema_name, 'ENABLE_SEARCH_ENGINE_INDEXING'), True)
@@ -753,14 +705,10 @@ class EditSiteSettingTestCase(FastTenantTestCase):
             }
         }
 
-        request = HttpRequest()
-        request.user = self.admin
-        result = graphql_sync(schema, {"query": mutation, "variables": variables}, context_value={"request": request})
+        self.graphql_client.force_login(self.admin)
+        result = self.graphql_client.post(mutation, variables)
 
-        self.assertTrue(result[0])
-
-        data = result[1]["data"]
-
+        data = result["data"]
         self.assertEqual(data["editSiteSetting"]["siteSettings"]["walledGardenByIpEnabled"], True)
         self.assertEqual(data["editSiteSetting"]["siteSettings"]["searchEngineIndexingEnabled"], False)
 
@@ -781,15 +729,9 @@ class EditSiteSettingTestCase(FastTenantTestCase):
             }
         }
 
-        request = HttpRequest()
-        request.user = self.admin
-        result = graphql_sync(schema, {"query": mutation, "variables": variables}, context_value={"request": request})
-
-        self.assertTrue(result[0])
-
-        errors = result[1]["errors"]
-
-        self.assertEqual(errors[0]["message"], "invalid_value")
+        with self.assertGraphQlError("invalid_value"):
+            self.graphql_client.force_login(self.admin)
+            self.graphql_client.post(mutation, variables)
 
     def test_edit_site_setting_invalid_max_characters(self):
         mutation = """
@@ -808,12 +750,6 @@ class EditSiteSettingTestCase(FastTenantTestCase):
             }
         }
 
-        request = HttpRequest()
-        request.user = self.admin
-        result = graphql_sync(schema, {"query": mutation, "variables": variables}, context_value={"request": request})
-
-        self.assertTrue(result[0])
-
-        errors = result[1]["errors"]
-
-        self.assertEqual(errors[0]["message"], "invalid_value")
+        with self.assertGraphQlError("invalid_value"):
+            self.graphql_client.force_login(self.admin)
+            self.graphql_client.post(mutation, variables)

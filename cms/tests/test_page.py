@@ -1,23 +1,15 @@
-from django.db import connection
-from django_tenants.test.cases import FastTenantTestCase
-from core.models import Group, GroupInvitation
+from core.tests.helpers import PleioTenantTestCase
 from user.models import User
-from file.models import FileFolder
 from core.constances import ACCESS_TYPE
-from backend2.schema import schema
 from django.utils.text import slugify
-from ariadne import graphql_sync
-import json
 from cms.models import Page
-from django.contrib.auth.models import AnonymousUser
-from django.http import HttpRequest
 from mixer.backend.django import mixer
 
 
-class PageTestCase(FastTenantTestCase):
+class PageTestCase(PleioTenantTestCase):
 
     def setUp(self):
-        self.anonymousUser = AnonymousUser()
+        super().setUp()
         self.user1 = mixer.blend(User)
         self.user2 = mixer.blend(User)
         self.page_parent = Page.objects.create(owner=self.user1,
@@ -51,6 +43,7 @@ class PageTestCase(FastTenantTestCase):
     def tearDown(self):
         self.page_parent.delete()
         self.user1.delete()
+        super().tearDown()
 
     def test_parent_page_by_anonymous(self):
         query = """
@@ -91,18 +84,13 @@ class PageTestCase(FastTenantTestCase):
                 }
             }
         """
-        request = HttpRequest()
-        request.user = self.anonymousUser
-
         variables = {
             "guid": self.page_parent.guid
         }
 
-        result = graphql_sync(schema, {"query": query, "variables": variables}, context_value={"request": request})
+        result = self.graphql_client.post(query, variables)
 
-        self.assertTrue(result[0])
-
-        data = result[1]["data"]
+        data = result["data"]
         self.assertEqual(data["entity"]["title"], "Test parent page")
         self.assertEqual(data["entity"]["richDescription"], "JSON to string")
         self.assertEqual(data["entity"]["tags"], [])
@@ -154,18 +142,14 @@ class PageTestCase(FastTenantTestCase):
                 }
             }
         """
-        request = HttpRequest()
-        request.user = self.user1
-
         variables = {
             "guid": self.page_child.guid
         }
 
-        result = graphql_sync(schema, {"query": query, "variables": variables}, context_value={"request": request})
+        self.graphql_client.force_login(self.user1)
+        result = self.graphql_client.post(query, variables)
 
-        self.assertTrue(result[0])
-
-        data = result[1]["data"]
+        data = result["data"]
         self.assertEqual(data["entity"]["title"], "Test child page")
         self.assertEqual(data["entity"]["richDescription"], "JSON to string")
         self.assertEqual(data["entity"]["tags"], [])

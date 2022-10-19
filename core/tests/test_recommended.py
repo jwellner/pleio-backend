@@ -1,20 +1,15 @@
-from django.db import connection
-from django_tenants.test.cases import FastTenantTestCase
-from core.models import Group
+from core.tests.helpers import PleioTenantTestCase
 from user.models import User
 from blog.models import Blog
 from news.models import News
 from core.constances import ACCESS_TYPE
-from backend2.schema import schema
-from ariadne import graphql_sync
-import json
-from django.contrib.auth.models import AnonymousUser
-from django.http import HttpRequest
 from mixer.backend.django import mixer
 
-class RecommendedTestCase(FastTenantTestCase):
+
+class RecommendedTestCase(PleioTenantTestCase):
 
     def setUp(self):
+        super().setUp()
         self.user1 = mixer.blend(User)
         self.user2 = mixer.blend(User)
         self.blog1 = Blog.objects.create(
@@ -75,18 +70,16 @@ class RecommendedTestCase(FastTenantTestCase):
         self.news1.delete()
         self.user2.delete()
         self.user1.delete()
+        super().tearDown()
 
     def test_recommended(self):
-        request = HttpRequest()
-        request.user = self.user1
-
         variables = {
             "limit": 1
         }
-        result = graphql_sync(schema, { "query": self.query, "variables": variables }, context_value={ "request": request })
 
-        self.assertTrue(result[0])
+        self.graphql_client.force_login(self.user1)
+        result = self.graphql_client.post(self.query, variables)
 
-        data = result[1]["data"]
+        data = result["data"]
         self.assertEqual(data["recommended"]["total"], 2)
         self.assertEqual(data["recommended"]["edges"][0]["guid"], self.blog3.guid)

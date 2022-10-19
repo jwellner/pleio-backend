@@ -1,21 +1,14 @@
-from django.db import connection
-from django_tenants.test.cases import FastTenantTestCase
-from backend2.schema import schema
-from ariadne import graphql_sync
-import json
-from core.lib import is_valid_json
-from django.contrib.auth.models import AnonymousUser
-from django.http import HttpRequest
-from core.models import Group, ProfileFieldValidator, Setting
+from core.models import ProfileFieldValidator
+from core.tests.helpers import PleioTenantTestCase
 from user.models import User
 from mixer.backend.django import mixer
-from graphql import GraphQLError
 from django.core.files.uploadedfile import SimpleUploadedFile
 
-class EditSiteSettingProfileFieldValidatorTestCase(FastTenantTestCase):
+
+class EditSiteSettingProfileFieldValidatorTestCase(PleioTenantTestCase):
 
     def setUp(self):
-        self.anonymousUser = AnonymousUser()
+        super().setUp()
         self.user = mixer.blend(User)
         self.admin = mixer.blend(User, roles=['ADMIN'])
         self.profileFieldValidator1 = ProfileFieldValidator.objects.create(
@@ -28,9 +21,9 @@ class EditSiteSettingProfileFieldValidatorTestCase(FastTenantTestCase):
         self.admin.delete()
         self.profileFieldValidator1.delete()
         self.user.delete()
+        super().tearDown()
 
     def test_edit_site_setting_profile_field_by_anonymous(self):
-
         mutation = """
             mutation editSiteSettingProfileFieldValidator($input: editSiteSettingProfileFieldValidatorInput!) {
                 editSiteSettingProfileFieldValidator(input: $input) {
@@ -46,18 +39,10 @@ class EditSiteSettingProfileFieldValidatorTestCase(FastTenantTestCase):
             }
         }
 
-        request = HttpRequest()
-        request.user = self.anonymousUser
-
-        result = graphql_sync(schema, { "query": mutation, "variables": variables }, context_value={ "request": request })
-
-        errors = result[1]["errors"]
-
-        self.assertEqual(errors[0]["message"], "not_logged_in")
-
+        with self.assertGraphQlError("not_logged_in"):
+            self.graphql_client.post(mutation, variables)
 
     def test_edit_profile_field_by_user(self):
-
         mutation = """
             mutation editSiteSettingProfileFieldValidator($input: editSiteSettingProfileFieldValidatorInput!) {
                 editSiteSettingProfileFieldValidator(input: $input) {
@@ -73,18 +58,11 @@ class EditSiteSettingProfileFieldValidatorTestCase(FastTenantTestCase):
             }
         }
 
-        request = HttpRequest()
-        request.user = self.user
-
-        result = graphql_sync(schema, { "query": mutation, "variables": variables }, context_value={ "request": request })
-
-        errors = result[1]["errors"]
-
-        self.assertEqual(errors[0]["message"], "user_not_site_admin")
-
+        with self.assertGraphQlError("user_not_site_admin"):
+            self.graphql_client.force_login(self.user)
+            self.graphql_client.post(mutation, variables)
 
     def test_edit_profile_field_by_admin(self):
-
         mutation = """
             mutation editSiteSettingProfileFieldValidator($input: editSiteSettingProfileFieldValidatorInput!) {
                 editSiteSettingProfileFieldValidator(input: $input) {
@@ -116,13 +94,10 @@ class EditSiteSettingProfileFieldValidatorTestCase(FastTenantTestCase):
             }
         }
 
-        request = HttpRequest()
-        request.user = self.admin
+        self.graphql_client.force_login(self.admin)
+        result = self.graphql_client.post(mutation, variables)
 
-        result = graphql_sync(schema, { "query": mutation, "variables": variables }, context_value={ "request": request })
-
-        data = result[1]["data"]
-
+        data = result["data"]
         self.assertEqual(data["editSiteSettingProfileFieldValidator"]["profileFieldValidator"]["type"], "inList")
         self.assertEqual(data["editSiteSettingProfileFieldValidator"]["profileFieldValidator"]["name"], "Nieuwe naam")
         self.assertEqual(data["editSiteSettingProfileFieldValidator"]["profileFieldValidator"]["validationList"], ["raap", "bep", "maas"])

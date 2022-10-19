@@ -1,20 +1,15 @@
 from django.db import connection
-from django_tenants.test.cases import FastTenantTestCase
-from backend2.schema import schema
-from ariadne import graphql_sync
-import json
-from django.contrib.auth.models import AnonymousUser
-from django.http import HttpRequest
-from user.models import User
+
+from core.tests.helpers import PleioTenantTestCase
 from mixer.backend.django import mixer
-from graphql import GraphQLError
 from user.models import User
 from django.core.cache import cache
 
-class EditUserNameTestCase(FastTenantTestCase):
+
+class EditUserNameTestCase(PleioTenantTestCase):
 
     def setUp(self):
-        self.anonymousUser = AnonymousUser()
+        super().setUp()
         self.user = mixer.blend(User)
         self.user_other = mixer.blend(User)
         self.admin = mixer.blend(User, roles=['ADMIN'])
@@ -24,9 +19,9 @@ class EditUserNameTestCase(FastTenantTestCase):
         self.user.delete()
         self.user_other.delete()
         self.admin.delete()
+        super().tearDown()
 
     def test_edit_user_name_by_admin(self):
-
         mutation = """
             mutation editUserName($input: editUserNameInput!) {
                 editUserName(input: $input) {
@@ -44,19 +39,14 @@ class EditUserNameTestCase(FastTenantTestCase):
             }
         }
 
-        request = HttpRequest()
-        request.user = self.admin
+        self.graphql_client.force_login(self.admin)
+        result = self.graphql_client.post(mutation, variables)
 
-        result = graphql_sync(schema, {"query": mutation, "variables": variables }, context_value={ "request": request })
-
-        data = result[1]["data"]
-
+        data = result["data"]
         self.assertEqual(data["editUserName"]["user"]["guid"], self.user.guid)
         self.assertEqual(data["editUserName"]["user"]["name"], "Jantje")
 
-
     def test_edit_user_name_by_anonymous(self):
-
         mutation = """
             mutation editUserName($input: editUserNameInput!) {
                 editUserName(input: $input) {
@@ -74,18 +64,10 @@ class EditUserNameTestCase(FastTenantTestCase):
             }
         }
 
-        request = HttpRequest()
-        request.user = self.anonymousUser
-
-        result = graphql_sync(schema, {"query": mutation, "variables": variables }, context_value={ "request": request })
-
-        errors = result[1]["errors"]
-
-        self.assertEqual(errors[0]["message"], "not_logged_in")
-
+        with self.assertGraphQlError("not_logged_in"):
+            self.graphql_client.post(mutation, variables)
 
     def test_edit_user_name_by_self(self):
-
         mutation = """
             mutation editUserName($input: editUserNameInput!) {
                 editUserName(input: $input) {
@@ -103,13 +85,10 @@ class EditUserNameTestCase(FastTenantTestCase):
             }
         }
 
-        request = HttpRequest()
-        request.user = self.user
+        self.graphql_client.force_login(self.user)
+        result = self.graphql_client.post(mutation, variables)
 
-        result = graphql_sync(schema, {"query": mutation, "variables": variables }, context_value={ "request": request })
-
-        data = result[1]["data"]
-
+        data = result["data"]
         self.assertEqual(data["editUserName"]["user"]["guid"], self.user.guid)
         self.assertEqual(data["editUserName"]["user"]["name"], "Jantje")
 
@@ -133,17 +112,11 @@ class EditUserNameTestCase(FastTenantTestCase):
             }
         }
 
-        request = HttpRequest()
-        request.user = self.user
-
-        result = graphql_sync(schema, {"query": mutation, "variables": variables }, context_value={ "request": request })
-
-        errors = result[1]["errors"]
-
-        self.assertEqual(errors[0]["message"], "could_not_save")
+        with self.assertGraphQlError("could_not_save"):
+            self.graphql_client.force_login(self.user)
+            self.graphql_client.post(mutation, variables)
 
     def test_edit_user_name_by_other_user(self):
-
         mutation = """
             mutation editUserName($input: editUserNameInput!) {
                 editUserName(input: $input) {
@@ -161,11 +134,6 @@ class EditUserNameTestCase(FastTenantTestCase):
             }
         }
 
-        request = HttpRequest()
-        request.user = self.user_other
-
-        result = graphql_sync(schema, {"query": mutation, "variables": variables }, context_value={ "request": request })
-
-        errors = result[1]["errors"]
-
-        self.assertEqual(errors[0]["message"], "could_not_save")
+        with self.assertGraphQlError("could_not_save"):
+            self.graphql_client.force_login(self.user_other)
+            self.graphql_client.post(mutation, variables)

@@ -1,39 +1,25 @@
-from django.db import connection
-from django_tenants.test.cases import FastTenantTestCase
-from backend2.schema import schema
-from ariadne import graphql_sync
-import json
-from django.contrib.auth.models import AnonymousUser
-from django.http import HttpRequest
-from core.models import Group
-from user.models import User
-from blog.models import Blog
-from mixer.backend.django import mixer
-from core.constances import ACCESS_TYPE
-from core.lib import get_acl, access_id_to_acl
-from django.utils.text import slugify
+from blog.factories import BlogFactory
+from core.tests.helpers import PleioTenantTestCase
+from user.factories import UserFactory
 
-class VoteTestCase(FastTenantTestCase):
+
+class VoteTestCase(PleioTenantTestCase):
 
     def setUp(self):
-        self.anonymousUser = AnonymousUser()
-        self.authenticatedUser = mixer.blend(User)
+        super().setUp()
+        self.authenticatedUser = UserFactory()
 
-        self.blog1 = Blog.objects.create(
-            title="Test1",
-            rich_description="",
-            read_access=[ACCESS_TYPE.public],
-            write_access=[ACCESS_TYPE.user.format(self.authenticatedUser.id)],
-            owner=self.authenticatedUser,
-            is_recommended=True
-        )
+        self.blog1 = BlogFactory(owner=self.authenticatedUser,
+                                 title="Test1",
+                                 rich_description="",
+                                 is_recommended=True)
 
     def tearDown(self):
         self.blog1.delete()
         self.authenticatedUser.delete()
-    
-    def test_bookmark(self):
+        super().tearDown()
 
+    def test_bookmark(self):
         query = """
             mutation ($input: voteInput!) {
                 vote(input: $input) {
@@ -44,9 +30,6 @@ class VoteTestCase(FastTenantTestCase):
             }
         """
 
-        request = HttpRequest()
-        request.user = self.authenticatedUser
-
         variables = {
             "input": {
                 "guid": self.blog1.guid,
@@ -54,12 +37,10 @@ class VoteTestCase(FastTenantTestCase):
             }
         }
 
-        result = graphql_sync(schema, { "query": query , "variables": variables}, context_value={ "request": request })
+        self.graphql_client.force_login(self.authenticatedUser)
+        result = self.graphql_client.post(query, variables)
 
-        self.assertTrue(result[0])
-
-        data = result[1]["data"]
-       
+        data = result["data"]
         self.assertEqual(data["vote"]["object"]["guid"], self.blog1.guid)
         self.assertEqual(self.blog1.vote_count(), 1)
 
@@ -71,12 +52,9 @@ class VoteTestCase(FastTenantTestCase):
             }
         }
 
-        result = graphql_sync(schema, { "query": query , "variables": variables}, context_value={ "request": request })
+        result = self.graphql_client.post(query, variables)
 
-        self.assertTrue(result[0])
-
-        data = result[1]["data"]
-       
+        data = result["data"]
         self.assertEqual(data["vote"]["object"]["guid"], self.blog1.guid)
         self.assertEqual(self.blog1.vote_count(), 0)
 
@@ -88,11 +66,8 @@ class VoteTestCase(FastTenantTestCase):
             }
         }
 
-        result = graphql_sync(schema, { "query": query , "variables": variables}, context_value={ "request": request })
+        result = self.graphql_client.post(query, variables)
 
-        self.assertTrue(result[0])
-
-        data = result[1]["data"]
-       
+        data = result["data"]
         self.assertEqual(data["vote"]["object"]["guid"], self.blog1.guid)
         self.assertEqual(self.blog1.vote_count(), -1)

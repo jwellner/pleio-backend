@@ -1,19 +1,13 @@
-from django.db import connection
-from django_tenants.test.cases import FastTenantTestCase
-from backend2.schema import schema
-from ariadne import graphql_sync
-import json
-from django.contrib.auth.models import AnonymousUser
-from django.http import HttpRequest
 from core.models import Group, Widget
+from core.tests.helpers import PleioTenantTestCase
 from user.models import User
 from mixer.backend.django import mixer
-from graphql import GraphQLError
 
-class EditGroupWidgetTestCase(FastTenantTestCase):
+
+class EditGroupWidgetTestCase(PleioTenantTestCase):
 
     def setUp(self):
-        self.anonymousUser = AnonymousUser()
+        super().setUp()
         self.user1 = mixer.blend(User)
         self.admin = mixer.blend(User)
         self.admin.roles = ['ADMIN']
@@ -28,7 +22,6 @@ class EditGroupWidgetTestCase(FastTenantTestCase):
         self.widget4 = Widget.objects.create(group=self.group, position=3,
                                              settings=[{"key": "key1", "value": "value1"}, {"key": "key2", "value": "value2"}])
 
-
     def tearDown(self):
         self.widget1.delete()
         self.widget2.delete()
@@ -37,7 +30,7 @@ class EditGroupWidgetTestCase(FastTenantTestCase):
         self.group.delete()
         self.admin.delete()
         self.user1.delete()
-
+        super().tearDown()
 
     def test_edit_group_widget(self):
         mutation = """
@@ -65,12 +58,10 @@ class EditGroupWidgetTestCase(FastTenantTestCase):
             }
         }
 
-        request = HttpRequest()
-        request.user = self.user1
-        result = graphql_sync(schema, { "query": mutation, "variables": variables }, context_value={ "request": request })
+        self.graphql_client.force_login(self.user1)
+        result = self.graphql_client.post(mutation, variables)
 
-        data = result[1]["data"]
-
+        data = result["data"]
         self.assertIsNotNone(data["editGroupWidget"]["entity"]["guid"])
         self.assertEqual(data["editGroupWidget"]["entity"]["containerGuid"], self.group.guid)
         self.assertEqual(data["editGroupWidget"]["entity"]["parentGuid"], self.group.guid)
@@ -80,7 +71,6 @@ class EditGroupWidgetTestCase(FastTenantTestCase):
         self.assertEqual(data["editGroupWidget"]["entity"]["settings"][1]["value"], "value5")
         self.assertEqual(data["editGroupWidget"]["entity"]["settings"][2]["key"], "key3")
         self.assertEqual(data["editGroupWidget"]["entity"]["settings"][2]["value"], "value3")
-
 
     def test_edit_group_widget_position_move_up(self):
         mutation = """
@@ -103,17 +93,14 @@ class EditGroupWidgetTestCase(FastTenantTestCase):
             }
         }
 
-        request = HttpRequest()
-        request.user = self.user1
-        result = graphql_sync(schema, { "query": mutation, "variables": variables }, context_value={ "request": request })
+        self.graphql_client.force_login(self.user1)
+        result = self.graphql_client.post(mutation, variables)
 
-        data = result[1]["data"]
-
+        data = result["data"]
         self.assertEqual(data["editGroupWidget"]["entity"]["position"], 2)
         self.assertEqual(Widget.objects.get(id=self.widget1.id).position, 0)
         self.assertEqual(Widget.objects.get(id=self.widget3.id).position, 1)
         self.assertEqual(Widget.objects.get(id=self.widget4.id).position, 3)
-
 
     def test_edit_group_widget_position_move_down(self):
         mutation = """
@@ -136,11 +123,10 @@ class EditGroupWidgetTestCase(FastTenantTestCase):
             }
         }
 
-        request = HttpRequest()
-        request.user = self.user1
-        result = graphql_sync(schema, { "query": mutation, "variables": variables }, context_value={ "request": request })
+        self.graphql_client.force_login(self.user1)
+        result = self.graphql_client.post(mutation, variables)
 
-        data = result[1]["data"]
+        data = result["data"]
 
         self.assertEqual(data["editGroupWidget"]["entity"]["position"], 0)
         self.assertEqual(Widget.objects.get(id=self.widget1.id).position, 1)

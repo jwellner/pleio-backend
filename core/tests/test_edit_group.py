@@ -1,29 +1,26 @@
 from django.db import connection
-from django_tenants.test.cases import FastTenantTestCase
-from backend2.schema import schema
-from ariadne import graphql_sync
 from django.conf import settings
-from django.contrib.auth.models import AnonymousUser
 from django.core.files import File
 from django.core.cache import cache
-from django.http import HttpRequest
 from core.constances import USER_ROLES
 from core.models import Group, ProfileField
+from core.tests.helpers import PleioTenantTestCase
 from user.models import User
 from mixer.backend.django import mixer
 from unittest.mock import patch, MagicMock
 
 
-class EditGroupCase(FastTenantTestCase):
+class EditGroupCase(PleioTenantTestCase):
 
     def setUp(self):
-        self.anonymousUser = AnonymousUser()
+        super().setUp()
         self.user = mixer.blend(User)
         self.admin = mixer.blend(User, roles=[USER_ROLES.ADMIN])
         self.group = mixer.blend(Group, owner=self.user)
 
     def tearDown(self):
         cache.clear()
+        super().tearDown()
 
     def test_edit_group_anon(self):
         mutation = """
@@ -42,14 +39,8 @@ class EditGroupCase(FastTenantTestCase):
             }
         }
 
-        request = HttpRequest()
-        request.user = self.anonymousUser
-
-        result = graphql_sync(schema, {"query": mutation, "variables": variables}, context_value={"request": request})
-
-        errors = result[1]["errors"]
-
-        self.assertEqual(errors[0]["message"], "not_logged_in")
+        with self.assertGraphQlError("not_logged_in"):
+            self.graphql_client.post(mutation, variables)
 
     @patch("core.lib.get_mimetype")
     @patch("{}.open".format(settings.DEFAULT_FILE_STORAGE))
@@ -106,13 +97,10 @@ class EditGroupCase(FastTenantTestCase):
             }
         }
 
-        request = HttpRequest()
-        request.user = self.user
+        self.graphql_client.force_login(self.user)
+        result = self.graphql_client.post(mutation, variables)
 
-        result = graphql_sync(schema, {"query": mutation, "variables": variables}, context_value={"request": request})
-
-        data = result[1]["data"]
-
+        data = result["data"]
         self.assertEqual(data["editGroup"]["group"]["guid"], variables["group"]["guid"])
         self.assertEqual(data["editGroup"]["group"]["name"], variables["group"]["name"])
         self.assertIn('/icon.png', data["editGroup"]["group"]["icon"])
@@ -150,14 +138,9 @@ class EditGroupCase(FastTenantTestCase):
             }
         }
 
-        request = HttpRequest()
-        request.user = self.user
-
-        result = graphql_sync(schema, {"query": mutation, "variables": variables}, context_value={"request": request})
-
-        errors = result[1]["errors"]
-
-        self.assertEqual(errors[0]["message"], "invalid_profile_field_guid")
+        with self.assertGraphQlError("invalid_profile_field_guid"):
+            self.graphql_client.force_login(self.user)
+            self.graphql_client.post(mutation, variables)
 
     def _build_profile_fields(self):
         profile_field1 = ProfileField.objects.create(key='text_key', name='text_name', field_type='text_field')
@@ -170,7 +153,6 @@ class EditGroupCase(FastTenantTestCase):
 
     def test_edit_group_member_fields(self):
         profile_field1, profile_field2 = self._build_profile_fields()
-
         mutation = """
             mutation ($group: editGroupInput!) {
                 editGroup(input: $group) {
@@ -184,7 +166,6 @@ class EditGroupCase(FastTenantTestCase):
                 }
             }
         """
-
         variables = {
             "group": {
                 "guid": self.group.guid,
@@ -192,13 +173,10 @@ class EditGroupCase(FastTenantTestCase):
             }
         }
 
-        request = HttpRequest()
-        request.user = self.user
+        self.graphql_client.force_login(self.user)
+        result = self.graphql_client.post(mutation, variables)
 
-        result = graphql_sync(schema, {"query": mutation, "variables": variables}, context_value={"request": request})
-
-        data = result[1]["data"]
-
+        data = result["data"]
         self.assertEqual(data["editGroup"]["group"]["guid"], variables["group"]["guid"])
         self.assertEqual(len(data["editGroup"]["group"]["showMemberProfileFields"]), 2)
         self.assertEqual(data["editGroup"]["group"]["showMemberProfileFields"][0]["guid"], profile_field1.guid)
@@ -211,13 +189,9 @@ class EditGroupCase(FastTenantTestCase):
             }
         }
 
-        request = HttpRequest()
-        request.user = self.user
+        result = self.graphql_client.post(mutation, variables)
 
-        result = graphql_sync(schema, {"query": mutation, "variables": variables}, context_value={"request": request})
-
-        data = result[1]["data"]
-
+        data = result["data"]
         self.assertEqual(data["editGroup"]["group"]["guid"], variables["group"]["guid"])
         self.assertEqual(len(data["editGroup"]["group"]["showMemberProfileFields"]), 1)
         self.assertEqual(data["editGroup"]["group"]["showMemberProfileFields"][0]["guid"], profile_field2.guid)
@@ -240,15 +214,10 @@ class EditGroupCase(FastTenantTestCase):
             }
         }
 
-        request = HttpRequest()
-        request.user = self.admin
+        self.graphql_client.force_login(self.admin)
+        result = self.graphql_client.post(mutation, variables)
 
-        result = graphql_sync(schema,
-                              {"query": mutation, "variables": variables},
-                              context_value={"request": request})
-
-        data = result[1]["data"]
-
+        data = result["data"]
         # Expect is_hidden is set to True like requested
         self.assertEqual(data["editGroup"]["group"]["isHidden"],
                          variables["group"]["isHidden"])
@@ -271,20 +240,15 @@ class EditGroupCase(FastTenantTestCase):
             }
         }
 
-        request = HttpRequest()
-        request.user = self.user
+        self.graphql_client.force_login(self.user)
+        result = self.graphql_client.post(mutation, variables)
 
-        result = graphql_sync(schema,
-                              {"query": mutation, "variables": variables},
-                              context_value={"request": request})
-        data = result[1]["data"]
-
+        data = result["data"]
         # Expect is_hidden is not set to True like requested
         self.assertFalse(data["editGroup"]["group"]["isHidden"])
 
     def test_edit_required_profile_fields(self):
         profile_field1, profile_field2 = self._build_profile_fields()
-
         mutation = """
             mutation ($group: editGroupInput!) {
                 editGroup(input: $group) {
@@ -298,7 +262,6 @@ class EditGroupCase(FastTenantTestCase):
                 }
             }
         """
-
         variables = {
             "group": {
                 "guid": self.group.guid,
@@ -306,13 +269,8 @@ class EditGroupCase(FastTenantTestCase):
             }
         }
 
-        request = HttpRequest()
-        request.user = self.user
-
-        success, result = graphql_sync(schema, {"query": mutation, "variables": variables},
-                                       context_value={"request": request})
-
-        self.assertTrue(success, msg=result)
+        self.graphql_client.force_login(self.user)
+        self.graphql_client.post(mutation, variables)
 
         from core.models.group import GroupProfileFieldSetting
         required_fields = [obj.profile_field.guid for obj in
@@ -324,7 +282,6 @@ class EditGroupCase(FastTenantTestCase):
 
     def test_edit_required_profile_fields_help_message(self):
         EXPECTED_MESSAGE = "I'd expect it to look like this"
-
         mutation = """
             mutation ($group: editGroupInput!) {
                 editGroup(input: $group) {
@@ -335,7 +292,6 @@ class EditGroupCase(FastTenantTestCase):
                 }
             }
         """
-
         variables = {
             "group": {
                 "guid": self.group.guid,
@@ -343,13 +299,8 @@ class EditGroupCase(FastTenantTestCase):
             }
         }
 
-        request = HttpRequest()
-        request.user = self.user
-
-        success, result = graphql_sync(schema, {"query": mutation, "variables": variables},
-                                       context_value={"request": request})
-
-        self.assertTrue(success, msg=result)
-
+        self.graphql_client.force_login(self.user)
+        self.graphql_client.post(mutation, variables)
         self.group.refresh_from_db()
+
         self.assertEqual(self.group.required_fields_message, EXPECTED_MESSAGE, msg="De inhoud van required_fields_message wordt niet goed geupdate.")

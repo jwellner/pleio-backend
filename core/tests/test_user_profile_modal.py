@@ -1,18 +1,14 @@
-from ariadne import graphql_sync
-from django.contrib.auth.models import AnonymousUser
-from django.http import HttpRequest
-from django_tenants.test.cases import FastTenantTestCase
-
-from backend2.schema import schema
 from core.constances import ACCESS_TYPE
 from core.models import Group, ProfileField, GroupProfileFieldSetting, UserProfile, UserProfileField
+from core.tests.helpers import PleioTenantTestCase
 from user.models import User
 from mixer.backend.django import mixer
 
 
-class UserProfileModalTestCase(FastTenantTestCase):
+class UserProfileModalTestCase(PleioTenantTestCase):
 
     def setUp(self):
+        super().setUp()
         self.member = mixer.blend(User, name="Member")
         self.group = mixer.blend(Group, required_fields_message="Please complete your profile")
         self.profile_field = ProfileField.objects.create(
@@ -46,19 +42,6 @@ class UserProfileModalTestCase(FastTenantTestCase):
             "user": self.member.guid
         }
 
-    def graphql_sync(self, visitor, expect_errors=False):
-        request = HttpRequest()
-        request.user = visitor
-
-        success, result = graphql_sync(schema, {"query": self.query, "variables": self.variables},
-                                       context_value={"request": request})
-
-        self.assertTrue(success, msg=result)
-        if not expect_errors:
-            self.assertIsNone(result.get('errors'), msg=result.get('errors'))
-
-        return result.get('data')
-
     def assertProfileFieldsMissing(self, data):
         self.assertEqual(len(data['entity']['missingProfileFields']), 1)
         self.assertEqual(data['entity']['missingProfileFields'][0]['guid'], self.profile_field.guid)
@@ -67,9 +50,10 @@ class UserProfileModalTestCase(FastTenantTestCase):
         self.assertEqual(len(data['entity']['missingProfileFields']), 0)
 
     def test_query_should_give_profile_field_info_when_user_has_profile_not_filled_in(self):
-        data = self.graphql_sync(visitor=self.member)
+        self.graphql_client.force_login(self.member)
+        result = self.graphql_client.post(self.query, self.variables)
 
-        self.assertProfileFieldsMissing(data)
+        self.assertProfileFieldsMissing(result['data'])
 
     def test_query_should_not_give_profile_field_info_when_user_has_profile_filled_in(self):
         user_profile, created = UserProfile.objects.get_or_create(user=self.member)
@@ -79,9 +63,10 @@ class UserProfileModalTestCase(FastTenantTestCase):
             value="some value"
         )
 
-        data = self.graphql_sync(visitor=self.member)
+        self.graphql_client.force_login(self.member)
+        result = self.graphql_client.post(self.query, self.variables)
 
-        self.assertProfileFieldsOK(data)
+        self.assertProfileFieldsOK(result['data'])
 
     def test_query_should_give_profile_field_info_when_user_has_empty_string_profile(self):
         user_profile, created = UserProfile.objects.get_or_create(user=self.member)
@@ -91,9 +76,10 @@ class UserProfileModalTestCase(FastTenantTestCase):
             value=''
         )
 
-        data = self.graphql_sync(visitor=self.member)
+        self.graphql_client.force_login(self.member)
+        result = self.graphql_client.post(self.query, self.variables)
 
-        self.assertProfileFieldsMissing(data)
+        self.assertProfileFieldsMissing(result['data'])
 
     def test_query_should_copy_access_properties_in_profile_items(self):
         user_profile, created = UserProfile.objects.get_or_create(user=self.member)
@@ -104,7 +90,7 @@ class UserProfileModalTestCase(FastTenantTestCase):
             value='',
         )
 
-        data = self.graphql_sync(visitor=self.member)
-        self.assertEqual(data['entity']['missingProfileFields'][0]['accessId'], 1)
+        self.graphql_client.force_login(self.member)
+        result = self.graphql_client.post(self.query, self.variables)
 
-
+        self.assertEqual(result['data']['entity']['missingProfileFields'][0]['accessId'], 1)

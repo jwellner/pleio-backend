@@ -1,24 +1,17 @@
-from django.db import connection
-from django_tenants.test.cases import FastTenantTestCase
-from backend2.schema import schema
-from ariadne import graphql_sync
-import json
-from django.contrib.auth.models import AnonymousUser
-from django.http import HttpRequest
-from core.models import Group
+from core.tests.helpers import PleioTenantTestCase
 from user.models import User
 from core.constances import ACCESS_TYPE
 from mixer.backend.django import mixer
-from graphql import GraphQLError
 from cms.models import Page
 from wiki.models import Wiki
 
-class ReorderTestCase(FastTenantTestCase):
+
+class ReorderTestCase(PleioTenantTestCase):
 
     def setUp(self):
-        self.anonymousUser = AnonymousUser()
+        super().setUp()
         self.user = mixer.blend(User)
-        self.admin = mixer.blend(User, roles=['ADMIN'])      
+        self.admin = mixer.blend(User, roles=['ADMIN'])
 
         self.page1 = mixer.blend(Page,
                                  owner=self.user,
@@ -76,7 +69,7 @@ class ReorderTestCase(FastTenantTestCase):
                                  owner=self.user,
                                  read_access=[ACCESS_TYPE.public],
                                  write_access=[ACCESS_TYPE.user.format(self.user.id)]
-                                 )         
+                                 )
         self.wiki1 = mixer.blend(Wiki,
                                  owner=self.user,
                                  read_access=[ACCESS_TYPE.public],
@@ -133,7 +126,7 @@ class ReorderTestCase(FastTenantTestCase):
                                  owner=self.user,
                                  read_access=[ACCESS_TYPE.public],
                                  write_access=[ACCESS_TYPE.user.format(self.user.id)]
-                                 )         
+                                 )
 
     def tearDown(self):
         self.wiki9.delete()
@@ -154,9 +147,9 @@ class ReorderTestCase(FastTenantTestCase):
         self.page2.delete()
         self.page1.delete()
         self.page6.delete()
+        super().tearDown()
 
     def test_reorder_page_move_up_position_by_admin(self):
-
         mutation = """
             mutation SubNavReorder($input: reorderInput!) {
                 reorder(input: $input) {
@@ -184,13 +177,10 @@ class ReorderTestCase(FastTenantTestCase):
             }
         }
 
-        request = HttpRequest()
-        request.user = self.admin
+        self.graphql_client.force_login(self.admin)
+        result = self.graphql_client.post(mutation, variables)
 
-        result = graphql_sync(schema, {"query": mutation, "variables": variables }, context_value={ "request": request })
-
-        data = result[1]["data"]
-
+        data = result["data"]
         self.assertEqual(Page.objects.get(id=self.page2.id).position, 2)
         self.assertEqual(Page.objects.get(id=self.page3.id).position, 0)
         self.assertEqual(Page.objects.get(id=self.page4.id).position, 1)
@@ -198,9 +188,7 @@ class ReorderTestCase(FastTenantTestCase):
         self.assertEqual(data["reorder"]["container"]["children"][0]["guid"], self.page3.guid)
         self.assertEqual(data["reorder"]["container"]["children"][1]["guid"], self.page4.guid)
 
-
     def test_reorder_page_move_up_position_by_owner(self):
-
         mutation = """
             mutation SubNavReorder($input: reorderInput!) {
                 reorder(input: $input) {
@@ -228,17 +216,11 @@ class ReorderTestCase(FastTenantTestCase):
             }
         }
 
-        request = HttpRequest()
-        request.user = self.user
-
-        result = graphql_sync(schema, {"query": mutation, "variables": variables }, context_value={ "request": request })
-
-        errors = result[1]["errors"]
-
-        self.assertEqual(errors[0]["message"], "could_not_save")
+        with self.assertGraphQlError("could_not_save"):
+            self.graphql_client.force_login(self.user)
+            self.graphql_client.post(mutation, variables)
 
     def test_reorder_page_move_down_position_by_admin(self):
-
         mutation = """
             mutation SubNavReorder($input: reorderInput!) {
                 reorder(input: $input) {
@@ -266,13 +248,10 @@ class ReorderTestCase(FastTenantTestCase):
             }
         }
 
-        request = HttpRequest()
-        request.user = self.admin
+        self.graphql_client.force_login(self.admin)
+        result = self.graphql_client.post(mutation, variables)
 
-        result = graphql_sync(schema, {"query": mutation, "variables": variables }, context_value={ "request": request })
-
-        data = result[1]["data"]
-
+        data = result["data"]
         self.assertEqual(Page.objects.get(id=self.page4.id).position, 0)
         self.assertEqual(Page.objects.get(id=self.page2.id).position, 1)
         self.assertEqual(Page.objects.get(id=self.page3.id).position, 2)
@@ -280,11 +259,8 @@ class ReorderTestCase(FastTenantTestCase):
         self.assertEqual(data["reorder"]["container"]["children"][0]["guid"], self.page4.guid)
         self.assertEqual(data["reorder"]["container"]["children"][1]["guid"], self.page2.guid)
 
-
     def test_reorder_page_move_up_position_unordered_children_by_admin(self):
-
         # default order is OLD -> NEW when no position is set
-
         mutation = """
             mutation SubNavReorder($input: reorderInput!) {
                 reorder(input: $input) {
@@ -312,13 +288,10 @@ class ReorderTestCase(FastTenantTestCase):
             }
         }
 
-        request = HttpRequest()
-        request.user = self.admin
+        self.graphql_client.force_login(self.admin)
+        result = self.graphql_client.post(mutation, variables)
 
-        result = graphql_sync(schema, {"query": mutation, "variables": variables }, context_value={ "request": request })
-
-        data = result[1]["data"]
-
+        data = result["data"]
         self.assertEqual(Page.objects.get(id=self.page7.id).position, 0)
         self.assertEqual(Page.objects.get(id=self.page8.id).position, 2)
         self.assertEqual(Page.objects.get(id=self.page9.id).position, 1)
@@ -326,7 +299,6 @@ class ReorderTestCase(FastTenantTestCase):
         self.assertEqual(data["reorder"]["container"]["children"][1]["guid"], self.page9.guid)
 
     def test_reorder_page_move_down_position_unordered_children_by_admin(self):
-
         # default order is OLD -> NEW when no position is set
 
         mutation = """
@@ -356,13 +328,10 @@ class ReorderTestCase(FastTenantTestCase):
             }
         }
 
-        request = HttpRequest()
-        request.user = self.admin
+        self.graphql_client.force_login(self.admin)
+        result = self.graphql_client.post(mutation, variables)
 
-        result = graphql_sync(schema, {"query": mutation, "variables": variables }, context_value={ "request": request })
-
-        data = result[1]["data"]
-
+        data = result["data"]
         self.assertEqual(Page.objects.get(id=self.page7.id).position, 1)
         self.assertEqual(Page.objects.get(id=self.page8.id).position, 0)
         self.assertEqual(Page.objects.get(id=self.page9.id).position, 2)
@@ -370,7 +339,6 @@ class ReorderTestCase(FastTenantTestCase):
         self.assertEqual(data["reorder"]["container"]["children"][1]["guid"], self.page7.guid)
 
     def test_reorder_wiki_move_up_position_by_admin(self):
-
         mutation = """
             mutation WikiNavMutation($input: reorderInput!) {
                 reorder(input: $input) {
@@ -408,13 +376,10 @@ class ReorderTestCase(FastTenantTestCase):
             }
         }
 
-        request = HttpRequest()
-        request.user = self.admin
+        self.graphql_client.force_login(self.admin)
+        result = self.graphql_client.post(mutation, variables)
 
-        result = graphql_sync(schema, {"query": mutation, "variables": variables }, context_value={ "request": request })
-
-        data = result[1]["data"]
-
+        data = result["data"]
         self.assertEqual(Wiki.objects.get(id=self.wiki2.id).position, 2)
         self.assertEqual(Wiki.objects.get(id=self.wiki3.id).position, 0)
         self.assertEqual(Wiki.objects.get(id=self.wiki4.id).position, 1)
@@ -422,9 +387,7 @@ class ReorderTestCase(FastTenantTestCase):
         self.assertEqual(data["reorder"]["container"]["children"][0]["guid"], self.wiki3.guid)
         self.assertEqual(data["reorder"]["container"]["children"][1]["guid"], self.wiki4.guid)
 
-
     def test_reorder_wiki_move_down_position_by_admin(self):
-
         mutation = """
             mutation WikiNavMutation($input: reorderInput!) {
                 reorder(input: $input) {
@@ -462,13 +425,10 @@ class ReorderTestCase(FastTenantTestCase):
             }
         }
 
-        request = HttpRequest()
-        request.user = self.admin
+        self.graphql_client.force_login(self.admin)
+        result = self.graphql_client.post(mutation, variables)
 
-        result = graphql_sync(schema, {"query": mutation, "variables": variables }, context_value={ "request": request })
-
-        data = result[1]["data"]
-
+        data = result["data"]
         self.assertEqual(Wiki.objects.get(id=self.wiki4.id).position, 0)
         self.assertEqual(Wiki.objects.get(id=self.wiki2.id).position, 1)
         self.assertEqual(Wiki.objects.get(id=self.wiki3.id).position, 2)
@@ -476,9 +436,7 @@ class ReorderTestCase(FastTenantTestCase):
         self.assertEqual(data["reorder"]["container"]["children"][0]["guid"], self.wiki4.guid)
         self.assertEqual(data["reorder"]["container"]["children"][1]["guid"], self.wiki2.guid)
 
-
     def test_reorder_wiki_move_up_position_unordered_children_by_admin(self):
-
         # default order is OLD -> NEW when no position is set
 
         mutation = """
@@ -518,22 +476,17 @@ class ReorderTestCase(FastTenantTestCase):
             }
         }
 
-        request = HttpRequest()
-        request.user = self.admin
+        self.graphql_client.force_login(self.admin)
+        result = self.graphql_client.post(mutation, variables)
 
-        result = graphql_sync(schema, {"query": mutation, "variables": variables }, context_value={ "request": request })
-
-        data = result[1]["data"]
-
+        data = result["data"]
         self.assertEqual(Wiki.objects.get(id=self.wiki7.id).position, 0)
         self.assertEqual(Wiki.objects.get(id=self.wiki8.id).position, 2)
         self.assertEqual(Wiki.objects.get(id=self.wiki9.id).position, 1)
         self.assertEqual(data["reorder"]["container"]["children"][0]["guid"], self.wiki7.guid)
         self.assertEqual(data["reorder"]["container"]["children"][1]["guid"], self.wiki9.guid)
 
-
     def test_reorder_wiki_move_down_position_unordered_children_by_admin(self):
-
         # default order is OLD -> NEW when no position is set
 
         mutation = """
@@ -573,13 +526,10 @@ class ReorderTestCase(FastTenantTestCase):
             }
         }
 
-        request = HttpRequest()
-        request.user = self.admin
+        self.graphql_client.force_login(self.admin)
+        result = self.graphql_client.post(mutation, variables)
 
-        result = graphql_sync(schema, {"query": mutation, "variables": variables }, context_value={ "request": request })
-
-        data = result[1]["data"]
-
+        data = result["data"]
         self.assertEqual(Wiki.objects.get(id=self.wiki7.id).position, 1)
         self.assertEqual(Wiki.objects.get(id=self.wiki8.id).position, 0)
         self.assertEqual(Wiki.objects.get(id=self.wiki9.id).position, 2)

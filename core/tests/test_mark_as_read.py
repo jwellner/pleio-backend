@@ -1,28 +1,20 @@
-from django.conf import settings
-from django.db import connection
-from django_tenants.test.cases import FastTenantTestCase
-from backend2.schema import schema
-from ariadne import graphql_sync
-import json
-from django.contrib.auth.models import AnonymousUser
-from django.http import HttpRequest
-from core.models import Group
+from core.tests.helpers import PleioTenantTestCase
 from user.models import User
 from mixer.backend.django import mixer
-from graphql import GraphQLError
 from notifications.signals import notify
 
 
-class MarkAsReadTestCase(FastTenantTestCase):
+class MarkAsReadTestCase(PleioTenantTestCase):
 
     def setUp(self):
-        self.anonymousUser = AnonymousUser()
+        super().setUp()
         self.user1 = mixer.blend(User)
         self.user2 = mixer.blend(User)
 
     def tearDown(self):
         self.user1.delete()
         self.user2.delete()
+        super().tearDown()
 
     def test_mark_as_read_user_anon(self):
         mutation = """
@@ -46,12 +38,8 @@ class MarkAsReadTestCase(FastTenantTestCase):
             }
         }
 
-        request = HttpRequest()
-        request.user = self.anonymousUser
-
-        result = graphql_sync(schema, {"query": mutation, "variables": variables}, context_value={ "request": request })
-        errors = result[1]["errors"]
-        self.assertEqual(errors[0]["message"], "not_logged_in")
+        with self.assertGraphQlError("not_logged_in"):
+            self.graphql_client.post(mutation, variables)
 
     def test_mark_as_read(self):
         mutation = """
@@ -68,18 +56,17 @@ class MarkAsReadTestCase(FastTenantTestCase):
             }
 
         """
-        request = HttpRequest()
-        request.user = self.user1
-        notification = notify.send(request.user, recipient=request.user, verb='welcome')[0][1][0]
-
+        notification = notify.send(self.user1, recipient=self.user1, verb='welcome')[0][1][0]
         variables = {
             "input": {
                 "id": notification.id
             }
         }
-        result = graphql_sync(schema, {"query": mutation, "variables": variables}, context_value={ "request": request })
-        data = result[1]["data"]
 
+        self.graphql_client.force_login(self.user1)
+        result = self.graphql_client.post(mutation, variables)
+
+        data = result["data"]
         self.assertEqual(data["markAsRead"]["success"], True)
         self.assertEqual(data["markAsRead"]["notification"]["isUnread"], False)
         self.assertEqual(data["markAsRead"]["notification"]["id"], notification.id)

@@ -1,10 +1,5 @@
-from backend2.schema import schema
-from ariadne import graphql_sync
-
 from core.constances import ACCESS_TYPE
 from django.core.cache import cache
-from django.contrib.auth.models import AnonymousUser
-from django.http import HttpRequest
 from core.models import Group, ProfileField, Setting, GroupProfileFieldSetting, UserProfileField, UserProfile
 from core.tests.helpers import ElasticsearchTestCase
 from user.models import User
@@ -16,7 +11,6 @@ class FiltersTestCase(ElasticsearchTestCase):
     def setUp(self):
         super().setUp()
 
-        self.anonymousUser = AnonymousUser()
         self.user = mixer.blend(User)
         self.other = mixer.blend(User)
         self.admin = mixer.blend(User)
@@ -45,13 +39,12 @@ class FiltersTestCase(ElasticsearchTestCase):
                                )
 
     def tearDown(self):
-        super().tearDown()
-
         self.admin.delete()
         self.other.delete()
         self.user.delete()
         Setting.objects.all().delete()
         cache.clear()
+        super().tearDown()
 
     def test_query_filters_by_user(self):
         query = """
@@ -69,13 +62,10 @@ class FiltersTestCase(ElasticsearchTestCase):
 
         self.initialize_index()
 
-        request = HttpRequest()
-        request.user = self.user
+        self.graphql_client.force_login(self.user)
+        result = self.graphql_client.post(query, {})
 
-        result = graphql_sync(schema, {"query": query}, context_value={"request": request})
-
-        data = result[1]["data"]
-
+        data = result["data"]
         self.assertEqual(data["filters"]["users"][0]["name"], "multi_key")
         self.assertEqual(data["filters"]["users"][0]["fieldType"], "multi_select_field")
         self.assertEqual(data["filters"]["users"][0]["label"], "multi_name")
@@ -130,15 +120,13 @@ class FiltersTestCase(ElasticsearchTestCase):
             "groupGuid": group.guid
         }
 
-        request = HttpRequest()
-        request.user = self.user
-
         # Elasticsearch is accessed when groups queried.
         self.initialize_index()
 
-        result = graphql_sync(schema, {"query": query, "variables": variables}, context_value={"request": request})
+        self.graphql_client.force_login(self.user)
+        result = self.graphql_client.post(query, variables)
 
-        data = result[1]["data"]
+        data = result["data"]
         self.assertIsNotNone(data["filters"]["users"], msg=result)
         self.assertEqual(len(data["filters"]["users"]), 1)
         self.assertEqual(data["filters"]["users"][0]["name"], "multi_key")

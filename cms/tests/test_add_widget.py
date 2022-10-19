@@ -1,25 +1,21 @@
 from unittest.mock import MagicMock, patch
 
-from ariadne import graphql_sync
 from django.conf import settings
-from django.contrib.auth.models import AnonymousUser
 from django.core.files import File
-from django.http import HttpRequest
 from core.models.attachment import Attachment
 from core.models.widget import Widget
-from django_tenants.test.cases import FastTenantTestCase
 from mixer.backend.django import mixer
 
-from backend2.schema import schema
 from cms.models import Column, Page, Row
 from core.constances import USER_ROLES
+from core.tests.helpers import PleioTenantTestCase
 from user.models import User
 
 
-class AddWidgetTestCase(FastTenantTestCase):
+class AddWidgetTestCase(PleioTenantTestCase):
 
     def setUp(self):
-        self.anonymousUser = AnonymousUser()
+        super().setUp()
         self.admin = mixer.blend(User, roles=[USER_ROLES.ADMIN])
         self.editor = mixer.blend(User, roles=[USER_ROLES.EDITOR])
         self.user = mixer.blend(User)
@@ -74,12 +70,10 @@ class AddWidgetTestCase(FastTenantTestCase):
             }
         }
 
-        request = HttpRequest()
-        request.user = self.admin
+        self.graphql_client.force_login(self.admin)
+        result = self.graphql_client.post(mutation, variables)
 
-        result = graphql_sync(schema, {"query": mutation, "variables": variables }, context_value={ "request": request })
-
-        data = result[1]["data"]
+        data = result["data"]
 
         attachment = Attachment.objects.get(id=data["addWidget"]["widget"]["settings"][0]['attachment']['id'])
         widget = Widget.objects.get(id=data["addWidget"]["widget"]["guid"])
@@ -93,7 +87,6 @@ class AddWidgetTestCase(FastTenantTestCase):
         self.assertEqual(attachment.attached, widget)
 
     def test_add_widget_to_column_by_editor(self):
-
         mutation = """
             mutation AddWidget($widgetInput: addWidgetInput!) {
                 addWidget(input: $widgetInput) {
@@ -119,20 +112,16 @@ class AddWidgetTestCase(FastTenantTestCase):
             }
         }
 
-        request = HttpRequest()
-        request.user = self.editor
+        self.graphql_client.force_login(self.editor)
+        result = self.graphql_client.post(mutation, variables)
 
-        result = graphql_sync(schema, {"query": mutation, "variables": variables }, context_value={ "request": request })
-
-        data = result[1]["data"]
-
+        data = result["data"]
         self.assertEqual(data["addWidget"]["widget"]["position"], 1)
         self.assertEqual(data["addWidget"]["widget"]["containerGuid"], self.page.guid)
         self.assertEqual(data["addWidget"]["widget"]["parentGuid"], self.column1.guid)
         self.assertEqual(data["addWidget"]["widget"]["canEdit"], True)
 
     def test_add_widget_to_column_by_anonymous(self):
-
         mutation = """
             mutation AddWidget($widgetInput: addWidgetInput!) {
                 addWidget(input: $widgetInput) {
@@ -158,18 +147,10 @@ class AddWidgetTestCase(FastTenantTestCase):
             }
         }
 
-        request = HttpRequest()
-        request.user = self.anonymousUser
-
-        result = graphql_sync(schema, {"query": mutation, "variables": variables }, context_value={ "request": request })
-
-        errors = result[1]["errors"]
-
-        self.assertEqual(errors[0]["message"], "not_logged_in")
-
+        with self.assertGraphQlError("not_logged_in"):
+            self.graphql_client.post(mutation, variables)
 
     def test_add_widget_to_column_by_user(self):
-
         mutation = """
             mutation AddWidget($widgetInput: addWidgetInput!) {
                 addWidget(input: $widgetInput) {
@@ -195,11 +176,6 @@ class AddWidgetTestCase(FastTenantTestCase):
             }
         }
 
-        request = HttpRequest()
-        request.user = self.user
-
-        result = graphql_sync(schema, {"query": mutation, "variables": variables }, context_value={ "request": request })
-
-        errors = result[1]["errors"]
-
-        self.assertEqual(errors[0]["message"], "could_not_save")
+        with self.assertGraphQlError("could_not_save"):
+            self.graphql_client.force_login(self.user)
+            self.graphql_client.post(mutation, variables)

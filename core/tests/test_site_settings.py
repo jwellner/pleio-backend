@@ -1,20 +1,15 @@
 from django.db import connection
-from django_tenants.test.cases import TenantTestCase
-from django_tenants.test.client import TenantClient
-from django_tenants.test.cases import FastTenantTestCase
 from core.models import ProfileField, SiteInvitation, SiteAccessRequest
+from core.tests.helpers import PleioTenantTestCase
 from user.models import User
 from cms.models import Page
-from backend2.schema import schema
-from ariadne import graphql_sync
 from django.contrib.auth.models import AnonymousUser
-from django.http import HttpRequest
 from django.core.cache import cache
 from mixer.backend.django import mixer
 from core.lib import get_language_options
 
 
-class SiteSettingsTestCase(FastTenantTestCase):
+class SiteSettingsTestCase(PleioTenantTestCase):
 
     def setUp(self):
         super().setUp()
@@ -242,19 +237,13 @@ class SiteSettingsTestCase(FastTenantTestCase):
         self.profileField2.delete()
         self.admin.delete()
         self.user.delete()
+        super().setUp()
 
     def test_site_settings_by_admin(self):
-        request = HttpRequest()
-        request.user = self.admin
+        self.graphql_client.force_login(self.admin)
+        result = self.graphql_client.post(self.query, {})
 
-        variables = {
-        }
-
-        result = graphql_sync(schema, {"query": self.query, "variables": variables}, context_value={"request": request})
-
-        self.assertTrue(result[0])
-        data = result[1]["data"]
-
+        data = result["data"]
         self.assertEqual(data["siteSettings"]["name"], "Pleio 2.0")
         self.assertEqual(data["siteSettings"]["language"], "nl")
         self.assertEqual(data["siteSettings"]["extraLanguages"], [])
@@ -281,8 +270,7 @@ class SiteSettingsTestCase(FastTenantTestCase):
             {"value": "Rijksoverheid Sans", "label": "Rijksoverheid Sans"},
             {"value": "Roboto", "label": "Roboto"},
             {"value": "Source Sans Pro", "label": "Source Sans Pro"}
-        ]
-                         )
+        ])
 
         self.assertEqual(data["siteSettings"]["font"], "Rijksoverheid Sans")
         self.assertEqual(data["siteSettings"]["colorHeader"], "#0e2f56")
@@ -425,52 +413,15 @@ class SiteSettingsTestCase(FastTenantTestCase):
         self.assertEqual(data["siteSettings"]["collabEditingEnabled"], False)
 
     def test_site_settings_by_anonymous(self):
-        request = HttpRequest()
-        request.user = self.anonymousUser
-
-        variables = {
-        }
-
-        self.query = """
-            query SiteGeneralSettings {
-                siteSettings {
-                    language
-                }
-            }
-        """
-        result = graphql_sync(schema, {"query": self.query, "variables": variables}, context_value={"request": request})
-
-        self.assertTrue(result[0])
-
-        errors = result[1]["errors"]
-
-        self.assertEqual(errors[0]["message"], "not_logged_in")
+        with self.assertGraphQlError("not_logged_in"):
+            self.graphql_client.post(self.query, {})
 
     def test_site_settings_by_user(self):
-        request = HttpRequest()
-        request.user = self.user
-
-        variables = {
-        }
-
-        self.query = """
-            query SiteGeneralSettings {
-                siteSettings {
-                    language
-                }
-            }
-        """
-        result = graphql_sync(schema, {"query": self.query, "variables": variables}, context_value={"request": request})
-
-        self.assertTrue(result[0])
-
-        errors = result[1]["errors"]
-
-        self.assertEqual(errors[0]["message"], "user_not_site_admin")
+        with self.assertGraphQlError("user_not_site_admin"):
+            self.graphql_client.force_login(self.user)
+            self.graphql_client.post(self.query, {})
 
     def test_site_settings_menu_state_normal(self):
-        request = HttpRequest()
-        request.user = self.admin
         query = """
         mutation UpdateFileOptions($input: editSiteSettingInput!) {
             editSiteSetting(input: $input) {
@@ -487,14 +438,12 @@ class SiteSettingsTestCase(FastTenantTestCase):
                 'menuState': 'normal',
             }
         }
-        success, result = graphql_sync(schema, {"query": query, "variables": variables},
-                                       context_value={"request": request})
+        self.graphql_client.force_login(self.admin)
+        result = self.graphql_client.post(query, variables)
 
         self.assertEqual(result['data']['editSiteSetting']['siteSettings']['menuState'], 'normal', msg=result)
 
     def test_site_settings_menu_state_compact(self):
-        request = HttpRequest()
-        request.user = self.admin
         query = """
         mutation UpdateFileOptions($input: editSiteSettingInput!) {
             editSiteSetting(input: $input) {
@@ -511,14 +460,12 @@ class SiteSettingsTestCase(FastTenantTestCase):
                 'menuState': 'compact',
             }
         }
-        success, result = graphql_sync(schema, {"query": query, "variables": variables},
-                                       context_value={"request": request})
+        self.graphql_client.force_login(self.admin)
+        result = self.graphql_client.post(query, variables)
 
         self.assertEqual(result['data']['editSiteSetting']['siteSettings']['menuState'], 'compact', msg=result)
 
     def test_site_settings_file_description_enabled(self):
-        request = HttpRequest()
-        request.user = self.admin
         query = """
         mutation UpdateFileOptions($input: editSiteSettingInput!) {
             editSiteSetting(input: $input) {
@@ -535,14 +482,12 @@ class SiteSettingsTestCase(FastTenantTestCase):
                 'fileDescriptionFieldEnabled': True,
             }
         }
-        success, result = graphql_sync(schema, {"query": query, "variables": variables},
-                                       context_value={"request": request})
+        self.graphql_client.force_login(self.admin)
+        result = self.graphql_client.post(query, variables)
 
         self.assertTrue(result['data']['editSiteSetting']['siteSettings']['fileDescriptionFieldEnabled'], msg=result)
 
     def test_site_settings_file_description_disabled(self):
-        request = HttpRequest()
-        request.user = self.admin
         query = """
         mutation UpdateFileOptions($input: editSiteSettingInput!) {
             editSiteSetting(input: $input) {
@@ -559,51 +504,50 @@ class SiteSettingsTestCase(FastTenantTestCase):
                 'fileDescriptionFieldEnabled': False,
             }
         }
-        success, result = graphql_sync(schema, {"query": query, "variables": variables},
-                                       context_value={"request": request})
+        self.graphql_client.force_login(self.admin)
+        result = self.graphql_client.post(query, variables)
 
         self.assertFalse(result['data']['editSiteSetting']['siteSettings']['fileDescriptionFieldEnabled'], msg=result)
 
 
-class SiteSettingsIsClosedTestCase(TenantTestCase):
+class SiteSettingsIsClosedTestCase(PleioTenantTestCase):
     def setUp(self):
         super().setUp()
-        self.c = TenantClient(self.tenant)
         cache.set("%s%s" % (connection.schema_name, 'IS_CLOSED'), True)
 
     def tearDown(self):
         cache.clear()
 
     def test_site_settings_is_closed_random(self):
-        response = self.c.get("/981random3")
+        response = self.client.get("/981random3")
         self.assertTemplateUsed(response, 'registration/login.html')
 
     def test_site_settings_is_closed_graphql(self):
-        response = self.c.get("/graphql")
+        response = self.client.get("/graphql")
         self.assertTemplateUsed(response, 'registration/login.html')
 
     def test_site_settings_is_closed_robots(self):
-        response = self.c.get("/robots.txt")
+        response = self.client.get("/robots.txt")
         self.assertTemplateNotUsed(response, 'registration/login.html')
 
     def test_site_settings_is_closed_sitemap(self):
-        response = self.c.get("/sitemap.xml")
+        response = self.client.get("/sitemap.xml")
         self.assertTemplateNotUsed(response, 'registration/login.html')
 
     def test_site_settings_is_closed_oidc(self):
-        response = self.c.get("/oidc/test")
+        response = self.client.get("/oidc/test")
         self.assertTemplateNotUsed(response, 'registration/login.html')
 
     def test_site_settings_is_closed_login(self):
-        response = self.c.get("/login")
+        response = self.client.get("/login")
         self.assertTemplateNotUsed(response, 'registration/login.html')
 
     def test_site_settings_is_closed_static(self):
-        response = self.c.get("/static/favicon.ico")
+        response = self.client.get("/static/favicon.ico")
         self.assertTemplateNotUsed(response, 'registration/login.html')
 
     def test_site_settings_is_closed_featured_file(self):
-        response = self.c.get("/file/featured/test.txt")
+        response = self.client.get("/file/featured/test.txt")
         self.assertTemplateNotUsed(response, 'registration/login.html')
 
     def test_site_settings_is_walled_garden_by_ip_enabled_but_whitelisted(self):
@@ -611,7 +555,7 @@ class SiteSettingsIsClosedTestCase(TenantTestCase):
         cache.set("%s%s" % (connection.schema_name, 'WALLED_GARDEN_BY_IP_ENABLED'), True)
         cache.set("%s%s" % (connection.schema_name, 'WHITELISTED_IP_RANGES'), ['10.10.10.10'])
 
-        response = self.c.get("/981random3", REMOTE_ADDR='10.10.10.10')
+        response = self.client.get("/981random3", REMOTE_ADDR='10.10.10.10')
 
         self.assertTemplateNotUsed(response, 'registration/login.html')
 
@@ -620,7 +564,7 @@ class SiteSettingsIsClosedTestCase(TenantTestCase):
         cache.set("%s%s" % (connection.schema_name, 'WALLED_GARDEN_BY_IP_ENABLED'), True)
         cache.set("%s%s" % (connection.schema_name, 'WHITELISTED_IP_RANGES'), ['10.10.10.11/32'])
 
-        response = self.c.get("/981random3", REMOTE_ADDR='10.10.10.10')
+        response = self.client.get("/981random3", REMOTE_ADDR='10.10.10.10')
 
         self.assertTemplateUsed(response, 'registration/login.html')
 
@@ -629,7 +573,7 @@ class SiteSettingsIsClosedTestCase(TenantTestCase):
         cache.set("%s%s" % (connection.schema_name, 'WALLED_GARDEN_BY_IP_ENABLED'), True)
         cache.set("%s%s" % (connection.schema_name, 'WHITELISTED_IP_RANGES'), ['10.10.10.0/24'])
 
-        response = self.c.get("/981random3", HTTP_X_FORWARDED_FOR='10.10.10.108')
+        response = self.client.get("/981random3", HTTP_X_FORWARDED_FOR='10.10.10.108')
 
         self.assertTemplateNotUsed(response, 'registration/login.html')
 
@@ -638,7 +582,7 @@ class SiteSettingsIsClosedTestCase(TenantTestCase):
         cache.set("%s%s" % (connection.schema_name, 'WALLED_GARDEN_BY_IP_ENABLED'), True)
         cache.set("%s%s" % (connection.schema_name, 'WHITELISTED_IP_RANGES'), ['10.10.11.0/24'])
 
-        response = self.c.get("/981random3", HTTP_X_FORWARDED_FOR='10.10.10.108')
+        response = self.client.get("/981random3", HTTP_X_FORWARDED_FOR='10.10.10.108')
 
         self.assertTemplateUsed(response, 'registration/login.html')
 
@@ -647,6 +591,6 @@ class SiteSettingsIsClosedTestCase(TenantTestCase):
         cache.set("%s%s" % (connection.schema_name, 'WALLED_GARDEN_BY_IP_ENABLED'), False)
         cache.set("%s%s" % (connection.schema_name, 'WHITELISTED_IP_RANGES'), [])
 
-        response = self.c.get("/981random3", REMOTE_ADDR='10.10.10.10')
+        response = self.client.get("/981random3", REMOTE_ADDR='10.10.10.10')
 
         self.assertTemplateNotUsed(response, 'registration/login.html')

@@ -1,25 +1,19 @@
-from django.db import connection
-from django_tenants.test.cases import FastTenantTestCase
-from backend2.schema import schema
-from ariadne import graphql_sync
-import json
-from django.contrib.auth.models import AnonymousUser
-from django.http import HttpRequest
 from core.models import Group, Subgroup
+from core.tests.helpers import PleioTenantTestCase
 from user.models import User
 from mixer.backend.django import mixer
-from graphql import GraphQLError
 
-class EditSubgroupTestCase(FastTenantTestCase):
+
+class EditSubgroupTestCase(PleioTenantTestCase):
 
     def setUp(self):
-        self.anonymousUser = AnonymousUser()
-        self.admin = mixer.blend(User, roles=['ADMIN']) 
+        super().setUp()
+        self.admin = mixer.blend(User, roles=['ADMIN'])
         self.user1 = mixer.blend(User)
         self.user2 = mixer.blend(User)
         self.user3 = mixer.blend(User)
         self.user4 = mixer.blend(User)
-        self.user5 = mixer.blend(User)        
+        self.user5 = mixer.blend(User)
 
         self.group = mixer.blend(Group, owner=self.user1)
         self.group.join(self.user2, 'member')
@@ -40,9 +34,9 @@ class EditSubgroupTestCase(FastTenantTestCase):
         self.user2.delete()
         self.user3.delete()
         self.admin.delete()
+        super().tearDown()
 
     def test_edit_subgroup_by_group_owner(self):
-
         mutation = """
             mutation SubgroupsModal($input: editSubgroupInput!) {
                 editSubgroup(input: $input) {
@@ -56,22 +50,18 @@ class EditSubgroupTestCase(FastTenantTestCase):
                 "name": "testSubgroupOther",
                 "members": [self.user3.guid, self.user4.guid],
                 "id": self.subgroup.id
-                }
             }
+        }
 
-        request = HttpRequest()
-        request.user = self.user1
+        self.graphql_client.force_login(self.user1)
+        result = self.graphql_client.post(mutation, variables)
 
-        result = graphql_sync(schema, { "query": mutation, "variables": variables }, context_value={ "request": request })
-
-        data = result[1]["data"]
+        data = result["data"]
 
         self.assertEqual(data["editSubgroup"]["success"], True)
         self.assertEqual(Subgroup.objects.get(id=self.subgroup.id).name, 'testSubgroupOther')
-
 
     def test_edit_subgroup_by_admin(self):
-
         mutation = """
             mutation SubgroupsModal($input: editSubgroupInput!) {
                 editSubgroup(input: $input) {
@@ -85,22 +75,18 @@ class EditSubgroupTestCase(FastTenantTestCase):
                 "name": "testSubgroupOther",
                 "members": [self.user3.guid, self.user4.guid],
                 "id": self.subgroup.id
-                }
             }
+        }
 
-        request = HttpRequest()
-        request.user = self.admin
+        self.graphql_client.force_login(self.admin)
+        result = self.graphql_client.post(mutation, variables)
 
-        result = graphql_sync(schema, { "query": mutation, "variables": variables }, context_value={ "request": request })
-
-        data = result[1]["data"]
+        data = result["data"]
 
         self.assertEqual(data["editSubgroup"]["success"], True)
         self.assertEqual(Subgroup.objects.get(id=self.subgroup.id).name, 'testSubgroupOther')
 
-
     def test_edit_subgroup_by_other_user(self):
-
         mutation = """
             mutation SubgroupsModal($input: editSubgroupInput!) {
                 editSubgroup(input: $input) {
@@ -114,21 +100,14 @@ class EditSubgroupTestCase(FastTenantTestCase):
                 "name": "testSubgroupOther",
                 "members": [self.user3.guid, self.user4.guid],
                 "id": self.subgroup.id
-                }
             }
+        }
 
-        request = HttpRequest()
-        request.user = self.user3
-
-        result = graphql_sync(schema, { "query": mutation, "variables": variables }, context_value={ "request": request })
-
-        errors = result[1]["errors"]
-
-        self.assertEqual(errors[0]["message"], "could_not_save")
-
+        with self.assertGraphQlError("could_not_save"):
+            self.graphql_client.force_login(self.user3)
+            self.graphql_client.post(mutation, variables)
 
     def test_edit_subgroup_by_anonymous(self):
-
         mutation = """
             mutation SubgroupsModal($input: editSubgroupInput!) {
                 editSubgroup(input: $input) {
@@ -142,21 +121,13 @@ class EditSubgroupTestCase(FastTenantTestCase):
                 "name": "testSubgroupOther",
                 "members": [self.user3.guid, self.user4.guid],
                 "id": self.subgroup.id
-                }
             }
+        }
 
-        request = HttpRequest()
-        request.user = self.anonymousUser
-
-        result = graphql_sync(schema, { "query": mutation, "variables": variables }, context_value={ "request": request })
-
-        errors = result[1]["errors"]
-
-        self.assertEqual(errors[0]["message"], "not_logged_in")
-
+        with self.assertGraphQlError("not_logged_in"):
+            self.graphql_client.post(mutation, variables)
 
     def test_edit_subgroup_with_non_group_member(self):
-
         mutation = """
             mutation SubgroupsModal($input: editSubgroupInput!) {
                 editSubgroup(input: $input) {
@@ -170,14 +141,9 @@ class EditSubgroupTestCase(FastTenantTestCase):
                 "name": "testSubgroupOther",
                 "members": [self.user3.guid, self.user4.guid],
                 "id": self.subgroup.id
-                }
             }
+        }
 
-        request = HttpRequest()
-        request.user = self.user5
-
-        result = graphql_sync(schema, { "query": mutation, "variables": variables }, context_value={ "request": request })
-
-        errors = result[1]["errors"]
-
-        self.assertEqual(errors[0]["message"], "could_not_save")
+        with self.assertGraphQlError("could_not_save"):
+            self.graphql_client.force_login(self.user5)
+            self.graphql_client.post(mutation, variables)

@@ -1,172 +1,72 @@
-from django_tenants.test.cases import FastTenantTestCase
-from backend2.schema import schema
-from ariadne import graphql_sync
-from django.contrib.auth.models import AnonymousUser
-from django.http import HttpRequest
+from core.tests.helpers import PleioTenantTestCase
 from user.models import User
 from event.models import Event, EventAttendee
 from mixer.backend.django import mixer
 from unittest import mock
 
-class AttendEventWithoutAccountTestCase(FastTenantTestCase):
+
+class AttendEventWithoutAccountTestCase(PleioTenantTestCase):
 
     def setUp(self):
-        self.anonymousUser = AnonymousUser()
+        super().setUp()
         self.authenticatedUser = mixer.blend(User)
         self.event = mixer.blend(Event)
         self.event.max_attendees = 1
         self.event.save()
+
+        self.mutation = """
+            mutation RequestAttendance($input: attendEventWithoutAccountInput!) {
+                attendEvent: attendEventWithoutAccount(input: $input) {
+                    entity {
+                        guid
+                        ... on Event {
+                            title
+                            __typename
+                        }
+                        __typename
+                    }
+                    __typename
+                }
+            }
+        """
+        self.variables = {
+            "input": {
+                "guid": self.event.guid,
+                "name": "Pete",
+                "email": "pete@tenant.fast-test.com"
+            }
+        }
+        mock.patch('event.resolvers.mutation_attend_event.generate_code', return_value='6df8cdad5582833eeab4')
+
     def tearDown(self):
         self.event.delete()
         self.authenticatedUser.delete()
+        super().tearDown()
 
-    @mock.patch('event.resolvers.mutation_attend_event.generate_code', return_value='6df8cdad5582833eeab4')
-    def test_create_attend_event_without_account_request(self, mocked_generate_code):
-        mutation = """
-            mutation RequestAttendance($input: attendEventWithoutAccountInput!) {
-                attendEventWithoutAccount(input: $input) {
-                    entity {
-                        guid
-                        ... on Event {
-                            title
-                            __typename
-                        }
-                        __typename
-                    }
-                    __typename
-                }
-            }
-        """
+    def test_create_attend_event_without_account_request(self):
+        result = self.graphql_client.post(self.mutation, self.variables)
 
-        variables = {
-            "input": {
-                "guid": self.event.guid,
-                "name": "pete",
-                "email": "pete@tenant.fast-test.com"
-            }
-        }
+        data = result["data"]
+        self.assertEqual(data["attendEvent"]["entity"]["guid"], self.event.guid)
 
-        request = HttpRequest()
-        request.user = self.anonymousUser
+    def test_attend_event_without_account_resend(self):
+        self.graphql_client.post(self.mutation, self.variables)
 
-        result = graphql_sync(schema, { "query": mutation, "variables": variables }, context_value={ "request": request })
+        self.variables['input']['resend'] = True
+        result = self.graphql_client.post(self.mutation, self.variables)
 
-        data = result[1]["data"]
-
-        link = "https://tenant.fast-test.com/events/confirm/" + self.event.guid + "?email=pete@tenant.fast-test.com&code=6df8cdad5582833eeab4"
-        subject = "Confirmation of registration %s" % self.event.title
-        context = {'link': link, 'title': self.event.title, 'location': self.event.location, 'start_date': self.event.start_date}
-        self.assertEqual(data["attendEventWithoutAccount"]["entity"]["guid"], self.event.guid)
-        self.assertEqual(data["attendEventWithoutAccount"]["entity"]["title"], self.event.title)
-
-
-    @mock.patch('event.resolvers.mutation_attend_event.generate_code', return_value='6df8cdad5582833eeab4')
-    def test_attend_event_without_account_resend(self, mocked_generate_code):
-        mutation = """
-            mutation RequestAttendance($input: attendEventWithoutAccountInput!) {
-                attendEventWithoutAccount(input: $input) {
-                    entity {
-                        guid
-                        ... on Event {
-                            title
-                            __typename
-                        }
-                        __typename
-                    }
-                    __typename
-                }
-            }
-        """
-
-        variables = {
-            "input": {
-                "guid": self.event.guid,
-                "name": "pete",
-                "email": "pete@tenant.fast-test.com"
-            }
-        }
-
-        request = HttpRequest()
-        request.user = self.anonymousUser
-
-        result = graphql_sync(schema, { "query": mutation, "variables": variables }, context_value={ "request": request })
-        variables = {
-            "input": {
-                "guid": self.event.guid,
-                "name": "pete",
-                "email": "pete@tenant.fast-test.com",
-                "resend": True
-            }
-        }
-        result = graphql_sync(schema, { "query": mutation, "variables": variables }, context_value={ "request": request })
-
-        data = result[1]["data"]
-
-        link = "https://tenant.fast-test.com/events/confirm/" + self.event.guid + "?email=pete@tenant.fast-test.com&code=6df8cdad5582833eeab4"
-        subject = "Confirmation of registration %s" % self.event.title
-
-        self.assertEqual(data["attendEventWithoutAccount"]["entity"]["guid"], self.event.guid)
-        self.assertEqual(data["attendEventWithoutAccount"]["entity"]["title"], self.event.title)
+        data = result["data"]
+        self.assertEqual(data["attendEvent"]["entity"]["guid"], self.event.guid)
 
     def test_attend_event_without_account_attend_twice(self):
-        mutation = """
-            mutation RequestAttendance($input: attendEventWithoutAccountInput!) {
-                attendEventWithoutAccount(input: $input) {
-                    entity {
-                        guid
-                        ... on Event {
-                            title
-                            __typename
-                        }
-                        __typename
-                    }
-                    __typename
-                }
-            }
-        """
+        # given
+        self.graphql_client.post(self.mutation, self.variables)
 
-        variables = {
-            "input": {
-                "guid": self.event.guid,
-                "name": "pete",
-                "email": "pete@tenant.fast-test.com"
-            }
-        }
-
-        request = HttpRequest()
-        request.user = self.anonymousUser
-
-        result = graphql_sync(schema, { "query": mutation, "variables": variables }, context_value={ "request": request })
-        result = graphql_sync(schema, { "query": mutation, "variables": variables }, context_value={ "request": request })
-
-        errors = result[1]["errors"]
-
-        self.assertEqual(errors[0]["message"], "email_already_used")
+        # when, then
+        with self.assertGraphQlError("email_already_used"):
+            self.graphql_client.post(self.mutation, self.variables)
 
     def test_attend_event_is_full_without_account(self):
-        mutation = """
-            mutation RequestAttendance($input: attendEventWithoutAccountInput!) {
-                attendEventWithoutAccount(input: $input) {
-                    entity {
-                        guid
-                        ... on Event {
-                            title
-                            __typename
-                        }
-                        __typename
-                    }
-                    __typename
-                }
-            }
-        """
-
-        variables = {
-            "input": {
-                "guid": self.event.guid,
-                "name": "pete",
-                "email": "pete@tenant.fast-test.com"
-            }
-        }
         EventAttendee.objects.create(
             event=self.event,
             state='accept',
@@ -174,43 +74,15 @@ class AttendEventWithoutAccountTestCase(FastTenantTestCase):
             email=self.authenticatedUser.email
         )
 
-        request = HttpRequest()
-        request.user = self.anonymousUser
+        result = self.graphql_client.post(self.mutation, self.variables)
 
-        result = graphql_sync(schema, { "query": mutation, "variables": variables }, context_value={ "request": request })
-        
-        self.assertTrue(result[0])
+        data = result["data"]
+        self.assertEqual(data["attendEvent"]["entity"]["guid"], self.event.guid)
 
+    def test_attend_event_without_account_no_name(self):
+        # Given
+        self.variables['input']['name'] = ""
 
-    @mock.patch('event.resolvers.mutation_attend_event.generate_code', return_value='6df8cdad5582833eeab4')
-    def test_attend_event_without_account_no_name(self, mocked_generate_code):
-        variables = {
-            "input": {
-                "guid": self.event.guid,
-                "name": "",
-                "email": "pete@tenant.fast-test.com"
-            }
-        }
-        mutation = """
-            mutation RequestAttendance($input: attendEventWithoutAccountInput!) {
-                attendEventWithoutAccount(input: $input) {
-                    entity {
-                        guid
-                        ... on Event {
-                            title
-                            __typename
-                        }
-                        __typename
-                    }
-                    __typename
-                }
-            }
-        """
-
-        request = HttpRequest()
-        request.user = self.anonymousUser
-
-        result = graphql_sync(schema, { "query": mutation, "variables": variables }, context_value={ "request": request })
-        errors = result[1]["errors"]
-
-        self.assertEqual(errors[0]["message"], "invalid_name")
+        # When, then
+        with self.assertGraphQlError("invalid_name"):
+            self.graphql_client.post(self.mutation, self.variables)

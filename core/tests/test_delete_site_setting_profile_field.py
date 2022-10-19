@@ -1,22 +1,15 @@
 from django.db import connection
-from django_tenants.test.cases import FastTenantTestCase
-from backend2.schema import schema
-from ariadne import graphql_sync
-import json
 from django.core.cache import cache
-from core import config
-from core.lib import is_valid_json
-from django.contrib.auth.models import AnonymousUser
-from django.http import HttpRequest
-from core.models import Group, ProfileField, Setting, UserProfileField
+from core.models import ProfileField, UserProfileField
+from core.tests.helpers import PleioTenantTestCase
 from user.models import User
 from mixer.backend.django import mixer
-from graphql import GraphQLError
 
-class DeleteSiteSettingProfileFieldTestCase(FastTenantTestCase):
+
+class DeleteSiteSettingProfileFieldTestCase(PleioTenantTestCase):
 
     def setUp(self):
-        self.anonymousUser = AnonymousUser()
+        super().setUp()
         self.user1 = mixer.blend(User)
         self.user2 = mixer.blend(User)
         self.admin = mixer.blend(User, roles=['ADMIN'])
@@ -33,10 +26,9 @@ class DeleteSiteSettingProfileFieldTestCase(FastTenantTestCase):
         self.user1.delete()
         self.user2.delete()
         cache.clear()
-
+        super().tearDown()
 
     def test_delete_site_setting_profile_field_by_anonymous(self):
-
         mutation = """
             mutation deleteSiteSettingProfileField($input: deleteSiteSettingProfileFieldInput!) {
                 deleteSiteSettingProfileField(input: $input) {
@@ -50,18 +42,10 @@ class DeleteSiteSettingProfileFieldTestCase(FastTenantTestCase):
             }
         }
 
-        request = HttpRequest()
-        request.user = self.anonymousUser
-
-        result = graphql_sync(schema, { "query": mutation, "variables": variables }, context_value={ "request": request })
-
-        errors = result[1]["errors"]
-
-        self.assertEqual(errors[0]["message"], "not_logged_in")
-
+        with self.assertGraphQlError("not_logged_in"):
+            self.graphql_client.post(mutation, variables)
 
     def test_delete_profile_field_by_user(self):
-
         mutation = """
             mutation deleteSiteSettingProfileField($input: deleteSiteSettingProfileFieldInput!) {
                 deleteSiteSettingProfileField(input: $input) {
@@ -74,18 +58,12 @@ class DeleteSiteSettingProfileFieldTestCase(FastTenantTestCase):
                 "guid": str(self.profileField1.id)
             }
         }
-        request = HttpRequest()
-        request.user = self.user1
 
-        result = graphql_sync(schema, { "query": mutation, "variables": variables }, context_value={ "request": request })
-
-        errors = result[1]["errors"]
-
-        self.assertEqual(errors[0]["message"], "user_not_site_admin")
-
+        with self.assertGraphQlError("user_not_site_admin"):
+            self.graphql_client.force_login(self.user1)
+            self.graphql_client.post(mutation, variables)
 
     def test_delete_site_setting_profile_field_by_admin(self):
-
         mutation = """
             mutation deleteSiteSettingProfileField($input: deleteSiteSettingProfileFieldInput!) {
                 deleteSiteSettingProfileField(input: $input) {
@@ -99,23 +77,19 @@ class DeleteSiteSettingProfileFieldTestCase(FastTenantTestCase):
             }
         }
 
-        request = HttpRequest()
-        request.user = self.admin
+        self.graphql_client.force_login(self.admin)
+        result = self.graphql_client.post(mutation, variables)
 
-        result = graphql_sync(schema, { "query": mutation, "variables": variables }, context_value={ "request": request })
-        data = result[1]["data"]
-
+        data = result["data"]
         self.assertEqual(data["deleteSiteSettingProfileField"]["success"], True)
         self.assertEqual(ProfileField.objects.all().count(), 1)
         self.assertEqual(UserProfileField.objects.all().count(), 1)
 
-
     def test_profile_sections_after_delete_by_admin(self):
-
         cache.set("%s%s" % (connection.schema_name, 'PROFILE_SECTIONS'),
-            [{"name": "section_one", "profileFieldGuids": [str(self.profileField1.id)]},
-            {"name": "section_two", "profileFieldGuids": [str(self.profileField2.id)]}]
-        )
+                  [{"name": "section_one", "profileFieldGuids": [str(self.profileField1.id)]},
+                   {"name": "section_two", "profileFieldGuids": [str(self.profileField2.id)]}]
+                  )
 
         mutation = """
             mutation deleteSiteSettingProfileField($input: deleteSiteSettingProfileFieldInput!) {
@@ -142,12 +116,10 @@ class DeleteSiteSettingProfileFieldTestCase(FastTenantTestCase):
             }
         }
 
-        request = HttpRequest()
-        request.user = self.admin
+        self.graphql_client.force_login(self.admin)
+        self.graphql_client.post(mutation, variables)
+        result = self.graphql_client.post(query, variables)
 
-        graphql_sync(schema, { "query": mutation, "variables": variables }, context_value={ "request": request })
-        result = graphql_sync(schema, { "query": query, "variables": variables }, context_value={ "request": request })
-        data = result[1]["data"]
-
+        data = result["data"]
         self.assertEqual(data["siteSettings"]["profileSections"], [{"name": "section_one", "profileFieldGuids": []},
                                                                    {"name": "section_two", "profileFieldGuids": [str(self.profileField2.id)]}])

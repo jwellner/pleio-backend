@@ -3,20 +3,17 @@ from django.utils import timezone
 from django_tenants.test.cases import FastTenantTestCase
 from core.models import Group, GroupInvitation, Entity
 from core.models.tags import Tag, TagSynonym
+from core.tests.helpers import PleioTenantTestCase
 from user.models import User
 from file.models import FileFolder
-from core.constances import ACCESS_TYPE, ENTITY_STATUS
-from backend2.schema import schema
-from ariadne import graphql_sync
-from django.contrib.auth.models import AnonymousUser
-from django.http import HttpRequest
+from core.constances import ACCESS_TYPE
 from mixer.backend.django import mixer
 
 
-class EntityTestCase(FastTenantTestCase):
+class EntityTestCase(PleioTenantTestCase):
 
     def setUp(self):
-        self.anonymousUser = AnonymousUser()
+        super().setUp()
         self.authenticatedUser = mixer.blend(User)
         self.user1 = mixer.blend(User)
         self.group = mixer.blend(Group, owner=self.authenticatedUser)
@@ -54,6 +51,7 @@ class EntityTestCase(FastTenantTestCase):
         self.folder.delete()
         self.user1.delete()
         self.authenticatedUser.delete()
+        super().tearDown()
 
     def test_entity_user_anonymous(self):
         query = """
@@ -68,19 +66,14 @@ class EntityTestCase(FastTenantTestCase):
                 }
             }
         """
-        request = HttpRequest()
-        request.user = self.anonymousUser
 
         variables = {
             "username": self.authenticatedUser.guid
         }
 
-        result = graphql_sync(schema, {"query": query, "variables": variables}, context_value={"request": request})
+        result = self.graphql_client.post(query, variables)
 
-        self.assertTrue(result[0])
-
-        data = result[1]["data"]
-
+        data = result["data"]
         self.assertEqual(data["entity"]["guid"], self.authenticatedUser.guid)
         self.assertEqual(data["entity"]["email"], None)
         self.assertEqual(data["entity"]["__typename"], "User")
@@ -98,19 +91,14 @@ class EntityTestCase(FastTenantTestCase):
                 }
             }
         """
-        request = HttpRequest()
-        request.user = self.authenticatedUser
-
         variables = {
             "username": self.authenticatedUser.guid
         }
 
-        result = graphql_sync(schema, {"query": query, "variables": variables}, context_value={"request": request})
+        self.graphql_client.force_login(self.authenticatedUser)
+        result = self.graphql_client.post(query, variables)
 
-        self.assertTrue(result[0])
-
-        data = result[1]["data"]
-
+        data = result["data"]
         self.assertEqual(data["entity"]["guid"], self.authenticatedUser.guid)
         self.assertEqual(data["entity"]["email"], self.authenticatedUser.email)
         self.assertEqual(data["entity"]["__typename"], "User")
@@ -125,19 +113,14 @@ class EntityTestCase(FastTenantTestCase):
                 }
             }
         """
-        request = HttpRequest()
-        request.user = self.authenticatedUser
-
         variables = {
             "guid": self.authenticatedUser.guid
         }
 
-        result = graphql_sync(schema, {"query": query, "variables": variables}, context_value={"request": request})
+        self.graphql_client.force_login(self.authenticatedUser)
+        result = self.graphql_client.post(query, variables)
 
-        self.assertTrue(result[0])
-
-        data = result[1]["data"]
-
+        data = result["data"]
         self.assertEqual(data["entity"]["guid"], self.authenticatedUser.guid)
         self.assertEqual(data["entity"]["__typename"], "User")
 
@@ -151,19 +134,15 @@ class EntityTestCase(FastTenantTestCase):
                 }
             }
         """
-        request = HttpRequest()
-        request.user = self.authenticatedUser
 
         variables = {
             "guid": self.group.guid
         }
 
-        result = graphql_sync(schema, {"query": query, "variables": variables}, context_value={"request": request})
+        self.graphql_client.force_login(self.authenticatedUser)
+        result = self.graphql_client.post(query, variables)
 
-        self.assertTrue(result[0])
-
-        data = result[1]["data"]
-
+        data = result["data"]
         self.assertEqual(data["entity"]["guid"], self.group.guid)
         self.assertEqual(data["entity"]["__typename"], "Group")
 
@@ -177,19 +156,14 @@ class EntityTestCase(FastTenantTestCase):
                 }
             }
         """
-        request = HttpRequest()
-        request.user = self.authenticatedUser
-
         variables = {
             "guid": self.file.guid
         }
 
-        result = graphql_sync(schema, {"query": query, "variables": variables}, context_value={"request": request})
+        self.graphql_client.force_login(self.authenticatedUser)
+        result = self.graphql_client.post(query, variables)
 
-        self.assertTrue(result[0])
-
-        data = result[1]["data"]
-
+        data = result["data"]
         self.assertEqual(data["entity"]["guid"], self.file.guid)
         self.assertEqual(data["entity"]["__typename"], "File")
 
@@ -203,16 +177,14 @@ class EntityTestCase(FastTenantTestCase):
         """
         self.file.is_archived = True
         self.file.save()
-        request = HttpRequest()
-        request.user = self.authenticatedUser
         variables = {
             "guid": self.file.guid
         }
 
-        result = graphql_sync(schema, {"query": query, "variables": variables}, context_value={"request": request})
+        self.graphql_client.force_login(self.authenticatedUser)
+        result = self.graphql_client.post(query, variables)
 
-        self.assertTrue(result[0])
-        data = result[1]["data"]
+        data = result["data"]
         self.assertEqual(data["entity"]["guid"], self.file.guid)
 
     def test_entity_breadcrumb_file_folder(self):
@@ -233,19 +205,14 @@ class EntityTestCase(FastTenantTestCase):
                 }
             }
         """
-        request = HttpRequest()
-        request.user = self.authenticatedUser
-
         variables = {
             "guid": self.file.guid
         }
 
-        result = graphql_sync(schema, {"query": query, "variables": variables}, context_value={"request": request})
+        self.graphql_client.force_login(self.authenticatedUser)
+        result = self.graphql_client.post(query, variables)
 
-        self.assertTrue(result[0])
-
-        data = result[1]["data"]
-
+        data = result["data"]
         self.assertEqual(data["breadcrumb"][0]["guid"], self.folder.guid)
         self.assertEqual(data["breadcrumb"][1]["guid"], self.subFolder.guid)
 
