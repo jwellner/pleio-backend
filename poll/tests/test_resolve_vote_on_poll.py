@@ -6,6 +6,7 @@ import json
 from django.contrib.auth.models import AnonymousUser
 from django.http import HttpRequest
 from core.models import Group
+from core.tests.helpers import PleioTenantTestCase
 from user.models import User
 from ..models import Poll, PollChoice
 from core.constances import ACCESS_TYPE
@@ -14,10 +15,10 @@ from graphql import GraphQLError
 from datetime import datetime
 
 
-class VoteOnPollTestCase(FastTenantTestCase):
+class VoteOnPollTestCase(PleioTenantTestCase):
 
     def setUp(self):
-        self.anonymousUser = AnonymousUser()
+        super().setUp()
         self.authenticatedUser1 = mixer.blend(User)
         self.authenticatedUser2 = mixer.blend(User)
         self.poll = mixer.blend(
@@ -63,18 +64,15 @@ class VoteOnPollTestCase(FastTenantTestCase):
         self.poll.delete()
         self.authenticatedUser1.delete()
         self.authenticatedUser2.delete()
+        super().tearDown()
 
     def test_vote_on_poll(self):
-
         variables = self.data
 
-        request = HttpRequest()
-        request.user = self.authenticatedUser1
+        self.graphql_client.force_login(self.authenticatedUser1)
+        result = self.graphql_client.post(self.mutation, variables)
 
-        result = graphql_sync(schema, {"query": self.mutation, "variables": variables }, context_value={ "request": request })
-
-        data = result[1]["data"]
-
+        data = result["data"]
         self.assertEqual(data["voteOnPoll"]["entity"]["guid"], self.poll.guid)
         self.assertEqual(data["voteOnPoll"]["entity"]["hasVoted"], True)
         self.assertEqual(len(data["voteOnPoll"]["entity"]["choices"]), 3)
@@ -83,12 +81,10 @@ class VoteOnPollTestCase(FastTenantTestCase):
         self.assertEqual(data["voteOnPoll"]["entity"]["choices"][1]["text"], "answer2")
         self.assertEqual(data["voteOnPoll"]["entity"]["choices"][1]["votes"], 1)
 
-        request.user = self.authenticatedUser2
+        self.graphql_client.force_login(self.authenticatedUser2)
+        result = self.graphql_client.post(self.mutation, variables)
 
-        result = graphql_sync(schema, {"query": self.mutation, "variables": variables }, context_value={ "request": request })
-
-        data = result[1]["data"]
-
+        data = result["data"]
         self.assertEqual(data["voteOnPoll"]["entity"]["guid"], self.poll.guid)
         self.assertEqual(data["voteOnPoll"]["entity"]["hasVoted"], True)
         self.assertEqual(len(data["voteOnPoll"]["entity"]["choices"]), 3)
@@ -97,10 +93,5 @@ class VoteOnPollTestCase(FastTenantTestCase):
         self.assertEqual(data["voteOnPoll"]["entity"]["choices"][1]["text"], "answer2")
         self.assertEqual(data["voteOnPoll"]["entity"]["choices"][1]["votes"], 2)
 
-        request.user = self.authenticatedUser2
-
-        result = graphql_sync(schema, {"query": self.mutation, "variables": variables }, context_value={ "request": request })
-
-        errors = result[1]["errors"]
-
-        self.assertEqual(errors[0]["message"], "already_voted")
+        with self.assertGraphQlError("already_voted"):
+            self.graphql_client.post(self.mutation, variables)

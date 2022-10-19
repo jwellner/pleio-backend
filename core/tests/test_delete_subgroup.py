@@ -1,25 +1,19 @@
-from django.db import connection
-from django_tenants.test.cases import FastTenantTestCase
-from backend2.schema import schema
-from ariadne import graphql_sync
-import json
-from django.contrib.auth.models import AnonymousUser
-from django.http import HttpRequest
 from core.models import Group, Subgroup
+from core.tests.helpers import PleioTenantTestCase
 from user.models import User
 from mixer.backend.django import mixer
-from graphql import GraphQLError
 
-class DeleteSubgroupTestCase(FastTenantTestCase):
+
+class DeleteSubgroupTestCase(PleioTenantTestCase):
 
     def setUp(self):
-        self.anonymousUser = AnonymousUser()
-        self.admin = mixer.blend(User, roles=['ADMIN']) 
+        super().setUp()
+        self.admin = mixer.blend(User, roles=['ADMIN'])
         self.user1 = mixer.blend(User)
         self.user2 = mixer.blend(User)
         self.user3 = mixer.blend(User)
         self.user4 = mixer.blend(User)
-        self.user5 = mixer.blend(User)        
+        self.user5 = mixer.blend(User)
 
         self.group = mixer.blend(Group, owner=self.user1)
         self.group.join(self.user2, 'member')
@@ -40,7 +34,6 @@ class DeleteSubgroupTestCase(FastTenantTestCase):
         self.subgroup2.members.add(self.user2)
         self.subgroup2.members.add(self.user4)
 
-
     def tearDown(self):
         self.subgroup1.delete()
         self.subgroup2.delete()
@@ -49,10 +42,9 @@ class DeleteSubgroupTestCase(FastTenantTestCase):
         self.user2.delete()
         self.user3.delete()
         self.admin.delete()
-
+        super().tearDown()
 
     def test_delete_subgroup_by_group_owner(self):
-
         mutation = """
             mutation SubgroupItem($input: deleteSubgroupInput!) {
                 deleteSubgroup(input: $input) {
@@ -64,22 +56,18 @@ class DeleteSubgroupTestCase(FastTenantTestCase):
         variables = {
             "input": {
                 "id": self.subgroup1.id
-                }
             }
+        }
 
-        request = HttpRequest()
-        request.user = self.user1
+        self.graphql_client.force_login(self.user1)
+        result = self.graphql_client.post(mutation, variables)
 
-        result = graphql_sync(schema, { "query": mutation, "variables": variables }, context_value={ "request": request })
-
-        data = result[1]["data"]
-
+        data = result["data"]
         self.assertEqual(data["deleteSubgroup"]["success"], True)
         self.assertEqual(len(Group.objects.get(id=self.group.id).subgroups.all()), 1)
         self.assertEqual(Group.objects.get(id=self.group.id).subgroups.all()[0], self.subgroup2)
 
     def test_delete_subgroup_by_admin(self):
-
         mutation = """
             mutation SubgroupItem($input: deleteSubgroupInput!) {
                 deleteSubgroup(input: $input) {
@@ -91,22 +79,18 @@ class DeleteSubgroupTestCase(FastTenantTestCase):
         variables = {
             "input": {
                 "id": self.subgroup1.id
-                }
             }
+        }
 
-        request = HttpRequest()
-        request.user = self.admin
+        self.graphql_client.force_login(self.admin)
+        result = self.graphql_client.post(mutation, variables)
 
-        result = graphql_sync(schema, { "query": mutation, "variables": variables }, context_value={ "request": request })
-
-        data = result[1]["data"]
-
+        data = result["data"]
         self.assertEqual(data["deleteSubgroup"]["success"], True)
         self.assertEqual(len(Group.objects.get(id=self.group.id).subgroups.all()), 1)
         self.assertEqual(Group.objects.get(id=self.group.id).subgroups.all()[0], self.subgroup2)
 
     def test_delete_subgroup_by_other_user(self):
-
         mutation = """
             mutation SubgroupItem($input: deleteSubgroupInput!) {
                 deleteSubgroup(input: $input) {
@@ -118,21 +102,14 @@ class DeleteSubgroupTestCase(FastTenantTestCase):
         variables = {
             "input": {
                 "id": self.subgroup1.id
-                }
             }
+        }
 
-        request = HttpRequest()
-        request.user = self.user3
-
-        result = graphql_sync(schema, { "query": mutation, "variables": variables }, context_value={ "request": request })
-
-        errors = result[1]["errors"]
-
-        self.assertEqual(errors[0]["message"], "could_not_save")
-
+        with self.assertGraphQlError("could_not_save"):
+            self.graphql_client.force_login(self.user3)
+            self.graphql_client.post(mutation, variables)
 
     def test_delete_subgroup_by_anonymous(self):
-
         mutation = """
             mutation SubgroupItem($input: deleteSubgroupInput!) {
                 deleteSubgroup(input: $input) {
@@ -144,14 +121,8 @@ class DeleteSubgroupTestCase(FastTenantTestCase):
         variables = {
             "input": {
                 "id": self.subgroup1.id
-                }
             }
+        }
 
-        request = HttpRequest()
-        request.user = self.anonymousUser
-
-        result = graphql_sync(schema, { "query": mutation, "variables": variables }, context_value={ "request": request })
-
-        errors = result[1]["errors"]
-
-        self.assertEqual(errors[0]["message"], "not_logged_in")
+        with self.assertGraphQlError("not_logged_in"):
+            self.graphql_client.post(mutation, variables)

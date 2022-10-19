@@ -1,25 +1,14 @@
-from django.conf import settings
 from django.core.cache import cache
 from django.db import connection
-from django_tenants.test.cases import FastTenantTestCase
-from django.utils import translation
-from backend2.schema import schema
-from ariadne import graphql_sync
-import json
-from django.contrib.auth.models import AnonymousUser
-from django.http import HttpRequest
-from core.models import Group
-from core.lib import get_language_options
+from core.tests.helpers import PleioTenantTestCase
 from user.models import User
 from mixer.backend.django import mixer
-from graphql import GraphQLError
-from unittest import mock
 
 
-class EditNotificationsTestCase(FastTenantTestCase):
+class EditNotificationsTestCase(PleioTenantTestCase):
 
     def setUp(self):
-        self.anonymousUser = AnonymousUser()
+        super().setUp()
         self.user1 = mixer.blend(User)
         self.user2 = mixer.blend(User)
         self.admin = mixer.blend(User)
@@ -31,6 +20,7 @@ class EditNotificationsTestCase(FastTenantTestCase):
         self.admin.delete()
         self.user2.delete()
         self.user1.delete()
+        super().tearDown()
 
     def test_edit_notifications_by_owner(self):
         mutation = """
@@ -55,23 +45,18 @@ class EditNotificationsTestCase(FastTenantTestCase):
                 "emailNotificationsFrequency": 24,
                 "newsletter": True,
                 "language": "en"
-                }
             }
+        }
 
-        request = HttpRequest()
-        request.user = self.user1
+        self.graphql_client.force_login(self.user1)
+        result = self.graphql_client.post(mutation, variables)
 
-        result = graphql_sync(schema, {"query": mutation, "variables": variables}, context_value={ "request": request })
-
-        self.assertTrue(result[0])
-        data = result[1]["data"]
-
+        data = result["data"]
         self.assertEqual(data["editNotifications"]["user"]["guid"], self.user1.guid)
         self.assertEqual(data["editNotifications"]["user"]["getsNewsletter"], True)
         self.assertEqual(data["editNotifications"]["user"]["emailNotifications"], True)
         self.assertEqual(data["editNotifications"]["user"]["emailNotificationsFrequency"], 24)
         self.assertEqual(data["editNotifications"]["user"]["language"], "en")
-
 
     def test_edit_notifications_by_admin(self):
         mutation = """
@@ -96,23 +81,18 @@ class EditNotificationsTestCase(FastTenantTestCase):
                 "emailNotificationsFrequency": 24,
                 "newsletter": False,
                 "language": "en"
-                }
             }
+        }
 
-        request = HttpRequest()
-        request.user = self.admin
+        self.graphql_client.force_login(self.admin)
+        result = self.graphql_client.post(mutation, variables)
 
-        result = graphql_sync(schema, {"query": mutation, "variables": variables}, context_value={ "request": request })
-
-        self.assertTrue(result[0])
-        data = result[1]["data"]
-
+        data = result["data"]
         self.assertEqual(data["editNotifications"]["user"]["guid"], self.user1.guid)
         self.assertEqual(data["editNotifications"]["user"]["getsNewsletter"], False)
         self.assertEqual(data["editNotifications"]["user"]["emailNotifications"], True)
         self.assertEqual(data["editNotifications"]["user"]["emailNotificationsFrequency"], 24)
         self.assertEqual(data["editNotifications"]["user"]["language"], "en")
-
 
     def test_edit_notifications_by_logged_in_user(self):
         mutation = """
@@ -135,20 +115,12 @@ class EditNotificationsTestCase(FastTenantTestCase):
                 "emailNotifications": True,
                 "emailNotificationsFrequency": 24,
                 "newsletter": False
-                }
             }
+        }
 
-
-        request = HttpRequest()
-        request.user = self.user2
-
-        result = graphql_sync(schema, {"query": mutation, "variables": variables}, context_value={ "request": request })
-
-        self.assertTrue(result[0])
-
-        errors = result[1]["errors"]
-
-        self.assertEqual(errors[0]["message"], "could_not_save")
+        with self.assertGraphQlError("could_not_save"):
+            self.graphql_client.force_login(self.user2)
+            self.graphql_client.post(mutation, variables)
 
     def test_edit_notifications_by_anonymous(self):
         mutation = """
@@ -171,16 +143,8 @@ class EditNotificationsTestCase(FastTenantTestCase):
                 "emailNotifications": True,
                 "emailNotificationsFrequency": 24,
                 "newsletter": False
-                }
             }
+        }
 
-        request = HttpRequest()
-        request.user = self.anonymousUser
-
-        result = graphql_sync(schema, {"query": mutation, "variables": variables}, context_value={ "request": request })
-
-        self.assertTrue(result[0])
-
-        errors = result[1]["errors"]
-
-        self.assertEqual(errors[0]["message"], "not_logged_in")
+        with self.assertGraphQlError("not_logged_in"):
+            self.graphql_client.post(mutation, variables)

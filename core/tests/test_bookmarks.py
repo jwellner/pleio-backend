@@ -1,5 +1,4 @@
 from django.contrib.auth.models import AnonymousUser
-from django.http import HttpRequest
 from mixer.backend.django import mixer
 
 from blog.models import Blog
@@ -126,15 +125,12 @@ class BookmarkTestCase(PleioTenantTestCase):
                 }
             }
         """
-        request = HttpRequest()
-        request.user = self.authenticatedUser
 
         variables = {}
 
         self.graphql_client.force_login(self.authenticatedUser)
-        result = result = self.graphql_client.post(query, variables)
+        result = self.graphql_client.post(query, variables)
 
         data = result["data"]
-       
         self.assertEqual(data["bookmarks"]["total"], 1)
         self.assertEqual(data["bookmarks"]["edges"][0]["guid"], self.blog2.guid)

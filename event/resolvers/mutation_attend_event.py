@@ -19,7 +19,7 @@ def resolve_attend_event_without_account(_, info, input):
     # pylint: disable=redefined-builtin
     # pylint: disable=unused-argument
 
-    clean_input = clean_graphql_input(input)
+    clean_input = clean_graphql_input(input, ['resend'])
     email = clean_input.get("email")
     name = validate_name(clean_input.get("name"))
 

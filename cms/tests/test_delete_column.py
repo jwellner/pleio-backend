@@ -1,21 +1,14 @@
-from django.db import connection
-from django_tenants.test.cases import FastTenantTestCase
-from backend2.schema import schema
-from ariadne import graphql_sync
-import json
-from django.contrib.auth.models import AnonymousUser
-from django.http import HttpRequest
-from core.models import Group
+from core.tests.helpers import PleioTenantTestCase
 from user.models import User
 from core.constances import ACCESS_TYPE, USER_ROLES
 from mixer.backend.django import mixer
-from graphql import GraphQLError
 from cms.models import Page, Row, Column
 
-class DeleteColumnTestCase(FastTenantTestCase):
+
+class DeleteColumnTestCase(PleioTenantTestCase):
 
     def setUp(self):
-        self.anonymousUser = AnonymousUser()
+        super().setUp()
         self.user = mixer.blend(User)
         self.admin = mixer.blend(User, roles=[USER_ROLES.ADMIN])
         self.editor = mixer.blend(User, roles=[USER_ROLES.EDITOR])
@@ -33,7 +26,6 @@ class DeleteColumnTestCase(FastTenantTestCase):
         self.column5 = mixer.blend(Column, position=4, row=self.row, page=self.page, width=[3])
 
     def test_delete_column_by_admin(self):
-
         mutation = """
             mutation deleteColumn($input: deleteColumnInput!) {
                 deleteColumn(input: $input) {
@@ -47,13 +39,10 @@ class DeleteColumnTestCase(FastTenantTestCase):
             }
         }
 
-        request = HttpRequest()
-        request.user = self.admin
+        self.graphql_client.force_login(self.admin)
+        result = self.graphql_client.post(mutation, variables)
 
-        result = graphql_sync(schema, {"query": mutation, "variables": variables }, context_value={ "request": request })
-
-        data = result[1]["data"]
-
+        data = result["data"]
         self.assertEqual(data["deleteColumn"]["success"], True)
         self.assertEqual(Column.objects.get(id=self.column1.id).position, 0)
         self.assertEqual(Column.objects.get(id=self.column2.id).position, 1)
@@ -61,7 +50,6 @@ class DeleteColumnTestCase(FastTenantTestCase):
         self.assertEqual(Column.objects.get(id=self.column5.id).position, 3)
 
     def test_delete_column_by_editor(self):
-
         mutation = """
             mutation deleteColumn($input: deleteColumnInput!) {
                 deleteColumn(input: $input) {
@@ -75,13 +63,10 @@ class DeleteColumnTestCase(FastTenantTestCase):
             }
         }
 
-        request = HttpRequest()
-        request.user = self.editor
+        self.graphql_client.force_login(self.editor)
+        result = self.graphql_client.post(mutation, variables)
 
-        result = graphql_sync(schema, {"query": mutation, "variables": variables }, context_value={ "request": request })
-
-        data = result[1]["data"]
-
+        data = result["data"]
         self.assertEqual(data["deleteColumn"]["success"], True)
         self.assertEqual(Column.objects.get(id=self.column1.id).position, 0)
         self.assertEqual(Column.objects.get(id=self.column2.id).position, 1)
@@ -89,7 +74,6 @@ class DeleteColumnTestCase(FastTenantTestCase):
         self.assertEqual(Column.objects.get(id=self.column5.id).position, 3)
 
     def test_delete_column_by_user(self):
-
         mutation = """
             mutation deleteColumn($input: deleteColumnInput!) {
                 deleteColumn(input: $input) {
@@ -103,18 +87,11 @@ class DeleteColumnTestCase(FastTenantTestCase):
             }
         }
 
-        request = HttpRequest()
-        request.user = self.user
-
-        result = graphql_sync(schema, {"query": mutation, "variables": variables }, context_value={ "request": request })
-
-        errors = result[1]["errors"]
-
-        self.assertEqual(errors[0]["message"], "could_not_save")
-
+        with self.assertGraphQlError("could_not_save"):
+            self.graphql_client.force_login(self.user)
+            self.graphql_client.post(mutation, variables)
 
     def test_delete_column_by_anonymous(self):
-
         mutation = """
             mutation deleteColumn($input: deleteColumnInput!) {
                 deleteColumn(input: $input) {
@@ -128,17 +105,10 @@ class DeleteColumnTestCase(FastTenantTestCase):
             }
         }
 
-        request = HttpRequest()
-        request.user = self.anonymousUser
-
-        result = graphql_sync(schema, {"query": mutation, "variables": variables }, context_value={ "request": request })
-
-        errors = result[1]["errors"]
-
-        self.assertEqual(errors[0]["message"], "not_logged_in")
+        with self.assertGraphQlError("not_logged_in"):
+            self.graphql_client.post(mutation, variables)
 
     def test_delete_column_by_other_user(self):
-
         mutation = """
             mutation deleteColumn($input: deleteColumnInput!) {
                 deleteColumn(input: $input) {
@@ -152,11 +122,6 @@ class DeleteColumnTestCase(FastTenantTestCase):
             }
         }
 
-        request = HttpRequest()
-        request.user = self.user2
-
-        result = graphql_sync(schema, {"query": mutation, "variables": variables }, context_value={ "request": request })
-
-        errors = result[1]["errors"]
-
-        self.assertEqual(errors[0]["message"], "could_not_save")
+        with self.assertGraphQlError("could_not_save"):
+            self.graphql_client.force_login(self.user2)
+            self.graphql_client.post(mutation, variables)

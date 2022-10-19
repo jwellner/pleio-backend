@@ -1,4 +1,3 @@
-from django.http import HttpRequest
 from core.models import Group
 from core.tests.helpers import PleioTenantTestCase
 from user.factories import UserFactory, AdminFactory
@@ -10,7 +9,7 @@ from mixer.backend.django import mixer
 class EditStatusUpdateTestCase(PleioTenantTestCase):
 
     def setUp(self):
-        super(EditStatusUpdateTestCase, self).setUp()
+        super().setUp()
 
         self.authenticated_user = UserFactory()
         self.user2 = UserFactory()
@@ -65,9 +64,6 @@ class EditStatusUpdateTestCase(PleioTenantTestCase):
 
     def test_edit_status_update(self):
         variables = self.data
-
-        request = HttpRequest()
-        request.user = self.authenticated_user
 
         self.graphql_client.force_login(self.authenticated_user)
         result = self.graphql_client.post(self.mutation, variables)

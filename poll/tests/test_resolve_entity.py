@@ -1,24 +1,15 @@
-from django.db import connection
-from django_tenants.test.cases import FastTenantTestCase
-from backend2.schema import schema
-from ariadne import graphql_sync
-import json
-from django.contrib.auth.models import AnonymousUser
-from django.http import HttpRequest
-from django.utils import timezone
-from core.models import Group
+from core.tests.helpers import PleioTenantTestCase
 from user.models import User
 from ..models import Poll
 from mixer.backend.django import mixer
 from core.constances import ACCESS_TYPE
-from core.lib import get_acl, access_id_to_acl
 from django.utils.text import slugify
 
 
-class PollTestCase(FastTenantTestCase):
+class PollTestCase(PleioTenantTestCase):
 
     def setUp(self):
-        self.anonymousUser = AnonymousUser()
+        super().setUp()
         self.authenticatedUser = mixer.blend(User)
 
         self.pollPublic = Poll.objects.create(
@@ -66,20 +57,13 @@ class PollTestCase(FastTenantTestCase):
         self.authenticatedUser.delete()
 
     def test_poll_anonymous(self):
-
-        request = HttpRequest()
-        request.user = self.anonymousUser
-
         variables = {
             "guid": self.pollPublic.guid
         }
 
-        result = graphql_sync(schema, { "query": self.query , "variables": variables}, context_value={ "request": request })
+        result = self.graphql_client.post(self.query, variables)
 
-        self.assertTrue(result[0])
-
-        data = result[1]["data"]
-
+        data = result["data"]
         self.assertEqual(data["entity"]["guid"], self.pollPublic.guid)
         self.assertEqual(data["entity"]["title"], self.pollPublic.title)
         self.assertEqual(data["entity"]["accessId"], 2)
@@ -90,28 +74,20 @@ class PollTestCase(FastTenantTestCase):
             "guid": self.pollPrivate.guid
         }
 
-        result = graphql_sync(schema, { "query": self.query , "variables": variables}, context_value={ "request": request })
+        result = self.graphql_client.post(self.query, variables)
 
-        self.assertTrue(result[0])
-
-        data = result[1]["data"]
-
+        data = result["data"]
         self.assertEqual(data["entity"], None)
 
     def test_poll_private(self):
-        request = HttpRequest()
-        request.user = self.authenticatedUser
-
         variables = {
             "guid": self.pollPrivate.guid
         }
 
-        result = graphql_sync(schema, { "query": self.query , "variables": variables}, context_value={ "request": request })
+        self.graphql_client.force_login(self.authenticatedUser)
+        result = self.graphql_client.post(self.query, variables)
 
-        self.assertTrue(result[0])
-
-        data = result[1]["data"]
-
+        data = result["data"]
         self.assertEqual(data["entity"]["guid"], self.pollPrivate.guid)
         self.assertEqual(data["entity"]["title"], self.pollPrivate.title)
         self.assertEqual(data["entity"]["accessId"], 0)

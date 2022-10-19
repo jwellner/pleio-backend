@@ -1,27 +1,23 @@
-from ariadne import graphql_sync
 from django.core.exceptions import ValidationError
-from django.http import HttpRequest
 from django.utils import timezone
-from django_tenants.test.cases import FastTenantTestCase
 from django.test import override_settings
 from mixer.backend.django import mixer
 
-from backend2.schema import schema
-from core.constances import ATTENDEE_ORDER_BY, ORDER_DIRECTION, USER_ROLES
+from core.constances import ATTENDEE_ORDER_BY, ORDER_DIRECTION
 from core.tests.helpers import PleioTenantTestCase
 from event.factories import EventFactory
 from event.models import Event, EventAttendee
 from event.tests.test_slots_available import create_slot
 from user.factories import AdminFactory, UserFactory
-from user.models import User
 
 
-class AttendeesTestCase(FastTenantTestCase):
+class AttendeesTestCase(PleioTenantTestCase):
 
     def setUp(self):
-        self.eventPublic = mixer.blend(Event)
+        super().setUp()
+        self.eventPublic = EventFactory(owner=UserFactory())
 
-        self.admin = mixer.blend(User, roles=[USER_ROLES.ADMIN])
+        self.admin = AdminFactory()
 
         mixer.blend(
             EventAttendee,
@@ -111,103 +107,79 @@ class AttendeesTestCase(FastTenantTestCase):
         self.assertTrue('Event attendee with this Event and User already exists.' in str(context.exception))
 
     def test_order_attendees_name(self):
-        request = HttpRequest()
-        request.user = self.admin
-
         variables = {
             "guid": self.eventPublic.guid,
             "orderBy": ATTENDEE_ORDER_BY.name
         }
 
-        result = graphql_sync(schema, {"query": self.query, "variables": variables}, context_value={"request": request})
+        self.graphql_client.force_login(self.admin)
+        result = self.graphql_client.post(self.query, variables)
 
-        self.assertTrue(result[0])
-        data = result[1]["data"]
-
+        data = result["data"]
         self.assertEqual(data["entity"]["attendees"]["edges"][0]["name"], "Bb")
         self.assertEqual(data["entity"]["attendees"]["edges"][1]["name"], "Cc")
         self.assertEqual(data["entity"]["attendees"]["edges"][2]["name"], "Dd")
         self.assertEqual(data["entity"]["attendees"]["edges"][3]["name"], "Ee")
 
     def test_order_attendees_email(self):
-        request = HttpRequest()
-        request.user = self.admin
-
         variables = {
             "guid": self.eventPublic.guid,
             "orderBy": ATTENDEE_ORDER_BY.email
         }
 
-        result = graphql_sync(schema, {"query": self.query, "variables": variables}, context_value={"request": request})
+        self.graphql_client.force_login(self.admin)
+        result = self.graphql_client.post(self.query, variables)
 
-        self.assertTrue(result[0])
-        data = result[1]["data"]
-
+        data = result["data"]
         self.assertEqual(data["entity"]["attendees"]["edges"][0]["name"], "Ee")
 
     def test_order_attendees_updated_at(self):
-        request = HttpRequest()
-        request.user = self.admin
-
         variables = {
             "guid": self.eventPublic.guid,
             "orderBy": ATTENDEE_ORDER_BY.timeUpdated
         }
 
-        result = graphql_sync(schema, {"query": self.query, "variables": variables}, context_value={"request": request})
+        self.graphql_client.force_login(self.admin)
+        result = self.graphql_client.post(self.query, variables)
 
-        self.assertTrue(result[0])
-        data = result[1]["data"]
-
+        data = result["data"]
         self.assertEqual(data["entity"]["attendees"]["edges"][0]["name"], "Dd")
 
     def test_order_attendees_name_desc(self):
-        request = HttpRequest()
-        request.user = self.admin
-
         variables = {
             "guid": self.eventPublic.guid,
             "orderBy": ATTENDEE_ORDER_BY.name,
             "orderDirection": ORDER_DIRECTION.desc
         }
 
-        result = graphql_sync(schema, {"query": self.query, "variables": variables}, context_value={"request": request})
+        self.graphql_client.force_login(self.admin)
+        result = self.graphql_client.post(self.query, variables)
 
-        self.assertTrue(result[0])
-        data = result[1]["data"]
-
+        data = result["data"]
         self.assertEqual(data["entity"]["attendees"]["edges"][0]["name"], "Ee")
 
     def test_checked_in_attendees(self):
-        request = HttpRequest()
-        request.user = self.admin
-
         variables = {
             "guid": self.eventPublic.guid,
             "isCheckedIn": True
         }
 
-        result = graphql_sync(schema, {"query": self.query, "variables": variables}, context_value={"request": request})
+        self.graphql_client.force_login(self.admin)
+        result = self.graphql_client.post(self.query, variables)
 
-        self.assertTrue(result[0])
-        data = result[1]["data"]
-
+        data = result["data"]
         self.assertEqual([d['name'] for d in data["entity"]["attendees"]["edges"]], ["Cc", "Ee"])
 
     def test_not_checked_in_attendees(self):
-        request = HttpRequest()
-        request.user = self.admin
-
         variables = {
             "guid": self.eventPublic.guid,
             "isCheckedIn": False
         }
 
-        result = graphql_sync(schema, {"query": self.query, "variables": variables}, context_value={"request": request})
+        self.graphql_client.force_login(self.admin)
+        result = self.graphql_client.post(self.query, variables)
 
-        self.assertTrue(result[0])
-        data = result[1]["data"]
-
+        data = result["data"]
         self.assertEqual([d['name'] for d in data["entity"]["attendees"]["edges"]], ['Bb', 'Dd'])
 
 

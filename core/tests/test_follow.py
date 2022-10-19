@@ -1,22 +1,14 @@
-from django.db import connection
-from django_tenants.test.cases import FastTenantTestCase
-from backend2.schema import schema
-from ariadne import graphql_sync
-import json
-from django.contrib.auth.models import AnonymousUser
-from django.http import HttpRequest
-from core.models import Group
+from core.tests.helpers import PleioTenantTestCase
 from user.models import User
 from blog.models import Blog
 from mixer.backend.django import mixer
 from core.constances import ACCESS_TYPE
-from core.lib import get_acl, access_id_to_acl
-from django.utils.text import slugify
 
-class FollowTestCase(FastTenantTestCase):
+
+class FollowTestCase(PleioTenantTestCase):
 
     def setUp(self):
-        self.anonymousUser = AnonymousUser()
+        super().setUp()
         self.authenticatedUser = mixer.blend(User)
 
         self.blog1 = Blog.objects.create(
@@ -32,9 +24,9 @@ class FollowTestCase(FastTenantTestCase):
         # self.blog1.get_follow(self.authenticatedUser).delete()
         self.blog1.delete()
         self.authenticatedUser.delete()
-    
-    def test_bookmark(self):
+        super().tearDown()
 
+    def test_bookmark(self):
         query = """
             mutation ($input: followInput!) {
                 follow(input: $input) {
@@ -44,10 +36,6 @@ class FollowTestCase(FastTenantTestCase):
                 }
             }
         """
-
-        request = HttpRequest()
-        request.user = self.authenticatedUser
-
         variables = {
             "input": {
                 "guid": self.blog1.guid,
@@ -55,12 +43,11 @@ class FollowTestCase(FastTenantTestCase):
             }
         }
 
-        result = graphql_sync(schema, { "query": query , "variables": variables}, context_value={ "request": request })
+        self.graphql_client.force_login(self.authenticatedUser)
+        result = self.graphql_client.post(query, variables)
 
-        self.assertTrue(result[0])
+        data = result["data"]
 
-        data = result[1]["data"]
-       
         self.assertEqual(data["follow"]["object"]["guid"], self.blog1.guid)
         self.assertTrue(self.blog1.is_following(self.authenticatedUser))
 
@@ -72,11 +59,8 @@ class FollowTestCase(FastTenantTestCase):
             }
         }
 
-        result = graphql_sync(schema, { "query": query , "variables": variables}, context_value={ "request": request })
+        result = self.graphql_client.post(query, variables)
 
-        self.assertTrue(result[0])
-
-        data = result[1]["data"]
-       
+        data = result["data"]
         self.assertEqual(data["follow"]["object"]["guid"], self.blog1.guid)
         self.assertFalse(self.blog1.is_following(self.authenticatedUser))

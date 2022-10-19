@@ -1,7 +1,4 @@
-from backend2.schema import schema
-from ariadne import graphql_sync
 from django.contrib.auth.models import AnonymousUser
-from django.http import HttpRequest
 from core.models import Group
 from core.tests.helpers import PleioTenantTestCase
 from user.models import User
@@ -134,9 +131,6 @@ class JoinGroupTestCase(PleioTenantTestCase):
                 }
             }
         """
-        request = HttpRequest()
-        request.user = self.user1
-
         variables = {"guid": self.group_auto.guid}
 
         self.graphql_client.force_login(self.user1)

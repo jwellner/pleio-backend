@@ -1,23 +1,16 @@
-from django.db import connection
-from django_tenants.test.cases import FastTenantTestCase
-from backend2.schema import schema
-from ariadne import graphql_sync
-import json
-from django.contrib.auth.models import AnonymousUser
-from django.http import HttpRequest
 from django.core.cache import cache
-from core.models import Group, Comment
+from core.models import Comment
+from core.tests.helpers import PleioTenantTestCase
 from user.models import User
 from question.models import Question
 from mixer.backend.django import mixer
 from core.constances import ACCESS_TYPE, USER_ROLES
-from core.lib import get_acl, access_id_to_acl
-from django.utils.text import slugify
 
-class ToggleBestAnswerTestCase(FastTenantTestCase):
+
+class ToggleBestAnswerTestCase(PleioTenantTestCase):
 
     def setUp(self):
-        self.anonymousUser = AnonymousUser()
+        super().setUp()
         self.authenticatedUser = mixer.blend(User)
         self.admin = mixer.blend(User, roles=[USER_ROLES.ADMIN])
         self.question_manager = mixer.blend(User, roles=[USER_ROLES.QUESTION_MANAGER])
@@ -37,16 +30,7 @@ class ToggleBestAnswerTestCase(FastTenantTestCase):
             container=self.question
         )
 
-        cache.set("%s%s" % (connection.schema_name, 'QUESTIONER_CAN_CHOOSE_BEST_ANSWER'), True)
-
-    def tearDown(self):
-        self.question.delete()
-        self.authenticatedUser.delete()
-        cache.clear()
-
-    def test_toggle_best_answer_owner(self):
-
-        query = """
+        self.query = """
             mutation ($input: toggleBestAnswerInput!) {
                 toggleBestAnswer(input: $input) {
                     entity {
@@ -59,21 +43,25 @@ class ToggleBestAnswerTestCase(FastTenantTestCase):
             }
         """
 
-        request = HttpRequest()
-        request.user = self.authenticatedUser
+        cache.set("%s%s" % (self.tenant.schema_name, 'QUESTIONER_CAN_CHOOSE_BEST_ANSWER'), True)
 
+    def tearDown(self):
+        self.question.delete()
+        self.authenticatedUser.delete()
+        cache.clear()
+        super().tearDown()
+
+    def test_toggle_best_answer_owner(self):
         variables = {
             "input": {
                 "guid": self.answer.guid,
             }
         }
 
-        result = graphql_sync(schema, { "query": query , "variables": variables}, context_value={ "request": request })
+        self.graphql_client.force_login(self.authenticatedUser)
+        result = self.graphql_client.post(self.query, variables)
 
-        self.assertTrue(result[0])
-
-        data = result[1]["data"]
-
+        data = result["data"]
         self.assertEqual(data["toggleBestAnswer"]["entity"]["guid"], self.question.guid)
         self.assertTrue(data["toggleBestAnswer"]["entity"]["comments"][0]["isBestAnswer"])
 
@@ -87,12 +75,9 @@ class ToggleBestAnswerTestCase(FastTenantTestCase):
             }
         }
 
-        result = graphql_sync(schema, { "query": query , "variables": variables}, context_value={ "request": request })
+        result = self.graphql_client.post(self.query, variables)
 
-        self.assertTrue(result[0])
-
-        data = result[1]["data"]
-
+        data = result["data"]
         self.assertEqual(data["toggleBestAnswer"]["entity"]["guid"], self.question.guid)
         self.assertFalse(data["toggleBestAnswer"]["entity"]["comments"][0]["isBestAnswer"])
 
@@ -101,35 +86,16 @@ class ToggleBestAnswerTestCase(FastTenantTestCase):
         self.assertIsNone(self.question.best_answer)
 
     def test_toggle_best_answer_admin(self):
-
-        query = """
-            mutation ($input: toggleBestAnswerInput!) {
-                toggleBestAnswer(input: $input) {
-                    entity {
-                        guid
-                        comments {
-                            isBestAnswer
-                        }
-                    }
-                }
-            }
-        """
-
-        request = HttpRequest()
-        request.user = self.admin
-
         variables = {
             "input": {
                 "guid": self.answer.guid,
             }
         }
 
-        result = graphql_sync(schema, { "query": query , "variables": variables}, context_value={ "request": request })
+        self.graphql_client.force_login(self.admin)
+        result = self.graphql_client.post(self.query, variables)
 
-        self.assertTrue(result[0])
-
-        data = result[1]["data"]
-
+        data = result["data"]
         self.assertEqual(data["toggleBestAnswer"]["entity"]["guid"], self.question.guid)
         self.assertTrue(data["toggleBestAnswer"]["entity"]["comments"][0]["isBestAnswer"])
 
@@ -143,12 +109,9 @@ class ToggleBestAnswerTestCase(FastTenantTestCase):
             }
         }
 
-        result = graphql_sync(schema, { "query": query , "variables": variables}, context_value={ "request": request })
+        result  =self.graphql_client.post(self.query, variables)
 
-        self.assertTrue(result[0])
-
-        data = result[1]["data"]
-
+        data = result["data"]
         self.assertEqual(data["toggleBestAnswer"]["entity"]["guid"], self.question.guid)
         self.assertFalse(data["toggleBestAnswer"]["entity"]["comments"][0]["isBestAnswer"])
 
@@ -157,35 +120,16 @@ class ToggleBestAnswerTestCase(FastTenantTestCase):
         self.assertIsNone(self.question.best_answer)
 
     def test_toggle_best_answer_question_manager(self):
-
-        query = """
-            mutation ($input: toggleBestAnswerInput!) {
-                toggleBestAnswer(input: $input) {
-                    entity {
-                        guid
-                        comments {
-                            isBestAnswer
-                        }
-                    }
-                }
-            }
-        """
-
-        request = HttpRequest()
-        request.user = self.question_manager
-
         variables = {
             "input": {
                 "guid": self.answer.guid,
             }
         }
 
-        result = graphql_sync(schema, { "query": query , "variables": variables}, context_value={ "request": request })
+        self.graphql_client.force_login(self.question_manager)
+        result = self.graphql_client.post(self.query, variables)
 
-        self.assertTrue(result[0])
-
-        data = result[1]["data"]
-
+        data = result["data"]
         self.assertEqual(data["toggleBestAnswer"]["entity"]["guid"], self.question.guid)
         self.assertTrue(data["toggleBestAnswer"]["entity"]["comments"][0]["isBestAnswer"])
 
@@ -199,12 +143,9 @@ class ToggleBestAnswerTestCase(FastTenantTestCase):
             }
         }
 
-        result = graphql_sync(schema, { "query": query , "variables": variables}, context_value={ "request": request })
+        result = self.graphql_client.post(self.query, variables)
 
-        self.assertTrue(result[0])
-
-        data = result[1]["data"]
-
+        data = result["data"]
         self.assertEqual(data["toggleBestAnswer"]["entity"]["guid"], self.question.guid)
         self.assertFalse(data["toggleBestAnswer"]["entity"]["comments"][0]["isBestAnswer"])
 

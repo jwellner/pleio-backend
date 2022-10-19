@@ -1,23 +1,14 @@
-from django.db import connection
-from django_tenants.test.cases import FastTenantTestCase
-from backend2.schema import schema
-from ariadne import graphql_sync
-import json
-from django.contrib.auth.models import AnonymousUser
-from django.http import HttpRequest
-from core.models import Group
-from user.models import User
+from core.tests.helpers import PleioTenantTestCase
+from user.factories import UserFactory
 from ..models import Task
 from core.constances import ACCESS_TYPE
-from mixer.backend.django import mixer
-from graphql import GraphQLError
-from datetime import datetime
 
-class EditTaskStateTestCase(FastTenantTestCase):
+
+class EditTaskStateTestCase(PleioTenantTestCase):
 
     def setUp(self):
-        self.anonymousUser = AnonymousUser()
-        self.authenticatedUser = mixer.blend(User)
+        super().setUp()
+        self.authenticatedUser = UserFactory()
 
         self.taskPublic = Task.objects.create(
             title="Test public update",
@@ -62,18 +53,10 @@ class EditTaskStateTestCase(FastTenantTestCase):
         """
 
     def test_edit_task_state(self):
-
-        variables = self.data
-
-        request = HttpRequest()
-        request.user = self.authenticatedUser
-
-        result = graphql_sync(schema, { "query": self.mutation, "variables": variables }, context_value={ "request": request })
-
-        data = result[1]["data"]
-
-        self.assertEqual(data["editTask"]["entity"]["state"], "DONE")
-
+        self.graphql_client.force_login(self.authenticatedUser)
+        result = self.graphql_client.post(self.mutation, self.data)
         self.taskPublic.refresh_from_db()
 
+        data = result["data"]
+        self.assertEqual(data["editTask"]["entity"]["state"], "DONE")
         self.assertEqual(data["editTask"]["entity"]["state"], self.taskPublic.state)

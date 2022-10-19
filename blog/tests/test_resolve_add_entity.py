@@ -1,8 +1,5 @@
 from django.utils import timezone
-from backend2.schema import schema
-from ariadne import graphql_sync
 from django.contrib.auth.models import AnonymousUser
-from django.http import HttpRequest
 from core.models import Group
 from core.tests.helpers import PleioTenantTestCase
 from user.models import User
@@ -14,10 +11,10 @@ from mixer.backend.django import mixer
 class AddBlogTestCase(PleioTenantTestCase):
 
     def setUp(self):
-        super(AddBlogTestCase, self).setUp()
+        super().setUp()
         self.anonymousUser = AnonymousUser()
         self.authenticatedUser = mixer.blend(User)
-        self.adminUser = mixer.blend(User, roles=['ADMIN'])
+        self.admin = mixer.blend(User, roles=['ADMIN'])
         self.group = mixer.blend(Group, owner=self.authenticatedUser, is_membership_on_request=False)
         self.group.join(self.authenticatedUser, 'owner')
         self.suggestedBlog = mixer.blend(Blog)
@@ -94,31 +91,23 @@ class AddBlogTestCase(PleioTenantTestCase):
         self.assertEqual(entity["suggestedItems"][1]["guid"], self.suggestedNews.guid)
 
     def test_add_blog_admin(self):
-        variables = self.data
+        self.graphql_client.force_login(self.admin)
+        result = self.graphql_client.post(self.mutation, self.data)
+        data = result["data"]
 
-        request = HttpRequest()
-        request.user = self.adminUser
-
-        result = graphql_sync(schema, {"query": self.mutation, "variables": variables}, context_value={"request": request})
-
-        data = result[1]["data"]
-
-        self.assertEqual(data["addEntity"]["entity"]["title"], variables["input"]["title"])
-        self.assertEqual(data["addEntity"]["entity"]["richDescription"], variables["input"]["richDescription"])
-        self.assertEqual(data["addEntity"]["entity"]["tags"], variables["input"]["tags"])
+        self.assertEqual(data["addEntity"]["entity"]["title"], self.data["input"]["title"])
+        self.assertEqual(data["addEntity"]["entity"]["richDescription"], self.data["input"]["richDescription"])
+        self.assertEqual(data["addEntity"]["entity"]["tags"], self.data["input"]["tags"])
         self.assertEqual(data["addEntity"]["entity"]["isRecommended"], True)
 
     def test_add_blog_to_group(self):
         variables = self.data
         variables["input"]["containerGuid"] = self.group.guid
 
-        request = HttpRequest()
-        request.user = self.authenticatedUser
+        self.graphql_client.force_login(self.authenticatedUser)
+        result = self.graphql_client.post(self.mutation, variables)
 
-        result = graphql_sync(schema, {"query": self.mutation, "variables": variables}, context_value={"request": request})
-
-        data = result[1]["data"]
-
+        data = result["data"]
         self.assertEqual(data["addEntity"]["entity"]["title"], variables["input"]["title"])
         self.assertEqual(data["addEntity"]["entity"]["richDescription"], variables["input"]["richDescription"])
         self.assertEqual(data["addEntity"]["entity"]["inGroup"], True)
@@ -168,13 +157,10 @@ class AddBlogTestCase(PleioTenantTestCase):
             }
         """
 
-        request = HttpRequest()
-        request.user = self.adminUser
+        self.graphql_client.force_login(self.admin)
+        result = self.graphql_client.post(mutation, variables)
 
-        result = graphql_sync(schema, {"query": mutation, "variables": variables}, context_value={"request": request})
-
-        data = result[1]["data"]
-
+        data = result["data"]
         self.assertEqual(data["addEntity"]["entity"]["title"], variables["input"]["title"])
         self.assertEqual(data["addEntity"]["entity"]["richDescription"], variables["input"]["richDescription"])
         self.assertEqual(data["addEntity"]["entity"]["tags"], variables["input"]["tags"])
@@ -192,6 +178,6 @@ class AddBlogTestCase(PleioTenantTestCase):
 
         self.graphql_client.force_login(self.authenticatedUser)
         result = self.graphql_client.post(self.mutation, variables)
-        entity = result["data"]["addEntity"]["entity"]
 
+        entity = result["data"]["addEntity"]["entity"]
         self.assertTrue(entity['canEdit'])
