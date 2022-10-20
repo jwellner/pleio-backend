@@ -156,6 +156,13 @@ DEFAULT_SITE_CONFIG = {
     'COLLAB_EDITING_ENABLED': (False, 'Is collaborative editing enabled'),
 
     'PRESERVE_FILE_EXIF': (False, 'Preserve the EXIF data of uploaded files'),
+
+    'ONLINEAFSPRAKEN_ENABLED': (None, "Onlineafspraken.nl enabled switch"),
+    'ONLINEAFSPRAKEN_KEY': (None, "Onlineafspraken.nl api key"),
+    'ONLINEAFSPRAKEN_SECRET': (None, "Onlineafspraken.nl api secret"),
+    'ONLINEAFSPRAKEN_URL': (None, "Override onlineafspraken.nl api url"),
+    'VIDEOCALL_ENABLED': (None, "Enable videocall api"),
+    'VIDEOCALL_API_URL': (None, "Override videocall api url"),
 }
 """
 Default site configuration

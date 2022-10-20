@@ -185,13 +185,13 @@ type addPagePayload {
 }
 
 input addPadInput {
-  title: String
-  containerGuid: String!
-  richDescription: SecureRichText!
+    title: String
+    containerGuid: String!
+    richDescription: SecureRichText!
 }
 
 type addPadPayload {
-  entity: Pad
+    entity: Pad
 }
 
 input addPollInput {
@@ -731,14 +731,14 @@ type editPagePayload {
 }
 
 input editPadInput {
-  guid: String!
-  title: String
-  richDescription: SecureRichText
-  state: String
+    guid: String!
+    title: String
+    richDescription: SecureRichText
+    state: String
 }
 
 type editPadPayload {
-  entity: Pad
+    entity: Pad
 }
 
 input editPollInput {
@@ -1581,6 +1581,25 @@ type Mutation {
     exportAvatars: exportAvatarsPayload
 
     updateRevision(input: updateRevisionInput!): Revision
+    scheduleAppointment(input: ScheduleAppointmentInput!): ScheduleAppointmentPayload
+}
+
+input ScheduleAppointmentInput {
+    agendaId: String!
+    appointmentTypeId: String!
+    startDateTime: DateTime!
+    endDateTime: DateTime!
+    includeVideoCall: Boolean
+    attendee: AppointmentAttendeeInput!
+}
+input AppointmentAttendeeInput {
+    firstName: String!
+    lastName: String!
+    email: String!
+    phone: String
+}
+type ScheduleAppointmentPayload {
+    success: Boolean
 }
 
 type exportAvatarsPayload {
@@ -1885,6 +1904,30 @@ type Query {
         offset: Int
         limit: Int
     ): RevisionList
+    appointmentData: AppointmentDataPayload
+    appointmentTimes(agendaId: String!, appointmentTypeId: String!, startDate: DateTime, endDate: DateTime): [AppointmentTimes]
+}
+
+type AppointmentDataPayload {
+    agendas: [AppointmentAgenda]
+    appointmentTypes: [AppointmentType]
+}
+type AppointmentAgenda {
+    id: String
+    name: String
+}
+type AppointmentType {
+    id: String
+    name: String
+}
+
+type AppointmentTimes {
+    day: DateTime,
+    times: [AppointmentTime]
+}
+type AppointmentTime {
+    startDateTime: DateTime
+    endDateTime: DateTime
 }
 
 type Question implements Entity {
@@ -2174,6 +2217,8 @@ type Site {
     showSuggestedItems: Boolean!
     collabEditingEnabled: Boolean!
     preserveFileExif: Boolean!
+    scheduleAppointmentEnabled: Boolean
+    videocallEnabled: Boolean
 }
 
 type SiteSettings {

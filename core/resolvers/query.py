@@ -1,13 +1,12 @@
 from ariadne import ObjectType
 from django.core.exceptions import ObjectDoesNotExist
 from django.db.models import F
-from django.utils import timezone
 from graphql import GraphQLError
 
 from core.constances import USER_NOT_MEMBER_OF_GROUP, USER_ROLES
 from core.models import Entity, EntityView, EntityViewCount, Group
 from user.models import User
-
+from .query_meetings import resolve_query_appointment_data, resolve_query_appointment_times
 from .query_bookmarks import resolve_bookmarks
 from .query_entities import resolve_entities
 from .query_filters import resolve_filters
@@ -56,6 +55,8 @@ query.set_field("filters", resolve_filters)
 query.set_field("tags", resolve_list_tags)
 query.set_field("viewer", resolve_viewer)
 query.set_field("revisions", resolve_revisions)
+query.set_field("appointmentData", resolve_query_appointment_data)
+query.set_field("appointmentTimes", resolve_query_appointment_times)
 
 
 @query.field("entity")

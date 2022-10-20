@@ -563,15 +563,16 @@ def require_tenant_api_token(f):
     return test_api_token
 
 
-def early_this_morning():
-    localtime = django_timezone.localtime()
-    return django_timezone.datetime(year=localtime.year,
-                                    month=localtime.month,
-                                    day=localtime.day,
+def early_this_morning(reference=None):
+    reference = reference or django_timezone.localtime()
+    return django_timezone.datetime(year=reference.year,
+                                    month=reference.month,
+                                    day=reference.day,
                                     hour=0,
                                     minute=0,
                                     second=0,
-                                    tzinfo=localtime.tzinfo)
+                                    microsecond=0,
+                                    tzinfo=reference.tzinfo)
 
 
 def str_to_datetime(datetime_str):

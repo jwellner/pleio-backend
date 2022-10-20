@@ -6,6 +6,7 @@ from contextlib import contextmanager
 from datetime import datetime
 from unittest import mock
 
+from django.core.cache import cache
 from PIL import Image, UnidentifiedImageError
 from ariadne import graphql_sync
 from django.contrib.auth.models import AnonymousUser
@@ -47,6 +48,10 @@ class PleioTenantTestCase(FastTenantTestCase):
 
         return file
 
+    def override_config(self, **kwargs):
+        for key, value in kwargs.items():
+            cache.set("%s%s" % (self.tenant.schema_name, key), value)
+
     @staticmethod
     def relative_path(root, path):
         return os.path.join(os.path.dirname(root), *path)
@@ -59,6 +64,8 @@ class PleioTenantTestCase(FastTenantTestCase):
         for file in self.file_cleanup:
             cleanup_path(file)
 
+        cache.clear()
+        mock.patch.stopall()
         super().tearDown()
 
     @contextmanager

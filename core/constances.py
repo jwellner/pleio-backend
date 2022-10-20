@@ -66,6 +66,10 @@ OIDC_PROVIDER_OPTIONS = [
     {'value': 'knb', 'label': 'Notariaat'},
     {'value': 'knb-test', 'label': 'Notariaat Test'},
 ]
+MISSING_REQUIRED_FIELD = "missing_required_field:%s"
+MEETINGS_NOT_ENABLED = "meetings_not_enabled"
+VIDEOCALL_NOT_ENABLED = "videocall_not_enabled"
+
 
 class ATTENDEE_ORDER_BY:
     name = 'name'
@@ -73,9 +77,11 @@ class ATTENDEE_ORDER_BY:
     timeUpdated = 'timeUpdated'
     timeCheckedIn = 'timeCheckedIn'
 
+
 class ORDER_DIRECTION:
     asc = 'asc'
     desc = 'desc'
+
 
 class ORDER_BY:
     timeCreated = 'timeCreated'
@@ -85,10 +91,12 @@ class ORDER_BY:
     title = 'title'
     startDate = 'startDate'
 
+
 class SEARCH_ORDER_BY:
     timeCreated = 'timeCreated'
     timePublished = 'timePublished'
     title = 'title'
+
 
 class ACCESS_TYPE:
     logged_in = 'logged_in'
@@ -97,16 +105,19 @@ class ACCESS_TYPE:
     group = 'group:{}'
     subgroup = 'subgroup:{}'
 
+
 class MEMBERSHIP:
     not_joined = 'not_joined'
     requested = 'requested'
     invited = 'invited'
     joined = 'joined'
 
+
 class USER_ROLES:
     ADMIN = "ADMIN"
     EDITOR = "EDITOR"
     QUESTION_MANAGER = "QUESTION_MANAGER"
+
 
 class ENTITY_STATUS(str, Enum):
     DRAFT = 'draft'
