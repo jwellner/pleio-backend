@@ -4,15 +4,19 @@ import os
 
 from auditlog.models import LogEntry
 from datetime import timedelta
+
+from django.conf import settings
 from django.shortcuts import render
 from django.contrib import messages
 from django.contrib.auth.decorators import user_passes_test, login_required
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.shortcuts import redirect
+from django.urls import reverse
 from django.views import View
 from django.utils import timezone
 from celery.result import AsyncResult
 from core.constances import OIDC_PROVIDER_OPTIONS
+from core.forms import MeetingsSettingsForm
 from core.models import Group
 from core.models.agreement import CustomAgreement
 from core.tasks import replace_domain_links, elasticsearch_rebuild_for_tenant
@@ -32,6 +36,7 @@ class SuperAdminView(LoginRequiredMixin, UserPassesTestMixin, View):
     def handle_no_permission(self):
         return redirect('/')
 
+
 class Dashboard(SuperAdminView):
     http_method_names = ['get']
 
@@ -47,6 +52,7 @@ class Dashboard(SuperAdminView):
         }
 
         return render(request, 'superadmin/home.html', context)
+
 
 class Settings(SuperAdminView):
     http_method_names = ['post', 'get']
@@ -74,11 +80,11 @@ class Settings(SuperAdminView):
 
         return render(request, 'superadmin/settings.html', context)
 
+
 class ScanLog(SuperAdminView):
     http_method_names = ['get']
 
     def get(self, request):
-
         filtered_qs = ScanIncidentFilter(request.GET, queryset=ScanIncident.objects.all())
         form = filtered_qs.form
         qs = filtered_qs.qs[:100]
@@ -90,6 +96,7 @@ class ScanLog(SuperAdminView):
 
         return render(request, 'superadmin/scanlog.html', context)
 
+
 class AuditLog(SuperAdminView):
     http_method_names = ['get']
 
@@ -100,7 +107,7 @@ class AuditLog(SuperAdminView):
         offset = page * page_size
 
         filtered_qs = AuditLogFilter(request.GET, LogEntry.objects.all())
-        logs = filtered_qs.qs[offset:offset+page_size+1] # grab one extra so we can check if there are more pages
+        logs = filtered_qs.qs[offset:offset + page_size + 1]  # grab one extra so we can check if there are more pages
         for log in logs:
             log.changes_obj = json.loads(log.changes)
 
@@ -121,13 +128,14 @@ class AuditLog(SuperAdminView):
 
         return render(request, 'superadmin/auditlog.html', context)
 
+
 class GroupCopyView(SuperAdminView):
     http_method_names = ['post', 'get']
 
     def get(self, request):
         sites = []
         for client in Client.objects.exclude(schema_name__in=['public', tenant_schema()]):
-            sites.append({ 'schema': client.schema_name, 'domain': client.get_primary_domain().domain })
+            sites.append({'schema': client.schema_name, 'domain': client.get_primary_domain().domain})
 
         tasks = GroupCopy.objects.filter(source_tenant=tenant_schema()).exclude(task_state__in=["SUCCESS", "FAILURE"])
         for task in tasks:
@@ -151,7 +159,7 @@ class GroupCopyView(SuperAdminView):
 
         context = {
             'groups': Group.objects.all(),
-            'sites':  sites,
+            'sites': sites,
             'items': items
         }
 
@@ -172,6 +180,7 @@ class GroupCopyView(SuperAdminView):
             messages.error(request, f"Error: {e}")
 
         return redirect('/superadmin/group_copy')
+
 
 @login_required
 @user_passes_test(lambda u: u.is_superadmin, login_url='/', redirect_field_name=None)
@@ -201,6 +210,7 @@ def tasks(request):
 
     return render(request, 'superadmin/tasks.html', context)
 
+
 @login_required
 @user_passes_test(lambda u: u.is_superadmin, login_url='/', redirect_field_name=None)
 def agreements(request):
@@ -222,6 +232,31 @@ def agreements(request):
         })
 
     return render(request, 'superadmin/agreements.html', {'form': form, 'custom_agreements': custom_agreements})
+
+
+@login_required
+@user_passes_test(lambda u: u.is_superadmin, login_url='/', redirect_field_name=None)
+def meetings_settings(request):
+    logger.error("Start of meeting_settings")
+    if request.method == 'POST':
+        logger.error("Inside 'method=post'")
+        form = MeetingsSettingsForm(request.POST)
+        if form.is_valid():
+            logger.error("Inside 'is_valid()'")
+            form.save()
+            messages.success(request, "Settings updated successfully")
+            return redirect(reverse('superadmin_meetings_settings'))
+        logger.error("Form is not valid")
+    else:
+        logger.error("Normal non-post operation")
+        form = MeetingsSettingsForm(MeetingsSettingsForm.initial_values())
+
+    return render(request, 'superadmin/meetings.html', {
+        'form': form,
+        'default_onlineafspraken_url': settings.ONLINE_MEETINGS_URL,
+        'default_videocall_api_url': settings.VIDEO_CALL_RESERVE_ROOM_URL,
+    })
+
 
 class OptionalFeatures(SuperAdminView):
     http_method_names = ['post', 'get']

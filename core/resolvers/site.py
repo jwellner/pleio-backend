@@ -288,22 +288,38 @@ def resolve_file_description_enabled(obj, info):
     # pylint: disable=unused-argument
     return 'enable_file_description' in config.FILE_OPTIONS
 
+
 @site.field("maxCharactersInAbstract")
 def resolve_max_characters_in_abstract(obj, info):
     # pylint: disable=unused-argument
     return config.MAX_CHARACTERS_IN_ABSTRACT
+
 
 @site.field("showSuggestedItems")
 def resolve_show_suggested_items(obj, info):
     # pylint: disable=unused-argument
     return config.SHOW_SUGGESTED_ITEMS
 
+
 @site.field("collabEditingEnabled")
 def resolve_collab_editing_enabled(obj, info):
     # pylint: disable=unused-argument
     return config.COLLAB_EDITING_ENABLED
 
+
 @site.field("preserveFileExif")
 def resolve_preserve_file_exif(obj, info):
     # pylint: disable=unused-argument
     return config.PRESERVE_FILE_EXIF
+
+
+@site.field("scheduleAppointmentEnabled")
+def resolve_schedule_appointment_enabled(obj, info):
+    # pylint: disable=unused-argument
+    return config.ONLINEAFSPRAKEN_ENABLED
+
+
+@site.field("videocallEnabled")
+def resolve_schedule_videocall_enabled(obj, info):
+    # pylint: disable=unused-argument
+    return config.VIDEOCALL_ENABLED

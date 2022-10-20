@@ -1,0 +1,73 @@
+{% extends "superadmin/base.html" %}
+
+{% load i18n %}
+
+{% block content %}
+
+    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+        <h1 class="h2">Meetings settings</h1>
+    </div>
+
+    <p>Active settings for {{ config.NAME }}</p>
+
+    <form method="post" action="{% url "superadmin_meetings_settings" %}">
+        {% csrf_token %}
+        <div class="card mb-3">
+            <h5 class="card-header">Onlineafspraken.nl</h5>
+            <div class="card-body">
+                <div class="input-field checkbox-field">
+                    <div class="mb-2 form-check">
+                        <input type="checkbox" name="onlineafspraken_enabled" id="onlineafspraken_enabled" {% if form.onlineafspraken_enabled.value %}
+                               checked {% endif %} />
+                        <label for="onlineafspraken_enabled">{{ form.onlineafspraken_enabled.label }}</label>
+                    </div>
+                </div>
+                <div class="input-field varchar-field">
+                    <label for="onlineafspraken_key">{{ form.onlineafspraken_key.label }}</label>
+                    <input class="form-control"
+                           autocomplete="off"
+                           type="text"
+                           name="onlineafspraken_key"
+                           id="onlineafspraken_key" value="{{ form.onlineafspraken_key.value }}">
+                </div>
+                <div class="input-field varchar-field">
+                    <label for="onlineafspraken_secret">{{ form.onlineafspraken_secret.label }}</label>
+                    <input class="form-control"
+                           autocomplete="off"
+                           type="text"
+                           name="onlineafspraken_secret"
+                           id="onlineafspraken_secret" value="{{ form.onlineafspraken_secret.value }}">
+                </div>
+                <div class="input-field varchar-field">
+                    <label for="onlineafspraken_url">{{ form.onlineafspraken_url.label }}</label>
+                    <input class="form-control"
+                           type="text"
+                           name="onlineafspraken_url"
+                           id="onlineafspraken_url" value="{{ form.onlineafspraken_url.value }}">
+                    {{ default_onlineafspraken_url }}
+                </div>
+            </div>
+        </div>
+        <div class="card mb-3">
+            <h5 class="card-header">Pleio videocall</h5>
+            <div class="card-body">
+                <div class="input-field checkbox-field">
+                    <div class="mb-2 form-check">
+                        <input type="checkbox" name="videocall_enabled" id="videocall_enabled" {% if form.videocall_enabled.value %} checked {% endif %} />
+                        <label for="videocall_enabled">{{ form.videocall_enabled.label }}</label>
+                    </div>
+                </div>
+                <div class="input-field varchar-field">
+                    <label for="videocall_api_url">{{ form.videocall_api_url.label }}</label>
+                    <input class="form-control"
+                           type="text"
+                           name="videocall_api_url"
+                           id="videocall_api_url" value="{{ form.videocall_api_url.value }}">
+                    {{ default_videocall_api_url }}
+                </div>
+            </div>
+        </div>
+        <button type="submit" class="btn btn-primary">Save</button>
+    </form>
+
+{% endblock %}

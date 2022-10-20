@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Duits\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-09-20 17:19+0200\n"
+"POT-Creation-Date: 2022-10-11 18:14+0200\n"
 "PO-Revision-Date: 2021-05-26 10:55+0200\n"
 "Last-Translator: \n"
 "Language-Team: \n"
@@ -22,23 +22,23 @@ msgstr ""
 msgid "status update"
 msgstr "Statusaktualisierung"
 
-#: core/forms.py:67
+#: core/forms.py:69
 msgid "Provide a valid value."
 msgstr "Geben Sie einen gültigen Wert an."
 
-#: core/forms.py:82 core/resolvers/query_site.py:167
+#: core/forms.py:82 core/resolvers/query_site.py:169
 msgid "Never"
 msgstr "Nie"
 
-#: core/forms.py:83 core/resolvers/query_site.py:164
+#: core/forms.py:83 core/resolvers/query_site.py:166
 msgid "Daily"
 msgstr "Täglich"
 
-#: core/forms.py:84 core/resolvers/query_site.py:165
+#: core/forms.py:84 core/resolvers/query_site.py:167
 msgid "Weekly"
 msgstr "Wöchentlich"
 
-#: core/forms.py:85 core/resolvers/query_site.py:166
+#: core/forms.py:85 core/resolvers/query_site.py:168
 msgid "Monthly"
 msgstr "Monatlich"
 
@@ -50,108 +50,108 @@ msgstr "Benachrichtigungs-E-Mails erhalten"
 msgid "Receive overview emails"
 msgstr "Übersichts-E-Mails erhalten"
 
-#: core/lib.py:206 core/resolvers/mutation_import_users.py:30
-#: core/resolvers/query_site.py:73
+#: core/lib.py:208 core/resolvers/mutation_import_users.py:30
+#: core/resolvers/query_site.py:75
 msgid "Just me"
 msgstr "Nur ich"
 
-#: core/lib.py:209
+#: core/lib.py:211
 #, python-format
 msgid "Group: %(group_name)s"
 msgstr "Gruppe: %(group_name)s"
 
-#: core/lib.py:212
+#: core/lib.py:214
 #, python-format
 msgid "Subgroup: %(subgroup_name)s"
 msgstr "Untergruppe: %(subgroup_name)s"
 
-#: core/lib.py:218 core/resolvers/mutation_import_users.py:31
-#: core/resolvers/query_site.py:74
+#: core/lib.py:220 core/resolvers/mutation_import_users.py:31
+#: core/resolvers/query_site.py:76
 msgid "Logged in users"
 msgstr "Angemeldete Benutzer"
 
-#: core/lib.py:220 core/resolvers/mutation_import_users.py:34
-#: core/resolvers/query_site.py:78
+#: core/lib.py:222 core/resolvers/mutation_import_users.py:34
+#: core/resolvers/query_site.py:80
 msgid "Public"
 msgstr "Öffentlich"
 
-#: core/lib.py:231
+#: core/lib.py:233
 msgid "Event"
 msgstr "Event"
 
-#: core/lib.py:235
+#: core/lib.py:237
 msgid "Blog"
 msgstr "Blog"
 
-#: core/lib.py:239
+#: core/lib.py:241
 msgid "Discussion"
 msgstr "Diskussion"
 
-#: core/lib.py:243 core/lib.py:413
+#: core/lib.py:245 core/lib.py:415
 msgid "News"
 msgstr "Neuigkeiten"
 
-#: core/lib.py:247
+#: core/lib.py:249
 msgid "Update"
 msgstr "Update"
 
-#: core/lib.py:251
+#: core/lib.py:253
 msgid "Question"
 msgstr "Frage"
 
-#: core/lib.py:255
+#: core/lib.py:257
 msgid "Wiki"
 msgstr "Wiki"
 
-#: core/lib.py:259
+#: core/lib.py:261
 msgid "Text page"
 msgstr "Text Seite"
 
-#: core/lib.py:407
+#: core/lib.py:409
 msgid "Updates"
 msgstr "Updates"
 
-#: core/lib.py:408
+#: core/lib.py:410
 msgid "Blogs"
 msgstr "Blogs"
 
-#: core/lib.py:409
+#: core/lib.py:411
 msgid "CMS pages"
 msgstr "CMS-Seiten"
 
-#: core/lib.py:410
+#: core/lib.py:412
 msgid "Discussions"
 msgstr "Diskussionen"
 
-#: core/lib.py:411
+#: core/lib.py:413
 msgid "Events"
 msgstr "Events"
 
-#: core/lib.py:412
+#: core/lib.py:414
 msgid "Files"
 msgstr "Dateien"
 
-#: core/lib.py:414
+#: core/lib.py:416
 msgid "Polls"
 msgstr "Umfragen"
 
-#: core/lib.py:415
+#: core/lib.py:417
 msgid "Questions"
 msgstr "Fragen"
 
-#: core/lib.py:416
+#: core/lib.py:418
 msgid "Tasks"
 msgstr "Aufgaben"
 
-#: core/lib.py:417
+#: core/lib.py:419
 msgid "Wiki pages"
 msgstr "Wiki-Seiten"
 
-#: core/lib.py:418
+#: core/lib.py:420
 msgid "Comments"
 msgstr "Kommentare"
 
-#: core/lib.py:419
+#: core/lib.py:421
 msgid "Groups"
 msgstr "Gruppen"
 
@@ -330,7 +330,7 @@ msgstr "In Arbeit"
 msgid "Ready"
 msgstr "Bereit"
 
-#: core/post_deploy.py:84
+#: core/post_deploy.py:86 core/post_deploy.py:103 klad.erlend.py:14
 msgid "Automatically generated initial revision"
 msgstr "Automatisch generierte erste Revision"
 
@@ -342,23 +342,43 @@ msgstr "E-Mail-Adresse"
 msgid "name"
 msgstr "Name"
 
-#: core/resolvers/query_site.py:126
+#: core/resolvers/query_meetings.py:16
+msgid "Failed to load agenda's"
+msgstr "Agenda konnte nicht geladen werden"
+
+#: core/resolvers/query_meetings.py:19
+msgid "Failed to load appointment types"
+msgstr "Terminarten konnten nicht geladen werden"
+
+#: core/resolvers/query_meetings.py:25
+msgid "Agenda"
+msgstr "Tagesordnung"
+
+#: core/resolvers/query_meetings.py:28
+msgid "Appointment"
+msgstr "Ernennung"
+
+#: core/resolvers/query_meetings.py:51
+msgid "Failed to load available times"
+msgstr "Verfügbare Zeiten konnten nicht geladen werden"
+
+#: core/resolvers/query_site.py:128
 msgid "Activity stream"
 msgstr "Aktivitäten-Stream"
 
-#: core/resolvers/query_site.py:126
+#: core/resolvers/query_site.py:128
 msgid "CMS page"
 msgstr "CMS-Seite"
 
-#: core/resolvers/query_site.py:217
+#: core/resolvers/query_site.py:219
 msgid "Administrator"
 msgstr "Administrator"
 
-#: core/resolvers/query_site.py:218
+#: core/resolvers/query_site.py:220
 msgid "Editor"
 msgstr "Editor"
 
-#: core/resolvers/query_site.py:219
+#: core/resolvers/query_site.py:221
 msgid "Question expert"
 msgstr "Experten fragen"
 
@@ -650,7 +670,7 @@ msgstr "Persönliche Nachricht"
 msgid "Direct notification"
 msgstr "Direkte Benachrichtigung"
 
-#: core/templates/email/send_notification_emails.html:10 core/views.py:647
+#: core/templates/email/send_notification_emails.html:10 core/views.py:638
 msgid "Notification overview"
 msgstr "Übersicht über die Benachrichtigung"
 
@@ -668,7 +688,7 @@ msgstr "Abbestellen"
 msgid "Adjust your email settings"
 msgstr "Passen Sie Ihre E-Mail-Einstellungen an"
 
-#: core/templates/email/send_overview_emails.html:22 core/views.py:644
+#: core/templates/email/send_overview_emails.html:22 core/views.py:635
 msgid "Periodic overview"
 msgstr "Regelmäßige Übersicht"
 
@@ -979,7 +999,7 @@ msgstr ""
 "Um diese Site zu betreten, müssen Sie den Zugriff vom Administrator "
 "anfordern. Klicken Sie auf die Schaltfläche, um den Zugriff anzufordern."
 
-#: core/templates/registration/request.html:23 core/views.py:491
+#: core/templates/registration/request.html:23 core/views.py:482
 msgid "Name"
 msgstr "Name"
 
@@ -1008,19 +1028,19 @@ msgstr ""
 "Zugang wird angefordert. Sie erhalten eine E-Mail, wenn die Anfrage "
 "angenommen wird."
 
-#: core/views.py:492
+#: core/views.py:483
 msgid "E-mail"
 msgstr "E-Mail"
 
-#: core/views.py:493
+#: core/views.py:484
 msgid "Group"
 msgstr "Gruppe"
 
-#: core/views.py:587
+#: core/views.py:578
 msgid "Your changes are saved"
 msgstr "Ihre Änderungen werden gespeichert"
 
-#: core/views.py:650
+#: core/views.py:641
 #, python-format
 msgid "Successfully unsubscribed %(email)s from %(list_name)s"
 msgstr "Erfolgreich abbestellt %(email)s von %(list_name)s"
@@ -1056,12 +1076,12 @@ msgstr "Entfernt vom Ereignis: %s"
 msgid "QR code for %s"
 msgstr "QR-Code für %s"
 
-#: event/mail_builders/waitinglist.py:22 event/models.py:105
+#: event/mail_builders/waitinglist.py:22 event/models.py:106
 #, python-format
 msgid "Added to event %s from waitinglist"
 msgstr "Zum Ereignis %s von der Warteliste hinzugefügt"
 
-#: event/models.py:239
+#: event/models.py:246
 msgid "You already signed in for another sub-event in the same slot."
 msgstr ""
 "Sie haben sich bereits für eine andere Unterveranstaltung auf demselben "
@@ -1349,3 +1369,17 @@ msgstr "Nachricht an die Veranstaltung"
 #, python-format
 msgid "Filescan found suspicous files on %(site_url)s"
 msgstr "Filescan hat verdächtige Dateien auf %(site_url)sgefunden"
+
+#: file/models.py:61
+#, fuzzy
+#| msgid "Files"
+msgid "File"
+msgstr "Datei"
+
+#: file/models.py:62
+msgid "Folder"
+msgstr "Mappe"
+
+#: file/models.py:63
+msgid "Pad"
+msgstr "Pad"

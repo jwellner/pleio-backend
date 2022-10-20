@@ -1,4 +1,4 @@
-from core import config
+from core import config, override_local_config
 from core.tests.helpers import PleioTenantTestCase
 from user.models import User
 from core.models import ProfileField
@@ -113,6 +113,8 @@ class SiteTestCase(PleioTenantTestCase):
                     showSuggestedItems
                     collabEditingEnabled
                     preserveFileExif
+                    scheduleAppointmentEnabled
+                    videocallEnabled
                 }
             }
         """
@@ -123,6 +125,7 @@ class SiteTestCase(PleioTenantTestCase):
         self.profileField1.delete()
         self.profileField2.delete()
         cache.clear()
+        super().tearDown()
 
     def test_site(self):
         cache.set("%s%s" % (connection.schema_name, 'IS_CLOSED'), False)
@@ -169,3 +172,23 @@ class SiteTestCase(PleioTenantTestCase):
             {'id': 0, 'description': 'Alleen eigenaar'},
             {'id': 1, 'description': 'Ingelogde gebruikers'},
         ])
+
+    @override_local_config(ONLINEAFSPRAKEN_ENABLED=True)
+    def test_schedule_appointment_enabled(self):
+        result = self.graphql_client.post(self.query, {})
+        self.assertEqual(result['data']['site']['scheduleAppointmentEnabled'], True)
+
+    @override_local_config(ONLINEAFSPRAKEN_ENABLED=False)
+    def test_schedule_appointment_disabled(self):
+        result = self.graphql_client.post(self.query, {})
+        self.assertEqual(result['data']['site']['scheduleAppointmentEnabled'], False)
+
+    @override_local_config(VIDEOCALL_ENABLED=True)
+    def test_videocall_enabled(self):
+        result = self.graphql_client.post(self.query, {})
+        self.assertEqual(result['data']['site']['videocallEnabled'], True)
+
+    @override_local_config(VIDEOCALL_ENABLED=False)
+    def test_videocall_disabled(self):
+        result = self.graphql_client.post(self.query, {})
+        self.assertEqual(result['data']['site']['videocallEnabled'], False)

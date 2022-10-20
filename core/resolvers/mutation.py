@@ -12,6 +12,7 @@ from .mutation_accept_group_invitation import resolve_accept_group_invitation
 from .mutation_resend_group_invitation import resolve_resend_group_invitation
 from .mutation_delete_group_invitation import resolve_delete_group_invitation
 from .mutation_change_group_role import resolve_change_group_role
+from .mutation_schedule_appointment import resolve_mutation_schedule_appointment
 from .mutation_send_message_to_group import resolve_send_message_to_group
 from .mutation_accept_membership_request import resolve_accept_membership_request
 from .mutation_reject_membership_request import resolve_reject_membership_request
@@ -135,3 +136,5 @@ mutation.set_field("signSiteAgreementVersion", resolve_sign_site_agreement_versi
 
 mutation.set_field("updateRevision", resolve_update_revision)
 mutation.set_field("exportAvatars", resolve_export_avatars)
+
+mutation.set_field("scheduleAppointment", resolve_mutation_schedule_appointment)
