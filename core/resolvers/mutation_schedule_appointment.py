@@ -19,32 +19,9 @@ def resolve_mutation_schedule_appointment(obj, info, **kwargs):
 
         attendee = appointmentDetails.get('attendee')
         assert_valid_unknown_attendee(attendee)
-
-        set_customer_kwargs = dict(Email=attendee['email'],
-                                   FirstName=attendee['firstName'],
-                                   LastName=attendee['lastName'])
-        if 'phone' in attendee:
-            set_customer_kwargs['Phone'] = attendee['phone']
-
-        update_kwargs = dict(
-            FirstName=attendee['firstName'],
-            LastName=attendee['lastName'],
-            Email=attendee['email'])
-        if 'phone' in attendee:
-            update_kwargs['Phone'] = attendee['phone']
-
-        existing_customer = expect_one(connection.get_customers(Email=attendee['email']))
-
-        if not existing_customer:
-            update_kwargs['Username'] = attendee['email']
-            update_kwargs['Password'] = uuid.uuid4()
-        else:
-            update_kwargs['Id'] = existing_customer['Id']
-
-        customer = connection.set_customer(**update_kwargs)
+        customer = get_or_create_customer(attendee)
 
         startDateTime, endDateTime = appointmentDetails.get("startDateTime"), appointmentDetails.get("endDateTime")
-
         kwargs = dict(AgendaId=appointmentDetails['agendaId'],
                       CustomerId=customer['Id'],
                       AppointmentTypeId=appointmentDetails['appointmentTypeId'],
@@ -68,7 +45,7 @@ def resolve_mutation_schedule_appointment(obj, info, **kwargs):
         }
 
     except (BackendResponseContentError, AssertionError) as e:
-        raise GraphQLError(e)
+        raise GraphQLError(str(e))
 
 
 def assert_valid_unknown_attendee(attendee: dict):
@@ -83,3 +60,29 @@ def assert_valid_unknown_attendee(attendee: dict):
 
     if not is_email(attendee.get('email')):
         raise GraphQLError(constances.INVALID_EMAIL)
+
+
+def get_or_create_customer(attendee):
+    connection = MeetingsApi()
+
+    update_kwargs = dict(
+        FirstName=attendee['firstName'],
+        LastName=attendee['lastName'],
+        Email=attendee['email'])
+    if 'phone' in attendee:
+        update_kwargs['Phone'] = attendee['phone']
+
+    existing_customer = expect_one(connection.get_customers(Email=attendee['email']))
+    if not existing_customer:
+        update_kwargs['Username'] = attendee['email']
+        update_kwargs['Password'] = uuid.uuid4()
+    else:
+        update_kwargs['Id'] = existing_customer['Id']
+
+    try:
+        return connection.set_customer(**update_kwargs)
+    except BackendResponseContentError as e:
+        if "Username is already in use" in str(e):
+            update_kwargs['Username'] = uuid.uuid4()
+            return connection.set_customer(**update_kwargs)
+        raise
