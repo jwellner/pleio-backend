@@ -2,14 +2,13 @@ import logging
 
 from django.db.models import Q
 from django.db.models.functions import Coalesce
-from core.constances import (
-    ORDER_DIRECTION, ORDER_BY, INVALID_SUBTYPE, COULD_NOT_ORDER_BY_START_DATE, COULD_NOT_USE_EVENT_FILTER
-)
+from core.constances import (ORDER_DIRECTION, ORDER_BY, INVALID_SUBTYPE,
+                             COULD_NOT_ORDER_BY_START_DATE, COULD_NOT_USE_EVENT_FILTER)
 from core.lib import early_this_morning
 from core.models import Entity
 from graphql import GraphQLError
 
-from core.models.tags import Tag
+from core.models.tags import Tag, flat_category_tags
 
 logger = logging.getLogger(__name__)
 
@@ -93,16 +92,17 @@ def conditional_tags_filter(tags, match_any):
     return Q()
 
 
-def conditional_tag_lists_filter(tag_lists, match_any):
+def conditional_tag_lists_filter(categorytag_lists, match_any):
     filters = Q()
-    if tag_lists:
-        for tags in tag_lists:
-            if tags:
+    if categorytag_lists:
+        for category in categorytag_lists:
+            if category:
+                matches = flat_category_tags(category)
                 if match_any:
-                    filters.add(Q(_tag_summary__overlap=Tag.translate_tags(tags)), Q.AND)
+                    filters.add(Q(_category_summary__overlap=matches), Q.AND)
                 else:
-                    for tag in Tag.translate_tags(tags):
-                        filters.add(Q(_tag_summary__overlap=[tag]), Q.AND)
+                    for match in matches:
+                        filters.add(Q(_category_summary__overlap=[match]), Q.AND)
     return filters
 
 
@@ -123,8 +123,8 @@ def resolve_entities(
         containerGuid=None,
         eventFilter=None,
         tags=None,
-        tagLists=None,
-        matchStrategy='legacy',
+        tagCategories=None,
+        matchStrategy='any',
         orderBy=ORDER_BY.timePublished,
         orderDirection=ORDER_DIRECTION.desc,
         isFeatured=None,
@@ -186,7 +186,7 @@ def resolve_entities(
                                conditional_group_filter(containerGuid) &
                                conditional_subtypes_filter(subtypes) &
                                conditional_tags_filter(tags, matchStrategy == 'any') &
-                               conditional_tag_lists_filter(tagLists, matchStrategy != 'all'))
+                               conditional_tag_lists_filter(tagCategories, matchStrategy != 'all'))
 
     if userGuid:
         entities = entities.filter(owner__id=userGuid)

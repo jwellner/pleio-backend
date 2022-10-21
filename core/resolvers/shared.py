@@ -224,7 +224,7 @@ def _comment_count_from_index(obj):
             if match.id == obj.guid:
                 return len(match.comments)
     except Exception as e:
-        LOGGER.error(e);
+        LOGGER.error(e)
     return None
 
 
@@ -262,6 +262,11 @@ def resolve_entity_is_pinned(obj, info):
     if hasattr(obj, "is_pinned"):
         return obj.is_pinned
     return False
+
+
+def resolve_entity_categories(obj, info):
+    # pylint: disable=unused-argument
+    return obj.category_tags
 
 
 def resolve_add_suggested_items(entity, clean_input):
@@ -361,7 +366,10 @@ def resolve_update_rich_description(entity, clean_input):
 
 def resolve_update_tags(entity, clean_input):
     if 'tags' in clean_input:
-        entity.tags = clean_input.get("tags")
+        entity.tags = clean_input["tags"]
+
+    if 'tagCategories' in clean_input:
+        entity.category_tags = clean_input['tagCategories']
 
 
 def resolve_add_access_id(entity, clean_input):
@@ -471,6 +479,7 @@ def assert_valid_abstract(abstract):
     text = html_to_text(abstract).strip()
     if len(text) > config.MAX_CHARACTERS_IN_ABSTRACT:
         raise GraphQLError(constances.TEXT_TOO_LONG)
+
 
 
 # Site setting profile field

@@ -5,6 +5,7 @@ from django.db import models
 from django.db.models.signals import post_delete, pre_save
 from django.dispatch import receiver
 from django.contrib.postgres.fields import ArrayField
+
 from django.utils import timezone
 from datetime import datetime
 from core.lib import get_acl
@@ -47,6 +48,7 @@ class UserProfile(models.Model):
     )
     overview_email_tags = ArrayField(models.CharField(max_length=256),
                                      blank=True, default=list)
+    overview_email_categories = models.JSONField(blank=True, default=list)
     overview_email_last_received = models.DateTimeField(blank=True, null=True)
     receive_newsletter = models.BooleanField(default=False)
     language = models.CharField(

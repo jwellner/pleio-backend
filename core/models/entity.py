@@ -11,9 +11,8 @@ from model_utils.managers import InheritanceManager
 
 from core.constances import ENTITY_STATUS, USER_ROLES
 from core.lib import get_acl
+from core.models.tags import TagsModel
 from core.models.shared import read_access_default, write_access_default
-
-from .tags import TagsMixin
 
 logger = logging.getLogger(__name__)
 
@@ -88,8 +87,7 @@ class EntityManager(InheritanceManager):
         return qs.filter(read_access__overlap=list(get_acl(user)))
 
 
-class Entity(models.Model, TagsMixin):
-    # During unsaved state of the Entity instance the (unsaved) last revision may help.
+class Entity(TagsModel):
     objects = EntityManager()
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
@@ -123,10 +121,9 @@ class Entity(models.Model, TagsMixin):
     _tag_summary = ArrayField(models.CharField(max_length=256),
                               blank=True, default=list,
                               db_column='tags')
-    
+
     suggested_items = ArrayField(models.UUIDField(default=uuid.uuid4),
                                  blank=True, null=True)
-
     notifications_created = models.BooleanField(default=False)
 
     is_pinned = models.BooleanField(default=False)

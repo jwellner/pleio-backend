@@ -1,5 +1,6 @@
 from core.constances import USER_ROLES
 
+
 def resolve_viewer(_, info):
     user = info.context["request"].user
     banned = False
@@ -17,6 +18,7 @@ def resolve_viewer(_, info):
             'isBanned': banned,
             'has2faEnabled': False,
             'tags': [],
+            'categories': [],
             'user': {
                 'guid': '0'
             }
@@ -29,5 +31,6 @@ def resolve_viewer(_, info):
         'isAdmin': user.has_role(USER_ROLES.ADMIN),
         'isBanned': banned,
         'has2faEnabled': user.has_2fa_enabled,
-        'tags': []
+        'tags': [],
+        'categories': [],
     }

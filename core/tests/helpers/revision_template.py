@@ -81,6 +81,10 @@ class RevisionTemplate:
                             abstract
                             richDescription
                             tags
+                            tagCategories {
+                                name
+                                values
+                            }
                             suggestedItems {
                                 guid
                             }
@@ -188,6 +192,20 @@ class RevisionTemplate:
             self.assertEqual(revision['author']['guid'], self.admin.guid)
             self.assertEqual(revision['changedFields'], ['tags'])
             self.assertEqual(revision['content']['tags'], sorted(self.variables['input']['tags']))
+            self.assertEqual(revision['content']['title'], self.variables['input']['title'])
+
+        def test_mutate_tag_categories(self):
+            if not self.useCommonTests:
+                return
+            self.localSetUp()
+
+            revisions = self.applyChanges(tagCategories=[{'name': 'Demo', 'values': ['One', 'Two', 'Three']}])
+            self.assertEqual(len(revisions), 1)
+
+            revision = revisions[0]
+            self.assertEqual(revision['author']['guid'], self.admin.guid)
+            self.assertEqual(revision['changedFields'], ['tagCategories'])
+            self.assertEqual(revision['content']['tagCategories'], self.variables['input']['tagCategories'])
             self.assertEqual(revision['content']['title'], self.variables['input']['title'])
 
         def test_mutate_time_created(self):

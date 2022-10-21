@@ -120,6 +120,8 @@ class GroupDocument(DefaultDocument):
     tags_matches = fields.ListField(fields.TextField(
         fields={'raw': fields.KeywordField()}
     ))
+    category_tags = fields.ListField(fields.KeywordField(attr='category_tags_index'))
+
     type = fields.KeywordField(attr="type_to_string")
     read_access = fields.ListField(fields.TextField(attr="search_read_access"))
     name = fields.TextField(

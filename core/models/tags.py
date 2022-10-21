@@ -1,3 +1,4 @@
+from django.contrib.postgres.fields import ArrayField
 from django.db import models
 from django.db.models import Q
 from django.db.models.signals import pre_save, post_delete
@@ -73,13 +74,25 @@ class EntityTag(models.Model):
 _model_repository = set()
 
 
-class TagsMixin:
+class TagsModel(models.Model):
     """
     Classes that include this mixin should:
 
     1. Also define a _tag_summary ArrayField.
     2. Also register itself in the ready method of the app using register_model_for_tags().
     """
+
+    class Meta:
+        abstract = True
+
+    _tag_summary = ArrayField(models.CharField(max_length=256),
+                              blank=True, default=list,
+                              db_column='tags')
+    _category_summary = ArrayField(models.CharField(max_length=256),
+                                   blank=True, default=list,
+                                   db_column='categories')
+
+    category_tags = models.JSONField(default=list, blank=True)
 
     @property
     def tags(self):
@@ -92,6 +105,8 @@ class TagsMixin:
         result = []
         for entity_tag in my_tags:
             result.extend(entity_tag.tag.all_matches)
+        for category in self.category_tags:
+            result.extend(flat_category_tags(category, brief=True))
         return result
 
     @tags.setter
@@ -125,10 +140,23 @@ class TagsMixin:
 
         self._expected_labels = expected_labels
 
+    @property
+    def category_tags_index(self):
+        for category in self.category_tags:
+            yield from flat_category_tags(category)
+
+
+def flat_category_tags(category, brief=False):
+    for value in category['values']:
+        if brief:
+            yield value.lower()
+        else:
+            yield f"{value} ({category['name']})".lower()
+
 
 def register_model_for_tags(cls):
     """
-    Register classes that implement TagsMixin in the ready function of the app.
+    Register classes that implement TagsModel in the ready function of the app.
     """
     _model_repository.add(cls)
 
@@ -144,15 +172,16 @@ def is_registered_for_tags(cls):
 def pre_save_entity(sender, instance, **kwargs):
     # pylint: disable=protected-access
     # pylint: disable=unused-argument
-    if isinstance(instance, TagsMixin):
+    if isinstance(instance, TagsModel):
         assert is_registered_for_tags(instance.__class__), \
-            "Register the base TagsMixin model using register_model_for_tags at the app's ready method."
+            "Register the base TagsModel model using register_model_for_tags at the app's ready method."
         assert '_tag_summary' in [f.name for f in instance._meta.fields], "Provide a _tag_summary ArrayField"
         instance._tag_summary = EntityTag.summary(instance.id)
+        instance._category_summary = [t for t in instance.category_tags_index]
 
 
 @receiver(post_delete)
 def post_delete_entity(sender, instance, **kwargs):
     # pylint: disable=unused-argument
-    if isinstance(instance, TagsMixin):
+    if isinstance(instance, TagsModel):
         EntityTag.objects.filter(entity_id=instance.id).delete()

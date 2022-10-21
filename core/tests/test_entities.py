@@ -34,8 +34,7 @@ class EntitiesTestCase(PleioTenantTestCase):
             title="Blog2",
             owner=self.user,
             read_access=[ACCESS_TYPE.public],
-            write_access=[ACCESS_TYPE.user.format(self.user.id)],
-            tags=["tag_one", "tag_four"]
+            write_access=[ACCESS_TYPE.user.format(self.user.id)]
         )
 
         self.blog3: Blog = Blog.objects.create(
@@ -43,8 +42,7 @@ class EntitiesTestCase(PleioTenantTestCase):
             owner=self.user,
             read_access=[ACCESS_TYPE.public],
             write_access=[ACCESS_TYPE.user.format(self.user.id)],
-            group=self.group,
-            tags=["tag_two", "tag_one", "tag_four"]
+            group=self.group
         )
 
         self.blog4: Blog = Blog.objects.create(
@@ -53,7 +51,6 @@ class EntitiesTestCase(PleioTenantTestCase):
             read_access=[ACCESS_TYPE.public],
             write_access=[ACCESS_TYPE.user.format(self.user.id)],
             group=self.group,
-            tags=["tag_four", "tag_three", "tag_one_extra"],
             is_featured=True
         )
 
@@ -98,8 +95,7 @@ class EntitiesTestCase(PleioTenantTestCase):
             write_access=[ACCESS_TYPE.user.format(self.user.id)],
             group=self.group,
             is_featured=True,
-            published=None,
-            tags=["tag_four", "tag_three"]
+            published=None
         )
 
         self.blog_draft2: Blog = Blog.objects.create(
@@ -109,8 +105,7 @@ class EntitiesTestCase(PleioTenantTestCase):
             write_access=[ACCESS_TYPE.user.format(self.user.id)],
             group=self.group,
             is_featured=True,
-            published=timezone.now() + timedelta(days=5),
-            tags=["tag_four", "tag_three"]
+            published=timezone.now() + timedelta(days=5)
         )
 
         self.archived1: Blog = Blog.objects.create(
@@ -134,9 +129,6 @@ class EntitiesTestCase(PleioTenantTestCase):
             query getEntities(
                     $subtype: String
                     $containerGuid: String
-                    $tags: [String!]
-                    $matchStrategy: MatchStrategy
-                    $tagLists: [[String]]
                     $isFeatured: Boolean
                     $limit: Int
                     $offset: Int
@@ -147,9 +139,6 @@ class EntitiesTestCase(PleioTenantTestCase):
                 entities(
                         subtype: $subtype
                         containerGuid: $containerGuid
-                        tags: $tags
-                        matchStrategy: $matchStrategy
-                        tagLists: $tagLists
                         isFeatured: $isFeatured
                         limit: $limit
                         offset: $offset
@@ -217,24 +206,6 @@ class EntitiesTestCase(PleioTenantTestCase):
         self.assertIsNotNone(data.get('entities'), msg=result)
         self.assertEqual(data["entities"]["total"], 6)
 
-    def test_tags_match_all(self):
-        result = self.graphql_client.post(self.query, {
-            'tags': ["tag_one", "tag_two"]
-        })
-        blogs = [e['title'] for e in result['data']['entities']['edges']]
-        self.assertEqual(1, len(blogs))
-        self.assertIn(self.blog3.title, blogs)
-
-    def test_tags_match_any(self):
-        result = self.graphql_client.post(self.query, {
-            'tags': ["tag_one", "tag_two"],
-            'matchStrategy': 'any',
-        })
-        blogs = [e['title'] for e in result['data']['entities']['edges']]
-        self.assertEqual(2, len(blogs))
-        self.assertIn(self.blog2.title, blogs)
-        self.assertIn(self.blog3.title, blogs)
-
     def test_entities_group(self):
         variables = {
             "containerGuid": self.group.guid
@@ -246,37 +217,6 @@ class EntitiesTestCase(PleioTenantTestCase):
         data = result["data"]
         self.assertEqual(data["entities"]["total"], 2)
 
-    def test_entities_filtered_by_tags_find_one(self):
-        variables = {"tags": ["tag_two"]}
-
-        self.graphql_client.force_login(self.user)
-        result = self.graphql_client.post(self.query, variables)
-
-        data = result["data"]
-        self.assertEqual(data["entities"]["total"], 1)
-        self.assertEqual(data["entities"]["edges"][0]["guid"], self.blog3.guid)
-
-    def test_entities_filtered_by_tags_find_two(self):
-        variables = {"tags": ["tag_one"]}
-
-        self.graphql_client.force_login(self.user)
-        result = self.graphql_client.post(self.query, variables)
-
-        data = result["data"]
-        self.assertEqual(data["entities"]["total"], 2)
-        self.assertEqual(data["entities"]["edges"][0]["guid"], self.blog3.guid)
-        self.assertEqual(data["entities"]["edges"][1]["guid"], self.blog2.guid)
-
-    def test_entities_filtered_by_tags_find_one_with_two_tags(self):
-        variables = {"tags": ["tag_one", "tag_two"]}
-
-        self.graphql_client.force_login(self.user)
-        result = self.graphql_client.post(self.query, variables)
-
-        data = result.get("data")
-        self.assertEqual(data["entities"]["total"], 1, msg=[edge['title'] for edge in data["entities"]["edges"]])
-        self.assertEqual(data["entities"]["edges"][0]["guid"], self.blog3.guid)
-
     def test_entities_all_pages_by_admin(self):
         variables = {
             "subtype": "page"
@@ -287,16 +227,6 @@ class EntitiesTestCase(PleioTenantTestCase):
 
         data = result["data"]
         self.assertEqual(data["entities"]["total"], 1)
-
-    def test_entities_filtered_by_tag_lists(self):
-        variables = {"tagLists": [["tag_four", "tag_three"], ["tag_one"]]}
-
-        self.graphql_client.force_login(self.user)
-        result = self.graphql_client.post(self.query, variables)
-
-        data = result.get("data")
-        status_message = "Query resutl: %s" % [d['title'] for d in data["entities"]['edges']]
-        self.assertEqual(data["entities"]["total"], 2, msg=status_message)
 
     def test_entities_filtered_is_featured(self):
         variables = {"isFeatured": True}
@@ -639,8 +569,6 @@ class EntitiesEventsTestCase(PleioTenantTestCase):
             query getEntities(
                     $subtype: String
                     $containerGuid: String
-                    $tags: [String!]
-                    $tagLists: [[String]]
                     $isFeatured: Boolean
                     $limit: Int
                     $offset: Int
@@ -653,8 +581,6 @@ class EntitiesEventsTestCase(PleioTenantTestCase):
                 entities(
                         subtype: $subtype
                         containerGuid: $containerGuid
-                        tags: $tags
-                        tagLists: $tagLists
                         isFeatured: $isFeatured
                         limit: $limit
                         offset: $offset
