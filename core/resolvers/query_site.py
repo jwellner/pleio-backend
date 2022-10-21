@@ -256,6 +256,8 @@ def get_site_settings():
         'maxCharactersInAbstract': config.MAX_CHARACTERS_IN_ABSTRACT,
         'collabEditingEnabled': config.COLLAB_EDITING_ENABLED,
         'preserveFileExif': config.PRESERVE_FILE_EXIF,
+        'supportContractEnabled': config.SUPPORT_CONTRACT_ENABLED,
+        'supportContractHoursRemaining': config.SUPPORT_CONTRACT_HOURS_REMAINING,
     }
 
     return site_settings
