@@ -1,0 +1,34 @@
+{% extends "superadmin/base.html" %}
+
+{% load i18n %}
+
+{% block content %}
+
+    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+        <h1 class="h2">Support contract</h1>
+    </div>
+
+    <p>Support contract for {{ config.NAME }}</p>
+
+    <form method="post">
+        {% csrf_token %}
+        <div class="card">
+            <h5 class="card-header">Contract</h5>
+            <div class="card-body">
+                <div class="mb-2 form-check">
+                    <label for="support_contract_enabled">Contract enabled:</label>
+                    <input type="checkbox" name="support_contract_enabled" id="support_contract_enabled" {% if config.SUPPORT_CONTRACT_ENABLED %} checked {% endif %} />
+                </div>
+                {{ form.errors.support_contract_enabled }}
+                <div class="mb-2 form-check">
+                    <label for="support_contract_hours_remaining">Hours remaining: </label>
+                    <input type="number" step="0.5" name="support_contract_hours_remaining" id="support_contract_hours_remaining" value="{{ config.SUPPORT_CONTRACT_HOURS_REMAINING }}"/>
+                </div>
+                    {{ form.errors.support_contract_hours_remaining }}
+            </div>
+        </div>
+        <br>
+        <button type="submit" class="btn btn-primary">Save</button>
+    </form>
+
+{% endblock %}

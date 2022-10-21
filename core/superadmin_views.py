@@ -21,7 +21,7 @@ from core.models import Group
 from core.models.agreement import CustomAgreement
 from core.tasks import replace_domain_links, elasticsearch_rebuild_for_tenant
 from core.lib import tenant_schema, is_valid_domain
-from core.superadmin.forms import AuditLogFilter, CustomAgreementForm, SettingsForm, ScanIncidentFilter, OptionalFeaturesForm
+from core.superadmin.forms import AuditLogFilter, CustomAgreementForm, SettingsForm, ScanIncidentFilter, OptionalFeaturesForm, SupportContractForm
 from control.tasks import get_db_disk_usage, get_file_disk_usage, copy_group_to_tenant
 from file.models import ScanIncident
 from tenants.models import Client, GroupCopy
@@ -209,6 +209,23 @@ def tasks(request):
         return redirect('/superadmin/tasks')
 
     return render(request, 'superadmin/tasks.html', context)
+
+
+class SupportContract(SuperAdminView):
+    http_method_names = ['post', 'get']
+
+    def post(self, request):
+        form = SupportContractForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect('/superadmin/support_contract')
+
+        context = {'form': form}
+
+        return render(request, 'superadmin/support_contract', context)
+
+    def get(self, request):
+        return render(request, 'superadmin/support_contract.html')
 
 
 @login_required

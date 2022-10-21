@@ -225,6 +225,8 @@ class SiteSettingsTestCase(PleioTenantTestCase):
 
                     pdfCheckerEnabled
                     collabEditingEnabled
+                    supportContractEnabled
+                    supportContractHoursRemaining
                 }
             }
         """
@@ -411,6 +413,8 @@ class SiteSettingsTestCase(PleioTenantTestCase):
         self.assertEqual(data["siteSettings"]["kalturaVideoPlayerId"], "")
         self.assertEqual(data["siteSettings"]["pdfCheckerEnabled"], True)
         self.assertEqual(data["siteSettings"]["collabEditingEnabled"], False)
+        self.assertEqual(data["siteSettings"]["supportContractEnabled"], False)
+        self.assertEqual(data["siteSettings"]["supportContractHoursRemaining"], 0)
 
     def test_site_settings_by_anonymous(self):
         with self.assertGraphQlError("not_logged_in"):

@@ -66,6 +66,7 @@ class CustomAgreementForm(forms.ModelForm):
     class Meta:
         model=CustomAgreement  
         fields = ['name', 'document']
+        
 class OptionalFeaturesForm(forms.Form):
     collab_editing_enabled = forms.BooleanField(required=False)
     edit_user_name_enabled = forms.BooleanField(required=False)
@@ -74,3 +75,12 @@ class OptionalFeaturesForm(forms.Form):
         data = self.cleaned_data
         config.COLLAB_EDITING_ENABLED = data['collab_editing_enabled']
         config.EDIT_USER_NAME_ENABLED = data['edit_user_name_enabled']
+
+class SupportContractForm(forms.Form):
+    support_contract_enabled = forms.BooleanField(required=False)
+    support_contract_hours_remaining = forms.FloatField(required=False)
+
+    def save(self):
+        data = self.cleaned_data
+        config.SUPPORT_CONTRACT_ENABLED = data['support_contract_enabled']
+        config.SUPPORT_CONTRACT_HOURS_REMAINING = data['support_contract_hours_remaining']
