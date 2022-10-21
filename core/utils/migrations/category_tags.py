@@ -37,6 +37,9 @@ class UserMigration(MigrationBase):
             pass
 
     def migrate_user(self, profile):
+        if profile.overview_email_categories:
+            return
+
         category_tags = defaultdict(lambda: {'values': []})
         new_tags = []
         for tag in profile.overview_email_tags:
@@ -58,8 +61,10 @@ class EntityMigration(MigrationBase):
             self.migrate_entity(entity)
 
     def migrate_entity(self, entity: Union[(Entity, Group)]):
-        category_tags = defaultdict(lambda: {'values': []})
+        if entity.category_tags:
+            return
 
+        category_tags = defaultdict(lambda: {'values': []})
         current_tags = EntityTag.objects.filter(entity_id=entity.pk)
         new_tags = []
         for tag in current_tags:
