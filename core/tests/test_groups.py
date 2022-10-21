@@ -19,7 +19,6 @@ class GroupsEmptyTestCase(PleioTenantTestCase):
                     edges {
                         guid
                         name
-                        tags
                     }
                 }
             }
@@ -39,25 +38,19 @@ class GroupsNotEmptyTestCase(PleioTenantTestCase):
         super(GroupsNotEmptyTestCase, self).setUp()
         self.user = mixer.blend(User)
         self.group1 = mixer.blend(Group,
-                                  name="Group 1",
-                                  tags=['tag_one'])
+                                  name="Group 1")
         self.group1.join(self.user, 'member')
         self.groups = mixer.cycle(5).blend(Group, is_closed=False)
         self.group2 = mixer.blend(Group, is_featured=True,
-                                  name="Group 2",
-                                  tags=['tag_one', 'tag_two'])
+                                  name="Group 2")
         self.query = """
             query GroupsQuery(
                     $filter: GroupFilter
-                    $tags: [String]
-                    $matchStrategy: MatchStrategy
                     $offset: Int
                     $limit: Int
                     $q: String) {
                 groups(
                         filter: $filter
-                        tags: $tags
-                        matchStrategy: $matchStrategy
                         offset: $offset
                         limit: $limit
                         q: $q) {
@@ -106,24 +99,6 @@ class GroupsNotEmptyTestCase(PleioTenantTestCase):
 
         self.assertEqual(data["groups"]["total"], 1)
         self.assertEqual(data["groups"]["edges"][0]["guid"], self.group1.guid)
-
-    def test_tags_match_all(self):
-        result = self.graphql_client.post(self.query, {
-            'tags': ["tag_one", "tag_two"]
-        })
-        groups = [e['name'] for e in result['data']['groups']['edges']]
-        self.assertEqual(1, len(groups), msg=groups)
-        self.assertIn(self.group2.name, groups, msg=groups)
-
-    def test_tags_match_any(self):
-        result = self.graphql_client.post(self.query, {
-            'tags': ["tag_one", "tag_two"],
-            'matchStrategy': 'any',
-        })
-        groups = [e['name'] for e in result['data']['groups']['edges']]
-        self.assertEqual(2, len(groups), msg=groups)
-        self.assertIn(self.group2.name, groups, msg=groups)
-        self.assertIn(self.group1.name, groups, msg=groups)
 
 
 class HiddenGroupTestCase(PleioTenantTestCase):

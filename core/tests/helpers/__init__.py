@@ -12,6 +12,7 @@ from ariadne import graphql_sync
 from django.contrib.auth.models import AnonymousUser
 from django.core.files.base import ContentFile
 from django.http import HttpRequest
+from django.test import override_settings
 from django.utils.crypto import get_random_string
 from mixer.backend.django import mixer
 
@@ -163,6 +164,7 @@ class GraphQLClient():
 class ElasticsearchTestCase(PleioTenantTestCase):
 
     @staticmethod
+    @override_settings(ENV='test')
     def initialize_index():
         with suppress_stdout():
             from core.lib import tenant_schema

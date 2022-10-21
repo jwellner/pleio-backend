@@ -21,6 +21,8 @@ class FileDocument(DefaultDocument):
     tags_matches = fields.ListField(fields.TextField(
         fields={'raw': fields.KeywordField()}
     ))
+    category_tags = fields.ListField(fields.KeywordField(attr='category_tags_index'))
+
     read_access = fields.ListField(fields.KeywordField())
     type = fields.KeywordField(attr="type_to_string")
     title = fields.TextField(
@@ -70,6 +72,9 @@ class FileDocument(DefaultDocument):
     def get_queryset(self):
         queryset = super(FileDocument, self).get_queryset()
         return queryset.exclude(group=None)
+
+    def should_index_object(self, obj):
+        return bool(obj.group)
 
     class Index:
         name = 'file'

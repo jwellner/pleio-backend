@@ -29,7 +29,7 @@ class CustomSignalProcessor(BaseSignalProcessor):
         """Overwrite default handle_save and stop raising exception on error
         """
         try:
-            if isinstance(instance, apps.get_model('file.FileFolder')) and instance.group:
+            if isinstance(instance, apps.get_model('file.FileFolder')) and instance.group and not settings.ENV == 'test':
                 schedule_index_document(instance)
             else:
                 registry.update(instance)

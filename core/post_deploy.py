@@ -1,6 +1,7 @@
 import json
 import logging
 
+from django.db.models import Prefetch, F
 from django.utils.translation import gettext, activate
 from post_deploy import post_deploy_action
 
@@ -12,9 +13,9 @@ from core.models import Group, Entity, Revision, Widget
 from core.models.attachment import Attachment
 from core.tasks import strip_exif_from_file
 from core.utils.entity import load_entity_by_id
+from core.utils.migrations import category_tags
 from user.models import User
 from notifications.models import Notification
-from django.db.models import Prefetch, F
 
 LOGGER = logging.getLogger(__name__)
 
@@ -151,3 +152,31 @@ def strip_article_images_of_exif_data():
     for entity in Entity.objects.all().select_subclasses():
         if hasattr(entity, 'featured_image') and entity.featured_image:
             strip_exif_from_file(schema=tenant_schema(), file_folder_guid=entity.featured_image)
+
+
+@post_deploy_action
+def migrate_categories():
+    if is_schema_public():
+        return
+
+    category_tags.EntityMigration().run()
+    category_tags.GroupMigration().run()
+    category_tags.UserMigration().run()
+    category_tags.WidgetMigration().run()
+    category_tags.cleanup()
+
+
+@post_deploy_action
+def migrate_widgets_for_match_strategy():
+    if is_schema_public():
+        return
+
+    for widget in Widget.objects.all():
+        if widget.type != 'objects':
+            continue
+
+        widget.settings.append({
+            'key': 'matchStrategy',
+            'value': 'all'
+        })
+        widget.save()

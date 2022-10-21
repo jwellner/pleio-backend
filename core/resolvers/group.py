@@ -359,3 +359,5 @@ def resolve_updates_enabled_field(obj, info):
 
 
 group.set_field("excerpt", shared.resolve_entity_excerpt)
+group.set_field("tags", shared.resolve_entity_tags)
+group.set_field("tagCategories", shared.resolve_entity_categories)

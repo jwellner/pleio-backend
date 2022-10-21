@@ -1,163 +1,63 @@
 from core.tests.helpers import PleioTenantTestCase
-from user.models import User
-from mixer.backend.django import mixer
+from user.factories import AdminFactory, UserFactory
 
 
 class EditEmailOverviewTestCase(PleioTenantTestCase):
-
     def setUp(self):
         super().setUp()
-        self.user1 = mixer.blend(User)
-        self.user2 = mixer.blend(User)
-        self.admin = mixer.blend(User)
-        self.admin.roles = ['ADMIN']
-        self.admin.save()
 
-    def tearDown(self):
-        self.admin.delete()
-        self.user2.delete()
-        self.user1.delete()
-        super().tearDown()
+        self.user1 = UserFactory(email="owner@localhost")
+        self.user2 = UserFactory(email="another@localhost")
+        self.admin = AdminFactory()
 
-    def test_edit_email_overview_by_owner(self):
-        mutation = """
-            mutation editEmailOverview($input: editEmailOverviewInput!) {
-                editEmailOverview(input: $input) {
-                    user {
-                        guid
-                        emailOverview {
-                            frequency
+        self.mutation = """
+        mutation editEmailOverview($input: editEmailOverviewInput!) {
+            editEmailOverview(input: $input) {
+                user {
+                    guid
+                    emailOverview {
+                        frequency
+                        tags
+                        tagCategories {
+                            name
+                            values
                         }
-                        __typename
                     }
                     __typename
                 }
+                __typename
             }
+        }
         """
 
-        variables = {
+        self.variables = {
             "input": {
                 "guid": self.user1.guid,
-                "frequency": "monthly"
+                "frequency": "monthly",
+                "tags": ["Monday", "Wednesday"],
+                "tagCategories": [{"name": "Demo", "values": ["Primary"]}]
             }
         }
 
-        self.graphql_client.force_login(self.user1)
-        result = self.graphql_client.post(mutation, variables)
+    def assertValidResult(self, msg):
+        data = self.graphql_client.result["data"]['editEmailOverview']['user']
+        self.assertEqual(data["guid"], self.user1.guid, msg=msg)
+        self.assertEqual(data["emailOverview"]["frequency"], self.variables['input']['frequency'], msg=msg)
+        self.assertEqual(data["emailOverview"]["tags"], self.variables['input']['tags'], msg=msg)
+        self.assertEqual(data["emailOverview"]["tagCategories"], self.variables['input']['tagCategories'], msg=msg)
 
-        data = result["data"]
-        self.assertEqual(data["editEmailOverview"]["user"]["guid"], self.user1.guid)
-        self.assertEqual(data["editEmailOverview"]["user"]["emailOverview"]["frequency"], "monthly")
+    def test_edit_email_overview_by_authorized_users(self):
+        for user, username in [(self.user1, "owner"),
+                               (self.admin, "admin")]:
+            self.graphql_client.force_login(user)
+            self.graphql_client.post(self.mutation, self.variables)
+            self.assertValidResult(msg=f"Unexepctedly not stored properly when executed as {username}")
 
-    def test_edit_email_overview_by_admin(self):
-        mutation = """
-            mutation editEmailOverview($input: editEmailOverviewInput!) {
-                editEmailOverview(input: $input) {
-                    user {
-                        guid
-                        emailOverview {
-                            frequency
-                        }
-                        __typename
-                    }
-                    __typename
-                }
-            }
-        """
-
-        variables = {
-            "input": {
-                "guid": self.user1.guid,
-                "frequency": "monthly"
-            }
-        }
-
-        self.graphql_client.force_login(self.admin)
-        result = self.graphql_client.post(mutation, variables)
-
-        data = result["data"]
-        self.assertEqual(data["editEmailOverview"]["user"]["guid"], self.user1.guid)
-        self.assertEqual(data["editEmailOverview"]["user"]["emailOverview"]["frequency"], "monthly")
-
-    def test_edit_email_overview_by_logged_in_user(self):
-        mutation = """
-            mutation editEmailOverview($input: editEmailOverviewInput!) {
-                editEmailOverview(input: $input) {
-                    user {
-                        guid
-                        emailOverview {
-                            frequency
-                        }
-                        __typename
-                    }
-                    __typename
-                }
-            }
-        """
-        variables = {
-            "input": {
-                "guid": self.user1.guid,
-                "frequency": "monthly"
-            }
-        }
-
+    def test_edit_email_overview_by_non_authorized_user(self):
         with self.assertGraphQlError("could_not_save"):
             self.graphql_client.force_login(self.user2)
-            self.graphql_client.post(mutation, variables)
+            self.graphql_client.post(self.mutation, self.variables)
 
-    def test_edit_email_overview_by_anonymous(self):
-        mutation = """
-            mutation editEmailOverview($input: editEmailOverviewInput!) {
-                editEmailOverview(input: $input) {
-                    user {
-                        guid
-                        emailOverview {
-                            frequency
-                        }
-                        __typename
-                    }
-                    __typename
-                }
-            }
-        """
-
-        variables = {
-            "input": {
-                "guid": self.user1.guid,
-                "frequency": "monthly"
-            }
-        }
-
+    def test_edit_email_overview_by_anonymous_visitor(self):
         with self.assertGraphQlError("not_logged_in"):
-            self.graphql_client.post(mutation, variables)
-
-    def test_edit_email_overview_by_owner_add_tag(self):
-        mutation = """
-            mutation editEmailOverview($input: editEmailOverviewInput!) {
-                editEmailOverview(input: $input) {
-                    user {
-                        guid
-                        emailOverview {
-                            frequency
-                            tags
-                        }
-                        __typename
-                    }
-                    __typename
-                }
-            }
-        """
-
-        variables = {
-            "input": {
-                "guid": self.user1.guid,
-                "tags": ['tag_one']
-            }
-        }
-
-        self.graphql_client.force_login(self.user1)
-        result = self.graphql_client.post(mutation, variables)
-
-        data = result["data"]
-        self.assertEqual(data["editEmailOverview"]["user"]["guid"], self.user1.guid)
-        self.assertEqual(data["editEmailOverview"]["user"]["emailOverview"]["tags"][0], 'tag_one')
+            self.graphql_client.post(self.mutation, self.variables)

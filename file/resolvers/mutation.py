@@ -93,7 +93,8 @@ def resolve_add_file(_, info, input):
     entity = FileFolder()
 
     entity.owner = user
-    entity.tags = clean_input.get("tags", [])
+
+    shared.resolve_update_tags(entity, clean_input)
 
     entity.upload = clean_input.get("file")
 
@@ -161,7 +162,8 @@ def resolve_add_folder(_, info, input):
     entity = FileFolder()
 
     entity.owner = user
-    entity.tags = clean_input.get("tags", [])
+
+    shared.resolve_update_tags(entity, clean_input)
     shared.resolve_update_title(entity, clean_input)
 
     entity.type = FileFolder.Types.FOLDER
@@ -200,7 +202,6 @@ def resolve_edit_file_folder(_, info, input):
     shared.resolve_update_tags(entity, clean_input)
     shared.resolve_update_title(entity, clean_input)
     shared.resolve_update_rich_description(entity, clean_input)
-
     shared.update_publication_dates(entity, clean_input)
     shared.resolve_update_access_id(entity, clean_input)
 

@@ -84,8 +84,8 @@ def resolve_activities(
         offset=0,
         limit=20,
         tags=None,
-        tagLists=None,
-        matchStrategy='legacy',
+        tagCategories=None,
+        matchStrategy='any',
         groupFilter=None,
         eventFilter=None,
         subtypes=None,
@@ -148,7 +148,7 @@ def resolve_activities(
 
     qs = qs.filter(conditional_subtypes_filter(subtypes) &
                    conditional_tags_filter(tags, matchStrategy == 'any') &
-                   conditional_tag_lists_filter(tagLists, matchStrategy != 'all') &
+                   conditional_tag_lists_filter(tagCategories, matchStrategy != 'all') &
                    conditional_group_filter(containerGuid) &
                    conditional_groups_filter(groupFilter, info.context["request"].user))
 

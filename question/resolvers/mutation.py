@@ -88,7 +88,6 @@ def resolve_add_question(_, info, input):
     shared.resolve_update_abstract(entity, clean_input)
     shared.update_featured_image(entity, clean_input)
     shared.update_publication_dates(entity, clean_input)
-
     shared.update_is_featured(entity, user, clean_input)
 
     entity.save()
@@ -118,10 +117,8 @@ def resolve_edit_question(_, info, input):
     shared.resolve_update_title(entity, clean_input)
     shared.resolve_update_rich_description(entity, clean_input)
     shared.resolve_update_abstract(entity, clean_input)
-
     shared.update_featured_image(entity, clean_input)
     shared.update_publication_dates(entity, clean_input)
-
     shared.update_is_featured(entity, user, clean_input)
 
     # only admins can edit these fields

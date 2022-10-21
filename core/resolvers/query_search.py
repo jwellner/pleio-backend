@@ -1,17 +1,28 @@
-from core.lib import get_acl
-from core.constances import INVALID_SUBTYPE, INVALID_DATE, ORDER_DIRECTION, SEARCH_ORDER_BY, NOT_LOGGED_IN, USER_ROLES, USER_NOT_SITE_ADMIN
+from core.constances import INVALID_SUBTYPE, INVALID_DATE, ORDER_DIRECTION, NOT_LOGGED_IN, USER_ROLES, USER_NOT_SITE_ADMIN
 from core.models import Entity, Group, SearchQueryJournal
+from core.utils.elasticsearch import QueryBuilder
 from user.models import User
-from elasticsearch_dsl import Search
-from elasticsearch_dsl import A, Q
 from graphql import GraphQLError
 from itertools import chain
-from django_tenants.utils import parse_tenant_config_path
 from django.utils import dateparse, timezone
 
 
-def resolve_search(_, info, q=None, containerGuid=None, type=None, subtype=None, subtypes=None, dateFrom=None, dateTo=None, offset=0, limit=20,
-                   tagLists=None, orderBy=None, orderDirection=ORDER_DIRECTION.asc, userGuid=None):
+def resolve_search(_, info,
+                   q=None,
+                   containerGuid=None,
+                   type=None,
+                   subtype=None,
+                   subtypes=None,
+                   dateFrom=None,
+                   dateTo=None,
+                   offset=0,
+                   limit=20,
+                   tags=None,
+                   tagCategories=None,
+                   matchStrategy='any',
+                   orderBy=None,
+                   orderDirection=ORDER_DIRECTION.asc,
+                   userGuid=None):
     # pylint: disable=unused-argument
     # pylint: disable=too-many-arguments
     # pylint: disable=redefined-builtin
@@ -23,13 +34,15 @@ def resolve_search(_, info, q=None, containerGuid=None, type=None, subtype=None,
     request = info.context["request"]
 
     user = request.user
-    tenant_name = parse_tenant_config_path("")
     sessionid = request.COOKIES.get('sessionid', None)
 
-    SearchQueryJournal.objects.maybe_log_query(
-        query=q,
-        session=sessionid,
-    )
+    if q:
+        SearchQueryJournal.objects.maybe_log_query(
+            query=q,
+            session=sessionid,
+        )
+
+    q = q or '*'
 
     if type in ['group', 'user']:
         subtype = type
@@ -50,71 +63,17 @@ def resolve_search(_, info, q=None, containerGuid=None, type=None, subtype=None,
     except ValueError:
         raise GraphQLError(INVALID_DATE)
 
-    if (tagLists or dateFrom or dateTo) and not q:
-        q = '*'
+    query = QueryBuilder(q, user, date_from, date_to)
+    query.maybe_filter_owner(userGuid)
+    query.maybe_filter_subtypes(subtypes)
+    query.maybe_filter_container(containerGuid)
+    query.maybe_filter_tags(tags, matchStrategy)
+    query.maybe_filter_categories(tagCategories, matchStrategy)
+    query.order_by(orderBy, orderDirection)
+    query.add_aggregation()
 
-    s = Search(index='_all').query(
-        Q('simple_query_string', query=q, fields=[
-            'title^3',
-            'name^3',
-            'email',
-            'description',
-            'tags^3',
-            'tags_matches',
-            'file_contents',
-            'introduction',
-            'comments.description',
-            'owner.name'
-        ]
-          )
-        | Q('nested', path='user_profile_fields', ignore_unmapped=True, query=Q('bool', must=[
-            Q('match', user_profile_fields__value=q),
-            Q('terms', user_profile_fields__read_access=list(get_acl(user)))
-        ]
-                                                                                )
-            )
-    ).filter(
-        'terms', read_access=list(get_acl(user))
-    ).filter(
-        'term', tenant_name=tenant_name
-    ).filter(
-        'range', created_at={'gte': date_from, 'lte': date_to}
-    ).exclude(
-        'term', is_active=False
-    )
+    s = query.s[offset:offset + limit]
 
-    if subtypes:
-        s = s.query('terms', type=subtypes)
-
-    if userGuid:
-        s = s.filter(owner__id=userGuid)
-
-    s = s.query('bool', filter=[
-        Q('range', published={'gt': None, 'lte': timezone.now()}) |
-        Q('terms', type=['group', 'user'])
-    ])
-
-    # Filter on container_guid (group.guid)
-    if containerGuid:
-        s = s.filter('term', container_guid=containerGuid)
-
-    if tagLists:
-        for tags in tagLists:
-            s = s.filter(
-                'terms', tags__raw=[x.lower() for x in tags]
-            )
-
-    if orderBy == SEARCH_ORDER_BY.title:
-        s = s.sort({'title.raw': {'order': orderDirection}})
-    elif orderBy == SEARCH_ORDER_BY.timeCreated:
-        s = s.sort({'created_at': {'order': orderDirection}})
-    elif orderBy == SEARCH_ORDER_BY.timePublished:
-        s = s.sort({'published': {'order': orderDirection}})
-
-    a = A('terms', field='type')
-    s.aggs.bucket('type_terms', a)
-
-    s = s[offset:offset + limit]
     response = s.execute()
 
     # TODO: maybe response can be extended, so duplicate code can be removed

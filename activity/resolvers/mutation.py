@@ -36,7 +36,8 @@ def resolve_add_status_update(_, info, input):
     entity = StatusUpdate()
 
     entity.owner = user
-    entity.tags = clean_input.get("tags", [])
+
+    shared.resolve_update_tags(entity, clean_input)
 
     if group:
         entity.group = group
@@ -73,7 +74,6 @@ def resolve_edit_status_update(_, info, input):
     shared.resolve_update_title(entity, clean_input)
     shared.resolve_update_rich_description(entity, clean_input)
     shared.resolve_update_tags(entity, clean_input)
-
     shared.update_publication_dates(entity, clean_input)
 
     # only admins can edit these fields

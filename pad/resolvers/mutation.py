@@ -49,6 +49,7 @@ def resolve_add_pad(_, info, input):
 
     shared.resolve_update_title(entity, clean_input)
     shared.resolve_update_rich_description(entity, clean_input)
+    shared.resolve_update_tags(entity, clean_input)
 
     # default all group members can read/write
     entity.read_access = access_id_to_acl(entity, 4)
@@ -78,6 +79,7 @@ def resolve_edit_pad(_, info, input):
 
     shared.resolve_update_title(entity, clean_input)
     shared.resolve_update_rich_description(entity, clean_input)
+    shared.resolve_update_tags(entity, clean_input)
 
     if clean_input.get("state"):
         entity.pad_state = clean_input.get("state")
