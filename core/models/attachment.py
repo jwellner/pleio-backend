@@ -84,14 +84,14 @@ class Attachment(ModelWithFile, ResizedImageMixin):
 @receiver(models.signals.pre_save, sender=Attachment)
 def attachment_mimetype_size(sender, instance, **kwargs):
     # pylint: disable=unused-argument
-    if instance.upload and not instance.name:
-        instance.name = instance.upload.file.name
-    if instance.upload:
-        instance.mime_type = get_mimetype(instance.upload.path)
-        try:
+    try:
+        if instance.upload and not instance.name:
+            instance.name = instance.upload.file.name
+        if instance.upload:
+            instance.mime_type = get_mimetype(instance.upload.path)
             instance.size = instance.upload.size
-        except Exception:
-            pass
+    except Exception:
+        pass
 
 
 @receiver(models.signals.post_save, sender=Attachment)
