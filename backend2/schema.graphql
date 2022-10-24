@@ -194,6 +194,8 @@ input addPadInput {
     richDescription: SecureRichText!
     tags: [String]
     tagCategories: [TagCategoryInput]
+    accessId: Int
+    writeAccessId: Int
 }
 
 type addPadPayload {
@@ -750,6 +752,8 @@ input editPadInput {
     state: String
     tags: [String]
     tagCategories: [TagCategoryInput]
+    accessId: Int
+    writeAccessId: Int
 }
 
 type editPadPayload {

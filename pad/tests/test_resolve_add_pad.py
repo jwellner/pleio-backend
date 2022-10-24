@@ -5,6 +5,7 @@ from django.contrib.auth.models import AnonymousUser
 from django.http import HttpRequest
 from core.models import Group
 from core.tests.helpers import PleioTenantTestCase
+from core import config
 from user.models import User
 from mixer.backend.django import mixer
 
@@ -32,6 +33,7 @@ class AddPadTestCase(PleioTenantTestCase):
                 title
                 richDescription
                 accessId
+                writeAccessId
                 timeCreated
                 timeUpdated
                 canEdit
@@ -62,5 +64,24 @@ class AddPadTestCase(PleioTenantTestCase):
 
         self.assertEqual(entity["title"], variables["input"]["title"])
         self.assertEqual(entity["richDescription"], variables["input"]["richDescription"])
-        self.assertEqual(entity["accessId"], 4)
+        self.assertEqual(entity["accessId"], config.DEFAULT_ACCESS_ID)
+        self.assertEqual(entity["writeAccessId"], 0)
         self.assertEqual(entity["group"]["guid"], self.group.guid)
+
+    def test_add_pad_access(self):
+
+        variables = self.data
+        variables["input"]["accessId"] = 4
+        variables["input"]["writeAccessId"] = 4
+
+        self.graphql_client.force_login(self.authenticatedUser)
+        result = self.graphql_client.post(self.mutation, variables)
+
+        entity = result["data"]['addPad']['entity']
+
+        self.assertEqual(entity["title"], variables["input"]["title"])
+        self.assertEqual(entity["richDescription"], variables["input"]["richDescription"])
+        self.assertEqual(entity["accessId"], 4)
+        self.assertEqual(entity["writeAccessId"], 4)
+        self.assertEqual(entity["group"]["guid"], self.group.guid)
+
