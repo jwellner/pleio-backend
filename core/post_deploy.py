@@ -1,6 +1,6 @@
 import json
-import logging
 
+from celery.utils.log import get_task_logger
 from django.db.models import Prefetch, F
 from django.utils.translation import gettext, activate
 from post_deploy import post_deploy_action
@@ -17,7 +17,7 @@ from core.utils.migrations import category_tags
 from user.models import User
 from notifications.models import Notification
 
-LOGGER = logging.getLogger(__name__)
+logger = get_task_logger(__name__)
 
 
 @post_deploy_action
@@ -69,7 +69,7 @@ def remove_notifications_with_broken_relation():
             notification.delete()
             count += 1
 
-    LOGGER.info("Deleted %s broken notifications", count)
+    logger.info("Deleted %s broken notifications", count)
 
 
 @post_deploy_action
@@ -159,11 +159,15 @@ def migrate_categories():
     if is_schema_public():
         return
 
-    category_tags.EntityMigration().run()
-    category_tags.GroupMigration().run()
-    category_tags.UserMigration().run()
-    category_tags.WidgetMigration().run()
-    category_tags.cleanup()
+    try:
+        category_tags.WidgetMigration().run()
+        category_tags.UserMigration().run()
+        category_tags.GroupMigration().run()
+        category_tags.EntityMigration().run()
+        category_tags.cleanup()
+    except Exception as e:
+        logger.error(f"migrate_categories@%s: %s (%s)", tenant_schema(), str(e), str(e.__class__))
+        raise
 
 
 @post_deploy_action
