@@ -1,10 +1,10 @@
 from graphql import GraphQLError
 from django.core.exceptions import ObjectDoesNotExist
-from core.constances import NOT_LOGGED_IN, COULD_NOT_SAVE, COULD_NOT_FIND, COULD_NOT_FIND_GROUP, USER_ROLES, ACCESS_TYPE
+from core.constances import COULD_NOT_SAVE, COULD_NOT_FIND
 from core.lib import clean_graphql_input, access_id_to_acl
 from core.models.group import Group
 from core.resolvers import shared
-from core.utils.entity import load_entity_by_id
+from core import config
 from file.models import FileFolder
 
 def resolve_add_pad(_, info, input):
@@ -40,6 +40,7 @@ def resolve_add_pad(_, info, input):
     entity.type = FileFolder.Types.PAD
 
     entity.owner = user
+    entity.tags = clean_input.get("tags", [])
 
     if parent:
         entity.parent = parent
@@ -51,9 +52,10 @@ def resolve_add_pad(_, info, input):
     shared.resolve_update_rich_description(entity, clean_input)
     shared.resolve_update_tags(entity, clean_input)
 
-    # default all group members can read/write
-    entity.read_access = access_id_to_acl(entity, 4)
-    entity.write_access = access_id_to_acl(entity, 4)
+    default_access_id = 4 if group and group.is_closed else config.DEFAULT_ACCESS_ID
+
+    entity.read_access = access_id_to_acl(entity, clean_input.get("accessId", default_access_id))
+    entity.write_access = access_id_to_acl(entity, clean_input.get("writeAccessId", 0))
 
     entity.save()
 
@@ -77,9 +79,10 @@ def resolve_edit_pad(_, info, input):
     shared.assert_authenticated(user)
     shared.assert_write_access(entity, user)
 
+    shared.resolve_update_tags(entity, clean_input)
     shared.resolve_update_title(entity, clean_input)
     shared.resolve_update_rich_description(entity, clean_input)
-    shared.resolve_update_tags(entity, clean_input)
+    shared.resolve_update_access_id(entity, clean_input)
 
     if clean_input.get("state"):
         entity.pad_state = clean_input.get("state")

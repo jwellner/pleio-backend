@@ -19,7 +19,7 @@ class EditPadTestCase(PleioTenantTestCase):
         self.authenticatedUser = mixer.blend(User)
         self.authenticatedUserNonGroupMember = mixer.blend(User)
         self.adminUser = mixer.blend(User, roles=['ADMIN'])
-        self.group = mixer.blend(Group, owner=self.authenticatedUser, is_membership_on_request=False)
+        self.group = mixer.blend(Group, owner=self.authenticatedUser, is_membership_on_request=False, is_closed=True)
         self.group.join(self.authenticatedUser, 'owner')
 
         self.pad = FileFolder.objects.create(
@@ -37,6 +37,8 @@ class EditPadTestCase(PleioTenantTestCase):
                 "guid": str(self.pad.id),
                 "title": "My first Pad",
                 "richDescription": "richDescription",
+                "accessId": 0,
+                "writeAccessId": 0
             }
         }
         self.mutation = """
@@ -44,6 +46,7 @@ class EditPadTestCase(PleioTenantTestCase):
                 title
                 richDescription
                 accessId
+                writeAccessId
                 timeCreated
                 timeUpdated
                 canEdit
@@ -74,6 +77,7 @@ class EditPadTestCase(PleioTenantTestCase):
 
         self.assertEqual(entity["title"], variables["input"]["title"])
         self.assertEqual(entity["richDescription"], variables["input"]["richDescription"])
-        self.assertEqual(entity["accessId"], 4)
+        self.assertEqual(entity["accessId"], 0)
+        self.assertEqual(entity["writeAccessId"], 0)
         self.assertEqual(entity["group"]["guid"], self.group.guid)
         self.assertEqual(entity["group"]["guid"], self.group.guid)
