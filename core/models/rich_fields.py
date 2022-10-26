@@ -1,6 +1,6 @@
 import abc
 from core.models.attachment import Attachment
-from core.models.shared import AbstractModelMeta
+from core.models.shared import AbstractModel
 from core.utils.tiptap_parser import Tiptap
 from core.lib import is_valid_uuid
 from django.contrib.contenttypes.fields import GenericRelation
@@ -10,7 +10,7 @@ from urllib.parse import unquote, urlparse
 from .mixin import NotificationMixin
 
 
-class RichFieldsMixin(metaclass=AbstractModelMeta):
+class RichFieldsMixin(AbstractModel):
     class Meta:
         abstract = True
 
@@ -34,11 +34,15 @@ class MentionMixin(NotificationMixin, RichFieldsMixin):
         return user_ids
 
 
-class AttachmentMixin(RichFieldsMixin, metaclass=AbstractModelMeta):
+class AttachmentMixin(RichFieldsMixin):
     class Meta:
         abstract = True
 
     attachments = GenericRelation(Attachment, object_id_field='attached_object_id', content_type_field='attached_content_type')
+
+    def save(self, *args, **kwargs):
+        super(AttachmentMixin, self).save(*args, **kwargs)
+        self.update_attachments_links()
 
     def attachments_in_fields(self):
         """ Can be overridden in parent Model """
