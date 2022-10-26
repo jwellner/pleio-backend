@@ -8,7 +8,7 @@ from django.contrib.contenttypes.fields import GenericRelation
 from django.urls import reverse
 from notifications.models import Notification
 from .annotation import Annotation
-from core.models.shared import AbstractModelMeta
+from core.models.shared import AbstractModel
 from core.utils.convert import truncate_rich_description, tiptap_to_text
 from core.lib import delete_attached_file
 from core.constances import USER_ROLES
@@ -214,7 +214,7 @@ class ArticleMixin(models.Model):
         return tiptap_to_text(self.rich_description)
 
 
-class ModelWithFile(models.Model, metaclass=AbstractModelMeta):
+class ModelWithFile(AbstractModel):
     class Meta:
         abstract = True
 

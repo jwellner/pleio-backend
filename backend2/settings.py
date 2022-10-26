@@ -159,7 +159,7 @@ TENANT_APPS = [
     'file',
     'elgg',
     'control',
-    'pad'
+    'pad',
 ]
 
 INSTALLED_APPS = list(SHARED_APPS) + [app for app in TENANT_APPS if app not in SHARED_APPS]
@@ -474,3 +474,7 @@ SILENCED_SYSTEM_CHECKS = [
     # For more information: run the application without this line.
     'django_jsonfield_backport.W001'
 ]
+
+ONLINE_MEETINGS_SETTINGS_CONTAINER = 'core.meetings.SettingsContainer'
+ONLINE_MEETINGS_URL = os.getenv("ONLINE_MEETINGS_URL")
+VIDEO_CALL_RESERVE_ROOM_URL = os.getenv("VIDEO_CALL_RESERVE_ROOM_URL")

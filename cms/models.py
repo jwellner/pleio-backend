@@ -77,6 +77,7 @@ class Page(Entity, AttachmentMixin):
                 'title': self.title or '',
                 'richDescription': self.rich_description or '',
                 'tags': sorted(self.tags) or [],
+                'tagCategories': self.category_tags or [],
                 'accessId': get_access_id(self.read_access),
             }
         return {}

@@ -2,6 +2,7 @@ from graphql import GraphQLError
 from django.core.exceptions import ObjectDoesNotExist
 from core.constances import NOT_LOGGED_IN, COULD_NOT_FIND, COULD_NOT_SAVE, USER_ROLES
 from core.lib import clean_graphql_input
+from core.resolvers import shared
 from user.models import User
 
 
@@ -29,6 +30,9 @@ def resolve_edit_email_overview(_, info, input):
 
     if 'tags' in clean_input:
         requested_user.profile.overview_email_tags = clean_input.get("tags", [])
+
+    if 'tagCategories' in clean_input:
+        requested_user.profile.overview_email_categories = clean_input['tagCategories']
 
     requested_user.profile.save()
 

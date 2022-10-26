@@ -1,5 +1,4 @@
 from core.factories import GroupFactory
-from core.models import GroupMembership
 from core.tests.helpers import PleioTenantTestCase
 from user.factories import UserFactory, AdminFactory
 from unittest import mock

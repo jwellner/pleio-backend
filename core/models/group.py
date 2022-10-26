@@ -15,7 +15,7 @@ from core.constances import USER_ROLES
 from core.models.featured import FeaturedCoverMixin
 from core.utils.convert import tiptap_to_text
 from .rich_fields import AttachmentMixin
-from .tags import TagsMixin
+from .tags import TagsModel
 
 logger = logging.getLogger(__name__)
 
@@ -35,7 +35,7 @@ class GroupManager(models.Manager):
         return self.get_queryset().exclude(hidden_groups_where_users_isnt_a_member)
 
 
-class Group(FeaturedCoverMixin, AttachmentMixin, TagsMixin):
+class Group(TagsModel, FeaturedCoverMixin, AttachmentMixin):
     class Meta:
         ordering = ['name']
 
@@ -84,9 +84,6 @@ class Group(FeaturedCoverMixin, AttachmentMixin, TagsMixin):
 
     auto_notification = models.BooleanField(default=False)
 
-    _tag_summary = ArrayField(models.CharField(max_length=256),
-                              blank=True, default=list,
-                              db_column='tags')
     plugins = ArrayField(models.CharField(
         max_length=256), blank=True, default=list)
 

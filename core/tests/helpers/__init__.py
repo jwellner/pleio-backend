@@ -6,11 +6,13 @@ from contextlib import contextmanager
 from datetime import datetime
 from unittest import mock
 
+from django.core.cache import cache
 from PIL import Image, UnidentifiedImageError
 from ariadne import graphql_sync
 from django.contrib.auth.models import AnonymousUser
 from django.core.files.base import ContentFile
 from django.http import HttpRequest
+from django.test import override_settings
 from django.utils.crypto import get_random_string
 from mixer.backend.django import mixer
 
@@ -47,6 +49,10 @@ class PleioTenantTestCase(FastTenantTestCase):
 
         return file
 
+    def override_config(self, **kwargs):
+        for key, value in kwargs.items():
+            cache.set("%s%s" % (self.tenant.schema_name, key), value)
+
     @staticmethod
     def relative_path(root, path):
         return os.path.join(os.path.dirname(root), *path)
@@ -59,6 +65,8 @@ class PleioTenantTestCase(FastTenantTestCase):
         for file in self.file_cleanup:
             cleanup_path(file)
 
+        cache.clear()
+        mock.patch.stopall()
         super().tearDown()
 
     @contextmanager
@@ -156,6 +164,7 @@ class GraphQLClient():
 class ElasticsearchTestCase(PleioTenantTestCase):
 
     @staticmethod
+    @override_settings(ENV='test')
     def initialize_index():
         with suppress_stdout():
             from core.lib import tenant_schema

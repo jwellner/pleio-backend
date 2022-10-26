@@ -50,7 +50,6 @@ def resolve_add_wiki(_, info, input):
     shared.resolve_update_rich_description(entity, clean_input)
     shared.resolve_update_abstract(entity, clean_input)
     shared.update_featured_image(entity, clean_input)
-
     shared.update_publication_dates(entity, clean_input)
     shared.update_is_featured(entity, user, clean_input)
 
@@ -83,6 +82,9 @@ def resolve_edit_wiki(_, info, input):
     shared.resolve_update_rich_description(entity, clean_input)
     shared.resolve_update_abstract(entity, clean_input)
     shared.update_featured_image(entity, clean_input)
+    shared.update_publication_dates(entity, clean_input)
+    shared.update_is_featured(entity, user, clean_input)
+    shared.resolve_update_access_id(entity, clean_input)
 
     if 'containerGuid' in clean_input:
         container = None
@@ -95,10 +97,6 @@ def resolve_edit_wiki(_, info, input):
 
         entity.parent = container
         entity.group = container.group if container else None
-
-    shared.update_publication_dates(entity, clean_input)
-    shared.update_is_featured(entity, user, clean_input)
-    shared.resolve_update_access_id(entity, clean_input)
 
     # only admins can edit these fields
     if user.has_role(USER_ROLES.ADMIN):

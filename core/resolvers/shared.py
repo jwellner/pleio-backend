@@ -5,11 +5,8 @@ from elasticsearch_dsl import Search
 from graphql import GraphQLError
 
 from core import config
-from core.constances import (ACCESS_TYPE, COULD_NOT_FIND, COULD_NOT_FIND_GROUP,
-                             COULD_NOT_SAVE, INVALID_ARCHIVE_AFTER_DATE,
-                             NOT_LOGGED_IN, TEXT_TOO_LONG,
-                             USER_NOT_MEMBER_OF_GROUP, USER_NOT_SITE_ADMIN,
-                             USER_ROLES, INVALID_VALUE)
+from core import constances
+from core.constances import USER_ROLES, ACCESS_TYPE
 from core.lib import (access_id_to_acl, html_to_text,
                       tenant_schema, get_access_id)
 from core.models import EntityViewCount, Group
@@ -34,13 +31,13 @@ def resolve_entity_write_access_id(obj, info):
     # pylint: disable=unused-argument
     if obj.group and obj.group.subgroups:
         for subgroup in obj.group.subgroups.all():
-            if ACCESS_TYPE.subgroup.format(subgroup.access_id) in obj.write_access:
+            if constances.ACCESS_TYPE.subgroup.format(subgroup.access_id) in obj.write_access:
                 return subgroup.access_id
-    if obj.group and ACCESS_TYPE.group.format(obj.group.id) in obj.write_access:
+    if obj.group and constances.ACCESS_TYPE.group.format(obj.group.id) in obj.write_access:
         return 4
-    if ACCESS_TYPE.public in obj.write_access:
+    if constances.ACCESS_TYPE.public in obj.write_access:
         return 2
-    if ACCESS_TYPE.logged_in in obj.write_access:
+    if constances.ACCESS_TYPE.logged_in in obj.write_access:
         return 1
     return 0
 
@@ -227,7 +224,7 @@ def _comment_count_from_index(obj):
             if match.id == obj.guid:
                 return len(match.comments)
     except Exception as e:
-        LOGGER.error(e);
+        LOGGER.error(e)
     return None
 
 
@@ -265,6 +262,11 @@ def resolve_entity_is_pinned(obj, info):
     if hasattr(obj, "is_pinned"):
         return obj.is_pinned
     return False
+
+
+def resolve_entity_categories(obj, info):
+    # pylint: disable=unused-argument
+    return obj.category_tags
 
 
 def resolve_add_suggested_items(entity, clean_input):
@@ -309,7 +311,7 @@ def update_publication_dates(entity, clean_input):
 
     if entity.schedule_delete_after and entity.schedule_archive_after:
         if entity.schedule_delete_after < entity.schedule_archive_after:
-            raise GraphQLError(INVALID_ARCHIVE_AFTER_DATE)
+            raise GraphQLError(constances.INVALID_ARCHIVE_AFTER_DATE)
 
 
 def update_featured_image(entity, clean_input, image_owner=None):
@@ -364,7 +366,10 @@ def resolve_update_rich_description(entity, clean_input):
 
 def resolve_update_tags(entity, clean_input):
     if 'tags' in clean_input:
-        entity.tags = clean_input.get("tags")
+        entity.tags = clean_input["tags"]
+
+    if 'tagCategories' in clean_input:
+        entity.category_tags = clean_input['tagCategories']
 
 
 def resolve_add_access_id(entity, clean_input):
@@ -386,7 +391,7 @@ def resolve_update_group(entity, clean_input):
             try:
                 entity.group = Group.objects.get(id=clean_input["groupGuid"])
             except Group.DoesNotExist:
-                raise GraphQLError(COULD_NOT_FIND)
+                raise GraphQLError(constances.COULD_NOT_FIND)
         else:
             entity.group = None
 
@@ -407,7 +412,7 @@ def resolve_update_owner(entity, clean_input):
                     entity.write_access = [i for i in entity.write_access if i != previous_owner_formatted]
                     entity.write_access.append(owner_formatted)
         except ObjectDoesNotExist:
-            raise GraphQLError(COULD_NOT_FIND)
+            raise GraphQLError(constances.COULD_NOT_FIND)
 
 
 def resolve_update_time_created(entity, clean_input):
@@ -439,7 +444,7 @@ def get_group(clean_input):
             group = Group.objects.get(id=clean_input.get("containerGuid"))
             return group
         except ObjectDoesNotExist:
-            raise GraphQLError(COULD_NOT_FIND_GROUP)
+            raise GraphQLError(constances.COULD_NOT_FIND_GROUP)
     else:
         return None
 
@@ -447,33 +452,35 @@ def get_group(clean_input):
 # Checks
 def assert_administrator(user):
     if not user.has_role(USER_ROLES.ADMIN):
-        raise GraphQLError(USER_NOT_SITE_ADMIN)
+        raise GraphQLError(constances.USER_NOT_SITE_ADMIN)
 
 
 def assert_authenticated(user):
     if not user.is_authenticated:
-        raise GraphQLError(NOT_LOGGED_IN)
+        raise GraphQLError(constances.NOT_LOGGED_IN)
 
 
 def assert_write_access(entity, user):
     if not entity.can_write(user):
-        raise GraphQLError(COULD_NOT_SAVE)
+        raise GraphQLError(constances.COULD_NOT_SAVE)
 
 
 def assert_group_member(user, group):
     if group and not group.is_full_member(user) and not user.has_role(USER_ROLES.ADMIN):
-        raise GraphQLError(USER_NOT_MEMBER_OF_GROUP)
+        raise GraphQLError(constances.USER_NOT_MEMBER_OF_GROUP)
 
 
 def assert_valid_title(title):
     if len(title) == 0 or len(title) > 256:
-        raise GraphQLError(INVALID_VALUE)
+        raise GraphQLError(constances.INVALID_VALUE)
 
 
 def assert_valid_abstract(abstract):
     text = html_to_text(abstract).strip()
     if len(text) > config.MAX_CHARACTERS_IN_ABSTRACT:
-        raise GraphQLError(TEXT_TOO_LONG)
+        raise GraphQLError(constances.TEXT_TOO_LONG)
+
+
 
 # Site setting profile field
 
@@ -505,3 +512,13 @@ def resolve_update_is_in_onboarding(profile_field, clean_input):
 def resolve_update_is_mandatory(profile_field, clean_input):
     if 'isMandatory' in clean_input:
         profile_field.is_mandatory = clean_input["isMandatory"]
+
+
+def assert_meetings_enabled():
+    if not config.ONLINEAFSPRAKEN_ENABLED:
+        raise GraphQLError(constances.MEETINGS_NOT_ENABLED)
+
+
+def assert_videocall_enabled():
+    if not config.VIDEOCALL_ENABLED:
+        raise GraphQLError(constances.VIDEOCALL_NOT_ENABLED)

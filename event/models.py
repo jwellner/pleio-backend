@@ -22,9 +22,8 @@ from django.utils.text import slugify
 from django.utils import timezone
 
 
-class Event(Entity,
-            CommentMixin, BookmarkMixin, FollowMixin, NotificationMixin, FeaturedCoverMixin, ArticleMixin,
-            AttachmentMixin):
+class Event(Entity, CommentMixin, BookmarkMixin, FollowMixin, NotificationMixin, FeaturedCoverMixin, ArticleMixin, AttachmentMixin):
+
     class Meta:
         ordering = ['-published']
 

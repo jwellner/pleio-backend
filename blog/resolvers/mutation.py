@@ -38,6 +38,8 @@ def resolve_add_blog(_, info, input):
     shared.update_is_recommended(entity, user, clean_input)
     shared.update_is_featured(entity, user, clean_input)
 
+    shared.resolve_add_suggested_items(entity, clean_input)
+
     entity.save()
     shared.store_initial_revision(entity)
 
@@ -65,14 +67,15 @@ def resolve_edit_blog(_, info, input):
 
     shared.resolve_update_access_id(entity, clean_input)
     shared.resolve_update_tags(entity, clean_input)
+    shared.resolve_update_access_id(entity, clean_input)
     shared.resolve_update_title(entity, clean_input)
     shared.resolve_update_rich_description(entity, clean_input)
     shared.resolve_update_abstract(entity, clean_input)
     shared.update_featured_image(entity, clean_input)
+    shared.update_publication_dates(entity, clean_input)
     shared.resolve_update_suggested_items(entity, clean_input)
     shared.update_is_recommended(entity, user, clean_input)
     shared.update_is_featured(entity, user, clean_input)
-    shared.update_publication_dates(entity, clean_input)
 
     # only admins can edit these fields
     if user.has_role(USER_ROLES.ADMIN):

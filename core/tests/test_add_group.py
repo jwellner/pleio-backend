@@ -165,7 +165,7 @@ class AddGroupCase(PleioTenantTestCase):
             }
         """
         variables = self.data
-        with self.assertGraphQlError('could_not_save'):
+        with self.assertGraphQlError('not_authorized'):
             self.graphql_client.force_login(self.user)
             self.graphql_client.post(mutation, variables)
 

@@ -104,6 +104,7 @@ input addEntityInput {
     accessId: Int
     writeAccessId: Int
     tags: [String]
+    tagCategories: [TagCategoryInput]
     mentions: [String]
     timePublished: DateTime
     scheduleArchiveEntity: DateTime
@@ -123,6 +124,7 @@ input addFileInput {
     accessId: Int
     writeAccessId: Int
     tags: [String]
+    tagCategories: [TagCategoryInput]
 }
 
 type addFilePayload {
@@ -150,6 +152,7 @@ input addGroupInput {
     isHidden: Boolean
     welcomeMessage: String
     tags: [String]
+    tagCategories: [TagCategoryInput]
     plugins: [Plugins]
     showMemberProfileFieldGuids: [String]
     requiredProfileFieldsMessage: String
@@ -178,6 +181,7 @@ input addPageInput {
     containerGuid: String
     accessId: Int
     tags: [String]
+    tagCategories: [TagCategoryInput]
 }
 
 type addPagePayload {
@@ -185,13 +189,17 @@ type addPagePayload {
 }
 
 input addPadInput {
-  title: String
-  containerGuid: String!
-  richDescription: SecureRichText!
+    title: String
+    containerGuid: String!
+    richDescription: SecureRichText!
+    tags: [String]
+    tagCategories: [TagCategoryInput]
+    accessId: Int
+    writeAccessId: Int
 }
 
 type addPadPayload {
-  entity: Pad
+    entity: Pad
 }
 
 input addPollInput {
@@ -301,6 +309,7 @@ type Blog implements Entity {
     excerpt: String
     url: String
     tags: [String]
+    tagCategories: [TagCategory]
     timeCreated: DateTime
     timeUpdated: DateTime
     timePublished: DateTime
@@ -342,6 +351,18 @@ input bookmarkInput {
 type bookmarkPayload {
     object: Entity!
     isFirstBookmark: Boolean!
+}
+
+input removeGroupMembersInput {
+    """The group guid."""
+    guid: String
+
+    """The user guids."""
+    userGuids: [String]
+}
+
+type removeGroupMembersPayload {
+    group: Group
 }
 
 input changeGroupRoleInput {
@@ -529,6 +550,7 @@ type Discussion implements Entity {
     excerpt: String
     url: String
     tags: [String]
+    tagCategories: [TagCategory]
     timeCreated: DateTime
     timeUpdated: DateTime
     timePublished: DateTime
@@ -581,6 +603,7 @@ input editEmailOverviewInput {
     guid: String
     frequency: Frequency
     tags: [String]
+    tagCategories: [TagCategoryInput]
 }
 
 type editEmailOverviewPayload {
@@ -610,6 +633,7 @@ input editEntityInput {
     containerGuid: String
     writeAccessId: Int
     tags: [String]
+    tagCategories: [TagCategoryInput]
     mentions: [String]
     timeCreated: DateTime
     timePublished: DateTime
@@ -639,6 +663,7 @@ input editFileFolderInput {
     writeAccessId: Int
     isAccessRecursive: Boolean
     tags: [String]
+    tagCategories: [TagCategoryInput]
     timePublished: DateTime
     scheduleArchiveEntity: DateTime
     scheduleDeleteEntity: DateTime
@@ -676,6 +701,7 @@ input editGroupInput {
     isHidden: Boolean
     welcomeMessage: String
     tags: [String]
+    tagCategories: [TagCategoryInput]
     plugins: [Plugins]
     showMemberProfileFieldGuids: [String]
     requiredProfileFieldsMessage: String
@@ -724,6 +750,7 @@ input editPageInput {
     richDescription: SecureRichText
     accessId: Int
     tags: [String]
+    tagCategories: [TagCategoryInput]
 }
 
 type editPagePayload {
@@ -731,14 +758,18 @@ type editPagePayload {
 }
 
 input editPadInput {
-  guid: String!
-  title: String
-  richDescription: SecureRichText
-  state: String
+    guid: String!
+    title: String
+    richDescription: SecureRichText
+    state: String
+    tags: [String]
+    tagCategories: [TagCategoryInput]
+    accessId: Int
+    writeAccessId: Int
 }
 
 type editPadPayload {
-  entity: Pad
+    entity: Pad
 }
 
 input editPollInput {
@@ -885,6 +916,8 @@ input editSiteSettingInput {
     pdfCheckerEnabled: Boolean
     maxCharactersInAbstract: Int
     preserveFileExif: Boolean
+    supportContractEnabled: Boolean
+    supportContractHoursRemaining: Float
 }
 
 type editSiteSettingPayload {
@@ -924,6 +957,7 @@ type editWidgetPayload {
 type EmailOverview {
     frequency: Frequency
     tags: [String]
+    tagCategories: [TagCategory]
 }
 
 interface Entity {
@@ -955,6 +989,7 @@ type Event implements Entity {
     excerpt: String
     url: String
     tags: [String]
+    tagCategories: [TagCategory]
     timeCreated: DateTime
     timeUpdated: DateTime
     timePublished: DateTime
@@ -1090,6 +1125,7 @@ type File implements Entity & FileFolder {
     url: String
     download: String
     tags: [String]
+    tagCategories: [TagCategory]
     timeCreated: DateTime
     timeUpdated: DateTime
     timePublished: DateTime
@@ -1134,6 +1170,7 @@ type Folder implements Entity & FileFolder {
     mimeType: String
     url: String
     tags: [String]
+    tagCategories: [TagCategory]
     timeCreated: DateTime
     timeUpdated: DateTime
     timePublished: DateTime
@@ -1176,6 +1213,7 @@ type Pad implements Entity & FileFolder {
     excerpt: String
     url: String
     tags: [String]
+    tagCategories: [TagCategory]
     timeCreated: DateTime
     timeUpdated: DateTime
     timePublished: DateTime
@@ -1267,6 +1305,7 @@ type Group implements Entity {
     accessIds: [AccessId]
     defaultAccessId: Int
     tags: [String]
+    tagCategories: [TagCategory]
     memberCount: Int!
     members(
         q: String
@@ -1514,6 +1553,7 @@ type Mutation {
 
     """Change the role of a user in a group."""
     changeGroupRole(input: changeGroupRoleInput!): changeGroupRolePayload
+    removeGroupMembers(input: removeGroupMembersInput!): removeGroupMembersPayload
     editTask(input: editTaskInput!): editTaskPayload
 
     """Attend an event with state accept, waitinglist, maybe or reject """
@@ -1581,6 +1621,25 @@ type Mutation {
     exportAvatars: exportAvatarsPayload
 
     updateRevision(input: updateRevisionInput!): Revision
+    scheduleAppointment(input: ScheduleAppointmentInput!): ScheduleAppointmentPayload
+}
+
+input ScheduleAppointmentInput {
+    agendaId: String!
+    appointmentTypeId: String!
+    startDateTime: DateTime!
+    endDateTime: DateTime!
+    includeVideoCall: Boolean
+    attendee: AppointmentAttendeeInput!
+}
+input AppointmentAttendeeInput {
+    firstName: String!
+    lastName: String!
+    email: String!
+    phone: String
+}
+type ScheduleAppointmentPayload {
+    success: Boolean
 }
 
 type exportAvatarsPayload {
@@ -1599,6 +1658,7 @@ type News implements Entity {
     excerpt: String
     url: String
     tags: [String]
+    tagCategories: [TagCategory]
     timeCreated: DateTime
     timeUpdated: DateTime
     timePublished: DateTime
@@ -1705,6 +1765,7 @@ type Page implements Entity {
     columns: [Column]
     widgets: [Widget]
     tags: [String]
+    tagCategories: [TagCategory]
     isPinned: Boolean!
     lastSeen: DateTime
 }
@@ -1776,7 +1837,6 @@ type ProfileOverviewItem {
 }
 
 enum MatchStrategy {
-    legacy
     any
     all
 }
@@ -1789,7 +1849,7 @@ type Query {
         incrementViewCount: Boolean
     ): Entity
     search(
-        q: String!
+        q: String
         containerGuid: String
         type: Type
         subtype: String
@@ -1798,7 +1858,9 @@ type Query {
         dateTo: String
         offset: Int
         limit: Int
-        tagLists: [[String]]
+        tags: [String]
+        tagCategories: [TagCategoryInput]
+        matchStrategy: MatchStrategy
         orderBy: SearchOrderBy
         orderDirection: OrderDirection
     ): SearchList
@@ -1812,11 +1874,19 @@ type Query {
     trending: [TrendingList]
     top: [TopItem]
     breadcrumb(guid: String): [Entity]
-    files(containerGuid: String, typeFilter: [String], orderBy: String, orderDirection: String, offset: Int, limit: Int): EntityList
+    files(
+        containerGuid: String
+        typeFilter: [String]
+        orderBy: String
+        orderDirection: String
+        offset: Int
+        limit: Int
+    ): EntityList
     groups(
         q: String
         filter: GroupFilter
         tags: [String]
+        tagCategories: [TagCategoryInput]
         matchStrategy: MatchStrategy
         offset: Int
         limit: Int
@@ -1833,7 +1903,7 @@ type Query {
         containerGuid: String
         eventFilter: EventFilter
         tags: [String]
-        tagLists: [[String]]
+        tagCategories: [TagCategoryInput]
         matchStrategy: MatchStrategy
         orderBy: OrderBy
         orderDirection: OrderDirection
@@ -1848,7 +1918,7 @@ type Query {
         offset: Int
         limit: Int
         tags: [String]
-        tagLists: [[String]]
+        tagCategories: [TagCategoryInput]
         matchStrategy: MatchStrategy
         groupFilter: [String]
         eventFilter: EventFilter
@@ -1885,6 +1955,30 @@ type Query {
         offset: Int
         limit: Int
     ): RevisionList
+    appointmentData: AppointmentDataPayload
+    appointmentTimes(agendaId: String!, appointmentTypeId: String!, startDate: DateTime, endDate: DateTime): [AppointmentTimes]
+}
+
+type AppointmentDataPayload {
+    agendas: [AppointmentAgenda]
+    appointmentTypes: [AppointmentType]
+}
+type AppointmentAgenda {
+    id: String
+    name: String
+}
+type AppointmentType {
+    id: String
+    name: String
+}
+
+type AppointmentTimes {
+    day: DateTime,
+    times: [AppointmentTime]
+}
+type AppointmentTime {
+    startDateTime: DateTime
+    endDateTime: DateTime
 }
 
 type Question implements Entity {
@@ -1900,6 +1994,7 @@ type Question implements Entity {
     excerpt: String
     url: String
     tags: [String]
+    tagCategories: [TagCategory]
     timeCreated: DateTime
     timeUpdated: DateTime
     timePublished: DateTime
@@ -1986,6 +2081,7 @@ type ContentVersion {
     abstract: String
     richDescription: SecureRichText
     tags: [String]
+    tagCategories: [TagCategory]
     suggestedItems: [Entity]
     source: String
     isRecommended: Boolean
@@ -2174,6 +2270,8 @@ type Site {
     showSuggestedItems: Boolean!
     collabEditingEnabled: Boolean!
     preserveFileExif: Boolean!
+    scheduleAppointmentEnabled: Boolean
+    videocallEnabled: Boolean
 }
 
 type SiteSettings {
@@ -2302,6 +2400,8 @@ type SiteSettings {
     maxCharactersInAbstract: Int
     collabEditingEnabled: Boolean!
     preserveFileExif: Boolean!
+    supportContractEnabled: Boolean!
+    supportContractHoursRemaining: Float
 }
 
 type StatsItem {
@@ -2322,6 +2422,7 @@ type StatusUpdate implements Entity {
     excerpt: String
     url: String
     tags: [String]
+    tagCategories: [TagCategory]
     timeCreated: DateTime
     timeUpdated: DateTime
     timePublished: DateTime
@@ -2386,6 +2487,7 @@ type Task implements Entity {
     thumbnail: String
     url: String
     tags: [String]
+    tagCategories: [TagCategory]
     timeCreated: DateTime
     timeUpdated: DateTime
     timePublished: DateTime
@@ -2525,6 +2627,7 @@ type Viewer {
     isBanned: Boolean!
     has2faEnabled: Boolean!
     tags: [String]
+    tagCategories: [TagCategory]
     canWriteToContainer(containerGuid: String, type: Type, subtype: String): Boolean!
     user: User
 }
@@ -2600,6 +2703,7 @@ type Wiki implements Entity {
     isFeatured: Boolean
     canBookmark: Boolean
     tags: [String]
+    tagCategories: [TagCategory]
     inGroup: Boolean
     group: Group
     owner: User

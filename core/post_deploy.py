@@ -1,6 +1,7 @@
 import json
-import logging
 
+from celery.utils.log import get_task_logger
+from django.db.models import Prefetch, F
 from django.utils.translation import gettext, activate
 from post_deploy import post_deploy_action
 
@@ -12,11 +13,11 @@ from core.models import Group, Entity, Revision, Widget
 from core.models.attachment import Attachment
 from core.tasks import strip_exif_from_file
 from core.utils.entity import load_entity_by_id
+from core.utils.migrations import category_tags
 from user.models import User
 from notifications.models import Notification
-from django.db.models import Prefetch, F
 
-LOGGER = logging.getLogger(__name__)
+logger = get_task_logger(__name__)
 
 
 @post_deploy_action
@@ -68,7 +69,7 @@ def remove_notifications_with_broken_relation():
             notification.delete()
             count += 1
 
-    LOGGER.info("Deleted %s broken notifications", count)
+    logger.info("Deleted %s broken notifications", count)
 
 
 @post_deploy_action
@@ -150,4 +151,36 @@ def strip_article_images_of_exif_data():
 
     for entity in Entity.objects.all().select_subclasses():
         if hasattr(entity, 'featured_image') and entity.featured_image:
-            strip_exif_from_file(file_folder_guid=entity.featured_image)
+            strip_exif_from_file(schema=tenant_schema(), file_folder_guid=entity.featured_image.guid)
+
+
+@post_deploy_action
+def migrate_categories():
+    if is_schema_public():
+        return
+
+    try:
+        category_tags.WidgetMigration().run()
+        category_tags.UserMigration().run()
+        category_tags.GroupMigration().run()
+        category_tags.EntityMigration().run()
+        category_tags.cleanup()
+    except Exception as e:
+        logger.error(f"migrate_categories@%s: %s (%s)", tenant_schema(), str(e), str(e.__class__))
+        raise
+
+
+@post_deploy_action
+def migrate_widgets_for_match_strategy():
+    if is_schema_public():
+        return
+
+    for widget in Widget.objects.all():
+        if widget.type != 'objects':
+            continue
+
+        widget.settings.append({
+            'key': 'matchStrategy',
+            'value': 'all'
+        })
+        widget.save()

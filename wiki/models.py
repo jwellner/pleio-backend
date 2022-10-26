@@ -61,6 +61,7 @@ class Wiki(Entity, FeaturedCoverMixin, BookmarkMixin, ArticleMixin, MentionMixin
             'accessId': get_access_id(self.read_access),
             'writeAccessId': get_access_id(self.write_access),
             'tags': sorted(self.tags) or [],
+            'tagCategories': self.category_tags or [],
             'timeCreated': str_datetime(self.created_at),
             'timePublished': str_datetime(self.published),
             'scheduleArchiveEntity': str_datetime(self.schedule_archive_after),

@@ -2,10 +2,9 @@ from django.core.exceptions import ValidationError
 from graphql import GraphQLError
 
 from core import config
-from core.constances import (COULD_NOT_SAVE, INVALID_PROFILE_FIELD_GUID,
-                             USER_ROLES)
-from core.lib import ACCESS_TYPE, clean_graphql_input
-from core.models import Group, GroupProfileFieldSetting, ProfileField
+from core.models import Group, ProfileField, GroupProfileFieldSetting
+from core.constances import USER_ROLES, INVALID_PROFILE_FIELD_GUID, NOT_AUTHORIZED
+from core.lib import clean_graphql_input, ACCESS_TYPE
 from core.resolvers import shared
 from file.models import FileFolder
 from user.models import User
@@ -20,7 +19,7 @@ def resolve_add_group(_, info, input):
     shared.assert_authenticated(user)
 
     if config.LIMITED_GROUP_ADD and not user.has_role(USER_ROLES.ADMIN):
-        raise GraphQLError(COULD_NOT_SAVE)
+        raise GraphQLError(NOT_AUTHORIZED)
 
     clean_input = clean_graphql_input(input)
 
@@ -39,6 +38,7 @@ def resolve_add_group(_, info, input):
         group.icon = icon_file
 
     shared.update_featured_image(group, clean_input, image_owner=user)
+    shared.resolve_update_tags(group, clean_input)
 
     group.rich_description = clean_input.get("richDescription", "")
     group.introduction = clean_input.get("introduction", "")
@@ -51,14 +51,13 @@ def resolve_add_group(_, info, input):
     group.is_membership_on_request = clean_input.get("isMembershipOnRequest", False)
     group.auto_notification = clean_input.get("autoNotification", False)
     group.is_submit_updates_enabled = clean_input.get("isSubmitUpdatesEnabled", False)
+    group.plugins = clean_input.get("plugins", [])
 
     if user.has_role(USER_ROLES.ADMIN):
         group.is_featured = clean_input.get("isFeatured", False)
         group.is_leaving_group_disabled = clean_input.get("isLeavingGroupDisabled", False)
         group.is_auto_membership_enabled = clean_input.get("isAutoMembershipEnabled", False)
 
-    group.plugins = clean_input.get("plugins", [])
-    group.tags = clean_input.get("tags", [])
 
     group.save()
 

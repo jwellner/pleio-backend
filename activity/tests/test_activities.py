@@ -25,32 +25,28 @@ class ActivitiesTestCase(PleioTenantTestCase):
             title="Blog1",
             owner=self.user1,
             read_access=[ACCESS_TYPE.public],
-            write_access=[ACCESS_TYPE.user.format(self.user1.id)],
-            tags=["tag_one", "tag_two"]
+            write_access=[ACCESS_TYPE.user.format(self.user1.id)]
         )
         self.blog2 = Blog.objects.create(
             title="Blog2",
             owner=self.user1,
             read_access=[ACCESS_TYPE.public],
             write_access=[ACCESS_TYPE.user.format(self.user1.id)],
-            group=self.group2,
-            tags=["tag_two", "tag_three"]
+            group=self.group2
         )
         self.blog3 = Blog.objects.create(
             title="Blog3",
             owner=self.user1,
             read_access=[ACCESS_TYPE.public],
             write_access=[ACCESS_TYPE.user.format(self.user1.id)],
-            group=self.group1,
-            tags=["tag_three"]
+            group=self.group1
         )
         self.blog4 = Blog.objects.create(
             title="Blog4",
             owner=self.user2,
             read_access=[ACCESS_TYPE.group.format(self.group2.id)],
             write_access=[ACCESS_TYPE.user.format(self.user1.id)],
-            group=self.group2,
-            tags=["tag_four"]
+            group=self.group2
         )
         self.blog5 = Blog.objects.create(
             title="Blog5",
@@ -84,9 +80,6 @@ class ActivitiesTestCase(PleioTenantTestCase):
                     $limit: Int
                     $subtypes: [String!]
                     $groupFilter: [String!]
-                    $tags: [String!]
-                    $matchStrategy: MatchStrategy
-                    $tagLists: [[String]]
                     $orderBy: OrderBy
                     $orderDirection: OrderDirection
                     $sortPinned: Boolean) {
@@ -95,9 +88,6 @@ class ActivitiesTestCase(PleioTenantTestCase):
                         limit: $limit
                         subtypes: $subtypes
                         groupFilter: $groupFilter
-                        tags: $tags
-                        matchStrategy: $matchStrategy
-                        tagLists: $tagLists
                         orderBy: $orderBy
                         orderDirection: $orderDirection
                         sortPinned: $sortPinned) {
@@ -131,31 +121,12 @@ class ActivitiesTestCase(PleioTenantTestCase):
         self.group1.delete()
         self.group2.delete()
 
-    def test_tags_match_all(self):
-        result = self.graphql_client.post(self.query, {
-            'tags': ["tag_one", "tag_two"]
-        })
-        blogs = [e['entity']['title'] for e in result['data']['activities']['edges']]
-        self.assertEqual(1, len(blogs))
-        self.assertIn(self.blog1.title, blogs)
-
-    def test_tags_match_any(self):
-        result = self.graphql_client.post(self.query, {
-            'tags': ["tag_one", "tag_two"],
-            'matchStrategy': 'any',
-        })
-        blogs = [e['entity']['title'] for e in result['data']['activities']['edges']]
-        self.assertEqual(2, len(blogs))
-        self.assertIn(self.blog1.title, blogs)
-        self.assertIn(self.blog2.title, blogs)
-
     def test_activities_group_filter_all(self):
         variables = {
             "groupFilter": ["all"],
             "limit": 20,
             "offset": 0,
             "subtypes": [],
-            "tags": []
         }
         mixer.cycle(45).blend(
             Blog,
@@ -175,27 +146,12 @@ class ActivitiesTestCase(PleioTenantTestCase):
             "limit": 20,
             "offset": 0,
             "subtypes": [],
-            "tags": []
         }
 
         self.graphql_client.force_login(self.user1)
         result = self.graphql_client.post(self.query, variables)
 
         self.assertEqual(result["data"]["activities"]["total"], 1)
-
-    def test_activities_taglists_filter(self):
-        variables = {
-            "limit": 20,
-            "offset": 0,
-            "subtypes": [],
-            "tags": [],
-            "tagLists": [["tag_one", "tag_three"], ["tag_two"]]
-        }
-
-        self.graphql_client.force_login(self.user2)
-        result = self.graphql_client.post(self.query, variables)
-
-        self.assertEqual(result["data"]["activities"]["total"], 2)
 
     def test_activities_show_pinned(self):
         variables = {
@@ -276,8 +232,6 @@ class ActivitiesTestCase(PleioTenantTestCase):
             read_access=[ACCESS_TYPE.public],
             write_access=[ACCESS_TYPE.user.format(self.user1.id)]
         )
-        event.tags = ["tag_one", "tag_two"]
-        event.save()
 
         subevent = Event.objects.create(
             title="subevent",
@@ -286,8 +240,6 @@ class ActivitiesTestCase(PleioTenantTestCase):
             write_access=[ACCESS_TYPE.user.format(self.user1.id)],
             parent=event
         )
-        subevent.tags = ["tag_one", "tag_two"]
-        subevent.save()
 
         variables = {
             "limit": 20,

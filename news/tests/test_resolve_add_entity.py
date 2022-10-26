@@ -1,5 +1,7 @@
+import json
 from django.utils import timezone
 from core.tests.helpers import PleioTenantTestCase
+from core.models.attachment import Attachment
 from news.models import News
 from user.models import User
 from core.constances import USER_ROLES
@@ -112,3 +114,17 @@ class AddNewsTestCase(PleioTenantTestCase):
         with self.assertGraphQlError('could_not_add'):
             self.graphql_client.force_login(self.authenticatedUser)
             self.graphql_client.post(self.mutation, self.minimal_data)
+
+    def test_add_with_attachment(self):
+        attachment = mixer.blend(Attachment)
+
+        variables = self.data
+        variables["input"]["richDescription"] = json.dumps(
+            {'type': 'file', 'attrs': {'url': f"/attachment/entity/{attachment.id}"}})
+
+        self.graphql_client.force_login(self.editorUser)
+        result = self.graphql_client.post(self.mutation, variables)
+
+        entity = result["data"]["addEntity"]["entity"]
+        news = News.objects.get(id=entity["guid"])
+        self.assertTrue(news.attachments.filter(id=attachment.id).exists())

@@ -10,3 +10,7 @@ def write_access_default():
 
 class AbstractModelMeta(abc.ABCMeta, type(models.Model)):
     pass
+
+class AbstractModel(models.Model, metaclass=AbstractModelMeta):
+    class Meta:
+        abstract = True

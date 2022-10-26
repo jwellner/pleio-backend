@@ -34,7 +34,9 @@ urlpatterns = [
     path('superadmin/auditlog', core_superadmin.AuditLog.as_view()),
     path('superadmin/group_copy', core_superadmin.GroupCopyView.as_view()),
     path('superadmin/optional_features', core_superadmin.OptionalFeatures.as_view()),
+    path('superadmin/support_contract', core_superadmin.SupportContract.as_view()),
     path('superadmin/agreements', core_superadmin.agreements),
+    path('superadmin/meetings', core_superadmin.meetings_settings, name='superadmin_meetings_settings'),
     path('graphql', GraphQLView.as_view(schema=schema, extensions=[OpenTracingExtensionSync], introspection=settings.DEBUG), name='graphql'),
 
     path('file/download/<uuid:file_id>', file_views.download, name='download'),

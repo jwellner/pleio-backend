@@ -10,6 +10,9 @@ from user.models import User
 
 
 class TestTagsTestCase(FastTenantTestCase):
+    """
+    @see also: .helpers.tags_testcase.py
+    """
 
     def setUp(self):
         super().setUp()

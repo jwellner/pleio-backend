@@ -12,6 +12,7 @@ from .mutation_accept_group_invitation import resolve_accept_group_invitation
 from .mutation_resend_group_invitation import resolve_resend_group_invitation
 from .mutation_delete_group_invitation import resolve_delete_group_invitation
 from .mutation_change_group_role import resolve_change_group_role
+from .mutation_schedule_appointment import resolve_mutation_schedule_appointment
 from .mutation_send_message_to_group import resolve_send_message_to_group
 from .mutation_accept_membership_request import resolve_accept_membership_request
 from .mutation_reject_membership_request import resolve_reject_membership_request
@@ -57,6 +58,7 @@ from .mutation_toggle_entity_is_pinned import resolve_toggle_entity_is_pinned
 from .mutation_edit_user_name import resolve_edit_user_name
 from .mutation_add_comment_without_account import resolve_add_comment_without_account
 from .mutation_sign_site_agreement_version import resolve_sign_site_agreement_version
+from .mutation_remove_group_members import resolve_remove_group_members
 
 mutation = ObjectType("Mutation")
 mutation.set_field("addGroup", resolve_add_group)
@@ -68,6 +70,7 @@ mutation.set_field("acceptGroupInvitation", resolve_accept_group_invitation)
 mutation.set_field("resendGroupInvitation", resolve_resend_group_invitation)
 mutation.set_field("deleteGroupInvitation", resolve_delete_group_invitation)
 mutation.set_field("changeGroupRole", resolve_change_group_role)
+mutation.set_field("removeGroupMembers", resolve_remove_group_members)
 mutation.set_field("sendMessageToGroup", resolve_send_message_to_group)
 mutation.set_field("acceptMembershipRequest", resolve_accept_membership_request)
 mutation.set_field("rejectMembershipRequest", resolve_reject_membership_request)
@@ -135,3 +138,5 @@ mutation.set_field("signSiteAgreementVersion", resolve_sign_site_agreement_versi
 
 mutation.set_field("updateRevision", resolve_update_revision)
 mutation.set_field("exportAvatars", resolve_export_avatars)
+
+mutation.set_field("scheduleAppointment", resolve_mutation_schedule_appointment)

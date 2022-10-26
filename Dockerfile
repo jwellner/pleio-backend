@@ -4,7 +4,8 @@ RUN apt-get update && apt-get install --no-install-recommends -y \
     build-essential \
     libpq-dev \
     python3-dev \
-    default-libmysqlclient-dev
+    default-libmysqlclient-dev \
+    git
 
 RUN python -m venv /app-tmp/venv && /app-tmp/venv/bin/pip install --upgrade pip
 

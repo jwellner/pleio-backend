@@ -1,21 +1,12 @@
 from django.db import connection
 from django_tenants.test.cases import FastTenantTestCase
-from backend2.schema import schema
-from ariadne import graphql_sync
 import json
-from django.contrib.auth.models import AnonymousUser
-from django.http import HttpRequest
 from core.models import Group, Comment, Annotation
 from user.models import User
 from blog.models import Blog
 from mixer.backend.django import mixer
 from core.constances import ACCESS_TYPE
-from core.lib import get_acl, access_id_to_acl
 from core.signals import comment_handler, mention_handler, notification_handler, user_handler
-from core.tests.helpers import QuerySetWith
-from django.utils.text import slugify
-from django.db.models.signals import post_save
-from notifications.models import Notification
 from unittest import mock
 
 

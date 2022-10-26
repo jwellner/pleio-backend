@@ -14,6 +14,8 @@ class WikiDocument(DefaultDocument):
     tags_matches = fields.ListField(fields.TextField(
         fields={'raw': fields.KeywordField()}
     ))
+    category_tags = fields.ListField(fields.KeywordField(attr='category_tags_index'))
+
     read_access = fields.ListField(fields.KeywordField())
     type = fields.KeywordField(attr="type_to_string")
     title = fields.TextField(

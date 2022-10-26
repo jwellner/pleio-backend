@@ -12,7 +12,7 @@ from .site import SiteInvitation, SiteAccessRequest, SiteStat
 from .widget import Widget
 from .rich_fields import MentionMixin, AttachmentMixin
 from .image import ResizedImage, ResizedImageMixin
-from .tags import Tag, TagSynonym, TagsMixin
+from .tags import Tag, TagSynonym, TagsModel
 from .search import SearchQueryJournal
 from .mail import MailInstance, MailLog
 from .revision import Revision

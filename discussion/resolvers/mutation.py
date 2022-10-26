@@ -33,11 +33,8 @@ def resolve_add_discussion(_, info, input):
     shared.resolve_update_title(entity, clean_input)
     shared.resolve_update_rich_description(entity, clean_input)
     shared.resolve_update_abstract(entity, clean_input)
-
     shared.update_featured_image(entity, clean_input)
-
     shared.update_is_featured(entity, user, clean_input)
-
     shared.update_publication_dates(entity, clean_input)
 
     entity.save()
@@ -66,6 +63,7 @@ def resolve_edit_discussion(_, info, input):
     shared.resolve_update_rich_description(entity, clean_input)
     shared.resolve_update_abstract(entity, clean_input)
     shared.resolve_update_tags(entity, clean_input)
+    shared.resolve_update_access_id(entity, clean_input)
     shared.update_featured_image(entity, clean_input)
 
     shared.update_is_featured(entity, user, clean_input)
@@ -75,9 +73,7 @@ def resolve_edit_discussion(_, info, input):
     # only admins can edit these fields
     if user.has_role(USER_ROLES.ADMIN):
         shared.resolve_update_group(entity, clean_input)
-
         shared.resolve_update_owner(entity, clean_input)
-
         shared.resolve_update_time_created(entity, clean_input)
 
     entity.save()

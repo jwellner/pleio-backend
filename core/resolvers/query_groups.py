@@ -1,5 +1,5 @@
 from core.models import Group
-from core.resolvers.query_entities import conditional_tags_filter
+from core.resolvers.query_entities import conditional_tags_filter, conditional_tag_lists_filter
 
 
 def resolve_groups(
@@ -8,7 +8,8 @@ def resolve_groups(
         q=None,
         filter=None,
         tags=None,
-        matchStrategy='legacy',
+        tagCategories=None,
+        matchStrategy='any',
         offset=0,
         limit=20
 ):
@@ -26,8 +27,9 @@ def resolve_groups(
         group_ids = user.memberships.filter(type__in=('member', 'admin', 'owner')).values_list('group', flat=True)
         groups = groups.filter(id__in=group_ids)
 
-    if tags:
-        groups = groups.filter(conditional_tags_filter(tags, matchStrategy == 'any'))
+    if tags or tagCategories:
+        groups = groups.filter(conditional_tags_filter(tags, matchStrategy == 'any') &
+                               conditional_tag_lists_filter(tagCategories, matchStrategy != 'all'))
 
     edges = groups.order_by('-is_featured', 'name')[offset:offset + limit]
 

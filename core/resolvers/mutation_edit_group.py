@@ -45,9 +45,9 @@ def resolve_edit_group(_, info, input):
         group.icon = icon_file
 
     shared.update_featured_image(group, clean_input, image_owner=user)
+    shared.resolve_update_rich_description(group, clean_input)
+    shared.resolve_update_tags(group, clean_input)
 
-    if 'richDescription' in clean_input:
-        group.rich_description = clean_input.get("richDescription")
 
     if 'introduction' in clean_input:
         group.introduction = clean_input.get("introduction")
@@ -67,6 +67,9 @@ def resolve_edit_group(_, info, input):
     if "isSubmitUpdatesEnabled" in clean_input:
         group.is_submit_updates_enabled = clean_input.get("isSubmitUpdatesEnabled")
 
+    if 'plugins' in clean_input:
+        group.plugins = clean_input.get("plugins")
+
     if user.has_role(USER_ROLES.ADMIN):
         if 'isFeatured' in clean_input:
             group.is_featured = clean_input.get("isFeatured")
@@ -84,10 +87,6 @@ def resolve_edit_group(_, info, input):
         if 'isHidden' in clean_input:
             group.is_hidden = clean_input.get("isHidden")
 
-    if 'plugins' in clean_input:
-        group.plugins = clean_input.get("plugins")
-    if 'tags' in clean_input:
-        group.tags = clean_input.get("tags")
 
     if 'showMemberProfileFieldGuids' in clean_input:
         for profile_field_id in clean_input.get("showMemberProfileFieldGuids"):
