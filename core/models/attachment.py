@@ -10,7 +10,7 @@ from django.utils.text import slugify
 from django.core.files.base import ContentFile
 from django.urls import reverse
 
-from core.lib import get_mimetype, strip_exif
+from core.lib import get_mimetype, strip_exif, get_filesize
 from core.models.mixin import ModelWithFile
 from core.models.image import ResizedImageMixin
 
@@ -36,6 +36,26 @@ class Attachment(ModelWithFile, ResizedImageMixin):
     attached_content_type = models.ForeignKey(ContentType, blank=True, null=True, on_delete=models.CASCADE)
     attached_object_id = models.UUIDField(blank=True, null=True)
     attached = GenericForeignKey(ct_field='attached_content_type', fk_field='attached_object_id')
+
+    def save(self, *args, **kwargs):
+        created = self._state.adding
+        self.update_metadata()
+        super(Attachment, self).save(*args, **kwargs)
+        self.strip_exif_on_add(created)
+
+    def update_metadata(self):
+        if self.upload:
+            try:
+                if not self.name:
+                    self.name = self.upload.file.name
+                self.mime_type = get_mimetype(self.upload.path)
+                self.size=get_filesize(self.upload.path)
+            except FileNotFoundError:
+                pass
+
+    def strip_exif_on_add(self, created):
+        if created and self.is_image():
+            strip_exif(self.upload)
 
     def can_read(self, user):
         if not self.attached:
@@ -79,23 +99,3 @@ class Attachment(ModelWithFile, ResizedImageMixin):
 
     def __str__(self):
         return f"{self._meta.object_name}[{self.upload.name}]"
-
-
-@receiver(models.signals.pre_save, sender=Attachment)
-def attachment_mimetype_size(sender, instance, **kwargs):
-    # pylint: disable=unused-argument
-    try:
-        if instance.upload and not instance.name:
-            instance.name = instance.upload.file.name
-        if instance.upload:
-            instance.mime_type = get_mimetype(instance.upload.path)
-            instance.size = instance.upload.size
-    except Exception:
-        pass
-
-
-@receiver(models.signals.post_save, sender=Attachment)
-def attachment_strip_exif(sender, instance, **kwargs):
-    # pylint: disable=unused-argument
-    if instance.is_image():
-        strip_exif(instance.upload)

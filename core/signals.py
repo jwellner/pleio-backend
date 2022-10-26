@@ -5,7 +5,7 @@ from django.utils import timezone
 from core.models.mixin import ModelWithFile
 from notifications.signals import notify
 from core.lib import datetime_isoformat, get_model_name, tenant_schema
-from core.models import Comment, Group, GroupInvitation, Entity, EntityViewCount, NotificationMixin, MentionMixin, AttachmentMixin
+from core.models import Comment, Group, GroupInvitation, Entity, EntityViewCount, NotificationMixin, MentionMixin
 from core.tasks import create_notification
 from user.models import User
 from event.models import EventAttendee
@@ -115,10 +115,6 @@ def file_delete_handler(sender, instance, using, **kwargs):
     # pylint: disable=unused-argument
     instance.delete_files()
 
-def attachment_handler(sender, instance, using, **kwargs):
-    # pylint: disable=unused-argument
-    instance.update_attachments_links()
-
 def process_waitinglist_handler(sender, instance, using, **kwargs):
     # pylint: disable=unused-argument
     instance.event.process_waitinglist()
@@ -147,9 +143,6 @@ for subclass in Entity.__subclasses__():
 
 for subclass in MentionMixin.__subclasses__():
     post_save.connect(mention_handler, subclass)
-
-for subclass in AttachmentMixin.__subclasses__():
-    post_save.connect(attachment_handler, subclass)
 
 for subclass in ModelWithFile.__subclasses__():
     post_delete.connect(file_delete_handler, subclass)
