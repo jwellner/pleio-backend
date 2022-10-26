@@ -58,6 +58,7 @@ from .mutation_toggle_entity_is_pinned import resolve_toggle_entity_is_pinned
 from .mutation_edit_user_name import resolve_edit_user_name
 from .mutation_add_comment_without_account import resolve_add_comment_without_account
 from .mutation_sign_site_agreement_version import resolve_sign_site_agreement_version
+from .mutation_remove_group_members import resolve_remove_group_members
 
 mutation = ObjectType("Mutation")
 mutation.set_field("addGroup", resolve_add_group)
@@ -69,6 +70,7 @@ mutation.set_field("acceptGroupInvitation", resolve_accept_group_invitation)
 mutation.set_field("resendGroupInvitation", resolve_resend_group_invitation)
 mutation.set_field("deleteGroupInvitation", resolve_delete_group_invitation)
 mutation.set_field("changeGroupRole", resolve_change_group_role)
+mutation.set_field("removeGroupMembers", resolve_remove_group_members)
 mutation.set_field("sendMessageToGroup", resolve_send_message_to_group)
 mutation.set_field("acceptMembershipRequest", resolve_accept_membership_request)
 mutation.set_field("rejectMembershipRequest", resolve_reject_membership_request)

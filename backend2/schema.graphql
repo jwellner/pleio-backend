@@ -353,6 +353,18 @@ type bookmarkPayload {
     isFirstBookmark: Boolean!
 }
 
+input removeGroupMembersInput {
+    """The group guid."""
+    guid: String
+
+    """The user guids."""
+    userGuids: [String]
+}
+
+type removeGroupMembersPayload {
+    group: Group
+}
+
 input changeGroupRoleInput {
     """The group guid."""
     guid: String
@@ -1541,6 +1553,7 @@ type Mutation {
 
     """Change the role of a user in a group."""
     changeGroupRole(input: changeGroupRoleInput!): changeGroupRolePayload
+    removeGroupMembers(input: removeGroupMembersInput!): removeGroupMembersPayload
     editTask(input: editTaskInput!): editTaskPayload
 
     """Attend an event with state accept, waitinglist, maybe or reject """
