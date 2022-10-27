@@ -138,6 +138,7 @@ class WalledGardenMiddleware:
         public_urls += ("/robots.txt",)
         public_urls += ("/sitemap.xml",)
         public_urls += ("/custom.css",)
+        public_urls += ("/favicon.png",)
         public_urls = [re.compile(v) for v in public_urls]
 
         return any(public_url.match(url) for public_url in public_urls)
@@ -154,6 +155,7 @@ class WalledGardenMiddleware:
         ):
             context = {
                 'next': request.path_info,
+                'banned': request.session.get('pleio_user_is_banned', False),
                 'constants': {
                     'OIDC_PROVIDER_OPTIONS': OIDC_PROVIDER_OPTIONS,
                 },
