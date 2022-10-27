@@ -4,7 +4,7 @@ from deploy_task.utils import DeployCommandBase
 
 
 class Command(DeployCommandBase):
-    deploy_task = 'deploy_task.management.commands.deploy_categories.deploy_task'
+    deploy_task = 'deploy_task.management.commands.deploy_task_migrate_categories.deploy_task'
 
 
 def deploy_task():
