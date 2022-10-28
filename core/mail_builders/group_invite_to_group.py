@@ -11,7 +11,7 @@ def schedule_invite_to_group_mail(user, sender, email, language, group):
     MailInstance.objects.submit(InviteToGroupMailer, {
         "email": email,
         "language": language,
-        "user": user.guid,
+        "user": user.guid if user else None,
         "sender": sender.guid,
         "group": group.guid
     })

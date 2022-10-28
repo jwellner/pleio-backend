@@ -1,6 +1,5 @@
 from unittest import mock
 
-from django.test import override_settings
 from mixer.backend.django import mixer
 
 from core.factories import GroupFactory
@@ -14,29 +13,46 @@ class TestMailerGroupResendInvitationTestCase(PleioTenantTestCase):
     def setUp(self):
         super().setUp()
 
+        self.ANOTHER_EMAIL = "anonymous@example.com"
         self.user = UserFactory()
         self.owner = UserFactory()
         self.group = GroupFactory(owner=self.owner)
-        self.invitation = mixer.blend(GroupInvitation,
-                                      group=self.group,
-                                      invited_user=self.user)
+        self.invitation = mixer.blend(
+            GroupInvitation,
+            group=self.group,
+            invited_user=self.user
+        )
+        self.anonymous_invitation = mixer.blend(
+            GroupInvitation,
+            group=self.group,
+            email=self.ANOTHER_EMAIL
+        )
 
-        self.mailer = ResendGroupInvitationMailer(sender=self.owner.guid,
-                                                  invitation=self.invitation.id)
+        self.build_context = mock.patch("core.mail_builders.base.MailerBase.build_context").start()
+        self.build_context.return_value = {}
+        self.get_language = mock.patch("user.models.User.get_language").start()
+        self.get_language.return_value = 'nl'
+        self.override_config(LANGUAGE='en')
 
-    @override_settings(LANGUAGE_CODE='en')
-    @mock.patch("core.mail_builders.base.MailerBase.build_context")
-    def test_properties(self, build_context):
-        build_context.return_value = {}
-
-        context = self.mailer.get_context()
+    def test_properties(self):
+        mailer = ResendGroupInvitationMailer(sender=self.owner.guid,
+                                             invitation=self.invitation.id)
+        context = mailer.get_context()
         self.assertEqual(['group_name', 'link'], sorted(context.keys()))
         self.assertEqual(context['group_name'], self.group.name)
         self.assertIn(self.invitation.code, context['link'])
 
-        self.assertEqual(self.mailer.get_language(), self.user.get_language())
-        self.assertEqual(self.mailer.get_template(), 'email/resend_group_invitation.html')
-        self.assertEqual(self.mailer.get_receiver(), self.user)
-        self.assertEqual(self.mailer.get_receiver_email(), self.user.email)
-        self.assertEqual(self.mailer.get_sender(), self.owner)
-        self.assertIn(self.group.name, self.mailer.get_subject())
+        self.assertEqual(mailer.get_language(), 'nl')
+        self.assertEqual(mailer.get_template(), 'email/resend_group_invitation.html')
+        self.assertEqual(mailer.get_receiver(), self.user)
+        self.assertEqual(mailer.get_receiver_email(), self.user.email)
+        self.assertEqual(mailer.get_sender(), self.owner)
+        self.assertIn(self.group.name, mailer.get_subject())
+
+    def test_properties_anonymous(self):
+        mailer = ResendGroupInvitationMailer(sender=self.owner.guid,
+                                             invitation=self.anonymous_invitation.id)
+
+        self.assertEqual(mailer.get_receiver(), None)
+        self.assertEqual(mailer.get_receiver_email(), self.anonymous_invitation.email)
+        self.assertEqual(mailer.get_language(), 'en')

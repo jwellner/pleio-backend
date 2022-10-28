@@ -1,5 +1,6 @@
 from django.utils.translation import gettext
 
+from core import config
 from core.lib import get_full_url
 from core.mail_builders.template_mailer import TemplateMailerBase
 from core.utils.entity import load_entity_by_id
@@ -28,7 +29,9 @@ class ResendGroupInvitationMailer(TemplateMailerBase):
         return context
 
     def get_language(self):
-        return self.invitation.invited_user.get_language()
+        if self.invitation.invited_user:
+            return self.invitation.invited_user.get_language()
+        return config.LANGUAGE
 
     def get_template(self):
         return 'email/resend_group_invitation.html'
@@ -37,7 +40,9 @@ class ResendGroupInvitationMailer(TemplateMailerBase):
         return self.invitation.invited_user
 
     def get_receiver_email(self):
-        return self.invitation.invited_user.email
+        if self.invitation.invited_user:
+            return self.invitation.invited_user.email
+        return self.invitation.email
 
     def get_sender(self):
         return self.sender
