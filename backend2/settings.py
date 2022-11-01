@@ -122,7 +122,10 @@ SHARED_APPS = [
     'django.contrib.messages',
     'widget_tweaks',
     'user',
+    # TODO: remove from project
     'post_deploy',
+    # TODO: replacement of post_deploy
+    'deploy_task',
 ]
 
 TENANT_APPS = [

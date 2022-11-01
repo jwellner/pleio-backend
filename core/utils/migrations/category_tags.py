@@ -40,18 +40,21 @@ class UserMigration(MigrationBase):
         if profile.overview_email_categories:
             return
 
-        category_tags = defaultdict(lambda: {'values': []})
-        new_tags = []
-        for tag in profile.overview_email_tags:
-            if tag.lower() in self.category_table.keys():
-                spec = self.category_table[tag.lower()]
-                category_tags[spec['name']]['name'] = spec['name']
-                category_tags[spec['name']]['values'].append(spec['value'])
-            else:
-                new_tags.append(tag)
-        profile.overview_email_tags = new_tags
-        profile.overview_email_categories = [category for category in category_tags.values()]
-        profile.save()
+        try:
+            category_tags = defaultdict(lambda: {'values': []})
+            new_tags = []
+            for tag in profile.overview_email_tags:
+                if tag.lower() in self.category_table.keys():
+                    spec = self.category_table[tag.lower()]
+                    category_tags[spec['name']]['name'] = spec['name']
+                    category_tags[spec['name']]['values'].append(spec['value'])
+                else:
+                    new_tags.append(tag)
+            profile.overview_email_tags = new_tags
+            profile.overview_email_categories = [category for category in category_tags.values()]
+            profile.save()
+        except Exception:
+            pass
 
 
 class EntityMigration(MigrationBase):
@@ -64,19 +67,22 @@ class EntityMigration(MigrationBase):
         if entity.category_tags:
             return
 
-        category_tags = defaultdict(lambda: {'values': []})
-        current_tags = EntityTag.objects.filter(entity_id=entity.pk)
-        new_tags = []
-        for tag in current_tags:
-            if tag.tag.label in self.category_table.keys():
-                spec = self.category_table[tag.tag.label]
-                category_tags[spec['name']]['name'] = spec['name']
-                category_tags[spec['name']]['values'].append(spec['value'])
-            else:
-                new_tags.append(tag.author_label)
-        entity.tags = new_tags
-        entity.category_tags = [category for category in category_tags.values()]
-        entity.save()
+        try:
+            category_tags = defaultdict(lambda: {'values': []})
+            current_tags = EntityTag.objects.filter(entity_id=entity.pk)
+            new_tags = []
+            for tag in current_tags:
+                if tag.tag.label in self.category_table.keys():
+                    spec = self.category_table[tag.tag.label]
+                    category_tags[spec['name']]['name'] = spec['name']
+                    category_tags[spec['name']]['values'].append(spec['value'])
+                else:
+                    new_tags.append(tag.author_label)
+            entity.tags = new_tags
+            entity.category_tags = [category for category in category_tags.values()]
+            entity.save()
+        except Exception:
+            pass
 
 
 class GroupMigration(EntityMigration):
@@ -93,24 +99,27 @@ class WidgetMigration(MigrationBase):
             self.migrate_widget(widget)
 
     def migrate_widget(self, widget: Widget):
-        changed = False
-        new_settings = []
-        for setting in widget.settings:
-            if setting['key'] == 'categoryTags':
-                try:
-                    json.loads(setting['value'])
-                except json.decoder.JSONDecodeError:
-                    # if not json:
-                    setting['value'] = self.translate_widget_tags(setting['value'])
+        try:
+            changed = False
+            new_settings = []
+            for setting in widget.settings:
+                if setting['key'] == 'categoryTags':
+                    try:
+                        json.loads(setting['value'])
+                    except json.decoder.JSONDecodeError:
+                        # if not json:
+                        setting['value'] = self.translate_widget_tags(setting['value'])
+                        changed = True
+                if setting['key'] == 'tagFilter':
+                    setting['value'] = self.translate_widget_tagfilter(setting['value'])
                     changed = True
-            if setting['key'] == 'tagFilter':
-                setting['value'] = self.translate_widget_tagfilter(setting['value'])
-                changed = True
-            new_settings.append(setting)
+                new_settings.append(setting)
 
-        if changed:
-            widget.settings = new_settings
-            widget.save()
+            if changed:
+                widget.settings = new_settings
+                widget.save()
+        except Exception:
+            pass
 
     def translate_widget_tags(self, value: str):
         category_tags = defaultdict(lambda: {'values': []})
