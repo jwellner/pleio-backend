@@ -72,6 +72,8 @@ def resolve_invite_to_group(_, info, input):
             code = generate_code()
             GroupInvitation.objects.create(code=code, invited_user=receiving_user, group=group, email=email)
 
+        logger.info("Sending to %s", email)
+
         try:
             schedule_invite_to_group_mail(
                 user=receiving_user,

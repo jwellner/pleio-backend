@@ -179,6 +179,9 @@ def migrate_widgets_for_match_strategy():
         if widget.type != 'objects':
             continue
 
+        if 'matchStrategy' in [s.get('key') for s in widget.settings]:
+            continue
+
         widget.settings.append({
             'key': 'matchStrategy',
             'value': 'all'
