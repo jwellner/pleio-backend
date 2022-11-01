@@ -85,8 +85,7 @@ def embed(request, file_id=None, file_name=None):
         response = StreamingHttpResponse(streaming_content=return_file.upload.open(), content_type=return_file.mime_type)
         response['Content-Length'] = return_file.upload.size
         return response
-
-    except ObjectDoesNotExist:
+    except (ObjectDoesNotExist, FileNotFoundError):
         raise Http404("File not found")
 
 

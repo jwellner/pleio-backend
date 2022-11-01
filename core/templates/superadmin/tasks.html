@@ -4,39 +4,45 @@
 
 {% block content %}
 
-<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-    <h1 class="h2">Tasks</h1>
-</div>
-
-<div class="card">
-    <h5 class="card-header">Elasticsearch</h5>
-    <div class="card-body">
-        <form method="post">
-            {% csrf_token %}
-            <input type="hidden" name="task" value="elasticsearch_rebuild">
-            <p>This task will rebuild the complete search index for this site.</p>
-            <button type="submit" class="btn btn-primary">Execute rebuild elasticsearch</button>
-        </form>
+    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+        <h1 class="h2">Tasks</h1>
     </div>
-  </div>
 
-  <div class="card mt-4">
-    <h5 class="card-header">Links</h5>
-    <div class="card-body">
-        <form method="post">
-            {% csrf_token %}
-            <input type="hidden" name="task" value="replace_links">
-            <p>This task will replace links to a old domain with the current domain.</p>
-            <div class="mb-3">
-                <label for="replace_domain" class="form-label">Old domain</label>
-                <input type="text" name="replace_domain"  class="form-control" id="replace_domain" aria-describedby="replaceDomainHelp">
-                <div id="replaceDomainHelp" class="form-text">Insert the old domain name to be replaced (format: support.pleio.nl).</div>
-            </div>
-            <button type="submit" class="btn btn-primary">Execute replace links</button>
-        </form>
+    <div class="card elasticsearch">
+        <h5 class="card-header">Elasticsearch</h5>
+        <div class="card-body">
+            <form method="post">
+                {% csrf_token %}
+                <input type="hidden" name="task" value="elasticsearch_rebuild">
+                <p>This task will rebuild the complete search index for this site.</p>
+                <div class="controls d-flex align-items-start justify-content-start">
+                    <button type="submit" class="btn btn-primary">Execute rebuild elasticsearch</button>
+                    <select name="index_name" class="form-select" style="width: auto;margin-left: 1rem">
+                        <option value="">All indices</option>
+                        <option value="group,user">Groups and users</option>
+                    </select>
+                </div>
+            </form>
+        </div>
     </div>
-  </div>
 
-</div>
+    <div class="card mt-4">
+        <h5 class="card-header">Links</h5>
+        <div class="card-body">
+            <form method="post">
+                {% csrf_token %}
+                <input type="hidden" name="task" value="replace_links">
+                <p>This task will replace links to a old domain with the current domain.</p>
+                <div class="mb-3">
+                    <label for="replace_domain" class="form-label">Old domain</label>
+                    <input type="text" name="replace_domain" class="form-control" id="replace_domain" aria-describedby="replaceDomainHelp">
+                    <div id="replaceDomainHelp" class="form-text">Insert the old domain name to be replaced (format: support.pleio.nl).</div>
+                </div>
+                <button type="submit" class="btn btn-primary">Execute replace links</button>
+            </form>
+        </div>
+    </div>
+
+    </div>
 
 {% endblock %}

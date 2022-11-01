@@ -192,7 +192,11 @@ def tasks(request):
 
     if request.POST:
         if request.POST.get("task", False) == "elasticsearch_rebuild":
-            elasticsearch_rebuild_for_tenant.delay(tenant_schema())
+            index_name = request.POST.get("index_name") or None
+            if index_name:
+                elasticsearch_rebuild_for_tenant.delay(tenant_schema(), index_name=index_name)
+            else:
+                elasticsearch_rebuild_for_tenant.delay(tenant_schema())
             messages.success(request, 'Elasticsearch rebuild started')
         elif request.POST.get("task", False) == "replace_links":
             replace_domain = request.POST.get("replace_domain") if request.POST.get("replace_domain") else current_domain

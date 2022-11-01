@@ -26,7 +26,7 @@ def elasticsearch_recreate_indices(index_name=None):
     if index_name:
         models = [get_model_by_subtype(index_name)]
     else:
-        models = registry.get_models()
+        models = _all_models()
 
     # delete indexes
     for index in registry.get_indices(models):
@@ -64,10 +64,15 @@ def elasticsearch_rebuild_for_tenant(schema_name, index_name=None):
     Rebuild index for tenant
     '''
     with schema_context(schema_name):
-        logger.info('elasticsearch_rebuild_for_tenant \'%s\' \'%s\'', index_name, schema_name)
-
-        elasticsearch_delete_data_for_tenant(schema_name, index_name)
-        elasticsearch_index_data_for_tenant(schema_name, index_name)
+        if not index_name:
+            logger.info('elasticsearch_rebuild_for_tenant \'%s\'', schema_name)
+            elasticsearch_delete_data_for_tenant(schema_name, index_name)
+            elasticsearch_index_data_for_tenant(schema_name, index_name)
+        else:
+            for name in index_name.split(','):
+                logger.info('elasticsearch_rebuild_for_tenant \'%s\' \'%s\'', name, schema_name)
+                elasticsearch_delete_data_for_tenant(schema_name, name)
+                elasticsearch_index_data_for_tenant(schema_name, name)
 
 
 @app.task(ignore_result=True)
@@ -83,7 +88,7 @@ def elasticsearch_index_data_for_tenant(schema_name, index_name=None):
         if index_name:
             models = [get_model_by_subtype(index_name)]
         else:
-            models = registry.get_models()
+            models = _all_models()
 
         for doc in registry.get_documents(models):
             logger.info("indexing %i '%s' objects",
@@ -111,7 +116,7 @@ def elasticsearch_delete_data_for_tenant(schema_name, index_name=None):
     if index_name:
         models = [get_model_by_subtype(index_name)]
     else:
-        models = registry.get_models()
+        models = _all_models()
 
     for index in registry.get_indices(models):
         # pylint: disable=protected-access
@@ -146,3 +151,15 @@ def elasticsearch_index_document(schema_name, document_guid, document_classname)
                 document_classname,
                 document_guid
             )
+
+
+def _all_models():
+    def model_weight(model):
+        name = model._meta.object_name
+        if name == 'Group':
+            return 0
+        if name == 'User':
+            return 1
+        return 100
+
+    return sorted(registry.get_models(), key=model_weight)
