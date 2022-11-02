@@ -461,17 +461,19 @@ def export_groupowners(request):
     if not user.has_role(USER_ROLES.ADMIN):
         raise Http404("Not admin")
 
-    def stream(groups, pseudo_buffer):
+    def stream(groups: [Group], pseudo_buffer):
         writer = csv.writer(pseudo_buffer, delimiter=';', quotechar='"')
         yield writer.writerow([_("Name"),
                                _("E-mail"),
-                               _("Group")])
+                               _("Group"),
+                               _("Disk size")])
 
         for g in groups:
             yield writer.writerow([
                 g.owner.name,
                 g.owner.email,
                 g.name,
+                g.disk_size(),
             ])
 
     response = StreamingHttpResponse(

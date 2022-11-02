@@ -1,4 +1,3 @@
-from django.utils.crypto import get_random_string
 from faker import Faker
 from mixer.backend.django import mixer
 
@@ -21,3 +20,9 @@ def GroupFactory(**kwargs):
     group = mixer.blend(Group, **kwargs)
     group.join(kwargs['owner'], 'owner')
     return group
+
+
+def AttachmentFactory(**kwargs):
+    assert kwargs.get('attached'), "Attachments are required to have 'attached' filled."
+    from core.models import Attachment
+    return mixer.blend(Attachment, **kwargs)
