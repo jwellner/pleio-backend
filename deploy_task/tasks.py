@@ -17,7 +17,11 @@ def schedule_deploy_task_for_all(method_name):
 def execute_deploy_task(schema_name, method_name):
     with schema_context(schema_name):
         try:
+            logger.error("execute_deploy_task start @%s %s", schema_name, method_name)
             method = import_string(method_name)
             method()
         except Exception as e:
-            logger.error("execute_deploy_task error @%s %s %s", schema_name, method_name, str(e))
+            error_message = f"{e.__class__.__module__}.{e.__class__.__qualname__}: {e}"
+            logger.error("execute_deploy_task error @%s %s %s", schema_name, method_name, error_message)
+        finally:
+            logger.error("execute_deploy_task end @%s %s", schema_name, method_name)
