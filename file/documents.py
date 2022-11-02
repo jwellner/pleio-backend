@@ -8,6 +8,8 @@ from django_elasticsearch_dsl import fields
 from django_elasticsearch_dsl.registries import registry
 from .models import FileFolder
 from core.documents import DefaultDocument, custom_analyzer
+from core.utils.convert import tiptap_to_text
+
 
 logger = logging.getLogger(__name__)
 
@@ -38,12 +40,17 @@ class FileDocument(DefaultDocument):
 
     read_access_weight = fields.IntegerField()
 
+    description = fields.TextField(
+        analyzer=custom_analyzer,
+        search_analyzer="standard"
+    )
+
     def prepare_file_contents(self, instance):
         # pylint: disable=unused-argument
         file_contents = ''
         try:
             # copy file to temp folder to process
-            if not instance.type == FileFolder.Types.FILE and instance.upload:
+            if instance.type == FileFolder.Types.FILE and instance.upload:
                 extension = os.path.splitext(instance.upload.name)[1]
                 if extension in ['.pdf', '.doc', '.docx', '.pptx', '.txt']:
                     with instance.upload.open() as f:
@@ -62,6 +69,9 @@ class FileDocument(DefaultDocument):
 
     def prepare_tags(self, instance):
         return [x.lower() for x in instance.tags]
+
+    def prepare_description(self, instance):
+        return tiptap_to_text(instance.rich_description)
 
     def update(self, thing, refresh=None, action='index', parallel=False, **kwargs):
         if isinstance(thing, models.Model) and not thing.group and action == "index":

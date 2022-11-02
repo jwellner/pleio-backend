@@ -47,7 +47,8 @@ def resolve_search(_, info,
     if type in ['group', 'user']:
         subtype = type
 
-    subtypes_available = ['user', 'group', 'file', 'folder', 'blog', 'discussion', 'event', 'news', 'question', 'wiki', 'page']
+    subtypes_available = ['user', 'group', 'file', 'folder', 'pad', 'blog', 'discussion',
+                        'event', 'news', 'question', 'wiki', 'page']
 
     if subtypes and [type for type in subtypes if type not in subtypes_available]:
         raise GraphQLError(INVALID_SUBTYPE)

@@ -9,10 +9,14 @@
 	<h2 class="walled-garden_subtitle">{{ config.DESCIPTION }}</h2>
 </div>
 <div class="content">
-	{% if config.LOGIN_INTRO %}
-		{% tiptap_to_html config.LOGIN_INTRO %}
+	{% if banned %}
+		<p class="invalid-feedback">{% blocktrans %}The site admin has blocked your account. Contact the site admin for more information.{% endblocktrans %}</p>
 	{% else %}
-		<p>{% blocktrans %}This site is closed. Log in to get access.{% endblocktrans %}</p>
+		{% if config.LOGIN_INTRO %}
+			{% tiptap_to_html config.LOGIN_INTRO %}
+		{% else %}
+			<p>{% blocktrans %}This site is closed. Log in to get access.{% endblocktrans %}</p>
+		{% endif %}
 	{% endif %}
 </div>
 <div class="elgg-module  elgg-module-walledgarden-login">
@@ -20,19 +24,23 @@
 		<form class="elgg-form elgg-form-pleio-template-pleio-login">
 			<fieldset>
 				<div class="walled-garden_buttons">
-					{% if config.IDP_ID %}
-						<a href="{% url 'oidc_authentication_init' %}?idp={{ config.IDP_ID }}&next={{ next }}" class="button ___medium" rel="nofollow">{{ config.IDP_NAME }}</a>
-						<div class="walled-garden_buttons-or">{% blocktrans %}or{% endblocktrans %}</div>
-					{% endif %}
-					{% for providerOption in constants.OIDC_PROVIDER_OPTIONS %}
-						{% if providerOption.value in config.OIDC_PROVIDERS %}
-							<a href="{% url 'oidc_authentication_init' %}?next={{ next }}&provider={{ providerOption.value }}" class="button ___medium {% if config.IDP_ID %}___line{% endif%}" rel="nofollow">
-								{% blocktrans with oidc_provider=providerOption.label %}Log in using {{ oidc_provider }}{% endblocktrans %}
-							</a>
+					{% if banned %}
+					<a href="/logout" class="button ___medium" rel="nofollow">{% blocktrans %}Login with different account{% endblocktrans %}</a>
+					{% else %}
+						{% if config.IDP_ID %}
+							<a href="{% url 'oidc_authentication_init' %}?idp={{ config.IDP_ID }}&next={{ next }}" class="button ___medium" rel="nofollow">{{ config.IDP_NAME }}</a>
+							<div class="walled-garden_buttons-or">{% blocktrans %}or{% endblocktrans %}</div>
 						{% endif %}
-					{% endfor %}
+						{% for providerOption in constants.OIDC_PROVIDER_OPTIONS %}
+							{% if providerOption.value in config.OIDC_PROVIDERS %}
+								<a href="{% url 'oidc_authentication_init' %}?next={{ next }}&provider={{ providerOption.value }}" class="button ___medium {% if config.IDP_ID %}___line{% endif%}" rel="nofollow">
+									{% blocktrans with oidc_provider=providerOption.label %}Log in using {{ oidc_provider }}{% endblocktrans %}
+								</a>
+							{% endif %}
+						{% endfor %}
+					{% endif %}
 				</div>
-				{% if config.ALLOW_REGISTRATION %}
+				{% if config.ALLOW_REGISTRATION and not banned %}
 				<div class="walled-garden_register content">
 					{% blocktrans %}Don't have an account?{% endblocktrans %} <a href="/login?login_credentials=true&amp;method=register" class="" rel="nofollow">{% blocktrans %}Register{% endblocktrans %}</a>
 				</div>

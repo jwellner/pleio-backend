@@ -50,7 +50,9 @@ class UserManager(BaseUserManager):
             user.set_password(password)
             user.save()
 
-        SiteAccessRequest.objects.filter(email=email).delete()
+        if not is_schema_public():
+            SiteAccessRequest.objects.filter(email=email).delete()
+
         return user
 
     def create_superuser(self, email, name, password):

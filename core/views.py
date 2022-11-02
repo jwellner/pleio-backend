@@ -149,6 +149,7 @@ def login(request):
 
     context = {
         'next': request.GET.get('next', ''),
+        'banned': request.session.get('pleio_user_is_banned', False),
         'constants': {
             'OIDC_PROVIDER_OPTIONS': OIDC_PROVIDER_OPTIONS,
         },
@@ -205,10 +206,10 @@ def onboarding(request):
     user = request.user
     claims = request.session.get('onboarding_claims', None)
 
-    if not request.user.is_authenticated and not claims:
+    if not user.is_authenticated and not claims:
         return HttpResponseRedirect('/')
 
-    if not config.ONBOARDING_INTRO and not ProfileField.objects.filter(is_in_onboarding=True).first():
+    if user.is_authenticated and not config.ONBOARDING_INTRO and not ProfileField.objects.filter(is_in_onboarding=True).first():
         return HttpResponseRedirect('/')
 
     if request.POST:
@@ -460,17 +461,19 @@ def export_groupowners(request):
     if not user.has_role(USER_ROLES.ADMIN):
         raise Http404("Not admin")
 
-    def stream(groups, pseudo_buffer):
+    def stream(groups: [Group], pseudo_buffer):
         writer = csv.writer(pseudo_buffer, delimiter=';', quotechar='"')
         yield writer.writerow([_("Name"),
                                _("E-mail"),
-                               _("Group")])
+                               _("Group"),
+                               _("Disk size")])
 
         for g in groups:
             yield writer.writerow([
                 g.owner.name,
                 g.owner.email,
                 g.name,
+                g.disk_size(),
             ])
 
     response = StreamingHttpResponse(
