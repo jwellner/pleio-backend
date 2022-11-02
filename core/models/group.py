@@ -190,6 +190,26 @@ class Group(TagsModel, FeaturedCoverMixin, AttachmentMixin):
     def description(self):
         return tiptap_to_text(self.rich_description)
 
+    def disk_size(self):
+        from file.models import FileFolder
+        from core.models import Attachment, Entity
+
+        file_folder_size = 0
+        attachment_size = 0
+
+        f = FileFolder.objects.filter(type=FileFolder.Types.FILE,
+                                      group=self.id).aggregate(total_size=models.Sum('size'))
+        if f.get('total_size', 0):
+            file_folder_size = f.get('total_size', 0)
+
+        ids = [id for id in Entity.objects.filter(group_id=self.id).values_list('pk', flat=True) or []]
+        ids.append(self.guid)
+        e = Attachment.objects.filter(attached_object_id__in=ids).aggregate(total_size=models.Sum('size'))
+        if e.get('total_size', 0):
+            attachment_size = e.get('total_size', 0)
+
+        return file_folder_size + attachment_size
+
 
 class GroupMembership(models.Model):
     class Meta:

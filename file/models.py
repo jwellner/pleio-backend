@@ -55,8 +55,8 @@ class FileFolderManager(EntityManager):
                 pass
         return None
 
-class FileFolder(Entity, ModelWithFile, ResizedImageMixin, AttachmentMixin):
 
+class FileFolder(Entity, ModelWithFile, ResizedImageMixin, AttachmentMixin):
     class Types(models.TextChoices):
         FILE = "File", _("File")
         FOLDER = "Folder", _("Folder")

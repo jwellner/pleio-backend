@@ -49,7 +49,7 @@ class Attachment(ModelWithFile, ResizedImageMixin):
                 if not self.name:
                     self.name = self.upload.file.name
                 self.mime_type = get_mimetype(self.upload.path)
-                self.size=get_filesize(self.upload.path)
+                self.size=self.upload.size
             except FileNotFoundError:
                 pass
 

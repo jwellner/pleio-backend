@@ -3,7 +3,6 @@ from django.utils import timezone
 
 
 class SiteInvitation(models.Model):
-
     email = models.EmailField(max_length=255, unique=True)
     code = models.CharField(max_length=36)
 
@@ -12,7 +11,6 @@ class SiteInvitation(models.Model):
 
 
 class SiteAccessRequest(models.Model):
-
     email = models.EmailField(max_length=255, unique=True)
     name = models.CharField(max_length=100)
 
@@ -25,7 +23,6 @@ class SiteAccessRequest(models.Model):
 
 
 class SiteStat(models.Model):
-
     STAT_TYPES = (
         ('DISK_SIZE', 'DISK_SIZE'),
         ('DB_SIZE', 'DB_SIZE'),

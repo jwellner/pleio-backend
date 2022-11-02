@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Frans\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-10-27 11:00+0200\n"
+"POT-Creation-Date: 2022-11-01 20:16+0100\n"
 "PO-Revision-Date: 2021-06-24 15:12+0200\n"
 "Last-Translator: \n"
 "Language-Team: frans\n"
@@ -205,7 +205,7 @@ msgstr "Message du groupe {0} : {1}"
 msgid "Request for access to the %(group_name)s group has been refused"
 msgstr "La demande d’accès au groupe %(group_name)s a été refusée"
 
-#: core/mail_builders/group_resend_invitation.py:46
+#: core/mail_builders/group_resend_invitation.py:51
 #, python-format
 msgid "Reminder to become a member of the %(group_name)s group"
 msgstr "Rappel pour devenir membre du groupe %(group_name)s"
@@ -654,7 +654,7 @@ msgstr "Message personnel"
 msgid "Direct notification"
 msgstr "Notification directe"
 
-#: core/templates/email/send_notification_emails.html:10 core/views.py:622
+#: core/templates/email/send_notification_emails.html:10 core/views.py:624
 msgid "Notification overview"
 msgstr "Aperçu des notifications"
 
@@ -672,7 +672,7 @@ msgstr "Se désabonner"
 msgid "Adjust your email settings"
 msgstr "Ajustez vos paramètres de messagerie"
 
-#: core/templates/email/send_overview_emails.html:22 core/views.py:619
+#: core/templates/email/send_overview_emails.html:22 core/views.py:621
 msgid "Periodic overview"
 msgstr "Aperçu périodique"
 
@@ -1048,11 +1048,15 @@ msgstr "E-mail"
 msgid "Group"
 msgstr "Groupe"
 
-#: core/views.py:562
+#: core/views.py:469
+msgid "Disk size"
+msgstr "Taille du disque"
+
+#: core/views.py:564
 msgid "Your changes are saved"
 msgstr "Vos modifications sont enregistrées"
 
-#: core/views.py:625
+#: core/views.py:627
 #, python-format
 msgid "Successfully unsubscribed %(email)s from %(list_name)s"
 msgstr "Désinscription réussie de %(email)s de %(list_name)s."
@@ -1088,12 +1092,12 @@ msgstr "Retiré de l'événement : %s"
 msgid "QR code for %s"
 msgstr "Code QR pour %s"
 
-#: event/mail_builders/waitinglist.py:22 event/models.py:102
+#: event/mail_builders/waitinglist.py:22 event/models.py:101
 #, python-format
 msgid "Added to event %s from waitinglist"
 msgstr "Ajouté à l'événement %s de la liste d'attente"
 
-#: event/models.py:242
+#: event/models.py:241
 msgid "You already signed in for another sub-event in the same slot."
 msgstr ""
 "Vous vous êtes déjà inscrit à un autre sous-événement dans le même créneau."

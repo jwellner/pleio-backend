@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Duits\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-10-27 11:00+0200\n"
+"POT-Creation-Date: 2022-11-01 20:16+0100\n"
 "PO-Revision-Date: 2021-05-26 10:55+0200\n"
 "Last-Translator: \n"
 "Language-Team: \n"
@@ -205,7 +205,7 @@ msgstr "Nachricht von der Gruppe {0}: {1}"
 msgid "Request for access to the %(group_name)s group has been refused"
 msgstr "Der Antrag auf Zugang zur %(group_name)s-Gruppe wurde abgelehnt"
 
-#: core/mail_builders/group_resend_invitation.py:46
+#: core/mail_builders/group_resend_invitation.py:51
 #, python-format
 msgid "Reminder to become a member of the %(group_name)s group"
 msgstr "Erinnerung, um Mitglied der %(group_name)s-Gruppe zu werden"
@@ -658,7 +658,7 @@ msgstr "Persönliche Nachricht"
 msgid "Direct notification"
 msgstr "Direkte Benachrichtigung"
 
-#: core/templates/email/send_notification_emails.html:10 core/views.py:622
+#: core/templates/email/send_notification_emails.html:10 core/views.py:624
 msgid "Notification overview"
 msgstr "Übersicht über die Benachrichtigung"
 
@@ -676,7 +676,7 @@ msgstr "Abbestellen"
 msgid "Adjust your email settings"
 msgstr "Passen Sie Ihre E-Mail-Einstellungen an"
 
-#: core/templates/email/send_overview_emails.html:22 core/views.py:619
+#: core/templates/email/send_overview_emails.html:22 core/views.py:621
 msgid "Periodic overview"
 msgstr "Regelmäßige Übersicht"
 
@@ -1036,11 +1036,15 @@ msgstr "E-Mail"
 msgid "Group"
 msgstr "Gruppe"
 
-#: core/views.py:562
+#: core/views.py:469
+msgid "Disk size"
+msgstr "Größe der Festplatte"
+
+#: core/views.py:564
 msgid "Your changes are saved"
 msgstr "Ihre Änderungen werden gespeichert"
 
-#: core/views.py:625
+#: core/views.py:627
 #, python-format
 msgid "Successfully unsubscribed %(email)s from %(list_name)s"
 msgstr "Erfolgreich abbestellt %(email)s von %(list_name)s"
@@ -1076,12 +1080,12 @@ msgstr "Entfernt vom Ereignis: %s"
 msgid "QR code for %s"
 msgstr "QR-Code für %s"
 
-#: event/mail_builders/waitinglist.py:22 event/models.py:102
+#: event/mail_builders/waitinglist.py:22 event/models.py:101
 #, python-format
 msgid "Added to event %s from waitinglist"
 msgstr "Zum Ereignis %s von der Warteliste hinzugefügt"
 
-#: event/models.py:242
+#: event/models.py:241
 msgid "You already signed in for another sub-event in the same slot."
 msgstr ""
 "Sie haben sich bereits für eine andere Unterveranstaltung auf demselben "
