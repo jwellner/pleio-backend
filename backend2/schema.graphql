@@ -1863,6 +1863,7 @@ type Query {
         matchStrategy: MatchStrategy
         orderBy: SearchOrderBy
         orderDirection: OrderDirection
+        ownerGuids: [String]
     ): SearchList
     searchJournal(
         dateTimeFrom: DateTime,

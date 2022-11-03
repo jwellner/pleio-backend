@@ -48,9 +48,9 @@ class QueryBuilder():
             Q('terms', type=['group', 'user'])
         ])
 
-    def maybe_filter_owner(self, guid):
-        if guid:
-            self.s = self.s.filter(owner__id=guid)
+    def maybe_filter_owners(self, owner_guids):
+        if owner_guids:
+            self.s = self.s.filter('terms', owner_guid=owner_guids)
 
     def maybe_filter_subtypes(self, subtypes):
         if subtypes:
