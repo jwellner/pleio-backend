@@ -20,6 +20,7 @@ class SearchTestCase(ElasticsearchTestCase):
         
         self.group = mixer.blend(Group)
         self.user = UserFactory()
+        self.user2 = UserFactory()
 
         self.query = """
             query Search(
@@ -57,6 +58,11 @@ class SearchTestCase(ElasticsearchTestCase):
             owner=self.user,
             group=self.group
         )
+        permission2 = {
+            'owner': self.user2,
+            'read_access': [ACCESS_TYPE.public],
+            'write_access': [ACCESS_TYPE.user.format(self.user2.guid)],
+        }
 
         self.blog1 = mixer.blend(Blog, title=self.common_tag1, **permission)
         self.blog2 = mixer.blend(Blog, title=self.common_tag2, **permission)
@@ -64,6 +70,7 @@ class SearchTestCase(ElasticsearchTestCase):
         self.wiki2 = mixer.blend(Wiki, title=self.common_tag2, **permission)
         self.news1 = mixer.blend(News, title=self.common_tag1, **permission)
         self.news2 = mixer.blend(News, title=self.common_tag2, **permission)
+        self.news3 = mixer.blend(News, title=self.common_tag2, **permission2)
 
     def test_invalid_subtype(self):
 
@@ -146,3 +153,40 @@ class SearchTestCase(ElasticsearchTestCase):
         self.assertEqual(1, data['total'])
 
         self.assertEqual(self.pad.guid, data["edges"][0]["guid"])
+
+    def test_owner_guids(self):
+        query = """
+            query Search(
+                        $ownerGuids: [String]
+                        ) {
+                search( 
+                        ownerGuids: $ownerGuids
+                        ) {
+                    edges {
+                        guid
+                    }
+                    total
+                    totals {
+                        subtype
+                        total
+                    }
+                }
+            }
+        """
+
+        variables = {
+            "ownerGuids": [str(self.user2.id)]
+        }
+        self.initialize_index()
+
+        self.graphql_client.force_login(self.user)
+        result = self.graphql_client.post(query, variables)
+
+        data = result['data']['search']
+        items = [i['guid'] for i in data['edges']]
+
+        self.assertEqual(1, data['total'])
+        self.assertEqual(1, len(items))
+        self.assertIn(self.news3.guid, items)
+        self.assertNotIn(self.news1.guid, items)
+        self.assertNotIn(self.blog1.guid, items)

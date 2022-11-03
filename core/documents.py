@@ -30,11 +30,18 @@ custom_analyzer = analyzer(
 
 class DefaultDocument(Document):
     tenant_name = fields.KeywordField()
+    owner_guid = fields.KeywordField()
     container_guid = fields.KeywordField()
 
     def prepare_tenant_name(self, instance):
         # pylint: disable=unused-argument
         return parse_tenant_config_path("")
+
+    def prepare_owner_guid(self, instance):
+        if hasattr(instance, 'owner') and instance.owner:
+            return instance.owner.id
+
+        return ""
 
     def prepare_container_guid(self, instance):
         if hasattr(instance, 'group') and instance.group:
