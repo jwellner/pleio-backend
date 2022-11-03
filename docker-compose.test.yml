@@ -1,0 +1,45 @@
+version: '3'
+
+services:
+
+  api:
+    build: .
+    environment:
+      SECRET_KEY: bg9kU6ckKXTLQeZxtovc
+      DB_HOST: db
+      DB_USER: postgres
+      DB_PASSWORD: postgres
+      DB_NAME: postgres
+      ENV: test
+      DEBUG: "True"
+      ELASTICSEARCH_HOST: http://elasticsearch:9200
+      CELERY_TASK_ALWAYS_EAGER: "True"
+      MEDIA_ROOT: /tmp
+    volumes:
+      - frontend-build:/app/static-frontend
+    depends_on:
+      - db
+      - frontend
+      - elasticsearch
+
+  frontend:
+    image: registry.gitlab.com/pleio/frontend:latest
+    volumes:
+      - frontend-build:/shared
+    command: bash -c "cp -Rp /usr/share/nginx/html/. /shared && chown -R www-data:www-data /shared"
+
+  db:
+    image: postgres:12
+    environment:
+      POSTGRES_PASSWORD: postgres
+
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.16.2
+    command: [ "bin/elasticsearch", "-Expack.security.enabled=false", "-Ediscovery.type=single-node" ]
+    healthcheck:
+      interval: 20s
+      retries: 10
+      test: curl -s http://localhost:9200/_cluster/health | grep -vq '"status":"red"'
+
+volumes:
+  frontend-build:

@@ -1,7 +1,7 @@
 import os
 
 from core.models.attachment import Attachment
-from django.core.files import File
+from django.core.files.base import ContentFile
 from mixer.backend.django import mixer
 
 from core.tests.helpers import PleioTenantTestCase
@@ -11,23 +11,14 @@ from user.models import User
 
 
 class AttachmentModelTestCase(PleioTenantTestCase):
-    basepath = 'test_files/'
 
     def setUp(self):
+        super().setUp()
         self.authenticatedUser = mixer.blend(User)
-        os.makedirs(self.basepath, exist_ok=True)
-
-    def tearDown(self):
-        os.system(f"rm -r {self.basepath}")
 
     def attach_file(self, instance, attr, filename):
-        path = self.basepath + filename
-        with open(path, 'w+') as f:
-            file = File(f)
-            file.write("some content")
-            setattr(instance, attr, file)
-            instance.save()
-
+        setattr(instance, attr, ContentFile("Some content", filename))
+        instance.save()
         return getattr(instance, attr).path
 
     def test_copy_attachment(self):

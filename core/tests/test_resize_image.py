@@ -1,10 +1,11 @@
 import os
+
 from django.db import connection
 from PIL import Image
 from core.models.attachment import Attachment
 from core.models.image import ResizedImage
 from django_tenants.test.client import TenantClient
-from django_tenants.test.cases import FastTenantTestCase
+from tenants.helpers import FastTenantTestCase
 from mixer.backend.django import mixer
 from django.core.cache import cache
 from django.contrib.auth.models import AnonymousUser
@@ -18,10 +19,7 @@ from unittest import mock
 
 class ResizeImageTestCase(FastTenantTestCase):
 
-    basepath = 'test_files/'
-
     def setUp(self):
-        os.makedirs(self.basepath, exist_ok=True)
         self.anonymousUser = AnonymousUser()
         self.authenticatedUser = mixer.blend(User)
         cache.set("%s%s" % (connection.schema_name, 'IS_CLOSED'), False)
@@ -31,7 +29,7 @@ class ResizeImageTestCase(FastTenantTestCase):
         self.blog = mixer.blend(Blog, read_access=[ACCESS_TYPE.public], owner=self.authenticatedUser)
 
     def tearDown(self):
-        os.system(f"rm -r {self.basepath}")
+        pass
 
     def get_image(self, filename, size=(800, 1280)):
         output = BytesIO()
