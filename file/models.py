@@ -16,8 +16,6 @@ from core.models.mixin import ModelWithFile
 from core.models.rich_fields import AttachmentMixin
 from core.models.image import ResizedImageMixin
 from django.db.models import ObjectDoesNotExist
-from django.db.models.signals import pre_save, pre_delete, post_save
-from django.dispatch import receiver
 from django.utils.text import slugify
 from django.utils.translation import gettext_lazy as _
 from django.core.files.base import ContentFile
@@ -88,28 +86,8 @@ class FileFolder(Entity, ModelWithFile, ResizedImageMixin, AttachmentMixin):
     rich_description = models.TextField(null=True, blank=True)
     pad_state = models.TextField(null=True, blank=True)
 
-    def get_content(self, wrap=None):
-        if os.path.exists(self.upload.path):
-            with open(self.upload.path, 'rb') as fh:
-                data = fh.read()
-                if callable(wrap):
-                    return wrap(data)
-                return data
-        return None
-
     def __str__(self):
         return f"FileFolder[{self.title}]"
-
-    def make_copy(self, user):
-        new = FileFolder()
-        new_file = ContentFile(self.upload.read())
-        new_file.name = self.upload.name
-        new.upload = new_file
-        new.owner = user
-
-        new.save()
-
-        return new
 
     @property
     def type_to_string(self):
@@ -220,6 +198,72 @@ class FileFolder(Entity, ModelWithFile, ResizedImageMixin, AttachmentMixin):
     def rich_fields(self):
         return [self.rich_description]
 
+    def save(self, *args, **kwargs):
+        self.update_metadata()
+        self.update_parent_timestamps()
+        super(FileFolder, self).save(*args, **kwargs)
+        if not is_upload_complete(self):
+            from file.tasks import post_process_file_attributes
+            post_process_file_attributes.delay(tenant_schema(), str(self.id))
+
+    def delete(self, *args, **kwargs):
+        self.cleanup_extra_file()
+        super(FileFolder, self).delete(*args, **kwargs)
+
+    def update_metadata(self):
+        self.read_access_weight = get_read_access_weight(self)
+        self.write_access_weight = get_write_access_weight(self)
+
+        if self.upload:
+            try:
+                if not self.title:
+                    self.title = self.upload.file.name
+                self.mime_type = get_mimetype(self.upload.path)
+                self.size = self.upload.size
+            except FileNotFoundError:
+                pass
+
+    def update_parent_timestamps(self):
+        set_parent_folders_updated_at(self)
+
+        try:
+            # Also update old parent if changed
+            old_instance = FileFolder.objects.get(id=self.id)
+            if old_instance.parent != self.parent:
+                set_parent_folders_updated_at(old_instance)
+        except ObjectDoesNotExist:
+            pass
+
+    def cleanup_extra_file(self):
+        # pylint: disable=unused-argument
+        if not self.type == FileFolder.Types.FILE:
+            return
+
+        try:
+            os.unlink(f"{os.path.dirname(self.upload.path)}/{self.title}")
+        except (FileNotFoundError, ValueError):
+            pass
+
+    def get_content(self, wrap=None):
+        if os.path.exists(self.upload.path):
+            with open(self.upload.path, 'rb') as fh:
+                data = fh.read()
+                if callable(wrap):
+                    return wrap(data)
+                return data
+        return None
+
+    def make_copy(self, user):
+        new = FileFolder()
+        new_file = ContentFile(self.upload.read())
+        new_file.name = self.upload.name
+        new.upload = new_file
+        new.owner = user
+
+        new.save()
+
+        return new
+
 
 class ScanIncident(models.Model):
     date = models.DateTimeField(default=timezone.now)
@@ -241,62 +285,9 @@ def set_parent_folders_updated_at(instance):
         return
     if instance.parent and instance.parent.type == FileFolder.Types.FOLDER:
         with signal_disabler.disable():
+            instance.parent.updated_at = timezone.now()
             instance.parent.save()
         set_parent_folders_updated_at(instance.parent)
-
-
-@receiver(pre_save, sender=FileFolder)
-def file_pre_save(sender, instance, **kwargs):
-    # pylint: disable=unused-argument
-    instance.read_access_weight = get_read_access_weight(instance)
-    instance.write_access_weight = get_write_access_weight(instance)
-
-    if instance.upload:
-        try:
-            if not instance.title:
-                instance.title = get_basename(instance.upload.path)
-            if not instance.mime_type:
-                instance.mime_type = get_mimetype(instance.upload.path)
-            if not instance.size:
-                instance.size = get_filesize(instance.upload.path)
-        except FileNotFoundError as e:
-            pass
-
-
-@receiver(post_save, sender=FileFolder)
-def file_post_save(sender, instance, **kwargs):
-    # pylint: disable=unused-argument
-    if not is_upload_complete(instance):
-        from file.tasks import post_process_file_attributes
-        post_process_file_attributes.delay(tenant_schema(), str(instance.id))
-
-
-# update parent folders updated_at when adding, moving and deleting files
-@receiver([pre_save], sender=FileFolder)
-def update_parent_timestamps(sender, instance, **kwargs):
-    # pylint: disable=unused-argument
-
-    set_parent_folders_updated_at(instance)
-
-    try:
-        # Also update old parent if changed
-        old_instance = FileFolder.objects.get(id=instance.id)
-        if old_instance.parent != instance.parent:
-            set_parent_folders_updated_at(old_instance)
-    except ObjectDoesNotExist:
-        pass
-
-
-@receiver(pre_delete, sender=FileFolder)
-def cleanup_extra_file(sender, instance, **kwargs):
-    # pylint: disable=unused-argument
-    if instance.type == FileFolder.Types.FOLDER:
-        return
-
-    try:
-        os.unlink(f"{os.path.dirname(instance.upload.path)}/{instance.title}")
-    except (FileNotFoundError, ValueError):
-        pass
 
 
 auditlog.register(FileFolder)
