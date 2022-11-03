@@ -11,16 +11,16 @@ from user.models import User
 from event.models import Event
 from core.constances import ACCESS_TYPE, USER_ROLES
 from mixer.backend.django import mixer
-from django.core.files import File
+from django.core.files.base import ContentFile
 from core.views import attachment
 from core.constances import ENTITY_STATUS
 
 
 class CopyEventTestCase(PleioTenantTestCase):
-    basepath = 'test_files/'
-
+    
     def setUp(self):
         super().setUp()
+
         self.now = datetime.datetime.now(tz=timezone.utc)
         self.authenticatedUser = mixer.blend(User)
         self.admin = mixer.blend(User, roles=[USER_ROLES.ADMIN])
@@ -48,8 +48,6 @@ class CopyEventTestCase(PleioTenantTestCase):
                                            read_access=[ACCESS_TYPE.public],
                                            write_access=[ACCESS_TYPE.user.format(self.authenticatedUser.id)]
                                            )
-
-        os.makedirs(self.basepath, exist_ok=True)
 
         self.attachment = mixer.blend(Attachment, attached=self.eventAttachment)
         path = self.attach_file(self.attachment, 'upload', 'testfile.txt')
@@ -121,16 +119,11 @@ class CopyEventTestCase(PleioTenantTestCase):
         """
 
     def tearDown(self):
-        os.system(f"rm -r {self.basepath}")
         super().tearDown()
 
     def attach_file(self, instance, attr, filename):
-        path = self.basepath + filename
-        with open(path, 'w+') as f:
-            file = File(f)
-            file.write("some content")
-            setattr(instance, attr, file)
-            instance.save()
+        setattr(instance, attr, ContentFile("Some content", filename))
+        instance.save()
 
         return getattr(instance, attr).path
 

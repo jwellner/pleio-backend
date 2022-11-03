@@ -1,28 +1,17 @@
 import os
+
 from core.models.attachment import Attachment
-from django_tenants.test.cases import FastTenantTestCase
-from django.core.files import File
-from django.conf import settings
+from tenants.helpers import FastTenantTestCase
+from django.core.files.base import ContentFile
 from mixer.backend.django import mixer
 from blog.models import Blog
 from file.models import FileFolder
 
 class DeleteAttachmentTestCase(FastTenantTestCase):
-    basepath = 'test_files/'
-
-    def setUp(self):
-        os.makedirs(self.basepath, exist_ok=True)
-
-    def tearDown(self):
-        os.system(f"rm -r {self.basepath}")
 
     def attach_file(self, instance, attr, filename):
-        path = self.basepath + filename
-        with open(path, 'w+') as f:
-            file = File(f)
-            file.write("some content")
-            setattr(instance, attr, file)
-            instance.save()
+        setattr(instance, attr, ContentFile("Some content", filename))
+        instance.save()
 
         return getattr(instance, attr).path
 

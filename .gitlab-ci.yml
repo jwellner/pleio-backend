@@ -1,23 +1,10 @@
-image: python:3.9
-
 stages:
   - test
   - build
   - deploy
 
 variables:
-  SECRET_KEY: bg9kU6ckKXTLQeZxtovc
-  POSTGRES_PASSWORD: postgres
-  DB_HOST: postgres
-  DB_USER: postgres
-  DB_PASSWORD: postgres
-  DB_NAME: postgres
-  ENV: test
-  DEBUG: "True"
   PIP_CACHE_DIR: $CI_PROJECT_DIR/.cache/pip
-  ELASTICSEARCH_URL: http://elasticsearch:9200
-  ELASTICSEARCH_HOST: http://elasticsearch:9200
-  CELERY_TASK_ALWAYS_EAGER: "True"
 
 cache:
   paths:
@@ -25,14 +12,8 @@ cache:
 
 before_script:
 
-services:
-  - postgres:9.6-alpine
-  - name: docker.elastic.co/elasticsearch/elasticsearch:7.4.0
-    alias: elasticsearch
-    command: [ "bin/elasticsearch", "-Expack.security.enabled=false", "-Ediscovery.type=single-node" ]
-
-
 prospector:
+  image: python:3.9
   stage: test
   tags:
     - docker
@@ -44,15 +25,12 @@ test:
   stage: test
   coverage: '/TOTAL.*\s+(\d+%)/'
   tags:
-    - docker
+    - shell
   script:
-    - curl "http://elasticsearch:9200/_cat/health"
-    - pip install -r requirements.txt
-    - mkdir -p static static-frontend
-    - touch static-frontend/web.css static-frontend/vendor.js static-frontend/web.js
-    - python manage.py collectstatic --noinput
-    - coverage run --source='.' manage.py test
-    - coverage report
+    - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN $CI_REGISTRY
+    - docker-compose -f docker-compose.test.yml down
+    - docker-compose -f docker-compose.test.yml build
+    - docker-compose -f docker-compose.test.yml run api /ci-test.sh
 
 scan:
   stage: test
