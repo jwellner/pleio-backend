@@ -1,7 +1,8 @@
 from graphql import GraphQLError
 from django.core.exceptions import ObjectDoesNotExist
-from core.constances import NOT_LOGGED_IN, COULD_NOT_FIND, COULD_NOT_SAVE, INVALID_VALUE, USER_ROLES
+from core.constances import COULD_NOT_FIND, COULD_NOT_SAVE, INVALID_VALUE, USER_ROLES
 from core.lib import clean_graphql_input
+from core.resolvers import shared
 from core import config
 from user.models import User
 
@@ -10,8 +11,7 @@ def resolve_edit_user_name(_, info, input):
     current_user = info.context["request"].user
     clean_input = clean_graphql_input(input)
 
-    if not current_user.is_authenticated:
-        raise GraphQLError(NOT_LOGGED_IN)
+    shared.assert_authenticated(current_user)
 
     if not config.EDIT_USER_NAME_ENABLED:
         raise GraphQLError(COULD_NOT_SAVE)

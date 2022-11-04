@@ -3,6 +3,7 @@ from django.core.exceptions import ObjectDoesNotExist
 from core.lib import clean_graphql_input
 from core.constances import NOT_LOGGED_IN, COULD_NOT_FIND, COULD_NOT_SAVE
 from core.models import Comment
+from  core.resolvers import shared
 
 def resolve_edit_comment(_, info, input):
     # pylint: disable=redefined-builtin
@@ -10,8 +11,7 @@ def resolve_edit_comment(_, info, input):
 
     clean_input = clean_graphql_input(input)
 
-    if not user.is_authenticated:
-        raise GraphQLError(NOT_LOGGED_IN)
+    shared.assert_authenticated(user)
 
     try:
         comment = Comment.objects.get(id=clean_input.get("guid"))
@@ -23,6 +23,8 @@ def resolve_edit_comment(_, info, input):
 
     if 'richDescription' in clean_input:
         comment.rich_description = clean_input.get("richDescription")
+
+    shared.update_updated_at(comment)
 
     comment.save()
 

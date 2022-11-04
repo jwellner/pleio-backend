@@ -1,6 +1,7 @@
 from ariadne import ObjectType
 from django.core.exceptions import ObjectDoesNotExist
 from django.db.models import F
+from django.utils import timezone
 from graphql import GraphQLError
 
 from core.constances import USER_NOT_MEMBER_OF_GROUP, USER_ROLES
@@ -138,7 +139,7 @@ def increment_view_count(entity, request):
 
     if views == 1:
         if EntityViewCount.objects.filter(entity_id=entity.guid).exists():
-            EntityViewCount.objects.filter(entity_id=entity.guid).update(views=F('views') + 1)
+            EntityViewCount.objects.filter(entity_id=entity.guid).update(views=F('views') + 1, updated_at=timezone.now())
         else:
             EntityViewCount.objects.create(entity_id=entity.guid, views=1)
 

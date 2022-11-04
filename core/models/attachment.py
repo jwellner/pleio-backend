@@ -10,7 +10,7 @@ from django.utils.text import slugify
 from django.core.files.base import ContentFile
 from django.urls import reverse
 
-from core.lib import get_mimetype, strip_exif
+from core.lib import get_mimetype, strip_exif, get_basename
 from core.models.mixin import ModelWithFile
 from core.models.image import ResizedImageMixin
 
@@ -47,7 +47,7 @@ class Attachment(ModelWithFile, ResizedImageMixin):
         if self.upload:
             try:
                 if not self.name:
-                    self.name = self.upload.file.name
+                    self.name = get_basename(self.upload.name)
                 self.mime_type = get_mimetype(self.upload.path)
                 self.size = self.upload.size
             except FileNotFoundError:
