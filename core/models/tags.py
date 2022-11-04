@@ -1,8 +1,6 @@
 from django.contrib.postgres.fields import ArrayField
 from django.db import models
 from django.db.models import Q
-from django.db.models.signals import pre_save, post_delete
-from django.dispatch import receiver
 
 from core.lib import NumberIncrement
 
@@ -145,6 +143,18 @@ class TagsModel(models.Model):
         for category in self.category_tags:
             yield from flat_category_tags(category)
 
+    def save(self, *args, **kwargs):
+        assert is_registered_for_tags(self.__class__), \
+            "Register the base TagsModel model using register_model_for_tags at the app's ready method."
+        assert '_tag_summary' in [f.name for f in self._meta.fields], "Provide a _tag_summary ArrayField"
+        self._tag_summary = EntityTag.summary(self.id)
+        self._category_summary = [t for t in self.category_tags_index]
+        super(TagsModel, self).save(*args, **kwargs)
+
+    def delete(self, *args, **kwargs):
+        super(TagsModel, self).delete(*args, **kwargs)
+        EntityTag.objects.filter(entity_id=self.id).delete()
+
 
 def flat_category_tags(category, brief=False):
     for value in category['values']:
@@ -166,22 +176,3 @@ def is_registered_for_tags(cls):
     compare.add(cls)
 
     return len(compare & _model_repository) > 0
-
-
-@receiver(pre_save)
-def pre_save_entity(sender, instance, **kwargs):
-    # pylint: disable=protected-access
-    # pylint: disable=unused-argument
-    if isinstance(instance, TagsModel):
-        assert is_registered_for_tags(instance.__class__), \
-            "Register the base TagsModel model using register_model_for_tags at the app's ready method."
-        assert '_tag_summary' in [f.name for f in instance._meta.fields], "Provide a _tag_summary ArrayField"
-        instance._tag_summary = EntityTag.summary(instance.id)
-        instance._category_summary = [t for t in instance.category_tags_index]
-
-
-@receiver(post_delete)
-def post_delete_entity(sender, instance, **kwargs):
-    # pylint: disable=unused-argument
-    if isinstance(instance, TagsModel):
-        EntityTag.objects.filter(entity_id=instance.id).delete()

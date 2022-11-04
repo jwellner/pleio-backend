@@ -76,6 +76,7 @@ def resolve_edit_blog(_, info, input):
     shared.resolve_update_suggested_items(entity, clean_input)
     shared.update_is_recommended(entity, user, clean_input)
     shared.update_is_featured(entity, user, clean_input)
+    shared.update_updated_at(entity)
 
     # only admins can edit these fields
     if user.has_role(USER_ROLES.ADMIN):

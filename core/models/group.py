@@ -6,8 +6,6 @@ from django.contrib.postgres.fields import ArrayField
 from django.core.exceptions import ObjectDoesNotExist, ValidationError
 from django.db import models
 from django.db.models import Q
-from django.db.models.signals import pre_save
-from django.dispatch import receiver
 from django.utils.text import slugify
 from django.utils import timezone
 from core.lib import ACCESS_TYPE
@@ -166,6 +164,32 @@ class Group(TagsModel, FeaturedCoverMixin, AttachmentMixin):
             member.save()
             return True
         return False
+
+    def save(self, *args, **kwargs):
+        self.update_entity_access()
+        super(Group, self).save(*args, **kwargs)
+
+    def update_entity_access(self):
+        """
+        Update Entity read_access when group is set to 'Closed'
+        """
+        if self.is_closed:
+            # to prevent cyclic import
+            Entity = apps.get_model('core', 'Entity')
+
+            filters = Q()
+            filters.add(Q(group__id=self.id), Q.AND)
+            filters.add(Q(read_access__overlap=list([ACCESS_TYPE.public, ACCESS_TYPE.logged_in])), Q.AND)
+
+            entities = Entity.objects.filter(filters)
+            for entity in entities:
+                if ACCESS_TYPE.public in entity.read_access:
+                    entity.read_access.remove(ACCESS_TYPE.public)
+                if ACCESS_TYPE.logged_in in entity.read_access:
+                    entity.read_access.remove(ACCESS_TYPE.logged_in)
+                if not ACCESS_TYPE.group.format(self.id) in entity.read_access:
+                    entity.read_access.append(ACCESS_TYPE.group.format(self.id))
+                entity.save()
 
     @property
     def guid(self):
@@ -332,31 +356,6 @@ class GroupProfileFieldSetting(models.Model):
         # pylint: disable=arguments-differ
         self.full_clean()
         super(GroupProfileFieldSetting, self).save(*args, **kwargs)
-
-
-@receiver([pre_save], sender=Group)
-def update_entity_access(sender, instance, **kwargs):
-    # pylint: disable=unused-argument
-    """
-    Update Entity read_access when group is set to 'Closed'
-    """
-    if instance.is_closed:
-        # to prevent cyclic import
-        Entity = apps.get_model('core', 'Entity')
-
-        filters = Q()
-        filters.add(Q(group__id=instance.id), Q.AND)
-        filters.add(Q(read_access__overlap=list([ACCESS_TYPE.public, ACCESS_TYPE.logged_in])), Q.AND)
-
-        entities = Entity.objects.filter(filters)
-        for entity in entities:
-            if ACCESS_TYPE.public in entity.read_access:
-                entity.read_access.remove(ACCESS_TYPE.public)
-            if ACCESS_TYPE.logged_in in entity.read_access:
-                entity.read_access.remove(ACCESS_TYPE.logged_in)
-            if not ACCESS_TYPE.group.format(instance.id) in entity.read_access:
-                entity.read_access.append(ACCESS_TYPE.group.format(instance.id))
-            entity.save()
 
 
 auditlog.register(Group)

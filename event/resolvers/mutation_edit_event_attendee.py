@@ -1,5 +1,7 @@
 from graphql import GraphQLError
 from django.core.exceptions import ObjectDoesNotExist
+from django.utils import timezone
+
 from core.constances import ALREADY_CHECKED_IN, COULD_NOT_FIND, NOT_LOGGED_IN, COULD_NOT_SAVE
 from core.lib import clean_graphql_input
 from core.resolvers import shared
@@ -35,6 +37,7 @@ def resolve_edit_event_attendee(_, info, input):
         else:
             raise GraphQLError(ALREADY_CHECKED_IN)    
 
+    attendee.updated_at = timezone.now()
     attendee.save()
 
     return {

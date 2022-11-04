@@ -2,6 +2,7 @@ from graphql import GraphQLError
 from django.core.exceptions import ObjectDoesNotExist
 from core.constances import NOT_LOGGED_IN, COULD_NOT_SAVE
 from core.models import Entity, Group
+from file.models import FileFolder
 from core.resolvers.mutation_delete_comment import resolve_delete_comment
 from core.utils.cleanup import schedule_cleanup_group_content_featured_images
 
@@ -35,6 +36,9 @@ def resolve_delete_entity(_, info, input):
 
     if isinstance(entity, Group):
         schedule_cleanup_group_content_featured_images(entity)
+
+    if isinstance(entity, FileFolder):
+        entity.update_updated_at() # update parent folder dates
 
     entity.delete()
 

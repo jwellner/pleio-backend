@@ -1,6 +1,7 @@
 import logging
 
 from django.core.exceptions import ObjectDoesNotExist
+from django.utils import timezone
 from elasticsearch_dsl import Search
 from graphql import GraphQLError
 
@@ -297,6 +298,8 @@ def resolve_update_suggested_items(entity, clean_input):
     if 'suggestedItems' in clean_input:
         entity.suggested_items = clean_input.get("suggestedItems")
 
+def update_updated_at(entity):
+    entity.updated_at = timezone.now()
 
 def update_publication_dates(entity, clean_input):
     if 'timePublished' in clean_input:

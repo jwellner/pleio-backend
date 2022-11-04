@@ -1,7 +1,6 @@
 import os
 import clamd
 import logging
-import signal_disabler
 
 from auditlog.registry import auditlog
 from django.urls import reverse
@@ -200,7 +199,6 @@ class FileFolder(Entity, ModelWithFile, ResizedImageMixin, AttachmentMixin):
 
     def save(self, *args, **kwargs):
         self.update_metadata()
-        self.update_parent_timestamps()
         super(FileFolder, self).save(*args, **kwargs)
         if not is_upload_complete(self):
             from file.tasks import post_process_file_attributes
@@ -213,17 +211,18 @@ class FileFolder(Entity, ModelWithFile, ResizedImageMixin, AttachmentMixin):
     def update_metadata(self):
         self.read_access_weight = get_read_access_weight(self)
         self.write_access_weight = get_write_access_weight(self)
-
         if self.upload:
             try:
                 if not self.title:
-                    self.title = self.upload.file.name
+                    self.title = get_basename(self.upload.name)
                 self.mime_type = get_mimetype(self.upload.path)
                 self.size = self.upload.size
             except FileNotFoundError:
                 pass
 
-    def update_parent_timestamps(self):
+    def update_updated_at(self):
+        """ Needs to be executed before save so we can compare if the File or Folder moved to a new parent and also update those dates"""
+        self.updated_at = timezone.now()
         set_parent_folders_updated_at(self)
 
         try:
@@ -284,9 +283,8 @@ def set_parent_folders_updated_at(instance):
     if instance == instance.parent:
         return
     if instance.parent and instance.parent.type == FileFolder.Types.FOLDER:
-        with signal_disabler.disable():
-            instance.parent.updated_at = timezone.now()
-            instance.parent.save()
+        instance.parent.updated_at = timezone.now()
+        instance.parent.save()
         set_parent_folders_updated_at(instance.parent)
 
 

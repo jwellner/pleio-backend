@@ -35,7 +35,7 @@ def resolve_has_children(obj, info):
 def resolve_children(obj, info):
     # pylint: disable=unused-argument
     """
-    Children fields published and isArchived are kept in sync with the parent event, see signals in event/models.py
+    Children fields published and isArchived are kept in sync with the parent event, see save in event/models.py
     """
     if obj.status_published == ENTITY_STATUS.PUBLISHED:
         qs = obj.children.visible(info.context["request"].user)

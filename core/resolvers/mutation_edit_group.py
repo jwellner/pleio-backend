@@ -48,7 +48,6 @@ def resolve_edit_group(_, info, input):
     shared.resolve_update_rich_description(group, clean_input)
     shared.resolve_update_tags(group, clean_input)
 
-
     if 'introduction' in clean_input:
         group.introduction = clean_input.get("introduction")
     if 'isIntroductionPublic' in clean_input:
@@ -119,6 +118,8 @@ def resolve_edit_group(_, info, input):
         # disable other
         group.profile_field_settings.exclude(
             profile_field__id__in=clean_input.get("requiredProfileFieldGuids")).update(is_required=False)
+
+    shared.update_updated_at(group)
 
     group.save()
 

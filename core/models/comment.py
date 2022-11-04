@@ -7,6 +7,7 @@ from django.utils import timezone
 from .mixin import VoteMixin, CommentMixin
 from .rich_fields import MentionMixin, AttachmentMixin
 from core.constances import USER_ROLES
+from core.lib import get_model_name, tenant_schema
 
 
 class CommentManager(models.Manager):
@@ -38,6 +39,65 @@ class Comment(VoteMixin, MentionMixin, AttachmentMixin, CommentMixin):
     object_id = models.UUIDField(default=uuid.uuid4)
     container = GenericForeignKey('content_type', 'object_id')
 
+    @property
+    def guid(self):
+        return str(self.id)
+
+    @property
+    def url(self):
+        if self.container and hasattr(self.container, 'url'):
+            return self.container.url
+        return False
+
+    @property
+    def rich_fields(self):
+        return [self.rich_description]
+
+    @property
+    def group(self):
+        if self.container and hasattr(self.container, 'group'):
+            return self.container.group
+
+        return None
+
+    @property
+    def type_to_string(self):
+        return 'comment'
+
+    @property
+    def title(self):
+        if self.container and hasattr(self.container, 'title'):
+            return self.container.title
+
+        return ''
+
+    def __str__(self):
+        return f"Comment[{self.guid}]"
+
+    def save(self, *args, **kwargs):
+        created = self._state.adding
+        super(Comment, self).save(*args, **kwargs)
+        if created:
+            self.create_notifications()
+
+    def create_notifications(self):
+        """ if comment is added to content, create a notification for all users following the content """
+        from core.tasks import create_notification
+
+        if self.owner:
+            sender = self.owner.id
+        else:
+            return
+
+        container = self.get_root_container()
+        if container.update_last_action(self.created_at):
+            container.save()
+
+        if hasattr(container, 'add_follow'):
+            container.add_follow(self.owner)
+
+        create_notification.delay(tenant_schema(), 'commented', get_model_name(container), container.id, sender)
+
     def can_write(self, user):
         if not user.is_authenticated:
             return False
@@ -61,41 +121,6 @@ class Comment(VoteMixin, MentionMixin, AttachmentMixin, CommentMixin):
 
     def index_instance(self):
         return self.get_root_container()
-
-    @property
-    def guid(self):
-        return str(self.id)
-
-    @property
-    def url(self):
-        if self.container and hasattr(self.container, 'url'):
-            return self.container.url
-        return False
-
-    def __str__(self):
-        return f"Comment[{self.guid}]"
-
-    @property
-    def rich_fields(self):
-        return [self.rich_description]
-
-    @property
-    def group(self):
-        if self.container and hasattr(self.container, 'group'):
-            return self.container.group
-
-        return None
-
-    @property
-    def type_to_string(self):
-        return 'comment'
-
-    @property
-    def title(self):
-        if self.container and hasattr(self.container, 'title'):
-            return self.container.title
-
-        return ''
 
 
 class CommentRequest(models.Model):

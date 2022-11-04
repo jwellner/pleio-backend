@@ -1,12 +1,15 @@
 from django.contrib.auth.models import AnonymousUser
 from django.utils import timezone
 from mixer.backend.django import mixer
+from django.db import connection
+from unittest import mock
 
 from blog.models import Blog
 from core.constances import ACCESS_TYPE
 from core.models import Comment
 from core.tests.helpers import PleioTenantTestCase
 from user.models import User
+
 
 class CommentTestCase(PleioTenantTestCase):
 
@@ -366,3 +369,13 @@ class CommentTestCase(PleioTenantTestCase):
         result = self.graphql_client.post(self.mutation2, variables)
 
         self.assertTrue(result["data"]["deleteEntity"]["success"])
+
+
+    @mock.patch('core.tasks.create_notification.delay')
+    def test_notification_send(self, mocked_create_notification):
+        self.comment1 = Comment.objects.create(
+            owner=self.authenticatedUser,
+            container=self.blogPublic
+        )
+
+        mocked_create_notification.assert_called_once_with(connection.schema_name, 'commented', 'blog.blog', self.blogPublic.id, self.comment1.owner.id)
