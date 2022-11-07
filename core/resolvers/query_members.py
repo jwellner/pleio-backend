@@ -1,102 +1,63 @@
-from core.lib import get_acl
-from core.models import Group, GroupMembership
+from core.models import Group, GroupMembership, UserProfileField
 from core.constances import NOT_LOGGED_IN, COULD_NOT_FIND
-from elasticsearch_dsl import Search
-from elasticsearch_dsl import Q
+from django.db.models import Q
 from graphql import GraphQLError
-from django_tenants.utils import parse_tenant_config_path
 
 from core.resolvers import shared
 
 
 def resolve_members(_, info, groupGuid, q="", filters=None, offset=0, limit=20):
-    # pylint: disable=unused-argument
-    # pylint: disable=too-many-locals
-    # pylint: disable=too-many-arguments
-    # pylint: disable=too-many-branches
     try:
         user = info.context["request"].user
-        tenant_name = parse_tenant_config_path("")
 
         if not user.is_authenticated:
             raise GraphQLError(NOT_LOGGED_IN)
 
         group = Group.objects.get(id=groupGuid)
-
         shared.assert_group_member(user, group)
 
-        query = Search(index='user').filter(
-            'terms', read_access=list(get_acl(user))
-        ).filter(
-            'term', tenant_name=tenant_name
-        ).filter(
-            'term', is_active=True
-        ).filter(
-            Q('nested', path='memberships', query=Q('bool', must=[
-                Q('match', memberships__group_id=group.guid)
-            ], must_not=[
-                Q('match', memberships__type="pending")
-            ]))
-        )
+        query = GroupMembership.objects.filter(group_id=groupGuid).exclude(type='pending')
 
         if q:
-            query = query.filter(
-                Q('simple_query_string', query=q, fields=['name^3', 'email']) |
-                Q('nested', path='user_profile_fields', query=Q('bool', must=[
-                    Q('match', user_profile_fields__value=q),
-                    Q('terms', user_profile_fields__read_access=list(get_acl(user)))
-                ]))
-            )
+            user_matches = Q(user__name__icontains=q) | Q(user__email__icontains=q)
+
+            fields_in_overview = list_fields_in_overview(group)
+            query_profile = UserProfileField.objects.visible(user).filter(
+                profile_field__key__in=[f['key'] for f in fields_in_overview],
+                value__icontains=q).values_list('user_profile__user_id', flat=True)
+            profile_field_matches = Q(user_id__in=query_profile)
+
+            # pylint: disable=unsupported-binary-operation
+            query = query.filter(user_matches | profile_field_matches)
 
         if filters:
             for f in filters:
-                query = query.filter(
-                    Q('nested', path='user_profile_fields', query=Q('bool', must=[
-                        Q('match', user_profile_fields__key=f['name']) & (
-                                Q('terms', user_profile_fields__value__raw=f['values']) |
-                                Q('terms', user_profile_fields__value_list=f['values'])
-                        )])
-                      )
-                )
+                values_match: Q = None
+                for value in f['values']:
+                    value_match = Q(value=value)
+                    value_match |= Q(value__startswith=value + ',')
+                    value_match |= Q(value__contains=',' + value + ',')
+                    value_match |= Q(value__endswith=',' + value)
+                    if values_match:
+                        values_match |= value_match
+                    else:
+                        values_match = value_match
+                query = query.filter(user_id__in=UserProfileField.objects.filter(Q(profile_field__key=f['name']) & values_match).values_list('user_profile__user_id', flat=True))
 
         total = query.count()
 
-        # Sort on name is score is equal
-        query = query.sort(
-            {'memberships.admin_weight': {'order': 'asc',
-                                          'nested': {
-                                              'path': 'memberships',
-                                              'filter': {
-                                                  'term': {'memberships.group_id': groupGuid}
-                                              },
-                                          }}},
-            '_score',
-            {'name.raw': {'order': 'asc'}},
-        )
-
-        query = query[offset:offset + limit]
-        response = query.execute()
-
-        ids = []
-        for hit in response:
-            ids.append(hit['id'])
-
-        objects = GroupMembership.objects.filter(user__id__in=ids, group__id=groupGuid)
-
-        # use elasticsearch ordering on objects
-        id_dict = {str(d.user.id): d for d in objects}
-        sorted_objects = [id_dict.get(id) for id in ids if id_dict.get(id)]
-
-        fields_in_overview = []
-
-        for item in group.profile_field_settings.filter(show_field=True):
-            fields_in_overview.append({'key': item.profile_field.key,
-                                       'label': item.profile_field.name})
-
         return {
             'total': total,
-            'edges': sorted_objects,
-            'fieldsInOverview': fields_in_overview
+            'edges': query.order_by('admin_weight', 'user__name')[offset:offset + limit],
+            'fieldsInOverview': list_fields_in_overview(group)
         }
     except Group.DoesNotExist:
         raise GraphQLError(COULD_NOT_FIND)
+
+
+def list_fields_in_overview(group):
+    fields_in_overview = []
+    for item in group.profile_field_settings.filter(show_field=True):
+        fields_in_overview.append({'key': item.profile_field.key,
+                                   'label': item.profile_field.name})
+    return fields_in_overview

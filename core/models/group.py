@@ -249,6 +249,10 @@ class GroupMembership(models.Model):
         choices=NOTIFICATION_MODES,
         default='overview'
     )
+    admin_weight = models.IntegerField(
+        default=100,
+        null=False,
+    )
 
     def __str__(self):
         return "GroupMembership[{}:{}:{}]".format(
@@ -257,8 +261,11 @@ class GroupMembership(models.Model):
             self.group.name
         )
 
-    @property
-    def admin_weight(self):
+    def save(self, *args, **kwargs):
+        self.admin_weight = self.get_admin_weight()
+        super().save(*args, **kwargs)
+
+    def get_admin_weight(self):
         """
          Weight of the membership on administration pages. Owner on top.
         """
