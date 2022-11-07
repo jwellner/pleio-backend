@@ -20,7 +20,7 @@ def fetch_avatar(user: User):
             'x-oidc-client-secret': settings.OIDC_RP_CLIENT_SECRET,
         }, timeout=30)
 
-        assert response.ok, response.reason
+        assert response.ok, f"{response.status_code}: {response.reason}"
 
         return response.json()
 

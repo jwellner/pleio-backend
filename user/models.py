@@ -1,4 +1,6 @@
+import os.path
 import uuid
+
 
 from core import config
 from core.constances import USER_ROLES
@@ -200,8 +202,11 @@ class User(AbstractBaseUser):
     @property
     def icon(self):
         if self.profile.picture_file:
-            return self.profile.picture_file.thumbnail_url
-        return self.picture
+            if os.path.exists(self.profile.picture_path()):
+                return self.profile.picture_file.thumbnail_url
+            # currently not available
+            return None
+        return self.picture or None
 
     def search_read_access(self):
         return ['logged_in']

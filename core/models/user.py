@@ -87,6 +87,12 @@ class UserProfile(models.Model):
         """ Return the object that will put changes to me in the search index."""
         return self.user
 
+    def picture_path(self):
+        try:
+            return self.picture_file.upload.path
+        except Exception:
+            pass
+
 
 class ProfileFieldValidator(models.Model):
     """

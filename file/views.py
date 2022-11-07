@@ -168,7 +168,6 @@ def thumbnail(request, file_id=None):
 
     try:
         entity = FileFolder.objects.visible(user).get(id=file_id)
-
     except ObjectDoesNotExist:
         raise Http404("File not found")
 
@@ -176,10 +175,15 @@ def thumbnail(request, file_id=None):
         raise Http404("File not found")
 
     if not entity.thumbnail:
-        generate_thumbnail(entity, 153)
+        try:
+            generate_thumbnail(entity, 153)
+        except FileNotFoundError:
+            pass
 
     if entity.thumbnail:
-        response = FileResponse(entity.thumbnail.open())
-        return response
+        try:
+            return FileResponse(entity.thumbnail.open())
+        except FileNotFoundError:
+            pass
 
     raise Http404("File not found")
