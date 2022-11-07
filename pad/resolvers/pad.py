@@ -27,6 +27,12 @@ def resolve_state(obj, info):
     return obj.pad_state
 
 
+@pad.field("downloadAsOptions")
+def resolve_download_as_options(obj, info):
+    # pylint: disable=unused-argument
+    return obj.download_as_options
+
+
 pad.set_field("guid", shared.resolve_entity_guid)
 pad.set_field("status", shared.resolve_entity_status)
 pad.set_field("title", shared.resolve_entity_title)

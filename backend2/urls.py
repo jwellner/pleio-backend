@@ -56,6 +56,7 @@ urlpatterns = [
     path('custom_agreement/<int:custom_agreement_id>', core_views.site_custom_agreement, name="custom_agreement"),
 
     path('bulk_download', file_views.bulk_download, name='bulk_download'),
+    path('download_rich_description_as/<uuid:entity_id>/<str:file_type>', core_views.download_rich_description_as, name='download_rich_description_as'),
 
     path('events/view/guest-list', event_views.check_in, name='check_in'),
 
