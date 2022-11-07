@@ -8,6 +8,7 @@ from django.conf import settings
 from django.db import models
 from django.utils import timezone
 from enum import Enum
+from core.constances import DOWNLOAD_AS_OPTIONS
 from core.lib import generate_object_filename, get_mimetype, tenant_schema, get_basename, get_filesize
 from core.models import Entity
 from core.models.entity import EntityManager
@@ -196,6 +197,15 @@ class FileFolder(Entity, ModelWithFile, ResizedImageMixin, AttachmentMixin):
     @property
     def rich_fields(self):
         return [self.rich_description]
+
+    @property
+    def download_as_options(self):
+        if self.type != self.Types.PAD:
+            return None
+        download_as_options = []
+        for option in DOWNLOAD_AS_OPTIONS:
+            download_as_options.append({"type": option, "url": "/download_rich_description_as/{}/{}".format(self.guid, option) })
+        return download_as_options
 
     def save(self, *args, **kwargs):
         self.update_metadata()

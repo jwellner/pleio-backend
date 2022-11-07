@@ -1241,6 +1241,7 @@ type Pad implements Entity & FileFolder {
     isPinned: Boolean!
     size: Int
     state: String
+    downloadAsOptions: [DownloadAsOption]
 }
 
 input FilterInput {
@@ -1395,6 +1396,11 @@ type joinGroupPayload {
 type KeyValueItem {
     key: String!
     value: String!
+}
+
+type DownloadAsOption {
+  type: String!
+  url: String!
 }
 
 input leaveGroupInput {

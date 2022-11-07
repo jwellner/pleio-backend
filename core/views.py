@@ -1,8 +1,11 @@
 import csv
+import io
 import json
 import logging
+import pypandoc
 import zipfile
 from datetime import datetime
+from bs4 import BeautifulSoup
 
 import qrcode
 from django.conf import settings
@@ -35,6 +38,7 @@ from core.models import (Attachment, Comment, CommentRequest, Entity, Group,
                          ProfileField, SiteAccessRequest, UserProfileField)
 from core.models.agreement import CustomAgreement
 from core.resolvers.query_site import get_settings
+from core.utils.convert import tiptap_to_html
 from core.utils.export import stream
 from core.utils.mail import EmailSettingsTokenizer, UnsubscribeTokenizer
 from event.lib import get_url
@@ -663,3 +667,57 @@ def site_custom_agreement(request, custom_agreement_id):
 
     except ObjectDoesNotExist:
         raise Http404("File not found")
+
+
+def download_rich_description_as(request, entity_id=None, file_type=None):
+
+    def replace_html_img_src(html, user, file_type):
+        def get_img_src(path, user):
+            if file_type in ['odt']:
+                try:
+                    attachment_id = path.split('/')[2]
+                    attachment = Attachment.objects.get(id=attachment_id)
+                    if attachment.can_read(user):
+                        path = attachment.upload.path
+                except Exception:
+                    pass
+            elif file_type == 'html':
+                path = get_base_url() + path
+            return path
+
+        soup = BeautifulSoup(html, "html.parser")
+        for img in soup.findAll('img'):
+            img['src'] = get_img_src(img['src'], user)
+        return str(soup)
+
+
+    user = request.user
+    entity = None
+
+    if file_type not in ['odt', 'html']:
+        raise Http404("File type not supported, choose from odt or html")
+
+    if entity_id:
+        try:
+            entity = Entity.objects.visible(user).select_subclasses().get(id=entity_id)
+        except ObjectDoesNotExist:
+            pass
+
+    if not entity:
+        raise Http404("Entity not found")
+
+    if not entity.rich_description:
+        raise Http404("Entity rich description not found")
+
+    filename = 'file_contents' 
+    if entity.title:
+        filename = entity.title
+
+    temp_file_path = get_tmp_file_path(user, '.{}'.format(file_type))
+    html = tiptap_to_html(entity.rich_description)
+    html = replace_html_img_src(html, user, file_type)
+
+    pypandoc.convert_text(html, file_type, format='html', outputfile=temp_file_path)
+    response = FileResponse(open(temp_file_path, 'rb'))
+    response['Content-Disposition'] = "attachment; filename=" + '{}.{}'.format(filename, file_type)
+    return response
