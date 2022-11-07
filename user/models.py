@@ -64,7 +64,14 @@ class UserManager(BaseUserManager):
             is_active=True
         )
 
-    def get_filtered_users(self, q=None, role=None, is_delete_requested=None, is_banned=False, last_online_before=None, member_since=None):
+    def get_filtered_users(self,
+                           q=None,
+                           role=None,
+                           is_delete_requested=None,
+                           is_banned=False,
+                           last_online_before=None,
+                           member_since=None,
+                           include_superadmin=True):
         # pylint: disable=too-many-arguments
         # pylint: disable=unsupported-binary-operation
 
@@ -94,6 +101,9 @@ class UserManager(BaseUserManager):
 
         if member_since is not None:
             users = users.filter(created_at__gte=member_since)
+
+        if not include_superadmin:
+            users = users.filter(is_superadmin=False)
 
         return users
 
@@ -318,12 +328,12 @@ class User(AbstractBaseUser):
     def welcome_notification_on_create(self, created=False):
         if created and not is_schema_public():
             notify.send(self, recipient=self, verb='welcome', action_object=self)
-    
+
     def auto_join_groups_on_create(self, created=False):
         if created and not is_schema_public():
             for group in Group.objects.filter(is_auto_membership_enabled=True):
                 group.join(self)
-    
+
     def add_user_profile_on_create(self, created=False):
         if created and not is_schema_public():
             UserProfile.objects.get_or_create(user=self)
@@ -339,3 +349,8 @@ class User(AbstractBaseUser):
         self.external_id = claims.get('sub')
         self.is_superadmin = bool(claims.get('is_admin'))
         return self
+
+    def undo_ban_if_superadmin(self):
+        if self.is_superadmin:
+            self.is_active = True
+

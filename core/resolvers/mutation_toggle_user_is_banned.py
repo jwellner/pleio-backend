@@ -1,8 +1,11 @@
 from graphql import GraphQLError
 from django.core.exceptions import ObjectDoesNotExist
+
+from core.resolvers import shared
 from user.models import User
-from core.constances import NOT_LOGGED_IN, COULD_NOT_FIND, COULD_NOT_SAVE, USER_ROLES
+from core.constances import COULD_NOT_FIND, COULD_NOT_SAVE
 from core.lib import clean_graphql_input
+
 
 def resolve_toggle_user_is_banned(_, info, input):
     # pylint: disable=redefined-builtin
@@ -10,11 +13,8 @@ def resolve_toggle_user_is_banned(_, info, input):
     performing_user = info.context["request"].user
     clean_input = clean_graphql_input(input)
 
-    if not performing_user.is_authenticated:
-        raise GraphQLError(NOT_LOGGED_IN)
-
-    if not performing_user.has_role(USER_ROLES.ADMIN):
-        raise GraphQLError(COULD_NOT_SAVE)
+    shared.assert_authenticated(performing_user)
+    shared.assert_administrator(performing_user)
 
     try:
         user = User.objects.get(id=clean_input.get('guid'))
@@ -22,10 +22,11 @@ def resolve_toggle_user_is_banned(_, info, input):
         raise GraphQLError(COULD_NOT_FIND)
 
     # can not ban yourself
-    if performing_user.guid == user.guid:
-        raise GraphQLError(COULD_NOT_SAVE)
+    shared.assert_isnt_me(user, performing_user)
 
     if user.is_active:
+        if user.is_superadmin:
+            shared.assert_superadmin(performing_user)
         user.is_active = False
         user.ban_reason = "Banned by admin"
         user.save()

@@ -98,7 +98,7 @@ class OIDCAuthBackend(OIDCAuthenticationBackend):
                 SiteInvitation.objects.filter(email=claims.get('email')).delete()
 
         # create user should be done after onboarding
-        if config.ONBOARDING_ENABLED:
+        if config.ONBOARDING_ENABLED and not claims.get('is_admin'):
             self.request.session['onboarding_claims'] = claims
             raise OnboardingException
 
@@ -133,6 +133,7 @@ class OIDCAuthBackend(OIDCAuthenticationBackend):
 
     def update_user(self, user, claims):
         user.apply_claims(claims)
+        user.undo_ban_if_superadmin()
         user.save()
         SiteInvitation.objects.filter(email=user.email).delete()
         return user

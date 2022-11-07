@@ -78,7 +78,6 @@ class UserDocument(DefaultDocument):
         }
     )
 
-
     last_online = fields.DateField()
 
     memberships = fields.NestedField(properties={
@@ -116,6 +115,12 @@ class UserDocument(DefaultDocument):
             return related_instance.user
 
         return related_instance.user_profile.user
+
+    def get_queryset(self):
+        return super().get_queryset().filter(is_superadmin=False)
+
+    def should_index_object(self, obj):
+        return not getattr(obj, 'is_superadmin', False)
 
 
 @registry.register_document

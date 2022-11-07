@@ -243,6 +243,7 @@ def resolve_group_membership_requests(obj, info):
 def resolve_group_member_count(group, info):
     # pylint: disable=unused-argument
     return group.members.filter(type__in=['admin', 'owner', 'member'],
+                                user__is_superadmin=False,
                                 user__is_active=True).count()
 
 
@@ -259,6 +260,7 @@ def resolve_group_members(group, info, q=None, offset=0, limit=5, inSubgroupId=N
         }
 
     members = group.members.filter(type__in=['admin', 'owner', 'member'],
+                                   user__is_superadmin=False,
                                    user__is_active=True)
 
     if inSubgroupId:

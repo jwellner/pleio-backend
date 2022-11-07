@@ -286,6 +286,6 @@ class AddGroupCase(PleioTenantTestCase):
             }
         }
 
-        with self.assertGraphQlError("invalid_profile_field_guid"):
+        with self.assertGraphQlError("Long text fields are not allowed to display on the member page."):
             self.graphql_client.force_login(self.admin)
             self.graphql_client.post(mutation, variables)
