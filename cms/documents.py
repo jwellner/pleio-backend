@@ -36,8 +36,10 @@ class CmsDocument(DefaultDocument):
         return [x.lower() for x in instance.tags]
 
     def get_queryset(self):
-        qs = super(CmsDocument, self).get_queryset()
-        return qs.filter(page_type='text')
+        return super().get_queryset().filter(page_type='text')
+
+    def should_index_object(self, obj):
+        return obj.page_type == 'text'
 
     class Index:
         name = 'page'

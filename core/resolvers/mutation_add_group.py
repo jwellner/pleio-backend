@@ -90,8 +90,10 @@ def _update_profile_field_show_field(group, guids):
             )
             setting.show_field = True
             setting.save()
-        except (ProfileField.DoesNotExist, ValidationError):
+        except ProfileField.DoesNotExist:
             raise GraphQLError(INVALID_PROFILE_FIELD_GUID)
+        except ValidationError as e:
+            raise GraphQLError(', '.join(e.messages))
 
 
 def _update_profile_field_required(group, guids):
@@ -104,5 +106,7 @@ def _update_profile_field_required(group, guids):
             )
             setting.is_required = True
             setting.save()
-        except (ProfileField.DoesNotExist, ValidationError):
+        except ProfileField.DoesNotExist:
             raise GraphQLError(INVALID_PROFILE_FIELD_GUID)
+        except ValidationError as e:
+            raise GraphQLError(', '.join(e.messages))

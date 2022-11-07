@@ -33,6 +33,17 @@ class TestAuthRequiresApprovalTestCase(BaseOIDCAuthBackendTestCase):
 
         self.assertTrue(required)
 
+    def test_requires_approval_not_required_for_superadmin(self):
+        claims = {
+            'is_admin': True,
+            'email': 'email@pleio.nl',
+            'sso': [],
+        }
+
+        required = self.backend.requires_approval(claims)
+
+        self.assertFalse(required)
+
     def test_requires_approval_open_registration(self):
         config.ALLOW_REGISTRATION = True
         claims = {

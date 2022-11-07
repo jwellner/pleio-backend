@@ -32,6 +32,8 @@ def profile_updated_signal(schema_name, origin_token, retry=3, retry_delay=60):
             user.email = data['email']
             user.picture = data['avatarUrl']
             user.is_superadmin = data['isAdmin']
+            if 'is_active' in data:
+                user.is_active = data['is_active']
             user.save()
 
         except (AssertionError, RequestException) as e:

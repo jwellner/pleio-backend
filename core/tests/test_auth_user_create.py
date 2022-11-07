@@ -99,3 +99,12 @@ class TestAuthUserCreateTestCase(BaseOIDCAuthBackendTestCase):
             self.backend.create_user(self.claims)
 
         self.assertDictEqual(self.request.session['onboarding_claims'], self.claims)
+
+    @override_local_config(ONBOARDING_ENABLED=True)
+    @mock.patch("core.auth.OIDCAuthBackend.requires_approval")
+    def test_with_onboarding_superadmin(self, mocked_requires_approval):
+        mocked_requires_approval.return_value = False
+        self.claims['is_admin'] = True
+
+        result = self.backend.create_user(self.claims)
+        self.assertEqual(result.email, self.claims['email'])

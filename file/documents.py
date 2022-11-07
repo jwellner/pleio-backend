@@ -80,8 +80,7 @@ class FileDocument(DefaultDocument):
         return super(FileDocument, self).update(thing, refresh, action, **kwargs)
 
     def get_queryset(self):
-        queryset = super(FileDocument, self).get_queryset()
-        return queryset.exclude(group=None)
+        return super().get_queryset().exclude(group=None)
 
     def should_index_object(self, obj):
         return bool(obj.group)
