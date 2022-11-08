@@ -32,6 +32,8 @@ services:
     image: postgres:12
     environment:
       POSTGRES_PASSWORD: postgres
+    volumes:
+      - db_data:/var/lib/postgresql/data/
 
   elasticsearch:
     image: docker.elastic.co/elasticsearch/elasticsearch:7.16.2
@@ -40,6 +42,10 @@ services:
       interval: 20s
       retries: 10
       test: curl -s http://localhost:9200/_cluster/health | grep -vq '"status":"red"'
+    volumes:
+      - es_data:/usr/share/elasticsearch/data
 
 volumes:
   frontend-build:
+  db_data:
+  es_data:
