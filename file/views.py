@@ -50,7 +50,7 @@ def download(request, file_id=None, file_name=None):
         response['Content-Disposition'] = f"{attachment_or_inline}; filename=%s" % get_download_filename(entity)
         return response
 
-    except ObjectDoesNotExist:
+    except (ObjectDoesNotExist, FileNotFoundError):
         raise Http404("File not found")
 
 
