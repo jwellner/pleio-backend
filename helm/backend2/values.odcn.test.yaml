@@ -20,8 +20,8 @@ background:
     replicaCount: 2
     resources:
       limits:
-        cpu: 1000m
-        memory: 1024Mi
+        cpu: 1500m
+        memory: 2048Mi
       requests:
         cpu: 500m
         memory: 1024Mi
