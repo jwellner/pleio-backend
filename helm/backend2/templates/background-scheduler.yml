@@ -42,6 +42,8 @@ spec:
                 name: {{ include "backend2.name" . }}
             - secretRef:
                 name: {{ include "backend2.secretsName" . }}
+          resources:
+            {{- toYaml .Values.background.scheduler.resources | nindent 12 }}
       volumes:
         - name: pleio-data
           {{- if eq .Values.storage.type "hostpath" }}
