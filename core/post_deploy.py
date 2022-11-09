@@ -1,14 +1,19 @@
+import csv
 import json
+import os
 
+import requests
 from celery.utils.log import get_task_logger
+from django.conf import settings
 from django.db.models import Prefetch, F
 from django.utils.translation import gettext, activate
 from post_deploy import post_deploy_action
 
+from concierge.api import fetch_avatar
 from core import config
 from core.constances import ACCESS_TYPE
 from core.elasticsearch import schedule_index_document
-from core.lib import tenant_schema, is_schema_public
+from core.lib import tenant_schema, is_schema_public, get_full_url
 from core.models import Group, Entity, Revision, Widget
 from core.models.attachment import Attachment
 from core.tasks import strip_exif_from_file
@@ -139,12 +144,14 @@ def migrate_entities():
                           published__gt=F('last_action')).update(last_action=F('published'))
 
 
-@post_deploy_action(auto=False)
+# no more exectute this method
+# @post_deploy_action(auto=False)
 def strip_article_images_of_exif_data():
     # pylint: disable=no-value-for-parameter
     if is_schema_public():
         return
 
+    # pylint: disable=unreachable
     for attachment_guid in Attachment.objects.all().values_list('id', flat=True):
         strip_exif_from_file.delay(schema=tenant_schema(),
                                    attachment_guid=str(attachment_guid))
@@ -154,7 +161,8 @@ def strip_article_images_of_exif_data():
             strip_exif_from_file(schema=tenant_schema(), file_folder_guid=entity.featured_image.guid)
 
 
-@post_deploy_action
+# no more exectute this method
+#@post_deploy_action
 def migrate_categories():
     if is_schema_public():
         return
@@ -170,7 +178,8 @@ def migrate_categories():
         raise
 
 
-@post_deploy_action
+# no more exectute this method
+#@post_deploy_action
 def migrate_widgets_for_match_strategy():
     if is_schema_public():
         return
@@ -187,3 +196,85 @@ def migrate_widgets_for_match_strategy():
             'value': 'all'
         })
         widget.save()
+
+
+@post_deploy_action
+def add_admin_weight_to_group_membership_objects():
+    if is_schema_public():
+        return
+
+    from core.models import GroupMembership
+    for membership in GroupMembership.objects.all():
+        membership.save()
+
+
+@post_deploy_action(auto=False)
+def verify_user_account_avatars():
+    if is_schema_public():
+        return
+
+    for user in User.objects.filter(is_active=True):
+        try:
+            if user.picture:
+                response = requests.get(user.picture, timeout=10)
+                if response.status_code == 404:
+                    result = fetch_avatar(user)
+                    if result.get('originalAvatarUrl') is None:
+                        user.profile.picture_file = None
+                        user.profile.save()
+                        user.picture = None
+                        user.save()
+                    else:
+                        user.picture = result.get('avatarUrl')
+                        user.save()
+        except Exception as e:
+            logger.error(str(e))
+            logger.error(str(e.__class__))
+
+
+@post_deploy_action
+def write_missing_file_report():
+    if is_schema_public():
+        return
+
+    from file.models import FileFolder
+    report_file = os.path.join(settings.BACKUP_PATH, "missing_file_report_" + tenant_schema()) + '.csv'
+    total = 0
+    files_ok = 0
+    files_err = 0
+    with open(report_file, 'w') as fh:
+        writer = csv.writer(fh, delimiter=';')
+        writer.writerow(['id', 'path', 'url', 'name', 'owner', 'group', 'groupowner', 'groupownermail'])
+        for file in FileFolder.objects.filter(type=FileFolder.Types.FILE, upload__isnull=False):
+            try:
+                if not os.path.exists(file.upload.path):
+                    writer.writerow([
+                        file.guid,
+                        file.upload.path,
+                        get_full_url(file.url),
+                        file.title,
+                        file.owner.name if file.owner else '-',
+                        file.group.name if file.group else '-',
+                        file.group.owner.name if file.group else '-',
+                        file.group.owner.email if file.group else '-',
+                    ])
+                    total += 1
+                else:
+                    files_ok += 1
+            except Exception as e:
+                writer.writerow([
+                    file.guid,
+                    f"Error: {e.__class__} {e}",
+                    file.owner.name if file.owner else '',
+                    file.group.name if file.group else '',
+                    file.group.owner.name if file.group else '',
+                    file.group.owner.email if file.group else '',
+                ])
+                total += 1
+                files_err += 1
+        writer.writerow([f"{total} files can't be found on the disk."])
+        writer.writerow([f"{files_ok} files were just fine."])
+        writer.writerow([f"{files_err} files had errors while checking."])
+
+    if total == 0:
+        os.unlink(report_file)
