@@ -1,7 +1,6 @@
 import csv
 import os
 
-import signal_disabler
 from PIL import Image
 from io import BytesIO
 from django.core.files.base import ContentFile
@@ -144,7 +143,6 @@ class UserCsvRowImporter():
 
 
 @shared_task(bind=True, ignore_result=True)
-@signal_disabler.disable()
 def replace_domain_links(self, schema_name, replace_domain=None):
     # pylint: disable=unused-argument
     # pylint: disable=too-many-locals

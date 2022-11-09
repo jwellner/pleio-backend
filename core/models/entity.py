@@ -8,9 +8,10 @@ from django.db.models import Q
 from django.core.exceptions import ObjectDoesNotExist
 from django.utils import timezone
 from model_utils.managers import InheritanceManager
+from notifications.models import Notification
 
 from core.constances import ENTITY_STATUS, USER_ROLES
-from core.lib import get_acl
+from core.lib import get_acl, datetime_isoformat, get_model_name, tenant_schema
 from core.models.tags import TagsModel
 from core.models.shared import read_access_default, write_access_default
 
@@ -88,6 +89,10 @@ class EntityManager(InheritanceManager):
 
 
 class Entity(TagsModel):
+
+    class Meta:
+        ordering = ['published']
+
     objects = EntityManager()
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
@@ -130,6 +135,66 @@ class Entity(TagsModel):
     is_featured = models.BooleanField(default=False)
     is_recommended = models.BooleanField(default=False)
 
+    @property
+    def guid(self):
+        return str(self.id)
+
+    @property
+    def status_published(self):
+        if self.is_archived:
+            return ENTITY_STATUS.ARCHIVED
+
+        if self.published and self.published < timezone.now():
+            return ENTITY_STATUS.PUBLISHED
+
+        return ENTITY_STATUS.DRAFT
+
+    @property
+    def last_seen(self):
+        try:
+            view_count = EntityViewCount.objects.get(entity_id=self.guid)
+            return view_count.updated_at
+        except ObjectDoesNotExist:
+            return None
+
+    def save(self, *args, **kwargs):
+        created = self._state.adding
+        if not created:
+            self.cleanup_notifications()
+        super(Entity, self).save(*args, **kwargs)
+        if created:
+            self.send_notifications_on_create()
+
+    def cleanup_notifications(self):
+        """ Delete notifications when read_access changed and user can not read entity """
+        if not self.group or not self.id:
+            return
+
+        entity = Entity.objects.get(id=self.id)
+
+        if entity.read_access != self.read_access:
+            for notification in Notification.objects.filter(action_object_object_id=self.id):
+                if not self.can_read(notification.recipient):
+                    notification.delete()
+
+    def send_notifications_on_create(self):
+        """ Adds notification for group members if entity in group is created
+
+        If an entity is created in a group, a notification is added for all group
+        member in this group.
+
+        """
+        from core.models.mixin import NotificationMixin
+        from core.tasks import create_notification
+        if not self.is_archived and issubclass(type(self), NotificationMixin) and self.group:
+            if (not self.published) or (datetime_isoformat(self.published) > datetime_isoformat(timezone.now())):
+                return
+
+            create_notification.delay(tenant_schema(), 'created', get_model_name(self), self.id, self.owner.id)
+        else:
+            self.notifications_created = True
+            self.save()
+
     def has_revisions(self):
         return False
 
@@ -152,20 +217,6 @@ class Entity(TagsModel):
 
         return len(get_acl(user) & set(self.write_access)) > 0
 
-    @property
-    def guid(self):
-        return str(self.id)
-
-    @property
-    def status_published(self):
-        if self.is_archived:
-            return ENTITY_STATUS.ARCHIVED
-
-        if self.published and self.published < timezone.now():
-            return ENTITY_STATUS.PUBLISHED
-
-        return ENTITY_STATUS.DRAFT
-
     def update_last_action(self, new_value):
         if new_value and new_value > self.last_action:
             self.last_action = new_value
@@ -179,17 +230,6 @@ class Entity(TagsModel):
           and after update can be done. @see core.Revision.
         """
         raise NotImplementedError()
-
-    @property
-    def last_seen(self):
-        try:
-            view_count = EntityViewCount.objects.get(entity_id=self.guid)
-            return view_count.updated_at
-        except ObjectDoesNotExist:
-            return None
-
-    class Meta:
-        ordering = ['published']
 
 
 class EntityView(models.Model):

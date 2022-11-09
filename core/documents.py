@@ -30,11 +30,18 @@ custom_analyzer = analyzer(
 
 class DefaultDocument(Document):
     tenant_name = fields.KeywordField()
+    owner_guid = fields.KeywordField()
     container_guid = fields.KeywordField()
 
     def prepare_tenant_name(self, instance):
         # pylint: disable=unused-argument
         return parse_tenant_config_path("")
+
+    def prepare_owner_guid(self, instance):
+        if hasattr(instance, 'owner') and instance.owner:
+            return instance.owner.id
+
+        return ""
 
     def prepare_container_guid(self, instance):
         if hasattr(instance, 'group') and instance.group:
@@ -70,7 +77,6 @@ class UserDocument(DefaultDocument):
             'value_list': fields.ListField(fields.KeywordField(attr="value_list_field_indexing"))
         }
     )
-
 
     last_online = fields.DateField()
 
@@ -109,6 +115,12 @@ class UserDocument(DefaultDocument):
             return related_instance.user
 
         return related_instance.user_profile.user
+
+    def get_queryset(self):
+        return super().get_queryset().filter(is_superadmin=False)
+
+    def should_index_object(self, obj):
+        return not getattr(obj, 'is_superadmin', False)
 
 
 @registry.register_document

@@ -1,5 +1,6 @@
 from graphql import GraphQLError
 from django.core.exceptions import ObjectDoesNotExist
+from django.utils import timezone
 
 from core.mail_builders.group_resend_invitation import schedule_resend_group_invitation_mail
 from core.models import GroupInvitation
@@ -29,6 +30,9 @@ def resolve_resend_group_invitation(_, info, input):
             invitation=invitation,
             sender=user,
         )
+
+        invitation.updated_at = timezone.now()
+        invitation.save()
 
     except Exception:
         # TODO: logging

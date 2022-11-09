@@ -75,6 +75,7 @@ def resolve_edit_status_update(_, info, input):
     shared.resolve_update_rich_description(entity, clean_input)
     shared.resolve_update_tags(entity, clean_input)
     shared.update_publication_dates(entity, clean_input)
+    shared.update_updated_at(entity)
 
     # only admins can edit these fields
     if user.has_role(USER_ROLES.ADMIN):

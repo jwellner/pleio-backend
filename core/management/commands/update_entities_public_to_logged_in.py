@@ -1,5 +1,3 @@
-import signal_disabler
-
 from django.core.management.base import BaseCommand
 from django.db.models import Q
 from core.models import Entity
@@ -38,8 +36,7 @@ class Command(BaseCommand):
                 entity.write_access.remove(ACCESS_TYPE.public)
                 entity.write_access.append(ACCESS_TYPE.logged_in)
 
-            with signal_disabler.disable():
-                entity.save()
+            entity.save()
             updated += 1
 
 

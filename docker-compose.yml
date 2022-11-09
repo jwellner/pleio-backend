@@ -7,6 +7,7 @@ services:
     restart: on-failure
     environment:
       DEBUG: 'True'
+      ENV: local
       CELERY_BROKER_URL: 'amqp://rabbitmq'
       CELERY_RESULT_BACKEND: 'redis://redis:6379/0'
       MEMCACHE_HOST_PORT: memcached:11211
@@ -32,6 +33,7 @@ services:
     build: .
     restart: on-failure
     environment:
+      ENV: local
       CELERY_BROKER_URL: 'amqp://rabbitmq'
       CELERY_RESULT_BACKEND: 'redis://redis:6379/0'
       MEMCACHE_HOST_PORT: memcached:11211
@@ -57,6 +59,7 @@ services:
     build: .
     restart: on-failure
     environment:
+      ENV: local
       RUN_AS_ADMIN_APP: 'True'
       CELERY_BROKER_URL: 'amqp://rabbitmq'
       CELERY_RESULT_BACKEND: 'redis://redis:6379/0'

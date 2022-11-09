@@ -50,7 +50,7 @@ def download(request, file_id=None, file_name=None):
         response['Content-Disposition'] = f"{attachment_or_inline}; filename=%s" % get_download_filename(entity)
         return response
 
-    except ObjectDoesNotExist:
+    except (ObjectDoesNotExist, FileNotFoundError):
         raise Http404("File not found")
 
 
@@ -168,7 +168,6 @@ def thumbnail(request, file_id=None):
 
     try:
         entity = FileFolder.objects.visible(user).get(id=file_id)
-
     except ObjectDoesNotExist:
         raise Http404("File not found")
 
@@ -176,10 +175,15 @@ def thumbnail(request, file_id=None):
         raise Http404("File not found")
 
     if not entity.thumbnail:
-        generate_thumbnail(entity, 153)
+        try:
+            generate_thumbnail(entity, 153)
+        except FileNotFoundError:
+            pass
 
     if entity.thumbnail:
-        response = FileResponse(entity.thumbnail.open())
-        return response
+        try:
+            return FileResponse(entity.thumbnail.open())
+        except FileNotFoundError:
+            pass
 
     raise Http404("File not found")

@@ -156,7 +156,7 @@ def webpack_dev_server_is_available():
     """Return true when webpack developer server is available"""
     # pylint: disable=import-outside-toplevel
 
-    if settings.ENV == 'prod':
+    if settings.ENV != 'local':
         return False
 
     docker_host = os.environ.get('DOCKER_LOCAL_MACHINE', None)
@@ -170,7 +170,6 @@ def webpack_dev_server_is_available():
             except Exception:
                 return False
     return False
-
 
 def get_access_id(acl):
     """

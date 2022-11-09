@@ -52,6 +52,7 @@ UNKNOWN_ERROR = "unknown_error"
 USER_NOT_GROUP_OWNER_OR_SITE_ADMIN = "user_not_group_owner_or_site_admin"
 USER_NOT_MEMBER_OF_GROUP = "user_not_member_of_group"
 USER_NOT_SITE_ADMIN = "user_not_site_admin"
+USER_NOT_SUPERADMIN = "user_not_superadmin"
 COULD_NOT_ORDER_BY_START_DATE = "order_by_start_date_is_only_for_events"
 COULD_NOT_USE_EVENT_FILTER = "event_filter_is_only_for_events"
 EVENT_IS_FULL = "event_is_full"
@@ -69,7 +70,7 @@ OIDC_PROVIDER_OPTIONS = [
 MISSING_REQUIRED_FIELD = "missing_required_field:%s"
 MEETINGS_NOT_ENABLED = "meetings_not_enabled"
 VIDEOCALL_NOT_ENABLED = "videocall_not_enabled"
-
+DOWNLOAD_AS_OPTIONS = ['odt', 'html']
 
 class ATTENDEE_ORDER_BY:
     name = 'name'

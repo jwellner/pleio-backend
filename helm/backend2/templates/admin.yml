@@ -58,6 +58,8 @@ spec:
               value: "True"
             - name: DB_HOST_REPLICA
               value: ""
+          resources:
+            {{- toYaml .Values.admin.resources | nindent 12 }}
         {{- if .Values.tunnel.hostname }}
         - name: tunnel
           image: "{{ .Values.tunnel.repository }}:{{ .Values.tunnel.tag }}"

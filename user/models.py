@@ -1,19 +1,19 @@
+import os.path
 import uuid
+
 
 from core import config
 from core.constances import USER_ROLES
 from core.data.paginate_result import PaginateResult
 from core.lib import is_schema_public
-from core.models import UserProfile, ProfileField, UserProfileField, SiteAccessRequest
+from core.models import UserProfile, ProfileField, UserProfileField, SiteAccessRequest, Group
 from datetime import timedelta
 from django.db.models import Case, Q, Value, When
-from django.db.models.signals import post_save
 from django.db import models
 from django.contrib.postgres.fields import ArrayField
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
-from django.conf import settings
-from django.dispatch import receiver
 from django.utils import timezone
+from notifications.signals import notify
 
 
 class UserManager(BaseUserManager):
@@ -64,7 +64,14 @@ class UserManager(BaseUserManager):
             is_active=True
         )
 
-    def get_filtered_users(self, q=None, role=None, is_delete_requested=None, is_banned=False, last_online_before=None, member_since=None):
+    def get_filtered_users(self,
+                           q=None,
+                           role=None,
+                           is_delete_requested=None,
+                           is_banned=False,
+                           last_online_before=None,
+                           member_since=None,
+                           include_superadmin=True):
         # pylint: disable=too-many-arguments
         # pylint: disable=unsupported-binary-operation
 
@@ -94,6 +101,9 @@ class UserManager(BaseUserManager):
 
         if member_since is not None:
             users = users.filter(created_at__gte=member_since)
+
+        if not include_superadmin:
+            users = users.filter(is_superadmin=False)
 
         return users
 
@@ -202,8 +212,11 @@ class User(AbstractBaseUser):
     @property
     def icon(self):
         if self.profile.picture_file:
-            return self.profile.picture_file.thumbnail_url
-        return self.picture
+            if os.path.exists(self.profile.picture_path()):
+                return self.profile.picture_file.thumbnail_url
+            # currently not available
+            return None
+        return self.picture or None
 
     def search_read_access(self):
         return ['logged_in']
@@ -302,8 +315,28 @@ class User(AbstractBaseUser):
         self.annotations.all().delete()
 
         self.save()
-
         return True
+
+    def save(self, *args, **kwargs):
+        created = self._state.adding
+        self.updated_at = timezone.now()
+        super(User, self).save(*args, **kwargs)
+        self.welcome_notification_on_create(created)
+        self.auto_join_groups_on_create(created)
+        self.add_user_profile_on_create(created)
+
+    def welcome_notification_on_create(self, created=False):
+        if created and not is_schema_public():
+            notify.send(self, recipient=self, verb='welcome', action_object=self)
+
+    def auto_join_groups_on_create(self, created=False):
+        if created and not is_schema_public():
+            for group in Group.objects.filter(is_auto_membership_enabled=True):
+                group.join(self)
+
+    def add_user_profile_on_create(self, created=False):
+        if created and not is_schema_public():
+            UserProfile.objects.get_or_create(user=self)
 
     def apply_claims(self, claims):
         assert claims.get('email'), "Email not found in claims"
@@ -317,9 +350,7 @@ class User(AbstractBaseUser):
         self.is_superadmin = bool(claims.get('is_admin'))
         return self
 
+    def undo_ban_if_superadmin(self):
+        if self.is_superadmin:
+            self.is_active = True
 
-@receiver(post_save, sender=User)
-def create_user_profile(sender, instance, created, **kwargs):
-    # pylint: disable=unused-argument
-    if not settings.RUN_AS_ADMIN_APP and created:
-        UserProfile.objects.create(user=instance)

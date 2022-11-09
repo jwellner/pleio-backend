@@ -53,7 +53,7 @@ class EditUsersTestCase(PleioTenantTestCase):
             }
         }
 
-        with self.assertGraphQlError("could_not_save"):
+        with self.assertGraphQlError("user_not_site_admin"):
             self.graphql_client.force_login(self.user1)
             self.graphql_client.post(mutation, variables)
 

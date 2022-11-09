@@ -123,7 +123,7 @@ def export(request):
             raise Http404("User field " + user_field + " can not be exported")
 
     response = StreamingHttpResponse(
-        streaming_content=(iter_items(User.objects.get_filtered_users(), Echo(), user_fields, profile_field_guids)),
+        streaming_content=(iter_items(User.objects.get_filtered_users(include_superadmin=False), Echo(), user_fields, profile_field_guids)),
         content_type='text/csv',
     )
 

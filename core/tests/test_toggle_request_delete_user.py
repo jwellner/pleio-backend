@@ -50,7 +50,6 @@ class ToggleRequestDeleteUserTestCase(PleioTenantTestCase):
             self.graphql_client.post(self.mutation, variables)
 
     def test_toggle_request_delete_could_not_find(self):
-
         variables = {
             "input": {
                 "guid": "43ee295a-5950-4330-8f0e-372f9f4caddf"

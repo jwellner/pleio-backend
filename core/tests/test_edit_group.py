@@ -138,7 +138,7 @@ class EditGroupCase(PleioTenantTestCase):
             }
         }
 
-        with self.assertGraphQlError("invalid_profile_field_guid"):
+        with self.assertGraphQlError("‘123’ is geen geldige UUID."):
             self.graphql_client.force_login(self.user)
             self.graphql_client.post(mutation, variables)
 

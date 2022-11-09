@@ -2,8 +2,6 @@ import uuid
 import logging
 from auditlog.registry import auditlog
 from django.db import models
-from django.db.models.signals import post_delete, pre_save
-from django.dispatch import receiver
 from django.contrib.postgres.fields import ArrayField
 
 from django.utils import timezone
@@ -88,6 +86,12 @@ class UserProfile(models.Model):
     def index_instance(self):
         """ Return the object that will put changes to me in the search index."""
         return self.user
+
+    def picture_path(self):
+        try:
+            return self.picture_file.upload.path
+        except Exception:
+            pass
 
 
 class ProfileFieldValidator(models.Model):
@@ -220,9 +224,12 @@ class ProfileField(models.Model):
             raise ValidationError("is_in_overview=True is not allowed for %s" % self.field_type)
 
     def save(self, *args, **kwargs):
-        # pylint: disable=arguments-differ
         self.full_clean()
         super(ProfileField, self).save(*args, **kwargs)
+
+    def delete(self, *args, **kwargs):
+        super(ProfileField, self).delete(*args, **kwargs)
+        config.PROFILE_SECTIONS = validate_profile_sections(config.PROFILE_SECTIONS)
 
 
 class UserProfileFieldManager(models.Manager):
@@ -300,24 +307,19 @@ class UserProfileField(models.Model):
     def __str__(self):
         return f"UserProfileField[{self.profile_field.name}]"
 
+    def save(self, *args, **kwargs):
+        self.set_date_field_value()
+        super(UserProfileField, self).save(*args, **kwargs)
+
     def index_instance(self):
         return self.user_profile.index_instance()
 
-
-@receiver(pre_save, sender=UserProfileField)
-def set_date_field_value(sender, instance, **kwargs):
-    # pylint: disable=unused-argument
-    if instance.profile_field.field_type == "date_field":
-        try:
-            instance.value_date = datetime.strptime(instance.value, '%Y-%m-%d')
-        except Exception:
-            instance.date_value = None
-
-
-@receiver(post_delete, sender=ProfileField)
-def validate_config_profile_sections(sender, instance, **kwargs):
-    # pylint: disable=unused-argument
-    config.PROFILE_SECTIONS = validate_profile_sections(config.PROFILE_SECTIONS)
+    def set_date_field_value(self):
+        if self.profile_field.field_type == "date_field":
+            try:
+                self.value_date = datetime.strptime(self.value, '%Y-%m-%d')
+            except Exception:
+                self.date_value = None
 
 
 auditlog.register(UserProfile, exclude_fields=['last_online'])

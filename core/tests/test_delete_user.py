@@ -11,6 +11,8 @@ class DeleteUserTestCase(PleioTenantTestCase):
         self.user = UserFactory()
         self.admin = AdminFactory()
         self.admin2 = AdminFactory()
+        self.superadmin1 = UserFactory(is_superadmin=True)
+        self.superadmin2 = UserFactory(is_superadmin=True)
 
         self.mutation = """
             mutation deleteUser($input: deleteUserInput!) {
@@ -48,10 +50,25 @@ class DeleteUserTestCase(PleioTenantTestCase):
         self.assertEqual(mocked_mail.call_count, 1)
 
     def test_delete_user_by_user(self):
-        with self.assertGraphQlError("could_not_delete"):
+        with self.assertGraphQlError("user_not_site_admin"):
             self.graphql_client.force_login(self.user)
             self.graphql_client.post(self.mutation, self.variables)
 
     def test_delete_user_by_anonymous(self):
         with self.assertGraphQlError("not_logged_in"):
             self.graphql_client.post(self.mutation, self.variables)
+
+    def test_delete_superuser(self):
+        self.variables['input']['guid'] = self.superadmin1.guid
+        with self.assertGraphQlError("user_not_superadmin"):
+            self.graphql_client.force_login(self.admin)
+            self.graphql_client.post(self.mutation, self.variables)
+
+    def test_delete_superuser_as_superuser(self):
+        self.variables['input']['guid'] = self.superadmin1.guid
+
+        self.graphql_client.force_login(self.superadmin2)
+        result = self.graphql_client.post(self.mutation, self.variables)
+
+        self.assertTrue(result['data']['deleteUser']['success'])
+

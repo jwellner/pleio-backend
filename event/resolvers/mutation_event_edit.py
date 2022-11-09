@@ -44,6 +44,7 @@ def resolve_edit_event(_, info, input):
     shared.update_publication_dates(entity, clean_input)
 
     shared.update_is_featured(entity, user, clean_input)
+    shared.update_updated_at(entity)
 
     event_shared.resolve_update_startenddate(entity, clean_input)
     event_shared.resolve_update_source(entity, clean_input)
@@ -58,9 +59,7 @@ def resolve_edit_event(_, info, input):
     # only admins can edit these fields
     if user.has_role(USER_ROLES.ADMIN):
         shared.resolve_update_group(entity, clean_input)
-
         shared.resolve_update_owner(entity, clean_input)
-
         shared.resolve_update_time_created(entity, clean_input)
 
     entity.save()

@@ -199,16 +199,20 @@ class OnboardingMiddleware:
 
     def __call__(self, request):
         user = request.user
-        if (
-                not self.is_public_url(request.path_info)
-                and user.is_authenticated
-                and config.ONBOARDING_ENABLED
-                and config.ONBOARDING_FORCE_EXISTING_USERS
-                and not user.is_profile_complete
-        ):
+        if self.restricted_url(request) and self.user_requires_onboarding(user) and self.onboarding_enabled():
             return redirect('onboarding')
-
         return self.get_response(request)
+
+    def restricted_url(self, request):
+        return not self.is_public_url(request.path_info)
+
+    @staticmethod
+    def user_requires_onboarding(user):
+        return user.is_authenticated and not user.is_superadmin and not user.is_profile_complete
+
+    @staticmethod
+    def onboarding_enabled():
+        return config.ONBOARDING_ENABLED and config.ONBOARDING_FORCE_EXISTING_USERS
 
 
 class RedirectMiddleware:

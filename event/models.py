@@ -16,8 +16,6 @@ from event.lib import get_url
 from event.mail_builders.qr_code import submit_mail_event_qr
 from event.mail_builders.waitinglist import submit_mail_at_accept_from_waitinglist
 from user.models import User
-from django.db.models.signals import pre_save, post_save
-from django.dispatch import receiver
 from django.utils.text import slugify
 from django.utils import timezone
 
@@ -168,6 +166,24 @@ class Event(Entity, CommentMixin, BookmarkMixin, FollowMixin, NotificationMixin,
         for guid, shared_via_slot in shared_slots.items():
             Event.objects.filter(id=guid).update(shared_via_slot=shared_via_slot)
 
+    def save(self, *args, **kwargs):
+        # When a subevent is edited and saved, the fields dependent on the parent are updated accordingly.
+        self.finalize_subevent()
+        self.finalize_slots_available()
+        super(Event, self).save(*args, **kwargs)
+        self.update_subevents()
+
+    def update_subevents(self):
+        """ Subevents are dependent on the main event, so when an event is saved, its subevents are updated """
+        for child in Event.objects.filter(parent=self):
+            child.is_archived = self.is_archived
+            child.published = self.published
+            child.read_access = self.read_access
+            child.write_access = self.write_access
+            child.owner = self.owner
+            child.group = self.group
+            child.save()
+
 
 class EventAttendee(models.Model):
     class Meta:
@@ -240,9 +256,17 @@ class EventAttendee(models.Model):
                 if self.event.is_in_same_slot(maybe_match.event):
                     raise ValidationError(_("You already signed in for another sub-event in the same slot."))
 
-    def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
+    def save(self, *args, **kwargs):
+        if self.user:
+            self.name = self.user.name
+            self.email = self.user.email
         self.full_clean()
-        super(EventAttendee, self).save(force_insert, force_update, using, update_fields)
+        super(EventAttendee, self).save(*args, **kwargs)
+
+    def delete(self, *args, **kwargs):
+        event = self.event
+        super(EventAttendee, self).delete(*args, **kwargs)
+        event.process_waitinglist()
 
     def as_attendee(self, access_user):
         return {
@@ -261,6 +285,7 @@ class EventAttendee(models.Model):
                 'language': self.language}
 
 
+
 class EventAttendeeRequest(models.Model):
     event = models.ForeignKey(
         Event,
@@ -275,39 +300,6 @@ class EventAttendeeRequest(models.Model):
 
     def __str__(self):
         return f"EventAttendeeRequest[{self.name}]"
-
-
-# Subevents are dependent on the main event, so when an event is saved, its subevents are updated.
-@receiver(post_save, sender=Event)
-def event_post_save(sender, instance, **kwargs):
-    # pylint: disable=unused-argument
-
-    for child in Event.objects.filter(parent=instance):
-        child.is_archived = instance.is_archived
-        child.published = instance.published
-        child.read_access = instance.read_access
-        child.write_access = instance.write_access
-        child.owner = instance.owner
-        child.group = instance.group
-        child.save()
-
-
-# When a subevent is edited and saved, the fields dependent on the parent are updated accordingly.
-@receiver(pre_save, sender=Event)
-def event_pre_save(sender, instance, **kwargs):
-    # pylint: disable=unused-argument
-    instance.finalize_subevent()
-    instance.finalize_slots_available()
-
-
-# When a subevent is edited and saved, the fields dependent on the parent are updated accordingly
-@receiver(pre_save, sender=EventAttendee)
-def event_attendee_pre_save(sender, instance, **kwargs):
-    # pylint: disable=unused-argument
-
-    if instance.user:
-        instance.name = instance.user.name
-        instance.email = instance.user.email
 
 
 auditlog.register(Event)

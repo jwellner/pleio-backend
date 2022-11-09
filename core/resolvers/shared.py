@@ -1,12 +1,13 @@
 import logging
 
 from django.core.exceptions import ObjectDoesNotExist
+from django.utils import timezone
 from elasticsearch_dsl import Search
 from graphql import GraphQLError
 
 from core import config
+from core.constances import ACCESS_TYPE, USER_ROLES
 from core import constances
-from core.constances import USER_ROLES, ACCESS_TYPE
 from core.lib import (access_id_to_acl, html_to_text,
                       tenant_schema, get_access_id)
 from core.models import EntityViewCount, Group
@@ -31,13 +32,13 @@ def resolve_entity_write_access_id(obj, info):
     # pylint: disable=unused-argument
     if obj.group and obj.group.subgroups:
         for subgroup in obj.group.subgroups.all():
-            if constances.ACCESS_TYPE.subgroup.format(subgroup.access_id) in obj.write_access:
+            if ACCESS_TYPE.subgroup.format(subgroup.access_id) in obj.write_access:
                 return subgroup.access_id
-    if obj.group and constances.ACCESS_TYPE.group.format(obj.group.id) in obj.write_access:
+    if obj.group and ACCESS_TYPE.group.format(obj.group.id) in obj.write_access:
         return 4
-    if constances.ACCESS_TYPE.public in obj.write_access:
+    if ACCESS_TYPE.public in obj.write_access:
         return 2
-    if constances.ACCESS_TYPE.logged_in in obj.write_access:
+    if ACCESS_TYPE.logged_in in obj.write_access:
         return 1
     return 0
 
@@ -297,6 +298,8 @@ def resolve_update_suggested_items(entity, clean_input):
     if 'suggestedItems' in clean_input:
         entity.suggested_items = clean_input.get("suggestedItems")
 
+def update_updated_at(entity):
+    entity.updated_at = timezone.now()
 
 def update_publication_dates(entity, clean_input):
     if 'timePublished' in clean_input:
@@ -460,6 +463,11 @@ def assert_authenticated(user):
         raise GraphQLError(constances.NOT_LOGGED_IN)
 
 
+def assert_superadmin(user):
+    if not user.is_superadmin:
+        raise GraphQLError(constances.USER_NOT_SUPERADMIN)
+
+
 def assert_write_access(entity, user):
     if not entity.can_write(user):
         raise GraphQLError(constances.COULD_NOT_SAVE)
@@ -480,6 +488,27 @@ def assert_valid_abstract(abstract):
     if len(text) > config.MAX_CHARACTERS_IN_ABSTRACT:
         raise GraphQLError(constances.TEXT_TOO_LONG)
 
+
+
+
+def assert_isnt_me(left_user, right_user):
+    if left_user == right_user:
+        raise GraphQLError(constances.COULD_NOT_SAVE)
+
+
+def has_full_admin_abilities_on_user(obj, info):
+    try:
+        operating_user = info.context["request"].user
+        assert_authenticated(operating_user)
+        assert_isnt_me(obj, operating_user)
+
+        if obj.is_superadmin:
+            return operating_user.is_superadmin
+
+        assert_administrator(operating_user)
+        return True
+    except GraphQLError:
+        return False
 
 
 # Site setting profile field

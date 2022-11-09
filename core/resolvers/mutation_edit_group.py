@@ -48,7 +48,6 @@ def resolve_edit_group(_, info, input):
     shared.resolve_update_rich_description(group, clean_input)
     shared.resolve_update_tags(group, clean_input)
 
-
     if 'introduction' in clean_input:
         group.introduction = clean_input.get("introduction")
     if 'isIntroductionPublic' in clean_input:
@@ -98,8 +97,10 @@ def resolve_edit_group(_, info, input):
                 )
                 setting.show_field = True
                 setting.save()
-            except (ProfileField.DoesNotExist, ValidationError):
+            except ProfileField.DoesNotExist:
                 raise GraphQLError(INVALID_PROFILE_FIELD_GUID)
+            except ValidationError as e:
+                raise GraphQLError(', '.join(e.messages))
         # disable other
         group.profile_field_settings.exclude(
             profile_field__id__in=clean_input.get("showMemberProfileFieldGuids")).update(show_field=False)
@@ -114,11 +115,15 @@ def resolve_edit_group(_, info, input):
                 )
                 setting.is_required = True
                 setting.save()
-            except (ProfileField.DoesNotExist, ValidationError):
+            except ProfileField.DoesNotExist:
                 raise GraphQLError(INVALID_PROFILE_FIELD_GUID)
+            except ValidationError as e:
+                raise GraphQLError(', '.join(e.messages))
         # disable other
         group.profile_field_settings.exclude(
             profile_field__id__in=clean_input.get("requiredProfileFieldGuids")).update(is_required=False)
+
+    shared.update_updated_at(group)
 
     group.save()
 

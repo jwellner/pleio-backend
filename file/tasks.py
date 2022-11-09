@@ -1,7 +1,5 @@
 from __future__ import absolute_import, unicode_literals
 
-import signal_disabler
-
 from celery import shared_task
 from celery.utils.log import get_task_logger
 from datetime import timedelta
@@ -53,9 +51,8 @@ def scan(self, schema_name, limit=1000):
             elif result == FILE_SCAN.UNKNOWN:
                 errors_count += 1
 
-            with signal_disabler.disable():
-                file.last_scan = timezone.now()
-                file.save()
+            file.last_scan = timezone.now()
+            file.save()
 
         if virus_count > 0:
             for admin_user in User.objects.filter(is_superadmin=True):

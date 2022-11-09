@@ -223,6 +223,10 @@ class ModelWithFile(AbstractModel):
     def file_fields(self):
         """ Return a list of fields that contain a file (i.e. FileField and ImageField) """
 
+    def delete(self, *args, **kwargs):
+        self.delete_files()
+        super(ModelWithFile, self).delete(*args, **kwargs)
+
     def delete_files(self):
         for field in self.file_fields:
             delete_attached_file(field)

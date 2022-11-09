@@ -16,17 +16,6 @@ class UserTestCase(ElasticsearchTestCase):
         self.user1 = mixer.blend(User, name="Aa")
         self.user2 = mixer.blend(User, name="Bb")
 
-        self.query = """
-            query UserList($query: String!, $offset: Int, $limit: Int) {
-                users(q: $query, offset: $offset, limit: $limit) {
-                    total
-                    edges {
-                        guid
-                    }
-                }
-            }
-        """
-
     def create_user_with_bday(self, date):
         user = mixer.blend(User, email=date)
 
@@ -101,44 +90,3 @@ class UserTestCase(ElasticsearchTestCase):
             self.birthday_field.guid, self.user, start_date, end_date, 0, 5).edges
 
         self.assertListEqual(expected_users, users)
-
-    def test_user_query_not_logged_in(self):
-   
-        variables = {
-            "query": "",
-            "offset": 0,
-            "limit": 20
-        }
-
-        with self.assertGraphQlError('not_logged_in'):
-            self.graphql_client.post(self.query, variables)
-
-    def test_users_query(self):
-
-        variables = {
-            "query": "Aa",
-            "offset": 0,
-            "limit": 20
-        }
-
-        self.initialize_index()
-
-        self.graphql_client.force_login(self.user1)
-        result = self.graphql_client.post(self.query, variables)
-
-        self.assertEqual(result["data"]["users"]["edges"][0]["guid"], self.user1.guid)
-
-    def test_users_no_query(self):
-
-        variables = {
-            "query": "",
-            "offset": 0,
-            "limit": 20
-        }
-
-        self.initialize_index()
-
-        self.graphql_client.force_login(self.user1)
-        result = self.graphql_client.post(self.query, variables)
-
-        self.assertEqual(result["data"]["users"]["total"], 2)

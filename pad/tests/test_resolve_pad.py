@@ -46,6 +46,10 @@ class PadTestCase(PleioTenantTestCase):
                 group {
                     guid
                 }
+                downloadAsOptions {
+                    type
+                    url
+                }
             }
             query GetPad($guid: String!) {
                 entity(guid: $guid) {
@@ -74,6 +78,10 @@ class PadTestCase(PleioTenantTestCase):
         self.assertEqual(entity["timeCreated"], self.pad.created_at.isoformat())
         self.assertEqual(entity["canEdit"], True)
         self.assertEqual(entity["url"], "/files/view/{}/{}".format(self.pad.guid, slugify(self.pad.title)))
+        self.assertEqual(entity["downloadAsOptions"], [
+            {"type": "odt", "url": "/download_rich_description_as/{}/{}".format(self.pad.guid, "odt") },
+            {"type": "html", "url": "/download_rich_description_as/{}/{}".format(self.pad.guid, "html") },
+        ])
 
 
     def test_pad_non_group_member(self):

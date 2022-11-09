@@ -1,5 +1,6 @@
 from django.core.exceptions import ObjectDoesNotExist, ValidationError
 from django.core.validators import validate_email
+from django.utils import timezone
 from graphql import GraphQLError
 
 from core import config
@@ -101,7 +102,7 @@ def resolve_attend_event(_, info, input):
             raise GraphQLError(EVENT_IS_FULL)
 
     attendee.state = clean_input.get("state")
-
+    attendee.updated_at = timezone.now()
     attendee.save()
 
     if clean_input.get("state") != "accept":

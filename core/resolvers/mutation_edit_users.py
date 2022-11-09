@@ -1,21 +1,18 @@
 from graphql import GraphQLError
 from django.core.exceptions import ObjectDoesNotExist
 from user.models import User
-from core.constances import NOT_LOGGED_IN, COULD_NOT_FIND, COULD_NOT_SAVE, USER_ROLES
+from core.constances import COULD_NOT_FIND, COULD_NOT_SAVE
 from core.lib import clean_graphql_input
+from core.resolvers import shared
 
 def resolve_edit_users(_, info, input):
     # pylint: disable=redefined-builtin
-
     performing_user = info.context["request"].user
     clean_input = clean_graphql_input(input)
     action = clean_input.get('action')
 
-    if not performing_user.is_authenticated:
-        raise GraphQLError(NOT_LOGGED_IN)
-
-    if not performing_user.has_role(USER_ROLES.ADMIN):
-        raise GraphQLError(COULD_NOT_SAVE)
+    shared.assert_authenticated(performing_user)
+    shared.assert_administrator(performing_user)
 
     try:
         users = User.objects.filter(id__in=clean_input.get('guids'))

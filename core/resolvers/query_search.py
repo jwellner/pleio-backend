@@ -22,7 +22,7 @@ def resolve_search(_, info,
                    matchStrategy='any',
                    orderBy=None,
                    orderDirection=ORDER_DIRECTION.asc,
-                   userGuid=None):
+                   ownerGuids=None):
     # pylint: disable=unused-argument
     # pylint: disable=too-many-arguments
     # pylint: disable=redefined-builtin
@@ -65,7 +65,7 @@ def resolve_search(_, info,
         raise GraphQLError(INVALID_DATE)
 
     query = QueryBuilder(q, user, date_from, date_to)
-    query.maybe_filter_owner(userGuid)
+    query.maybe_filter_owners(ownerGuids)
     query.maybe_filter_subtypes(subtypes)
     query.maybe_filter_container(containerGuid)
     query.maybe_filter_tags(tags, matchStrategy)

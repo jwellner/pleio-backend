@@ -85,6 +85,7 @@ def resolve_edit_wiki(_, info, input):
     shared.update_publication_dates(entity, clean_input)
     shared.update_is_featured(entity, user, clean_input)
     shared.resolve_update_access_id(entity, clean_input)
+    shared.update_updated_at(entity)
 
     if 'containerGuid' in clean_input:
         container = None

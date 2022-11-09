@@ -6,6 +6,8 @@ from core.models import ProfileField, UserProfileField, Group, GroupProfileField
 from django.core.exceptions import ObjectDoesNotExist
 from graphql import GraphQLError
 
+from core.resolvers import shared
+
 user = ObjectType("User")
 
 
@@ -113,6 +115,13 @@ def resolve_can_edit(obj, info):
 def resolve_roles(obj, info):
     if is_user_or_admin(obj, info):
         return obj.roles
+    return None
+
+
+@user.field("isSuperadmin")
+def resolve_is_superadmin(obj, info):
+    if is_user_or_admin(obj, info):
+        return obj.is_superadmin
     return None
 
 
@@ -227,6 +236,9 @@ def resolve_created_at(obj, info):
 
 @user.field('missingProfileFields')
 def resolve_missing_profile_fields(obj, info, groupGuid):
+    if getattr(info.context['request'].user, 'is_superadmin', False):
+        return []
+
     # pylint: disable=unused-argument
     class ModalNotRequiredSignal(Exception):
         pass
@@ -267,3 +279,7 @@ def resolve_missing_profile_fields(obj, info, groupGuid):
         pass
 
     return []
+
+
+user.set_field('canDelete', shared.has_full_admin_abilities_on_user)
+user.set_field('canBan', shared.has_full_admin_abilities_on_user)

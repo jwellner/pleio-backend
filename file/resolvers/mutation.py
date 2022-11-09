@@ -10,7 +10,6 @@ from core.resolvers import shared
 from core.utils.entity import load_entity_by_id
 from user.models import User
 
-from ..helpers.post_processing import ensure_correct_file_without_signals
 from ..models import FILE_SCAN, FileFolder
 
 
@@ -114,12 +113,12 @@ def resolve_add_file(_, info, input):
     if entity.scan() == FILE_SCAN.VIRUS:
         raise GraphQLError("INVALID_FILE")
 
+    entity.update_updated_at()
+
     entity.save()
 
-    if not config.PRESERVE_FILE_EXIF:
+    if not config.PRESERVE_FILE_EXIF and entity.is_image():
         strip_exif(entity.upload)
-
-    ensure_correct_file_without_signals(entity)
 
     return {
         "entity": entity
@@ -180,6 +179,8 @@ def resolve_add_folder(_, info, input):
 
     shared.resolve_add_access_id(entity, clean_input)
 
+    entity.update_updated_at()
+
     entity.save()
 
     return {
@@ -216,9 +217,8 @@ def resolve_edit_file_folder(_, info, input):
                                  recursive='ownerGuidRecursive' in clean_input,
                                  full_recursive=clean_input.get('ownerGuidRecursive') == 'updateAllFiles')
 
+    entity.update_updated_at()
     entity.save()
-
-    ensure_correct_file_without_signals(entity)
 
     return {
         "entity": entity
@@ -268,6 +268,7 @@ def resolve_move_file_folder(_, info, input):
 
         entity.parent = parent
 
+    entity.update_updated_at()
     entity.save()
 
     return {

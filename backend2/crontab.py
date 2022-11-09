@@ -25,7 +25,7 @@ beat_schedule = {
     },
     'file_scan': {
         'task': 'core.tasks.cronjobs.dispatch_task',
-        'schedule': crontab(minute=15, hour=2),
+        'schedule': crontab(minute=15, hour=23),
         'args': ['file.tasks.scan']
     }
 }

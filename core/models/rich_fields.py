@@ -2,7 +2,7 @@ import abc
 from core.models.attachment import Attachment
 from core.models.shared import AbstractModel
 from core.utils.tiptap_parser import Tiptap
-from core.lib import is_valid_uuid
+from core.lib import is_valid_uuid, get_model_name, tenant_schema
 from django.contrib.contenttypes.fields import GenericRelation
 from pathlib import PurePosixPath
 from urllib.parse import unquote, urlparse
@@ -32,6 +32,21 @@ class MentionMixin(NotificationMixin, RichFieldsMixin):
             user_ids.update(parser.mentioned_users)
 
         return user_ids
+
+    def save(self, *args, **kwargs):
+        super(MentionMixin, self).save(*args, **kwargs)
+        self.send_notifications()
+
+    def send_notifications(self):
+        """ Look for users that are mentioned and notify them """
+        # extra robustness for when tests don't assign an owner also don't send as deleted user
+        # also don't try to create notifications when user is inactive
+        if not self.owner or not self.owner.is_active:
+            return
+
+        if self.mentioned_users:
+            from core.tasks import create_notification # prevent circular import
+            create_notification.delay(tenant_schema(), 'mentioned', get_model_name(self), self.id, self.owner.id)
 
 
 class AttachmentMixin(RichFieldsMixin):
