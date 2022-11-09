@@ -1,6 +1,7 @@
 import csv
 import json
 import os
+from collections import defaultdict
 
 import requests
 from celery.utils.log import get_task_logger
@@ -162,7 +163,7 @@ def strip_article_images_of_exif_data():
 
 
 # no more exectute this method
-#@post_deploy_action
+# @post_deploy_action
 def migrate_categories():
     if is_schema_public():
         return
@@ -179,7 +180,7 @@ def migrate_categories():
 
 
 # no more exectute this method
-#@post_deploy_action
+# @post_deploy_action
 def migrate_widgets_for_match_strategy():
     if is_schema_public():
         return
@@ -278,3 +279,53 @@ def write_missing_file_report():
 
     if total == 0:
         os.unlink(report_file)
+
+
+class TagCategoryCollector:
+    repository = defaultdict(set)
+
+    def add(self, name, value):
+        self.repository[name].add(value)
+
+    def get_tag_categories(self):
+        tag_categories = []
+        for name in sorted(self.repository.keys()):
+            tag_categories.append({
+                'name': name,
+                'values': [v for v in sorted(self.repository[name])]
+            })
+        return tag_categories
+
+    def loop_entities(self, qs):
+        for entity in qs:
+            if entity.category_tags:
+                for category_tag in entity.category_tags:
+                    for value in category_tag['values']:
+                        self.add(category_tag['name'], value)
+
+    def loop_widget_settings(self, qs):
+        for widget in qs:
+            for setting in widget.settings:
+                if setting['key'] in ['categoryTags', 'tagFilter']:
+                    try:
+                        for category_tag in json.loads(setting['value']):
+                            for value in category_tag['values']:
+                                self.add(category_tag['name'], value)
+                    except Exception:
+                        pass
+
+
+@post_deploy_action(auto=False)
+def reconstruct_tag_categories():
+    if is_schema_public():
+        return
+
+    if len(config.TAG_CATEGORIES) > 0:
+        return
+
+    tag_collector = TagCategoryCollector()
+    tag_collector.loop_entities(Entity.objects.all().select_subclasses())
+    tag_collector.loop_entities(Group.objects.all())
+    tag_collector.loop_widget_settings(Widget.objects.all())
+
+    config.TAG_CATEGORIES = tag_collector.get_tag_categories()
