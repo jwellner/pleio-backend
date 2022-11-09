@@ -7,24 +7,44 @@ cspReportOnly: 'False'
 
 api:
   replicaCount: 14
+  resources:
+    limits:
+      cpu: 1500m
+      memory: 1536Mi
+    requests:
+      cpu: 500m
+      memory: 1024Mi
 
 background:
-  replicaCount: 2
+  worker:
+    replicaCount: 4
+    resources:
+      limits:
+        cpu: 2500m
+        memory: 2048Mi
+      requests:
+        cpu: 1500m
+        memory: 2048Mi
+  scheduler:
+    resources:
+      limits:
+        cpu: 750m
+        memory: 512Mi
+      requests:
+        cpu: 200m
+        memory: 250Mi
+
+admin:
+  replicaCount: 1
+  resources:
+    limits:
+      cpu: 500m
+      memory: 512Mi
+    requests:
+      cpu: 200m
+      memory: 250Mi
 
 env: prod
-
-resources:
-  # We usually recommend not to specify default resources and to leave this as a conscious
-  # choice for the user. This also increases chances charts run on environments with little
-  # resources, such as Minikube. If you do want to specify resources, uncomment the following
-  # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
-  # limits:
-  #   cpu: 100m
-  #   memory: 128Mi
- requests:
-   cpu: 500m
-  # memory: 128Mi
-
 
 storage:
   type: hostpath

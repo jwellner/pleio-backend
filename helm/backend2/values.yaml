@@ -19,12 +19,18 @@ frontend:
 
 admin:
   replicaCount: 1
+  resources: {}
 
 api:
   replicaCount: 1
+  resources: {}
 
 background:
-  replicaCount: 1
+  worker:
+    replicaCount: 1
+    resources: {}
+  scheduler:
+    resources: {}
 
 image:
   repository: registry.gitlab.com/pleio/backend2
