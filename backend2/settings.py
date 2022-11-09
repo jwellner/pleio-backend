@@ -140,6 +140,7 @@ TENANT_APPS = [
     'django_elasticsearch_dsl',
     'mozilla_django_oidc',
     'ariadne_django',
+    'post_deploy',
     'notifications',
     'autotranslate',
     'auditlog',

@@ -29,6 +29,7 @@ class PleioTenantTestCase(FastTenantTestCase):
         super().setUp()
         self.graphql_client = GraphQLClient()
         self.file_cleanup = []
+        mock.patch("logging.Logger.warning").start()
 
     def file_factory(self, filepath):
         from file.models import FileFolder
