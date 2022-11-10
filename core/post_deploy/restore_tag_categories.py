@@ -81,13 +81,7 @@ class CategoryRestorer:
             if setting['key'] in ['tagFilter', 'categoryTags']:
                 try:
                     original_tags = setting['value']
-                    new_category_tags = defaultdict(list)
-                    category_tags = json.loads(setting['value'])
-                    for category_tag in category_tags:
-                        for tag in category_tag['values']:
-                            if tag not in self.tag_repository:
-                                continue
-                            new_category_tags[self.tag_repository[tag]].append(tag)
+                    new_category_tags = self.sanitize_widget_categories(json.loads(setting['value']))
                     setting['value'] = json.dumps([{"name": name, "values": values} for name, values in new_category_tags.items()])
                     if setting['value'] != original_tags:
                         changed = True
@@ -98,6 +92,15 @@ class CategoryRestorer:
         if changed:
             widget.settings = new_settings
             widget.save()
+
+    def sanitize_widget_categories(self, category_tags):
+        new_category_tags = defaultdict(list)
+        for category_tag in category_tags:
+            for tag in category_tag['values']:
+                if tag not in self.tag_repository:
+                    continue
+                new_category_tags[self.tag_repository[tag]].append(tag)
+        return new_category_tags
 
     def process_profile(self, profile: UserProfile):
         original_tags = profile.overview_email_tags
