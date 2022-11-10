@@ -1,10 +1,8 @@
 import json
-from unittest import mock
 
 from mixer.backend.django import mixer
 
 from blog.factories import BlogFactory
-from core import config
 from core.factories import GroupFactory
 from core.models import Widget
 from core.tests.helpers import PleioTenantTestCase
@@ -43,8 +41,6 @@ class TestReconstructTagCategoriesTestCase(PleioTenantTestCase):
                                                                                                {"name": "Count", "values": ["Four", "One"]}])}])
         self.widget3 = mixer.blend(Widget, settings=[])
 
-        self.collector = self.create_collector()
-
     def tearDown(self):
         self.blog.delete()
         self.blog2.delete()
@@ -60,31 +56,11 @@ class TestReconstructTagCategoriesTestCase(PleioTenantTestCase):
         self.widget2.delete()
         self.widget3.delete()
 
-    def create_collector(self):
-        from core.post_deploy import TagCategoryCollector
-        return TagCategoryCollector()
-
-    @mock.patch('core.post_deploy.TagCategoryCollector.loop_entities')
-    @mock.patch('core.post_deploy.TagCategoryCollector.loop_widget_settings')
-    def test_with_tag_categories_filled(self, loop_widget_settings, loop_entities):
-        from core.post_deploy import reconstruct_tag_categories
-
-        self.override_config(TAG_CATEGORIES=[{"name": "test", "values": ['One', 'Two', 'Three']}])
-        reconstruct_tag_categories()
-        self.assertEqual(loop_entities.call_count, 0)
-        self.assertEqual(loop_widget_settings.call_count, 0)
-
-        self.override_config(TAG_CATEGORIES=[])
-        reconstruct_tag_categories()
-        self.assertEqual(loop_entities.call_count, 2)
-        self.assertEqual(loop_widget_settings.call_count, 1)
-
     def test_reconstruction(self):
-        from core.post_deploy import reconstruct_tag_categories
-        self.override_config(TAG_CATEGORIES=[])
-        reconstruct_tag_categories()
+        from core.utils.migrations.category_tags_reconstruct import reconstruct_tag_categories
+        tag_categories = reconstruct_tag_categories()
 
-        self.assertEqual(config.TAG_CATEGORIES, [
+        self.assertEqual(tag_categories, [
             {"name": "Confirmation",
              "values": ["Maybe", "No", "Yes"]},
             {"name": "Count",
