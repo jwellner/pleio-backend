@@ -15,19 +15,17 @@ def restore_tag_categories():
     if is_schema_public():
         return
 
-    json_filename = os.path.join(os.path.dirname(__file__), 'assets', 'all_tag_categories-22-11-02.json')
-
     # Step one: restore the TAG_CATEGORIES value if needed.
+    json_filename = os.path.join(os.path.dirname(__file__), 'assets', 'all_tag_categories-22-11-02.json')
     with open(json_filename, 'r') as fh:
-        data = json.load(fh)
-        old_tag_categories = data[tenant_schema()]
-        if config.TAG_CATEGORIES:
-            data[tenant_schema()] = config.TAG_CATEGORIES
-        if old_tag_categories and not config.TAG_CATEGORIES:
-            config.TAG_CATEGORIES = old_tag_categories
+        data = json.load(fh) or {}
+
+    old_tag_categories = data.get(tenant_schema()) or []
+    if old_tag_categories and not config.TAG_CATEGORIES:
+        config.TAG_CATEGORIES = old_tag_categories
 
     # Step two: re-process content, given the new tag_categories.
-    restore_content_tag_categories(data[tenant_schema()])
+    restore_content_tag_categories(config.TAG_CATEGORIES)
 
 
 def restore_content_tag_categories(old_tag_categories):
@@ -54,6 +52,9 @@ class CategoryRestorer:
                 self.tag_repository[value] = tag_category['name']
 
     def process_article(self, article: TagsModel):
+        original_tags = article.tags
+        original_categories = article.category_tags
+
         all_tags = article.tags
         for category_tag in article.category_tags:
             for value in category_tag['values']:
@@ -69,13 +70,17 @@ class CategoryRestorer:
                 new_tags.append(tag)
         article.tags = new_tags
         article.category_tags = [{'name': name, "values": values} for name, values in new_category_tags.items()]
-        article.save()
+
+        if article.tags != original_tags or article.category_tags != original_categories:
+            article.save()
 
     def process_widget(self, widget: Widget):
         new_settings = []
+        changed = False
         for setting in widget.settings:
             if setting['key'] in ['tagFilter', 'categoryTags']:
                 try:
+                    original_tags = setting['value']
                     new_category_tags = defaultdict(list)
                     category_tags = json.loads(setting['value'])
                     for category_tag in category_tags:
@@ -84,13 +89,20 @@ class CategoryRestorer:
                                 continue
                             new_category_tags[self.tag_repository[tag]].append(tag)
                     setting['value'] = json.dumps([{"name": name, "values": values} for name, values in new_category_tags.items()])
+                    if setting['value'] != original_tags:
+                        changed = True
                 except Exception:
                     pass
             new_settings.append(setting)
-        widget.settings = new_settings
-        widget.save()
+
+        if changed:
+            widget.settings = new_settings
+            widget.save()
 
     def process_profile(self, profile: UserProfile):
+        original_tags = profile.overview_email_tags
+        original_categories = profile.overview_email_categories
+
         all_tags = profile.overview_email_tags
         for category_tag in profile.overview_email_categories:
             for value in category_tag['values']:
@@ -104,6 +116,8 @@ class CategoryRestorer:
                 new_category_tags[self.tag_repository[tag]].append(tag)
             else:
                 new_tags.append(tag)
-        profile.tags = new_tags
+        profile.overview_email_tags = new_tags
         profile.overview_email_categories = [{'name': name, "values": values} for name, values in new_category_tags.items()]
-        profile.save()
+
+        if profile.overview_email_tags != original_tags or profile.overview_email_categories != original_categories:
+            profile.save()

@@ -40,7 +40,7 @@ prosemirror-py==0.2
 django-autotranslate==1.2.0
 futures==2.2.0 # remove when autotranslate dependency is fixed
 qrcode==7.3.1
-django_post_deploy==2.2.1
+django_post_deploy==2.2.3
 django-uuslug==2.0.0
 pyIsEmail==1.4.0
 git+https://gitlab.com/pleio/online-planner.git@1.3.1
