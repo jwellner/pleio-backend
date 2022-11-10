@@ -23,6 +23,8 @@ from core.utils.migrations import category_tags
 from user.models import User
 from notifications.models import Notification
 
+from .restore_tag_categories import restore_tag_categories
+
 logger = get_task_logger(__name__)
 
 
