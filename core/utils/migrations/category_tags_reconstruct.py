@@ -20,9 +20,9 @@ class TagCategoryCollector:
         return tag_categories
 
     def loop_entities(self, qs):
-        for entity in qs:
-            if entity.category_tags:
-                for category_tag in entity.category_tags:
+        for category_tags in qs.values_list('category_tags', flat=True):
+            if category_tags:
+                for category_tag in category_tags:
                     for value in category_tag['values']:
                         self.add(category_tag['name'], value)
 
