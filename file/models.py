@@ -35,7 +35,7 @@ def write_access_default():
     return []
 
 
-class FILE_SCAN(Enum):
+class FILE_SCAN(str, Enum):
     CLEAN = 'CLEAN'
     VIRUS = 'VIRUS'
     UNKNOWN = 'UNKNOWN'

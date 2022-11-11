@@ -1,6 +1,6 @@
 from __future__ import absolute_import, unicode_literals
 
-from celery import shared_task
+from celery import shared_task, chord
 from celery.utils.log import get_task_logger
 from datetime import timedelta
 from django.db.models import Q, F
@@ -31,36 +31,48 @@ def resize_featured(self, schema_name, file_guid):
             logger.error('resize_featured %s %s: %s', schema_name, file_guid, e)
 
 
-@shared_task(bind=True, ignore_result=True)
-def scan(self, schema_name, limit=1000):
-    # pylint: disable=unused-argument
+@shared_task(ignore_result=True)
+def schedule_scan(schema_name, limit=1000):
     with schema_context(schema_name):
         time_threshold = timezone.now() - timedelta(days=7)
 
         files = FileFolder.objects.filter(type=FileFolder.Types.FILE)
         files = files.filter(Q(last_scan__isnull=True) | Q(last_scan__lt=time_threshold))
         files = files.order_by(F("last_scan").desc(nulls_first=True))[:limit]
+        chord([scan_file.s(schema_name, file.id) for file in files], schedule_scan_finished.s(schema_name)).apply_async()
+        logger.info("Start scanning %i files @%s", files.count(), schema_name)
 
-        file_count = files.count()
+@shared_task(ignore_result=True)
+def schedule_scan_finished(results, schema_name):
+    with schema_context(schema_name):
+        file_count = 0
         virus_count = 0
         errors_count = 0
-        for file in files:
-            result = file.scan()
+        for result in results:
+            file_count += 1
             if result == FILE_SCAN.VIRUS:
                 virus_count += 1
-            elif result == FILE_SCAN.UNKNOWN:
+            if result == FILE_SCAN.UNKNOWN:
                 errors_count += 1
-
-            file.last_scan = timezone.now()
-            file.save()
 
         if virus_count > 0:
             for admin_user in User.objects.filter(is_superadmin=True):
                 schedule_file_scan_found_mail(virus_count=virus_count,
-                                              admin=admin_user)
+                                                admin=admin_user)
 
         logger.info("Scanned %i and found %i virusses and %i errors @%s", file_count, virus_count, errors_count, schema_name)
 
+@shared_task(rate_limit="60/m")
+def scan_file(schema_name, file_id):
+    with schema_context(schema_name):
+        file = FileFolder.objects.filter(id=file_id).first()
+        if file:
+            result = file.scan()
+            file.last_scan = timezone.now()
+            file.save()
+            return result
+
+        return FILE_SCAN.UNKNOWN
 
 @shared_task(autoretry_for=(AssertionError,), retry_backoff=10, max_retries=10)
 def post_process_file_attributes(schema_name, instance_id):
