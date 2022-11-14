@@ -19,14 +19,17 @@ class TestConfigTestCase(PleioTenantTestCase):
         self.assertEqual(config.NAME, self.NAME)
 
     @mock.patch('core.base_config.cache.get')
-    def test_get_name_behaviour_when_errors_occur(self, mocked_cache_get):
+    @mock.patch('core.base_config.ConfigBackend.set')
+    def test_get_name_behaviour_when_errors_occur(self, mocked_set, mocked_cache_get):
         mocked_cache_get.return_value = None
 
         self.assertEqual(Setting.objects.get(key='NAME').value, self.NAME)
 
         with mock.patch("core.models.setting.SettingManager.get") as mocked_model_get:
             mocked_model_get.side_effect = OperationalError()
-            with self.assertRaises(OperationalError):
-                self.assertEqual(config.NAME, "Pleio 2.0")
+            try:
+                getattr(config, 'NAME')
+            except Exception:
+                pass
 
-        self.assertEqual(Setting.objects.get(key="NAME").value, self.NAME)
+            self.assertEqual(mocked_set.call_count, 0)
