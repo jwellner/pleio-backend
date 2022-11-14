@@ -190,7 +190,7 @@ class ConfigBackend():
         if value is None:
             try:
                 value = self._model.objects.get(key=key).value
-            except (self._model.DoesNotExist):
+            except self._model.DoesNotExist:
                 pass
             else:
                 cache.set("%s%s" % (connection.schema_name, key), value)
