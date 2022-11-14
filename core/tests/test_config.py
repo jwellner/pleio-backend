@@ -28,7 +28,5 @@ class TestConfigTestCase(PleioTenantTestCase):
             mocked_model_get.side_effect = OperationalError()
             with self.assertRaises(OperationalError):
                 self.assertEqual(config.NAME, "Pleio 2.0")
-            with self.assertRaises(OperationalError):
-                self.assertEqual(config.NAME, "Pleio 2.0")
 
         self.assertEqual(Setting.objects.get(key="NAME").value, self.NAME)
