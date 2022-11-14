@@ -207,9 +207,10 @@ class ConfigBackend():
 
     def init(self):
         # fill cache on init
-        for setting in self._model.objects.all():
-            if setting.key in DEFAULT_SITE_CONFIG:
-                cache.set("%s%s" % (connection.schema_name, setting.key), setting.value)
+        if not connection.schema_name == 'public':
+            for setting in self._model.objects.all():
+                if setting.key in DEFAULT_SITE_CONFIG:
+                    cache.set("%s%s" % (connection.schema_name, setting.key), setting.value)
 
 
 class Config():
