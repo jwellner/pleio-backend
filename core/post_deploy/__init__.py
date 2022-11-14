@@ -281,3 +281,8 @@ def write_missing_file_report():
 
     if total == 0:
         os.unlink(report_file)
+
+
+@post_deploy_action
+def no_operation():
+    logger.info("running core.post_deploy.no_operation at %s" % tenant_schema())
