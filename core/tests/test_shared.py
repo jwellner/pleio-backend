@@ -1,8 +1,8 @@
-from unittest import TestCase
+from django_tenants.test.cases import FastTenantTestCase
 from graphql import GraphQLError
 from core.resolvers.shared import assert_valid_abstract
 
-class SharedTests(TestCase):
+class SharedTests(FastTenantTestCase):
 
     def test_clean_abstract(self):
         text = "x" * 320
