@@ -177,7 +177,7 @@ def migrate_categories():
         category_tags.EntityMigration().run()
         category_tags.cleanup()
     except Exception as e:
-        logger.error(f"migrate_categories@%s: %s (%s)", tenant_schema(), str(e), str(e.__class__))
+        logger.error("migrate_categories@%s: %s (%s)", tenant_schema(), str(e), str(e.__class__))
         raise
 
 
@@ -285,4 +285,4 @@ def write_missing_file_report():
 
 @post_deploy_action
 def no_operation():
-    logger.info("running core.post_deploy.no_operation at %s" % tenant_schema())
+    logger.info("running core.post_deploy.no_operation at %s", tenant_schema())
