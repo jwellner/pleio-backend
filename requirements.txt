@@ -26,7 +26,7 @@ django-ses==2.6.1
 textract==1.6.5
 html2text==2020.1.16
 django-widget-tweaks==1.4.12
-pydash==5.1.0
+pydash==5.1.1
 django-signal-disabler==0.1.1
 colour==0.1.5
 pytz==2022.1
