@@ -42,6 +42,26 @@ nodes = {
         "toDOM": lambda node: [f"h{node.attrs['level']}", 0],
     },
     "text": {"group": "inline"},
+    "mention": {
+        "inline": True,
+        "attrs": {
+            "id": {"default": None},
+            "label": {"default": None},
+            "href": {"default": None}
+        },
+        "group": "inline",
+        "parseDOM": [{"tag": "a[href]"}],
+        "toDOM": lambda node: [
+            "a",
+            {
+                "href": node.attrs["href"],
+                "alt": node.attrs["label"],
+                "title": node.attrs["label"],
+                "target": "_blank"
+            },
+            "@"+node.attrs["label"]
+        ],
+    },
     "image": {
         "inline": True,
         "attrs": {
