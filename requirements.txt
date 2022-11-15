@@ -11,7 +11,7 @@ prospector==1.7.7
 ariadne==0.15.1
 ariadne-django==0.2.0
 simplejson==3.17.6
-graphql-core==3.2.1
+graphql-core==3.2.3
 django-model-utils==4.2.0
 mixer==7.2.2
 elastic-apm==6.10.1
