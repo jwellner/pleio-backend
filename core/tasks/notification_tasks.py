@@ -89,6 +89,8 @@ def create_notification(self, schema_name, verb, model_name, entity_id, sender_i
                     recipients.append(follower)
         elif verb == 'mentioned':
             recipients = User.objects.get_unmentioned_users(instance.mentioned_users, instance)
+        elif verb == 'custom':
+            recipients = instance.recipients()
         else:
             return
 
@@ -96,7 +98,7 @@ def create_notification(self, schema_name, verb, model_name, entity_id, sender_i
         notifications = notify.send(sender, recipient=recipients, verb=verb, action_object=instance)[0][1]
 
         # only send direct notification for content in groups
-        if instance.group:
+        if getattr(instance, 'group', None):
             from core.mail_builders.notifications import schedule_notification_mail, MailTypeEnum
             for notification in notifications:
                 recipient = User.objects.get(id=notification.recipient_id)

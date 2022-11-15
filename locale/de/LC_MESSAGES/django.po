@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Duits\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-11-01 20:16+0100\n"
+"POT-Creation-Date: 2022-11-02 14:42+0100\n"
 "PO-Revision-Date: 2021-05-26 10:55+0200\n"
 "Last-Translator: \n"
 "Language-Team: \n"
@@ -18,7 +18,7 @@ msgstr ""
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 "X-Generator: Poedit 2.4.3\n"
 
-#: activity/models.py:11
+#: activity/models.py:12
 msgid "status update"
 msgstr "Statusaktualisierung"
 
@@ -918,6 +918,33 @@ msgstr ""
 "Deine Site-Administratorrolle wurde von %(user_name)sentfernt.<br><br>\n"
 "\n"
 "Wenn Sie glauben, dass dies ein Fehler war, wenden Sie sich bitte an einen der anderen Website-Administratoren.\n"
+
+#: core/templates/notification/videocall_guest_notification.html:2
+#, python-format
+msgid ""
+"<strong>%(name)s</strong> invited you for a <a href=\"%(url)s\">video "
+"call</a>"
+msgstr ""
+"<strong>%(name)s</strong> hat Sie zu einem <a "
+"href=\"%(url)s\">Videoanruf</a> eingeladen"
+
+#: core/templates/notification/videocall_host_notification.html:3
+#, python-format
+msgid ""
+"You invited <strong>%(guest_list)s and %(guest)s</strong> for a <a "
+"href=\"%(url)s\">video call</a>"
+msgstr ""
+"Sie haben <strong>%(guest_list)s und %(guest)s</strong> zu einem <a "
+"href=\"%(url)s\">Videoanruf</a> eingeladen"
+
+#: core/templates/notification/videocall_host_notification.html:5
+#, python-format
+msgid ""
+"You invited <strong>%(guest)s</strong> for a <a href=\"%(url)s\">video "
+"call</a>"
+msgstr ""
+"Sie haben <strong>%(guest)s</strong> zu einem <a "
+"href=\"%(url)s\">Videoanruf</a> eingeladen"
 
 #: core/templates/onboarding.html:14
 msgid ""

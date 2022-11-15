@@ -5,6 +5,7 @@ from django.utils.translation import ugettext_lazy
 from core.models import Entity, VoteMixin, CommentMixin, BookmarkMixin, FollowMixin, AttachmentMixin, MentionMixin
 from core.utils.convert import tiptap_to_text
 
+
 class StatusUpdate(Entity, VoteMixin, CommentMixin, BookmarkMixin, FollowMixin, AttachmentMixin, MentionMixin):
     class Meta:
         ordering = ['-published']

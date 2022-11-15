@@ -18,3 +18,4 @@ from .mail import MailInstance, MailLog
 from .revision import Revision
 from .export import AvatarExport
 from .agreement import CustomAgreement
+from .videocall import VideoCall, VideoCallGuest

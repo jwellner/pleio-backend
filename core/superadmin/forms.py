@@ -39,6 +39,7 @@ class SettingsForm(forms.Form):
         config.CUSTOM_JAVASCRIPT = data['custom_javascript']
         config.CSP_HEADER_EXCEPTIONS = data['csp_header_exceptions'].splitlines(False)
 
+
 class ScanIncidentFilter(django_filters.FilterSet):
     blocked = django_filters.BooleanFilter(
         field_name='file',
@@ -49,6 +50,7 @@ class ScanIncidentFilter(django_filters.FilterSet):
     class Meta:
         model = ScanIncident
         fields = []
+
 
 class AuditLogFilter(django_filters.FilterSet):
     object_pk = django_filters.CharFilter(
@@ -62,11 +64,12 @@ class AuditLogFilter(django_filters.FilterSet):
         model = LogEntry
         fields = []
 
+
 class CustomAgreementForm(forms.ModelForm):
     class Meta:
-        model=CustomAgreement  
+        model = CustomAgreement
         fields = ['name', 'document']
-        
+
 class OptionalFeaturesForm(forms.Form):
     collab_editing_enabled = forms.BooleanField(required=False)
     edit_user_name_enabled = forms.BooleanField(required=False)

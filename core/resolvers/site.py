@@ -323,3 +323,9 @@ def resolve_schedule_appointment_enabled(obj, info):
 def resolve_schedule_videocall_enabled(obj, info):
     # pylint: disable=unused-argument
     return config.VIDEOCALL_ENABLED
+
+
+@site.field("videocallProfilepage")
+def resolve_videocall_profilepage(*args):
+    # pylint: disable=unused-argument
+    return config.VIDEOCALL_PROFILEPAGE

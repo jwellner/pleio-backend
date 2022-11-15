@@ -115,6 +115,7 @@ class SiteTestCase(PleioTenantTestCase):
                     preserveFileExif
                     scheduleAppointmentEnabled
                     videocallEnabled
+                    videocallProfilepage
                 }
             }
         """
@@ -192,3 +193,13 @@ class SiteTestCase(PleioTenantTestCase):
     def test_videocall_disabled(self):
         result = self.graphql_client.post(self.query, {})
         self.assertEqual(result['data']['site']['videocallEnabled'], False)
+
+    @override_local_config(VIDEOCALL_PROFILEPAGE=True)
+    def test_videocall_profilepage_enabled(self):
+        result = self.graphql_client.post(self.query, {})
+        self.assertEqual(result['data']['site']['videocallProfilepage'], True)
+
+    @override_local_config(VIDEOCALL_PROFILEPAGE=False)
+    def test_videocall_profilepage_enabled(self):
+        result = self.graphql_client.post(self.query, {})
+        self.assertEqual(result['data']['site']['videocallProfilepage'], False)

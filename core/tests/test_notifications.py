@@ -1,4 +1,7 @@
 from django.db import connection
+from notifications.admin import Notification
+from notifications.models import Notification
+
 from core.models import Group, Comment
 from core.tests.helpers import PleioTenantTestCase
 from user.models import User
@@ -134,6 +137,8 @@ class NotificationsTestCase(PleioTenantTestCase):
         """ use welcome message notification for test, is created at user creation, see core/signals.py"""
         self.graphql_client.force_login(self.user1)
         result = self.graphql_client.post(self.query, {})
+
+        self.assertTrue(Notification.objects.all())
 
         data = result["data"]
         self.assertEqual(data["notifications"]["edges"][0]["performer"]["guid"], str(self.user1.id))
