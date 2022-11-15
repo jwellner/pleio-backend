@@ -1,0 +1,6 @@
+{% load i18n %}
+{% if guest_list %}
+    {% blocktrans %}You invited <strong>{{ guest_list }} and {{ guest }}</strong> for a <a href="{{ url }}">video call</a>{% endblocktrans %}
+{% else %}
+    {% blocktrans %}You invited <strong>{{ guest }}</strong> for a <a href="{{ url }}">video call</a>{% endblocktrans %}
+{% endif %}

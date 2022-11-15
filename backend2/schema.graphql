@@ -1628,6 +1628,14 @@ type Mutation {
 
     updateRevision(input: updateRevisionInput!): Revision
     scheduleAppointment(input: ScheduleAppointmentInput!): ScheduleAppointmentPayload
+
+    initiateVideocall(userGuid: String!): InitiateVideocallPayload
+}
+
+type InitiateVideocallPayload {
+    success: Boolean
+    hostUrl: String
+    guestUrl: String
 }
 
 input ScheduleAppointmentInput {
@@ -1705,6 +1713,7 @@ type Notification {
     performer: User
     entity: Entity
     container: Entity
+    customMessage: String
     timeCreated: DateTime
     isUnread: Boolean
 }
@@ -2279,6 +2288,7 @@ type Site {
     preserveFileExif: Boolean!
     scheduleAppointmentEnabled: Boolean
     videocallEnabled: Boolean
+    videocallProfilepage: Boolean
 }
 
 type SiteSettings {

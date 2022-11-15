@@ -6,6 +6,7 @@ from contextlib import contextmanager
 from datetime import datetime
 from unittest import mock
 
+from django.conf import settings
 from django.core.cache import cache
 from PIL import Image, UnidentifiedImageError
 from ariadne import graphql_sync
@@ -30,6 +31,7 @@ class PleioTenantTestCase(FastTenantTestCase):
         self.graphql_client = GraphQLClient()
         self.file_cleanup = []
         mock.patch("logging.Logger.warning").start()
+        self.settings_cache = {}
 
     def file_factory(self, filepath):
         from file.models import FileFolder
@@ -54,6 +56,11 @@ class PleioTenantTestCase(FastTenantTestCase):
         for key, value in kwargs.items():
             cache.set("%s%s" % (self.tenant.schema_name, key), value)
 
+    def override_setting(self, **kwargs):
+        for key, value in kwargs.items():
+            self.settings_cache[key] = getattr(settings, key, None)
+            setattr(settings, key, value)
+
     @staticmethod
     def relative_path(root, path):
         return os.path.join(os.path.dirname(root), *path)
@@ -66,6 +73,8 @@ class PleioTenantTestCase(FastTenantTestCase):
         for file in self.file_cleanup:
             cleanup_path(file)
 
+        for key, value in self.settings_cache.items():
+            setattr(settings, key, value)
         cache.clear()
         mock.patch.stopall()
         super().tearDown()

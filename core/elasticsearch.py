@@ -8,7 +8,7 @@ from django_elasticsearch_dsl.signals import BaseSignalProcessor
 from django_tenants.utils import parse_tenant_config_path
 from elasticsearch.helpers import BulkIndexError
 
-from core.lib import tenant_schema
+from core.lib import tenant_schema, is_schema_public
 
 logger = logging.getLogger(__name__)
 
@@ -57,7 +57,7 @@ class CustomSignalProcessor(BaseSignalProcessor):
             log_elasticsearch_error('sending delete task', e, instance)
 
     def setup(self):
-        if not settings.RUN_AS_ADMIN_APP:
+        if not is_schema_public():
             # Listen to all model saves.
             models.signals.post_save.connect(self.handle_save)
             models.signals.post_delete.connect(self.handle_delete)
@@ -67,7 +67,7 @@ class CustomSignalProcessor(BaseSignalProcessor):
             models.signals.pre_delete.connect(self.handle_pre_delete)
 
     def teardown(self):
-        if not settings.RUN_AS_ADMIN_APP:
+        if not is_schema_public():
             # Listen to all model saves.
             models.signals.post_save.disconnect(self.handle_save)
             models.signals.post_delete.disconnect(self.handle_delete)
