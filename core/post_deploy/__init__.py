@@ -1,6 +1,7 @@
 import csv
 import json
 import os
+from collections import defaultdict
 
 import requests
 from celery.utils.log import get_task_logger
@@ -21,6 +22,8 @@ from core.utils.entity import load_entity_by_id
 from core.utils.migrations import category_tags
 from user.models import User
 from notifications.models import Notification
+
+from .restore_tag_categories import restore_tag_categories
 
 logger = get_task_logger(__name__)
 
@@ -162,7 +165,7 @@ def strip_article_images_of_exif_data():
 
 
 # no more exectute this method
-#@post_deploy_action
+# @post_deploy_action
 def migrate_categories():
     if is_schema_public():
         return
@@ -174,12 +177,12 @@ def migrate_categories():
         category_tags.EntityMigration().run()
         category_tags.cleanup()
     except Exception as e:
-        logger.error(f"migrate_categories@%s: %s (%s)", tenant_schema(), str(e), str(e.__class__))
+        logger.error("migrate_categories@%s: %s (%s)", tenant_schema(), str(e), str(e.__class__))
         raise
 
 
 # no more exectute this method
-#@post_deploy_action
+# @post_deploy_action
 def migrate_widgets_for_match_strategy():
     if is_schema_public():
         return
@@ -278,3 +281,8 @@ def write_missing_file_report():
 
     if total == 0:
         os.unlink(report_file)
+
+
+@post_deploy_action
+def no_operation():
+    logger.info("running core.post_deploy.no_operation at %s", tenant_schema())

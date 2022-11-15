@@ -1,4 +1,3 @@
-from django.db import OperationalError, ProgrammingError
 from django.db import connection
 from django.core.cache import cache
 from django.apps import apps
@@ -191,7 +190,7 @@ class ConfigBackend():
         if value is None:
             try:
                 value = self._model.objects.get(key=key).value
-            except (OperationalError, ProgrammingError, self._model.DoesNotExist):
+            except self._model.DoesNotExist:
                 pass
             else:
                 cache.set("%s%s" % (connection.schema_name, key), value)
@@ -199,24 +198,19 @@ class ConfigBackend():
         return value
 
     def set(self, key, value):
-        try:
-            setting, created = self._model.objects.get_or_create(key=key)
-            if created or setting.value != value:
-                setting.value = value
-                setting.save()
-        except (OperationalError, ProgrammingError):
-            return
+        setting, created = self._model.objects.get_or_create(key=key)
+        if created or setting.value != value:
+            setting.value = value
+            setting.save()
 
         cache.set("%s%s" % (connection.schema_name, key), value)
 
     def init(self):
         # fill cache on init
-        try:
+        if not connection.schema_name == 'public':
             for setting in self._model.objects.all():
                 if setting.key in DEFAULT_SITE_CONFIG:
                     cache.set("%s%s" % (connection.schema_name, setting.key), setting.value)
-        except ProgrammingError:
-            pass
 
 
 class Config():

@@ -1,10 +1,10 @@
-
 import uuid
 from auditlog.registry import auditlog
 from django.db import models
 from django.contrib.postgres.fields import ArrayField
 
 from core.models.rich_fields import AttachmentMixin, Attachment
+
 
 class Widget(AttachmentMixin, models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
@@ -32,6 +32,7 @@ class Widget(AttachmentMixin, models.Model):
         null=True,
         related_name='widgets'
     )
+
     @property
     def guid(self):
         return str(self.id)
@@ -78,6 +79,11 @@ class Widget(AttachmentMixin, models.Model):
         attachment_ids = [setting.get('attachment') for setting in self.settings if setting.get('attachment', None)]
 
         return Attachment.objects.filter(id__in=attachment_ids)
+
+    def get_setting_value(self, key):
+        for setting in self.settings:
+            if setting['key'] == key:
+                return setting['value']
 
 
 auditlog.register(Widget)
