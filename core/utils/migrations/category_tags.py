@@ -33,7 +33,7 @@ class UserMigration(MigrationBase):
             assert self.category_table
             for profile in UserProfile.objects.filter(overview_email_tags__isnull=False):
                 self.migrate_user(profile)
-        except:
+        except Exception:
             pass
 
     def migrate_user(self, profile):
@@ -44,7 +44,7 @@ class UserMigration(MigrationBase):
             category_tags = defaultdict(lambda: {'values': []})
             new_tags = []
             for tag in profile.overview_email_tags:
-                if tag.lower() in self.category_table.keys():
+                if tag.lower() in self.category_table:
                     spec = self.category_table[tag.lower()]
                     category_tags[spec['name']]['name'] = spec['name']
                     category_tags[spec['name']]['values'].append(spec['value'])
@@ -72,7 +72,7 @@ class EntityMigration(MigrationBase):
             current_tags = EntityTag.objects.filter(entity_id=entity.pk)
             new_tags = []
             for tag in current_tags:
-                if tag.tag.label in self.category_table.keys():
+                if tag.tag.label in self.category_table:
                     spec = self.category_table[tag.tag.label]
                     category_tags[spec['name']]['name'] = spec['name']
                     category_tags[spec['name']]['values'].append(spec['value'])

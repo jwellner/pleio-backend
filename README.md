@@ -273,6 +273,12 @@ docker-compose exec background celery -A backend2.celery call core.tasks.elastic
 docker-compose exec background celery -A backend2.celery call core.tasks.cronjobs.dispatch_daily_cron
 ```
 
+#### Report about inconsistent TAG_CATEGORIES:
+
+```bash
+docker-compose exec background celery -A backend2.celery call core.tasks.reporting.report_is_tag_categories_consistent --args='["erlend@pleio.nl"]'
+```
+
 ## Elastic APM
 
 If you want to monitor your application with [APM from Elastic](https://www.elastic.co/apm)
