@@ -70,6 +70,9 @@ OIDC_PROVIDER_OPTIONS = [
 MISSING_REQUIRED_FIELD = "missing_required_field:%s"
 MEETINGS_NOT_ENABLED = "meetings_not_enabled"
 VIDEOCALL_NOT_ENABLED = "videocall_not_enabled"
+VIDEOCALL_PROFILEPAGE_NOT_AVAILABLE = "videocall_profilepage_not_available"
+VIDEOCALL_LIMIT_REACHED="videocall_limit_reached"
+
 DOWNLOAD_AS_OPTIONS = ['odt', 'html']
 
 class ATTENDEE_ORDER_BY:

@@ -22,6 +22,7 @@ def tiptap_to_html(s):
         return s
 
     doc = json.loads(s)
+
     try:
         doc_node = Node.from_json(tiptap_schema, doc)
         html = DOMSerializer.from_schema(tiptap_schema).serialize_fragment(doc_node.content)

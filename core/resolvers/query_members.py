@@ -16,7 +16,8 @@ def resolve_members(_, info, groupGuid, q="", filters=None, offset=0, limit=20):
         group = Group.objects.get(id=groupGuid)
         shared.assert_group_member(user, group)
 
-        query = GroupMembership.objects.filter(group_id=groupGuid).exclude(type='pending')
+        query = GroupMembership.objects.filter(group_id=groupGuid,
+                                               user__is_superadmin=False).exclude(type='pending')
 
         if q:
             user_matches = Q(user__name__icontains=q) | Q(user__email__icontains=q)

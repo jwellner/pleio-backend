@@ -103,6 +103,10 @@ class MeetingsSettingsForm(forms.Form):
         label="Enable videocalls", required=False)
     videocall_api_url = forms.CharField(
         label="Override api url", required=False)
+    videocall_profilepage = forms.BooleanField(
+        label="Enable videocalls at profile page")
+    videocall_throttle = forms.IntegerField(
+        label="Maximum number of room reservations per hour", required=False)
 
     @staticmethod
     def initial_values():
@@ -113,6 +117,8 @@ class MeetingsSettingsForm(forms.Form):
             'onlineafspraken_url': config.ONLINEAFSPRAKEN_URL or '',
             'videocall_enabled': config.VIDEOCALL_ENABLED,
             'videocall_api_url': config.VIDEOCALL_API_URL or '',
+            'videocall_profilepage': config.VIDEOCALL_PROFILEPAGE or '',
+            'videocall_throttle': config.VIDEOCALL_THROTTLE or 0,
         }
 
     def save(self):
@@ -122,3 +128,4 @@ class MeetingsSettingsForm(forms.Form):
         config.ONLINEAFSPRAKEN_URL = self.cleaned_data['onlineafspraken_url'] or None
         config.VIDEOCALL_ENABLED = bool(self.cleaned_data['videocall_enabled'])
         config.VIDEOCALL_API_URL = self.cleaned_data['videocall_api_url'] or None
+        config.VIDEOCALL_PROFILEPAGE = self.cleaned_data['videocall_profilepage'] or None

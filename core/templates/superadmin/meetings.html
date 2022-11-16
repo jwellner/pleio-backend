@@ -65,6 +65,20 @@
                            id="videocall_api_url" value="{{ form.videocall_api_url.value }}">
                     {{ default_videocall_api_url }}
                 </div>
+                <div class="input-field checkbox-field">
+                    <div class="mb-2 form-check">
+                        <input type="checkbox" name="videocall_profilepage" id="videocall_profilepage" {% if form.videocall_profilepage.value %} checked {% endif %} />
+                        <label for="videocall_profilepage">{{ form.videocall_profilepage.label }}</label>
+                    </div>
+                </div>
+                <div class="input-field varchar-field">
+                    <label for="videocall_throttle">{{ form.videocall_throttle.label }}</label>
+                    <input class="form-control"
+                           size="10"
+                           type="text"
+                           name="videocall_throttle"
+                           id="videocall_throttle" value="{{ form.videocall_throttle.value }}">
+                </div>
             </div>
         </div>
         <button type="submit" class="btn btn-primary">Save</button>

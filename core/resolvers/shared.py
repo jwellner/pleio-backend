@@ -10,7 +10,7 @@ from core.constances import ACCESS_TYPE, USER_ROLES
 from core import constances
 from core.lib import (access_id_to_acl, html_to_text,
                       tenant_schema, get_access_id)
-from core.models import EntityViewCount, Group
+from core.models import EntityViewCount, Group, VideoCallGuest
 from core.models.revision import Revision
 from core.tasks.cleanup_tasks import cleanup_featured_image_files
 from core.utils.convert import tiptap_to_text, truncate_rich_description
@@ -212,9 +212,11 @@ def resolve_entity_comment_count(obj, info):
         return _comment_count_from_object(obj)
     return count
 
+
 def resolve_entity_last_seen(obj, info):
     # pylint: disable=unused-argument
     return obj.last_seen
+
 
 def _comment_count_from_index(obj):
     try:
@@ -468,6 +470,13 @@ def assert_superadmin(user):
         raise GraphQLError(constances.USER_NOT_SUPERADMIN)
 
 
+def load_user(guid):
+    try:
+        return User.objects.get(id=guid)
+    except User.DoesNotExist:
+        raise GraphQLError(constances.COULD_NOT_FIND_USER)
+
+
 def assert_write_access(entity, user):
     if not entity.can_write(user):
         raise GraphQLError(constances.COULD_NOT_SAVE)
@@ -551,3 +560,14 @@ def assert_meetings_enabled():
 def assert_videocall_enabled():
     if not config.VIDEOCALL_ENABLED:
         raise GraphQLError(constances.VIDEOCALL_NOT_ENABLED)
+
+
+def assert_videocall_profilepage():
+    if not config.VIDEOCALL_PROFILEPAGE:
+        raise GraphQLError(constances.VIDEOCALL_PROFILEPAGE_NOT_AVAILABLE)
+
+
+def assert_videocall_limit():
+    last_hour = VideoCallGuest.objects.filter(created_at__gte=timezone.localtime() - timezone.timedelta(hours=1)).count()
+    if last_hour >= config.VIDEOCALL_THROTTLE:
+        raise GraphQLError(constances.VIDEOCALL_LIMIT_REACHED)

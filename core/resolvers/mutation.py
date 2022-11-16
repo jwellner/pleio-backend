@@ -2,6 +2,7 @@ from ariadne import ObjectType
 
 from .mutation_archive_entity import resolve_archive_entity
 from .mutation_avatar_exports import resolve_export_avatars
+from .mutation_initiate_videocall import resolve_mutation_initiate_videocall
 from .mutation_revisions import resolve_update_revision
 from .mutation_add_group import resolve_add_group
 from .mutation_edit_group import resolve_edit_group
@@ -140,3 +141,4 @@ mutation.set_field("updateRevision", resolve_update_revision)
 mutation.set_field("exportAvatars", resolve_export_avatars)
 
 mutation.set_field("scheduleAppointment", resolve_mutation_schedule_appointment)
+mutation.set_field("initiateVideocall", resolve_mutation_initiate_videocall)
