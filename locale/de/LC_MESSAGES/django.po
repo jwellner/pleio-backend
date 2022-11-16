@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Duits\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-11-02 14:42+0100\n"
+"POT-Creation-Date: 2022-11-16 14:32+0100\n"
 "PO-Revision-Date: 2021-05-26 10:55+0200\n"
 "Last-Translator: \n"
 "Language-Team: \n"
@@ -50,108 +50,108 @@ msgstr "Benachrichtigungs-E-Mails erhalten"
 msgid "Receive overview emails"
 msgstr "Übersichts-E-Mails erhalten"
 
-#: core/lib.py:208 core/resolvers/mutation_import_users.py:30
+#: core/lib.py:207 core/resolvers/mutation_import_users.py:30
 #: core/resolvers/query_site.py:75
 msgid "Just me"
 msgstr "Nur ich"
 
-#: core/lib.py:211
+#: core/lib.py:210
 #, python-format
 msgid "Group: %(group_name)s"
 msgstr "Gruppe: %(group_name)s"
 
-#: core/lib.py:214
+#: core/lib.py:213
 #, python-format
 msgid "Subgroup: %(subgroup_name)s"
 msgstr "Untergruppe: %(subgroup_name)s"
 
-#: core/lib.py:220 core/resolvers/mutation_import_users.py:31
+#: core/lib.py:219 core/resolvers/mutation_import_users.py:31
 #: core/resolvers/query_site.py:76
 msgid "Logged in users"
 msgstr "Angemeldete Benutzer"
 
-#: core/lib.py:222 core/resolvers/mutation_import_users.py:34
+#: core/lib.py:221 core/resolvers/mutation_import_users.py:34
 #: core/resolvers/query_site.py:80
 msgid "Public"
 msgstr "Öffentlich"
 
-#: core/lib.py:233
+#: core/lib.py:232
 msgid "Event"
 msgstr "Event"
 
-#: core/lib.py:237
+#: core/lib.py:236
 msgid "Blog"
 msgstr "Blog"
 
-#: core/lib.py:241
+#: core/lib.py:240
 msgid "Discussion"
 msgstr "Diskussion"
 
-#: core/lib.py:245 core/lib.py:415
+#: core/lib.py:244 core/lib.py:414
 msgid "News"
 msgstr "Neuigkeiten"
 
-#: core/lib.py:249
+#: core/lib.py:248
 msgid "Update"
 msgstr "Update"
 
-#: core/lib.py:253
+#: core/lib.py:252
 msgid "Question"
 msgstr "Frage"
 
-#: core/lib.py:257
+#: core/lib.py:256
 msgid "Wiki"
 msgstr "Wiki"
 
-#: core/lib.py:261
+#: core/lib.py:260
 msgid "Text page"
 msgstr "Text Seite"
 
-#: core/lib.py:409
+#: core/lib.py:408
 msgid "Updates"
 msgstr "Updates"
 
-#: core/lib.py:410
+#: core/lib.py:409
 msgid "Blogs"
 msgstr "Blogs"
 
-#: core/lib.py:411
+#: core/lib.py:410
 msgid "CMS pages"
 msgstr "CMS-Seiten"
 
-#: core/lib.py:412
+#: core/lib.py:411
 msgid "Discussions"
 msgstr "Diskussionen"
 
-#: core/lib.py:413
+#: core/lib.py:412
 msgid "Events"
 msgstr "Events"
 
-#: core/lib.py:414
+#: core/lib.py:413
 msgid "Files"
 msgstr "Dateien"
 
-#: core/lib.py:416
+#: core/lib.py:415
 msgid "Polls"
 msgstr "Umfragen"
 
-#: core/lib.py:417
+#: core/lib.py:416
 msgid "Questions"
 msgstr "Fragen"
 
-#: core/lib.py:418
+#: core/lib.py:417
 msgid "Tasks"
 msgstr "Aufgaben"
 
-#: core/lib.py:419
+#: core/lib.py:418
 msgid "Wiki pages"
 msgstr "Wiki-Seiten"
 
-#: core/lib.py:420
+#: core/lib.py:419
 msgid "Comments"
 msgstr "Kommentare"
 
-#: core/lib.py:421
+#: core/lib.py:420
 msgid "Groups"
 msgstr "Gruppen"
 
@@ -330,7 +330,7 @@ msgstr "In Arbeit"
 msgid "Ready"
 msgstr "Bereit"
 
-#: core/post_deploy.py:87 core/post_deploy.py:104
+#: core/post_deploy/__init__.py:95 core/post_deploy/__init__.py:112
 msgid "Automatically generated initial revision"
 msgstr "Automatisch generierte erste Revision"
 
@@ -658,7 +658,7 @@ msgstr "Persönliche Nachricht"
 msgid "Direct notification"
 msgstr "Direkte Benachrichtigung"
 
-#: core/templates/email/send_notification_emails.html:10 core/views.py:624
+#: core/templates/email/send_notification_emails.html:10 core/views.py:628
 msgid "Notification overview"
 msgstr "Übersicht über die Benachrichtigung"
 
@@ -676,7 +676,7 @@ msgstr "Abbestellen"
 msgid "Adjust your email settings"
 msgstr "Passen Sie Ihre E-Mail-Einstellungen an"
 
-#: core/templates/email/send_overview_emails.html:22 core/views.py:621
+#: core/templates/email/send_overview_emails.html:22 core/views.py:625
 msgid "Periodic overview"
 msgstr "Regelmäßige Übersicht"
 
@@ -1026,7 +1026,7 @@ msgstr ""
 "Um diese Site zu betreten, müssen Sie den Zugriff vom Administrator "
 "anfordern. Klicken Sie auf die Schaltfläche, um den Zugriff anzufordern."
 
-#: core/templates/registration/request.html:23 core/views.py:466
+#: core/templates/registration/request.html:23 core/views.py:470
 msgid "Name"
 msgstr "Name"
 
@@ -1055,23 +1055,23 @@ msgstr ""
 "Zugang wird angefordert. Sie erhalten eine E-Mail, wenn die Anfrage "
 "angenommen wird."
 
-#: core/views.py:467
+#: core/views.py:471
 msgid "E-mail"
 msgstr "E-Mail"
 
-#: core/views.py:468
+#: core/views.py:472
 msgid "Group"
 msgstr "Gruppe"
 
-#: core/views.py:469
+#: core/views.py:473
 msgid "Disk size"
 msgstr "Größe der Festplatte"
 
-#: core/views.py:564
+#: core/views.py:568
 msgid "Your changes are saved"
 msgstr "Ihre Änderungen werden gespeichert"
 
-#: core/views.py:627
+#: core/views.py:631
 #, python-format
 msgid "Successfully unsubscribed %(email)s from %(list_name)s"
 msgstr "Erfolgreich abbestellt %(email)s von %(list_name)s"
@@ -1107,19 +1107,19 @@ msgstr "Entfernt vom Ereignis: %s"
 msgid "QR code for %s"
 msgstr "QR-Code für %s"
 
-#: event/mail_builders/waitinglist.py:22 event/models.py:101
+#: event/mail_builders/waitinglist.py:22 event/models.py:99
 #, python-format
 msgid "Added to event %s from waitinglist"
 msgstr "Zum Ereignis %s von der Warteliste hinzugefügt"
 
-#: event/models.py:241
+#: event/models.py:257
 msgid "You already signed in for another sub-event in the same slot."
 msgstr ""
 "Sie haben sich bereits für eine andere Unterveranstaltung auf demselben "
 "Platz angemeldet."
 
 #: event/resolvers/mutation_event_copy.py:62
-#: event/tests/test_resolve_copy_entity.py:143
+#: event/tests/test_resolve_copy_entity.py:136
 #, python-format
 msgid "Copy %s"
 msgstr "Kopie %s"
@@ -1401,17 +1401,15 @@ msgstr "Nachricht an die Veranstaltung"
 msgid "Filescan found suspicous files on %(site_url)s"
 msgstr "Filescan hat verdächtige Dateien auf %(site_url)sgefunden"
 
-#: file/models.py:61
-#, fuzzy
-#| msgid "Files"
+#: file/models.py:59
 msgid "File"
 msgstr "Datei"
 
-#: file/models.py:62
+#: file/models.py:60
 msgid "Folder"
 msgstr "Mappe"
 
-#: file/models.py:63
+#: file/models.py:61
 msgid "Pad"
 msgstr "Pad"
 
