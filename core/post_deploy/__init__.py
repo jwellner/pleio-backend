@@ -207,8 +207,9 @@ def add_admin_weight_to_group_membership_objects():
         return
 
     from core.models import GroupMembership
-    for membership in GroupMembership.objects.all():
-        membership.save()
+    GroupMembership.objects.all().update(admin_weight=3)
+    GroupMembership.objects.filter(type='owner').update(admin_weight=1)
+    GroupMembership.objects.filter(type='admin').update(admin_weight=2)
 
 
 @post_deploy_action(auto=False)
