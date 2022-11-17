@@ -25,6 +25,13 @@ spec:
                   name: http
             path: '/'
             pathType: Prefix
+          - backend:
+              service:
+                name: collab-backend
+                port:
+                  name: http
+            path: '/collab'
+            pathType: Prefix
   {{- end }}
   {{- if .Values.adminDomain }}
     - host: {{ .Values.adminDomain }}
@@ -73,6 +80,13 @@ spec:
                 port:
                   name: http
             path: '/'
+            pathType: Prefix
+          - backend:
+              service:
+                name: collab-backend
+                port:
+                  name: http
+            path: '/collab'
             pathType: Prefix
   {{- end }}
   tls:
