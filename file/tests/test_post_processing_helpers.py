@@ -11,7 +11,7 @@ from user.factories import UserFactory
 class TestPostProcessingHelpersTestCase(PleioTenantTestCase):
 
     def setUp(self):
-        super(TestPostProcessingHelpersTestCase, self).setUp()
+        super().setUp()
         from file.models import FileFolder
 
         self.file_mock = mock.MagicMock(spec=File)

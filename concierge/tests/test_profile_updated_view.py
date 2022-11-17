@@ -11,7 +11,7 @@ class TestViewsTestCase(PleioTenantTestCase):
     PROFILE_UPDATED = '/api/profile_updated/'
 
     def setUp(self):
-        super(TestViewsTestCase, self).setUp()
+        super().setUp()
         self.ORIGIN_TOKEN = str(uuid.uuid4())
 
     def test_url_resolves(self):

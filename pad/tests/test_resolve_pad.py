@@ -10,7 +10,7 @@ from django.utils.text import slugify
 class PadTestCase(PleioTenantTestCase):
 
     def setUp(self):
-        super(PadTestCase, self).setUp()
+        super().setUp()
         self.authenticatedUser = mixer.blend(User)
         self.authenticatedAdminUser = mixer.blend(User, roles = ['ADMIN'])
         self.authenticatedNotGroupMember = mixer.blend(User)
@@ -32,6 +32,7 @@ class PadTestCase(PleioTenantTestCase):
         self.authenticatedUser.delete()
         self.authenticatedAdminUser.delete()
         self.authenticatedNotGroupMember.delete()
+        super().tearDown()
 
     def test_pad_owner(self):
         query = """

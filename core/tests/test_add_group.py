@@ -13,7 +13,7 @@ from unittest import mock
 class AddGroupCase(PleioTenantTestCase):
 
     def setUp(self):
-        super(AddGroupCase, self).setUp()
+        super().setUp()
 
         self.user = UserFactory()
         self.admin = AdminFactory()

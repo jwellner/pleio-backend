@@ -8,7 +8,7 @@ from unittest import mock
 class AcceptMembershipRequestTestCase(PleioTenantTestCase):
 
     def setUp(self):
-        super(AcceptMembershipRequestTestCase, self).setUp()
+        super().setUp()
 
         self.user1 = UserFactory()
         self.user2 = UserFactory()

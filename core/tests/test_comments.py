@@ -70,6 +70,7 @@ class CommentTestCase(PleioTenantTestCase):
     def tearDown(self):
         self.blogPublic.delete()
         self.authenticatedUser.delete()
+        super().tearDown()
 
     def test_blog_anonymous(self):
         query = """

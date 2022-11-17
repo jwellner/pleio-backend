@@ -10,7 +10,7 @@ from core.constances import ACCESS_TYPE
 class RevisionQueryTestCase(PleioTenantTestCase):
 
     def setUp(self):
-        super(RevisionQueryTestCase, self).setUp()
+        super().setUp()
         self.authenticatedUser1 = mixer.blend(User)
         self.authenticatedUser2 = mixer.blend(User)
 

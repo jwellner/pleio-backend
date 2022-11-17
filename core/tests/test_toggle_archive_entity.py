@@ -8,7 +8,7 @@ from user.factories import UserFactory
 class ToggleEntityArchivedTestCase(PleioTenantTestCase):
 
     def setUp(self):
-        super(ToggleEntityArchivedTestCase, self).setUp()
+        super().setUp()
 
         self.user = UserFactory()
         self.admin = UserFactory(roles=['ADMIN'])

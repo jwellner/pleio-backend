@@ -14,7 +14,7 @@ from django.utils import timezone
 class AddEventTestCase(PleioTenantTestCase):
 
     def setUp(self):
-        super(AddEventTestCase, self).setUp()
+        super().setUp()
         self.authenticated_user = mixer.blend(User)
         self.group = mixer.blend(Group, owner=self.authenticated_user, is_membership_on_request=False)
         self.group.join(self.authenticated_user, 'owner')

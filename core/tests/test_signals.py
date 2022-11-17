@@ -11,6 +11,7 @@ from unittest import mock
 class SignalsTestCase(FastTenantTestCase):
 
     def setUp(self):
+        super().setUp()
         self.user1 = mixer.blend(User)
         self.user2 = mixer.blend(User)
         self.group = mixer.blend(Group, owner=self.user1, auto_notification=True)
@@ -36,6 +37,7 @@ class SignalsTestCase(FastTenantTestCase):
         self.group.delete()
         self.user1.delete()
         self.user2.delete()
+        super().tearDown()
 
     @mock.patch('core.tasks.create_notification.delay')
     def test_follow_after_comment(self, __):

@@ -11,7 +11,7 @@ from user.factories import UserFactory
 class TestAttendEventMailerTestCase(PleioTenantTestCase):
 
     def setUp(self):
-        super(TestAttendEventMailerTestCase, self).setUp()
+        super().setUp()
 
         from event.models import Event
         self.event = mixer.blend(Event,

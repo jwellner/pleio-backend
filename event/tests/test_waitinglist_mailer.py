@@ -13,7 +13,7 @@ from user.factories import UserFactory
 class TestWaitinglistMailerTestCase(PleioTenantTestCase):
 
     def setUp(self):
-        super(TestWaitinglistMailerTestCase, self).setUp()
+        super().setUp()
 
         self.user = UserFactory()
         self.owner = UserFactory()

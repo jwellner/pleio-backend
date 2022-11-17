@@ -15,7 +15,7 @@ from wiki.models import Wiki
 class TestExportSelectedContentTestCase(PleioTenantTestCase):
     
     def setUp(self):
-        super(TestExportSelectedContentTestCase, self).setUp()
+        super().setUp()
 
         self.admin = AdminFactory()
         self.user1 = UserFactory()

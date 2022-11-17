@@ -7,7 +7,7 @@ from mixer.backend.django import mixer
 class AddGroupWidgetTestCase(PleioTenantTestCase):
 
     def setUp(self):
-        super(AddGroupWidgetTestCase, self).setUp()
+        super().setUp()
 
         self.user1 = UserFactory()
         self.admin = AdminFactory()

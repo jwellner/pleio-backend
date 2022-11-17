@@ -9,7 +9,7 @@ from user.models import User
 
 class UserTestCase(ElasticsearchTestCase):
     def setUp(self):
-        super(UserTestCase, self).setUp()
+        super().setUp()
 
         self.birthday_field = ProfileField.objects.create(key='birthday', name='birthday', field_type='date_field')
         self.user = AnonymousUser()

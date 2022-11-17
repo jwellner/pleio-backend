@@ -13,7 +13,7 @@ from mixer.backend.django import mixer
 class AddPadTestCase(PleioTenantTestCase):
 
     def setUp(self):
-        super(AddPadTestCase, self).setUp()
+        super().setUp()
         self.anonymousUser = AnonymousUser()
         self.authenticatedUser = mixer.blend(User)
         self.authenticatedUserNonGroupMember = mixer.blend(User)

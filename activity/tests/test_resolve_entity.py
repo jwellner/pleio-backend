@@ -7,7 +7,7 @@ from core.constances import ACCESS_TYPE
 class StatusUpdateTestCase(PleioTenantTestCase):
 
     def setUp(self):
-        super(StatusUpdateTestCase, self).setUp()
+        super().setUp()
 
         self.authenticated_user = UserFactory()
 
@@ -64,6 +64,7 @@ class StatusUpdateTestCase(PleioTenantTestCase):
         self.statusPublic.delete()
         self.statusPrivate.delete()
         self.authenticated_user.delete()
+        super().tearDown()
 
     def test_status_update_anonymous(self):
         result = self.graphql_client.post(self.query, {

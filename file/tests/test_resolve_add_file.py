@@ -15,7 +15,7 @@ from unittest.mock import MagicMock, patch
 class AddFileTestCase(PleioTenantTestCase):
 
     def setUp(self):
-        super(AddFileTestCase, self).setUp()
+        super().setUp()
         self.authenticatedUser = mixer.blend(User)
         self.authenticatedUser2 = mixer.blend(User)
         self.authenticatedUser3 = mixer.blend(User)

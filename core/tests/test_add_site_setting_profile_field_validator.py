@@ -6,7 +6,7 @@ from django.core.files.uploadedfile import SimpleUploadedFile
 class AddSiteSettingProfileFieldValidatorTestCase(PleioTenantTestCase):
 
     def setUp(self):
-        super(AddSiteSettingProfileFieldValidatorTestCase, self).setUp()
+        super().setUp()
 
         self.user = UserFactory()
         self.admin = AdminFactory()

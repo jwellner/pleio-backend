@@ -10,7 +10,7 @@ from user.models import User
 class TestResolveSizeQueryTestCase(PleioTenantTestCase):
 
     def setUp(self):
-        super(TestResolveSizeQueryTestCase, self).setUp()
+        super().setUp()
 
         self.authenticatedUser = mixer.blend(User)
 

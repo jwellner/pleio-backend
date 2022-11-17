@@ -15,7 +15,7 @@ from user.models import User
 class TestTasksTestCase(FastTenantTestCase):
 
     def setUp(self):
-        super(TestTasksTestCase, self).setUp()
+        super().setUp()
 
         self.user = mixer.blend(User,
                                 is_active=True,

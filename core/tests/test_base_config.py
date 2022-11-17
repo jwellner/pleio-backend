@@ -5,9 +5,7 @@ from core.base_config import DEFAULT_SITE_CONFIG
 
 
 class BaseConfigCase(FastTenantTestCase):
-    def setUp(self):
-        pass
-    
+
     def test_config(self):
         self.assertEqual(config.NAME, DEFAULT_SITE_CONFIG['NAME'][0])
 
@@ -20,8 +18,8 @@ class BaseConfigCase(FastTenantTestCase):
         self.assertEqual(config.ACHIEVEMENTS_ENABLED, False)
 
         # Dict
-        config.MENU = { "Test": "1234", "Param": { "item": "1"}}
-        self.assertEqual(config.MENU, { "Test": "1234", "Param": { "item": "1"}})
+        config.MENU = {"Test": "1234", "Param": {"item": "1"}}
+        self.assertEqual(config.MENU, {"Test": "1234", "Param": {"item": "1"}})
 
         # List
         config.MENU = [1, "String", 1.23]
@@ -41,13 +39,14 @@ class BaseConfigCase(FastTenantTestCase):
 
 
 class BaseConfigCacheCase(FastTenantTestCase):
+
     def setUp(self):
+        super().setUp()
         patcher_cache = patch('core.base_config.cache')
         self.mock_cache = patcher_cache.start()
         self.addCleanup(patcher_cache.stop)
 
     def test_config_cache(self):
-
         self.assertEqual(self.mock_cache.set.call_count, 0)
         self.assertEqual(self.mock_cache.get.call_count, 0)
 

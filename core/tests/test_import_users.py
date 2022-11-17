@@ -48,10 +48,9 @@ class ImportUsersTestCase(PleioTenantTestCase):
                 destination.write(chunk)
 
     def teardown(self):
-        super().tearDown()
-
         os.remove(self.usersCsv)
         User.objects.all().delete()
+        super().tearDown()
 
     def test_import_users_step1_admin(self):
         mutation = """

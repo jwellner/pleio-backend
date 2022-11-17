@@ -55,6 +55,7 @@ class TestReconstructTagCategoriesTestCase(PleioTenantTestCase):
         self.widget.delete()
         self.widget2.delete()
         self.widget3.delete()
+        super().tearDown()
 
     def test_reconstruction(self):
         from core.utils.migrations.category_tags_reconstruct import reconstruct_tag_categories

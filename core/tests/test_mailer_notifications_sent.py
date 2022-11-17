@@ -17,6 +17,7 @@ from unittest import mock
 class SendNotificationEmailsTestCase(PleioTenantTestCase):
 
     def setUp(self):
+        super().setUp()
         self.user1 = mixer.blend(User)
         self.user2 = mixer.blend(User)
         self.user2.profile.receive_notification_email = True
@@ -55,6 +56,7 @@ class SendNotificationEmailsTestCase(PleioTenantTestCase):
         self.user2.delete()
         self.user3.delete()
         self.group.delete()
+        super().tearDown()
 
     @mock.patch('core.mail_builders.notifications.schedule_notification_mail')
     def test_command_do_not_send_welcome_notification(self, mocked_send_notifications):

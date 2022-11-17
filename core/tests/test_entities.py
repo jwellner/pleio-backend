@@ -182,6 +182,7 @@ class EntitiesTestCase(PleioTenantTestCase):
         self.admin.delete()
         self.user.delete()
         self.user2.delete()
+        super().tearDown()
 
     def test_entities_all(self):
         variables = {
@@ -536,7 +537,7 @@ class EntitiesTestCase(PleioTenantTestCase):
 class EntitiesEventsTestCase(PleioTenantTestCase):
 
     def setUp(self):
-        super(EntitiesEventsTestCase, self).setUp()
+        super().setUp()
 
         self.user1 = UserFactory()
         self.user2 = UserFactory()

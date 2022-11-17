@@ -35,6 +35,7 @@ class AutoBlockUsersTests(TenantTestCase):
         self.user2.delete()
         self.user3.delete()
         self.user4.delete()
+        super().tearDown()
 
     @override_settings(BOUNCER_URL='domain@url.nl')
     @override_settings(BOUNCER_TOKEN='fake_token')

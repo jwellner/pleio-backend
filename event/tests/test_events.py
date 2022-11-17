@@ -125,6 +125,7 @@ class EventsTestCase(PleioTenantTestCase):
         self.eventOneHourAgo.delete()
         self.user1.delete()
         self.user2.delete()
+        super().tearDown()
 
     def test_events_anonymous(self):
 

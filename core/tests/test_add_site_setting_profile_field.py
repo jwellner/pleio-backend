@@ -6,7 +6,7 @@ from user.factories import UserFactory, AdminFactory
 class AddSiteSettingProfileFieldTestCase(PleioTenantTestCase):
 
     def setUp(self):
-        super(AddSiteSettingProfileFieldTestCase, self).setUp()
+        super().setUp()
 
         self.user = UserFactory()
         self.admin = AdminFactory()

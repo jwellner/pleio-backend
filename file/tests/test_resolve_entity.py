@@ -12,7 +12,7 @@ from django.conf import settings
 class FileFolderTestCase(PleioTenantTestCase):
 
     def setUp(self):
-        super(FileFolderTestCase, self).setUp()
+        super().setUp()
         self.authenticatedUser = mixer.blend(User)
 
         self.folder = FileFolder.objects.create(
@@ -84,6 +84,7 @@ class FileFolderTestCase(PleioTenantTestCase):
     def tearDown(self):
         FileFolder.objects.all().delete()
         self.authenticatedUser.delete()
+        super().tearDown()
 
     @patch("core.lib.get_mimetype")
     @patch("{}.save".format(settings.DEFAULT_FILE_STORAGE))

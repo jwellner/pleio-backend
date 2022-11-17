@@ -13,7 +13,7 @@ from mixer.backend.django import mixer
 class GroupTestCase(PleioTenantTestCase):
 
     def setUp(self):
-        super(GroupTestCase, self).setUp()
+        super().setUp()
 
         self.authenticatedUser = mixer.blend(User, name="yy")
         self.user1 = mixer.blend(User)
@@ -51,6 +51,7 @@ class GroupTestCase(PleioTenantTestCase):
         self.user1.delete()
         self.user2 = mixer.blend(User)
         self.authenticatedUser.delete()
+        super().tearDown()
 
     def test_entity_group_invited_list(self):
         query = """

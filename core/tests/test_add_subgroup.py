@@ -7,7 +7,7 @@ from mixer.backend.django import mixer
 class AddSubgroupTestCase(PleioTenantTestCase):
 
     def setUp(self):
-        super(AddSubgroupTestCase, self).setUp()
+        super().setUp()
 
         self.user1 = UserFactory(name='a')
         self.user2 = UserFactory(name='b')

@@ -8,7 +8,7 @@ from mixer.backend.django import mixer
 class AddStatusUpdateTestCase(PleioTenantTestCase):
 
     def setUp(self):
-        super(AddStatusUpdateTestCase, self).setUp()
+        super().setUp()
 
         self.authenticated_user = UserFactory()
         self.group = mixer.blend(Group, owner=self.authenticated_user, is_membership_on_request=False)

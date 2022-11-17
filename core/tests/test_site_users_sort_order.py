@@ -7,7 +7,7 @@ from user.factories import UserFactory, AdminFactory
 class TestSiteUsersSortOrderTestCase(PleioTenantTestCase):
 
     def setUp(self):
-        super(TestSiteUsersSortOrderTestCase, self).setUp()
+        super().setUp()
 
         self.authenticatedUser = UserFactory(
             name='user',

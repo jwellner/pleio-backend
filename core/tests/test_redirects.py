@@ -17,6 +17,7 @@ from django.test import RequestFactory, SimpleTestCase
 class RedirectsTestCase(FastTenantTestCase):
 
     def setUp(self):
+        super().setUp()
         self.request_factory = RequestFactory()
         self.dummy_response = object()
         self.middleware = RedirectMiddleware(lambda request: self.dummy_response)

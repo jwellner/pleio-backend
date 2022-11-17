@@ -12,6 +12,7 @@ from core.constances import USER_ROLES
 class EventTestCase(FastTenantTestCase):
 
     def setUp(self):
+        super().setUp()
         self.authenticatedUser = mixer.blend(User, roles=[USER_ROLES.ADMIN])
         self.eventPublic = mixer.blend(Event)
 

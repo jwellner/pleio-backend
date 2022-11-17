@@ -31,6 +31,7 @@ class FlowApiTests(TenantTestCase):
 
     def tearDown(self):
         cache.clear()
+        super().tearDown()
 
     @mock.patch('requests.post')
     def test_add_comment(self, mocked_post):

@@ -10,7 +10,7 @@ from mixer.backend.django import mixer
 class AddWikiCase(PleioTenantTestCase):
 
     def setUp(self):
-        super(AddWikiCase, self).setUp()
+        super().setUp()
         self.authenticatedUser = mixer.blend(User)
         self.group = mixer.blend(Group, owner=self.authenticatedUser, is_membership_on_request=False)
         self.group.join(self.authenticatedUser, 'owner')

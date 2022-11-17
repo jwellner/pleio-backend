@@ -329,8 +329,8 @@ class TestFetchAvatarTestCase(PleioTenantTestCase):
     ORIGINAL_URL = 'https://original.jpg'
 
     def setUp(self):
-        from requests import Response
         super().setUp()
+        from requests import Response
         self.user = UserFactory(picture=self.PICTURE_URL)
         self.response = mock.MagicMock(spec=Response)
         self.response.ok = True

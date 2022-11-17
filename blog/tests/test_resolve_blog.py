@@ -9,7 +9,7 @@ from django.utils.text import slugify
 class BlogTestCase(PleioTenantTestCase):
 
     def setUp(self):
-        super(BlogTestCase, self).setUp()
+        super().setUp()
         self.authenticatedUser = mixer.blend(User)
         self.authenticatedAdminUser = mixer.blend(User, roles = ['ADMIN'])
 
@@ -39,6 +39,7 @@ class BlogTestCase(PleioTenantTestCase):
         self.blogPrivate.delete()
         self.authenticatedUser.delete()
         self.authenticatedAdminUser.delete()
+        super().tearDown()
 
     def test_blog_anonymous(self):
         query = """

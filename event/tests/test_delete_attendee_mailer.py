@@ -12,7 +12,7 @@ from user.factories import UserFactory
 class TestDeleteAttendeeMailerTestCase(PleioTenantTestCase):
 
     def setUp(self):
-        super(TestDeleteAttendeeMailerTestCase, self).setUp()
+        super().setUp()
 
         self.participant = UserFactory(name="Participant")
         self.event = EventFactory(owner=UserFactory(), title="Test event")

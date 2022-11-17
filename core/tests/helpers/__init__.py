@@ -58,7 +58,8 @@ class PleioTenantTestCase(FastTenantTestCase):
 
     def override_setting(self, **kwargs):
         for key, value in kwargs.items():
-            self.settings_cache[key] = getattr(settings, key, None)
+            if key not in self.settings_cache:
+                self.settings_cache[key] = getattr(settings, key, None)
             setattr(settings, key, value)
 
     @staticmethod

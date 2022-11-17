@@ -15,6 +15,7 @@ from flow.models import FlowId
 class SignalsTestCase(FastTenantTestCase):
 
     def setUp(self):
+        super().setUp()
         self.user1 = mixer.blend(User)
 
         cache.set("%s%s" % (connection.schema_name, 'FLOW_ENABLED'), True)
@@ -28,6 +29,7 @@ class SignalsTestCase(FastTenantTestCase):
 
     def tearDown(self):
         cache.clear()
+        super().tearDown()
 
     @mock.patch('requests.post')
     def test_object_and_comment_handler(self, mocked_post):
