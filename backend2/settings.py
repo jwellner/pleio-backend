@@ -22,6 +22,7 @@ ALLOWED_HOSTS = [os.getenv('ALLOWED_HOST')]
 # Database
 DATABASES = {
     'default': {
+        'DATABASE': 'default',
         'ENGINE': 'django_tenants.postgresql_backend',
         'HOST': os.getenv('DB_HOST'),
         'USER': os.getenv('DB_USER'),
@@ -32,20 +33,12 @@ DATABASES = {
 
 if os.getenv('DB_HOST_REPLICA'):
     DATABASES["replica"] = {
+        'DATABASE': 'replica',
         'ENGINE': 'django_tenants.postgresql_backend',
         'HOST': os.getenv('DB_HOST_REPLICA'),
         'USER': os.getenv('DB_USER'),
         'PASSWORD': os.getenv('DB_PASSWORD'),
         'NAME': os.getenv('DB_NAME'),
-    }
-
-if os.getenv('ELGG_DB_HOST'):
-    DATABASES["elgg_control"] = {
-        'ENGINE': 'django.db.backends.mysql',
-        'HOST': os.getenv('ELGG_DB_HOST'),
-        'USER': os.getenv('ELGG_DB_USER'),
-        'PASSWORD': os.getenv('ELGG_DB_PASSWORD'),
-        'NAME': os.getenv('ELGG_DB_NAME')
     }
 
 OIDC_RP_CLIENT_ID = os.getenv('OIDC_RP_CLIENT_ID')
@@ -173,7 +166,7 @@ if RUN_AS_ADMIN_APP:
     AUTHENTICATION_BACKENDS = ['django.contrib.auth.backends.ModelBackend']
 
 MIDDLEWARE = [
-    'backend2.middleware.ReadReplicaTenantMiddleware',
+    'backend2.middleware.PleioTenantMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -342,6 +335,8 @@ DATABASE_ROUTERS = (
 TENANT_MODEL = "tenants.Client"
 
 TENANT_DOMAIN_MODEL = "tenants.Domain"
+
+EXTRA_SET_TENANT_METHOD_PATH = "backend2.dbrouter.extra_set_tenant_method"
 
 # Celery
 CELERY_BROKER_URL = os.getenv('CELERY_BROKER_URL')
