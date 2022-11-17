@@ -57,3 +57,5 @@ tunnel:
 
 collab:
   backend: collab-backend
+
+videoCallReserveRoomUrl: https://videobellen.pleio.nl/api/v1/room/
