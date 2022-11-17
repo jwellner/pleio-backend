@@ -19,3 +19,5 @@ data:
   BACKUP_PATH: /backup-storage
   CSP_REPORT_ONLY: {{ .Values.cspReportOnly | quote }}
   ENDPOINT_2FA: {{ printf "%s/securitypages" .Values.accountDomain }}
+  ONLINE_MEETINGS_URL: {{ .Values.onlineMeetingsUrl }}
+  VIDEO_CALL_RESERVE_ROOM_URL: {{ .Values.videoCallReserveRoomUrl }}
