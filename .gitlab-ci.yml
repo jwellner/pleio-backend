@@ -4,42 +4,70 @@ stages:
   - deploy
 
 variables:
+  TAG_PREFIX: ""
+  SECRET_KEY: bg9kU6ckKXTLQeZxtovc
+  POSTGRES_PASSWORD: postgres
+  DB_HOST: postgres
+  DB_USER: postgres
+  DB_PASSWORD: postgres
+  DB_NAME: postgres
+  ENV: test
+  DEBUG: "True"
   PIP_CACHE_DIR: $CI_PROJECT_DIR/.cache/pip
+  ELASTICSEARCH_URL: http://elasticsearch:9200
+  ELASTICSEARCH_HOST: http://elasticsearch:9200
+  CELERY_TASK_ALWAYS_EAGER: "True"
+
+.python:
+  image: python:3.9.10
+  tags:
+    - docker
+  before_script:
+    - apt-get update && apt-get install --no-install-recommends -y pandoc
+    - pip install -r requirements.txt
+
+.python-test:
+  services:
+    - postgres:12-alpine
+    - name: docker.elastic.co/elasticsearch/elasticsearch:7.16.2
+      alias: elasticsearch
+      variables:
+        discovery.type: single-node
+        bootstrap.memory_lock: 'true'
+        ES_JAVA_OPTS: -Xms1024m -Xmx1024m
 
 cache:
   paths:
   - $PIP_CACHE_DIR
 
-before_script:
-
 prospector:
-  image: python:3.9
   stage: test
-  tags:
-    - docker
+  extends:
+    - .python
   script:
-    - pip3 install -r requirements.txt
     - prospector
 
 test:
   stage: test
+  extends:
+    - .python
+    - .python-test
   coverage: '/TOTAL.*\s+(\d+%)/'
-  tags:
-    - shell
   script:
-    - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN $CI_REGISTRY
-    - docker-compose -p backend2-test-${CI_COMMIT_SHA:0:8} -f docker-compose.test.yml down -v
-    - docker-compose -p backend2-test-${CI_COMMIT_SHA:0:8} -f docker-compose.test.yml build
-    - docker-compose -p backend2-test-${CI_COMMIT_SHA:0:8} -f docker-compose.test.yml run api /ci-test.sh
-    - docker-compose -p backend2-test-${CI_COMMIT_SHA:0:8} -f docker-compose.test.yml down -v
+    - curl "http://elasticsearch:9200/_cat/health"
+    - mkdir -p static static-frontend
+    - touch static-frontend/web.css static-frontend/vendor.js static-frontend/web.js
+    - python manage.py collectstatic --noinput
+    - coverage run --source='.' manage.py test
+    - coverage report
 
 scan:
   stage: test
   tags:
     - shell
   script:
-    - docker build -t registry.gitlab.com/pleio/backend2:${CI_COMMIT_SHA:0:8} .
-    - scan.sh registry.gitlab.com/pleio/backend2:${CI_COMMIT_SHA:0:8}
+    - DOCKER_BUILDKIT=1 docker build -t ${CI_REGISTRY_IMAGE}:${TAG_PREFIX}${CI_COMMIT_SHORT_SHA} .
+    - scan.sh ${CI_REGISTRY_IMAGE}:${TAG_PREFIX}${CI_COMMIT_SHORT_SHA}
 
 build:
   stage: build
@@ -49,24 +77,22 @@ build:
     - dev
     - master
   script:
-    - docker build -t registry.gitlab.com/pleio/backend2:${CI_COMMIT_SHA:0:8} .
-    - docker build -t registry.gitlab.com/pleio/backend2:latest .
-    - scan.sh registry.gitlab.com/pleio/backend2:${CI_COMMIT_SHA:0:8}
+    - DOCKER_BUILDKIT=1 docker build -t ${CI_REGISTRY_IMAGE}:${TAG_PREFIX}${CI_COMMIT_SHORT_SHA} .
     - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN $CI_REGISTRY
-    - docker push registry.gitlab.com/pleio/backend2:${CI_COMMIT_SHA:0:8}
-    - docker push registry.gitlab.com/pleio/backend2:latest
+    - docker push ${CI_REGISTRY_IMAGE}:${TAG_PREFIX}${CI_COMMIT_SHORT_SHA}
+    - |-
+        if [[ $CI_COMMIT_BRANCH == "master" ]]; then
+          docker tag ${CI_REGISTRY_IMAGE}:${CI_COMMIT_SHORT_SHA} ${CI_REGISTRY_IMAGE}:latest
+          docker push ${CI_REGISTRY_IMAGE}:latest
+        fi
 
-build-feature:
-  stage: build
+build feature:
+  extends:
+    - build
+  variables:
+    TAG_PREFIX: feature-
   only:
-    - /^feature-(.*)$/
-  tags:
-    - shell
-  script:
-    - docker build -t registry.gitlab.com/pleio/backend2:feature-${CI_COMMIT_SHA:0:8} .
-    - scan.sh registry.gitlab.com/pleio/backend2:feature-${CI_COMMIT_SHA:0:8}
-    - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN $CI_REGISTRY
-    - docker push registry.gitlab.com/pleio/backend2:feature-${CI_COMMIT_SHA:0:8}
+      - /^feature-(.*)$/
 
 .helm_deploy:
   stage: deploy
@@ -75,7 +101,7 @@ build-feature:
     - helm dependency update helm/backend2
     - |
       helm upgrade --install -n pleio2 -f ${HELM_VALUES_FILE} \
-        --set image.tag=${TAG_PREFIX}${CI_COMMIT_SHA:0:8} \
+        --set image.tag=${TAG_PREFIX}${CI_COMMIT_SHORT_SHA} \
         --set frontend.tag=${FRONTEND_TAG} \
         ${HELM_NAME} helm/backend2
 
