@@ -91,12 +91,18 @@ def auto_notification(obj, info):
 @group.field("featured")
 def resolve_group_featured(obj, info):
     # pylint: disable=unused-argument
-    result = obj.serialize_featured()
+    if obj.featured_image:
+        image = obj.featured_image.embed_url
+    else:
+        image = None
 
-    if result.image:
-        result['image'] = obj.featured_image.embed_url
-
-    return result
+    return {
+        'image': image,
+        'video': obj.featured_video,
+        'videoTitle': obj.featured_video_title,
+        'positionY': obj.featured_position_y,
+        'alt': obj.featured_alt
+    }
 
 
 @group.field("isFeatured")
