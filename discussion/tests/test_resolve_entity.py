@@ -9,7 +9,7 @@ from django.utils.text import slugify
 class EventTestCase(PleioTenantTestCase):
 
     def setUp(self):
-        super(EventTestCase, self).setUp()
+        super().setUp()
         self.authenticatedUser = mixer.blend(User)
 
         self.discussionPublic = Discussion.objects.create(
@@ -69,6 +69,7 @@ class EventTestCase(PleioTenantTestCase):
         self.discussionPublic.delete()
         self.discussionPrivate.delete()
         self.authenticatedUser.delete()
+        super().tearDown()
 
     def test_event_anonymous(self):
         variables = {

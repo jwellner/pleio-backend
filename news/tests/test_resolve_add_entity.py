@@ -11,7 +11,7 @@ from mixer.backend.django import mixer
 class AddNewsTestCase(PleioTenantTestCase):
 
     def setUp(self):
-        super(AddNewsTestCase, self).setUp()
+        super().setUp()
 
         self.authenticatedUser = mixer.blend(User)
         self.adminUser = mixer.blend(User, roles=[USER_ROLES.ADMIN])

@@ -120,6 +120,7 @@ class ActivitiesTestCase(PleioTenantTestCase):
         self.blog4.delete()
         self.group1.delete()
         self.group2.delete()
+        super().tearDown()
 
     def test_activities_group_filter_all(self):
         variables = {

@@ -20,6 +20,7 @@ from unittest import mock
 class ResizeImageTestCase(FastTenantTestCase):
 
     def setUp(self):
+        super().setUp()
         self.anonymousUser = AnonymousUser()
         self.authenticatedUser = mixer.blend(User)
         cache.set("%s%s" % (connection.schema_name, 'IS_CLOSED'), False)
@@ -27,9 +28,6 @@ class ResizeImageTestCase(FastTenantTestCase):
         self.client = TenantClient(self.tenant)
 
         self.blog = mixer.blend(Blog, read_access=[ACCESS_TYPE.public], owner=self.authenticatedUser)
-
-    def tearDown(self):
-        pass
 
     def get_image(self, filename, size=(800, 1280)):
         output = BytesIO()

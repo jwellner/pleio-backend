@@ -50,6 +50,7 @@ class ProfileSyncApiTests(TenantTestCase):
 
     def tearDown(self):
         cache.clear()
+        super().tearDown()
 
     def test_get_3_users(self):
 

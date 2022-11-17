@@ -55,8 +55,6 @@ class FilterUsersTestCase(ElasticsearchTestCase):
         self.not_a_member = mixer.blend(User, name="Outsider")
 
     def teardown(self):
-        super().tearDown()
-
         self.owner.delete()
         self.group.delete()
         self.admin.delete()
@@ -71,6 +69,7 @@ class FilterUsersTestCase(ElasticsearchTestCase):
         self.member3.delete()
         self.pending_member.delete()
         self.not_a_member.delete()
+        super().tearDown()
 
     def graphql_sync_data(self, query, variables, visitor):
         self.graphql_client.force_login(visitor)

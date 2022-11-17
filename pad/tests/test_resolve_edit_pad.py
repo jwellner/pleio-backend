@@ -14,7 +14,7 @@ from mixer.backend.django import mixer
 class EditPadTestCase(PleioTenantTestCase):
 
     def setUp(self):
-        super(EditPadTestCase, self).setUp()
+        super().setUp()
         self.anonymousUser = AnonymousUser()
         self.authenticatedUser = mixer.blend(User)
         self.authenticatedUserNonGroupMember = mixer.blend(User)

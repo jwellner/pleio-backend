@@ -118,9 +118,6 @@ class CopyEventTestCase(PleioTenantTestCase):
             }
         """
 
-    def tearDown(self):
-        super().tearDown()
-
     def attach_file(self, instance, attr, filename):
         setattr(instance, attr, ContentFile("Some content", filename))
         instance.save()

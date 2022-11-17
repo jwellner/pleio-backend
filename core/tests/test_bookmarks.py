@@ -42,7 +42,8 @@ class BookmarkTestCase(PleioTenantTestCase):
         self.blog1.delete()
         self.blog2.delete()
         self.authenticatedUser.delete()
-    
+        super().tearDown()
+
     def test_bookmark_list(self):
 
         query = """

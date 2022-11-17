@@ -14,7 +14,7 @@ from core.constances import ACCESS_TYPE
 class DownloadRichDescriptionAsTestCase(TenantTestCase):
 
     def setUp(self):
-        super(DownloadRichDescriptionAsTestCase, self).setUp()
+        super().setUp()
         self.c = TenantClient(self.tenant)
         self.authenticatedUser = mixer.blend(User)
         self.authenticatedAdminUser = mixer.blend(User, roles = ['ADMIN'])
@@ -35,6 +35,7 @@ class DownloadRichDescriptionAsTestCase(TenantTestCase):
         self.pad.delete()
         self.authenticatedUser.delete()
         self.authenticatedAdminUser.delete()
+        super().tearDown()
 
     def test_download_rich_description_as_html(self):
 

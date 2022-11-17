@@ -12,7 +12,7 @@ from django.utils import timezone
 class EditEventTestCase(PleioTenantTestCase):
 
     def setUp(self):
-        super(EditEventTestCase, self).setUp()
+        super().setUp()
         self.authenticatedUser = mixer.blend(User)
         self.user2 = mixer.blend(User)
         self.admin = mixer.blend(User, roles=[USER_ROLES.ADMIN])

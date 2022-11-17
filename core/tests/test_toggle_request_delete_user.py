@@ -7,7 +7,7 @@ from user.factories import UserFactory, AdminFactory
 class ToggleRequestDeleteUserTestCase(PleioTenantTestCase):
 
     def setUp(self):
-        super(ToggleRequestDeleteUserTestCase, self).setUp()
+        super().setUp()
 
         self.user1 = UserFactory(is_delete_requested=False)
         self.admin = AdminFactory()
@@ -25,6 +25,7 @@ class ToggleRequestDeleteUserTestCase(PleioTenantTestCase):
     def tearDown(self):
         self.user1.delete()
         self.admin.delete()
+        super().tearDown()
 
     def test_toggle_request_delete_not_logged_in(self):
         

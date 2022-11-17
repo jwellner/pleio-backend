@@ -10,7 +10,7 @@ from django.utils.text import slugify
 class WikiTestCase(PleioTenantTestCase):
 
     def setUp(self):
-        super(WikiTestCase, self).setUp()
+        super().setUp()
         self.authenticatedUser = mixer.blend(User)
         self.authenticatedUser2 = mixer.blend(User)
 
@@ -86,6 +86,7 @@ class WikiTestCase(PleioTenantTestCase):
         self.wikiPublic.delete()
         self.wikiPrivate.delete()
         self.authenticatedUser.delete()
+        super().tearDown()
 
     def test_news_anonymous(self):
         variables = {

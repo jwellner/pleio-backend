@@ -10,7 +10,7 @@ from mixer.backend.django import mixer
 class AddDiscussionTestCase(PleioTenantTestCase):
 
     def setUp(self):
-        super(AddDiscussionTestCase, self).setUp()
+        super().setUp()
         self.anonymousUser = AnonymousUser()
         self.authenticatedUser = mixer.blend(User)
         self.editorUser = mixer.blend(User, roles=[USER_ROLES.EDITOR])

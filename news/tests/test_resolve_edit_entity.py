@@ -10,7 +10,7 @@ from mixer.backend.django import mixer
 class EditNewsTestCase(PleioTenantTestCase):
 
     def setUp(self):
-        super(EditNewsTestCase, self).setUp()
+        super().setUp()
         self.authenticatedUser = mixer.blend(User)
         self.user2 = mixer.blend(User)
         self.editorUser = mixer.blend(User, roles=[USER_ROLES.EDITOR])

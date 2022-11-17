@@ -36,7 +36,7 @@ class GroupsEmptyTestCase(PleioTenantTestCase):
 class GroupsNotEmptyTestCase(PleioTenantTestCase):
 
     def setUp(self):
-        super(GroupsNotEmptyTestCase, self).setUp()
+        super().setUp()
         self.user = mixer.blend(User)
         self.group1 = mixer.blend(Group,
                                   name="Group 1")
@@ -70,6 +70,7 @@ class GroupsNotEmptyTestCase(PleioTenantTestCase):
         self.group1.delete()
         self.group2.delete()
         self.user.delete()
+        super().tearDown()
 
     def test_groups_default(self):
         result = self.graphql_client.post(self.query, {})
@@ -105,7 +106,7 @@ class GroupsNotEmptyTestCase(PleioTenantTestCase):
 class HiddenGroupTestCase(PleioTenantTestCase):
 
     def setUp(self):
-        super(HiddenGroupTestCase, self).setUp()
+        super().setUp()
         self.authenticated_user = mixer.blend(User, name="yy")
         self.group_member_user = mixer.blend(User, name="xx")
         self.non_member_user = mixer.blend(User, name="yyy")

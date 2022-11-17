@@ -7,7 +7,7 @@ from mixer.backend.django import mixer
 class SiteCustomAgreementsTestCase(PleioTenantTestCase):
 
     def setUp(self):
-        super(SiteCustomAgreementsTestCase, self).setUp()
+        super().setUp()
 
         self.user = UserFactory()
         self.admin = AdminFactory()
@@ -27,6 +27,7 @@ class SiteCustomAgreementsTestCase(PleioTenantTestCase):
     def tearDown(self):
         self.admin.delete()
         self.user.delete()
+        super().tearDown()
 
     def test_site_custom_agreements_by_admin(self):
         self.graphql_client.force_login(self.admin)

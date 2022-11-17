@@ -9,7 +9,7 @@ from django.utils.text import slugify
 class NewsTestCase(PleioTenantTestCase):
 
     def setUp(self):
-        super(NewsTestCase, self).setUp()
+        super().setUp()
         self.authenticatedUser = mixer.blend(User)
 
         self.newsPublic = News.objects.create(
@@ -75,6 +75,7 @@ class NewsTestCase(PleioTenantTestCase):
         self.newsPublic.delete()
         self.newsPrivate.delete()
         self.authenticatedUser.delete()
+        super().tearDown()
 
     def test_news_anonymous(self):
         variables = {

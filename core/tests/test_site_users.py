@@ -8,7 +8,7 @@ from user.models import User
 class SiteUsersTestCase(PleioTenantTestCase):
 
     def setUp(self):
-        super(SiteUsersTestCase, self).setUp()
+        super().setUp()
 
         self.user1 = UserFactory(name="Tt")
         self.user2 = UserFactory(name="Specific_user_name_1",
@@ -69,6 +69,7 @@ class SiteUsersTestCase(PleioTenantTestCase):
         self.user2.delete()
         self.user3.delete()
         self.user4.delete()
+        super().tearDown()
 
     def test_site_users_get_all_by_admin(self):
         self.graphql_client.force_login(self.admin1)

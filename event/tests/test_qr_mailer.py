@@ -20,7 +20,7 @@ from user.models import User
 class TestQrMailerTestCase(PleioTenantTestCase):
 
     def setUp(self):
-        super(TestQrMailerTestCase, self).setUp()
+        super().setUp()
 
         self.group: Group = mixer.blend(Group)
         self.owner: User = UserFactory()

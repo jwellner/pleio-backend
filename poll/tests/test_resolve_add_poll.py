@@ -44,6 +44,7 @@ class AddPollTestCase(PleioTenantTestCase):
 
     def tearDown(self):
         self.authenticatedUser.delete()
+        super().tearDown()
 
     def test_add_poll(self):
         variables = self.data

@@ -10,7 +10,7 @@ from user.models import User
 class TestDepublicationCronjobTestCase(PleioTenantTestCase):
 
     def setUp(self):
-        super(TestDepublicationCronjobTestCase, self).setUp()
+        super().setUp()
 
         self.owner = mixer.blend(User, name="owner", email="owner@example.com")
 

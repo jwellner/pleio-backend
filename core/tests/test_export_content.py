@@ -46,6 +46,7 @@ class TestExportContentTestCase(TenantTestCase):
 
     def tearDown(self):
         cache.clear()
+        super().tearDown()
 
     def test_export_content_blog_not_logged_in(self):
         response = self.c.get("/exporting/content/blog")

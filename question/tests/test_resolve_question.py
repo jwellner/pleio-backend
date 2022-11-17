@@ -12,7 +12,7 @@ from django.utils.text import slugify
 class QuestionTestCase(PleioTenantTestCase):
 
     def setUp(self):
-        super(QuestionTestCase, self).setUp()
+        super().setUp()
         self.authenticatedUser = mixer.blend(User)
 
         self.questionPublic = Question.objects.create(
@@ -103,6 +103,7 @@ class QuestionTestCase(PleioTenantTestCase):
         self.questionPrivate.delete()
         self.authenticatedUser.delete()
         cache.clear()
+        super().tearDown()
 
     def test_question_anonymous(self):
         variables = {

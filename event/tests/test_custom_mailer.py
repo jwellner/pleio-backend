@@ -14,7 +14,7 @@ from user.models import User
 class TestCustomMailerTestCase(PleioTenantTestCase):
 
     def setUp(self):
-        super(TestCustomMailerTestCase, self).setUp()
+        super().setUp()
 
         self.mutation = """
             mutation ($input: sendMessageToEventInput!) {

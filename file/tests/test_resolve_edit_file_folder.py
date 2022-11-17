@@ -14,7 +14,7 @@ from ..models import FileFolder
 class EditFileFolderTestCase(PleioTenantTestCase):
 
     def setUp(self):
-        super(EditFileFolderTestCase, self).setUp()
+        super().setUp()
         self.authenticatedUser = mixer.blend(User, name="Aut Hen Ticated")
         self.user1 = mixer.blend(User, name="User One")
         self.user2 = mixer.blend(User, name="Someone Else")

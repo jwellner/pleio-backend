@@ -21,6 +21,7 @@ class ToggleUserIsBannedTestCase(PleioTenantTestCase):
     def tearDown(self):
         self.user1.delete()
         self.admin.delete()
+        super().tearDown()
 
     def test_toggle_is_banned_by_anonymous(self):
         variables = {

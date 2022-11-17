@@ -9,7 +9,7 @@ from unittest.mock import MagicMock, patch
 class AddAttachmentTestCase(PleioTenantTestCase):
 
     def setUp(self):
-        super(AddAttachmentTestCase, self).setUp()
+        super().setUp()
 
         self.authenticatedUser = UserFactory()
         self.authenticatedUser2 = UserFactory()

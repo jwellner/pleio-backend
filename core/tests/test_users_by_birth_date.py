@@ -11,7 +11,7 @@ from core.lib import access_id_to_acl
 class UsersByBirthDateTestCase(PleioTenantTestCase):
 
     def setUp(self):
-        super(UsersByBirthDateTestCase, self).setUp()
+        super().setUp()
         self.user1 = mixer.blend(User, name="Tt")
         self.user2 = mixer.blend(User, name="Specific_user_name_1")
         self.user3 = mixer.blend(User, name="User3")
@@ -60,6 +60,7 @@ class UsersByBirthDateTestCase(PleioTenantTestCase):
         self.user4.delete()
         self.user5.delete()
         self.user6.delete()
+        super().tearDown()
 
     def test_users_by_birth_date_by_user(self):
         variables = {

@@ -9,7 +9,7 @@ from user.factories import AdminFactory, UserFactory
 class TestQueryJournalTestCase(PleioTenantTestCase):
 
     def setUp(self):
-        super(TestQueryJournalTestCase, self).setUp()
+        super().setUp()
 
         self.FIRST = 'test'
         self.SECOND = 'test123'

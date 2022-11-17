@@ -10,6 +10,7 @@ from core.lib import ACCESS_TYPE
 class UpdateEntitiesPublicToLoggedInTestCase(FastTenantTestCase):
 
     def setUp(self):
+        super().setUp()
         self.command = Command()
         self.command.stdout = mock.Mock()
         self.fake_tenant = 'no-tenant'
@@ -30,9 +31,9 @@ class UpdateEntitiesPublicToLoggedInTestCase(FastTenantTestCase):
             write_access=[ACCESS_TYPE.logged_in, ACCESS_TYPE.user.format("123")]
         )
 
-
     def tearDown(self):
         Entity.objects.all().delete()
+        super().tearDown()
 
     def test_update_read_access(self):
         self.command.handle()

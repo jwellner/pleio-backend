@@ -76,6 +76,7 @@ class TestAttendEventWithoutAccountConfirmMailerTestCase(PleioTenantTestCase):
 
 class TestLeaveUrlTestCase(FastTenantTestCase):
     def setUp(self):
+        super().setUp()
         from event.mail_builders.attend_event_confirm import LeaveUrl
         self.event = MagicMock()
         self.event.guid = "demo"
