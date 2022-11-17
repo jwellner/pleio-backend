@@ -37,4 +37,7 @@ services:
       - ${HOME}/opt/postgres/simple-replica/replica/postgresql.conf:/etc/postgresql/postgresql.conf
       - ${HOME}/opt/postgres/simple-replica/replica/data:/var/lib/postgresql/data
       - ${HOME}/opt/postgres/simple-replica/replica/pg_hba.conf:/var/lib/postgresql/data/pg_hba.conf
+      #- ${HOME}/opt/postgres/simple-replica/replica/bootstrap.postgresql.conf:/etc/postgresql/postgresql.conf
+      #- ${HOME}/opt/postgres/simple-replica/replica/bootstrap-data:/var/lib/postgresql/data
+      #- ${HOME}/opt/postgres/simple-replica/replica/data:/var/lib/postgresql-slave/data
     command: ["postgres", "-c", "config_file=/etc/postgresql/postgresql.conf"]
