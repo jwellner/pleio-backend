@@ -15,16 +15,18 @@ def restore_tag_categories():
     if is_schema_public():
         return
 
-    # Step one: restore the TAG_CATEGORIES value if needed.
-    json_filename = os.path.join(os.path.dirname(__file__), 'assets', 'all_tag_categories-22-11-02.json')
-    with open(json_filename, 'r') as fh:
-        data = json.load(fh) or {}
+    try:
+        # Step one: restore the TAG_CATEGORIES value if needed.
+        json_filename = os.path.join(os.path.dirname(__file__), 'assets', 'all_tag_categories-22-11-02.json')
+        with open(json_filename, 'r') as fh:
+            data = json.load(fh) or {}
+    except FileNotFoundError:
+        data = {}
 
     old_tag_categories = data.get(tenant_schema()) or []
     if old_tag_categories and not config.TAG_CATEGORIES:
         config.TAG_CATEGORIES = old_tag_categories
 
-    # Step two: re-process content, given the new tag_categories.
     restore_content_tag_categories(config.TAG_CATEGORIES)
 
 
@@ -52,27 +54,31 @@ class CategoryRestorer:
                 self.tag_repository[value] = tag_category['name']
 
     def process_article(self, article: TagsModel):
-        original_tags = article.tags
-        original_categories = article.category_tags
+        try:
+            original_tags = article.tags
+            original_categories = article.category_tags
 
-        all_tags = article.tags
-        for category_tag in article.category_tags:
-            for value in category_tag['values']:
-                all_tags.append(value)
+            all_tags = article.tags
+            for category_tag in article.category_tags:
+                for value in category_tag['values']:
+                    all_tags.append(value)
 
-        new_tags = []
-        new_category_tags = defaultdict(list)
+            new_tags = []
+            new_category_tags = defaultdict(list)
 
-        for tag in all_tags:
-            if tag in self.tag_repository:
-                new_category_tags[self.tag_repository[tag]].append(tag)
-            else:
-                new_tags.append(tag)
-        article.tags = new_tags
-        article.category_tags = [{'name': name, "values": values} for name, values in new_category_tags.items()]
+            for tag in all_tags:
+                if tag in self.tag_repository:
+                    new_category_tags[self.tag_repository[tag]].append(tag)
+                elif tag not in new_tags:
+                    new_tags.append(tag)
 
-        if article.tags != original_tags or article.category_tags != original_categories:
-            article.save()
+            article.tags = new_tags
+            article.category_tags = [{'name': name, "values": values} for name, values in new_category_tags.items()]
+
+            if article.tags != original_tags or article.category_tags != original_categories:
+                article.save()
+        except Exception:
+            pass
 
     def process_widget(self, widget: Widget):
         new_settings = []
@@ -103,24 +109,27 @@ class CategoryRestorer:
         return new_category_tags
 
     def process_profile(self, profile: UserProfile):
-        original_tags = profile.overview_email_tags
-        original_categories = profile.overview_email_categories
+        try:
+            original_tags = profile.overview_email_tags
+            original_categories = profile.overview_email_categories
 
-        all_tags = profile.overview_email_tags
-        for category_tag in profile.overview_email_categories:
-            for value in category_tag['values']:
-                all_tags.append(value)
+            all_tags = profile.overview_email_tags
+            for category_tag in profile.overview_email_categories:
+                for value in category_tag['values']:
+                    all_tags.append(value)
 
-        new_tags = []
-        new_category_tags = defaultdict(list)
+            new_tags = []
+            new_category_tags = defaultdict(list)
 
-        for tag in all_tags:
-            if tag in self.tag_repository:
-                new_category_tags[self.tag_repository[tag]].append(tag)
-            else:
-                new_tags.append(tag)
-        profile.overview_email_tags = new_tags
-        profile.overview_email_categories = [{'name': name, "values": values} for name, values in new_category_tags.items()]
+            for tag in all_tags:
+                if tag in self.tag_repository:
+                    new_category_tags[self.tag_repository[tag]].append(tag)
+                else:
+                    new_tags.append(tag)
+            profile.overview_email_tags = new_tags
+            profile.overview_email_categories = [{'name': name, "values": values} for name, values in new_category_tags.items()]
 
-        if profile.overview_email_tags != original_tags or profile.overview_email_categories != original_categories:
-            profile.save()
+            if profile.overview_email_tags != original_tags or profile.overview_email_categories != original_categories:
+                profile.save()
+        except Exception:
+            pass
