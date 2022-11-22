@@ -7,7 +7,7 @@ from django.urls import get_script_prefix, is_valid_path, resolve
 from django.utils import timezone, translation
 from django.utils.cache import patch_vary_headers
 from django.utils.deprecation import MiddlewareMixin
-from django.shortcuts import redirect, render
+from django.shortcuts import redirect
 from django.contrib.auth import logout
 
 from django.template.response import TemplateResponse
@@ -217,9 +217,7 @@ class OnboardingMiddleware:
 
 class RedirectMiddleware:
     """
-    Show onboarding when user has to complete mandatory fields
-
-    Note: new user onboaring is routed in authentication layer
+    Custom redirects configured by site admins
     """
 
     def __init__(self, get_response):
@@ -238,6 +236,29 @@ class RedirectMiddleware:
 
         return response
 
+class TenantPrimaryDomainRedirectMiddleware:
+    """
+    If current domain is not primary domain redirect to primary domain
+    """
+
+    def __init__(self, get_response):
+        self.get_response = get_response
+
+    def __call__(self, request):
+        response = self.get_response(request)
+        if hasattr(request, 'tenant'):
+            current_domain = request.get_host().split(':')[0]
+            primary_domain = request.tenant.primary_domain
+
+            if current_domain != primary_domain:
+                server_port = request.get_port()
+                if server_port != ('443' if request.is_secure() else '80'):
+                    primary_domain = '%s:%s' %(primary_domain, server_port)
+
+                redirect_url = f"%s://%s%s" % (request.scheme, primary_domain, request.get_full_path())
+                return redirect(redirect_url, permanent=True)
+
+        return response
 
 class UnsupportedBrowserMiddleware:
     """

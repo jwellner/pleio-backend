@@ -178,6 +178,7 @@ MIDDLEWARE = [
 ]
 
 TENANT_MIDDLEWARE = [
+    'core.middleware.TenantPrimaryDomainRedirectMiddleware',
     'core.middleware.CustomLocaleMiddleware',
     'core.middleware.AnonymousVisitorSessionMiddleware',
     'core.middleware.AcrCheckMiddleware',
