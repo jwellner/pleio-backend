@@ -122,6 +122,9 @@ def resolve_edit_site_setting(_, info, input):
 
         'startPage': 'STARTPAGE',
         'startPageCms': 'STARTPAGE_CMS',
+        'anonymousStartPage': 'ANONYMOUS_START_PAGE',
+        'anonymousStartPageCms': 'ANONYMOUS_START_PAGE_CMS',
+
         'showIcon': 'ICON_ENABLED',
         'iconAlt': 'ICON_ALT',
         'menuState': 'MENU_STATE',

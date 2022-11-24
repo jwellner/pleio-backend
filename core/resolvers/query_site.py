@@ -10,9 +10,11 @@ from core.models import UserProfile, ProfileField, SiteInvitation, SiteAccessReq
 from user.models import User
 from graphql import GraphQLError
 
+
 def get_online_users():
     ten_minutes_ago = timezone.now() - timezone.timedelta(minutes=10)
     return UserProfile.objects.filter(last_online__gte=ten_minutes_ago).count()
+
 
 def get_profile():
     profile_fields = []
@@ -23,7 +25,20 @@ def get_profile():
             continue
     return profile_fields
 
-def get_settings():
+
+def get_start_page(user):
+    if user.is_anonymous and config.ANONYMOUS_START_PAGE:
+        return {
+            "startPage": config.ANONYMOUS_START_PAGE,
+            "startPageCms": config.ANONYMOUS_START_PAGE_CMS,
+        }
+    return {
+        "startPage": config.STARTPAGE,
+        "startPageCms": config.STARTPAGE_CMS,
+    }
+
+
+def get_settings(user):
     """Temporary helper to build window.__SETTINGS__"""
 
     return {
@@ -31,8 +46,6 @@ def get_settings():
             "language": config.LANGUAGE,
             "name": config.NAME,
             "theme": config.THEME,
-            "startPage": config.STARTPAGE,
-            "startPageCms": config.STARTPAGE_CMS,
             "accessIds": get_access_ids(),
             "defaultAccessId": config.DEFAULT_ACCESS_ID,
             "likeIcon": config.LIKE_ICON,
@@ -40,6 +53,7 @@ def get_settings():
             "cookieConsent": config.COOKIE_CONSENT,
             "isClosed": config.IS_CLOSED,
             "newsletter": config.NEWSLETTER,
+            **get_start_page(user),
         },
         "backendVersion": config.BACKEND_VERSION,
         "env": settings.ENV,
@@ -54,7 +68,7 @@ def get_settings():
         "commentsOnNews": config.COMMENT_ON_NEWS,
         "eventExport": config.EVENT_EXPORT,
         'eventTiles': config.EVENT_TILES,
-        "subgroups":  config.SUBGROUPS,
+        "subgroups": config.SUBGROUPS,
         "statusUpdateGroups": config.STATUS_UPDATE_GROUPS,
         "showExtraHomepageFilters": config.ACTIVITY_FEED_FILTERS_ENABLED,
         "showViewsCount": config.SHOW_VIEW_COUNT,
@@ -72,9 +86,9 @@ def get_settings():
 
 def get_site_settings():
     defaultAccessIdOptions = [
-            {"value": 0, "label": ugettext_lazy("Just me")},
-            {"value": 1, "label": ugettext_lazy("Logged in users")}
-        ]
+        {"value": 0, "label": ugettext_lazy("Just me")},
+        {"value": 1, "label": ugettext_lazy("Logged in users")}
+    ]
 
     if not config.IS_CLOSED:
         defaultAccessIdOptions.append({"value": 2, "label": ugettext_lazy("Public")})
@@ -102,7 +116,7 @@ def get_site_settings():
 
         'googleAnalyticsId': config.GOOGLE_ANALYTICS_ID,
         'googleSiteVerification': config.GOOGLE_SITE_VERIFICATION,
-        'searchEngineIndexingEnabled' : config.ENABLE_SEARCH_ENGINE_INDEXING,
+        'searchEngineIndexingEnabled': config.ENABLE_SEARCH_ENGINE_INDEXING,
         'piwikUrl': config.PIWIK_URL,
         'piwikId': config.PIWIK_ID,
 
@@ -125,11 +139,12 @@ def get_site_settings():
         'favicon': config.FAVICON,
         'likeIcon': config.LIKE_ICON,
 
-        'startPageOptions': [{"value": "activity", "label": ugettext_lazy("Activity stream")},{"value": "cms", "label": ugettext_lazy("CMS page")}],
+        'startPageOptions': [{"value": "activity", "label": ugettext_lazy("Activity stream")}, {"value": "cms", "label": ugettext_lazy("CMS page")}],
         'startPage': config.STARTPAGE,
-
         'startPageCmsOptions': start_page_cms_options,
         'startPageCms': config.STARTPAGE_CMS,
+        'anonymousStartPage': config.ANONYMOUS_START_PAGE,
+        'anonymousStartPageCms': config.ANONYMOUS_START_PAGE_CMS,
         'icon': config.ICON if config.ICON else static('icon.svg'),
         'iconAlt': config.ICON_ALT,
         'showIcon': config.ICON_ENABLED,
@@ -262,8 +277,9 @@ def get_site_settings():
 
     return site_settings
 
+
 def resolve_site(*_):
-    return { 'guid': 1 }
+    return {'guid': 1}
 
 
 def resolve_site_settings(_, info):
@@ -288,12 +304,12 @@ def resolve_site_stats(_, info):
         raise GraphQLError(USER_NOT_SITE_ADMIN)
 
     try:
-        db_usage =  SiteStat.objects.filter(stat_type='DB_SIZE').latest('created_at').value
+        db_usage = SiteStat.objects.filter(stat_type='DB_SIZE').latest('created_at').value
     except Exception:
         db_usage = 0
 
     try:
-        file_disk_usage =  SiteStat.objects.filter(stat_type='DISK_SIZE').latest('created_at').value
+        file_disk_usage = SiteStat.objects.filter(stat_type='DISK_SIZE').latest('created_at').value
     except Exception:
         file_disk_usage = 0
 
