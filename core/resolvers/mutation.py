@@ -60,6 +60,7 @@ from .mutation_edit_user_name import resolve_edit_user_name
 from .mutation_add_comment_without_account import resolve_add_comment_without_account
 from .mutation_sign_site_agreement_version import resolve_sign_site_agreement_version
 from .mutation_remove_group_members import resolve_remove_group_members
+from .mutation_profileset_manager import resolve_mutation_add_profileset_manager, resolve_mutation_remove_profileset_manager
 
 mutation = ObjectType("Mutation")
 mutation.set_field("addGroup", resolve_add_group)
@@ -142,3 +143,6 @@ mutation.set_field("exportAvatars", resolve_export_avatars)
 
 mutation.set_field("scheduleAppointment", resolve_mutation_schedule_appointment)
 mutation.set_field("initiateVideocall", resolve_mutation_initiate_videocall)
+
+mutation.set_field("addProfileSetManager", resolve_mutation_add_profileset_manager)
+mutation.set_field("removeProfileSetManager", resolve_mutation_remove_profileset_manager)

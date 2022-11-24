@@ -1,6 +1,12 @@
 scalar DateTime
 scalar SecureRichText
 
+type ProfileSet {
+    id: String
+    name: String
+    field: ProfileItem
+}
+
 input acceptGroupInvitationInput {
     """The unique invite code."""
     code: String
@@ -1401,8 +1407,8 @@ type KeyValueItem {
 }
 
 type DownloadAsOption {
-  type: String!
-  url: String!
+    type: String!
+    url: String!
 }
 
 input leaveGroupInput {
@@ -1632,6 +1638,14 @@ type Mutation {
     scheduleAppointment(input: ScheduleAppointmentInput!): ScheduleAppointmentPayload
 
     initiateVideocall(userGuid: String!): InitiateVideocallPayload
+
+    addProfileSetManager(userGuid: String!, profileSetGuid: String!): ProfileSetManagerPayload
+    removeProfileSetManager(userGuid: String!, profileSetGuid: String!): ProfileSetManagerPayload
+}
+
+type ProfileSetManagerPayload {
+    user: User
+    profileSet: ProfileSet
 }
 
 type InitiateVideocallPayload {
@@ -1910,7 +1924,13 @@ type Query {
         limit: Int
     ): GroupList
     events(filter: EventFilter, containerGuid: String, offset: Int, limit: Int): EventList
-    users(q: String!, offset: Int, limit: Int, filters: [FilterInput]): UserList
+    users(
+        q: String!
+        offset: Int
+        limit: Int
+        filters: [FilterInput]
+        profileSetGuid: String
+    ): UserList
     members(groupGuid: String!, q: String, offset: Int, limit: Int, filters: [FilterInput]): MemberList
     entities(
         offset: Int
@@ -2423,6 +2443,7 @@ type SiteSettings {
     preserveFileExif: Boolean!
     supportContractEnabled: Boolean!
     supportContractHoursRemaining: Float
+    profileSets: [ProfileSet]
 }
 
 type StatsItem {
@@ -2611,6 +2632,7 @@ type User implements Entity {
     canDelete: Boolean
     canBan: Boolean
     isSuperadmin: Boolean
+    profileSetManager: [ProfileSet]
 }
 
 type UserFilter {
@@ -2654,6 +2676,7 @@ type Viewer {
     tagCategories: [TagCategory]
     canWriteToContainer(containerGuid: String, type: Type, subtype: String): Boolean!
     user: User
+    profileSetManager: [ProfileSet]
 }
 
 input voteInput {

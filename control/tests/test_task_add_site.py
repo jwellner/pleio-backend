@@ -1,12 +1,11 @@
 from django_tenants.utils import schema_context
 
 from control.tasks import add_site
-from core.tests.helpers import suppress_stdout
-from tenants.helpers import FastTenantTestCase
+from core.tests.helpers import PleioTenantTestCase, suppress_stdout
 from tenants.models import Client
 
 
-class TestTaskAddSiteTestCase(FastTenantTestCase):
+class TestTaskAddSiteTestCase(PleioTenantTestCase):
 
     @suppress_stdout()
     @schema_context('public')

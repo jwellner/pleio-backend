@@ -16,19 +16,51 @@
             <h5 class="card-header">Features</h5>
             <div class="card-body">
                 <div class="mb-2 form-check">
-                <input type="checkbox" name="collab_editing_enabled" id="collab_editing_enabled" {% if config.COLLAB_EDITING_ENABLED %} checked {% endif %} />
+                    <input type="checkbox" name="collab_editing_enabled" id="collab_editing_enabled" {% if config.COLLAB_EDITING_ENABLED %}
+                           checked {% endif %} />
                     <label for="collab_editing_enabled">Collaborative editing</label>
                 </div>
                 {{ form.errors.collab_editing_enabled }}
                 <div class="mb-2 form-check">
-                    <input type="checkbox" name="edit_user_name_enabled" id="edit_user_name_enabled" {% if config.EDIT_USER_NAME_ENABLED %} checked {% endif %} />
-                        <label for="edit_user_name_enabled">Enable edit name</label>
-                    </div>
-                    {{ form.errors.edit_user_name_enabled }}
+                    <input type="checkbox" name="edit_user_name_enabled" id="edit_user_name_enabled" {% if config.EDIT_USER_NAME_ENABLED %}
+                           checked {% endif %} />
+                    <label for="edit_user_name_enabled">Enable edit name</label>
+                </div>
+                {{ form.errors.edit_user_name_enabled }}
             </div>
         </div>
         <br>
         <button type="submit" class="btn btn-primary">Save</button>
     </form>
+    <br>
+    <div class="card">
+        <h5 class="card-header">Profile field sets</h5>
+        <div class="card-body">
+            {% if profile_sets %}
+                <table class="table">
+                    <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Field</th>
+                        <th></th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for profile_set in profile_sets %}
+                        <tr>
+                            <td>{{ profile_set.name }}</td>
+                            <td>{{ profile_set.field }}</td>
+                            <td>
+                                <a href="{% url "optional_features_edit_profile_field" profile_set.pk %}">edit</a> /
+                                <a href="{% url "optional_features_delete_profile_field" profile_set.pk %}">delete</a>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            {% endif %}
+            <a class="btn btn-primary" href="{% url "optional_features_add_profile_field" %}">Add profile field set</a>
+        </div>
+    </div>
 
 {% endblock %}
