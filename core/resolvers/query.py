@@ -1,5 +1,5 @@
 from ariadne import ObjectType
-from django.core.exceptions import ObjectDoesNotExist
+from django.core.exceptions import ObjectDoesNotExist, ValidationError
 from django.db.models import F
 from django.utils import timezone
 from graphql import GraphQLError
@@ -79,11 +79,9 @@ def resolve_entity(
 
     try:
         entity = Entity.objects.visible(user).get_subclass(id=guid)
-
         if entity.group and entity.group.is_closed and not entity.group.is_full_member(user) and not user.has_role(USER_ROLES.ADMIN):
             raise GraphQLError(USER_NOT_MEMBER_OF_GROUP)
-
-    except ObjectDoesNotExist:
+    except (ObjectDoesNotExist, ValidationError):
         pass
 
     # Also try to get User, Group, Comment
@@ -91,7 +89,7 @@ def resolve_entity(
     if not entity:
         try:
             entity = Group.objects.visible(user).get(id=guid)
-        except ObjectDoesNotExist:
+        except (ObjectDoesNotExist, ValidationError):
             pass
 
     if not entity:
@@ -99,7 +97,7 @@ def resolve_entity(
             if username:
                 guid = username
             entity = User.objects.visible(user).get(id=guid)
-        except ObjectDoesNotExist:
+        except (ObjectDoesNotExist, ValidationError):
             pass
 
     # check if draft exists
@@ -107,13 +105,13 @@ def resolve_entity(
         if user.is_authenticated:
             try:
                 entity = Entity.objects.draft(user).get_subclass(id=guid)
-            except ObjectDoesNotExist:
+            except (ObjectDoesNotExist, ValidationError):
                 pass
 
     if not entity:
         try:
             entity = Entity.objects.archived(user).get_subclass(id=guid)
-        except ObjectDoesNotExist:
+        except (ObjectDoesNotExist, ValidationError):
             pass
 
     if not entity:
