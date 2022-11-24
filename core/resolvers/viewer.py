@@ -10,6 +10,7 @@ logger = logging.getLogger(__name__)
 
 viewer = ObjectType("Viewer")
 
+
 @viewer.field('user')
 def resolve_user(_, info):
     user = info.context["request"].user
@@ -17,6 +18,7 @@ def resolve_user(_, info):
     if user.is_authenticated:
         return user
     return None
+
 
 @viewer.field('canWriteToContainer')
 def resolve_can_write_to_container(obj, info, containerGuid=None, subtype=None, type=None):
@@ -58,3 +60,9 @@ def resolve_can_write_to_container(obj, info, containerGuid=None, subtype=None, 
         return True
 
     return False
+
+
+@viewer.field("profileSetManager")
+def resolve_user_profile_set_manager(_, info):
+    user = info.context["request"].user
+    return user.profile_sets.all()

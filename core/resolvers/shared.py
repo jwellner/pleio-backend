@@ -300,8 +300,10 @@ def resolve_update_suggested_items(entity, clean_input):
     if 'suggestedItems' in clean_input:
         entity.suggested_items = clean_input.get("suggestedItems")
 
+
 def update_updated_at(entity):
     entity.updated_at = timezone.now()
+
 
 def update_publication_dates(entity, clean_input):
     if 'timePublished' in clean_input:
@@ -470,6 +472,11 @@ def assert_superadmin(user):
         raise GraphQLError(constances.USER_NOT_SUPERADMIN)
 
 
+def assert_is_profile_set_manager(user, profileSetGuid):
+    if not user.profile_sets.filter(pk=profileSetGuid).exists():
+        raise GraphQLError(constances.NOT_AUTHORIZED)
+
+
 def load_user(guid):
     try:
         return User.objects.get(id=guid)
@@ -496,8 +503,6 @@ def assert_valid_abstract(abstract):
     text = html_to_text(abstract).strip()
     if len(text) > config.MAX_CHARACTERS_IN_ABSTRACT:
         raise GraphQLError(constances.TEXT_TOO_LONG)
-
-
 
 
 def assert_isnt_me(left_user, right_user):

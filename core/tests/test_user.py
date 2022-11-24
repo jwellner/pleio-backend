@@ -1,4 +1,7 @@
+from mixer.backend.django import mixer
+
 from blog.factories import BlogFactory
+from core.models import ProfileField, ProfileSet, UserProfileField
 from core.tests.helpers import PleioTenantTestCase, ElasticsearchTestCase
 from user.factories import UserFactory, AdminFactory
 
@@ -157,3 +160,87 @@ class TestUserTestCase(PleioTenantTestCase):
 
         self.assertEqual(0, result['data']['users']['total'])
         self.assertEqual(0, len(result['data']['users']['edges']))
+
+
+class TestUserProfileSetTestCase(PleioTenantTestCase):
+    def setUp(self):
+        super().setUp()
+
+        self.manager = UserFactory()
+        self.similar_user = UserFactory()
+        self.other_user = UserFactory()
+
+        # Will not get the profile field at all.
+        self.invalid_user = UserFactory()
+
+        self.field = mixer.blend(ProfileField,
+                                 key="demo_field")
+        self.profile_set = ProfileSet.objects.create(
+            field=self.field,
+            name="Demo profile set"
+        )
+        self.profile_set.users.add(self.manager)
+        self.profile_set.users.add(self.invalid_user)
+
+        UserProfileField.objects.create(
+            user_profile=self.manager.profile,
+            profile_field=self.field,
+            value="similar",
+        )
+        UserProfileField.objects.create(
+            user_profile=self.similar_user.profile,
+            profile_field=self.field,
+            value="similar"
+        )
+        UserProfileField.objects.create(
+            user_profile=self.other_user.profile,
+            profile_field=self.field,
+            value="other"
+        )
+
+        self.query = """
+            query UserList($query: String!, $guid: String) {
+                users(q: $query, profileSetGuid: $guid) {
+                    total
+                    edges {
+                        guid
+                        email
+                    }
+                }
+            }
+        """
+
+        self.variables = {
+            'query': '',
+            'guid': self.profile_set.guid,
+        }
+
+    def tearDown(self):
+        self.manager.delete()
+        self.similar_user.delete()
+        self.other_user.delete()
+        self.invalid_user.delete()
+        self.field.delete()
+        super().tearDown()
+
+    def test_similar_users_as_manager(self):
+        ElasticsearchTestCase.initialize_index()
+        self.graphql_client.force_login(self.manager)
+        result = self.graphql_client.post(self.query, self.variables)
+
+        user_guids = [e['guid'] for e in result['data']['users']['edges']]
+        self.assertEqual(2, len(user_guids))
+        self.assertIn(self.manager.guid, user_guids)
+        self.assertIn(self.similar_user.guid, user_guids)
+
+    def test_similar_users_as_not_a_manager(self):
+        ElasticsearchTestCase.initialize_index()
+        with self.assertGraphQlError("not_authorized"):
+            self.graphql_client.force_login(self.similar_user)
+            self.graphql_client.post(self.query, self.variables)
+
+    def test_similar_users_as_invalid_user(self):
+        ElasticsearchTestCase.initialize_index()
+        with self.assertGraphQlError("missing_required_field:demo_field"):
+            self.graphql_client.force_login(self.invalid_user)
+            self.graphql_client.post(self.query, self.variables)

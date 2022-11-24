@@ -281,5 +281,11 @@ def resolve_missing_profile_fields(obj, info, groupGuid):
     return []
 
 
+@user.field("profileSetManager")
+def resolve_user_profile_set_manager(obj, info):
+    # pylint: disable=unused-argument
+    return obj.profile_sets.all()
+
+
 user.set_field('canDelete', shared.has_full_admin_abilities_on_user)
 user.set_field('canBan', shared.has_full_admin_abilities_on_user)

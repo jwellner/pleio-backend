@@ -6,7 +6,7 @@ from cms.models import Page
 from core import config
 from core.constances import NOT_LOGGED_IN, USER_NOT_SITE_ADMIN, USER_ROLES
 from core.lib import get_access_ids, get_activity_filters, get_exportable_user_fields, get_exportable_content_types, get_language_options
-from core.models import UserProfile, ProfileField, SiteInvitation, SiteAccessRequest, ProfileFieldValidator, SiteStat
+from core.models import UserProfile, ProfileField, SiteInvitation, SiteAccessRequest, ProfileFieldValidator, SiteStat, ProfileSet
 from user.models import User
 from graphql import GraphQLError
 
@@ -273,6 +273,7 @@ def get_site_settings():
         'preserveFileExif': config.PRESERVE_FILE_EXIF,
         'supportContractEnabled': config.SUPPORT_CONTRACT_ENABLED,
         'supportContractHoursRemaining': config.SUPPORT_CONTRACT_HOURS_REMAINING,
+        'profileSets': ProfileSet.objects.all()
     }
 
     return site_settings

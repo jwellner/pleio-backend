@@ -1,0 +1,20 @@
+{% extends "superadmin/base.html" %}
+
+{% load i18n %}
+
+{% block content %}
+
+    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+        <h1 class="h2">{{ title }}</h1>
+    </div>
+
+    <form method="post">
+        {% csrf_token %}
+        <input type="hidden" name="confirmed" value="true">
+        <p>Are you sure that you want to remove {{ profile_set.name }}? This action can not be undone.</p>
+        <br>
+        <button type="submit" class="btn btn-primary">Remove</button>
+        <a href="{% url "optional_features" %}" class="btn btn-primary">Cancel</a>
+    </form>
+
+{% endblock %}

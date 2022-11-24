@@ -129,3 +129,28 @@ class MeetingsSettingsForm(forms.Form):
         config.VIDEOCALL_ENABLED = bool(self.cleaned_data['videocall_enabled'])
         config.VIDEOCALL_API_URL = self.cleaned_data['videocall_api_url'] or None
         config.VIDEOCALL_PROFILEPAGE = self.cleaned_data['videocall_profilepage'] or None
+
+
+class ProfileSetForm(forms.Form):
+    name = forms.CharField(
+        label=ugettext_lazy("Name"),
+        max_length=255,
+        required=True)
+    field = forms.ModelChoiceField(
+        label=ugettext_lazy("Profile field"),
+        queryset=ProfileField.objects.all(),
+        widget=forms.Select,
+    )
+
+    @staticmethod
+    def initial_values(profile_set):
+        # pylint: disable=protected-access
+        return {
+            "name": profile_set.name or '',
+            "field": profile_set.field.id if not profile_set._state.adding else None,
+        }
+
+    def save(self, profile_set):
+        profile_set.name = self.cleaned_data['name']
+        profile_set.field = self.cleaned_data['field']
+        profile_set.save()

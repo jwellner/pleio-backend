@@ -30,8 +30,10 @@ class PleioTenantTestCase(FastTenantTestCase):
         super().setUp()
         self.graphql_client = GraphQLClient()
         self.file_cleanup = []
-        mock.patch("logging.Logger.warning").start()
         self.settings_cache = {}
+
+        self.mocked_log_warning = mock.patch("logging.Logger.warning").start()
+        self.mocked_warn = mock.patch("warnings.warn").start()
 
     def file_factory(self, filepath):
         from file.models import FileFolder
@@ -177,12 +179,11 @@ class ElasticsearchTestCase(PleioTenantTestCase):
     @staticmethod
     @override_settings(ENV='test')
     def initialize_index():
-        with suppress_stdout():
-            from core.lib import tenant_schema
-            from core.tasks.elasticsearch_tasks import elasticsearch_recreate_indices, elasticsearch_index_data_for_tenant
-            elasticsearch_recreate_indices()
-            elasticsearch_index_data_for_tenant(tenant_schema(), None)
-            time.sleep(.200)
+        from core.lib import tenant_schema
+        from core.tasks.elasticsearch_tasks import elasticsearch_recreate_indices, elasticsearch_index_data_for_tenant
+        elasticsearch_recreate_indices()
+        elasticsearch_index_data_for_tenant(tenant_schema(), None)
+        time.sleep(.200)
 
 
 class QuerySetWith:

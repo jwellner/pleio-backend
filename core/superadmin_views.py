@@ -1,12 +1,13 @@
 import json
 import logging
 import os
+from typing import Dict
 
 from auditlog.models import LogEntry
 from datetime import timedelta
 
 from django.conf import settings
-from django.shortcuts import render
+from django.shortcuts import render, get_object_or_404
 from django.contrib import messages
 from django.contrib.auth.decorators import user_passes_test, login_required
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
@@ -16,8 +17,8 @@ from django.views import View
 from django.utils import timezone
 from celery.result import AsyncResult
 from core.constances import OIDC_PROVIDER_OPTIONS
-from core.forms import MeetingsSettingsForm
-from core.models import Group
+from core.forms import MeetingsSettingsForm, ProfileSetForm
+from core.models import Group, ProfileSet
 from core.models.agreement import CustomAgreement
 from core.tasks import replace_domain_links, elasticsearch_rebuild_for_tenant
 from core.lib import tenant_schema, is_valid_domain
@@ -282,15 +283,71 @@ def meetings_settings(request):
 class OptionalFeatures(SuperAdminView):
     http_method_names = ['post', 'get']
 
+    def get_context(self, context):
+        context.update({
+            'profile_sets': ProfileSet.objects.all()
+        })
+        return context
+
     def post(self, request):
         form = OptionalFeaturesForm(request.POST)
         if form.is_valid():
             form.save()
             return redirect('/superadmin/optional_features')
 
-        context = {'form': form}
-
-        return render(request, 'superadmin/optional_features.html', context)
+        return render(request, 'superadmin/optional_features.html', self.get_context({
+            'form': form,
+        }))
 
     def get(self, request):
-        return render(request, 'superadmin/optional_features.html')
+        return render(request, 'superadmin/optional_features.html', self.get_context({}))
+
+
+@login_required
+@user_passes_test(lambda u: u.is_superadmin, login_url='/', redirect_field_name=None)
+def profileset_add(request):
+    if request.method == 'POST':
+        form = ProfileSetForm(request.POST)
+        if form.is_valid():
+            form.save(ProfileSet())
+            return redirect('/superadmin/optional_features')
+    else:
+        form = ProfileSetForm(ProfileSetForm.initial_values(ProfileSet()))
+
+    return render(request, 'superadmin/profile_set_form.html', {
+        'title': "Create new profile-set",
+        'form': form
+    })
+
+
+@login_required
+@user_passes_test(lambda u: u.is_superadmin, login_url='/', redirect_field_name=None)
+def profileset_edit(request, pk):
+    profile_set = get_object_or_404(ProfileSet, pk=pk)
+    if request.method == 'POST':
+        form = ProfileSetForm(request.POST)
+        if form.is_valid():
+            form.save(profile_set)
+            return redirect('/superadmin/optional_features')
+    else:
+        form = ProfileSetForm(ProfileSetForm.initial_values(profile_set))
+
+    return render(request, 'superadmin/profile_set_form.html', {
+        'title': "Update profile-set %s" % profile_set.name,
+        'profile_set': profile_set,
+        'form': form
+    })
+
+
+@login_required
+@user_passes_test(lambda u: u.is_superadmin, login_url='/', redirect_field_name=None)
+def profileset_delete(request, pk):
+    profile_set = get_object_or_404(ProfileSet, pk=pk)
+    if request.method == 'POST':
+        if request.POST['confirmed'] == 'true':
+            profile_set.delete()
+            return redirect('/superadmin/optional_features')
+
+    return render(request, 'superadmin/profile_set_delete_form.html', {
+        'profile_set': profile_set,
+    })
