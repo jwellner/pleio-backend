@@ -66,6 +66,8 @@ class EditSiteSettingTestCase(PleioTenantTestCase):
 
                         startPage
                         startPageCms
+                        anonymousStartPage
+                        anonymousStartPageCms
                         showIcon
                         icon
                         iconAlt
@@ -222,6 +224,8 @@ class EditSiteSettingTestCase(PleioTenantTestCase):
 
                 "startPage": "cms",
                 "startPageCms": "123456",
+                "anonymousStartPage": '',
+                "anonymousStartPageCms": '',
                 "showIcon": True,
                 "iconAlt": "iconAlt",
                 # TODO: "icon": "",
@@ -361,6 +365,8 @@ class EditSiteSettingTestCase(PleioTenantTestCase):
 
         self.assertEqual(data["editSiteSetting"]["siteSettings"]["startPage"], "cms")
         self.assertEqual(data["editSiteSetting"]["siteSettings"]["startPageCms"], "123456")
+        self.assertEqual(data["editSiteSetting"]["siteSettings"]["anonymousStartPage"], "")
+        self.assertEqual(data["editSiteSetting"]["siteSettings"]["anonymousStartPageCms"], "")
         self.assertEqual(data["editSiteSetting"]["siteSettings"]["showIcon"], True)
         self.assertEqual(data["editSiteSetting"]["siteSettings"]["iconAlt"], "iconAlt")
         # TODO: self.assertEqual(data["editSiteSetting"]["siteSettings"]["icon"], "heart")

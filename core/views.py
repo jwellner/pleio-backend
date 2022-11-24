@@ -61,7 +61,7 @@ def default(request, exception=None):
 
     context = {
         'webpack_dev_server': settings.WEBPACK_DEV_SERVER,
-        'json_settings': json.dumps(get_settings()),
+        'json_settings': json.dumps(get_settings(request.user)),
         'metadata': metadata,
     }
 
@@ -116,7 +116,7 @@ def entity_view(request, entity_id=None, entity_title=None):
 
     context = {
         'webpack_dev_server': settings.WEBPACK_DEV_SERVER,
-        'json_settings': json.dumps(get_settings()),
+        'json_settings': json.dumps(get_settings(request.user)),
         'metadata': metadata
     }
 
@@ -391,6 +391,7 @@ def export_group_members(request, group_id=None):
 
     return response
 
+
 def export_selected_content(request):
     user = request.user
 
@@ -408,7 +409,7 @@ def export_selected_content(request):
 
     temp_file_path = get_tmp_file_path(user, ".zip")
     zipf = zipfile.ZipFile(temp_file_path, 'w', zipfile.ZIP_DEFLATED)
-    
+
     for content_type in exportable_content_types:
         Model = get_model_by_subtype(content_type)
         entities = Model.objects.filter(id__in=content_ids)
@@ -420,8 +421,9 @@ def export_selected_content(request):
 
     response = FileResponse(open(temp_file_path, 'rb'))
     response['Content-Disposition'] = "attachment; filename=content_export.zip"
- 
+
     return response
+
 
 def export_content(request, content_type=None):
     user = request.user
@@ -670,7 +672,6 @@ def site_custom_agreement(request, custom_agreement_id):
 
 
 def download_rich_description_as(request, entity_id=None, file_type=None):
-
     def replace_html_img_src(html, user, file_type):
         def get_img_src(path, user):
             if file_type in ['odt']:
@@ -690,7 +691,6 @@ def download_rich_description_as(request, entity_id=None, file_type=None):
             img['src'] = get_img_src(img['src'], user)
         return str(soup)
 
-
     user = request.user
     entity = None
 
@@ -709,7 +709,7 @@ def download_rich_description_as(request, entity_id=None, file_type=None):
     if not entity.rich_description:
         raise Http404("Entity rich description not found")
 
-    filename = 'file_contents' 
+    filename = 'file_contents'
     if entity.title:
         filename = entity.title
 
