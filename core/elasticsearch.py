@@ -57,22 +57,20 @@ class CustomSignalProcessor(BaseSignalProcessor):
             log_elasticsearch_error('sending delete task', e, instance)
 
     def setup(self):
-        if not is_schema_public():
-            # Listen to all model saves.
-            models.signals.post_save.connect(self.handle_save)
-            models.signals.post_delete.connect(self.handle_delete)
+        # Listen to all model saves.
+        models.signals.post_save.connect(self.handle_save)
+        models.signals.post_delete.connect(self.handle_delete)
 
-            # Use to manage related objects update
-            models.signals.m2m_changed.connect(self.handle_m2m_changed)
-            models.signals.pre_delete.connect(self.handle_pre_delete)
+        # Use to manage related objects update
+        models.signals.m2m_changed.connect(self.handle_m2m_changed)
+        models.signals.pre_delete.connect(self.handle_pre_delete)
 
     def teardown(self):
-        if not is_schema_public():
-            # Listen to all model saves.
-            models.signals.post_save.disconnect(self.handle_save)
-            models.signals.post_delete.disconnect(self.handle_delete)
-            models.signals.m2m_changed.disconnect(self.handle_m2m_changed)
-            models.signals.pre_delete.disconnect(self.handle_pre_delete)
+        # Listen to all model saves.
+        models.signals.post_save.disconnect(self.handle_save)
+        models.signals.post_delete.disconnect(self.handle_delete)
+        models.signals.m2m_changed.disconnect(self.handle_m2m_changed)
+        models.signals.pre_delete.disconnect(self.handle_pre_delete)
 
 
 def retry_index_document(instance):

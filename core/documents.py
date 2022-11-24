@@ -2,6 +2,8 @@ from django_elasticsearch_dsl import Document, fields
 from django_elasticsearch_dsl.registries import registry
 from django_tenants.utils import parse_tenant_config_path
 from elasticsearch_dsl import analysis, analyzer
+
+from .lib import is_schema_public
 from .models.user import UserProfile, UserProfileField
 from .models.group import Group, GroupMembership
 from user.models import User
@@ -117,9 +119,13 @@ class UserDocument(DefaultDocument):
         return related_instance.user_profile.user
 
     def get_queryset(self):
+        if is_schema_public():
+            return super().get_queryset().none()
         return super().get_queryset().filter(is_superadmin=False)
 
     def should_index_object(self, obj):
+        if is_schema_public():
+            return False
         return not getattr(obj, 'is_superadmin', False)
 
 
