@@ -22,6 +22,14 @@ class Client(TenantMixin):
             return primary.domain
         return None
 
+    def save(self, *args, **kwargs):
+        is_new = self._state.adding
+        super(Client, self).save(*args, **kwargs)
+
+        if is_new:
+            from tenants.tasks import update_post_deploy_tasks
+            update_post_deploy_tasks.delay(self.schema_name)
+
 
 class Domain(DomainMixin):
     pass
