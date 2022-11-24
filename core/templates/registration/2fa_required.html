@@ -9,7 +9,7 @@
     {% blocktrans %}To gain access to this site, you need to improve the security of your account with two-factor authentication. In case you are using the Single-Sign-On of your organisation, you will only need to log in again.{% endblocktrans %}
 </p>
 
-<a href="{% url 'login' %}" class="button ___medium rel="nofollow">
+<a href="{% url 'logout' %}" class="button ___medium rel="nofollow">
     {% blocktrans %}Log in again{% endblocktrans %}
 </a>
 <a href="{{ endpoint_2fa }}" class="button ___medium rel="nofollow">
