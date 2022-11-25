@@ -16,12 +16,8 @@ class SiteTestCase(PleioTenantTestCase):
         self.profileField1 = ProfileField.objects.create(key='text_key1', name='text_name', field_type='text_field')
         self.profileField2 = ProfileField.objects.create(key='text_key2', name='text_name', field_type='date_field')
 
-        cache.set("%s%s" % (connection.schema_name, 'PROFILE_SECTIONS'),
-                  [{"name": "section_one", "profileFieldGuids": [self.profileField1.guid, self.profileField2.guid]}]
-                  )
-        cache.set("%s%s" % (connection.schema_name, 'COLLAB_EDITING_ENABLED'),
-                  True
-                  )
+        self.override_config(PROFILE_SECTIONS=[{"name": "section_one", "profileFieldGuids": [self.profileField1.guid, self.profileField2.guid]}])
+        self.override_config(COLLAB_EDITING_ENABLED=True)
 
         self.query = """
             query testSite {
@@ -129,7 +125,7 @@ class SiteTestCase(PleioTenantTestCase):
         super().tearDown()
 
     def test_site(self):
-        cache.set("%s%s" % (connection.schema_name, 'IS_CLOSED'), False)
+        self.override_config(IS_CLOSED=False)
 
         self.graphql_client.force_login(self.user)
         result = self.graphql_client.post(self.query, {})
