@@ -644,7 +644,6 @@ class EntitiesEventsTestCase(PleioTenantTestCase):
             self.graphql_client.force_login(self.user2)
             self.graphql_client.post(self.query, variables)
 
-
     def test_entities_filter_by_upcoming(self):
         variables = {
             "limit": 20,
@@ -657,7 +656,6 @@ class EntitiesEventsTestCase(PleioTenantTestCase):
         result = self.graphql_client.post(self.query, variables)
         self.assertEqual(len(result["data"]["entities"]["edges"]), 2)
         self.assertEqual(result["data"]["entities"]["edges"][0]["guid"], self.event_in_6_days.guid)
-
 
     def test_entities_filter_by_previous(self):
         variables = {
@@ -672,7 +670,6 @@ class EntitiesEventsTestCase(PleioTenantTestCase):
         self.assertEqual(len(result["data"]["entities"]["edges"]), 2)
         self.assertEqual(result["data"]["entities"]["edges"][0]["guid"], self.event_3_days_ago.guid)
 
-
     def test_entities_blog_event_filter_by_previous(self):
         variables = {
             "limit": 20,
@@ -684,3 +681,18 @@ class EntitiesEventsTestCase(PleioTenantTestCase):
         with self.assertGraphQlError(COULD_NOT_USE_EVENT_FILTER):
             self.graphql_client.force_login(self.user2)
             self.graphql_client.post(self.query, variables)
+
+
+class EdgeCaseEntitiesTestCase(PleioTenantTestCase):
+    def test_invalid_guid_entity_query(self):
+        query = """
+        query GetEntity($guid: String!) {
+            entity(guid: $guid) {
+                guid
+            }
+        }
+        """
+        variables = {'guid': 'improper-format-guid'}
+        response = self.graphql_client.post(query, variables)
+
+        self.assertIsNone(response['data']['entity'])

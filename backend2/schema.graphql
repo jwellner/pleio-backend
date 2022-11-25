@@ -827,6 +827,8 @@ input editSiteSettingInput {
     likeIcon: String
     startPage: String
     startPageCms: String
+    anonymousStartPage: String
+    anonymousStartPageCms: String
     icon: Upload
     showIcon: Boolean
     removeIcon: Boolean
@@ -2320,6 +2322,8 @@ type SiteSettings {
     startPageOptions: [Option]
     startPageCms: String
     startPageCmsOptions: [Option]
+    anonymousStartPage: String
+    anonymousStartPageCms: String
     icon: String
     showIcon: Boolean!
     menu: [MenuItem]

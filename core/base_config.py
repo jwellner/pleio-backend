@@ -43,9 +43,11 @@ DEFAULT_SITE_CONFIG = {
     'ICON': ('', 'Icon'),
     'ICON_ALT': ('', 'Icon alt text'),
     'ICON_ENABLED': (False, 'Icon enabled'),
-    'STARTPAGE': ('activity', 'Startpage'),
 
+    'STARTPAGE': ('activity', 'Startpage'),
     'STARTPAGE_CMS': ('', 'Startpage cms'),
+    'ANONYMOUS_START_PAGE': ('', 'Start page type for anonymous visitors'),
+    'ANONYMOUS_START_PAGE_CMS': ('', 'Start page CMS page guid for anonymous visitors'),
 
     'NUMBER_OF_FEATURED_ITEMS': (0, 'Number of featured items'),
     'ENABLE_FEED_SORTING': (False, 'Enable feed sorting'),

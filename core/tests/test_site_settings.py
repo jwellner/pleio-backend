@@ -1,6 +1,9 @@
+import uuid
+
 from django.db import connection
 from core.models import ProfileField, SiteInvitation, SiteAccessRequest
 from core.tests.helpers import PleioTenantTestCase
+from user.factories import UserFactory
 from user.models import User
 from cms.models import Page
 from django.contrib.auth.models import AnonymousUser
@@ -14,7 +17,7 @@ class SiteSettingsTestCase(PleioTenantTestCase):
     def setUp(self):
         super().setUp()
 
-        cache.set("%s%s" % (connection.schema_name, 'IS_CLOSED'), False)
+        self.override_config(IS_CLOSED=False)
 
         self.user = mixer.blend(User, is_delete_requested=False)
         self.admin = mixer.blend(User, roles=['ADMIN'], is_delete_requested=False)
@@ -26,6 +29,9 @@ class SiteSettingsTestCase(PleioTenantTestCase):
         self.profileField2 = ProfileField.objects.create(key='text_key2', name='text_name', field_type='text_field')
         self.siteInvitation = mixer.blend(SiteInvitation, email='a@a.nl')
         self.siteAccessRequest = mixer.blend(SiteAccessRequest, email='b@b.nl', name='b')
+
+        self.override_config(ANONYMOUS_START_PAGE='cms')
+        self.override_config(ANONYMOUS_START_PAGE_CMS=self.cmsPage2.guid)
 
         self.query = """
             query SiteGeneralSettings {
@@ -79,6 +85,8 @@ class SiteSettingsTestCase(PleioTenantTestCase):
                         label
                     }
                     startPageCms
+                    anonymousStartPage
+                    anonymousStartPageCms
                     showIcon
                     icon
                     menu {
@@ -284,6 +292,8 @@ class SiteSettingsTestCase(PleioTenantTestCase):
         self.assertEqual(data["siteSettings"]["favicon"], "")
         self.assertEqual(data["siteSettings"]["likeIcon"], "heart")
 
+        self.assertEqual(data['siteSettings']['anonymousStartPage'], 'cms')
+        self.assertEqual(data['siteSettings']['anonymousStartPageCms'], self.cmsPage2.guid)
         self.assertEqual(data["siteSettings"]["startPageOptions"],
                          [{"value": "activity", "label": "Activiteitenstroom"},
                           {"value": "cms", "label": "CMS pagina"}])
@@ -598,3 +608,36 @@ class SiteSettingsIsClosedTestCase(PleioTenantTestCase):
         response = self.client.get("/981random3", REMOTE_ADDR='10.10.10.10')
 
         self.assertTemplateNotUsed(response, 'registration/login.html')
+
+
+class TestSiteSettingsJavascriptSection(PleioTenantTestCase):
+
+    def setUp(self):
+        super().setUp()
+
+        self.authenticated_user = UserFactory()
+
+        self.override_config(IS_CLOSED=False)
+
+        self.AUTHENTICATED_UUID = str(uuid.uuid4())
+        self.ANONYMOUS_UUID = str(uuid.uuid4())
+
+        self.override_config(STARTPAGE='cms',
+                             STARTPAGE_CMS=self.AUTHENTICATED_UUID)
+        self.override_config(ANONYMOUS_START_PAGE='cms',
+                             ANONYMOUS_START_PAGE_CMS=self.ANONYMOUS_UUID)
+
+    def test_anonymous(self):
+        response = self.client.get('')
+        content = response.content.decode()
+
+        self.assertNotIn(self.AUTHENTICATED_UUID, content)
+        self.assertIn(self.ANONYMOUS_UUID, content)
+
+    def test_authenticated_user(self):
+        self.client.force_login(self.authenticated_user)
+        response = self.client.get('')
+        content = response.content.decode()
+
+        self.assertIn(self.AUTHENTICATED_UUID, content)
+        self.assertNotIn(self.ANONYMOUS_UUID, content)
