@@ -1,5 +1,6 @@
 from mixer.backend.django import mixer
 
+from blog.factories import BlogFactory
 from blog.models import Blog
 from core.constances import ACCESS_TYPE
 from core.models import Group
@@ -9,6 +10,7 @@ from news.models import News
 from user.factories import UserFactory
 from wiki.models import Wiki
 
+
 class SearchTestCase(ElasticsearchTestCase):
 
     def setUp(self):
@@ -17,7 +19,7 @@ class SearchTestCase(ElasticsearchTestCase):
         self.common_tag1 = "Alles moet weg"
         self.common_tag2 = "Niets blijft staan"
         self.q = "Alles"
-        
+
         self.group = mixer.blend(Group)
         self.user = UserFactory()
         self.user2 = UserFactory()
@@ -52,7 +54,7 @@ class SearchTestCase(ElasticsearchTestCase):
         self.pad = FileFolder.objects.create(
             type=FileFolder.Types.PAD,
             title="Test group pad",
-            rich_description={"type":"doc","content":[{"type":"paragraph","content":[{"type":"text","text":"padtest"}]}]},
+            rich_description={"type": "doc", "content": [{"type": "paragraph", "content": [{"type": "text", "text": "padtest"}]}]},
             read_access=[ACCESS_TYPE.public],
             write_access=[ACCESS_TYPE.user.format(self.user.id)],
             owner=self.user,
@@ -73,7 +75,6 @@ class SearchTestCase(ElasticsearchTestCase):
         self.news3 = mixer.blend(News, title=self.common_tag2, **permission2)
 
     def test_invalid_subtype(self):
-
         with self.assertGraphQlError("invalid_subtype"):
             self.graphql_client.force_login(self.user)
             self.graphql_client.post(self.query, {
@@ -89,7 +90,6 @@ class SearchTestCase(ElasticsearchTestCase):
             })
 
     def test_multiple_subtypes(self):
-
         variables = {
             "q": self.q,
             "subtypes": ["blog", "wiki", "pad"],
@@ -138,7 +138,6 @@ class SearchTestCase(ElasticsearchTestCase):
             self.graphql_client.post(query, variables)
 
     def test_pad_search(self):
-
         variables = {
             "q": "padtest",
             "subtype": "pad"
@@ -190,3 +189,86 @@ class SearchTestCase(ElasticsearchTestCase):
         self.assertIn(self.news3.guid, items)
         self.assertNotIn(self.news1.guid, items)
         self.assertNotIn(self.blog1.guid, items)
+
+
+class TestCaseSensitivityTitleSortingSearchTestCase(ElasticsearchTestCase):
+
+    def setUp(self):
+        super().setUp()
+        self.owner = UserFactory()
+        self.lowercase = BlogFactory(owner=self.owner,
+                                     title="the quick brown fox")
+        self.uppercase = BlogFactory(owner=self.owner,
+                                     title="The Quick Fox is brown")
+        self.lowercase2 = BlogFactory(owner=self.owner,
+                                      title="i'm quick but that's ok")
+        self.uppercase2 = BlogFactory(owner=self.owner,
+                                      title="I'm Quick if that's OK with you")
+        self.uppercase3 = BlogFactory(owner=self.owner,
+                                      title="That's Quick!")
+
+        self.expected_order = sorted([self.lowercase,
+                                      self.lowercase2,
+                                      self.uppercase,
+                                      self.uppercase2,
+                                      self.uppercase3], key=lambda b: b.title.lower())
+
+    def tearDown(self):
+        self.lowercase.delete()
+        self.lowercase2.delete()
+        self.uppercase.delete()
+        self.uppercase2.delete()
+        self.uppercase3.delete()
+        self.owner.delete()
+        super().tearDown()
+
+    def test_search_query(self):
+        self.initialize_index()
+        query = """
+            query Search($query: String!, $orderBy: SearchOrderBy) {
+                search(q: $query, orderBy: $orderBy) {
+                    edges {
+                        guid
+                        ... on Blog {
+                            title
+                        }
+                    }
+                }
+            }
+        """
+        variables = {
+            "query": '',
+            "orderBy": 'title'
+        }
+        self.graphql_client.force_login(self.owner)
+        response = self.graphql_client.post(query, variables)
+
+        expected_titles = [b.title for b in self.expected_order]
+        actual_titles = [edge['title'] for edge in response['data']['search']['edges']]
+
+        self.assertEqual(expected_titles, actual_titles)
+
+    def test_entities_query(self):
+        query = """
+            query Search($orderBy: OrderBy, $orderDirection: OrderDirection) {
+                entities(orderBy: $orderBy, orderDirection: $orderDirection) {
+                    edges {
+                        guid
+                        ... on Blog {
+                            title
+                        }
+                    }
+                }
+            }
+        """
+        variables = {
+            "orderBy": "title",
+            "orderDirection": "asc",
+        }
+        self.graphql_client.force_login(self.owner)
+        response = self.graphql_client.post(query, variables)
+
+        expected_titles = [b.title for b in self.expected_order]
+        actual_titles = [edge['title'] for edge in response['data']['entities']['edges']]
+
+        self.assertEqual(expected_titles, actual_titles)
