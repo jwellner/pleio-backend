@@ -1,7 +1,7 @@
 import logging
 
-from django.db.models import Q
-from django.db.models.functions import Coalesce
+from django.db.models import Q, F
+from django.db.models.functions import Coalesce, Lower
 from core.constances import (ORDER_DIRECTION, ORDER_BY, INVALID_SUBTYPE,
                              COULD_NOT_ORDER_BY_START_DATE, COULD_NOT_USE_EVENT_FILTER)
 from core.lib import early_this_morning
@@ -156,7 +156,7 @@ def resolve_entities(
     elif orderBy == ORDER_BY.lastAction:
         order_by = 'last_action'
     elif orderBy == ORDER_BY.title:
-        order_by = 'title'
+        order_by = 'sort_title'
     elif orderBy == ORDER_BY.startDate:
         if subtypes == ['event']:
             order_by = 'event__start_date'
@@ -167,15 +167,6 @@ def resolve_entities(
 
     if orderDirection == ORDER_DIRECTION.desc:
         order_by = '-%s' % (order_by)
-
-    if order_by == '-title':
-        order_by = Coalesce('news__title', 'blog__title', 'filefolder__title', 'poll__title', 'statusupdate__title',
-                            'wiki__title',
-                            'page__title', 'question__title', 'discussion__title', 'event__title').desc()
-    elif order_by == 'title':
-        order_by = Coalesce('news__title', 'blog__title', 'filefolder__title', 'poll__title', 'statusupdate__title',
-                            'wiki__title',
-                            'page__title', 'question__title', 'discussion__title', 'event__title').asc()
 
     if statusPublished and len(statusPublished) > 0:
         entities = Model.objects.status_published(statusPublished, info.context["request"].user)
@@ -200,11 +191,25 @@ def resolve_entities(
     # when page is selected change sorting and only return pages without parent
     if subtype and subtype == 'page':
         entities = entities.filter(page__parent=None)
-        order_by = 'page__title'
+        entities = entities.annotate(sort_title=Lower("page__title"))
+        order_by = 'sort_title'
 
     # only return wiki's without parent
-    if subtype and subtype == 'wiki':
+    elif subtype and subtype == 'wiki':
         entities = entities.filter(wiki__parent=None)
+        entities = entities.annotate(sort_title=Lower("wiki__title"))
+
+    else:
+        entities = entities.annotate(sort_title=Lower(Coalesce('news__title',
+                                                               'blog__title',
+                                                               'filefolder__title',
+                                                               'poll__title',
+                                                               'statusupdate__title',
+                                                               'wiki__title',
+                                                               'page__title',
+                                                               'question__title',
+                                                               'discussion__title',
+                                                               'event__title')))
 
     order = [order_by]
 

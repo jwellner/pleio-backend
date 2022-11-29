@@ -183,7 +183,7 @@ class ElasticsearchTestCase(PleioTenantTestCase):
         from core.tasks.elasticsearch_tasks import elasticsearch_recreate_indices, elasticsearch_index_data_for_tenant
         elasticsearch_recreate_indices()
         elasticsearch_index_data_for_tenant(tenant_schema(), None)
-        time.sleep(.200)
+        time.sleep(.100)
 
 
 class QuerySetWith:

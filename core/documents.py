@@ -51,6 +51,10 @@ class DefaultDocument(Document):
 
         return ""
 
+    def prepare_title(self, instance):
+        return instance.title.lower() if hasattr(instance, 'title') and instance.title else ''
+
+
 
 @registry.register_document
 class UserDocument(DefaultDocument):
