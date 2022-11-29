@@ -45,7 +45,7 @@ prospector:
   extends:
     - .python
   script:
-    - prospector
+    - prospector -X
 
 test:
   stage: test
