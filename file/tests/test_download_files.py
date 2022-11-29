@@ -3,21 +3,20 @@ from http import HTTPStatus
 from zipfile import ZipFile
 
 from django.core.files.uploadedfile import SimpleUploadedFile
-from django_tenants.test.cases import TenantTestCase
-from django_tenants.test.client import TenantClient
 from mixer.backend.django import mixer
 
 from core.constances import ACCESS_TYPE
 from core.models import Group
+from tenants.helpers import FastTenantTestCase
 from user.models import User
 
 from ..models import FileFolder
 
 
-class DownloadFiles(TenantTestCase):
+class DownloadFiles(FastTenantTestCase):
+
     def setUp(self):
         super().setUp()
-        self.c = TenantClient(self.tenant)
         self.authenticatedUser = mixer.blend(User, name="Aut Hen Ticated")
 
         self.PREVIOUS_DESCRIPTION = 'PREVIOUS_DESCRIPTION'
@@ -77,8 +76,8 @@ class DownloadFiles(TenantTestCase):
     def test_bulk_download(self):
 
         path = '/bulk_download?folder_guids[]=' + str(self.folder1.id) + '&folder_guids[]=' + str(self.folder2.id) + '&file_guids[]=' + str(self.file.id)
-        self.c.force_login(self.authenticatedUser)
-        response = self.c.get(path)
+        self.client.force_login(self.authenticatedUser)
+        response = self.client.get(path)
 
         self.assertEqual(response.status_code, HTTPStatus.OK)
         zip_file = io.BytesIO(b''.join(response.streaming_content))
@@ -94,6 +93,6 @@ class DownloadFiles(TenantTestCase):
     def test_bulk_download_anonymous(self):
 
         path = '/bulk_download?folder_guids[]=' + str(self.folder1.id) + '&folder_guids[]=' + str(self.folder2.id)
-        response = self.c.get(path)
+        response = self.client.get(path)
 
         self.assertEqual(response.status_code, HTTPStatus.UNAUTHORIZED)

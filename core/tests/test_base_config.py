@@ -1,7 +1,7 @@
-from django_tenants.test.cases import FastTenantTestCase
 from unittest.mock import patch
 from core import config
 from core.base_config import DEFAULT_SITE_CONFIG
+from tenants.helpers import FastTenantTestCase
 
 
 class BaseConfigCase(FastTenantTestCase):

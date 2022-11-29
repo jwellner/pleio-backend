@@ -1,13 +1,13 @@
-from django.contrib.auth.models import AnonymousUser
 from django_tenants.test.client import TenantClient
-from django_tenants.test.cases import FastTenantTestCase
 from django.core.cache import cache
 from django.db import connection
 from django.test import override_settings
+
+from tenants.helpers import FastTenantTestCase
 from user.models import User
-from core.models import ProfileField, Setting, UserProfileField
+from core.models import ProfileField, UserProfileField
 from mixer.backend.django import mixer
-from importlib import import_module
+
 
 class OnboardingTestCase(FastTenantTestCase):
 

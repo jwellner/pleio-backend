@@ -3,12 +3,12 @@ from unittest import mock
 
 from django.conf import settings
 from django.test import override_settings
-from django_tenants.test.cases import FastTenantTestCase
 from mixer.backend.django import mixer
 from requests import ConnectionError as RequestConnectionError
 
 from concierge.constances import REGISTER_ORIGIN_SITE_URL
 from core.lib import tenant_summary, get_account_url
+from tenants.helpers import FastTenantTestCase
 from user.models import User
 
 

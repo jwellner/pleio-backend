@@ -1,9 +1,9 @@
 from datetime import timedelta
 from django.utils import timezone
-from django_tenants.test.cases import FastTenantTestCase
 from core.models import Group, GroupInvitation, Entity
 from core.models.tags import Tag, TagSynonym
 from core.tests.helpers import PleioTenantTestCase
+from tenants.helpers import FastTenantTestCase
 from user.models import User
 from file.models import FileFolder
 from core.constances import ACCESS_TYPE

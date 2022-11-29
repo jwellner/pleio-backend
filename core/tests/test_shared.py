@@ -1,6 +1,7 @@
-from django_tenants.test.cases import FastTenantTestCase
 from graphql import GraphQLError
 from core.resolvers.shared import assert_valid_abstract
+from tenants.helpers import FastTenantTestCase
+
 
 class SharedTests(FastTenantTestCase):
 

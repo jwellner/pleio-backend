@@ -3,7 +3,7 @@ import json
 from django.core.exceptions import ValidationError
 
 from core.utils.tiptap_parser import Tiptap
-from django_tenants.test.cases import FastTenantTestCase
+from tenants.helpers import FastTenantTestCase
 
 
 class TiptapParserTestCase(FastTenantTestCase):

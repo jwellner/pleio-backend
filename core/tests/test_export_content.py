@@ -1,7 +1,5 @@
 from django.core.cache import cache
 from django.db import connection
-from django_tenants.test.cases import TenantTestCase
-from django_tenants.test.client import TenantClient
 from mixer.backend.django import mixer
 
 from activity.models import StatusUpdate
@@ -14,14 +12,14 @@ from news.models import News
 from poll.models import Poll
 from question.models import Question
 from task.models import Task
+from tenants.helpers import FastTenantTestCase
 from user.models import User
 from wiki.models import Wiki
 
 
-class TestExportContentTestCase(TenantTestCase):
+class TestExportContentTestCase(FastTenantTestCase):
     def setUp(self):
         super().setUp()
-        self.c = TenantClient(self.tenant)
 
         self.user = mixer.blend(User)
         self.admin = mixer.blend(User, roles=['ADMIN'])
@@ -49,76 +47,76 @@ class TestExportContentTestCase(TenantTestCase):
         super().tearDown()
 
     def test_export_content_blog_not_logged_in(self):
-        response = self.c.get("/exporting/content/blog")
+        response = self.client.get("/exporting/content/blog")
         self.assertEqual(response.streaming, False)
 
     def test_export_content_blog_not_admin(self):
-        self.c.force_login(self.user)
-        response = self.c.get("/exporting/content/blog")
+        self.client.force_login(self.user)
+        response = self.client.get("/exporting/content/blog")
         self.assertEqual(response.streaming, False)
 
     def test_export_content_activity(self):
-        self.c.force_login(self.admin)
-        response = self.c.get("/exporting/content/statusupdate")
+        self.client.force_login(self.admin)
+        response = self.client.get("/exporting/content/statusupdate")
         self.assertEqual(response.streaming, True)
         self.assertEqual(len(list(response.streaming_content)), 2)
 
     def test_export_content_blog(self):
-        self.c.force_login(self.admin)
-        response = self.c.get("/exporting/content/blog")
+        self.client.force_login(self.admin)
+        response = self.client.get("/exporting/content/blog")
         self.assertEqual(response.streaming, True)
         self.assertEqual(len(list(response.streaming_content)), 3)
 
     def test_export_content_page(self):
-        self.c.force_login(self.admin)
-        response = self.c.get("/exporting/content/page")
+        self.client.force_login(self.admin)
+        response = self.client.get("/exporting/content/page")
         self.assertEqual(response.streaming, True)
         self.assertEqual(len(list(response.streaming_content)), 2)
 
     def test_export_content_discussion(self):
-        self.c.force_login(self.admin)
-        response = self.c.get("/exporting/content/discussion")
+        self.client.force_login(self.admin)
+        response = self.client.get("/exporting/content/discussion")
         self.assertEqual(response.streaming, True)
         self.assertEqual(len(list(response.streaming_content)), 2)
 
     def test_export_content_file(self):
-        self.c.force_login(self.admin)
-        response = self.c.get("/exporting/content/file")
+        self.client.force_login(self.admin)
+        response = self.client.get("/exporting/content/file")
         self.assertEqual(response.streaming, True)
         self.assertEqual(len(list(response.streaming_content)), 2)
 
     def test_export_content_news(self):
-        self.c.force_login(self.admin)
-        response = self.c.get("/exporting/content/news")
+        self.client.force_login(self.admin)
+        response = self.client.get("/exporting/content/news")
         self.assertEqual(response.streaming, True)
         self.assertEqual(len(list(response.streaming_content)), 2)
 
     def test_export_content_poll(self):
-        self.c.force_login(self.admin)
-        response = self.c.get("/exporting/content/poll")
+        self.client.force_login(self.admin)
+        response = self.client.get("/exporting/content/poll")
         self.assertEqual(response.streaming, True)
         self.assertEqual(len(list(response.streaming_content)), 2)
 
     def test_export_content_question(self):
-        self.c.force_login(self.admin)
-        response = self.c.get("/exporting/content/question")
+        self.client.force_login(self.admin)
+        response = self.client.get("/exporting/content/question")
         self.assertEqual(response.streaming, True)
         self.assertEqual(len(list(response.streaming_content)), 2)
 
     def test_export_content_wiki(self):
-        self.c.force_login(self.admin)
-        response = self.c.get("/exporting/content/wiki")
+        self.client.force_login(self.admin)
+        response = self.client.get("/exporting/content/wiki")
         self.assertEqual(response.streaming, True)
         self.assertEqual(len(list(response.streaming_content)), 2)
 
     def test_export_content_task(self):
-        self.c.force_login(self.admin)
-        response = self.c.get("/exporting/content/task")
+        self.client.force_login(self.admin)
+        response = self.client.get("/exporting/content/task")
         self.assertEqual(response.streaming, True)
         self.assertEqual(len(list(response.streaming_content)), 2)
 
     def test_export_content_comment(self):
-        self.c.force_login(self.admin)
-        response = self.c.get("/exporting/content/comment")
+        self.client.force_login(self.admin)
+        response = self.client.get("/exporting/content/comment")
         self.assertEqual(response.streaming, True)
         self.assertEqual(len(list(response.streaming_content)), 2)

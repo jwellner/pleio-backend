@@ -1,22 +1,17 @@
 from http import HTTPStatus
 
-from django_tenants.test.cases import TenantTestCase
-from django_tenants.test.client import TenantClient
 from django.core.cache import cache
 from django.db import connection
-from django.test import TestCase
-from core import config
+
+from tenants.helpers import FastTenantTestCase
 
 
-class RobotsTxtTests(TenantTestCase):
-    def setUp(self):
-        super().setUp()
-        self.c = TenantClient(self.tenant)
+class RobotsTxtTests(FastTenantTestCase):
 
     def test_enabled_get(self):
         cache.set("%s%s" % (connection.schema_name, 'ENABLE_SEARCH_ENGINE_INDEXING'), True)
 
-        response = self.c.get("/robots.txt")
+        response = self.client.get("/robots.txt")
 
         self.assertEqual(response.status_code, HTTPStatus.OK)
         self.assertEqual(response["content-type"], "text/plain")
@@ -26,7 +21,7 @@ class RobotsTxtTests(TenantTestCase):
 
     def test_disabled_get(self):
         cache.set("%s%s" % (connection.schema_name, 'ENABLE_SEARCH_ENGINE_INDEXING'), False)
-        response = self.c.get("/robots.txt")
+        response = self.client.get("/robots.txt")
 
         self.assertEqual(response.status_code, HTTPStatus.OK)
         self.assertEqual(response["content-type"], "text/plain")
@@ -35,6 +30,6 @@ class RobotsTxtTests(TenantTestCase):
         self.assertEqual(lines[1], "Disallow: /")
 
     def test_post_disallowed(self):
-        response = self.c.post("/robots.txt")
+        response = self.client.post("/robots.txt")
 
         self.assertEqual(HTTPStatus.METHOD_NOT_ALLOWED, response.status_code)

@@ -1,28 +1,23 @@
 import json
 import uuid
-from http import HTTPStatus
 
-from django_tenants.test.cases import TenantTestCase
-from django_tenants.test.client import TenantClient
 from django.conf import settings
 from django.core.cache import cache
 from django.db import connection
-from django.test import TestCase
-from core import config
-from core.models import Comment, ProfileField, UserProfileField, Group
+from core.models import ProfileField, UserProfileField, Group
 from mixer.backend.django import mixer
+
+from tenants.helpers import FastTenantTestCase
 from user.models import User
-from blog.models import Blog
 from core.constances import ACCESS_TYPE
 from django.core.files import File
 from profile_sync.models import Logs
 from unittest.mock import MagicMock, patch
 
 
-class ProfileSyncApiTests(TenantTestCase):
+class ProfileSyncApiTests(FastTenantTestCase):
     def setUp(self):
         super().setUp()
-        self.c = TenantClient(self.tenant)
 
         self.user1 = mixer.blend(User)
         self.user2 = mixer.blend(User, email='user1@pleio.test')
@@ -54,7 +49,7 @@ class ProfileSyncApiTests(TenantTestCase):
 
     def test_get_3_users(self):
 
-        response = self.c.get('/profile_sync_api/users?limit=3&cursor=', headers=self.headers)
+        response = self.client.get('/profile_sync_api/users?limit=3&cursor=', headers=self.headers)
 
         self.assertEqual(len(response.json()["users"]), 3)
         self.assertEqual(response.json()["users"][0]["name"], self.user1.name)
@@ -62,7 +57,7 @@ class ProfileSyncApiTests(TenantTestCase):
 
     def test_get_users_from_specific_id(self):
         path = '/profile_sync_api/users?limit=3&cursor=' + str(self.user3.id)
-        response = self.c.get(path, headers=self.headers)
+        response = self.client.get(path, headers=self.headers)
 
         self.assertEqual(len(response.json()["users"]), 2)
         self.assertEqual(response.json()["users"][0]["name"], self.user4.name)
@@ -70,7 +65,7 @@ class ProfileSyncApiTests(TenantTestCase):
 
     def test_get_users_with_non_existing_cursor(self):
         path = '/profile_sync_api/users?limit=3&cursor=aa'
-        response = self.c.get(path, headers=self.headers)
+        response = self.client.get(path, headers=self.headers)
 
         json_response = {
             "error": "not_found",
@@ -87,7 +82,7 @@ class ProfileSyncApiTests(TenantTestCase):
             'Authorization': 'Bearer 2312341'
         }
 
-        response = self.c.get("/profile_sync_api/users", headers=headers)
+        response = self.client.get("/profile_sync_api/users", headers=headers)
 
         json_response = {
             "error": "invalid_bearer_token",
@@ -104,7 +99,7 @@ class ProfileSyncApiTests(TenantTestCase):
             "content": "contentcontent"
         }
 
-        response = self.c.post('/profile_sync_api/logs', data=json.dumps(data), headers=self.headers,
+        response = self.client.post('/profile_sync_api/logs', data=json.dumps(data), headers=self.headers,
                                content_type="application/json")
 
         json_response = {
@@ -123,7 +118,7 @@ class ProfileSyncApiTests(TenantTestCase):
             "content": "contentcontent"
         }
 
-        response = self.c.post('/profile_sync_api/logs', data=json.dumps(data), headers=self.headers,
+        response = self.client.post('/profile_sync_api/logs', data=json.dumps(data), headers=self.headers,
                                content_type="application/json")
 
 
@@ -147,7 +142,7 @@ class ProfileSyncApiTests(TenantTestCase):
             }
         }
 
-        response = self.c.post('/profile_sync_api/users',
+        response = self.client.post('/profile_sync_api/users',
                                data=json.dumps(data),
                                headers=self.headers,
                                content_type="application/json")
@@ -181,7 +176,7 @@ class ProfileSyncApiTests(TenantTestCase):
             }
         }
 
-        response = self.c.post('/profile_sync_api/users',
+        response = self.client.post('/profile_sync_api/users',
                                data=json.dumps(data),
                                headers=self.headers,
                                content_type="application/json")
@@ -208,7 +203,7 @@ class ProfileSyncApiTests(TenantTestCase):
             }
         }
 
-        response = self.c.post('/profile_sync_api/users',
+        response = self.client.post('/profile_sync_api/users',
                                data=json.dumps(data),
                                headers=self.headers,
                                content_type="application/json")
@@ -244,7 +239,7 @@ class ProfileSyncApiTests(TenantTestCase):
             }
         }
 
-        response = self.c.post('/profile_sync_api/users',
+        response = self.client.post('/profile_sync_api/users',
                                data=json.dumps(data),
                                headers=self.headers,
                                content_type="application/json")
@@ -286,7 +281,7 @@ class ProfileSyncApiTests(TenantTestCase):
             }
         }
 
-        response = self.c.post('/profile_sync_api/users',
+        response = self.client.post('/profile_sync_api/users',
                                data=json.dumps(data),
                                headers=self.headers,
                                content_type="application/json")
@@ -315,7 +310,7 @@ class ProfileSyncApiTests(TenantTestCase):
             }
         }
 
-        response = self.c.post('/profile_sync_api/users',
+        response = self.client.post('/profile_sync_api/users',
                                data=json.dumps(data),
                                headers=self.headers,
                                content_type="application/json")
@@ -331,7 +326,7 @@ class ProfileSyncApiTests(TenantTestCase):
 
 
     def test_delete_user(self):
-        response = self.c.delete('/profile_sync_api/users/' + self.user2.guid,
+        response = self.client.delete('/profile_sync_api/users/' + self.user2.guid,
                                headers=self.headers,
                                content_type="application/json")
 
@@ -345,7 +340,7 @@ class ProfileSyncApiTests(TenantTestCase):
 
 
     def test_delete_non_existing_user(self):
-        response = self.c.delete('/profile_sync_api/users/' + str(uuid.uuid1()),
+        response = self.client.delete('/profile_sync_api/users/' + str(uuid.uuid1()),
                                headers=self.headers,
                                content_type="application/json")
 
@@ -359,7 +354,7 @@ class ProfileSyncApiTests(TenantTestCase):
 
 
     def test_ban_user(self):
-        response = self.c.post('/profile_sync_api/users/' + self.user2.guid + '/ban',
+        response = self.client.post('/profile_sync_api/users/' + self.user2.guid + '/ban',
                                headers=self.headers,
                                content_type="application/json")
 
@@ -390,7 +385,7 @@ class ProfileSyncApiTests(TenantTestCase):
             'Authorization': 'Bearer 2312341234'
         }
 
-        response = self.c.post('/profile_sync_api/users/' + str(uuid.uuid1()) + '/ban',
+        response = self.client.post('/profile_sync_api/users/' + str(uuid.uuid1()) + '/ban',
                                headers=headers,
                                content_type="application/json")
 
@@ -406,7 +401,7 @@ class ProfileSyncApiTests(TenantTestCase):
     def test_unban_user(self):
         user = mixer.blend(User, is_active=False, ban_reason='banned')
 
-        response = self.c.post('/profile_sync_api/users/' + user.guid + '/unban',
+        response = self.client.post('/profile_sync_api/users/' + user.guid + '/unban',
                                headers=self.headers,
                                content_type="application/json")
 
@@ -435,7 +430,7 @@ class ProfileSyncApiTests(TenantTestCase):
 
 
     def test_unban_non_existing_user(self):
-        response = self.c.post('/profile_sync_api/users/' + str(uuid.uuid1()) + '/unban',
+        response = self.client.post('/profile_sync_api/users/' + str(uuid.uuid1()) + '/unban',
                                headers=self.headers,
                                content_type="application/json")
 
@@ -456,7 +451,7 @@ class ProfileSyncApiTests(TenantTestCase):
 
         mock_open.return_value = file_mock
 
-        response = self.c.post('/profile_sync_api/users/' + self.user3.guid + '/avatar',
+        response = self.client.post('/profile_sync_api/users/' + self.user3.guid + '/avatar',
                                headers=self.headers,
                                data={'avatar': file_mock},
                                format='multipart')
@@ -484,7 +479,7 @@ class ProfileSyncApiTests(TenantTestCase):
 
 
     def test_change_avatar_non_existing_user(self):
-        response = self.c.post('/profile_sync_api/users/' + str(uuid.uuid1()) + '/avatar',
+        response = self.client.post('/profile_sync_api/users/' + str(uuid.uuid1()) + '/avatar',
                                headers=self.headers,
                                content_type="application/json"
                                )
