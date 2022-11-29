@@ -1,11 +1,11 @@
-from django_tenants.test.client import TenantClient
-from django_tenants.test.cases import FastTenantTestCase
 from django.core.cache import cache
 from django.db import connection
 from core.middleware import RedirectMiddleware
 from http import HTTPStatus
 from django.test import RequestFactory
 from django.test.utils import override_settings
+
+from tenants.helpers import FastTenantTestCase
 from tenants.models import Domain
 
 
@@ -22,7 +22,6 @@ class RedirectsTestCase(FastTenantTestCase):
             tenant=self.tenant,
             is_primary=False
         )
-        self.client = TenantClient(self.tenant)
 
     def test_redirect(self):
         cache.set("%s%s" % (connection.schema_name, 'REDIRECTS'), {"/path1": "/path2", "/path3": "/path4"})

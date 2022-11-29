@@ -5,7 +5,6 @@ from unittest import mock
 
 from django.apps import apps
 from django.utils.timezone import localtime, timedelta
-from django_tenants.test.cases import FastTenantTestCase
 
 from core import override_local_config
 from core.constances import ACCESS_TYPE
@@ -13,6 +12,7 @@ from core.factories import GroupFactory
 from core.lib import get_acl
 from core.mail_builders.frequent_overview import FrequentOverviewMailer, EntityCollection
 from core.tasks import send_overview
+from tenants.helpers import FastTenantTestCase
 from user.factories import UserFactory, EditorFactory
 
 

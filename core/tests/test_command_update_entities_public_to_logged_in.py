@@ -1,11 +1,12 @@
 from unittest import mock
 
-from django_tenants.test.cases import FastTenantTestCase
 from mixer.backend.django import mixer
 
 from core.management.commands.update_entities_public_to_logged_in import Command
 from core.models import Entity
 from core.lib import ACCESS_TYPE
+from tenants.helpers import FastTenantTestCase
+
 
 class UpdateEntitiesPublicToLoggedInTestCase(FastTenantTestCase):
 

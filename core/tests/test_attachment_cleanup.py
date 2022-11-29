@@ -1,9 +1,10 @@
-from django_tenants.test.cases import FastTenantTestCase
 from mixer.backend.django import mixer
 from django.db import connection
 from core.tasks.cronjobs import remove_floating_attachments
 from core.models.attachment import Attachment
 from blog.models import Blog
+from tenants.helpers import FastTenantTestCase
+
 
 class AttachmentCleanupTestcase(FastTenantTestCase):
     def test_deletes_floating(self):

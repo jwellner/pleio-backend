@@ -2,8 +2,10 @@ import json
 
 from blog.models import Blog
 from core.models.attachment import Attachment
-from django_tenants.test.cases import FastTenantTestCase
 from mixer.backend.django import mixer
+
+from tenants.helpers import FastTenantTestCase
+
 
 class RichFieldTestCase(FastTenantTestCase):
     def test_removes_attachment(self):

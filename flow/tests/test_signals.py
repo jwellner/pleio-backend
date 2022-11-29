@@ -1,8 +1,8 @@
 import json
 from django.db import connection
-from django_tenants.test.cases import FastTenantTestCase
 from django.core.cache import cache
 from core.models import Comment
+from tenants.helpers import FastTenantTestCase
 from user.models import User
 from blog.models import Blog
 from core import config

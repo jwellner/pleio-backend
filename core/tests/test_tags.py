@@ -1,11 +1,11 @@
 from django.contrib.auth.models import AnonymousUser
-from django_tenants.test.cases import FastTenantTestCase
 from mixer.backend.django import mixer
 
 from core.constances import USER_ROLES
 from core.models import Entity
 from core.models.tags import Tag, TagSynonym, EntityTag
 from core.tests.helpers import PleioTenantTestCase
+from tenants.helpers import FastTenantTestCase
 from user.models import User
 
 

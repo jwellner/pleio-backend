@@ -1,10 +1,12 @@
 from django_tenants.test.client import TenantClient
-from django_tenants.test.cases import FastTenantTestCase
 from django.test import override_settings
+
+from tenants.helpers import FastTenantTestCase
 from user.models import User
 from mixer.backend.django import mixer
 from django.core.cache import cache
 from django.db import connection
+
 
 class SuperadminTestCase(FastTenantTestCase):
 

@@ -2,12 +2,12 @@ import os
 from unittest import mock
 
 from django.test import override_settings
-from django_tenants.test.cases import FastTenantTestCase
 
 from core import override_local_config
 from core.lib import clean_graphql_input, tenant_api_token, tenant_summary
 from core.tests.helpers import PleioTenantTestCase
 from file.models import FileFolder
+from tenants.helpers import FastTenantTestCase
 
 
 class TestCleanGraphQLInput(FastTenantTestCase):

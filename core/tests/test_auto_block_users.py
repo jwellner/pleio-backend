@@ -1,27 +1,17 @@
-import json
-from http import HTTPStatus
-
-from django_tenants.test.cases import TenantTestCase
-from django_tenants.test.client import TenantClient
-from django.core.cache import cache
 from django.db import connection
 from django.test import override_settings
-from core import config
-from core.models import Setting
 from mixer.backend.django import mixer
 from django.core.cache import cache
+
+from tenants.helpers import FastTenantTestCase
 from user.models import User
-from blog.models import Blog
-from core.constances import ACCESS_TYPE
 from unittest import mock
 from core.tasks import ban_users_that_bounce, ban_users_with_no_account
 
 
-class AutoBlockUsersTests(TenantTestCase):
+class AutoBlockUsersTests(FastTenantTestCase):
     def setUp(self):
         super().setUp()
-        self.c = TenantClient(self.tenant)
-
         cache.set("%s%s" % (connection.schema_name, 'LAST_RECEIVED_BOUNCING_EMAIL'), '2000-01-01')
 
         self.user1 = mixer.blend(User)

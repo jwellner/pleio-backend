@@ -1,8 +1,8 @@
-from django_tenants.test.cases import FastTenantTestCase
 from mixer.backend.django import mixer
 
 from event.models import Event
 from core.views import get_url_qr
+from tenants.helpers import FastTenantTestCase
 from user.models import User
 from django.http import HttpRequest
 

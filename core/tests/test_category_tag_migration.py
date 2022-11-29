@@ -1,10 +1,10 @@
-from django_tenants.test.cases import FastTenantTestCase
 from mixer.backend.django import mixer
 
 from blog.models import Blog
 from core import override_local_config
 from core.models import Group
 from core.post_deploy import migrate_categories
+from tenants.helpers import FastTenantTestCase
 from user.factories import UserFactory
 
 

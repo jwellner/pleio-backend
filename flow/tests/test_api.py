@@ -1,24 +1,20 @@
 from http import HTTPStatus
 
-from django_tenants.test.cases import TenantTestCase
-from django_tenants.test.client import TenantClient
-from django.core.cache import cache
 from django.db import connection
-from django.test import TestCase
-from core import config
 from core.models import Comment
 from mixer.backend.django import mixer
 from django.core.cache import cache
+
+from tenants.helpers import FastTenantTestCase
 from user.models import User
 from blog.models import Blog
 from core.constances import ACCESS_TYPE
 from unittest import mock
 
 
-class FlowApiTests(TenantTestCase):
+class FlowApiTests(FastTenantTestCase):
     def setUp(self):
         super().setUp()
-        self.c = TenantClient(self.tenant)
 
         self.user1 = mixer.blend(User)
 
@@ -54,7 +50,7 @@ class FlowApiTests(TenantTestCase):
             'Authorization': 'Bearer 12341234'
         }
 
-        response = self.c.post("/flow/comments/add", headers=headers, data=self.data)
+        response = self.client.post("/flow/comments/add", headers=headers, data=self.data)
 
         comment = Comment.objects.all().first()
         self.assertEqual(comment.rich_description, 'test_description')
@@ -83,7 +79,7 @@ class FlowApiTests(TenantTestCase):
             'description': ''
         }
 
-        response = self.c.post("/flow/comments/add", headers=headers, data=self.data)
+        response = self.client.post("/flow/comments/add", headers=headers, data=self.data)
 
         self.assertEqual(response.status_code, HTTPStatus.BAD_REQUEST)
 
@@ -109,7 +105,7 @@ class FlowApiTests(TenantTestCase):
             'description': 'test_description'
         }
 
-        response = self.c.post("/flow/comments/add", headers=headers, data=self.data)
+        response = self.client.post("/flow/comments/add", headers=headers, data=self.data)
 
         self.assertEqual(response.status_code, HTTPStatus.BAD_REQUEST)
 
@@ -137,7 +133,7 @@ class FlowApiTests(TenantTestCase):
             'description': 'test_description'
         }
 
-        response = self.c.post("/flow/comments/add", headers=headers, data=self.data)
+        response = self.client.post("/flow/comments/add", headers=headers, data=self.data)
 
         self.assertEqual(response.status_code, HTTPStatus.BAD_REQUEST)
 
@@ -165,7 +161,7 @@ class FlowApiTests(TenantTestCase):
             'description': 'test_description'
         }
 
-        response = self.c.post("/flow/comments/add", headers=headers, data=self.data)
+        response = self.client.post("/flow/comments/add", headers=headers, data=self.data)
 
         self.assertEqual(response.status_code, HTTPStatus.BAD_REQUEST)
 

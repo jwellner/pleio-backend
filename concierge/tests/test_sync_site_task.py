@@ -2,10 +2,10 @@ from unittest import mock
 
 from django.conf import settings
 from django.test import override_settings
-from django_tenants.test.cases import FastTenantTestCase
 
 from concierge.constances import UPDATE_ORIGIN_SITE_URL
 from core.lib import tenant_summary, get_account_url
+from tenants.helpers import FastTenantTestCase
 
 
 class TestSyncSiteTestCase(FastTenantTestCase):

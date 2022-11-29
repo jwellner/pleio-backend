@@ -2,14 +2,14 @@ from unittest import mock
 from unittest.mock import MagicMock
 
 from django.utils.crypto import get_random_string
-from django_tenants.test.cases import FastTenantTestCase
 from faker import Faker
 from mixer.backend.django import mixer
 
 from core.tests.helpers import PleioTenantTestCase
 from event.factories import EventFactory
-from event.mail_builders.attend_event_confirm import AttendEventWithoutAccountConfirmMailer, LeaveUrl
+from event.mail_builders.attend_event_confirm import AttendEventWithoutAccountConfirmMailer
 from event.models import EventAttendee
+from tenants.helpers import FastTenantTestCase
 from user.factories import UserFactory
 
 
