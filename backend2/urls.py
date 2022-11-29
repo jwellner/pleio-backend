@@ -20,7 +20,7 @@ from tenants import views as tenants_views
 urlpatterns = [
     path('unsubscribe/<str:token>', core_views.unsubscribe, name='unsubscribe'),
     path('logout', core_views.logout, name='logout'),
-    path('action/logout', core_views.logout, name='logout'),
+    path('action/logout', core_views.logout),
     path('login', core_views.login, name='login'),
     path('login/request', core_views.request_access, name='request_access'),
     path('login/requested', core_views.access_requested, name='access_requested'),
