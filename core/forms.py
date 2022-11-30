@@ -1,12 +1,19 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
+import json
+import logging
+
+from django.core.exceptions import ValidationError
 from django.db.models import Q
 from django import forms
 from django.utils.translation import ugettext_lazy
 
 from core import config
 from core.models import ProfileField
+from core.resolvers.shared import resolve_load_appointment_types
+
+logger = logging.getLogger(__name__)
 
 
 class OnboardingForm(forms.Form):
@@ -98,12 +105,17 @@ class MeetingsSettingsForm(forms.Form):
         label="Api secret", required=False)
     onlineafspraken_url = forms.CharField(
         label="Override default api url", required=False)
+    videocall_appointment_type = forms.CharField(
+        label="Configure appointment types",
+        required=False,
+        widget=forms.Textarea())
 
     videocall_enabled = forms.BooleanField(
         label="Enable videocalls", required=False)
     videocall_api_url = forms.CharField(
         label="Override api url", required=False)
     videocall_profilepage = forms.BooleanField(
+        required=False,
         label="Enable videocalls at profile page")
     videocall_throttle = forms.IntegerField(
         label="Maximum number of room reservations per hour", required=False)
@@ -115,20 +127,35 @@ class MeetingsSettingsForm(forms.Form):
             'onlineafspraken_key': config.ONLINEAFSPRAKEN_KEY or '',
             'onlineafspraken_secret': config.ONLINEAFSPRAKEN_SECRET or '',
             'onlineafspraken_url': config.ONLINEAFSPRAKEN_URL or '',
+            'videocall_appointment_type': MeetingsSettingsForm.load_appointment_type_config(),
             'videocall_enabled': config.VIDEOCALL_ENABLED,
             'videocall_api_url': config.VIDEOCALL_API_URL or '',
             'videocall_profilepage': config.VIDEOCALL_PROFILEPAGE or '',
             'videocall_throttle': config.VIDEOCALL_THROTTLE or 0,
         }
 
+    @staticmethod
+    def load_appointment_type_config():
+        try:
+            return json.dumps(resolve_load_appointment_types(), indent=2)
+        except Exception:
+            return '[]'
+
     def save(self):
         config.ONLINEAFSPRAKEN_ENABLED = bool(self.cleaned_data['onlineafspraken_enabled'])
         config.ONLINEAFSPRAKEN_KEY = self.cleaned_data['onlineafspraken_key'] or None
         config.ONLINEAFSPRAKEN_SECRET = self.cleaned_data['onlineafspraken_secret'] or None
         config.ONLINEAFSPRAKEN_URL = self.cleaned_data['onlineafspraken_url'] or None
+        config.VIDEOCALL_APPOINTMENT_TYPE = self.cleaned_data['videocall_appointment_type'] or []
         config.VIDEOCALL_ENABLED = bool(self.cleaned_data['videocall_enabled'])
         config.VIDEOCALL_API_URL = self.cleaned_data['videocall_api_url'] or None
         config.VIDEOCALL_PROFILEPAGE = self.cleaned_data['videocall_profilepage'] or None
+
+    def clean_videocall_appointment_type(self):
+        try:
+            return json.loads(self.cleaned_data['videocall_appointment_type'])
+        except json.JSONDecodeError as e:
+            raise ValidationError(str(e))
 
 
 class ProfileSetForm(forms.Form):

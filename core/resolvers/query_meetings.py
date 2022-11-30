@@ -3,7 +3,6 @@ from collections import defaultdict
 import pytz
 from django.utils import timezone
 from django.utils.timezone import datetime, localtime, timedelta
-from django.utils.translation import gettext
 from graphql import GraphQLError
 from online_planner.exceptions import BackendResponseContentError
 from online_planner.meetings_api import MeetingsApi
@@ -14,20 +13,10 @@ from core.resolvers import shared
 
 def resolve_query_appointment_data(*_):
     shared.assert_meetings_enabled()
-
-    connection = MeetingsApi()
     try:
-        agendas = connection.get_agendas()
-
-        appointement_types = connection.get_appointment_types()
-
         return {
-            'agendas': [{
-                'id': a['Id'],
-                'name': a['Name'] or gettext('Agenda')} for a in agendas],
-            'appointmentTypes': [{
-                "id": t['Id'],
-                'name': t['Name'] or gettext('Appointment')} for t in appointement_types],
+            'agendas': shared.resolve_load_agendas(),
+            'appointmentTypes': shared.resolve_load_appointment_types(),
         }
     except (BackendResponseContentError, AssertionError) as e:
         raise GraphQLError(e)

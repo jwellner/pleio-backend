@@ -46,6 +46,13 @@
                            id="onlineafspraken_url" value="{{ form.onlineafspraken_url.value }}">
                     {{ default_onlineafspraken_url }}
                 </div>
+                <div class="input-field varchar-field">
+                    <label for="videocall_appointment_type">{{ form.videocall_appointment_type.label }}</label>
+                    <textarea class="form-control" rows="10"
+                              style="font-family: monospace"
+                              name="videocall_appointment_type"
+                              id="videocall_appointment_type">{{ form.videocall_appointment_type.value }}</textarea>
+                </div>
             </div>
         </div>
         <div class="card mb-3">
@@ -67,7 +74,8 @@
                 </div>
                 <div class="input-field checkbox-field">
                     <div class="mb-2 form-check">
-                        <input type="checkbox" name="videocall_profilepage" id="videocall_profilepage" {% if form.videocall_profilepage.value %} checked {% endif %} />
+                        <input type="checkbox" name="videocall_profilepage" id="videocall_profilepage" {% if form.videocall_profilepage.value %}
+                        checked {% endif %} />
                         <label for="videocall_profilepage">{{ form.videocall_profilepage.label }}</label>
                     </div>
                 </div>

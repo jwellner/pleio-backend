@@ -29,7 +29,6 @@ class TestScheduleAppointmentTestCase(PleioTenantTestCase):
                 "appointmentTypeId": "1000",
                 "startDateTime": str(self.schedule_date),
                 "endDateTime": str(early_this_morning() + timezone.timedelta(hours=11)),
-                "includeVideoCall": False,
                 "attendee": {
                     "email": "mail@example.com",
                     "firstName": "Mister",
@@ -106,10 +105,11 @@ class TestScheduleAppointmentTestCase(PleioTenantTestCase):
             "EndTime": '11:00',
         })
 
-    @override_local_config(VIDEOCALL_ENABLED=False)
     def test_signup_with_videocall_requires_videocall_enabled(self):
+        self.override_config(VIDEOCALL_APPOINTMENT_TYPE=[{"id": "1000", "hasVideocall": True}])
+        self.override_config(VIDEOCALL_ENABLED=False)
+
         with self.assertGraphQlError("videocall_not_enabled"):
-            self.variables['input']['includeVideoCall'] = True
             self.graphql_client.post(self.mutation, self.variables)
 
     @mock.patch('core.resolvers.mutation_schedule_appointment.get_video_call_params')
@@ -118,10 +118,11 @@ class TestScheduleAppointmentTestCase(PleioTenantTestCase):
             "Foo": "Bar",
             "Baz": "Test123"
         }
-        self.variables['input']['includeVideoCall'] = True
+        self.override_config(VIDEOCALL_APPOINTMENT_TYPE=[{"id": "1000", "hasVideocall": True}])
 
         result = self.graphql_client.post(self.mutation, self.variables)
 
+        self.assertEqual(get_video_call_params.call_count, 1)
         set_appointment_kwargs = self.set_appointment.call_args.kwargs
         get_video_call_kwargs = get_video_call_params.call_args.args[0]
 
