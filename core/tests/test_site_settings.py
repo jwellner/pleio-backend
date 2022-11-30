@@ -1,3 +1,4 @@
+from unittest import mock
 import uuid
 
 from django.db import connection
@@ -13,6 +14,8 @@ from core.lib import get_language_options
 
 
 class SiteSettingsTestCase(PleioTenantTestCase):
+
+    # TODO: Voeg hier een test toe om een koppeling te maken tussen videocall en onlineafspraken.nl
 
     def setUp(self):
         super().setUp()
@@ -235,6 +238,11 @@ class SiteSettingsTestCase(PleioTenantTestCase):
                     collabEditingEnabled
                     supportContractEnabled
                     supportContractHoursRemaining
+                    
+                    appointmentTypeVideocall {
+                        name
+                        hasVideocall
+                    }
                 }
             }
         """
@@ -247,7 +255,7 @@ class SiteSettingsTestCase(PleioTenantTestCase):
         self.profileField2.delete()
         self.admin.delete()
         self.user.delete()
-        super().setUp()
+        super().tearDown()
 
     def test_site_settings_by_admin(self):
         self.graphql_client.force_login(self.admin)
@@ -523,6 +531,78 @@ class SiteSettingsTestCase(PleioTenantTestCase):
 
         self.assertFalse(result['data']['editSiteSetting']['siteSettings']['fileDescriptionFieldEnabled'], msg=result)
 
+    @mock.patch('core.resolvers.shared.MeetingsApi.get_appointment_types')
+    def test_query_no_videocall_settings(self, get_appointment_types):
+        get_appointment_types.return_value = [{"Id": "1000", "Name": "First"},
+                                              {"Id": "1001", "Name": "Second"}]
+        self.override_config(VIDEOCALL_APPOINTMENT_TYPE=None,
+                             ONLINEAFSPRAKEN_ENABLED=True)
+
+        self.graphql_client.force_login(self.admin)
+        response = self.graphql_client.post(self.query, {})
+
+        self.assertEqual(response['data']['siteSettings']['appointmentTypeVideocall'], [
+            {"name": "First",
+             "hasVideocall": False},
+            {"name": "Second",
+             "hasVideocall": False},
+        ])
+
+    @mock.patch('core.resolvers.shared.MeetingsApi.get_appointment_types')
+    def test_query_videocall_settings(self, get_appointment_types):
+        get_appointment_types.return_value = [{"Id": "1000", "Name": "First"},
+                                              {"Id": "1001", "Name": "Second"}]
+        self.override_config(VIDEOCALL_APPOINTMENT_TYPE=[{"id": "1000", "hasVideocall": True}],
+                             ONLINEAFSPRAKEN_ENABLED=True)
+        self.graphql_client.force_login(self.admin)
+        response = self.graphql_client.post(self.query, {})
+
+        self.assertEqual(
+            response['data']['siteSettings']['appointmentTypeVideocall'],
+            [{"name": 'First',
+              "hasVideocall": True
+              },
+             {"name": "Second",
+              "hasVideocall": False}]
+        )
+
+    @mock.patch('core.resolvers.shared.MeetingsApi.get_appointment_types')
+    def test_update_videocall_settings(self, get_appointment_types):
+        get_appointment_types.return_value = [{"Id": "1000", "Name": "First"},
+                                              {"Id": "1001", "Name": "Second"}]
+        self.override_config(VIDEOCALL_APPOINTMENT_TYPE=[{"id": "1000", "hasVideocall": True}],
+                             ONLINEAFSPRAKEN_ENABLED=True)
+
+        mutation = """
+        mutation UpdateSiteSettings($input: editSiteSettingInput!) {
+            m: editSiteSetting(input: $input) {
+                r: siteSettings {
+                    appointmentTypeVideocall {
+                        name
+                        hasVideocall
+                    }
+                }
+            }
+        }
+        """
+
+        self.graphql_client.force_login(self.admin)
+        response = self.graphql_client.post(mutation, {"input": {
+            "appointmentTypeVideocall": [
+                {"id": "1000",
+                 "hasVideocall": False},
+                {"id": "1001",
+                 "hasVideocall": True},
+            ]
+        }})
+
+        self.assertEqual(response['data']['m']['r']['appointmentTypeVideocall'], [
+            {"name": "First",
+             "hasVideocall": False},
+            {"name": "Second",
+             "hasVideocall": True},
+        ])
+
 
 class SiteSettingsIsClosedTestCase(PleioTenantTestCase):
     def setUp(self):
@@ -531,6 +611,7 @@ class SiteSettingsIsClosedTestCase(PleioTenantTestCase):
 
     def tearDown(self):
         cache.clear()
+        super().tearDown()
 
     def test_site_settings_is_closed_random(self):
         response = self.client.get("/981random3")

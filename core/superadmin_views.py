@@ -1,6 +1,7 @@
 import json
 import logging
 import os
+from pprint import pformat
 from typing import Dict
 
 from auditlog.models import LogEntry
@@ -259,18 +260,14 @@ def agreements(request):
 @login_required
 @user_passes_test(lambda u: u.is_superadmin, login_url='/', redirect_field_name=None)
 def meetings_settings(request):
-    logger.error("Start of meeting_settings")
     if request.method == 'POST':
-        logger.error("Inside 'method=post'")
         form = MeetingsSettingsForm(request.POST)
         if form.is_valid():
-            logger.error("Inside 'is_valid()'")
             form.save()
             messages.success(request, "Settings updated successfully")
             return redirect(reverse('superadmin_meetings_settings'))
-        logger.error("Form is not valid")
+        messages.error(request, form.errors)
     else:
-        logger.error("Normal non-post operation")
         form = MeetingsSettingsForm(MeetingsSettingsForm.initial_values())
 
     return render(request, 'superadmin/meetings.html', {

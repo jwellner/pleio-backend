@@ -1,3 +1,4 @@
+import logging
 import uuid
 
 from graphql import GraphQLError
@@ -6,8 +7,10 @@ from online_planner.video_call import get_video_call_params
 from online_planner.meetings_api import MeetingsApi, expect_one
 from pyisemail import is_email
 
-from core import constances
+from core import constances, config
 from core.resolvers import shared
+
+logger = logging.getLogger(__name__)
 
 
 def resolve_mutation_schedule_appointment(obj, info, **kwargs):
@@ -30,7 +33,8 @@ def resolve_mutation_schedule_appointment(obj, info, **kwargs):
         if endDateTime:
             kwargs['EndTime'] = endDateTime.strftime("%H:%M")
 
-        if appointmentDetails.get('includeVideoCall'):
+        has_videocall = {str(s['id']): s['hasVideocall'] for s in config.VIDEOCALL_APPOINTMENT_TYPE or []}
+        if has_videocall.get(appointmentDetails['appointmentTypeId']):
             shared.assert_videocall_enabled()
             kwargs.update(get_video_call_params(dict(
                 date=startDateTime.strftime("%Y-%m-%d"),

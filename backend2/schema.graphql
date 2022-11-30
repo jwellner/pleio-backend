@@ -926,6 +926,7 @@ input editSiteSettingInput {
     preserveFileExif: Boolean
     supportContractEnabled: Boolean
     supportContractHoursRemaining: Float
+    appointmentTypeVideocall: [AppointmentTypeInput]
 }
 
 type editSiteSettingPayload {
@@ -1659,7 +1660,6 @@ input ScheduleAppointmentInput {
     appointmentTypeId: String!
     startDateTime: DateTime!
     endDateTime: DateTime!
-    includeVideoCall: Boolean
     attendee: AppointmentAttendeeInput!
 }
 input AppointmentAttendeeInput {
@@ -2008,6 +2008,12 @@ type AppointmentAgenda {
 type AppointmentType {
     id: String
     name: String
+    hasVideocall: Boolean
+}
+
+input AppointmentTypeInput{
+    id: String
+    hasVideocall: Boolean
 }
 
 type AppointmentTimes {
@@ -2444,6 +2450,7 @@ type SiteSettings {
     supportContractEnabled: Boolean!
     supportContractHoursRemaining: Float
     profileSets: [ProfileSet]
+    appointmentTypeVideocall: [AppointmentType]
 }
 
 type StatsItem {

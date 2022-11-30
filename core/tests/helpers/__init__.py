@@ -79,7 +79,6 @@ class PleioTenantTestCase(FastTenantTestCase):
         for key, value in self.settings_cache.items():
             setattr(settings, key, value)
         cache.clear()
-        mock.patch.stopall()
         super().tearDown()
 
     @contextmanager

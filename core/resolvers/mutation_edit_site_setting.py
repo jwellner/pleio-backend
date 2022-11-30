@@ -16,7 +16,6 @@ from core.mail_builders.site_access_changed import schedule_site_access_changed_
 from core.models import ProfileField, Setting
 from core.models.user import validate_profile_sections
 from core.resolvers import shared
-from core.resolvers.query_site import get_site_settings
 from file.helpers.images import resize_and_save_as_png
 from file.models import FileFolder
 from user.models import User
@@ -208,8 +207,8 @@ def resolve_edit_site_setting(_, info, input):
         'kalturaVideoPlayerId': 'KALTURA_VIDEO_PLAYER_ID',
 
         'pdfCheckerEnabled': 'PDF_CHECKER_ENABLED',
-
         'preserveFileExif': 'PRESERVE_FILE_EXIF',
+        'appointmentTypeVideocall': 'VIDEOCALL_APPOINTMENT_TYPE',
     }
 
     resolve_update_keys(setting_keys, clean_input)
@@ -231,11 +230,10 @@ def resolve_edit_site_setting(_, info, input):
     resolve_update_file_description_field_enabled(clean_input)
     resolve_update_is_closed(user, clean_input)
     resolve_update_max_characters_in_abstract(clean_input)
-
     resolve_sync_sitename(clean_input)
 
     return {
-        "siteSettings": get_site_settings()
+        "siteSettings": {}
     }
 
 

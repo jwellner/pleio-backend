@@ -2,8 +2,10 @@ import logging
 
 from django.core.exceptions import ObjectDoesNotExist
 from django.utils import timezone
+from django.utils.translation import gettext
 from elasticsearch_dsl import Search
 from graphql import GraphQLError
+from online_planner.meetings_api import MeetingsApi
 
 from core import config
 from core.constances import ACCESS_TYPE, USER_ROLES
@@ -576,3 +578,17 @@ def assert_videocall_limit():
     last_hour = VideoCallGuest.objects.filter(created_at__gte=timezone.localtime() - timezone.timedelta(hours=1)).count()
     if last_hour >= config.VIDEOCALL_THROTTLE:
         raise GraphQLError(constances.VIDEOCALL_LIMIT_REACHED)
+
+
+def resolve_load_appointment_types():
+    appointement_types = MeetingsApi().get_appointment_types()
+    has_videocall = {s['id']: s['hasVideocall'] for s in config.VIDEOCALL_APPOINTMENT_TYPE}
+    return [{
+        "id": t['Id'],
+        'name': t['Name'] or gettext('Appointment'),
+        'hasVideocall': has_videocall.get(t['Id']) or False} for t in appointement_types]
+
+
+def resolve_load_agendas():
+    agendas = MeetingsApi().get_agendas()
+    return [{'id': a['Id'], 'name': a['Name'] or gettext('Agenda')} for a in agendas]
