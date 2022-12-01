@@ -27,6 +27,7 @@ class TestAdminUserTestCase(PleioTenantTestCase):
                                 name
                                 canDelete
                                 canBan
+                                banReason
                             }
                         }
                     }
@@ -244,3 +245,47 @@ class TestUserProfileSetTestCase(PleioTenantTestCase):
         with self.assertGraphQlError("missing_required_field:demo_field"):
             self.graphql_client.force_login(self.invalid_user)
             self.graphql_client.post(self.query, self.variables)
+
+
+class TestBanReasonTestCase(PleioTenantTestCase):
+    BAN_REASON = "Just for testing"
+
+    def setUp(self):
+        super().setUp()
+        self.admin = AdminFactory(name='admin', email='admin@localhost')
+        self.banned = UserFactory(name='banned', email='banned@localhost',
+                                  is_active=False,
+                                  ban_reason=self.BAN_REASON)
+        self.viewer = UserFactory(name='viewer', email='viewer@localhost')
+        self.blog = BlogFactory(owner=self.banned)
+
+        self.query = """
+        query GetEntity ($guid: String) {
+            entity(guid: $guid) {
+                ... on Blog {
+                    owner {
+                        banReason
+                    }
+                }
+            }
+        }
+        """
+        self.variables = {
+            "guid": self.blog.guid,
+        }
+
+    def tearDown(self):
+        self.blog.delete()
+        self.banned.delete()
+        self.admin.delete()
+        super().tearDown()
+
+    def test_user_info_as_user(self):
+        self.graphql_client.force_login(self.viewer)
+        result = self.graphql_client.post(self.query, self.variables)
+        self.assertIsNone(result['data']['entity']['owner']['banReason'])
+
+    def test_user_info_as_administrator(self):
+        self.graphql_client.force_login(self.admin)
+        result = self.graphql_client.post(self.query, self.variables)
+        self.assertEqual(result['data']['entity']['owner']['banReason'], self.BAN_REASON)
