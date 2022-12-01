@@ -192,7 +192,7 @@ class EditSiteSettingTestCase(PleioTenantTestCase):
                         pdfCheckerEnabled
                         maxCharactersInAbstract
                         preserveFileExif
-
+                        searchArchiveOption
                     }
                 }
             }
@@ -329,7 +329,7 @@ class EditSiteSettingTestCase(PleioTenantTestCase):
 
                 "maxCharactersInAbstract": 500,
                 "preserveFileExif": True,
-
+                "searchArchiveOption": "authenticated",
             }
         }
 
@@ -479,6 +479,7 @@ class EditSiteSettingTestCase(PleioTenantTestCase):
 
         self.assertEqual(data["editSiteSetting"]["siteSettings"]["maxCharactersInAbstract"], 500)
         self.assertEqual(data["editSiteSetting"]["siteSettings"]["preserveFileExif"], True)
+        self.assertEqual(data["editSiteSetting"]["siteSettings"]["searchArchiveOption"], "authenticated")
 
     @patch("core.lib.get_mimetype")
     @patch("{}.open".format(settings.DEFAULT_FILE_STORAGE))

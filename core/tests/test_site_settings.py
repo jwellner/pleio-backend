@@ -15,8 +15,6 @@ from core.lib import get_language_options
 
 class SiteSettingsTestCase(PleioTenantTestCase):
 
-    # TODO: Voeg hier een test toe om een koppeling te maken tussen videocall en onlineafspraken.nl
-
     def setUp(self):
         super().setUp()
 
@@ -238,6 +236,7 @@ class SiteSettingsTestCase(PleioTenantTestCase):
                     collabEditingEnabled
                     supportContractEnabled
                     supportContractHoursRemaining
+                    searchArchiveOption
                     
                     appointmentTypeVideocall {
                         name
@@ -433,6 +432,7 @@ class SiteSettingsTestCase(PleioTenantTestCase):
         self.assertEqual(data["siteSettings"]["collabEditingEnabled"], False)
         self.assertEqual(data["siteSettings"]["supportContractEnabled"], False)
         self.assertEqual(data["siteSettings"]["supportContractHoursRemaining"], 0)
+        self.assertEqual(data['siteSettings']["searchArchiveOption"], 'nobody')
 
     def test_site_settings_by_anonymous(self):
         with self.assertGraphQlError("not_logged_in"):

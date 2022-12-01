@@ -20,6 +20,7 @@ def resolve_search(_, info,
                    tags=None,
                    tagCategories=None,
                    matchStrategy='any',
+                   filterArchived=False,
                    orderBy=None,
                    orderDirection=ORDER_DIRECTION.asc,
                    ownerGuids=None):
@@ -70,6 +71,7 @@ def resolve_search(_, info,
     query.maybe_filter_container(containerGuid)
     query.maybe_filter_tags(tags, matchStrategy)
     query.maybe_filter_categories(tagCategories, matchStrategy)
+    query.maybe_filter_archived(filterArchived)
     query.order_by(orderBy, orderDirection)
     query.add_aggregation()
 

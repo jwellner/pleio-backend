@@ -208,6 +208,7 @@ def resolve_edit_site_setting(_, info, input):
 
         'pdfCheckerEnabled': 'PDF_CHECKER_ENABLED',
         'preserveFileExif': 'PRESERVE_FILE_EXIF',
+        'searchArchiveOption': 'SEARCH_ARCHIVE_OPTION',
         'appointmentTypeVideocall': 'VIDEOCALL_APPOINTMENT_TYPE',
     }
 

@@ -946,3 +946,10 @@ def resolve_appointment_type_videocall(obj, info):
 def resolve_profile_sets(obj, info):
     # pylint: disable=unused-argument
     return ProfileSet.objects.all()
+
+
+@site_settings_public.field("searchArchiveOption")
+@site_settings_private.field("searchArchiveOption")
+def resolve_searchArchiveOption(obj, info):
+    # pylint: disable=unused-argument
+    return config.SEARCH_ARCHIVE_OPTION
