@@ -953,3 +953,10 @@ def resolve_profile_sets(obj, info):
 def resolve_searchArchiveOption(obj, info):
     # pylint: disable=unused-argument
     return config.SEARCH_ARCHIVE_OPTION
+
+
+@site_settings_public.field('blockedUserIntroMessage')
+@site_settings_private.field('blockedUserIntroMessage')
+def resolve_blocked_user_intro_message(obj, info):
+    # pylint: disable=unused-argument
+    return config.BLOCKED_USER_INTRO_MESSAGE

@@ -18,6 +18,7 @@ class SiteTestCase(PleioTenantTestCase):
 
         self.override_config(PROFILE_SECTIONS=[{"name": "section_one", "profileFieldGuids": [self.profileField1.guid, self.profileField2.guid]}])
         self.override_config(COLLAB_EDITING_ENABLED=True)
+        self.override_config(BLOCKED_USER_INTRO_MESSAGE="another blockedUserIntroMessage")
 
         self.query = """
             query testSite {
@@ -112,13 +113,13 @@ class SiteTestCase(PleioTenantTestCase):
                     scheduleAppointmentEnabled
                     videocallEnabled
                     videocallProfilepage
+                    blockedUserIntroMessage
                 }
             }
         """
 
     def tearDown(self):
         self.user.delete()
-
         self.profileField1.delete()
         self.profileField2.delete()
         cache.clear()
@@ -157,6 +158,7 @@ class SiteTestCase(PleioTenantTestCase):
         self.assertEqual(data["site"]["showSuggestedItems"], config.SHOW_SUGGESTED_ITEMS)
         self.assertEqual(data["site"]["collabEditingEnabled"], config.COLLAB_EDITING_ENABLED)
         self.assertEqual(data["site"]["preserveFileExif"], config.PRESERVE_FILE_EXIF)
+        self.assertEqual(data["site"]["blockedUserIntroMessage"], config.BLOCKED_USER_INTRO_MESSAGE)
 
     def test_site_closed(self):
         cache.set("%s%s" % (connection.schema_name, 'IS_CLOSED'), True)

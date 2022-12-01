@@ -928,6 +928,7 @@ input editSiteSettingInput {
     supportContractHoursRemaining: Float
     searchArchiveOption: SearchArchiveOptionEnum
     appointmentTypeVideocall: [AppointmentTypeInput]
+    blockedUserIntroMessage: SecureRichText
 }
 
 type editSiteSettingPayload {
@@ -2320,6 +2321,7 @@ type Site {
     videocallEnabled: Boolean
     videocallProfilepage: Boolean
     searchArchiveOption: SearchArchiveOptionEnum
+    blockedUserIntroMessage: SecureRichText
 }
 
 type SiteSettings {
@@ -2454,6 +2456,7 @@ type SiteSettings {
     supportContractHoursRemaining: Float
     profileSets: [ProfileSet]
     appointmentTypeVideocall: [AppointmentType]
+    blockedUserIntroMessage: SecureRichText
     searchArchiveOption: SearchArchiveOptionEnum
 }
 

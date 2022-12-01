@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-11-16 14:32+0100\n"
+"POT-Creation-Date: 2022-11-28 14:15+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -25,19 +25,19 @@ msgstr "status update"
 msgid "Provide a valid value."
 msgstr "Provide a valid value."
 
-#: core/forms.py:82 core/resolvers/query_site.py:169
+#: core/forms.py:82 core/resolvers/query_site.py:184
 msgid "Never"
 msgstr "Never"
 
-#: core/forms.py:83 core/resolvers/query_site.py:166
+#: core/forms.py:83 core/resolvers/query_site.py:181
 msgid "Daily"
 msgstr "Daily"
 
-#: core/forms.py:84 core/resolvers/query_site.py:167
+#: core/forms.py:84 core/resolvers/query_site.py:182
 msgid "Weekly"
 msgstr "Weekly"
 
-#: core/forms.py:85 core/resolvers/query_site.py:168
+#: core/forms.py:85 core/resolvers/query_site.py:183
 msgid "Monthly"
 msgstr "Monthly"
 
@@ -49,8 +49,17 @@ msgstr "Receive notification emails"
 msgid "Receive overview emails"
 msgstr "Receive overview emails"
 
+#: core/forms.py:136 core/templates/registration/request.html:23
+#: core/views.py:472
+msgid "Name"
+msgstr "Name"
+
+#: core/forms.py:140
+msgid "Profile field"
+msgstr "Profile field"
+
 #: core/lib.py:207 core/resolvers/mutation_import_users.py:30
-#: core/resolvers/query_site.py:75
+#: core/resolvers/query_site.py:89
 msgid "Just me"
 msgstr "Just me"
 
@@ -65,12 +74,12 @@ msgid "Subgroup: %(subgroup_name)s"
 msgstr "Subgroup: %(subgroup_name)s"
 
 #: core/lib.py:219 core/resolvers/mutation_import_users.py:31
-#: core/resolvers/query_site.py:76
+#: core/resolvers/query_site.py:90
 msgid "Logged in users"
 msgstr "Logged in users"
 
 #: core/lib.py:221 core/resolvers/mutation_import_users.py:34
-#: core/resolvers/query_site.py:80
+#: core/resolvers/query_site.py:94
 msgid "Public"
 msgstr "Public"
 
@@ -349,23 +358,23 @@ msgstr "Agenda"
 msgid "Appointment"
 msgstr "Appointment"
 
-#: core/resolvers/query_site.py:128
+#: core/resolvers/query_site.py:142
 msgid "Activity stream"
 msgstr "Activity stream"
 
-#: core/resolvers/query_site.py:128
+#: core/resolvers/query_site.py:142
 msgid "CMS page"
 msgstr "CMS page"
 
-#: core/resolvers/query_site.py:219
+#: core/resolvers/query_site.py:234
 msgid "Administrator"
 msgstr "Administrator"
 
-#: core/resolvers/query_site.py:220
+#: core/resolvers/query_site.py:235
 msgid "Editor"
 msgstr "Editor"
 
-#: core/resolvers/query_site.py:221
+#: core/resolvers/query_site.py:236
 msgid "Question expert"
 msgstr "Question expert"
 
@@ -652,7 +661,7 @@ msgstr "Personal message"
 msgid "Direct notification"
 msgstr "Direct notification"
 
-#: core/templates/email/send_notification_emails.html:10 core/views.py:628
+#: core/templates/email/send_notification_emails.html:10 core/views.py:630
 msgid "Notification overview"
 msgstr "Notification overview"
 
@@ -670,7 +679,7 @@ msgstr "Unsubscribe"
 msgid "Adjust your email settings"
 msgstr "Adjust your email settings"
 
-#: core/templates/email/send_overview_emails.html:22 core/views.py:625
+#: core/templates/email/send_overview_emails.html:22 core/views.py:627
 msgid "Periodic overview"
 msgstr "Periodic overview"
 
@@ -980,7 +989,7 @@ msgstr "Log in again"
 msgid "Activate 2FA"
 msgstr "Activate 2FA"
 
-#: core/templates/registration/login.html:13
+#: core/templates/registration/login.html:17
 msgid ""
 "The site admin has blocked your account. Contact the site admin for more "
 "information."
@@ -988,28 +997,28 @@ msgstr ""
 "The site admin has blocked your account. Contact the site admin for more "
 "information."
 
-#: core/templates/registration/login.html:18
+#: core/templates/registration/login.html:24
 msgid "This site is closed. Log in to get access."
 msgstr "This site is closed. Log in to get access."
 
-#: core/templates/registration/login.html:28
+#: core/templates/registration/login.html:34
 msgid "Login with different account"
 msgstr "Login with different account"
 
-#: core/templates/registration/login.html:32
+#: core/templates/registration/login.html:39
 msgid "or"
 msgstr "or"
 
-#: core/templates/registration/login.html:37
+#: core/templates/registration/login.html:45
 #, python-format
 msgid "Log in using %(oidc_provider)s"
 msgstr "Log in using %(oidc_provider)s"
 
-#: core/templates/registration/login.html:45
+#: core/templates/registration/login.html:53
 msgid "Don't have an account?"
 msgstr "Don't have an account?"
 
-#: core/templates/registration/login.html:45
+#: core/templates/registration/login.html:54
 msgid "Register"
 msgstr "Register"
 
@@ -1024,10 +1033,6 @@ msgid ""
 msgstr ""
 "To enter this site, you must request access from the admin. Click the button"
 " to request access."
-
-#: core/templates/registration/request.html:23 core/views.py:470
-msgid "Name"
-msgstr "Name"
 
 #: core/templates/registration/request.html:27
 msgid "Emailaddress"
@@ -1054,23 +1059,23 @@ msgstr ""
 "Access is requested. You will receive an e-mail when the request is "
 "accepted."
 
-#: core/views.py:471
+#: core/views.py:473
 msgid "E-mail"
 msgstr "E-mail"
 
-#: core/views.py:472
+#: core/views.py:474
 msgid "Group"
 msgstr "Group"
 
-#: core/views.py:473
+#: core/views.py:475
 msgid "Disk size"
 msgstr "Disk size"
 
-#: core/views.py:568
+#: core/views.py:570
 msgid "Your changes are saved"
 msgstr "Your changes are saved"
 
-#: core/views.py:631
+#: core/views.py:633
 #, python-format
 msgid "Successfully unsubscribed %(email)s from %(list_name)s"
 msgstr "Successfully unsubscribed %(email)s from %(list_name)s"
@@ -1116,7 +1121,7 @@ msgid "You already signed in for another sub-event in the same slot."
 msgstr "You already signed in for another sub-event in the same slot."
 
 #: event/resolvers/mutation_event_copy.py:62
-#: event/tests/test_resolve_copy_entity.py:136
+#: event/tests/test_resolve_copy_entity.py:133
 #, python-format
 msgid "Copy %s"
 msgstr "Copy %s"
