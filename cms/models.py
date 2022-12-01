@@ -3,13 +3,13 @@ from auditlog.registry import auditlog
 from django.db import models
 
 from core.lib import get_access_id
-from core.models import Entity, AttachmentMixin
+from core.models import Entity, AttachmentMixin, RevisionMixin
 from core.constances import USER_ROLES
 from django.contrib.postgres.fields import ArrayField
 from django.utils.text import slugify
 
 
-class Page(Entity, AttachmentMixin):
+class Page(Entity, AttachmentMixin, RevisionMixin):
     """
     Page for CMS
     """
@@ -79,6 +79,7 @@ class Page(Entity, AttachmentMixin):
                 'tags': sorted(self.tags) or [],
                 'tagCategories': self.category_tags or [],
                 'accessId': get_access_id(self.read_access),
+                'statusPublished': self.status_published,
             }
         return {}
 

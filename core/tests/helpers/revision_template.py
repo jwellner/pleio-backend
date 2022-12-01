@@ -114,7 +114,8 @@ class RevisionTemplate:
 
         def applyChanges(self, **kwargs):
             for key, value in self.entity.serialize().items():
-                self.variables['input'][key] = value
+                if key != "statusPublished":
+                    self.variables['input'][key] = value
             for key, value in kwargs.items():
                 self.variables['input'][key] = value
             self.graphql_client.force_login(self.admin)

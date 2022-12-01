@@ -3,12 +3,15 @@ from django.db import models
 from django.utils.text import slugify
 
 from core.lib import get_access_id
-from core.models import Entity, VoteMixin, CommentMixin, BookmarkMixin, FollowMixin, MentionMixin, ArticleMixin, AttachmentMixin
+from core.models import (ArticleMixin, AttachmentMixin, BookmarkMixin,
+                         CommentMixin, Entity, FollowMixin, MentionMixin,
+                         VoteMixin, RevisionMixin)
 from core.models.entity import str_datetime
 from core.models.featured import FeaturedCoverMixin
 
 
-class Blog(Entity, FeaturedCoverMixin, VoteMixin, BookmarkMixin, FollowMixin, CommentMixin, MentionMixin, AttachmentMixin, ArticleMixin):
+class Blog(Entity, FeaturedCoverMixin, VoteMixin, BookmarkMixin, FollowMixin, 
+           CommentMixin, MentionMixin, AttachmentMixin, ArticleMixin, RevisionMixin):
     """
     Blog
     """
@@ -55,6 +58,7 @@ class Blog(Entity, FeaturedCoverMixin, VoteMixin, BookmarkMixin, FollowMixin, Co
             'tagCategories': self.category_tags or [],
             'timeCreated': str_datetime(self.created_at),
             'timePublished': str_datetime(self.published),
+            'statusPublished': self.status_published,
             'scheduleArchiveEntity': str_datetime(self.schedule_archive_after),
             'scheduleDeleteEntity': str_datetime(self.schedule_delete_after),
             'abstract': self.abstract or '',

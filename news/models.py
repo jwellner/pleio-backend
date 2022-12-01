@@ -1,14 +1,19 @@
 from auditlog.registry import auditlog
 from django.db import models
 from django.utils.text import slugify
-from core.models import Entity, VoteMixin, CommentMixin, BookmarkMixin, FollowMixin, ArticleMixin, MentionMixin, AttachmentMixin
+
 from core.constances import USER_ROLES
-from core.lib import get_acl, get_access_id
+from core.lib import get_access_id, get_acl
+from core.models import (ArticleMixin, AttachmentMixin, BookmarkMixin,
+                         CommentMixin, Entity, FollowMixin, MentionMixin,
+                         VoteMixin, RevisionMixin)
 from core.models.entity import str_datetime
 from core.models.featured import FeaturedCoverMixin
 
 
-class News(Entity, VoteMixin, BookmarkMixin, FollowMixin, CommentMixin, FeaturedCoverMixin, ArticleMixin, MentionMixin, AttachmentMixin):
+class News(Entity, VoteMixin, BookmarkMixin, FollowMixin, CommentMixin, 
+           FeaturedCoverMixin, ArticleMixin, MentionMixin, AttachmentMixin, 
+           RevisionMixin):
     """
     News
     """
@@ -55,6 +60,7 @@ class News(Entity, VoteMixin, BookmarkMixin, FollowMixin, CommentMixin, Featured
             'tagCategories': self.category_tags or [],
             'timeCreated': str_datetime(self.created_at),
             'timePublished': str_datetime(self.published),
+            'statusPublished': self.status_published,
             'scheduleArchiveEntity': str_datetime(self.schedule_archive_after),
             'scheduleDeleteEntity': str_datetime(self.schedule_delete_after),
             'abstract': self.abstract or '',

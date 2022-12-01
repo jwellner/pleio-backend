@@ -10,11 +10,13 @@ from core import config
 from core.mail_builders.frequent_overview import schedule_frequent_overview_mail
 from core.models import SiteStat, Attachment, ResizedImage, Entity, AvatarExport
 from core.tasks.notification_tasks import create_notifications_for_scheduled_content
+from core.resolvers import shared
+from core.constances import ENTITY_STATUS
 from django.conf import settings
 from django.core import management
 from django.core.exceptions import ObjectDoesNotExist
 from django.db import connection
-from django.db.models import Sum, F
+from django.db.models import Sum
 from django_tenants.utils import schema_context
 from django.utils import timezone
 from datetime import timedelta
@@ -34,6 +36,7 @@ def dispatch_hourly_cron():
         create_notifications_for_scheduled_content.delay(client.schema_name)
         send_notifications.delay(client.schema_name)
         depublicate_content.delay(client.schema_name)
+        make_publication_revisions.delay(client.schema_name)
 
 
 @shared_task
@@ -285,3 +288,15 @@ def depublicate_content(schema_name):
                                           schedule_delete_after__lte=now).select_subclasses()
         for entity in to_delete:
             entity.delete()
+
+@shared_task
+def make_publication_revisions(schema_name):
+    with schema_context(schema_name):
+        time_threshold = timezone.now() - timedelta(hours=2)
+        published = Entity.objects.filter(published__gte=time_threshold).select_subclasses()
+        for entity in published:
+            last_revision = entity.last_revision()
+            if last_revision.content["statusPublished"] == ENTITY_STATUS.DRAFT \
+                            and entity.status_published == ENTITY_STATUS.PUBLISHED:
+                revision = shared.resolve_start_revision(entity, entity.owner)
+                revision.store_publication_revision(entity)

@@ -1,15 +1,16 @@
 from auditlog.registry import auditlog
 from django.db import models
-
-from core.lib import get_access_id
-from core.models import Entity, BookmarkMixin, ArticleMixin, MentionMixin, AttachmentMixin
 from django.utils.text import slugify
 
+from core.lib import get_access_id
+from core.models import (ArticleMixin, AttachmentMixin, BookmarkMixin, Entity,
+                         MentionMixin, RevisionMixin)
 from core.models.entity import str_datetime
 from core.models.featured import FeaturedCoverMixin
 
 
-class Wiki(Entity, FeaturedCoverMixin, BookmarkMixin, ArticleMixin, MentionMixin, AttachmentMixin):
+class Wiki(Entity, FeaturedCoverMixin, BookmarkMixin, ArticleMixin, MentionMixin, 
+           AttachmentMixin, RevisionMixin):
     """
     Wiki
     """
@@ -29,7 +30,7 @@ class Wiki(Entity, FeaturedCoverMixin, BookmarkMixin, ArticleMixin, MentionMixin
 
     def has_revisions(self):
         return True
-
+    
     def __str__(self):
         return f"Wiki[{self.title}]"
 
@@ -64,6 +65,7 @@ class Wiki(Entity, FeaturedCoverMixin, BookmarkMixin, ArticleMixin, MentionMixin
             'tagCategories': self.category_tags or [],
             'timeCreated': str_datetime(self.created_at),
             'timePublished': str_datetime(self.published),
+            'statusPublished': self.status_published,
             'scheduleArchiveEntity': str_datetime(self.schedule_archive_after),
             'scheduleDeleteEntity': str_datetime(self.schedule_delete_after),
             'abstract': self.abstract or '',
