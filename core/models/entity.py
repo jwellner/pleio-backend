@@ -156,6 +156,7 @@ class Entity(TagsModel):
             return view_count.updated_at
         except ObjectDoesNotExist:
             return None
+    
 
     def save(self, *args, **kwargs):
         created = self._state.adding
@@ -197,7 +198,7 @@ class Entity(TagsModel):
 
     def has_revisions(self):
         return False
-
+    
     def can_read(self, user):
         if user.is_authenticated and user.has_role(USER_ROLES.ADMIN):
             return True

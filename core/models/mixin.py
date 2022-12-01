@@ -5,7 +5,6 @@ from django.db.models import Sum, IntegerField
 from django.db.models.functions import Cast
 from django.contrib.postgres.fields.jsonb import KeyTextTransform
 from django.contrib.contenttypes.fields import GenericRelation
-from django.urls import reverse
 from notifications.models import Notification
 from .annotation import Annotation
 from core.models.shared import AbstractModel
@@ -259,6 +258,17 @@ class CommentMixin(models.Model):
 
     class Meta:
         abstract = True
+
+class RevisionMixin(models.Model):
+    class Meta:
+        abstract = True
+    
+    def last_revision(self):
+        # pylint: disable=import-outside-toplevel
+        from core.models import Revision
+        revisions = Revision.objects.get_queryset()
+        revisions = revisions.filter(_container=self.guid)
+        return revisions.latest('created_at')
 
 
 def default_featured_image_properties(entity):
