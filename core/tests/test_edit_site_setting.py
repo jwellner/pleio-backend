@@ -193,6 +193,7 @@ class EditSiteSettingTestCase(PleioTenantTestCase):
                         maxCharactersInAbstract
                         preserveFileExif
                         searchArchiveOption
+                        blockedUserIntroMessage
                     }
                 }
             }
@@ -330,6 +331,7 @@ class EditSiteSettingTestCase(PleioTenantTestCase):
                 "maxCharactersInAbstract": 500,
                 "preserveFileExif": True,
                 "searchArchiveOption": "authenticated",
+                "blockedUserIntroMessage": "blockedUserIntroMessage"
             }
         }
 
@@ -480,6 +482,7 @@ class EditSiteSettingTestCase(PleioTenantTestCase):
         self.assertEqual(data["editSiteSetting"]["siteSettings"]["maxCharactersInAbstract"], 500)
         self.assertEqual(data["editSiteSetting"]["siteSettings"]["preserveFileExif"], True)
         self.assertEqual(data["editSiteSetting"]["siteSettings"]["searchArchiveOption"], "authenticated")
+        self.assertEqual(data["editSiteSetting"]["siteSettings"]["blockedUserIntroMessage"], "blockedUserIntroMessage")
 
     @patch("core.lib.get_mimetype")
     @patch("{}.open".format(settings.DEFAULT_FILE_STORAGE))

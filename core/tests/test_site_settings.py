@@ -237,6 +237,7 @@ class SiteSettingsTestCase(PleioTenantTestCase):
                     supportContractEnabled
                     supportContractHoursRemaining
                     searchArchiveOption
+                    blockedUserIntroMessage
                     
                     appointmentTypeVideocall {
                         name
@@ -433,6 +434,7 @@ class SiteSettingsTestCase(PleioTenantTestCase):
         self.assertEqual(data["siteSettings"]["supportContractEnabled"], False)
         self.assertEqual(data["siteSettings"]["supportContractHoursRemaining"], 0)
         self.assertEqual(data['siteSettings']["searchArchiveOption"], 'nobody')
+        self.assertEqual(data["siteSettings"]["blockedUserIntroMessage"], '')
 
     def test_site_settings_by_anonymous(self):
         with self.assertGraphQlError("not_logged_in"):

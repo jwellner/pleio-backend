@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Frans\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-11-16 14:32+0100\n"
+"POT-Creation-Date: 2022-11-28 14:15+0100\n"
 "PO-Revision-Date: 2021-06-24 15:12+0200\n"
 "Last-Translator: \n"
 "Language-Team: frans\n"
@@ -26,19 +26,19 @@ msgstr "mise à jour du statut"
 msgid "Provide a valid value."
 msgstr "Fournissez une valeur valide."
 
-#: core/forms.py:82 core/resolvers/query_site.py:169
+#: core/forms.py:82 core/resolvers/query_site.py:184
 msgid "Never"
 msgstr "Jamais"
 
-#: core/forms.py:83 core/resolvers/query_site.py:166
+#: core/forms.py:83 core/resolvers/query_site.py:181
 msgid "Daily"
 msgstr "Quotidien"
 
-#: core/forms.py:84 core/resolvers/query_site.py:167
+#: core/forms.py:84 core/resolvers/query_site.py:182
 msgid "Weekly"
 msgstr "Hebdomadaire"
 
-#: core/forms.py:85 core/resolvers/query_site.py:168
+#: core/forms.py:85 core/resolvers/query_site.py:183
 msgid "Monthly"
 msgstr "Mensuel"
 
@@ -50,8 +50,17 @@ msgstr "Recevoir des courriels de notification"
 msgid "Receive overview emails"
 msgstr "Recevoir des courriels de présentation"
 
+#: core/forms.py:136 core/templates/registration/request.html:23
+#: core/views.py:472
+msgid "Name"
+msgstr "Nom"
+
+#: core/forms.py:140
+msgid "Profile field"
+msgstr "Champ du profil"
+
 #: core/lib.py:207 core/resolvers/mutation_import_users.py:30
-#: core/resolvers/query_site.py:75
+#: core/resolvers/query_site.py:89
 msgid "Just me"
 msgstr "Juste moi"
 
@@ -66,12 +75,12 @@ msgid "Subgroup: %(subgroup_name)s"
 msgstr "Sous-groupe : %(subgroup_name)s"
 
 #: core/lib.py:219 core/resolvers/mutation_import_users.py:31
-#: core/resolvers/query_site.py:76
+#: core/resolvers/query_site.py:90
 msgid "Logged in users"
 msgstr "Utilisateurs connectés"
 
 #: core/lib.py:221 core/resolvers/mutation_import_users.py:34
-#: core/resolvers/query_site.py:80
+#: core/resolvers/query_site.py:94
 msgid "Public"
 msgstr "Public"
 
@@ -351,23 +360,23 @@ msgstr "Agenda"
 msgid "Appointment"
 msgstr "Rendez-vous"
 
-#: core/resolvers/query_site.py:128
+#: core/resolvers/query_site.py:142
 msgid "Activity stream"
 msgstr "Flux d’activité"
 
-#: core/resolvers/query_site.py:128
+#: core/resolvers/query_site.py:142
 msgid "CMS page"
 msgstr "Page SGC"
 
-#: core/resolvers/query_site.py:219
+#: core/resolvers/query_site.py:234
 msgid "Administrator"
 msgstr "Administrateur"
 
-#: core/resolvers/query_site.py:220
+#: core/resolvers/query_site.py:235
 msgid "Editor"
 msgstr "Éditeur"
 
-#: core/resolvers/query_site.py:221
+#: core/resolvers/query_site.py:236
 msgid "Question expert"
 msgstr "Expert en questions"
 
@@ -654,7 +663,7 @@ msgstr "Message personnel"
 msgid "Direct notification"
 msgstr "Notification directe"
 
-#: core/templates/email/send_notification_emails.html:10 core/views.py:628
+#: core/templates/email/send_notification_emails.html:10 core/views.py:630
 msgid "Notification overview"
 msgstr "Aperçu des notifications"
 
@@ -672,7 +681,7 @@ msgstr "Se désabonner"
 msgid "Adjust your email settings"
 msgstr "Ajustez vos paramètres de messagerie"
 
-#: core/templates/email/send_overview_emails.html:22 core/views.py:625
+#: core/templates/email/send_overview_emails.html:22 core/views.py:627
 msgid "Periodic overview"
 msgstr "Aperçu périodique"
 
@@ -993,7 +1002,7 @@ msgstr "Connectez-vous à nouveau"
 msgid "Activate 2FA"
 msgstr "Activer 2FA"
 
-#: core/templates/registration/login.html:13
+#: core/templates/registration/login.html:17
 msgid ""
 "The site admin has blocked your account. Contact the site admin for more "
 "information."
@@ -1001,28 +1010,28 @@ msgstr ""
 "L'administrateur du site a bloqué votre compte. Contactez l'administrateur "
 "du site pour plus d'informations."
 
-#: core/templates/registration/login.html:18
+#: core/templates/registration/login.html:24
 msgid "This site is closed. Log in to get access."
 msgstr "Ce site est fermé. Connectez-vous pour accéder."
 
-#: core/templates/registration/login.html:28
+#: core/templates/registration/login.html:34
 msgid "Login with different account"
 msgstr "Se connecter avec un autre compte"
 
-#: core/templates/registration/login.html:32
+#: core/templates/registration/login.html:39
 msgid "or"
 msgstr "ou"
 
-#: core/templates/registration/login.html:37
+#: core/templates/registration/login.html:45
 #, python-format
 msgid "Log in using %(oidc_provider)s"
 msgstr "Connectez-vous en utilisant %(oidc_provider)s"
 
-#: core/templates/registration/login.html:45
+#: core/templates/registration/login.html:53
 msgid "Don't have an account?"
 msgstr "Vous n’avez pas de compte ?"
 
-#: core/templates/registration/login.html:45
+#: core/templates/registration/login.html:54
 msgid "Register"
 msgstr "S’inscrire"
 
@@ -1037,10 +1046,6 @@ msgid ""
 msgstr ""
 "Pour accéder à ce site, vous devez demander l’accès à l’administrateur.  "
 "Cliquez sur l’onglet pour demander l’accès."
-
-#: core/templates/registration/request.html:23 core/views.py:470
-msgid "Name"
-msgstr "Nom"
 
 #: core/templates/registration/request.html:27
 msgid "Emailaddress"
@@ -1067,23 +1072,23 @@ msgstr ""
 "L’accès est demandé. Vous recevrez un courrier électronique lorsque l’accès "
 "sera accepté."
 
-#: core/views.py:471
+#: core/views.py:473
 msgid "E-mail"
 msgstr "E-mail"
 
-#: core/views.py:472
+#: core/views.py:474
 msgid "Group"
 msgstr "Groupe"
 
-#: core/views.py:473
+#: core/views.py:475
 msgid "Disk size"
 msgstr "Taille du disque"
 
-#: core/views.py:568
+#: core/views.py:570
 msgid "Your changes are saved"
 msgstr "Vos modifications sont enregistrées"
 
-#: core/views.py:631
+#: core/views.py:633
 #, python-format
 msgid "Successfully unsubscribed %(email)s from %(list_name)s"
 msgstr "Désinscription réussie de %(email)s de %(list_name)s."
@@ -1130,7 +1135,7 @@ msgstr ""
 "Vous vous êtes déjà inscrit à un autre sous-événement dans le même créneau."
 
 #: event/resolvers/mutation_event_copy.py:62
-#: event/tests/test_resolve_copy_entity.py:136
+#: event/tests/test_resolve_copy_entity.py:133
 #, python-format
 msgid "Copy %s"
 msgstr "Copie %s"

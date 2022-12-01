@@ -210,6 +210,7 @@ def resolve_edit_site_setting(_, info, input):
         'preserveFileExif': 'PRESERVE_FILE_EXIF',
         'searchArchiveOption': 'SEARCH_ARCHIVE_OPTION',
         'appointmentTypeVideocall': 'VIDEOCALL_APPOINTMENT_TYPE',
+        'blockedUserIntroMessage': 'BLOCKED_USER_INTRO_MESSAGE',
     }
 
     resolve_update_keys(setting_keys, clean_input)
