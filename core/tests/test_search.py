@@ -1,10 +1,11 @@
+from django.utils import timezone
 from mixer.backend.django import mixer
 
 from blog.factories import BlogFactory
 from blog.models import Blog
 from core.constances import ACCESS_TYPE
 from core.models import Group
-from core.tests.helpers import ElasticsearchTestCase
+from core.tests.helpers import ElasticsearchTestCase, PleioTenantTestCase
 from file.models import FileFolder
 from news.models import News
 from user.factories import UserFactory
@@ -28,11 +29,13 @@ class SearchTestCase(ElasticsearchTestCase):
             query Search(
                         $q: String!
                         $subtype: String
-                        $subtypes: [String]) {
+                        $subtypes: [String]
+                        $filterArchived: Boolean) {
                 search( 
                         q: $q,
                         subtype: $subtype
-                        subtypes: $subtypes) {
+                        subtypes: $subtypes
+                        filterArchived: $filterArchived) {
                     edges {
                         guid
                     }
@@ -189,6 +192,54 @@ class SearchTestCase(ElasticsearchTestCase):
         self.assertIn(self.news3.guid, items)
         self.assertNotIn(self.news1.guid, items)
         self.assertNotIn(self.blog1.guid, items)
+
+
+class TestSearchArchivedTestCase(PleioTenantTestCase):
+
+    def setUp(self):
+        super().setUp()
+        self.user = UserFactory()
+        self.archived_blog = BlogFactory(owner=self.user,
+                                         is_archived=True,
+                                         published=timezone.localtime())
+        self.not_archived_blog = BlogFactory(owner=self.user,
+                                             is_archived=False,
+                                             published=timezone.localtime())
+
+        self.query = """
+        query Search($q: String! $enabled: Boolean, $disabled: Boolean) {
+                onlyArchived: search(q: $q, filterArchived: $enabled) {
+                    edges {
+                        guid
+                    }
+                }
+                allContent: search(q: $q, filterArchived: $disabled) {
+                    edges {
+                        guid
+                    }
+                }
+            }
+        """
+        self.variables = {
+            'q': '',
+            'enabled': True,
+            'disabled': False
+        }
+
+    def test_filter_archived(self):
+        ElasticsearchTestCase.initialize_index()
+
+        self.graphql_client.force_login(self.user)
+        result = self.graphql_client.post(self.query, self.variables)
+
+        only_archived = [e['guid'] for e in result['data']['onlyArchived']['edges']]
+        all_content = [e['guid'] for e in result['data']['allContent']['edges']]
+
+        self.assertIn(self.archived_blog.guid, only_archived)
+        self.assertIn(self.archived_blog.guid, all_content)
+
+        self.assertNotIn(self.not_archived_blog.guid, only_archived)
+        self.assertIn(self.not_archived_blog.guid, all_content)
 
 
 class TestCaseSensitivityTitleSortingSearchTestCase(ElasticsearchTestCase):

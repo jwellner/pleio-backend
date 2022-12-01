@@ -170,6 +170,7 @@ DEFAULT_SITE_CONFIG = {
 
     'SUPPORT_CONTRACT_ENABLED': (False, "Support contract enabled for site"),
     'SUPPORT_CONTRACT_HOURS_REMAINING': (0, "Support contract hours remaining for site"),
+    'SEARCH_ARCHIVE_OPTION': ('nobody', "Allow filter archived articles on search"),
 }
 """
 Default site configuration

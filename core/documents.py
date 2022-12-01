@@ -59,6 +59,7 @@ class DefaultDocument(Document):
 @registry.register_document
 class UserDocument(DefaultDocument):
     id = fields.KeywordField()
+    is_archived = fields.BooleanField()
     type = fields.KeywordField(attr="type_to_string")
     read_access = fields.ListField(fields.TextField(attr="search_read_access"))
     is_active = fields.BooleanField()
@@ -94,6 +95,9 @@ class UserDocument(DefaultDocument):
 
     def prepare_last_online(self, instance):
         return instance.profile.last_online
+
+    def prepare_is_archived(self, instance):
+        return not instance.is_active
 
     class Index:
         name = 'user'

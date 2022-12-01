@@ -86,6 +86,10 @@ class QueryBuilder():
                             'terms', category_tags=[single_match]
                         )
 
+    def maybe_filter_archived(self, filter_archived):
+        if filter_archived:
+            self.s = self.s.filter('term', is_archived=True)
+
     def order_by(self, sort_order, direction):
         if sort_order == SEARCH_ORDER_BY.title:
             self.s = self.s.sort({'title.raw': {'order': direction}})

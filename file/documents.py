@@ -17,6 +17,7 @@ logger = logging.getLogger(__name__)
 @registry.register_document
 class FileDocument(DefaultDocument):
     id = fields.KeywordField()
+    is_archived = fields.BooleanField()
     tags = fields.ListField(fields.TextField(
         fields={'raw': fields.KeywordField()}
     ))

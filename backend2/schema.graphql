@@ -926,6 +926,7 @@ input editSiteSettingInput {
     preserveFileExif: Boolean
     supportContractEnabled: Boolean
     supportContractHoursRemaining: Float
+    searchArchiveOption: SearchArchiveOptionEnum
     appointmentTypeVideocall: [AppointmentTypeInput]
 }
 
@@ -1892,6 +1893,7 @@ type Query {
         tags: [String]
         tagCategories: [TagCategoryInput]
         matchStrategy: MatchStrategy
+        filterArchived: Boolean
         orderBy: SearchOrderBy
         orderDirection: OrderDirection
         ownerGuids: [String]
@@ -2317,6 +2319,7 @@ type Site {
     scheduleAppointmentEnabled: Boolean
     videocallEnabled: Boolean
     videocallProfilepage: Boolean
+    searchArchiveOption: SearchArchiveOptionEnum
 }
 
 type SiteSettings {
@@ -2451,6 +2454,15 @@ type SiteSettings {
     supportContractHoursRemaining: Float
     profileSets: [ProfileSet]
     appointmentTypeVideocall: [AppointmentType]
+    searchArchiveOption: SearchArchiveOptionEnum
+}
+
+enum SearchArchiveOptionEnum {
+    nobody
+    admin
+    editor
+    authenticated
+    everyone
 }
 
 type StatsItem {

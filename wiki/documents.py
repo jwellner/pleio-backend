@@ -8,6 +8,7 @@ from core.utils.convert import tiptap_to_text
 @registry.register_document
 class WikiDocument(DefaultDocument):
     id = fields.KeywordField()
+    is_archived = fields.BooleanField()
     tags = fields.ListField(fields.TextField(
         fields={'raw': fields.KeywordField()}
     ))
