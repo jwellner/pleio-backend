@@ -287,5 +287,13 @@ def resolve_user_profile_set_manager(obj, info):
     return obj.profile_sets.all()
 
 
+@user.field("banReason")
+def resolve_user_ban_reason(obj, info):
+    # pylint: disable=unused-argument
+    request_user = info.context["request"].user
+    if request_user.is_authenticated and request_user.has_role(USER_ROLES.ADMIN):
+        return obj.ban_reason
+
+
 user.set_field('canDelete', shared.has_full_admin_abilities_on_user)
 user.set_field('canBan', shared.has_full_admin_abilities_on_user)

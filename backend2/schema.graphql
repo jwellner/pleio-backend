@@ -2652,6 +2652,7 @@ type User implements Entity {
     canBan: Boolean
     isSuperadmin: Boolean
     profileSetManager: [ProfileSet]
+    banReason: String
 }
 
 type UserFilter {
