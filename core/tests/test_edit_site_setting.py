@@ -127,6 +127,8 @@ class EditSiteSettingTestCase(PleioTenantTestCase):
                         tagCategories {
                             name
                             values
+                            restrictContentTypes
+                            allowedContentTypes
                         }
                         showTagsInFeed
                         showTagsInDetail
@@ -262,8 +264,13 @@ class EditSiteSettingTestCase(PleioTenantTestCase):
                                     {"name": "section_two", "profileFieldGuids": [str(self.profileField4.id)]},
                                     {"name": "section_three", "profileFieldGuids": ['notrealid']}],
 
-                "tagCategories": [{"name": "cat1", "values": ["tag1", "tag2"]},
-                                  {"name": "cat2", "values": ["tag3", "tag4"]}],
+                "tagCategories": [{"name": "cat1",
+                                   "values": ["tag1", "tag2"],
+                                   "restrictContentTypes": False},
+                                  {"name": "cat2",
+                                   "values": ["tag3", "tag4"],
+                                   "restrictContentTypes": True,
+                                   "allowedContentTypes": ['blog']}],
                 'showTagsInFeed': True,
                 'showTagsInDetail': True,
 
@@ -414,8 +421,14 @@ class EditSiteSettingTestCase(PleioTenantTestCase):
                           {"name": "section_two", "profileFieldGuids": [str(self.profileField4.id)]},
                           {"name": "section_three", "profileFieldGuids": []}])
 
-        self.assertEqual(data["editSiteSetting"]["siteSettings"]["tagCategories"], [{"name": "cat1", "values": ["tag1", "tag2"]},
-                                                                                    {"name": "cat2", "values": ["tag3", "tag4"]}])
+        self.assertDictEqual(data["editSiteSetting"]["siteSettings"]["tagCategories"], [{"name": "cat1",
+                                                                                         "values": ["tag1", "tag2"],
+                                                                                         "restrictContentTypes": False,
+                                                                                         'allowedContentTypes': None},
+                                                                                        {"name": "cat2",
+                                                                                         "values": ["tag3", "tag4"],
+                                                                                         "restrictContentTypes": True,
+                                                                                         "allowedContentTypes": ['blog']}])
         self.assertEqual(data["editSiteSetting"]["siteSettings"]["showTagsInFeed"], True)
         self.assertEqual(data["editSiteSetting"]["siteSettings"]["showTagsInDetail"], True)
 

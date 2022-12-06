@@ -104,6 +104,13 @@ class PleioTenantTestCase(FastTenantTestCase):
         right = datetime.fromisoformat(right_date_string)
         self.assertEqual(left, right, *args, **kwargs)
 
+    def assertDictEqual(self, d1, d2, msg=None):
+        if isinstance(d1, dict) and isinstance(d2, dict):
+            super().assertDictEqual(d1, d2, msg)
+        super().assertDictEqual({'data': d1},
+                                {'data': d2},
+                                msg)
+
     def tiptap_paragraph(self, *paragraphs):
         return json.dumps({
             'type': 'doc',
