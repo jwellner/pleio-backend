@@ -1,0 +1,29 @@
+{% load backup_utils %}
+
+{% if tasks %}
+    <table class="table">
+        <thead>
+        <th>Initiated</th>
+        <th>Status</th>
+        <th></th>
+        </thead>
+        <tbody>
+        {% for task in tasks %}
+            <tr>
+                <td>{{ task.created_at }}</td>
+                <td>{{ task.state }}</td>
+                <td>
+                    {% backup_url task as maybe_backup_url %}
+                    {% if task.state != 'SUCCESS' %}
+                        -
+                    {% elif not maybe_backup_url %}
+                        {{ task.response }}
+                    {% else %}
+                        <a href="{{ maybe_backup_url }}">{{ task.response }}</a>{% if task.arguments.1 %} (database only){% endif %}
+                    {% endif %}
+                </td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+{% endif %}

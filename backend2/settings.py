@@ -115,6 +115,7 @@ SHARED_APPS = [
     'django.contrib.messages',
     'widget_tweaks',
     'user',
+    'control',
     'post_deploy',
     # Fail-over for post-deploy
     'deploy_task',
@@ -195,7 +196,7 @@ if not RUN_AS_ADMIN_APP:
     MIDDLEWARE.extend(TENANT_MIDDLEWARE)
 
 ROOT_URLCONF = 'backend2.urls'
-PUBLIC_SCHEMA_URLCONF = 'backend2.urls_public'
+PUBLIC_SCHEMA_URLCONF = 'backend2.urls_admin'
 
 TEMPLATES = [
     {
@@ -314,10 +315,11 @@ STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.ManifestStaticFilesSto
 PASSWORD_RESET_TIMEOUT_DAYS = 1
 ACCOUNT_ACTIVATION_DAYS = 7
 
-if not RUN_AS_ADMIN_APP:
-    LOGIN_URL = '/oidc/authenticate/'
-    LOGIN_REDIRECT_URL = '/'
-    LOGOUT_REDIRECT_URL = '/'
+LOGIN_URL = '/oidc/authenticate/'
+LOGIN_REDIRECT_URL = '/'
+LOGOUT_REDIRECT_URL = '/'
+if RUN_AS_ADMIN_APP:
+    LOGIN_URL = '/admin/login/'
 
 APPEND_SLASH = False
 

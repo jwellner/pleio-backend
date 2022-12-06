@@ -5,6 +5,8 @@ from django_tenants.models import TenantMixin, DomainMixin
 from django.utils import timezone
 from django.urls import reverse
 from uuslug import uuslug
+from core.models import SiteStat
+from django_tenants.utils import tenant_context
 
 
 class Client(TenantMixin):
@@ -21,6 +23,30 @@ class Client(TenantMixin):
         if primary:
             return primary.domain
         return None
+
+    @property
+    def stat_disk_size(self):
+        try:
+            with tenant_context(self):
+                return SiteStat.objects.filter(stat_type='DISK_SIZE').latest('created_at').value
+        except Exception:
+            return 0
+
+    @property
+    def stat_db_size(self):
+        try:
+            with tenant_context(self):
+                return SiteStat.objects.filter(stat_type='DB_SIZE').latest('created_at').value
+        except Exception:
+            return 0
+
+    @property
+    def agreements_accepted(self):
+        agreements_accepted = True
+        for agreement in Agreement.objects.all():
+            if not agreement.latest_accepted_for_tenant(self):
+                agreements_accepted = False
+        return agreements_accepted
 
     def save(self, *args, **kwargs):
         is_new = self._state.adding

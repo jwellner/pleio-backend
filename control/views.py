@@ -1,0 +1,469 @@
+import logging
+import os
+import mimetypes
+import csv
+import tempfile
+
+from io import StringIO
+from django.conf import settings
+from django.contrib.auth.decorators import login_required
+from django.contrib import messages
+from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
+from django.shortcuts import render, redirect, reverse
+from django.views.decorators.http import require_http_methods
+from django.utils.text import slugify
+from django.utils.timezone import localtime
+from django.http import FileResponse, HttpResponseNotFound, StreamingHttpResponse
+from wsgiref.util import FileWrapper
+from tenants.models import Client, Agreement, AgreementVersion
+from control.models import SiteFilter, Task
+from control.forms import AddSiteForm, DeleteSiteForm, ConfirmSiteForm, ConfirmSiteBackupForm, SearchUserForm, AgreementAddForm, AgreementAddVersionForm
+from core.models import SiteStat
+from user.models import User
+from django_tenants.utils import tenant_context
+
+logger = logging.getLogger(__name__)
+
+
+@login_required
+def home(request):
+    # pylint: disable=unused-argument
+
+    context = {
+        'name': settings.ENV,
+        'site_count': Client.objects.exclude(schema_name='public').filter(is_active=True).count()
+    }
+
+    return render(request, 'home.html', context)
+
+
+@login_required
+def sites(request):
+    # pylint: disable=unused-argument
+
+    f = SiteFilter(
+        request.GET,
+        queryset=Client.objects.exclude(schema_name='public').all()
+    )
+
+    page = request.GET.get('page', 1)
+
+    paginator = Paginator(f.qs, 50)
+    try:
+        sites = paginator.page(page)
+    except PageNotAnInteger:
+        sites = paginator.page(1)
+    except EmptyPage:
+        sites = paginator.page(paginator.num_pages)
+
+    context = {
+        'filter': f,
+        'sites': sites,
+    }
+
+    return render(request, 'sites.html', context)
+
+
+@login_required
+def site(request, site_id):
+    # pylint: disable=unused-argument
+
+    site = Client.objects.get(id=site_id)
+
+    with tenant_context(site):
+        db_size_dates = list(SiteStat.objects.filter(stat_type='DB_SIZE').values_list('created_at', flat=True))[-50:]
+        db_size_data = list(SiteStat.objects.filter(stat_type='DB_SIZE').values_list('value', flat=True))[-50:]
+        db_stat_days = []
+        for date in db_size_dates:
+            db_stat_days.append(date.strftime("%d-%b-%Y"))
+
+        disk_size_dates = list(SiteStat.objects.filter(stat_type='DISK_SIZE').values_list('created_at', flat=True))[-50:]
+        disk_size_data = list(SiteStat.objects.filter(stat_type='DISK_SIZE').values_list('value', flat=True))[-50:]
+        disk_stat_days = []
+        for date in disk_size_dates:
+            disk_stat_days.append(date.strftime("%d-%b-%Y"))
+
+    context = {
+        'site': site,
+        'db_stat_days': db_stat_days,
+        'db_stat_data': db_size_data,
+        'disk_stat_days': disk_stat_days,
+        'disk_stat_data': disk_size_data
+    }
+
+    return render(request, 'site.html', context)
+
+
+@login_required
+def sites_add(request):
+    # pylint: disable=unused-argument
+
+    if request.POST:
+        form = AddSiteForm(request.POST)
+        if form.is_valid():
+            data = form.cleaned_data
+
+            schema_name = data.get("schema_name")
+            domain = data.get("domain")
+            backup = data.get("backup")
+
+            if backup:
+                task = Task.objects.create_task('control.tasks.restore_site', (backup, schema_name, domain))
+            else:
+                task = Task.objects.create_task('control.tasks.add_site', (schema_name, domain))
+
+            messages.info(request, "Add site {%s} gestart in achtergrond (task.id=%s)" % (domain, task.id))
+
+            return redirect(reverse('sites'))
+    else:
+        form = AddSiteForm(initial={})
+
+    context = {
+        'form': form
+    }
+
+    return render(request, 'sites_add.html', context)
+
+
+@login_required
+def tasks(request):
+    # pylint: disable=unused-argument
+    page = request.GET.get('page', 1)
+
+    paginator = Paginator(Task.objects.all(), 50)
+    try:
+        tasks = paginator.page(page)
+    except PageNotAnInteger:
+        tasks = paginator.page(1)
+    except EmptyPage:
+        tasks = paginator.page(paginator.num_pages)
+
+    context = {
+        'tasks': tasks,
+    }
+
+    return render(request, 'tasks.html', context)
+
+
+@login_required
+@require_http_methods(["POST", "GET"])
+def sites_delete(request, site_id):
+    # pylint: disable=unused-argument
+
+    site = Client.objects.get(id=site_id)
+
+    if request.POST:
+        form = DeleteSiteForm(request.POST)
+        if form.is_valid():
+            task = Task.objects.create_task('control.tasks.delete_site', (site.id,))
+
+            messages.info(request, "Removed site %s gestart in achtergrond (task.id=%s)" % (site.primary_domain, task.id))
+
+            return redirect(reverse('sites'))
+
+    else:
+        form = DeleteSiteForm(initial={
+            'site_id': site.id
+        })
+
+    context = {
+        'site': site,
+        'form': form
+    }
+
+    return render(request, 'sites_delete.html', context)
+
+
+
+@login_required
+@require_http_methods(["POST", "GET"])
+def sites_disable(request, site_id):
+    # pylint: disable=unused-argument
+
+    site = Client.objects.get(id=site_id)
+
+    if request.POST:
+        form = ConfirmSiteForm(request.POST)
+        if form.is_valid():
+            task = Task.objects.create_task('control.tasks.update_site', (site.id, {"is_active": False}))
+
+            messages.info(request, "Disable site %s gestart in achtergrond (task.id=%s)" % (site.primary_domain, task.id))
+
+            return redirect(reverse('sites'))
+
+    else:
+        form = ConfirmSiteForm(initial={
+            'site_id': site.id
+        })
+
+    context = {
+        'site': site,
+        'form': form
+    }
+
+    return render(request, 'sites_disable.html', context)
+
+
+@require_http_methods(["POST", "GET"])
+def sites_enable(request, site_id):
+    # pylint: disable=unused-argument
+
+    site = Client.objects.get(id=site_id)
+
+    if request.POST:
+        form = ConfirmSiteForm(request.POST)
+        if form.is_valid():
+            task = Task.objects.create_task('control.tasks.update_site', (site.id, {"is_active": True}))
+
+            messages.info(request, "Enable site %s gestart in achtergrond (task.id=%s)" % (site.primary_domain, task.id))
+
+            return redirect(reverse('sites'))
+
+    else:
+        form = ConfirmSiteForm(initial={
+            'site_id': site.id
+        })
+
+    context = {
+        'site': site,
+        'form': form
+    }
+
+    return render(request, 'sites_enable.html', context)
+
+
+@login_required
+@require_http_methods(["POST", "GET"])
+def sites_backup(request, site_id):
+    # pylint: disable=unused-argument
+
+    def _backup_foldername(site):
+        return slugify("%s_%s" % (
+            localtime().strftime("%Y%m%d%H%M%S"),
+            site.schema_name,
+        ))
+
+    site = Client.objects.get(id=site_id)
+    origin = "site_backup:%s" % site.id
+
+    if request.POST:
+        form = ConfirmSiteBackupForm(request.POST)
+        if form.is_valid():
+            task = Task.objects.create_task(
+                name='control.tasks.backup_site',
+                arguments=(
+                    site.id,
+                    not form.cleaned_data['include_files'],
+                    _backup_foldername(site),
+                    bool(form.cleaned_data['create_archive'])
+                ),
+                origin=origin,
+                author=request.user,
+                followup='core.tasks.followup_backup_complete',
+                client=site
+            )
+            messages.info(request, "Backup site %s gestart in achtergrond (task.id=%i)" % (site.primary_domain, task.id))
+            return redirect(reverse('site_backup', args=(site_id,)))
+
+    else:
+        form = ConfirmSiteBackupForm(initial={
+            'site_id': site.id
+        })
+
+    context = {
+        'site': site,
+        'form': form,
+        'tasks': Task.objects.filter(origin=origin).order_by('-created_at')[:5]
+    }
+
+    return render(request, 'sites_backup.html', context)
+
+
+@login_required
+def download_backup(request, task_id):
+    task = Task.objects.get(id=task_id)
+
+    filepath = os.path.join(settings.BACKUP_PATH, task.response)
+    if not os.path.isfile(filepath):
+        return HttpResponseNotFound()
+
+    logger.info(
+        "download_backup %s by %s",
+        os.path.basename(filepath),
+        request.user.email
+    )
+
+    chunk_size = 8192
+    response = FileResponse(
+        FileWrapper(open(filepath, 'rb'), chunk_size),
+        content_type=mimetypes.guess_type(filepath)[0]
+    )
+    response['Content-Length'] = os.path.getsize(filepath)
+    response['Content-Disposition'] = "attachment; filename=%s" % os.path.basename(filepath)
+    return response
+
+
+@login_required
+def tools(request):
+    # pylint: disable=unused-argument
+
+    return render(request, 'tools.html')
+
+
+@login_required
+def dowload_site_admins(request):
+    # pylint: disable=unused-argument
+    # pylint: disable=unused-variable
+
+    clients = Client.objects.exclude(schema_name='public', is_active=True)
+
+    admins = []
+    for client in clients:
+
+        with tenant_context(client):
+
+            users = User.objects.filter(roles__contains=['ADMIN'], is_active=True)
+            for user in users:
+                admins.append({
+                    'name': user.name,
+                    'email': user.email,
+                    'client_id': client.id,
+                    'client_domain': client.get_primary_domain().domain
+                })
+
+    def stream():
+        buffer = StringIO()
+        writer = csv.writer(buffer, delimiter=';', quotechar='"')
+        writer.writerow(['name', 'email', 'site'])
+        yield buffer.getvalue()
+
+        for admin in admins:
+            buffer = StringIO()
+            writer = csv.writer(buffer, delimiter=';', quotechar='"')
+            writer.writerow([admin['name'], admin['email'], admin['client_domain']])
+            yield buffer.getvalue()
+
+    response = StreamingHttpResponse(stream(), content_type="text/csv")
+    response['Content-Disposition'] = 'attachment; filename="site_admins.csv"'
+
+    return response
+
+
+@login_required
+def search_user(request):
+    # pylint: disable=unused-argument
+    # pylint: disable=unused-variable
+
+    if request.POST:
+        form = SearchUserForm(request.POST)
+        if form.is_valid():
+            data = form.cleaned_data
+
+            email = data.get("email")
+
+            clients = Client.objects.exclude(schema_name='public')
+
+            data = []
+            for client in clients:
+
+                with tenant_context(client):
+
+                    user = User.objects.filter(email=email, is_active=True).first()
+                    if user:
+                        data.append({
+                            'user_name': user.name,
+                            'user_email': user.email,
+                            'user_external_id': user.external_id,
+                            'id': client.id,
+                            'schema': client.schema_name,
+                            'domain': client.get_primary_domain().domain
+                        })
+
+            context = {
+                'form': form,
+                'sites': data,
+            }
+
+            return render(request,'search_user.html', context)
+
+    else:
+        form = SearchUserForm(initial={})
+
+    context = {
+        'form': form
+    }
+
+    return render(request, 'search_user.html', context)
+
+
+@login_required
+def agreements(request, cluster_id=None):
+    # pylint: disable=unused-argument
+
+    context = {
+        'agreements': Agreement.objects.all()
+    }
+
+    return render(request, 'agreements.html', context)
+
+
+@login_required
+def agreements_add(request):
+    # pylint: disable=unused-argument
+
+    if request.POST:
+        form = AgreementAddForm(request.POST)
+        if form.is_valid():
+            data = form.cleaned_data
+
+            name = data.get("name")
+            Agreement.objects.create(name=name, description='')
+
+            messages.info(request, f"Added agreement {name}")
+
+            return redirect('/agreements')
+    else:
+        form = AgreementAddForm(initial={})
+
+    context = {
+        'form': form
+    }
+
+    return render(request, 'agreements_add.html', context)
+
+
+@login_required
+def agreements_add_version(request, agreement_id):
+    # pylint: disable=unused-argument
+
+    agreement = Agreement.objects.get(id=agreement_id)
+
+    if request.POST:
+        form = AgreementAddVersionForm(request.POST, request.FILES)
+        if form.is_valid():
+            data = form.cleaned_data
+
+            version = data.get("version")
+            agreement_id = data.get("agreement_id")
+            uploaded_file = request.FILES['document']
+
+            agreement = Agreement.objects.get(id=agreement_id)
+            version = AgreementVersion.objects.create(
+                agreement=agreement,
+                version=version,
+                document=uploaded_file
+            )
+
+            messages.info(request, "Added version %s to agreement %s" % (version.version, agreement.name) )
+
+            return redirect('/agreements')
+    else:
+        form = AgreementAddVersionForm(initial={
+            'agreement_id': agreement_id
+        })
+
+    context = {
+        'form': form
+    }
+
+    return render(request, 'agreements_add.html', context)

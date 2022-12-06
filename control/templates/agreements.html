@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+
+{% load widget_tweaks %}
+{% load i18n %}
+
+{% block content %}
+
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+  <h1 class="h2">Agreements</h1>
+</div>
+
+<br><br>
+{% for agreement in agreements %}
+<h4>{{ agreement.name }}</h4>
+<table class="table">
+    <thead>
+      <tr>
+        <th scope="col">Version</th>
+        <th scope="col">Document</th>
+      </tr>
+    </thead>
+    <tbody>
+    {% for version in agreement.versions.all %}
+      <tr>
+        <td>{{ version.version }}</td>
+        <td>{{ version.document }}</td>
+      </tr>
+    {% endfor %}      
+    </tbody>
+    <tfoot>
+        <tr>
+            <td colspan="3"><a href="/agreements/{{ agreement.id }}/add">Add version</a></td>
+        </tr>
+    </tfoot>
+</table>
+{% endfor %}
+
+
+<br><br>
+<a href="/agreements/add">Add document</a>
+
+{% endblock %}

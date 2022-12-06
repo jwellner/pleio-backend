@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+
+{% load i18n %}
+{% load url_replace %}
+
+{% block content %}
+
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+  <h1 class="h2">Tasks</h1>
+  <div>
+
+  </div>
+</div>
+
+<table class="table" width="100%">
+  <thead>
+    <tr>
+      <th scope="col" width=175>Date</th>
+      <th scope="col">Name</th>
+      <th scope="col">State</th>
+      <th scope="col">Response</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for task in tasks %}
+    <tr>
+      <td>{{ task.created_at|date:'Y-m-d H:i' }}</td>
+      <td>{{ task.name }}</td>
+      <td>{{ task.state }}</td>
+      <td>{{ task.response }}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+{% if tasks.has_other_pages %}
+  <ul class="pagination">
+    {% if tasks.has_previous %}
+      <li class="page-item"><a href="?{% url_replace page=tasks.previous_page_number %}" class="page-link">&laquo;</a></li>
+    {% else %}
+      <li class="page-item disabled"><span class="page-link">&laquo;</span></li>
+    {% endif %}
+    {% for i in tasks.paginator.page_range %}
+      {% if tasks.number == i %}
+        <li class="page-item active"><span class="page-link">{{ i }}</span></li>
+      {% else %}
+        <li class="page-item"><a href="?{% url_replace page=i %}" class="page-link">{{ i }}</a></li>
+      {% endif %}
+    {% endfor %}
+    {% if tasks.has_next %}
+      <li class="page-item"><a href="?{% url_replace page=tasks.next_page_number %}" class="page-link">&raquo;</a></li>
+    {% else %}
+      <li class="page-item disabled"><span class="page-link">&raquo;</span></li>
+    {% endif %}
+  </ul>
+{% endif %}
+
+{% endblock %}
