@@ -5,9 +5,11 @@ import os
 import shutil
 import subprocess
 import signal_disabler
+from datetime import timedelta
 
 from celery import shared_task
 from celery.utils.log import get_task_logger
+from celery.result import AsyncResult
 from core.models import SiteStat, Attachment, Entity, CommentMixin, Comment, GroupMembership, Group, Subgroup
 from core.lib import ACCESS_TYPE, access_id_to_acl, get_access_id
 from core.utils.export import compress_path
@@ -22,9 +24,40 @@ from django.utils import timezone
 from file.models import FileFolder
 from tenants.models import Client, Domain, GroupCopy, GroupCopyMapping, Agreement, AgreementVersion
 from user.models import User
+from control.models import Task
 
 logger = get_task_logger(__name__)
 
+
+@shared_task(bind=True, ignore_result=True)
+def poll_task_result(self):
+    # pylint: disable=unused-argument
+    '''
+    Poll task status
+    '''
+    tasks = Task.objects.exclude(state__in=["SUCCESS", "FAILURE"])
+
+    for task in tasks:
+        remote_task = AsyncResult(task.task_id)
+        task.state = remote_task.state
+
+        if remote_task.successful():
+            task.response = remote_task.result
+
+        elif remote_task.failed():
+            task.response = {
+                "error": str(remote_task.result)
+            }
+        else:
+            # timeout task after 1 day
+            if task.created_at < (timezone.now() - timedelta(days=1)):
+                task.state = "FAILURE"
+                task.response = "TIMEOUT"
+
+        if task.followup:
+            task.run_followup()
+
+        task.save()
 
 @shared_task(bind=True)
 def get_sites(self):
@@ -104,31 +137,6 @@ def delete_site(self, site_id):
             raise Exception(e)
 
     return True
-
-
-@shared_task(bind=True)
-def get_sites_admin(self):
-    # pylint: disable=unused-argument
-    '''
-    Get all site administrators
-    '''
-    clients = Client.objects.exclude(schema_name='public')
-
-    admins = []
-    for client in clients:
-
-        with schema_context(client.schema_name):
-
-            users = User.objects.filter(roles__contains=['ADMIN'], is_active=True)
-            for user in users:
-                admins.append({
-                    'name': user.name,
-                    'email': user.email,
-                    'client_id': client.id,
-                    'client_domain': client.get_primary_domain().domain
-                })
-
-    return admins
 
 
 @shared_task(bind=True)

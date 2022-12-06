@@ -1,0 +1,134 @@
+{% extends "base.html" %}
+
+{% load i18n %}
+
+{% block content %}
+
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+    <h1 class="h2">{{ site.domain }}</h1>
+</div>
+
+<nav>
+    <div class="nav nav-tabs" id="nav-tab" role="tablist">
+      <button class="nav-link active" id="nav-general-tab" data-bs-toggle="tab" data-bs-target="#nav-general" type="button" role="tab" aria-controls="nav-general" aria-selected="true">General</button>
+      <button class="nav-link" id="nav-stats1-tab" data-bs-toggle="tab" data-bs-target="#nav-stats1" type="button" role="tab" aria-controls="nav-stats1" aria-selected="false">DB Usage</button>
+      <button class="nav-link" id="nav-stats2-tab" data-bs-toggle="tab" data-bs-target="#nav-stats2" type="button" role="tab" aria-controls="nav-stats2" aria-selected="false">Disk Usage</button>
+  </div>
+</nav>
+  
+  <!-- Tabs content -->
+  <br />
+  <div class="tab-content" id="nav-tabContent">
+    <div class="tab-pane fade show active" id="nav-general" role="tabpanel" aria-labelledby="nav-general-tab">
+      <table class="table">
+          <tbody>
+            <tr><td><strong>Domain: </strong></td><td><a href="https://{{ site.primary_domain }}">{{ site.primary_domain }}</a></td></tr>
+            <tr><td><strong>Schema: </strong></td><td>{{ site.schema_name }}</td></tr>
+            <tr><td><strong>Active: </strong></td><td>{{ site.is_active }}</td></tr>
+            <tr><td><strong>Disk Size: </strong></td><td>{{ site.stat_disk_size|filesizeformat }}</td></tr>
+            <tr><td><strong>Database Size: </strong></td><td>{{ site.stat_db_size|filesizeformat }}</td></tr>
+            <tr><td><strong>Agreements accepted (<a href="https://{{ site.primary_domain }}/admin/agreements">Show in site admin</a>): </strong></td><td>{{ site.agreements_accepted }}</td></tr>
+          </tbody>
+      </table>
+
+    </div>
+
+    <div class="tab-pane fade" id="nav-stats1" role="tabpanel" aria-labelledby="nav-stats1-tab">
+
+      <div>
+        <canvas id="myChart1" height="60vh"></canvas>
+      </div>
+      
+      <script>
+        function formatBytes(bytes, decimals = 2) {
+            if (bytes === 0) return '0 Bytes';
+
+            const k = 1024;
+            const dm = decimals < 0 ? 0 : decimals;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'];
+
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
+        }
+
+        const labels1 = {{ db_stat_days|safe }}
+        const data1 = {
+          labels: labels1,
+          datasets: [{
+            label: 'DB usage',
+            backgroundColor: 'rgb(255, 99, 132)',
+            borderColor: 'rgb(255, 99, 132)',
+            data: {{ db_stat_data|safe }},
+          }]
+        };
+        const config1 = {
+          type: 'line',
+          data: data1,
+          options: {
+            responsive: true,
+            scales: {
+              y: {
+                ticks: {
+                  callback: function(value, index, values) {
+                    return formatBytes(value);
+                  }
+                }
+              }
+            }
+          }
+        };
+
+        var myChart1 = new Chart(
+          document.getElementById('myChart1'),
+          config1
+        );
+      </script>
+    </div>
+
+    <div class="tab-pane fade" id="nav-stats2" role="tabpanel" aria-labelledby="nav-stats2-tab">
+
+      <div>
+        <canvas id="myChart2" height="60vh"></canvas>
+      </div>
+      
+      <script>
+        const labels2 = {{ disk_stat_days|safe }}
+        const data2 = {
+          labels: labels2,
+          datasets: [{
+            label: 'Disk usage',
+            backgroundColor: 'rgb(255, 99, 132)',
+            borderColor: 'rgb(255, 99, 132)',
+            data: {{ disk_stat_data|safe }},
+          }]
+        };
+        const config2 = {
+          type: 'line',
+          data: data2,
+          options: {
+            responsive: true,
+            scales: {
+              y: {
+                ticks: {
+                  callback: function(value, index, values) {
+                    return formatBytes(value);
+                  }
+                }
+              }
+            }
+          }
+        };
+
+        var myChart2 = new Chart(
+          document.getElementById('myChart2'),
+          config2
+        );
+      </script>
+    </div>
+  </div>
+
+
+  <!-- Tabs content -->
+
+{% endblock %}

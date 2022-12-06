@@ -1,0 +1,89 @@
+{% extends "base.html" %}
+
+{% load i18n %}
+{% load url_replace %}
+
+{% block content %}
+
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+  <div>
+    <h1 class="h2">Sites</h1>
+    <a href="/sites/add" class="btn btn-primary">Add site</a>
+  </div>
+  <div>
+    <form method="get" class="row  row-cols-lg-auto g-3 align-items-center">
+      <div class="col-12">
+        <label class="visually-hidden" for="inlineFormSelectPref">{{ filter.form.domain.label }}</label>
+        {{ filter.form.domain }}
+      </div>
+      <div class="col-12">
+        <label class="visually-hidden" for="inlineFormSelectPref">{{ filter.form.is_active.label }}</label>
+        {{ filter.form.is_active }}
+      </div>
+      <div class="col-6">
+        <button type="submit" class="btn btn-primary">Filter</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<table class="table">
+  <thead>
+    <tr>
+      <th></th>
+      <th scope="col">Domain</th>
+      <th scope="col">Schema</th>
+      <th scope="col">Disk Size</th>
+      <th scope="col">DB Size</th>
+      <th scope="col">Agreement</th>
+      <th scope="col"></th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for site in sites %}
+    <tr>
+      <td width="20" style="color:red">{% if not site.is_active %}x{% endif %}</td>
+      <td><a href="/site/{{ site.id }}">{{ site.primary_domain }}</a></td>
+      <td>{{ site.schema_name }}</td>
+      <td style="text-align:right">{{ site.stat_disk_size|filesizeformat }}</td>
+      <td style="text-align:right">{{ site.stat_db_size|filesizeformat }}</td>
+      <td>{% if site.agreements_accepted %}&#x2713;{% else %}&#x10102;{% endif %}</td>
+      <td>
+        <div class="d-grid gap-2 d-md-block">
+          {% if site.is_active %}
+            <a href="/sites/disable/{{ site.id }}" class="btn btn-sm btn-warning">Disable</a>
+          {% else %}
+            <a href="/sites/enable/{{ site.id }}" class="btn btn-sm btn-success">Activate</a>
+          {% endif %}
+          <a href="/sites/delete/{{ site.id }}" class="btn btn-sm btn-danger">Delete</a>
+          <a href="/sites/backup/{{ site.id }}" class="btn btn-secondary btn-sm">Backup</a>
+        </div>
+      </td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+{% if sites.has_other_pages %}
+  <ul class="pagination">
+    {% if sites.has_previous %}
+      <li class="page-item"><a href="?{% url_replace page=sites.previous_page_number %}" class="page-link">&laquo;</a></li>
+    {% else %}
+      <li class="page-item disabled"><span class="page-link">&laquo;</span></li>
+    {% endif %}
+    {% for i in sites.paginator.page_range %}
+      {% if sites.number == i %}
+        <li class="page-item active"><span class="page-link">{{ i }}</span></li>
+      {% else %}
+        <li class="page-item"><a href="?{% url_replace page=i %}" class="page-link">{{ i }}</a></li>
+      {% endif %}
+    {% endfor %}
+    {% if sites.has_next %}
+      <li class="page-item"><a href="?{% url_replace page=sites.next_page_number %}" class="page-link">&raquo;</a></li>
+    {% else %}
+      <li class="page-item disabled"><span class="page-link">&raquo;</span></li>
+    {% endif %}
+  </ul>
+{% endif %}
+
+{% endblock %}
