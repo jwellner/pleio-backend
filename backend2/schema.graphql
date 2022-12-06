@@ -2527,11 +2527,15 @@ type SubgroupList {
 type TagCategory {
     name: String!
     values: [String]
+    restrictContentTypes: Boolean
+    allowedContentTypes: [String]
 }
 
 input TagCategoryInput {
     name: String!
     values: [String]
+    restrictContentTypes: Boolean
+    allowedContentTypes: [String]
 }
 
 type Task implements Entity {

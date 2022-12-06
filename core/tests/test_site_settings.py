@@ -140,6 +140,8 @@ class SiteSettingsTestCase(PleioTenantTestCase):
                     tagCategories {
                         name
                         values
+                        restrictContentTypes
+                        allowedContentTypes
                     }
                     showTagsInFeed
                     showTagsInDetail
