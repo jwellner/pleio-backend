@@ -6,7 +6,7 @@ import tempfile
 
 from io import StringIO
 from django.conf import settings
-from django.contrib.auth.decorators import login_required
+from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib import messages
 from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
 from django.shortcuts import render, redirect, reverse
@@ -24,8 +24,11 @@ from django_tenants.utils import tenant_context
 
 logger = logging.getLogger(__name__)
 
+def is_admin(user):
+    return user.is_superadmin
 
 @login_required
+@user_passes_test(is_admin)
 def home(request):
     # pylint: disable=unused-argument
 
@@ -38,6 +41,7 @@ def home(request):
 
 
 @login_required
+@user_passes_test(is_admin)
 def sites(request):
     # pylint: disable=unused-argument
 
@@ -65,6 +69,7 @@ def sites(request):
 
 
 @login_required
+@user_passes_test(is_admin)
 def site(request, site_id):
     # pylint: disable=unused-argument
 
@@ -95,6 +100,7 @@ def site(request, site_id):
 
 
 @login_required
+@user_passes_test(is_admin)
 def sites_add(request):
     # pylint: disable=unused-argument
 
@@ -126,6 +132,7 @@ def sites_add(request):
 
 
 @login_required
+@user_passes_test(is_admin)
 def tasks(request):
     # pylint: disable=unused-argument
     page = request.GET.get('page', 1)
@@ -146,6 +153,7 @@ def tasks(request):
 
 
 @login_required
+@user_passes_test(is_admin)
 @require_http_methods(["POST", "GET"])
 def sites_delete(request, site_id):
     # pylint: disable=unused-argument
@@ -176,6 +184,7 @@ def sites_delete(request, site_id):
 
 
 @login_required
+@user_passes_test(is_admin)
 @require_http_methods(["POST", "GET"])
 def sites_disable(request, site_id):
     # pylint: disable=unused-argument
@@ -204,6 +213,8 @@ def sites_disable(request, site_id):
     return render(request, 'sites_disable.html', context)
 
 
+@login_required
+@user_passes_test(is_admin)
 @require_http_methods(["POST", "GET"])
 def sites_enable(request, site_id):
     # pylint: disable=unused-argument
@@ -233,6 +244,7 @@ def sites_enable(request, site_id):
 
 
 @login_required
+@user_passes_test(is_admin)
 @require_http_methods(["POST", "GET"])
 def sites_backup(request, site_id):
     # pylint: disable=unused-argument
@@ -280,6 +292,7 @@ def sites_backup(request, site_id):
 
 
 @login_required
+@user_passes_test(is_admin)
 def download_backup(request, task_id):
     task = Task.objects.get(id=task_id)
 
@@ -304,6 +317,7 @@ def download_backup(request, task_id):
 
 
 @login_required
+@user_passes_test(is_admin)
 def tools(request):
     # pylint: disable=unused-argument
 
@@ -311,6 +325,7 @@ def tools(request):
 
 
 @login_required
+@user_passes_test(is_admin)
 def dowload_site_admins(request):
     # pylint: disable=unused-argument
     # pylint: disable=unused-variable
@@ -350,6 +365,7 @@ def dowload_site_admins(request):
 
 
 @login_required
+@user_passes_test(is_admin)
 def search_user(request):
     # pylint: disable=unused-argument
     # pylint: disable=unused-variable
@@ -397,6 +413,7 @@ def search_user(request):
 
 
 @login_required
+@user_passes_test(is_admin)
 def agreements(request, cluster_id=None):
     # pylint: disable=unused-argument
 
@@ -408,6 +425,7 @@ def agreements(request, cluster_id=None):
 
 
 @login_required
+@user_passes_test(is_admin)
 def agreements_add(request):
     # pylint: disable=unused-argument
 
@@ -433,6 +451,7 @@ def agreements_add(request):
 
 
 @login_required
+@user_passes_test(is_admin)
 def agreements_add_version(request, agreement_id):
     # pylint: disable=unused-argument
 

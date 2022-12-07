@@ -175,7 +175,6 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'csp.middleware.CSPMiddleware',
 ]
 
 TENANT_MIDDLEWARE = [
@@ -187,6 +186,7 @@ TENANT_MIDDLEWARE = [
     'core.middleware.WalledGardenMiddleware',
     'core.middleware.OnboardingMiddleware',
     'core.middleware.RedirectMiddleware',
+    'csp.middleware.CSPMiddleware',
     'core.middleware.CustomCSPMiddleware',
     'auditlog.middleware.AuditlogMiddleware',
     'core.middleware.UserLastOnlineMiddleware',
