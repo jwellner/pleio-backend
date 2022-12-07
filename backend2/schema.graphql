@@ -1444,6 +1444,7 @@ type Member {
     role: Role
     user: User
     email: String
+    memberSince: DateTime
 }
 
 type MemberList {
