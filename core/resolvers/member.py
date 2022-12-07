@@ -21,3 +21,8 @@ def resolve_email(obj, info):
 def resolve_user(obj, info):
     # pylint: disable=unused-argument
     return obj.user
+
+@member.field("memberSince")
+def resolve_member_since(obj, info):
+    # pylint: disable=unused-argument
+    return obj.created_at

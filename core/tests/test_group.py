@@ -224,6 +224,7 @@ class GroupTestCase(PleioTenantTestCase):
                             edges {
                                 role
                                 email
+                                memberSince
                                 user {
                                     guid
                                     username
@@ -242,6 +243,9 @@ class GroupTestCase(PleioTenantTestCase):
             "guid": self.group.guid
         }
 
+        member_owner = self.group.members.get(type='owner')
+        member_admin = self.group.members.filter(type='admin').first()
+
         self.graphql_client.force_login(self.authenticatedUser)
         result = self.graphql_client.post(query, variables)
 
@@ -250,8 +254,14 @@ class GroupTestCase(PleioTenantTestCase):
         self.assertEqual(data["entity"]["memberCount"], 4)
         self.assertEqual(data["entity"]["members"]["total"], 4)
         self.assertEqual(len(data["entity"]["members"]["edges"]), 4)
+
         self.assertEqual(data["entity"]["members"]["edges"][0]["role"], "owner")
+        self.assertEqual(data["entity"]["members"]["edges"][0]["memberSince"], member_owner.created_at.isoformat())
+        self.assertEqual(data["entity"]["members"]["edges"][0]["email"], member_owner.user.email)
+
         self.assertEqual(data["entity"]["members"]["edges"][1]["role"], "admin")
+        self.assertEqual(data["entity"]["members"]["edges"][1]["memberSince"], member_admin.created_at.isoformat())
+        self.assertEqual(data["entity"]["members"]["edges"][1]["email"], member_admin.user.email)
 
     def test_group_is_hidden_by_admin(self):
         query = """
