@@ -53,7 +53,7 @@ storage:
   existingBackupStorage: /storage/backup-storage
 
 tunnel:
-  hostname: admin-odcn-review.pleio-beheer.nl
+  hostname: control-review.pleio-beheer.nl
 
 collab:
   backend: collab-backend-test

@@ -155,7 +155,6 @@ TENANT_APPS = [
     'task',
     'file',
     'elgg',
-    'control',
     'pad',
 ]
 

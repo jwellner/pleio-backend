@@ -287,7 +287,7 @@ class User(AbstractBaseUser):
 
         return incomplete == 0
 
-    def delete(self, using='', keep_parents=False):
+    def delete(self, *args, **kwargs):
         self.is_active = False
         self.email = "%s@deleted" % self.guid
         self.name = "Verwijderde gebruiker"
@@ -302,17 +302,18 @@ class User(AbstractBaseUser):
         self.roles = []
 
         # delete user profile data
-        try:
-            self._profile.delete()
-        except UserProfile.DoesNotExist:
-            pass
+        if not is_schema_public():
+            try:
+                self._profile.delete()
+            except UserProfile.DoesNotExist:
+                pass
 
-        # delete memberships and notifications
-        self.memberships.all().delete()
-        self.subgroups.all().delete()
-        self.notifications.all().delete()
-        self.invitation.all().delete()
-        self.annotations.all().delete()
+            # delete memberships and notifications
+            self.memberships.all().delete()
+            self.subgroups.all().delete()
+            self.notifications.all().delete()
+            self.invitation.all().delete()
+            self.annotations.all().delete()
 
         self.save()
         return True

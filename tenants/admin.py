@@ -1,7 +1,5 @@
 from django.contrib import admin
-
-from tenants.models import Client, Domain, Agreement, AgreementVersion, AgreementAccept
-from user.models import User
+from tenants.models import Client, Domain
 
 
 class DomainInline(admin.TabularInline):
