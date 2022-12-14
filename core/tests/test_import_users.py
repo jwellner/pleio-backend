@@ -84,7 +84,7 @@ class ImportUsersTestCase(PleioTenantTestCase):
         self.assertEqual(data["csvColumns"], ["column1", "column2", "column3", 'column4', 'column5'])
         self.assertEqual(data["userFields"][3]["label"], self.profileField1.name)
 
-    @patch('core.resolvers.mutation_import_users.import_users.delay')
+    @patch('core.tasks.import_users.delay')
     def test_import_users_step2_admin_new_users(self, mocked_import_users):
         mutation = """
             mutation ($input: importUsersStep2Input!) {
