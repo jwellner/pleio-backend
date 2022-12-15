@@ -1,4 +1,7 @@
 import abc
+
+from django.db.models import QuerySet
+
 from core.models.attachment import Attachment
 from core.models.shared import AbstractModel
 from core.utils.tiptap_parser import Tiptap
@@ -45,7 +48,7 @@ class MentionMixin(NotificationMixin, RichFieldsMixin):
             return
 
         if self.mentioned_users:
-            from core.tasks import create_notification # prevent circular import
+            from core.tasks import create_notification  # prevent circular import
             create_notification.delay(tenant_schema(), 'mentioned', get_model_name(self), self.id, self.owner.id)
 
 
@@ -82,9 +85,13 @@ class AttachmentMixin(RichFieldsMixin):
 
         return attachments
 
-    def update_attachments_links(self):
+    def collect_attachments(self) -> QuerySet[Attachment]:
         attachments_found = self.attachments_in_text()
         attachments_found = attachments_found.union(self.attachments_in_fields())
+        return attachments_found
+
+    def update_attachments_links(self):
+        attachments_found = self.collect_attachments()
 
         current = self.attachments.get_queryset()
 

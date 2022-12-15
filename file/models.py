@@ -10,9 +10,9 @@ from django.utils import timezone
 from enum import Enum
 from core.constances import DOWNLOAD_AS_OPTIONS
 from core.lib import generate_object_filename, get_mimetype, tenant_schema, get_basename, get_filesize
-from core.models import Entity
+from core.models import Entity, Tag, TagSynonym
 from core.models.entity import EntityManager
-from core.models.mixin import ModelWithFile
+from core.models.mixin import ModelWithFile, TitleMixin, HasMediaMixin
 from core.models.rich_fields import AttachmentMixin
 from core.models.image import ResizedImageMixin
 from django.db.models import ObjectDoesNotExist
@@ -20,8 +20,10 @@ from django.utils.text import slugify
 from django.utils.translation import gettext_lazy as _
 from django.core.files.base import ContentFile
 
-from core.utils.convert import tiptap_to_text
+from core.models.tags import EntityTag
+from core.utils.convert import tiptap_to_text, tiptap_to_html
 from core.utils.access import get_read_access_weight, get_write_access_weight
+from core.utils.export.content import ContentSnapshot
 from file.validators import is_upload_complete
 
 logger = logging.getLogger(__name__)
@@ -53,8 +55,16 @@ class FileFolderManager(EntityManager):
                 pass
         return None
 
+    def content_snapshots(self, user):
+        tags = [t for t in Tag.translate_tags([ContentSnapshot.EXCLUDE_TAG])]
+        all_snapshots = EntityTag.objects.filter(tag__label__in=tags).values_list('entity_id', flat=True)
+        qs = self.visible(user=user)
+        qs = qs.filter(owner=user)
+        qs = qs.filter(id__in=all_snapshots)
+        return qs.order_by('-created_at')
 
-class FileFolder(Entity, ModelWithFile, ResizedImageMixin, AttachmentMixin):
+
+class FileFolder(HasMediaMixin, TitleMixin, ModelWithFile, ResizedImageMixin, AttachmentMixin, Entity):
     class Types(models.TextChoices):
         FILE = "File", _("File")
         FOLDER = "Folder", _("Folder")
@@ -62,7 +72,6 @@ class FileFolder(Entity, ModelWithFile, ResizedImageMixin, AttachmentMixin):
 
     objects = FileFolderManager()
 
-    title = models.CharField(max_length=256)
     parent = models.ForeignKey('self', blank=True, null=True, related_name='children', on_delete=models.CASCADE)
 
     type = models.CharField(
@@ -109,14 +118,15 @@ class FileFolder(Entity, ModelWithFile, ResizedImageMixin, AttachmentMixin):
                 prefix, self.guid
             ).lower()
 
-        if self.type == self.Types.FILE:
-            return '{}/files/view/{}/{}'.format(
-                prefix, self.guid, os.path.basename(self.upload.name)
-            ).lower()
-
         return '{}/files/view/{}/{}'.format(
-            prefix, self.guid, slugify(self.title)
+            prefix, self.guid, self.slug
         ).lower()
+
+    @property
+    def slug(self):
+        if self.type == self.Types.FILE:
+            return os.path.basename(self.upload.name)
+        return super().slug
 
     @property
     def download_url(self):
@@ -204,8 +214,30 @@ class FileFolder(Entity, ModelWithFile, ResizedImageMixin, AttachmentMixin):
             return None
         download_as_options = []
         for option in DOWNLOAD_AS_OPTIONS:
-            download_as_options.append({"type": option, "url": "/download_rich_description_as/{}/{}".format(self.guid, option) })
+            download_as_options.append({"type": option, "url": "/download_rich_description_as/{}/{}".format(self.guid, option)})
         return download_as_options
+
+    def get_media_status(self):
+        if self.type == self.Types.PAD:
+            return bool(self.rich_description)
+        if self.type == self.Types.FILE:
+            return bool(self.upload.name and os.path.exists(self.upload.path))
+        return False
+
+    def get_media_filename(self):
+        if self.upload.name and self.upload.path:
+            return os.path.basename(self.upload.path)
+        if self.type == self.Types.PAD:
+            return "%s.html" % self.slug
+        return None
+
+    def get_media_content(self):
+        if self.type == self.Types.FILE:
+            with open(self.upload.path, 'rb') as fh:
+                return fh.read()
+        if self.type == self.Types.PAD:
+            return tiptap_to_html(self.rich_description)
+        return None
 
     def save(self, *args, **kwargs):
         self.update_metadata()
@@ -245,7 +277,7 @@ class FileFolder(Entity, ModelWithFile, ResizedImageMixin, AttachmentMixin):
 
     def cleanup_extra_file(self):
         # pylint: disable=unused-argument
-        if not self.type == FileFolder.Types.FILE:
+        if self.type != FileFolder.Types.FILE:
             return
 
         try:

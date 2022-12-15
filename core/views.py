@@ -721,3 +721,4 @@ def download_rich_description_as(request, entity_id=None, file_type=None):
     response = FileResponse(open(temp_file_path, 'rb'))
     response['Content-Disposition'] = "attachment; filename=" + '{}.{}'.format(filename, file_type)
     return response
+

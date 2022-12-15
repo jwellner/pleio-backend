@@ -4,17 +4,22 @@ import logging
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
 from django.db import models
-from django.dispatch import receiver
 from django.utils import timezone
 from django.utils.text import slugify
 from django.core.files.base import ContentFile
 from django.urls import reverse
 
 from core.lib import get_mimetype, strip_exif, get_basename
-from core.models.mixin import ModelWithFile
+from core.models.mixin import ModelWithFile, HasMediaMixin
 from core.models.image import ResizedImageMixin
 
 logger = logging.getLogger(__name__)
+
+
+class AttachmentQuerySet(models.QuerySet):
+    def filter_attached(self, obj):
+        return self.filter(attached_object_id=obj.id,
+                           attached_content_type=ContentType.objects.get_for_model(obj).pk)
 
 
 def attachment_path(instance, filename):
@@ -24,7 +29,9 @@ def attachment_path(instance, filename):
     return os.path.join('attachments', str(instance.id), filename)
 
 
-class Attachment(ModelWithFile, ResizedImageMixin):
+class Attachment(ModelWithFile, ResizedImageMixin, HasMediaMixin):
+    objects = AttachmentQuerySet.as_manager()
+
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     name = models.CharField(max_length=256, default="")
     upload = models.FileField(upload_to=attachment_path, blank=True, null=True, max_length=512)
@@ -99,3 +106,18 @@ class Attachment(ModelWithFile, ResizedImageMixin):
 
     def __str__(self):
         return f"{self._meta.object_name}[{self.upload.name}]"
+
+    def get_media_status(self):
+        try:
+            with open(self.upload.path, 'r'):
+                return True
+        except Exception:
+            return False
+
+    def get_media_filename(self):
+        name, ext = os.path.splitext(self.upload.path)
+        return "%s%s" % (self.pk, ext)
+
+    def get_media_content(self):
+        with open(self.upload.path, 'rb') as fh:
+            return fh.read()

@@ -3,9 +3,10 @@ from django.db import models
 from django.utils.text import slugify
 from core.models import Entity, VoteMixin, CommentMixin, BookmarkMixin, FollowMixin, MentionMixin, ArticleMixin, AttachmentMixin
 from core.models.featured import FeaturedCoverMixin
+from core.models.mixin import TitleMixin, RichDescriptionMediaMixin
 
 
-class Discussion(Entity, VoteMixin, BookmarkMixin, FollowMixin, CommentMixin, MentionMixin, FeaturedCoverMixin, ArticleMixin, AttachmentMixin):
+class Discussion(RichDescriptionMediaMixin, TitleMixin, VoteMixin, BookmarkMixin, FollowMixin, CommentMixin, MentionMixin, FeaturedCoverMixin, ArticleMixin, AttachmentMixin, Entity):
     class Meta:
         ordering = ['-published']
 
@@ -28,7 +29,7 @@ class Discussion(Entity, VoteMixin, BookmarkMixin, FollowMixin, CommentMixin, Me
             )
 
         return '{}/discussion/view/{}/{}'.format(
-            prefix, self.guid, slugify(self.title)
+            prefix, self.guid, self.slug
         ).lower()
 
     @property

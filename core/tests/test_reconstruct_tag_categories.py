@@ -13,16 +13,19 @@ class TestReconstructTagCategoriesTestCase(PleioTenantTestCase):
 
     def setUp(self):
         super().setUp()
-
-        self.blog = BlogFactory(category_tags=[{"name": "Confirmation", "values": ["Yes", "No"]}
+        self.owner = UserFactory()
+        self.other_user = UserFactory()
+        self.blog = BlogFactory(owner=self.other_user,
+                                category_tags=[{"name": "Confirmation", "values": ["Yes", "No"]}
                                                ])
-        self.blog2 = BlogFactory(category_tags=[{"name": "Confirmation", "values": ["Yes"]},
+        self.blog2 = BlogFactory(owner=self.other_user,
+                                 category_tags=[{"name": "Confirmation", "values": ["Yes"]},
                                                 {"name": "Count", "values": ["One", "Two"]}
                                                 ])
-        self.blog3 = BlogFactory(category_tags=[{"name": "Confirmation", "values": ["No"]}
+        self.blog3 = BlogFactory(owner=self.other_user,
+                                 category_tags=[{"name": "Confirmation", "values": ["No"]}
                                                 ])
 
-        self.owner = UserFactory()
         self.group = GroupFactory(owner=self.owner,
                                   category_tags=[{"name": "Confirmation", "values": ["Yes"]}
                                                  ])

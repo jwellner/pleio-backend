@@ -6,7 +6,7 @@ from core.models import Entity, VoteMixin, CommentMixin, BookmarkMixin, FollowMi
 from core.utils.convert import tiptap_to_text
 
 
-class StatusUpdate(Entity, VoteMixin, CommentMixin, BookmarkMixin, FollowMixin, AttachmentMixin, MentionMixin):
+class StatusUpdate(VoteMixin, CommentMixin, BookmarkMixin, FollowMixin, AttachmentMixin, MentionMixin, Entity):
     class Meta:
         ordering = ['-published']
         verbose_name = ugettext_lazy("status update")
@@ -31,8 +31,12 @@ class StatusUpdate(Entity, VoteMixin, CommentMixin, BookmarkMixin, FollowMixin, 
             )
 
         return '{}/update/view/{}'.format(
-            prefix, self.guid
+            prefix, self.slug
         ).lower()
+
+    @property
+    def slug(self):
+        return self.guid
 
     @property
     def rich_fields(self):

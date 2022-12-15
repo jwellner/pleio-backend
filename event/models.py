@@ -6,13 +6,11 @@ from django.utils.translation import gettext as _
 
 from auditlog.registry import auditlog
 from django.db import models
-from core.lib import get_default_email_context
 from core.models import (ArticleMixin, AttachmentMixin, BookmarkMixin, CommentMixin, Entity, FollowMixin,
                          NotificationMixin)
-from django_tenants.utils import parse_tenant_config_path
 
 from core.models.featured import FeaturedCoverMixin
-from event.lib import get_url
+from core.models.mixin import TitleMixin, RichDescriptionMediaMixin
 from event.mail_builders.qr_code import submit_mail_event_qr
 from event.mail_builders.waitinglist import submit_mail_at_accept_from_waitinglist
 from user.models import User
@@ -20,12 +18,10 @@ from django.utils.text import slugify
 from django.utils import timezone
 
 
-class Event(Entity, CommentMixin, BookmarkMixin, FollowMixin, NotificationMixin, FeaturedCoverMixin, ArticleMixin, AttachmentMixin):
+class Event(RichDescriptionMediaMixin, TitleMixin, CommentMixin, BookmarkMixin, FollowMixin, NotificationMixin, FeaturedCoverMixin, ArticleMixin, AttachmentMixin, Entity):
 
     class Meta:
         ordering = ['-published']
-
-    title = models.CharField(max_length=256)
 
     parent = models.ForeignKey('self', blank=True, null=True, related_name='children', on_delete=models.CASCADE)
     slots_available = models.JSONField(default=list)
@@ -87,7 +83,7 @@ class Event(Entity, CommentMixin, BookmarkMixin, FollowMixin, NotificationMixin,
             )
 
         return '{}/events/view/{}/{}'.format(
-            prefix, self.guid, slugify(self.title)
+            prefix, self.guid, self.slug
         ).lower()
 
     @property
@@ -95,19 +91,6 @@ class Event(Entity, CommentMixin, BookmarkMixin, FollowMixin, NotificationMixin,
         return [self.rich_description]
 
     def process_waitinglist(self):
-        link = get_url(self)
-        subject = _("Added to event %s from waitinglist") % self.title
-
-        schema_name = parse_tenant_config_path("")
-        context = get_default_email_context()
-        context['link'] = link
-        context['title'] = self.title
-
-        context['location'] = self.location if self.location else None
-        context['locationLink'] = self.location_link if self.location_link else None
-        context['locationAddress'] = self.location_address if self.location_address else None
-
-        context['start_date'] = self.start_date
         for attendee in self.attendees.filter(state='waitinglist').order_by('updated_at'):
             if self.is_full():
                 break

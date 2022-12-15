@@ -9,11 +9,12 @@ from core.models import (ArticleMixin, AttachmentMixin, BookmarkMixin,
                          VoteMixin, RevisionMixin)
 from core.models.entity import str_datetime
 from core.models.featured import FeaturedCoverMixin
+from core.models.mixin import TitleMixin, RichDescriptionMediaMixin
 
 
-class News(Entity, VoteMixin, BookmarkMixin, FollowMixin, CommentMixin, 
+class News(RichDescriptionMediaMixin, TitleMixin, VoteMixin, BookmarkMixin, FollowMixin, CommentMixin,
            FeaturedCoverMixin, ArticleMixin, MentionMixin, AttachmentMixin, 
-           RevisionMixin):
+           RevisionMixin, Entity):
     """
     News
     """
@@ -21,7 +22,6 @@ class News(Entity, VoteMixin, BookmarkMixin, FollowMixin, CommentMixin,
     class Meta:
         ordering = ['-published']
 
-    title = models.CharField(max_length=256)
     source = models.TextField(default="")
 
     def has_revisions(self):
@@ -37,7 +37,7 @@ class News(Entity, VoteMixin, BookmarkMixin, FollowMixin, CommentMixin,
     @property
     def url(self):
         return '/news/view/{}/{}'.format(
-            self.guid, slugify(self.title)
+            self.guid, self.slug
         ).lower()
 
     def can_write(self, user):

@@ -1,6 +1,6 @@
 from core.tests.helpers.revision_template import RevisionTemplate
 from news.factories import NewsFactory
-from user.factories import UserFactory
+from user.factories import EditorFactory
 
 
 class TestNewsRevisionsTestCase(RevisionTemplate.BaseTestCase):
@@ -24,4 +24,4 @@ class TestNewsRevisionsTestCase(RevisionTemplate.BaseTestCase):
                            is_featured=False)
 
     def build_owner(self):
-        return UserFactory()
+        return EditorFactory()

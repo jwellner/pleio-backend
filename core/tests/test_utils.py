@@ -4,7 +4,7 @@ import os.path
 
 from core.tests.helpers import PleioTenantTestCase
 from core.utils.convert import is_tiptap, tiptap_to_text, tiptap_to_html
-from core.utils.export import fetch_avatar_image, CouldNotLoadPictureError
+from core.utils.export.avatar import fetch_avatar_image, CouldNotLoadPictureError
 from user.factories import UserFactory
 
 
@@ -337,8 +337,8 @@ class TestFetchAvatarTestCase(PleioTenantTestCase):
         self.response.content = open(self.relative_path(__file__, ['assets', 'avatar.jpg']), 'rb').read()
         self.response.headers = {"content-type": "image/jpeg"}
 
-    @mock.patch("core.utils.export.fetch_avatar")
-    @mock.patch("core.utils.export.requests.get")
+    @mock.patch("core.utils.export.avatar.fetch_avatar")
+    @mock.patch("core.utils.export.avatar.requests.get")
     def test_fetch_avatar_with_external_original_url(self, mocked_get, mocked_get_data):
         mocked_get_data.return_value = {'originalAvatarUrl': self.ORIGINAL_URL,
                                         'avatarUrl': self.THUMBNAIL_URL}
@@ -350,8 +350,8 @@ class TestFetchAvatarTestCase(PleioTenantTestCase):
         self.assertEqual(mocked_get.call_args.args, (self.ORIGINAL_URL,))
         self.assertEqual((self.response.content, '.jpg'), response)
 
-    @mock.patch("core.utils.export.fetch_avatar")
-    @mock.patch("core.utils.export.requests.get")
+    @mock.patch("core.utils.export.avatar.fetch_avatar")
+    @mock.patch("core.utils.export.avatar.requests.get")
     def test_fetch_avatar_with_external_thumbnail_only(self, mocked_get, mocked_get_data):
         mocked_get_data.return_value = {'avatarUrl': self.THUMBNAIL_URL}
         mocked_get.return_value = self.response
@@ -361,8 +361,8 @@ class TestFetchAvatarTestCase(PleioTenantTestCase):
 
         self.assertFalse(mocked_get.called)
 
-    @mock.patch("core.utils.export.fetch_avatar")
-    @mock.patch("core.utils.export.requests.get")
+    @mock.patch("core.utils.export.avatar.fetch_avatar")
+    @mock.patch("core.utils.export.avatar.requests.get")
     def test_fetch_avatar_without_external_urls(self, mocked_get, mocked_get_data):
         mocked_get_data.return_value = {}
         mocked_get.return_value = self.response
@@ -372,8 +372,8 @@ class TestFetchAvatarTestCase(PleioTenantTestCase):
 
         self.assertFalse(mocked_get.called)
 
-    @mock.patch("core.utils.export.fetch_avatar")
-    @mock.patch("core.utils.export.requests.get")
+    @mock.patch("core.utils.export.avatar.fetch_avatar")
+    @mock.patch("core.utils.export.avatar.requests.get")
     def test_fetch_avatar_with_error(self, mocked_get, mocked_get_data):
         mocked_get_data.return_value = {'error': 'some error message'}
         mocked_get.return_value = self.response
@@ -383,8 +383,8 @@ class TestFetchAvatarTestCase(PleioTenantTestCase):
 
         self.assertFalse(mocked_get.called)
 
-    @mock.patch("core.utils.export.fetch_avatar")
-    @mock.patch("core.utils.export.requests.get")
+    @mock.patch("core.utils.export.avatar.fetch_avatar")
+    @mock.patch("core.utils.export.avatar.requests.get")
     def test_fetch_avatar_without_any_url(self, mocked_get, mocked_get_data):
         self.user.picture = ''
         self.user.save()

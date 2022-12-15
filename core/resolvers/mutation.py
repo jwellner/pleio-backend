@@ -2,6 +2,7 @@ from ariadne import ObjectType
 
 from .mutation_archive_entity import resolve_archive_entity
 from .mutation_avatar_exports import resolve_export_avatars
+from .mutation_content_snapshots import resolve_create_content_snapshot
 from .mutation_initiate_videocall import resolve_mutation_initiate_videocall
 from .mutation_revisions import resolve_update_revision
 from .mutation_add_group import resolve_add_group
@@ -146,3 +147,5 @@ mutation.set_field("initiateVideocall", resolve_mutation_initiate_videocall)
 
 mutation.set_field("addProfileSetManager", resolve_mutation_add_profileset_manager)
 mutation.set_field("removeProfileSetManager", resolve_mutation_remove_profileset_manager)
+
+mutation.set_field("createContentSnapshot", resolve_create_content_snapshot)

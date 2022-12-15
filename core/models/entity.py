@@ -89,7 +89,6 @@ class EntityManager(InheritanceManager):
 
 
 class Entity(TagsModel):
-
     class Meta:
         ordering = ['published']
 
@@ -140,6 +139,10 @@ class Entity(TagsModel):
         return str(self.id)
 
     @property
+    def slug(self):
+        raise NotImplementedError()
+
+    @property
     def status_published(self):
         if self.is_archived:
             return ENTITY_STATUS.ARCHIVED
@@ -156,7 +159,6 @@ class Entity(TagsModel):
             return view_count.updated_at
         except ObjectDoesNotExist:
             return None
-    
 
     def save(self, *args, **kwargs):
         created = self._state.adding
@@ -198,7 +200,7 @@ class Entity(TagsModel):
 
     def has_revisions(self):
         return False
-    
+
     def can_read(self, user):
         if user.is_authenticated and user.has_role(USER_ROLES.ADMIN):
             return True

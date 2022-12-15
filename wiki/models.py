@@ -7,10 +7,11 @@ from core.models import (ArticleMixin, AttachmentMixin, BookmarkMixin, Entity,
                          MentionMixin, RevisionMixin)
 from core.models.entity import str_datetime
 from core.models.featured import FeaturedCoverMixin
+from core.models.mixin import TitleMixin, RichDescriptionMediaMixin
 
 
-class Wiki(Entity, FeaturedCoverMixin, BookmarkMixin, ArticleMixin, MentionMixin, 
-           AttachmentMixin, RevisionMixin):
+class Wiki(RichDescriptionMediaMixin, TitleMixin, FeaturedCoverMixin, BookmarkMixin, ArticleMixin, MentionMixin,
+           AttachmentMixin, RevisionMixin, Entity):
     """
     Wiki
     """
@@ -20,7 +21,6 @@ class Wiki(Entity, FeaturedCoverMixin, BookmarkMixin, ArticleMixin, MentionMixin
         ordering = ['position', 'published']
 
     position = models.IntegerField(null=False, default=0)
-    title = models.CharField(max_length=256)
     parent = models.ForeignKey('self', blank=True, null=True, related_name='children', on_delete=models.CASCADE)
 
     def has_children(self):
@@ -48,7 +48,7 @@ class Wiki(Entity, FeaturedCoverMixin, BookmarkMixin, ArticleMixin, MentionMixin
             )
 
         return '{}/wiki/view/{}/{}'.format(
-            prefix, self.guid, slugify(self.title)
+            prefix, self.guid, self.slug
         ).lower()
 
     @property
