@@ -6,16 +6,17 @@ from core.lib import get_acl
 from core.models import Entity, VoteMixin, CommentMixin, BookmarkMixin, FollowMixin, Comment, MentionMixin, ArticleMixin, AttachmentMixin
 from core.constances import USER_ROLES
 from core.models.featured import FeaturedCoverMixin
+from core.models.mixin import TitleMixin, RichDescriptionMediaMixin
 
 
-class Question(Entity, VoteMixin, BookmarkMixin, FollowMixin, CommentMixin, MentionMixin, FeaturedCoverMixin, ArticleMixin, AttachmentMixin):
+class Question(RichDescriptionMediaMixin, TitleMixin, VoteMixin, BookmarkMixin, FollowMixin, CommentMixin, MentionMixin, FeaturedCoverMixin, ArticleMixin, AttachmentMixin, Entity):
     """
     Question
     """
+
     class Meta:
         ordering = ['-published']
 
-    title = models.CharField(max_length=256)
     is_closed = models.BooleanField(default=False)
 
     best_answer = models.ForeignKey(
@@ -34,7 +35,6 @@ class Question(Entity, VoteMixin, BookmarkMixin, FollowMixin, CommentMixin, Ment
 
         return False
 
-
     def can_choose_best_answer(self, user):
         if not user.is_authenticated:
             return False
@@ -43,8 +43,8 @@ class Question(Entity, VoteMixin, BookmarkMixin, FollowMixin, CommentMixin, Ment
             return False
 
         if (
-            (user.has_role(USER_ROLES.ADMIN) or user.has_role(USER_ROLES.QUESTION_MANAGER) or user == self.owner)
-            and config.QUESTIONER_CAN_CHOOSE_BEST_ANSWER
+                (user.has_role(USER_ROLES.ADMIN) or user.has_role(USER_ROLES.QUESTION_MANAGER) or user == self.owner)
+                and config.QUESTIONER_CAN_CHOOSE_BEST_ANSWER
         ):
             return True
 
@@ -82,7 +82,7 @@ class Question(Entity, VoteMixin, BookmarkMixin, FollowMixin, CommentMixin, Ment
             )
 
         return '{}/questions/view/{}/{}'.format(
-            prefix, self.guid, slugify(self.title)
+            prefix, self.guid, self.slug
         ).lower()
 
     @property

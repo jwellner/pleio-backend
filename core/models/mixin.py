@@ -1,16 +1,60 @@
 import abc
+
 from django.apps import apps
 from django.db import models
 from django.db.models import Sum, IntegerField
 from django.db.models.functions import Cast
 from django.contrib.postgres.fields.jsonb import KeyTextTransform
 from django.contrib.contenttypes.fields import GenericRelation
+from django.utils.text import slugify
 from notifications.models import Notification
+
 from .annotation import Annotation
 from core.models.shared import AbstractModel
-from core.utils.convert import truncate_rich_description, tiptap_to_text
+from core.utils.convert import truncate_rich_description, tiptap_to_text, tiptap_to_html
 from core.lib import delete_attached_file
 from core.constances import USER_ROLES
+
+
+class TitleMixin(models.Model):
+    class Meta:
+        abstract = True
+
+    title = models.CharField(max_length=256)
+
+    @property
+    def slug(self):
+        return slugify(self.title)
+
+
+class HasMediaMixin:
+
+    def get_media_status(self):
+        raise NotImplementedError()
+
+    def get_media_filename(self):
+        raise NotImplementedError()
+
+    def get_media_content(self):
+        raise NotImplementedError()
+
+
+class RichDescriptionMediaMixin(HasMediaMixin):
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        assert hasattr(self, 'rich_description'), "Expected a rich_description field for export entity as media"
+
+    def get_media_status(self):
+        return bool(self.rich_description)
+
+    def get_media_filename(self):
+        if isinstance(self, TitleMixin):
+            return "{slug}.html".format(slug=self.slug)
+        raise NotImplementedError()
+
+    def get_media_content(self):
+        return tiptap_to_html(self.rich_description)
 
 
 class VoteMixin(models.Model):
@@ -259,10 +303,11 @@ class CommentMixin(models.Model):
     class Meta:
         abstract = True
 
+
 class RevisionMixin(models.Model):
     class Meta:
         abstract = True
-    
+
     def last_revision(self):
         # pylint: disable=import-outside-toplevel
         from core.models import Revision

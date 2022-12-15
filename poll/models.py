@@ -1,14 +1,13 @@
 from auditlog.registry import auditlog
 from django.db import models
 from core.models import Entity, VoteMixin
-from django.utils.text import slugify
+
+from core.models.mixin import TitleMixin
 
 
-class Poll(Entity):
+class Poll(TitleMixin, Entity):
     class Meta:
         ordering = ['-id']
-
-    title = models.CharField(max_length=256)
 
     def __str__(self):
         return f"Poll[{self.title}]"
@@ -22,7 +21,7 @@ class Poll(Entity):
         prefix = ''
 
         return '{}/polls/view/{}/{}'.format(
-            prefix, self.guid, slugify(self.title)
+            prefix, self.guid, self.slug
         ).lower()
 
 

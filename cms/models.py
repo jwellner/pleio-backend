@@ -6,10 +6,11 @@ from core.lib import get_access_id
 from core.models import Entity, AttachmentMixin, RevisionMixin
 from core.constances import USER_ROLES
 from django.contrib.postgres.fields import ArrayField
-from django.utils.text import slugify
+
+from core.models.mixin import TitleMixin, RichDescriptionMediaMixin
 
 
-class Page(Entity, AttachmentMixin, RevisionMixin):
+class Page(RichDescriptionMediaMixin, TitleMixin, AttachmentMixin, RevisionMixin, Entity):
     """
     Page for CMS
     """
@@ -22,7 +23,6 @@ class Page(Entity, AttachmentMixin, RevisionMixin):
         # When positions are equal sort old -> new (used for menu's)
         ordering = ['position', 'published']
 
-    title = models.CharField(max_length=256)
     rich_description = models.TextField(null=True, blank=True)
 
     page_type = models.CharField(max_length=256, choices=PAGE_TYPES)
@@ -49,7 +49,7 @@ class Page(Entity, AttachmentMixin, RevisionMixin):
     @property
     def url(self):
         return '/cms/view/{}/{}'.format(
-            self.guid, slugify(self.title)
+            self.guid, self.slug
         ).lower()
 
     @property
@@ -82,6 +82,11 @@ class Page(Entity, AttachmentMixin, RevisionMixin):
                 'statusPublished': self.status_published,
             }
         return {}
+
+    def get_media_status(self):
+        if self.page_type == 'campagne':
+            return False
+        return super().get_media_status()
 
 
 class Row(models.Model):

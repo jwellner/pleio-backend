@@ -37,7 +37,7 @@ class TestAvatarExportNotificationTestCase(PleioTenantTestCase):
         self.assertEqual(self.mailer.get_receiver(), self.initiator)
         self.assertEqual(self.mailer.get_receiver_email(), self.initiator.email)
 
-    @mock.patch('core.utils.export.build_avatar_export')
+    @mock.patch('core.utils.export.avatar.build_avatar_export')
     @mock.patch('core.mail_builders.avatar_export_ready.schedule_avatar_export_ready_mail')
     def test_called_at_the_end_of_building_the_export(self, mocked_send_mail, mocked_build_export):
         from core.tasks.exports import export_avatars

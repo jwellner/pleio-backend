@@ -1645,6 +1645,7 @@ type Mutation {
 
     addProfileSetManager(userGuid: String!, profileSetGuid: String!): ProfileSetManagerPayload
     removeProfileSetManager(userGuid: String!, profileSetGuid: String!): ProfileSetManagerPayload
+    createContentSnapshot: ContentSnapshotPayload
 }
 
 type ProfileSetManagerPayload {
@@ -1999,6 +2000,12 @@ type Query {
     ): RevisionList
     appointmentData: AppointmentDataPayload
     appointmentTimes(agendaId: String!, appointmentTypeId: String!, startDate: DateTime, endDate: DateTime): [AppointmentTimes]
+    contentSnapshots: ContentSnapshotPayload
+}
+
+type ContentSnapshotPayload {
+    success: Boolean
+    edges: [File]
 }
 
 type AppointmentDataPayload {

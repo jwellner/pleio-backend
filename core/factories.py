@@ -1,6 +1,8 @@
 from faker import Faker
 from mixer.backend.django import mixer
 
+from user.models import User
+
 
 def SearchQueryJournalFactory(**kwargs):
     from core.models import SearchQueryJournal
@@ -13,12 +15,12 @@ def SearchQueryJournalFactory(**kwargs):
     return journal
 
 
-def GroupFactory(**kwargs):
-    assert kwargs.get('owner'), "Groups should have an owner"
+def GroupFactory(**attributes):
+    assert isinstance(attributes.get('owner'), User), "owner is a required property"
 
     from core.models import Group
-    group = mixer.blend(Group, **kwargs)
-    group.join(kwargs['owner'], 'owner')
+    group = mixer.blend(Group, **attributes)
+    group.join(attributes['owner'], 'owner')
     return group
 
 

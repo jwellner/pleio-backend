@@ -7,6 +7,7 @@ from graphql import GraphQLError
 from core.constances import USER_NOT_MEMBER_OF_GROUP, USER_ROLES
 from core.models import Entity, EntityView, EntityViewCount, Group
 from user.models import User
+from .query_content_snapshots import resolve_content_snapshots
 from .query_meetings import resolve_query_appointment_data, resolve_query_appointment_times
 from .query_bookmarks import resolve_bookmarks
 from .query_entities import resolve_entities
@@ -58,6 +59,7 @@ query.set_field("viewer", resolve_viewer)
 query.set_field("revisions", resolve_revisions)
 query.set_field("appointmentData", resolve_query_appointment_data)
 query.set_field("appointmentTimes", resolve_query_appointment_times)
+query.set_field("contentSnapshots", resolve_content_snapshots)
 
 
 @query.field("entity")

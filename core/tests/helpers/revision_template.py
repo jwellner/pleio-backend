@@ -4,7 +4,7 @@ from blog.factories import BlogFactory
 from core.factories import GroupFactory
 from core.tests.helpers import PleioTenantTestCase
 from news.factories import NewsFactory
-from user.factories import UserFactory, AdminFactory
+from user.factories import UserFactory, AdminFactory, EditorFactory
 
 
 class RevisionTemplate:
@@ -411,8 +411,8 @@ class RevisionTemplate:
                 return
             self.localSetUp()
 
-            related_blog = BlogFactory()
-            related_news = NewsFactory()
+            related_blog = BlogFactory(owner=self.owner)
+            related_news = NewsFactory(owner=EditorFactory())
 
             revisions = self.applyChanges(suggestedItems=[
                 related_blog.guid,

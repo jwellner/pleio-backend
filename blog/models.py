@@ -1,5 +1,4 @@
 from auditlog.registry import auditlog
-from django.db import models
 from django.utils.text import slugify
 
 from core.lib import get_access_id
@@ -8,18 +7,17 @@ from core.models import (ArticleMixin, AttachmentMixin, BookmarkMixin,
                          VoteMixin, RevisionMixin)
 from core.models.entity import str_datetime
 from core.models.featured import FeaturedCoverMixin
+from core.models.mixin import TitleMixin, RichDescriptionMediaMixin
 
 
-class Blog(Entity, FeaturedCoverMixin, VoteMixin, BookmarkMixin, FollowMixin, 
-           CommentMixin, MentionMixin, AttachmentMixin, ArticleMixin, RevisionMixin):
+class Blog(RichDescriptionMediaMixin, TitleMixin, FeaturedCoverMixin, VoteMixin, BookmarkMixin, FollowMixin,
+           CommentMixin, MentionMixin, AttachmentMixin, ArticleMixin, RevisionMixin, Entity):
     """
     Blog
     """
 
     class Meta:
         ordering = ['-published']
-
-    title = models.CharField(max_length=256)
 
     def __str__(self):
         return f"Blog[{self.title}]"
@@ -41,7 +39,7 @@ class Blog(Entity, FeaturedCoverMixin, VoteMixin, BookmarkMixin, FollowMixin,
             )
 
         return '{}/blog/view/{}/{}'.format(
-            prefix, self.guid, slugify(self.title)
+            prefix, self.guid, self.slug
         ).lower()
 
     @property

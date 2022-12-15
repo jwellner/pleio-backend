@@ -1,8 +1,8 @@
 from mixer.backend.django import mixer
 
 from cms.models import Page
-from core.constances import ACCESS_TYPE
-from user.factories import EditorFactory
+from core.constances import ACCESS_TYPE, USER_ROLES
+from user.models import User
 
 
 def TextPageFactory(**attributes):
@@ -14,8 +14,8 @@ def CampagnePageFactory(**attributes):
 
 
 def _common_page_factory(**attributes):
-    if 'owner' not in attributes:
-        attributes['owner'] = EditorFactory()
+    assert isinstance(attributes.get('owner'), User), "owner is a required property"
+    assert USER_ROLES.EDITOR in attributes['owner'].roles, "The owner should have the USER_ROLES.EDITOR role."
     attributes.setdefault('read_access', [ACCESS_TYPE.public])
     attributes.setdefault('write_access', [ACCESS_TYPE.user.format(attributes['owner'].guid)])
     return mixer.blend(Page, **attributes)
