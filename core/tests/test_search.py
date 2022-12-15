@@ -236,7 +236,7 @@ class TestSearchArchivedTestCase(PleioTenantTestCase):
         all_content = [e['guid'] for e in result['data']['allContent']['edges']]
 
         self.assertIn(self.archived_blog.guid, only_archived)
-        self.assertIn(self.archived_blog.guid, all_content)
+        self.assertNotIn(self.archived_blog.guid, all_content)
 
         self.assertNotIn(self.not_archived_blog.guid, only_archived)
         self.assertIn(self.not_archived_blog.guid, all_content)

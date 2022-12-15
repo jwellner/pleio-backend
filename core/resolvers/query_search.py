@@ -71,7 +71,7 @@ def resolve_search(_, info,
     query.maybe_filter_container(containerGuid)
     query.maybe_filter_tags(tags, matchStrategy)
     query.maybe_filter_categories(tagCategories, matchStrategy)
-    query.maybe_filter_archived(filterArchived)
+    query.filter_archived(filterArchived)
     query.order_by(orderBy, orderDirection)
     query.add_aggregation()
 
