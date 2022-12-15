@@ -8,7 +8,6 @@ from user.models import User
 from core.models import ProfileField, UserProfileField
 from mixer.backend.django import mixer
 
-
 class OnboardingTestCase(FastTenantTestCase):
 
     def setUp(self):

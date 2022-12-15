@@ -338,7 +338,6 @@ class Echo:
 
 def export_group_members(request, group_id=None):
     # pylint: disable=too-many-locals
-    # TODO: add tests
     user = request.user
 
     if not user.is_authenticated:
