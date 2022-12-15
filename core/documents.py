@@ -140,6 +140,7 @@ class UserDocument(DefaultDocument):
 @registry.register_document
 class GroupDocument(DefaultDocument):
     id = fields.KeywordField()
+    is_archived = fields.BooleanField()
     tags = fields.ListField(fields.TextField(
         fields={'raw': fields.KeywordField()}
     ))
@@ -163,6 +164,10 @@ class GroupDocument(DefaultDocument):
         analyzer=custom_analyzer,
         search_analyzer="standard"
     )
+
+    def prepare_is_archived(self, instance):
+        # pylint: disable=unused-argument
+        return False
 
     def prepare_description(self, instance):
         return tiptap_to_text(instance.rich_description)
