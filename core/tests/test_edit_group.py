@@ -71,6 +71,11 @@ class EditGroupCase(PleioTenantTestCase):
                         isSubmitUpdatesEnabled
                         autoNotification
                         tags
+                        defaultTags
+                        defaultTagCategories {
+                            name
+                            values
+                        }
                         isLeavingGroupDisabled
                         isAutoMembershipEnabled
                     }
@@ -91,9 +96,10 @@ class EditGroupCase(PleioTenantTestCase):
                 "isFeatured": True,
                 "isSubmitUpdatesEnabled": False,
                 "autoNotification": True,
-                "tags": ["tag_one", "tag_two"],
                 "isLeavingGroupDisabled": True,
                 "isAutoMembershipEnabled": True,
+                "defaultTags": ['tag_one', 'tag_three'],
+                'defaultTagCategories': [{'name': 'Test', 'values': ['One', 'Two']}]
             }
         }
 
@@ -115,7 +121,8 @@ class EditGroupCase(PleioTenantTestCase):
         self.assertEqual(data["editGroup"]["group"]["isAutoMembershipEnabled"], False)
         self.assertEqual(data["editGroup"]["group"]["isSubmitUpdatesEnabled"], False)
         self.assertEqual(data["editGroup"]["group"]["autoNotification"], variables["group"]["autoNotification"])
-        self.assertEqual(data["editGroup"]["group"]["tags"], ["tag_one", "tag_two"])
+        self.assertEqual(data["editGroup"]["group"]["defaultTags"], variables['group']['defaultTags'])
+        self.assertEqual(data["editGroup"]["group"]["defaultTagCategories"], variables['group']['defaultTagCategories'])
 
     def test_edit_group_member_fields_invalid_id(self):
         mutation = """

@@ -53,11 +53,13 @@ def resolve_add_group(_, info, input):
     group.is_submit_updates_enabled = clean_input.get("isSubmitUpdatesEnabled", False)
     group.plugins = clean_input.get("plugins", [])
 
+    group.content_presets['defaultTags'] = clean_input.get("defaultTags", [])
+    group.content_presets['defaultTagCategories'] = clean_input.get("defaultTagCategories", [])
+
     if user.has_role(USER_ROLES.ADMIN):
         group.is_featured = clean_input.get("isFeatured", False)
         group.is_leaving_group_disabled = clean_input.get("isLeavingGroupDisabled", False)
         group.is_auto_membership_enabled = clean_input.get("isAutoMembershipEnabled", False)
-
 
     group.save()
 

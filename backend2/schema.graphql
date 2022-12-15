@@ -159,6 +159,8 @@ input addGroupInput {
     welcomeMessage: String
     tags: [String]
     tagCategories: [TagCategoryInput]
+    defaultTags: [String]
+    defaultTagCategories: [TagCategoryInput]
     plugins: [Plugins]
     showMemberProfileFieldGuids: [String]
     requiredProfileFieldsMessage: String
@@ -708,6 +710,8 @@ input editGroupInput {
     welcomeMessage: String
     tags: [String]
     tagCategories: [TagCategoryInput]
+    defaultTags: [String]
+    defaultTagCategories: [TagCategoryInput]
     plugins: [Plugins]
     showMemberProfileFieldGuids: [String]
     requiredProfileFieldsMessage: String
@@ -1318,6 +1322,8 @@ type Group implements Entity {
     defaultAccessId: Int
     tags: [String]
     tagCategories: [TagCategory]
+    defaultTags: [String]
+    defaultTagCategories: [TagCategory]
     memberCount: Int!
     members(
         q: String

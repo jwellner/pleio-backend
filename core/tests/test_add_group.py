@@ -19,73 +19,8 @@ class AddGroupCase(PleioTenantTestCase):
         self.admin = AdminFactory()
         self.profile_field = ProfileField.objects.create(key='profile_field', name='text_name', field_type='text_field')
 
-        self.data = {
-            "group": {
-                "name": "Name",
-                "icon": "icon.png",
-                "richDescription": "<p>richDescription</p>",
-                "introduction": "introductionMessage",
-                "isIntroductionPublic": False,
-                "welcomeMessage": "welcomeMessage",
-                "isClosed": True,
-                "isMembershipOnRequest": True,
-                "isFeatured": True,
-                "isAutoMembershipEnabled": True,
-                "isLeavingGroupDisabled": True,
-                "autoNotification": True,
-                "isHidden": True,
-                "requiredProfileFieldsMessage": "I'd expect this message for requiredProfileFieldsMessage",
-                "tags": ["tag_one", "tag_two"],
-                "requiredProfileFieldGuids": [self.profile_field.guid],
-            }
-        }
 
-    @mock.patch("core.resolvers.scalar.Tiptap")
-    def test_add_group_anon(self, mock_tiptap):
-        mutation = """
-            mutation ($group: addGroupInput!) {
-                addGroup(input: $group) {
-                    group {
-                        guid
-                        name
-                        icon
-                        richDescription
-                        introduction
-                        welcomeMessage
-                        isClosed
-                        isMembershipOnRequest
-                        isFeatured
-                        isSubmitUpdatesEnabled
-                        autoNotification
-                        tags
-                        isLeavingGroupDisabled
-                        isAutoMembershipEnabled
-                    }
-                }
-            }
-        """
-        variables = self.data
-
-        with self.assertGraphQlError('not_logged_in'):
-            self.graphql_client.post(mutation, variables)
-
-        mock_tiptap.assert_called_once_with(self.data['group']['richDescription'])
-        mock_tiptap.return_value.check_for_external_urls.assert_called_once_with()
-
-    @mock.patch("core.lib.get_mimetype")
-    @mock.patch("{}.open".format(settings.DEFAULT_FILE_STORAGE))
-    def test_add_group(self, mock_open, mock_mimetype):
-        file_mock = mock.MagicMock(spec=File)
-        file_mock.name = 'icon.png'
-        file_mock.content_type = 'image/png'
-        file_mock.download = '/icon.png'
-
-        mock_open.return_value = file_mock
-        mock_mimetype.return_value = file_mock.content_type
-
-        cache.set("%s%s" % (connection.schema_name, 'LIMITED_GROUP_ADD'), False)
-
-        mutation = """
+        self.mutation = """
             mutation ($group: addGroupInput!) {
                 addGroup(input: $group) {
                     group {
@@ -107,16 +42,72 @@ class AddGroupCase(PleioTenantTestCase):
                         isLeavingGroupDisabled
                         isAutoMembershipEnabled
                         requiredProfileFields {
-                          guid
+                            guid
+                        }
+                        showMemberProfileFields {
+                            guid
+                            name
+                        }
+                        defaultTags
+                        defaultTagCategories {
+                            name
+                            values
                         }
                     }
                 }
             }
         """
+
+        self.data = {
+            "group": {
+                "name": "Name",
+                "icon": "icon.png",
+                "richDescription": "<p>richDescription</p>",
+                "introduction": "introductionMessage",
+                "isIntroductionPublic": False,
+                "welcomeMessage": "welcomeMessage",
+                "isClosed": True,
+                "isMembershipOnRequest": True,
+                "isFeatured": True,
+                "isAutoMembershipEnabled": True,
+                "isLeavingGroupDisabled": True,
+                "autoNotification": True,
+                "isHidden": True,
+                "requiredProfileFieldsMessage": "I'd expect this message for requiredProfileFieldsMessage",
+                "tags": ["tag_one", "tag_two"],
+                "requiredProfileFieldGuids": [self.profile_field.guid],
+                "defaultTags": ['tag_one', 'tag_three'],
+                'defaultTagCategories': [{'name': 'Test', 'values': ['One', 'Two']}]
+            }
+        }
+
+    @mock.patch("core.resolvers.scalar.Tiptap")
+    def test_add_group_anon(self, mock_tiptap):
+        variables = self.data
+
+        with self.assertGraphQlError('not_logged_in'):
+            self.graphql_client.post(self.mutation, variables)
+
+        mock_tiptap.assert_called_once_with(self.data['group']['richDescription'])
+        mock_tiptap.return_value.check_for_external_urls.assert_called_once_with()
+
+    @mock.patch("core.lib.get_mimetype")
+    @mock.patch("{}.open".format(settings.DEFAULT_FILE_STORAGE))
+    def test_add_group(self, mock_open, mock_mimetype):
+        file_mock = mock.MagicMock(spec=File)
+        file_mock.name = 'icon.png'
+        file_mock.content_type = 'image/png'
+        file_mock.download = '/icon.png'
+
+        mock_open.return_value = file_mock
+        mock_mimetype.return_value = file_mock.content_type
+
+        cache.set("%s%s" % (connection.schema_name, 'LIMITED_GROUP_ADD'), False)
+
         variables = self.data
 
         self.graphql_client.force_login(self.user)
-        result = self.graphql_client.post(mutation, variables)
+        result = self.graphql_client.post(self.mutation, variables)
 
         data = result.get("data")
         self.assertEqual(data["addGroup"]["group"]["name"], variables["group"]["name"])
@@ -138,36 +129,17 @@ class AddGroupCase(PleioTenantTestCase):
         self.assertEqual(data["addGroup"]["group"]["autoNotification"], variables["group"]["autoNotification"])
         self.assertEqual(data["addGroup"]["group"]["tags"], ["tag_one", "tag_two"])
         self.assertEqual(data["addGroup"]["group"]["requiredProfileFields"], [{"guid": self.profile_field.guid}])
+        self.assertEqual(data["addGroup"]["group"]["defaultTags"], variables['group']['defaultTags'])
+        self.assertEqual(data["addGroup"]["group"]["defaultTagCategories"], variables['group']['defaultTagCategories'])
 
         cache.clear()
 
     @override_local_config(LIMITED_GROUP_ADD=True)
     def test_add_group_limited_group_add(self):
-        mutation = """
-            mutation ($group: addGroupInput!) {
-                addGroup(input: $group) {
-                    group {
-                        guid
-                        name
-                        icon
-                        richDescription
-                        introduction
-                        welcomeMessage
-                        isClosed
-                        isMembershipOnRequest
-                        isFeatured
-                        autoNotification
-                        tags
-                        isLeavingGroupDisabled
-                        isAutoMembershipEnabled
-                    }
-                }
-            }
-        """
         variables = self.data
         with self.assertGraphQlError('not_authorized'):
             self.graphql_client.force_login(self.user)
-            self.graphql_client.post(mutation, variables)
+            self.graphql_client.post(self.mutation, variables)
 
     @mock.patch("core.lib.get_mimetype")
     @mock.patch("{}.open".format(settings.DEFAULT_FILE_STORAGE))
@@ -179,31 +151,10 @@ class AddGroupCase(PleioTenantTestCase):
         mock_open.return_value = file_mock
         mock_mimetype.return_value = file_mock.content_type
 
-        mutation = """
-            mutation ($group: addGroupInput!) {
-                addGroup(input: $group) {
-                    group {
-                        guid
-                        name
-                        icon
-                        richDescription
-                        introduction
-                        welcomeMessage
-                        isClosed
-                        isMembershipOnRequest
-                        isFeatured
-                        autoNotification
-                        isLeavingGroupDisabled
-                        isAutoMembershipEnabled
-                        tags
-                    }
-                }
-            }
-        """
         variables = self.data
 
         self.graphql_client.force_login(self.admin)
-        result = self.graphql_client.post(mutation, variables)
+        result = self.graphql_client.post(self.mutation, variables)
 
         data = result["data"]
         self.assertEqual(data["addGroup"]["group"]["name"], variables["group"]["name"])
@@ -227,21 +178,6 @@ class AddGroupCase(PleioTenantTestCase):
                   [{"name": "section_one", "profileFieldGuids": [profile_field1.guid]}]
                   )
 
-        mutation = """
-            mutation ($group: addGroupInput!) {
-                addGroup(input: $group) {
-                    group {
-                        guid
-                        name
-                        showMemberProfileFields {
-                            guid
-                            name
-                        }
-                    }
-                }
-            }
-        """
-
         variables = {
             "group": {
                 "name": "Test123",
@@ -250,7 +186,7 @@ class AddGroupCase(PleioTenantTestCase):
         }
 
         self.graphql_client.force_login(self.admin)
-        result = self.graphql_client.post(mutation, variables)
+        result = self.graphql_client.post(self.mutation, variables)
 
         data = result["data"]
         self.assertEqual(data["addGroup"]["group"]["name"], variables["group"]["name"])
@@ -264,21 +200,6 @@ class AddGroupCase(PleioTenantTestCase):
                   [{"name": "section_one", "profileFieldGuids": [profile_field1.guid]}]
                   )
 
-        mutation = """
-            mutation ($group: addGroupInput!) {
-                addGroup(input: $group) {
-                    group {
-                        guid
-                        name
-                        showMemberProfileFields {
-                            guid
-                            name
-                        }
-                    }
-                }
-            }
-        """
-
         variables = {
             "group": {
                 "name": "Test123",
@@ -288,4 +209,4 @@ class AddGroupCase(PleioTenantTestCase):
 
         with self.assertGraphQlError("Long text fields are not allowed to display on the member page."):
             self.graphql_client.force_login(self.admin)
-            self.graphql_client.post(mutation, variables)
+            self.graphql_client.post(self.mutation, variables)

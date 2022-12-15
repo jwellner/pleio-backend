@@ -354,6 +354,18 @@ def resolve_updates_enabled_field(obj, info):
     return obj.is_submit_updates_enabled
 
 
+@group.field("defaultTags")
+def resolve_default_tags(obj, info):
+    # pylint: disable=unused-argument
+    return obj.content_presets['defaultTags']
+
+
+@group.field("defaultTagCategories")
+def resolve_default_tag_categories(obj, info):
+    # pylint: disable=unused-argument
+    return obj.content_presets['defaultTagCategories']
+
+
 group.set_field("excerpt", shared.resolve_entity_excerpt)
 group.set_field("tags", shared.resolve_entity_tags)
 group.set_field("tagCategories", shared.resolve_entity_categories)

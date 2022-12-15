@@ -19,7 +19,10 @@ def resolve_edit_group(_, info, input):
 
     user = info.context["request"].user
 
-    clean_input = clean_graphql_input(input)
+    clean_input = clean_graphql_input(input, [
+        'defaultTags',
+        'defaultTagCategories',
+    ])
 
     if not user.is_authenticated:
         raise GraphQLError(NOT_LOGGED_IN)
@@ -47,6 +50,11 @@ def resolve_edit_group(_, info, input):
     shared.update_featured_image(group, clean_input, image_owner=user)
     shared.resolve_update_rich_description(group, clean_input)
     shared.resolve_update_tags(group, clean_input)
+
+    if 'defaultTags' in clean_input:
+        group.content_presets['defaultTags'] = clean_input['defaultTags'] or []
+    if 'defaultTagCategories' in clean_input:
+        group.content_presets['defaultTagCategories'] = clean_input['defaultTagCategories'] or []
 
     if 'introduction' in clean_input:
         group.introduction = clean_input.get("introduction")
@@ -85,7 +93,6 @@ def resolve_edit_group(_, info, input):
 
         if 'isHidden' in clean_input:
             group.is_hidden = clean_input.get("isHidden")
-
 
     if 'showMemberProfileFieldGuids' in clean_input:
         for profile_field_id in clean_input.get("showMemberProfileFieldGuids"):
