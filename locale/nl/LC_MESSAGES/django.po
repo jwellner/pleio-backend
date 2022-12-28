@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-12-28 11:43+0100\n"
+"POT-Creation-Date: 2022-12-28 15:42+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -58,7 +58,7 @@ msgid "Receive overview emails"
 msgstr "Ontvang overzicht emails"
 
 #: core/forms.py:163 core/templates/registration/request.html:23
-#: core/views.py:471
+#: core/views.py:471 event/export.py:58
 msgid "Name"
 msgstr "Naam"
 
@@ -436,7 +436,7 @@ msgstr "Wilt u <strong>%(name)s</strong> (%(email)s) inchecken?"
 msgid "Yes, confirm"
 msgstr "Ja, bevestig."
 
-#: core/templates/check_in/checked_in.html:8
+#: core/templates/check_in/checked_in.html:8 event/models.py:275
 msgid "Checked in"
 msgstr "Ingecheckt."
 
@@ -1107,7 +1107,7 @@ msgstr ""
 "De toegang is aangevraagd. Je ontvangt een e-mail wanneer de toegang door de"
 " beheerder wordt toegewezen."
 
-#: core/views.py:472
+#: core/views.py:472 event/export.py:58
 msgid "E-mail"
 msgstr "E-mail"
 
@@ -1127,6 +1127,22 @@ msgstr "Je wijzigingen zijn opgeslagen"
 #, python-format
 msgid "Successfully unsubscribed %(email)s from %(list_name)s"
 msgstr "%(email)s Succesvol uitgeschreven uit %(list_name)s"
+
+#: event/export.py:44
+msgid "All attendees"
+msgstr "Alle deelnemers"
+
+#: event/export.py:49
+msgid "All events"
+msgstr "Alle evenementen"
+
+#: event/export.py:58
+msgid "Status"
+msgstr "Status"
+
+#: event/export.py:58
+msgid "Updated"
+msgstr "Bijgewerkt"
 
 #: event/mail_builders/attend_event_confirm.py:59
 #, python-format
@@ -1164,7 +1180,23 @@ msgstr "QR code voor %s"
 msgid "Added to event %s from waitinglist"
 msgstr "Toegevoegd aan evenement %s van wachtlijst"
 
-#: event/models.py:240
+#: event/models.py:180
+msgid "Accepted"
+msgstr "Aanvaard"
+
+#: event/models.py:181
+msgid "Maybe"
+msgstr "Misschien"
+
+#: event/models.py:182
+msgid "Rejected"
+msgstr "Afgewezen"
+
+#: event/models.py:183
+msgid "At waitinglist"
+msgstr "Op de wachtlijst"
+
+#: event/models.py:243
 msgid "You already signed in for another sub-event in the same slot."
 msgstr ""
 "Je hebt je al aangemeld voor een ander sub-evenement in hetzelfde slot."
@@ -1470,12 +1502,3 @@ msgstr "Verwijderd door Profile-Sync"
 #: user/models.py:300 user/post_deploy.py:22
 msgid "Deleted"
 msgstr "Verwijderd"
-
-#~ msgid "Failed to load agenda's"
-#~ msgstr "Agenda's niet geladen"
-
-#~ msgid "Failed to load appointment types"
-#~ msgstr "Afspraaktypes niet geladen"
-
-#~ msgid "Failed to load available times"
-#~ msgstr "Beschikbare tijden niet geladen"

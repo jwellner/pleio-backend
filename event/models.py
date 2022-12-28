@@ -2,7 +2,7 @@ from django.contrib.postgres import fields
 from django.core.exceptions import ValidationError
 
 from core import config
-from django.utils.translation import gettext as _
+from django.utils.translation import gettext, gettext_lazy as _
 
 from auditlog.registry import auditlog
 from django.db import models
@@ -18,8 +18,8 @@ from django.utils.text import slugify
 from django.utils import timezone
 
 
-class Event(RichDescriptionMediaMixin, TitleMixin, CommentMixin, BookmarkMixin, FollowMixin, NotificationMixin, FeaturedCoverMixin, ArticleMixin, AttachmentMixin, Entity):
-
+class Event(RichDescriptionMediaMixin, TitleMixin, CommentMixin, BookmarkMixin, FollowMixin, NotificationMixin, FeaturedCoverMixin, ArticleMixin,
+            AttachmentMixin, Entity):
     class Meta:
         ordering = ['-published']
 
@@ -174,13 +174,16 @@ class EventAttendee(models.Model):
             models.UniqueConstraint(fields=['event', 'email'], name="unique_email"),
             models.UniqueConstraint(fields=['event', 'user'], name="unique_user")
         ]
+        ordering = ('updated_at',)
 
     STATE_TYPES = (
-        ('accept', 'Accept'),
-        ('maybe', 'Maybe'),
-        ('reject', 'Reject'),
-        ('waitinglist', 'Waitinglist')
+        ('accept', _('Accepted')),
+        ('maybe', _('Maybe')),
+        ('reject', _('Rejected')),
+        ('waitinglist', _('At waitinglist'))
     )
+
+    _state_label = {key: label for key, label in STATE_TYPES}
 
     event = models.ForeignKey(
         Event,
@@ -237,7 +240,7 @@ class EventAttendee(models.Model):
             qs = qs.filter(event__parent=self.event.parent, state='accept')
             for maybe_match in qs:
                 if self.event.is_in_same_slot(maybe_match.event):
-                    raise ValidationError(_("You already signed in for another sub-event in the same slot."))
+                    raise ValidationError(gettext("You already signed in for another sub-event in the same slot."))
 
     def save(self, *args, **kwargs):
         if self.user:
@@ -267,6 +270,10 @@ class EventAttendee(models.Model):
                 'email': self.email,
                 'language': self.language}
 
+    def format_state(self):
+        if bool(self.checked_in_at):
+            return _("Checked in")
+        return self._state_label.get(self.state) or self.state
 
 
 class EventAttendeeRequest(models.Model):

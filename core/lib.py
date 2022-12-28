@@ -486,6 +486,15 @@ def datetime_isoformat(obj):
     return None
 
 
+def datetime_format(obj, seconds=False):
+    if isinstance(obj, django_timezone.datetime):
+        obj = obj.astimezone(django_timezone.get_current_timezone())
+        if seconds:
+            return obj.strftime("%Y-%m-%d %H:%M:%S")
+        return obj.strftime("%Y-%m-%d %H:%M")
+    return ""
+
+
 def get_client_ip(request):
     x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
 
