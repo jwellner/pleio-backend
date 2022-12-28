@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-11-28 14:15+0100\n"
+"POT-Creation-Date: 2022-12-28 09:43+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -21,45 +21,53 @@ msgstr ""
 msgid "status update"
 msgstr "statusupdate"
 
-#: core/forms.py:69
+#: control/forms.py:65
+msgid "Include files"
+msgstr "Bestanden opnemen"
+
+#: control/forms.py:69
+msgid "Create zip-file"
+msgstr "Maak een zip-bestand"
+
+#: core/forms.py:76
 msgid "Provide a valid value."
 msgstr "Voer een geldige waarde in."
 
-#: core/forms.py:82 core/resolvers/query_site.py:184
+#: core/forms.py:89 core/resolvers/site_settings.py:459
 msgid "Never"
 msgstr "Nooit"
 
-#: core/forms.py:83 core/resolvers/query_site.py:181
+#: core/forms.py:90 core/resolvers/site_settings.py:458
 msgid "Daily"
 msgstr "Dagelijks"
 
-#: core/forms.py:84 core/resolvers/query_site.py:182
+#: core/forms.py:91 core/resolvers/site_settings.py:458
 msgid "Weekly"
 msgstr "Wekelijks"
 
-#: core/forms.py:85 core/resolvers/query_site.py:183
+#: core/forms.py:92 core/resolvers/site_settings.py:459
 msgid "Monthly"
 msgstr "Maandelijks"
 
-#: core/forms.py:88
+#: core/forms.py:95
 msgid "Receive notification emails"
 msgstr "Ontvang notificatie emails"
 
-#: core/forms.py:89
+#: core/forms.py:96
 msgid "Receive overview emails"
 msgstr "Ontvang overzicht emails"
 
-#: core/forms.py:136 core/templates/registration/request.html:23
-#: core/views.py:472
+#: core/forms.py:163 core/templates/registration/request.html:23
+#: core/views.py:471
 msgid "Name"
 msgstr "Naam"
 
-#: core/forms.py:140
+#: core/forms.py:167
 msgid "Profile field"
 msgstr "Profiel veld"
 
-#: core/lib.py:207 core/resolvers/mutation_import_users.py:30
-#: core/resolvers/query_site.py:89
+#: core/lib.py:207 core/resolvers/mutation_import_users.py:29
+#: core/resolvers/site_settings.py:88
 msgid "Just me"
 msgstr "Alleen eigenaar"
 
@@ -73,13 +81,13 @@ msgstr "Groep: %(group_name)s"
 msgid "Subgroup: %(subgroup_name)s"
 msgstr "Subgroep: %(subgroup_name)s"
 
-#: core/lib.py:219 core/resolvers/mutation_import_users.py:31
-#: core/resolvers/query_site.py:90
+#: core/lib.py:219 core/resolvers/mutation_import_users.py:30
+#: core/resolvers/site_settings.py:89
 msgid "Logged in users"
 msgstr "Ingelogde gebruikers"
 
-#: core/lib.py:221 core/resolvers/mutation_import_users.py:34
-#: core/resolvers/query_site.py:94
+#: core/lib.py:221 core/resolvers/mutation_import_users.py:33
+#: core/resolvers/site_settings.py:93
 msgid "Public"
 msgstr "Iedereen (publiek zichtbaar)"
 
@@ -172,6 +180,10 @@ msgstr "Avatar export is klaar"
 #, python-format
 msgid "Confirm comment on %(site_name)s"
 msgstr "Bevestig commentaar op %(site_name)s"
+
+#: core/mail_builders/content_export_ready.py:46
+msgid "Your content export is ready for download"
+msgstr "Je inhoudsexport is klaar voor download"
 
 #: core/mail_builders/frequent_overview.py:76
 #, python-format
@@ -342,41 +354,56 @@ msgstr "Klaar"
 msgid "Automatically generated initial revision"
 msgstr "Automatisch gegenereerde eerste revisie"
 
-#: core/resolvers/mutation_import_users.py:17
+#: core/resolvers/mutation_edit_users.py:32
+#: core/resolvers/mutation_toggle_user_is_banned.py:32 user/post_deploy.py:18
+msgid "Blocked by admin"
+msgstr "Geblokkeerd door admin"
+
+#: core/resolvers/mutation_import_users.py:16
 msgid "email"
 msgstr "e-mail"
 
-#: core/resolvers/mutation_import_users.py:18
+#: core/resolvers/mutation_import_users.py:17
 msgid "name"
 msgstr "naam"
 
-#: core/resolvers/query_meetings.py:27
-msgid "Agenda"
-msgstr "Agenda"
-
-#: core/resolvers/query_meetings.py:30
+#: core/resolvers/shared.py:588
 msgid "Appointment"
 msgstr "Afspraak"
 
-#: core/resolvers/query_site.py:142
+#: core/resolvers/shared.py:594
+msgid "Agenda"
+msgstr "Agenda"
+
+#: core/resolvers/site_settings.py:209
 msgid "Activity stream"
 msgstr "Activiteitenstroom"
 
-#: core/resolvers/query_site.py:142
+#: core/resolvers/site_settings.py:210
 msgid "CMS page"
 msgstr "CMS pagina"
 
-#: core/resolvers/query_site.py:234
+#: core/resolvers/site_settings.py:704
 msgid "Administrator"
 msgstr "Beheerder"
 
-#: core/resolvers/query_site.py:235
+#: core/resolvers/site_settings.py:705
 msgid "Editor"
 msgstr "Redacteur"
 
-#: core/resolvers/query_site.py:236
+#: core/resolvers/site_settings.py:706
 msgid "Question expert"
 msgstr "Vraagexpert"
+
+#: core/tasks/cronjobs.py:200 core/tests/test_auto_block_users.py:67
+#: core/tests/test_auto_block_users.py:70 user/post_deploy.py:19
+msgid "Bouncing e-mail address"
+msgstr "Bouncing e-mail adres"
+
+#: core/tasks/cronjobs.py:243 core/tests/test_auto_block_users.py:109
+#: core/tests/test_auto_block_users.py:111 user/post_deploy.py:20
+msgid "User deleted externally"
+msgstr "Gebruiker extern verwijderd"
 
 #: core/templates/check_in/already_checked_in.html:8
 msgid "Already checked in"
@@ -494,6 +521,19 @@ msgstr "Commentaar:"
 #: core/templates/email/confirm_add_comment_without_account.html:9
 msgid "Click on the link below to confirm the comment."
 msgstr "Klik op de onderstaande link om uw reactie te bevestigen."
+
+#: core/templates/email/content_export_ready.html:5
+#, python-format
+msgid "The export of your content at %(site_name)s is ready."
+msgstr "De export van je inhoud op %(site_name)s is klaar."
+
+#: core/templates/email/content_export_ready.html:6
+msgid ""
+"Follow the link below to download your content or copy the link to your web "
+"browser."
+msgstr ""
+"Volg de onderstaande link om je inhoud te downloaden of kopieer de link naar"
+" je webbrowser."
 
 #: core/templates/email/element/footer-userorigin.html:2
 #, python-format
@@ -662,7 +702,7 @@ msgstr "Persoonlijk bericht"
 msgid "Direct notification"
 msgstr "Directe notificatie"
 
-#: core/templates/email/send_notification_emails.html:10 core/views.py:630
+#: core/templates/email/send_notification_emails.html:10 core/views.py:629
 msgid "Notification overview"
 msgstr "Notificaties overzicht"
 
@@ -680,7 +720,7 @@ msgstr "Afmelden"
 msgid "Adjust your email settings"
 msgstr "Pas je e-mailinstellingen aan"
 
-#: core/templates/email/send_overview_emails.html:22 core/views.py:627
+#: core/templates/email/send_overview_emails.html:22 core/views.py:626
 msgid "Periodic overview"
 msgstr "Periodiek overzicht"
 
@@ -1061,23 +1101,23 @@ msgstr ""
 "De toegang is aangevraagd. Je ontvangt een e-mail wanneer de toegang door de"
 " beheerder wordt toegewezen."
 
-#: core/views.py:473
+#: core/views.py:472
 msgid "E-mail"
 msgstr "E-mail"
 
-#: core/views.py:474
+#: core/views.py:473
 msgid "Group"
 msgstr "Groep"
 
-#: core/views.py:475
+#: core/views.py:474
 msgid "Disk size"
 msgstr "Schijfgrootte"
 
-#: core/views.py:570
+#: core/views.py:569
 msgid "Your changes are saved"
 msgstr "Je wijzigingen zijn opgeslagen"
 
-#: core/views.py:633
+#: core/views.py:632
 #, python-format
 msgid "Successfully unsubscribed %(email)s from %(list_name)s"
 msgstr "%(email)s Succesvol uitgeschreven uit %(list_name)s"
@@ -1113,12 +1153,12 @@ msgstr "Verwijderd uit evenement: %s"
 msgid "QR code for %s"
 msgstr "QR code voor %s"
 
-#: event/mail_builders/waitinglist.py:22 event/models.py:99
+#: event/mail_builders/waitinglist.py:22
 #, python-format
 msgid "Added to event %s from waitinglist"
 msgstr "Toegevoegd aan evenement %s van wachtlijst"
 
-#: event/models.py:257
+#: event/models.py:240
 msgid "You already signed in for another sub-event in the same slot."
 msgstr ""
 "Je hebt je al aangemeld voor een ander sub-evenement in hetzelfde slot."
@@ -1405,17 +1445,25 @@ msgstr "Bericht naar evenement"
 msgid "Filescan found suspicous files on %(site_url)s"
 msgstr "Filescan heeft verdachte bestanden gevonden op %(site_url)s"
 
-#: file/models.py:59
+#: file/models.py:69
 msgid "File"
 msgstr "Bestand"
 
-#: file/models.py:60
+#: file/models.py:70
 msgid "Folder"
 msgstr "Map"
 
-#: file/models.py:61
+#: file/models.py:71
 msgid "Pad"
 msgstr "Pad"
+
+#: profile_sync/views.py:275 user/post_deploy.py:21
+msgid "Removed by Profile-Sync"
+msgstr "Verwijderd door Profile-Sync"
+
+#: user/models.py:300 user/post_deploy.py:22
+msgid "Deleted"
+msgstr "Verwijderd"
 
 #~ msgid "Failed to load agenda's"
 #~ msgstr "Agenda's niet geladen"

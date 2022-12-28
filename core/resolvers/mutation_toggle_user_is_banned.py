@@ -1,9 +1,10 @@
+from django.utils.translation import gettext
 from graphql import GraphQLError
 from django.core.exceptions import ObjectDoesNotExist
 
 from core.resolvers import shared
 from user.models import User
-from core.constances import COULD_NOT_FIND, COULD_NOT_SAVE
+from core.constances import COULD_NOT_FIND
 from core.lib import clean_graphql_input
 
 
@@ -28,7 +29,7 @@ def resolve_toggle_user_is_banned(_, info, input):
         if user.is_superadmin:
             shared.assert_superadmin(performing_user)
         user.is_active = False
-        user.ban_reason = "Banned by admin"
+        user.ban_reason = gettext("Blocked by admin")
         user.save()
 
     else:

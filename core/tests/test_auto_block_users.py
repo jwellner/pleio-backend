@@ -1,5 +1,6 @@
 from django.db import connection
 from django.test import override_settings
+from django.utils.translation import gettext
 from mixer.backend.django import mixer
 from django.core.cache import cache
 
@@ -63,10 +64,10 @@ class AutoBlockUsersTests(FastTenantTestCase):
         self.assertEqual(self.user1.is_active, True)
         self.assertEqual(self.user1.ban_reason, '')
         self.assertEqual(self.user2.is_active, False)
-        self.assertEqual(self.user2.ban_reason, 'bouncing email adres')
+        self.assertEqual(self.user2.ban_reason, gettext('Bouncing e-mail address'))
         self.assertEqual(self.user3.is_active, True)
         self.assertEqual(self.user4.is_active, False)
-        self.assertEqual(self.user4.ban_reason, 'bouncing email adres')
+        self.assertEqual(self.user4.ban_reason, gettext('Bouncing e-mail address'))
 
     @override_settings(ACCOUNT_API_URL='domain@url.nl')
     @override_settings(ACCOUNT_API_TOKEN='fake_token')
@@ -105,6 +106,6 @@ class AutoBlockUsersTests(FastTenantTestCase):
         self.assertEqual(self.user1.ban_reason, '')
         self.assertEqual(self.user2.is_active, True)
         self.assertEqual(self.user3.is_active, False)
-        self.assertEqual(self.user3.ban_reason, 'user deleted in account')
+        self.assertEqual(self.user3.ban_reason, gettext('User deleted externally'))
         self.assertEqual(self.user4.is_active, False)
-        self.assertEqual(self.user4.ban_reason, 'user deleted in account')
+        self.assertEqual(self.user4.ban_reason, gettext('User deleted externally'))

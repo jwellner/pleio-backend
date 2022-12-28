@@ -5,6 +5,7 @@ from auditlog.models import LogEntry
 from celery import shared_task
 from celery.utils.log import get_task_logger
 from django.utils.timezone import localtime
+from django.utils.translation import gettext
 
 from core import config
 from core.mail_builders.frequent_overview import schedule_frequent_overview_mail
@@ -196,7 +197,7 @@ def ban_users_that_bounce(schema_name):
                 continue
 
             user.is_active = False
-            user.ban_reason = 'bouncing email adres'
+            user.ban_reason = gettext('Bouncing e-mail address')
             user.save()
             count = count + 1
 
@@ -239,7 +240,7 @@ def ban_users_with_no_account(schema_name):
                 continue
 
             user.is_active = False
-            user.ban_reason = 'user deleted in account'
+            user.ban_reason = gettext('User deleted externally')
             user.save()
             count = count + 1
 
