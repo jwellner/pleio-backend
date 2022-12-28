@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Duits\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-12-28 11:43+0100\n"
+"POT-Creation-Date: 2022-12-28 15:42+0100\n"
 "PO-Revision-Date: 2021-05-26 10:55+0200\n"
 "Last-Translator: \n"
 "Language-Team: \n"
@@ -59,7 +59,7 @@ msgid "Receive overview emails"
 msgstr "Übersichts-E-Mails erhalten"
 
 #: core/forms.py:163 core/templates/registration/request.html:23
-#: core/views.py:471
+#: core/views.py:471 event/export.py:58
 msgid "Name"
 msgstr "Name"
 
@@ -438,7 +438,7 @@ msgstr "Möchten Sie <strong>%(name)s</strong> (%(email)s) einchecken?"
 msgid "Yes, confirm"
 msgstr "Ja, bestätigen"
 
-#: core/templates/check_in/checked_in.html:8
+#: core/templates/check_in/checked_in.html:8 event/models.py:275
 msgid "Checked in"
 msgstr "Eingecheckt"
 
@@ -1106,7 +1106,7 @@ msgstr ""
 "Zugang wird angefordert. Sie erhalten eine E-Mail, wenn die Anfrage "
 "angenommen wird."
 
-#: core/views.py:472
+#: core/views.py:472 event/export.py:58
 msgid "E-mail"
 msgstr "E-Mail"
 
@@ -1126,6 +1126,22 @@ msgstr "Ihre Änderungen werden gespeichert"
 #, python-format
 msgid "Successfully unsubscribed %(email)s from %(list_name)s"
 msgstr "Erfolgreich abbestellt %(email)s von %(list_name)s"
+
+#: event/export.py:44
+msgid "All attendees"
+msgstr "Alle Teilnehmerinnen und Teilnehmer"
+
+#: event/export.py:49
+msgid "All events"
+msgstr "Alle Ereignisse"
+
+#: event/export.py:58
+msgid "Status"
+msgstr "Status"
+
+#: event/export.py:58
+msgid "Updated"
+msgstr "Aktualisiert"
 
 #: event/mail_builders/attend_event_confirm.py:59
 #, python-format
@@ -1163,7 +1179,23 @@ msgstr "QR-Code für %s"
 msgid "Added to event %s from waitinglist"
 msgstr "Zum Ereignis %s von der Warteliste hinzugefügt"
 
-#: event/models.py:240
+#: event/models.py:180
+msgid "Accepted"
+msgstr "Angenommen"
+
+#: event/models.py:181
+msgid "Maybe"
+msgstr "Vielleicht"
+
+#: event/models.py:182
+msgid "Rejected"
+msgstr "Abgelehnt"
+
+#: event/models.py:183
+msgid "At waitinglist"
+msgstr "Auf der Warteliste"
+
+#: event/models.py:243
 msgid "You already signed in for another sub-event in the same slot."
 msgstr ""
 "Sie haben sich bereits für eine andere Unterveranstaltung auf demselben "
@@ -1471,12 +1503,3 @@ msgstr "Entfernt von Profile-Sync"
 #: user/models.py:300 user/post_deploy.py:22
 msgid "Deleted"
 msgstr "Gelöscht"
-
-#~ msgid "Failed to load agenda's"
-#~ msgstr "Agenda konnte nicht geladen werden"
-
-#~ msgid "Failed to load appointment types"
-#~ msgstr "Terminarten konnten nicht geladen werden"
-
-#~ msgid "Failed to load available times"
-#~ msgstr "Verfügbare Zeiten konnten nicht geladen werden"

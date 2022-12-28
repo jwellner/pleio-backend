@@ -1,83 +1,55 @@
 import csv
 import io
 import qrcode
-from core.lib import datetime_isoformat
-from django.core.exceptions import ObjectDoesNotExist
+
+from django.core.exceptions import ObjectDoesNotExist, ValidationError
 from django.http import Http404, HttpResponse, StreamingHttpResponse
-from django.utils.text import slugify
-from core.models import Entity
-from core.lib import get_base_url, generate_code
-from event.models import EventAttendee, Event
 from django.shortcuts import render
-from django.utils import timezone
+from django.utils import timezone, translation
+from django.utils.text import slugify
+
+from core.lib import generate_code, get_base_url
+from core.models import Entity
+from event.export import AttendeeExporter
+from event.models import EventAttendee, Event
+
 
 class Echo:
     """An object that implements just the write method of the file-like
     interface.
     """
+
     def write(self, value):
         """Write the value by returning it, instead of storing in a buffer."""
         return value
 
+
 def export(request, event_id=None):
     # pylint: disable=too-many-branches
-    # TODO: add check if setting for exporting is set
-    # TODO: add tests
     user = request.user
 
     if not user.is_authenticated:
-        raise Http404("Event not found")
+        raise Http404("Not found")
 
     try:
         event = Event.objects.get(id=event_id)
-    except ObjectDoesNotExist:
-        raise Http404("Event not found")
+    except (ObjectDoesNotExist, ValidationError):
+        raise Http404("Not found")
 
     if not event.can_write(user):
-        raise Http404("Event not found")
+        raise Http404("Not found")
 
-    rows = []
-    rows.append([event.title, datetime_isoformat(event.start_date)])
-
-    for state in ['accept', 'waitinglist']:
-        for attendee in event.attendees.all():
-            if attendee.state == state:
-                if attendee.user:
-                    email = attendee.user.email
-                else:
-                    email = attendee.email
-                if attendee.user:
-                    name = attendee.user.name
-                else:
-                    name = attendee.name
-
-                rows.append([state, datetime_isoformat(attendee.updated_at), name, email])
-
-    for child in event.children.all():
-        rows.append([])
-        rows.append([child.title, datetime_isoformat(child.start_date)])
-
-        for state in ['accept', 'waitinglist']:
-            for attendee in child.attendees.all():
-                if attendee.state == state:
-                    if attendee.user:
-                        email = attendee.user.email
-                    else:
-                        email = attendee.email
-                    if attendee.user:
-                        name = attendee.user.name
-                    else:
-                        name = attendee.name
-
-                    rows.append([state, datetime_isoformat(attendee.updated_at), name, email])
+    event_export = AttendeeExporter(event, user)
 
     pseudo_buffer = Echo()
     writer = csv.writer(pseudo_buffer, delimiter=';', quotechar='"')
-    response = StreamingHttpResponse((writer.writerow(row) for row in rows),
+    response = StreamingHttpResponse((writer.writerow(row) for row in event_export.rows()),
                                      content_type="text/csv")
     filename = slugify(event.title)
     response['Content-Disposition'] = f'attachment; filename="{filename}.csv"'
+
     return response
+
 
 def export_calendar(request):
     output = io.StringIO()
@@ -102,8 +74,8 @@ def export_calendar(request):
     response['Content-Disposition'] = f'attachment; filename="{filename}.ics"'
     return response
 
-def get_access_qr(request, entity_id, email=None):
 
+def get_access_qr(request, entity_id, email=None):
     if request.user:
         user = request.user
         if not user.is_authenticated:
@@ -118,7 +90,6 @@ def get_access_qr(request, entity_id, email=None):
         attendee = EventAttendee.objects.get(user=user, event=entity)
     else:
         attendee = EventAttendee.objects.get(email=email, event=entity)
-
 
     if hasattr(entity, 'title') and entity.title:
         filename = slugify(entity.title)[:238].removesuffix("-")
@@ -146,15 +117,14 @@ def get_access_qr(request, entity_id, email=None):
 
     return response
 
-def check_in(request):
 
+def check_in(request):
     user = request.user
 
     try:
-        attendee = EventAttendee.objects.get(code = request.GET.get('code'))
+        attendee = EventAttendee.objects.get(code=request.GET.get('code'))
     except EventAttendee.DoesNotExist:
         raise Http404("Attendee not found")
-
 
     event = Event.objects.get(id=attendee.event.guid)
 
@@ -177,5 +147,5 @@ def check_in(request):
 
     if attendee.checked_in_at is None:
         return render(request, 'check_in/check_in.html', context)
-    
+
     return render(request, 'check_in/already_checked_in.html', context)

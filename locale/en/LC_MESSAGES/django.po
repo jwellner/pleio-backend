@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-12-28 11:43+0100\n"
+"POT-Creation-Date: 2022-12-28 15:42+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -58,7 +58,7 @@ msgid "Receive overview emails"
 msgstr "Receive overview emails"
 
 #: core/forms.py:163 core/templates/registration/request.html:23
-#: core/views.py:471
+#: core/views.py:471 event/export.py:58
 msgid "Name"
 msgstr "Name"
 
@@ -436,7 +436,7 @@ msgstr "Do you want to check in <strong>%(name)s</strong> (%(email)s)?"
 msgid "Yes, confirm"
 msgstr "Yes, confirm"
 
-#: core/templates/check_in/checked_in.html:8
+#: core/templates/check_in/checked_in.html:8 event/models.py:275
 msgid "Checked in"
 msgstr "Checked in"
 
@@ -1105,7 +1105,7 @@ msgstr ""
 "Access is requested. You will receive an e-mail when the request is "
 "accepted."
 
-#: core/views.py:472
+#: core/views.py:472 event/export.py:58
 msgid "E-mail"
 msgstr "E-mail"
 
@@ -1125,6 +1125,22 @@ msgstr "Your changes are saved"
 #, python-format
 msgid "Successfully unsubscribed %(email)s from %(list_name)s"
 msgstr "Successfully unsubscribed %(email)s from %(list_name)s"
+
+#: event/export.py:44
+msgid "All attendees"
+msgstr "All attendees"
+
+#: event/export.py:49
+msgid "All events"
+msgstr "All events"
+
+#: event/export.py:58
+msgid "Status"
+msgstr "Status"
+
+#: event/export.py:58
+msgid "Updated"
+msgstr "Updated"
 
 #: event/mail_builders/attend_event_confirm.py:59
 #, python-format
@@ -1162,7 +1178,23 @@ msgstr "QR code for %s"
 msgid "Added to event %s from waitinglist"
 msgstr "Added to event %s from waitinglist"
 
-#: event/models.py:240
+#: event/models.py:180
+msgid "Accepted"
+msgstr "Accepted"
+
+#: event/models.py:181
+msgid "Maybe"
+msgstr "Maybe"
+
+#: event/models.py:182
+msgid "Rejected"
+msgstr "Rejected"
+
+#: event/models.py:183
+msgid "At waitinglist"
+msgstr "At waitinglist"
+
+#: event/models.py:243
 msgid "You already signed in for another sub-event in the same slot."
 msgstr "You already signed in for another sub-event in the same slot."
 
@@ -1467,12 +1499,3 @@ msgstr "Removed by Profile-Sync"
 #: user/models.py:300 user/post_deploy.py:22
 msgid "Deleted"
 msgstr "Deleted"
-
-#~ msgid "Failed to load agenda's"
-#~ msgstr "Failed to load agenda's"
-
-#~ msgid "Failed to load appointment types"
-#~ msgstr "Failed to load appointment types"
-
-#~ msgid "Failed to load available times"
-#~ msgstr "Failed to load available times"
