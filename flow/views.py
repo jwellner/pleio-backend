@@ -1,35 +1,29 @@
+import functools
+
 from django.core.exceptions import ObjectDoesNotExist
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
 from core import config
+from core.lib import validate_token
 from core.models import Comment, Entity
 from user.models import User
 
 
-def validate_flow_token(request):
-    token = config.FLOW_TOKEN
-    if not token:
-        return False
-    try:
-        if str(request.META['HTTP_AUTHORIZATION']) == str('Bearer ' + token):
-            return True
-    except Exception:
-        pass
-    try:
-        if str(request.META['headers']['Authorization']) == str('Bearer ' + token):
-            return True
-    except Exception:
-        pass
-    return False
+def require_flow_token(func):
+    @functools.wraps(func)
+    def wrapper(request, *args, **kwargs):
+        if not config.FLOW_ENABLED or not validate_token(request, config.FLOW_TOKEN):
+            return JsonResponse({"error": "Bad request"}, status=400)
+        return func(request, *args, **kwargs)
+
+    return wrapper
 
 
 @csrf_exempt
+@require_flow_token
 @require_http_methods(["POST"])
 def add_comment(request):
-    if not config.FLOW_ENABLED or not validate_flow_token(request):
-        return JsonResponse({"error": "Bad request"}, status=400)
-
     description = request.POST.get("description", "")
     object_id = request.POST.get("container_guid", "")
 
@@ -56,11 +50,9 @@ def add_comment(request):
 
 
 @csrf_exempt
+@require_flow_token
 @require_http_methods(["POST"])
 def edit_comment(request):
-    if not config.FLOW_ENABLED or not validate_flow_token(request):
-        return JsonResponse({"error": "Bad request"}, status=400)
-
     description = request.POST.get("description", "")
     object_id = request.POST.get("container_guid", "")
 
@@ -75,4 +67,4 @@ def edit_comment(request):
     comment.rich_description = description
     comment.save()
 
-    return JsonResponse({"error": None, "status": "Comment edited from flow"},  status=200)
+    return JsonResponse({"error": None, "status": "Comment edited from flow"}, status=200)

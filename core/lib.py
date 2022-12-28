@@ -171,6 +171,7 @@ def webpack_dev_server_is_available():
                 return False
     return False
 
+
 def get_access_id(acl):
     """
     @tag: acl_methods
@@ -592,3 +593,19 @@ def strip_exif(upload_field):
     except (FileNotFoundError, ValueError,
             UnidentifiedImageError):
         pass
+
+
+def validate_token(request, token):
+    if not token:
+        return False
+    try:
+        if str(request.META['HTTP_AUTHORIZATION']) == str('Bearer ' + token):
+            return True
+    except Exception:
+        pass
+    try:
+        if str(request.META['headers']['Authorization']) == str('Bearer ' + token):
+            return True
+    except Exception:
+        pass
+    return False

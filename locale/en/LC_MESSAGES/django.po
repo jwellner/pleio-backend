@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-11-28 14:15+0100\n"
+"POT-Creation-Date: 2022-12-28 09:43+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -21,45 +21,53 @@ msgstr ""
 msgid "status update"
 msgstr "status update"
 
-#: core/forms.py:69
+#: control/forms.py:65
+msgid "Include files"
+msgstr "Include files"
+
+#: control/forms.py:69
+msgid "Create zip-file"
+msgstr "Create zip-file"
+
+#: core/forms.py:76
 msgid "Provide a valid value."
 msgstr "Provide a valid value."
 
-#: core/forms.py:82 core/resolvers/query_site.py:184
+#: core/forms.py:89 core/resolvers/site_settings.py:459
 msgid "Never"
 msgstr "Never"
 
-#: core/forms.py:83 core/resolvers/query_site.py:181
+#: core/forms.py:90 core/resolvers/site_settings.py:458
 msgid "Daily"
 msgstr "Daily"
 
-#: core/forms.py:84 core/resolvers/query_site.py:182
+#: core/forms.py:91 core/resolvers/site_settings.py:458
 msgid "Weekly"
 msgstr "Weekly"
 
-#: core/forms.py:85 core/resolvers/query_site.py:183
+#: core/forms.py:92 core/resolvers/site_settings.py:459
 msgid "Monthly"
 msgstr "Monthly"
 
-#: core/forms.py:88
+#: core/forms.py:95
 msgid "Receive notification emails"
 msgstr "Receive notification emails"
 
-#: core/forms.py:89
+#: core/forms.py:96
 msgid "Receive overview emails"
 msgstr "Receive overview emails"
 
-#: core/forms.py:136 core/templates/registration/request.html:23
-#: core/views.py:472
+#: core/forms.py:163 core/templates/registration/request.html:23
+#: core/views.py:471
 msgid "Name"
 msgstr "Name"
 
-#: core/forms.py:140
+#: core/forms.py:167
 msgid "Profile field"
 msgstr "Profile field"
 
-#: core/lib.py:207 core/resolvers/mutation_import_users.py:30
-#: core/resolvers/query_site.py:89
+#: core/lib.py:207 core/resolvers/mutation_import_users.py:29
+#: core/resolvers/site_settings.py:88
 msgid "Just me"
 msgstr "Just me"
 
@@ -73,13 +81,13 @@ msgstr "Group: %(group_name)s"
 msgid "Subgroup: %(subgroup_name)s"
 msgstr "Subgroup: %(subgroup_name)s"
 
-#: core/lib.py:219 core/resolvers/mutation_import_users.py:31
-#: core/resolvers/query_site.py:90
+#: core/lib.py:219 core/resolvers/mutation_import_users.py:30
+#: core/resolvers/site_settings.py:89
 msgid "Logged in users"
 msgstr "Logged in users"
 
-#: core/lib.py:221 core/resolvers/mutation_import_users.py:34
-#: core/resolvers/query_site.py:94
+#: core/lib.py:221 core/resolvers/mutation_import_users.py:33
+#: core/resolvers/site_settings.py:93
 msgid "Public"
 msgstr "Public"
 
@@ -172,6 +180,10 @@ msgstr "Avatar export is ready"
 #, python-format
 msgid "Confirm comment on %(site_name)s"
 msgstr "Confirm comment on %(site_name)s"
+
+#: core/mail_builders/content_export_ready.py:46
+msgid "Your content export is ready for download"
+msgstr "Your content export is ready for download"
 
 #: core/mail_builders/frequent_overview.py:76
 #, python-format
@@ -342,41 +354,56 @@ msgstr "Ready"
 msgid "Automatically generated initial revision"
 msgstr "Automatically generated initial revision"
 
-#: core/resolvers/mutation_import_users.py:17
+#: core/resolvers/mutation_edit_users.py:32
+#: core/resolvers/mutation_toggle_user_is_banned.py:32 user/post_deploy.py:18
+msgid "Blocked by admin"
+msgstr "Blocked by admin"
+
+#: core/resolvers/mutation_import_users.py:16
 msgid "email"
 msgstr "email"
 
-#: core/resolvers/mutation_import_users.py:18
+#: core/resolvers/mutation_import_users.py:17
 msgid "name"
 msgstr "name"
 
-#: core/resolvers/query_meetings.py:27
-msgid "Agenda"
-msgstr "Agenda"
-
-#: core/resolvers/query_meetings.py:30
+#: core/resolvers/shared.py:588
 msgid "Appointment"
 msgstr "Appointment"
 
-#: core/resolvers/query_site.py:142
+#: core/resolvers/shared.py:594
+msgid "Agenda"
+msgstr "Agenda"
+
+#: core/resolvers/site_settings.py:209
 msgid "Activity stream"
 msgstr "Activity stream"
 
-#: core/resolvers/query_site.py:142
+#: core/resolvers/site_settings.py:210
 msgid "CMS page"
 msgstr "CMS page"
 
-#: core/resolvers/query_site.py:234
+#: core/resolvers/site_settings.py:704
 msgid "Administrator"
 msgstr "Administrator"
 
-#: core/resolvers/query_site.py:235
+#: core/resolvers/site_settings.py:705
 msgid "Editor"
 msgstr "Editor"
 
-#: core/resolvers/query_site.py:236
+#: core/resolvers/site_settings.py:706
 msgid "Question expert"
 msgstr "Question expert"
+
+#: core/tasks/cronjobs.py:200 core/tests/test_auto_block_users.py:67
+#: core/tests/test_auto_block_users.py:70 user/post_deploy.py:19
+msgid "Bouncing e-mail address"
+msgstr "Bouncing e-mail address"
+
+#: core/tasks/cronjobs.py:243 core/tests/test_auto_block_users.py:109
+#: core/tests/test_auto_block_users.py:111 user/post_deploy.py:20
+msgid "User deleted externally"
+msgstr "User deleted externally"
 
 #: core/templates/check_in/already_checked_in.html:8
 msgid "Already checked in"
@@ -494,6 +521,19 @@ msgstr "Comment:"
 #: core/templates/email/confirm_add_comment_without_account.html:9
 msgid "Click on the link below to confirm the comment."
 msgstr "Click on the link below to confirm the comment."
+
+#: core/templates/email/content_export_ready.html:5
+#, python-format
+msgid "The export of your content at %(site_name)s is ready."
+msgstr "The export of your content at %(site_name)s is ready."
+
+#: core/templates/email/content_export_ready.html:6
+msgid ""
+"Follow the link below to download your content or copy the link to your web "
+"browser."
+msgstr ""
+"Follow the link below to download your content or copy the link to your web "
+"browser."
 
 #: core/templates/email/element/footer-userorigin.html:2
 #, python-format
@@ -661,7 +701,7 @@ msgstr "Personal message"
 msgid "Direct notification"
 msgstr "Direct notification"
 
-#: core/templates/email/send_notification_emails.html:10 core/views.py:630
+#: core/templates/email/send_notification_emails.html:10 core/views.py:629
 msgid "Notification overview"
 msgstr "Notification overview"
 
@@ -679,7 +719,7 @@ msgstr "Unsubscribe"
 msgid "Adjust your email settings"
 msgstr "Adjust your email settings"
 
-#: core/templates/email/send_overview_emails.html:22 core/views.py:627
+#: core/templates/email/send_overview_emails.html:22 core/views.py:626
 msgid "Periodic overview"
 msgstr "Periodic overview"
 
@@ -1059,23 +1099,23 @@ msgstr ""
 "Access is requested. You will receive an e-mail when the request is "
 "accepted."
 
-#: core/views.py:473
+#: core/views.py:472
 msgid "E-mail"
 msgstr "E-mail"
 
-#: core/views.py:474
+#: core/views.py:473
 msgid "Group"
 msgstr "Group"
 
-#: core/views.py:475
+#: core/views.py:474
 msgid "Disk size"
 msgstr "Disk size"
 
-#: core/views.py:570
+#: core/views.py:569
 msgid "Your changes are saved"
 msgstr "Your changes are saved"
 
-#: core/views.py:633
+#: core/views.py:632
 #, python-format
 msgid "Successfully unsubscribed %(email)s from %(list_name)s"
 msgstr "Successfully unsubscribed %(email)s from %(list_name)s"
@@ -1111,12 +1151,12 @@ msgstr "Removed from event: %s"
 msgid "QR code for %s"
 msgstr "QR code for %s"
 
-#: event/mail_builders/waitinglist.py:22 event/models.py:99
+#: event/mail_builders/waitinglist.py:22
 #, python-format
 msgid "Added to event %s from waitinglist"
 msgstr "Added to event %s from waitinglist"
 
-#: event/models.py:257
+#: event/models.py:240
 msgid "You already signed in for another sub-event in the same slot."
 msgstr "You already signed in for another sub-event in the same slot."
 
@@ -1402,17 +1442,25 @@ msgstr "Message to event"
 msgid "Filescan found suspicous files on %(site_url)s"
 msgstr "Filescan found suspicous files on %(site_url)s"
 
-#: file/models.py:59
+#: file/models.py:69
 msgid "File"
 msgstr "File"
 
-#: file/models.py:60
+#: file/models.py:70
 msgid "Folder"
 msgstr "Folder"
 
-#: file/models.py:61
+#: file/models.py:71
 msgid "Pad"
 msgstr "Pad"
+
+#: profile_sync/views.py:275 user/post_deploy.py:21
+msgid "Removed by Profile-Sync"
+msgstr "Removed by Profile-Sync"
+
+#: user/models.py:300 user/post_deploy.py:22
+msgid "Deleted"
+msgstr "Deleted"
 
 #~ msgid "Failed to load agenda's"
 #~ msgstr "Failed to load agenda's"

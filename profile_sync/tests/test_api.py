@@ -39,7 +39,6 @@ class ProfileSyncApiTests(FastTenantTestCase):
             'Authorization': 'Bearer 2312341234'
         }
 
-
         cache.set("%s%s" % (connection.schema_name, 'PROFILE_SYNC_ENABLED'), True)
         cache.set("%s%s" % (connection.schema_name, 'PROFILE_SYNC_TOKEN'), '2312341234')
 
@@ -48,12 +47,10 @@ class ProfileSyncApiTests(FastTenantTestCase):
         super().tearDown()
 
     def test_get_3_users(self):
-
         response = self.client.get('/profile_sync_api/users?limit=3&cursor=', headers=self.headers)
 
         self.assertEqual(len(response.json()["users"]), 3)
         self.assertEqual(response.json()["users"][0]["name"], self.user1.name)
-
 
     def test_get_users_from_specific_id(self):
         path = '/profile_sync_api/users?limit=3&cursor=' + str(self.user3.id)
@@ -61,7 +58,6 @@ class ProfileSyncApiTests(FastTenantTestCase):
 
         self.assertEqual(len(response.json()["users"]), 2)
         self.assertEqual(response.json()["users"][0]["name"], self.user4.name)
-
 
     def test_get_users_with_non_existing_cursor(self):
         path = '/profile_sync_api/users?limit=3&cursor=aa'
@@ -75,9 +71,7 @@ class ProfileSyncApiTests(FastTenantTestCase):
 
         self.assertEqual(response.json(), json_response)
 
-
     def test_invalid_token(self):
-
         headers = {
             'Authorization': 'Bearer 2312341'
         }
@@ -92,7 +86,6 @@ class ProfileSyncApiTests(FastTenantTestCase):
 
         self.assertEqual(response.json(), json_response)
 
-
     def test_write_log(self):
         data = {
             "uuid": "asdasd78987wejkjasdljasd",
@@ -100,7 +93,7 @@ class ProfileSyncApiTests(FastTenantTestCase):
         }
 
         response = self.client.post('/profile_sync_api/logs', data=json.dumps(data), headers=self.headers,
-                               content_type="application/json")
+                                    content_type="application/json")
 
         json_response = {
             "log": {
@@ -112,15 +105,13 @@ class ProfileSyncApiTests(FastTenantTestCase):
         self.assertEqual(response.json(), json_response)
         self.assertEqual(Logs.objects.all().count(), 1)
 
-
     def test_write_log_missing_uuid(self):
         data = {
             "content": "contentcontent"
         }
 
         response = self.client.post('/profile_sync_api/logs', data=json.dumps(data), headers=self.headers,
-                               content_type="application/json")
-
+                                    content_type="application/json")
 
         json_response = {
             "error": "could_not_create",
@@ -143,9 +134,9 @@ class ProfileSyncApiTests(FastTenantTestCase):
         }
 
         response = self.client.post('/profile_sync_api/users',
-                               data=json.dumps(data),
-                               headers=self.headers,
-                               content_type="application/json")
+                                    data=json.dumps(data),
+                                    headers=self.headers,
+                                    content_type="application/json")
 
         json_response = {
             "status": 200,
@@ -163,7 +154,6 @@ class ProfileSyncApiTests(FastTenantTestCase):
         new_field = UserProfileField.objects.filter(user_profile=new_user.profile, profile_field=self.profile_field1).first()
         self.assertEqual(new_field.value, 'Tester')
 
-
     def test_add_user_with_existing_email(self):
         data = {
             "name": "User 7",
@@ -177,9 +167,9 @@ class ProfileSyncApiTests(FastTenantTestCase):
         }
 
         response = self.client.post('/profile_sync_api/users',
-                               data=json.dumps(data),
-                               headers=self.headers,
-                               content_type="application/json")
+                                    data=json.dumps(data),
+                                    headers=self.headers,
+                                    content_type="application/json")
 
         json_response = {
             "error": "could_not_create",
@@ -188,7 +178,6 @@ class ProfileSyncApiTests(FastTenantTestCase):
         }
 
         self.assertEqual(response.json(), json_response)
-
 
     def test_add_user_with_existing_external_id(self):
         data = {
@@ -204,9 +193,9 @@ class ProfileSyncApiTests(FastTenantTestCase):
         }
 
         response = self.client.post('/profile_sync_api/users',
-                               data=json.dumps(data),
-                               headers=self.headers,
-                               content_type="application/json")
+                                    data=json.dumps(data),
+                                    headers=self.headers,
+                                    content_type="application/json")
 
         json_response = {
             "error": "could_not_create",
@@ -216,9 +205,7 @@ class ProfileSyncApiTests(FastTenantTestCase):
 
         self.assertEqual(response.json(), json_response)
 
-
     def test_update_user(self):
-
         user_profile_field = UserProfileField.objects.create(
             user_profile=self.user5.profile,
             profile_field=self.profile_field2,
@@ -240,9 +227,9 @@ class ProfileSyncApiTests(FastTenantTestCase):
         }
 
         response = self.client.post('/profile_sync_api/users',
-                               data=json.dumps(data),
-                               headers=self.headers,
-                               content_type="application/json")
+                                    data=json.dumps(data),
+                                    headers=self.headers,
+                                    content_type="application/json")
 
         json_response = {
             "status": 200,
@@ -266,7 +253,6 @@ class ProfileSyncApiTests(FastTenantTestCase):
         self.assertEqual(updated_field.value, 'update_existing')
         self.assertEqual(updated_field.read_access, ['public'])
 
-
     def test_update_user_with_non_available_email(self):
         data = {
             "guid": self.user5.guid,
@@ -282,9 +268,9 @@ class ProfileSyncApiTests(FastTenantTestCase):
         }
 
         response = self.client.post('/profile_sync_api/users',
-                               data=json.dumps(data),
-                               headers=self.headers,
-                               content_type="application/json")
+                                    data=json.dumps(data),
+                                    headers=self.headers,
+                                    content_type="application/json")
 
         json_response = {
             "status": 400,
@@ -294,7 +280,6 @@ class ProfileSyncApiTests(FastTenantTestCase):
         }
 
         self.assertEqual(response.json(), json_response)
-
 
     def test_update_user_with_non_available_external_id(self):
         data = {
@@ -311,9 +296,9 @@ class ProfileSyncApiTests(FastTenantTestCase):
         }
 
         response = self.client.post('/profile_sync_api/users',
-                               data=json.dumps(data),
-                               headers=self.headers,
-                               content_type="application/json")
+                                    data=json.dumps(data),
+                                    headers=self.headers,
+                                    content_type="application/json")
 
         json_response = {
             "status": 400,
@@ -324,11 +309,10 @@ class ProfileSyncApiTests(FastTenantTestCase):
 
         self.assertEqual(response.json(), json_response)
 
-
     def test_delete_user(self):
         response = self.client.delete('/profile_sync_api/users/' + self.user2.guid,
-                               headers=self.headers,
-                               content_type="application/json")
+                                      headers=self.headers,
+                                      content_type="application/json")
 
         json_response = {
             "status": 200
@@ -337,12 +321,10 @@ class ProfileSyncApiTests(FastTenantTestCase):
         self.assertEqual(response.json(), json_response)
         self.assertEqual(User.objects.filter(id=self.user2.id, is_active=True).count(), 0)
 
-
-
     def test_delete_non_existing_user(self):
         response = self.client.delete('/profile_sync_api/users/' + str(uuid.uuid1()),
-                               headers=self.headers,
-                               content_type="application/json")
+                                      headers=self.headers,
+                                      content_type="application/json")
 
         json_response = {
             "status": 404,
@@ -352,11 +334,10 @@ class ProfileSyncApiTests(FastTenantTestCase):
 
         self.assertEqual(response.json(), json_response)
 
-
     def test_ban_user(self):
         response = self.client.post('/profile_sync_api/users/' + self.user2.guid + '/ban',
-                               headers=self.headers,
-                               content_type="application/json")
+                                    headers=self.headers,
+                                    content_type="application/json")
 
         self.user2.refresh_from_db()
 
@@ -377,8 +358,7 @@ class ProfileSyncApiTests(FastTenantTestCase):
         }
 
         self.assertEqual(response.json(), json_response)
-        self.assertEqual(User.objects.filter(id=self.user2.id, is_active=False, ban_reason='banned').count(), 1)
-
+        self.assertEqual(User.objects.filter(id=self.user2.id, is_active=False, ban_reason='Verwijderd door Profile-Sync').count(), 1)
 
     def test_ban_non_existing_user(self):
         headers = {
@@ -386,8 +366,8 @@ class ProfileSyncApiTests(FastTenantTestCase):
         }
 
         response = self.client.post('/profile_sync_api/users/' + str(uuid.uuid1()) + '/ban',
-                               headers=headers,
-                               content_type="application/json")
+                                    headers=headers,
+                                    content_type="application/json")
 
         json_response = {
             "status": 404,
@@ -397,13 +377,12 @@ class ProfileSyncApiTests(FastTenantTestCase):
 
         self.assertEqual(response.json(), json_response)
 
-
     def test_unban_user(self):
         user = mixer.blend(User, is_active=False, ban_reason='banned')
 
         response = self.client.post('/profile_sync_api/users/' + user.guid + '/unban',
-                               headers=self.headers,
-                               content_type="application/json")
+                                    headers=self.headers,
+                                    content_type="application/json")
 
         user.refresh_from_db()
 
@@ -428,11 +407,10 @@ class ProfileSyncApiTests(FastTenantTestCase):
 
         user.delete()
 
-
     def test_unban_non_existing_user(self):
         response = self.client.post('/profile_sync_api/users/' + str(uuid.uuid1()) + '/unban',
-                               headers=self.headers,
-                               content_type="application/json")
+                                    headers=self.headers,
+                                    content_type="application/json")
 
         json_response = {
             "status": 404,
@@ -441,7 +419,6 @@ class ProfileSyncApiTests(FastTenantTestCase):
         }
 
         self.assertEqual(response.json(), json_response)
-
 
     @patch("{}.open".format(settings.DEFAULT_FILE_STORAGE))
     def test_change_avatar(self, mock_open):
@@ -452,9 +429,9 @@ class ProfileSyncApiTests(FastTenantTestCase):
         mock_open.return_value = file_mock
 
         response = self.client.post('/profile_sync_api/users/' + self.user3.guid + '/avatar',
-                               headers=self.headers,
-                               data={'avatar': file_mock},
-                               format='multipart')
+                                    headers=self.headers,
+                                    data={'avatar': file_mock},
+                                    format='multipart')
 
         self.user3.refresh_from_db()
 
@@ -477,12 +454,11 @@ class ProfileSyncApiTests(FastTenantTestCase):
         self.assertEqual(response.json(), json_response)
         self.assertIn('test.gif', self.user3.profile.picture_file.upload.name)
 
-
     def test_change_avatar_non_existing_user(self):
         response = self.client.post('/profile_sync_api/users/' + str(uuid.uuid1()) + '/avatar',
-                               headers=self.headers,
-                               content_type="application/json"
-                               )
+                                    headers=self.headers,
+                                    content_type="application/json"
+                                    )
 
         json_response = {
             "status": 404,
@@ -491,5 +467,3 @@ class ProfileSyncApiTests(FastTenantTestCase):
         }
 
         self.assertEqual(response.json(), json_response)
-
-

@@ -1,6 +1,7 @@
 import os.path
 import uuid
 
+from django.utils.translation import gettext
 
 from core import config
 from core.constances import USER_ROLES
@@ -296,7 +297,7 @@ class User(AbstractBaseUser):
         self.picture = None
         self.is_government = False
         self.has_2fa_enabled = False
-        self.ban_reason = "Deleted"
+        self.ban_reason = self.ban_reason or gettext("Deleted")
         self.is_delete_requested = False
         self.is_superadmin = False
         self.roles = []

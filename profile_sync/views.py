@@ -1,13 +1,15 @@
+import functools
 import json
 import logging
 from datetime import datetime
 from django.core.exceptions import ObjectDoesNotExist, ValidationError
 from django.http import JsonResponse
+from django.utils.translation import gettext
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
 from core import config
 from core.constances import ACCESS_TYPE
-from core.lib import access_id_to_acl
+from core.lib import access_id_to_acl, validate_token
 from core.models import Group, ProfileField, UserProfileField
 from file.models import FileFolder
 from profile_sync.models import Logs
@@ -16,25 +18,30 @@ from django.utils import timezone
 
 logger = logging.getLogger(__name__)
 
-def validate_token(request):
-    token = config.PROFILE_SYNC_TOKEN
-    if not token:
-        return False
-    try:
-        if str(request.META['HTTP_AUTHORIZATION']) == str('Bearer ' + token):
-            return True
-    except Exception:
-        pass
-    try:
-        if str(request.META['headers']['Authorization']) == str('Bearer ' + token):
-            return True
-    except Exception:
-        pass
-    return False
+
+def require_valid_token(func):
+    @functools.wraps(func)
+    def wrapper(request, *args, **kwargs):
+        if not validate_token(request, config.PROFILE_SYNC_TOKEN):
+            return JsonResponse({
+                "error": "invalid_bearer_token",
+                "pretty_error": "You did not supply a valid bearer token.",
+                "status": 403
+            }, status=403)
+        return func(request, *args, **kwargs)
+
+    return wrapper
+
+
+def user_not_found_response():
+    return JsonResponse({
+        "status": 404,
+        "error": "not_found",
+        "pretty_error": "Could not find user with this guid."
+    }, status=404)
 
 
 def serialize_user(user):
-
     profile = {}
 
     for field in ProfileField.objects.all():
@@ -56,25 +63,17 @@ def serialize_user(user):
         "profile": profile
     }
 
-# TODO: remove exempt?
+
 @csrf_exempt
+@require_valid_token
 @require_http_methods(["POST", "GET"])
 def users(request):
     # pylint: disable=too-many-branches
     # pylint: disable=too-many-locals
-    if not validate_token(request):
-        return JsonResponse({
-            "error": "invalid_bearer_token",
-            "pretty_error": "You did not supply a valid bearer token.",
-            "status": 403
-            },
-            status=403
-        )
-
     if request.method == 'GET':
         limit = 100
         if request.GET.get('limit'):
-            limit=int(request.GET.get('limit'))
+            limit = int(request.GET.get('limit'))
 
         created_at = datetime(1980, 1, 1, tzinfo=timezone.utc)
         if request.GET.get('cursor'):
@@ -85,7 +84,7 @@ def users(request):
                     "error": "not_found",
                     "pretty_error": "Could not find user with this guid.",
                     "status": 404
-                    },
+                },
                     status=404
                 )
 
@@ -113,33 +112,29 @@ def users(request):
             if User.objects.filter(email__iexact=email).count() == 0:
                 user.email = email
             elif (
-                User.objects.filter(email__iexact=email).count() == 1
-                and User.objects.filter(email__iexact=email).first() != user
+                    User.objects.filter(email__iexact=email).count() == 1
+                    and User.objects.filter(email__iexact=email).first() != user
             ):
                 return JsonResponse({
                     "status": 400,
                     "error": "could_not_update",
                     "pretty_error": "Could not change the email to another email as the id is already taken.",
                     "user": {}
-                    },
-                    status=400
-                )
+                }, status=400)
 
             if external_id:
                 if User.objects.filter(custom_id__iexact=external_id).count() == 0:
                     user.custom_id = external_id
                 elif (
-                    User.objects.filter(custom_id__iexact=external_id).count() == 1
-                    and User.objects.filter(custom_id__iexact=external_id).first() != user
+                        User.objects.filter(custom_id__iexact=external_id).count() == 1
+                        and User.objects.filter(custom_id__iexact=external_id).first() != user
                 ):
                     return JsonResponse({
                         "status": 400,
                         "error": "could_not_update",
                         "pretty_error": "Could not change the external_id to another external_id as the id is already taken.",
                         "user": {}
-                        },
-                        status=400
-                    )
+                    }, status=400)
             user.save()
 
         if 'guid' not in data:
@@ -148,18 +143,14 @@ def users(request):
                     "error": "could_not_create",
                     "pretty_error": "This e-mail is already taken by another user.",
                     "status": 400
-                    },
-                    status=400
-                )
+                }, status=400)
 
             if User.objects.filter(custom_id__iexact=external_id).first():
                 return JsonResponse({
                     "error": "could_not_create",
                     "pretty_error": "This external_id is already taken by another user.",
                     "status": 400
-                    },
-                    status=400
-                )
+                }, status=400)
 
             try:
                 user = User.objects.create(
@@ -174,9 +165,7 @@ def users(request):
                     "error": "could_not_create",
                     "pretty_error": "Could not create the user with these attributes " + e,
                     "user": []
-                    },
-                    status=400
-                )
+                }, status=400)
 
         if 'groups' in data and data['groups']:
             for group_guid in data["groups"].split(sep=','):
@@ -206,137 +195,69 @@ def users(request):
         return JsonResponse({
             "status": 200,
             "user": serialize_user(user)
-            },
-            status=200
-        )
+        }, status=200)
     return JsonResponse({
-            "status": 404
-            },
-            status=404
-        )
+        "status": 404
+    }, status=404)
 
 
-# TODO: remove exempt?
 @csrf_exempt
+@require_valid_token
 @require_http_methods(["DELETE"])
 def users_delete(request, user_id):
-    if not validate_token(request):
+    try:
+        user = User.objects.get(id=user_id)
+        user.delete()
         return JsonResponse({
-            "error": "invalid_bearer_token",
-            "pretty_error": "You did not supply a valid bearer token.",
-            "status": 403
-            },
-            status=403
-        )
-    user = User.objects.filter(id=user_id).first()
-    if not user:
-        return JsonResponse({
-            "status": 404,
-            "error": "not_found",
-            "pretty_error": "Could not find user with this guid."
-            },
-            status=404
-        )
-
-    user.delete()
-
-    return JsonResponse({
-        "status": 200
-        },
-        status=200
-    )
+            "status": 200
+        }, status=200)
+    except User.DoesNotExist:
+        return user_not_found_response()
 
 
-# TODO: remove exempt?
 @csrf_exempt
+@require_valid_token
 @require_http_methods(["POST"])
 def ban_user(request, user_id):
-    if not validate_token(request):
+    try:
+        user = User.objects.get(id=user_id)
+        user.is_active = False
+        user.ban_reason = gettext('Removed by Profile-Sync')
+        user.save()
+
         return JsonResponse({
-            "error": "invalid_bearer_token",
-            "pretty_error": "You did not supply a valid bearer token.",
-            "status": 403
-            },
-            status=403
-        )
-    user = User.objects.filter(id=user_id).first()
-    if not user:
-        return JsonResponse({
-            "status": 404,
-            "error": "not_found",
-            "pretty_error": "Could not find user with this guid."
-            },
-            status=404
-        )
-
-    user.is_active = False
-    user.ban_reason = 'banned'
-    user.save()
-
-    return JsonResponse({
-        "status": 200,
-        "user": serialize_user(user)
-        },
-        status=200
-    )
+            "status": 200,
+            "user": serialize_user(user)
+        }, status=200)
+    except User.DoesNotExist:
+        return user_not_found_response()
 
 
-# TODO: remove exempt?
 @csrf_exempt
+@require_valid_token
 @require_http_methods(["POST"])
 def unban_user(request, user_id):
-    if not validate_token(request):
+    try:
+        user = User.objects.get(id=user_id)
+
+        user.is_active = True
+        user.ban_reason = ''
+        user.save()
+
         return JsonResponse({
-            "error": "invalid_bearer_token",
-            "pretty_error": "You did not supply a valid bearer token.",
-            "status": 403
-            },
-            status=403
-        )
-    user = User.objects.filter(id=user_id).first()
-    if not user:
-        return JsonResponse({
-            "status": 404,
-            "error": "not_found",
-            "pretty_error": "Could not find user with this guid."
-            },
-            status=404
-        )
+            "status": 200,
+            "user": serialize_user(user)
+        }, status=200)
+    except User.DoesNotExist:
+        return user_not_found_response()
 
-    user.is_active = True
-    user.ban_reason = ''
-    user.save()
 
-    return JsonResponse({
-        "status": 200,
-        "user": serialize_user(user)
-        },
-        status=200
-    )
-
-# TODO: remove exempt?
 @csrf_exempt
+@require_valid_token
 @require_http_methods(["POST"])
 def avatar_user(request, user_id):
-    if not validate_token(request):
-        return JsonResponse({
-            "error": "invalid_bearer_token",
-            "pretty_error": "You did not supply a valid bearer token.",
-            "status": 403
-            },
-            status=403
-        )
-    user = User.objects.filter(id=user_id).first()
-    if not user:
-        return JsonResponse({
-            "status": 404,
-            "error": "not_found",
-            "pretty_error": "Could not find user with this guid."
-            },
-            status=404
-        )
-
     try:
+        user = User.objects.get(id=user_id)
         avatar_file = FileFolder.objects.create(
             owner=user,
             upload=request.FILES['avatar'],
@@ -354,36 +275,26 @@ def avatar_user(request, user_id):
         user.profile.picture_file = avatar_file
         user.profile.save()
 
+        return JsonResponse({
+            "status": 200,
+            "user": serialize_user(user)
+        }, status=200)
+
+    except User.DoesNotExist:
+        return user_not_found_response()
+
     except Exception:
         return JsonResponse({
             "status": 404,
             "error": "not_saved",
-            "pretty_error": "Could save avatar for user with this guid."
-            },
-            status=404
-        )
-
-    return JsonResponse({
-        "status": 200,
-        "user": serialize_user(user)
-        },
-        status=200
-    )
+            "pretty_error": "Could not save avatar for user with this guid."
+        }, status=404)
 
 
-
-# TODO: remove exempt?
 @csrf_exempt
+@require_valid_token
 @require_http_methods(["POST"])
 def logs(request):
-    if not validate_token(request):
-        return JsonResponse({
-            "error": "invalid_bearer_token",
-            "pretty_error": "You did not supply a valid bearer token.",
-            "status": 403
-            },
-            status=403
-        )
     data = json.loads(request.body)
 
     if 'uuid' not in data:
@@ -391,9 +302,7 @@ def logs(request):
             "error": "could_not_create",
             "pretty_error": "Could not create the log entry, uuid is missing.",
             "status": 400
-            },
-            status=400
-        )
+        }, status=400)
 
     try:
         uuid = data['uuid']
@@ -403,16 +312,11 @@ def logs(request):
             "error": "could_not_create",
             "pretty_error": "Invalid data",
             "status": 400
-            },
-            status=400
-        )
-
+        }, status=400)
 
     Logs.objects.create(uuid=uuid, content=content)
 
     return JsonResponse({
         "status": 200,
         "log": {"uuid": uuid}
-        },
-        status=200
-    )
+    }, status=200)
