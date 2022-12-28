@@ -22,6 +22,7 @@ class ContentSnapshot:
         buffer = BytesIO()
         zip_file = zipfile.ZipFile(buffer, mode='w', compression=zipfile.ZIP_DEFLATED)
         query = Entity.objects.filter(owner=self.user.guid)
+        has_files = False
 
         for entity in query.select_subclasses():
             folder = self.folder_name(entity)
@@ -30,12 +31,18 @@ class ContentSnapshot:
                     os.path.join(folder, entity.get_media_filename()),
                     entity.get_media_content(),
                 )
+                has_files = True
             for attachment in Attachment.objects.filter_attached(entity):
                 if attachment.get_media_status():
                     zip_file.writestr(
                         os.path.join(folder, attachment.get_media_filename()),
                         attachment.get_media_content()
                     )
+                    has_files = True
+
+        if not has_files:
+            return False
+
         zip_file.close()
         buffer.seek(0)
         return buffer.read()

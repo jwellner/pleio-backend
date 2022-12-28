@@ -1,6 +1,7 @@
 from unittest import mock
 
 from django.core.files.base import ContentFile
+from django.utils import translation
 
 from core.lib import get_full_url
 from core.mail_builders.content_export_ready import ContentExportReadyMailer
@@ -42,4 +43,4 @@ class TestMailerContentExportReadyTestCase(PleioTenantTestCase):
         self.assertEqual(self.mailer.get_receiver(), self.owner)
         self.assertEqual(self.mailer.get_receiver_email(), self.owner.email)
         self.assertEqual(self.mailer.get_sender(), None)
-        self.assertEqual(self.mailer.get_subject(), 'Je inhoudsexport is klaar voor download')
+        self.assertEqual(self.mailer.get_subject(), 'Je inhoudsexport is klaar')

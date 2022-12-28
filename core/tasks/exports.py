@@ -39,14 +39,19 @@ def export_my_content(schema, user_guid):
     with schema_context(schema):
         date = localtime()
         snapshot = ContentSnapshot(user_guid)
-        file_object = FileFolder.objects.create(
-            type=FileFolder.Types.FILE,
-            tags=[ContentSnapshot.EXCLUDE_TAG],
-            owner_id=user_guid,
-            upload=ContentFile(snapshot.collect_content(), 'content-%s.zip' % date.strftime("%Y%m%d-%H%M")),
-            read_access=[ACCESS_TYPE.user.format(user_guid)],
-            write_access=[ACCESS_TYPE.user.format(user_guid)],
-        )
+        content = snapshot.collect_content()
+        if content:
+            file_object = FileFolder.objects.create(
+                type=FileFolder.Types.FILE,
+                tags=[ContentSnapshot.EXCLUDE_TAG],
+                owner_id=user_guid,
+                upload=ContentFile(content, 'content-%s.zip' % date.strftime("%Y%m%d-%H%M")),
+                read_access=[ACCESS_TYPE.user.format(user_guid)],
+                write_access=[ACCESS_TYPE.user.format(user_guid)],
+            )
 
-        from core.mail_builders.content_export_ready import schedule_content_export_ready_mail
-        schedule_content_export_ready_mail(file_object, file_object.owner)
+            from core.mail_builders.content_export_ready import schedule_content_export_ready_mail
+            schedule_content_export_ready_mail(file_object, file_object.owner)
+        else:
+            from core.mail_builders.content_export_ready import schedule_content_export_empty_mail
+            schedule_content_export_empty_mail(user_guid)

@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Duits\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-12-28 09:43+0100\n"
+"POT-Creation-Date: 2022-12-28 11:43+0100\n"
 "PO-Revision-Date: 2021-05-26 10:55+0200\n"
 "Last-Translator: \n"
 "Language-Team: \n"
@@ -67,108 +67,108 @@ msgstr "Name"
 msgid "Profile field"
 msgstr "Feld Profil"
 
-#: core/lib.py:207 core/resolvers/mutation_import_users.py:29
+#: core/lib.py:208 core/resolvers/mutation_import_users.py:29
 #: core/resolvers/site_settings.py:88
 msgid "Just me"
 msgstr "Nur ich"
 
-#: core/lib.py:210
+#: core/lib.py:211
 #, python-format
 msgid "Group: %(group_name)s"
 msgstr "Gruppe: %(group_name)s"
 
-#: core/lib.py:213
+#: core/lib.py:214
 #, python-format
 msgid "Subgroup: %(subgroup_name)s"
 msgstr "Untergruppe: %(subgroup_name)s"
 
-#: core/lib.py:219 core/resolvers/mutation_import_users.py:30
+#: core/lib.py:220 core/resolvers/mutation_import_users.py:30
 #: core/resolvers/site_settings.py:89
 msgid "Logged in users"
 msgstr "Angemeldete Benutzer"
 
-#: core/lib.py:221 core/resolvers/mutation_import_users.py:33
+#: core/lib.py:222 core/resolvers/mutation_import_users.py:33
 #: core/resolvers/site_settings.py:93
 msgid "Public"
 msgstr "Öffentlich"
 
-#: core/lib.py:232
+#: core/lib.py:233
 msgid "Event"
 msgstr "Event"
 
-#: core/lib.py:236
+#: core/lib.py:237
 msgid "Blog"
 msgstr "Blog"
 
-#: core/lib.py:240
+#: core/lib.py:241
 msgid "Discussion"
 msgstr "Diskussion"
 
-#: core/lib.py:244 core/lib.py:414
+#: core/lib.py:245 core/lib.py:415
 msgid "News"
 msgstr "Neuigkeiten"
 
-#: core/lib.py:248
+#: core/lib.py:249
 msgid "Update"
 msgstr "Update"
 
-#: core/lib.py:252
+#: core/lib.py:253
 msgid "Question"
 msgstr "Frage"
 
-#: core/lib.py:256
+#: core/lib.py:257
 msgid "Wiki"
 msgstr "Wiki"
 
-#: core/lib.py:260
+#: core/lib.py:261
 msgid "Text page"
 msgstr "Text Seite"
 
-#: core/lib.py:408
+#: core/lib.py:409
 msgid "Updates"
 msgstr "Updates"
 
-#: core/lib.py:409
+#: core/lib.py:410
 msgid "Blogs"
 msgstr "Blogs"
 
-#: core/lib.py:410
+#: core/lib.py:411
 msgid "CMS pages"
 msgstr "CMS-Seiten"
 
-#: core/lib.py:411
+#: core/lib.py:412
 msgid "Discussions"
 msgstr "Diskussionen"
 
-#: core/lib.py:412
+#: core/lib.py:413
 msgid "Events"
 msgstr "Events"
 
-#: core/lib.py:413
+#: core/lib.py:414
 msgid "Files"
 msgstr "Dateien"
 
-#: core/lib.py:415
+#: core/lib.py:416
 msgid "Polls"
 msgstr "Umfragen"
 
-#: core/lib.py:416
+#: core/lib.py:417
 msgid "Questions"
 msgstr "Fragen"
 
-#: core/lib.py:417
+#: core/lib.py:418
 msgid "Tasks"
 msgstr "Aufgaben"
 
-#: core/lib.py:418
+#: core/lib.py:419
 msgid "Wiki pages"
 msgstr "Wiki-Seiten"
 
-#: core/lib.py:419
+#: core/lib.py:420
 msgid "Comments"
 msgstr "Kommentare"
 
-#: core/lib.py:420
+#: core/lib.py:421
 msgid "Groups"
 msgstr "Gruppen"
 
@@ -182,9 +182,10 @@ msgstr "Avatar-Export ist bereit"
 msgid "Confirm comment on %(site_name)s"
 msgstr "Bestätigen Sie den Kommentar zu %(site_name)s"
 
-#: core/mail_builders/content_export_ready.py:46
-msgid "Your content export is ready for download"
-msgstr "Ihr Inhaltsexport ist bereit zum Herunterladen"
+#: core/mail_builders/content_export_ready.py:53
+#: core/mail_builders/content_export_ready.py:83
+msgid "Your content export is ready"
+msgstr "Ihr Inhaltsexport ist fertig"
 
 #: core/mail_builders/frequent_overview.py:76
 #, python-format
@@ -525,10 +526,15 @@ msgid "Click on the link below to confirm the comment."
 msgstr ""
 "Klicken Sie auf den untenstehenden Link, um den Kommentar zu bestätigen."
 
+#: core/templates/email/content_export_empty.html:5
 #: core/templates/email/content_export_ready.html:5
 #, python-format
 msgid "The export of your content at %(site_name)s is ready."
 msgstr "Der Export Ihres Inhalts unter %(site_name)s ist fertig."
+
+#: core/templates/email/content_export_empty.html:6
+msgid "There was no content available for export yet."
+msgstr "Es waren noch keine Inhalte für den Export verfügbar."
 
 #: core/templates/email/content_export_ready.html:6
 msgid ""
@@ -1458,7 +1464,7 @@ msgstr "Mappe"
 msgid "Pad"
 msgstr "Pad"
 
-#: profile_sync/views.py:275 user/post_deploy.py:21
+#: profile_sync/views.py:225 user/post_deploy.py:21
 msgid "Removed by Profile-Sync"
 msgstr "Entfernt von Profile-Sync"
 
