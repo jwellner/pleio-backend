@@ -290,14 +290,19 @@ def depublicate_content(schema_name):
         for entity in to_delete:
             entity.delete()
 
+
 @shared_task
 def make_publication_revisions(schema_name):
     with schema_context(schema_name):
         time_threshold = timezone.now() - timedelta(hours=2)
-        published = Entity.objects.filter(published__gte=time_threshold).select_subclasses()
-        for entity in published:
-            last_revision = entity.last_revision()
-            if last_revision.content["statusPublished"] == ENTITY_STATUS.DRAFT \
-                            and entity.status_published == ENTITY_STATUS.PUBLISHED:
-                revision = shared.resolve_start_revision(entity, entity.owner)
-                revision.store_publication_revision(entity)
+        for entity in Entity.objects.filter(published__gte=time_threshold).select_subclasses():
+            if entity.has_revisions():
+                _maybe_create_publication_revision(entity)
+
+
+def _maybe_create_publication_revision(entity):
+    last_revision = entity.last_revision()
+    if last_revision.content["statusPublished"] == ENTITY_STATUS.DRAFT \
+            and entity.status_published == ENTITY_STATUS.PUBLISHED:
+        revision = shared.resolve_start_revision(entity, entity.owner)
+        revision.store_publication_revision(entity)
