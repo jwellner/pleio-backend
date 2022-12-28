@@ -1,0 +1,7 @@
+{% extends "email/base_notification.html" %}
+{% load i18n %}
+
+{% block body %}
+    <p>{% blocktrans %}The export of your content at {{ site_name }} is ready.{% endblocktrans %}</p>
+    <p>{% blocktrans %}There was no content available for export yet.{% endblocktrans %}</p>
+{% endblock %}

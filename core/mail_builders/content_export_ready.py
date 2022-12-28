@@ -12,6 +12,13 @@ def schedule_content_export_ready_mail(file_folder, owner):
     })
 
 
+def schedule_content_export_empty_mail(owner_guid):
+    from core.models import MailInstance
+    MailInstance.objects.submit(ContentExportEmptyMailer, {
+        'owner': owner_guid,
+    })
+
+
 class ContentExportReadyMailer(TemplateMailerBase):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -43,4 +50,34 @@ class ContentExportReadyMailer(TemplateMailerBase):
         pass
 
     def get_subject(self):
-        return _("Your content export is ready for download")
+        return _("Your content export is ready")
+
+
+class ContentExportEmptyMailer(TemplateMailerBase):
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+
+        from user.models import User
+        self.owner: User = User.objects.get(id=kwargs['owner'])
+
+    def get_context(self):
+        return self.build_context(user=self.owner)
+
+    def get_language(self):
+        return self.owner.get_language()
+
+    def get_template(self):
+        return 'email/content_export_empty.html'
+
+    def get_receiver(self):
+        return self.owner
+
+    def get_receiver_email(self):
+        return self.owner.email
+
+    def get_sender(self):
+        pass
+
+    def get_subject(self):
+        return _("Your content export is ready")

@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-12-28 09:43+0100\n"
+"POT-Creation-Date: 2022-12-28 11:43+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -66,108 +66,108 @@ msgstr "Naam"
 msgid "Profile field"
 msgstr "Profiel veld"
 
-#: core/lib.py:207 core/resolvers/mutation_import_users.py:29
+#: core/lib.py:208 core/resolvers/mutation_import_users.py:29
 #: core/resolvers/site_settings.py:88
 msgid "Just me"
 msgstr "Alleen eigenaar"
 
-#: core/lib.py:210
+#: core/lib.py:211
 #, python-format
 msgid "Group: %(group_name)s"
 msgstr "Groep: %(group_name)s"
 
-#: core/lib.py:213
+#: core/lib.py:214
 #, python-format
 msgid "Subgroup: %(subgroup_name)s"
 msgstr "Subgroep: %(subgroup_name)s"
 
-#: core/lib.py:219 core/resolvers/mutation_import_users.py:30
+#: core/lib.py:220 core/resolvers/mutation_import_users.py:30
 #: core/resolvers/site_settings.py:89
 msgid "Logged in users"
 msgstr "Ingelogde gebruikers"
 
-#: core/lib.py:221 core/resolvers/mutation_import_users.py:33
+#: core/lib.py:222 core/resolvers/mutation_import_users.py:33
 #: core/resolvers/site_settings.py:93
 msgid "Public"
 msgstr "Iedereen (publiek zichtbaar)"
 
-#: core/lib.py:232
+#: core/lib.py:233
 msgid "Event"
 msgstr "Agenda-item"
 
-#: core/lib.py:236
+#: core/lib.py:237
 msgid "Blog"
 msgstr "Blog"
 
-#: core/lib.py:240
+#: core/lib.py:241
 msgid "Discussion"
 msgstr "Discussie"
 
-#: core/lib.py:244 core/lib.py:414
+#: core/lib.py:245 core/lib.py:415
 msgid "News"
 msgstr "Nieuws"
 
-#: core/lib.py:248
+#: core/lib.py:249
 msgid "Update"
 msgstr "Update"
 
-#: core/lib.py:252
+#: core/lib.py:253
 msgid "Question"
 msgstr "Vraag"
 
-#: core/lib.py:256
+#: core/lib.py:257
 msgid "Wiki"
 msgstr "Wiki"
 
-#: core/lib.py:260
+#: core/lib.py:261
 msgid "Text page"
 msgstr "Tekst pagina"
 
-#: core/lib.py:408
+#: core/lib.py:409
 msgid "Updates"
 msgstr "Updates"
 
-#: core/lib.py:409
+#: core/lib.py:410
 msgid "Blogs"
 msgstr "Blogs"
 
-#: core/lib.py:410
+#: core/lib.py:411
 msgid "CMS pages"
 msgstr "CMS pagina's"
 
-#: core/lib.py:411
+#: core/lib.py:412
 msgid "Discussions"
 msgstr "Discussies"
 
-#: core/lib.py:412
+#: core/lib.py:413
 msgid "Events"
 msgstr "Agenda-items"
 
-#: core/lib.py:413
+#: core/lib.py:414
 msgid "Files"
 msgstr "Bestanden"
 
-#: core/lib.py:415
+#: core/lib.py:416
 msgid "Polls"
 msgstr "Polls"
 
-#: core/lib.py:416
+#: core/lib.py:417
 msgid "Questions"
 msgstr "Vragen"
 
-#: core/lib.py:417
+#: core/lib.py:418
 msgid "Tasks"
 msgstr "Taken"
 
-#: core/lib.py:418
+#: core/lib.py:419
 msgid "Wiki pages"
 msgstr "Wiki pagina's"
 
-#: core/lib.py:419
+#: core/lib.py:420
 msgid "Comments"
 msgstr "Reacties"
 
-#: core/lib.py:420
+#: core/lib.py:421
 msgid "Groups"
 msgstr "Groepen"
 
@@ -181,9 +181,10 @@ msgstr "Avatar export is klaar"
 msgid "Confirm comment on %(site_name)s"
 msgstr "Bevestig commentaar op %(site_name)s"
 
-#: core/mail_builders/content_export_ready.py:46
-msgid "Your content export is ready for download"
-msgstr "Je inhoudsexport is klaar voor download"
+#: core/mail_builders/content_export_ready.py:53
+#: core/mail_builders/content_export_ready.py:83
+msgid "Your content export is ready"
+msgstr "Je inhoudsexport is klaar"
 
 #: core/mail_builders/frequent_overview.py:76
 #, python-format
@@ -522,10 +523,15 @@ msgstr "Commentaar:"
 msgid "Click on the link below to confirm the comment."
 msgstr "Klik op de onderstaande link om uw reactie te bevestigen."
 
+#: core/templates/email/content_export_empty.html:5
 #: core/templates/email/content_export_ready.html:5
 #, python-format
 msgid "The export of your content at %(site_name)s is ready."
 msgstr "De export van je inhoud op %(site_name)s is klaar."
+
+#: core/templates/email/content_export_empty.html:6
+msgid "There was no content available for export yet."
+msgstr "Er was nog geen inhoud beschikbaar voor export."
 
 #: core/templates/email/content_export_ready.html:6
 msgid ""
@@ -1457,7 +1463,7 @@ msgstr "Map"
 msgid "Pad"
 msgstr "Pad"
 
-#: profile_sync/views.py:275 user/post_deploy.py:21
+#: profile_sync/views.py:225 user/post_deploy.py:21
 msgid "Removed by Profile-Sync"
 msgstr "Verwijderd door Profile-Sync"
 
