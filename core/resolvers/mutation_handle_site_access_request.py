@@ -1,3 +1,4 @@
+from django.utils.timezone import now
 from graphql import GraphQLError
 from django.core.exceptions import ObjectDoesNotExist
 
@@ -42,6 +43,7 @@ def resolve_handle_site_access_request(_, info, input):
 
     if accepted:
         access_request.accepted = True
+        access_request.updated_at = now()
         access_request.save()
     else:
         access_request.delete()

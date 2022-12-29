@@ -2769,6 +2769,13 @@ type Wiki implements Entity {
 type SiteAccessRequest {
     name: String!
     email: String!
+    status: SiteAccessStatus
+    timeUpdated: DateTime
+}
+
+enum SiteAccessStatus {
+    accepted
+    pending
 }
 
 type SiteAccessRequestList {

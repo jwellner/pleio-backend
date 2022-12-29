@@ -7,7 +7,6 @@ from core.tests.helpers import PleioTenantTestCase
 from user.factories import UserFactory
 from user.models import User
 from cms.models import Page
-from django.contrib.auth.models import AnonymousUser
 from django.core.cache import cache
 from mixer.backend.django import mixer
 from core.lib import get_language_options
@@ -25,13 +24,13 @@ class SiteSettingsTestCase(PleioTenantTestCase):
         self.user = mixer.blend(User, is_delete_requested=False)
         self.admin = mixer.blend(User, roles=['ADMIN'], is_delete_requested=False)
         self.delete_user = mixer.blend(User, is_delete_requested=True)
-        self.anonymousUser = AnonymousUser()
         self.cmsPage1 = mixer.blend(Page, title="Z title")
         self.cmsPage2 = mixer.blend(Page, title="A title")
         self.profileField1 = ProfileField.objects.create(key='text_key1', name='text_name', field_type='text_field')
         self.profileField2 = ProfileField.objects.create(key='text_key2', name='text_name', field_type='text_field')
         self.siteInvitation = mixer.blend(SiteInvitation, email='a@a.nl')
         self.siteAccessRequest = mixer.blend(SiteAccessRequest, email='b@b.nl', name='b')
+        self.siteAccessRequest2 = mixer.blend(SiteAccessRequest, email='c@c.nl', name='c', accepted=True)
 
         self.override_config(ANONYMOUS_START_PAGE='cms')
         self.override_config(ANONYMOUS_START_PAGE_CMS=self.cmsPage2.guid)
@@ -201,6 +200,8 @@ class SiteSettingsTestCase(PleioTenantTestCase):
                         edges {
                             email
                             name
+                            status
+                            timeUpdated
                         }
                     }
                     deleteAccountRequests {
@@ -248,11 +249,14 @@ class SiteSettingsTestCase(PleioTenantTestCase):
         """
 
     def tearDown(self):
+        self.siteAccessRequest.delete()
+        self.siteAccessRequest2.delete()
         self.siteInvitation.delete()
-        self.cmsPage1.delete()
-        self.cmsPage2.delete()
         self.profileField1.delete()
         self.profileField2.delete()
+        self.cmsPage1.delete()
+        self.cmsPage2.delete()
+        self.delete_user.delete()
         self.admin.delete()
         self.user.delete()
         super().tearDown()
@@ -406,7 +410,10 @@ class SiteSettingsTestCase(PleioTenantTestCase):
         self.assertEqual(data["siteSettings"]["roleOptions"],
                          [{'value': 'ADMIN', 'label': 'Beheerder'}, {'value': 'EDITOR', 'label': 'Redacteur'},
                           {'value': 'QUESTION_MANAGER', 'label': 'Vraagexpert'}])
-        self.assertEqual(data["siteSettings"]["siteAccessRequests"]["edges"][0]['email'], 'b@b.nl')
+        self.assertEqual(data["siteSettings"]["siteAccessRequests"]["edges"], [{'email': 'b@b.nl', 'name': 'b', 'status': 'pending',
+                                                                                'timeUpdated': str(self.siteAccessRequest.updated_at.isoformat())},
+                                                                               {'email': 'c@c.nl', 'name': 'c', 'status': 'accepted',
+                                                                                'timeUpdated': str(self.siteAccessRequest2.updated_at.isoformat())}])
         self.assertEqual(data["siteSettings"]["deleteAccountRequests"]["edges"][0]['guid'], self.delete_user.guid)
         self.assertEqual(data["siteSettings"]["profileSyncEnabled"], False)
         self.assertEqual(data["siteSettings"]["profileSyncToken"], "")
