@@ -309,7 +309,10 @@ STATICFILES_DIRS = [
     ("frontend", os.path.join(BASE_DIR, 'static-frontend')),
 ]
 
-STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.ManifestStaticFilesStorage'
+if DEBUG:
+    STATICFILES_STORAGE = 'core.tests.helpers.staticfiles_storage.ManifestStaticFilesStorage'
+else:
+    STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.ManifestStaticFilesStorage'
 
 PASSWORD_RESET_TIMEOUT_DAYS = 1
 ACCOUNT_ACTIVATION_DAYS = 7
