@@ -22,6 +22,12 @@
                 </div>
                 {{ form.errors.collab_editing_enabled }}
                 <div class="mb-2 form-check">
+                    <input type="checkbox" name="push_notifications_enabled" id="push_notifications_enabled" {% if config.PUSH_NOTIFICATIONS_ENABLED %}
+                           checked {% endif %} />
+                    <label for="push_notifications_enabled">Enable push notifications</label>
+                </div>
+                {{ form.errors.edit_user_name_enabled }}
+                <div class="mb-2 form-check">
                     <input type="checkbox" name="edit_user_name_enabled" id="edit_user_name_enabled" {% if config.EDIT_USER_NAME_ENABLED %}
                            checked {% endif %} />
                     <label for="edit_user_name_enabled">Enable edit name</label>

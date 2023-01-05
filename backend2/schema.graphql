@@ -241,6 +241,17 @@ type addSubgroupPayload {
     success: Boolean
 }
 
+input addWebPushSubscriptionInput {
+    browser: String!
+    endpoint: String!
+    auth: String!
+    p256dh: String!
+}
+
+type addWebPushSubscriptionPayload {
+    success: Boolean
+}
+
 input addWidgetInput {
     position: Int!
     containerGuid: String!
@@ -933,6 +944,7 @@ input editSiteSettingInput {
     searchArchiveOption: SearchArchiveOptionEnum
     appointmentTypeVideocall: [AppointmentTypeInput]
     blockedUserIntroMessage: SecureRichText
+    pushNotificationsEnabled: Boolean
 }
 
 type editSiteSettingPayload {
@@ -1528,6 +1540,7 @@ type Mutation {
     addColumn(input: addColumnInput!): addColumnPayload
     editColumn(input: editColumnInput!): editColumnPayload
     deleteColumn(input: deleteColumnInput!): deleteColumnPayload
+    addWebPushSubscription(input: addWebPushSubscriptionInput!): addWebPushSubscriptionPayload
     addWidget(input: addWidgetInput!): addWidgetPayload
     editWidget(input: editWidgetInput!): editWidgetPayload
     deleteWidget(input: deleteWidgetInput!): deleteWidgetPayload
@@ -2336,6 +2349,7 @@ type Site {
     videocallProfilepage: Boolean
     searchArchiveOption: SearchArchiveOptionEnum
     blockedUserIntroMessage: SecureRichText
+    pushNotificationsEnabled: Boolean!
 }
 
 type SiteSettings {
@@ -2472,6 +2486,7 @@ type SiteSettings {
     appointmentTypeVideocall: [AppointmentType]
     blockedUserIntroMessage: SecureRichText
     searchArchiveOption: SearchArchiveOptionEnum
+    pushNotificationsEnabled: Boolean!
 }
 
 enum SearchArchiveOptionEnum {

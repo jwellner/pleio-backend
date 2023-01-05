@@ -61,6 +61,7 @@ def get_settings(user):
         'maxCharactersInAbstract': config.MAX_CHARACTERS_IN_ABSTRACT,
         'collabEditingEnabled': config.COLLAB_EDITING_ENABLED,
         'preserveFileExif': config.PRESERVE_FILE_EXIF,
+        'pushNotificationsEnabled': config.PUSH_NOTIFICATIONS_ENABLED,
     }
 
 

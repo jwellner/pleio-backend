@@ -211,6 +211,7 @@ def resolve_edit_site_setting(_, info, input):
         'searchArchiveOption': 'SEARCH_ARCHIVE_OPTION',
         'appointmentTypeVideocall': 'VIDEOCALL_APPOINTMENT_TYPE',
         'blockedUserIntroMessage': 'BLOCKED_USER_INTRO_MESSAGE',
+        'pushNotificationsEnabled': 'PUSH_NOTIFICATIONS_ENABLED',
     }
 
     resolve_update_keys(setting_keys, clean_input)

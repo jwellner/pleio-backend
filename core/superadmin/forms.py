@@ -73,11 +73,13 @@ class CustomAgreementForm(forms.ModelForm):
 class OptionalFeaturesForm(forms.Form):
     collab_editing_enabled = forms.BooleanField(required=False)
     edit_user_name_enabled = forms.BooleanField(required=False)
+    push_notifications_enabled = forms.BooleanField(required=False)
 
     def save(self):
         data = self.cleaned_data
         config.COLLAB_EDITING_ENABLED = data['collab_editing_enabled']
         config.EDIT_USER_NAME_ENABLED = data['edit_user_name_enabled']
+        config.PUSH_NOTIFICATIONS_ENABLED = data['push_notifications_enabled']
 
 class SupportContractForm(forms.Form):
     support_contract_enabled = forms.BooleanField(required=False)

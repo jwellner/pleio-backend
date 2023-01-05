@@ -38,3 +38,9 @@ accountApi: {}
 # url
 # token
 # syncEnabled
+
+vapid:
+  publicKey:
+  privateKey:
+  adminEmail:
+  

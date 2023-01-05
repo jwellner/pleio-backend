@@ -246,6 +246,8 @@ class SiteSettingsTestCase(PleioTenantTestCase):
                         name
                         hasVideocall
                     }
+
+                    pushNotificationsEnabled
                 }
             }
         """
@@ -444,6 +446,7 @@ class SiteSettingsTestCase(PleioTenantTestCase):
         self.assertEqual(data["siteSettings"]["supportContractHoursRemaining"], 0)
         self.assertEqual(data['siteSettings']["searchArchiveOption"], 'nobody')
         self.assertEqual(data["siteSettings"]["blockedUserIntroMessage"], '')
+        self.assertEqual(data["siteSettings"]["pushNotificationsEnabled"], False)
 
     def test_site_settings_by_anonymous(self):
         with self.assertGraphQlError("not_logged_in"):

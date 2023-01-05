@@ -965,3 +965,10 @@ def resolve_searchArchiveOption(obj, info):
 def resolve_blocked_user_intro_message(obj, info):
     # pylint: disable=unused-argument
     return config.BLOCKED_USER_INTRO_MESSAGE
+
+
+@site_settings_public.field('pushNotificationsEnabled')
+@site_settings_private.field('pushNotificationsEnabled')
+def resolve_push_notifications_enabled(obj, info):
+    # pylint: disable=unused-argument
+    return config.PUSH_NOTIFICATIONS_ENABLED

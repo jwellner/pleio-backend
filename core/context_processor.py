@@ -8,5 +8,6 @@ def config_processor(request):
     """
     return {
         'config': config,
+        'vapid_public_key': settings.WEBPUSH_SETTINGS['VAPID_PUBLIC_KEY'],
         'webpack_dev_server': settings.WEBPACK_DEV_SERVER,
     }
