@@ -62,6 +62,7 @@ from .mutation_add_comment_without_account import resolve_add_comment_without_ac
 from .mutation_sign_site_agreement_version import resolve_sign_site_agreement_version
 from .mutation_remove_group_members import resolve_remove_group_members
 from .mutation_profileset_manager import resolve_mutation_add_profileset_manager, resolve_mutation_remove_profileset_manager
+from .mutation_add_web_push_subscription import resolve_add_web_push_subscription
 
 mutation = ObjectType("Mutation")
 mutation.set_field("addGroup", resolve_add_group)
@@ -82,6 +83,8 @@ mutation.set_field("editSubgroup", resolve_edit_subgroup)
 mutation.set_field("deleteSubgroup", resolve_delete_subgroup)
 mutation.set_field("addGroupWidget", resolve_add_group_widget)
 mutation.set_field("editGroupWidget", resolve_edit_group_widget)
+
+mutation.set_field("addWebPushSubscription", resolve_add_web_push_subscription)
 
 mutation.set_field("addEntity", resolve_add_entity)
 mutation.set_field("editEntity", resolve_edit_entity)

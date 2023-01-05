@@ -38,6 +38,11 @@
     {% if config.CUSTOM_CSS %}
         <link href="/custom.css?v={{ config.CUSTOM_CSS_TIMESTAMP }}" rel="stylesheet" type="text/css" media="screen">
     {% endif %}
+
+    {% if config.PUSH_NOTIFICATIONS_ENABLED %}
+        <meta name="service-worker-js" content="/service-worker.js">
+        <meta name="webpush-vapid-key" content="{{ vapid_public_key }}">
+    {% endif %}
 </head>
 
 <body class="___{{ config.THEME }}"{% if request.user.is_authenticated %} data-authenticated-user="{{ request.user.email }}"{% endif %}>

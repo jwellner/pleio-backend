@@ -1,10 +1,13 @@
 import logging
 from celery import shared_task
+from core import config
 from core.models.entity import Entity
 from core.models.group import GroupMembership
+from core.models.push_notification import WebPushSubscription
 from core.lib import get_model_name, tenant_schema
+from core.utils.push_notification import get_notification_payload, send_web_push_notification
 from django.apps import apps
-from django.utils import timezone
+from django.utils import timezone, translation
 from django_tenants.utils import schema_context
 from notifications.signals import notify
 
@@ -112,3 +115,12 @@ def create_notification(self, schema_name, verb, model_name, entity_id, sender_i
                 # send email direct and mark emailed as True
                 if direct:
                     schedule_notification_mail(recipient, [notification], MailTypeEnum.DIRECT)
+
+        if config.PUSH_NOTIFICATIONS_ENABLED:
+            # send all notifications direct through web push
+            for recipient in recipients:
+                translation.activate(recipient.get_language())
+                payload = get_notification_payload(sender, verb, instance)
+                if payload:
+                    for subscription in WebPushSubscription.objects.filter(user=recipient):
+                        send_web_push_notification(subscription, payload)

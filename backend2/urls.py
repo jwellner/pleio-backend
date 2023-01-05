@@ -83,6 +83,7 @@ urlpatterns = [
     path('custom.css', core_views.custom_css),
     path('favicon.png', core_views.favicon),
     path('robots.txt', core_views.robots_txt),
+    path('service-worker.js', core_views.ServiceWorkerView.as_view(), name='service_worker'),
     path('sitemap.xml', cache_page(3600)(sitemap), {'sitemaps': sitemaps}, name='sitemap'),
 
     path('flow/', include('flow.urls')),

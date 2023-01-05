@@ -1,5 +1,6 @@
 import csv
 import io
+import os
 import json
 import logging
 import pypandoc
@@ -24,6 +25,7 @@ from django.utils.text import Truncator, slugify
 from django.utils.translation import gettext as _
 from django.views.decorators.cache import cache_control
 from django.views.decorators.http import require_GET
+from django.views.generic import TemplateView
 
 from core import config
 from core.auth import oidc_provider_logout_url
@@ -721,3 +723,12 @@ def download_rich_description_as(request, entity_id=None, file_type=None):
     response['Content-Disposition'] = "attachment; filename=" + '{}.{}'.format(filename, file_type)
     return response
 
+
+class ServiceWorkerView(TemplateView):
+    """
+    Service Worker need to be loaded from same domain.
+    Therefore, use TemplateView in order to server the service_worker.js
+    """
+
+    template_name = 'service_worker.js'
+    content_type = 'application/javascript'

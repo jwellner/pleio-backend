@@ -10,6 +10,7 @@ from .group import Group, GroupMembership, GroupInvitation, Subgroup, GroupProfi
 from .image import ResizedImage, ResizedImageMixin
 from .mail import MailInstance, MailLog
 from .profile_set import ProfileSet
+from .push_notification import WebPushSubscription
 from .revision import Revision
 from .rich_fields import MentionMixin, AttachmentMixin
 from .search import SearchQueryJournal
