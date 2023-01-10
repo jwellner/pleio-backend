@@ -51,6 +51,8 @@ class EditEventTestCase(PleioTenantTestCase):
                 "timePublished": str(timezone.localtime()),
                 "scheduleArchiveEntity": str(timezone.localtime() + timezone.timedelta(days=10)),
                 "scheduleDeleteEntity": str(timezone.localtime() + timezone.timedelta(days=20)),
+                "attendeeWelcomeMailSubject": "Mail Subject",
+                "attendeeWelcomeMailContent": "Welcome Content",
             }
         }
         self.mutation = """
@@ -89,13 +91,15 @@ class EditEventTestCase(PleioTenantTestCase):
                 locationAddress
                 maxAttendees
                 qrAccess
+                attendeeWelcomeMailSubject
+                attendeeWelcomeMailContent
             }
             mutation ($input: editEntityInput!) {
                 editEntity(input: $input) {
                     entity {
-                    guid
-                    status
-                    ...EventParts
+                        guid
+                        status
+                        ...EventParts
                     }
                 }
             }
@@ -106,89 +110,45 @@ class EditEventTestCase(PleioTenantTestCase):
 
         self.graphql_client.force_login(self.authenticatedUser)
         result = self.graphql_client.post(self.mutation, variables)
-
-        entity = result["data"]["editEntity"]["entity"]
-        self.assertEqual(entity["title"], variables["input"]["title"])
-        self.assertEqual(entity["richDescription"], variables["input"]["richDescription"])
-        self.assertEqual(entity["startDate"], "2019-10-02T09:00:00+02:00")
-        self.assertEqual(entity["endDate"], "2019-10-02T10:00:00+02:00")
-        self.assertEqual(entity["maxAttendees"], variables["input"]["maxAttendees"])
-        self.assertEqual(entity["location"], variables["input"]["location"])
-        self.assertEqual(entity["locationLink"], variables["input"]["locationLink"])
-        self.assertEqual(entity["locationAddress"], variables["input"]["locationAddress"])
-        self.assertEqual(entity["source"], variables["input"]["source"])
-        self.assertEqual(entity["ticketLink"], variables["input"]["ticketLink"])
-        self.assertEqual(entity["attendEventWithoutAccount"], variables["input"]["attendEventWithoutAccount"])
-        self.assertEqual(entity["rsvp"], variables["input"]["rsvp"])
-        self.assertEqual(entity["qrAccess"], variables["input"]["qrAccess"])
-        self.assertDateEqual(entity['timePublished'], variables["input"]["timePublished"])
-        self.assertDateEqual(entity['scheduleArchiveEntity'], variables["input"]["scheduleArchiveEntity"])
-        self.assertDateEqual(entity['scheduleDeleteEntity'], variables["input"]["scheduleDeleteEntity"])
-
-        self.assertEqual(entity["slotsAvailable"][0]['name'], variables["input"]["slotsAvailable"][0]['name'])
-
-        self.eventPublic.refresh_from_db()
-
-        self.assertEqual(entity["title"], self.eventPublic.title)
-        self.assertEqual(entity['slotsAvailable'][0]['name'], self.eventPublic.slots_available[0]['name'])
-        self.assertEqual(entity["richDescription"], self.eventPublic.rich_description)
-        self.assertEqual(entity["startDate"], str(datetime_isoformat(self.eventPublic.start_date)))
-        self.assertEqual(entity["endDate"], str(datetime_isoformat(self.eventPublic.end_date)))
-        self.assertEqual(entity["maxAttendees"], str(self.eventPublic.max_attendees))
-        self.assertEqual(entity["location"], self.eventPublic.location)
-        self.assertEqual(entity["locationLink"], self.eventPublic.location_link)
-        self.assertEqual(entity["locationAddress"], self.eventPublic.location_address)
-        self.assertEqual(entity["ticketLink"], self.eventPublic.ticket_link)
-
-        self.assertEqual(entity["source"], self.eventPublic.external_link)
-        self.assertEqual(entity["attendEventWithoutAccount"], self.eventPublic.attend_event_without_account)
-        self.assertEqual(entity["rsvp"], self.eventPublic.rsvp)
-        self.assertEqual(entity["group"], None)
-        self.assertEqual(entity["owner"]["guid"], self.authenticatedUser.guid)
-        self.assertEqual(entity["timeCreated"], self.eventPublic.created_at.isoformat())
-        self.assertEqual(entity["qrAccess"], self.eventPublic.qr_access)
-
-        self.assertDateEqual(entity['timePublished'], str(self.eventPublic.published))
-        self.assertDateEqual(entity['scheduleArchiveEntity'], str(self.eventPublic.schedule_archive_after))
-        self.assertDateEqual(entity['scheduleDeleteEntity'], str(self.eventPublic.schedule_delete_after))
+        self.assertMutationProcessedCorrectly(result)
 
     def test_edit_event_by_admin(self):
-        variables = self.data
-        variables["input"]["timeCreated"] = "2018-12-10T23:00:00.000Z"
-        variables["input"]["groupGuid"] = self.group.guid
-        variables["input"]["ownerGuid"] = self.user2.guid
+        self.data["input"]["timeCreated"] = "2018-12-10T23:00:00.000Z"
+        self.data["input"]["groupGuid"] = self.group.guid
+        self.data["input"]["ownerGuid"] = self.user2.guid
 
         self.graphql_client.force_login(self.admin)
-        result = self.graphql_client.post(self.mutation, variables)
+        result = self.graphql_client.post(self.mutation, self.data)
 
+        self.assertMutationProcessedCorrectly(result)
+
+        # And...
         entity = result["data"]["editEntity"]["entity"]
-        self.assertEqual(entity["title"], variables["input"]["title"])
-        self.assertEqual(entity["richDescription"], variables["input"]["richDescription"])
+        self.assertEqual(entity["group"]["guid"], self.group.guid)
+        self.assertEqual(entity["owner"]["guid"], self.user2.guid)
+        self.assertEqual(entity["timeCreated"], "2018-12-10T23:00:00+00:00")
+
+    def assertMutationProcessedCorrectly(self, result):
+        entity = result["data"]["editEntity"]["entity"]
+        self.assertEqual(entity["title"], self.data["input"]["title"])
+        self.assertEqual(entity["richDescription"], self.data["input"]["richDescription"])
         self.assertEqual(entity["startDate"], "2019-10-02T09:00:00+02:00")
         self.assertEqual(entity["endDate"], "2019-10-02T10:00:00+02:00")
-        self.assertEqual(entity["maxAttendees"], variables["input"]["maxAttendees"])
-        self.assertEqual(entity["location"], variables["input"]["location"])
-        self.assertEqual(entity["source"], variables["input"]["source"])
-        self.assertEqual(entity["attendEventWithoutAccount"], variables["input"]["attendEventWithoutAccount"])
-        self.assertEqual(entity["rsvp"], variables["input"]["rsvp"])
-        self.assertEqual(entity["group"]["guid"], self.group.guid)
-        self.assertEqual(entity["owner"]["guid"], self.user2.guid)
-        self.assertEqual(entity["timeCreated"], "2018-12-10T23:00:00+00:00")
-
-        self.eventPublic.refresh_from_db()
-
-        self.assertEqual(entity["title"], self.eventPublic.title)
-        self.assertEqual(entity["richDescription"], self.eventPublic.rich_description)
-        self.assertEqual(entity["startDate"], str(datetime_isoformat(self.eventPublic.start_date)))
-        self.assertEqual(entity["endDate"], str(datetime_isoformat(self.eventPublic.end_date)))
-        self.assertEqual(entity["maxAttendees"], str(self.eventPublic.max_attendees))
-        self.assertEqual(entity["location"], self.eventPublic.location)
-        self.assertEqual(entity["source"], self.eventPublic.external_link)
-        self.assertEqual(entity["attendEventWithoutAccount"], self.eventPublic.attend_event_without_account)
-        self.assertEqual(entity["rsvp"], self.eventPublic.rsvp)
-        self.assertEqual(entity["group"]["guid"], self.group.guid)
-        self.assertEqual(entity["owner"]["guid"], self.user2.guid)
-        self.assertEqual(entity["timeCreated"], "2018-12-10T23:00:00+00:00")
+        self.assertEqual(entity["maxAttendees"], self.data["input"]["maxAttendees"])
+        self.assertEqual(entity["location"], self.data["input"]["location"])
+        self.assertEqual(entity["locationLink"], self.data["input"]["locationLink"])
+        self.assertEqual(entity["locationAddress"], self.data["input"]["locationAddress"])
+        self.assertEqual(entity["source"], self.data["input"]["source"])
+        self.assertEqual(entity["ticketLink"], self.data["input"]["ticketLink"])
+        self.assertEqual(entity["attendEventWithoutAccount"], self.data["input"]["attendEventWithoutAccount"])
+        self.assertEqual(entity["rsvp"], self.data["input"]["rsvp"])
+        self.assertEqual(entity["qrAccess"], self.data["input"]["qrAccess"])
+        self.assertEqual(entity["attendeeWelcomeMailSubject"], self.data["input"]["attendeeWelcomeMailSubject"])
+        self.assertEqual(entity["attendeeWelcomeMailContent"], self.data["input"]["attendeeWelcomeMailContent"])
+        self.assertDateEqual(entity['timePublished'], self.data["input"]["timePublished"])
+        self.assertDateEqual(entity['scheduleArchiveEntity'], self.data["input"]["scheduleArchiveEntity"])
+        self.assertDateEqual(entity['scheduleDeleteEntity'], self.data["input"]["scheduleDeleteEntity"])
+        self.assertEqual(entity["slotsAvailable"][0]['name'], self.data["input"]["slotsAvailable"][0]['name'])
 
     def test_edit_event_group_null_by_admin(self):
         variables = self.data

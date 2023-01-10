@@ -91,6 +91,13 @@ def resolve_delete_attendee(attendee):
                                        user=mail_user)
 
 
+def resolve_update_attendee_welcome_mail(entity, clean_input):
+    if 'attendeeWelcomeMailSubject' in clean_input:
+        entity.attendee_welcome_mail_subject = clean_input.get("attendeeWelcomeMailSubject")
+    if 'attendeeWelcomeMailContent' in clean_input:
+        entity.attendee_welcome_mail_content = clean_input.get("attendeeWelcomeMailContent")
+
+
 def attending_events(info):
     user = info.context["request"].user
     if user.is_authenticated:

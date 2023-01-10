@@ -34,7 +34,6 @@ class AddWikiCase(PleioTenantTestCase):
 
         self.data = {
             "input": {
-                "type": "object",
                 "subtype": "wiki",
                 "title": "My first Wiki",
                 "richDescription": "richDescription",

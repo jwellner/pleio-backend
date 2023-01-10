@@ -3,22 +3,21 @@
 
 {% block body %}
 
-{% if removed_attendee_name %}
-    {% blocktrans %}
-        Dear {{ removed_attendee_name }},
-    {% endblocktrans %}
-{% else %}
-    {% blocktrans %}
-        Dear user,
-    {% endblocktrans %}
-{% endif %}
+    {% if removed_attendee_name %}
+        {% blocktrans %}
+            Dear {{ removed_attendee_name }},
+        {% endblocktrans %}
+    {% else %}
+        {% blocktrans %}
+            Dear user,
+        {% endblocktrans %}
+    {% endif %}
 
-{% blocktrans %}
-You are removed as attendee from {{ title }}.<br><br>
+    {% blocktrans %}You are removed as attendee from {{ title }}.{% endblocktrans %}<br><br>
 
-If you have questions, please contact the event organizer.
+    {% blocktrans %}If you have questions, please contact the event organizer.{% endblocktrans %}
 
-Click on the link below to see the event.<br><br>
-<a href="{{ link }}">{{ link }}</a>
-{% endblocktrans %}
+    {% blocktrans %}Click on the link below to see the event.{% endblocktrans %}<br><br>
+
+    <a href="{{ link }}">{{ link }}</a>
 {% endblock %}

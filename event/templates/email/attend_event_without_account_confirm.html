@@ -2,60 +2,29 @@
 {% load i18n %}
 
 {% block body %}
-{% if state == 'waitinglist' %}
-    {% blocktrans %}
-        This is confirmation of your registration for the <em>waitinglist</em> of {{ title }}.<br><br>
-    {% endblocktrans %}
-{% elif state == 'accept' %}
-    {% blocktrans %}
-        This is confirmation of your registration for {{ title }}.<br><br>
-    {% endblocktrans %}
-{% elif state == 'maybe' %}
-    {% blocktrans %}
-        The state for registration for {{ title }} changed to <em>maybe</em>.<br><br>
-    {% endblocktrans %}
-{% elif state == 'reject' %}
-    {% blocktrans %}
-        The state for registration for {{ title }} changed to <em>rejected</em>.<br><br>
-    {% endblocktrans %}
-{% endif %}
+    {% if state == 'waitinglist' %}
+        {% blocktrans %}
+            This is confirmation of your registration for the <em>waitinglist</em> of {{ title }}.<br><br>
+        {% endblocktrans %}
+    {% elif state == 'accept' %}
+        {% blocktrans %}
+            This is confirmation of your registration for {{ title }}.<br><br>
+        {% endblocktrans %}
+    {% elif state == 'maybe' %}
+        {% blocktrans %}
+            The state for registration for {{ title }} changed to <em>maybe</em>.<br><br>
+        {% endblocktrans %}
+    {% elif state == 'reject' %}
+        {% blocktrans %}
+            The state for registration for {{ title }} changed to <em>rejected</em>.<br><br>
+        {% endblocktrans %}
+    {% endif %}
 
-{% if location != None and locationAddress != None and locationLink != None %}
-    {% blocktrans %}    
-    Location: <a href="{{ locationLink }}"> {{ location }}</a> - {{ locationAddress }}<br>
-    {% endblocktrans %}
-{% elif location != None and locationAddress != None %} 
-    {% blocktrans %}    
-    Location: {{ location }} - {{ locationAddress }}<br>
-    {% endblocktrans %}
-{% elif locationAddress != None and locationLink != None %}
-    {% blocktrans %} 
-    Location: <a href="{{ locationLink }}"> {{ locationAddress }}</a><br>
-    {% endblocktrans %}
-{% elif location != None and locationLink != None %}
-    {% blocktrans %}
-    Location: <a href="{{ locationLink }}"> {{ location }}</a><br>
-    {% endblocktrans %}
-{% elif location != None %} 
-    {% blocktrans %}
-    Location: {{ location }}<br>
-    {% endblocktrans %}
-{% elif locationAddress != None %} 
-    {% blocktrans %}
-    Location: {{ locationAddress }}<br>
-    {% endblocktrans %}
-{% elif locationLink != None %}
-    {% blocktrans %}
-    Location: <a href="{{ locationLink }}"> Location </a><br>
-    {% endblocktrans %}
-{% endif %}
+    {% include "email/element/event_date_location.html" %}<br>
 
-{% blocktrans %}
-Date: {{ start_date }}<br><br>
+    {% blocktrans %}Click on the link below to see your registration and to add this appointment to your agenda.{% endblocktrans %}
 
-Click on the link below to see your registration and to add this appointment to your agenda.<br><br>
-<a href="{{ link }}">{{ link }}</a><br><br>
+    <a href="{{ link }}">{{ link }}</a><br><br>
 
-If you want to cancel your registration of the event, use <a href="{{ leave_link }}">{{ leave_link }}</a>
-{% endblocktrans %}
+    {% blocktrans %}If you want to cancel your registration of the event, use <a href="{{ leave_link }}">{{ leave_link }}</a>{% endblocktrans %}
 {% endblock %}

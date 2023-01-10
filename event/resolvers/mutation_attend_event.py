@@ -101,7 +101,7 @@ def resolve_attend_event(_, info, input):
         if event.is_full():
             raise GraphQLError(EVENT_IS_FULL)
 
-    attendee.state = clean_input.get("state")
+    attendee.update_state(clean_input["state"])
     attendee.updated_at = timezone.now()
     attendee.save()
 

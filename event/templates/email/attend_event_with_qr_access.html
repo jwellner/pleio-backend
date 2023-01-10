@@ -2,41 +2,13 @@
 {% load i18n %}
 
 {% block body %}
-{% blocktrans %}
-You are added as attendee for {{ title }}. For this event, you will need the QR code attached to this email.<br><br>
-{% endblocktrans %}
+    {% blocktrans %}You are added as attendee for {{ title }}. For this event, you will need the QR code attached to this email.{% endblocktrans %}<br><br>
 
-{% if location != None and locationAddress != None and locationLink != None %}
-    {% blocktrans %}    
-    Location: <a href="{{ locationLink }}"> {{ location }}</a> - {{ locationAddress }}<br>
-    {% endblocktrans %}
-{% elif location != None and locationAddress != None %} 
-    {% blocktrans %}    
-    Location: {{ location }} - {{ locationAddress }}<br>
-    {% endblocktrans %}
-{% elif locationAddress != None and locationLink != None %}
-    {% blocktrans %} 
-    Location: <a href="{{ locationLink }}"> {{ locationAddress }}</a><br>
-    {% endblocktrans %}
-{% elif location != None and locationLink != None %}
-    {% blocktrans %}
-    Location: <a href="{{ locationLink }}"> {{ location }}</a><br>
-    {% endblocktrans %}
-{% elif location != None %} 
-    {% blocktrans %}
-    Location: {{ location }}<br>
-    {% endblocktrans %}
-{% elif locationAddress != None %} 
-    {% blocktrans %}
-    Location: {{ locationAddress }}<br>
-    {% endblocktrans %}
-{% elif locationLink != None %}
-    {% blocktrans %}
-    Location: <a href="{{ locationLink }}"> Location </a><br>
-    {% endblocktrans %}
-{% endif %}
-{% blocktrans with date=startDate %}Date: {{ date }}{% endblocktrans %}
-<img src="{{ qr_filename }}" /><br>
-{% blocktrans %}Click on the link below to see the event.{% endblocktrans %}<br><br>
-<a href="{{ link }}">{{ link }}</a>
+    {% include "email/element/event_date_location.html" %}
+
+    <img src="{{ qr_filename }}"/><br>
+
+    {% blocktrans %}Click on the link below to see the event.{% endblocktrans %}<br><br>
+
+    <a href="{{ link }}">{{ link }}</a>
 {% endblock %}

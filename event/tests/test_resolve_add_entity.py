@@ -32,7 +32,6 @@ class AddEventTestCase(PleioTenantTestCase):
 
         self.data = {
             "input": {
-                "type": "object",
                 "subtype": "event",
                 "title": "My first Event",
                 "richDescription": "richDescription",
@@ -53,6 +52,8 @@ class AddEventTestCase(PleioTenantTestCase):
                 "timePublished": str(timezone.localtime()),
                 "scheduleArchiveEntity": str(timezone.localtime() + timezone.timedelta(days=10)),
                 "scheduleDeleteEntity": str(timezone.localtime() + timezone.timedelta(days=20)),
+                "attendeeWelcomeMailSubject": "Welcome subject",
+                "attendeeWelcomeMailContent": "Welcome content",
             }
         }
         self.mutation = """
@@ -88,13 +89,15 @@ class AddEventTestCase(PleioTenantTestCase):
                 locationAddress
                 maxAttendees
                 qrAccess
+                attendeeWelcomeMailSubject
+                attendeeWelcomeMailContent
             }
             mutation ($input: addEntityInput!) {
                 addEntity(input: $input) {
                     entity {
-                    guid
-                    status
-                    ...EventParts
+                        guid
+                        status
+                        ...EventParts
                     }
                 }
             }
@@ -123,6 +126,8 @@ class AddEventTestCase(PleioTenantTestCase):
         self.assertDateEqual(entity['timePublished'], variables["input"]["timePublished"])
         self.assertDateEqual(entity['scheduleArchiveEntity'], variables["input"]["scheduleArchiveEntity"])
         self.assertDateEqual(entity['scheduleDeleteEntity'], variables["input"]["scheduleDeleteEntity"])
+        self.assertEqual(entity['attendeeWelcomeMailSubject'], variables['input']['attendeeWelcomeMailSubject'])
+        self.assertEqual(entity['attendeeWelcomeMailContent'], variables['input']['attendeeWelcomeMailContent'])
 
     def test_add_event_to_group(self):
         variables = self.data

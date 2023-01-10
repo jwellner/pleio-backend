@@ -188,7 +188,6 @@ class AddFileTestCase(PleioTenantTestCase):
                 "title": "testfolder",
                 "accessId": 1,
                 "writeAccessId": 0,
-                "type": "object"
             }
         }
 
@@ -224,7 +223,6 @@ class AddFileTestCase(PleioTenantTestCase):
                 "title": "testfolder",
                 "accessId": 1,
                 "writeAccessId": 0,
-                "type": "object"
             }
         }
 
@@ -266,7 +264,6 @@ class AddFileTestCase(PleioTenantTestCase):
                 "title": "testfolder",
                 "accessId": 1,
                 "writeAccessId": 0,
-                "type": "object"
             }
         }
 

@@ -19,7 +19,6 @@ class AddDiscussionTestCase(PleioTenantTestCase):
 
         self.data = {
             "input": {
-                "type": "object",
                 "subtype": "discussion",
                 "title": "My first discussion",
                 "richDescription": "richDescription",

@@ -17,7 +17,6 @@ class AddQuestionTestCase(PleioTenantTestCase):
 
         self.data = {
             "input": {
-                "type": "object",
                 "subtype": "question",
                 "title": "My first Question",
                 "richDescription": "richDescription",

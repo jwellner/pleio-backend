@@ -177,10 +177,21 @@ def resolve_is_attending(obj, info):
 
     return None
 
+
 @event.field("qrAccess")
 def resolve_qr_access(obj, info):
     # pylint: disable=unused-argument
     return obj.qr_access
+
+
+@event.field("attendeeWelcomeMailSubject")
+def resolve_attendee_welcome_mail_subject(obj, _):
+    return obj.attendee_welcome_mail_subject
+
+
+@event.field("attendeeWelcomeMailContent")
+def resolve_attendee_welcome_mail(obj, _):
+    return obj.attendee_welcome_mail_content
 
 
 @event.field("attendees")
