@@ -46,8 +46,8 @@ def conditional_subtypes_filter(subtypes):
         q_objects.add(~Q(wiki__isnull=True), Q.OR)
         q_objects.add(~Q(page__isnull=True) & ~Q(page__page_type='campagne'), Q.OR)
 
-
     return q_objects
+
 
 def conditional_group_filter(container_guid):
     """ Filter on one group """
@@ -120,15 +120,15 @@ def resolve_activities(
         order_by = '-%s' % (order_by)
 
     title_order_by = Coalesce(
-        'news__title', 
+        'news__title',
         'blog__title',
         'filefolder__title',
         'poll__title',
         'statusupdate__title',
         'wiki__title',
-        'page__title', 
-        'question__title', 
-        'discussion__title', 
+        'page__title',
+        'question__title',
+        'discussion__title',
         'event__title'
     )
     if order_by == '-title':

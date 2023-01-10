@@ -14,6 +14,7 @@ from django.contrib.auth.models import AnonymousUser
 from django.core.files.base import ContentFile
 from django.http import HttpRequest
 from django.test import override_settings
+from django.utils import translation
 from django.utils.crypto import get_random_string
 from mixer.backend.django import mixer
 
@@ -21,6 +22,7 @@ from backend2.schema import schema
 from django.db.models import QuerySet
 from collections import Counter
 
+from core.base_config import DEFAULT_SITE_CONFIG
 from tenants.helpers import FastTenantTestCase
 
 
@@ -29,11 +31,20 @@ class PleioTenantTestCase(FastTenantTestCase):
     def setUp(self):
         super().setUp()
         self.graphql_client = GraphQLClient()
-        self.file_cleanup = []
-        self.settings_cache = {}
+        self._file_cleanup = []
+        self._settings_cache = {}
+        self._restore_language = None
 
         self.mocked_log_warning = mock.patch("logging.Logger.warning").start()
         self.mocked_warn = mock.patch("warnings.warn").start()
+
+    def switch_language(self, language_code):
+        assert language_code in ['en', 'nl', 'de', 'fr'], "Language code is restricted."
+        if not self._restore_language:
+            self._restore_language = translation.get_language()
+        self.override_setting(LANGUAGE_CODE=language_code)
+        self.override_config(LANGUAGE=language_code)
+        translation.activate(language_code)
 
     def file_factory(self, filepath):
         from file.models import FileFolder
@@ -47,21 +58,22 @@ class PleioTenantTestCase(FastTenantTestCase):
                            upload=upload)
         if upload:
             upload_dir = os.path.dirname(file.upload.path)
-            self.file_cleanup.append(os.path.join(upload_dir, filename))
-            self.file_cleanup.append(file.upload.path)
+            self._file_cleanup.append(os.path.join(upload_dir, filename))
+            self._file_cleanup.append(file.upload.path)
             if file.thumbnail.name:
-                self.file_cleanup.append(file.thumbnail.path)
+                self._file_cleanup.append(file.thumbnail.path)
 
         return file
 
     def override_config(self, **kwargs):
         for key, value in kwargs.items():
+            assert key in DEFAULT_SITE_CONFIG, "%s is not a valid key" % key
             cache.set("%s%s" % (self.tenant.schema_name, key), value)
 
     def override_setting(self, **kwargs):
         for key, value in kwargs.items():
-            if key not in self.settings_cache:
-                self.settings_cache[key] = getattr(settings, key, None)
+            if key not in self._settings_cache:
+                self._settings_cache[key] = getattr(settings, key, None)
             setattr(settings, key, value)
 
     @staticmethod
@@ -73,12 +85,16 @@ class PleioTenantTestCase(FastTenantTestCase):
         return ContentFile(content, os.path.basename(path))
 
     def tearDown(self):
-        for file in self.file_cleanup:
+        for file in self._file_cleanup:
             cleanup_path(file)
 
-        for key, value in self.settings_cache.items():
+        for key, value in self._settings_cache.items():
             setattr(settings, key, value)
         cache.clear()
+
+        if self._restore_language:
+            translation.activate(self._restore_language)
+
         super().tearDown()
 
     @contextmanager
@@ -111,7 +127,8 @@ class PleioTenantTestCase(FastTenantTestCase):
                                 {'data': d2},
                                 msg)
 
-    def tiptap_paragraph(self, *paragraphs):
+    @staticmethod
+    def tiptap_paragraph(*paragraphs):
         return json.dumps({
             'type': 'doc',
             'content': [{

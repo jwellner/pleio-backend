@@ -1,7 +1,4 @@
-from mixer.backend.django import mixer
-
 from core.factories import GroupFactory
-from core.models import Group
 from core.tests.helpers.tags_testcase import Template
 from file.models import FileFolder
 from user.models import User
@@ -18,8 +15,9 @@ class TestPadTagsTestCase(Template.TagsTestCaseTemplate):
 
     _container = None
 
-    def setUp(self):
-        super().setUp()
+    def local_setup(self):
+        super().local_setup()
+        self.override_config(COLLAB_EDITING_ENABLED=True)
         self.variables_add = {'input': {
             'containerGuid': self.container.guid,
             'richDescription': '',

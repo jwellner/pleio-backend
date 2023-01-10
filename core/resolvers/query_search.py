@@ -1,4 +1,5 @@
 from core.constances import INVALID_SUBTYPE, INVALID_DATE, ORDER_DIRECTION, NOT_LOGGED_IN, USER_ROLES, USER_NOT_SITE_ADMIN
+from core.lib import get_search_filters
 from core.models import Entity, Group, SearchQueryJournal
 from core.utils.elasticsearch import QueryBuilder
 from user.models import User
@@ -48,13 +49,13 @@ def resolve_search(_, info,
     if type in ['group', 'user']:
         subtype = type
 
-    subtypes_available = ['user', 'group', 'file', 'folder', 'pad', 'blog', 'discussion',
-                        'event', 'news', 'question', 'wiki', 'page']
+    subtypes_available = {ct['key']: ct for ct in get_search_filters()}
+    subtype_keys = [key for key in subtypes_available.keys()]
 
-    if subtypes and [type for type in subtypes if type not in subtypes_available]:
+    if subtypes and [type for type in subtypes if type not in subtype_keys]:
         raise GraphQLError(INVALID_SUBTYPE)
 
-    if subtype and subtype not in subtypes_available:
+    if subtype and subtype not in subtype_keys:
         raise GraphQLError(INVALID_SUBTYPE)
 
     # TODO: Check what happens if site alters default ACL (IE: from default "logged_in" to "public")
@@ -81,7 +82,9 @@ def resolve_search(_, info,
 
     # TODO: maybe response can be extended, so duplicate code can be removed
     for t in response.aggregations.type_terms.buckets:
-        totals.append({"subtype": t.key, "total": t.doc_count})
+        totals.append({"subtype": t.key,
+                       "total": t.doc_count,
+                       "title": subtypes_available[t.key]['plural']})
         total = total + t.doc_count
 
     if subtype:

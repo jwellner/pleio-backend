@@ -34,6 +34,7 @@ class Template:
         variables_add = {}
         model = None
 
+        include_add_edit = True
         include_site_search = False
         include_entity_search = False
         include_activity_search = False
@@ -69,8 +70,7 @@ class Template:
         def owner_factory(self):
             return UserFactory(email="owner@localhost")
 
-        def setUp(self):
-            super().setUp()
+        def local_setup(self):
             assert self.graphql_label, "Please fill in the object name for this model in the graphql schema"
 
             self.owner = self.owner_factory()
@@ -205,6 +205,10 @@ class Template:
             """
 
         def test_add_with_tags(self):
+            if not self.include_add_edit:
+                return
+
+            self.local_setup()
             assert self.variables_add, "Provide self.variables_add where input contains sane defaults, similar to the article_factory method."
 
             self.variables_add['input']['tags'] = ['Foo']
@@ -226,6 +230,10 @@ class Template:
             self.assertEqual(entity['tagCategories'], self.variables_add['input']['tagCategories'])
 
         def test_update_tags(self):
+            if not self.include_add_edit:
+                return
+            self.local_setup()
+
             self.graphql_client.force_login(self.owner)
             response = self.graphql_client.post(self.mutation_update, self.variables_update)
 
@@ -251,6 +259,7 @@ class Template:
                 yield self.get_query_group(), "groups", "query.groups"
 
         def test_search_by_tag(self):
+            self.local_setup()
             self.graphql_client.force_login(self.owner)
 
             for query, data_key, message in self.iterate_query_search():
@@ -271,6 +280,7 @@ class Template:
                 self.assertIn(self.article1.guid, [e['guid'] for e in edges], msg="Unexpectedly not found article1 at %s" % message)
 
         def test_search_entity_by_category(self):
+            self.local_setup()
             self.graphql_client.force_login(self.owner)
 
             for query, data_key, message in self.iterate_query_search():
@@ -297,6 +307,7 @@ class Template:
                 self.assertEqual(self.article1.guid, edges[0]['guid'], msg="Unexpectedly not found article1 at %s" % message)
 
         def test_search_tags_overflow(self):
+            self.local_setup()
             self.graphql_client.force_login(self.owner)
 
             for query, data_key, message in self.iterate_query_search():
@@ -318,6 +329,7 @@ class Template:
                 self.assertEqual(self.article1.guid, edges[0]['guid'], msg="Unexpectedly not found article1 at %s" % message)
 
         def test_search_categories_overflow(self):
+            self.local_setup()
             self.graphql_client.force_login(self.owner)
 
             # testing that 'tagsList' uses match-any
@@ -340,6 +352,8 @@ class Template:
                 self.assertEqual(self.article1.guid, edges[0]['guid'], msg="Unexpectedly not found article1 at %s" % message)
 
         def test_tag_properties(self):
+            self.local_setup()
+
             # pylint: disable=protected-access
             tag_with_synonyms = Tag.objects.get(label=self.article1._tag_summary[0])
             tag_with_synonyms.synonyms.create(label="foobar")

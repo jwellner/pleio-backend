@@ -1,7 +1,5 @@
 from unittest import mock
 
-from django.test import override_settings
-
 from core.mail_builders.user_delete_complete import UserDeleteCompleteMailer
 from core.tests.helpers import PleioTenantTestCase
 from user.factories import UserFactory
@@ -10,6 +8,7 @@ from user.factories import UserFactory
 class TestMailerUserOnDeleteTestCase(PleioTenantTestCase):
     def setUp(self):
         super().setUp()
+        self.switch_language('en')
 
         user = UserFactory()
         self.user_info = user.as_mailinfo()
@@ -25,7 +24,6 @@ class TestMailerUserOnDeleteTestCase(PleioTenantTestCase):
             to_admin=False
         )
 
-    @override_settings(LANGUAGE_CODE='en')
     @mock.patch("core.mail_builders.base.MailerBase.build_context")
     def test_properties(self, build_context):
         build_context.return_value = {}
@@ -38,7 +36,6 @@ class TestMailerUserOnDeleteTestCase(PleioTenantTestCase):
         self.assertEqual(self.mailer.get_sender(), self.sender)
         self.assertIn(self.user_info['name'], self.mailer.get_subject())
 
-    @override_settings(LANGUAGE_CODE='en')
     def test_properties_when_receiver_is_deleted(self):
         # When
         self.receiver.delete()
@@ -46,7 +43,6 @@ class TestMailerUserOnDeleteTestCase(PleioTenantTestCase):
         # Then
         self.assertEqual(self.mailer.get_receiver(), None)
 
-    @override_settings(LANGUAGE_CODE='en')
     def test_properties_when_send_to_admin(self):
         # When
         self.mailer.to_admin = True

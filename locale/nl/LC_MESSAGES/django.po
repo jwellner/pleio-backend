@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-01-09 10:32+0100\n"
+"POT-Creation-Date: 2023-01-10 09:52+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,9 +17,33 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
+#: activity/core_hooks.py:7
+msgid "Update"
+msgstr "Update"
+
 #: activity/models.py:12
 msgid "status update"
 msgstr "statusupdate"
+
+#: blog/core_hooks.py:7 blog/core_hooks.py:14 blog/core_hooks.py:21
+msgid "Blog"
+msgstr "Blog"
+
+#: blog/core_hooks.py:22 core/lib.py:411
+msgid "Blogs"
+msgstr "Blogs"
+
+#: cms/core_hooks.py:7 cms/core_hooks.py:21
+msgid "Page"
+msgstr "Pagina"
+
+#: cms/core_hooks.py:14
+msgid "Text page"
+msgstr "Tekst pagina"
+
+#: cms/core_hooks.py:22
+msgid "Pages"
+msgstr "Pagina's"
 
 #: control/forms.py:65
 msgid "Include files"
@@ -29,23 +53,31 @@ msgstr "Bestanden opnemen"
 msgid "Create zip-file"
 msgstr "Maak een zip-bestand"
 
+#: core/core_hooks.py:7 core/views.py:475
+msgid "Group"
+msgstr "Groep"
+
+#: core/core_hooks.py:8 core/lib.py:422
+msgid "Groups"
+msgstr "Groepen"
+
 #: core/forms.py:76
 msgid "Provide a valid value."
 msgstr "Voer een geldige waarde in."
 
-#: core/forms.py:89 core/resolvers/site_settings.py:459
+#: core/forms.py:89 core/resolvers/site_settings.py:461
 msgid "Never"
 msgstr "Nooit"
 
-#: core/forms.py:90 core/resolvers/site_settings.py:458
+#: core/forms.py:90 core/resolvers/site_settings.py:460
 msgid "Daily"
 msgstr "Dagelijks"
 
-#: core/forms.py:91 core/resolvers/site_settings.py:458
+#: core/forms.py:91 core/resolvers/site_settings.py:460
 msgid "Weekly"
 msgstr "Wekelijks"
 
-#: core/forms.py:92 core/resolvers/site_settings.py:459
+#: core/forms.py:92 core/resolvers/site_settings.py:461
 msgid "Monthly"
 msgstr "Maandelijks"
 
@@ -66,110 +98,75 @@ msgstr "Naam"
 msgid "Profile field"
 msgstr "Profiel veld"
 
-#: core/lib.py:208 core/resolvers/mutation_import_users.py:29
-#: core/resolvers/site_settings.py:88
+#: core/lib.py:216 core/resolvers/mutation_import_users.py:29
+#: core/resolvers/site_settings.py:90
 msgid "Just me"
 msgstr "Alleen eigenaar"
 
-#: core/lib.py:211
+#: core/lib.py:219
 #, python-format
 msgid "Group: %(group_name)s"
 msgstr "Groep: %(group_name)s"
 
-#: core/lib.py:214
+#: core/lib.py:222
 #, python-format
 msgid "Subgroup: %(subgroup_name)s"
 msgstr "Subgroep: %(subgroup_name)s"
 
-#: core/lib.py:220 core/resolvers/mutation_import_users.py:30
-#: core/resolvers/site_settings.py:89
+#: core/lib.py:228 core/resolvers/mutation_import_users.py:30
+#: core/resolvers/site_settings.py:91
 msgid "Logged in users"
 msgstr "Ingelogde gebruikers"
 
-#: core/lib.py:222 core/resolvers/mutation_import_users.py:33
-#: core/resolvers/site_settings.py:93
+#: core/lib.py:230 core/resolvers/mutation_import_users.py:33
+#: core/resolvers/site_settings.py:95
 msgid "Public"
 msgstr "Iedereen (publiek zichtbaar)"
 
-#: core/lib.py:233
-msgid "Event"
-msgstr "Agenda-item"
-
-#: core/lib.py:237
-msgid "Blog"
-msgstr "Blog"
-
-#: core/lib.py:241
-msgid "Discussion"
-msgstr "Discussie"
-
-#: core/lib.py:245 core/lib.py:415
-msgid "News"
-msgstr "Nieuws"
-
-#: core/lib.py:249
-msgid "Update"
-msgstr "Update"
-
-#: core/lib.py:253
-msgid "Question"
-msgstr "Vraag"
-
-#: core/lib.py:257
-msgid "Wiki"
-msgstr "Wiki"
-
-#: core/lib.py:261
-msgid "Text page"
-msgstr "Tekst pagina"
-
-#: core/lib.py:409
+#: core/lib.py:410
 msgid "Updates"
 msgstr "Updates"
 
-#: core/lib.py:410
-msgid "Blogs"
-msgstr "Blogs"
-
-#: core/lib.py:411
+#: core/lib.py:412
 msgid "CMS pages"
 msgstr "CMS pagina's"
 
-#: core/lib.py:412
+#: core/lib.py:413 discussion/core_hooks.py:22
 msgid "Discussions"
 msgstr "Discussies"
 
-#: core/lib.py:413
+#: core/lib.py:414 event/core_hooks.py:22
 msgid "Events"
 msgstr "Agenda-items"
 
-#: core/lib.py:414
+#: core/lib.py:415 file/core_hooks.py:15
 msgid "Files"
 msgstr "Bestanden"
 
-#: core/lib.py:416
+#: core/lib.py:416 news/core_hooks.py:7 news/core_hooks.py:14
+#: news/core_hooks.py:21
+msgid "News"
+msgstr "Nieuws"
+
+#: core/lib.py:417
 msgid "Polls"
 msgstr "Polls"
 
-#: core/lib.py:417
+#: core/lib.py:418 question/core_hooks.py:22
 msgid "Questions"
 msgstr "Vragen"
 
-#: core/lib.py:418
+#: core/lib.py:419
 msgid "Tasks"
 msgstr "Taken"
 
-#: core/lib.py:419
+#: core/lib.py:420
 msgid "Wiki pages"
 msgstr "Wiki pagina's"
 
-#: core/lib.py:420
+#: core/lib.py:421
 msgid "Comments"
 msgstr "Reacties"
-
-#: core/lib.py:421
-msgid "Groups"
-msgstr "Groepen"
 
 #: core/mail_builders/avatar_export_ready.py:41
 #: core/tests/test_avatar_export_notification.py:34
@@ -351,10 +348,6 @@ msgstr "In uitvoering"
 msgid "Ready"
 msgstr "Klaar"
 
-#: core/post_deploy/__init__.py:95 core/post_deploy/__init__.py:112
-msgid "Automatically generated initial revision"
-msgstr "Automatisch gegenereerde eerste revisie"
-
 #: core/resolvers/mutation_edit_users.py:32
 #: core/resolvers/mutation_toggle_user_is_banned.py:32 user/post_deploy.py:18
 msgid "Blocked by admin"
@@ -376,23 +369,23 @@ msgstr "Afspraak"
 msgid "Agenda"
 msgstr "Agenda"
 
-#: core/resolvers/site_settings.py:209
+#: core/resolvers/site_settings.py:211
 msgid "Activity stream"
 msgstr "Activiteitenstroom"
 
-#: core/resolvers/site_settings.py:210
+#: core/resolvers/site_settings.py:212
 msgid "CMS page"
 msgstr "CMS pagina"
 
-#: core/resolvers/site_settings.py:704
+#: core/resolvers/site_settings.py:724
 msgid "Administrator"
 msgstr "Beheerder"
 
-#: core/resolvers/site_settings.py:705
+#: core/resolvers/site_settings.py:725
 msgid "Editor"
 msgstr "Redacteur"
 
-#: core/resolvers/site_settings.py:706
+#: core/resolvers/site_settings.py:726
 msgid "Question expert"
 msgstr "Vraagexpert"
 
@@ -1141,10 +1134,6 @@ msgstr "%(sender_name)s heeft u genoemd bij %(entity_title)s"
 msgid "E-mail"
 msgstr "E-mail"
 
-#: core/views.py:475
-msgid "Group"
-msgstr "Groep"
-
 #: core/views.py:476
 msgid "Disk size"
 msgstr "Schijfgrootte"
@@ -1157,6 +1146,15 @@ msgstr "Je wijzigingen zijn opgeslagen"
 #, python-format
 msgid "Successfully unsubscribed %(email)s from %(list_name)s"
 msgstr "%(email)s Succesvol uitgeschreven uit %(list_name)s"
+
+#: discussion/core_hooks.py:7 discussion/core_hooks.py:14
+#: discussion/core_hooks.py:21
+msgid "Discussion"
+msgstr "Discussie"
+
+#: event/core_hooks.py:7 event/core_hooks.py:14 event/core_hooks.py:21
+msgid "Event"
+msgstr "Agenda-item"
 
 #: event/export.py:44
 msgid "All attendees"
@@ -1238,6 +1236,7 @@ msgid "Copy %s"
 msgstr "Kopie %s"
 
 #: event/templates/email/attend_event_from_waitinglist.html:5
+#, python-format
 msgid "You are added as attendee for %(title)s from the waitinglist."
 msgstr "U bent toegevoegd als deelnemer voor %(title)s van de wachtlijst."
 
@@ -1248,6 +1247,7 @@ msgid "Click on the link below to see the event."
 msgstr "Klik op de onderstaande link om het evenement te zien."
 
 #: event/templates/email/attend_event_with_qr_access.html:5
+#, python-format
 msgid ""
 "You are added as attendee for %(title)s. For this event, you will need the "
 "QR code attached to this email."
@@ -1256,6 +1256,7 @@ msgstr ""
 "de QR-code nodig die bij deze e-mail is gevoegd."
 
 #: event/templates/email/attend_event_without_account.html:5
+#, python-format
 msgid "Confirm your registration for %(title)s."
 msgstr "Bevestig uw inschrijving voor %(title)s."
 
@@ -1264,6 +1265,7 @@ msgid "Click on the link below to confirm."
 msgstr "Klik op onderstaande link om te bevestigen."
 
 #: event/templates/email/attend_event_without_account_confirm.html:6
+#, python-format
 msgid ""
 "\n"
 "            This is confirmation of your registration for the <em>waitinglist</em> of %(title)s.<br><br>\n"
@@ -1274,6 +1276,7 @@ msgstr ""
 "        "
 
 #: event/templates/email/attend_event_without_account_confirm.html:10
+#, python-format
 msgid ""
 "\n"
 "            This is confirmation of your registration for %(title)s.<br><br>\n"
@@ -1284,6 +1287,7 @@ msgstr ""
 "        "
 
 #: event/templates/email/attend_event_without_account_confirm.html:14
+#, python-format
 msgid ""
 "\n"
 "            The state for registration for %(title)s changed to <em>maybe</em>.<br><br>\n"
@@ -1294,6 +1298,7 @@ msgstr ""
 "        "
 
 #: event/templates/email/attend_event_without_account_confirm.html:18
+#, python-format
 msgid ""
 "\n"
 "            The state for registration for %(title)s changed to <em>rejected</em>.<br><br>\n"
@@ -1321,6 +1326,7 @@ msgstr ""
 "href=\"%(leave_link)s\">%(leave_link)s</a>."
 
 #: event/templates/email/delete_event_attendees.html:7
+#, python-format
 msgid ""
 "\n"
 "            Dear %(removed_attendee_name)s,\n"
@@ -1341,6 +1347,7 @@ msgstr ""
 "        "
 
 #: event/templates/email/delete_event_attendees.html:16
+#, python-format
 msgid "You are removed as attendee from %(title)s."
 msgstr "U bent verwijderd als deelnemer van %(title)s."
 
@@ -1354,12 +1361,14 @@ msgstr ""
 #: event/templates/email/element/event_date_location.html:7
 #: event/templates/email/element/event_date_location.html:9
 #: event/templates/email/element/event_date_location.html:11
+#, python-format
 msgid "Location: <a href=\"%(locationLink)s\">%(location)s</a>"
 msgstr "Locatie: <a href=\"%(locationLink)s\">%(location)s</a>"
 
 #: event/templates/email/element/event_date_location.html:15
 #: event/templates/email/element/event_date_location.html:17
 #: event/templates/email/element/event_date_location.html:19
+#, python-format
 msgid "Location: %(location)s"
 msgstr "Locatie: %(location)s"
 
@@ -1372,27 +1381,64 @@ msgstr "Datum: %(date)s"
 msgid "Message to event"
 msgstr "Bericht naar evenement"
 
+#: external_content/utils.py:68
+msgid "External content author"
+msgstr "Auteur van externe inhoud"
+
+#: file/core_hooks.py:7 file/core_hooks.py:14 file/models.py:69
+msgid "File"
+msgstr "Bestand"
+
+#: file/core_hooks.py:19 file/models.py:70
+msgid "Folder"
+msgstr "Map"
+
+#: file/core_hooks.py:20
+msgid "Folders"
+msgstr "Mappen"
+
 #: file/mail_builders/file_scan_found.py:45
 #, python-format
 msgid "Filescan found suspicous files on %(site_url)s"
 msgstr "Filescan heeft verdachte bestanden gevonden op %(site_url)s"
 
-#: file/models.py:69
-msgid "File"
-msgstr "Bestand"
-
-#: file/models.py:70
-msgid "Folder"
-msgstr "Map"
-
-#: file/models.py:71
+#: file/models.py:71 pad/core_hooks.py:10
 msgid "Pad"
 msgstr "Pad"
+
+#: news/core_hooks.py:22
+msgid "News items"
+msgstr "Nieuwsberichten"
+
+#: pad/core_hooks.py:11
+msgid "Pads"
+msgstr "Pads"
 
 #: profile_sync/views.py:225 user/post_deploy.py:21
 msgid "Removed by Profile-Sync"
 msgstr "Verwijderd door Profile-Sync"
 
+#: question/core_hooks.py:7 question/core_hooks.py:14
+#: question/core_hooks.py:21
+msgid "Question"
+msgstr "Vraag"
+
+#: user/core_hooks.py:7
+msgid "User"
+msgstr "Gebruiker"
+
+#: user/core_hooks.py:8
+msgid "Users"
+msgstr "Gebruikers"
+
 #: user/models.py:300 user/post_deploy.py:22
 msgid "Deleted"
 msgstr "Verwijderd"
+
+#: wiki/core_hooks.py:7 wiki/core_hooks.py:14 wiki/core_hooks.py:21
+msgid "Wiki"
+msgstr "Wiki"
+
+#: wiki/core_hooks.py:22
+msgid "Wiki's"
+msgstr "Wiki's"

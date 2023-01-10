@@ -1,7 +1,5 @@
 from unittest import mock
 
-from django.test import override_settings
-
 from core.mail_builders.user_cancel_delete_for_admin import UserCancelDeleteToAdminMailer
 from core.mail_builders.user_cancel_delete_for_user import UserCancelDeleteToSelfMailer
 from core.mail_builders.user_request_delete_for_admin import UserRequestDeleteToAdminMailer
@@ -17,7 +15,8 @@ class TestMailerUserOnDeleteTestCase(PleioTenantTestCase):
         self.user = UserFactory()
         self.admin = AdminFactory()
 
-    @override_settings(LANGUAGE_CODE='en')
+        self.switch_language('en')
+
     @mock.patch("core.mail_builders.base.MailerBase.build_context")
     def test_schedule_user_cancel_delete_for_admin_mail(self, build_context):
         build_context.return_value = mock.MagicMock()
@@ -34,7 +33,6 @@ class TestMailerUserOnDeleteTestCase(PleioTenantTestCase):
         self.assertEqual(mailer.get_sender(), self.user)
         self.assertEqual(mailer.get_subject(), "Request to remove account cancelled")
 
-    @override_settings(LANGUAGE_CODE='en')
     @mock.patch("core.mail_builders.base.MailerBase.build_context")
     def test_schedule_user_cancel_delete_for_user_mail(self, build_context):
         build_context.return_value = mock.MagicMock()
@@ -50,7 +48,6 @@ class TestMailerUserOnDeleteTestCase(PleioTenantTestCase):
         self.assertEqual(mailer.get_sender(), None)
         self.assertEqual(mailer.get_subject(), "Request to remove account cancelled")
 
-    @override_settings(LANGUAGE_CODE='en')
     @mock.patch("core.mail_builders.base.MailerBase.build_context")
     def test_schedule_user_request_delete_for_admin_mail(self, build_context):
         build_context.return_value = mock.MagicMock()
@@ -67,7 +64,6 @@ class TestMailerUserOnDeleteTestCase(PleioTenantTestCase):
         self.assertEqual(mailer.get_sender(), self.user)
         self.assertEqual(mailer.get_subject(), "Request to remove account")
 
-    @override_settings(LANGUAGE_CODE='en')
     @mock.patch("core.mail_builders.base.MailerBase.build_context")
     def test_schedule_user_request_delete_for_user_mail(self, build_context):
         build_context.return_value = mock.MagicMock()

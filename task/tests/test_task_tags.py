@@ -6,11 +6,9 @@ class TestTaskTagsTestCase(Template.TagsTestCaseTemplate):
     graphql_label = 'Task'
     model = Task
 
-    def setUp(self):
-        super().setUp()
-        self.variables_add = {'input': {
-            'title': "Todo",
-            'subtype': 'task',
-        }}
+    variables_add = {'input': {
+        'title': "Todo",
+        'subtype': 'task',
+    }}
 
     include_entity_search = True

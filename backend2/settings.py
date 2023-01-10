@@ -77,7 +77,7 @@ if os.getenv('EMAIL_PORT'):
 if os.getenv('AWS_SES_ACCESS_KEY_ID'):
     EMAIL_BACKEND = 'django_ses.SESBackend'
     AWS_SES_REGION_NAME = os.getenv('AWS_SES_REGION_NAME')  # 'us-west-2'
-    AWS_SES_REGION_ENDPOINT = os.getenv('AWS_SES_REGION_ENDPOINT') #'email.us-west-2.amazonaws.com'
+    AWS_SES_REGION_ENDPOINT = os.getenv('AWS_SES_REGION_ENDPOINT')  # 'email.us-west-2.amazonaws.com'
 
     AWS_SES_ACCESS_KEY_ID = os.getenv('AWS_SES_ACCESS_KEY_ID')
     AWS_SES_SECRET_ACCESS_KEY = os.getenv('AWS_SES_SECRET_ACCESS_KEY')
@@ -140,6 +140,7 @@ TENANT_APPS = [
     'concierge',
     'core',
     'user',
+    'external_content',
     'flow',
     'profile_sync',
     'blog',
@@ -425,7 +426,7 @@ CSP_FONT_SRC = [
     "https://fonts.gstatic.com"
 ]
 # Using unsafe-inline is not safe so we choose to use strict-dynamic (https://csp.withgoogle.com/docs/index.html)
-#CSP_SCRIPT_SRC = ["'self'", "'unsafe-inline'", "https://stats.pleio.nl", "https://statistiek.rijksoverheid.nl"]
+# CSP_SCRIPT_SRC = ["'self'", "'unsafe-inline'", "https://stats.pleio.nl", "https://statistiek.rijksoverheid.nl"]
 CSP_INCLUDE_NONCE_IN = ['script-src']
 CSP_SCRIPT_SRC = [
     "'unsafe-inline'",
@@ -449,8 +450,8 @@ CSP_FRAME_SRC = [
     "https://feed.mikle.com"
 ]
 # Add csp.contrib.rate_limiting.RateLimitedCSPMiddleware middleware when enabling reporting
-#CSP_REPORT_URI = "/report-csp-violation"
-#CSP_REPORT_PERCENTAGE = 1 if DEBUG else 0.1
+# CSP_REPORT_URI = "/report-csp-violation"
+# CSP_REPORT_PERCENTAGE = 1 if DEBUG else 0.1
 
 # When DEBUG is on we don't require HTTPS on our resources because in a local environment
 CSP_UPGRADE_INSECURE_REQUESTS = not DEBUG
@@ -490,3 +491,5 @@ WEBPUSH_SETTINGS = {
     "VAPID_PRIVATE_KEY": os.getenv("VAPID_PRIVATE_KEY"),
     "VAPID_ADMIN_EMAIL": os.getenv("VAPID_ADMIN_EMAIL")
 }
+
+EXTERNAL_CONTENT_AUTHOR_EMAIL = "externalcontent@localhost"

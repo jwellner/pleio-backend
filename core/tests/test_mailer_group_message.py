@@ -1,7 +1,5 @@
 from unittest import mock
 
-from django.test import override_settings
-
 from core.factories import GroupFactory
 from core.lib import get_full_url
 from core.mail_builders.group_message import SendGroupMessageMailer
@@ -24,8 +22,8 @@ class TestMailerGroupMessageTestCase(PleioTenantTestCase):
                                              sender=self.sender.guid,
                                              group=self.group.guid,
                                              copy=False)
+        self.switch_language('en')
 
-    @override_settings(LANGUAGE_CODE='en')
     @mock.patch("core.mail_builders.base.MailerBase.build_context")
     def test_properties(self, build_context):
         build_context.return_value = {}

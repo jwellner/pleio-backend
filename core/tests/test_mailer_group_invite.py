@@ -1,7 +1,6 @@
 from unittest import mock
 
 import faker
-from django.test import override_settings
 
 from core.factories import GroupFactory
 from core.lib import get_full_url
@@ -16,8 +15,8 @@ class TestMailerGroupInviteTestCase(PleioTenantTestCase):
 
         self.owner = UserFactory()
         self.group = GroupFactory(owner=self.owner)
+        self.switch_language('en')
 
-    @override_settings(LANGUAGE_CODE='en')
     @mock.patch("core.mail_builders.base.MailerBase.build_context")
     def test_properties(self, build_context):
         build_context.return_value = {}
@@ -41,7 +40,6 @@ class TestMailerGroupInviteTestCase(PleioTenantTestCase):
         self.assertEqual(mailer.get_sender(), self.owner)
         self.assertIn(self.group.name, mailer.get_subject())
 
-    @override_settings(LANGUAGE_CODE='en')
     @mock.patch("core.mail_builders.base.MailerBase.build_context")
     def test_user_properties(self, build_context):
         build_context.return_value = {}

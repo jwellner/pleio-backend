@@ -92,6 +92,18 @@ class SiteTestCase(PleioTenantTestCase):
                             value
                         }
                     }
+                    entityFilter {
+                        contentTypes {
+                            key
+                            value
+                        }
+                    }
+                    searchFilter {
+                        contentTypes {
+                            key
+                            value
+                        }
+                    }
                     showExtraHomepageFilters
                     showTagsInFeed
                     showTagsInDetail
@@ -160,6 +172,47 @@ class SiteTestCase(PleioTenantTestCase):
         self.assertEqual(data["site"]["preserveFileExif"], config.PRESERVE_FILE_EXIF)
         self.assertEqual(data["site"]["blockedUserIntroMessage"], config.BLOCKED_USER_INTRO_MESSAGE)
 
+        self.assertDictEqual(data['site']['activityFilter'], {
+            "contentTypes": [
+                {'key': 'blog', 'value': 'Blog'},
+                {'key': 'page', 'value': 'Tekst pagina'},
+                {'key': 'discussion', 'value': 'Discussie'},
+                {'key': 'event', 'value': 'Agenda-item'},
+                {'key': 'news', 'value': 'Nieuws'},
+                {'key': 'question', 'value': 'Vraag'},
+                {'key': 'wiki', 'value': 'Wiki'},
+                {'key': 'statusupdate', 'value': 'Update'}
+            ]
+        })
+        self.assertDictEqual(data['site']['entityFilter'], {
+            "contentTypes": [
+                {'key': 'blog', 'value': 'Blog'},
+                {'key': 'page', 'value': 'Pagina'},
+                {'key': 'discussion', 'value': 'Discussie'},
+                {'key': 'event', 'value': 'Agenda-item'},
+                {'key': 'news', 'value': 'Nieuws'},
+                {'key': 'question', 'value': 'Vraag'},
+                {'key': 'wiki', 'value': 'Wiki'},
+                {'key': 'file', 'value': 'Bestand'}
+            ]
+        })
+        self.assertDictEqual(data['site']['searchFilter'], {
+            "contentTypes": [
+                {'key': 'user', 'value': 'Gebruiker'},
+                {'key': 'group', 'value': 'Groep'},
+                {'key': 'blog', 'value': 'Blog'},
+                {'key': 'page', 'value': 'Pagina'},
+                {'key': 'discussion', 'value': 'Discussie'},
+                {'key': 'event', 'value': 'Agenda-item'},
+                {'key': 'news', 'value': 'Nieuws'},
+                {'key': 'question', 'value': 'Vraag'},
+                {'key': 'wiki', 'value': 'Wiki'},
+                {'key': 'file', 'value': 'Bestand'},
+                {'key': 'folder', 'value': 'Map'},
+                {'key': 'pad', 'value': 'Pad'},
+            ]
+        })
+
     def test_site_closed(self):
         cache.set("%s%s" % (connection.schema_name, 'IS_CLOSED'), True)
 
@@ -198,6 +251,6 @@ class SiteTestCase(PleioTenantTestCase):
         self.assertEqual(result['data']['site']['videocallProfilepage'], True)
 
     @override_local_config(VIDEOCALL_PROFILEPAGE=False)
-    def test_videocall_profilepage_enabled(self):
+    def test_videocall_profilepage_disabled(self):
         result = self.graphql_client.post(self.query, {})
         self.assertEqual(result['data']['site']['videocallProfilepage'], False)

@@ -10,6 +10,7 @@ from user.factories import AdminFactory
 class TestMailerFileScanFoundTestCase(PleioTenantTestCase):
     def setUp(self):
         super().setUp()
+        self.switch_language('en')
 
         self.admin = AdminFactory()
         self.virus_count = 42
@@ -18,7 +19,6 @@ class TestMailerFileScanFoundTestCase(PleioTenantTestCase):
                                           virus_count=self.virus_count)
 
     @override_settings(ENV='test')
-    @override_settings(LANGUAGE_CODE='en')
     @mock.patch('core.mail_builders.base.MailerBase.build_context')
     def test_properties(self, build_context):
         build_context.return_value = {}

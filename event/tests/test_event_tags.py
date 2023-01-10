@@ -9,14 +9,12 @@ class TestEventTagsTestCase(Template.TagsTestCaseTemplate):
     graphql_label = 'Event'
     model = Event
 
-    def setUp(self):
-        super().setUp()
-        self.variables_add = {'input': {
-            'title': "Test event",
-            'subtype': 'event',
-            'startDate': str(localtime()),
-            'endDate': str(localtime()),
-        }}
+    variables_add = {'input': {
+        'title': "Test event",
+        'subtype': 'event',
+        'startDate': str(localtime()),
+        'endDate': str(localtime()),
+    }}
 
     def article_factory(self, owner: User, **kwargs):
         kwargs.setdefault('start_date', localtime())

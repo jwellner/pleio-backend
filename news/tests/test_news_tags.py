@@ -7,12 +7,10 @@ class TestNewsTagsTestCase(Template.TagsTestCaseTemplate):
     graphql_label = 'News'
     model = News
 
-    def setUp(self):
-        super().setUp()
-        self.variables_add = {'input': {
-            'title': "Test newsitem",
-            'subtype': 'news',
-        }}
+    variables_add = {'input': {
+        'title': "Test newsitem",
+        'subtype': 'news',
+    }}
 
     def owner_factory(self):
         return EditorFactory(email="editor-owner@localhost")

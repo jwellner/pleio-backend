@@ -14,6 +14,7 @@ from django.contrib.auth.decorators import user_passes_test, login_required
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.shortcuts import redirect
 from django.urls import reverse
+from django.utils.module_loading import import_string
 from django.views import View
 from django.utils import timezone
 from celery.result import AsyncResult
@@ -209,6 +210,14 @@ def tasks(request):
             else:
                 replace_domain_links.delay(tenant_schema(), replace_domain)
                 messages.success(request, f"Replace links for {replace_domain} started.")
+        elif request.POST.get('task') == 'dispatch_cron':
+            from core.tasks.cronjobs import dispatch_hourly_cron
+            try:
+                method = import_string(request.POST.get("subtask"))
+                method.delay(schema_name=tenant_schema())
+                messages.success(request, "Scheduled task %s" % request.POST.get("subtask"))
+            except Exception as e:
+                messages.error(request, "%s at %s: %s" % (e.__class__.__name__, request.POST.get("subtask"), e))
         else:
             messages.error(request, "Invalid command")
 

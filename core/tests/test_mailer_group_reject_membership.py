@@ -1,7 +1,5 @@
 from unittest import mock
 
-from django.test import override_settings
-
 from core.factories import GroupFactory
 from core.mail_builders.group_reject_membership import RejectGroupMembershipMailer
 from core.tests.helpers import PleioTenantTestCase
@@ -18,8 +16,8 @@ class TestMailerGroupRejectMembershipTestCase(PleioTenantTestCase):
         self.mailer = RejectGroupMembershipMailer(user=self.user.guid,
                                                   receiver=self.owner.guid,
                                                   group=self.group.guid)
+        self.switch_language('en')
 
-    @override_settings(LANGUAGE_CODE='en')
     @mock.patch("core.mail_builders.base.MailerBase.build_context")
     def test_properties(self, build_context):
         build_context.return_value = {}

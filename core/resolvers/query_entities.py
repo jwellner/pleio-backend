@@ -9,6 +9,7 @@ from core.models import Entity
 from graphql import GraphQLError
 
 from core.models.tags import Tag, flat_category_tags
+from external_content.utils import is_external_content_source
 
 logger = logging.getLogger(__name__)
 
@@ -42,6 +43,8 @@ def conditional_subtypes_filter(subtypes):
                 q_objects.add(~Q(filefolder__isnull=True), Q.OR)
             elif object_type == 'task':
                 q_objects.add(~Q(task__isnull=True), Q.OR)
+            elif is_external_content_source(object_type):
+                q_objects.add(~Q(externalcontent__isnull=True) & Q(externalcontent__source_id=object_type), Q.OR)
     else:
         q_objects.add(~Q(news__isnull=True), Q.OR)
         q_objects.add(~Q(blog__isnull=True), Q.OR)
@@ -54,6 +57,7 @@ def conditional_subtypes_filter(subtypes):
         q_objects.add(~Q(page__isnull=True), Q.OR)
         q_objects.add(~Q(filefolder__isnull=True), Q.OR)
         q_objects.add(~Q(task__isnull=True), Q.OR)
+        q_objects.add(~Q(externalcontent__isnull=True), Q.OR)
     return q_objects
 
 
@@ -209,7 +213,8 @@ def resolve_entities(
                                                                'page__title',
                                                                'question__title',
                                                                'discussion__title',
-                                                               'event__title')))
+                                                               'event__title',
+                                                               'externalcontent__title')))
 
     order = [order_by]
 

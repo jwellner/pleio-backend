@@ -23,9 +23,9 @@ class TestMailerInviteToSiteTestCase(PleioTenantTestCase):
         self.mailer = InviteToSiteMailer(sender=self.sender.guid,
                                          email=self.invitation.email,
                                          message=self.MESSAGE)
+        self.switch_language('en')
 
     @override_settings(ENV='test')
-    @override_settings(LANGUAGE_CODE='en')
     @mock.patch('core.mail_builders.base.MailerBase.build_context')
     def test_properties(self, build_context):
         build_context.return_value = {}

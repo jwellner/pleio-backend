@@ -17,11 +17,9 @@ class TestFileTagsTestCase(Template.TagsTestCaseTemplate):
 
     _container = None
 
-    def setUp(self):
-        super().setUp()
-        self.variables_add = {'input': {
-            'file': 'test.gif'
-        }}
+    variables_add = {'input': {
+        'file': 'test.gif'
+    }}
 
     @property
     def container(self):
@@ -49,13 +47,10 @@ class TestFolderTagsTestCase(Template.TagsTestCaseTemplate):
 
     _container = None
 
-    def setUp(self):
-        super().setUp()
-
-        self.variables_add = {'input': {
-            'title': 'Some folder',
-            'subtype': 'folder'
-        }}
+    variables_add = {'input': {
+        'title': 'Some folder',
+        'subtype': 'folder'
+    }}
 
     @property
     def container(self):
