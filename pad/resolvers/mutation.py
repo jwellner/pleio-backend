@@ -83,6 +83,7 @@ def resolve_edit_pad(_, info, input):
     shared.resolve_update_title(entity, clean_input)
     shared.resolve_update_rich_description(entity, clean_input)
     shared.resolve_update_access_id(entity, clean_input)
+    shared.update_updated_at(entity)
 
     if clean_input.get("state"):
         entity.pad_state = clean_input.get("state")
