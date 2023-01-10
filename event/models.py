@@ -43,6 +43,9 @@ class Event(RichDescriptionMediaMixin, TitleMixin, CommentMixin, BookmarkMixin, 
 
     qr_access = models.BooleanField(default=False)
 
+    attendee_welcome_mail_content = models.TextField(default='', blank=True)
+    attendee_welcome_mail_subject = models.CharField(max_length=256, default='', blank=True)
+
     def has_children(self):
         if self.children.count() > 0:
             return True
@@ -95,7 +98,7 @@ class Event(RichDescriptionMediaMixin, TitleMixin, CommentMixin, BookmarkMixin, 
             if self.is_full():
                 break
 
-            attendee.state = 'accept'
+            attendee.update_state('accept')
             attendee.save()
 
             if self.qr_access:
@@ -274,6 +277,16 @@ class EventAttendee(models.Model):
         if bool(self.checked_in_at):
             return _("Checked in")
         return self._state_label.get(self.state) or self.state
+
+    def update_state(self, new_state):
+        if new_state == self.state:
+            return
+
+        self.state = new_state
+
+        if new_state == 'accept' and self.event.attendee_welcome_mail_content:
+            from event.mail_builders.attendee_welcome_mail import send_mail
+            send_mail(attendee=self)
 
 
 class EventAttendeeRequest(models.Model):

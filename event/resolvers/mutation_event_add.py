@@ -16,7 +16,8 @@ def resolve_add_event(_, info, input):
 
     user = info.context["request"].user
 
-    clean_input = clean_graphql_input(input)
+    clean_input = clean_graphql_input(input, ['attendeeWelcomeMailSubject',
+                                              'attendeeWelcomeMailContent'])
 
     shared.assert_authenticated(user)
 
@@ -63,6 +64,7 @@ def resolve_add_event(_, info, input):
     event_shared.resolve_update_rsvp(entity, clean_input)
     event_shared.resolve_update_attend_without_account(entity, clean_input)
     event_shared.resolve_update_qr_access(entity, clean_input)
+    event_shared.resolve_update_attendee_welcome_mail(entity, clean_input)
 
     entity.save()
     entity.add_follow(user)

@@ -1,9 +1,10 @@
 from graphql import GraphQLError
 from django.core.exceptions import ObjectDoesNotExist
 from core.lib import clean_graphql_input
-from core.constances import NOT_LOGGED_IN, COULD_NOT_FIND, COULD_NOT_SAVE
+from core.constances import COULD_NOT_FIND, COULD_NOT_SAVE
 from core.models import Comment
-from  core.resolvers import shared
+from core.resolvers import shared
+
 
 def resolve_edit_comment(_, info, input):
     # pylint: disable=redefined-builtin
@@ -21,11 +22,9 @@ def resolve_edit_comment(_, info, input):
     if not comment.can_write(user):
         raise GraphQLError(COULD_NOT_SAVE)
 
-    if 'richDescription' in clean_input:
-        comment.rich_description = clean_input.get("richDescription")
+    shared.resolve_update_rich_description(comment, clean_input)
 
     shared.update_updated_at(comment)
-
     comment.save()
 
     return {

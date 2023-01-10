@@ -2,44 +2,11 @@
 {% load i18n %}
 
 {% block body %}
-{% blocktrans %}
-Confirm your registration for {{ title }}.<br><br>
-{% endblocktrans %}
+    {% blocktrans %}Confirm your registration for {{ title }}.{% endblocktrans %}<br><br>
 
-{% if location != None and locationAddress != None and locationLink != None %}
-    {% blocktrans %}    
-    Location: <a href="{{ locationLink }}"> {{ location }}</a> - {{ locationAddress }}<br>
-    {% endblocktrans %}
-{% elif location != None and locationAddress != None %} 
-    {% blocktrans %}    
-    Location: {{ location }} - {{ locationAddress }}<br>
-    {% endblocktrans %}
-{% elif locationAddress != None and locationLink != None %}
-    {% blocktrans %} 
-    Location: <a href="{{ locationLink }}"> {{ locationAddress }}</a><br>
-    {% endblocktrans %}
-{% elif location != None and locationLink != None %}
-    {% blocktrans %}
-    Location: <a href="{{ locationLink }}"> {{ location }}</a><br>
-    {% endblocktrans %}
-{% elif location != None %} 
-    {% blocktrans %}
-    Location: {{ location }}<br>
-    {% endblocktrans %}
-{% elif locationAddress != None %} 
-    {% blocktrans %}
-    Location: {{ locationAddress }}<br>
-    {% endblocktrans %}
-{% elif locationLink != None %}
-    {% blocktrans %}
-    Location: <a href="{{ locationLink }}"> Location </a><br>
-    {% endblocktrans %}
-{% endif %}
+    {% include "email/element/event_date_location.html" %}
 
-{% blocktrans %}
-Date: {{ start_date }}<br><br>
+    {% blocktrans %}Click on the link below to confirm.{% endblocktrans %}<br><br>
 
-Click on the link below to confirm.<br><br>
-<a href="{{ link }}">{{ link }}</a>
-{% endblocktrans %}
+    <a href="{{ link }}">{{ link }}</a>
 {% endblock %}

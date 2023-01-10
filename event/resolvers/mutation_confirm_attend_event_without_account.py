@@ -75,7 +75,7 @@ def resolve_confirm_attend_event_without_account(_, info, input):
             if event.is_full():
                 raise GraphQLError(EVENT_IS_FULL)
 
-        attendee.state = state
+        attendee.update_state(state)
         attendee.save()
 
         submit_attend_event_wa_confirm(attendee.id, attendee_request.code)

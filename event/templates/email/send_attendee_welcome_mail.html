@@ -1,0 +1,16 @@
+{% extends "email/base_notification.html" %}
+{% load i18n %}
+
+{% block header_subtitle %}
+    {% include "email/element/header_subtitle.html" with header_subtitle=subject %}
+{% endblock %}
+
+{% block body %}
+    {% include "email/element/title-link.html" with link_url=event_url link_title=event %}
+
+    <div>{{ message }}</div>
+
+    <br/><br/>
+    {% include "email/element/event_date_location.html" %}
+
+{% endblock %}

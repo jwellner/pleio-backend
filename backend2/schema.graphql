@@ -117,6 +117,8 @@ input addEntityInput {
     scheduleDeleteEntity: DateTime
     qrAccess: Boolean
     suggestedItems: [String]
+    attendeeWelcomeMailSubject: String
+    attendeeWelcomeMailContent: SecureRichText
 }
 
 type addEntityPayload {
@@ -458,7 +460,6 @@ type copyEntityPayload {
     entity: Entity
 }
 
-
 input deleteColumnInput {
     guid: String!
 }
@@ -662,6 +663,8 @@ input editEntityInput {
     ownerGuid: String
     qrAccess: Boolean
     suggestedItems: [String]
+    attendeeWelcomeMailSubject: String
+    attendeeWelcomeMailContent: SecureRichText
 }
 
 type editEntityPayload {
@@ -1056,6 +1059,8 @@ type Event implements Entity {
     isPinned: Boolean!
     qrAccess: Boolean
     lastSeen: DateTime
+    attendeeWelcomeMailSubject: String
+    attendeeWelcomeMailContent: SecureRichText
 }
 
 """Show upcoming events or previous events"""
@@ -1522,7 +1527,6 @@ type Mutation {
     editSiteSetting(input: editSiteSettingInput!): editSiteSettingPayload
     addEntity(input: addEntityInput!): addEntityPayload
     editEntity(input: editEntityInput!): editEntityPayload
-    """Currently only implemented for events"""
     copyEntity(input: copyEntityInput!): copyEntityPayload
     deleteEntity(input: deleteEntityInput!): deleteEntityPayload
     deleteEntities(input: deleteEntitiesInput!): deleteEntitiesPayload

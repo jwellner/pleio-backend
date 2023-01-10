@@ -1,0 +1,24 @@
+{% load i18n %}
+
+{% if locationLink %}
+    {% if location and locationAddress %}
+        {% blocktrans %}Location: <a href="{{ locationLink }}">{{ location }}</a>{% endblocktrans %} - {{ locationAddress }}<br/>
+    {% elif location %}
+        {% blocktrans %}Location: <a href="{{ locationLink }}">{{ location }}</a>{% endblocktrans %}
+    {% elif locationAddress %}
+        {% blocktrans with location=locationAddress %}Location: <a href="{{ locationLink }}">{{ location }}</a>{% endblocktrans %}
+    {% else %}
+        {% blocktrans with location=locationLink %}Location: <a href="{{ locationLink }}">{{ location }}</a>{% endblocktrans %}
+    {% endif %}
+{% else %}
+    {% if location and locationAddress %}
+        {% blocktrans %}Location: {{ location }}{% endblocktrans %} - {{ locationAddress }}<br/>
+    {% elif location %}
+        {% blocktrans %}Location: {{ location }}{% endblocktrans %}<br/>
+    {% elif locationAddress %}
+        {% blocktrans with location=locationAddress%}Location: {{ location }}{% endblocktrans %}<br/>
+    {% endif %}
+{% endif %}
+
+{% blocktrans with date=start_date %}Date: {{ date }}{% endblocktrans %}<br>
+

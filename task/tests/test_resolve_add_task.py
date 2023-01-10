@@ -15,7 +15,6 @@ class AddTaskTestCase(PleioTenantTestCase):
 
         self.data = {
             "input": {
-                "type": "object",
                 "subtype": "task",
                 "title": "My first Task",
                 "richDescription": "richDescription",

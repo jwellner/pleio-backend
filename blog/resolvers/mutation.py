@@ -65,7 +65,6 @@ def resolve_edit_blog(_, info, input):
 
     revision = shared.resolve_start_revision(entity, user)
 
-    shared.resolve_update_access_id(entity, clean_input)
     shared.resolve_update_tags(entity, clean_input)
     shared.resolve_update_access_id(entity, clean_input)
     shared.resolve_update_title(entity, clean_input)

@@ -16,7 +16,6 @@ class AddStatusUpdateTestCase(PleioTenantTestCase):
 
         self.data = {
             "input": {
-                "type": "object",
                 "subtype": "status_update",
                 "title": "My first StatusUpdate",
                 "richDescription": "richDescription",

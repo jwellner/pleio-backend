@@ -16,7 +16,8 @@ def resolve_edit_event(_, info, input):
     user = info.context["request"].user
     entity = load_entity_by_id(input['guid'], [Event])
 
-    clean_input = clean_graphql_input(input)
+    clean_input = clean_graphql_input(input, ['attendeeWelcomeMailSubject',
+                                              'attendeeWelcomeMailContent'])
 
     shared.assert_authenticated(user)
     shared.assert_write_access(entity, user)
@@ -55,6 +56,7 @@ def resolve_edit_event(_, info, input):
     event_shared.resolve_update_attend_without_account(entity, clean_input)
     event_shared.resolve_update_qr_access(entity, clean_input)
     event_shared.resolve_update_slots_available(entity, clean_input)
+    event_shared.resolve_update_attendee_welcome_mail(entity, clean_input)
 
     # only admins can edit these fields
     if user.has_role(USER_ROLES.ADMIN):

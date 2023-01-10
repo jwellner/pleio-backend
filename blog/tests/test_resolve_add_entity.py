@@ -24,7 +24,6 @@ class AddBlogTestCase(PleioTenantTestCase):
 
         self.data = {
             "input": {
-                "type": "object",
                 "subtype": "blog",
                 "title": "My first Blog",
                 "richDescription": "richDescription",
@@ -118,7 +117,6 @@ class AddBlogTestCase(PleioTenantTestCase):
     def test_add_unpublished_blog_admin(self):
         variables = {
             "input": {
-                "type": "object",
                 "subtype": "blog",
                 "title": "My first Blog",
                 "richDescription": "richDescription",

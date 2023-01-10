@@ -21,7 +21,6 @@ class AddNewsTestCase(PleioTenantTestCase):
 
         self.data = {
             "input": {
-                "type": "object",
                 "subtype": "news",
                 "title": "My first News",
                 "richDescription": "richDescription",
