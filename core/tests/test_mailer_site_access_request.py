@@ -19,9 +19,9 @@ class TestMailerSiteAccessRequestTestCase(PleioTenantTestCase):
 
         self.mailer = SiteAccessRequestMailer(admin=self.admin.guid,
                                               name=self.NAME)
+        self.switch_language('en')
 
     @override_settings(ENV='test')
-    @override_settings(LANGUAGE_CODE='en')
     @mock.patch('core.mail_builders.base.MailerBase.build_context')
     def test_properties(self, build_context):
         build_context.return_value = {}

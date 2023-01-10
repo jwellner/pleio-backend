@@ -1,7 +1,5 @@
 from unittest import mock
 
-from django.test import override_settings
-
 from core import config
 from core.mail_builders.site_access_changed import SiteAccessChangedMailer
 from core.tests.helpers import PleioTenantTestCase
@@ -20,8 +18,8 @@ class TestMailerSiteAccessChangedTestCase(PleioTenantTestCase):
         self.mailer = SiteAccessChangedMailer(admin=self.admin.guid,
                                               sender=self.sender.guid,
                                               is_closed=self.is_closed)
+        self.switch_language('en')
 
-    @override_settings(LANGUAGE_CODE='en')
     @mock.patch('core.mail_builders.base.MailerBase.build_context')
     def test_properties(self, build_context):
         build_context.return_value = {}

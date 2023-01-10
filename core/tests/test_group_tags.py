@@ -13,11 +13,9 @@ class TestGroupTagsTestCase(Template.TagsTestCaseTemplate):
     graphql_update_input = 'editGroupInput'
     model = Group
 
-    def setUp(self):
-        super().setUp()
-        self.variables_add = {'input': {
-            'name': "Test group"
-        }}
+    variables_add = {'input': {
+        'name': "Test group"
+    }}
 
     def article_factory(self, owner: User, **kwargs):
         if 'title' in kwargs:

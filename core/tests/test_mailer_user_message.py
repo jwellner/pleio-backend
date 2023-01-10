@@ -1,7 +1,5 @@
 from unittest import mock
 
-from django.test import override_settings
-
 from core.mail_builders.user_send_message import UserSendMessageMailer
 from core.tests.helpers import PleioTenantTestCase
 from user.factories import UserFactory
@@ -22,8 +20,8 @@ class TestMailerUserOnDeleteTestCase(PleioTenantTestCase):
                                             receiver=self.receiver.guid,
                                             sender=self.sender.guid,
                                             copy=False)
+        self.switch_language('en')
 
-    @override_settings(LANGUAGE_CODE='en')
     @mock.patch("core.mail_builders.base.MailerBase.build_context")
     def test_properties(self, build_context):
         build_context.return_value = {}
@@ -39,7 +37,6 @@ class TestMailerUserOnDeleteTestCase(PleioTenantTestCase):
         self.assertEqual(self.mailer.get_sender(), self.sender)
         self.assertEqual(self.mailer.get_subject(), "Message from Wilfred of Marcel: Demo subject")
 
-    @override_settings(LANGUAGE_CODE='en')
     def test_copy(self):
         # When
         self.mailer.copy = True

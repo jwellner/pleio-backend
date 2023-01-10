@@ -7,7 +7,9 @@ from graphql import GraphQLError
 from cms.models import Page
 from core import config
 from core.constances import USER_ROLES
-from core.lib import get_language_options, get_exportable_user_fields, get_exportable_content_types, get_access_ids, get_activity_filters
+from core.lib import (get_language_options, get_access_ids,
+                      get_exportable_user_fields, get_exportable_content_types,
+                      get_activity_filters, get_entity_filters, get_search_filters)
 from core.models import ProfileField, ProfileFieldValidator, SiteInvitation, SiteAccessRequest, UserProfile, ProfileSet
 from core.resolvers import shared
 from user.models import User
@@ -644,7 +646,25 @@ def resolve_style(obj, info):
 @site_settings_public.field('activityFilter')
 def resolve_activity_filter(obj, info):
     # pylint: disable=unused-argument
-    return get_activity_filters()
+    return {
+        "contentTypes": get_activity_filters()
+    }
+
+
+@site_settings_public.field('entityFilter')
+def resolve_entity_filter(obj, info):
+    # pylint: disable=unused-argument
+    return {
+        "contentTypes": get_entity_filters()
+    }
+
+
+@site_settings_public.field('searchFilter')
+def resolve_search_filter(obj, info):
+    # pylint: disable=unused-argument
+    return {
+        "contentTypes": get_search_filters()
+    }
 
 
 @site_settings_public.field('usersOnline')

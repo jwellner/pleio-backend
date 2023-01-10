@@ -1,6 +1,5 @@
 from unittest import mock
 
-from django.test import override_settings
 from faker import Faker
 
 from core import config, override_local_config
@@ -22,9 +21,9 @@ class TestMailerSiteAccessRequestDeniedTestCase(PleioTenantTestCase):
         self.mailer = SiteAccessRequestDeniedMailer(email=self.EMAIL,
                                                     name=self.NAME,
                                                     sender=self.sender.guid)
+        self.switch_language('en')
 
     @override_local_config(SITE_MEMBERSHIP_DENIED_INTRO=INTRO)
-    @override_settings(LANGUAGE_CODE='en')
     @mock.patch('core.mail_builders.base.MailerBase.build_context')
     def test_properties(self, build_context):
         build_context.return_value = {}

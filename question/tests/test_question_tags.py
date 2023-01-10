@@ -6,12 +6,10 @@ class TestQuestionTagsTestCase(Template.TagsTestCaseTemplate):
     graphql_label = 'Question'
     model = Question
 
-    def setUp(self):
-        super().setUp()
-        self.variables_add = {'input': {
-            'title': "Any questions?",
-            'subtype': 'question',
-        }}
+    variables_add = {'input': {
+        'title': "Any questions?",
+        'subtype': 'question',
+    }}
 
     include_site_search = True
     include_entity_search = True

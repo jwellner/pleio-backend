@@ -1,6 +1,5 @@
 from unittest import mock
 
-from django.test import override_settings
 from faker import Faker
 from mixer.backend.django import mixer
 from notifications.signals import notify
@@ -40,6 +39,7 @@ class TestNotificationsMailerTestCase(PleioTenantTestCase):
                                                          clean_notification.pk,
                                                          group_notification.pk],
                                           mail_type=self.mail_type)
+        self.switch_language('en')
 
     def create_notification(self, action_object, verb='created'):
         notification = notify.send(self.author, recipient=[self.recipient], verb=verb, action_object=action_object)[0][1][0]
@@ -79,22 +79,18 @@ class TestNotificationsMailerTestCase(PleioTenantTestCase):
         self.assertEqual(mocked_get_full_url.call_args.args,
                          (mocked_create_unsubscribe_url.return_value,))
 
-    @override_settings(LANGUAGE_CODE='en')
     @override_local_config(NAME="Testing Site")
     def test_mailer_subject(self):
         self.assertEqual(self.mailer.get_subject(), 'New notifications at Testing Site')
 
-    @override_settings(LANGUAGE_CODE='en')
     def test_mailer_subject_one(self):
         self.mailer.notifications = [self.blog_notification]
         self.assertEqual(self.mailer.get_subject(), f'Notification on {self.blog.title}')
 
-    @override_settings(LANGUAGE_CODE='en')
     def test_mailer_subject_one_notitle(self):
         self.mailer.notifications = [self.clean_notification]
         self.assertEqual(self.mailer.get_subject(), 'Notification on blog')
 
-    @override_settings(LANGUAGE_CODE='en')
     def test_mailer_subject_one_grouped(self):
         self.mailer.notifications = [self.clean_grouped_notification]
         self.assertEqual(self.mailer.get_subject(), f'Notification on blog in group {self.group.name}')

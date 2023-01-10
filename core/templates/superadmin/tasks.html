@@ -16,11 +16,32 @@
                 <input type="hidden" name="task" value="elasticsearch_rebuild">
                 <p>This task will rebuild the complete search index for this site.</p>
                 <div class="controls d-flex align-items-start justify-content-start">
-                    <button type="submit" class="btn btn-primary">Execute rebuild elasticsearch</button>
-                    <select name="index_name" class="form-select" style="width: auto;margin-left: 1rem">
+                    <select name="index_name" class="form-select" style="width: auto;margin-right: 1rem">
                         <option value="">All indices</option>
                         <option value="group,user">Groups and users</option>
                     </select>
+                    <button type="submit" class="btn btn-primary">Rebuild</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    <br/>
+
+    <div class="card cron-jobs">
+        <h5 class="card-header">Cron</h5>
+        <div class="card-body">
+            <form method="post">
+                {% csrf_token %}
+                <input type="hidden" name="task" value="dispatch_cron">
+                <p>This task will dispatch a cron task one extra time for only this site.</p>
+                <div class="controls d-flex align-items-start justify-content-start">
+                    <select name="subtask" class="form-select" style="width: auto;margin-right: 1rem">
+                        <option value="">--</option>
+                        <option value="core.tasks.cronjobs.depublicate_content">Scheduled archive / delete</option>
+                        <option value="core.tasks.cronjobs.make_publication_revisions">Make publication revisions</option>
+                        <option value="external_content.tasks.fetch_external_content">Fetch external content</option>
+                    </select>
+                    <button type="submit" class="btn btn-primary">Execute</button>
                 </div>
             </form>
         </div>
@@ -41,8 +62,6 @@
                 <button type="submit" class="btn btn-primary">Execute replace links</button>
             </form>
         </div>
-    </div>
-
     </div>
 
 {% endblock %}

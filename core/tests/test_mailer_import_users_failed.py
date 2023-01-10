@@ -1,7 +1,5 @@
 from unittest import mock
 
-from django.test import override_settings
-
 from core.mail_builders.user_import_failed_mailer import UserImportFailedMailer
 from core.tests.helpers import PleioTenantTestCase
 from user.factories import UserFactory
@@ -22,8 +20,8 @@ class TestMailerImportUsersFailedTestCase(PleioTenantTestCase):
         self.mailer = UserImportFailedMailer(user=self.operating_user.guid,
                                              stats=self.STATS,
                                              error_message=self.ERROR_MESSAGE)
+        self.switch_language('en')
 
-    @override_settings(LANGUAGE_CODE='en')
     @mock.patch('core.mail_builders.base.MailerBase.build_context')
     def test_mailer_properties(self, mocked_build_context):
         mocked_build_context.return_value = {}

@@ -1,6 +1,7 @@
 import base64
 import ipaddress
 import json
+import logging
 import os
 import re
 import secrets
@@ -8,11 +9,14 @@ import tempfile
 import mimetypes
 import uuid
 from functools import wraps
+from inspect import isfunction
 from urllib.parse import urljoin
 
 from PIL import Image, UnidentifiedImageError
+from django.core.cache import cache
 from django.http import HttpRequest, HttpResponseForbidden
 import html2text
+from django.utils.module_loading import import_string
 from pytz import timezone
 from colour import Color
 from core.constances import ACCESS_TYPE
@@ -21,12 +25,14 @@ from django.apps import apps
 from django.conf import settings
 from django.core.validators import URLValidator
 from django.db import connection
-from django.utils import timezone as django_timezone
+from django.utils import timezone as django_timezone, translation
 from django.utils.text import slugify
 from django.utils.translation import ugettext, ugettext_lazy
 from enum import Enum
 
 from core.utils.mail import EmailSettingsTokenizer
+
+logger = logging.getLogger(__name__)
 
 
 class TypeModels(Enum):
@@ -49,6 +55,8 @@ class TypeModels(Enum):
     file = "file.FileFolder"
     folder = "file.FileFolder"
     pad = "file.FileFolder"
+    externalcontent = 'external_content.ExternalContent'
+    externalcontentsource = 'external_content.ExternalContentSource'
 
 
 def get_model_by_subtype(subtype):
@@ -224,44 +232,37 @@ def get_access_ids(obj=None):
     return accessIds
 
 
+def get_core_hook(hook_name):
+    key = "CORE_HOOK_REPOSITORY:%s" % hook_name
+    if not cache.get(key):
+        result = []
+        for app_config in apps.get_app_configs():
+            try:
+                hook_path = "{}.core_hooks.{}".format(app_config.name, hook_name)
+                assert isfunction(import_string(hook_path))
+                result.append(hook_path)
+            except ImportError:
+                pass
+        cache.set(key, {'result': result})
+    return cache.get(key)['result']
+
+
 def get_activity_filters():
-    """TODO: should only return active content"""
-    return {
-        'contentTypes': [
-            {
-                'key': 'event',
-                'value': ugettext_lazy("Event")
-            },
-            {
-                'key': 'blog',
-                'value': ugettext_lazy("Blog")
-            },
-            {
-                'key': 'discussion',
-                'value': ugettext_lazy("Discussion")
-            },
-            {
-                'key': 'news',
-                'value': ugettext_lazy("News")
-            },
-            {
-                'key': 'statusupdate',
-                'value': ugettext_lazy("Update")
-            },
-            {
-                'key': 'question',
-                'value': ugettext_lazy("Question")
-            },
-            {
-                'key': 'wiki',
-                'value': ugettext_lazy("Wiki")
-            },
-            {
-                'key': 'page',
-                'value': ugettext_lazy("Text page")
-            },
-        ]
-    }
+    for hook in get_core_hook('get_activity_filters'):
+        hook_function = import_string(hook)
+        yield from hook_function()
+
+
+def get_entity_filters():
+    for hook in get_core_hook('get_entity_filters'):
+        hook_function = import_string(hook)
+        yield from hook_function()
+
+
+def get_search_filters():
+    for hook in get_core_hook('get_search_filters'):
+        hook_function = import_string(hook)
+        yield from hook_function()
 
 
 def generate_object_filename(obj, filename):

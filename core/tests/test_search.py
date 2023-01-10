@@ -17,6 +17,8 @@ class SearchTestCase(ElasticsearchTestCase):
     def setUp(self):
         super().setUp()
 
+        self.override_config(COLLAB_EDITING_ENABLED=True)
+
         self.common_tag1 = "Alles moet weg"
         self.common_tag2 = "Niets blijft staan"
         self.q = "Alles"

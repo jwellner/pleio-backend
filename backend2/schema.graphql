@@ -53,6 +53,14 @@ type ActivityFilter {
     contentTypes: [KeyValueItem]!
 }
 
+type EntityFilter {
+    contentTypes: [KeyValueItem]
+}
+
+type SearchFilter {
+    contentTypes: [KeyValueItem]
+}
+
 type ActivityList {
     total: Int!
     edges: [Activity]
@@ -1000,6 +1008,27 @@ type EntityList {
     edges: [Entity]
 }
 
+type ExternalContent implements Entity {
+    guid: String!
+    status: Int
+    title: String
+    tags: [String]
+    tagCategories: [TagCategory]
+    description: String
+    timeCreated: DateTime
+    timeUpdated: DateTime
+    timePublished: DateTime
+    canEdit: Boolean!
+    accessId: Int
+    writeAccessId: Int
+    owner: User
+
+    source: ExternalContentSource
+    remoteId: String
+    url: String
+}
+
+
 type Event implements Entity {
     guid: String!
     status: Int
@@ -1669,6 +1698,10 @@ type Mutation {
     addProfileSetManager(userGuid: String!, profileSetGuid: String!): ProfileSetManagerPayload
     removeProfileSetManager(userGuid: String!, profileSetGuid: String!): ProfileSetManagerPayload
     createContentSnapshot: ContentSnapshotPayload
+
+    deleteExternalContentSource(key: String!): ExternalContentSourcePayload
+    addDatahubExternalContentSource(input: AddDatahubContentSourceInput!): ExternalContentSourcePayload
+    editDatahubExternalContentSource(input: UpdateDatahubContentSourceInput!): ExternalContentSourcePayload
 }
 
 type ProfileSetManagerPayload {
@@ -2023,6 +2056,7 @@ type Query {
     ): RevisionList
     appointmentData: AppointmentDataPayload
     appointmentTimes(agendaId: String!, appointmentTypeId: String!, startDate: DateTime, endDate: DateTime): [AppointmentTimes]
+    externalContentSources(handler: ExternalContentSourceHandlerEnum!): ExternalContentSourcePayload
     contentSnapshots: ContentSnapshotPayload
 }
 
@@ -2035,10 +2069,12 @@ type AppointmentDataPayload {
     agendas: [AppointmentAgenda]
     appointmentTypes: [AppointmentType]
 }
+
 type AppointmentAgenda {
     id: String
     name: String
 }
+
 type AppointmentType {
     id: String
     name: String
@@ -2224,6 +2260,7 @@ enum SearchOrderBy {
 }
 
 type SearchTotal {
+    title: String
     subtype: String!
     total: Int!
 }
@@ -2330,6 +2367,8 @@ type Site {
     customTagsAllowed: Boolean!
     tagCategories: [TagCategory]!
     activityFilter: ActivityFilter
+    entityFilter: EntityFilter
+    searchFilter: SearchFilter
     showExtraHomepageFilters: Boolean!
     showTagsInFeed: Boolean!
     showTagsInDetail: Boolean!
@@ -3179,4 +3218,48 @@ input signSiteAgreementVersionInput {
 
 type signSiteAgreementVersionPayload {
     siteAgreementVersion: SiteAgreementVersion
+}
+
+enum ExternalContentSourceHandlerEnum {
+    datahub
+    default
+}
+
+type ExternalContentSourcePayload {
+    edges: [ExternalContentSource]
+}
+
+interface ExternalContentSource {
+    key: String
+    name: String
+    pluralName: String
+    handlerId: ExternalContentSourceHandlerEnum
+}
+
+type DefaultExternalContentSource implements ExternalContentSource {
+    key: String
+    name: String
+    pluralName: String
+    handlerId: ExternalContentSourceHandlerEnum
+}
+
+type DatahubContentSource implements ExternalContentSource {
+    key: String
+    name: String
+    pluralName: String
+    handlerId: ExternalContentSourceHandlerEnum
+    apiUrl: String
+}
+
+input AddDatahubContentSourceInput {
+    name: String
+    pluralName: String
+    apiUrl: String
+}
+
+input UpdateDatahubContentSourceInput {
+    key: String!
+    name: String!
+    pluralName: String!
+    apiUrl: String!
 }

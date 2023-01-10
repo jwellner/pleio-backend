@@ -11,12 +11,10 @@ class TestPageTagsTestCase(Template.TagsTestCaseTemplate):
     graphql_label = 'Page'
     model = Page
 
-    def setUp(self):
-        super().setUp()
-        self.variables_add = {'input': {
-            'title': "Test page",
-            'pageType': 'text',
-        }}
+    variables_add = {'input': {
+        'title': "Test page",
+        'pageType': 'text',
+    }}
 
     def owner_factory(self):
         return EditorFactory(email="editor-owner@localhost")
@@ -28,4 +26,3 @@ class TestPageTagsTestCase(Template.TagsTestCaseTemplate):
 
     # TODO: Om 1 of andere reden is deze instabiel voor cms pagina's....
     # include_activity_search = True
-

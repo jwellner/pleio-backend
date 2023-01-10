@@ -1,6 +1,5 @@
 from django.core.exceptions import ValidationError
 from django.utils import timezone
-from django.test import override_settings
 from mixer.backend.django import mixer
 
 from core.constances import ATTENDEE_ORDER_BY, ORDER_DIRECTION
@@ -15,8 +14,9 @@ class AttendeesTestCase(PleioTenantTestCase):
 
     def setUp(self):
         super().setUp()
-        self.eventPublic = EventFactory(owner=UserFactory())
+        self.switch_language('en')
 
+        self.eventPublic = EventFactory(owner=UserFactory())
         self.admin = AdminFactory()
 
         mixer.blend(
@@ -67,7 +67,6 @@ class AttendeesTestCase(PleioTenantTestCase):
             }
         """
 
-    @override_settings(LANGUAGE_CODE='en')
     def test_attendee_unique_email_constraint(self):
 
         EventAttendee.objects.create(
@@ -86,7 +85,6 @@ class AttendeesTestCase(PleioTenantTestCase):
             )
         self.assertTrue('Event attendee with this Event and Email already exists.' in str(context.exception))
 
-    @override_settings(LANGUAGE_CODE='en')
     def test_attendee_unique_user_constraint(self):
         EventAttendee.objects.create(
             event=self.eventPublic,

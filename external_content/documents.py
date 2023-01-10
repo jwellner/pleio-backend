@@ -1,0 +1,55 @@
+from django_elasticsearch_dsl import fields
+from django_elasticsearch_dsl.registries import registry
+from .models import ExternalContent
+from core.documents import DefaultDocument, custom_analyzer
+
+
+@registry.register_document
+class ExternalContentDocument(DefaultDocument):
+    id = fields.KeywordField()
+    is_archived = fields.BooleanField()
+    tags = fields.ListField(fields.TextField(
+        fields={'raw': fields.KeywordField()}
+    ))
+    tags_matches = fields.ListField(fields.TextField(
+        fields={'raw': fields.KeywordField()}
+    ))
+    category_tags = fields.ListField(fields.KeywordField(attr='category_tags_index'))
+
+    read_access = fields.ListField(fields.KeywordField())
+
+    type = fields.KeywordField(attr="type_to_string")
+
+    title = fields.TextField(
+        analyzer=custom_analyzer,
+        search_analyzer="standard",
+        boost=2,
+        fields={'raw': fields.KeywordField()}
+    )
+    description = fields.TextField(
+        analyzer=custom_analyzer,
+        search_analyzer="standard",
+        attr='description',
+    )
+
+    owner = fields.ObjectField(properties={
+        'name': fields.TextField(analyzer=custom_analyzer, search_analyzer="standard")
+    })
+
+    def prepare_tags(self, instance):
+        return [x.lower() for x in instance.tags]
+
+    def prepare_is_archived(self, _):
+        return False
+
+    class Index:
+        name = 'external_content'
+
+    class Django:
+        model = ExternalContent
+
+        fields = [
+            'created_at',
+            'updated_at',
+            'published'
+        ]
