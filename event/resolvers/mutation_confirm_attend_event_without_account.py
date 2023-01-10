@@ -66,10 +66,11 @@ def resolve_confirm_attend_event_without_account(_, info, input):
             attendee = None
 
         if not attendee:
-            attendee = EventAttendee()
-            attendee.name = attendee_request.name
-            attendee.event = event
-            attendee.email = email
+            attendee = EventAttendee.objects.create(
+                event=event,
+                name=attendee_request.name,
+                email=email,
+            )
 
         if state == "accept":
             if event.is_full():

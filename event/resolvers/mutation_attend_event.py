@@ -88,11 +88,12 @@ def resolve_attend_event(_, info, input):
         }
 
     if not attendee:
-        attendee = EventAttendee()
-        attendee.event = event
-        attendee.user = user
-        attendee.email = user.email
-        attendee.name = user.name
+        attendee = EventAttendee.objects.create(
+            event=event,
+            user=user,
+            email=user.email,
+            name=user.name
+        )
 
     if clean_input["state"] not in ["accept", "reject", "maybe", "waitinglist"]:
         raise GraphQLError(EVENT_INVALID_STATE)

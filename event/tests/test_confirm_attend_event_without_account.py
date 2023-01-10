@@ -12,12 +12,15 @@ class ConfirmAttendEventWithoutAccountTestCase(PleioTenantTestCase):
         super().setUp()
 
         self.authenticated_user = UserFactory()
-        self.event = EventFactory(owner=UserFactory(),
-                                  location="place",
-                                  location_link="test.com",
-                                  location_address="Straat 10",
-                                  max_attendees=1,
-                                  attend_event_without_account=True)
+        self.event = EventFactory(
+            owner=UserFactory(),
+            location="place",
+            location_link="test.com",
+            location_address="Straat 10",
+            max_attendees=1,
+            attend_event_without_account=True,
+            attendee_welcome_mail_content=self.tiptap_paragraph("Welcome!")
+        )
 
         EventAttendeeRequest.objects.create(code='1234567890', email='pete@tenant.fast-test.com', event=self.event)
         EventAttendeeRequest.objects.create(code='1234567890', email='test@tenant.fast-test.com', event=self.event)
@@ -40,8 +43,9 @@ class ConfirmAttendEventWithoutAccountTestCase(PleioTenantTestCase):
             }
         """
 
+    @mock.patch("event.mail_builders.attendee_welcome_mail.send_mail")
     @mock.patch('event.resolvers.mutation_confirm_attend_event_without_account.submit_attend_event_wa_confirm')
-    def test_confirm_attend_event_without_account(self, mocked_send_mail):
+    def test_confirm_attend_event_without_account(self, mocked_send_mail, mocked_welcome_mail):
         variables = {
             "input": {
                 "guid": self.event.guid,
@@ -56,6 +60,9 @@ class ConfirmAttendEventWithoutAccountTestCase(PleioTenantTestCase):
         self.assertEqual(data["confirmAttendEventWithoutAccount"]["entity"]["guid"], self.event.guid)
         self.assertEqual(data["confirmAttendEventWithoutAccount"]["entity"]["attendees"]["edges"], [])
         self.assertEqual(1, mocked_send_mail.call_count)
+        self.assertEqual(mocked_welcome_mail.call_args.kwargs, {
+            'attendee': self.event.attendees.get(email=variables['input']['email'])
+        })
 
     def test_confirm_attend_event_is_full_without_account(self):
         variables = {
