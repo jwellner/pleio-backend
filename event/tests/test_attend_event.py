@@ -3,7 +3,7 @@ from mixer.backend.django import mixer
 
 from core.constances import ACCESS_TYPE
 from core.tests.helpers import PleioTenantTestCase
-from event.models import Event, EventAttendeeRequest
+from event.models import Event, EventAttendeeRequest, EventAttendee
 from user.models import User
 
 
@@ -59,7 +59,9 @@ class AttendEventTestCase(PleioTenantTestCase):
         entity = result['data']['attendEvent']['entity']
         self.assertEqual(entity['attendees']['edges'][0]['name'], self.authenticatedUser.name)
         self.assertTrue(send_qr_mail.called)
-        self.assertTrue(send_welcome_mail.called)
+        self.assertEqual(send_welcome_mail.call_args.kwargs, {
+            "attendee": self.event.attendees.get(email=self.authenticatedUser.email)
+        })
 
     @mock.patch("event.mail_builders.attendee_welcome_mail.send_mail")
     @mock.patch("event.resolvers.mutation_confirm_attend_event_without_account.submit_mail_event_qr")
