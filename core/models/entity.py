@@ -152,6 +152,13 @@ class Entity(TagsModel):
 
         return ENTITY_STATUS.DRAFT
 
+    def status_published_at(self, date):
+        if self.schedule_archive_after and self.schedule_archive_after <= date:
+            return ENTITY_STATUS.ARCHIVED
+        if self.published and self.published <= date:
+            return ENTITY_STATUS.PUBLISHED
+        return ENTITY_STATUS.DRAFT
+
     @property
     def last_seen(self):
         try:

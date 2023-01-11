@@ -14,10 +14,18 @@ def resolve_revsion_time_created(obj, info):
     return obj.created_at
 
 
+@revision.field("statusPublishedChanged")
+def resolve_status_published_changed(obj, info):
+    # pylint: disable=unused-argument
+    if "statusPublished" in obj.content:
+        return obj.content['statusPublished']
+    return None
+
+
 @revision.field('changedFields')
 def resolve_changed_fields(obj, info):
     # pylint: disable=unused-argument
-    return [str(key) for key in obj.content.keys()]
+    return [str(key) for key in obj.content.keys() if key != 'statusPublished']
 
 
 @revision.field('content')

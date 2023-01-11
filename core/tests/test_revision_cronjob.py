@@ -17,22 +17,27 @@ class TestRevisionCronjobTestCase(PleioTenantTestCase):
     def setUp(self):
         super(TestRevisionCronjobTestCase, self).setUp()
 
-        self.recently = timezone.now() - timezone.timedelta(minutes=30)
+        self.published_at = timezone.now() - timezone.timedelta(minutes=30)
+        self.created_at = timezone.now() - timezone.timedelta(minutes=60)
         self.yesterday = timezone.now() - timezone.timedelta(days=1)
 
         self.user1 = UserFactory(email="user1@example.com")
         self.blog = BlogFactory(owner=self.user1,
+                                created_at=self.created_at,
                                 title="Only valid blog post",
-                                published=self.recently)
+                                published=self.published_at)
         self.event = EventFactory(owner=self.user1,
+                                  created_at=self.created_at,
                                   title="Event, no revision support (last time I checked)",
-                                  published=self.recently)
+                                  published=self.published_at)
         self.blog2 = BlogFactory(owner=self.user1,
                                  title="Out of scope blog post",
+                                 created_at=self.yesterday,
                                  published=self.yesterday)
 
         self.revision = mixer.blend(Revision,
                                     _container=self.blog,
+                                    created_at=self.created_at,
                                     content={"richDescription": "Content1", "statusPublished": ENTITY_STATUS.DRAFT},
                                     description="Version 1")
 

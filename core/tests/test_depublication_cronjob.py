@@ -24,8 +24,11 @@ class TestDepublicationCronjobTestCase(PleioTenantTestCase):
 
         depublicate_content(self.tenant.schema_name)
         entity.refresh_from_db()
+        revision = entity.last_revision()
 
         self.assertTrue(entity.is_archived)
+        self.assertEqual([*revision.content.keys()], ['statusPublished'])
+        self.assertEqual(revision.content['statusPublished'], 'archived')
 
     def test_future_archive_entity(self):
         entity = mixer.blend(Blog, owner=self.owner,

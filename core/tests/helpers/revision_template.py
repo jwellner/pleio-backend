@@ -67,6 +67,7 @@ class RevisionTemplate:
                             guid
                         }
                         type
+                        statusPublishedChanged
                         changedFields
                         content {
                             title
@@ -229,6 +230,8 @@ class RevisionTemplate:
             if not self.useArchiveDeletePublish:
                 return
             self.localSetUp()
+            self.entity.published = None
+            self.entity.save()
 
             revisions = self.applyChanges(timePublished=str(localtime()))
             self.assertEqual(len(revisions), 1)
@@ -237,6 +240,7 @@ class RevisionTemplate:
             self.assertEqual(revision['author']['guid'], self.admin.guid)
             self.assertEqual(revision['changedFields'], ['timePublished'])
             self.assertDateEqual(revision['content']['timePublished'], self.variables['input']['timePublished'])
+            self.assertEqual(revision['statusPublishedChanged'], "published")
             self.assertEqual(revision['content']['title'], self.variables['input']['title'])
 
         def test_mutate_schedule_archive_entity(self):
@@ -250,6 +254,7 @@ class RevisionTemplate:
             revision = revisions[0]
             self.assertEqual(revision['author']['guid'], self.admin.guid)
             self.assertEqual(revision['changedFields'], ['scheduleArchiveEntity'])
+            self.assertEqual(revision['statusPublishedChanged'], "archived")
             self.assertDateEqual(revision['content']['scheduleArchiveEntity'], self.variables['input']['scheduleArchiveEntity'])
             self.assertEqual(revision['content']['title'], self.variables['input']['title'])
 
