@@ -282,8 +282,10 @@ def depublicate_content(schema_name):
                                            schedule_archive_after__lte=now,
                                            is_archived=False).select_subclasses()
         for entity in to_archive:
+            revision = shared.resolve_start_revision(entity, user=None)
             entity.is_archived = True
             entity.save()
+            shared.store_update_revision(revision, entity)
 
         to_delete = Entity.objects.filter(schedule_delete_after__isnull=False,
                                           schedule_delete_after__lte=now).select_subclasses()
@@ -302,7 +304,7 @@ def make_publication_revisions(schema_name):
 
 def _maybe_create_publication_revision(entity):
     last_revision = entity.last_revision()
-    if last_revision.content["statusPublished"] == ENTITY_STATUS.DRAFT \
-            and entity.status_published == ENTITY_STATUS.PUBLISHED:
+    last_status_published = entity.status_published_at(last_revision.created_at)
+    if last_status_published != entity.status_published_at(timezone.now()):
         revision = shared.resolve_start_revision(entity, entity.owner)
-        revision.store_publication_revision(entity)
+        revision.store_publication_revision(entity, previous_status=last_status_published)

@@ -6,7 +6,6 @@ from django.utils import timezone
 from core.lib import str_to_datetime
 from core.models import Entity
 from core.utils.entity import load_entity_by_id
-from core.constances import ENTITY_STATUS
 
 
 class Revision(models.Model):
@@ -52,8 +51,8 @@ class Revision(models.Model):
         self.is_update = True
         self.save()
 
-    def store_publication_revision(self, container):
-        self.original['statusPublished']=ENTITY_STATUS.DRAFT
+    def store_publication_revision(self, container, previous_status):
+        self.original['statusPublished'] = previous_status
         self.store_update_revision(container)
 
     @property

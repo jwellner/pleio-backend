@@ -314,6 +314,8 @@ def update_publication_dates(entity, clean_input):
 
     if 'scheduleArchiveEntity' in clean_input:
         entity.schedule_archive_after = clean_input.get("scheduleArchiveEntity") or None
+        if entity.schedule_archive_after and entity.schedule_archive_after <= timezone.now():
+            entity.is_archived = True
 
     if 'scheduleDeleteEntity' in clean_input:
         entity.schedule_delete_after = clean_input.get("scheduleDeleteEntity") or None

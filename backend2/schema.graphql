@@ -2183,6 +2183,7 @@ type Revision {
     author: User
     container: Entity
     description: String
+    statusPublishedChanged: StatusPublished
     content: ContentVersion
     changedFields: [String]
     timeCreated: DateTime
