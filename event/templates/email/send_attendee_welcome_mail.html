@@ -8,7 +8,7 @@
 {% block body %}
     {% include "email/element/title-link.html" with link_url=event_url link_title=event %}
 
-    <div>{{ message }}</div>
+    <div>{{ message|safe }}</div>
 
     <br/><br/>
     {% include "email/element/event_date_location.html" %}
