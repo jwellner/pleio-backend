@@ -77,5 +77,4 @@ class Wiki(RichDescriptionMediaMixin, TitleMixin, FeaturedCoverMixin, BookmarkMi
         }
 
 
-
 auditlog.register(Wiki)

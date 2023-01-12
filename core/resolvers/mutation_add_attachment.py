@@ -22,7 +22,7 @@ def resolve_add_attachment(_, info, input):
         for subclass in AttachmentMixin.__subclasses__():
             content = subclass.objects.filter(id=input.get("contentGuid")).first()
             if content and content.can_write(user):
-                attachment.attached = content;
+                attachment.attached = content
                 attachment.save()
                 break
 

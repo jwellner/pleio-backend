@@ -42,10 +42,8 @@ class Question(RichDescriptionMediaMixin, TitleMixin, VoteMixin, BookmarkMixin, 
         if self.is_closed:
             return False
 
-        if (
-                (user.has_role(USER_ROLES.ADMIN) or user.has_role(USER_ROLES.QUESTION_MANAGER) or user == self.owner)
-                and config.QUESTIONER_CAN_CHOOSE_BEST_ANSWER
-        ):
+        if ((user.has_role(USER_ROLES.ADMIN) or user.has_role(USER_ROLES.QUESTION_MANAGER) or user == self.owner)
+                and config.QUESTIONER_CAN_CHOOSE_BEST_ANSWER):
             return True
 
         return False

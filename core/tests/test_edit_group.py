@@ -2,21 +2,20 @@ from django.db import connection
 from django.conf import settings
 from django.core.files import File
 from django.core.cache import cache
-from core.constances import USER_ROLES
-from core.models import Group, ProfileField
+from core.factories import GroupFactory
+from core.models import ProfileField
 from core.tests.helpers import PleioTenantTestCase
-from user.models import User
-from mixer.backend.django import mixer
+from user.factories import UserFactory, AdminFactory
 from unittest.mock import patch, MagicMock
 
 
-class EditGroupCase(PleioTenantTestCase):
+class TestEditGroupTestCase(PleioTenantTestCase):
 
     def setUp(self):
         super().setUp()
-        self.user = mixer.blend(User)
-        self.admin = mixer.blend(User, roles=[USER_ROLES.ADMIN])
-        self.group = mixer.blend(Group, owner=self.user)
+        self.user = UserFactory()
+        self.admin = AdminFactory()
+        self.group = GroupFactory(owner=self.user)
 
     def tearDown(self):
         cache.clear()
@@ -78,6 +77,9 @@ class EditGroupCase(PleioTenantTestCase):
                         }
                         isLeavingGroupDisabled
                         isAutoMembershipEnabled
+                        widgets {
+                            type
+                        }
                     }
                 }
             }
@@ -98,6 +100,7 @@ class EditGroupCase(PleioTenantTestCase):
                 "autoNotification": True,
                 "isLeavingGroupDisabled": True,
                 "isAutoMembershipEnabled": True,
+                "widgets": [{"type": "demo"}],
                 "defaultTags": ['tag_one', 'tag_three'],
                 'defaultTagCategories': [{'name': 'Test', 'values': ['One', 'Two']}]
             }
@@ -121,6 +124,7 @@ class EditGroupCase(PleioTenantTestCase):
         self.assertEqual(data["editGroup"]["group"]["isAutoMembershipEnabled"], False)
         self.assertEqual(data["editGroup"]["group"]["isSubmitUpdatesEnabled"], False)
         self.assertEqual(data["editGroup"]["group"]["autoNotification"], variables["group"]["autoNotification"])
+        self.assertEqual(data["editGroup"]["group"]["widgets"], [{"type": "demo"}])
         self.assertEqual(data["editGroup"]["group"]["defaultTags"], variables['group']['defaultTags'])
         self.assertEqual(data["editGroup"]["group"]["defaultTagCategories"], variables['group']['defaultTagCategories'])
 

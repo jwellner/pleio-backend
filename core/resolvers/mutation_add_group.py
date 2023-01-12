@@ -4,8 +4,8 @@ from graphql import GraphQLError
 from core import config
 from core.models import Group, ProfileField, GroupProfileFieldSetting
 from core.constances import USER_ROLES, INVALID_PROFILE_FIELD_GUID, NOT_AUTHORIZED
-from core.lib import clean_graphql_input, ACCESS_TYPE
-from core.resolvers import shared
+from core.lib import clean_graphql_input
+from core.resolvers import shared, group_shared
 from file.models import FileFolder
 from user.models import User
 
@@ -27,15 +27,7 @@ def resolve_add_group(_, info, input):
     group.owner = user
     group.name = clean_input.get("name", "")
 
-    if 'icon' in clean_input:
-        icon_file = FileFolder.objects.create(
-            owner=group.owner,
-            upload=clean_input.get("icon"),
-            read_access=[ACCESS_TYPE.public],
-            write_access=[ACCESS_TYPE.user.format(user.id)]
-        )
-
-        group.icon = icon_file
+    group_shared.update_icon(group, clean_input, image_owner=user)
 
     shared.update_featured_image(group, clean_input, image_owner=user)
     shared.resolve_update_tags(group, clean_input)
@@ -60,6 +52,10 @@ def resolve_add_group(_, info, input):
         group.is_featured = clean_input.get("isFeatured", False)
         group.is_leaving_group_disabled = clean_input.get("isLeavingGroupDisabled", False)
         group.is_auto_membership_enabled = clean_input.get("isAutoMembershipEnabled", False)
+
+    group.plugins = clean_input.get("plugins", [])
+    group.tags = clean_input.get("tags", [])
+    group_shared.update_widgets(group, clean_input)
 
     group.save()
 

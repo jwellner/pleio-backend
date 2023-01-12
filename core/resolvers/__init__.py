@@ -7,7 +7,6 @@ from .viewer import viewer
 from .entity import entity
 from .comment import comment
 from .profile_item import profile_item
-from .widget import widget, widget_setting
 from .invite import invite
 from .subgroup_list import subgroup_list
 from .subgroup import subgroup
@@ -25,8 +24,7 @@ from .site_settings import site_settings_private, site_settings_public
 
 resolvers = [
     query, mutation, viewer, entity, user, group, member, comment, profile_item,
-    profile_field_validator, widget, invite, subgroup_list, subgroup, email_overview,
+    profile_field_validator, invite, subgroup_list, subgroup, email_overview,
     notification, attachment, notifications_list, filters, revision, content_version,
-    secure_rich_text, site_agreement, site_agreement_version, widget_setting,
-    site_settings_private, site_settings_public
+    secure_rich_text, site_agreement, site_agreement_version, site_settings_private, site_settings_public
 ]

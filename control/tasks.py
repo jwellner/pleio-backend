@@ -1,6 +1,5 @@
 from __future__ import absolute_import, unicode_literals
 
-import json
 import os
 import shutil
 import subprocess
@@ -12,8 +11,8 @@ from celery.utils.log import get_task_logger
 from celery.result import AsyncResult
 from core.models import SiteStat, Attachment, Entity, CommentMixin, Comment, GroupMembership, Group, Subgroup
 from core.lib import ACCESS_TYPE, access_id_to_acl, get_access_id
+from core.models.rich_fields import ReplaceAttachments
 from core.utils.export import compress_path
-from core.utils.tiptap_parser import Tiptap
 from core.tasks.elasticsearch_tasks import elasticsearch_delete_data_for_tenant
 from django_tenants.utils import schema_context
 from django.core.management import call_command
@@ -97,6 +96,9 @@ def add_site(self, schema_name, domain):
         try:
             tenant = Client(schema_name=schema_name, name=schema_name)
             tenant.save()
+
+            from tenants.tasks import update_post_deploy_tasks
+            update_post_deploy_tasks.delay(schema_name)
 
             d = Domain()
             d.domain = domain
@@ -454,13 +456,14 @@ def copy_entity_file(source_schema, target_schema, target_entity, file_attribute
         setattr(target_entity, file_attribute, target_file)
 
 
-def copy_attachments(source_schema, target_schema, target_entity, rich_fields):
+def copy_attachments(source_schema, target_schema, target_entity):
     """
     Copy entity attachments and replace rich_field links
     """
     with schema_context(source_schema):
-        attachments = list(item for item in target_entity.attachments_in_text())
+        attachments = Attachment.objects.filter(pk__in=[item for item in target_entity.lookup_attachments()])
 
+    attachment_map = ReplaceAttachments()
     for attachment in attachments:
         attachment_contents = get_file_field_data(source_schema, attachment.upload)
 
@@ -471,15 +474,10 @@ def copy_attachments(source_schema, target_schema, target_entity, rich_fields):
             new_attachment.save()
             logger.info("saved new attachemnt %s", str(new_attachment.id))
 
-        original = "/attachment/%s" % attachment.id
-        replacement = "/attachment/%s" % new_attachment.id
+        attachment_map.append(str(attachment.id), str(new_attachment.id))
 
-        for rich_field in rich_fields:
-            logger.info("replace in %s from %s to %s", rich_field, original, replacement)
-            tiptap = Tiptap(getattr(target_entity, rich_field))
-            tiptap.replace_url(original, replacement)
-            tiptap.replace_src(original, replacement)
-            setattr(target_entity, rich_field, json.dumps(tiptap.tiptap_json))
+    if hasattr(target_entity, 'replace_attachments'):
+        target_entity.replace_attachments(attachment_map)
 
 
 def get_or_create_user(copy, source_user_id):
@@ -549,7 +547,7 @@ def copy_group_to_tenant(source_schema, action_user_id, group_id, target_schema)
         target_group.pk = None
         target_group.id = None
 
-        copy_attachments(source_schema, target_schema, target_group, ["rich_description", "introduction"])
+        copy_attachments(source_schema, target_schema, target_group)
 
         target_group.save()
 
@@ -711,7 +709,7 @@ def copy_group_entities(copy_id):
                     copy_entity_file(copy.source_tenant, copy.target_tenant, target_entity, "featured_image")
 
                 if target_entity.__class__.__name__ in ["Blog", "StatusUpdate", "Task", "Wiki", "Event"]:
-                    copy_attachments(copy.source_tenant, copy.target_tenant, target_entity, ["rich_description"])
+                    copy_attachments(copy.source_tenant, copy.target_tenant, target_entity)
 
                 if target_entity.__class__.__name__ in ["FileFolder", "Wiki", "Event"]:
                     with schema_context(copy.source_tenant):
@@ -762,7 +760,7 @@ def copy_group_entities(copy_id):
                     container_source_id = None
                     comment_source_id = comment.id
                     comment.owner = get_or_create_user(copy, comment.owner_id)
-                    copy_attachments(copy.source_tenant, copy.target_tenant, comment, ["rich_description"])
+                    copy_attachments(copy.source_tenant, copy.target_tenant, comment)
                     comment.pk = None
                     comment.id = None
                     with schema_context(copy.source_tenant):

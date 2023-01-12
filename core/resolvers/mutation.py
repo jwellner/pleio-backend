@@ -21,8 +21,6 @@ from .mutation_reject_membership_request import resolve_reject_membership_reques
 from .mutation_add_subgroup import resolve_add_subgroup
 from .mutation_edit_subgroup import resolve_edit_subgroup
 from .mutation_delete_subgroup import resolve_delete_subgroup
-from .mutation_add_group_widget import resolve_add_group_widget
-from .mutation_edit_group_widget import resolve_edit_group_widget
 from .mutation_add_entity import resolve_add_entity
 from .mutation_edit_entity import resolve_edit_entity
 from .mutation_copy_entity import resolve_copy_entity
@@ -81,8 +79,6 @@ mutation.set_field("rejectMembershipRequest", resolve_reject_membership_request)
 mutation.set_field("addSubgroup", resolve_add_subgroup)
 mutation.set_field("editSubgroup", resolve_edit_subgroup)
 mutation.set_field("deleteSubgroup", resolve_delete_subgroup)
-mutation.set_field("addGroupWidget", resolve_add_group_widget)
-mutation.set_field("editGroupWidget", resolve_edit_group_widget)
 
 mutation.set_field("addWebPushSubscription", resolve_add_web_push_subscription)
 

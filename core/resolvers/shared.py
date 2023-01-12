@@ -7,6 +7,7 @@ from elasticsearch_dsl import Search
 from graphql import GraphQLError
 from online_planner.meetings_api import MeetingsApi
 
+from cms.row_resolver import RowSerializer
 from core import config
 from core.constances import ACCESS_TYPE, USER_ROLES
 from core import constances
@@ -375,6 +376,11 @@ def resolve_update_rich_description(entity, clean_input):
         entity.rich_description = clean_input.get("richDescription")
 
 
+def resolve_update_introduction(entity, clean_input):
+    if 'introduction' in clean_input:
+        entity.introduction = clean_input.get("introduction")
+
+
 def resolve_update_tags(entity, clean_input):
     if 'tags' in clean_input:
         entity.tags = clean_input["tags"]
@@ -559,6 +565,14 @@ def resolve_update_is_in_onboarding(profile_field, clean_input):
 def resolve_update_is_mandatory(profile_field, clean_input):
     if 'isMandatory' in clean_input:
         profile_field.is_mandatory = clean_input["isMandatory"]
+
+
+def resolve_update_rows(entity, clean_input, user):
+    if 'rows' in clean_input:
+        entity.row_repository = []
+        for row in clean_input['rows']:
+            rowSerializer = RowSerializer(row, acting_user=user)
+            entity.row_repository.append(rowSerializer.serialize())
 
 
 def assert_meetings_enabled():

@@ -12,8 +12,9 @@ from core.lib import ACCESS_TYPE
 from core.constances import USER_ROLES
 from core.models.featured import FeaturedCoverMixin
 from core.utils.convert import tiptap_to_text
-from .rich_fields import AttachmentMixin
 from .tags import TagsModel
+from .rich_fields import AttachmentMixin, ReplaceAttachments
+from core.widget_resolver import WidgetSerializer
 
 logger = logging.getLogger(__name__)
 
@@ -86,6 +87,8 @@ class Group(TagsModel, FeaturedCoverMixin, AttachmentMixin):
         max_length=256), blank=True, default=list)
 
     content_presets = models.JSONField(default=dict)
+
+    widget_repository = models.JSONField(null=True, default=list)
 
     def __str__(self):
         return f"Group[{self.name}]"
@@ -207,7 +210,37 @@ class Group(TagsModel, FeaturedCoverMixin, AttachmentMixin):
 
     @property
     def rich_fields(self):
-        return [self.rich_description, self.introduction]
+        return [field for field in self.attachments_from_rich_fields()]
+
+    def attachments_from_rich_fields(self):
+        if self.rich_description:
+            yield self.rich_description
+        if self.introduction:
+            yield self.introduction
+        for widget in self.widget_repository or []:
+            yield from WidgetSerializer(widget).rich_fields()
+
+    def lookup_attachments(self):
+        yield from super().lookup_attachments()
+        for widget in self.widget_repository or []:
+            yield from WidgetSerializer(widget).attachments()
+
+    def replace_attachments(self, attachment_map: ReplaceAttachments):
+        super().replace_attachments(attachment_map)
+
+        if self.introduction:
+            self.introduction = attachment_map.replace(self.introduction)
+
+        for widget_id, widget in enumerate(self.widget_repository):
+            for setting_id, setting in enumerate(widget.settings):
+                attachment_id = setting.get('attachmentId')
+                if attachment_map.has_attachment(attachment_id):
+                    setting['attachmentId'] = attachment_map.translate(attachment_id)
+                if setting['key'] == 'richDescription' or setting.get('richDescription'):
+                    setting['richDescription'] = attachment_map.replace(setting['richDescription'] or setting['value'])
+                    setting['value'] = None
+                self.widget_repository[widget_id]['settings'][setting_id] = setting
+
 
     def search_read_access(self):
         return [ACCESS_TYPE.public]

@@ -1,52 +1,44 @@
+from unittest import mock
+
+from django.conf import settings
+from django.core.files import File
+
+from cms.factories import TextPageFactory, CampagnePageFactory
+from core.models import Attachment
 from core.tests.helpers import PleioTenantTestCase
-from user.models import User
+from user.factories import EditorFactory
 from core.constances import ACCESS_TYPE
+from backend2.schema import schema
 from django.utils.text import slugify
-from cms.models import Page
-from mixer.backend.django import mixer
+from ariadne import graphql_sync
+from django.http import HttpRequest
 
 
 class PageTestCase(PleioTenantTestCase):
 
     def setUp(self):
         super().setUp()
-        self.user1 = mixer.blend(User)
-        self.user2 = mixer.blend(User)
-        self.page_parent = Page.objects.create(owner=self.user1,
-                                               read_access=[ACCESS_TYPE.public],
-                                               write_access=[ACCESS_TYPE.user.format(self.user1.id)],
-                                               title="Test parent page",
-                                               rich_description="JSON to string",
-                                               )
-        self.page_child = Page.objects.create(owner=self.user1,
-                                              read_access=[ACCESS_TYPE.public],
-                                              write_access=[ACCESS_TYPE.user.format(self.user1.id)],
-                                              title="Test child page",
-                                              rich_description="JSON to string",
-                                              parent=self.page_parent
-                                              )
-        self.page_child2 = Page.objects.create(owner=self.user2,
-                                               read_access=[ACCESS_TYPE.user.format(self.user2.id)],
-                                               write_access=[ACCESS_TYPE.user.format(self.user2.id)],
-                                               title="Test child page other user",
-                                               rich_description="JSON to string",
-                                               parent=self.page_parent
-                                               )
-        self.page_child_child = Page.objects.create(owner=self.user1,
-                                                    read_access=[ACCESS_TYPE.public],
-                                                    write_access=[ACCESS_TYPE.user.format(self.user1.id)],
-                                                    title="Test child of child page",
-                                                    rich_description="JSON to string",
-                                                    parent=self.page_child
-                                                    )
+        self.user1 = EditorFactory()
+        self.user2 = EditorFactory()
+        self.page_parent = TextPageFactory(owner=self.user1,
+                                           title="Test parent page",
+                                           rich_description="JSON to string")
+        self.page_child = TextPageFactory(owner=self.user1,
+                                          title="Test child page",
+                                          rich_description="JSON to string",
+                                          parent=self.page_parent)
+        self.page_child2 = TextPageFactory(owner=self.user2,
+                                           read_access=[ACCESS_TYPE.user.format(self.user2.id)],
+                                           write_access=[ACCESS_TYPE.user.format(self.user2.id)],
+                                           title="Test child page other user",
+                                           rich_description="JSON to string",
+                                           parent=self.page_parent)
+        self.page_child_child = TextPageFactory(owner=self.user1,
+                                                title="Test child of child page",
+                                                rich_description="JSON to string",
+                                                parent=self.page_child)
 
-    def tearDown(self):
-        self.page_parent.delete()
-        self.user1.delete()
-        super().tearDown()
-
-    def test_parent_page_by_anonymous(self):
-        query = """
+        self.query = """
             query PageItem($guid: String!) {
                 entity(guid: $guid) {
                     guid
@@ -84,11 +76,17 @@ class PageTestCase(PleioTenantTestCase):
                 }
             }
         """
+
+    def tearDown(self):
+        self.page_parent.delete()
+        self.user1.delete()
+        super().tearDown()
+
+    def test_parent_page_by_anonymous(self):
         variables = {
             "guid": self.page_parent.guid
         }
-
-        result = self.graphql_client.post(query, variables)
+        result = self.graphql_client.post(self.query, variables)
 
         data = result["data"]
         self.assertEqual(data["entity"]["title"], "Test parent page")
@@ -104,58 +102,76 @@ class PageTestCase(PleioTenantTestCase):
         self.assertEqual(data["entity"]["children"][0]["children"][0]["guid"], self.page_child_child.guid)
 
     def test_child_page_by_owner(self):
-        query = """
-            query PageItem($guid: String!) {
-                entity(guid: $guid) {
-                    guid
-                    status
-                    ...PageDetailFragment
-                    __typename
-                }
-            }
-
-            fragment PageDetailFragment on Page {
-                pageType
-                canEdit
-                title
-                url
-                richDescription
-                tags
-                accessId
-                parent {
-                    guid
-                }
-                hasChildren
-                children {
-                    guid
-                    title
-                    canEdit
-                    children {
-                        guid
-                        title
-                        canEdit
-                        children {
-                            guid
-                            title
-                        }
-                    }
-                }
-            }
-        """
         variables = {
             "guid": self.page_child.guid
         }
 
         self.graphql_client.force_login(self.user1)
-        result = self.graphql_client.post(query, variables)
+        result = self.graphql_client.post(self.query, variables)
+        data = result['data']
 
-        data = result["data"]
         self.assertEqual(data["entity"]["title"], "Test child page")
         self.assertEqual(data["entity"]["richDescription"], "JSON to string")
         self.assertEqual(data["entity"]["tags"], [])
         self.assertEqual(data["entity"]["accessId"], 2)
-        self.assertEqual(data["entity"]["canEdit"], False)
+        self.assertEqual(data["entity"]["canEdit"], True)
         self.assertEqual(data["entity"]["parent"]["guid"], self.page_parent.guid)
         self.assertEqual(data["entity"]["hasChildren"], True)
         self.assertEqual(data["entity"]["url"], "/cms/view/{}/{}".format(self.page_child.guid, slugify(self.page_child.title)))
         self.assertEqual(data["entity"]["children"][0]["guid"], self.page_child_child.guid)
+
+
+class TestPagePropertiesTestCase(PleioTenantTestCase):
+
+    def setUp(self):
+        super().setUp()
+
+        self.owner = EditorFactory()
+        self.page = CampagnePageFactory(owner=self.owner)
+
+    def create_attachment(self):
+        self.file_mock = mock.MagicMock(spec=File)
+        self.file_mock.name = 'attachment.jpg'
+        self.file_mock.content_type = 'image/jpg'
+
+        self.get_mimetype = mock.patch("core.lib.get_mimetype").start()
+        self.get_mimetype.return_value = self.file_mock.content_type
+
+        self.file_open = mock.patch("{}.open".format(settings.DEFAULT_FILE_STORAGE)).start()
+        self.file_open.return_value = self.file_mock
+        return Attachment.objects.create(upload="attachment.jpg", owner=self.owner)
+
+    def test_zero_attachments_via_rows(self):
+        found_attachments = [a_pk for a_pk in self.page.lookup_attachments()]
+        self.assertQuerysetEqual(found_attachments, [])
+
+    def test_one_attachment_via_rows(self):
+        attachment = self.create_attachment()
+        self.page.row_repository = [
+            {"columns": [
+                {"widgets": [
+                    {"settings": [
+                        {"attachmentId": str(attachment.id)}
+                    ]}
+                ]}
+            ]}
+        ]
+        found_attachments = [a_pk for a_pk in self.page.lookup_attachments()]
+        self.assertQuerysetEqual(found_attachments, [str(attachment.pk)])
+
+    def test_rich_text_fields(self):
+        self.page.rich_description = self.tiptap_paragraph("rich_description")
+        self.page.row_repository = [
+            {'columns': [
+                {"widgets": [
+                    {'settings': [
+                        {'richDescription': self.tiptap_paragraph("widget_rich_description")}]
+                    }]
+                }]
+            }
+        ]
+
+        self.assertEqual(self.page.rich_fields, [
+            self.tiptap_paragraph("rich_description"),
+            self.tiptap_paragraph("widget_rich_description")
+        ])

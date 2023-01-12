@@ -4,6 +4,7 @@ from django.db.models import Case, When, IntegerField
 from core.constances import MEMBERSHIP, USER_ROLES
 from core.lib import get_access_ids
 from core.models import GroupInvitation, Subgroup
+from core.widget_resolver import WidgetSerializer
 from user.models import User
 from core import config
 from core.resolvers import shared
@@ -14,7 +15,7 @@ group = ObjectType("Group")
 @group.field("widgets")
 def resolve_group_widgets(obj, info):
     # pylint: disable=unused-argument
-    return obj.widgets.all()
+    return [WidgetSerializer(w) for w in obj.widget_repository or []]
 
 
 group.set_field("richDescription", shared.resolve_entity_rich_description)
