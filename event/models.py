@@ -43,8 +43,8 @@ class Event(RichDescriptionMediaMixin, TitleMixin, CommentMixin, BookmarkMixin, 
 
     qr_access = models.BooleanField(default=False)
 
-    attendee_welcome_mail_content = models.TextField(default='', blank=True)
-    attendee_welcome_mail_subject = models.CharField(max_length=256, default='', blank=True)
+    attendee_welcome_mail_content = models.TextField(default='', null=True, blank=True)
+    attendee_welcome_mail_subject = models.CharField(max_length=256, null=True, default='', blank=True)
 
     def has_children(self):
         if self.children.count() > 0:
