@@ -1,14 +1,14 @@
 import abc
+import json
 
-from django.db.models import QuerySet
+from django.contrib.contenttypes.fields import GenericRelation
+from pathlib import PurePosixPath
+from urllib.parse import unquote, urlparse
 
 from core.models.attachment import Attachment
 from core.models.shared import AbstractModel
 from core.utils.tiptap_parser import Tiptap
 from core.lib import is_valid_uuid, get_model_name, tenant_schema
-from django.contrib.contenttypes.fields import GenericRelation
-from pathlib import PurePosixPath
-from urllib.parse import unquote, urlparse
 
 from .mixin import NotificationMixin
 
@@ -52,46 +52,50 @@ class MentionMixin(NotificationMixin, RichFieldsMixin):
             create_notification.delay(tenant_schema(), 'mentioned', get_model_name(self), self.id, self.owner.id)
 
 
+class ReplaceAttachments:
+    def __init__(self):
+        self.attachment_map = {}
+
+    def append(self, original_id, new_id):
+        self.attachment_map[original_id] = new_id
+
+    def replace(self, value):
+        tiptap = Tiptap(value)
+        for attachment, new_attachment in self.attachment_map:
+            original = "/attachment/%s" % attachment
+            replacement = "/attachment/%s" % new_attachment
+            tiptap.replace_url(original, replacement)
+            tiptap.replace_src(original, replacement)
+        return json.dumps(tiptap.tiptap_json)
+
+    def has_attachment(self, attachment_id):
+        return attachment_id in self.attachment_map
+
+    def translate(self, attachment_id):
+        return self.attachment_map[attachment_id]
+
+
 class AttachmentMixin(RichFieldsMixin):
     class Meta:
         abstract = True
 
-    attachments = GenericRelation(Attachment, object_id_field='attached_object_id', content_type_field='attached_content_type')
+    attachments = GenericRelation('core.Attachment', object_id_field='attached_object_id', content_type_field='attached_content_type')
 
     def save(self, *args, **kwargs):
         super(AttachmentMixin, self).save(*args, **kwargs)
         self.update_attachments_links()
 
-    def attachments_in_fields(self):
-        """ Can be overridden in parent Model """
-        return Attachment.objects.none()
+    def lookup_attachments(self):
+        yield from TipTapAttachments(*self.rich_fields).attachments()
+        yield from self.revision_attachments()
 
-    def get_rich_fields(self):
-        yield from self.rich_fields
-        yield from self.revision_rich_fields()
-
-    def revision_rich_fields(self):
+    def revision_attachments(self):
         if hasattr(self, 'has_revisions') and self.has_revisions():
             for revision in self.revision_set.all():
-                yield from revision.rich_fields
-
-    def attachments_in_text(self):
-        sources = set()
-        for tiptap in self.get_rich_fields():
-            parser = Tiptap(tiptap)
-            sources.update(parser.attached_sources)
-
-        attachments = self.sources_to_attachments(sources)
-
-        return attachments
-
-    def collect_attachments(self) -> QuerySet[Attachment]:
-        attachments_found = self.attachments_in_text()
-        attachments_found = attachments_found.union(self.attachments_in_fields())
-        return attachments_found
+                yield from TipTapAttachments(*revision.rich_fields).attachments()
 
     def update_attachments_links(self):
-        attachments_found = self.collect_attachments()
+        attachments_found = Attachment.objects.filter(id__in=[*self.lookup_attachments()])
 
         current = self.attachments.get_queryset()
 
@@ -105,20 +109,37 @@ class AttachmentMixin(RichFieldsMixin):
         for x in removed:
             x.delete()
 
-    def source_to_attachment_id(self, source):
-        # NOTE: this is a simple approach that fits the current urls "/attachment/<type>/<id>", it might not be sufficient for future changes
-        source_parts = PurePosixPath(unquote(urlparse(source).path)).parts
-        if len(source_parts) < 2:
-            return None
+    def replace_attachments(self, attachment_map: ReplaceAttachments):
+        if hasattr(self, 'rich_description') and getattr(self, 'rich_description'):
+            setattr(self, 'rich_description', attachment_map.replace(self.rich_description))
 
-        if not source_parts[1] == 'attachment':
-            return None
 
-        if not is_valid_uuid(source_parts[-1]):
-            return None
+class TipTapAttachments:
+    def __init__(self, *fields):
+        self.fields = fields
 
-        return source_parts[-1]
+    def attachments(self):
+        for field in self.fields:
+            yield from self.attachments_in_text(field)
 
-    def sources_to_attachments(self, sources):
-        attachment_ids = filter(None, [self.source_to_attachment_id(source) for source in sources])
-        return Attachment.objects.filter(id__in=attachment_ids)
+    def attachments_in_text(self, field):
+        sources = set()
+        parser = Tiptap(field)
+        sources.update(parser.attached_sources)
+
+        yield from self.sources_to_attachment_ids(sources)
+
+    def sources_to_attachment_ids(self, sources):
+        for source in sources:
+            # NOTE: this is a simple approach that fits the current urls "/attachment/<type>/<id>", it might not be sufficient for future changes
+            source_parts = PurePosixPath(unquote(urlparse(source).path)).parts
+            if len(source_parts) < 2:
+                continue
+
+            if not source_parts[1] == 'attachment':
+                continue
+
+            if not is_valid_uuid(source_parts[-1]):
+                continue
+
+            yield source_parts[-1]

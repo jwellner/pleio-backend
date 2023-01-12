@@ -1,5 +1,6 @@
 import json
 
+from core.models import Attachment
 from core.resolvers import shared
 from core.utils.entity import load_entity_by_id
 from core.utils.tiptap_parser import Tiptap
@@ -16,7 +17,7 @@ def copy_event(event_id, user, parent=None):
 
     now = timezone.now()
 
-    attachments = entity.attachments_in_text()
+    attachments = Attachment.objects.filter(pk__in=[a for a in entity.lookup_attachments()])
     for x in attachments:
         attachment_copy = x.make_copy(user)
         original = "/attachment/%s" % x.id

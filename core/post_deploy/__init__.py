@@ -9,6 +9,8 @@ from post_deploy import post_deploy_action
 from core.lib import tenant_schema, is_schema_public, get_full_url
 from notifications.models import Notification
 
+from .migrate_rows_cols_widgets import deploy_action as migrate_rows_cols_widgets
+
 logger = get_task_logger(__name__)
 
 

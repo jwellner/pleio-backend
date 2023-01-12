@@ -9,6 +9,7 @@ class Task(TitleMixin, AttachmentMixin, Entity):
     """
     Task
     """
+
     class Meta:
         ordering = ['-published']
 

@@ -27,6 +27,7 @@ def resolve_add_page(_, info, input):
     shared.resolve_update_title(entity, clean_input)
     shared.resolve_update_rich_description(entity, clean_input)
     shared.update_publication_dates(entity, clean_input)
+    shared.resolve_update_rows(entity, clean_input, user)
     resolve_update_access(entity, clean_input)
     resolve_update_parent(entity, clean_input)
 

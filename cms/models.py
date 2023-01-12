@@ -2,12 +2,15 @@ import uuid
 from auditlog.registry import auditlog
 from django.db import models
 
+from cms.row_resolver import RowSerializer
 from core.lib import get_access_id
 from core.models import Entity, AttachmentMixin, RevisionMixin
 from core.constances import USER_ROLES
 from django.contrib.postgres.fields import ArrayField
 
 from core.models.mixin import TitleMixin, RichDescriptionMediaMixin
+
+from core.models.rich_fields import ReplaceAttachments
 
 
 class Page(RichDescriptionMediaMixin, TitleMixin, AttachmentMixin, RevisionMixin, Entity):
@@ -27,6 +30,8 @@ class Page(RichDescriptionMediaMixin, TitleMixin, AttachmentMixin, RevisionMixin
 
     page_type = models.CharField(max_length=256, choices=PAGE_TYPES)
     parent = models.ForeignKey('self', blank=True, null=True, related_name='children', on_delete=models.CASCADE)
+
+    row_repository = models.JSONField(null=True, default=list)
 
     position = models.IntegerField(null=False, default=0)
 
@@ -69,7 +74,35 @@ class Page(RichDescriptionMediaMixin, TitleMixin, AttachmentMixin, RevisionMixin
 
     @property
     def rich_fields(self):
-        return [self.rich_description]
+        return [field for field in self.attachments_from_rich_fields()]
+
+    def attachments_from_rich_fields(self):
+        if self.rich_description:
+            yield self.rich_description
+        for row in self.row_repository or []:
+            yield from RowSerializer(row).rich_fields()
+
+    def lookup_attachments(self):
+        yield from super().lookup_attachments()
+        yield from self.attachments_in_rows()
+
+    def attachments_in_rows(self):
+        for row in [RowSerializer(r) for r in self.row_repository]:
+            yield from row.attachments()
+
+    def replace_attachments(self, attachment_map: ReplaceAttachments):
+        super().replace_attachments(attachment_map)
+        for row_id, row in self.row_repository:
+            for column_id, column in row['columns']:
+                for widget_id, widget in enumerate(column['widgets']):
+                    for setting_id, setting in enumerate(widget.settings):
+                        current_id = setting.get('attachmentId')
+                        if attachment_map.has_attachment(current_id):
+                            setting['attachmentId'] = attachment_map.translate(current_id)
+                        if setting['key'] == 'richDescription' or setting.get('richDescription'):
+                            setting['richDescription'] = attachment_map.replace(setting['richDescription'] or setting['value'])
+                            setting['value'] = None
+                        self.row_repository[row_id]['columns'][column_id]['widgets'][widget_id]['settings'][setting_id] = setting
 
     def serialize(self):
         if self.has_revisions():

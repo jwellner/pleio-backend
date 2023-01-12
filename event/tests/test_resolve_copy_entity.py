@@ -6,7 +6,6 @@ from django.utils.translation import ugettext_lazy
 from core.lib import datetime_isoformat
 from core.models import Group, Attachment
 from core.tests.helpers import PleioTenantTestCase
-from event.factories import EventFactory
 from user.models import User
 from event.models import Event
 from core.constances import ACCESS_TYPE, USER_ROLES
@@ -17,7 +16,7 @@ from core.constances import ENTITY_STATUS
 
 
 class CopyEventTestCase(PleioTenantTestCase):
-    
+
     def setUp(self):
         super().setUp()
 
@@ -129,7 +128,6 @@ class CopyEventTestCase(PleioTenantTestCase):
         result = self.graphql_client.post(self.mutation, self.data)
 
         data = result["data"]
-
         self.assertEqual(data["copyEntity"]["entity"]["title"], ugettext_lazy("Copy %s") % self.eventPublic.title)
         self.assertEqual(data["copyEntity"]["entity"]["richDescription"], self.eventPublic.rich_description)
         start_date = self.eventPublic.start_date.replace(year=self.now.year, month=self.now.month, day=self.now.day, microsecond=0, tzinfo=timezone.utc)
@@ -163,7 +161,7 @@ class CopyEventTestCase(PleioTenantTestCase):
         data = result["data"]
         event = Event.objects.get(id=data["copyEntity"]["entity"]["guid"])
 
-        attachments = event.attachments_in_text()
+        attachments = Attachment.objects.filter(pk__in=[a for a in event.lookup_attachments()])
 
         access = [ACCESS_TYPE.user.format(self.admin.id)]
         self.assertEqual(event.read_access[0], access[0])
@@ -184,7 +182,7 @@ class CopyEventTestCase(PleioTenantTestCase):
         data = result["data"]
         event = Event.objects.get(id=data["copyEntity"]["entity"]["guid"])
 
-        attachments = event.attachments_in_text()
+        attachments = Attachment.objects.filter(pk__in=[a for a in event.lookup_attachments()])
 
         mutation = """
             mutation deleteEntity($input: deleteEntityInput!) {
@@ -208,8 +206,11 @@ class CopyEventTestCase(PleioTenantTestCase):
             self.assertEqual(response.status_code, 200)
 
     def test_copy_with_children(self):
-        subevent = EventFactory(parent=self.eventPublic)
-        EventFactory(parent=self.eventPublic)
+        subevent = mixer.blend(Event,
+                               parent=self.eventPublic)
+        mixer.blend(Event,
+                    parent=self.eventPublic)
+        self.eventPublic.refresh_from_db()
 
         self.graphql_client.force_login(self.authenticatedUser)
         result = self.graphql_client.post(self.mutation, self.data)
@@ -218,6 +219,7 @@ class CopyEventTestCase(PleioTenantTestCase):
         event = Event.objects.get(id=data["copyEntity"]["entity"]["guid"])
 
         event.refresh_from_db()
+
         self.assertEqual(event.status_published, ENTITY_STATUS.DRAFT)
         self.assertTrue(event.has_children())
         self.assertNotEqual(subevent.guid, event.children.first().guid)
@@ -237,15 +239,15 @@ class CopyEventTestCase(PleioTenantTestCase):
 
         data = result["data"]
         event = Event.objects.get(id=data["copyEntity"]["entity"]["guid"])
-
         self.assertEqual(event.group.guid, self.group.guid)
         self.assertEqual(data["copyEntity"]["entity"]["group"]["guid"], self.group.guid)
         self.assertEqual(data["copyEntity"]["entity"]["owner"]["guid"], self.authenticatedUser.guid)
 
     def test_copy_with_children_in_group(self):
-        subevent = EventFactory(parent=self.eventGroup)
-        EventFactory(parent=self.eventGroup)
-
+        subevent = mixer.blend(Event,
+                               parent=self.eventGroup)
+        mixer.blend(Event,
+                    parent=self.eventGroup)
         self.assertEqual(subevent.group.guid, self.group.guid)
         self.eventPublic.refresh_from_db()
 
@@ -254,9 +256,7 @@ class CopyEventTestCase(PleioTenantTestCase):
 
         data = result["data"]
         event = Event.objects.get(id=data["copyEntity"]["entity"]["guid"])
-
         event.refresh_from_db()
-
         self.assertEqual(event.status_published, ENTITY_STATUS.DRAFT)
         self.assertTrue(event.has_children())
         self.assertNotEqual(subevent.guid, event.children.first().guid)

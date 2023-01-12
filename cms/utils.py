@@ -1,7 +1,6 @@
-from cms.models import Page, Row, Column
+from cms.models import Page
 from graphql import GraphQLError
 from core.constances import COULD_NOT_FIND
-from core.models import Widget
 from wiki.models import Wiki
 
 
@@ -9,18 +8,7 @@ def order_positions(parent):
     """
     Order Rows, Columns or Widgets with same parent_id so that the positions are following numbers
     """
-
-    if parent.type_to_string == 'page':
-        children = Row.objects.filter(page=parent)
-
-    if parent.type_to_string == 'row':
-        children = Column.objects.filter(row=parent)
-
-    if parent.type_to_string == 'column':
-        children = Widget.objects.filter(column=parent)
-
-    if parent.type_to_string == 'group':
-        children = Widget.objects.filter(group=parent)
+    children = []
 
     if parent.type_to_string == 'wiki':
         children = Wiki.objects.filter(parent=parent)
@@ -55,18 +43,6 @@ def reorder_positions(obj, old_position, new_position):
 
     if obj.type_to_string == 'wiki':
         children = Wiki.objects.filter(parent=obj.parent)
-
-    if obj.type_to_string == 'row':
-        children = Row.objects.filter(page=obj.page)
-
-    if obj.type_to_string == 'column':
-        children = Column.objects.filter(row=obj.row)
-
-    if obj.type_to_string == 'widget' and obj.group:
-        children = Widget.objects.filter(group=obj.group)
-
-    if obj.type_to_string == 'widget' and not obj.group:
-        children = Widget.objects.filter(column=obj.column)
 
     if not children:
         raise GraphQLError(COULD_NOT_FIND)
