@@ -236,6 +236,7 @@ class RedirectMiddleware:
 
         return response
 
+
 class TenantPrimaryDomainRedirectMiddleware:
     """
     If current domain is not primary domain redirect to primary domain
@@ -253,12 +254,13 @@ class TenantPrimaryDomainRedirectMiddleware:
             if current_domain != primary_domain:
                 server_port = request.get_port()
                 if server_port != ('443' if request.is_secure() else '80'):
-                    primary_domain = '%s:%s' %(primary_domain, server_port)
+                    primary_domain = '%s:%s' % (primary_domain, server_port)
 
                 redirect_url = f"%s://%s%s" % (request.scheme, primary_domain, request.get_full_path())
                 return redirect(redirect_url, permanent=True)
 
         return response
+
 
 class UnsupportedBrowserMiddleware:
     """

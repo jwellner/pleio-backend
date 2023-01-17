@@ -1,9 +1,13 @@
+import uuid
+
 from django.db import connection
+from django.http import HttpRequest, Http404
 from django_tenants.test.client import TenantClient
 from django.contrib.auth.models import AnonymousUser
 from django.core.cache import cache
 from core.models import Comment, CommentRequest
 from core.tests.helpers import PleioTenantTestCase
+from core.views import comment_confirm
 from user.models import User
 from blog.models import Blog
 from mixer.backend.django import mixer
@@ -130,3 +134,10 @@ class CommentWithoutAccountTestCase(PleioTenantTestCase):
         self.assertEqual(comment.owner, None)
         self.assertEqual(comment.email, "test@test.com")
         self.assertEqual(comment.name, "Unit Tester")
+
+    def test_confirm_comment_non_comment(self):
+        request = HttpRequest()
+        random_id = uuid.uuid4()
+
+        with self.assertRaises(Http404):
+            comment_confirm(request, random_id)

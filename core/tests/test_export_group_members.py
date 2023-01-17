@@ -1,32 +1,77 @@
+import uuid
+from http import HTTPStatus
+
+from django.urls import reverse
+
+from core.factories import GroupFactory
+from core.models import Subgroup
 from core.tests.helpers import PleioTenantTestCase
-from core.models import Group
-from mixer.backend.django import mixer
 from user.factories import UserFactory
-from core import config
 
 
 class ExportGroupMembersTestCase(PleioTenantTestCase):
 
     def setUp(self):
         super(ExportGroupMembersTestCase, self).setUp()
-        config.GROUP_MEMBER_EXPORT = True
-        
-        self.user1 = UserFactory()
-        self.user2 = UserFactory()
-        self.group = mixer.blend(Group, owner = self.user1)
-        self.group.join(self.user1)
+        self.override_config(GROUP_MEMBER_EXPORT=True)
+
+        self.group_admin = UserFactory()
+        self.visitor = UserFactory()
+        self.inactive_member = UserFactory(is_active=False)
+        self.active_member = UserFactory()
+        self.group = GroupFactory(owner=self.group_admin)
+        self.group.join(self.inactive_member)
+        self.group.join(self.active_member)
+
+        self.subgroup = Subgroup.objects.create(name="Demo subgroup name",
+                                                group=self.group)
+        self.subgroup.members.add(self.inactive_member)
+        self.subgroup.members.add(self.active_member)
 
     def test_export_group_members_not_logged_in(self):
-        response = self.client.get("/exporting/group/{}".format(self.group.guid))
-        self.assertEqual(response.status_code, 401)
-        self.assertFalse(hasattr(response, 'streaming_content'))
+        self.override_config(IS_CLOSED=False)
+
+        response = self.client.get(reverse("group_members_export", args=[self.group.guid]))
+        content = response.getvalue().decode()
+
+        self.assertEqual(response.status_code, HTTPStatus.UNAUTHORIZED)
+        self.assertNotIn(self.group_admin.email, content)
+        self.assertTemplateUsed("react.html")
+
+    def test_export_group_members_not_enabled(self):
+        self.override_config(GROUP_MEMBER_EXPORT=False)
+        self.client.force_login(self.group_admin)
+
+        response = self.client.get(reverse("group_members_export", args=[self.group.guid]))
+
+        self.assertEqual(response.status_code, HTTPStatus.NOT_FOUND)
+        self.assertTemplateUsed("react.html")
 
     def test_export_group_members_not_admin(self):
-        self.client.force_login(self.user2)
-        response = self.client.get("/exporting/group/{}".format(self.group.guid))
-        self.assertFalse(hasattr(response, 'streaming_content'))
+        self.client.force_login(self.visitor)
+        response = self.client.get(reverse("group_members_export", args=[self.group.guid]))
+        content = response.getvalue().decode()
+
+        self.assertEqual(response.status_code, HTTPStatus.FORBIDDEN)
+        self.assertNotIn(self.group_admin.email, content)
+        self.assertTemplateUsed("react.html")
 
     def test_export_group_members(self):
-        self.client.force_login(self.user1)
-        response = self.client.get("/exporting/group/{}".format(self.group.guid))
-        self.assertIn('{};{};{}'.format(self.user1.guid,self.user1.name,self.user1.email), list(response.streaming_content)[1].decode())
+        self.client.force_login(self.group_admin)
+        response = self.client.get(reverse("group_members_export", args=[self.group.guid]))
+        content = response.getvalue().decode()
+
+        self.assertEqual(response.status_code, HTTPStatus.OK)
+        self.assertIn(self.group_admin.email, content)
+        self.assertIn(self.active_member.email, content)
+        self.assertNotIn(self.inactive_member.email, content)
+        self.assertIn(self.subgroup.name, content)
+
+    def test_export_group_not_exists(self):
+        no_group_guid = str(uuid.uuid4())
+        self.client.force_login(self.group_admin)
+
+        response = self.client.get(reverse("group_members_export", args=[no_group_guid]))
+
+        self.assertEqual(response.status_code, HTTPStatus.NOT_FOUND)
+        self.assertTemplateUsed("react.html")
