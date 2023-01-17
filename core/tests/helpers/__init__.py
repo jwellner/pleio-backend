@@ -59,6 +59,12 @@ class PleioTenantTestCase(FastTenantTestCase):
         self.override_config(LANGUAGE=language_code)
         translation.activate(language_code)
 
+    def diskfile_factory(self, filename, content='', binary=False):
+        os.makedirs(os.path.dirname(filename), exist_ok=True)
+        with open(filename, "w%s" % ('b' if binary else '')) as fh:
+            fh.write(content)
+        self._file_cleanup.append(filename)
+
     def file_factory(self, filepath):
         from file.models import FileFolder
         filename = os.path.basename(filepath)

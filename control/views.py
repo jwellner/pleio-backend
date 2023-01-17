@@ -2,7 +2,6 @@ import logging
 import os
 import mimetypes
 import csv
-import tempfile
 
 from io import StringIO
 from django.conf import settings
@@ -17,15 +16,17 @@ from django.http import FileResponse, HttpResponseNotFound, StreamingHttpRespons
 from wsgiref.util import FileWrapper
 from tenants.models import Client, Agreement, AgreementVersion
 from control.models import SiteFilter, Task
-from control.forms import AddSiteForm, DeleteSiteForm, ConfirmSiteForm, ConfirmSiteBackupForm, SearchUserForm, AgreementAddForm, AgreementAddVersionForm
+from control.forms import AddSiteForm, DeleteSiteForm, ConfirmSiteBackupForm, SearchUserForm, AgreementAddForm, AgreementAddVersionForm
 from core.models import SiteStat
 from user.models import User
 from django_tenants.utils import tenant_context
 
 logger = logging.getLogger(__name__)
 
+
 def is_admin(user):
     return user.is_superadmin
+
 
 @login_required
 @user_passes_test(is_admin)
@@ -104,7 +105,7 @@ def site(request, site_id):
 def sites_add(request):
     # pylint: disable=unused-argument
 
-    if request.POST:
+    if request.method == 'POST':
         form = AddSiteForm(request.POST)
         if form.is_valid():
             data = form.cleaned_data
@@ -157,10 +158,9 @@ def tasks(request):
 @require_http_methods(["POST", "GET"])
 def sites_delete(request, site_id):
     # pylint: disable=unused-argument
-
     site = Client.objects.get(id=site_id)
 
-    if request.POST:
+    if request.method == 'POST':
         form = DeleteSiteForm(request.POST)
         if form.is_valid():
             task = Task.objects.create_task('control.tasks.delete_site', (site.id,))
@@ -182,32 +182,19 @@ def sites_delete(request, site_id):
     return render(request, 'sites_delete.html', context)
 
 
-
 @login_required
 @user_passes_test(is_admin)
 @require_http_methods(["POST", "GET"])
 def sites_disable(request, site_id):
-    # pylint: disable=unused-argument
-
     site = Client.objects.get(id=site_id)
 
-    if request.POST:
-        form = ConfirmSiteForm(request.POST)
-        if form.is_valid():
-            task = Task.objects.create_task('control.tasks.update_site', (site.id, {"is_active": False}))
-
-            messages.info(request, "Disable site %s gestart in achtergrond (task.id=%s)" % (site.primary_domain, task.id))
-
-            return redirect(reverse('sites'))
-
-    else:
-        form = ConfirmSiteForm(initial={
-            'site_id': site.id
-        })
+    if request.method == 'POST':
+        task = Task.objects.create_task('control.tasks.update_site', (site_id, {"is_active": False}))
+        messages.info(request, "Disable site %s gestart in achtergrond (task.id=%s)" % (site.primary_domain, task.id))
+        return redirect(reverse('sites'))
 
     context = {
         'site': site,
-        'form': form
     }
 
     return render(request, 'sites_disable.html', context)
@@ -217,27 +204,15 @@ def sites_disable(request, site_id):
 @user_passes_test(is_admin)
 @require_http_methods(["POST", "GET"])
 def sites_enable(request, site_id):
-    # pylint: disable=unused-argument
-
     site = Client.objects.get(id=site_id)
 
-    if request.POST:
-        form = ConfirmSiteForm(request.POST)
-        if form.is_valid():
-            task = Task.objects.create_task('control.tasks.update_site', (site.id, {"is_active": True}))
-
-            messages.info(request, "Enable site %s gestart in achtergrond (task.id=%s)" % (site.primary_domain, task.id))
-
-            return redirect(reverse('sites'))
-
-    else:
-        form = ConfirmSiteForm(initial={
-            'site_id': site.id
-        })
+    if request.method == 'POST':
+        task = Task.objects.create_task('control.tasks.update_site', (site_id, {"is_active": True}))
+        messages.info(request, "Enable site %s gestart in achtergrond (task.id=%s)" % (site.primary_domain, task.id))
+        return redirect(reverse('sites'))
 
     context = {
         'site': site,
-        'form': form
     }
 
     return render(request, 'sites_enable.html', context)
@@ -248,25 +223,18 @@ def sites_enable(request, site_id):
 @require_http_methods(["POST", "GET"])
 def sites_backup(request, site_id):
     # pylint: disable=unused-argument
-
-    def _backup_foldername(site):
-        return slugify("%s_%s" % (
-            localtime().strftime("%Y%m%d%H%M%S"),
-            site.schema_name,
-        ))
-
     site = Client.objects.get(id=site_id)
-    origin = "site_backup:%s" % site.id
+    origin = "site_backup:%s" % site_id
 
-    if request.POST:
+    if request.method == 'POST':
         form = ConfirmSiteBackupForm(request.POST)
         if form.is_valid():
             task = Task.objects.create_task(
                 name='control.tasks.backup_site',
                 arguments=(
-                    site.id,
+                    site_id,
                     not form.cleaned_data['include_files'],
-                    _backup_foldername(site),
+                    _backup_folder(site),
                     bool(form.cleaned_data['create_archive'])
                 ),
                 origin=origin,
@@ -278,9 +246,7 @@ def sites_backup(request, site_id):
             return redirect(reverse('site_backup', args=(site_id,)))
 
     else:
-        form = ConfirmSiteBackupForm(initial={
-            'site_id': site.id
-        })
+        form = ConfirmSiteBackupForm()
 
     context = {
         'site': site,
@@ -289,6 +255,13 @@ def sites_backup(request, site_id):
     }
 
     return render(request, 'sites_backup.html', context)
+
+
+def _backup_folder(site):
+    return slugify("%s_%s" % (
+        localtime().strftime("%Y%m%d%H%M%S"),
+        site.schema_name,
+    ))
 
 
 @login_required
@@ -319,17 +292,12 @@ def download_backup(request, task_id):
 @login_required
 @user_passes_test(is_admin)
 def tools(request):
-    # pylint: disable=unused-argument
-
     return render(request, 'tools.html')
 
 
 @login_required
 @user_passes_test(is_admin)
-def dowload_site_admins(request):
-    # pylint: disable=unused-argument
-    # pylint: disable=unused-variable
-
+def download_site_admins(request):
     clients = Client.objects.exclude(schema_name='public', is_active=True)
 
     admins = []
@@ -367,23 +335,15 @@ def dowload_site_admins(request):
 @login_required
 @user_passes_test(is_admin)
 def search_user(request):
-    # pylint: disable=unused-argument
-    # pylint: disable=unused-variable
-
-    if request.POST:
+    if request.method == 'POST':
         form = SearchUserForm(request.POST)
         if form.is_valid():
             data = form.cleaned_data
-
             email = data.get("email")
-
             clients = Client.objects.exclude(schema_name='public')
-
             data = []
             for client in clients:
-
                 with tenant_context(client):
-
                     user = User.objects.filter(email=email, is_active=True).first()
                     if user:
                         data.append({
@@ -400,7 +360,7 @@ def search_user(request):
                 'sites': data,
             }
 
-            return render(request,'search_user.html', context)
+            return render(request, 'search_user.html', context)
 
     else:
         form = SearchUserForm(initial={})
@@ -427,9 +387,7 @@ def agreements(request, cluster_id=None):
 @login_required
 @user_passes_test(is_admin)
 def agreements_add(request):
-    # pylint: disable=unused-argument
-
-    if request.POST:
+    if request.method == 'POST':
         form = AgreementAddForm(request.POST)
         if form.is_valid():
             data = form.cleaned_data
@@ -453,11 +411,10 @@ def agreements_add(request):
 @login_required
 @user_passes_test(is_admin)
 def agreements_add_version(request, agreement_id):
-    # pylint: disable=unused-argument
+    if not Agreement.objects.filter(id=agreement_id).exists():
+        return HttpResponseNotFound("Agreement not found")
 
-    agreement = Agreement.objects.get(id=agreement_id)
-
-    if request.POST:
+    if request.method == 'POST':
         form = AgreementAddVersionForm(request.POST, request.FILES)
         if form.is_valid():
             data = form.cleaned_data
@@ -473,7 +430,7 @@ def agreements_add_version(request, agreement_id):
                 document=uploaded_file
             )
 
-            messages.info(request, "Added version %s to agreement %s" % (version.version, agreement.name) )
+            messages.info(request, "Added version %s to agreement %s" % (version.version, agreement.name))
 
             return redirect('/agreements')
     else:

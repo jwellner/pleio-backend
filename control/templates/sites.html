@@ -27,6 +27,7 @@
   </div>
 </div>
 
+{% if sites %}
 <table class="table">
   <thead>
     <tr>
@@ -63,6 +64,9 @@
     {% endfor %}
   </tbody>
 </table>
+{% else %}
+    <p>No sites found yet.</p>
+{% endif %}
 
 {% if sites.has_other_pages %}
   <ul class="pagination">
