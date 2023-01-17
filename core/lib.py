@@ -70,8 +70,6 @@ def get_model_by_subtype(subtype):
     except AttributeError:
         return None
 
-    return None
-
 
 def access_id_to_acl(obj, access_id):
     """
@@ -169,6 +167,7 @@ def webpack_dev_server_is_available():
     if settings.ENV != 'local':
         return False
 
+    # pragma: no cover
     docker_host = os.environ.get('DOCKER_LOCAL_MACHINE', None)
 
     if docker_host:
@@ -350,39 +349,14 @@ def tenant_summary(with_favicon=False):
     return summary
 
 
-def get_default_email_context(user=None):
-    site_url = get_base_url()
-    user_url = site_url + user.url if user else ''
-    user_name = user.name if user else ''
-    site_name = config.NAME
-    primary_color = config.COLOR_PRIMARY
-    header_color = config.COLOR_HEADER if config.COLOR_HEADER else config.COLOR_PRIMARY
-    if user:
-        tokenizer = EmailSettingsTokenizer()
-        mail_settings_url = get_full_url(tokenizer.create_url(user))
-    else:
-        mail_settings_url = ''
-
-    return {
-        'user_name': user_name,
-        'user_url': user_url,
-        'site_url': site_url,
-        'site_name': site_name,
-        'primary_color': primary_color,
-        'header_color': header_color,
-        'mail_settings_url': mail_settings_url
-    }
-
-
 def obfuscate_email(email):
     # alter email: example@domain.com -> e******@domain.com
     try:
         email_splitted = email.split("@")
-        nr_char = len(email_splitted[0])
+        nr_char = len(email_splitted[0]) - 1
         return email_splitted[0][0] + '*' * nr_char + '@' + email_splitted[1]
     except Exception:
-        pass
-    return ""
+        return ""
 
 
 def generate_code():
@@ -495,7 +469,6 @@ def hex_color_tint(hex_color, weight=0.5):
     try:
         color = Color(hex_color)
     except AttributeError:
-        # Add some logging?
         return hex_color
 
     newR = color.rgb[0] + (1 - color.rgb[0]) * weight
@@ -525,6 +498,7 @@ def get_client_ip(request):
 
     try:
         ipv4_version = ipaddress.IPv6Address(x_forwarded_for).ipv4_mapped
+
         if ipv4_version:
             x_forwarded_for = str(ipv4_version)
     except Exception:
@@ -615,6 +589,7 @@ def str_to_datetime(datetime_str):
     result = django_timezone.datetime.fromisoformat(datetime_str)
     if django_timezone.is_aware(result):
         return result.astimezone(django_timezone.get_current_timezone())
+
     return django_timezone.make_aware(result).astimezone(django_timezone.get_current_timezone())
 
 
@@ -632,11 +607,13 @@ def strip_exif(upload_field):
 def validate_token(request, token):
     if not token:
         return False
+
     try:
         if str(request.META['HTTP_AUTHORIZATION']) == str('Bearer ' + token):
             return True
     except Exception:
         pass
+
     try:
         if str(request.META['headers']['Authorization']) == str('Bearer ' + token):
             return True

@@ -10,7 +10,7 @@ from django_tenants.utils import tenant_context
 
 
 class ClientManager(models.Manager):
-    """ Separate manager for testing purposes. """
+    """ Separate manager for unit-testing purposes. """
 
 
 class Client(TenantMixin):

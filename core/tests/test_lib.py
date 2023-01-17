@@ -1,7 +1,6 @@
 import os
+import uuid
 from unittest import mock
-
-from django.test import override_settings
 
 from core import override_local_config
 from core.lib import clean_graphql_input, tenant_api_token, tenant_summary
@@ -60,10 +59,13 @@ class TestTenantApiToken(FastTenantTestCase):
 
 class TestTenantSummary(PleioTenantTestCase):
 
-    @override_local_config(TENANT_API_TOKEN="test",
-                           DESCRIPTION="test site description.",
-                           NAME="test site name")
-    @override_settings(ENV='test')
+    def setUp(self):
+        super().setUp()
+        self.override_config(TENANT_API_TOKEN="test",
+                             DESCRIPTION="test site description.",
+                             NAME="test site name")
+        self.override_setting(ENV='test')
+
     def test_without_favicon(self):
         self.assertDictEqual(tenant_summary(), {
             'api_token': 'test',
@@ -93,3 +95,12 @@ class TestTenantSummary(PleioTenantTestCase):
             summary = tenant_summary(with_favicon=True)
             self.assertEqual("favicon.ico", summary.get('favicon'))
             self.assertEqual("file contents", summary.get('favicon_data'))
+
+    def test_with_favicon_error(self):
+        self.override_config(FAVICON=uuid.uuid4())
+        self.assertDictEqual(tenant_summary(with_favicon=True), {
+            'api_token': 'test',
+            'description': 'test site description.',
+            'name': 'test site name',
+            'url': 'https://tenant.fast-test.com',
+        })
