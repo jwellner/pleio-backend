@@ -1,45 +1,62 @@
-from django_tenants.test.client import TenantClient
-from django.core.cache import cache
-from django.db import connection
-from django.test import override_settings
+import uuid
+from http import HTTPStatus
 
-from tenants.helpers import FastTenantTestCase
+from django.test import override_settings
+from django.utils import timezone
+
+from core.tests.helpers import PleioTenantTestCase
 from user.models import User
 from core.models import ProfileField, UserProfileField
 from mixer.backend.django import mixer
 
-class OnboardingTestCase(FastTenantTestCase):
+
+class OnboardingTestCase(PleioTenantTestCase):
 
     def setUp(self):
         super().setUp()
 
-        self.existing_user = mixer.blend(User, is_active=True)
-
+        # Prepare fields
         self.profile_field1 = ProfileField.objects.create(
             key="profile_field1",
             name="profile_field1_name",
-            is_mandatory=True,
-            is_in_onboarding=True
         )
+        self.profile_field_multiselect = ProfileField.objects.create(
+            key="profile_field_multiselect",
+            name="profile_field_multi_select",
+            field_type='multi_select_field',
+            field_options=['Foo', 'Bar', 'Baz'],
+        )
+        self.profile_field_datefield = ProfileField.objects.create(
+            key="profile_field_datefield",
+            name="profile_field_datefield",
+            field_type='date_field',
+        )
+        ProfileField.objects.update(is_mandatory=True,
+                                    is_in_onboarding=True)
 
-        cache.set("%s%s" % (connection.schema_name, 'PROFILE_SECTIONS'), [
+        # prepare existing user
+        self.existing_user = mixer.blend(User, is_active=True)
+
+        self.override_config(PROFILE_SECTIONS=[
             {"name": "", "profileFieldGuids": [str(self.profile_field1.id)]}
         ])
+        self.override_config(IS_CLOSED=True)
+        self.override_config(ONBOARDING_ENABLED=True)
+        self.override_config(ONBOARDING_INTRO="There is an intro")
+        self.override_config(ONBOARDING_FORCE_EXISTING_USERS=False)
 
-        cache.set("%s%s" % (connection.schema_name, 'IS_CLOSED'), True)
+    def tearDown(self):
+        ProfileField.objects.all().delete()
+        self.existing_user.delete()
 
-        self.client = TenantClient(self.tenant)
+        super().tearDown()
 
     @override_settings(AUTHENTICATION_BACKENDS=['django.contrib.auth.backends.ModelBackend'])
     def test_onboarding_redirect(self):
-        session = self.client.session
-        session['onboarding_claims'] = {
+        self.update_session(onboarding_claims={
             'email': 'test@pleio.nl',
             'name': 'test user'
-        }
-        session.save()
-
-        cache.set("%s%s" % (connection.schema_name, 'ONBOARDING_ENABLED'), True)
+        })
 
         response = self.client.get('/onboarding', follow=True)
 
@@ -47,15 +64,11 @@ class OnboardingTestCase(FastTenantTestCase):
 
     @override_settings(AUTHENTICATION_BACKENDS=['django.contrib.auth.backends.ModelBackend'])
     def test_onboarding_with_only_intro(self):
-        session = self.client.session
-        session['onboarding_claims'] = {
+        self.update_session(onboarding_claims={
             'email': 'test@pleio.nl',
             'name': 'test user'
-        }
-        session.save()
+        })
 
-        cache.set("%s%s" % (connection.schema_name, 'ONBOARDING_ENABLED'), True)
-        cache.set("%s%s" % (connection.schema_name, 'ONBOARDING_INTRO'), "Ther is an intro")
         self.profile_field1.delete()
 
         response = self.client.get('/onboarding', follow=True)
@@ -64,26 +77,33 @@ class OnboardingTestCase(FastTenantTestCase):
 
     @override_settings(AUTHENTICATION_BACKENDS=['django.contrib.auth.backends.ModelBackend'])
     def test_onboarding_passed_if_no_intro_or_profile_fields(self):
-        session = self.client.session
-        session['onboarding_claims'] = {
+        ProfileField.objects.all().delete()
+        self.update_session(onboarding_claims={
             'email': 'test@pleio.nl',
             'name': 'test user'
-        }
-        session.save()
-        self.profile_field1.delete()
-
-        cache.set("%s%s" % (connection.schema_name, 'ONBOARDING_ENABLED'), True)
+        })
 
         response = self.client.get('/onboarding', follow=True)
 
         self.assertTemplateUsed(response, 'base_closed.html')
 
+    def test_onboarding_passes_when_logged_in_without_profile_field(self):
+        ProfileField.objects.all().delete()
+        self.update_session(onboarding_claims={
+            'email': 'test@pleio.nl',
+            'name': 'test user'
+        })
+        self.override_config(ONBOARDING_INTRO=None)
+
+        self.client.force_login(self.existing_user)
+        response = self.client.get('/onboarding')
+
+        self.assertEqual(response.status_code, HTTPStatus.FOUND)
+        self.assertEqual(response.url, '/')
 
     @override_settings(AUTHENTICATION_BACKENDS=['django.contrib.auth.backends.ModelBackend'])
     def test_onboarding_create_user(self):
-        session = self.client.session
-
-        session['onboarding_claims'] = {
+        self.update_session(onboarding_claims={
             'email': 'test@pleio.nl',
             'name': 'test user',
             'picture': None,
@@ -91,28 +111,96 @@ class OnboardingTestCase(FastTenantTestCase):
             'has_2fa_enabled': True,
             'sub': '1234',
             'is_superadmin': False
-        }
-        session.save()
+        })
 
-        response = self.client.post(
-            "/onboarding", data={self.profile_field1.guid: "Field1 value"}
-        )
+        expected_date = timezone.now()
 
-        self.assertEqual(response.status_code, 302)
+        response = self.client.post("/onboarding", data={
+            self.profile_field1.guid: "Field1 value",
+            self.profile_field_multiselect.guid: ["Foo", "Bar"],
+            self.profile_field_datefield.guid: expected_date.strftime("%d-%m-%Y"),
+        })
+
+        self.assertEqual(response.status_code, HTTPStatus.FOUND)
         self.assertEqual(response["Location"], "/")
 
         new_user = User.objects.filter(external_id="1234").first()
         self.assertEqual(new_user.email, 'test@pleio.nl')
         self.assertEqual(new_user.has_2fa_enabled, True)
 
-        user_profile_field = UserProfileField.objects.filter(user_profile=new_user.profile, profile_field=self.profile_field1).first()
-        self.assertEqual(user_profile_field.value, 'Field1 value')
+        current_profile = {field.profile_field.guid: field.value for field in UserProfileField.objects.filter(user_profile=new_user.profile)}
+        self.assertDictEqual(current_profile, {
+            self.profile_field1.guid: "Field1 value",
+            self.profile_field_multiselect.guid: "Foo,Bar",
+            self.profile_field_datefield.guid: expected_date.strftime("%Y-%m-%d"),
+        })
+
+    def test_non_mandatory_onboarding(self):
+        ProfileField.objects.update(is_mandatory=False)
+        self.update_session(onboarding_claims={
+            'email': 'test@pleio.nl',
+            'name': 'test user',
+            'sub': '1234',
+        })
+        response = self.client.post("/onboarding")
+
+        self.assertEqual(response.status_code, HTTPStatus.FOUND)
+        self.assertEqual(response.url, "/")
+
+        new_user = User.objects.filter(external_id="1234").first()
+        self.assertTrue(new_user)
+        self.assertEqual(new_user.email, "test@pleio.nl")
+
+        current_profile = {field.profile_field.guid: field.value for field in UserProfileField.objects.filter(user_profile=new_user.profile)}
+        self.assertDictEqual(current_profile, {
+            self.profile_field1.guid: "",
+            self.profile_field_multiselect.guid: "",
+            self.profile_field_datefield.guid: "",
+        })
+
+    def test_onboarding_logged_in_user(self):
+        expected_prepopulated_value = str(uuid.uuid4())
+        prepopulated_date = '2014-10-10'
+        expected_date = '10-10-2014'
+        UserProfileField.objects.create(user_profile=self.existing_user.profile,
+                                        profile_field=self.profile_field1,
+                                        value=expected_prepopulated_value)
+        UserProfileField.objects.create(user_profile=self.existing_user.profile,
+                                        profile_field=self.profile_field_multiselect,
+                                        value='Foo')
+        UserProfileField.objects.create(user_profile=self.existing_user.profile,
+                                        profile_field=self.profile_field_datefield,
+                                        value=prepopulated_date)
+        self.update_session(onboarding_claims={
+            'email': self.existing_user.email,
+            'name': self.existing_user.name,
+        })
+
+        self.client.force_login(self.existing_user)
+        response = self.client.get("/onboarding")
+
+        self.assertEqual(response.status_code, HTTPStatus.OK)
+        self.assertTemplateUsed(response, "onboarding.html")
+        self.assertIn(expected_prepopulated_value, response.content.decode())
+        self.assertIn(expected_date, response.content.decode())
+
+    def test_onboarding_logged_in_user_with_invalid_date_value(self):
+        expected_prepopulated_value = str(uuid.uuid4())
+        UserProfileField.objects.create(user_profile=self.existing_user.profile,
+                                        profile_field=self.profile_field_datefield,
+                                        value=expected_prepopulated_value)
+        self.update_session(onboarding_claims={
+            'email': self.existing_user.email,
+            'name': self.existing_user.name,
+        })
+
+        self.client.force_login(self.existing_user)
+        response = self.client.get("/onboarding")
+
+        self.assertNotIn(expected_prepopulated_value, response.content.decode())
 
     @override_settings(AUTHENTICATION_BACKENDS=['django.contrib.auth.backends.ModelBackend'])
     def test_onboarding_no_claim(self):
-
-        cache.set("%s%s" % (connection.schema_name, 'ONBOARDING_ENABLED'), True)
-
         response = self.client.get('/onboarding', follow=True)
 
         self.assertTemplateUsed(response, 'base_closed.html')
@@ -120,9 +208,6 @@ class OnboardingTestCase(FastTenantTestCase):
     @override_settings(AUTHENTICATION_BACKENDS=['django.contrib.auth.backends.ModelBackend'])
     def test_onboarding_redirect_existing_off(self):
         self.client.force_login(self.existing_user)
-
-        cache.set("%s%s" % (connection.schema_name, 'ONBOARDING_ENABLED'), True)
-        cache.set("%s%s" % (connection.schema_name, 'ONBOARDING_FORCE_EXISTING_USERS'), False)
 
         response = self.client.get('/', follow=True)
 
@@ -132,8 +217,7 @@ class OnboardingTestCase(FastTenantTestCase):
     def test_onboarding_redirect_existing_on(self):
         self.client.force_login(self.existing_user)
 
-        cache.set("%s%s" % (connection.schema_name, 'ONBOARDING_ENABLED'), True)
-        cache.set("%s%s" % (connection.schema_name, 'ONBOARDING_FORCE_EXISTING_USERS'), True)
+        self.override_config(ONBOARDING_FORCE_EXISTING_USERS=True)
 
         response = self.client.get('/', follow=True)
 
@@ -142,8 +226,7 @@ class OnboardingTestCase(FastTenantTestCase):
     @override_settings(AUTHENTICATION_BACKENDS=['django.contrib.auth.backends.ModelBackend'])
     def test_onboarding_off(self):
         self.client.force_login(self.existing_user)
-
-        cache.set("%s%s" % (connection.schema_name, 'ONBOARDING_ENABLED'), False)
+        self.override_config(ONBOARDING_ENABLED=False)
 
         response = self.client.get('/', follow=True)
 

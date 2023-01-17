@@ -1,7 +1,8 @@
+import uuid
 from http import HTTPStatus
 
-
 from django.test import override_settings
+from django.urls import reverse
 
 from tenants.helpers import FastTenantTestCase
 from user.models import User
@@ -16,7 +17,7 @@ class DownloadRichDescriptionAsTestCase(FastTenantTestCase):
     def setUp(self):
         super().setUp()
         self.authenticatedUser = mixer.blend(User)
-        self.authenticatedAdminUser = mixer.blend(User, roles = ['ADMIN'])
+        self.authenticatedAdminUser = mixer.blend(User, roles=['ADMIN'])
         self.group = mixer.blend(Group, owner=self.authenticatedAdminUser, is_membership_on_request=False)
         self.group.join(self.authenticatedUser, 'member')
 
@@ -36,28 +37,41 @@ class DownloadRichDescriptionAsTestCase(FastTenantTestCase):
         self.authenticatedAdminUser.delete()
         super().tearDown()
 
-    def test_download_rich_description_as_html(self):
+    def test_download_rich_description_on_non_existing_entity(self):
+        random_id = uuid.uuid4()
 
+        self.client.force_login(self.authenticatedUser)
+        response = self.client.get(reverse('download_rich_description_as', args=[random_id, 'html']))
+        self.assertEqual(response.status_code, 404)
+
+    def test_download_rich_description_on_empty_pad(self):
+        self.pad.rich_description = None
+        self.pad.save()
+
+        self.client.force_login(self.authenticatedUser)
+        response = self.client.get(reverse('download_rich_description_as', args=[self.pad.id, 'html']))
+        self.assertEqual(response.status_code, 404)
+
+    def test_download_rich_description_as_html(self):
         path = '/download_rich_description_as/' + str(self.pad.id) + '/html'
         self.client.force_login(self.authenticatedUser)
         response = self.client.get(path)
-       
+
         self.assertEqual(response.status_code, HTTPStatus.OK)
         self.assertEqual(b'JSON to string. text\n', b''.join(response.streaming_content))
 
     def test_download_rich_description_as_odt(self):
-
         path = '/download_rich_description_as/' + str(self.pad.id) + '/odt'
         self.client.force_login(self.authenticatedUser)
         response = self.client.get(path)
-      
+
         self.assertEqual(response.status_code, HTTPStatus.OK)
 
     @override_settings(DEBUG=False)
     def test_download_rich_description_as_not_supported_file_type(self):
-
         path = '/download_rich_description_as/' + str(self.pad.id) + '/notexisting'
         self.client.force_login(self.authenticatedUser)
         response = self.client.get(path)
-       
+
+        self.assertEqual(response.status_code, 404)
         self.assertTemplateUsed(response, 'react.html')

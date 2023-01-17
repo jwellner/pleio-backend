@@ -3,10 +3,11 @@ import io
 import os
 import json
 import logging
+from http import HTTPStatus
+
 import pypandoc
 import zipfile
 from datetime import datetime
-from bs4 import BeautifulSoup
 
 import qrcode
 from django.conf import settings
@@ -15,9 +16,8 @@ from django.contrib.auth import login as auth_login
 from django.contrib.auth.views import LogoutView
 from django.core import signing
 from django.core.exceptions import ObjectDoesNotExist
-from django.http import (FileResponse, Http404, HttpResponse,
-                         HttpResponseNotFound, HttpResponseRedirect,
-                         StreamingHttpResponse)
+from django.http import (FileResponse, HttpResponse, HttpResponseRedirect,
+                         StreamingHttpResponse, Http404)
 from django.shortcuts import redirect, render
 from django.urls import reverse
 from django.utils.http import urlencode
@@ -31,11 +31,10 @@ from core import config
 from core.auth import oidc_provider_logout_url
 from core.constances import OIDC_PROVIDER_OPTIONS, USER_ROLES
 from core.forms import EditEmailSettingsForm, OnboardingForm, RequestAccessForm
-from core.lib import (access_id_to_acl, get_base_url,
-                      get_exportable_content_types, get_model_by_subtype,
-                      get_tmp_file_path, is_schema_public, tenant_schema)
-from core.mail_builders.site_access_request import \
-    schedule_site_access_request_mail
+from core.http import HttpErrorReactPage, NotFoundReact, UnauthorizedReact, ForbiddenReact, NotAllowedReact
+from core.lib import (get_base_url, get_exportable_content_types, get_model_by_subtype,
+                      get_tmp_file_path, is_schema_public, tenant_schema, replace_html_img_src)
+from core.mail_builders.site_access_request import schedule_site_access_request_mail
 from core.models import (Attachment, Comment, CommentRequest, Entity, Group,
                          ProfileField, SiteAccessRequest, UserProfileField)
 from core.models.agreement import CustomAgreement
@@ -67,7 +66,13 @@ def default(request, exception=None):
         'metadata': metadata,
     }
 
-    return render(request, 'react.html', context)
+    status = HTTPStatus.OK
+    if isinstance(exception, HttpErrorReactPage):
+        status = exception.status_code
+    elif isinstance(exception, Http404):
+        status = HTTPStatus.NOT_FOUND
+
+    return render(request, 'react.html', context, status=status)
 
 
 def entity_view(request, entity_id=None, entity_title=None):
@@ -95,7 +100,7 @@ def entity_view(request, entity_id=None, entity_title=None):
             pass
 
     if entity:
-        status_code = 200
+        status_code = HTTPStatus.OK
         if hasattr(entity, 'description') and entity.description:
             metadata["description"] = Truncator(entity.description).words(26).replace("\"", "")
             metadata["og:description"] = metadata["description"]
@@ -111,10 +116,10 @@ def entity_view(request, entity_id=None, entity_title=None):
         metadata["article:modified_time"] = entity.updated_at.strftime("%Y-%m-%d %H:%M")
     else:
         try:
-            entity = Group.objects.visible(user).get(id=entity_id)
-            status_code = 200
+            Group.objects.visible(user).get(id=entity_id)
+            status_code = HTTPStatus.OK
         except ObjectDoesNotExist:
-            status_code = 404
+            status_code = HTTPStatus.NOT_FOUND
 
     context = {
         'webpack_dev_server': settings.WEBPACK_DEV_SERVER,
@@ -128,7 +133,6 @@ def entity_view(request, entity_id=None, entity_title=None):
 def logout(request):
     # should find out how we can make this better. OIDC logout only allows POST
     LogoutView.as_view()(request)
-
     return redirect(oidc_provider_logout_url(request))
 
 
@@ -136,31 +140,25 @@ def login(request):
     if request.GET.get('invitecode', None):
         request.session['invitecode'] = request.GET.get('invitecode')
 
-    query_args = {}
-    redirect_url = None
+    if len(config.OIDC_PROVIDERS) != 1:
+        context = {
+            'next': request.GET.get('next', ''),
+            'banned': request.session.get('pleio_user_is_banned', False),
+            'constants': {
+                'OIDC_PROVIDER_OPTIONS': OIDC_PROVIDER_OPTIONS,
+            },
+        }
+        return render(request, 'registration/login.html', context)
 
+    query_args = {}
     if config.IDP_ID and not request.GET.get('login_credentials'):
         query_args["idp"] = config.IDP_ID
-
     if request.GET.get('next'):
         query_args["next"] = request.GET.get('next')
+    query_args["provider"] = config.OIDC_PROVIDERS[0]
 
-    if len(config.OIDC_PROVIDERS) == 1:
-        query_args["provider"] = config.OIDC_PROVIDERS[0]
-        # only redirect when there is a single provider configured otherwise show login page
-        redirect_url = reverse('oidc_authentication_init') + '?' + urlencode(query_args)
-
-    if redirect_url:
-        return redirect(redirect_url)
-
-    context = {
-        'next': request.GET.get('next', ''),
-        'banned': request.session.get('pleio_user_is_banned', False),
-        'constants': {
-            'OIDC_PROVIDER_OPTIONS': OIDC_PROVIDER_OPTIONS,
-        },
-    }
-    return render(request, 'registration/login.html', context)
+    redirect_url = reverse('oidc_authentication_init') + '?' + urlencode(query_args)
+    return redirect(redirect_url)
 
 
 def oidc_failure(request):
@@ -174,7 +172,7 @@ def request_access(request):
     if not claims:
         return redirect('/')
 
-    if request.POST:
+    if request.method == "POST":
         form = RequestAccessForm(request.POST)
 
         if form.is_valid():
@@ -218,7 +216,7 @@ def onboarding(request):
     if user.is_authenticated and not config.ONBOARDING_INTRO and not ProfileField.objects.filter(is_in_onboarding=True).first():
         return HttpResponseRedirect('/')
 
-    if request.POST:
+    if request.method == 'POST':
         form = OnboardingForm(request.POST)
         if form.is_valid():
             data = form.cleaned_data
@@ -248,18 +246,9 @@ def onboarding(request):
                     else:
                         value = ''
 
-                try:
-                    user_profile_field = UserProfileField.objects.get(user_profile=user.profile, profile_field=profile_field)
-                    user_profile_field.value = value
-                    user_profile_field.save()
-                except ObjectDoesNotExist:
-                    user_profile_field = UserProfileField.objects.create(
-                        user_profile=user.profile,
-                        profile_field=profile_field,
-                        value=value,
-                        read_access=access_id_to_acl(user, config.DEFAULT_ACCESS_ID)
-                    )
-
+                user_profile_field, _ = UserProfileField.objects.get_or_create(user_profile=user.profile, profile_field=profile_field)
+                user_profile_field.value = value
+                user_profile_field.save()
             return HttpResponseRedirect('/')
 
     else:
@@ -342,19 +331,19 @@ def export_group_members(request, group_id=None):
     # pylint: disable=too-many-locals
     user = request.user
 
-    if not user.is_authenticated:
-        raise Http404("User not authenticated")
-
     if not config.GROUP_MEMBER_EXPORT:
-        raise Http404("Export could not be performed")
+        raise NotFoundReact("Export could not be performed")
+
+    if not user.is_authenticated:
+        raise UnauthorizedReact("Not logged in")
 
     try:
         group = Group.objects.get(id=group_id)
     except ObjectDoesNotExist:
-        raise Http404("Group not found")
+        raise NotFoundReact("Group not found")
 
     if not group.can_write(user):
-        raise Http404("Group not found")
+        raise ForbiddenReact("Visitor has no access")
 
     headers = ['guid', 'name', 'email', 'member since', 'last login']
 
@@ -397,10 +386,10 @@ def export_selected_content(request):
     user = request.user
 
     if not user.is_authenticated:
-        raise Http404("Not logged in")
+        raise UnauthorizedReact("Not logged in")
 
     if not user.has_role(USER_ROLES.ADMIN):
-        raise Http404("Not admin")
+        raise ForbiddenReact("Not Admin")
 
     content_ids = request.GET.getlist('content_guids[]')
 
@@ -426,22 +415,19 @@ def export_selected_content(request):
     return response
 
 
-def export_content(request, content_type=None):
+def export_content(request, content_type):
     user = request.user
 
     if not user.is_authenticated:
-        raise Http404("Not logged in")
+        raise UnauthorizedReact("Not logged in")
 
     if not user.has_role(USER_ROLES.ADMIN):
-        raise Http404("Not admin")
-
-    if not content_type:
-        raise Http404("Not found")
+        raise ForbiddenReact("Not logged in")
 
     exportable_content_types = [d['value'] for d in get_exportable_content_types()]
 
     if content_type not in exportable_content_types:
-        raise Http404("Content type " + content_type + " can not be exported")
+        raise NotFoundReact("Content type " + content_type + " can not be exported")
 
     Model = get_model_by_subtype(content_type)
     entities = Model.objects.all()
@@ -463,10 +449,10 @@ def export_groupowners(request):
     user = request.user
 
     if not user.is_authenticated:
-        raise Http404("Not logged in")
+        raise UnauthorizedReact("Not logged in")
 
     if not user.has_role(USER_ROLES.ADMIN):
-        raise Http404("Not admin")
+        raise ForbiddenReact("Not Admin")
 
     def stream(groups: [Group], pseudo_buffer):
         writer = csv.writer(pseudo_buffer, delimiter=';', quotechar='"')
@@ -504,7 +490,7 @@ def attachment(request, attachment_id, attachment_type=None):
         attachment = Attachment.objects.get(id=attachment_id)
 
         if not attachment.can_read(user):
-            raise Http404("File not found")
+            raise NotFoundReact("File not found")
 
         return_file = attachment
 
@@ -524,14 +510,14 @@ def attachment(request, attachment_id, attachment_type=None):
         return response
 
     except ObjectDoesNotExist:
-        raise Http404("File not found")
+        raise NotFoundReact("File not found")
 
 
 def comment_confirm(request, entity_id):
     try:
         entity = Entity.objects.select_subclasses().get(id=entity_id)
     except ObjectDoesNotExist:
-        raise Http404("Entity not found")
+        raise NotFoundReact("Entity not found")
 
     comment_request = CommentRequest.objects.filter(
         object_id=entity.id,
@@ -553,8 +539,6 @@ def comment_confirm(request, entity_id):
 
 
 def edit_email_settings(request, token):
-    user = None
-
     try:
         tokenizer = EmailSettingsTokenizer()
         user = tokenizer.unpack(token)
@@ -597,18 +581,15 @@ def get_url_qr(request, entity_id=None):
     user = request.user
 
     if not user.is_authenticated:
-        raise Http404("Event not found")
+        raise UnauthorizedReact("Not logged in")
 
     try:
         entity = Entity.objects.visible(user).get_subclass(id=entity_id)
     except ObjectDoesNotExist:
-        raise Http404("Event not found")
+        raise NotFoundReact("Entity not found")
 
     url = get_url(entity)
-    if hasattr(entity, 'title') and entity.title:
-        filename = slugify(entity.title)[:248].removesuffix("-")
-    else:
-        filename = entity.id
+    filename = slugify(entity.title)[:248].removesuffix("-")
 
     code = qrcode.make(url)
 
@@ -645,7 +626,7 @@ def unsubscribe(request, token):
         })
     except Exception as e:
         logger.error("unsubscribe_error: schema=%s, error=%s, type=%s, token=%s", tenant_schema(), str(e), e.__class__, token)
-        return HttpResponseNotFound()
+        raise NotFoundReact()
 
 
 def site_custom_agreement(request, custom_agreement_id):
@@ -653,10 +634,10 @@ def site_custom_agreement(request, custom_agreement_id):
     user = request.user
 
     if not user.is_authenticated:
-        raise Http404("Not logged in")
+        raise UnauthorizedReact("Not logged in")
 
     if not user.has_role(USER_ROLES.ADMIN):
-        raise Http404("Not admin")
+        raise ForbiddenReact("Not Admin")
 
     try:
         custom_agreement = CustomAgreement.objects.get(id=custom_agreement_id)
@@ -669,34 +650,15 @@ def site_custom_agreement(request, custom_agreement_id):
         return response
 
     except ObjectDoesNotExist:
-        raise Http404("File not found")
+        raise NotFoundReact("File not found")
 
 
 def download_rich_description_as(request, entity_id=None, file_type=None):
-    def replace_html_img_src(html, user, file_type):
-        def get_img_src(path, user):
-            if file_type in ['odt']:
-                try:
-                    attachment_id = path.split('/')[2]
-                    attachment = Attachment.objects.get(id=attachment_id)
-                    if attachment.can_read(user):
-                        path = attachment.upload.path
-                except Exception:
-                    pass
-            elif file_type == 'html':
-                path = get_base_url() + path
-            return path
-
-        soup = BeautifulSoup(html, "html.parser")
-        for img in soup.findAll('img'):
-            img['src'] = get_img_src(img['src'], user)
-        return str(soup)
-
     user = request.user
     entity = None
 
     if file_type not in ['odt', 'html']:
-        raise Http404("File type not supported, choose from odt or html")
+        raise NotFoundReact("File type not supported, choose from odt or html")
 
     if entity_id:
         try:
@@ -705,10 +667,10 @@ def download_rich_description_as(request, entity_id=None, file_type=None):
             pass
 
     if not entity:
-        raise Http404("Entity not found")
+        raise NotFoundReact("Entity not found")
 
     if not entity.rich_description:
-        raise Http404("Entity rich description not found")
+        raise NotFoundReact("Entity rich description not found")
 
     filename = 'file_contents'
     if entity.title:

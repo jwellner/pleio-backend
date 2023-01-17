@@ -10,7 +10,13 @@ class SiteInvitation(models.Model):
     updated_at = models.DateTimeField(default=timezone.now)
 
 
+class SiteAccessRequestManager(models.Manager):
+    """ Separate manager for unit-testing purposes. """
+
+
 class SiteAccessRequest(models.Model):
+    objects = SiteAccessRequestManager()
+
     email = models.EmailField(max_length=255, unique=True)
     name = models.CharField(max_length=100)
 

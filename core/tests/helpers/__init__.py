@@ -38,6 +38,19 @@ class PleioTenantTestCase(FastTenantTestCase):
         self.mocked_log_warning = mock.patch("logging.Logger.warning").start()
         self.mocked_warn = mock.patch("warnings.warn").start()
 
+    def tearDown(self):
+        for file in self._file_cleanup:
+            cleanup_path(file)
+
+        for key, value in self._settings_cache.items():
+            setattr(settings, key, value)
+        cache.clear()
+
+        if self._restore_language:
+            translation.activate(self._restore_language)
+
+        super().tearDown()
+
     def switch_language(self, language_code):
         assert language_code in ['en', 'nl', 'de', 'fr'], "Language code is restricted."
         if not self._restore_language:
@@ -84,18 +97,11 @@ class PleioTenantTestCase(FastTenantTestCase):
         content = open(path, 'rb').read()
         return ContentFile(content, os.path.basename(path))
 
-    def tearDown(self):
-        for file in self._file_cleanup:
-            cleanup_path(file)
-
-        for key, value in self._settings_cache.items():
-            setattr(settings, key, value)
-        cache.clear()
-
-        if self._restore_language:
-            translation.activate(self._restore_language)
-
-        super().tearDown()
+    def update_session(self, **kwargs):
+        session = self.client.session
+        for key, value in kwargs.items():
+            session[key] = value
+        session.save()
 
     @contextmanager
     def assertGraphQlError(self, expected=None, msg=None):

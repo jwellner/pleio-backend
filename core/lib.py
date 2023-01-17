@@ -1,36 +1,38 @@
 import base64
+import html2text
 import ipaddress
 import json
 import logging
+import mimetypes
 import os
 import re
 import secrets
 import tempfile
-import mimetypes
 import uuid
+
+from bs4 import BeautifulSoup
+from colour import Color
 from functools import wraps
 from inspect import isfunction
-from urllib.parse import urljoin
-
-from PIL import Image, UnidentifiedImageError
-from django.core.cache import cache
-from django.http import HttpRequest, HttpResponseForbidden
-import html2text
-from django.utils.module_loading import import_string
-from pytz import timezone
-from colour import Color
-from core.constances import ACCESS_TYPE
-from core import config
 from django.apps import apps
 from django.conf import settings
+from django.core.cache import cache
 from django.core.validators import URLValidator
 from django.db import connection
-from django.utils import timezone as django_timezone, translation
+from django.http import HttpRequest, HttpResponseForbidden
+from django.utils import timezone as django_timezone
+from django.utils.module_loading import import_string
 from django.utils.text import slugify
 from django.utils.translation import ugettext, ugettext_lazy
 from enum import Enum
+from PIL import Image, UnidentifiedImageError
+from pytz import timezone
+from urllib.parse import urljoin
 
+from core import config
+from core.constances import ACCESS_TYPE
 from core.utils.mail import EmailSettingsTokenizer
+
 
 logger = logging.getLogger(__name__)
 
@@ -441,6 +443,28 @@ def html_to_text(html):
     h.ignore_tables = True
     h.ignore_images = True
     return h.handle(html)
+
+
+def replace_html_img_src(html, user, file_type):
+    from core.models import Attachment
+
+    def get_img_src(path, user):
+        if file_type in ['odt']:
+            try:
+                attachment_id = path.split('/')[2]
+                attachment = Attachment.objects.get(id=attachment_id)
+                if attachment.can_read(user):
+                    path = attachment.upload.path
+            except Exception:
+                pass
+        elif file_type == 'html':
+            path = get_base_url() + path
+        return path
+
+    soup = BeautifulSoup(html, "html.parser")
+    for img in soup.findAll('img'):
+        img['src'] = get_img_src(img['src'], user)
+    return str(soup)
 
 
 def get_tmp_file_path(user, suffix=""):

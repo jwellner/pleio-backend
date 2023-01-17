@@ -2,7 +2,6 @@ import io
 from http import HTTPStatus
 from zipfile import ZipFile
 
-from django_tenants.test.client import TenantClient
 from mixer.backend.django import mixer
 
 from blog.models import Blog
@@ -13,7 +12,7 @@ from wiki.models import Wiki
 
 
 class TestExportSelectedContentTestCase(PleioTenantTestCase):
-    
+
     def setUp(self):
         super().setUp()
 
@@ -24,23 +23,44 @@ class TestExportSelectedContentTestCase(PleioTenantTestCase):
         self.event = mixer.blend(Event)
         self.wiki = mixer.blend(Wiki)
 
-    def test_export_selected_content(self):
+        self.selection = '/exporting/content/selected?content_guids[]={}&content_guids[]={}&content_guids[]={}'.format(self.blog1.id, self.blog2.id,
+                                                                                                                       self.event.id)
 
+    def tearDown(self):
+        self.wiki.delete()
+        self.event.delete()
+        self.blog2.delete()
+        self.blog1.delete()
+        self.user1.delete()
+        self.admin.delete()
+        super().tearDown()
+
+    def test_export_selected_content(self):
         self.client.force_login(self.admin)
 
-        path = '/exporting/content/selected?content_guids[]={}&content_guids[]={}&content_guids[]={}'.format(self.blog1.id, self.blog2.id, self.event.id)
-        response = self.client.get(path)
+        response = self.client.get(self.selection)
 
         self.assertEqual(response.status_code, HTTPStatus.OK)
-        zip_file = io.BytesIO(b''.join(response.streaming_content))
+        zip_file = io.BytesIO(response.getvalue())
 
-        with ZipFile(zip_file, 'r') as zip:
-            names = zip.namelist()
+        with ZipFile(zip_file, 'r') as fh:
+            names = fh.namelist()
             self.assertEqual(names[0], 'blog-export.csv')
             self.assertEqual(names[1], 'event-export.csv')
 
     def test_export_selected_content_anonymous(self):
-        path = '/exporting/content/selected?content_guids[]={}&content_guids[]={}&content_guids[]={}'.format(self.blog1.id, self.blog2.id, self.event.id)
-        response = self.client.get(path)
+        self.override_config(IS_CLOSED=False)
+
+        response = self.client.get(self.selection)
 
         self.assertEqual(response.status_code, HTTPStatus.UNAUTHORIZED)
+        self.assertTemplateUsed("react.html")
+
+    def test_export_selected_content_as_visitor(self):
+        self.override_config(IS_CLOSED=False)
+        self.client.force_login(self.user1)
+
+        response = self.client.get(self.selection)
+
+        self.assertEqual(response.status_code, HTTPStatus.FORBIDDEN)
+        self.assertTemplateUsed("react.html")
