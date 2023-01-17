@@ -9,7 +9,13 @@ from core.models import SiteStat
 from django_tenants.utils import tenant_context
 
 
+class ClientManager(models.Manager):
+    """ Separate manager for testing purposes. """
+
+
 class Client(TenantMixin):
+    objects = ClientManager()
+
     name = models.CharField(max_length=100)
     created_on = models.DateField(auto_now_add=True)
     is_active = models.BooleanField(default=True)

@@ -55,11 +55,7 @@ class DeleteSiteForm(forms.Form):
             self.add_error('check', "Type schema name to delete this site")
 
 
-class ConfirmSiteForm(forms.Form):
-    site_id = forms.IntegerField(widget=forms.HiddenInput())
-
-
-class ConfirmSiteBackupForm(ConfirmSiteForm):
+class ConfirmSiteBackupForm(forms.Form):
     include_files = forms.BooleanField(initial=True,
                                        required=False,
                                        label=_("Include files"),

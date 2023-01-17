@@ -6,6 +6,7 @@ from django.forms import Select, TextInput
 from django.utils.module_loading import import_string
 from tenants.models import Client
 
+
 class SiteFilter(django_filters.FilterSet):
     # pylint: disable=keyword-arg-before-vararg
 
@@ -42,6 +43,7 @@ class SiteFilter(django_filters.FilterSet):
 
 
 class TaskManager(models.Manager):
+
     def create_task(self, name, arguments=None, **kwargs):
         remote_task = celery.current_app.send_task(name, arguments)
 
