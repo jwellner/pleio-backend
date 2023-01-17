@@ -5,7 +5,9 @@ RUN apt-get update && apt-get install --no-install-recommends -y \
     libpq-dev \
     python3-dev \
     default-libmysqlclient-dev \
-    git
+    git \
+    libpcre3 \
+    libpcre3-dev
 
 RUN python -m venv /app-tmp/venv && /app-tmp/venv/bin/pip install --upgrade pip
 
@@ -31,7 +33,8 @@ RUN apt-get update && apt-get install --no-install-recommends -y \
     gnupg \
     wget \
     lsb-release \
-    pandoc
+    pandoc \
+    libpcre3
 
 # Install postgresql client version 12
 RUN mkdir -p /usr/share/man/man1/ /usr/share/man/man3/ /usr/share/man/man7/
