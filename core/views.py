@@ -1,9 +1,9 @@
 import csv
-import io
-import os
 import json
 import logging
 from http import HTTPStatus
+
+from urllib.parse import urljoin
 
 import pypandoc
 import zipfile
@@ -15,7 +15,7 @@ from django.contrib import messages
 from django.contrib.auth import login as auth_login
 from django.contrib.auth.views import LogoutView
 from django.core import signing
-from django.core.exceptions import ObjectDoesNotExist
+from django.core.exceptions import ObjectDoesNotExist, ValidationError
 from django.http import (FileResponse, HttpResponse, HttpResponseRedirect,
                          StreamingHttpResponse, Http404)
 from django.shortcuts import redirect, render
@@ -294,6 +294,18 @@ def favicon(request):
     if config.FAVICON:
         return redirect(config.FAVICON)
     return redirect("/static/apple-touch-icon.png")
+
+
+def avatar(request, user_guid):
+    try:
+        user = User.objects.get(id=user_guid)
+        assert user.external_id, "User has no account on account.pleio.nl"
+
+        size = request.GET.get('size') or 80
+        return HttpResponseRedirect(urljoin(settings.PROFILE_PICTURE_URL, f'avatar/{user.email}/{size}/'))
+
+    except (User.DoesNotExist, ValidationError, AssertionError):
+        raise Http404("Page not found")
 
 
 @require_GET
