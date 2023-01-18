@@ -39,17 +39,16 @@ def resolve_url(obj, info):
 
 @page.field("menu")
 def resolve_menu(obj, info):
-    # pylint: disable=unused-argument
+    user = info.context["request"].user
     top_parent = obj if not obj.parent else obj.parents[0]
-    return build_menu(top_parent)
+    return build_menu(top_parent, user)
 
 
-def build_menu(page):
+def build_menu(page, user):
     return {"title": page.title,
             "link": page.url,
             "guid": page.guid,
-            "children": [build_menu(c) for c in page.children.all()],
-            # EM: Hier
+            "children": [build_menu(c, user) for c in page.children.visible(user)],
             "accessId": get_access_id(page.read_access)}
 
 
