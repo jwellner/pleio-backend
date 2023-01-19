@@ -13,7 +13,7 @@ class ExternalContent(Entity):
     source = models.ForeignKey('external_content.ExternalContentSource', on_delete=models.CASCADE)
 
     title = models.CharField(max_length=256)
-    description = models.TextField()
+    description = models.TextField(null=True, blank=True)
     remote_id = models.CharField(max_length=256)
     canonical_url = models.URLField()
 
@@ -45,6 +45,15 @@ class ExternalContent(Entity):
         self.read_access = [ACCESS_TYPE.logged_in] if config.IS_CLOSED else [ACCESS_TYPE.public]
         self.write_access = [ACCESS_TYPE.user.format(self.owner.guid)]
 
+    def __str__(self):
+        return "<ExternalContent[%s] %s>" % (self.source.name, self.title)
+
+    def __repr__(self):
+        try:
+            return self.__str__()
+        except Exception as e:
+            return "Assertion error at __repr__"
+
 
 class ExternalContentSource(models.Model):
     class Meta:
@@ -60,6 +69,9 @@ class ExternalContentSource(models.Model):
     created_at = models.DateTimeField(default=timezone.now)
     updated_at = models.DateTimeField(default=timezone.now)
 
+    last_full_sync = models.DateTimeField(default=None, null=True)
+    last_update_sync = models.DateTimeField(default=None, null=True)
+
     @property
     def guid(self):
         return str(self.id)
@@ -67,6 +79,12 @@ class ExternalContentSource(models.Model):
     def get_handler(self):
         assert self.handler_id in self.get_handlers()
         return self.get_handlers()[self.handler_id](self)
+
+    def set_full_sync(self, value):
+        ExternalContentSource.objects.filter(id=self.id).update(last_full_sync=value)
+
+    def set_update_sync(self, value):
+        ExternalContentSource.objects.filter(id=self.id).update(last_update_sync=value)
 
     @classmethod
     def get_handlers(cls):

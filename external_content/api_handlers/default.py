@@ -22,7 +22,7 @@ class ApiHandler(ApiHandlerBase):
         ExternalContent.objects.create(
             title=factory.sentence(),
             source=self.source,
-            owner=self.author,
+            owner=self.owner,
             description=self.get_description(),
             remote_id=uuid.uuid4(),
             canonical_url=factory.url(),

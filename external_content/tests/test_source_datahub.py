@@ -22,6 +22,8 @@ class TestAddDatahubSourceTestCase(PleioTenantTestCase):
                     handlerId
                     ... on DatahubContentSource {
                         apiUrl
+                        frontendUrl
+                        batchSize
                     }
                 }
             }
@@ -29,9 +31,11 @@ class TestAddDatahubSourceTestCase(PleioTenantTestCase):
         """
         self.variables = {
             'input': {
-                'name': 'Demo',
-                'pluralName': 'Demos',
-                'apiUrl': 'https://pleio.com/',
+                'name': 'Datahub resource',
+                'pluralName': 'Datahub resources',
+                'apiUrl': 'https://test.datahub.pleio.wonderbit.com/api/v1/',
+                'frontendUrl': 'https://test.datahub.pleio.wonderbit.com/en/explorer/',
+                'batchSize': 50,
             }
         }
 
@@ -57,14 +61,14 @@ class TestAddDatahubSourceTestCase(PleioTenantTestCase):
 
         source = ExternalContentSource.objects.first()
 
-        self.maxDiff = None
         self.assertDictEqual(result['data']['payload'], {
             'edges': [{"key": source.guid,
                        "handlerId": source.handler_id,
                        "name": self.variables['input']['name'],
                        "pluralName": self.variables['input']['pluralName'],
-                       "apiUrl": self.variables['input']['apiUrl']}
-                      ]
+                       "apiUrl": self.variables['input']['apiUrl'],
+                       "frontendUrl": self.variables['input']['frontendUrl'],
+                       "batchSize": self.variables['input']['batchSize']}]
         })
 
 
@@ -87,6 +91,8 @@ class TestUpdateDatahubSourceTestCase(PleioTenantTestCase):
                     handlerId
                     ... on DatahubContentSource {
                         apiUrl
+                        frontendUrl
+                        batchSize
                     }
                 }
             }
@@ -98,6 +104,8 @@ class TestUpdateDatahubSourceTestCase(PleioTenantTestCase):
                 'name': 'Demo',
                 'pluralName': 'Demos',
                 'apiUrl': 'https://pleio.com/',
+                'frontendUrl': 'https://rvo-frontend.gov/en/explorer/',
+                'batchSize': 50
             }
         }
 
@@ -124,6 +132,7 @@ class TestUpdateDatahubSourceTestCase(PleioTenantTestCase):
                        "handlerId": self.source.handler_id,
                        "name": self.variables['input']['name'],
                        "pluralName": self.variables['input']['pluralName'],
-                       "apiUrl": self.variables['input']['apiUrl']}
-                      ]
+                       "apiUrl": self.variables['input']['apiUrl'],
+                       "frontendUrl": self.variables['input']['frontendUrl'],
+                       "batchSize": 50}]
         })

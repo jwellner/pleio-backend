@@ -113,6 +113,7 @@ SHARED_APPS = [
     'django.contrib.auth',
     'django.contrib.sessions',
     'django.contrib.messages',
+    'db_mutex',
     'widget_tweaks',
     'user',
     'control',
@@ -131,6 +132,7 @@ TENANT_APPS = [
     'django.contrib.messages',
     'django.contrib.sitemaps',
     'django_elasticsearch_dsl',
+    'db_mutex',
     'mozilla_django_oidc',
     'ariadne_django',
     'post_deploy',
@@ -492,3 +494,4 @@ WEBPUSH_SETTINGS = {
 }
 
 EXTERNAL_CONTENT_AUTHOR_EMAIL = "externalcontent@localhost"
+DB_MUTEX_TTL_SECONDS=3600*6

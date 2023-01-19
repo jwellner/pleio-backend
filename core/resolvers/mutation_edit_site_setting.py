@@ -3,6 +3,7 @@ import ipaddress
 from django.core.cache import cache
 from django.db import connection
 from django.utils import timezone
+from django.utils.translation import gettext
 from django_tenants.utils import parse_tenant_config_path
 from graphql import GraphQLError
 

@@ -1,0 +1,647 @@
+{
+  "count": 40,
+  "next": null,
+  "previous": "http://test.datahub.pleio.wonderbit.com/api/v1/files/?format=json&limit=20",
+  "results": [
+    {
+      "id": 32,
+      "classification": {
+        "id": 1,
+        "name": "Raw data"
+      },
+      "sensor": {
+        "id": 1,
+        "name": "Multibeam echo sounder"
+      },
+      "study": {
+        "id": 2,
+        "name": "Geotechnical investigations HKN"
+      },
+      "extension": {
+        "id": 1,
+        "name": "PDF"
+      },
+      "chapter": {
+        "id": 1,
+        "name": "General Information"
+      },
+      "name": "AAAAAAAAAA_3003.pdf",
+      "date_created": "2022-09-10T17:54:42.680000+02:00",
+      "date_modified": "2022-09-10T17:54:42.680000+02:00",
+      "description": "Some file you would like to see",
+      "published": true,
+      "size": 523723678235,
+      "nr_downloads": 0,
+      "processed": true,
+      "md5_hash": "12345abcde"
+    },
+    {
+      "id": 2,
+      "classification": {
+        "id": 1,
+        "name": "Raw data"
+      },
+      "sensor": {
+        "id": 1,
+        "name": "Multibeam echo sounder"
+      },
+      "study": {
+        "id": 2,
+        "name": "Geotechnical investigations HKN"
+      },
+      "extension": {
+        "id": 1,
+        "name": "PDF"
+      },
+      "chapter": {
+        "id": 1,
+        "name": "General Information"
+      },
+      "name": "bestandA.pdf",
+      "date_created": "2022-09-10T17:54:42.680000+02:00",
+      "date_modified": "2022-09-10T17:54:42.680000+02:00",
+      "description": "Some file you would like to see",
+      "published": true,
+      "size": 924786321,
+      "nr_downloads": 0,
+      "processed": true,
+      "md5_hash": "12345abcde"
+    },
+    {
+      "id": 12,
+      "classification": {
+        "id": 1,
+        "name": "Raw data"
+      },
+      "sensor": {
+        "id": 1,
+        "name": "Multibeam echo sounder"
+      },
+      "study": {
+        "id": 2,
+        "name": "Geotechnical investigations HKN"
+      },
+      "extension": {
+        "id": 1,
+        "name": "PDF"
+      },
+      "chapter": {
+        "id": 1,
+        "name": "General Information"
+      },
+      "name": "MYFILE-000-002.pdf",
+      "date_created": "2022-09-10T17:54:42.680000+02:00",
+      "date_modified": "2022-09-10T17:54:42.680000+02:00",
+      "description": "Some file you would like to see",
+      "published": true,
+      "size": 2346723678235,
+      "nr_downloads": 0,
+      "processed": true,
+      "md5_hash": "12345abcde"
+    },
+    {
+      "id": 25,
+      "classification": {
+        "id": 2,
+        "name": "Processed data"
+      },
+      "sensor": {
+        "id": 1,
+        "name": "Multibeam echo sounder"
+      },
+      "study": {
+        "id": 2,
+        "name": "Geotechnical investigations HKN"
+      },
+      "extension": {
+        "id": 1,
+        "name": "PDF"
+      },
+      "chapter": {
+        "id": 1,
+        "name": "General Information"
+      },
+      "name": "BLOB0x05.pdf",
+      "date_created": "2022-09-10T17:54:42.680000+02:00",
+      "date_modified": "2022-09-10T17:54:42.680000+02:00",
+      "description": "File D",
+      "published": true,
+      "size": 22347267842,
+      "nr_downloads": 0,
+      "processed": true,
+      "md5_hash": "12345abcde"
+    },
+    {
+      "id": 40,
+      "classification": {
+        "id": 3,
+        "name": "Report"
+      },
+      "sensor": {
+        "id": 3,
+        "name": "Magnetometer"
+      },
+      "study": {
+        "id": 2,
+        "name": "Geotechnical investigations HKN"
+      },
+      "extension": {
+        "id": 2,
+        "name": "ZIP"
+      },
+      "chapter": {
+        "id": 1,
+        "name": "General Information"
+      },
+      "name": "AAAAAABBBB_5250.pdf",
+      "date_created": "2022-06-11T17:00:11.680000+02:00",
+      "date_modified": "2022-06-11T17:00:11.680000+02:00",
+      "description": "this file is very important",
+      "published": true,
+      "size": 8234762316723,
+      "nr_downloads": 0,
+      "processed": true,
+      "md5_hash": "12345abcde"
+    },
+    {
+      "id": 10,
+      "classification": {
+        "id": 3,
+        "name": "Report"
+      },
+      "sensor": {
+        "id": 3,
+        "name": "Magnetometer"
+      },
+      "study": {
+        "id": 2,
+        "name": "Geotechnical investigations HKN"
+      },
+      "extension": {
+        "id": 2,
+        "name": "ZIP"
+      },
+      "chapter": {
+        "id": 1,
+        "name": "General Information"
+      },
+      "name": "bestandH.ZIP",
+      "date_created": "2022-06-11T17:00:11.680000+02:00",
+      "date_modified": "2022-06-11T17:00:11.680000+02:00",
+      "description": "this file is very important",
+      "published": true,
+      "size": 11128928732,
+      "nr_downloads": 0,
+      "processed": true,
+      "md5_hash": "12345abcde"
+    },
+    {
+      "id": 20,
+      "classification": {
+        "id": 3,
+        "name": "Report"
+      },
+      "sensor": {
+        "id": 3,
+        "name": "Magnetometer"
+      },
+      "study": {
+        "id": 2,
+        "name": "Geotechnical investigations HKN"
+      },
+      "extension": {
+        "id": 2,
+        "name": "ZIP"
+      },
+      "chapter": {
+        "id": 1,
+        "name": "General Information"
+      },
+      "name": "MYFILE-000-010.pdf",
+      "date_created": "2022-06-11T17:00:11.680000+02:00",
+      "date_modified": "2022-06-11T17:00:11.680000+02:00",
+      "description": "this file is very important",
+      "published": true,
+      "size": 2347167234,
+      "nr_downloads": 0,
+      "processed": true,
+      "md5_hash": "12345abcde"
+    },
+    {
+      "id": 30,
+      "classification": {
+        "id": 3,
+        "name": "Report"
+      },
+      "sensor": {
+        "id": 3,
+        "name": "Magnetometer"
+      },
+      "study": {
+        "id": 2,
+        "name": "Geotechnical investigations HKN"
+      },
+      "extension": {
+        "id": 2,
+        "name": "ZIP"
+      },
+      "chapter": {
+        "id": 1,
+        "name": "General Information"
+      },
+      "name": "AAAAAAAAAA_3001.ZIP",
+      "date_created": "2022-06-11T17:00:11.680000+02:00",
+      "date_modified": "2022-06-11T17:00:11.680000+02:00",
+      "description": "this file is very important",
+      "published": true,
+      "size": 31128928732,
+      "nr_downloads": 0,
+      "processed": true,
+      "md5_hash": "12345abcde"
+    },
+    {
+      "id": 3,
+      "classification": {
+        "id": 1,
+        "name": "Raw data"
+      },
+      "sensor": {
+        "id": 2,
+        "name": "Sidescan sonar"
+      },
+      "study": {
+        "id": 3,
+        "name": "Study 2"
+      },
+      "extension": {
+        "id": 1,
+        "name": "PDF"
+      },
+      "chapter": {
+        "id": 2,
+        "name": "Obstructions"
+      },
+      "name": "bestandB.pdf",
+      "date_created": "2022-03-10T13:54:42.680000+01:00",
+      "date_modified": "2022-03-10T13:54:42.680000+01:00",
+      "description": "This is another description",
+      "published": true,
+      "size": 2478242,
+      "nr_downloads": 0,
+      "processed": true,
+      "md5_hash": "12345abcde"
+    },
+    {
+      "id": 16,
+      "classification": {
+        "id": 1,
+        "name": "Raw data"
+      },
+      "sensor": {
+        "id": 2,
+        "name": "Sidescan sonar"
+      },
+      "study": {
+        "id": 2,
+        "name": "Geotechnical investigations HKN"
+      },
+      "extension": {
+        "id": 1,
+        "name": "PDF"
+      },
+      "chapter": {
+        "id": 1,
+        "name": "General Information"
+      },
+      "name": "MYFILE-000-006.pdf",
+      "date_created": "2022-03-10T13:54:42.680000+01:00",
+      "date_modified": "2022-03-10T13:54:42.680000+01:00",
+      "description": "This is the file",
+      "published": true,
+      "size": 2387234768232,
+      "nr_downloads": 0,
+      "processed": true,
+      "md5_hash": "12345abcde"
+    },
+    {
+      "id": 6,
+      "classification": {
+        "id": 1,
+        "name": "Raw data"
+      },
+      "sensor": {
+        "id": 2,
+        "name": "Sidescan sonar"
+      },
+      "study": {
+        "id": 2,
+        "name": "Geotechnical investigations HKN"
+      },
+      "extension": {
+        "id": 1,
+        "name": "PDF"
+      },
+      "chapter": {
+        "id": 1,
+        "name": "General Information"
+      },
+      "name": "bestandE.pdf",
+      "date_created": "2022-03-10T13:54:42.680000+01:00",
+      "date_modified": "2022-03-10T13:54:42.680000+01:00",
+      "description": "This is the file",
+      "published": true,
+      "size": 2762674221,
+      "nr_downloads": 0,
+      "processed": true,
+      "md5_hash": "12345abcde"
+    },
+    {
+      "id": 26,
+      "classification": {
+        "id": 1,
+        "name": "Raw data"
+      },
+      "sensor": {
+        "id": 2,
+        "name": "Sidescan sonar"
+      },
+      "study": {
+        "id": 2,
+        "name": "Geotechnical investigations HKN"
+      },
+      "extension": {
+        "id": 1,
+        "name": "PDF"
+      },
+      "chapter": {
+        "id": 1,
+        "name": "General Information"
+      },
+      "name": "BLOB0x06.pdf",
+      "date_created": "2022-03-10T13:54:42.680000+01:00",
+      "date_modified": "2022-03-10T13:54:42.680000+01:00",
+      "description": "This is the file",
+      "published": true,
+      "size": 127626714221,
+      "nr_downloads": 0,
+      "processed": true,
+      "md5_hash": "12345abcde"
+    },
+    {
+      "id": 33,
+      "classification": {
+        "id": 1,
+        "name": "Raw data"
+      },
+      "sensor": {
+        "id": 2,
+        "name": "Sidescan sonar"
+      },
+      "study": {
+        "id": 3,
+        "name": "Study 2"
+      },
+      "extension": {
+        "id": 1,
+        "name": "PDF"
+      },
+      "chapter": {
+        "id": 2,
+        "name": "Obstructions"
+      },
+      "name": "AAAAAAAAAA_3004.pdf",
+      "date_created": "2022-03-10T13:54:42.680000+01:00",
+      "date_modified": "2022-03-10T13:54:42.680000+01:00",
+      "description": "This is another description",
+      "published": true,
+      "size": 5999227626222,
+      "nr_downloads": 0,
+      "processed": true,
+      "md5_hash": "12345abcde"
+    },
+    {
+      "id": 13,
+      "classification": {
+        "id": 1,
+        "name": "Raw data"
+      },
+      "sensor": {
+        "id": 2,
+        "name": "Sidescan sonar"
+      },
+      "study": {
+        "id": 3,
+        "name": "Study 2"
+      },
+      "extension": {
+        "id": 1,
+        "name": "PDF"
+      },
+      "chapter": {
+        "id": 2,
+        "name": "Obstructions"
+      },
+      "name": "MYFILE-000-003.pdf",
+      "date_created": "2022-03-10T13:54:42.680000+01:00",
+      "date_modified": "2022-03-10T13:54:42.680000+01:00",
+      "description": "This is another description",
+      "published": true,
+      "size": 999227626222,
+      "nr_downloads": 0,
+      "processed": true,
+      "md5_hash": "12345abcde"
+    },
+    {
+      "id": 23,
+      "classification": {
+        "id": 1,
+        "name": "Raw data"
+      },
+      "sensor": {
+        "id": 2,
+        "name": "Sidescan sonar"
+      },
+      "study": {
+        "id": 3,
+        "name": "Study 2"
+      },
+      "extension": {
+        "id": 1,
+        "name": "PDF"
+      },
+      "chapter": {
+        "id": 2,
+        "name": "Obstructions"
+      },
+      "name": "BLOB0x03.pdf",
+      "date_created": "2022-03-10T13:54:42.680000+01:00",
+      "date_modified": "2022-03-10T13:54:42.680000+01:00",
+      "description": "This is another description",
+      "published": true,
+      "size": 10002478242,
+      "nr_downloads": 0,
+      "processed": true,
+      "md5_hash": "12345abcde"
+    },
+    {
+      "id": 36,
+      "classification": {
+        "id": 1,
+        "name": "Raw data"
+      },
+      "sensor": {
+        "id": 2,
+        "name": "Sidescan sonar"
+      },
+      "study": {
+        "id": 2,
+        "name": "Geotechnical investigations HKN"
+      },
+      "extension": {
+        "id": 1,
+        "name": "PDF"
+      },
+      "chapter": {
+        "id": 1,
+        "name": "General Information"
+      },
+      "name": "AAAAAABBBB_5210.pdf",
+      "date_created": "2022-03-10T13:54:42.680000+01:00",
+      "date_modified": "2022-03-10T13:54:42.680000+01:00",
+      "description": "This is the file",
+      "published": true,
+      "size": 9238724768232,
+      "nr_downloads": 0,
+      "processed": true,
+      "md5_hash": "12345abcde"
+    },
+    {
+      "id": 4,
+      "classification": {
+        "id": 1,
+        "name": "Raw data"
+      },
+      "sensor": {
+        "id": 3,
+        "name": "Magnetometer"
+      },
+      "study": {
+        "id": 2,
+        "name": "Geotechnical investigations HKN"
+      },
+      "extension": {
+        "id": 1,
+        "name": "PDF"
+      },
+      "chapter": {
+        "id": 1,
+        "name": "General Information"
+      },
+      "name": "bestandC.pdf",
+      "date_created": "2021-09-10T17:54:42.680000+02:00",
+      "date_modified": "2021-09-10T17:54:42.680000+02:00",
+      "description": "This is another description",
+      "published": true,
+      "size": 29928928732,
+      "nr_downloads": 0,
+      "processed": true,
+      "md5_hash": "12345abcde"
+    },
+    {
+      "id": 34,
+      "classification": {
+        "id": 1,
+        "name": "Raw data"
+      },
+      "sensor": {
+        "id": 3,
+        "name": "Magnetometer"
+      },
+      "study": {
+        "id": 2,
+        "name": "Geotechnical investigations HKN"
+      },
+      "extension": {
+        "id": 1,
+        "name": "PDF"
+      },
+      "chapter": {
+        "id": 1,
+        "name": "General Information"
+      },
+      "name": "AAAAAAAAAA_3005.pdf",
+      "date_created": "2021-09-10T17:54:42.680000+02:00",
+      "date_modified": "2021-09-10T17:54:42.680000+02:00",
+      "description": "This is another description",
+      "published": true,
+      "size": 4124785124122,
+      "nr_downloads": 0,
+      "processed": true,
+      "md5_hash": "12345abcde"
+    },
+    {
+      "id": 24,
+      "classification": {
+        "id": 1,
+        "name": "Raw data"
+      },
+      "sensor": {
+        "id": 3,
+        "name": "Magnetometer"
+      },
+      "study": {
+        "id": 2,
+        "name": "Geotechnical investigations HKN"
+      },
+      "extension": {
+        "id": 1,
+        "name": "PDF"
+      },
+      "chapter": {
+        "id": 1,
+        "name": "General Information"
+      },
+      "name": "BLOB0x04.pdf",
+      "date_created": "2021-09-10T17:54:42.680000+02:00",
+      "date_modified": "2021-09-10T17:54:42.680000+02:00",
+      "description": "This is another description",
+      "published": true,
+      "size": 3829928928732,
+      "nr_downloads": 0,
+      "processed": true,
+      "md5_hash": "12345abcde"
+    },
+    {
+      "id": 14,
+      "classification": {
+        "id": 1,
+        "name": "Raw data"
+      },
+      "sensor": {
+        "id": 3,
+        "name": "Magnetometer"
+      },
+      "study": {
+        "id": 2,
+        "name": "Geotechnical investigations HKN"
+      },
+      "extension": {
+        "id": 1,
+        "name": "PDF"
+      },
+      "chapter": {
+        "id": 1,
+        "name": "General Information"
+      },
+      "name": "MYFILE-000-004.pdf",
+      "date_created": "2021-09-10T17:54:42.680000+02:00",
+      "date_modified": "2021-09-10T17:54:42.680000+02:00",
+      "description": "This is another description",
+      "published": true,
+      "size": 1247685124122,
+      "nr_downloads": 0,
+      "processed": true,
+      "md5_hash": "12345abcde"
+    }
+  ]
+}

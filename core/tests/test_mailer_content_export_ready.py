@@ -21,6 +21,8 @@ class TestMailerContentExportReadyTestCase(PleioTenantTestCase):
         self.mailer = ContentExportReadyMailer(file_folder=self.file_folder.guid,
                                                owner=self.owner.guid)
 
+        self.switch_language('en')
+
     def tearDown(self):
         self.file_folder.delete()
         self.owner.delete()
@@ -43,4 +45,4 @@ class TestMailerContentExportReadyTestCase(PleioTenantTestCase):
         self.assertEqual(self.mailer.get_receiver(), self.owner)
         self.assertEqual(self.mailer.get_receiver_email(), self.owner.email)
         self.assertEqual(self.mailer.get_sender(), None)
-        self.assertEqual(self.mailer.get_subject(), 'Je inhoudsexport is klaar')
+        self.assertEqual(self.mailer.get_subject(), 'Your content export is ready')

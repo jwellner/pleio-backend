@@ -39,6 +39,10 @@ def dispatch_hourly_cron():
         depublicate_content.delay(client.schema_name)
         make_publication_revisions.delay(client.schema_name)
 
+        from core.lib import get_hourly_cron_jobs
+        for task in get_hourly_cron_jobs():
+            task.delay(client.schema_name)
+
 
 @shared_task
 def dispatch_daily_cron():

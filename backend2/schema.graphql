@@ -2305,6 +2305,7 @@ type Site {
     searchArchiveOption: SearchArchiveOptionEnum
     blockedUserIntroMessage: SecureRichText
     pushNotificationsEnabled: Boolean!
+    datahubExternalContentEnabled: Boolean
 }
 
 type SiteSettings {
@@ -3139,12 +3140,16 @@ type DatahubContentSource implements ExternalContentSource {
     pluralName: String
     handlerId: ExternalContentSourceHandlerEnum
     apiUrl: String
+    frontendUrl: String
+    batchSize: Int
 }
 
 input AddDatahubContentSourceInput {
-    name: String
-    pluralName: String
-    apiUrl: String
+    name: String!
+    pluralName: String!
+    apiUrl: String!
+    frontendUrl: String!
+    batchSize: Int
 }
 
 input UpdateDatahubContentSourceInput {
@@ -3152,4 +3157,6 @@ input UpdateDatahubContentSourceInput {
     name: String!
     pluralName: String!
     apiUrl: String!
+    frontendUrl: String!
+    batchSize: Int
 }

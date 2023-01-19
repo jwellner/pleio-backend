@@ -13,5 +13,9 @@ class ApiHandlerBase:
         raise NotImplementedError()
 
     @property
-    def author(self):
+    def owner(self):
         return get_or_create_default_author()
+
+
+class ApiHandlerError(Exception):
+    pass

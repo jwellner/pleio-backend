@@ -43,7 +43,6 @@ class TestCleanExternalContentTestCase(PleioTenantTestCase):
         self.required_params = {
             "source": self.source,
             "title": "Demo",
-            "description": "<p>I'm still here</p>",
             "remote_id": "1",
             "canonical_url": "https://www.pleio.nl",
             "owner": self.owner,
