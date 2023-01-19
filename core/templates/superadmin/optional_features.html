@@ -33,6 +33,12 @@
                     <label for="edit_user_name_enabled">Enable edit name</label>
                 </div>
                 {{ form.errors.edit_user_name_enabled }}
+                <div class="mb-2 form-check">
+                    <input type="checkbox" name="datahub_external_content_enabled" id="datahub_external_content_enabled" {% if config.DATAHUB_EXTERNAL_CONTENT_ENABLED %}
+                           checked {% endif %} />
+                    <label for="datahub_external_content_enabled">Enable external content from datahub</label>
+                </div>
+                {{ form.errors.edit_user_name_enabled }}
             </div>
         </div>
         <br>

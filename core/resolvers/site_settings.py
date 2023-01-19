@@ -992,3 +992,9 @@ def resolve_blocked_user_intro_message(obj, info):
 def resolve_push_notifications_enabled(obj, info):
     # pylint: disable=unused-argument
     return config.PUSH_NOTIFICATIONS_ENABLED
+
+
+@site_settings_public.field('datahubExternalContentEnabled')
+def resolve_datahub_external_content_enabled(obj, info):
+    # pylint: disable=unused-argument
+    return config.DATAHUB_EXTERNAL_CONTENT_ENABLED

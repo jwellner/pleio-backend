@@ -2,6 +2,7 @@ from unittest import mock
 import uuid
 
 from django.db import connection
+
 from core.models import ProfileField, SiteInvitation, SiteAccessRequest
 from core.tests.helpers import PleioTenantTestCase
 from user.factories import UserFactory
@@ -12,7 +13,7 @@ from mixer.backend.django import mixer
 from core.lib import get_language_options
 
 
-class SiteSettingsTestCase(PleioTenantTestCase):
+class TestSiteSettingsTestCase(PleioTenantTestCase):
 
     def setUp(self):
         super().setUp()
@@ -618,7 +619,7 @@ class SiteSettingsTestCase(PleioTenantTestCase):
         ])
 
 
-class SiteSettingsIsClosedTestCase(PleioTenantTestCase):
+class TestSiteSettingsIsClosedTestCase(PleioTenantTestCase):
     def setUp(self):
         super().setUp()
         cache.set("%s%s" % (connection.schema_name, 'IS_CLOSED'), True)

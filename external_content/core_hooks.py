@@ -15,3 +15,8 @@ def get_search_filters():
             "value": source.name,
             "plural": source.plural_name,
         }
+
+
+def get_hourly_cron_jobs():
+    from external_content.tasks import fetch_external_content
+    yield fetch_external_content

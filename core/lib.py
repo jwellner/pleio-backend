@@ -248,6 +248,11 @@ def get_core_hook(hook_name):
     return cache.get(key)['result']
 
 
+def get_hourly_cron_jobs():
+    for task_name in get_core_hook("get_hourly_cron_jobs"):
+        yield from import_string(task_name)()
+
+
 def get_activity_filters():
     for hook in get_core_hook('get_activity_filters'):
         hook_function = import_string(hook)

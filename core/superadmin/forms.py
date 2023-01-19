@@ -70,16 +70,20 @@ class CustomAgreementForm(forms.ModelForm):
         model = CustomAgreement
         fields = ['name', 'document']
 
+
 class OptionalFeaturesForm(forms.Form):
     collab_editing_enabled = forms.BooleanField(required=False)
     edit_user_name_enabled = forms.BooleanField(required=False)
     push_notifications_enabled = forms.BooleanField(required=False)
+    datahub_external_content_enabled = forms.BooleanField(required=False)
 
     def save(self):
         data = self.cleaned_data
-        config.COLLAB_EDITING_ENABLED = data['collab_editing_enabled']
-        config.EDIT_USER_NAME_ENABLED = data['edit_user_name_enabled']
-        config.PUSH_NOTIFICATIONS_ENABLED = data['push_notifications_enabled']
+        config.COLLAB_EDITING_ENABLED = bool(data['collab_editing_enabled'])
+        config.EDIT_USER_NAME_ENABLED = bool(data['edit_user_name_enabled'])
+        config.PUSH_NOTIFICATIONS_ENABLED = bool(data['push_notifications_enabled'])
+        config.DATAHUB_EXTERNAL_CONTENT_ENABLED = bool(data['datahub_external_content_enabled'])
+
 
 class SupportContractForm(forms.Form):
     support_contract_enabled = forms.BooleanField(required=False)

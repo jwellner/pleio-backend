@@ -16,6 +16,8 @@ def add_datahub_external_content_source(_, info, input):
         plural_name=input['pluralName'],
         settings={
             "apiUrl": input['apiUrl'],
+            "frontendUrl": input['frontendUrl'],
+            "batchSize": input['batchSize']
         }
     )
     return resolve_query_external_content_sources(_, info, source.handler_id)

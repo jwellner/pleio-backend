@@ -49,3 +49,15 @@ datahub_source.set_field("handlerId", resolve_handler)
 def resolve_api_url(obj, info):
     # pylint: disable=unused-argument
     return obj.settings['apiUrl']
+
+
+@datahub_source.field("frontendUrl")
+def resolve_frontend_url(obj, info):
+    # pylint: disable=unused-argument
+    return obj.settings['frontendUrl']
+
+
+@datahub_source.field("batchSize")
+def resolve_batch_size(obj, info):
+    # pylint: disable=unused-argument
+    return obj.settings['batchSize']

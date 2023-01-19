@@ -25,6 +25,10 @@ def edit_datahub_external_content_source(_, info, input):
 
         if 'apiUrl' in input:
             source.settings['apiUrl'] = input['apiUrl']
+        if 'frontendUrl' in input:
+            source.settings['frontendUrl'] = input['frontendUrl']
+        if 'batchSize' in input:
+            source.settings['batchSize'] = input['batchSize']
 
         source.updated_at = timezone.now()
         source.save()
