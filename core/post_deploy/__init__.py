@@ -1,5 +1,7 @@
 import csv
 import os
+import pandas as pd
+import datetime
 
 from celery.utils.log import get_task_logger
 from django.conf import settings
@@ -77,3 +79,35 @@ def write_missing_file_report():
 
     if total == 0:
         os.unlink(report_file)
+
+
+@post_deploy_action
+def entity_updated_at_from_report():
+    """
+    Fix updated_at date for entities involved in the 27/10/2022 updated_at incident
+    Entity CSV format: id;updated_at
+    """
+    if is_schema_public():
+        return
+
+    report_file_path = os.path.join(settings.BACKUP_PATH, "entity_updated_at_" + tenant_schema()) + '.csv'
+
+    if not os.path.isfile(report_file_path):
+        logger.error("%s does not exist for tenant %s", report_file_path, tenant_schema())
+        return 
+
+    df = pd.read_csv(report_file_path, delimiter=';')
+    df["updated_at"] = pd.to_datetime(df["updated_at"])
+
+    from core.models import Entity
+    total = 0
+    queryset = Entity.objects.filter(updated_at__date=datetime.date(2022, 10, 27))
+    for entity in queryset.iterator(chunk_size=10000):
+        result = df[df["id"].str.match(str(entity.id))]
+        if len(result.index) > 0:
+            match = result.iloc[0]
+            entity.updated_at = match["updated_at"]
+            entity.save()
+            total += 1
+
+    logger.error("Updated updated_at for %i entities in schema %s ", total, tenant_schema())
