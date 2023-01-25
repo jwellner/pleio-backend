@@ -25,6 +25,7 @@ def resolve_edit_page(_, info, input):
     shared.resolve_update_rich_description(entity, clean_input)
     shared.update_publication_dates(entity, clean_input)
     shared.resolve_update_rows(entity, clean_input, user)
+    shared.update_updated_at(entity)
 
     entity.save()
     shared.store_update_revision(revision, entity)
