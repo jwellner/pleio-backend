@@ -16,8 +16,8 @@ def conditional_group_filter(container_guid):
 
 def conditional_date_filter(date_filter):
     if date_filter == 'previous':
-        return Q(start_date__lt=early_this_morning())
-    return Q(start_date__gte=early_this_morning())
+        return Q(end_date__lt=early_this_morning())
+    return Q(end_date__gte=early_this_morning())
 
 
 @query.field("events")
