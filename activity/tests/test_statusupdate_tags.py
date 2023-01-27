@@ -8,7 +8,7 @@ class TestStatusUpdateTagsTestCase(Template.TagsTestCaseTemplate):
 
     variables_add = {'input': {
         'title': "New Status",
-        'subtype': 'status_update',
+        'subtype': 'statusupdate',
     }}
 
     include_entity_search = True

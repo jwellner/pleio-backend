@@ -40,7 +40,7 @@
             {% if notification.type_to_string == 'wiki' %}
                 {% include "email/notifications/wiki.html" %}
             {% endif %}
-            {% if notification.type_to_string == 'thewire' %}
+            {% if notification.type_to_string == 'statusupdate' %}
                 {% include "email/notifications/update.html" %}
             {% endif %}
         {% endif %}

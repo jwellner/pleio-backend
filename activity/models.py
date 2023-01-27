@@ -19,7 +19,7 @@ class StatusUpdate(VoteMixin, CommentMixin, BookmarkMixin, FollowMixin, Attachme
 
     @property
     def type_to_string(self):
-        return 'thewire'
+        return 'statusupdate'
 
     @property
     def url(self):

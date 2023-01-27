@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Frans\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-01-10 09:52+0100\n"
+"POT-Creation-Date: 2023-01-27 17:28+0100\n"
 "PO-Revision-Date: 2021-06-24 15:12+0200\n"
 "Last-Translator: \n"
 "Language-Team: frans\n"
@@ -30,7 +30,7 @@ msgstr "mise à jour du statut"
 msgid "Blog"
 msgstr "Blog"
 
-#: blog/core_hooks.py:22 core/lib.py:411
+#: blog/core_hooks.py:22 core/lib.py:391
 msgid "Blogs"
 msgstr "Blogs"
 
@@ -46,19 +46,19 @@ msgstr "Page de texte"
 msgid "Pages"
 msgstr "Pages"
 
-#: control/forms.py:65
+#: control/forms.py:61
 msgid "Include files"
 msgstr "Inclure les fichiers"
 
-#: control/forms.py:69
+#: control/forms.py:65
 msgid "Create zip-file"
 msgstr "Créer un fichier zip"
 
-#: core/core_hooks.py:7 core/views.py:475
+#: core/core_hooks.py:7 core/views.py:473
 msgid "Group"
 msgstr "Groupe"
 
-#: core/core_hooks.py:8 core/lib.py:422
+#: core/core_hooks.py:8 core/lib.py:402
 msgid "Groups"
 msgstr "Groupes"
 
@@ -91,7 +91,7 @@ msgid "Receive overview emails"
 msgstr "Recevoir des courriels de présentation"
 
 #: core/forms.py:163 core/templates/registration/request.html:23
-#: core/views.py:473 event/export.py:58
+#: core/views.py:471 event/export.py:58
 msgid "Name"
 msgstr "Nom"
 
@@ -124,48 +124,48 @@ msgstr "Utilisateurs connectés"
 msgid "Public"
 msgstr "Public"
 
-#: core/lib.py:410
+#: core/lib.py:390
 msgid "Updates"
 msgstr "Mises à jour"
 
-#: core/lib.py:412
+#: core/lib.py:392
 msgid "CMS pages"
 msgstr "Pages SGC"
 
-#: core/lib.py:413 discussion/core_hooks.py:22
+#: core/lib.py:393 discussion/core_hooks.py:22
 msgid "Discussions"
 msgstr "Discussions"
 
-#: core/lib.py:414 event/core_hooks.py:22
+#: core/lib.py:394 event/core_hooks.py:22
 msgid "Events"
 msgstr "Événements"
 
-#: core/lib.py:415 file/core_hooks.py:15
+#: core/lib.py:395 file/core_hooks.py:15
 msgid "Files"
 msgstr "Fichiers"
 
-#: core/lib.py:416 news/core_hooks.py:7 news/core_hooks.py:14
+#: core/lib.py:396 news/core_hooks.py:7 news/core_hooks.py:14
 #: news/core_hooks.py:21
 msgid "News"
 msgstr "Actualité"
 
-#: core/lib.py:417
+#: core/lib.py:397
 msgid "Polls"
 msgstr "Sondages"
 
-#: core/lib.py:418 question/core_hooks.py:22
+#: core/lib.py:398 question/core_hooks.py:22
 msgid "Questions"
 msgstr "Questions"
 
-#: core/lib.py:419
+#: core/lib.py:399
 msgid "Tasks"
 msgstr "Tâches"
 
-#: core/lib.py:420
+#: core/lib.py:400
 msgid "Wiki pages"
 msgstr "Wiki pages"
 
-#: core/lib.py:421
+#: core/lib.py:401
 msgid "Comments"
 msgstr "Commentaires"
 
@@ -363,11 +363,11 @@ msgstr "courrier électronique"
 msgid "name"
 msgstr "nom"
 
-#: core/resolvers/shared.py:588
+#: core/resolvers/shared.py:604
 msgid "Appointment"
 msgstr "Rendez-vous"
 
-#: core/resolvers/shared.py:594
+#: core/resolvers/shared.py:610
 msgid "Agenda"
 msgstr "Agenda"
 
@@ -391,12 +391,12 @@ msgstr "Éditeur"
 msgid "Question expert"
 msgstr "Expert en questions"
 
-#: core/tasks/cronjobs.py:200 core/tests/test_auto_block_users.py:67
+#: core/tasks/cronjobs.py:204 core/tests/test_auto_block_users.py:67
 #: core/tests/test_auto_block_users.py:70 user/post_deploy.py:19
 msgid "Bouncing e-mail address"
 msgstr "Adresse électronique rebondissante"
 
-#: core/tasks/cronjobs.py:243 core/tests/test_auto_block_users.py:109
+#: core/tasks/cronjobs.py:247 core/tests/test_auto_block_users.py:109
 #: core/tests/test_auto_block_users.py:111 user/post_deploy.py:20
 msgid "User deleted externally"
 msgstr "Utilisateur supprimé en externe"
@@ -459,11 +459,11 @@ msgstr "Rendez-vous sur %(site_name)s"
 #, python-format
 msgid ""
 "The administrator %(user_name)s has approved your request to join the "
-"%(group_name)s group. Follow the link below to go directly to the group:<br "
-"/><a href=\"%(link)s\">%(link)s</a> "
+"%(group_name)s group. Follow the link below to go directly to the group:<br /"
+"><a href=\"%(link)s\">%(link)s</a> "
 msgstr ""
-"L’administrateur %(user_name)s a approuvé votre demande d’adhésion au groupe"
-" %(group_name)s. Suivez le lien ci-dessous pour accéder directement au "
+"L’administrateur %(user_name)s a approuvé votre demande d’adhésion au groupe "
+"%(group_name)s. Suivez le lien ci-dessous pour accéder directement au "
 "groupe :<br /><a href=“%(link)s”>%(link)s</a> "
 
 #: core/templates/email/admin_user_deleted.html:6
@@ -482,12 +482,14 @@ msgid ""
 "\n"
 "Hi,<br><br>\n"
 "\n"
-"The account of %(name_deleted_user)s is deleted. This action was taken by %(user_name)s.\n"
+"The account of %(name_deleted_user)s is deleted. This action was taken by "
+"%(user_name)s.\n"
 msgstr ""
 "\n"
 "Bonjour, <br><br>\n"
 "\n"
-"Le compte de %(name_deleted_user)s est supprimé. Cette action a été effectuée par %(user_name)s.\n"
+"Le compte de %(name_deleted_user)s est supprimé. Cette action a été "
+"effectuée par %(user_name)s.\n"
 
 #: core/templates/email/avatar_export_ready.html:5
 msgid "The export file you requested is ready for download."
@@ -505,11 +507,11 @@ msgstr "Ce lien expire dans 30 jours."
 #: core/templates/email/confirm_add_comment_without_account.html:5
 #, python-format
 msgid ""
-"This is a request to confirm your comment on <a "
-"href=\"%(entity_url)s\">%(entity_title)s</a>."
+"This is a request to confirm your comment on <a href=\"%(entity_url)s\">"
+"%(entity_title)s</a>."
 msgstr ""
-"Ceci est une demande de confirmation de votre commentaire sur <a "
-"href=\"%(entity_url)s\">%(entity_title)s</a>."
+"Ceci est une demande de confirmation de votre commentaire sur <a href="
+"\"%(entity_url)s\">%(entity_title)s</a>."
 
 #: core/templates/email/confirm_add_comment_without_account.html:6
 msgid "Comment:"
@@ -541,10 +543,14 @@ msgstr ""
 #, python-format
 msgid ""
 "\n"
-"    This message is sent by <a href=\"%(user_url)s\" style=\"color: black;\">%(user_name)s</a> at <a href=\"%(site_url)s\" style=\"color: black;\">%(site_url)s</a>\n"
+"    This message is sent by <a href=\"%(user_url)s\" style=\"color: black;\">"
+"%(user_name)s</a> at <a href=\"%(site_url)s\" style=\"color: black;\">"
+"%(site_url)s</a>\n"
 msgstr ""
 "\n"
-"    Ce message est envoyé par <a href=\"%(user_url)s\" style=\"color : black ;\">%(user_name)s</a> à <a href=\"%(site_url)s\" style=\"color : black ;\">%(site_url)s</a>.\n"
+"    Ce message est envoyé par <a href=\"%(user_url)s\" style=\"color : "
+"black ;\">%(user_name)s</a> à <a href=\"%(site_url)s\" style=\"color : "
+"black ;\">%(site_url)s</a>.\n"
 
 #: core/templates/email/entities/blog.html:27
 msgid "Blog created by"
@@ -578,35 +584,39 @@ msgstr "Wiki créé par"
 msgid ""
 "Hi,<br><br>\n"
 "\n"
-"We found %(virus_count)s suspicuous files while scanning for virusses. We have blocked the files for download.<br><br>\n"
+"We found %(virus_count)s suspicuous files while scanning for virusses. We "
+"have blocked the files for download.<br><br>\n"
 "\n"
-"Please visit the <a href=\"%(site_url)s/superadmin/scanlog\">file scan logs</a> to review.\n"
+"Please visit the <a href=\"%(site_url)s/superadmin/scanlog\">file scan logs</"
+"a> to review.\n"
 "\n"
 msgstr ""
 "Bonjour, <br><br>\n"
 "\n"
-"Nous avons trouvé des fichiers suspects %(virus_count)s lors de l'analyse des virus. Nous avons bloqué les fichiers pour le téléchargement.<br><br>\n"
+"Nous avons trouvé des fichiers suspects %(virus_count)s lors de l'analyse "
+"des virus. Nous avons bloqué les fichiers pour le téléchargement.<br><br>\n"
 "\n"
-"Veuillez consulter le <a href=\"%(site_url)s/superadmin/scanlog\">journaux d'analyse des fichiers</a> pour les examiner.\n"
+"Veuillez consulter le <a href=\"%(site_url)s/superadmin/scanlog\">journaux "
+"d'analyse des fichiers</a> pour les examiner.\n"
 "\n"
 
 #: core/templates/email/group_access_request.html:6
 #, python-format
 msgid ""
 "The user %(user_name)s (%(user_obfuscated_email)s) has requested access to "
-"the group %(group_name)s. Follow the link below to review the request: <br "
-"/><a href=\"%(link)s\">%(link)s</a> "
+"the group %(group_name)s. Follow the link below to review the request: <br /"
+"><a href=\"%(link)s\">%(link)s</a> "
 msgstr ""
-"L’utilisateur %(user_name)s (%(user_obfuscated_email)s) a demandé l’accès au"
-" groupe %(group_name)s. Suivez le lien ci-dessous pour examiner la demande: "
+"L’utilisateur %(user_name)s (%(user_obfuscated_email)s) a demandé l’accès au "
+"groupe %(group_name)s. Suivez le lien ci-dessous pour examiner la demande: "
 "<br /><a href=“%(link)s”>%(link)s</a> "
 
 #: core/templates/email/group_ownership_transferred.html:6
 #, python-format
 msgid ""
 "The administrator %(user_name)s has transferred the ownership of the group "
-"%(group_name)s to you. View the group at: <br /><a "
-"href=\"%(link)s\">%(link)s</a> "
+"%(group_name)s to you. View the group at: <br /><a href=\"%(link)s\">"
+"%(link)s</a> "
 msgstr ""
 "L’administrateur %(user_name)s vous a transféré la propriété du groupe "
 "%(group_name)s. Voir le groupe sur : <br /><a href=“%(link)s”>%(link)s</a> "
@@ -615,8 +625,8 @@ msgstr ""
 #, python-format
 msgid ""
 "You have been invited by %(user_name)s to join the %(group_name)s group. "
-"Follow the link below to become a member of the group: <br /><a "
-"href=\"%(link)s\">%(link)s</a> "
+"Follow the link below to become a member of the group: <br /><a href="
+"\"%(link)s\">%(link)s</a> "
 msgstr ""
 "Vous avez été invité par %(user_name)s à rejoindre le groupe %(group_name)s "
 "Suivez le lien ci-dessous pour devenir membre du groupe : <br /><a "
@@ -678,8 +688,8 @@ msgstr ""
 #, python-format
 msgid ""
 "You have been invited again by %(user_name)s to join the %(group_name)s "
-"group. Follow the link below to become a member of the group: <br /><a "
-"href=\"%(link)s\">%(link)s</a> "
+"group. Follow the link below to become a member of the group: <br /><a href="
+"\"%(link)s\">%(link)s</a> "
 msgstr ""
 "Vous avez été invité à nouveau par %(user_name)s à rejoindre le groupe "
 "%(group_name)s. Suivez le lien ci- dessous pour devenir membre du groupe : "
@@ -702,7 +712,7 @@ msgstr "Message personnel"
 msgid "Direct notification"
 msgstr "Notification directe"
 
-#: core/templates/email/send_notification_emails.html:10 core/views.py:631
+#: core/templates/email/send_notification_emails.html:10 core/views.py:624
 msgid "Notification overview"
 msgstr "Aperçu des notifications"
 
@@ -720,7 +730,7 @@ msgstr "Se désabonner"
 msgid "Adjust your email settings"
 msgstr "Ajustez vos paramètres de messagerie"
 
-#: core/templates/email/send_overview_emails.html:22 core/views.py:628
+#: core/templates/email/send_overview_emails.html:22 core/views.py:621
 msgid "Periodic overview"
 msgstr "Aperçu périodique"
 
@@ -739,33 +749,39 @@ msgstr "Pour tous les nouveaux messages, rendez-vous sur %(site_name)s"
 msgid ""
 "Hi,<br><br>\n"
 "\n"
-"The site access level for site <a href=\"%(site_url)s\">%(site_name)s</a> changed to <b>%(access_level)s</b>. <br><br>\n"
+"The site access level for site <a href=\"%(site_url)s\">%(site_name)s</a> "
+"changed to <b>%(access_level)s</b>. <br><br>\n"
 "\n"
 "This action was taken by %(user_name)s.<br><br>\n"
 "\n"
-"If you believe this was done in error, please <a href=\"%(site_url)s/admin\">go to the admin</a> and undo this action.\n"
+"If you believe this was done in error, please <a href=\"%(site_url)s/admin"
+"\">go to the admin</a> and undo this action.\n"
 msgstr ""
 "Bonjour, <br><br>\n"
 "\n"
-"Le niveau d'accès du site <a href=\"%(site_url)s\">%(site_name)s</a> a changé en <b>%(access_level)s</b>. <br><br>\n"
+"Le niveau d'accès du site <a href=\"%(site_url)s\">%(site_name)s</a> a "
+"changé en <b>%(access_level)s</b>. <br><br>\n"
 "\n"
 "Cette action a été effectuée par %(user_name)s.<br><br>\n"
 "\n"
-"Si vous pensez que cela a été fait par erreur, veuillez <a href=\"%(site_url)s/admin\">aller dans l'admin</a> et annuler cette action.\n"
+"Si vous pensez que cela a été fait par erreur, veuillez <a href="
+"\"%(site_url)s/admin\">aller dans l'admin</a> et annuler cette action.\n"
 
 #: core/templates/email/site_access_request.html:10
 #, python-format
 msgid ""
 "Hello %(admin_name)s,<br><br>\n"
 "\n"
-"Somebody with the name %(request_name)s has performed an access request to %(site_name)s .<br><br>\n"
+"Somebody with the name %(request_name)s has performed an access request to "
+"%(site_name)s .<br><br>\n"
 "\n"
 "To review the request please visit:<br><br>\n"
 "\n"
 "<a href=\"%(site_admin_url)s\">%(site_admin_url)s</a>\n"
 msgstr ""
 "Salut %(admin_name)s,<br><br>\n"
-"Une personne du nom %(request_name)s a réalisé une demande d’accès à %(site_name)s.<br><br>\n"
+"Une personne du nom %(request_name)s a réalisé une demande d’accès à "
+"%(site_name)s.<br><br>\n"
 "\n"
 "Pour examiner la demande, veuillez vous rendre sur :<br><br>\n"
 "\n"
@@ -776,12 +792,14 @@ msgstr ""
 msgid ""
 "Hello %(request_name)s,<br><br>\n"
 "\n"
-"    The administrator approved your access request to %(site_name)s. Go to this link to get access to the site:<br><br>\n"
+"    The administrator approved your access request to %(site_name)s. Go to "
+"this link to get access to the site:<br><br>\n"
 "    "
 msgstr ""
 "Salut %(request_name)s,<br><br>\n"
 "\n"
-"    L’administrateur a approuvé votre demande d’accès à %(site_name)s. Cliquez sur ce lien pour accéder au site:<br><br>.\n"
+"    L’administrateur a approuvé votre demande d’accès à %(site_name)s. "
+"Cliquez sur ce lien pour accéder au site:<br><br>.\n"
 "    "
 
 #: core/templates/email/site_access_request_denied.html:6
@@ -789,11 +807,15 @@ msgstr ""
 msgid ""
 "Hello %(request_name)s, <br><br>\n"
 "\n"
-"    Unfortunately the site administrator of %(site_name)s decided to decline your membership request. Please contact the administrator if you think this is a mistake."
+"    Unfortunately the site administrator of %(site_name)s decided to decline "
+"your membership request. Please contact the administrator if you think this "
+"is a mistake."
 msgstr ""
 "Salut %(request_name)s, <br><br>\n"
 "\n"
-"Malheureusement l’administrateur du site %(site_name)s a décidé de refuser votre demande d’adhésion. Veuillez contacter l’administrateur si vous pensez qu’il s’agit d’une erreur."
+"Malheureusement l’administrateur du site %(site_name)s a décidé de refuser "
+"votre demande d’adhésion. Veuillez contacter l’administrateur si vous pensez "
+"qu’il s’agit d’une erreur."
 
 #: core/templates/email/toggle_request_delete_user_cancelled.html:6
 #, python-format
@@ -809,8 +831,7 @@ msgstr ""
 msgid ""
 "The user <strong>%(user_name)s</strong> has cancelled his/her request to "
 "remove his/her account. This account will no longer be visible on the <a "
-"href='%(site_url)s/admin/users/delete-requests'>list</a> of removal "
-"requests."
+"href='%(site_url)s/admin/users/delete-requests'>list</a> of removal requests."
 msgstr ""
 "L'utilisateur <strong>%(user_name)s</strong> a annulé sa demande de "
 "suppression de son compte. Ce compte ne sera plus visible sur la <a "
@@ -844,18 +865,27 @@ msgstr "Voir les demandes"
 #, python-format
 msgid ""
 "\n"
-"Dear %(name_deleted_user)s,<br><br> Your membership of <a href=\"%(site_url)s\">%(site_url)s</a> has been cancelled by the administrator.<br><br>\n"
+"Dear %(name_deleted_user)s,<br><br> Your membership of <a href=\"%(site_url)s"
+"\">%(site_url)s</a> has been cancelled by the administrator.<br><br>\n"
 "\n"
-"Your profile, settings and saved items have been removed from the site and your content has been made anonymous.<br><br>\n"
+"Your profile, settings and saved items have been removed from the site and "
+"your content has been made anonymous.<br><br>\n"
 "\n"
-"Your Pleio account will continue to exist as will your membership of any other sites. See <a href=\"https://account.pleio.nl\">account.pleio.nl</a> for more information.\n"
+"Your Pleio account will continue to exist as will your membership of any "
+"other sites. See <a href=\"https://account.pleio.nl\">account.pleio.nl</a> "
+"for more information.\n"
 msgstr ""
 "\n"
-"Cher/Chère %(name_deleted_user)s,<br><br> Votre adhésion à <a href=“%(site_url)s”>%(site_url)s</a> a été annulée par l’administrateur.<br><br>\n"
-"Votre profil, vos paramètres et vos articles sauvegardés ont été supprimés du site et votre contenu a été rendu anonyme.<br><br>\n"
+"Cher/Chère %(name_deleted_user)s,<br><br> Votre adhésion à <a "
+"href=“%(site_url)s”>%(site_url)s</a> a été annulée par l’administrateur."
+"<br><br>\n"
+"Votre profil, vos paramètres et vos articles sauvegardés ont été supprimés "
+"du site et votre contenu a été rendu anonyme.<br><br>\n"
 "\n"
 "\n"
-"Votre compte Pleio continuera d’exister, tout comme votre adhésion à tout autre site. Rendez-vous sur <a href=“https://account.pleio.nl”>account.pleio.nl</a> pour plus d’informations.\n"
+"Votre compte Pleio continuera d’exister, tout comme votre adhésion à tout "
+"autre site. Rendez-vous sur <a href=“https://account.pleio.nl”>account.pleio."
+"nl</a> pour plus d’informations.\n"
 
 #: core/templates/email/user_import_failed.html:6
 #, python-format
@@ -870,7 +900,8 @@ msgstr ""
 "\n"
 "<p>Cher/Chère %(user_name)s,</p>\n"
 "\n"
-"<p>L’importation des utilisateurs a échoué. Voici le message d’erreur du serveur :</p>\n"
+"<p>L’importation des utilisateurs a échoué. Voici le message d’erreur du "
+"serveur :</p>\n"
 "\n"
 "\n"
 "\n"
@@ -910,18 +941,24 @@ msgstr ""
 msgid ""
 "Hi,<br><br>\n"
 "\n"
-"The user %(name_of_user_admin_role_changed)s was assigned as a new site administrator by %(user_name)s.<br>\n"
-"    Check out the profile of the new site administrator here <a href=\"%(link)s\">%(link)s</a>.<br><br>\n"
+"The user %(name_of_user_admin_role_changed)s was assigned as a new site "
+"administrator by %(user_name)s.<br>\n"
+"    Check out the profile of the new site administrator here <a href="
+"\"%(link)s\">%(link)s</a>.<br><br>\n"
 "\n"
-"    If you believe this was done in error, please login here <a href=\"%(site_url)s\">%(site_url)s</a> and undo this action.\n"
+"    If you believe this was done in error, please login here <a href="
+"\"%(site_url)s\">%(site_url)s</a> and undo this action.\n"
 msgstr ""
 "Salut,<br><br>\n"
 "\n"
-"L’utilisateur %(name_of_user_admin_role_changed)s a été désigné par %(user_name)s en tant que nouvel administrateur du site.<br>\n"
+"L’utilisateur %(name_of_user_admin_role_changed)s a été désigné par "
+"%(user_name)s en tant que nouvel administrateur du site.<br>\n"
 "\n"
-"Consultez le profil du nouvel administrateur du site ici <a href=\"%(link)s\">%(link)s</a>.<br><br>\n"
+"Consultez le profil du nouvel administrateur du site ici <a href=\"%(link)s"
+"\">%(link)s</a>.<br><br>\n"
 "\n"
-"Si vous pensez qu’il s’agit d’une erreur, veuillez vous connecter ici <a href=\"%(site_url)s\">%(site_url)s</a> et annulez cette action.\n"
+"Si vous pensez qu’il s’agit d’une erreur, veuillez vous connecter ici <a "
+"href=\"%(site_url)s\">%(site_url)s</a> et annulez cette action.\n"
 
 #: core/templates/email/user_role_admin_assigned_for_user.html:6
 #, python-format
@@ -930,38 +967,49 @@ msgid ""
 "\n"
 "You've been assigned as a new site administrator by %(user_name)s.<br><br>\n"
 "\n"
-"Enjoy your new found rights by logging in here <a href=\"%(site_url)s\">%(site_url)s</a>.<br><br>\n"
+"Enjoy your new found rights by logging in here <a href=\"%(site_url)s\">"
+"%(site_url)s</a>.<br><br>\n"
 "\n"
-"If you believe this was done in error, please contact one of the other site administrators.\n"
+"If you believe this was done in error, please contact one of the other site "
+"administrators.\n"
 msgstr ""
 "Salut %(name_of_user_admin_role_changed)s,<br><br>\n"
 "\n"
-"Vous avez été désigné comme nouvel administrateur de site par %(user_name)s.<br><br>\n"
+"Vous avez été désigné comme nouvel administrateur de site par %(user_name)s."
+"<br><br>\n"
 "\n"
-"Profitez de vos nouveaux droits en vous connectant ici <a href=\"%(site_url)s\">%(site_url)s</a>.<br><br>\n"
+"Profitez de vos nouveaux droits en vous connectant ici <a href=\"%(site_url)s"
+"\">%(site_url)s</a>.<br><br>\n"
 "\n"
-"Si vous pensez qu’il s’agit d’une erreur, veuillez contacter l’un des autres administrateurs du site.\n"
+"Si vous pensez qu’il s’agit d’une erreur, veuillez contacter l’un des autres "
+"administrateurs du site.\n"
 
 #: core/templates/email/user_role_admin_removed_for_admins.html:10
 #, python-format
 msgid ""
 "Hi,<br><br>\n"
 "\n"
-"        The user %(name_of_user_admin_role_changed)s is no longer a site administrator. This action was taken by %(user_name)s.<br>\n"
-"        Check out the profile of the old site administrator here <a href=\"%(link)s\">%(link)s</a>.<br><br>\n"
+"        The user %(name_of_user_admin_role_changed)s is no longer a site "
+"administrator. This action was taken by %(user_name)s.<br>\n"
+"        Check out the profile of the old site administrator here <a href="
+"\"%(link)s\">%(link)s</a>.<br><br>\n"
 "\n"
-"        If you believe this was done in error, please login here <a href=\"%(site_url)s\">%(site_url)s</a> and undo this action.\n"
+"        If you believe this was done in error, please login here <a href="
+"\"%(site_url)s\">%(site_url)s</a> and undo this action.\n"
 "    "
 msgstr ""
 "Salut,<br><br>\n"
 "\n"
 "\n"
 "\n"
-"L’utilisateur %(name_of_user_admin_role_changed)s n’est plus administrateur du site. Cette action a été réalisée par %(user_name)s.<br>\n"
+"L’utilisateur %(name_of_user_admin_role_changed)s n’est plus administrateur "
+"du site. Cette action a été réalisée par %(user_name)s.<br>\n"
 "\n"
-"Consultez le profile de l’ancien administrateur du site ici <a href=\"%(link)s\">%(link)s</a>.<br><br>\n"
+"Consultez le profile de l’ancien administrateur du site ici <a href="
+"\"%(link)s\">%(link)s</a>.<br><br>\n"
 "\n"
-"Si vous pensez qu’il s’agit d’une erreur, veuillez vous connecter ici <a href=\"%(site_url)s\">%(site_url)s</a> et annulez cette action.\n"
+"Si vous pensez qu’il s’agit d’une erreur, veuillez vous connecter ici <a "
+"href=\"%(site_url)s\">%(site_url)s</a> et annulez cette action.\n"
 "    "
 
 #: core/templates/email/user_role_admin_removed_for_user.html:6
@@ -971,19 +1019,22 @@ msgid ""
 "\n"
 "Your site administrator role was removed by %(user_name)s.<br><br>\n"
 "\n"
-"If you believe this was done in error, please contact one of the other site administrators.\n"
+"If you believe this was done in error, please contact one of the other site "
+"administrators.\n"
 msgstr ""
 "Salut %(name_of_user_admin_role_changed)s,<br><br>\n"
 "\n"
-"Votre statut d’administrateur de site a été supprimé par %(user_name)s.<br><br>\n"
+"Votre statut d’administrateur de site a été supprimé par %(user_name)s."
+"<br><br>\n"
 "\n"
-"Si vous pensez qu’il s’agit d’une erreur, veuillez contacter l’un des autres administrateurs du site.\n"
+"Si vous pensez qu’il s’agit d’une erreur, veuillez contacter l’un des autres "
+"administrateurs du site.\n"
 
 #: core/templates/notification/videocall_guest_notification.html:2
 #, python-format
 msgid ""
-"<strong>%(name)s</strong> invited you for a <a href=\"%(url)s\">video "
-"call</a>"
+"<strong>%(name)s</strong> invited you for a <a href=\"%(url)s\">video call</"
+"a>"
 msgstr ""
 "<strong>%(name)s</strong> vous a invité pour un <a href=\"%(url)s\">appel "
 "vidéo</a>."
@@ -991,8 +1042,8 @@ msgstr ""
 #: core/templates/notification/videocall_host_notification.html:3
 #, python-format
 msgid ""
-"You invited <strong>%(guest_list)s and %(guest)s</strong> for a <a "
-"href=\"%(url)s\">video call</a>"
+"You invited <strong>%(guest_list)s and %(guest)s</strong> for a <a href="
+"\"%(url)s\">video call</a>"
 msgstr ""
 "Vous avez invité <strong>%(guest_list)s et %(guest)s</strong> pour un <a "
 "href=\"%(url)s\">vidéoconférence</a>."
@@ -1000,11 +1051,11 @@ msgstr ""
 #: core/templates/notification/videocall_host_notification.html:5
 #, python-format
 msgid ""
-"You invited <strong>%(guest)s</strong> for a <a href=\"%(url)s\">video "
-"call</a>"
+"You invited <strong>%(guest)s</strong> for a <a href=\"%(url)s\">video call</"
+"a>"
 msgstr ""
-"Vous avez invité <strong>%(guest)s</strong> pour un <a "
-"href=\"%(url)s\">appel vidéo</a>."
+"Vous avez invité <strong>%(guest)s</strong> pour un <a href=\"%(url)s"
+"\">appel vidéo</a>."
 
 #: core/templates/onboarding.html:14
 msgid ""
@@ -1080,8 +1131,8 @@ msgstr "Demander l’accès"
 
 #: core/templates/registration/request.html:20
 msgid ""
-"To enter this site, you must request access from the admin. Click the button"
-" to request access."
+"To enter this site, you must request access from the admin. Click the button "
+"to request access."
 msgstr ""
 "Pour accéder à ce site, vous devez demander l’accès à l’administrateur.  "
 "Cliquez sur l’onglet pour demander l’accès."
@@ -1105,55 +1156,110 @@ msgstr "Accès demandé"
 
 #: core/templates/registration/requested.html:13
 msgid ""
-"Access is requested. You will receive an e-mail when the request is "
-"accepted."
+"Access is requested. You will receive an e-mail when the request is accepted."
 msgstr ""
 "L’accès est demandé. Vous recevrez un courrier électronique lorsque l’accès "
 "sera accepté."
 
 #: core/utils/push_notification.py:45
+msgid "news-item"
+msgstr "Nouvelles"
+
+#: core/utils/push_notification.py:46
+msgid "poll"
+msgstr "sondage"
+
+#: core/utils/push_notification.py:47
+msgid "discussion"
+msgstr "discussion"
+
+#: core/utils/push_notification.py:48
+msgid "event"
+msgstr "Événement"
+
+#: core/utils/push_notification.py:49
+msgid "wiki"
+msgstr "wiki"
+
+#: core/utils/push_notification.py:50
+msgid "question"
+msgstr "question"
+
+#: core/utils/push_notification.py:51
+msgid "cms-page"
+msgstr "page SGC"
+
+#: core/utils/push_notification.py:52
+msgid "blog"
+msgstr "blog"
+
+#: core/utils/push_notification.py:53
+msgid "update"
+msgstr "mise à jour"
+
+#: core/utils/push_notification.py:54
+msgid "task"
+msgstr "tâche"
+
+#: core/utils/push_notification.py:55
+msgid "comment"
+msgstr "commentaires"
+
+#: core/utils/push_notification.py:56
+msgid "file"
+msgstr "fichier"
+
+#: core/utils/push_notification.py:57
+msgid "folder"
+msgstr "dossier"
+
+#: core/utils/push_notification.py:58
+msgid "pad"
+msgstr "pad"
+
+#: core/utils/push_notification.py:64
 #, python-format
 msgid "New %(entity_type)s on %(site_name)s"
 msgstr "Nouveau %(entity_type)s sur %(site_name)s"
 
-#: core/utils/push_notification.py:46
+#: core/utils/push_notification.py:65
 #, python-format
 msgid "%(sender_name)s created a %(entity_type)s: %(entity_title)s"
 msgstr "%(sender_name)s a créé un %(entity_type)s: %(entity_title)s"
 
-#: core/utils/push_notification.py:53
+#: core/utils/push_notification.py:72
 #, python-format
 msgid "New reaction on %(entity_type)s"
 msgstr "Nouvelle réaction sur %(entity_type)s"
 
-#: core/utils/push_notification.py:54
+#: core/utils/push_notification.py:73
 #, python-format
 msgid "%(sender_name)s posted a reaction on %(entity_title)s"
 msgstr "%(sender_name)s a posté une réaction sur %(entity_title)s"
 
-#: core/utils/push_notification.py:61
+#: core/utils/push_notification.py:80
 #, python-format
 msgid "New mention on %(entity_type)s"
 msgstr "Nouvelle mention sur %(entity_type)s"
 
-#: core/utils/push_notification.py:62
+#: core/utils/push_notification.py:81
 #, python-format
 msgid "%(sender_name)s has mentioned you at %(entity_title)s"
 msgstr "%(sender_name)s vous a mentionné à %(entity_title)s."
 
-#: core/views.py:474 event/export.py:58
+#: core/views.py:472 event/export.py:58
 msgid "E-mail"
 msgstr "E-mail"
 
-#: core/views.py:476
+#: core/views.py:474
 msgid "Disk size"
 msgstr "Taille du disque"
 
-#: core/views.py:571
+#: core/views.py:567
 msgid "Your changes are saved"
 msgstr "Vos modifications sont enregistrées"
 
-#: core/views.py:634
+#: core/views.py:627
 #, python-format
 msgid "Successfully unsubscribed %(email)s from %(list_name)s"
 msgstr "Désinscription réussie de %(email)s de %(list_name)s."
@@ -1240,8 +1346,8 @@ msgid "You already signed in for another sub-event in the same slot."
 msgstr ""
 "Vous vous êtes déjà inscrit à un autre sous-événement dans le même créneau."
 
-#: event/resolvers/mutation_event_copy.py:62
-#: event/tests/test_resolve_copy_entity.py:133
+#: event/resolvers/mutation_event_copy.py:63
+#: event/tests/test_resolve_copy_entity.py:131
 #, python-format
 msgid "Copy %s"
 msgstr "Copie %s"
@@ -1265,8 +1371,8 @@ msgid ""
 "You are added as attendee for %(title)s. For this event, you will need the "
 "QR code attached to this email."
 msgstr ""
-"Vous êtes ajouté en tant que participant pour %(title)s. Pour cet événement,"
-" vous aurez besoin du code QR joint à cet e-mail."
+"Vous êtes ajouté en tant que participant pour %(title)s. Pour cet événement, "
+"vous aurez besoin du code QR joint à cet e-mail."
 
 #: event/templates/email/attend_event_without_account.html:5
 #, python-format
@@ -1281,50 +1387,58 @@ msgstr "Cliquez sur le lien ci-dessous pour confirmer."
 #, python-format
 msgid ""
 "\n"
-"            This is confirmation of your registration for the <em>waitinglist</em> of %(title)s.<br><br>\n"
+"            This is confirmation of your registration for the "
+"<em>waitinglist</em> of %(title)s.<br><br>\n"
 "        "
 msgstr ""
 "\n"
-"            Ceci est la confirmation de votre inscription à la <em>liste d'attente</em> de %(title)s.<br><br>.\n"
+"            Ceci est la confirmation de votre inscription à la <em>liste "
+"d'attente</em> de %(title)s.<br><br>.\n"
 "        "
 
 #: event/templates/email/attend_event_without_account_confirm.html:10
 #, python-format
 msgid ""
 "\n"
-"            This is confirmation of your registration for %(title)s.<br><br>\n"
+"            This is confirmation of your registration for %(title)s."
+"<br><br>\n"
 "        "
 msgstr ""
 "\n"
-"            Ceci est la confirmation de votre inscription à %(title)s.<br><br>\n"
+"            Ceci est la confirmation de votre inscription à %(title)s."
+"<br><br>\n"
 "        "
 
 #: event/templates/email/attend_event_without_account_confirm.html:14
 #, python-format
 msgid ""
 "\n"
-"            The state for registration for %(title)s changed to <em>maybe</em>.<br><br>\n"
+"            The state for registration for %(title)s changed to <em>maybe</"
+"em>.<br><br>\n"
 "        "
 msgstr ""
 "\n"
-"            L'état pour l'enregistrement de %(title)s est passé à <em>maybe</em>.<br><br>.\n"
+"            L'état pour l'enregistrement de %(title)s est passé à <em>maybe</"
+"em>.<br><br>.\n"
 "        "
 
 #: event/templates/email/attend_event_without_account_confirm.html:18
 #, python-format
 msgid ""
 "\n"
-"            The state for registration for %(title)s changed to <em>rejected</em>.<br><br>\n"
+"            The state for registration for %(title)s changed to "
+"<em>rejected</em>.<br><br>\n"
 "        "
 msgstr ""
 "\n"
-"            L'état pour l'enregistrement de %(title)s est passé à <em>rejeté</em>.<br><br>.\n"
+"            L'état pour l'enregistrement de %(title)s est passé à "
+"<em>rejeté</em>.<br><br>.\n"
 "        "
 
 #: event/templates/email/attend_event_without_account_confirm.html:25
 msgid ""
-"Click on the link below to see your registration and to add this appointment"
-" to your agenda."
+"Click on the link below to see your registration and to add this appointment "
+"to your agenda."
 msgstr ""
 "Cliquez sur le lien ci-dessous pour voir votre inscription et ajouter ce "
 "rendez-vous à votre agenda."
@@ -1332,11 +1446,11 @@ msgstr ""
 #: event/templates/email/attend_event_without_account_confirm.html:29
 #, python-format
 msgid ""
-"If you want to cancel your registration of the event, use <a "
-"href=\"%(leave_link)s\">%(leave_link)s</a>"
+"If you want to cancel your registration of the event, use <a href="
+"\"%(leave_link)s\">%(leave_link)s</a>"
 msgstr ""
-"Si vous souhaitez annuler votre inscription à l'événement, utilisez <a "
-"href=\"%(leave_link)s\">%(leave_link)s</a>."
+"Si vous souhaitez annuler votre inscription à l'événement, utilisez <a href="
+"\"%(leave_link)s\">%(leave_link)s</a>."
 
 #: event/templates/email/delete_event_attendees.html:7
 #, python-format
@@ -1367,8 +1481,7 @@ msgstr "Vous êtes retiré comme participant de %(title)s."
 #: event/templates/email/delete_event_attendees.html:18
 msgid "If you have questions, please contact the event organizer."
 msgstr ""
-"Si vous avez des questions, veuillez contacter l'organisateur de "
-"l'événement."
+"Si vous avez des questions, veuillez contacter l'organisateur de l'événement."
 
 #: event/templates/email/element/event_date_location.html:5
 #: event/templates/email/element/event_date_location.html:7
@@ -1431,8 +1544,7 @@ msgstr "Coussinets"
 msgid "Removed by Profile-Sync"
 msgstr "Supprimé par Profile-Sync"
 
-#: question/core_hooks.py:7 question/core_hooks.py:14
-#: question/core_hooks.py:21
+#: question/core_hooks.py:7 question/core_hooks.py:14 question/core_hooks.py:21
 msgid "Question"
 msgstr "Question"
 
@@ -1455,3 +1567,6 @@ msgstr "Wiki"
 #: wiki/core_hooks.py:22
 msgid "Wiki's"
 msgstr "Wiki's"
+
+#~ msgid "news"
+#~ msgstr "nouvelles"
