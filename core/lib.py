@@ -51,7 +51,6 @@ class TypeModels(Enum):
     group = "core.Group"
     user = "user.User"
     statusupdate = "activity.StatusUpdate"
-    thewire = "activity.StatusUpdate"
     task = "task.Task"
     comment = "core.Comment"
     file = "file.FileFolder"
