@@ -29,7 +29,8 @@ self.addEventListener('notificationclick', function (event) {
     event.notification.close();
 
     if (event.notification.data.url) {
-        var targetUrl = new URL(event.notification.data.url);
+        var url = event.notification.data.url;
+        var targetUrl = new URL(url);
 
         // Attempt to fetch open tabs
         event.waitUntil(self.clients.matchAll({ type: 'window' }).then(function (clientList) {
