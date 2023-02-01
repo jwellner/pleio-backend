@@ -30,7 +30,7 @@ def resolve_add_entity(_, info, input):
     if clean_input.get("subtype") == "discussion":
         return resolve_add_discussion(_, info, input)
 
-    if clean_input.get("subtype") in ["status_update", "thewire"]:
+    if clean_input.get("subtype") == "statusupdate":
         return resolve_add_status_update(_, info, input)
 
     if clean_input.get("subtype") == "task":

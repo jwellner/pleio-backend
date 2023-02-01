@@ -40,17 +40,36 @@ def send_web_push_notification(subscription, payload):
 
 
 def get_notification_payload(sender, verb, instance):
+    def translate_entity_type(entity_type):
+        entities = {
+            'news': _("news-item"),
+            'poll': _("poll"),
+            'discussion': _("discussion"),
+            'event': _("event"),
+            'wiki': _("wiki"),
+            'question': _("question"),
+            'page': _("cms-page"),
+            'blog': _("blog"),
+            'statusupdate': _("update"),
+            'task': _("task"),
+            'comment': _("comment"),
+            'file': _("file"),
+            'folder': _("folder"),
+            'pad': _("pad")
+        }
+        return entities.get(entity_type, entity_type)
+
     if verb == 'created':
         return json.dumps({
-            "head": _("New %(entity_type)s on %(site_name)s") % {'entity_type': instance.type_to_string, 'site_name': config.NAME},
-            "body": _("%(sender_name)s created a %(entity_type)s: %(entity_title)s") % {'sender_name': sender.name, 'entity_type': instance.type_to_string, 'entity_title': instance.title},
+            "head": _("New %(entity_type)s on %(site_name)s") % {'entity_type': translate_entity_type(instance.type_to_string), 'site_name': config.NAME},
+            "body": _("%(sender_name)s created a %(entity_type)s: %(entity_title)s") % {'sender_name': sender.name, 'entity_type': translate_entity_type(instance.type_to_string), 'entity_title': instance.title},
             "icon": config.ICON,
             "url": instance.url
         })
 
     if verb == 'commented':
         return json.dumps({
-            "head": _("New reaction on %(entity_type)s") % {'entity_type': instance.type_to_string},
+            "head": _("New reaction on %(entity_type)s") % {'entity_type': translate_entity_type(instance.type_to_string)},
             "body": _("%(sender_name)s posted a reaction on %(entity_title)s") % {'sender_name': sender.name, 'entity_title': instance.title},
             "icon": config.ICON,
             "url": instance.url
@@ -58,7 +77,7 @@ def get_notification_payload(sender, verb, instance):
 
     if verb == 'mentioned':
         return json.dumps({
-            "head": _("New mention on %(entity_type)s") % {'entity_type': instance.type_to_string},
+            "head": _("New mention on %(entity_type)s") % {'entity_type': translate_entity_type(instance.type_to_string)},
             "body": _("%(sender_name)s has mentioned you at %(entity_title)s") % {'sender_name': sender.name, 'entity_title': instance.title},
             "icon": config.ICON,
             "url": instance.url

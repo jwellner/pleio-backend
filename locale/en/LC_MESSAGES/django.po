@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-01-10 09:52+0100\n"
+"POT-Creation-Date: 2023-01-31 19:55+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -29,7 +29,7 @@ msgstr "status update"
 msgid "Blog"
 msgstr "Blog"
 
-#: blog/core_hooks.py:22 core/lib.py:411
+#: blog/core_hooks.py:22 core/lib.py:391
 msgid "Blogs"
 msgstr "Blogs"
 
@@ -45,19 +45,19 @@ msgstr "Text page"
 msgid "Pages"
 msgstr "Pages"
 
-#: control/forms.py:65
+#: control/forms.py:61
 msgid "Include files"
 msgstr "Include files"
 
-#: control/forms.py:69
+#: control/forms.py:65
 msgid "Create zip-file"
 msgstr "Create zip-file"
 
-#: core/core_hooks.py:7 core/views.py:475
+#: core/core_hooks.py:7 core/views.py:473
 msgid "Group"
 msgstr "Group"
 
-#: core/core_hooks.py:8 core/lib.py:422
+#: core/core_hooks.py:8 core/lib.py:402
 msgid "Groups"
 msgstr "Groups"
 
@@ -90,7 +90,7 @@ msgid "Receive overview emails"
 msgstr "Receive overview emails"
 
 #: core/forms.py:163 core/templates/registration/request.html:23
-#: core/views.py:473 event/export.py:58
+#: core/views.py:471 event/export.py:58
 msgid "Name"
 msgstr "Name"
 
@@ -123,48 +123,48 @@ msgstr "Logged in users"
 msgid "Public"
 msgstr "Public"
 
-#: core/lib.py:410
+#: core/lib.py:390
 msgid "Updates"
 msgstr "Updates"
 
-#: core/lib.py:412
+#: core/lib.py:392
 msgid "CMS pages"
 msgstr "CMS pages"
 
-#: core/lib.py:413 discussion/core_hooks.py:22
+#: core/lib.py:393 discussion/core_hooks.py:22
 msgid "Discussions"
 msgstr "Discussions"
 
-#: core/lib.py:414 event/core_hooks.py:22
+#: core/lib.py:394 event/core_hooks.py:22
 msgid "Events"
 msgstr "Events"
 
-#: core/lib.py:415 file/core_hooks.py:15
+#: core/lib.py:395 file/core_hooks.py:15
 msgid "Files"
 msgstr "Files"
 
-#: core/lib.py:416 news/core_hooks.py:7 news/core_hooks.py:14
-#: news/core_hooks.py:21
+#: core/lib.py:396 news/core_hooks.py:7 news/core_hooks.py:14
+#: news/core_hooks.py:21 news/core_hooks.py:22
 msgid "News"
 msgstr "News"
 
-#: core/lib.py:417
+#: core/lib.py:397
 msgid "Polls"
 msgstr "Polls"
 
-#: core/lib.py:418 question/core_hooks.py:22
+#: core/lib.py:398 question/core_hooks.py:22
 msgid "Questions"
 msgstr "Questions"
 
-#: core/lib.py:419
+#: core/lib.py:399
 msgid "Tasks"
 msgstr "Tasks"
 
-#: core/lib.py:420
+#: core/lib.py:400
 msgid "Wiki pages"
 msgstr "Wiki pages"
 
-#: core/lib.py:421
+#: core/lib.py:401
 msgid "Comments"
 msgstr "Comments"
 
@@ -361,11 +361,11 @@ msgstr "email"
 msgid "name"
 msgstr "name"
 
-#: core/resolvers/shared.py:588
+#: core/resolvers/shared.py:604
 msgid "Appointment"
 msgstr "Appointment"
 
-#: core/resolvers/shared.py:594
+#: core/resolvers/shared.py:610
 msgid "Agenda"
 msgstr "Agenda"
 
@@ -389,12 +389,12 @@ msgstr "Editor"
 msgid "Question expert"
 msgstr "Question expert"
 
-#: core/tasks/cronjobs.py:200 core/tests/test_auto_block_users.py:67
+#: core/tasks/cronjobs.py:204 core/tests/test_auto_block_users.py:67
 #: core/tests/test_auto_block_users.py:70 user/post_deploy.py:19
 msgid "Bouncing e-mail address"
 msgstr "Bouncing e-mail address"
 
-#: core/tasks/cronjobs.py:243 core/tests/test_auto_block_users.py:109
+#: core/tasks/cronjobs.py:247 core/tests/test_auto_block_users.py:109
 #: core/tests/test_auto_block_users.py:111 user/post_deploy.py:20
 msgid "User deleted externally"
 msgstr "User deleted externally"
@@ -700,7 +700,7 @@ msgstr "Personal message"
 msgid "Direct notification"
 msgstr "Direct notification"
 
-#: core/templates/email/send_notification_emails.html:10 core/views.py:631
+#: core/templates/email/send_notification_emails.html:10 core/views.py:624
 msgid "Notification overview"
 msgstr "Notification overview"
 
@@ -718,7 +718,7 @@ msgstr "Unsubscribe"
 msgid "Adjust your email settings"
 msgstr "Adjust your email settings"
 
-#: core/templates/email/send_overview_emails.html:22 core/views.py:628
+#: core/templates/email/send_overview_emails.html:22 core/views.py:621
 msgid "Periodic overview"
 msgstr "Periodic overview"
 
@@ -1099,48 +1099,104 @@ msgstr ""
 "accepted."
 
 #: core/utils/push_notification.py:45
+msgid "news-item"
+msgstr "News items"
+
+#: core/utils/push_notification.py:46
+msgid "poll"
+msgstr "poll"
+
+#: core/utils/push_notification.py:47
+msgid "discussion"
+msgstr "discussion"
+
+#: core/utils/push_notification.py:48
+msgid "event"
+msgstr "event"
+
+#: core/utils/push_notification.py:49
+msgid "wiki"
+msgstr "wiki"
+
+#: core/utils/push_notification.py:50
+msgid "question"
+msgstr "question"
+
+#: core/utils/push_notification.py:51
+msgid "cms-page"
+msgstr "cms-page"
+
+#: core/utils/push_notification.py:52
+msgid "blog"
+msgstr "blog"
+
+#: core/utils/push_notification.py:53
+msgid "update"
+msgstr "update"
+
+#: core/utils/push_notification.py:54
+msgid "task"
+msgstr "task"
+
+#: core/utils/push_notification.py:55
+msgid "comment"
+msgstr "comment"
+
+#: core/utils/push_notification.py:56
+msgid "file"
+msgstr "file"
+
+#: core/utils/push_notification.py:57
+msgid "folder"
+msgstr "folder"
+
+#: core/utils/push_notification.py:58
+msgid "pad"
+msgstr "pad"
+
+#: core/utils/push_notification.py:64
 #, python-format
 msgid "New %(entity_type)s on %(site_name)s"
 msgstr "New %(entity_type)s on %(site_name)s"
 
-#: core/utils/push_notification.py:46
+#: core/utils/push_notification.py:65
 #, python-format
 msgid "%(sender_name)s created a %(entity_type)s: %(entity_title)s"
 msgstr "%(sender_name)s created a %(entity_type)s: %(entity_title)s"
 
-#: core/utils/push_notification.py:53
+#: core/utils/push_notification.py:72
 #, python-format
 msgid "New reaction on %(entity_type)s"
 msgstr "New reaction on %(entity_type)s"
 
-#: core/utils/push_notification.py:54
+#: core/utils/push_notification.py:73
 #, python-format
 msgid "%(sender_name)s posted a reaction on %(entity_title)s"
 msgstr "%(sender_name)s posted a reaction on %(entity_title)s"
 
-#: core/utils/push_notification.py:61
+#: core/utils/push_notification.py:80
 #, python-format
 msgid "New mention on %(entity_type)s"
 msgstr "New mention on %(entity_type)s"
 
-#: core/utils/push_notification.py:62
+#: core/utils/push_notification.py:81
 #, python-format
 msgid "%(sender_name)s has mentioned you at %(entity_title)s"
 msgstr "%(sender_name)s has mentioned you at %(entity_title)s"
 
-#: core/views.py:474 event/export.py:58
+#: core/views.py:472 event/export.py:58
 msgid "E-mail"
 msgstr "E-mail"
 
-#: core/views.py:476
+#: core/views.py:474
 msgid "Disk size"
 msgstr "Disk size"
 
-#: core/views.py:571
+#: core/views.py:567
 msgid "Your changes are saved"
 msgstr "Your changes are saved"
 
-#: core/views.py:634
+#: core/views.py:627
 #, python-format
 msgid "Successfully unsubscribed %(email)s from %(list_name)s"
 msgstr "Successfully unsubscribed %(email)s from %(list_name)s"
@@ -1226,8 +1282,8 @@ msgstr "At waitinglist"
 msgid "You already signed in for another sub-event in the same slot."
 msgstr "You already signed in for another sub-event in the same slot."
 
-#: event/resolvers/mutation_event_copy.py:62
-#: event/tests/test_resolve_copy_entity.py:133
+#: event/resolvers/mutation_event_copy.py:63
+#: event/tests/test_resolve_copy_entity.py:131
 #, python-format
 msgid "Copy %s"
 msgstr "Copy %s"
@@ -1400,10 +1456,6 @@ msgstr "Filescan found suspicous files on %(site_url)s"
 #: file/models.py:71 pad/core_hooks.py:10
 msgid "Pad"
 msgstr "Pad"
-
-#: news/core_hooks.py:22
-msgid "News items"
-msgstr "News items"
 
 #: pad/core_hooks.py:11
 msgid "Pads"

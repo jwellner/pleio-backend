@@ -16,7 +16,7 @@ class AddStatusUpdateTestCase(PleioTenantTestCase):
 
         self.data = {
             "input": {
-                "subtype": "status_update",
+                "subtype": "statusupdate",
                 "title": "My first StatusUpdate",
                 "richDescription": "richDescription",
                 "tags": ["tag1", "tag2"]
@@ -87,7 +87,7 @@ class AddStatusUpdateTestCase(PleioTenantTestCase):
         variables = {
             'input': {
                 'title': "Simple status update",
-                'subtype': "status_update",
+                'subtype': "statusupdate",
             }
         }
 
