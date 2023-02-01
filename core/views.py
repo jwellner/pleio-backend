@@ -296,18 +296,6 @@ def favicon(request):
     return redirect("/static/apple-touch-icon.png")
 
 
-def avatar(request, user_guid):
-    try:
-        user = User.objects.get(id=user_guid)
-        assert user.external_id, "User has no account on account.pleio.nl"
-
-        size = request.GET.get('size') or 80
-        return HttpResponseRedirect(urljoin(settings.PROFILE_PICTURE_URL, f'avatar/{user.email}/{size}/'))
-
-    except (User.DoesNotExist, ValidationError, AssertionError):
-        raise Http404("Page not found")
-
-
 @require_GET
 def robots_txt(request):
     if config.ENABLE_SEARCH_ENGINE_INDEXING:
