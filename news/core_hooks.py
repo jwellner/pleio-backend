@@ -19,5 +19,5 @@ def get_search_filters():
     yield {
         "key": "news",
         "value": _("News"),
-        "plural": _("News items"),
+        "plural": _("News"),
     }
