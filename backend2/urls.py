@@ -18,7 +18,6 @@ from concierge import views as concierge_views
 from tenants import views as tenants_views
 
 urlpatterns = [
-    path('avatar/<str:user_guid>', core_views.avatar, name='avatar'),
     path('unsubscribe/<str:token>', core_views.unsubscribe, name='unsubscribe'),
     path('logout', core_views.logout, name='logout'),
     path('action/logout', core_views.logout),
