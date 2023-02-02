@@ -2,11 +2,11 @@ from celery.schedules import crontab
 
 beat_schedule = {
     # The 'minute' definition can be used for testing purposes
-    #'minute': {
+    # 'minute': {
     #    'task': 'core.tasks.dispatch_hourly_cron',
     #    'schedule': crontab(minute='*', hour='*'),
     #    'args': ['minute']
-    #},
+    # },
     'hourly': {
         'task': 'core.tasks.cronjobs.dispatch_hourly_cron',
         'schedule': crontab(minute=55, hour='*'),
@@ -27,6 +27,10 @@ beat_schedule = {
         'task': 'core.tasks.cronjobs.dispatch_task',
         'schedule': crontab(minute=15, hour=23),
         'args': ['file.tasks.schedule_scan']
+    },
+    'elasticsearch_status': {
+        'task': 'control.tasks.update_elasticsearch_status',
+        'schedule': crontab(minute=30, hour=6)
     },
     'control_poll_task': {
         'task': 'control.tasks.poll_task_result',

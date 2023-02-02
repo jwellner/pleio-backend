@@ -31,8 +31,8 @@ from urllib.parse import urljoin
 
 from core import config
 from core.constances import ACCESS_TYPE
+from core.exceptions import IgnoreIndexError, UnableToTestIndex
 from core.utils.mail import EmailSettingsTokenizer
-
 
 logger = logging.getLogger(__name__)
 
@@ -245,6 +245,18 @@ def get_core_hook(hook_name):
                 pass
         cache.set(key, {'result': result})
     return cache.get(key)['result']
+
+
+def test_elasticsearch_index(index_name):
+    for path in get_core_hook('test_elasticsearch_index'):
+        try:
+            test_function = import_string(path)
+            test_function(index_name)
+            return
+        except IgnoreIndexError:
+            pass
+
+    raise UnableToTestIndex()
 
 
 def get_hourly_cron_jobs():

@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-01-31 19:55+0100\n"
+"POT-Creation-Date: 2023-02-01 10:49+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -25,23 +25,23 @@ msgstr "Update"
 msgid "status update"
 msgstr "status update"
 
-#: blog/core_hooks.py:7 blog/core_hooks.py:14 blog/core_hooks.py:21
+#: blog/core_hooks.py:11 blog/core_hooks.py:18 blog/core_hooks.py:25
 msgid "Blog"
 msgstr "Blog"
 
-#: blog/core_hooks.py:22 core/lib.py:391
+#: blog/core_hooks.py:26 core/lib.py:403
 msgid "Blogs"
 msgstr "Blogs"
 
-#: cms/core_hooks.py:7 cms/core_hooks.py:21
+#: cms/core_hooks.py:11 cms/core_hooks.py:25
 msgid "Page"
 msgstr "Page"
 
-#: cms/core_hooks.py:14
+#: cms/core_hooks.py:18
 msgid "Text page"
 msgstr "Text page"
 
-#: cms/core_hooks.py:22
+#: cms/core_hooks.py:26
 msgid "Pages"
 msgstr "Pages"
 
@@ -53,11 +53,90 @@ msgstr "Include files"
 msgid "Create zip-file"
 msgstr "Create zip-file"
 
-#: core/core_hooks.py:7 core/views.py:473
+#: control/models.py:143
+msgid "Index not up to date"
+msgstr "Index not up to date"
+
+#: control/models.py:150
+msgid "Index may not be accessible"
+msgstr "Index may not be accessible"
+
+#: control/templates/tools/elasticsearch_details.html:7
+msgid "Elasticsearch status details"
+msgstr "Elasticsearch status details"
+
+#: control/templates/tools/elasticsearch_details.html:8
+msgid "Back to overview"
+msgstr "Back to overview"
+
+#: control/templates/tools/elasticsearch_details.html:32
+#: control/templates/tools/elasticsearch_summary.html:18
+msgid "Index status"
+msgstr "Index status"
+
+#: control/templates/tools/elasticsearch_details.html:36
+#: control/templates/tools/elasticsearch_details.html:77
+msgid "Index name"
+msgstr "Index name"
+
+#: control/templates/tools/elasticsearch_details.html:37
+#: core/templates/superadmin/tasks.html:36
+msgid "Expected"
+msgstr "Expected"
+
+#: control/templates/tools/elasticsearch_details.html:38
+#: core/templates/superadmin/tasks.html:37
+msgid "Actual"
+msgstr "Actual"
+
+#: control/templates/tools/elasticsearch_details.html:53
+#: control/templates/tools/elasticsearch_details.html:92
+msgid "Error"
+msgstr "Error"
+
+#: control/templates/tools/elasticsearch_details.html:57
+#: control/templates/tools/elasticsearch_details.html:96
+msgid "Type"
+msgstr "Type"
+
+#: control/templates/tools/elasticsearch_details.html:61
+#: control/templates/tools/elasticsearch_details.html:100
+msgid "Backtrace"
+msgstr "Backtrace"
+
+#: control/templates/tools/elasticsearch_details.html:68
+#: control/templates/tools/elasticsearch_details.html:107
+#: control/templates/tools/elasticsearch_summary.html:12
+msgid "Nothing to report"
+msgstr "Nothing to report"
+
+#: control/templates/tools/elasticsearch_details.html:73
+#: control/templates/tools/elasticsearch_summary.html:19
+msgid "Access status"
+msgstr "Access status"
+
+#: control/templates/tools/elasticsearch_details.html:78
+#: core/templates/superadmin/tasks.html:38 event/export.py:58
+msgid "Status"
+msgstr "Status"
+
+#: control/templates/tools/elasticsearch_summary.html:7
+msgid "Elasticsearch status overview"
+msgstr "Elasticsearch status overview"
+
+#: control/templates/tools/elasticsearch_summary.html:16
+msgid "Site"
+msgstr "Site"
+
+#: control/templates/tools/elasticsearch_summary.html:17
+msgid "Report date"
+msgstr "Report date"
+
+#: core/core_hooks.py:11 core/views.py:473
 msgid "Group"
 msgstr "Group"
 
-#: core/core_hooks.py:8 core/lib.py:402
+#: core/core_hooks.py:12 core/lib.py:414
 msgid "Groups"
 msgstr "Groups"
 
@@ -123,48 +202,48 @@ msgstr "Logged in users"
 msgid "Public"
 msgstr "Public"
 
-#: core/lib.py:390
+#: core/lib.py:402
 msgid "Updates"
 msgstr "Updates"
 
-#: core/lib.py:392
+#: core/lib.py:404
 msgid "CMS pages"
 msgstr "CMS pages"
 
-#: core/lib.py:393 discussion/core_hooks.py:22
+#: core/lib.py:405 discussion/core_hooks.py:26
 msgid "Discussions"
 msgstr "Discussions"
 
-#: core/lib.py:394 event/core_hooks.py:22
+#: core/lib.py:406 event/core_hooks.py:26
 msgid "Events"
 msgstr "Events"
 
-#: core/lib.py:395 file/core_hooks.py:15
+#: core/lib.py:407 file/core_hooks.py:19
 msgid "Files"
 msgstr "Files"
 
-#: core/lib.py:396 news/core_hooks.py:7 news/core_hooks.py:14
-#: news/core_hooks.py:21 news/core_hooks.py:22
+#: core/lib.py:408 news/core_hooks.py:11 news/core_hooks.py:18
+#: news/core_hooks.py:25 news/core_hooks.py:26
 msgid "News"
 msgstr "News"
 
-#: core/lib.py:397
+#: core/lib.py:409
 msgid "Polls"
 msgstr "Polls"
 
-#: core/lib.py:398 question/core_hooks.py:22
+#: core/lib.py:410 question/core_hooks.py:26
 msgid "Questions"
 msgstr "Questions"
 
-#: core/lib.py:399
+#: core/lib.py:411 core/templates/superadmin/tasks.html:8
 msgid "Tasks"
 msgstr "Tasks"
 
-#: core/lib.py:400
+#: core/lib.py:412
 msgid "Wiki pages"
 msgstr "Wiki pages"
 
-#: core/lib.py:401
+#: core/lib.py:413
 msgid "Comments"
 msgstr "Comments"
 
@@ -1098,6 +1177,63 @@ msgstr ""
 "Access is requested. You will receive an e-mail when the request is "
 "accepted."
 
+#: core/templates/superadmin/tasks.html:14
+msgid "Process all indexes or a specific index"
+msgstr "Process all indexes or a specific index"
+
+#: core/templates/superadmin/tasks.html:23
+msgid "Update all indexes"
+msgstr "Update all indexes"
+
+#: core/templates/superadmin/tasks.html:28
+msgid "Rebuild all indexes"
+msgstr "Rebuild all indexes"
+
+#: core/templates/superadmin/tasks.html:35
+msgid "Index"
+msgstr "Index"
+
+#: core/templates/superadmin/tasks.html:52
+msgid "Update index"
+msgstr "Update index"
+
+#: core/templates/superadmin/tasks.html:57
+msgid "Rebuild index"
+msgstr "Rebuild index"
+
+#: core/templates/superadmin/tasks.html:67
+msgid "Index details are not available at the moment"
+msgstr "Index details are not available at the moment"
+
+#: core/templates/superadmin/tasks.html:80
+msgid "This task will dispatch a cron task one extra time for only this site."
+msgstr ""
+"This task will dispatch a cron task one extra time for only this site."
+
+#: core/templates/superadmin/tasks.html:88
+msgid "Execute"
+msgstr "Execute"
+
+#: core/templates/superadmin/tasks.html:95
+msgid "Links"
+msgstr "Links"
+
+#: core/templates/superadmin/tasks.html:100
+msgid "This task will replace links to a old domain with the current domain."
+msgstr "This task will replace links to a old domain with the current domain."
+
+#: core/templates/superadmin/tasks.html:102
+msgid "Old domain"
+msgstr "Old domain"
+
+#: core/templates/superadmin/tasks.html:104
+msgid "Insert the old domain name to be replaced (format: support.pleio.nl)."
+msgstr "Insert the old domain name to be replaced (format: support.pleio.nl)."
+
+#: core/templates/superadmin/tasks.html:106
+msgid "Replace links"
+msgstr "Replace links"
+
 #: core/utils/push_notification.py:45
 msgid "news-item"
 msgstr "News items"
@@ -1201,12 +1337,12 @@ msgstr "Your changes are saved"
 msgid "Successfully unsubscribed %(email)s from %(list_name)s"
 msgstr "Successfully unsubscribed %(email)s from %(list_name)s"
 
-#: discussion/core_hooks.py:7 discussion/core_hooks.py:14
-#: discussion/core_hooks.py:21
+#: discussion/core_hooks.py:11 discussion/core_hooks.py:18
+#: discussion/core_hooks.py:25
 msgid "Discussion"
 msgstr "Discussion"
 
-#: event/core_hooks.py:7 event/core_hooks.py:14 event/core_hooks.py:21
+#: event/core_hooks.py:11 event/core_hooks.py:18 event/core_hooks.py:25
 msgid "Event"
 msgstr "Event"
 
@@ -1217,10 +1353,6 @@ msgstr "All attendees"
 #: event/export.py:49
 msgid "All events"
 msgstr "All events"
-
-#: event/export.py:58
-msgid "Status"
-msgstr "Status"
 
 #: event/export.py:58
 msgid "Updated"
@@ -1436,15 +1568,15 @@ msgstr "Message to event"
 msgid "External content author"
 msgstr "External content author"
 
-#: file/core_hooks.py:7 file/core_hooks.py:14 file/models.py:69
+#: file/core_hooks.py:11 file/core_hooks.py:18 file/models.py:69
 msgid "File"
 msgstr "File"
 
-#: file/core_hooks.py:19 file/models.py:70
+#: file/core_hooks.py:23 file/models.py:70
 msgid "Folder"
 msgstr "Folder"
 
-#: file/core_hooks.py:20
+#: file/core_hooks.py:24
 msgid "Folders"
 msgstr "Folders"
 
@@ -1465,8 +1597,8 @@ msgstr "Pads"
 msgid "Removed by Profile-Sync"
 msgstr "Removed by Profile-Sync"
 
-#: question/core_hooks.py:7 question/core_hooks.py:14
-#: question/core_hooks.py:21
+#: question/core_hooks.py:11 question/core_hooks.py:18
+#: question/core_hooks.py:25
 msgid "Question"
 msgstr "Question"
 
@@ -1482,10 +1614,10 @@ msgstr "Users"
 msgid "Deleted"
 msgstr "Deleted"
 
-#: wiki/core_hooks.py:7 wiki/core_hooks.py:14 wiki/core_hooks.py:21
+#: wiki/core_hooks.py:11 wiki/core_hooks.py:18 wiki/core_hooks.py:25
 msgid "Wiki"
 msgstr "Wiki"
 
-#: wiki/core_hooks.py:22
+#: wiki/core_hooks.py:26
 msgid "Wiki's"
 msgstr "Wiki's"

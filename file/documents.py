@@ -62,11 +62,11 @@ class FileDocument(DefaultDocument):
                             file_contents = re.sub(r"\s+", " ",
                                                    textract.process(temp.name, encoding='utf8').decode("utf-8"))
                             os.unlink(temp.name)
-
-            return file_contents
+        except FileNotFoundError:
+            pass
         except Exception as e:
             logger.error('Error occured while indexing file (%s): %s', instance.id, e)
-            return file_contents
+        return file_contents
 
     def prepare_tags(self, instance):
         return [x.lower() for x in instance.tags]

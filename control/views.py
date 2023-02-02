@@ -14,12 +14,14 @@ from django.utils.text import slugify
 from django.utils.timezone import localtime
 from django.http import FileResponse, HttpResponseNotFound, StreamingHttpResponse
 from wsgiref.util import FileWrapper
+
+from core.lib import get_base_url
 from tenants.models import Client, Agreement, AgreementVersion
-from control.models import SiteFilter, Task
+from control.models import SiteFilter, Task, ElasticsearchStatus
 from control.forms import AddSiteForm, DeleteSiteForm, ConfirmSiteBackupForm, SearchUserForm, AgreementAddForm, AgreementAddVersionForm
 from core.models import SiteStat
 from user.models import User
-from django_tenants.utils import tenant_context
+from django_tenants.utils import tenant_context, schema_context
 
 logger = logging.getLogger(__name__)
 
@@ -443,3 +445,51 @@ def agreements_add_version(request, agreement_id):
     }
 
     return render(request, 'agreements_add.html', context)
+
+
+@login_required
+@user_passes_test(is_admin)
+def elasticsearch_status(request):
+    clients = Client.objects.exclude(schema_name='public')
+    rows = []
+    for client in clients:
+        last_record = ElasticsearchStatus.objects.order_by('-created_at').filter(client=client).first()
+        status = {}
+        with schema_context(client.schema_name):
+            from core import config
+            status['name'] = config.NAME
+            status['url'] = get_base_url()
+
+        if last_record:
+            status["created_at"] = last_record.created_at
+            status["index_status"] = last_record.index_status_summary()
+            status["access_status"] = last_record.access_status_summary()
+            status['details_url'] = reverse("elasticsearch_status", args=[client.id])
+        rows.append(status)
+
+    # render summary of all sites with elasticsearch issues
+    return render(request, "tools/elasticsearch_summary.html", {
+        'rows': rows
+    })
+
+
+@login_required
+@user_passes_test(is_admin)
+def elasticsearch_status_details(request, client_id, record_id=None):
+    client = Client.objects.get(id=client_id)
+    if not record_id:
+        record = ElasticsearchStatus.objects.filter(client=client).first()
+    else:
+        record = ElasticsearchStatus.objects.get(client=client,
+                                                 id=record_id)
+    if not record:
+        return HttpResponseNotFound("Invalid parameters")
+
+    context = {
+        'record': record,
+        'previous': ElasticsearchStatus.objects.previous(record.client, record.created_at),
+        'next': ElasticsearchStatus.objects.next(record.client, record.created_at),
+    }
+
+    # render elasticsearch status of one site
+    return render(request, "tools/elasticsearch_details.html", context)
