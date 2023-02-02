@@ -43,7 +43,7 @@ class ExternalContentDocument(DefaultDocument):
         return False
 
     class Index:
-        name = 'external_content'
+        name = 'externalcontent'
 
     class Django:
         model = ExternalContent

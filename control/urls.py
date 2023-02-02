@@ -18,4 +18,7 @@ urlpatterns = [
     path('agreements', views.agreements, name="agreements"),
     path('agreements/add', views.agreements_add, name="agreement_add"),
     path('agreements/<int:agreement_id>/add', views.agreements_add_version, name="agreement_add_version"),
+    path('tools/elasticsearch/<int:client_id>/<int:record_id>', views.elasticsearch_status_details, name='elasticsearch_status'),
+    path('tools/elasticsearch/<int:client_id>', views.elasticsearch_status_details, name='elasticsearch_status'),
+    path('tools/elasticsearch', views.elasticsearch_status, name='elasticsearch_status'),
 ]

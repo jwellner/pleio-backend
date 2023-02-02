@@ -1,3 +1,7 @@
+from time import sleep
+from traceback import format_exc
+
+from celery import chain
 from celery.utils.log import get_task_logger
 from elasticsearch import ConnectionError as ElasticsearchConnectionError
 
@@ -40,20 +44,49 @@ def elasticsearch_recreate_indices(index_name=None):
             index.create()
             logger.info('created index %s', index._name)
         except Exception:
-            logger.info('index %s already exists', index._name)
+            logger.error('index %s already exists', index._name)
 
 
 @app.task(ignore_result=True)
 def elasticsearch_rebuild_all(index_name=None):
     '''
-    Delete indexes, creates indexes and populate tenants
+    Delete indexes, creates indexes and populate tenants.
+    Sites in random order, indexes in sequential order.
 
     No option passed then all indices are rebuild
     Options: ['news', 'file', 'question' 'wiki', 'discussion', 'page', 'event', 'blog', 'user', 'group']
-
     '''
+
+    elasticsearch_recreate_indices(index_name)
+
     for client in Client.objects.exclude(schema_name='public'):
-        elasticsearch_rebuild_for_tenant.delay(client.schema_name, index_name)
+        elasticsearch_index_data_for_tenant.delay(client.schema_name, index_name)
+
+
+@app.task
+def elasticsearch_rebuild_all_per_index():
+    """
+    Delete indexes, create indexes and populate tenants.
+
+    Indexes in parallel, sites in serial.
+    """
+
+    signatures = []
+    for index in all_indexes():
+        # pylint: disable=protected-access
+        signatures.append(elasticsearch_rebuild_all_at_index.si(index._name))
+    chain(*signatures).apply_async()
+
+
+@app.task
+def elasticsearch_rebuild_all_at_index(index_name):
+    elasticsearch_recreate_indices(index_name)
+
+    signatures = []
+    for client in Client.objects.exclude(schema_name='public'):
+        args = (client.schema_name, index_name)
+        signatures.append(elasticsearch_index_data_for_tenant.si(*args))
+    chain(*signatures).apply_async()
 
 
 @app.task(ignore_result=True)
@@ -85,21 +118,34 @@ def elasticsearch_index_data_for_all(index_name=None):
 def elasticsearch_index_data_for_tenant(schema_name, index_name=None):
     logger.info('elasticsearch_index_data_for_tenant \'%s\' \'%s\'', index_name, schema_name)
     with schema_context(schema_name):
-        if index_name:
-            models = [get_model_by_subtype(index_name)]
-        else:
-            models = _all_models()
-
-        for doc in registry.get_documents(models):
-            logger.info("indexing %i '%s' objects",
-                        doc().get_queryset().count(),
-                        doc.django.model.__name__)
-            qs = doc().get_indexing_queryset()
-
-            if doc.django.model.__name__ == 'FileFolder':
-                doc().update(qs, parallel=False, chunk_size=10)
+        try:
+            if index_name:
+                models = [get_model_by_subtype(index_name)]
             else:
-                doc().update(qs, parallel=False, chunk_size=500)
+                models = _all_models()
+
+            for doc in registry.get_documents(models):
+                logger.info("indexing %i '%s' objects",
+                            doc().get_queryset().count(),
+                            doc.django.model.__name__)
+                qs = doc().get_indexing_queryset()
+
+                try:
+                    if doc.django.model.__name__ == 'FileFolder':
+                        doc().update(qs, parallel=False, chunk_size=10)
+                    else:
+                        doc().update(qs, parallel=False, chunk_size=500)
+                except Exception as e:
+                    # pylint: disable=logging-not-lazy
+                    logger.error("exception at elasticsearch_index_data_for_tenant %s %s: %s" % (
+                        schema_name, e.__class__, e))
+                    logger.error(format_exc())
+
+        except Exception as e:
+            # pylint: disable=logging-not-lazy
+            logger.error("exception at elasticsearch_index_data_for_tenant %s %s: %s" % (
+                schema_name, e.__class__, e))
+            logger.error(format_exc())
 
 
 @app.task(ignore_result=True)
@@ -124,6 +170,7 @@ def elasticsearch_delete_data_for_tenant(schema_name, index_name=None):
             'term', tenant_name=schema_name
         )
 
+        # pylint: disable=protected-access
         logger.info('deleting %i %s objects', s.count(), index._name)
         s.delete()
 
@@ -160,6 +207,23 @@ def _all_models():
             return 0
         if name == 'User':
             return 1
-        return 100
+        if name == 'FileFolder':
+            return 100
+        return 10
 
     return sorted(registry.get_models(), key=model_weight)
+
+
+def all_indexes():
+    def index_weight(index):
+        # pylint: disable=protected-access
+        name = index._name
+        if name == 'group':
+            return 0
+        if name == 'user':
+            return 1
+        if name == 'file':
+            return 100
+        return 10
+
+    return sorted(registry.get_indices(), key=index_weight)

@@ -5,7 +5,9 @@ from .cronjobs import (dispatch_hourly_cron, dispatch_daily_cron, dispatch_weekl
                        remove_floating_attachments, resize_pending_images,
                        cleanup_auditlog, depublicate_content)
 from .elasticsearch_tasks import (elasticsearch_recreate_indices,
-                                  elasticsearch_rebuild_all, elasticsearch_rebuild_for_tenant,
+                                  elasticsearch_rebuild_all,
+                                  elasticsearch_rebuild_all_per_index,
+                                  elasticsearch_rebuild_for_tenant,
                                   elasticsearch_index_data_for_all, elasticsearch_index_data_for_tenant,
                                   elasticsearch_delete_data_for_tenant,
                                   elasticsearch_index_document)

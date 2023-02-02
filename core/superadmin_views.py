@@ -1,8 +1,6 @@
 import json
 import logging
 import os
-from pprint import pformat
-from typing import Dict
 
 from auditlog.models import LogEntry
 from datetime import timedelta
@@ -18,14 +16,17 @@ from django.utils.module_loading import import_string
 from django.views import View
 from django.utils import timezone
 from celery.result import AsyncResult
+
 from core.constances import OIDC_PROVIDER_OPTIONS
+from core.elasticsearch import elasticsearch_status_report
 from core.forms import MeetingsSettingsForm, ProfileSetForm
 from core.models import Group, ProfileSet
 from core.models.agreement import CustomAgreement
-from core.tasks import replace_domain_links, elasticsearch_rebuild_for_tenant
+from core.tasks import replace_domain_links, elasticsearch_rebuild_for_tenant, elasticsearch_index_data_for_tenant
 from core.lib import tenant_schema, is_valid_domain
 from core.superadmin.forms import AuditLogFilter, CustomAgreementForm, SettingsForm, ScanIncidentFilter, OptionalFeaturesForm, SupportContractForm
 from control.tasks import get_db_disk_usage, get_file_disk_usage, copy_group_to_tenant
+from core.tasks.elasticsearch_tasks import all_indexes
 from file.models import ScanIncident
 from tenants.models import Client, GroupCopy
 
@@ -185,45 +186,78 @@ class GroupCopyView(SuperAdminView):
         return redirect('/superadmin/group_copy')
 
 
-@login_required
-@user_passes_test(lambda u: u.is_superadmin, login_url='/', redirect_field_name=None)
-def tasks(request):
-    # pylint: disable=unused-argument
-    current_domain = request.tenant.get_primary_domain().domain
+class HandleViewTasksPage(SuperAdminView):
+    http_method_names = ['get']
 
-    context = {}
+    def get(self, request):
+        # pylint: disable=unused-argument
+        context = {}
 
-    if request.POST:
-        if request.POST.get("task", False) == "elasticsearch_rebuild":
-            index_name = request.POST.get("index_name") or None
-            if index_name:
-                elasticsearch_rebuild_for_tenant.delay(tenant_schema(), index_name=index_name)
-            else:
-                elasticsearch_rebuild_for_tenant.delay(tenant_schema())
-            messages.success(request, 'Elasticsearch rebuild started')
-        elif request.POST.get("task", False) == "replace_links":
-            replace_domain = request.POST.get("replace_domain") if request.POST.get("replace_domain") else current_domain
-            if not is_valid_domain(replace_domain):
-                messages.error(request, f"The domain {replace_domain} is not a valid domain")
-            elif current_domain == replace_domain:
-                messages.error(request, "Please provide the domain name to replace")
-            else:
-                replace_domain_links.delay(tenant_schema(), replace_domain)
-                messages.success(request, f"Replace links for {replace_domain} started.")
-        elif request.POST.get('task') == 'dispatch_cron':
-            from core.tasks.cronjobs import dispatch_hourly_cron
-            try:
-                method = import_string(request.POST.get("subtask"))
-                method.delay(schema_name=tenant_schema())
-                messages.success(request, "Scheduled task %s" % request.POST.get("subtask"))
-            except Exception as e:
-                messages.error(request, "%s at %s: %s" % (e.__class__.__name__, request.POST.get("subtask"), e))
-        else:
-            messages.error(request, "Invalid command")
+        try:
+            context["es_report"] = elasticsearch_status_report()
+        except Exception as e:
+            messages.error(request, str(e))
 
+        return render(request, 'superadmin/tasks.html', context)
+
+
+class HandleScheduleCronTask(SuperAdminView):
+    http_method_names = ['post']
+
+    def post(self, request):
+        try:
+            method = import_string(request.POST.get("subtask"))
+            method.delay(schema_name=tenant_schema())
+            messages.success(request, "Scheduled task %s" % request.POST.get("subtask"))
+        except Exception as e:
+            messages.error(request, "%s at %s: %s" % (e.__class__.__name__, request.POST.get("subtask"), e))
         return redirect('/superadmin/tasks')
 
-    return render(request, 'superadmin/tasks.html', context)
+
+class HandleUpdateLinksTask(SuperAdminView):
+    http_method_names = ['post']
+
+    def post(self, request):
+        current_domain = request.tenant.get_primary_domain().domain
+        replace_domain = request.POST.get("replace_domain") if request.POST.get("replace_domain") else current_domain
+        if not is_valid_domain(replace_domain):
+            messages.error(request, f"The domain {replace_domain} is not a valid domain")
+        elif current_domain == replace_domain:
+            messages.error(request, "Please provide the domain name to replace")
+        else:
+            replace_domain_links.delay(tenant_schema(), replace_domain)
+            messages.success(request, f"Replace links for {replace_domain} started.")
+        return redirect('/superadmin/tasks')
+
+
+class HandleElasticsearchTask(SuperAdminView):
+    # pylint: disable=protected-access
+    http_method_names = ['post']
+
+    def post(self, request):
+        task = request.POST.get("task", False)
+        index_name = request.POST.get("index_name")
+        if task == "elasticsearch_rebuild":
+            if index_name in [i._name for i in all_indexes()]:
+                elasticsearch_rebuild_for_tenant.delay(tenant_schema(), index_name=index_name)
+                messages.success(request, 'Elasticsearch rebuild started for %s' % index_name)
+            elif not index_name:
+                elasticsearch_rebuild_for_tenant.delay(tenant_schema())
+                messages.success(request, 'Elasticsearch rebuild started')
+            else:
+                messages.error(request, 'Specify an index to process')
+        elif task == "elasticsearch_update":
+            if index_name in [i._name for i in all_indexes()]:
+                elasticsearch_index_data_for_tenant.delay(tenant_schema(), index_name=index_name)
+                messages.success(request, 'Elasticsearch update started for %s' % index_name)
+            elif not index_name:
+                elasticsearch_index_data_for_tenant.delay(tenant_schema())
+                messages.success(request, 'Elasticsearch update started')
+            else:
+                messages.error(request, 'Specify an index to process')
+        else:
+            messages.error(request, "Invalid command %s" % task)
+        return redirect('/superadmin/tasks')
 
 
 class SupportContract(SuperAdminView):
@@ -237,7 +271,7 @@ class SupportContract(SuperAdminView):
 
         context = {'form': form}
 
-        return render(request, 'superadmin/support_contract', context)
+        return render(request, 'superadmin/support_contract.html', context)
 
     def get(self, request):
         return render(request, 'superadmin/support_contract.html')

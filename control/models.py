@@ -3,7 +3,10 @@ import django_filters
 
 from django.db import models
 from django.forms import Select, TextInput
+from django.utils import timezone
 from django.utils.module_loading import import_string
+from django.utils.translation import gettext
+
 from tenants.models import Client
 
 
@@ -104,3 +107,47 @@ class Task(models.Model):
             followup.delay(self.id)
         except Exception:
             pass
+
+
+class ElasticsearchStatusManager(models.Manager):
+
+    def cleanup(self, **filter_kwargs):
+        existing = self.get_queryset().filter(**filter_kwargs)
+        for item in existing[2:]:
+            item.delete()
+
+    def previous(self, client, reference_date):
+        qs = self.get_queryset()
+        qs = qs.filter(client=client, created_at__lt=reference_date)
+        return qs.first()
+
+    def next(self, client, reference_date):
+        qs = self.get_queryset().order_by('created_at')
+        qs = qs.filter(client=client, created_at__gt=reference_date)
+        return qs.first()
+
+
+class ElasticsearchStatus(models.Model):
+    class Meta:
+        ordering = ('-created_at',)
+
+    objects = ElasticsearchStatusManager()
+
+    client = models.ForeignKey('tenants.Client', null=True, on_delete=models.CASCADE, related_name='elasticsearch_status')
+    index_status = models.JSONField(null=True)
+    access_status = models.JSONField(null=True)
+    created_at = models.DateTimeField(default=timezone.now)
+
+    def index_status_summary(self):
+        if self.index_status.get('result'):
+            return gettext("Index not up to date")
+        if 'message' in self.index_status:
+            return self.index_status['message']
+        return ""
+
+    def access_status_summary(self):
+        if self.access_status.get('result'):
+            return gettext("Index may not be accessible")
+        if 'message' in self.access_status:
+            return self.access_status['message']
+        return ""
