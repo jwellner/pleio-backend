@@ -859,6 +859,7 @@ input editSiteSettingInput {
     appointmentTypeVideocall: [AppointmentTypeInput]
     blockedUserIntroMessage: SecureRichText
     pushNotificationsEnabled: Boolean
+    pageTagFilters: [PageTagFilterInput]
 }
 
 type editSiteSettingPayload {
@@ -2306,6 +2307,7 @@ type Site {
     blockedUserIntroMessage: SecureRichText
     pushNotificationsEnabled: Boolean!
     datahubExternalContentEnabled: Boolean
+    pageTagFilters(contentType: String!): PageTagFilter
 }
 
 type SiteSettings {
@@ -2443,6 +2445,7 @@ type SiteSettings {
     blockedUserIntroMessage: SecureRichText
     searchArchiveOption: SearchArchiveOptionEnum
     pushNotificationsEnabled: Boolean!
+    pageTagFilters: [PageTagFilter]
 }
 
 enum SearchArchiveOptionEnum {
@@ -2515,15 +2518,11 @@ type SubgroupList {
 type TagCategory {
     name: String!
     values: [String]
-    restrictContentTypes: Boolean
-    allowedContentTypes: [String]
 }
 
 input TagCategoryInput {
     name: String!
     values: [String]
-    restrictContentTypes: Boolean
-    allowedContentTypes: [String]
 }
 
 type Task implements Entity {
@@ -3159,4 +3158,16 @@ input UpdateDatahubContentSourceInput {
     apiUrl: String!
     frontendUrl: String!
     batchSize: Int
+}
+
+type PageTagFilter {
+    contentType: String
+    showTagFilter: Boolean
+    showTagCategories: [String]
+}
+
+input PageTagFilterInput {
+    contentType: String!
+    showTagFilter: Boolean
+    showTagCategories: [String]
 }

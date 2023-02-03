@@ -174,6 +174,7 @@ DEFAULT_SITE_CONFIG = {
     'BLOCKED_USER_INTRO_MESSAGE': ('', "Custom message to show blocked users at login attempts."),
     'PUSH_NOTIFICATIONS_ENABLED': (False, "Push notifications enabled for this site"),
     'DATAHUB_EXTERNAL_CONTENT_ENABLED': (False, "Allow to add a datahub external content processor"),
+    'PAGE_TAG_FILTERS': ([], "Specify what tags should be available per content type.")
 }
 """
 Default site configuration

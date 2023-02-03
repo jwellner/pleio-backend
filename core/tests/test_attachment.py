@@ -11,7 +11,7 @@ from user.factories import UserFactory
 class AttachmentTestCase(PleioTenantTestCase):
 
     def setUp(self):
-        super(AttachmentTestCase, self).setUp()
+        super().setUp()
         self.user1 = UserFactory(email="user1@example.net")
         self.user2 = UserFactory(email="user2@example.net")
         self.attachment = mixer.blend(Attachment,

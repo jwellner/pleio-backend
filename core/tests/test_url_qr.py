@@ -9,7 +9,7 @@ from django.utils.text import slugify
 class UrlQrTestCase(PleioTenantTestCase):
 
     def setUp(self):
-        super(UrlQrTestCase, self).setUp()
+        super().setUp()
         
         self.user1 = UserFactory()
         self.user2 = UserFactory()

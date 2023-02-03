@@ -636,3 +636,22 @@ def validate_token(request, token):
     except Exception:
         pass
     return False
+
+
+def get_page_tag_filters():
+    defaults = [{"contentType": ct,
+                 "showTagFilter": tf,
+                 "showTagCategories": []
+                 } for ct, tf in [('news', True),
+                                  ('blog', True),
+                                  ('question', True),
+                                  ('discussion', True),
+                                  ('event', False)]]
+    stored_settings = {f['contentType']: f for f in config.PAGE_TAG_FILTERS if 'contentType' in f}
+
+    # Ensure consistent number of settings for the applicable content types.
+    for setting in defaults:
+        if setting['contentType'] in stored_settings:
+            yield stored_settings[setting['contentType']]
+        else:
+            yield setting

@@ -11,7 +11,7 @@ from user.factories import AdminFactory, UserFactory
 class ExportGroupOwnersTestCase(PleioTenantTestCase):
 
     def setUp(self):
-        super(ExportGroupOwnersTestCase, self).setUp()
+        super().setUp()
 
         self.user1 = UserFactory()
         self.admin = AdminFactory()

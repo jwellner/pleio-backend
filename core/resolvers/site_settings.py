@@ -9,7 +9,7 @@ from core import config
 from core.constances import USER_ROLES
 from core.lib import (get_language_options, get_access_ids,
                       get_exportable_user_fields, get_exportable_content_types,
-                      get_activity_filters, get_entity_filters, get_search_filters)
+                      get_activity_filters, get_entity_filters, get_search_filters, get_page_tag_filters)
 from core.models import ProfileField, ProfileFieldValidator, SiteInvitation, SiteAccessRequest, UserProfile, ProfileSet
 from core.resolvers import shared
 from user.models import User
@@ -998,3 +998,22 @@ def resolve_push_notifications_enabled(obj, info):
 def resolve_datahub_external_content_enabled(obj, info):
     # pylint: disable=unused-argument
     return config.DATAHUB_EXTERNAL_CONTENT_ENABLED
+
+
+@site_settings_private.field('pageTagFilters')
+def resolve_page_tag_filters(obj, info):
+    # pylint: disable=unused-argument
+    return get_page_tag_filters()
+
+
+@site_settings_public.field('pageTagFilters')
+def resolve_page_tag_filters_subtype(obj, info, contentType):
+    # pylint: disable=unused-argument
+    for page_tag_filter in get_page_tag_filters():
+        if page_tag_filter['contentType'] == contentType:
+            return page_tag_filter
+    return {
+        'contentType': contentType,
+        'showTagFilter': True,
+        'showTagCategories': []
+    }
