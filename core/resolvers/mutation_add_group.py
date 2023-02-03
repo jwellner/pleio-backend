@@ -6,7 +6,6 @@ from core.models import Group, ProfileField, GroupProfileFieldSetting
 from core.constances import USER_ROLES, INVALID_PROFILE_FIELD_GUID, NOT_AUTHORIZED
 from core.lib import clean_graphql_input
 from core.resolvers import shared, group_shared
-from file.models import FileFolder
 from user.models import User
 
 
