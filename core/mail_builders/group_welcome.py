@@ -1,7 +1,11 @@
+import warnings
+
+import bleach
 from django.utils.translation import gettext as _
 
-from core.lib import html_to_text, get_full_url
+from core.lib import get_full_url
 from core.mail_builders.template_mailer import TemplateMailerBase
+from core.utils.convert import filter_html_mail_input
 from core.utils.entity import load_entity_by_id
 
 
@@ -26,16 +30,18 @@ class GroupWelcomeMailer(TemplateMailerBase):
             raise self.FailSilentlyError()
 
         context = self.build_context(user=self.user)
-        context['welcome_message'] = self._get_message()
-        context['welcome_message'] = context['welcome_message'].replace("[name]", self.user.name)
-        context['welcome_message'] = context['welcome_message'].replace("[group_name]", self.group.name)
-        context['welcome_message'] = context['welcome_message'].replace("[group_url]", get_full_url(self.group.url))
-
+        context['welcome_message'] = filter_html_mail_input(self._get_message())
         return context
 
     def _get_message(self):
-        has_message = html_to_text(self.group.welcome_message)
-        return has_message.strip() if has_message else None
+        welcome_message = self.group.welcome_message or ''
+        if not welcome_message.strip():
+            return None
+
+        welcome_message = welcome_message.replace("[name]", self.user.name)
+        welcome_message = welcome_message.replace("[group_name]", self.group.name)
+        welcome_message = welcome_message.replace("[group_url]", get_full_url(self.group.url))
+        return welcome_message
 
     def get_language(self):
         return self.user.get_language()

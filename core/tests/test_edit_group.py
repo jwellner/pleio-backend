@@ -89,7 +89,7 @@ class TestEditGroupTestCase(PleioTenantTestCase):
                 "guid": self.group.guid,
                 "name": "Name",
                 "icon": "icon.png",
-                "richDescription": "<p>richDescription</p>",
+                "richDescription": self.tiptap_paragraph("richDescription"),
                 "introduction": "introdcution",
                 "isIntroductionPublic": True,
                 "welcomeMessage": "welcomeMessage",

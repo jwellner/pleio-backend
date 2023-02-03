@@ -62,7 +62,7 @@ class AddGroupCase(PleioTenantTestCase):
             "group": {
                 "name": "Name",
                 "icon": "icon.png",
-                "richDescription": "<p>richDescription</p>",
+                "richDescription": self.tiptap_paragraph("richDescription"),
                 "introduction": "introductionMessage",
                 "isIntroductionPublic": False,
                 "welcomeMessage": "welcomeMessage",
