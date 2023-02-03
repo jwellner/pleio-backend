@@ -1,7 +1,6 @@
 from unittest import mock
 
 from django.core.files.base import ContentFile
-from django.utils import translation
 
 from core.lib import get_full_url
 from core.mail_builders.content_export_ready import ContentExportReadyMailer

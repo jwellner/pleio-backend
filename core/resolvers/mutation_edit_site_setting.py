@@ -213,6 +213,7 @@ def resolve_edit_site_setting(_, info, input):
         'appointmentTypeVideocall': 'VIDEOCALL_APPOINTMENT_TYPE',
         'blockedUserIntroMessage': 'BLOCKED_USER_INTRO_MESSAGE',
         'pushNotificationsEnabled': 'PUSH_NOTIFICATIONS_ENABLED',
+        'pageTagFilters': 'PAGE_TAG_FILTERS',
     }
 
     resolve_update_keys(setting_keys, clean_input)

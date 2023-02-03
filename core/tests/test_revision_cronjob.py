@@ -15,7 +15,7 @@ from core.tasks.cronjobs import make_publication_revisions, _maybe_create_public
 class TestRevisionCronjobTestCase(PleioTenantTestCase):
 
     def setUp(self):
-        super(TestRevisionCronjobTestCase, self).setUp()
+        super().setUp()
 
         self.published_at = timezone.now() - timezone.timedelta(minutes=30)
         self.created_at = timezone.now() - timezone.timedelta(minutes=60)
