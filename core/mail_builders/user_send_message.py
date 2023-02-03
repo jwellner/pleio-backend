@@ -1,7 +1,7 @@
-from django.utils.html import format_html
 from django.utils.translation import gettext
 
 from core.mail_builders.template_mailer import TemplateMailerBase
+from core.utils.convert import filter_html_mail_input
 from core.utils.entity import load_entity_by_id
 
 
@@ -29,7 +29,7 @@ class UserSendMessageMailer(TemplateMailerBase):
 
     def get_context(self):
         context = self.build_context(user=self.sender)
-        context['message'] = format_html(self.message)
+        context['message'] = filter_html_mail_input(self.message)
         context['subject'] = self.get_subject()
         return context
 

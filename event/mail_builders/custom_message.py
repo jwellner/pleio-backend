@@ -1,8 +1,8 @@
-from django.utils.html import format_html
 from django.utils.translation import ugettext as _
 
 from core.lib import get_full_url
 from core.mail_builders.template_mailer import TemplateMailerBase
+from core.utils.convert import filter_html_mail_input
 from event.models import Event
 from user.models import User
 
@@ -44,7 +44,7 @@ class CustomMessageMailer(TemplateMailerBase):
 
     def get_context(self):
         context = self.build_context(user=self.sender)
-        context['message'] = format_html(self.message)
+        context['message'] = filter_html_mail_input(self.message)
         context['event'] = self.event.title
         context['event_url'] = get_full_url(self.event.url)
         return context
