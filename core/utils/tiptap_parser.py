@@ -1,6 +1,7 @@
 import json
 import logging
 from urllib.parse import urlparse
+from django.db import connection
 from django.core.exceptions import ValidationError
 from core.lib import get_base_url
 
@@ -70,19 +71,12 @@ class Tiptap:
             if self.get_field(x, 'src') == original:
                 x['attrs']['src'] = replacement
 
-    def replace_local_absolute_urls(self):
-        match = "%s/" % get_base_url()
-
-        for x in self.get_nodes('file'):
-            if self.get_field(x, 'url') == match :
-                x['attrs']['url'] = x['attrs']['url'].replace(match, "/")
-
-        for x in self.get_nodes('image'):
-            if self.get_field(x, 'src') == match:
-                x['attrs']['src'] = x['attrs']['src'].replace(match, "/")
-
     def check_for_external_urls(self):
-        self.replace_local_absolute_urls()
+        local_domain = ''
+        try:
+            local_domain = connection.tenant.get_primary_domain().domain
+        except Exception:
+            pass
 
         content = self.tiptap_json.get("content", [])
 
@@ -94,5 +88,6 @@ class Tiptap:
             else:
                 continue
 
-            if urlparse(url).netloc:
-                raise ValidationError(f"Not a relative URL: {url}")
+            netloc = urlparse(url).netloc
+            if netloc and netloc != local_domain:
+                raise ValidationError(f"Invalid external file or image URL: {url}")
