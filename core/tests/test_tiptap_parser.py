@@ -139,7 +139,15 @@ class TiptapParserTestCase(FastTenantTestCase):
         image_json = json.dumps({"content": [
             {"type": "image", "attrs": {"src": "no/path/prefix"}}
         ]})
+        file_json_localdomain = json.dumps({"content": [
+            {"type": "file", "attrs": {"url": "https://tenant.fast-test.com/foo/bar"}}
+        ]})
+        image_json_localdomain = json.dumps({"content": [
+            {"type": "image", "attrs": {"src": "http://tenant.fast-test.com/no/path/prefix"}}
+        ]})
 
         # Expect no ValidationErrors being raised
         Tiptap(file_json).check_for_external_urls()
         Tiptap(image_json).check_for_external_urls()
+        Tiptap(file_json_localdomain).check_for_external_urls()
+        Tiptap(image_json_localdomain).check_for_external_urls()
