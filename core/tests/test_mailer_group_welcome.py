@@ -53,9 +53,7 @@ class TestGroupWelcomeMailerTestCase(PleioTenantTestCase):
         self.assertEqual(mocked_build_context.call_count, 1)
         self.assertIn(self.user.name, context['welcome_message'])
         self.assertIn(self.group.name, context['welcome_message'])
-
-        # it is text-only
-        self.assertNotIn(self.group.url, context['welcome_message'])
+        self.assertIn(self.group.url, context['welcome_message'])
 
     def test_properties(self):
         self.assertEqual(self.user.get_language(), self.mailer.get_language())

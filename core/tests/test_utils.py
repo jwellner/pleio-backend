@@ -7,7 +7,6 @@ from core.utils.convert import is_tiptap, tiptap_to_text, tiptap_to_html
 from core.utils.export.avatar import fetch_avatar_image, CouldNotLoadPictureError
 from user.factories import UserFactory
 
-
 from core.utils.export import compress_path
 
 
@@ -69,6 +68,10 @@ class TestUtilsTipTapIOTestCase(PleioTenantTestCase):
         # Has tiptapjson
         result = tiptap_to_html(json.dumps(self.tiptap_json))
         self.assertIn("<p>Dit is een <strong>paragraph</strong></p>", result)
+
+    def test_tiptap_is_html(self):
+        result = tiptap_to_html('<script>"Malicious code";</script>')
+        self.assertEqual(result, '"Malicious code";')
 
     def test_tiptap_to_text_with_mention(self):
         tiptap = {

@@ -5,23 +5,67 @@
 {% block content %}
 
     <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-        <h1 class="h2">Tasks</h1>
+        <h1 class="h2">{% trans "Tasks" %}</h1>
     </div>
 
     <div class="card elasticsearch">
         <h5 class="card-header">Elasticsearch</h5>
         <div class="card-body">
-            <form method="post">
+            <p>{% trans "Process all indexes or a specific index" %}</p>
+            <form method="post" class="index-control" action="{% url "tasks_elasticsearch" %}">
                 {% csrf_token %}
-                <input type="hidden" name="task" value="elasticsearch_rebuild">
-                <p>This task will rebuild the complete search index for this site.</p>
+                <input type="hidden" name="task" value="">
+                <input type="hidden" name="index_name" value="">
                 <div class="controls d-flex align-items-start justify-content-start">
-                    <select name="index_name" class="form-select" style="width: auto;margin-right: 1rem">
-                        <option value="">All indices</option>
-                        <option value="group,user">Groups and users</option>
-                    </select>
-                    <button type="submit" class="btn btn-primary">Rebuild</button>
+                    <button type="submit" class="btn btn-primary index-control"
+                            data-task="elasticsearch_update"
+                            data-index-name="">
+                        {% trans "Update all indexes" %}
+                    </button>
+                    <button type="submit" class="btn btn-danger ms-2 index-control"
+                            data-task="elasticsearch_rebuild"
+                            data-index-name="">
+                        {% trans "Rebuild all indexes" %}
+                    </button>
                 </div>
+                {% if es_report %}
+                    <table class="table">
+                        <thead>
+                        <tr>
+                            <th>{% trans "Index" %}</th>
+                            <th>{% trans "Expected" %}</th>
+                            <th>{% trans "Actual" %}</th>
+                            <th colspan="2">{% trans "Status" %}</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {% for report in es_report %}
+                            <tr>
+                                <td>{{ report.index }}</td>
+                                <td>{{ report.expected }}</td>
+                                <td>{{ report.actual }}</td>
+                                <td>{% if report.alert %}❗{% else %}✅{% endif %}</td>
+                                <td>
+                                    <button class="btn btn-sm btn-outline-primary index-control lh-1"
+                                            data-task="elasticsearch_update"
+                                            data-index-name="{{ report.index }}">
+                                        {% trans "Update index" %}
+                                    </button>
+                                    <button class="btn btn-sm btn-outline-danger index-control lh-1 ms-1"
+                                            data-task="elasticsearch_rebuild"
+                                            data-index-name="{{ report.index }}">
+                                        {% trans "Rebuild index" %}
+                                    </button>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                    <div class="controls d-flex align-items-start justify-content-start">
+                    </div>
+                {% else %}
+                    <p class="mt-2"><strong style="color: red;">{% trans "Index details are not available at the moment" %}</strong></p>
+                {% endif %}
             </form>
         </div>
     </div>
@@ -30,10 +74,10 @@
     <div class="card cron-jobs">
         <h5 class="card-header">Cron</h5>
         <div class="card-body">
-            <form method="post">
+            <form method="post" action="{% url "tasks_dispatch_cron" %}">
                 {% csrf_token %}
                 <input type="hidden" name="task" value="dispatch_cron">
-                <p>This task will dispatch a cron task one extra time for only this site.</p>
+                <p>{% trans "This task will dispatch a cron task one extra time for only this site." %}</p>
                 <div class="controls d-flex align-items-start justify-content-start">
                     <select name="subtask" class="form-select" style="width: auto;margin-right: 1rem">
                         <option value="">--</option>
@@ -41,25 +85,25 @@
                         <option value="core.tasks.cronjobs.make_publication_revisions">Make publication revisions</option>
                         <option value="external_content.tasks.fetch_external_content">Fetch external content</option>
                     </select>
-                    <button type="submit" class="btn btn-primary">Execute</button>
+                    <button type="submit" class="btn btn-primary">{% trans "Execute" %}</button>
                 </div>
             </form>
         </div>
     </div>
 
     <div class="card mt-4">
-        <h5 class="card-header">Links</h5>
+        <h5 class="card-header">{% trans "Links" %}</h5>
         <div class="card-body">
-            <form method="post">
+            <form method="post" action="{% url "tasks_replace_links" %}">
                 {% csrf_token %}
                 <input type="hidden" name="task" value="replace_links">
-                <p>This task will replace links to a old domain with the current domain.</p>
+                <p>{% trans "This task will replace links to a old domain with the current domain." %}</p>
                 <div class="mb-3">
-                    <label for="replace_domain" class="form-label">Old domain</label>
+                    <label for="replace_domain" class="form-label">{% trans "Old domain" %}</label>
                     <input type="text" name="replace_domain" class="form-control" id="replace_domain" aria-describedby="replaceDomainHelp">
-                    <div id="replaceDomainHelp" class="form-text">Insert the old domain name to be replaced (format: support.pleio.nl).</div>
+                    <div id="replaceDomainHelp" class="form-text">{% trans "Insert the old domain name to be replaced (format: support.pleio.nl)." %}</div>
                 </div>
-                <button type="submit" class="btn btn-primary">Execute replace links</button>
+                <button type="submit" class="btn btn-primary">{% trans "Replace links" %}</button>
             </form>
         </div>
     </div>

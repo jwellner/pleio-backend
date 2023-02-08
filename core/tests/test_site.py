@@ -126,6 +126,11 @@ class SiteTestCase(PleioTenantTestCase):
                     videocallEnabled
                     videocallProfilepage
                     blockedUserIntroMessage
+                    pageTagFilters(contentType: "blog") {
+                        contentType
+                        showTagFilter
+                        showTagCategories
+                    }
                 }
             }
         """
@@ -139,6 +144,8 @@ class SiteTestCase(PleioTenantTestCase):
 
     def test_site(self):
         self.override_config(IS_CLOSED=False)
+        self.override_config(PAGE_TAG_FILTERS=[{'showTagFilter': False, 'showTagCategories': [], 'contentType': 'blog'},
+                                               {'showTagFilter': False, 'showTagCategories': [], 'contentType': 'news'}])
 
         self.graphql_client.force_login(self.user)
         result = self.graphql_client.post(self.query, {})
@@ -212,6 +219,7 @@ class SiteTestCase(PleioTenantTestCase):
                 {'key': 'pad', 'value': 'Pad'},
             ]
         })
+        self.assertEqual(data['site']['pageTagFilters'], {'showTagFilter': False, 'showTagCategories': [], 'contentType': 'blog'})
 
     def test_site_closed(self):
         cache.set("%s%s" % (connection.schema_name, 'IS_CLOSED'), True)

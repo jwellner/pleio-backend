@@ -2,28 +2,36 @@ from __future__ import absolute_import, unicode_literals
 
 import os
 import shutil
-import subprocess
 import signal_disabler
-from datetime import timedelta
+import subprocess
 
+from traceback import format_exc
+from datetime import timedelta
 from celery import shared_task
 from celery.utils.log import get_task_logger
 from celery.result import AsyncResult
-from core.models import SiteStat, Attachment, Entity, CommentMixin, Comment, GroupMembership, Group, Subgroup
-from core.lib import ACCESS_TYPE, access_id_to_acl, get_access_id
-from core.models.rich_fields import ReplaceAttachments
-from core.utils.export import compress_path
-from core.tasks.elasticsearch_tasks import elasticsearch_delete_data_for_tenant
+from django.core.mail import send_mail
+from django.template.loader import render_to_string
 from django_tenants.utils import schema_context
 from django.core.management import call_command
 from django.core.files.base import ContentFile
 from django.conf import settings
 from django.db import connection
 from django.utils import timezone
+
+from control.lib import get_full_url, reverse
+from control.models import AccessLog, AccessCategory
+from core import config
+from core.elasticsearch import elasticsearch_status_report
+from core.exceptions import ExceptionDuringQueryIndex, UnableToTestIndex
+from core.models import SiteStat, Attachment, Entity, CommentMixin, Comment, GroupMembership, Group, Subgroup
+from core.lib import ACCESS_TYPE, access_id_to_acl, get_access_id, test_elasticsearch_index
+from core.models.rich_fields import ReplaceAttachments
+from core.utils.export import compress_path
+from core.tasks.elasticsearch_tasks import elasticsearch_delete_data_for_tenant, all_indexes
 from file.models import FileFolder
 from tenants.models import Client, Domain, GroupCopy, GroupCopyMapping, Agreement, AgreementVersion
 from user.models import User
-from control.models import Task
 
 logger = get_task_logger(__name__)
 
@@ -34,6 +42,7 @@ def poll_task_result(self):
     '''
     Poll task status
     '''
+    from control.models import Task
     tasks = Task.objects.exclude(state__in=["SUCCESS", "FAILURE"])
 
     for task in tasks:
@@ -57,6 +66,7 @@ def poll_task_result(self):
             task.run_followup()
 
         task.save()
+
 
 @shared_task(bind=True)
 def get_sites(self):
@@ -205,8 +215,11 @@ def backup_site(self, backup_site_id, skip_files=False, backup_folder=None, comp
 
     # copy files
     if not skip_files:
-        backup_files_folder = os.path.join(backup_base_path, "files")
-        shutil.copytree(os.path.join(settings.MEDIA_ROOT, backup_site.schema_name), backup_files_folder)
+        try:
+            backup_files_folder = os.path.join(backup_base_path, "files")
+            shutil.copytree(os.path.join(settings.MEDIA_ROOT, backup_site.schema_name), backup_files_folder)
+        except FileNotFoundError:
+            pass
 
     if compress:
         filename = compress_path(backup_base_path)
@@ -215,6 +228,43 @@ def backup_site(self, backup_site_id, skip_files=False, backup_folder=None, comp
             return os.path.basename(filename)
 
     return backup_folder
+
+
+@shared_task
+def followup_backup_complete(backup_result, site_id, owner_guid):
+    user = User.objects.get(id=owner_guid)
+    backup_url = reverse('site_backup', args=[site_id])
+
+    site = Client.objects.get(id=site_id)
+    download_url = reverse('download_backup', args=[site.id, backup_result])
+
+    AccessLog.objects.create(
+        category=AccessLog.custom_category(AccessCategory.SITE_BACKUP, site_id),
+        user=user,
+        item_id=backup_result,
+        type=AccessLog.AccessTypes.CREATE,
+        site=site,
+    )
+
+    with schema_context(site.schema_name):
+        context = {
+            'site_name': config.NAME,
+            'backup_page': get_full_url(backup_url),
+            'download': download_url.endswith('.zip'),
+            'download_url': get_full_url(download_url)
+        }
+
+    content = render_to_string("mail/backup_success.txt", context)
+
+    send_mail("Site backup complete [Control2]",
+              message=content,
+              from_email="info@pleio.nl",
+              recipient_list=[user.email],
+              fail_silently=False)
+
+    logger.warning("SENT MAIL TO %s", user.email)
+
+    return user.email
 
 
 @shared_task(bind=True)
@@ -897,3 +947,50 @@ def add_agreement_version(self, agreement_id, version, document_path):
         'version': version.version,
         'document': version.get_absolute_url()
     }
+
+
+@shared_task
+def update_elasticsearch_status():
+    for client in Client.objects.exclude(schema_name='public'):
+        update_elasticsearch_status_for_tenant.delay(client.id)
+
+
+@shared_task
+def update_elasticsearch_status_for_tenant(client_id):
+    # pylint: disable=protected-access
+    client = Client.objects.get(id=client_id)
+    with schema_context(client.schema_name):
+        try:
+            index_test_result = []
+            for index in all_indexes():
+                try:
+                    test_elasticsearch_index(index._name)
+                except ExceptionDuringQueryIndex as e:
+                    index_test_result.append({'index': index._name,
+                                              "message": str(e)})
+                except UnableToTestIndex:
+                    index_test_result.append({'index': index._name,
+                                              "message": "unable to test %s" % index._name})
+            access_result = {
+                "result": index_test_result,
+            }
+        except Exception as e:
+            access_result = {
+                "exception": str(e.__class__),
+                "message": str(e),
+                "backtrace": format_exc()
+            }
+        try:
+            index_status_result = {
+                "result": elasticsearch_status_report(alert_only=True)
+            }
+        except Exception as e:
+            index_status_result = {"exception": e.__class__,
+                                   "message": str(e),
+                                   "backtrace": format_exc()}
+
+    from control.models import ElasticsearchStatus
+    ElasticsearchStatus.objects.cleanup(client=client)
+    ElasticsearchStatus.objects.create(client=client,
+                                       index_status=index_status_result,
+                                       access_status=access_result)

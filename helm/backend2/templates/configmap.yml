@@ -21,3 +21,4 @@ data:
   ENDPOINT_2FA: {{ printf "%s/securitypages" .Values.accountDomain }}
   ONLINE_MEETINGS_URL: {{ .Values.onlineMeetingsUrl }}
   VIDEO_CALL_RESERVE_ROOM_URL: {{ .Values.videoCallReserveRoomUrl }}
+  CONTROL_PRIMARY_DOMAIN: {{ .Values.tunnel.hostname }}

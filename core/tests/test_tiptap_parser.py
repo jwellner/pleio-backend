@@ -7,6 +7,7 @@ from tenants.helpers import FastTenantTestCase
 
 
 class TiptapParserTestCase(FastTenantTestCase):
+
     def test_mentioned_users(self):
         user_id = 'c5617f63-6c98-44b5-a206-ff05eb648e52'
         tiptap_json = {
@@ -73,10 +74,10 @@ class TiptapParserTestCase(FastTenantTestCase):
         original = "https://example.com"
         replacement = "https://google.com"
         tiptap_json = {
-           'type': 'file',
-           'attrs': {
-               'url': original,
-           },
+            'type': 'file',
+            'attrs': {
+                'url': original,
+            },
         }
         tiptap = Tiptap(tiptap_json)
 
@@ -100,14 +101,14 @@ class TiptapParserTestCase(FastTenantTestCase):
         result = tiptap.tiptap_json
 
         self.assertEqual(result['attrs']['url'], tiptap_json['attrs']['url'])
-    
+
     def test_replace_src(self):
         original = "https://example.com"
         replacement = "https://google.com"
         tiptap_json = {
             'type': 'image',
             'attrs': {
-               'src': original,
+                'src': original,
             },
         }
         tiptap = Tiptap(tiptap_json)
@@ -138,7 +139,15 @@ class TiptapParserTestCase(FastTenantTestCase):
         image_json = json.dumps({"content": [
             {"type": "image", "attrs": {"src": "no/path/prefix"}}
         ]})
+        file_json_localdomain = json.dumps({"content": [
+            {"type": "file", "attrs": {"url": "https://tenant.fast-test.com/foo/bar"}}
+        ]})
+        image_json_localdomain = json.dumps({"content": [
+            {"type": "image", "attrs": {"src": "http://tenant.fast-test.com/no/path/prefix"}}
+        ]})
 
         # Expect no ValidationErrors being raised
         Tiptap(file_json).check_for_external_urls()
         Tiptap(image_json).check_for_external_urls()
+        Tiptap(file_json_localdomain).check_for_external_urls()
+        Tiptap(image_json_localdomain).check_for_external_urls()

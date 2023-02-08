@@ -1,9 +1,7 @@
 from core.tests.helpers import PleioTenantTestCase
 
-class RequestAccessTestCase(PleioTenantTestCase):
 
-    def setUp(self):
-        super(RequestAccessTestCase, self).setUp()
+class RequestAccessTestCase(PleioTenantTestCase):
 
     def test_request_access(self):
         session = self.client.session
@@ -14,5 +12,5 @@ class RequestAccessTestCase(PleioTenantTestCase):
         session.save()
 
         response = self.client.get('/login/request', follow=True)
-        
+
         self.assertTemplateUsed(response, 'registration/request.html')

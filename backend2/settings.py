@@ -19,6 +19,8 @@ DEBUG = os.getenv('DEBUG') == 'True'
 ENV = os.getenv('ENV')
 ALLOWED_HOSTS = [os.getenv('ALLOWED_HOST')]
 
+CONTROL_PRIMARY_DOMAIN = os.getenv("CONTROL_PRIMARY_DOMAIN")
+
 # Database
 DATABASES = {
     'default': {
@@ -494,4 +496,13 @@ WEBPUSH_SETTINGS = {
 }
 
 EXTERNAL_CONTENT_AUTHOR_EMAIL = "externalcontent@localhost"
-DB_MUTEX_TTL_SECONDS=3600*6
+DB_MUTEX_TTL_SECONDS = 3600 * 6
+
+BLEACH_EMAIL_TAGS = [
+    "br", "p",
+    "h2", "h3", "h4", "h5",
+    "strong", "em", "u",
+]
+BLEACH_EMAIL_ATTRIBUTES = {
+    "*": [],
+}

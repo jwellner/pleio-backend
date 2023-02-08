@@ -358,13 +358,13 @@ def resolve_updates_enabled_field(obj, info):
 @group.field("defaultTags")
 def resolve_default_tags(obj, info):
     # pylint: disable=unused-argument
-    return obj.content_presets['defaultTags']
+    return obj.content_presets.get('defaultTags')
 
 
 @group.field("defaultTagCategories")
 def resolve_default_tag_categories(obj, info):
     # pylint: disable=unused-argument
-    return obj.content_presets['defaultTagCategories']
+    return obj.content_presets.get('defaultTagCategories')
 
 
 group.set_field("excerpt", shared.resolve_entity_excerpt)

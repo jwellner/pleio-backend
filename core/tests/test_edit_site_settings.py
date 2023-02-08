@@ -19,6 +19,10 @@ class EditSiteSettingTestCase(PleioTenantTestCase):
         self.profileField2 = ProfileField.objects.create(key='text_key2', name='text_name', field_type='text_field')
         self.profileField3 = ProfileField.objects.create(key='text_key3', name='text_name', field_type='text_field')
         self.profileField4 = ProfileField.objects.create(key='text_key4', name='text_name', field_type='text_field')
+        self.EXPECTED_PAGE_TAG_FILTERS = [{'showTagFilter': False,
+                                           'showTagCategories': [],
+                                           'contentType': 'blog'}]
+        self.override_config(PAGE_TAG_FILTERS=self.EXPECTED_PAGE_TAG_FILTERS)
 
     def tearDown(self):
         self.admin.delete()
@@ -127,8 +131,6 @@ class EditSiteSettingTestCase(PleioTenantTestCase):
                         tagCategories {
                             name
                             values
-                            restrictContentTypes
-                            allowedContentTypes
                         }
                         showTagsInFeed
                         showTagsInDetail
@@ -197,6 +199,12 @@ class EditSiteSettingTestCase(PleioTenantTestCase):
                         searchArchiveOption
                         blockedUserIntroMessage
                         pushNotificationsEnabled
+                        
+                        pageTagFilters {
+                            contentType
+                            showTagCategories
+                            showTagFilter
+                        }
                     }
                 }
             }
@@ -266,12 +274,10 @@ class EditSiteSettingTestCase(PleioTenantTestCase):
                                     {"name": "section_three", "profileFieldGuids": ['notrealid']}],
 
                 "tagCategories": [{"name": "cat1",
-                                   "values": ["tag1", "tag2"],
-                                   "restrictContentTypes": False},
+                                   "values": ["tag1", "tag2"]},
                                   {"name": "cat2",
-                                   "values": ["tag3", "tag4"],
-                                   "restrictContentTypes": True,
-                                   "allowedContentTypes": ['blog']}],
+                                   "values": ["tag3", "tag4"]}
+                                  ],
                 'showTagsInFeed': True,
                 'showTagsInDetail': True,
 
@@ -341,7 +347,10 @@ class EditSiteSettingTestCase(PleioTenantTestCase):
                 "searchArchiveOption": "authenticated",
                 "blockedUserIntroMessage": "blockedUserIntroMessage",
 
-                "pushNotificationsEnabled": True
+                "pushNotificationsEnabled": True,
+                "pageTagFilters": [{"showTagFilter": False,
+                                    "showTagCategories": [],
+                                    "contentType": "blog"}, ]
             }
         }
 
@@ -425,13 +434,9 @@ class EditSiteSettingTestCase(PleioTenantTestCase):
                           {"name": "section_three", "profileFieldGuids": []}])
 
         self.assertDictEqual(data["editSiteSetting"]["siteSettings"]["tagCategories"], [{"name": "cat1",
-                                                                                         "values": ["tag1", "tag2"],
-                                                                                         "restrictContentTypes": False,
-                                                                                         'allowedContentTypes': None},
+                                                                                         "values": ["tag1", "tag2"]},
                                                                                         {"name": "cat2",
-                                                                                         "values": ["tag3", "tag4"],
-                                                                                         "restrictContentTypes": True,
-                                                                                         "allowedContentTypes": ['blog']}])
+                                                                                         "values": ["tag3", "tag4"]}])
         self.assertEqual(data["editSiteSetting"]["siteSettings"]["showTagsInFeed"], True)
         self.assertEqual(data["editSiteSetting"]["siteSettings"]["showTagsInDetail"], True)
 
@@ -500,6 +505,13 @@ class EditSiteSettingTestCase(PleioTenantTestCase):
         self.assertEqual(data["editSiteSetting"]["siteSettings"]["searchArchiveOption"], "authenticated")
         self.assertEqual(data["editSiteSetting"]["siteSettings"]["blockedUserIntroMessage"], "blockedUserIntroMessage")
         self.assertEqual(data["editSiteSetting"]["siteSettings"]["pushNotificationsEnabled"], True)
+
+        self.assertEqual(data['editSiteSetting']['siteSettings']['pageTagFilters'],
+                         [{"showTagFilter": True, "showTagCategories": [], "contentType": "news"},
+                          {"showTagFilter": False, "showTagCategories": [], "contentType": "blog"},
+                          {"showTagFilter": True, "showTagCategories": [], "contentType": "question"},
+                          {"showTagFilter": True, "showTagCategories": [], "contentType": "discussion"},
+                          {"showTagFilter": False, "showTagCategories": [], "contentType": "event"}])
 
     @patch("core.lib.get_mimetype")
     @patch("{}.open".format(settings.DEFAULT_FILE_STORAGE))

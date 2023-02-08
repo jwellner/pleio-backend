@@ -1,10 +1,10 @@
-from django.utils.html import format_html
 from django.utils.translation import gettext as _
 
 from core import config
 from core.lib import get_full_url
 from core.mail_builders.template_mailer import TemplateMailerBase
 from core.models import SiteInvitation
+from core.utils.convert import filter_html_mail_input
 from core.utils.entity import load_entity_by_id
 
 
@@ -27,7 +27,7 @@ class InviteToSiteMailer(TemplateMailerBase):
     def get_context(self):
         context = self.build_context(user=self.sender)
         context['link'] = self.build_link()
-        context['message'] = format_html(self.message) or ''
+        context['message'] = filter_html_mail_input(self.message) or ''
         return context
 
     def build_link(self):

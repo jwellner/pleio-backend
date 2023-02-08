@@ -31,8 +31,8 @@ from urllib.parse import urljoin
 
 from core import config
 from core.constances import ACCESS_TYPE
+from core.exceptions import IgnoreIndexError, UnableToTestIndex
 from core.utils.mail import EmailSettingsTokenizer
-
 
 logger = logging.getLogger(__name__)
 
@@ -245,6 +245,18 @@ def get_core_hook(hook_name):
                 pass
         cache.set(key, {'result': result})
     return cache.get(key)['result']
+
+
+def test_elasticsearch_index(index_name):
+    for path in get_core_hook('test_elasticsearch_index'):
+        try:
+            test_function = import_string(path)
+            test_function(index_name)
+            return
+        except IgnoreIndexError:
+            pass
+
+    raise UnableToTestIndex()
 
 
 def get_hourly_cron_jobs():
@@ -624,3 +636,22 @@ def validate_token(request, token):
     except Exception:
         pass
     return False
+
+
+def get_page_tag_filters():
+    defaults = [{"contentType": ct,
+                 "showTagFilter": tf,
+                 "showTagCategories": []
+                 } for ct, tf in [('news', True),
+                                  ('blog', True),
+                                  ('question', True),
+                                  ('discussion', True),
+                                  ('event', False)]]
+    stored_settings = {f['contentType']: f for f in config.PAGE_TAG_FILTERS if 'contentType' in f}
+
+    # Ensure consistent number of settings for the applicable content types.
+    for setting in defaults:
+        if setting['contentType'] in stored_settings:
+            yield stored_settings[setting['contentType']]
+        else:
+            yield setting

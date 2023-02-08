@@ -8,10 +8,7 @@ from core.models import Attachment
 from core.tests.helpers import PleioTenantTestCase
 from user.factories import EditorFactory
 from core.constances import ACCESS_TYPE
-from backend2.schema import schema
 from django.utils.text import slugify
-from ariadne import graphql_sync
-from django.http import HttpRequest
 
 
 class PageTestCase(PleioTenantTestCase):

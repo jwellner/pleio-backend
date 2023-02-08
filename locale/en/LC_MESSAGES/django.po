@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-01-31 19:55+0100\n"
+"POT-Creation-Date: 2023-02-02 21:15+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -25,23 +25,23 @@ msgstr "Update"
 msgid "status update"
 msgstr "status update"
 
-#: blog/core_hooks.py:7 blog/core_hooks.py:14 blog/core_hooks.py:21
+#: blog/core_hooks.py:11 blog/core_hooks.py:18 blog/core_hooks.py:25
 msgid "Blog"
 msgstr "Blog"
 
-#: blog/core_hooks.py:22 core/lib.py:391
+#: blog/core_hooks.py:26 core/lib.py:403
 msgid "Blogs"
 msgstr "Blogs"
 
-#: cms/core_hooks.py:7 cms/core_hooks.py:21
+#: cms/core_hooks.py:11 cms/core_hooks.py:25
 msgid "Page"
 msgstr "Page"
 
-#: cms/core_hooks.py:14
+#: cms/core_hooks.py:18
 msgid "Text page"
 msgstr "Text page"
 
-#: cms/core_hooks.py:22
+#: cms/core_hooks.py:26
 msgid "Pages"
 msgstr "Pages"
 
@@ -53,11 +53,205 @@ msgstr "Include files"
 msgid "Create zip-file"
 msgstr "Create zip-file"
 
-#: core/core_hooks.py:7 core/views.py:473
+#: control/models.py:114
+msgid "Site backup"
+msgstr "Site backup"
+
+#: control/models.py:128
+msgctxt "Past Perfect"
+msgid "Created"
+msgstr "Created"
+
+#: control/models.py:129
+msgctxt "Past Perfect"
+msgid "Read"
+msgstr "Read"
+
+#: control/models.py:130
+msgctxt "Past Perfect"
+msgid "Downloaded"
+msgstr "Downloaded"
+
+#: control/models.py:131
+msgctxt "Past Perfect"
+msgid "Updated"
+msgstr "Updated"
+
+#: control/models.py:132
+msgctxt "Past Perfect"
+msgid "Deleted"
+msgstr "Deleted"
+
+#: control/models.py:180
+msgid "Index not up to date"
+msgstr "Index not up to date"
+
+#: control/models.py:187
+msgid "Index may not be accessible"
+msgstr "Index may not be accessible"
+
+#: control/templates/mail/backup_success.txt:1
+#, python-format
+msgid "Your request to backup site %(site_name)s just completed."
+msgstr "Your request to backup site %(site_name)s just completed."
+
+#: control/templates/mail/backup_success.txt:3
+#, python-format
+msgid "Download your backup at %(download_url)s"
+msgstr "Download your backup at %(download_url)s"
+
+#: control/templates/mail/backup_success.txt:4
+#, python-format
+msgid "Schedule a new backup at %(backup_page)s"
+msgstr "Schedule a new backup at %(backup_page)s"
+
+#: control/templates/mail/backup_success.txt:6
+#, python-format
+msgid "Visit %(backup_page)s for a detailed overview of site backups."
+msgstr "Visit %(backup_page)s for a detailed overview of site backups."
+
+#: control/templates/site.html:13
+#, python-format
+msgid "Website details for %(site_name)s"
+msgstr "Website details for %(site_name)s"
+
+#: control/templates/site_details_menu.html:5
+msgid "Website details"
+msgstr "Website details"
+
+#: control/templates/site_details_menu.html:8
+#: control/templates/sites_backup.html:46
+msgid "Backups"
+msgstr "Backups"
+
+#: control/templates/sites_backup.html:13
+#, python-format
+msgid "Backups for %(site_name)s"
+msgstr "Backups for %(site_name)s"
+
+#: control/templates/sites_backup.html:48
+msgid "Access history"
+msgstr "Access history"
+
+#: control/templates/sites_backup/access_overview.html:7
+#: control/templates/sites_backup/backup_overview.html:7
+msgid "Date"
+msgstr "Date"
+
+#: control/templates/sites_backup/access_overview.html:8
+msgid "Actor"
+msgstr "Actor"
+
+#: control/templates/sites_backup/access_overview.html:9
+msgid "Action"
+msgstr "Action"
+
+#: control/templates/sites_backup/access_overview.html:10
+#: control/templates/sites_backup/backup_overview.html:10
+msgid "Filename"
+msgstr "Filename"
+
+#: control/templates/sites_backup/access_overview.html:24
+msgid "Access history not available."
+msgstr "Access history not available."
+
+#: control/templates/sites_backup/backup_overview.html:8
+msgid "Author"
+msgstr "Author"
+
+#: control/templates/sites_backup/backup_overview.html:9
+msgid "Filesize"
+msgstr "Filesize"
+
+#: control/templates/sites_backup/backup_overview.html:30
+msgid "Backup history not available."
+msgstr "Backup history not available."
+
+#: control/templates/tools/elasticsearch_details.html:7
+msgid "Elasticsearch status details"
+msgstr "Elasticsearch status details"
+
+#: control/templates/tools/elasticsearch_details.html:8
+msgid "Back to overview"
+msgstr "Back to overview"
+
+#: control/templates/tools/elasticsearch_details.html:32
+#: control/templates/tools/elasticsearch_summary.html:18
+msgid "Index status"
+msgstr "Index status"
+
+#: control/templates/tools/elasticsearch_details.html:36
+#: control/templates/tools/elasticsearch_details.html:77
+msgid "Index name"
+msgstr "Index name"
+
+#: control/templates/tools/elasticsearch_details.html:37
+#: core/templates/superadmin/tasks.html:36
+msgid "Expected"
+msgstr "Expected"
+
+#: control/templates/tools/elasticsearch_details.html:38
+#: core/templates/superadmin/tasks.html:37
+msgid "Actual"
+msgstr "Actual"
+
+#: control/templates/tools/elasticsearch_details.html:53
+#: control/templates/tools/elasticsearch_details.html:92
+msgid "Error"
+msgstr "Error"
+
+#: control/templates/tools/elasticsearch_details.html:57
+#: control/templates/tools/elasticsearch_details.html:96
+msgid "Type"
+msgstr "Type"
+
+#: control/templates/tools/elasticsearch_details.html:61
+#: control/templates/tools/elasticsearch_details.html:100
+msgid "Backtrace"
+msgstr "Backtrace"
+
+#: control/templates/tools/elasticsearch_details.html:68
+#: control/templates/tools/elasticsearch_details.html:107
+#: control/templates/tools/elasticsearch_summary.html:12
+msgid "Nothing to report"
+msgstr "Nothing to report"
+
+#: control/templates/tools/elasticsearch_details.html:73
+#: control/templates/tools/elasticsearch_summary.html:19
+msgid "Access status"
+msgstr "Access status"
+
+#: control/templates/tools/elasticsearch_details.html:78
+#: core/templates/superadmin/tasks.html:38 event/export.py:58
+msgid "Status"
+msgstr "Status"
+
+#: control/templates/tools/elasticsearch_summary.html:7
+msgid "Elasticsearch status overview"
+msgstr "Elasticsearch status overview"
+
+#: control/templates/tools/elasticsearch_summary.html:16
+msgid "Site"
+msgstr "Site"
+
+#: control/templates/tools/elasticsearch_summary.html:17
+msgid "Report date"
+msgstr "Report date"
+
+#: control/views.py:252
+#, python-format
+msgid ""
+"Backup site %(site_name)s is scheduled. The backup will soon be added to the"
+" list of backups below. Reference: %(task_id)s"
+msgstr ""
+"Backup site %(site_name)s is scheduled. The backup will soon be added to the"
+" list of backups below. Reference: %(task_id)s"
+
+#: core/core_hooks.py:11 core/views.py:461
 msgid "Group"
 msgstr "Group"
 
-#: core/core_hooks.py:8 core/lib.py:402
+#: core/core_hooks.py:12 core/lib.py:414
 msgid "Groups"
 msgstr "Groups"
 
@@ -90,7 +284,7 @@ msgid "Receive overview emails"
 msgstr "Receive overview emails"
 
 #: core/forms.py:163 core/templates/registration/request.html:23
-#: core/views.py:471 event/export.py:58
+#: core/views.py:459 event/export.py:58
 msgid "Name"
 msgstr "Name"
 
@@ -123,48 +317,48 @@ msgstr "Logged in users"
 msgid "Public"
 msgstr "Public"
 
-#: core/lib.py:390
+#: core/lib.py:402
 msgid "Updates"
 msgstr "Updates"
 
-#: core/lib.py:392
+#: core/lib.py:404
 msgid "CMS pages"
 msgstr "CMS pages"
 
-#: core/lib.py:393 discussion/core_hooks.py:22
+#: core/lib.py:405 discussion/core_hooks.py:26
 msgid "Discussions"
 msgstr "Discussions"
 
-#: core/lib.py:394 event/core_hooks.py:22
+#: core/lib.py:406 event/core_hooks.py:26
 msgid "Events"
 msgstr "Events"
 
-#: core/lib.py:395 file/core_hooks.py:15
+#: core/lib.py:407 file/core_hooks.py:19
 msgid "Files"
 msgstr "Files"
 
-#: core/lib.py:396 news/core_hooks.py:7 news/core_hooks.py:14
-#: news/core_hooks.py:21 news/core_hooks.py:22
+#: core/lib.py:408 news/core_hooks.py:11 news/core_hooks.py:18
+#: news/core_hooks.py:25 news/core_hooks.py:26
 msgid "News"
 msgstr "News"
 
-#: core/lib.py:397
+#: core/lib.py:409
 msgid "Polls"
 msgstr "Polls"
 
-#: core/lib.py:398 question/core_hooks.py:22
+#: core/lib.py:410 question/core_hooks.py:26
 msgid "Questions"
 msgstr "Questions"
 
-#: core/lib.py:399
+#: core/lib.py:411 core/templates/superadmin/tasks.html:8
 msgid "Tasks"
 msgstr "Tasks"
 
-#: core/lib.py:400
+#: core/lib.py:412
 msgid "Wiki pages"
 msgstr "Wiki pages"
 
-#: core/lib.py:401
+#: core/lib.py:413
 msgid "Comments"
 msgstr "Comments"
 
@@ -700,7 +894,7 @@ msgstr "Personal message"
 msgid "Direct notification"
 msgstr "Direct notification"
 
-#: core/templates/email/send_notification_emails.html:10 core/views.py:624
+#: core/templates/email/send_notification_emails.html:10 core/views.py:612
 msgid "Notification overview"
 msgstr "Notification overview"
 
@@ -718,7 +912,7 @@ msgstr "Unsubscribe"
 msgid "Adjust your email settings"
 msgstr "Adjust your email settings"
 
-#: core/templates/email/send_overview_emails.html:22 core/views.py:621
+#: core/templates/email/send_overview_emails.html:22 core/views.py:609
 msgid "Periodic overview"
 msgstr "Periodic overview"
 
@@ -1098,6 +1292,63 @@ msgstr ""
 "Access is requested. You will receive an e-mail when the request is "
 "accepted."
 
+#: core/templates/superadmin/tasks.html:14
+msgid "Process all indexes or a specific index"
+msgstr "Process all indexes or a specific index"
+
+#: core/templates/superadmin/tasks.html:23
+msgid "Update all indexes"
+msgstr "Update all indexes"
+
+#: core/templates/superadmin/tasks.html:28
+msgid "Rebuild all indexes"
+msgstr "Rebuild all indexes"
+
+#: core/templates/superadmin/tasks.html:35
+msgid "Index"
+msgstr "Index"
+
+#: core/templates/superadmin/tasks.html:52
+msgid "Update index"
+msgstr "Update index"
+
+#: core/templates/superadmin/tasks.html:57
+msgid "Rebuild index"
+msgstr "Rebuild index"
+
+#: core/templates/superadmin/tasks.html:67
+msgid "Index details are not available at the moment"
+msgstr "Index details are not available at the moment"
+
+#: core/templates/superadmin/tasks.html:80
+msgid "This task will dispatch a cron task one extra time for only this site."
+msgstr ""
+"This task will dispatch a cron task one extra time for only this site."
+
+#: core/templates/superadmin/tasks.html:88
+msgid "Execute"
+msgstr "Execute"
+
+#: core/templates/superadmin/tasks.html:95
+msgid "Links"
+msgstr "Links"
+
+#: core/templates/superadmin/tasks.html:100
+msgid "This task will replace links to a old domain with the current domain."
+msgstr "This task will replace links to a old domain with the current domain."
+
+#: core/templates/superadmin/tasks.html:102
+msgid "Old domain"
+msgstr "Old domain"
+
+#: core/templates/superadmin/tasks.html:104
+msgid "Insert the old domain name to be replaced (format: support.pleio.nl)."
+msgstr "Insert the old domain name to be replaced (format: support.pleio.nl)."
+
+#: core/templates/superadmin/tasks.html:106
+msgid "Replace links"
+msgstr "Replace links"
+
 #: core/utils/push_notification.py:45
 msgid "news-item"
 msgstr "News items"
@@ -1184,29 +1435,29 @@ msgstr "New mention on %(entity_type)s"
 msgid "%(sender_name)s has mentioned you at %(entity_title)s"
 msgstr "%(sender_name)s has mentioned you at %(entity_title)s"
 
-#: core/views.py:472 event/export.py:58
+#: core/views.py:460 event/export.py:58
 msgid "E-mail"
 msgstr "E-mail"
 
-#: core/views.py:474
+#: core/views.py:462
 msgid "Disk size"
 msgstr "Disk size"
 
-#: core/views.py:567
+#: core/views.py:555
 msgid "Your changes are saved"
 msgstr "Your changes are saved"
 
-#: core/views.py:627
+#: core/views.py:615
 #, python-format
 msgid "Successfully unsubscribed %(email)s from %(list_name)s"
 msgstr "Successfully unsubscribed %(email)s from %(list_name)s"
 
-#: discussion/core_hooks.py:7 discussion/core_hooks.py:14
-#: discussion/core_hooks.py:21
+#: discussion/core_hooks.py:11 discussion/core_hooks.py:18
+#: discussion/core_hooks.py:25
 msgid "Discussion"
 msgstr "Discussion"
 
-#: event/core_hooks.py:7 event/core_hooks.py:14 event/core_hooks.py:21
+#: event/core_hooks.py:11 event/core_hooks.py:18 event/core_hooks.py:25
 msgid "Event"
 msgstr "Event"
 
@@ -1217,10 +1468,6 @@ msgstr "All attendees"
 #: event/export.py:49
 msgid "All events"
 msgstr "All events"
-
-#: event/export.py:58
-msgid "Status"
-msgstr "Status"
 
 #: event/export.py:58
 msgid "Updated"
@@ -1436,15 +1683,15 @@ msgstr "Message to event"
 msgid "External content author"
 msgstr "External content author"
 
-#: file/core_hooks.py:7 file/core_hooks.py:14 file/models.py:69
+#: file/core_hooks.py:11 file/core_hooks.py:18 file/models.py:69
 msgid "File"
 msgstr "File"
 
-#: file/core_hooks.py:19 file/models.py:70
+#: file/core_hooks.py:23 file/models.py:70
 msgid "Folder"
 msgstr "Folder"
 
-#: file/core_hooks.py:20
+#: file/core_hooks.py:24
 msgid "Folders"
 msgstr "Folders"
 
@@ -1465,8 +1712,8 @@ msgstr "Pads"
 msgid "Removed by Profile-Sync"
 msgstr "Removed by Profile-Sync"
 
-#: question/core_hooks.py:7 question/core_hooks.py:14
-#: question/core_hooks.py:21
+#: question/core_hooks.py:11 question/core_hooks.py:18
+#: question/core_hooks.py:25
 msgid "Question"
 msgstr "Question"
 
@@ -1482,10 +1729,10 @@ msgstr "Users"
 msgid "Deleted"
 msgstr "Deleted"
 
-#: wiki/core_hooks.py:7 wiki/core_hooks.py:14 wiki/core_hooks.py:21
+#: wiki/core_hooks.py:11 wiki/core_hooks.py:18 wiki/core_hooks.py:25
 msgid "Wiki"
 msgstr "Wiki"
 
-#: wiki/core_hooks.py:22
+#: wiki/core_hooks.py:26
 msgid "Wiki's"
 msgstr "Wiki's"

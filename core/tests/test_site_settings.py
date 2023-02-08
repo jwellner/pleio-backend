@@ -33,6 +33,9 @@ class TestSiteSettingsTestCase(PleioTenantTestCase):
 
         self.override_config(ANONYMOUS_START_PAGE='cms')
         self.override_config(ANONYMOUS_START_PAGE_CMS=self.cmsPage2.guid)
+        self.override_config(PAGE_TAG_FILTERS=[{'showTagFilter': False,
+                                                'showTagCategories': [],
+                                                'contentType': 'blog'}])
 
         self.query = """
             query SiteGeneralSettings {
@@ -140,8 +143,6 @@ class TestSiteSettingsTestCase(PleioTenantTestCase):
                     tagCategories {
                         name
                         values
-                        restrictContentTypes
-                        allowedContentTypes
                     }
                     showTagsInFeed
                     showTagsInDetail
@@ -249,6 +250,12 @@ class TestSiteSettingsTestCase(PleioTenantTestCase):
                     }
 
                     pushNotificationsEnabled
+                    
+                    pageTagFilters {
+                        showTagFilter
+                        showTagCategories
+                        contentType
+                    }
                 }
             }
         """
@@ -448,6 +455,11 @@ class TestSiteSettingsTestCase(PleioTenantTestCase):
         self.assertEqual(data['siteSettings']["searchArchiveOption"], 'nobody')
         self.assertEqual(data["siteSettings"]["blockedUserIntroMessage"], '')
         self.assertEqual(data["siteSettings"]["pushNotificationsEnabled"], False)
+        self.assertEqual(data["siteSettings"]["pageTagFilters"], [{'contentType': 'news', 'showTagFilter': True, 'showTagCategories': []},
+                                                                  {'contentType': 'blog', 'showTagFilter': False, 'showTagCategories': []},
+                                                                  {'contentType': 'question', 'showTagFilter': True, 'showTagCategories': []},
+                                                                  {'contentType': 'discussion', 'showTagFilter': True, 'showTagCategories': []},
+                                                                  {'contentType': 'event', 'showTagFilter': False, 'showTagCategories': []}])
 
     def test_site_settings_by_anonymous(self):
         with self.assertGraphQlError("not_logged_in"):

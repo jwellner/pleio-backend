@@ -2,8 +2,8 @@ import os
 
 from django import template
 from django.conf import settings
-from django.urls import reverse
 
+from control.lib import reverse
 from control.models import Task
 
 register = template.Library()
