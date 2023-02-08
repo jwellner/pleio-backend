@@ -11,3 +11,6 @@ class WebPushSubscription(models.Model):
         related_name='web_push_subscriptions',
         on_delete=models.PROTECT
     )
+
+    class Meta:
+        unique_together = ('endpoint', 'user')
