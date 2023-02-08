@@ -259,7 +259,7 @@ def sites_backup(request, site_id):
         'site_id': site_id,
         'site_name': schema_config(site.schema_name, 'NAME'),
         'form': form,
-        'access_logs': AccessLog.objects.filter(),
+        'access_logs': AccessLog.objects.filter(site=site),
         'backups': [{
             'created_at': log.created_at,
             'download': log.item_id.endswith('.zip'),
@@ -269,7 +269,7 @@ def sites_backup(request, site_id):
             'filename': log.item_id,
         } for log in AccessLog.objects.filter(
             type=AccessLog.AccessTypes.CREATE,
-            category=AccessLog.custom_category(AccessCategory.SITE_BACKUP, site_id)
+            category=AccessLog.custom_category(AccessCategory.SITE_BACKUP, site_id),
         )[:5]],
     }
 
@@ -293,6 +293,7 @@ def download_backup(request, site_id, backup_name):
             category=AccessLog.custom_category(AccessCategory.SITE_BACKUP, site_id),
             user=auth.get_user(request),
             item_id=backup_name,
+            site=site,
         )
 
         chunk_size = 8192
