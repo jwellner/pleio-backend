@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Frans\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-02-01 10:49+0100\n"
+"POT-Creation-Date: 2023-02-02 21:15+0100\n"
 "PO-Revision-Date: 2021-06-24 15:12+0200\n"
 "Last-Translator: \n"
 "Language-Team: frans\n"
@@ -54,13 +54,120 @@ msgstr "Inclure les fichiers"
 msgid "Create zip-file"
 msgstr "Créer un fichier zip"
 
-#: control/models.py:143
+#: control/models.py:114
+msgid "Site backup"
+msgstr "Sauvegarde du site"
+
+#: control/models.py:128
+msgctxt "Past Perfect"
+msgid "Created"
+msgstr "Créé"
+
+#: control/models.py:129
+msgctxt "Past Perfect"
+msgid "Read"
+msgstr "Lu"
+
+#: control/models.py:130
+msgctxt "Past Perfect"
+msgid "Downloaded"
+msgstr "Téléchargé"
+
+#: control/models.py:131
+msgctxt "Past Perfect"
+msgid "Updated"
+msgstr "Mise à jour de"
+
+#: control/models.py:132
+msgctxt "Past Perfect"
+msgid "Deleted"
+msgstr "Supprimé"
+
+#: control/models.py:180
 msgid "Index not up to date"
 msgstr "L'index n'est pas à jour"
 
-#: control/models.py:150
+#: control/models.py:187
 msgid "Index may not be accessible"
 msgstr "L'index peut ne pas être accessible"
+
+#: control/templates/mail/backup_success.txt:1
+#, python-format
+msgid "Your request to backup site %(site_name)s just completed."
+msgstr "Votre demande de sauvegarde du site %(site_name)s vient d'aboutir."
+
+#: control/templates/mail/backup_success.txt:3
+#, python-format
+msgid "Download your backup at %(download_url)s"
+msgstr "Téléchargez votre sauvegarde à l'adresse %(download_url)s."
+
+#: control/templates/mail/backup_success.txt:4
+#, python-format
+msgid "Schedule a new backup at %(backup_page)s"
+msgstr "Planifier une nouvelle sauvegarde à %(backup_page)s"
+
+#: control/templates/mail/backup_success.txt:6
+#, python-format
+msgid "Visit %(backup_page)s for a detailed overview of site backups."
+msgstr ""
+"Visitez %(backup_page)s pour un aperçu détaillé des sauvegardes de sites."
+
+#: control/templates/site.html:13
+#, python-format
+msgid "Website details for %(site_name)s"
+msgstr "Détails du site web pour %(site_name)s"
+
+#: control/templates/site_details_menu.html:5
+msgid "Website details"
+msgstr "Détails du site web"
+
+#: control/templates/site_details_menu.html:8
+#: control/templates/sites_backup.html:46
+msgid "Backups"
+msgstr "Sauvegardes"
+
+#: control/templates/sites_backup.html:13
+#, python-format
+msgid "Backups for %(site_name)s"
+msgstr "Sauvegardes pour %(site_name)s"
+
+#: control/templates/sites_backup.html:48
+msgid "Access history"
+msgstr "Historique des accès"
+
+#: control/templates/sites_backup/access_overview.html:7
+#: control/templates/sites_backup/backup_overview.html:7
+msgid "Date"
+msgstr "Date"
+
+#: control/templates/sites_backup/access_overview.html:8
+msgid "Actor"
+msgstr "Acteur"
+
+#: control/templates/sites_backup/access_overview.html:9
+msgid "Action"
+msgstr "Action"
+
+#: control/templates/sites_backup/access_overview.html:10
+#: control/templates/sites_backup/backup_overview.html:10
+msgid "Filename"
+msgstr "Nom de fichier"
+
+#: control/templates/sites_backup/access_overview.html:24
+msgid "Access history not available."
+msgstr "L'historique des accès n'est pas disponible."
+
+#: control/templates/sites_backup/backup_overview.html:8
+msgid "Author"
+msgstr "Auteur"
+
+#: control/templates/sites_backup/backup_overview.html:9
+msgid "Filesize"
+msgstr "Taille des fichiers"
+
+#: control/templates/sites_backup/backup_overview.html:30
+msgid "Backup history not available."
+msgstr "L'historique des sauvegardes n'est pas disponible."
 
 #: control/templates/tools/elasticsearch_details.html:7
 msgid "Elasticsearch status details"
@@ -133,7 +240,17 @@ msgstr "Site"
 msgid "Report date"
 msgstr "Date du rapport"
 
-#: core/core_hooks.py:11 core/views.py:473
+#: control/views.py:252
+#, python-format
+msgid ""
+"Backup site %(site_name)s is scheduled. The backup will soon be added to the"
+" list of backups below. Reference: %(task_id)s"
+msgstr ""
+"La sauvegarde du site %(site_name)s est programmée. La sauvegarde sera "
+"bientôt ajoutée à la liste des sauvegardes ci-dessous. Référence : "
+"%(task_id)s"
+
+#: core/core_hooks.py:11 core/views.py:461
 msgid "Group"
 msgstr "Groupe"
 
@@ -170,7 +287,7 @@ msgid "Receive overview emails"
 msgstr "Recevoir des courriels de présentation"
 
 #: core/forms.py:163 core/templates/registration/request.html:23
-#: core/views.py:471 event/export.py:58
+#: core/views.py:459 event/export.py:58
 msgid "Name"
 msgstr "Nom"
 
@@ -781,7 +898,7 @@ msgstr "Message personnel"
 msgid "Direct notification"
 msgstr "Notification directe"
 
-#: core/templates/email/send_notification_emails.html:10 core/views.py:624
+#: core/templates/email/send_notification_emails.html:10 core/views.py:612
 msgid "Notification overview"
 msgstr "Aperçu des notifications"
 
@@ -799,7 +916,7 @@ msgstr "Se désabonner"
 msgid "Adjust your email settings"
 msgstr "Ajustez vos paramètres de messagerie"
 
-#: core/templates/email/send_overview_emails.html:22 core/views.py:621
+#: core/templates/email/send_overview_emails.html:22 core/views.py:609
 msgid "Periodic overview"
 msgstr "Aperçu périodique"
 
@@ -1336,19 +1453,19 @@ msgstr "Nouvelle mention sur %(entity_type)s"
 msgid "%(sender_name)s has mentioned you at %(entity_title)s"
 msgstr "%(sender_name)s vous a mentionné à %(entity_title)s."
 
-#: core/views.py:472 event/export.py:58
+#: core/views.py:460 event/export.py:58
 msgid "E-mail"
 msgstr "E-mail"
 
-#: core/views.py:474
+#: core/views.py:462
 msgid "Disk size"
 msgstr "Taille du disque"
 
-#: core/views.py:567
+#: core/views.py:555
 msgid "Your changes are saved"
 msgstr "Vos modifications sont enregistrées"
 
-#: core/views.py:627
+#: core/views.py:615
 #, python-format
 msgid "Successfully unsubscribed %(email)s from %(list_name)s"
 msgstr "Désinscription réussie de %(email)s de %(list_name)s."

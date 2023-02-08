@@ -1,3 +1,5 @@
+from enum import Enum
+
 import celery
 import django_filters
 
@@ -5,8 +7,7 @@ from django.db import models
 from django.forms import Select, TextInput
 from django.utils import timezone
 from django.utils.module_loading import import_string
-from django.utils.translation import gettext
-
+from django.utils.translation import gettext_lazy as _, pgettext_lazy
 from tenants.models import Client
 
 
@@ -109,6 +110,42 @@ class Task(models.Model):
             pass
 
 
+class AccessCategory(Enum):
+    SITE_BACKUP = _("Site backup")
+
+
+class AccessLogManager(models.Manager):
+    """Separate Manager for testing purposes. """
+
+
+class AccessLog(models.Model):
+    objects = AccessLogManager()
+
+    class Meta:
+        ordering = ('-created_at',)
+
+    class AccessTypes(models.TextChoices):
+        CREATE = 'create', pgettext_lazy("Past Perfect", "Created")
+        READ = 'read', pgettext_lazy("Past Perfect", "Read")
+        DOWNLOAD = 'download', pgettext_lazy("Past Perfect", "Downloaded")
+        UPDATE = 'update', pgettext_lazy("Past Perfect", "Updated")
+        DELETE = 'delete', pgettext_lazy("Past Perfect", "Deleted")
+
+    created_at = models.DateTimeField(default=timezone.now)
+    category = models.CharField(max_length=256)
+    user = models.ForeignKey('user.User', on_delete=models.CASCADE)
+    item_id = models.CharField(max_length=256)
+    type = models.CharField(max_length=128, choices=AccessTypes.choices)
+
+    @staticmethod
+    def custom_category(category, suffix):
+        return "%s:%s" % (category.name, suffix)
+
+    @property
+    def type_label(self):
+        return AccessLog.AccessTypes(self.type).label
+
+
 class ElasticsearchStatusManager(models.Manager):
 
     def cleanup(self, **filter_kwargs):
@@ -140,14 +177,14 @@ class ElasticsearchStatus(models.Model):
 
     def index_status_summary(self):
         if self.index_status.get('result'):
-            return gettext("Index not up to date")
+            return _("Index not up to date")
         if 'message' in self.index_status:
             return self.index_status['message']
         return ""
 
     def access_status_summary(self):
         if self.access_status.get('result'):
-            return gettext("Index may not be accessible")
+            return _("Index may not be accessible")
         if 'message' in self.access_status:
             return self.access_status['message']
         return ""

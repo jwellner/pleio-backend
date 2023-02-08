@@ -1,0 +1,7 @@
+{% load i18n %}{% blocktrans %}Your request to backup site {{ site_name }} just completed.{% endblocktrans %}
+{% if download %}
+{% blocktrans %}Download your backup at {{ download_url }}{% endblocktrans %}
+{% blocktrans %}Schedule a new backup at {{ backup_page }}{% endblocktrans %}
+{% else %}
+{% blocktrans %}Visit {{ backup_page }} for a detailed overview of site backups.{% endblocktrans %}
+{% endif %}

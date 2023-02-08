@@ -3,13 +3,15 @@
 {% load widget_tweaks %}
 {% load i18n %}
 
+{% block sites_section %}
+{% include "site_details_menu.html" with active="sites_backup" %}
+{% endblock %}
+
 {% block content %}
 
     <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-        <h1 class="h2">Backup site</h1>
+        <h2 class="h3">{% blocktrans %}Backups for {{ site_name }}{% endblocktrans %}</h2>
     </div>
-
-    <p>Backup site <strong>{{ site.schema }}</strong> on cluster <strong>{{ site.cluster.name }}</strong>? </p>
 
     <form method="POST" enctype="multipart/form-data" novalidate>
         {% csrf_token %}
@@ -40,11 +42,11 @@
             <button class="btn btn-danger" type="submit">Backup site</button>
         </div>
     </form>
-        {% if tasks %}
-        <div class="mt-3">
-        <h4>Previous backups</h4>
-        {% include "backup_tasks.html" %}
-        </div>
-    {% endif %}
+    <div class="mt-3">
+        <h4>{% trans "Backups" %}</h4>
+        {% include "sites_backup/backup_overview.html" with items=backups %}
+        <h4>{% trans "Access history" %}</h4>
+        {% include "sites_backup/access_overview.html" with items=access_logs %}
+    </div>
 
 {% endblock %}
