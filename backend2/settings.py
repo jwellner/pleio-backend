@@ -19,6 +19,8 @@ DEBUG = os.getenv('DEBUG') == 'True'
 ENV = os.getenv('ENV')
 ALLOWED_HOSTS = [os.getenv('ALLOWED_HOST')]
 
+CONTROL_PRIMARY_DOMAIN = os.getenv("CONTROL_PRIMARY_DOMAIN")
+
 # Database
 DATABASES = {
     'default': {

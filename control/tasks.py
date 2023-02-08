@@ -2,16 +2,26 @@ from __future__ import absolute_import, unicode_literals
 
 import os
 import shutil
-import subprocess
-from traceback import format_exc
-
 import signal_disabler
-from datetime import timedelta
+import subprocess
 
+from traceback import format_exc
+from datetime import timedelta
 from celery import shared_task
 from celery.utils.log import get_task_logger
 from celery.result import AsyncResult
+from django.core.mail import send_mail
+from django.template.loader import render_to_string
+from django_tenants.utils import schema_context
+from django.core.management import call_command
+from django.core.files.base import ContentFile
+from django.conf import settings
+from django.db import connection
+from django.utils import timezone
 
+from control.lib import get_full_url, reverse
+from control.models import AccessLog, AccessCategory
+from core import config
 from core.elasticsearch import elasticsearch_status_report
 from core.exceptions import ExceptionDuringQueryIndex, UnableToTestIndex
 from core.models import SiteStat, Attachment, Entity, CommentMixin, Comment, GroupMembership, Group, Subgroup
@@ -19,12 +29,6 @@ from core.lib import ACCESS_TYPE, access_id_to_acl, get_access_id, test_elastics
 from core.models.rich_fields import ReplaceAttachments
 from core.utils.export import compress_path
 from core.tasks.elasticsearch_tasks import elasticsearch_delete_data_for_tenant, all_indexes
-from django_tenants.utils import schema_context
-from django.core.management import call_command
-from django.core.files.base import ContentFile
-from django.conf import settings
-from django.db import connection
-from django.utils import timezone
 from file.models import FileFolder
 from tenants.models import Client, Domain, GroupCopy, GroupCopyMapping, Agreement, AgreementVersion
 from user.models import User
@@ -224,6 +228,42 @@ def backup_site(self, backup_site_id, skip_files=False, backup_folder=None, comp
             return os.path.basename(filename)
 
     return backup_folder
+
+
+@shared_task
+def followup_backup_complete(backup_result, site_id, owner_guid):
+    user = User.objects.get(id=owner_guid)
+    backup_url = reverse('site_backup', args=[site_id])
+
+    site = Client.objects.get(id=site_id)
+    download_url = reverse('download_backup', args=[site.id, backup_result])
+
+    AccessLog.objects.create(
+        category=AccessLog.custom_category(AccessCategory.SITE_BACKUP, site_id),
+        user=user,
+        item_id=backup_result,
+        type=AccessLog.AccessTypes.CREATE,
+    )
+
+    with schema_context(site.schema_name):
+        context = {
+            'site_name': config.NAME,
+            'backup_page': get_full_url(backup_url),
+            'download': download_url.endswith('.zip'),
+            'download_url': get_full_url(download_url)
+        }
+
+    content = render_to_string("mail/backup_success.txt", context)
+
+    send_mail("Site backup complete [Control2]",
+              message=content,
+              from_email="info@pleio.nl",
+              recipient_list=[user.email],
+              fail_silently=False)
+
+    logger.warning("SENT MAIL TO %s", user.email)
+
+    return user.email
 
 
 @shared_task(bind=True)

@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-02-01 10:49+0100\n"
+"POT-Creation-Date: 2023-02-02 21:15+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -53,13 +53,122 @@ msgstr "Bestanden opnemen"
 msgid "Create zip-file"
 msgstr "Maak een zip-bestand"
 
-#: control/models.py:143
+#: control/models.py:114
+msgid "Site backup"
+msgstr "Site back-up"
+
+#: control/models.py:128
+msgctxt "Past Perfect"
+msgid "Created"
+msgstr "Gemaakt"
+
+#: control/models.py:129
+msgctxt "Past Perfect"
+msgid "Read"
+msgstr "Gelezen"
+
+#: control/models.py:130
+msgctxt "Past Perfect"
+msgid "Downloaded"
+msgstr "Gedownload"
+
+#: control/models.py:131
+msgctxt "Past Perfect"
+msgid "Updated"
+msgstr "Bijgewerkt"
+
+#: control/models.py:132
+msgctxt "Past Perfect"
+msgid "Deleted"
+msgstr "Verwijderd"
+
+#: control/models.py:180
 msgid "Index not up to date"
 msgstr "Index niet up-to-date"
 
-#: control/models.py:150
+#: control/models.py:187
 msgid "Index may not be accessible"
 msgstr "Index is mogelijk niet toegankelijk"
+
+#: control/templates/mail/backup_success.txt:1
+#, python-format
+msgid "Your request to backup site %(site_name)s just completed."
+msgstr ""
+"Uw verzoek om een back-up te maken van site %(site_name)s is zojuist "
+"afgerond."
+
+#: control/templates/mail/backup_success.txt:3
+#, python-format
+msgid "Download your backup at %(download_url)s"
+msgstr "Download uw back-up op %(download_url)s"
+
+#: control/templates/mail/backup_success.txt:4
+#, python-format
+msgid "Schedule a new backup at %(backup_page)s"
+msgstr "Plan een nieuwe back-up op %(backup_page)s"
+
+#: control/templates/mail/backup_success.txt:6
+#, python-format
+msgid "Visit %(backup_page)s for a detailed overview of site backups."
+msgstr ""
+"Bezoek %(backup_page)s voor een gedetailleerd overzicht van site backups."
+
+#: control/templates/site.html:13
+#, python-format
+msgid "Website details for %(site_name)s"
+msgstr "Websitegegevens voor %(site_name)s"
+
+#: control/templates/site_details_menu.html:5
+msgid "Website details"
+msgstr "Websitegegevens"
+
+#: control/templates/site_details_menu.html:8
+#: control/templates/sites_backup.html:46
+msgid "Backups"
+msgstr "Back-ups"
+
+#: control/templates/sites_backup.html:13
+#, python-format
+msgid "Backups for %(site_name)s"
+msgstr "Back-ups voor %(site_name)s"
+
+#: control/templates/sites_backup.html:48
+msgid "Access history"
+msgstr "Toegangsgeschiedenis"
+
+#: control/templates/sites_backup/access_overview.html:7
+#: control/templates/sites_backup/backup_overview.html:7
+msgid "Date"
+msgstr "Datum"
+
+#: control/templates/sites_backup/access_overview.html:8
+msgid "Actor"
+msgstr "Acteur"
+
+#: control/templates/sites_backup/access_overview.html:9
+msgid "Action"
+msgstr "Actie"
+
+#: control/templates/sites_backup/access_overview.html:10
+#: control/templates/sites_backup/backup_overview.html:10
+msgid "Filename"
+msgstr "Bestandsnaam"
+
+#: control/templates/sites_backup/access_overview.html:24
+msgid "Access history not available."
+msgstr "Toegangsgeschiedenis niet beschikbaar."
+
+#: control/templates/sites_backup/backup_overview.html:8
+msgid "Author"
+msgstr "Auteur"
+
+#: control/templates/sites_backup/backup_overview.html:9
+msgid "Filesize"
+msgstr "Bestandsgrootte"
+
+#: control/templates/sites_backup/backup_overview.html:30
+msgid "Backup history not available."
+msgstr "Back-up geschiedenis niet beschikbaar."
 
 #: control/templates/tools/elasticsearch_details.html:7
 msgid "Elasticsearch status details"
@@ -132,7 +241,16 @@ msgstr "Site"
 msgid "Report date"
 msgstr "Verslagdatum"
 
-#: core/core_hooks.py:11 core/views.py:473
+#: control/views.py:252
+#, python-format
+msgid ""
+"Backup site %(site_name)s is scheduled. The backup will soon be added to the"
+" list of backups below. Reference: %(task_id)s"
+msgstr ""
+"Back-up site %(site_name)s is gepland. De back-up zal binnenkort worden "
+"toegevoegd aan de onderstaande lijst met back-ups. Referentie: %(task_id)s"
+
+#: core/core_hooks.py:11 core/views.py:461
 msgid "Group"
 msgstr "Groep"
 
@@ -169,7 +287,7 @@ msgid "Receive overview emails"
 msgstr "Ontvang overzicht emails"
 
 #: core/forms.py:163 core/templates/registration/request.html:23
-#: core/views.py:471 event/export.py:58
+#: core/views.py:459 event/export.py:58
 msgid "Name"
 msgstr "Naam"
 
@@ -780,7 +898,7 @@ msgstr "Persoonlijk bericht"
 msgid "Direct notification"
 msgstr "Directe notificatie"
 
-#: core/templates/email/send_notification_emails.html:10 core/views.py:624
+#: core/templates/email/send_notification_emails.html:10 core/views.py:612
 msgid "Notification overview"
 msgstr "Notificaties overzicht"
 
@@ -798,7 +916,7 @@ msgstr "Afmelden"
 msgid "Adjust your email settings"
 msgstr "Pas je e-mailinstellingen aan"
 
-#: core/templates/email/send_overview_emails.html:22 core/views.py:621
+#: core/templates/email/send_overview_emails.html:22 core/views.py:609
 msgid "Periodic overview"
 msgstr "Periodiek overzicht"
 
@@ -1324,19 +1442,19 @@ msgstr "Nieuwe vermelding op %(entity_type)s"
 msgid "%(sender_name)s has mentioned you at %(entity_title)s"
 msgstr "%(sender_name)s heeft u genoemd bij %(entity_title)s"
 
-#: core/views.py:472 event/export.py:58
+#: core/views.py:460 event/export.py:58
 msgid "E-mail"
 msgstr "E-mail"
 
-#: core/views.py:474
+#: core/views.py:462
 msgid "Disk size"
 msgstr "Schijfgrootte"
 
-#: core/views.py:567
+#: core/views.py:555
 msgid "Your changes are saved"
 msgstr "Je wijzigingen zijn opgeslagen"
 
-#: core/views.py:627
+#: core/views.py:615
 #, python-format
 msgid "Successfully unsubscribed %(email)s from %(list_name)s"
 msgstr "%(email)s Succesvol uitgeschreven uit %(list_name)s"

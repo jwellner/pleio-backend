@@ -1,0 +1,25 @@
+{% load backup_utils %}
+{% load i18n %}
+
+{% if items %}
+    <table class="table">
+        <thead>
+        <th>{% trans "Date" %}</th>
+        <th>{% trans "Actor" %}</th>
+        <th>{% trans "Action" %}</th>
+        <th>{% trans "Filename" %}</th>
+        </thead>
+        <tbody>
+        {% for item in items %}
+            <tr>
+                <td>{{ item.created_at }}</td>
+                <td>{{ item.user.name }}</td>
+                <td>{{ item.type_label }}</td>
+                <td>{{ item.item_id }}</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+{% else %}
+    <p>{% trans "Access history not available." %}</p>
+{% endif %}

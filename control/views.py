@@ -4,20 +4,25 @@ import mimetypes
 import csv
 
 from io import StringIO
+
 from django.conf import settings
 from django.contrib.auth.decorators import login_required, user_passes_test
-from django.contrib import messages
+from django.contrib import messages, auth
 from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
 from django.shortcuts import render, redirect, reverse
 from django.views.decorators.http import require_http_methods
-from django.utils.text import slugify
-from django.utils.timezone import localtime
+from django.utils.translation import gettext as _
 from django.http import FileResponse, HttpResponseNotFound, StreamingHttpResponse
 from wsgiref.util import FileWrapper
 
 from core.lib import get_base_url
+
+from pip._internal.utils.filesystem import format_file_size
+
+from control.lib import get_full_url, schema_config
+from control.utils.backup import schedule_backup
 from tenants.models import Client, Agreement, AgreementVersion
-from control.models import SiteFilter, Task, ElasticsearchStatus
+from control.models import AccessLog, AccessCategory, SiteFilter, Task, ElasticsearchStatus
 from control.forms import AddSiteForm, DeleteSiteForm, ConfirmSiteBackupForm, SearchUserForm, AgreementAddForm, AgreementAddVersionForm
 from core.models import SiteStat
 from user.models import User
@@ -93,6 +98,8 @@ def site(request, site_id):
 
     context = {
         'site': site,
+        'site_id': site_id,
+        'site_name': schema_config(site.schema_name, 'NAME'),
         'db_stat_days': db_stat_days,
         'db_stat_data': db_size_data,
         'disk_stat_days': disk_stat_days,
@@ -226,69 +233,81 @@ def sites_enable(request, site_id):
 def sites_backup(request, site_id):
     # pylint: disable=unused-argument
     site = Client.objects.get(id=site_id)
-    origin = "site_backup:%s" % site_id
+    actor = auth.get_user(request)
 
     if request.method == 'POST':
         form = ConfirmSiteBackupForm(request.POST)
         if form.is_valid():
-            task = Task.objects.create_task(
-                name='control.tasks.backup_site',
-                arguments=(
-                    site_id,
-                    not form.cleaned_data['include_files'],
-                    _backup_folder(site),
-                    bool(form.cleaned_data['create_archive'])
-                ),
-                origin=origin,
-                author=request.user,
-                followup='core.tasks.followup_backup_complete',
-                client=site
-            )
-            messages.info(request, "Backup site %s gestart in achtergrond (task.id=%i)" % (site.primary_domain, task.id))
+            task = schedule_backup(site,
+                                   actor,
+                                   form.cleaned_data['include_files'],
+                                   form.cleaned_data['create_archive'])
+
+            context = {
+                "site_name": schema_config(site.schema_name, 'NAME'),
+                "task_id": str(task.id),
+            }
+
+            messages.info(request,
+                          _("Backup site %(site_name)s is scheduled. The backup will soon be added to the list of backups below. Reference: %(task_id)s") % context)
             return redirect(reverse('site_backup', args=(site_id,)))
 
     else:
         form = ConfirmSiteBackupForm()
 
     context = {
-        'site': site,
+        'site_id': site_id,
+        'site_name': schema_config(site.schema_name, 'NAME'),
         'form': form,
-        'tasks': Task.objects.filter(origin=origin).order_by('-created_at')[:5]
+        'access_logs': AccessLog.objects.filter(),
+        'backups': [{
+            'created_at': log.created_at,
+            'download': log.item_id.endswith('.zip'),
+            'author': log.user.name,
+            'download_url': get_full_url(reverse('download_backup', args=[site.id, log.item_id])),
+            'filesize': format_file_size(os.path.join(settings.BACKUP_PATH, log.item_id)),
+            'filename': log.item_id,
+        } for log in AccessLog.objects.filter(
+            type=AccessLog.AccessTypes.CREATE,
+            category=AccessLog.custom_category(AccessCategory.SITE_BACKUP, site_id)
+        )[:5]],
     }
 
     return render(request, 'sites_backup.html', context)
 
 
-def _backup_folder(site):
-    return slugify("%s_%s" % (
-        localtime().strftime("%Y%m%d%H%M%S"),
-        site.schema_name,
-    ))
-
-
 @login_required
 @user_passes_test(is_admin)
-def download_backup(request, task_id):
-    task = Task.objects.get(id=task_id)
+def download_backup(request, site_id, backup_name):
+    try:
+        site = Client.objects.get(id=site_id)
 
-    filepath = os.path.join(settings.BACKUP_PATH, task.response)
-    if not os.path.isfile(filepath):
-        return HttpResponseNotFound()
+        assert backup_name.endswith(f"_{site.schema_name}.zip"), "Invalid backup file name"
 
-    logger.info(
-        "download_backup %s by %s",
-        os.path.basename(filepath),
-        request.user.email
-    )
+        filepath = os.path.join(settings.BACKUP_PATH, backup_name)
+        if not os.path.isfile(filepath):
+            return HttpResponseNotFound()
 
-    chunk_size = 8192
-    response = FileResponse(
-        FileWrapper(open(filepath, 'rb'), chunk_size),
-        content_type=mimetypes.guess_type(filepath)[0]
-    )
-    response['Content-Length'] = os.path.getsize(filepath)
-    response['Content-Disposition'] = "attachment; filename=%s" % os.path.basename(filepath)
-    return response
+        AccessLog.objects.create(
+            type=AccessLog.AccessTypes.DOWNLOAD,
+            category=AccessLog.custom_category(AccessCategory.SITE_BACKUP, site_id),
+            user=auth.get_user(request),
+            item_id=backup_name,
+        )
+
+        chunk_size = 8192
+        response = FileResponse(
+            FileWrapper(open(filepath, 'rb'), chunk_size),
+            content_type=mimetypes.guess_type(filepath)[0]
+        )
+        response['Content-Length'] = os.path.getsize(filepath)
+        response['Content-Disposition'] = "attachment; filename=%s" % os.path.basename(filepath)
+
+        return response
+    except Client.DoesNotExist:
+        return HttpResponseNotFound("Client does not exist")
+    except AssertionError as e:
+        return HttpResponseNotFound(e)
 
 
 @login_required

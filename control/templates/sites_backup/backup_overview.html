@@ -1,0 +1,29 @@
+{% load backup_utils %}
+{% load i18n %}
+
+{% if items %}
+    <table class="table">
+        <thead>
+        <th>{% trans "Date" %}</th>
+        <th>{% trans "Author" %}</th>
+        <th>{% trans "Filename" %}</th>
+        </thead>
+        <tbody>
+        {% for item in items %}
+            <tr>
+                <td>{{ item.created_at }}</td>
+                <td>{{ item.author }}</td>
+                <td>
+                    {% if item.download %}
+                        <a href="{{ item.download_url }}">{{ item.filename }}</a> [{{ item.filesize }}]
+                    {% else %}
+                        {{ item.filename }}
+                    {% endif %}
+                </td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+{% else %}
+    <p>{% trans "Backup history not available." %}</p>
+{% endif %}

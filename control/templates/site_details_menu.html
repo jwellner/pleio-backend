@@ -1,0 +1,11 @@
+{% load i18n %}
+<div class="subnav-content ms-3">
+    <ul class="nav subnav flex-column">
+        <li class="nav-item{% if active == 'site' %} fw-bold{% endif %}">
+            <a class="nav-link" href="{% url "site_details" site_id %}">{% trans "Website details" %}</a>
+        </li>
+        <li class="nav-item{% if active == 'sites_backup' %} fw-bold{% endif %}">
+            <a class="nav-link" href="{% url "site_backup" site_id %}">{% trans "Backups" %}</a>
+        </li>
+    </ul>
+</div>
