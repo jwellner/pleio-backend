@@ -23,14 +23,16 @@ class TestViewSiteBackupTestCase(_.BaseTestCase):
         self.assertTemplateNotUsed(response, "sites_backup.html")
         self.assertEqual(manager_get.call_count, 0)
 
+    @mock.patch("control.models.AccessLogManager.filter")
     @mock.patch("tenants.models.ClientManager.get")
     @mock.patch("control.views.schema_config")
-    def test_backup_site_form(self, schema_config, manager_get):
+    def test_backup_site_form(self, schema_config, manager_get, accesslog_filter):
         site = mock.MagicMock(spec=get_tenant_model())
         site.schema_name = "demo"
         site.id = 1
         manager_get.return_value = site
         schema_config.return_value = "Demo site"
+        accesslog_filter.side_effect = [[], []]
 
         self.client.force_login(self.admin)
         response = self.client.get(_.reverse("site_backup", args=[1]))
@@ -38,49 +40,54 @@ class TestViewSiteBackupTestCase(_.BaseTestCase):
         self.assertEqual(response.status_code, HTTPStatus.OK)
         self.assertTemplateUsed(response, "sites_backup.html")
 
-    @mock.patch("tenants.models.ClientManager.get")
-    @mock.patch("control.views.schema_config")
-    @mock.patch("control.views.schedule_backup")
-    def test_enable_site_submit_with_files(self, schedule_backup, schema_config, manager_get):
-        site = mock.MagicMock(spec=get_tenant_model())
-        site.schema_name = "demo"
-        site.id = 1
-        manager_get.return_value = site
-        schema_config.return_value = "Demo Site"
-        self.client.force_login(self.admin)
+        from control.models import AccessLog
+        filter_calls = [c.kwargs for c in accesslog_filter.call_args_list]
+        self.assertEqual(filter_calls, [{'site': site},
+                                        {'type': AccessLog.AccessTypes.CREATE, 'category': "SITE_BACKUP:1"}])
 
-        response = self.client.post(_.reverse("site_backup", args=[1]), data={
-            'include_files': True,
-        })
+        @mock.patch("tenants.models.ClientManager.get")
+        @mock.patch("control.views.schema_config")
+        @mock.patch("control.views.schedule_backup")
+        def test_enable_site_submit_with_files(self, schedule_backup, schema_config, manager_get):
+            site = mock.MagicMock(spec=get_tenant_model())
+            site.schema_name = "demo"
+            site.id = 1
+            manager_get.return_value = site
+            schema_config.return_value = "Demo Site"
+            self.client.force_login(self.admin)
 
-        self.maxDiff = None
+            response = self.client.post(_.reverse("site_backup", args=[1]), data={
+                'include_files': True,
+            })
 
-        self.assertEqual(response.status_code, HTTPStatus.FOUND)
-        self.assertEqual(response.url, _.reverse("site_backup", args=[1]))
-        self.assertEqual(schedule_backup.call_count, 1)
-        self.assertEqual(schedule_backup.call_args.args,
-                         (site, self.admin, True, False))
+            self.maxDiff = None
 
-    @mock.patch("tenants.models.ClientManager.get")
-    @mock.patch("control.views.schema_config")
-    @mock.patch("control.views.schedule_backup")
-    def test_enable_site_submit_to_archive(self, schedule_backup, schema_config, manager_get):
-        site = mock.MagicMock(spec=get_tenant_model())
-        site.schema_name = "demo"
-        site.id = 1
-        manager_get.return_value = site
-        schema_config.return_value = "Demo Site"
+            self.assertEqual(response.status_code, HTTPStatus.FOUND)
+            self.assertEqual(response.url, _.reverse("site_backup", args=[1]))
+            self.assertEqual(schedule_backup.call_count, 1)
+            self.assertEqual(schedule_backup.call_args.args,
+                             (site, self.admin, True, False))
 
-        self.client.force_login(self.admin)
+        @mock.patch("tenants.models.ClientManager.get")
+        @mock.patch("control.views.schema_config")
+        @mock.patch("control.views.schedule_backup")
+        def test_enable_site_submit_to_archive(self, schedule_backup, schema_config, manager_get):
+            site = mock.MagicMock(spec=get_tenant_model())
+            site.schema_name = "demo"
+            site.id = 1
+            manager_get.return_value = site
+            schema_config.return_value = "Demo Site"
 
-        response = self.client.post(_.reverse("site_backup", args=[1]), data={
-            'create_archive': True,
-        })
+            self.client.force_login(self.admin)
 
-        self.maxDiff = None
+            response = self.client.post(_.reverse("site_backup", args=[1]), data={
+                'create_archive': True,
+            })
 
-        self.assertEqual(response.status_code, HTTPStatus.FOUND)
-        self.assertEqual(response.url, _.reverse("site_backup", args=[1]))
-        self.assertEqual(schedule_backup.call_count, 1)
-        self.assertEqual(schedule_backup.call_args.args,
-                         (site, self.admin, False, True))
+            self.maxDiff = None
+
+            self.assertEqual(response.status_code, HTTPStatus.FOUND)
+            self.assertEqual(response.url, _.reverse("site_backup", args=[1]))
+            self.assertEqual(schedule_backup.call_count, 1)
+            self.assertEqual(schedule_backup.call_args.args,
+                             (site, self.admin, False, True))

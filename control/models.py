@@ -136,6 +136,7 @@ class AccessLog(models.Model):
     user = models.ForeignKey('user.User', on_delete=models.CASCADE)
     item_id = models.CharField(max_length=256)
     type = models.CharField(max_length=128, choices=AccessTypes.choices)
+    site = models.ForeignKey('tenants.Client', on_delete=models.CASCADE, default=None, null=True, blank=True)
 
     @staticmethod
     def custom_category(category, suffix):

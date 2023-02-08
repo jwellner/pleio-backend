@@ -243,6 +243,7 @@ def followup_backup_complete(backup_result, site_id, owner_guid):
         user=user,
         item_id=backup_result,
         type=AccessLog.AccessTypes.CREATE,
+        site=site,
     )
 
     with schema_context(site.schema_name):

@@ -68,6 +68,7 @@ class TestViewDownloadBackupTestCase(_.BaseTestCase):
         self.assertEqual(accesslog_create.call_args.kwargs, {
             "category": AccessLog.custom_category(AccessCategory.SITE_BACKUP, 1),
             "item_id": expected_backup_filename,
+            "site": client_get.return_value,
             "type": AccessLog.AccessTypes.DOWNLOAD,
             "user": self.admin,
         })
