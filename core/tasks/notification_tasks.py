@@ -104,10 +104,8 @@ def create_notification(self, schema_name, verb, model_name, entity_id, sender_i
         if getattr(instance, 'group', None):
             from core.mail_builders.notifications import schedule_notification_mail, MailTypeEnum
             for notification in notifications:
-                recipient = User.objects.get(id=notification.recipient_id)
-
-                # get direct setting
                 try:
+                    recipient = User.objects.get(id=notification.recipient_id)
                     direct = GroupMembership.objects.get(user=recipient, group=instance.group).notification_mode == 'direct'
                 except Exception:
                     continue
