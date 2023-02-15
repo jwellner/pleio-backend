@@ -232,19 +232,20 @@ def backup_site(self, backup_site_id, skip_files=False, backup_folder=None, comp
 
 @shared_task
 def followup_backup_complete(backup_result, site_id, owner_guid):
-    user = User.objects.get(id=owner_guid)
-    backup_url = reverse('site_backup', args=[site_id])
+    with schema_context("public"):
+        user = User.objects.get(id=owner_guid)
+        backup_url = reverse('site_backup', args=[site_id])
 
-    site = Client.objects.get(id=site_id)
-    download_url = reverse('download_backup', args=[site.id, backup_result])
+        site = Client.objects.get(id=site_id)
+        download_url = reverse('download_backup', args=[site.id, backup_result])
 
-    AccessLog.objects.create(
-        category=AccessLog.custom_category(AccessCategory.SITE_BACKUP, site_id),
-        user=user,
-        item_id=backup_result,
-        type=AccessLog.AccessTypes.CREATE,
-        site=site,
-    )
+        AccessLog.objects.create(
+            category=AccessLog.custom_category(AccessCategory.SITE_BACKUP, site_id),
+            user=user,
+            item_id=backup_result,
+            type=AccessLog.AccessTypes.CREATE,
+            site=site,
+        )
 
     with schema_context(site.schema_name):
         context = {
