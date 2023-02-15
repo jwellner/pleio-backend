@@ -32,6 +32,23 @@ spec:
                   name: http
             path: '/collab'
             pathType: Prefix
+    - host: {{ printf "www.%s" .domain | quote }}
+      http:
+        paths:
+          - backend:
+              service:
+                name: {{ $serviceName }}
+                port:
+                  name: http
+            path: '/'
+            pathType: Prefix
+          - backend:
+              service:
+                name: collab-backend
+                port:
+                  name: http
+            path: '/collab'
+            pathType: Prefix
   {{- end }}
   {{- if .Values.adminDomain }}
     - host: {{ .Values.adminDomain }}
@@ -72,6 +89,23 @@ spec:
   rules:
   {{- range .Values.websitesManual }}
     - host: {{ .domain | quote }}
+      http:
+        paths:
+          - backend:
+              service:
+                name: {{ $serviceName }}
+                port:
+                  name: http
+            path: '/'
+            pathType: Prefix
+          - backend:
+              service:
+                name: collab-backend
+                port:
+                  name: http
+            path: '/collab'
+            pathType: Prefix
+    - host: {{ printf "www.%s" .domain | quote }}
       http:
         paths:
           - backend:
