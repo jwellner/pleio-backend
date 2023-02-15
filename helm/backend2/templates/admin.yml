@@ -48,6 +48,8 @@ spec:
             - mountPath: /app-data
               name: pleio-data
               readOnly: true
+            - mountPath: /backup-storage
+              name: backup-storage
           envFrom:
             - configMapRef:
                 name: {{ include "backend2.name" . }}
@@ -84,6 +86,14 @@ spec:
           {{- else }}
           persistentVolumeClaim:
             claimName: {{ include "backend2.dataStorageName" . }}
+          {{- end }}
+        - name: backup-storage
+          {{- if eq .Values.storage.type "hostpath" }}
+          hostPath:
+            path: {{ .Values.storage.existingBackupStorage }}
+          {{- else }}
+          persistentVolumeClaim:
+            claimName: {{ include "backend2.backupStorageName" . }}
           {{- end }}
         {{- if .Values.tunnel.hostname }}
         - name: tunnel-secret
