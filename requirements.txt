@@ -9,7 +9,7 @@ Celery==5.2.7
 uwsgi==2.0.20
 mozilla-django-oidc==2.0.0
 coverage==6.4.4
-pylint==2.15.6 # 2.15.7 crashes prospector
+pylint==2.15.6 # >= 2.15.7 crashes prospector, >= 2.16 breaks compatibility with prosemirror-py
 prospector==1.7.7
 ariadne==0.15.1
 ariadne-django==0.2.0

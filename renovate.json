@@ -8,6 +8,10 @@
     {
       "matchPackageNames": ["Django"],
       "allowedVersions": "<4"
+    },
+    {
+      "matchPackageNames": ["pylint"],
+      "allowedVersions": "2.15.6"
     }
   ]
 }
