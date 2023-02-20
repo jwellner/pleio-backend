@@ -87,6 +87,13 @@ class EntityManager(InheritanceManager):
 
         return qs.filter(read_access__overlap=list(get_acl(user)))
 
+    def visible_all(self, user):
+        qs = self.get_queryset().all()
+        if user.is_authenticated and user.has_role(USER_ROLES.ADMIN):
+            return qs
+
+        return qs.filter(read_access__overlap=list(get_acl(user)))
+
 
 class Entity(TagsModel):
     class Meta:
