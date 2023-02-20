@@ -145,7 +145,7 @@ class Group(TagsModel, FeaturedCoverMixin, AttachmentMixin):
         )
 
         # send welcome message for new members
-        if obj.type == 'member' and not already_member:
+        if obj.type == 'member' and not already_member and self.welcome_message:
             from core.mail_builders.group_welcome import schedule_group_welcome_mail
             schedule_group_welcome_mail(group=self,
                                         user=user)

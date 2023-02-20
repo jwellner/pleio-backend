@@ -1,6 +1,4 @@
-import warnings
-
-import bleach
+from django.utils.html import strip_tags
 from django.utils.translation import gettext as _
 
 from core.lib import get_full_url
@@ -31,6 +29,10 @@ class GroupWelcomeMailer(TemplateMailerBase):
 
         context = self.build_context(user=self.user)
         context['welcome_message'] = filter_html_mail_input(self._get_message())
+
+        if not strip_tags(context['welcome_message']).strip():
+            raise self.FailSilentlyError()
+
         return context
 
     def _get_message(self):
