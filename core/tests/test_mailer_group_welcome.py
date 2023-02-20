@@ -10,6 +10,8 @@ from user.models import User
 
 class TestGroupWelcomeMailerTestCase(PleioTenantTestCase):
 
+    BLANK_HTML =  "<h2></h2><p>\n\n</p>  <p><strong>  \t\t</strong>"
+
     def setUp(self):
         super().setUp()
 
@@ -62,3 +64,30 @@ class TestGroupWelcomeMailerTestCase(PleioTenantTestCase):
         self.assertEqual(self.user.email, self.mailer.get_receiver_email())
         self.assertFalse(self.mailer.get_sender())
         self.assertIn(self.group.name, self.mailer.get_subject())
+
+    @mock.patch("core.mail_builders.group_welcome.schedule_group_welcome_mail")
+    def test_fail_silently_if_message_is_not_set(self, mocked_send_mail):
+        self.group.welcome_message = ""
+        self.group.save()
+
+        self.group.join(self.user)
+        self.assertFalse(mocked_send_mail.called)
+
+    @mock.patch("core.mail_builders.group_welcome.schedule_group_welcome_mail")
+    def test_mail_is_scheduled_though_message_is_empty(self, mocked_send_mail):
+        self.group.welcome_message = self.BLANK_HTML
+        self.group.save()
+
+        self.group.join(self.user)
+        self.assertTrue(mocked_send_mail.called)
+
+    def test_fail_silently_if_message_is_empty(self):
+        self.group.welcome_message = self.BLANK_HTML
+        self.group.save()
+        self.mailer.group.refresh_from_db()
+
+        try:
+            self.mailer.get_context()
+            self.fail("unexpectedly did not fail though the message is empty")
+        except self.mailer.FailSilentlyError:
+            pass
