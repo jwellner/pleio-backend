@@ -1,6 +1,8 @@
 from graphql import GraphQLError
 
+from core import constances
 from core.constances import INVALID_DATE, COULD_NOT_ADD, SUBEVENT_OPERATION, NON_SUBEVENT_OPERATION
+from core.utils.convert import tiptap_to_text
 from event.mail_builders.delete_event_attendees import submit_delete_event_attendees_mail
 from event.models import Event, EventAttendee
 
@@ -97,6 +99,12 @@ def resolve_update_attendee_welcome_mail(entity, clean_input):
     if 'attendeeWelcomeMailContent' in clean_input:
         entity.attendee_welcome_mail_content = clean_input.get("attendeeWelcomeMailContent")
 
+    subject = (entity.attendee_welcome_mail_subject or '').strip()
+    content = tiptap_to_text(entity.attendee_welcome_mail_content or '').strip()
+    if content and not subject:
+        raise GraphQLError(constances.MISSING_REQUIRED_FIELD % 'attendeeWelcomeMailSubject')
+    if subject and not content:
+        raise GraphQLError(constances.MISSING_REQUIRED_FIELD % 'attendeeWelcomeMailContent')
 
 def attending_events(info):
     user = info.context["request"].user

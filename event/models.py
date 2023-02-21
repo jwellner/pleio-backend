@@ -11,6 +11,7 @@ from core.models import (ArticleMixin, AttachmentMixin, BookmarkMixin, CommentMi
 
 from core.models.featured import FeaturedCoverMixin
 from core.models.mixin import TitleMixin, RichDescriptionMediaMixin
+from core.utils.convert import tiptap_to_text
 from event.mail_builders.qr_code import submit_mail_event_qr
 from event.mail_builders.waitinglist import submit_mail_at_accept_from_waitinglist
 from user.models import User
@@ -245,6 +246,11 @@ class EventAttendee(models.Model):
                 if self.event.is_in_same_slot(maybe_match.event):
                     raise ValidationError(gettext("You already signed in for another sub-event in the same slot."))
 
+    def is_welcome_mail_enabled(self):
+        subject = (self.event.attendee_welcome_mail_subject or '').strip()
+        content = tiptap_to_text(self.event.attendee_welcome_mail_content or '').strip()
+        return subject and content
+
     def save(self, *args, **kwargs):
         if self.user:
             self.name = self.user.name
@@ -284,7 +290,7 @@ class EventAttendee(models.Model):
 
         self.state = new_state
 
-        if new_state == 'accept' and self.event.attendee_welcome_mail_content:
+        if new_state == 'accept' and self.is_welcome_mail_enabled():
             from event.mail_builders.attendee_welcome_mail import send_mail
             send_mail(attendee=self)
 
