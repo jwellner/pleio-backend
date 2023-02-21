@@ -19,6 +19,7 @@ class ConfirmAttendEventWithoutAccountTestCase(PleioTenantTestCase):
             location_address="Straat 10",
             max_attendees=1,
             attend_event_without_account=True,
+            attendee_welcome_mail_subject="Some subject",
             attendee_welcome_mail_content=self.tiptap_paragraph("Welcome!")
         )
 
@@ -60,6 +61,7 @@ class ConfirmAttendEventWithoutAccountTestCase(PleioTenantTestCase):
         self.assertEqual(data["confirmAttendEventWithoutAccount"]["entity"]["guid"], self.event.guid)
         self.assertEqual(data["confirmAttendEventWithoutAccount"]["entity"]["attendees"]["edges"], [])
         self.assertEqual(1, mocked_send_mail.call_count)
+        self.assertEqual(1, mocked_welcome_mail.call_count)
         self.assertEqual(mocked_welcome_mail.call_args.kwargs, {
             'attendee': self.event.attendees.get(email=variables['input']['email'])
         })

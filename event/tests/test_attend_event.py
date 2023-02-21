@@ -17,6 +17,7 @@ class AttendEventTestCase(PleioTenantTestCase):
             read_access=[ACCESS_TYPE.public],
             write_access=[ACCESS_TYPE.user.format(self.authenticatedUser.id)],
             attend_event_without_account=True,
+            attendee_welcome_mail_subject="Some subject",
             attendee_welcome_mail_content=self.tiptap_paragraph("Welcome!"),
         )
         EventAttendeeRequest.objects.create(code='1234567890', email='pete@tenant.fast-test.com', event=self.event)
@@ -59,6 +60,7 @@ class AttendEventTestCase(PleioTenantTestCase):
         entity = result['data']['attendEvent']['entity']
         self.assertEqual(entity['attendees']['edges'][0]['name'], self.authenticatedUser.name)
         self.assertTrue(send_qr_mail.called)
+        self.assertTrue(send_welcome_mail.called)
         self.assertEqual(send_welcome_mail.call_args.kwargs, {
             "attendee": self.event.attendees.get(email=self.authenticatedUser.email)
         })
