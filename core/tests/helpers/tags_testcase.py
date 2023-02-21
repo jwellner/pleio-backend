@@ -279,6 +279,23 @@ class Template:
                 self.assertEqual(1, response['data'][data_key]['total'], msg="Unexpectedly not found exactly two matches at %s" % message)
                 self.assertIn(self.article1.guid, [e['guid'] for e in edges], msg="Unexpectedly not found article1 at %s" % message)
 
+        def test_search_by_incomplete_category(self):
+            self.local_setup()
+            self.graphql_client.force_login(self.owner)
+
+            for query, data_key, message in self.iterate_query_search():
+                variables = {
+                    'categories': [{'name': 'Fruit', 'values': []}]
+                }
+
+                response = self.graphql_client.post(query, variables)
+                guids = [e['guid'] for e in get_edges(response['data'][data_key]) if e.get('guid')]
+                self.assertEqual(4, len(guids), msg="Unexpectedly not found exactly two matches at %s" % message)
+                self.assertIn(self.article.guid, guids, msg="Unexpectedly not found article at %s" % message)
+                self.assertIn(self.article1.guid, guids, msg="Unexpectedly not found article1 at %s" % message)
+                self.assertIn(self.article2.guid, guids, msg="Unexpectedly not found article2 at %s" % message)
+                self.assertIn(self.article3.guid, guids, msg="Unexpectedly not found article3 at %s" % message)
+
         def test_search_entity_by_category(self):
             self.local_setup()
             self.graphql_client.force_login(self.owner)

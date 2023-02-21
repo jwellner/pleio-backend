@@ -97,16 +97,19 @@ def conditional_tags_filter(tags, match_any):
 
 
 def conditional_tag_lists_filter(categorytag_lists, match_any):
+    if not categorytag_lists:
+        return Q()
+
     filters = Q()
-    if categorytag_lists:
-        for category in categorytag_lists:
-            if category:
-                matches = flat_category_tags(category)
-                if match_any:
-                    filters.add(Q(_category_summary__overlap=matches), Q.AND)
-                else:
-                    for match in matches:
-                        filters.add(Q(_category_summary__overlap=[match]), Q.AND)
+    for category in categorytag_lists:
+        matches = [*flat_category_tags(category)]
+        if not matches:
+            continue
+        if match_any:
+            filters.add(Q(_category_summary__overlap=matches), Q.AND)
+        else:
+            for match in matches:
+                filters.add(Q(_category_summary__overlap=[match]), Q.AND)
     return filters
 
 

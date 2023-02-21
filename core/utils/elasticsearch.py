@@ -73,18 +73,19 @@ class QueryBuilder():
     def maybe_filter_categories(self, categories, strategy):
         if categories:
             for category in categories:
-                matches = flat_category_tags(category)
-                if strategy != 'all':
-                    # Categories: match-any
-                    self.s = self.s.filter(
-                        'terms', category_tags=[t for t in matches]
-                    )
-                else:
-                    # match-all
-                    for single_match in matches:
+                matches = [*flat_category_tags(category)]
+                if matches:
+                    if strategy != 'all':
+                        # Categories: match-any
                         self.s = self.s.filter(
-                            'terms', category_tags=[single_match]
+                            'terms', category_tags=matches
                         )
+                    else:
+                        # match-all
+                        for single_match in matches:
+                            self.s = self.s.filter(
+                                'terms', category_tags=[single_match]
+                            )
 
     def filter_archived(self, filter_archived):
         self.s = self.s.filter('term', is_archived=bool(filter_archived))

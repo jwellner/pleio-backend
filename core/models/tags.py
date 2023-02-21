@@ -148,7 +148,7 @@ class TagsModel(models.Model):
             "Register the base TagsModel model using register_model_for_tags at the app's ready method."
         assert '_tag_summary' in [f.name for f in self._meta.fields], "Provide a _tag_summary ArrayField"
         self._tag_summary = EntityTag.summary(self.id)
-        self._category_summary = [t for t in self.category_tags_index]
+        self._category_summary = [*self.category_tags_index]
         super(TagsModel, self).save(*args, **kwargs)
 
     def delete(self, *args, **kwargs):
@@ -157,7 +157,10 @@ class TagsModel(models.Model):
 
 
 def flat_category_tags(category, brief=False):
-    for value in category['values']:
+    if not category:
+        return
+
+    for value in category.get('values') or []:
         if brief:
             yield value.lower()
         else:
