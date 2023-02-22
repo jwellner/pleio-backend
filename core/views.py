@@ -130,6 +130,10 @@ def entity_view(request, entity_id=None, entity_title=None):
     return render(request, 'react.html', context, status=status_code)
 
 
+def register(request):
+    return redirect('/login?login_credentials=true&method=register')
+
+
 def logout(request):
     # should find out how we can make this better. OIDC logout only allows POST
     LogoutView.as_view()(request)

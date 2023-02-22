@@ -106,7 +106,6 @@ def send_overview(schema_name, period):
 
     with schema_context(schema_name):
         users = User.objects.filter(is_active=True,
-                                    _profile__receive_notification_email=True,
                                     _profile__overview_email_interval=period)
         for user in users:
             schedule_frequent_overview_mail(user, period)

@@ -20,7 +20,7 @@ def redirect_view(request, entity_id):
             if mapper.object_type == "group":
                 entity = Group.objects.visible(user).get(id=mapper.guid)
             else:
-                entity = Entity.objects.visible(user).select_subclasses().get(id=mapper.guid)
+                entity = Entity.objects.visible_all(user).select_subclasses().get(id=mapper.guid)
 
         except ObjectDoesNotExist:
             pass

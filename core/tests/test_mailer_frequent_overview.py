@@ -18,6 +18,7 @@ from user.factories import UserFactory, EditorFactory
 
 def create_user(interval='never', factory=UserFactory, **kwargs):
     user = factory(**kwargs)
+    user.profile.receive_notification_email = False
     user.profile.overview_email_interval = interval
     user.profile.save()
     return user

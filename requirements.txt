@@ -1,5 +1,5 @@
 bleach==5.0.1
-Django==3.2.16
+Django==3.2.18
 psycopg2-binary==2.9.5
 django-db-mutex==1.1.0
 django-filter==2.4.0
@@ -9,7 +9,7 @@ Celery==5.2.7
 uwsgi==2.0.20
 mozilla-django-oidc==2.0.0
 coverage==6.4.4
-pylint==2.15.6 # 2.15.7 crashes prospector
+pylint==2.15.6 # >= 2.15.7 crashes prospector, >= 2.16 breaks compatibility with prosemirror-py
 prospector==1.7.7
 ariadne==0.15.1
 ariadne-django==0.2.0
@@ -20,7 +20,7 @@ mixer==7.2.2
 elastic-apm==6.10.1
 opentracing==2.4.0
 django-notifications-hq==1.7.0
-django-tenants==3.4.7
+django-tenants==3.4.8
 mysqlclient==2.1.1
 django-storages==1.12.3
 phpserialize==1.3
