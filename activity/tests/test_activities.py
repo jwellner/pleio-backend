@@ -315,25 +315,36 @@ class ActivitiesEventsTestCase(PleioTenantTestCase):
             owner=self.user1,
             read_access=[ACCESS_TYPE.public],
             write_access=[ACCESS_TYPE.user.format(self.user1.id)],
-            start_date=timezone.now() + timezone.timedelta(days=4)
+            start_date=timezone.now() + timezone.timedelta(days=4),
+            end_date = timezone.now() + timezone.timedelta(days=4)
         )
         self.event_5_days_ago = Event.objects.create(
             owner=self.user1,
             read_access=[ACCESS_TYPE.public],
             write_access=[ACCESS_TYPE.user.format(self.user1.id)],
-            start_date=timezone.now() - timezone.timedelta(days=5)
+            start_date=timezone.now() - timezone.timedelta(days=5),
+            end_date=timezone.now() - timezone.timedelta(days=5),
+        )
+        self.event_ongoing = Event.objects.create(
+            owner=self.user1,
+            read_access=[ACCESS_TYPE.public],
+            write_access=[ACCESS_TYPE.user.format(self.user1.id)],
+            start_date=timezone.now() - timezone.timedelta(days=5),
+            end_date=timezone.now() + timezone.timedelta(days=5),
         )
         self.event_in_6_days = Event.objects.create(
             owner=self.user1,
             read_access=[ACCESS_TYPE.public],
             write_access=[ACCESS_TYPE.user.format(self.user1.id)],
-            start_date=timezone.now() + timezone.timedelta(days=6)
+            start_date=timezone.now() + timezone.timedelta(days=6),
+            end_date=timezone.now() + timezone.timedelta(days=6),
         )
         self.event_3_days_ago = Event.objects.create(
             owner=self.user1,
             read_access=[ACCESS_TYPE.public],
             write_access=[ACCESS_TYPE.user.format(self.user1.id)],
-            start_date=timezone.now() - timezone.timedelta(days=3)
+            start_date=timezone.now() - timezone.timedelta(days=3),
+            end_date=timezone.now() - timezone.timedelta(days=3)
         )
 
         self.query = """
@@ -436,7 +447,7 @@ class ActivitiesEventsTestCase(PleioTenantTestCase):
 
         self.graphql_client.force_login(self.user2)
         result = self.graphql_client.post(self.query, variables)
-        self.assertEqual(len(result["data"]["activities"]["edges"]), 2)
+        self.assertEqual(len(result["data"]["activities"]["edges"]), 3)
         self.assertEqual(result["data"]["activities"]["edges"][0]["entity"]["guid"], self.event_in_6_days.guid)
 
 
