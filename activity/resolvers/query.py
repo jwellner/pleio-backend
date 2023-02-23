@@ -8,45 +8,33 @@ from django.db.models import Q
 from django.db.models.functions import Coalesce
 from core.constances import ORDER_BY, ORDER_DIRECTION, COULD_NOT_ORDER_BY_START_DATE, COULD_NOT_USE_EVENT_FILTER
 from core.resolvers.query_entities import conditional_tags_filter, conditional_tag_lists_filter
+from core.resolvers import query_entity_filters as filters
 
 query = ObjectType("Query")
 
 logger = logging.getLogger(__name__)
 
 
+class TextPageEntityFilter(filters.PageEntityFilter):
+
+    def add(self, query):
+        query.add(~Q(page__isnull=True) & Q(page__page_type='text'), Q.OR)
+
+
 def conditional_subtypes_filter(subtypes):
-    q_objects = Q()
+    query = Q()
 
-    if subtypes:
-        for object_type in subtypes:
-            if object_type == 'news':
-                q_objects.add(~Q(news__isnull=True), Q.OR)
-            elif object_type == 'blog':
-                q_objects.add(~Q(blog__isnull=True), Q.OR)
-            elif object_type == 'event':
-                q_objects.add(~Q(event__isnull=True) & ~Q(event__parent__isnull=False), Q.OR)
-            elif object_type == 'discussion':
-                q_objects.add(~Q(discussion__isnull=True), Q.OR)
-            elif object_type == 'statusupdate':
-                q_objects.add(~Q(statusupdate__isnull=True), Q.OR)
-            elif object_type == 'question':
-                q_objects.add(~Q(question__isnull=True), Q.OR)
-            elif object_type == 'wiki':
-                q_objects.add(~Q(wiki__isnull=True), Q.OR)
-            elif object_type == 'page':
-                q_objects.add(~Q(page__isnull=True) & ~Q(page__page_type='campagne'), Q.OR)
-    else:
-        # activities should only search for these entities:
-        q_objects.add(~Q(news__isnull=True), Q.OR)
-        q_objects.add(~Q(blog__isnull=True), Q.OR)
-        q_objects.add(~Q(event__isnull=True) & ~Q(event__parent__isnull=False), Q.OR)
-        q_objects.add(~Q(discussion__isnull=True), Q.OR)
-        q_objects.add(~Q(statusupdate__isnull=True), Q.OR)
-        q_objects.add(~Q(question__isnull=True), Q.OR)
-        q_objects.add(~Q(wiki__isnull=True), Q.OR)
-        q_objects.add(~Q(page__isnull=True) & ~Q(page__page_type='campagne'), Q.OR)
+    for entity_filter in [filters.NewsEntityFilter,
+                          filters.BlogEntityFilter,
+                          filters.EventEntityFilter,
+                          filters.DiscussionEntityFilter,
+                          filters.StatusupdateEntityFilter,
+                          filters.QuestionEntityFilter,
+                          filters.WikiEntityFilter,
+                          TextPageEntityFilter]:
+        entity_filter().add_if_applicable(query, subtypes)
 
-    return q_objects
+    return query
 
 
 def conditional_group_filter(container_guid):

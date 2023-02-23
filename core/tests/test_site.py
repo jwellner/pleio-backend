@@ -200,7 +200,9 @@ class SiteTestCase(PleioTenantTestCase):
                 {'key': 'news', 'value': 'Nieuws'},
                 {'key': 'question', 'value': 'Vraag'},
                 {'key': 'wiki', 'value': 'Wiki'},
-                {'key': 'file', 'value': 'Bestand'}
+                {'key': 'file', 'value': 'Bestand'},
+                {'key': 'folder', 'value': 'Map'},
+                {'key': 'pad', 'value': 'Pad'},
             ]
         })
         self.assertDictEqual(data['site']['searchFilter'], {

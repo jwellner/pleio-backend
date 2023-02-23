@@ -1,7 +1,8 @@
 import logging
 
-from django.db.models import Q, F
+from django.db.models import Q
 from django.db.models.functions import Coalesce, Lower
+
 from core.constances import (ORDER_DIRECTION, ORDER_BY, INVALID_SUBTYPE,
                              COULD_NOT_ORDER_BY_START_DATE, COULD_NOT_USE_EVENT_FILTER)
 from core.lib import early_this_morning
@@ -9,7 +10,7 @@ from core.models import Entity
 from graphql import GraphQLError
 
 from core.models.tags import Tag, flat_category_tags
-from external_content.utils import is_external_content_source
+from core.resolvers import query_entity_filters as filters
 
 logger = logging.getLogger(__name__)
 
@@ -18,47 +19,25 @@ def conditional_subtypes_filter(subtypes):
     """
     Filter multiple subtypes
     """
-    q_objects = Q()
-    if subtypes:
-        for object_type in subtypes:
-            if object_type == 'news':
-                q_objects.add(~Q(news__isnull=True), Q.OR)
-            elif object_type == 'blog':
-                q_objects.add(~Q(blog__isnull=True), Q.OR)
-            elif object_type == 'event':
-                q_objects.add(~Q(event__isnull=True) & ~Q(event__parent__isnull=False), Q.OR)
-            elif object_type == 'discussion':
-                q_objects.add(~Q(discussion__isnull=True), Q.OR)
-            elif object_type == 'statusupdate':
-                q_objects.add(~Q(statusupdate__isnull=True), Q.OR)
-            elif object_type == 'question':
-                q_objects.add(~Q(question__isnull=True), Q.OR)
-            elif object_type == 'poll':
-                q_objects.add(~Q(poll__isnull=True), Q.OR)
-            elif object_type == 'wiki':
-                q_objects.add(~Q(wiki__isnull=True), Q.OR)
-            elif object_type == 'page':
-                q_objects.add(~Q(page__isnull=True), Q.OR)
-            elif object_type == 'file':
-                q_objects.add(~Q(filefolder__isnull=True), Q.OR)
-            elif object_type == 'task':
-                q_objects.add(~Q(task__isnull=True), Q.OR)
-            elif is_external_content_source(object_type):
-                q_objects.add(~Q(externalcontent__isnull=True) & Q(externalcontent__source_id=object_type), Q.OR)
-    else:
-        q_objects.add(~Q(news__isnull=True), Q.OR)
-        q_objects.add(~Q(blog__isnull=True), Q.OR)
-        q_objects.add(~Q(event__isnull=True) & ~Q(event__parent__isnull=False), Q.OR)
-        q_objects.add(~Q(discussion__isnull=True), Q.OR)
-        q_objects.add(~Q(statusupdate__isnull=True), Q.OR)
-        q_objects.add(~Q(question__isnull=True), Q.OR)
-        q_objects.add(~Q(poll__isnull=True), Q.OR)
-        q_objects.add(~Q(wiki__isnull=True), Q.OR)
-        q_objects.add(~Q(page__isnull=True), Q.OR)
-        q_objects.add(~Q(filefolder__isnull=True), Q.OR)
-        q_objects.add(~Q(task__isnull=True), Q.OR)
-        q_objects.add(~Q(externalcontent__isnull=True), Q.OR)
-    return q_objects
+    query = Q()
+
+    for entity_filter in [filters.NewsEntityFilter,
+                          filters.BlogEntityFilter,
+                          filters.EventEntityFilter,
+                          filters.DiscussionEntityFilter,
+                          filters.StatusupdateEntityFilter,
+                          filters.QuestionEntityFilter,
+                          filters.PollEntityFilter,
+                          filters.WikiEntityFilter,
+                          filters.PageEntityFilter,
+                          filters.FileEntityFilter,
+                          filters.FolderEntityFilter,
+                          filters.PadEntityFilter,
+                          filters.TaskEntityFilter,
+                          filters.ExternalcontentEntityFilter]:
+        entity_filter().add_if_applicable(query, subtypes)
+
+    return query
 
 
 def conditional_group_filter(container_guid):
