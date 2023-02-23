@@ -17,13 +17,13 @@ api:
 
 background:
   worker:
-    replicaCount: 4
+    replicaCount: 8
     resources:
       limits:
-        cpu: 2500m
+        cpu: 400m
         memory: 2048Mi
       requests:
-        cpu: 1500m
+        cpu: 400m
         memory: 2048Mi
   scheduler:
     resources:
