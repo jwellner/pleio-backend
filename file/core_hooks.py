@@ -1,5 +1,6 @@
 from django.utils.translation import gettext_lazy as _
 
+from core import config
 from core.exceptions import IgnoreIndexError, ExceptionDuringQueryIndex
 from core.tests.helpers import GraphQLClient
 from user.models import User
@@ -10,6 +11,15 @@ def get_entity_filters():
         "key": "file",
         "value": _("File"),
     }
+    yield {
+        "key": "folder",
+        "value": _("Folder"),
+    }
+    if config.COLLAB_EDITING_ENABLED:
+        yield {
+            "key": "pad",
+            "value": _("Pad"),
+        }
 
 
 def get_search_filters():
