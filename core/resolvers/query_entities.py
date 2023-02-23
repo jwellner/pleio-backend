@@ -94,8 +94,8 @@ def conditional_tag_lists_filter(categorytag_lists, match_any):
 
 def conditional_event_filter(date_filter):
     if date_filter == 'previous':
-        return Q(event__start_date__lt=early_this_morning())
-    return Q(event__start_date__gte=early_this_morning())
+        return Q(event__end_date__lt=early_this_morning())
+    return Q(event__end_date__gte=early_this_morning())
 
 
 def resolve_entities(
