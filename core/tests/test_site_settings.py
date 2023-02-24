@@ -2,6 +2,7 @@ from unittest import mock
 import uuid
 
 from django.db import connection
+from django.utils import timezone
 
 from core.models import ProfileField, SiteInvitation, SiteAccessRequest
 from core.tests.helpers import PleioTenantTestCase
@@ -10,7 +11,11 @@ from user.models import User
 from cms.models import Page
 from django.core.cache import cache
 from mixer.backend.django import mixer
-from core.lib import get_language_options
+from core.lib import get_language_options, datetime_utciso
+
+
+def time_factory(**kwargs):
+    return timezone.localtime() + timezone.timedelta(**kwargs)
 
 
 class TestSiteSettingsTestCase(PleioTenantTestCase):
@@ -28,8 +33,18 @@ class TestSiteSettingsTestCase(PleioTenantTestCase):
         self.profileField1 = ProfileField.objects.create(key='text_key1', name='text_name', field_type='text_field')
         self.profileField2 = ProfileField.objects.create(key='text_key2', name='text_name', field_type='text_field')
         self.siteInvitation = mixer.blend(SiteInvitation, email='a@a.nl')
-        self.siteAccessRequest = mixer.blend(SiteAccessRequest, email='b@b.nl', name='b')
-        self.siteAccessRequest2 = mixer.blend(SiteAccessRequest, email='c@c.nl', name='c', accepted=True)
+        self.siteAccessRequest0 = mixer.blend(SiteAccessRequest, email='johnny.a@example.com', name='Johnny A.',
+                                              created_at=time_factory(days=-10))
+        self.siteAccessRequest1 = mixer.blend(SiteAccessRequest, email='johnny.b@example.com', name='Johnny B.',
+                                              created_at=time_factory(days=-5))
+        self.siteAccessRequest2 = mixer.blend(SiteAccessRequest, email='johnny.c@example.com', name='Johnny C.',
+                                              created_at=time_factory(days=-7))
+        self.siteApprovedRequest0 = mixer.blend(SiteAccessRequest, email='johnny.d@example.com', name='Johnny D.', accepted=True,
+                                                updated_at=time_factory(days=-6))
+        self.siteApprovedRequest1 = mixer.blend(SiteAccessRequest, email='johnny.e@example.com', name='Johnny E.', accepted=True,
+                                                updated_at=time_factory(days=-2))
+        self.siteApprovedRequest2 = mixer.blend(SiteAccessRequest, email='johnny.f@example.com', name='Johnny F.', accepted=True,
+                                                updated_at=time_factory(days=-4))
 
         self.override_config(ANONYMOUS_START_PAGE='cms')
         self.override_config(ANONYMOUS_START_PAGE_CMS=self.cmsPage2.guid)
@@ -203,7 +218,13 @@ class TestSiteSettingsTestCase(PleioTenantTestCase):
                             email
                             name
                             status
+                            timeCreated
                             timeUpdated
+                        }
+                    }
+                    siteAccessApproved {
+                        edges {
+                            email
                         }
                     }
                     deleteAccountRequests {
@@ -261,8 +282,12 @@ class TestSiteSettingsTestCase(PleioTenantTestCase):
         """
 
     def tearDown(self):
-        self.siteAccessRequest.delete()
+        self.siteAccessRequest0.delete()
+        self.siteAccessRequest1.delete()
         self.siteAccessRequest2.delete()
+        self.siteApprovedRequest0.delete()
+        self.siteApprovedRequest1.delete()
+        self.siteApprovedRequest2.delete()
         self.siteInvitation.delete()
         self.profileField1.delete()
         self.profileField2.delete()
@@ -422,10 +447,17 @@ class TestSiteSettingsTestCase(PleioTenantTestCase):
         self.assertEqual(data["siteSettings"]["roleOptions"],
                          [{'value': 'ADMIN', 'label': 'Beheerder'}, {'value': 'EDITOR', 'label': 'Redacteur'},
                           {'value': 'QUESTION_MANAGER', 'label': 'Vraagexpert'}])
-        self.assertEqual(data["siteSettings"]["siteAccessRequests"]["edges"], [{'email': 'b@b.nl', 'name': 'b', 'status': 'pending',
-                                                                                'timeUpdated': str(self.siteAccessRequest.updated_at.isoformat())},
-                                                                               {'email': 'c@c.nl', 'name': 'c', 'status': 'accepted',
-                                                                                'timeUpdated': str(self.siteAccessRequest2.updated_at.isoformat())}])
+        pending_requests = [r['email'] for r in data["siteSettings"]["siteAccessRequests"]["edges"]]
+        self.assertEqual(pending_requests, ['johnny.a@example.com', 'johnny.c@example.com', 'johnny.b@example.com'])
+        accepted_requests = [r['email'] for r in data["siteSettings"]["siteAccessApproved"]["edges"]]
+        self.assertEqual(accepted_requests, ['johnny.e@example.com', 'johnny.f@example.com', 'johnny.d@example.com'])
+        self.assertEqual(data["siteSettings"]["siteAccessRequests"]["edges"][0], {
+            "email": self.siteAccessRequest0.email,
+            "name": self.siteAccessRequest0.name,
+            "status": "pending",
+            "timeCreated": datetime_utciso(self.siteAccessRequest0.created_at),
+            "timeUpdated": datetime_utciso(self.siteAccessRequest0.updated_at),
+        })
         self.assertEqual(data["siteSettings"]["deleteAccountRequests"]["edges"][0]['guid'], self.delete_user.guid)
         self.assertEqual(data["siteSettings"]["profileSyncEnabled"], False)
         self.assertEqual(data["siteSettings"]["profileSyncToken"], "")
