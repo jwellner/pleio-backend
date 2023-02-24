@@ -2,6 +2,7 @@ import uuid
 from unittest import mock
 from unittest.mock import Mock
 
+import celery.exceptions
 from django.conf import settings
 from mixer.backend.django import mixer
 
@@ -38,7 +39,7 @@ class TestTasksTestCase(PleioTenantTestCase):
         mocked_request.return_value = response
 
         # When
-        profile_updated_signal(tenant_schema(), self.ORIGIN_TOKEN)
+        profile_updated_signal(tenant_schema(), self.user.id)
         self.user.refresh_from_db()
 
         # Then
@@ -52,26 +53,25 @@ class TestTasksTestCase(PleioTenantTestCase):
         self.assertEqual(self.user.is_superadmin, data['isAdmin'])
 
     @mock.patch('concierge.api.requests.get')
-    @mock.patch('concierge.tasks.profile_updated_signal.apply_async')
     @mock.patch('logging.Logger.error')
-    def test_profile_task_failure_schedules_a_retry(self, mocked_logger, mocked_retry, mocked_request):
+    def test_profile_task_failure_schedules_a_retry(self, mocked_logger, mocked_request):
         from concierge.tasks import profile_updated_signal
         response = Mock()
         response.ok = False
         response.reason = 'expected-reason'
         mocked_request.return_value = response
 
-        # When
-        profile_updated_signal(tenant_schema(), self.ORIGIN_TOKEN)
-
-        # Then
-        mocked_request.assert_called()
-        mocked_logger.assert_called_with('expected-reason')
-        mocked_retry.assert_called()
+        try:
+            # When
+            profile_updated_signal(tenant_schema(), self.user.id)
+            self.fail("Unexpectedly did not retry the action")
+        except celery.exceptions.Retry:
+            mocked_request.assert_called()
+            mocked_logger.assert_called_with('expected-reason')
 
     @mock.patch('concierge.tasks.requests.get')
     def test_profile_task_invalid_uuid_silently_ends_operation(self, mocked_get_request):
         from concierge.tasks import profile_updated_signal
 
-        profile_updated_signal(tenant_schema(), "altered %s" % uuid.uuid4())
+        profile_updated_signal(tenant_schema(), uuid.uuid4())
         mocked_get_request.asset_not_called()
