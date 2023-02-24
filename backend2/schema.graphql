@@ -2402,6 +2402,7 @@ type SiteSettings {
     onboardingIntro: String
     siteInvites: SiteInviteList
     siteAccessRequests: SiteAccessRequestList
+    siteAccessApproved: SiteAccessRequestList
     cookieConsent: Boolean!
     eventTiles: Boolean!
     loginIntro: String
@@ -2752,6 +2753,7 @@ type SiteAccessRequest {
     name: String!
     email: String!
     status: SiteAccessStatus
+    timeCreated: DateTime
     timeUpdated: DateTime
 }
 

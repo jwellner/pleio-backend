@@ -10,11 +10,49 @@ class SiteInvitation(models.Model):
     updated_at = models.DateTimeField(default=timezone.now)
 
 
+class SiteAccessRequestQuerySet(models.QuerySet):
+
+    def filter_accepted(self):
+        return self.filter(accepted=True)
+
+    def filter_pending(self):
+        return self.filter(accepted=False)
+
+    def last_modified_on_top(self):
+        return self.order_by('-updated_at')
+
+    def serialize(self):
+        for record in self.all():
+            yield {
+                'email': record.email,
+                'name': record.name,
+                'status': 'accepted' if record.accepted else 'pending',
+                'timeCreated': record.created_at,
+                'timeUpdated': record.updated_at,
+            }
+
+
 class SiteAccessRequestManager(models.Manager):
-    """ Separate manager for unit-testing purposes. """
+    def get_queryset(self):
+        return SiteAccessRequestQuerySet(self.model, using=self._db)
+
+    def filter_accepted(self):
+        return self.get_queryset().filter_accepted()
+
+    def filter_pending(self):
+        return self.get_queryset().filter_pending()
+
+    def last_modified_on_top(self):
+        return self.get_queryset().last_modified_on_top()
+
+    def serialize(self):
+        yield from self.get_queryset().serialize()
 
 
 class SiteAccessRequest(models.Model):
+    class Meta:
+        ordering = ('created_at',)
+
     objects = SiteAccessRequestManager()
 
     email = models.EmailField(max_length=255, unique=True)
