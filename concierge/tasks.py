@@ -6,7 +6,6 @@ import requests
 from celery import shared_task
 from django.conf import settings
 from django.core.exceptions import ValidationError
-from django.utils import timezone
 from django_tenants.utils import schema_context
 from requests import RequestException, ConnectionError as RequestConnectionError
 
@@ -18,11 +17,11 @@ from user.models import User
 logger = logging.getLogger(__name__)
 
 
-@shared_task
-def profile_updated_signal(schema_name, origin_token, retry=3, retry_delay=60):
+@shared_task(bind=True, rate_limit="100/m", max_retries=3)
+def profile_updated_signal(self, schema_name, user_id):
     with schema_context(schema_name):
         try:
-            user = User.objects.get(_profile__origin_token=origin_token)
+            user = User.objects.get(id=user_id)
             data = fetch_profile(user)
 
             assert "error" not in data, data['error']
@@ -38,12 +37,8 @@ def profile_updated_signal(schema_name, origin_token, retry=3, retry_delay=60):
 
         except (AssertionError, RequestException) as e:
             logger.error(str(e))
-            if retry > 0:
-                profile_updated_signal.apply_async(kwargs={'schema_name': schema_name,
-                                                           'origin_token': origin_token,
-                                                           'retry': retry - 1,
-                                                           'retry_delay': 10 * retry_delay},
-                                                   eta=timezone.now() + timezone.timedelta(seconds=retry_delay))
+            if self.request.retries < self.max_retries:
+                self.retry(countdown=100)
         except (User.DoesNotExist, ValidationError):
             pass
 
