@@ -32,7 +32,7 @@ class WidgetSerializer(WidgetSerializerBase):
         result['type'] = self.type
         for setting in self.settings:
             result['settings'].append(setting.serialize())
-        return result
+        return {**result}
 
     def attachments(self):
         for setting in self.settings:
@@ -41,6 +41,13 @@ class WidgetSerializer(WidgetSerializerBase):
     def rich_fields(self):
         for setting in self.settings:
             yield from setting.rich_fields()
+
+    def map_rich_fields(self, callback):
+        new_settings = []
+        for setting in self.settings:
+            setting.transform_rich_field(callback)
+            new_settings.append(setting.serialize())
+        self.widget['settings'] = new_settings
 
 
 class WidgetSettingSerializer(WidgetSerializerBase):
@@ -60,7 +67,7 @@ class WidgetSettingSerializer(WidgetSerializerBase):
     def richDescription(self):
         if self.setting.get('richDescription'):
             return self.setting.get('richDescription')
-        if self.setting.get('key') == 'richDescription':
+        if self.setting.get('key') == 'richDescription' and self.setting.get('value'):
             return self.setting.get('value')
 
     @property
@@ -96,3 +103,9 @@ class WidgetSettingSerializer(WidgetSerializerBase):
     def rich_fields(self):
         if self.richDescription:
             yield self.richDescription
+
+    def transform_rich_field(self, callback):
+        if self.setting.get('key') == 'richDescription' and self.setting.get('value'):
+            self.setting['value'] = callback(self.setting['value'])
+        elif self.setting.get('richDescription'):
+            self.setting['richDescription'] = callback(self.setting['richDescription'])

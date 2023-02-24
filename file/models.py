@@ -9,8 +9,8 @@ from django.db import models
 from django.utils import timezone
 from enum import Enum
 from core.constances import DOWNLOAD_AS_OPTIONS
-from core.lib import generate_object_filename, get_mimetype, tenant_schema, get_basename, get_filesize
-from core.models import Entity, Tag, TagSynonym
+from core.lib import generate_object_filename, get_mimetype, tenant_schema, get_basename
+from core.models import Entity, Tag
 from core.models.entity import EntityManager
 from core.models.mixin import ModelWithFile, TitleMixin, HasMediaMixin
 from core.models.rich_fields import AttachmentMixin
@@ -304,6 +304,20 @@ class FileFolder(HasMediaMixin, TitleMixin, ModelWithFile, ResizedImageMixin, At
         new.save()
 
         return new
+
+    def map_rich_text_fields(self, callback):
+        self.rich_description = callback(self.rich_description)
+
+    def serialize(self):
+        return {
+            'title': self.title,
+            'file': self.upload.name,
+            'mimeType': self.mime_type,
+            'size': self.size,
+            'richDescription': self.rich_description,
+            'parentGuid': str(self.parent_id) if self.parent else None,
+            **super().serialize()
+        }
 
 
 class ScanIncident(models.Model):

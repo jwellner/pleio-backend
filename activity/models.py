@@ -46,5 +46,15 @@ class StatusUpdate(VoteMixin, CommentMixin, BookmarkMixin, FollowMixin, Attachme
     def description(self):
         return tiptap_to_text(self.rich_description)
 
+    def map_rich_text_fields(self, callback):
+        self.rich_description = callback(self.rich_description)
+
+    def serialize(self):
+        return {
+            'title': self.title,
+            'richDescription': self.rich_description,
+            **super().serialize()
+        }
+
 
 auditlog.register(StatusUpdate)

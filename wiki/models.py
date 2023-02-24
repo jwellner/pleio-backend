@@ -2,10 +2,8 @@ from auditlog.registry import auditlog
 from django.db import models
 from django.utils.text import slugify
 
-from core.lib import get_access_id
 from core.models import (ArticleMixin, AttachmentMixin, BookmarkMixin, Entity,
                          MentionMixin, RevisionMixin)
-from core.models.entity import str_datetime
 from core.models.featured import FeaturedCoverMixin
 from core.models.mixin import TitleMixin, RichDescriptionMediaMixin
 
@@ -30,7 +28,7 @@ class Wiki(RichDescriptionMediaMixin, TitleMixin, FeaturedCoverMixin, BookmarkMi
 
     def has_revisions(self):
         return True
-    
+
     def __str__(self):
         return f"Wiki[{self.title}]"
 
@@ -55,25 +53,18 @@ class Wiki(RichDescriptionMediaMixin, TitleMixin, FeaturedCoverMixin, BookmarkMi
     def rich_fields(self):
         return [self.rich_description]
 
+    def map_rich_text_fields(self, callback):
+        self.rich_description = callback(self.rich_description)
+        self.abstract = callback(self.abstract)
+
     def serialize(self):
         return {
             'title': self.title or '',
             'richDescription': self.rich_description or '',
-            'accessId': get_access_id(self.read_access),
-            'writeAccessId': get_access_id(self.write_access),
-            'tags': sorted(self.tags) or [],
-            'tagCategories': self.category_tags or [],
-            'timeCreated': str_datetime(self.created_at),
-            'timePublished': str_datetime(self.published),
-            'statusPublished': self.status_published,
-            'scheduleArchiveEntity': str_datetime(self.schedule_archive_after),
-            'scheduleDeleteEntity': str_datetime(self.schedule_delete_after),
             'abstract': self.abstract or '',
-            'isFeatured': bool(self.is_featured),
             'featured': self.serialize_featured(),
-            'groupGuid': self.group.guid if self.group else None,
-            'ownerGuid': self.owner.guid if self.owner else None,
             'containerGuid': self.parent.guid if self.parent else None,
+            **super().serialize(),
         }
 
 

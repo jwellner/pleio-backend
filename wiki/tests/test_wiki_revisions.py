@@ -1,5 +1,4 @@
 from wiki.factories import WikiFactory
-from core.lib import get_access_id
 from core.tests.helpers.revision_template import RevisionTemplate
 from user.factories import UserFactory
 
@@ -25,3 +24,10 @@ class TestWikiRevisionsTestCase(RevisionTemplate.BaseTestCase):
 
     def build_owner(self):
         return UserFactory()
+
+    def localSetUp(self):
+        super().localSetUp()
+        self.reference_data = {
+            'title': self.entity.title,
+            'richDescription': self.entity.rich_description,
+        }

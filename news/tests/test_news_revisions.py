@@ -25,3 +25,10 @@ class TestNewsRevisionsTestCase(RevisionTemplate.BaseTestCase):
 
     def build_owner(self):
         return EditorFactory()
+
+    def localSetUp(self):
+        super().localSetUp()
+        self.reference_data = {
+            'title': self.entity.title,
+            'richDescription': self.entity.rich_description,
+        }
