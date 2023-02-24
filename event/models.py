@@ -6,6 +6,8 @@ from django.utils.translation import gettext, gettext_lazy as _
 
 from auditlog.registry import auditlog
 from django.db import models
+
+from core.lib import datetime_utciso
 from core.models import (ArticleMixin, AttachmentMixin, BookmarkMixin, CommentMixin, Entity, FollowMixin,
                          NotificationMixin)
 
@@ -170,6 +172,37 @@ class Event(RichDescriptionMediaMixin, TitleMixin, CommentMixin, BookmarkMixin, 
             child.owner = self.owner
             child.group = self.group
             child.save()
+
+    def map_rich_text_fields(self, callback):
+        # Welcome message is for email, and should be treated differently.
+        # self.attendee_welcome_mail_content = callback(self.attendee_welcome_mail_content)
+        self.rich_description = callback(self.rich_description)
+        self.abstract = callback(self.abstract)
+
+
+    def serialize(self):
+        return {
+            'title': self.title,
+            'richDescription': self.rich_description,
+            'abstract': self.abstract,
+            'startDate': datetime_utciso(self.start_date),
+            'endDate': datetime_utciso(self.end_date),
+            'parentGuid': str(self.parent_id) if self.parent else None,
+            'slotsAvailable': self.slots_available,
+            'sharedViaSlot': self.shared_via_slot,
+            'location': self.location,
+            'locationAddress': self.location_address,
+            'locationLink': self.location_link,
+            'externalLink': self.external_link,
+            'ticketLink': self.ticket_link,
+            'maxAttendees': self.max_attendees,
+            'rsvp': self.rsvp,
+            'attendEventWithoutAccount': self.attend_event_without_account,
+            'qrAccess': self.qr_access,
+            'attendeeWelcomeMailContent': self.attendee_welcome_mail_content,
+            'attendeeWelcomeMailSubject': self.attendee_welcome_mail_subject,
+            **super().serialize(),
+        }
 
 
 class EventAttendee(models.Model):

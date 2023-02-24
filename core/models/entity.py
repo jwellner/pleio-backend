@@ -11,7 +11,7 @@ from model_utils.managers import InheritanceManager
 from notifications.models import Notification
 
 from core.constances import ENTITY_STATUS, USER_ROLES
-from core.lib import get_acl, datetime_isoformat, get_model_name, tenant_schema
+from core.lib import get_acl, datetime_isoformat, get_model_name, tenant_schema, get_access_id, datetime_utciso
 from core.models.tags import TagsModel
 from core.models.shared import read_access_default, write_access_default
 
@@ -241,12 +241,23 @@ class Entity(TagsModel):
         return False
 
     def serialize(self):
-        """
-        Result is a dict that contains all values that can be updated
-          on the entity, in such a way that comparing the values before
-          and after update can be done. @see core.Revision.
-        """
-        raise NotImplementedError()
+        return {
+            'ownerGuid': self.owner.guid if self.owner else '',
+            'groupGuid': self.group.guid if self.group else '',
+            'statusPublished': self.status_published.value,
+            'timePublished': datetime_utciso(self.published),
+            'timeCreated': datetime_utciso(self.created_at),
+            'scheduleArchiveEntity': datetime_utciso(self.schedule_archive_after),
+            'scheduleDeleteEntity': datetime_utciso(self.schedule_delete_after),
+            'accessId': get_access_id(self.read_access),
+            'writeAccessId': get_access_id(self.write_access),
+            'suggestedItems': [str(i) for i in self.suggested_items or []],
+            'tags': sorted(self.tags),
+            'tagCategories': self.category_tags,
+            'isPinned': self.is_pinned,
+            'isFeatured': self.is_featured,
+            'isRecommended': self.is_recommended,
+        }
 
 
 class EntityView(models.Model):
@@ -262,8 +273,3 @@ class EntityViewCount(models.Model):
     views = models.IntegerField(default=0)
     created_at = models.DateTimeField(default=timezone.now)
     updated_at = models.DateTimeField(default=timezone.now)
-
-
-def str_datetime(value: timezone.datetime):
-    if value:
-        return str(value.astimezone(timezone.utc))

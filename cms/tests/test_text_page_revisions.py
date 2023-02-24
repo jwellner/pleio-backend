@@ -22,3 +22,10 @@ class TestTextPageRevisionsTestCase(RevisionTemplate.BaseTestCase):
             'tags': [],
             'accessId': get_access_id(self.entity.read_access),
         }
+
+    def localSetUp(self):
+        super().localSetUp()
+        self.reference_data = {
+            'title': self.entity.title,
+            'richDescription': self.entity.rich_description,
+        }

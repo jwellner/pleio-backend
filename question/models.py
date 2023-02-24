@@ -9,7 +9,8 @@ from core.models.featured import FeaturedCoverMixin
 from core.models.mixin import TitleMixin, RichDescriptionMediaMixin
 
 
-class Question(RichDescriptionMediaMixin, TitleMixin, VoteMixin, BookmarkMixin, FollowMixin, CommentMixin, MentionMixin, FeaturedCoverMixin, ArticleMixin, AttachmentMixin, Entity):
+class Question(RichDescriptionMediaMixin, TitleMixin, VoteMixin, BookmarkMixin, FollowMixin, CommentMixin, MentionMixin, FeaturedCoverMixin, ArticleMixin,
+               AttachmentMixin, Entity):
     """
     Question
     """
@@ -90,6 +91,19 @@ class Question(RichDescriptionMediaMixin, TitleMixin, VoteMixin, BookmarkMixin, 
     @property
     def rich_fields(self):
         return [self.rich_description]
+
+    def map_rich_text_fields(self, callback):
+        self.rich_description = callback(self.rich_description)
+        self.abstract = callback(self.abstract)
+
+    def serialize(self):
+        return {
+            'title': self.title,
+            'richDescription': self.rich_description,
+            'abstract': self.abstract,
+            'featured': self.serialize_featured(),
+            **super().serialize(),
+        }
 
 
 auditlog.register(Question)

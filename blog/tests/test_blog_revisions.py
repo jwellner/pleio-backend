@@ -23,5 +23,12 @@ class TestBlogRevisionsTestCase(RevisionTemplate.BaseTestCase):
                            is_recommended=False,
                            is_featured=False)
 
+    def localSetUp(self):
+        super().localSetUp()
+        self.reference_data = {
+            'title': self.entity.title,
+            'richDescription': self.entity.rich_description,
+        }
+
     def build_owner(self):
         return UserFactory()

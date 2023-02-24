@@ -6,7 +6,8 @@ from core.models.featured import FeaturedCoverMixin
 from core.models.mixin import TitleMixin, RichDescriptionMediaMixin
 
 
-class Discussion(RichDescriptionMediaMixin, TitleMixin, VoteMixin, BookmarkMixin, FollowMixin, CommentMixin, MentionMixin, FeaturedCoverMixin, ArticleMixin, AttachmentMixin, Entity):
+class Discussion(RichDescriptionMediaMixin, TitleMixin, VoteMixin, BookmarkMixin, FollowMixin, CommentMixin, MentionMixin, FeaturedCoverMixin, ArticleMixin,
+                 AttachmentMixin, Entity):
     class Meta:
         ordering = ['-published']
 
@@ -35,6 +36,17 @@ class Discussion(RichDescriptionMediaMixin, TitleMixin, VoteMixin, BookmarkMixin
     @property
     def rich_fields(self):
         return [self.rich_description]
+
+    def map_rich_text_fields(self, callback):
+        self.rich_description = callback(self.rich_description)
+        raise NotImplementedError()
+
+    def serialize(self):
+        return {
+            'title': self.title,
+            'richDescription': self.rich_description,
+            **super().serialize()
+        }
 
 
 auditlog.register(Discussion)

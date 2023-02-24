@@ -509,6 +509,12 @@ def datetime_format(obj, seconds=False):
     return ""
 
 
+def datetime_utciso(value):
+    if isinstance(value, (django_timezone.datetime,)):
+        return value.astimezone(django_timezone.utc).isoformat()
+    return ""
+
+
 def get_client_ip(request):
     x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
 
