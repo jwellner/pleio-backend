@@ -70,9 +70,9 @@ class TiptapParserTestCase(FastTenantTestCase):
 
         self.assertSetEqual(tiptap.mentioned_users, {user_id})
 
-    def test_replace_url(self):
-        original = "https://example.com"
-        replacement = "https://google.com"
+    def test_replace_attachment(self):
+        original = "111111"
+        replacement = "99999999"
         tiptap_json = {
             'type': 'file',
             'attrs': {
@@ -81,42 +81,26 @@ class TiptapParserTestCase(FastTenantTestCase):
         }
         tiptap = Tiptap(tiptap_json)
 
-        tiptap.replace_url(original, replacement)
+        tiptap.replace_attachment(original, replacement)
         result = tiptap.tiptap_json
 
-        self.assertEqual(result['attrs']['url'], replacement)
+        self.assertEqual(result['attrs']['url'], "/attachment/%s" % replacement)
 
-    def test_replace_url_empty(self):
+    def test_replace_attachment_empty(self):
         original = ""
-        replacement = "https://google.com"
+        replacement = "8888888"
         tiptap_json = {
             'type': 'file',
             'attrs': {
-                'url': "https://example.com",
+                'url': "1111111",
             },
         }
         tiptap = Tiptap(tiptap_json)
 
-        tiptap.replace_url(original, replacement)
+        tiptap.replace_attachment(original, replacement)
         result = tiptap.tiptap_json
 
         self.assertEqual(result['attrs']['url'], tiptap_json['attrs']['url'])
-
-    def test_replace_src(self):
-        original = "https://example.com"
-        replacement = "https://google.com"
-        tiptap_json = {
-            'type': 'image',
-            'attrs': {
-                'src': original,
-            },
-        }
-        tiptap = Tiptap(tiptap_json)
-
-        tiptap.replace_src(original, replacement)
-        result = tiptap.tiptap_json
-
-        self.assertEqual(result['attrs']['src'], replacement)
 
     def test_validate_rich_text_attachments_with_absolute_urls(self):
         file_json = json.dumps({"content": [

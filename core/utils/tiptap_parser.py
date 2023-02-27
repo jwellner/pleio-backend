@@ -60,16 +60,14 @@ class Tiptap:
 
     def get_field(self, node, field):
         return node.get('attrs', {}).get(field, None)
-
-    def replace_url(self, original, replacement):
+    
+    def replace_attachment(self, original_uuid, replacement_uuid):
         for x in self.get_nodes('file'):
-            if self.get_field(x, 'url') == original:
-                x['attrs']['url'] = replacement
-
-    def replace_src(self, original, replacement):
+            if self.get_field(x, 'url') and str(original_uuid) in self.get_field(x, 'url'):
+                x['attrs']['url'] = '/attachment/%s' % str(replacement_uuid)
         for x in self.get_nodes('image'):
-            if self.get_field(x, 'src') == original:
-                x['attrs']['src'] = replacement
+            if self.get_field(x, 'src') and str(original_uuid) in self.get_field(x, 'src'):
+                x['attrs']['src'] = '/attachment/%s' % str(replacement_uuid)
 
     def check_for_external_urls(self):
         local_domain = ''
