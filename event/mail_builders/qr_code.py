@@ -61,7 +61,7 @@ class QrMailer(TemplateMailerBase):
         context['location'] = self.attendee.event.location
         context['locationAddress'] = self.attendee.event.location_address
         context['locationLink'] = self.attendee.event.location_link
-        context['startDate'] = self.attendee.event.start_date
+        context['start_date'] = self.attendee.event.start_date
         context['link'] = get_url(self.attendee.event)
         context['qr_filename'] = f"cid:{self.content_id}"
         return context
