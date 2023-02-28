@@ -213,7 +213,7 @@ class TestQrMailerTestCase(PleioTenantTestCase):
         self.assertEqual(context['location'], self.event.location)
         self.assertEqual(context['locationAddress'], self.event.location_address)
         self.assertEqual(context['locationLink'], self.event.location_link)
-        self.assertEqual(context['startDate'], self.event.start_date)
+        self.assertEqual(context['start_date'], self.event.start_date)
         self.assertIn(self.event.url, context['link'])
         self.assertIn(mailer.content_id, context['qr_filename'])
 
