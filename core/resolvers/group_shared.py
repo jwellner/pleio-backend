@@ -13,12 +13,14 @@ def update_name(group, clean_input):
 
 def update_icon(group, clean_input, image_owner):
     if 'icon' in clean_input:
-        icon_file = FileFolder.objects.create(
-            owner=group.owner,
-            upload=clean_input.get("icon"),
-            read_access=[ACCESS_TYPE.public],
-            write_access=[ACCESS_TYPE.user.format(image_owner.id)]
-        )
+        icon_file = None
+        if clean_input['icon']:
+            icon_file = FileFolder.objects.create(
+                owner=group.owner,
+                upload=clean_input.get("icon"),
+                read_access=[ACCESS_TYPE.public],
+                write_access=[ACCESS_TYPE.user.format(image_owner.id)]
+            )
         group.icon = icon_file
 
 

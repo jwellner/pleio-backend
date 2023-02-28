@@ -5,6 +5,7 @@ from django.core.cache import cache
 from core.factories import GroupFactory
 from core.models import ProfileField
 from core.tests.helpers import PleioTenantTestCase
+from file.factories import FileFactory
 from user.factories import UserFactory, AdminFactory
 from unittest.mock import patch, MagicMock
 
@@ -16,9 +17,13 @@ class TestEditGroupTestCase(PleioTenantTestCase):
         self.user = UserFactory()
         self.admin = AdminFactory()
         self.group = GroupFactory(owner=self.user)
+        self.icon = FileFactory(owner=self.user, upload=self.build_contentfile(self.relative_path(__file__, ['assets', 'avatar.jpg'])))
 
     def tearDown(self):
-        cache.clear()
+        self.icon.delete()
+        self.group.delete()
+        self.admin.delete()
+        self.user.delete()
         super().tearDown()
 
     def test_edit_group_anon(self):
@@ -34,7 +39,7 @@ class TestEditGroupTestCase(PleioTenantTestCase):
         variables = {
             "group": {
                 "guid": self.group.guid,
-                "name": "test"
+                "name": "test",
             }
         }
 
@@ -315,3 +320,29 @@ class TestEditGroupTestCase(PleioTenantTestCase):
         self.group.refresh_from_db()
 
         self.assertEqual(self.group.required_fields_message, EXPECTED_MESSAGE, msg="De inhoud van required_fields_message wordt niet goed geupdate.")
+
+    def test_delete_icon(self):
+        self.group.icon = self.icon
+        self.group.save()
+        mutation = """
+            mutation ($group: editGroupInput!) {
+                editGroup(input: $group) {
+                    group {
+                        guid
+                        requiredProfileFieldsMessage
+                    }
+                }
+            }
+        """
+        variables = {
+            "group": {
+                "guid": self.group.guid,
+                "icon": None
+            }
+        }
+        self.graphql_client.force_login(self.user)
+        self.graphql_client.post(mutation, variables)
+        self.group.refresh_from_db()
+
+        self.assertIsNone(self.group.icon)
+
