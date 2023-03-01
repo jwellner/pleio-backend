@@ -9,11 +9,11 @@ api:
   replicaCount: 2
   resources:
     limits:
-      cpu: 1000m
-      memory: 1024Mi
+      cpu: 500m
+      memory: 768Mi
     requests:
       cpu: 500m
-      memory: 512Mi
+      memory: 768Mi
 
 background:
   worker:
