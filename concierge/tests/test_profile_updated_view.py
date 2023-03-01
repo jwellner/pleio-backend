@@ -5,6 +5,7 @@ from django.urls import resolve, ResolverMatch
 
 from core.lib import tenant_schema
 from core.tests.helpers import PleioTenantTestCase
+from user.factories import UserFactory
 
 
 class TestViewsTestCase(PleioTenantTestCase):
@@ -12,6 +13,7 @@ class TestViewsTestCase(PleioTenantTestCase):
 
     def setUp(self):
         super().setUp()
+        self.user = UserFactory(external_id="foo")
         self.ORIGIN_TOKEN = str(uuid.uuid4())
 
     def test_url_resolves(self):
@@ -24,8 +26,12 @@ class TestViewsTestCase(PleioTenantTestCase):
         self.assertEqual(response.status_code, 400)
 
     @mock.patch('concierge.tasks.profile_updated_signal.delay')
-    def test_visit_update_notification_should_schedule_profile_update_request(self, mocked_profile_updated_signal):
+    @mock.patch('concierge.views.ApiTokenData.assert_valid')
+    def test_visit_update_notification_should_schedule_profile_update_request(self,
+                                                                              mocked_assert_valid,
+                                                                              mocked_profile_updated_signal):
         response = self.client.post(self.PROFILE_UPDATED,
-                                    {'origin_token': self.ORIGIN_TOKEN})
+                                    {'id': "foo"})
         self.assertEqual(response.status_code, 200)
-        mocked_profile_updated_signal.assert_called_with(tenant_schema(), self.ORIGIN_TOKEN)
+        mocked_assert_valid.assert_called()
+        mocked_profile_updated_signal.assert_called_with(tenant_schema(), self.user.guid)

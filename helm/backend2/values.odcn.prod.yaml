@@ -6,24 +6,24 @@ websitesManual:
 cspReportOnly: 'False'
 
 api:
-  replicaCount: 14
+  replicaCount: 8
   resources:
     limits:
       cpu: 1500m
       memory: 1536Mi
     requests:
-      cpu: 500m
-      memory: 1024Mi
+      cpu: 1500m
+      memory: 1536Mi
 
 background:
   worker:
-    replicaCount: 4
+    replicaCount: 8
     resources:
       limits:
-        cpu: 2500m
+        cpu: 400m
         memory: 2048Mi
       requests:
-        cpu: 1500m
+        cpu: 400m
         memory: 2048Mi
   scheduler:
     resources:

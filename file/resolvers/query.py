@@ -57,13 +57,15 @@ def resolve_files(
         order_by.insert(0, 'size')
     if orderBy == 'timeUpdated':
         order_by.insert(0, 'updated_at')
-    elif orderBy == ['timeCreated']:
+    elif orderBy == 'timeCreated':
+        order_by.insert(0, 'created_at')
+    elif orderBy == 'timePublished':
         order_by.insert(0, 'published')
     elif orderBy == 'readAccessWeight':
         order_by.insert(0, 'read_access_weight')
     elif orderBy == 'writeAccessWeight':
         order_by.insert(0, 'write_access_weight')
-    elif orderBy == ['lastDownload']:
+    elif orderBy == 'lastDownload':
         order_by.insert(0, 'last_download')
 
     if orderDirection == 'desc':

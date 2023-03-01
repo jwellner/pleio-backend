@@ -10,7 +10,7 @@ from core import config
 from core.lib import access_id_to_acl, strip_exif
 from core.mail_builders.user_import_failed_mailer import schedule_user_import_failed
 from core.mail_builders.user_import_success_mailer import schedule_user_import_success
-from core.models import Group, Entity, Widget, Comment, ProfileField, UserProfileField, ResizedImage, Attachment
+from core.models import Group, Entity, Comment, ProfileField, UserProfileField, ResizedImage, Attachment
 from django.utils import translation
 from django_tenants.utils import schema_context
 
@@ -140,8 +140,6 @@ class UserCsvRowImporter():
                 pass
 
 
-
-
 @shared_task(bind=True, ignore_result=True)
 def replace_domain_links(self, schema_name, replace_domain=None):
     # pylint: disable=unused-argument
@@ -161,6 +159,9 @@ def replace_domain_links(self, schema_name, replace_domain=None):
             replace_domain = tenant_domain
 
         def _replace_links(text):
+            if not isinstance(text, (str,)):
+                return text
+
             # make absolute links relative
             text = text.replace(f"https://{replace_domain}/", f"/")
 
@@ -201,54 +202,28 @@ def replace_domain_links(self, schema_name, replace_domain=None):
         entities = Entity.objects.all().select_subclasses()
 
         for entity in entities:
-            if hasattr(entity, 'rich_description'):
-                rich_description = _replace_links(entity.rich_description)
-
-                if rich_description != entity.rich_description:
-                    entity.rich_description = rich_description
-                    entity.save()
+            snapshot = entity.serialize()
+            entity.map_rich_text_fields(_replace_links)
+            if snapshot != entity.serialize():
+                entity.save()
 
         # -- Replace group description
         groups = Group.objects.all()
 
         for group in groups:
-            rich_description = _replace_links(group.rich_description)
-            introduction = _replace_links(group.introduction)
-            welcome_message = _replace_links(group.welcome_message)
-
-            if rich_description != group.rich_description or \
-                    introduction != group.introduction or \
-                    welcome_message != group.welcome_message:
-                group.rich_description = rich_description
-                group.introduction = introduction
-                group.welcome_message = welcome_message
+            snapshot = group.serialize()
+            group.map_rich_text_fields(_replace_links)
+            if snapshot != group.serialize():
                 group.save()
 
         # -- Replace comment description
         comments = Comment.objects.all()
 
         for comment in comments:
-            rich_description = _replace_links(comment.rich_description)
-
-            if rich_description != comment.rich_description:
-                comment.rich_description = rich_description
+            snapshot = comment.serialize()
+            comment.map_rich_text_fields(_replace_links)
+            if snapshot != comment.serialize():
                 comment.save()
-
-        # -- Replace widget settings
-        widgets = Widget.objects.all()
-
-        for widget in widgets:
-            changed = False
-            if widget.settings:
-                for setting in widget.settings:
-                    if 'value' in setting and isinstance(setting.get('value'), str):
-                        new_value = _replace_links(setting.get('value'))
-                        if new_value != setting.get('value'):
-                            setting['value'] = new_value
-                            changed = True
-
-            if changed:
-                widget.save()
 
     logger.info("Done replacing links")
 

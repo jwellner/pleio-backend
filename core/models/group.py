@@ -1,5 +1,7 @@
 import uuid
 import logging
+from copy import deepcopy
+
 from auditlog.registry import auditlog
 from django.apps import apps
 from django.contrib.postgres.fields import ArrayField
@@ -8,6 +10,7 @@ from django.db import models
 from django.db.models import Q
 from django.utils.text import slugify
 from django.utils import timezone
+
 from core.lib import ACCESS_TYPE
 from core.constances import USER_ROLES
 from core.models.featured import FeaturedCoverMixin
@@ -232,7 +235,7 @@ class Group(TagsModel, FeaturedCoverMixin, AttachmentMixin):
             self.introduction = attachment_map.replace(self.introduction)
 
         for widget_id, widget in enumerate(self.widget_repository):
-            for setting_id, setting in enumerate(widget.settings):
+            for setting_id, setting in enumerate(widget['settings']):
                 attachment_id = setting.get('attachmentId')
                 if attachment_map.has_attachment(attachment_id):
                     setting['attachmentId'] = attachment_map.translate(attachment_id)
@@ -241,6 +244,18 @@ class Group(TagsModel, FeaturedCoverMixin, AttachmentMixin):
                     setting['value'] = None
                 self.widget_repository[widget_id]['settings'][setting_id] = setting
 
+    def map_rich_text_fields(self, callback):
+        # Welcome message is for email, should be treated differently
+        # self.welcome_message = callback(self.welcome_message)
+        self.rich_description = callback(self.rich_description)
+        self.introduction = callback(self.introduction)
+
+        new_widgets = []
+        for widget in self.widget_repository:
+            serializer = WidgetSerializer(widget)
+            serializer.map_rich_fields(callback)
+            new_widgets.append(serializer.serialize())
+        self.widget_repository = new_widgets
 
     def search_read_access(self):
         return [ACCESS_TYPE.public]
@@ -268,6 +283,33 @@ class Group(TagsModel, FeaturedCoverMixin, AttachmentMixin):
             attachment_size = e.get('total_size', 0)
 
         return file_folder_size + attachment_size
+
+    def serialize(self):
+        return {
+            'name': self.name,
+            'ownerGuid': self.owner.guid if self.owner else '',
+            'richDescription': self.rich_description or '',
+            'intro': self.introduction or '',
+            'isIntroductionPublic': self.is_introduction_public,
+            'welcomeMessage': self.welcome_message or '',
+            'requiredProfileFieldsMessage': self.required_fields_message or '',
+            'icon': self.icon_id,
+            'isFeatured': self.is_featured,
+            'featured': self.serialize_featured(),
+            'isClosed': self.is_closed,
+            'isMembershipOnRequest': self.is_membership_on_request,
+            'isLeavingGroupDisabled': self.is_leaving_group_disabled,
+            'isAutoMembershipEnabled': self.is_auto_membership_enabled,
+            'isSubmitUpdatesEnabled': self.is_submit_updates_enabled,
+            'isHidden': self.is_hidden,
+            'autoNotification': self.auto_notification,
+            'plugins': self.plugins,
+            'defaultTags': sorted(self.content_presets.get('defaultTags') or []),
+            'defaultTagCategories': deepcopy(self.content_presets.get('defaultTagCategories') or []),
+            'widgets': deepcopy(self.widget_repository),
+            'tags': sorted(self.tags),
+            'tagCategories': self.category_tags,
+        }
 
 
 class GroupMembership(models.Model):

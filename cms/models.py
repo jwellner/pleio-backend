@@ -1,9 +1,10 @@
 import uuid
+from copy import deepcopy
+
 from auditlog.registry import auditlog
 from django.db import models
 
 from cms.row_resolver import RowSerializer
-from core.lib import get_access_id
 from core.models import Entity, AttachmentMixin, RevisionMixin
 from core.constances import USER_ROLES
 from django.contrib.postgres.fields import ArrayField
@@ -11,6 +12,7 @@ from django.contrib.postgres.fields import ArrayField
 from core.models.mixin import TitleMixin, RichDescriptionMediaMixin
 
 from core.models.rich_fields import ReplaceAttachments
+from core.widget_resolver import WidgetSerializer
 
 
 class Page(RichDescriptionMediaMixin, TitleMixin, AttachmentMixin, RevisionMixin, Entity):
@@ -90,31 +92,55 @@ class Page(RichDescriptionMediaMixin, TitleMixin, AttachmentMixin, RevisionMixin
         for row in [RowSerializer(r) for r in self.row_repository]:
             yield from row.attachments()
 
+    def update_widgets(self, callback):
+        new_rows = []
+        for row in self.row_repository:
+            new_columns = []
+            for column in row['columns']:
+                column['widgets'] = [callback(w) for w in column.get('widgets') or []]
+                new_columns.append(column)
+            row['columns'] = new_columns
+            new_rows.append(row)
+        self.row_repository = new_rows
+
     def replace_attachments(self, attachment_map: ReplaceAttachments):
         super().replace_attachments(attachment_map)
-        for row_id, row in self.row_repository:
-            for column_id, column in row['columns']:
-                for widget_id, widget in enumerate(column['widgets']):
-                    for setting_id, setting in enumerate(widget.settings):
-                        current_id = setting.get('attachmentId')
-                        if attachment_map.has_attachment(current_id):
-                            setting['attachmentId'] = attachment_map.translate(current_id)
-                        if setting['key'] == 'richDescription' or setting.get('richDescription'):
-                            setting['richDescription'] = attachment_map.replace(setting['richDescription'] or setting['value'])
-                            setting['value'] = None
-                        self.row_repository[row_id]['columns'][column_id]['widgets'][widget_id]['settings'][setting_id] = setting
+
+        def update_attachments(widget):
+            new_settings = []
+            for setting in widget['settings']:
+                current_id = setting.get('attachmentId')
+                if attachment_map.has_attachment(current_id):
+                    setting['attachmentId'] = attachment_map.translate(current_id)
+                if setting['key'] == 'richDescription' or setting.get('richDescription'):
+                    setting['richDescription'] = attachment_map.replace(setting['richDescription'] or setting['value'])
+                    setting['value'] = None
+                new_settings.append(setting)
+            widget['settings'] = new_settings
+            return widget
+
+        self.update_widgets(update_attachments)
+
+    def map_rich_text_fields(self, callback):
+        self.rich_description = callback(self.rich_description)
+
+        def change_rich_widget(widget):
+            widget_serializer = WidgetSerializer(widget)
+            widget_serializer.map_rich_fields(callback)
+            return widget_serializer.serialize()
+
+        if self.row_repository:
+            self.update_widgets(change_rich_widget)
 
     def serialize(self):
-        if self.has_revisions():
-            return {
-                'title': self.title or '',
-                'richDescription': self.rich_description or '',
-                'tags': sorted(self.tags) or [],
-                'tagCategories': self.category_tags or [],
-                'accessId': get_access_id(self.read_access),
-                'statusPublished': self.status_published,
-            }
-        return {}
+        return {
+            'title': self.title or '',
+            'richDescription': self.rich_description or '',
+            'parentGuid': self.parent.guid if self.parent else '',
+            'position': self.position,
+            'rows': deepcopy(self.row_repository),
+            **super().serialize(),
+        }
 
     def get_media_status(self):
         if self.page_type == 'campagne':

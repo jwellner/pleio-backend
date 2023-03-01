@@ -1,19 +1,17 @@
 from auditlog.registry import auditlog
 from django.db import models
-from django.utils.text import slugify
 
 from core.constances import USER_ROLES
-from core.lib import get_access_id, get_acl
+from core.lib import get_acl
 from core.models import (ArticleMixin, AttachmentMixin, BookmarkMixin,
                          CommentMixin, Entity, FollowMixin, MentionMixin,
                          VoteMixin, RevisionMixin)
-from core.models.entity import str_datetime
 from core.models.featured import FeaturedCoverMixin
 from core.models.mixin import TitleMixin, RichDescriptionMediaMixin
 
 
 class News(RichDescriptionMediaMixin, TitleMixin, VoteMixin, BookmarkMixin, FollowMixin, CommentMixin,
-           FeaturedCoverMixin, ArticleMixin, MentionMixin, AttachmentMixin, 
+           FeaturedCoverMixin, ArticleMixin, MentionMixin, AttachmentMixin,
            RevisionMixin, Entity):
     """
     News
@@ -50,25 +48,18 @@ class News(RichDescriptionMediaMixin, TitleMixin, VoteMixin, BookmarkMixin, Foll
     def rich_fields(self):
         return [self.rich_description]
 
+    def map_rich_text_fields(self, callback):
+        self.rich_description = callback(self.rich_description)
+        self.abstract = callback(self.abstract)
+
     def serialize(self):
         return {
             'title': self.title or '',
             'richDescription': self.rich_description or '',
-            'accessId': get_access_id(self.read_access),
-            'writeAccessId': get_access_id(self.write_access),
-            'tags': sorted(self.tags) or [],
-            'tagCategories': self.category_tags or [],
-            'timeCreated': str_datetime(self.created_at),
-            'timePublished': str_datetime(self.published),
-            'statusPublished': self.status_published,
-            'scheduleArchiveEntity': str_datetime(self.schedule_archive_after),
-            'scheduleDeleteEntity': str_datetime(self.schedule_delete_after),
             'abstract': self.abstract or '',
             'source': self.source or '',
-            'isFeatured': bool(self.is_featured),
             'featured': self.serialize_featured(),
-            'ownerGuid': self.owner.guid if self.owner else None,
-            'suggestedItems': [str(item) for item in self.suggested_items or []],
+            **super().serialize()
         }
 
 

@@ -1,11 +1,13 @@
 import logging
+from hashlib import md5
 
 import requests
 from django.conf import settings
+from django.utils import timezone
 from requests import ConnectionError as RequestConnectionError
 
 from concierge.constances import FETCH_AVATAR_URL, FETCH_PROFILE_URL, FETCH_MAIL_PROFILE_URL
-from core.lib import get_account_url
+from core.lib import get_account_url, tenant_api_token
 from user.models import User
 
 logger = logging.getLogger(__name__)
@@ -72,3 +74,48 @@ def fetch_mail_profile(email):
             "error": str(e),
             "status_code": response.status_code if response else None
         }
+
+
+class ApiTokenData:
+    def __init__(self, request):
+        self.request = request
+        self._data = None
+
+    @staticmethod
+    def flat_data(data):
+        return {k: v for k, v in data.items()}
+
+    @property
+    def data(self):
+        if not self._data:
+            if self.request.method == 'POST':
+                self._data = self.flat_data(self.request.POST)
+            else:
+                self._data = self.flat_data(self.request.GET)
+        return self._data
+
+    def assert_valid_checksum(self):
+        expected_checksum = md5(tenant_api_token().encode())
+        for k, v in sorted(self.data.items(), key=lambda x: [str(v).lower() for v in x]):
+            if k == 'checksum':
+                # Checksum is not included in the checksum.
+                continue
+
+            expected_checksum.update(k.encode())
+            expected_checksum.update(v.encode())
+
+        assert self.data.get('checksum') == expected_checksum.hexdigest()[:12], "Invalid checksum"
+
+    def assert_valid_timestamp(self):
+        assert self.data.get('timestamp'), "Timestamp is missing"
+
+        try:
+            due = timezone.now() - timezone.timedelta(minutes=int(settings.ACCOUNT_DATA_EXPIRE))
+            timestamp = timezone.datetime.fromisoformat(self.data.get('timestamp', ''))
+            assert timestamp > due, "Data expired"
+        except ValueError:
+            raise AssertionError("Invalid timestmap format.")
+
+    def assert_valid(self):
+        self.assert_valid_checksum()
+        self.assert_valid_timestamp()

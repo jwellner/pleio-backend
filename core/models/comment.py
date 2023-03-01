@@ -7,7 +7,7 @@ from django.utils import timezone
 from .mixin import VoteMixin, CommentMixin
 from .rich_fields import MentionMixin, AttachmentMixin
 from core.constances import USER_ROLES
-from core.lib import get_model_name, tenant_schema
+from core.lib import get_model_name, tenant_schema, datetime_utciso
 
 
 class CommentManager(models.Manager):
@@ -121,6 +121,19 @@ class Comment(VoteMixin, MentionMixin, AttachmentMixin, CommentMixin):
 
     def index_instance(self):
         return self.get_root_container()
+
+    def map_rich_text_fields(self, callback):
+        self.rich_description = callback(self.rich_description)
+
+    def serialize(self):
+        return {
+            'ownerGuid': self.owner.guid if self.owner else '',
+            'name': self.owner.name if self.owner and not self.name else self.name,
+            'email': self.owner.email if self.owner and not self.email else self.email,
+            'richDescription': self.rich_description,
+            'timeCreated': datetime_utciso(self.created_at),
+            'containerGuid': str(self.container.id) if self.container else '',
+        }
 
 
 class CommentRequest(models.Model):

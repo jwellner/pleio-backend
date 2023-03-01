@@ -20,11 +20,8 @@ def copy_event(event_id, user, parent=None):
     attachments = Attachment.objects.filter(pk__in=[a for a in entity.lookup_attachments()])
     for x in attachments:
         attachment_copy = x.make_copy(user)
-        original = "/attachment/%s" % x.id
-        replacement = "/attachment/%s" % attachment_copy.id
         tiptap = Tiptap(entity.rich_description)
-        tiptap.replace_url(original, replacement)
-        tiptap.replace_src(original, replacement)
+        tiptap.replace_attachment(x.id, attachment_copy.id)
         entity.rich_description = json.dumps(tiptap.tiptap_json)
 
     if entity.featured_image:

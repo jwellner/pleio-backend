@@ -24,6 +24,15 @@ class Poll(TitleMixin, Entity):
             prefix, self.guid, self.slug
         ).lower()
 
+    def map_rich_text_fields(self, callback):
+        pass
+
+    def serialize(self):
+        return {
+            'title': self.title,
+            **super().serialize(),
+        }
+
 
 class PollChoice(VoteMixin):
     class Meta:

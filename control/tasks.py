@@ -512,7 +512,8 @@ def copy_attachments(source_schema, target_schema, target_entity):
     Copy entity attachments and replace rich_field links
     """
     with schema_context(source_schema):
-        attachments = Attachment.objects.filter(pk__in=[item for item in target_entity.lookup_attachments()])
+        # make it a list so it get looked up within context
+        attachments = list(Attachment.objects.filter(pk__in=[*target_entity.lookup_attachments()]))
 
     attachment_map = ReplaceAttachments()
     for attachment in attachments:
@@ -591,6 +592,7 @@ def copy_group_to_tenant(source_schema, action_user_id, group_id, target_schema)
         target_group.created_at = now
         target_group.updated_at = now
         target_group.is_featured = False
+        target_group.is_auto_membership_enabled = False
 
         copy_entity_file(source_schema, target_schema, target_group, "featured_image")
         copy_entity_file(source_schema, target_schema, target_group, "icon")

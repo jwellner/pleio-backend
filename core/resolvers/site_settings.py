@@ -729,12 +729,21 @@ def resolve_role_options(obj, info):
 @site_settings_private.field('siteAccessRequests')
 def resolve_site_access_requests(obj, info):
     # pylint: disable=unused-argument
-    return {'edges': [{
-        'email': r.email,
-        'name': r.name,
-        'status': 'accepted' if r.accepted else 'pending',
-        'timeUpdated': r.updated_at,
-    } for r in SiteAccessRequest.objects.order_by('accepted', 'created_at')]}
+    records = SiteAccessRequest.objects.filter_pending()
+    return {
+        'edges': records.serialize()
+    }
+
+
+@site_settings_private.field('siteAccessApproved')
+def resolve_approved_access_requests(obj, info):
+    # pylint: disable=unused-argument
+    records = SiteAccessRequest.objects \
+        .filter_accepted() \
+        .last_modified_on_top()
+    return {
+        'edges': records.serialize()
+    }
 
 
 @site_settings_private.field('deleteAccountRequests')

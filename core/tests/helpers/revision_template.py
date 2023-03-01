@@ -26,6 +26,14 @@ class RevisionTemplate:
         useSource = False
         useParent = False
 
+        reference_data = {}
+
+        def assertReferenceUnchanged(self, content, *is_not_reference):
+            for key, value in self.reference_data.items():
+                if key in is_not_reference:
+                    continue
+                self.assertEqual(content[key], value)
+
         def build_entity(self, owner):
             raise NotImplementedError()
 
@@ -114,9 +122,9 @@ class RevisionTemplate:
             """
 
         def applyChanges(self, **kwargs):
-            for key, value in self.entity.serialize().items():
-                if key != "statusPublished":
-                    self.variables['input'][key] = value
+            assert self.reference_data, "Add two or more fields to test if they are not changed in the process."
+            for key, value in self.reference_data.items():
+                self.variables['input'][key] = value
             for key, value in kwargs.items():
                 self.variables['input'][key] = value
             self.graphql_client.force_login(self.admin)
@@ -139,6 +147,7 @@ class RevisionTemplate:
             self.assertEqual(revision['content']['title'], self.variables['input']['title'])
             self.assertEqual(revision['content']['richDescription'], self.variables['input']['richDescription'])
             self.assertEqual(revision['type'], 'update')
+            self.assertReferenceUnchanged(revision['content'], 'title')
 
         def test_mutate_rich_description(self):
             if not self.useCommonTests:
@@ -152,7 +161,7 @@ class RevisionTemplate:
             self.assertEqual(revision['author']['guid'], self.admin.guid)
             self.assertEqual(revision['changedFields'], ['richDescription'])
             self.assertEqual(revision['content']['richDescription'], self.variables['input']['richDescription'])
-            self.assertEqual(revision['content']['title'], self.variables['input']['title'])
+            self.assertReferenceUnchanged(revision['content'], 'richDescription')
 
         def test_mutate_access_id(self):
             if not self.useCommonTests:
@@ -166,7 +175,7 @@ class RevisionTemplate:
             self.assertEqual(revision['author']['guid'], self.admin.guid)
             self.assertEqual(revision['changedFields'], ['accessId'])
             self.assertEqual(revision['content']['accessId'], self.variables['input']['accessId'])
-            self.assertEqual(revision['content']['title'], self.variables['input']['title'])
+            self.assertReferenceUnchanged(revision['content'], 'accessId')
 
         def test_mutate_write_access_id(self):
             if not self.useWriteAccess:
@@ -180,7 +189,7 @@ class RevisionTemplate:
             self.assertEqual(revision['author']['guid'], self.admin.guid)
             self.assertEqual(revision['changedFields'], ['writeAccessId'])
             self.assertEqual(revision['content']['writeAccessId'], self.variables['input']['writeAccessId'])
-            self.assertEqual(revision['content']['title'], self.variables['input']['title'])
+            self.assertReferenceUnchanged(revision['content'], 'writeAccessId')
 
         def test_mutate_tags(self):
             if not self.useCommonTests:
@@ -194,7 +203,7 @@ class RevisionTemplate:
             self.assertEqual(revision['author']['guid'], self.admin.guid)
             self.assertEqual(revision['changedFields'], ['tags'])
             self.assertEqual(revision['content']['tags'], sorted(self.variables['input']['tags']))
-            self.assertEqual(revision['content']['title'], self.variables['input']['title'])
+            self.assertReferenceUnchanged(revision['content'], 'tags')
 
         def test_mutate_tag_categories(self):
             if not self.useCommonTests:
@@ -208,7 +217,7 @@ class RevisionTemplate:
             self.assertEqual(revision['author']['guid'], self.admin.guid)
             self.assertEqual(revision['changedFields'], ['tagCategories'])
             self.assertEqual(revision['content']['tagCategories'], self.variables['input']['tagCategories'])
-            self.assertEqual(revision['content']['title'], self.variables['input']['title'])
+            self.assertReferenceUnchanged(revision['content'], 'tagCategories')
 
         def test_mutate_time_created(self):
             if not self.useTimeCreated:
@@ -224,7 +233,7 @@ class RevisionTemplate:
             self.assertEqual(revision['author']['guid'], self.admin.guid)
             self.assertEqual(revision['changedFields'], ['timeCreated'])
             self.assertDateEqual(revision['content']['timeCreated'], self.variables['input']['timeCreated'])
-            self.assertEqual(revision['content']['title'], self.variables['input']['title'])
+            self.assertReferenceUnchanged(revision['content'], 'timeCreated')
 
         def test_mutate_time_published(self):
             if not self.useArchiveDeletePublish:
@@ -241,7 +250,7 @@ class RevisionTemplate:
             self.assertEqual(revision['changedFields'], ['timePublished'])
             self.assertDateEqual(revision['content']['timePublished'], self.variables['input']['timePublished'])
             self.assertEqual(revision['statusPublishedChanged'], "published")
-            self.assertEqual(revision['content']['title'], self.variables['input']['title'])
+            self.assertReferenceUnchanged(revision['content'], 'timePublished')
 
         def test_mutate_schedule_archive_entity(self):
             if not self.useArchiveDeletePublish:
@@ -256,7 +265,7 @@ class RevisionTemplate:
             self.assertEqual(revision['changedFields'], ['scheduleArchiveEntity'])
             self.assertEqual(revision['statusPublishedChanged'], "archived")
             self.assertDateEqual(revision['content']['scheduleArchiveEntity'], self.variables['input']['scheduleArchiveEntity'])
-            self.assertEqual(revision['content']['title'], self.variables['input']['title'])
+            self.assertReferenceUnchanged(revision['content'], 'scheduleArchiveEntity')
 
         def test_mutate_schedule_delete_entity(self):
             if not self.useArchiveDeletePublish:
@@ -270,7 +279,7 @@ class RevisionTemplate:
             self.assertEqual(revision['author']['guid'], self.admin.guid)
             self.assertEqual(revision['changedFields'], ['scheduleDeleteEntity'])
             self.assertDateEqual(revision['content']['scheduleDeleteEntity'], self.variables['input']['scheduleDeleteEntity'])
-            self.assertEqual(revision['content']['title'], self.variables['input']['title'])
+            self.assertReferenceUnchanged(revision['content'], 'scheduleDeleteEntity')
 
         def test_mutate_abstract(self):
             if not self.useAbstract:
@@ -284,7 +293,7 @@ class RevisionTemplate:
             self.assertEqual(revision['author']['guid'], self.admin.guid)
             self.assertEqual(revision['changedFields'], ['abstract'])
             self.assertEqual(revision['content']['abstract'], self.variables['input']['abstract'])
-            self.assertEqual(revision['content']['title'], self.variables['input']['title'])
+            self.assertReferenceUnchanged(revision['content'], 'abstract')
 
         def test_mutate_is_recommended(self):
             if not self.useIsRecommended:
@@ -298,7 +307,7 @@ class RevisionTemplate:
             self.assertEqual(revision['author']['guid'], self.admin.guid)
             self.assertEqual(revision['changedFields'], ['isRecommended'])
             self.assertEqual(revision['content']['isRecommended'], self.variables['input']['isRecommended'])
-            self.assertEqual(revision['content']['title'], self.variables['input']['title'])
+            self.assertReferenceUnchanged(revision['content'], 'isRecommended')
 
         def test_mutate_is_featured(self):
             if not self.useIsFeatured:
@@ -312,7 +321,7 @@ class RevisionTemplate:
             self.assertEqual(revision['author']['guid'], self.admin.guid)
             self.assertEqual(revision['changedFields'], ['isFeatured'])
             self.assertEqual(revision['content']['isFeatured'], self.variables['input']['isFeatured'])
-            self.assertEqual(revision['content']['title'], self.variables['input']['title'])
+            self.assertReferenceUnchanged(revision['content'], 'isFeatured')
 
         def test_mutate_featured_video(self):
             if not self.useFeatured:
@@ -329,7 +338,7 @@ class RevisionTemplate:
             self.assertEqual(revision['author']['guid'], self.admin.guid)
             self.assertEqual(revision['changedFields'], ['featured'])
             self.assertDictEqual({k: v for k, v in revision['content']['featured'].items() if v}, self.variables['input']['featured'])
-            self.assertEqual(revision['content']['title'], self.variables['input']['title'])
+            self.assertReferenceUnchanged(revision['content'], 'featured')
 
         def test_mutate_featured_image(self):
             if not self.useFeatured:
@@ -355,7 +364,7 @@ class RevisionTemplate:
                 "image": self.entity.featured_image.download_url,
                 "positionY": 10,
             })
-            self.assertEqual(revision['content']['title'], self.variables['input']['title'])
+            self.assertReferenceUnchanged(revision['content'], 'featured')
 
         def test_mutate_featured_image_twice(self):
             if not self.useFeatured:
@@ -392,7 +401,7 @@ class RevisionTemplate:
             left = revision['content']['group']['guid'] if revision['content'].get('group') else None
             right = self.variables['input']['groupGuid']
             self.assertEqual(left, right)
-            self.assertEqual(revision['content']['title'], self.variables['input']['title'])
+            self.assertReferenceUnchanged(revision['content'], 'groupGuid')
 
         def test_mutate_owner_guid(self):
             if not self.useOwnerGuid:
@@ -409,7 +418,7 @@ class RevisionTemplate:
             left = revision['content']['owner']['guid'] if revision['content'].get('owner') else None
             right = self.variables['input']['ownerGuid']
             self.assertEqual(left, right)
-            self.assertEqual(revision['content']['title'], self.variables['input']['title'])
+            self.assertReferenceUnchanged(revision['content'], 'ownerGuid')
 
         def test_mutate_suggested_items(self):
             if not self.useSuggestedItems:
@@ -429,7 +438,7 @@ class RevisionTemplate:
             self.assertEqual(revision['author']['guid'], self.admin.guid)
             self.assertEqual(revision['changedFields'], ['suggestedItems'])
             self.assertListEqual([item['guid'] for item in revision['content']['suggestedItems']], self.variables['input']['suggestedItems'])
-            self.assertEqual(revision['content']['title'], self.variables['input']['title'])
+            self.assertReferenceUnchanged(revision['content'], 'suggestedItems')
 
         def test_mutate_source(self):
             if not self.useSource:
@@ -443,7 +452,7 @@ class RevisionTemplate:
             self.assertEqual(revision['author']['guid'], self.admin.guid)
             self.assertEqual(revision['changedFields'], ['source'])
             self.assertEqual(revision['content']['source'], self.variables['input']['source'])
-            self.assertEqual(revision['content']['title'], self.variables['input']['title'])
+            self.assertReferenceUnchanged(revision['content'], 'source')
 
         def test_mutate_parent(self):
             if not self.useParent:
@@ -460,4 +469,4 @@ class RevisionTemplate:
             self.assertEqual(revision['author']['guid'], self.admin.guid)
             self.assertEqual(revision['changedFields'], ['containerGuid'])
             self.assertEqual(revision['content']['parent']['guid'], self.variables['input']['containerGuid'])
-            self.assertEqual(revision['content']['title'], self.variables['input']['title'])
+            self.assertReferenceUnchanged(revision['content'], 'containerGuid')

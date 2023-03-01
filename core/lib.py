@@ -1,4 +1,6 @@
 import base64
+from hashlib import md5
+
 import html2text
 import ipaddress
 import json
@@ -12,14 +14,12 @@ import uuid
 
 from bs4 import BeautifulSoup
 from colour import Color
-from functools import wraps
 from inspect import isfunction
 from django.apps import apps
 from django.conf import settings
 from django.core.cache import cache
 from django.core.validators import URLValidator
 from django.db import connection
-from django.http import HttpRequest, HttpResponseForbidden
 from django.utils import timezone as django_timezone
 from django.utils.module_loading import import_string
 from django.utils.text import slugify
@@ -32,7 +32,6 @@ from urllib.parse import urljoin
 from core import config
 from core.constances import ACCESS_TYPE
 from core.exceptions import IgnoreIndexError, UnableToTestIndex
-from core.utils.mail import EmailSettingsTokenizer
 
 logger = logging.getLogger(__name__)
 
@@ -509,6 +508,12 @@ def datetime_format(obj, seconds=False):
     return ""
 
 
+def datetime_utciso(value):
+    if isinstance(value, (django_timezone.datetime,)):
+        return value.astimezone(django_timezone.utc).isoformat()
+    return ""
+
+
 def get_client_ip(request):
     x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
 
@@ -575,16 +580,6 @@ class NumberIncrement:
             return self.n
         finally:
             self.n = self.n + 1
-
-
-def require_tenant_api_token(f):
-    @wraps(f)
-    def test_api_token(request: HttpRequest, *args, **kwargs):
-        if request.headers.get('x-origin-site-api-token') != tenant_api_token():
-            return HttpResponseForbidden()
-        return f(request, *args, **kwargs)
-
-    return test_api_token
 
 
 def early_this_morning(reference=None):

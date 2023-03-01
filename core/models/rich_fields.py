@@ -61,11 +61,8 @@ class ReplaceAttachments:
 
     def replace(self, value):
         tiptap = Tiptap(value)
-        for attachment, new_attachment in self.attachment_map:
-            original = "/attachment/%s" % attachment
-            replacement = "/attachment/%s" % new_attachment
-            tiptap.replace_url(original, replacement)
-            tiptap.replace_src(original, replacement)
+        for attachment, new_attachment in self.attachment_map.items():
+            tiptap.replace_attachment(attachment, new_attachment)
         return json.dumps(tiptap.tiptap_json)
 
     def has_attachment(self, attachment_id):

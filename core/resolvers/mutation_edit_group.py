@@ -16,6 +16,7 @@ def resolve_edit_group(_, info, input):
     user = info.context["request"].user
 
     clean_input = clean_graphql_input(input, [
+        'icon',
         'defaultTags',
         'defaultTagCategories',
         'isAutoMembershipEnabled',
