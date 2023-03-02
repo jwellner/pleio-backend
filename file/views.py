@@ -1,16 +1,19 @@
 import zipfile
+from os import path
+
 from django.core.exceptions import ObjectDoesNotExist
 from django.http import Http404, FileResponse, StreamingHttpResponse
-from django.views.decorators.cache import cache_control
 from django.shortcuts import redirect
+from django.utils import timezone
+from django.views.decorators.cache import cache_control
+
+from core.http import file_blocked_response
 from core.lib import get_tmp_file_path
 from core.models import Entity
 from core.constances import USER_ROLES
-from file.models import FileFolder
 from file.helpers.compression import add_folders_to_zip, get_download_filename
 from file.helpers.images import generate_thumbnail
-from os import path
-from django.utils import timezone
+from file.models import FileFolder
 
 
 def download(request, file_id=None, file_name=None):
@@ -25,10 +28,10 @@ def download(request, file_id=None, file_name=None):
     try:
         entity = FileFolder.objects.visible(user).get(id=file_id)
 
-        if entity.group and entity.group.is_closed and not entity.group.is_full_member(user) and not user.has_role(USER_ROLES.ADMIN):
-            raise Http404("File not found")
+        if entity.blocked:
+            return file_blocked_response(request, entity.upload.name, entity.block_reason)
 
-        if entity.scan_incidents.count() > 0:
+        if entity.group and entity.group.is_closed and not entity.group.is_full_member(user) and not user.has_role(USER_ROLES.ADMIN):
             raise Http404("File not found")
 
         return_file = entity
@@ -66,10 +69,10 @@ def embed(request, file_id=None, file_name=None):
     try:
         entity = FileFolder.objects.visible(user).get(id=file_id)
 
-        if entity.group and entity.group.is_closed and not entity.group.is_full_member(user) and not user.has_role(USER_ROLES.ADMIN):
-            raise Http404("File not found")
+        if entity.blocked:
+            return file_blocked_response(request, entity.upload.name, entity.block_reason)
 
-        if entity.scan_incidents.count() > 0:
+        if entity.group and entity.group.is_closed and not entity.group.is_full_member(user) and not user.has_role(USER_ROLES.ADMIN):
             raise Http404("File not found")
 
         return_file = entity
@@ -101,10 +104,12 @@ def featured(request, entity_guid=None):
         entity = Entity.objects.get_subclass(id=entity_guid)
 
         if hasattr(entity, 'featured_image') and entity.featured_image:
-            if entity.featured_image.scan_incidents.count() > 0:
-                raise Http404("File not found")
-
             return_file = entity.featured_image
+
+            if return_file.blocked:
+                return file_blocked_response(request,
+                                             return_file.upload.name,
+                                             return_file.block_reason)
 
             if size:
                 resized_image = entity.featured_image.get_resized_image(size)
@@ -119,7 +124,7 @@ def featured(request, entity_guid=None):
             return response
 
     except ObjectDoesNotExist:
-        raise Http404("File not found")
+        pass
 
     raise Http404("File not found")
 
@@ -140,8 +145,6 @@ def bulk_download(request):
     files = FileFolder.objects.visible(user).filter(id__in=file_ids, type=FileFolder.Types.FILE)
     for f in files:
         if f.group and f.group.is_closed and not f.group.is_full_member(user) and not user.has_role(USER_ROLES.ADMIN):
-            continue
-        if f.scan_incidents.count() > 0:
             continue
         zipf.writestr(path.basename(get_download_filename(f)), f.upload.read())
         f.last_download = timezone.now()
@@ -171,8 +174,8 @@ def thumbnail(request, file_id=None):
     except ObjectDoesNotExist:
         raise Http404("File not found")
 
-    if entity.scan_incidents.count() > 0:
-        raise Http404("File not found")
+    if entity.blocked:
+        return file_blocked_response(request, entity.upload.name, entity.block_reason)
 
     if not entity.thumbnail:
         try:

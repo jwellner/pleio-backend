@@ -4,45 +4,66 @@
 
 {% block content %}
 
-<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-    <h1 class="h2">Scan log</h1>
-    <div>
+    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+        <h1 class="h2">Scan log</h1>
         <form method="get" class="row  row-cols-lg-auto g-3 align-items-center">
-          <div class="col-12">
-            <label class="visually-hidden" for="inlineFormSelectPref">{{ form.blocked.label }}</label>
-            {{ form.blocked }}
-          </div>
-          <div class="col-12">
-            <button type="submit" class="btn btn-primary">Filter</button>
-          </div>
+            <div class="d-flex align-content-end">
+                <label class="visually-hidden" for="inlineFormSelectPref">{{ form.blocked.label }}</label>
+                <div class="me-2">{{ form.filename }}</div>
+                <div class="me-2">{{ form.blocked }}</div>
+                <button type="submit" class="btn btn-primary">Filter</button>
+            </div>
         </form>
-      </div>
-</div>
+    </div>
 
-<table class="table" width="100%">
-    <thead>
-      <tr>
-        <th scope="col" width=175>Date</th>
-        <th scope="col">File</th>
-        <th scope="col">Message</th>
-        <th scope="col">User</th>
-        <th scope="col">Link</th>
-      </tr>
-    </thead>
-    <tbody>
-      {% for log in qs %}
-      <tr>
-        <td>{{ log.date|date:'Y-m-d H:i' }}</td>
-        <td>{{ log.file_title }}</td>
-        <td>{{ log.message }}</td>
-        <td><a href="{{ log.file_owner.url }}">{{ log.file_owner }}</a></td>
-        {% if log.file %}
-            <td><a href="{{ log.file.url }}">{{ log.file.url }}</a></td>
-        {% else %}
-            <td>verwijderd</td>
-        {% endif %}
-      </tr>
-      {% endfor %}
-    </tbody>
-  </table>
+    <div class="card">
+        <div class="card-body">
+            <h5 class="card-title">
+                Scan summary
+            </h5>
+            <table class="table">
+                <tr>
+                    <th></th>
+                    <th>Files</th>
+                    <th>Attachments</th>
+                </tr>
+                <tr>
+                    <th>First scan</th>
+                    <td>{{ first_scanned_file.last_scan }}</td>
+                    <td>{{ first_scanned_attachment.last_scan }}</td>
+                </tr>
+                <tr>
+                    <th>Last scan</th>
+                    <td>{{ last_scanned_file.last_scan }}</td>
+                    <td>{{ last_scanned_attachment.last_scan }}</td>
+                </tr>
+                <tr>
+                    <th>Total</th>
+                    <td>{{ total_files }}</td>
+                    <td>{{ total_attachments }}</td>
+                </tr>
+            </table>
+        </div>
+    </div>
+
+    <table class="table" width="100%">
+        <thead>
+        <tr>
+            <th scope="col" width=175>Date</th>
+            <th scope="col">File</th>
+            <th scope="col">Message</th>
+            <th scope="col">User</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for log in qs %}
+            <tr>
+                <td>{{ log.date|date:'Y-m-d H:i' }}</td>
+                <td>{{ log.file_title }}</td>
+                <td>{{ log.message }}</td>
+                <td><a href="{{ log.file_owner.url }}">{{ log.file_owner }}</a></td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
 {% endblock %}

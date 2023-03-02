@@ -3,8 +3,6 @@ import json
 import logging
 from http import HTTPStatus
 
-from urllib.parse import urljoin
-
 import pypandoc
 import zipfile
 from datetime import datetime
@@ -15,7 +13,7 @@ from django.contrib import messages
 from django.contrib.auth import login as auth_login
 from django.contrib.auth.views import LogoutView
 from django.core import signing
-from django.core.exceptions import ObjectDoesNotExist, ValidationError
+from django.core.exceptions import ObjectDoesNotExist
 from django.http import (FileResponse, HttpResponse, HttpResponseRedirect,
                          StreamingHttpResponse, Http404)
 from django.shortcuts import redirect, render
@@ -31,7 +29,7 @@ from core import config
 from core.auth import oidc_provider_logout_url
 from core.constances import OIDC_PROVIDER_OPTIONS, USER_ROLES
 from core.forms import EditEmailSettingsForm, OnboardingForm, RequestAccessForm
-from core.http import HttpErrorReactPage, NotFoundReact, UnauthorizedReact, ForbiddenReact, NotAllowedReact
+from core.http import HttpErrorReactPage, NotFoundReact, UnauthorizedReact, ForbiddenReact, file_blocked_response
 from core.lib import (get_base_url, get_exportable_content_types, get_model_by_subtype,
                       get_tmp_file_path, is_schema_public, tenant_schema, replace_html_img_src)
 from core.mail_builders.site_access_request import schedule_site_access_request_mail
@@ -495,6 +493,9 @@ def attachment(request, attachment_id, attachment_type=None):
 
         if not attachment.can_read(user):
             raise NotFoundReact("File not found")
+
+        if attachment.blocked:
+            return file_blocked_response(request, attachment.upload.name, attachment.block_reason)
 
         return_file = attachment
 

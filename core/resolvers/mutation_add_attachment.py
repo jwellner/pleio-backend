@@ -1,6 +1,9 @@
+import os
+
 from graphql import GraphQLError
 from core.models import Attachment, AttachmentMixin
-from core.constances import NOT_LOGGED_IN, COULD_NOT_ADD
+from core.constances import NOT_LOGGED_IN, COULD_NOT_ADD, FILE_NOT_CLEAN
+
 
 def resolve_add_attachment(_, info, input):
     # pylint: disable=redefined-builtin
@@ -12,7 +15,12 @@ def resolve_add_attachment(_, info, input):
     if not input.get("file"):
         raise GraphQLError("NO_FILE")
 
-    attachment = Attachment.objects.create(upload=input.get("file"), owner=user)
+    attachment = Attachment.objects.create(upload=input.get("file"),
+                                           owner=user)
+
+    if not attachment.scan():
+        attachment.delete()
+        raise GraphQLError(FILE_NOT_CLEAN.format(os.path.basename(attachment.upload.name)))
 
     if not attachment:
         raise GraphQLError(COULD_NOT_ADD)

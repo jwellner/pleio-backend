@@ -1,6 +1,9 @@
+import os
 from collections import defaultdict
 
 from django.core.exceptions import ValidationError
+
+from core.exceptions import AttachmentVirusScanError
 
 
 class WidgetSerializerBase:
@@ -79,6 +82,9 @@ class WidgetSettingSerializer(WidgetSerializerBase):
                 attachment = Attachment.objects.get(id=attachment_input.get('id'))
             except (Attachment.DoesNotExist, ValidationError, AttributeError):
                 attachment = Attachment.objects.create(upload=attachment_input, owner=self.acting_user)
+                if not attachment.scan():
+                    attachment.delete()
+                    raise AttachmentVirusScanError(os.path.basename(attachment.upload.name))
             self.setting['attachmentId'] = str(attachment.id)
         return self.setting.get('attachmentId')
 

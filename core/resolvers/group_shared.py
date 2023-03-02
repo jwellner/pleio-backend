@@ -1,8 +1,11 @@
 from graphql import GraphQLError
 from django.core.exceptions import ValidationError
+
+from core.exceptions import AttachmentVirusScanError
 from core.models import ProfileField, GroupProfileFieldSetting
-from core.constances import INVALID_PROFILE_FIELD_GUID
+from core.constances import INVALID_PROFILE_FIELD_GUID, FILE_NOT_CLEAN
 from core.lib import ACCESS_TYPE
+from core.widget_resolver import WidgetSerializer
 from file.models import FileFolder
 
 
@@ -124,5 +127,8 @@ def update_required_profile_fields_message(group, clean_input):
 
 
 def update_widgets(group, clean_input):
-    if 'widgets' in clean_input:
-        group.widget_repository = clean_input['widgets'] or []
+    try:
+        if 'widgets' in clean_input:
+            group.widget_repository = [WidgetSerializer(w).serialize() for w in clean_input['widgets'] or []]
+    except AttachmentVirusScanError as e:
+        raise GraphQLError(FILE_NOT_CLEAN.format(str(e)))

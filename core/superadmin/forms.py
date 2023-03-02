@@ -1,13 +1,15 @@
-from core.models.agreement import CustomAgreement
 import django_filters
-
 from auditlog.models import LogEntry
+
 from django import forms
 from django.contrib.contenttypes.models import ContentType
 from django.core.validators import URLValidator
 from django.core.exceptions import ValidationError
+from django.utils.translation import gettext_lazy as _
+
 from core import config
 from core.constances import OIDC_PROVIDER_OPTIONS
+from core.models.agreement import CustomAgreement
 from file.models import ScanIncident
 
 
@@ -45,6 +47,11 @@ class ScanIncidentFilter(django_filters.FilterSet):
         field_name='file',
         lookup_expr='isnull',
         widget=forms.Select(attrs={'class': 'form-select'}, choices=((None, "Alles"), (True, "Verwijderd",), (False, "Geblokkeerd"))),
+    )
+    filename = django_filters.CharFilter(
+        field_name='file_title',
+        lookup_expr='icontains',
+        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': _("Filename")})
     )
 
     class Meta:

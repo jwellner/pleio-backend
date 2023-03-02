@@ -1,16 +1,22 @@
+import logging
+import os
+
 from ariadne import ObjectType
 from django.core.exceptions import ObjectDoesNotExist
+from django.utils.translation import gettext
 from graphql import GraphQLError
 
 from core import config
-from core.constances import ACCESS_TYPE, COULD_NOT_SAVE
+from core.constances import ACCESS_TYPE, COULD_NOT_SAVE, FILE_NOT_CLEAN
 from core.lib import access_id_to_acl, clean_graphql_input, strip_exif
 from core.models import Group
 from core.resolvers import shared
 from core.utils.entity import load_entity_by_id
 from user.models import User
 
-from ..models import FILE_SCAN, FileFolder
+from ..models import FileFolder
+
+logger = logging.getLogger(__name__)
 
 
 def update_access_recursive(user, entity, access_id, write_access_id):
@@ -95,7 +101,7 @@ def resolve_add_file(_, info, input):
 
     shared.resolve_update_tags(entity, clean_input)
 
-    entity.upload = clean_input.get("file")
+    resolve_update_file(entity, clean_input)
 
     if parent:
         entity.parent = parent
@@ -110,12 +116,11 @@ def resolve_add_file(_, info, input):
 
     shared.update_publication_dates(entity, clean_input)
 
-    if entity.scan() == FILE_SCAN.VIRUS:
-        raise GraphQLError("INVALID_FILE")
-
     entity.update_updated_at()
 
     entity.save()
+
+    resolve_scan_file(entity, clean_input, delete_entity=True)
 
     if not config.PRESERVE_FILE_EXIF and entity.is_image():
         strip_exif(entity.upload)
@@ -220,6 +225,8 @@ def resolve_edit_file_folder(_, info, input):
     entity.update_updated_at()
     entity.save()
 
+    resolve_scan_file(entity, clean_input)
+
     return {
         "entity": entity
     }
@@ -277,9 +284,20 @@ def resolve_move_file_folder(_, info, input):
 
 
 def resolve_update_file(entity, clean_input):
-    if 'file' in clean_input:
+    if clean_input.get('file'):
         entity.upload = clean_input.get("file")
-        if entity.scan() == FILE_SCAN.VIRUS:
-            raise GraphQLError("INVALID_FILE")
+        if entity.thumbnail.name:
+            entity.thumbnail.delete()
         if not config.PRESERVE_FILE_EXIF:
             strip_exif(entity.upload)
+
+
+def resolve_scan_file(entity, clean_input, delete_entity=False):
+    if clean_input.get('file') and not entity.scan():
+        if delete_entity:
+            entity.delete()
+        else:
+            entity.blocked = True
+            entity.block_reason = gettext("File contains virus")
+            entity.save()
+        raise GraphQLError(FILE_NOT_CLEAN.format(os.path.basename(entity.upload.name)))

@@ -174,9 +174,10 @@ class AddCampagnePageTestCase(PleioTenantTestCase):
             self.graphql_client.force_login(self.user)
             self.graphql_client.post(self.mutation, self.variables)
 
+    @mock.patch("core.models.Attachment.scan")
     @mock.patch("core.lib.get_mimetype")
     @mock.patch("{}.open".format(settings.DEFAULT_FILE_STORAGE))
-    def test_add_page_with_widgets(self, mocked_open, mocked_mimetype):
+    def test_add_page_with_widgets(self, mocked_open, mocked_mimetype, mocked_scan):
         file_mock = mock.MagicMock(spec=File)
         file_mock.name = 'attachment.jpg'
         file_mock.content_type = 'image/jpg'
@@ -233,3 +234,4 @@ class AddCampagnePageTestCase(PleioTenantTestCase):
                   ]}
              ]}
         ]})
+        self.assertTrue(mocked_scan.called)

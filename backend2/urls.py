@@ -34,7 +34,7 @@ urlpatterns = [
     path('superadmin/tasks/dispatch_cron', core_superadmin.HandleScheduleCronTask.as_view(), name="tasks_dispatch_cron"),
     path('superadmin/tasks/replace_links', core_superadmin.HandleUpdateLinksTask.as_view(), name="tasks_replace_links"),
     path('superadmin/tasks/elasticsearch', core_superadmin.HandleElasticsearchTask.as_view(), name="tasks_elasticsearch"),
-    path('superadmin/scanlog', core_superadmin.ScanLog.as_view()),
+    path('superadmin/scanlog', core_superadmin.ScanLog.as_view(), name='scanlog'),
     path('superadmin/auditlog', core_superadmin.AuditLog.as_view()),
     path('superadmin/group_copy', core_superadmin.GroupCopyView.as_view()),
     path('superadmin/optional_features', core_superadmin.OptionalFeatures.as_view(), name="optional_features"),
