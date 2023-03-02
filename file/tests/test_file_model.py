@@ -80,14 +80,23 @@ class TestDiskFileModelTestCase(Base.TestFileModelTestCaseBase):
             "title": self.TITLE,
         })
 
+    def test_is_file(self):
+        self.assertTrue(self.entity.is_file())
+
 
 class TestFolderFileModelTestCase(Base.TestFileModelTestCaseBase):
 
     def file_entity_factory(self, **kwargs):
         return FolderFactory(**kwargs)
 
+    def test_is_not_a_file(self):
+        self.assertFalse(self.entity.is_file())
+
 
 class TestPadFileModelTestCase(Base.TestFileModelTestCaseBase):
 
     def file_entity_factory(self, **kwargs):
         return PadFactory(**kwargs)
+
+    def test_is_not_a_file(self):
+        self.assertFalse(self.entity.is_file())

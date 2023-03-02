@@ -1,0 +1,8 @@
+{% extends "base_closed.html" %}
+{% load i18n %}
+
+{% block content %}
+    <h1>{% blocktrans %}{{ filename }} is not available for download.{% endblocktrans %}</h1>
+    <p>{{ reason }}</p>
+    <p>{% trans "Please try again later. Contact the site administrator if this problem persists." %}</p>
+{% endblock %}

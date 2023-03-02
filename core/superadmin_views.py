@@ -20,14 +20,14 @@ from celery.result import AsyncResult
 from core.constances import OIDC_PROVIDER_OPTIONS
 from core.elasticsearch import elasticsearch_status_report
 from core.forms import MeetingsSettingsForm, ProfileSetForm
-from core.models import Group, ProfileSet
+from core.models import Group, ProfileSet, Attachment
 from core.models.agreement import CustomAgreement
 from core.tasks import replace_domain_links, elasticsearch_rebuild_for_tenant, elasticsearch_index_data_for_tenant
 from core.lib import tenant_schema, is_valid_domain
 from core.superadmin.forms import AuditLogFilter, CustomAgreementForm, SettingsForm, ScanIncidentFilter, OptionalFeaturesForm, SupportContractForm
 from control.tasks import get_db_disk_usage, get_file_disk_usage, copy_group_to_tenant
 from core.tasks.elasticsearch_tasks import all_indexes
-from file.models import ScanIncident
+from file.models import ScanIncident, FileFolder
 from tenants.models import Client, GroupCopy
 
 logger = logging.getLogger(__name__)
@@ -95,7 +95,13 @@ class ScanLog(SuperAdminView):
 
         context = {
             'qs': qs,
-            'form': form
+            'form': form,
+            'first_scanned_file': FileFolder.objects.order_by('last_scan').first(),
+            'last_scanned_file': FileFolder.objects.order_by('-last_scan').first(),
+            'total_files': FileFolder.objects.count(),
+            'first_scanned_attachment': Attachment.objects.order_by('last_scan').first(),
+            'last_scanned_attachment': Attachment.objects.order_by('-last_scan').first(),
+            'total_attachments': Attachment.objects.count(),
         }
 
         return render(request, 'superadmin/scanlog.html', context)

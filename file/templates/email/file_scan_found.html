@@ -1,0 +1,15 @@
+{% extends "email/base_notification.html" %}
+{% load i18n %}
+
+{% block body %}
+    {% if virus_count %}
+        {% blocktrans %}We found {{ virus_count }} suspicious files while scanning for viruses. We have blocked download access to the
+            files.{% endblocktrans %}<br/>
+        <br/>
+    {% endif %}
+    {% if error_count %}
+        {% blocktrans %}There were {{ error_count }} errors while scanning for viruses.{% endblocktrans %}<br/>
+        <br/>
+    {% endif %}
+    {% blocktrans %}Please visit the <a href="{{ scanlog_url }}">file scan logs</a> to review.{% endblocktrans %}
+{% endblock %}

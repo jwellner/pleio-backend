@@ -80,10 +80,10 @@ class DownloadFiles(FastTenantTestCase):
         response = self.client.get(path)
 
         self.assertEqual(response.status_code, HTTPStatus.OK)
-        zip_file = io.BytesIO(b''.join(response.streaming_content))
+        zip_file_content = io.BytesIO(b''.join(response.streaming_content))
 
-        with ZipFile(zip_file, 'r') as zip:
-            names = zip.namelist()
+        with ZipFile(zip_file_content, 'r') as zip_file:
+            names = zip_file.namelist()
             self.assertEqual(names[0], 'test.csv')
             self.assertEqual(names[1], 'folder1/test.csv')
             self.assertEqual(names[2], 'folder2/test.csv')

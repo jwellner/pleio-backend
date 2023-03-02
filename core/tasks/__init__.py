@@ -17,3 +17,4 @@ from .notification_tasks import create_notifications_for_scheduled_content, crea
 from .cleanup_tasks import do_cleanup_featured_image_files
 from .migrate_tags import migrate_tags, revert_tags
 from .exports import export_avatars
+from .clamav import scan_attachment

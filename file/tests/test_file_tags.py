@@ -21,6 +21,10 @@ class TestFileTagsTestCase(Template.TagsTestCaseTemplate):
         'file': 'test.gif'
     }}
 
+    def local_setup(self):
+        self.override_setting(CLAMAV_HOST='')
+        super().local_setup()
+
     @property
     def container(self):
         if not self._container:

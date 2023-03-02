@@ -272,6 +272,7 @@ class TestHandlerDatahubCleanupFilesTestCase(PleioTenantTestCase):
 
     def setUp(self):
         super().setUp()
+
         self.source = ExternalContentSourceFactory(settings={
             "apiUrl": "https://www.pleio.nl",
             "batchSize": 50,
@@ -279,7 +280,6 @@ class TestHandlerDatahubCleanupFilesTestCase(PleioTenantTestCase):
         self.handler = ApiHandler(self.source)
         self.article1 = ExternalContentFactory(source=self.source)
         self.article2 = ExternalContentFactory(source=self.source)
-
 
     def tearDown(self):
         self.source.delete()

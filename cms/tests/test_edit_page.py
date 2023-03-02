@@ -155,9 +155,10 @@ class EditCampagnePageTestCase(PleioTenantTestCase):
         self.assertEqual(entity["parent"], None)
         self.assertEqual(entity["rows"], [])
 
+    @mock.patch("core.models.Attachment.scan")
     @mock.patch("core.lib.get_mimetype")
     @mock.patch("{}.open".format(settings.DEFAULT_FILE_STORAGE))
-    def test_update_rows(self, mocked_open, mocked_mimetype):
+    def test_update_rows(self, mocked_open, mocked_mimetype, mocked_scan):
         file_mock = mock.MagicMock(spec=File)
         file_mock.name = 'attachment.jpg'
         file_mock.content_type = 'image/jpg'
@@ -213,6 +214,7 @@ class EditCampagnePageTestCase(PleioTenantTestCase):
                   ]}
              ]}
         ]})
+        self.assertTrue(mocked_scan.called)
 
     def test_edit_page_by_admin(self):
         self.graphql_client.force_login(self.admin)

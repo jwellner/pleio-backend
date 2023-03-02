@@ -1,4 +1,5 @@
 import logging
+import traceback
 
 from django.db import models
 from django.utils import timezone
@@ -53,6 +54,7 @@ class MailInstance(models.Model):
             result = {
                 'error': str(e),
                 'error_type': str(e.__class__),
+                'traceback': traceback.format_exc()
             }
 
         MailLog.objects.create(

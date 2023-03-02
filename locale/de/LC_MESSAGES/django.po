@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Duits\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-02-02 21:15+0100\n"
+"POT-Creation-Date: 2023-02-24 09:06+0100\n"
 "PO-Revision-Date: 2021-05-26 10:55+0200\n"
 "Last-Translator: \n"
 "Language-Team: \n"
@@ -83,11 +83,11 @@ msgctxt "Past Perfect"
 msgid "Deleted"
 msgstr "Gelöscht"
 
-#: control/models.py:180
+#: control/models.py:181
 msgid "Index not up to date"
 msgstr "Index nicht auf dem neuesten Stand"
 
-#: control/models.py:187
+#: control/models.py:188
 msgid "Index may not be accessible"
 msgstr "Der Index ist möglicherweise nicht zugänglich"
 
@@ -151,7 +151,8 @@ msgid "Action"
 msgstr "Aktion"
 
 #: control/templates/sites_backup/access_overview.html:10
-#: control/templates/sites_backup/backup_overview.html:10
+#: control/templates/sites_backup/backup_overview.html:9
+#: core/superadmin/forms.py:54
 msgid "Filename"
 msgstr "Dateiname"
 
@@ -163,11 +164,7 @@ msgstr "Zugangshistorie nicht verfügbar."
 msgid "Author"
 msgstr "Autor"
 
-#: control/templates/sites_backup/backup_overview.html:9
-msgid "Filesize"
-msgstr "Dateigröße"
-
-#: control/templates/sites_backup/backup_overview.html:30
+#: control/templates/sites_backup/backup_overview.html:28
 msgid "Backup history not available."
 msgstr "Sicherungshistorie nicht verfügbar."
 
@@ -251,7 +248,7 @@ msgstr ""
 "Die Sicherung der Website %(site_name)s ist geplant. Das Backup wird in "
 "Kürze zur Liste der Backups unten hinzugefügt. Referenz: %(task_id)s"
 
-#: core/core_hooks.py:11 core/views.py:461
+#: core/core_hooks.py:11 core/views.py:463
 msgid "Group"
 msgstr "Gruppe"
 
@@ -288,7 +285,7 @@ msgid "Receive overview emails"
 msgstr "Übersichts-E-Mails erhalten"
 
 #: core/forms.py:163 core/templates/registration/request.html:23
-#: core/views.py:459 event/export.py:58
+#: core/views.py:461 event/export.py:58
 msgid "Name"
 msgstr "Name"
 
@@ -337,7 +334,7 @@ msgstr "Diskussionen"
 msgid "Events"
 msgstr "Events"
 
-#: core/lib.py:407 file/core_hooks.py:19
+#: core/lib.py:407 file/core_hooks.py:29
 msgid "Files"
 msgstr "Dateien"
 
@@ -426,7 +423,7 @@ msgstr "Der Antrag auf Zugang zur %(group_name)s-Gruppe wurde abgelehnt"
 msgid "Reminder to become a member of the %(group_name)s group"
 msgstr "Erinnerung, um Mitglied der %(group_name)s-Gruppe zu werden"
 
-#: core/mail_builders/group_welcome.py:56
+#: core/mail_builders/group_welcome.py:64
 #, python-format
 msgid "Welcome to %(group_name)s"
 msgstr "Wilkommen zu: %(group_name)s"
@@ -559,11 +556,11 @@ msgstr "E-Mail-Adresse"
 msgid "name"
 msgstr "Name"
 
-#: core/resolvers/shared.py:604
+#: core/resolvers/shared.py:616
 msgid "Appointment"
 msgstr "Ernennung"
 
-#: core/resolvers/shared.py:610
+#: core/resolvers/shared.py:622
 msgid "Agenda"
 msgstr "Tagesordnung"
 
@@ -587,12 +584,16 @@ msgstr "Editor"
 msgid "Question expert"
 msgstr "Experten fragen"
 
-#: core/tasks/cronjobs.py:204 core/tests/test_auto_block_users.py:67
+#: core/tasks/clamav.py:28 file/tasks.py:105
+msgid "This file contains a virus"
+msgstr "Diese Datei enthält einen Virus"
+
+#: core/tasks/cronjobs.py:203 core/tests/test_auto_block_users.py:67
 #: core/tests/test_auto_block_users.py:70 user/post_deploy.py:19
 msgid "Bouncing e-mail address"
 msgstr "Unzustellbare E-Mail Adresse"
 
-#: core/tasks/cronjobs.py:247 core/tests/test_auto_block_users.py:109
+#: core/tasks/cronjobs.py:246 core/tests/test_auto_block_users.py:109
 #: core/tests/test_auto_block_users.py:111 user/post_deploy.py:20
 msgid "User deleted externally"
 msgstr "Extern gelöschter Benutzer"
@@ -628,7 +629,7 @@ msgstr "Möchten Sie <strong>%(name)s</strong> (%(email)s) einchecken?"
 msgid "Yes, confirm"
 msgstr "Ja, bestätigen"
 
-#: core/templates/check_in/checked_in.html:8 event/models.py:278
+#: core/templates/check_in/checked_in.html:8 event/models.py:284
 msgid "Checked in"
 msgstr "Eingecheckt"
 
@@ -770,23 +771,6 @@ msgstr "Frage gestellt von"
 msgid "Wiki created by"
 msgstr "Wiki erstellt von"
 
-#: core/templates/email/file_scan_found.html:6
-#, python-format
-msgid ""
-"Hi,<br><br>\n"
-"\n"
-"We found %(virus_count)s suspicuous files while scanning for virusses. We have blocked the files for download.<br><br>\n"
-"\n"
-"Please visit the <a href=\"%(site_url)s/superadmin/scanlog\">file scan logs</a> to review.\n"
-"\n"
-msgstr ""
-"Hallo,<br><br>\n"
-"\n"
-"Wir haben beim Scannen nach Viren %(virus_count)s verdächtige Dateien gefunden. Wir haben die Dateien für den Download gesperrt.<br><br>\n"
-"\n"
-"Bitte besuchen Sie die <a href=\"%(site_url)s/superadmin/scanlog\">Dateiscanprotokolle</a> zur Überprüfung.\n"
-"\n"
-
 #: core/templates/email/group_access_request.html:6
 #, python-format
 msgid ""
@@ -903,7 +887,7 @@ msgstr "Persönliche Nachricht"
 msgid "Direct notification"
 msgstr "Direkte Benachrichtigung"
 
-#: core/templates/email/send_notification_emails.html:10 core/views.py:612
+#: core/templates/email/send_notification_emails.html:10 core/views.py:617
 msgid "Notification overview"
 msgstr "Übersicht über die Benachrichtigung"
 
@@ -921,7 +905,7 @@ msgstr "Abbestellen"
 msgid "Adjust your email settings"
 msgstr "Passen Sie Ihre E-Mail-Einstellungen an"
 
-#: core/templates/email/send_overview_emails.html:22 core/views.py:609
+#: core/templates/email/send_overview_emails.html:22 core/views.py:614
 msgid "Periodic overview"
 msgstr "Regelmäßige Übersicht"
 
@@ -1163,6 +1147,19 @@ msgstr ""
 "Deine Site-Administratorrolle wurde von %(user_name)sentfernt.<br><br>\n"
 "\n"
 "Wenn Sie glauben, dass dies ein Fehler war, wenden Sie sich bitte an einen der anderen Website-Administratoren.\n"
+
+#: core/templates/file_blocked.html:5
+#, python-format
+msgid "%(filename)s is not available for download."
+msgstr "%(filename)s ist nicht zum Download verfügbar."
+
+#: core/templates/file_blocked.html:7
+msgid ""
+"Please try again later. Contact the site administrator if this problem "
+"persists."
+msgstr ""
+"Bitte versuchen Sie es später noch einmal. Wenden Sie sich an den "
+"Administrator der Website, wenn dieses Problem weiterhin besteht."
 
 #: core/templates/notification/videocall_guest_notification.html:2
 #, python-format
@@ -1442,19 +1439,19 @@ msgstr "Neue Erwähnung auf %(entity_type)s"
 msgid "%(sender_name)s has mentioned you at %(entity_title)s"
 msgstr "%(sender_name)s hat Sie bei %(entity_title)s erwähnt"
 
-#: core/views.py:460 event/export.py:58
+#: core/views.py:462 event/export.py:58
 msgid "E-mail"
 msgstr "E-Mail"
 
-#: core/views.py:462
+#: core/views.py:464
 msgid "Disk size"
 msgstr "Größe der Festplatte"
 
-#: core/views.py:555
+#: core/views.py:560
 msgid "Your changes are saved"
 msgstr "Ihre Änderungen werden gespeichert"
 
-#: core/views.py:615
+#: core/views.py:620
 #, python-format
 msgid "Successfully unsubscribed %(email)s from %(list_name)s"
 msgstr "Erfolgreich abbestellt %(email)s von %(list_name)s"
@@ -1516,23 +1513,23 @@ msgstr "QR-Code für %s"
 msgid "Added to event %s from waitinglist"
 msgstr "Zum Ereignis %s von der Warteliste hinzugefügt"
 
-#: event/models.py:183
+#: event/models.py:184
 msgid "Accepted"
 msgstr "Angenommen"
 
-#: event/models.py:184
+#: event/models.py:185
 msgid "Maybe"
 msgstr "Vielleicht"
 
-#: event/models.py:185
+#: event/models.py:186
 msgid "Rejected"
 msgstr "Abgelehnt"
 
-#: event/models.py:186
+#: event/models.py:187
 msgid "At waitinglist"
 msgstr "Auf der Warteliste"
 
-#: event/models.py:246
+#: event/models.py:247
 msgid "You already signed in for another sub-event in the same slot."
 msgstr ""
 "Sie haben sich bereits für eine andere Unterveranstaltung auf demselben "
@@ -1696,26 +1693,55 @@ msgstr "Nachricht an die Veranstaltung"
 msgid "External content author"
 msgstr "Autor externer Inhalte"
 
-#: file/core_hooks.py:11 file/core_hooks.py:18 file/models.py:69
+#: file/core_hooks.py:12 file/core_hooks.py:28 file/models.py:62
 msgid "File"
 msgstr "Datei"
 
-#: file/core_hooks.py:23 file/models.py:70
+#: file/core_hooks.py:16 file/core_hooks.py:33 file/models.py:63
 msgid "Folder"
 msgstr "Mappe"
 
-#: file/core_hooks.py:24
+#: file/core_hooks.py:21 file/models.py:64 pad/core_hooks.py:10
+msgid "Pad"
+msgstr "Pad"
+
+#: file/core_hooks.py:34
 msgid "Folders"
 msgstr "Ordner"
 
-#: file/mail_builders/file_scan_found.py:45
+#: file/mail_builders/file_scan_found.py:50
 #, python-format
 msgid "Filescan found suspicous files on %(site_url)s"
 msgstr "Filescan hat verdächtige Dateien auf %(site_url)sgefunden"
 
-#: file/models.py:71 pad/core_hooks.py:10
-msgid "Pad"
-msgstr "Pad"
+#: file/resolvers/mutation.py:301
+msgid "File contains virus"
+msgstr "Datei enthält Virus"
+
+#: file/tasks.py:95
+msgid "File not found on file storage"
+msgstr "Datei nicht im Dateispeicher gefunden"
+
+#: file/templates/email/file_scan_found.html:6
+#, python-format
+msgid ""
+"We found %(virus_count)s suspicious files while scanning for viruses. We have blocked download access to the\n"
+"            files."
+msgstr ""
+"Wir haben bei der Suche nach Viren %(virus_count)s verdächtige Dateien gefunden. Wir haben den Download-Zugriff auf die\n"
+"            Dateien gesperrt."
+
+#: file/templates/email/file_scan_found.html:11
+#, python-format
+msgid "There were %(error_count)s errors while scanning for viruses."
+msgstr "Es gab %(error_count)s Fehler bei der Überprüfung auf Viren."
+
+#: file/templates/email/file_scan_found.html:14
+#, python-format
+msgid "Please visit the <a href=\"%(scanlog_url)s\">file scan logs</a> to review."
+msgstr ""
+"Bitte besuchen Sie die <a href=\"%(scanlog_url)s\">Datei Scanprotokolle</a>,"
+" um sie zu überprüfen."
 
 #: pad/core_hooks.py:11
 msgid "Pads"
@@ -1749,3 +1775,6 @@ msgstr "Wiki"
 #: wiki/core_hooks.py:26
 msgid "Wiki's"
 msgstr "Wikis"
+
+#~ msgid "Filesize"
+#~ msgstr "Dateigröße"
