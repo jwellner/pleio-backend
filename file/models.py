@@ -6,6 +6,8 @@ from auditlog.registry import auditlog
 from django.urls import reverse
 from django.db import models
 from django.utils import timezone
+from model_utils.managers import InheritanceQuerySet
+
 from core.constances import DOWNLOAD_AS_OPTIONS
 from core.lib import generate_object_filename, get_mimetype, tenant_schema, get_basename
 from core.models import Entity, Tag
@@ -36,7 +38,15 @@ def write_access_default():
     return []
 
 
+class FileFolderQuerySet(InheritanceQuerySet):
+
+    def filter_files(self):
+        return self.filter(type=FileFolder.Types.FILE)
+
+
 class FileFolderManager(EntityManager):
+    def get_queryset(self):
+        return FileFolderQuerySet(self.model, using=self._db)
 
     def file_by_path(self, path):
         for maybe_guid in path.split('/'):
@@ -55,6 +65,9 @@ class FileFolderManager(EntityManager):
         qs = qs.filter(owner=user)
         qs = qs.filter(id__in=all_snapshots)
         return qs.order_by('-created_at')
+
+    def filter_files(self):
+        return self.get_queryset().filter_files()
 
 
 class FileFolder(HasMediaMixin, TitleMixin, ModelWithFile, ResizedImageMixin, AttachmentMixin, Entity):

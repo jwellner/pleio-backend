@@ -57,14 +57,38 @@ class TestTaskScheduleScanTestCase(PleioTenantTestCase):
         self.owner.delete()
         super().tearDown()
 
-    def test_collect_files(self):
-        result = ScheduleScan().collect_files(1)
+    @mock.patch("file.models.FileFolderQuerySet.count")
+    def test_file_count(self, mocked_count):
+        self.override_setting(SCAN_CYCLE_DAYS=10)
+
+        mocked_count.return_value = 100
+        self.assertEqual(ScheduleScan().file_limit(), 10)
+
+        mocked_count.return_value = 200
+        self.assertEqual(ScheduleScan().file_limit(), 20)
+
+    @mock.patch("core.models.attachment.AttachmentQuerySet.count")
+    def test_attachment_count(self, mocked_count):
+        self.override_setting(SCAN_CYCLE_DAYS=10)
+
+        mocked_count.return_value = 100
+        self.assertEqual(ScheduleScan().attachment_limit(), 10)
+
+        mocked_count.return_value = 1000
+        self.assertEqual(ScheduleScan().attachment_limit(), 100)
+
+    @mock.patch("file.tasks.ScheduleScan.file_limit")
+    def test_collect_files(self, file_limit):
+        file_limit.return_value = 1
+        result = ScheduleScan().collect_files()
 
         # second should be the middle of the scanned-before files.
         self.assertEqual([*result], [self.files[1]])
 
-    def test_collect_attachments(self):
-        result = ScheduleScan().collect_attachments(1)
+    @mock.patch("file.tasks.ScheduleScan.attachment_limit")
+    def test_collect_attachments(self, file_limit):
+        file_limit.return_value = 1
+        result = ScheduleScan().collect_attachments()
 
         # second should be the middle of the scanned-before files.
         self.assertEqual([*result], [self.attachments[1]])
@@ -81,7 +105,7 @@ class TestTaskScheduleScanTestCase(PleioTenantTestCase):
         mocked_scan_attachment.si.return_value = "SCAN_ATTACHMENT_SIGNATURE"
         mocked_scan_file.si.return_value = "SCAN_FILE_SIGNATURE"
 
-        self.assertEqual([*ScheduleScan().generate_tasks(self.tenant.schema_name, 1)], [
+        self.assertEqual([*ScheduleScan().generate_tasks(self.tenant.schema_name)], [
             "SCAN_FILE_SIGNATURE", "SCAN_ATTACHMENT_SIGNATURE"
         ])
         self.assertEqual(mocked_scan_file.si.call_args.args,
@@ -104,7 +128,7 @@ class TestTaskScheduleScanTestCase(PleioTenantTestCase):
         ScheduleScan().run(self.tenant.schema_name)
 
         self.assertEqual(mocked_generate_tasks.call_args.args,
-                         (self.tenant.schema_name, 1000))
+                         (self.tenant.schema_name,))
         self.assertEqual(mocked_chord.call_args.args, (["SCAN_TASK_SIGNATURE"], "SCAN_COMPLETE_SIGNATURE"))
         self.assertTrue(chord_task.apply_async.called)
 
@@ -113,4 +137,4 @@ class TestTaskScheduleScanTestCase(PleioTenantTestCase):
         schedule_scan(self.tenant.schema_name)
 
         self.assertTrue(mocked_run.called)
-        self.assertEqual(mocked_run.call_args.args, (self.tenant.schema_name, 1000))
+        self.assertEqual(mocked_run.call_args.args, (self.tenant.schema_name,))

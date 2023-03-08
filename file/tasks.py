@@ -1,10 +1,12 @@
 from __future__ import absolute_import, unicode_literals
 
+import math
 import os
 from os.path import exists
 
 from celery import shared_task, chord
 from celery.utils.log import get_task_logger
+from django.conf import settings
 from django.utils.translation import gettext
 from django_tenants.utils import schema_context
 from django.utils import timezone
@@ -52,33 +54,43 @@ def schedule_scan_finished(schema_name):
 
 
 @shared_task
-def schedule_scan(schema_name, limit=1000):
+def schedule_scan(schema_name):
     with schema_context(schema_name):
         runner = ScheduleScan()
-        runner.run(schema_name, limit)
+        runner.run(schema_name)
 
 
 class ScheduleScan:
 
-    @staticmethod
-    def collect_files(limit):
-        files = FileFolder.objects.filter(type=FileFolder.Types.FILE)
-        return files.order_by('last_scan').values_list('id', flat=True)[:limit]
+    def file_limit(self):
+        return math.ceil(self.file_queryset().count() / settings.SCAN_CYCLE_DAYS)
+
+    def attachment_limit(self):
+        return math.ceil(self.attachment_queryset().count() / settings.SCAN_CYCLE_DAYS)
 
     @staticmethod
-    def collect_attachments(limit):
-        attachments = Attachment.objects.all()
-        return attachments.order_by('last_scan').values_list('id', flat=True)[:limit]
+    def file_queryset():
+        return FileFolder.objects.filter_files()
 
-    def generate_tasks(self, schema_name, limit):
+    def collect_files(self):
+        return self.file_queryset().order_by('last_scan').values_list('id', flat=True)[:self.file_limit()]
+
+    @staticmethod
+    def attachment_queryset():
+        return Attachment.objects.all()
+
+    def collect_attachments(self):
+        return self.attachment_queryset().order_by('last_scan').values_list('id', flat=True)[:self.attachment_limit()]
+
+    def generate_tasks(self, schema_name):
         from core.tasks import scan_attachment
-        for file_id in self.collect_files(limit):
+        for file_id in self.collect_files():
             yield scan_file.si(schema_name, str(file_id))
-        for file_id in self.collect_attachments(limit):
+        for file_id in self.collect_attachments():
             yield scan_attachment.si(schema_name, str(file_id))
 
-    def run(self, schema_name, limit=1000):
-        chord([*self.generate_tasks(schema_name, limit)],
+    def run(self, schema_name):
+        chord([*self.generate_tasks(schema_name)],
               schedule_scan_finished.si(schema_name)).apply_async()
 
 
