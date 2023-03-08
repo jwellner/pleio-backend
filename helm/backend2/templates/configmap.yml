@@ -22,4 +22,4 @@ data:
   ONLINE_MEETINGS_URL: {{ .Values.onlineMeetingsUrl }}
   VIDEO_CALL_RESERVE_ROOM_URL: {{ .Values.videoCallReserveRoomUrl }}
   CONTROL_PRIMARY_DOMAIN: {{ .Values.tunnel.hostname }}
-  SCAN_CYCLE_DAYS: {{ .Values.clamav.scanCycleDays }}
+  SCAN_CYCLE_DAYS: {{ .Values.clamav.scanCycleDays | quote }}
