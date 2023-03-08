@@ -86,3 +86,6 @@ collab:
 
 onlineMeetingsUrl: https://agenda.onlineafspraken.nl/APIREST
 videoCallReserveRoomUrl: https://videobellen.pleio-test.nl/api/v1/room/
+
+clamav:
+  scanCycleDays: 120

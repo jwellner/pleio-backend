@@ -1739,6 +1739,7 @@ type Page implements Entity {
     isPinned: Boolean!
     lastSeen: DateTime
     rows: [Row]
+    owner: User
 }
 
 """The available plugins."""
