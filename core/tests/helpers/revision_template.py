@@ -1,8 +1,13 @@
+from unittest import mock
+
+from django.conf import settings
+from django.core.files import File
 from django.utils.timezone import localtime, timedelta
 
 from blog.factories import BlogFactory
 from core.factories import GroupFactory
 from core.tests.helpers import PleioTenantTestCase
+from core.utils.clamav import FileScanError, FILE_SCAN
 from news.factories import NewsFactory
 from user.factories import UserFactory, AdminFactory, EditorFactory
 
@@ -385,6 +390,27 @@ class RevisionTemplate:
                                           })
             self.assertNotEqual(revisions[0]['content']['featured']['imageGuid'], revisions[1]['content']['featured']['imageGuid'])
             self.assertNotEqual(revisions[0]['content']['featured']['image'], revisions[1]['content']['featured']['image'])
+
+        def test_featured_image_with_virus(self):
+            if not self.useFeatured:
+                return
+            self.localSetUp()
+
+            mocked_scan = mock.patch("core.utils.clamav.scan").start()
+            mocked_mimetype = mock.patch("core.lib.get_mimetype").start()
+            mocked_open = mock.patch("{}.open".format(settings.DEFAULT_FILE_STORAGE)).start()
+
+            file_mock = mock.MagicMock(spec=File)
+            file_mock.name = 'test.gif'
+            file_mock.content_type = 'image/gif'
+            mocked_open.return_value = file_mock
+            mocked_mimetype.return_value = file_mock.content_type
+            mocked_scan.side_effect = FileScanError(FILE_SCAN.VIRUS, "NL.SARS.PLEIO.ST77H")
+
+            with self.assertGraphQlError(f"file_not_clean:{file_mock.name}"):
+                self.applyChanges(featured={
+                    'image': file_mock.name,
+                })
 
         def test_mutate_group_guid(self):
             if not self.useGroupGuid:

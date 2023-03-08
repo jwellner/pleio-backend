@@ -14,9 +14,11 @@ class TestMailerFileScanFoundTestCase(PleioTenantTestCase):
 
         self.admin = AdminFactory()
         self.virus_count = 42
+        self.error_count = 555
 
         self.mailer = FileScanFoundMailer(admin=self.admin.guid,
-                                          virus_count=self.virus_count)
+                                          virus_count=self.virus_count,
+                                          error_count=self.error_count)
 
     @override_settings(ENV='test')
     @mock.patch('core.mail_builders.base.MailerBase.build_context')
@@ -24,7 +26,9 @@ class TestMailerFileScanFoundTestCase(PleioTenantTestCase):
         build_context.return_value = {}
 
         self.assertDictEqual(self.mailer.get_context(), {
+            'error_count': self.error_count,
             'virus_count': self.virus_count,
+            'scanlog_url': "https://tenant.fast-test.com/superadmin/scanlog"
         })
         self.assertEqual(self.mailer.get_language(), self.admin.get_language())
         self.assertEqual(self.mailer.get_template(), "email/file_scan_found.html")
@@ -32,4 +36,3 @@ class TestMailerFileScanFoundTestCase(PleioTenantTestCase):
         self.assertEqual(self.mailer.get_receiver_email(), self.admin.email)
         self.assertEqual(self.mailer.get_sender(), None)
         self.assertEqual(self.mailer.get_subject(), "Filescan found suspicous files on https://tenant.fast-test.com")
-

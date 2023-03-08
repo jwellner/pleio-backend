@@ -96,10 +96,11 @@ class AddFileTestCase(PleioTenantTestCase):
             }
         """
 
+    @patch("file.models.FileFolder.scan")
     @patch("file.resolvers.mutation.strip_exif")
     @patch("core.lib.get_mimetype")
     @patch("{}.open".format(settings.DEFAULT_FILE_STORAGE))
-    def test_add_file(self, mock_open, mock_mimetype, mocked_strip_exif):
+    def test_add_file(self, mock_open, mock_mimetype, mocked_strip_exif, mocked_scan):
         file_mock = MagicMock(spec=File)
         file_mock.name = 'test.gif'
         file_mock.content_type = 'image/gif'
@@ -121,6 +122,7 @@ class AddFileTestCase(PleioTenantTestCase):
         self.assertEqual(entity["tags"][0], "tag_one")
         self.assertEqual(entity["tags"][1], "tag_two")
         self.assertTrue(mocked_strip_exif.called)
+        self.assertTrue(mocked_scan.called)
 
     @patch("core.lib.get_mimetype")
     @patch("{}.open".format(settings.DEFAULT_FILE_STORAGE))
@@ -272,9 +274,11 @@ class AddFileTestCase(PleioTenantTestCase):
 
         self.assertEqual(result["data"]["addEntity"]["entity"]["title"], "testfolder")
 
+    @patch("file.models.FileFolder.scan")
     @patch("core.lib.get_mimetype")
     @patch("{}.open".format(settings.DEFAULT_FILE_STORAGE))
-    def test_add_personal_file(self, mock_open, mock_mimetype):
+    def test_add_personal_file(self, mock_open, mock_mimetype, scan):
+        scan.return_value = True
         file_mock = MagicMock(spec=File)
         file_mock.name = 'test.gif'
         file_mock.content_type = 'image/gif'
@@ -294,8 +298,10 @@ class AddFileTestCase(PleioTenantTestCase):
         self.assertEqual(entity["group"], None)
         self.assertEqual(entity["tags"][0], "tag_one")
         self.assertEqual(entity["tags"][1], "tag_two")
+        self.assertTrue(scan.called)
 
-    def test_add_minimal_entity(self):
+    @patch("file.models.FileFolder.scan")
+    def test_add_minimal_entity(self, scan):
         variables = {
             'input': {
                 'file': "image.jpg",
@@ -307,3 +313,4 @@ class AddFileTestCase(PleioTenantTestCase):
 
         entity = result["data"]["addFile"]["entity"]
         self.assertTrue(entity['canEdit'])
+        self.assertTrue(scan.called)

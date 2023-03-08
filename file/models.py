@@ -1,13 +1,11 @@
-import os
-import clamd
 import logging
+import os
+from hashlib import md5
 
 from auditlog.registry import auditlog
 from django.urls import reverse
-from django.conf import settings
 from django.db import models
 from django.utils import timezone
-from enum import Enum
 from core.constances import DOWNLOAD_AS_OPTIONS
 from core.lib import generate_object_filename, get_mimetype, tenant_schema, get_basename
 from core.models import Entity, Tag
@@ -21,6 +19,7 @@ from django.utils.translation import gettext_lazy as _
 from django.core.files.base import ContentFile
 
 from core.models.tags import EntityTag
+from core.utils import clamav
 from core.utils.convert import tiptap_to_text, tiptap_to_html
 from core.utils.access import get_read_access_weight, get_write_access_weight
 from core.utils.export.content import ContentSnapshot
@@ -35,12 +34,6 @@ def read_access_default():
 
 def write_access_default():
     return []
-
-
-class FILE_SCAN(str, Enum):
-    CLEAN = 'CLEAN'
-    VIRUS = 'VIRUS'
-    UNKNOWN = 'UNKNOWN'
 
 
 class FileFolderManager(EntityManager):
@@ -86,8 +79,11 @@ class FileFolder(HasMediaMixin, TitleMixin, ModelWithFile, ResizedImageMixin, At
     mime_type = models.CharField(null=True, blank=True, max_length=100)
     size = models.IntegerField(default=0)
 
-    last_scan = models.DateTimeField(default=None, null=True)
+    last_scan = models.DateTimeField(default=timezone.now)
     last_download = models.DateTimeField(default=None, null=True)
+
+    blocked = models.BooleanField(default=False)
+    block_reason = models.CharField(max_length=255, null=True, blank=True)
 
     read_access_weight = models.IntegerField(default=0)
     write_access_weight = models.IntegerField(default=0)
@@ -144,7 +140,8 @@ class FileFolder(HasMediaMixin, TitleMixin, ModelWithFile, ResizedImageMixin, At
     def thumbnail_url(self):
         if self.type != self.Types.FILE:
             return None
-        return reverse('thumbnail', args=[self.id])
+        checksum = "?check=%s" % md5(self.upload.name.encode()).hexdigest()[:12] if self.upload.name else ''
+        return reverse('thumbnail', args=[self.id]) + checksum
 
     @property
     def file_fields(self):
@@ -154,43 +151,6 @@ class FileFolder(HasMediaMixin, TitleMixin, ModelWithFile, ResizedImageMixin, At
         if self.children.count() > 0:
             return True
         return False
-
-    def scan(self) -> FILE_SCAN:
-        if settings.CLAMAV_HOST:
-            cd = clamd.ClamdNetworkSocket(host=settings.CLAMAV_HOST, timeout=120)
-            result = None
-
-            try:
-                if not os.path.exists(self.upload.path):
-                    return FILE_SCAN.CLEAN
-
-                result = cd.instream(self.upload.file)
-            except Exception as e:
-                logger.error('Clamav error scanning file (%s): %s', self.guid, e)
-                return FILE_SCAN.UNKNOWN
-
-            self.last_scan = timezone.now()
-
-            if result and result['stream'][0] == 'FOUND':
-                message = result['stream'][1]
-
-                logger.error('Clamav found suspicious file: %s', message)
-
-                ScanIncident.objects.create(
-                    message=message,
-                    file=self if not self._state.adding else None,
-                    file_created=self.created_at,
-                    file_title=self.upload.file.name,
-                    file_mime_type=get_mimetype(self.upload.path),
-                    file_owner=self.owner,
-                    file_group=self.group,
-                )
-
-                return FILE_SCAN.VIRUS
-
-            return FILE_SCAN.CLEAN
-
-        return FILE_SCAN.UNKNOWN
 
     @property
     def upload_field(self):
@@ -232,7 +192,7 @@ class FileFolder(HasMediaMixin, TitleMixin, ModelWithFile, ResizedImageMixin, At
         return None
 
     def get_media_content(self):
-        if self.type == self.Types.FILE:
+        if self.type == self.Types.FILE and not self.blocked:
             with open(self.upload.path, 'rb') as fh:
                 return fh.read()
         if self.type == self.Types.PAD:
@@ -245,6 +205,18 @@ class FileFolder(HasMediaMixin, TitleMixin, ModelWithFile, ResizedImageMixin, At
         if not is_upload_complete(self):
             from file.tasks import post_process_file_attributes
             post_process_file_attributes.delay(tenant_schema(), str(self.id))
+
+    def scan(self):
+        try:
+            if self.is_file():
+                FileFolder.objects.filter(id=self.id).update(last_scan=timezone.now())
+                clamav.scan(self.upload.path)
+            return True
+        except AttributeError:
+            return False
+        except clamav.FileScanError as e:
+            ScanIncident.objects.create_from_file_folder(e, self)
+            return not e.is_virus()
 
     def delete(self, *args, **kwargs):
         self.cleanup_extra_file()
@@ -319,8 +291,33 @@ class FileFolder(HasMediaMixin, TitleMixin, ModelWithFile, ResizedImageMixin, At
             **super().serialize()
         }
 
+    def is_file(self):
+        return self.type == self.Types.FILE
+
+
+class ScanIncidentManager(models.Manager):
+    def create_from_attachment(self, e, attachment):
+        self.create(message=e.feedback,
+                    is_virus=e.is_virus(),
+                    file_group=attachment.group,
+                    file_created=attachment.created_at,
+                    file_title=attachment.upload.name,
+                    file_mime_type=get_mimetype(attachment.upload.path),
+                    file_owner=attachment.owner)
+
+    def create_from_file_folder(self, e, file_folder):
+        self.create(message=e.feedback,
+                    is_virus=e.is_virus(),
+                    file_group=file_folder.group,
+                    file_created=file_folder.created_at,
+                    file_title=file_folder.upload.name,
+                    file_mime_type=get_mimetype(file_folder.upload.path),
+                    file_owner=file_folder.owner)
+
 
 class ScanIncident(models.Model):
+    objects = ScanIncidentManager()
+
     date = models.DateTimeField(default=timezone.now)
     message = models.CharField(max_length=256)
     file = models.ForeignKey('file.FileFolder', blank=True, null=True, on_delete=models.SET_NULL,
@@ -330,6 +327,7 @@ class ScanIncident(models.Model):
     file_title = models.CharField(max_length=256)
     file_mime_type = models.CharField(null=True, blank=True, max_length=100)
     file_owner = models.ForeignKey('user.User', blank=True, null=True, on_delete=models.SET_NULL)
+    is_virus = models.BooleanField(default=False)
 
     class Meta:
         ordering = ('-date',)

@@ -1,6 +1,7 @@
 import uuid
 import os
 import logging
+
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
 from django.db import models
@@ -9,9 +10,10 @@ from django.utils.text import slugify
 from django.core.files.base import ContentFile
 from django.urls import reverse
 
-from core.lib import get_mimetype, strip_exif, get_basename
+from core.lib import get_mimetype, strip_exif, get_basename, tenant_schema
 from core.models.mixin import ModelWithFile, HasMediaMixin
 from core.models.image import ResizedImageMixin
+from core.utils import clamav
 
 logger = logging.getLogger(__name__)
 
@@ -44,11 +46,39 @@ class Attachment(ModelWithFile, ResizedImageMixin, HasMediaMixin):
     attached_object_id = models.UUIDField(blank=True, null=True)
     attached = GenericForeignKey(ct_field='attached_content_type', fk_field='attached_object_id')
 
+    last_scan = models.DateTimeField(default=timezone.now)
+    blocked = models.BooleanField(default=False)
+    block_reason = models.CharField(max_length=255, null=True, blank=True)
+
     def save(self, *args, **kwargs):
         created = self._state.adding
         self.update_metadata()
         super(Attachment, self).save(*args, **kwargs)
         self.strip_exif_on_add(created)
+
+    def scan(self):
+        try:
+            clamav.scan(self.upload.path)
+            return True
+        except AttributeError:
+            return False
+        except clamav.FileScanError as e:
+            from file.models import ScanIncident
+            ScanIncident.objects.create_from_attachment(e, self)
+            return not e.is_virus()
+
+    @property
+    def group(self):
+        try:
+            if self.attached._meta.label == 'core.Group':
+                return self.attached
+            return self.attached.group
+        except AttributeError:
+            return None
+
+    @property
+    def guid(self):
+        return str(self.id)
 
     def update_metadata(self):
         if self.upload:

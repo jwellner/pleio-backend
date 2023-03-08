@@ -20,3 +20,9 @@ class UnableToTestIndex(Exception):
     """
     Thrown when a given index has no test.
     """
+
+
+class AttachmentVirusScanError(Exception):
+    """
+    Thrown when a virus is found in an attachment.
+    """

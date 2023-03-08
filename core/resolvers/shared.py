@@ -1,4 +1,5 @@
 import logging
+import os
 
 from django.core.exceptions import ObjectDoesNotExist
 from django.utils import timezone
@@ -11,6 +12,7 @@ from cms.row_resolver import RowSerializer
 from core import config
 from core.constances import ACCESS_TYPE, USER_ROLES
 from core import constances
+from core.exceptions import AttachmentVirusScanError
 from core.lib import (access_id_to_acl, html_to_text,
                       tenant_schema, get_access_id)
 from core.models import EntityViewCount, Group, VideoCallGuest
@@ -19,7 +21,6 @@ from core.tasks.cleanup_tasks import cleanup_featured_image_files
 from core.utils.convert import tiptap_to_text, truncate_rich_description
 from core.utils.entity import load_entity_by_id
 from file.models import FileFolder
-from file.tasks import resize_featured
 from user.models import User
 
 LOGGER = logging.getLogger(__name__)
@@ -345,9 +346,17 @@ def update_featured_image(entity, clean_input, image_owner=None):
             featured_image.read_access = [ACCESS_TYPE.public]
             featured_image.write_access = [ACCESS_TYPE.user.format(image_owner.id)]
         featured_image.save()
-        resize_featured.delay(tenant_schema(), featured_image.id)
+
         featured['imageGuid'] = featured_image.guid
         featured.pop('image', None)
+
+        if featured_image.scan():
+            from file.tasks import resize_featured
+            resize_featured.delay(tenant_schema(), featured_image.guid)
+        else:
+            featured_image.delete()
+            raise GraphQLError(constances.FILE_NOT_CLEAN.format(os.path.basename(featured_image.upload.name)))
+
     elif not featured.get("imageGuid"):
         # No image, no guid, no video: cleanup.
         featured['imageGuid'] = None
@@ -568,11 +577,14 @@ def resolve_update_is_mandatory(profile_field, clean_input):
 
 
 def resolve_update_rows(entity, clean_input, user):
-    if 'rows' in clean_input:
-        entity.row_repository = []
-        for row in clean_input['rows']:
-            rowSerializer = RowSerializer(row, acting_user=user)
-            entity.row_repository.append(rowSerializer.serialize())
+    try:
+        if 'rows' in clean_input:
+            entity.row_repository = []
+            for row in clean_input['rows']:
+                rowSerializer = RowSerializer(row, acting_user=user)
+                entity.row_repository.append(rowSerializer.serialize())
+    except AttachmentVirusScanError as e:
+        raise GraphQLError(constances.FILE_NOT_CLEAN.format(str(e)))
 
 
 def assert_meetings_enabled():

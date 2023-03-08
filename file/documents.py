@@ -10,7 +10,6 @@ from .models import FileFolder
 from core.documents import DefaultDocument, custom_analyzer
 from core.utils.convert import tiptap_to_text
 
-
 logger = logging.getLogger(__name__)
 
 
@@ -81,10 +80,13 @@ class FileDocument(DefaultDocument):
         return super(FileDocument, self).update(thing, refresh, action, **kwargs)
 
     def get_queryset(self):
-        return super().get_queryset().exclude(group=None)
+        qs = super().get_queryset()
+        qs = qs.exclude(group=None)
+        qs = qs.exclude(blocked=True)
+        return qs
 
     def should_index_object(self, obj):
-        return bool(obj.group)
+        return bool(obj.group) and not obj.blocked
 
     class Index:
         name = 'file'

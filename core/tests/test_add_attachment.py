@@ -46,10 +46,11 @@ class AddAttachmentTestCase(PleioTenantTestCase):
         with self.assertGraphQlError('not_logged_in'):
             self.graphql_client.post(self.mutation, variables)
 
+    @patch("core.models.Attachment.scan")
     @patch("core.models.attachment.strip_exif")
     @patch("core.lib.get_mimetype")
     @patch("{}.open".format(settings.DEFAULT_FILE_STORAGE))
-    def test_add_attachment(self, mock_open, mock_mimetype, mocked_strip_exif):
+    def test_add_attachment(self, mock_open, mock_mimetype, mocked_strip_exif, mocked_scan):
         file_mock = MagicMock(spec=File)
         file_mock.name = 'test.gif'
         file_mock.content_type = 'image/gif'
@@ -73,3 +74,4 @@ class AddAttachmentTestCase(PleioTenantTestCase):
         self.assertEqual(data["addAttachment"]["attachment"]["mimeType"], attachment.mime_type)
         self.assertEqual(data["addAttachment"]["attachment"]["name"], file_mock.name)
         self.assertTrue(mocked_strip_exif.called)
+        self.assertTrue(mocked_scan.called)

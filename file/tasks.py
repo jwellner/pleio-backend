@@ -1,15 +1,19 @@
 from __future__ import absolute_import, unicode_literals
 
+import os
+from os.path import exists
+
 from celery import shared_task, chord
 from celery.utils.log import get_task_logger
-from datetime import timedelta
-from django.db.models import Q, F
+from django.utils.translation import gettext
 from django_tenants.utils import schema_context
 from django.utils import timezone
 
+from core.lib import datetime_format
+from core.models import Attachment
 from file.helpers.post_processing import ensure_correct_file_without_signals
 from file.mail_builders.file_scan_found import schedule_file_scan_found_mail
-from file.models import FileFolder, FILE_SCAN
+from file.models import FileFolder, ScanIncident
 from file.helpers.images import resize_and_update_image
 from file.validators import is_upload_complete
 from user.models import User
@@ -17,9 +21,8 @@ from user.models import User
 logger = get_task_logger(__name__)
 
 
-@shared_task(bind=True, ignore_result=True)
-def resize_featured(self, schema_name, file_guid):
-    # pylint: disable=unused-argument
+@shared_task
+def resize_featured(schema_name, file_guid):
     '''
     Resize featured image for tenant
     '''
@@ -31,48 +34,85 @@ def resize_featured(self, schema_name, file_guid):
             logger.error('resize_featured %s %s: %s', schema_name, file_guid, e)
 
 
-@shared_task(ignore_result=True)
-def schedule_scan(schema_name, limit=1000):
+@shared_task
+def schedule_scan_finished(schema_name):
     with schema_context(schema_name):
-        time_threshold = timezone.now() - timedelta(days=7)
+        incidents = ScanIncident.objects.filter(file_created__gte=timezone.now() - timezone.timedelta(days=1))
 
-        files = FileFolder.objects.filter(type=FileFolder.Types.FILE)
-        files = files.filter(Q(last_scan__isnull=True) | Q(last_scan__lt=time_threshold))
-        files = files.order_by(F("last_scan").desc(nulls_first=True))[:limit]
-        chord([scan_file.s(schema_name, file.id) for file in files], schedule_scan_finished.s(schema_name)).apply_async()
-        logger.info("Start scanning %i files @%s", files.count(), schema_name)
+        virus_count = incidents.filter(is_virus=True).count()
+        error_count = incidents.filter(is_virus=False).count()
 
-@shared_task(ignore_result=True)
-def schedule_scan_finished(results, schema_name):
-    with schema_context(schema_name):
-        file_count = 0
-        virus_count = 0
-        errors_count = 0
-        for result in results:
-            file_count += 1
-            if result == FILE_SCAN.VIRUS:
-                virus_count += 1
-            if result == FILE_SCAN.UNKNOWN:
-                errors_count += 1
-
-        if virus_count > 0:
+        if incidents.count():
             for admin_user in User.objects.filter(is_superadmin=True):
                 schedule_file_scan_found_mail(virus_count=virus_count,
-                                                admin=admin_user)
+                                              error_count=error_count,
+                                              admin=admin_user)
 
-        logger.info("Scanned %i and found %i virusses and %i errors @%s", file_count, virus_count, errors_count, schema_name)
+        logger.info("Scanned found %i virusses @%s", incidents, schema_name)
+
+
+@shared_task
+def schedule_scan(schema_name, limit=1000):
+    with schema_context(schema_name):
+        runner = ScheduleScan()
+        runner.run(schema_name, limit)
+
+
+class ScheduleScan:
+
+    @staticmethod
+    def collect_files(limit):
+        files = FileFolder.objects.filter(type=FileFolder.Types.FILE)
+        return files.order_by('last_scan').values_list('id', flat=True)[:limit]
+
+    @staticmethod
+    def collect_attachments(limit):
+        attachments = Attachment.objects.all()
+        return attachments.order_by('last_scan').values_list('id', flat=True)[:limit]
+
+    def generate_tasks(self, schema_name, limit):
+        from core.tasks import scan_attachment
+        for file_id in self.collect_files(limit):
+            yield scan_file.si(schema_name, str(file_id))
+        for file_id in self.collect_attachments(limit):
+            yield scan_attachment.si(schema_name, str(file_id))
+
+    def run(self, schema_name, limit=1000):
+        chord([*self.generate_tasks(schema_name, limit)],
+              schedule_scan_finished.si(schema_name)).apply_async()
+
 
 @shared_task(rate_limit="60/m")
 def scan_file(schema_name, file_id):
-    with schema_context(schema_name):
-        file = FileFolder.objects.filter(id=file_id).first()
-        if file:
-            result = file.scan()
-            file.last_scan = timezone.now()
-            file.save()
-            return result
+    try:
+        with schema_context(schema_name):
+            file = FileFolder.objects.filter(id=file_id).first()
+            if not file or not file.is_file():
+                return
 
-        return FILE_SCAN.UNKNOWN
+            if not file.upload.name or not exists(file.upload.path):
+                file.blocked = True
+                file.block_reason = gettext("File not found on file storage")
+                file.save()
+                return
+
+            logger.info("Scan file %s, last scanned %s", os.path.basename(file.upload.name), datetime_format(file.last_scan))
+            file.last_scan = timezone.now()
+
+            result = file.scan()
+            if not result:
+                file.blocked = True
+                file.block_reason = gettext("This file contains a virus")
+            else:
+                file.blocked = False
+                file.block_reason = None
+            file.save()
+
+            return result
+    except Exception as e:
+        # Make sure the task exits OK.
+        return str(e)
+
 
 @shared_task(autoretry_for=(AssertionError,), retry_backoff=10, max_retries=10)
 def post_process_file_attributes(schema_name, instance_id):
