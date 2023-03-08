@@ -69,7 +69,19 @@ class PageTestCase(PleioTenantTestCase):
                             guid
                             title
                         }
+                        owner {
+                            guid
+                            name
+                        }
                     }
+                    owner {
+                        guid
+                        name
+                    }
+                }
+                owner {
+                    guid
+                    name
                 }
             }
         """
@@ -96,7 +108,11 @@ class PageTestCase(PleioTenantTestCase):
         self.assertEqual(data["entity"]["url"], "/cms/view/{}/{}".format(self.page_parent.guid, slugify(self.page_parent.title)))
         self.assertEqual(len(data["entity"]["children"]), 1)
         self.assertEqual(data["entity"]["children"][0]["guid"], self.page_child.guid)
+        self.assertEqual(data["entity"]["children"][0]["owner"]["guid"], self.user1.guid)
         self.assertEqual(data["entity"]["children"][0]["children"][0]["guid"], self.page_child_child.guid)
+        self.assertEqual(data["entity"]["children"][0]["children"][0]["owner"]["guid"], self.user1.guid)
+        self.assertEqual(data["entity"]["owner"]["guid"], self.user1.guid)
+        self.assertEqual(data["entity"]["owner"]["name"], self.user1.name)
 
     def test_child_page_by_owner(self):
         variables = {
@@ -116,6 +132,8 @@ class PageTestCase(PleioTenantTestCase):
         self.assertEqual(data["entity"]["hasChildren"], True)
         self.assertEqual(data["entity"]["url"], "/cms/view/{}/{}".format(self.page_child.guid, slugify(self.page_child.title)))
         self.assertEqual(data["entity"]["children"][0]["guid"], self.page_child_child.guid)
+        self.assertEqual(data["entity"]["owner"]["guid"], self.user1.guid)
+        self.assertEqual(data["entity"]["owner"]["name"], self.user1.name)
 
 
 class TestPagePropertiesTestCase(PleioTenantTestCase):
