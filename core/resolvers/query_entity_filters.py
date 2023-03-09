@@ -50,7 +50,7 @@ class StatusupdateEntityFilter(EntityFilterBase):
 
 
 class QuestionEntityFilter(EntityFilterBase):
-    key = "statusupdate"
+    key = "question"
 
     def add(self, query):
         query.add(~Q(question__isnull=True), Q.OR)
