@@ -23,3 +23,14 @@ data:
   VIDEO_CALL_RESERVE_ROOM_URL: {{ .Values.videoCallReserveRoomUrl }}
   CONTROL_PRIMARY_DOMAIN: {{ .Values.tunnel.hostname }}
   SCAN_CYCLE_DAYS: {{ .Values.clamav.scanCycleDays | quote }}
+
+---
+
+{{- if .Values.tunnel.hostname }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ printf "%s-cloudflared" (include "backend2.name" .) }}
+data:
+  config.yaml: {{ toYaml .Values.admin.tunnelConfig | indent 2 }}
+{{- end }}

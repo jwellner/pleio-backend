@@ -2,6 +2,10 @@
 {{- .Release.Name | trunc 63  -}}
 {{- end -}}
 
+{{- define "backend2.tunnelCredentials" -}}
+{{- printf "%s-tunnel-credentials" (include "backend2.name" .) -}}
+{{- end -}}
+
 {{- define "backend2.chart" -}}
 {{- printf "%s-%s" .Chart.Name .Chart.Version | replace "+" "_" | trunc 63 | trimSuffix "-" -}}
 {{- end -}}

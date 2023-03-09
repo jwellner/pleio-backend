@@ -10,6 +10,10 @@
 {{- printf "tls-%s" ((include "backend2.name" .)) -}}
 {{- end -}}
 
+{{- define "backend2.tunnelCredentials" -}}
+{{- printf "%s-tunnel-credentials" (include "backend2.secretsName" .) -}}
+{{- end -}}
+
 {{- define "backend2.frontendName" -}}
 {{- printf "%s-frontend" ((include "backend2.name" . )) -}}
 {{- end -}}
