@@ -65,18 +65,25 @@ spec:
         {{- if .Values.tunnel.hostname }}
         - name: tunnel
           image: "{{ .Values.tunnel.repository }}:{{ .Values.tunnel.tag }}"
-          command:
-            - cloudflared
-            - tunnel
           args:
-            - --url=http://127.0.0.1:8000
-            - --hostname={{ .Values.tunnel.hostname }}
-            - --origincert=/etc/cloudflared/cert.pem
-            - --no-autoupdate
+          - tunnel
+          - --config
+          - /etc/cloudflared/config/config.yaml
+          - run
+          livenessProbe:
+            httpGet:
+              path: /ready
+              port: 2000
+            failureThreshold: 1
+            initialDelaySeconds: 10
+            periodSeconds: 10
           volumeMounts:
-            - mountPath: /etc/cloudflared
-              name: tunnel-secret
-              readOnly: true
+          - name: cloudflared-config
+            mountPath: /etc/cloudflared/config
+            readOnly: true
+          - name: cloudflared-creds
+            mountPath: /etc/cloudflared/creds
+            readOnly: true
         {{- end }}
       volumes:
         - name: pleio-data
@@ -96,8 +103,13 @@ spec:
             claimName: {{ include "backend2.backupStorageName" . }}
           {{- end }}
         {{- if .Values.tunnel.hostname }}
-        - name: tunnel-secret
+        - name: cloudflared-creds
           secret:
-            defaultMode: 420
-            secretName: {{ .Values.tunnel.secretname }}
+            secretName: {{ include "backend2.tunnelCredentials" . }}
+        - name: cloudflared-config
+          configMap:
+            name: {{ printf "%s-cloudflared" (include "backend2.name" .) }}
+            items:
+            - key: config.yaml
+              path: config.yaml
         {{- end }}

@@ -45,6 +45,15 @@ admin:
     requests:
       cpu: 200m
       memory: 250Mi
+  tunnelConfig: |
+    tunnel: control-review
+    credentials-file: /etc/cloudflared/creds/credentials.json
+    metrics: 0.0.0.0:2000
+    no-autoupdate: true
+    ingress:
+    - hostname: control-review.pleio-beheer.nl
+      service: http://127.0.0.1:8000
+    - service: http_status:404
 
 storage:
   type: hostpath
