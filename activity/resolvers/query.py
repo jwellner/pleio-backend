@@ -105,7 +105,7 @@ def resolve_activities(
         order_by = 'published'
 
     # Set orderDirection to default when none value is used
-    if orderDirection == None:
+    if orderDirection is None:
         orderDirection = ORDER_DIRECTION.desc
 
     if orderDirection == ORDER_DIRECTION.desc:
