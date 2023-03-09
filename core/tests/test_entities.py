@@ -694,7 +694,7 @@ class EntitiesEventsTestCase(PleioTenantTestCase):
             self.graphql_client.post(self.query, variables)
 
 
-class TestImproperformatEntitiesTestCase(PleioTenantTestCase):
+class TestImproperFormatEntitiesTestCase(PleioTenantTestCase):
 
     def test_invalid_guid_entity_query(self):
         query = """
