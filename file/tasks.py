@@ -63,10 +63,10 @@ def schedule_scan(schema_name):
 class ScheduleScan:
 
     def file_limit(self):
-        return math.ceil(self.file_queryset().count() / settings.SCAN_CYCLE_DAYS)
+        return math.ceil(self.file_queryset().count() / int(settings.SCAN_CYCLE_DAYS))
 
     def attachment_limit(self):
-        return math.ceil(self.attachment_queryset().count() / settings.SCAN_CYCLE_DAYS)
+        return math.ceil(self.attachment_queryset().count() / int(settings.SCAN_CYCLE_DAYS))
 
     @staticmethod
     def file_queryset():
