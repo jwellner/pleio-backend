@@ -59,7 +59,7 @@ class TestTaskScheduleScanTestCase(PleioTenantTestCase):
 
     @mock.patch("file.models.FileFolderQuerySet.count")
     def test_file_count(self, mocked_count):
-        self.override_setting(SCAN_CYCLE_DAYS=10)
+        self.override_setting(SCAN_CYCLE_DAYS="10")
 
         mocked_count.return_value = 100
         self.assertEqual(ScheduleScan().file_limit(), 10)
@@ -69,7 +69,7 @@ class TestTaskScheduleScanTestCase(PleioTenantTestCase):
 
     @mock.patch("core.models.attachment.AttachmentQuerySet.count")
     def test_attachment_count(self, mocked_count):
-        self.override_setting(SCAN_CYCLE_DAYS=10)
+        self.override_setting(SCAN_CYCLE_DAYS="10")
 
         mocked_count.return_value = 100
         self.assertEqual(ScheduleScan().attachment_limit(), 10)
