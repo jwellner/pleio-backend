@@ -39,7 +39,6 @@ class Discussion(RichDescriptionMediaMixin, TitleMixin, VoteMixin, BookmarkMixin
 
     def map_rich_text_fields(self, callback):
         self.rich_description = callback(self.rich_description)
-        raise NotImplementedError()
 
     def serialize(self):
         return {

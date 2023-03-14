@@ -78,7 +78,7 @@ class FilterUsersTestCase(ElasticsearchTestCase):
             }
         """
 
-    def teardown(self):
+    def tearDown(self):
         self.owner.delete()
         self.group.delete()
         self.admin.delete()

@@ -70,7 +70,7 @@ class TestAvatarExportMutationTestCase(PleioTenantTestCase):
         self.assertEqual(1, AvatarExport.objects.filter(initiator=self.admin).count())
 
     @mock.patch('core.tasks.exports.export_avatars.delay')
-    def test_prevent_duplicate_exports(self, mocked_schedule_export):
+    def test_prevent_duplicate_exports_after_the_fact(self, mocked_schedule_export):
         AvatarExport.objects.create(
             initiator=self.admin,
             status='in_progress',

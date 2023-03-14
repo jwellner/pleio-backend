@@ -47,9 +47,11 @@ class ImportUsersTestCase(PleioTenantTestCase):
             for chunk in SimpleUploadedFile('test.csv', self.csv_bytes).chunks():
                 destination.write(chunk)
 
-    def teardown(self):
-        os.remove(self.usersCsv)
-        User.objects.all().delete()
+    def tearDown(self):
+        if os.path.exists(self.usersCsv):
+            os.remove(self.usersCsv)
+        for user in User.objects.all():
+            user.delete()
         super().tearDown()
 
     def test_import_users_step1_admin(self):

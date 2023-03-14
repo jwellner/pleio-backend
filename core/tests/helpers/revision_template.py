@@ -42,9 +42,6 @@ class RevisionTemplate:
         def build_entity(self, owner):
             raise NotImplementedError()
 
-        def default_variables(self):
-            raise NotImplementedError()
-
         def build_owner(self):
             raise NotImplementedError()
 

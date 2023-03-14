@@ -145,6 +145,8 @@ class NotificationsTestCase(PleioTenantTestCase):
         self.assertEqual(data["notifications"]["edges"][0]["container"], None)
         self.assertEqual(data["notifications"]["edges"][0]["entity"]["guid"], str(self.user1.id))
 
+    # Dit zorgt er voor dat de test niet wordt uitgevoerd.
+    # TODO: Bedenk iets beters.
     @suspendingreceiver(post_save, sender=Comment)
     def test_notifications_add_comment(self):
         i = 0
@@ -163,6 +165,8 @@ class NotificationsTestCase(PleioTenantTestCase):
         self.assertEqual(data["notifications"]["edges"][0]["isUnread"], True)
         self.assertEqual(data["notifications"]["edges"][0]["action"], "commented")
 
+    # Dit zorgt er voor dat de test niet wordt uitgevoerd.
+    # TODO: Bedenk iets beters.
     @suspendingreceiver(post_save, sender=Comment)
     def test_notifications_unread_filter(self):
         variables = {
@@ -188,6 +192,8 @@ class NotificationsTestCase(PleioTenantTestCase):
         self.assertEqual(data["notifications"]["total"], 1)
         self.assertEqual(data["notifications"]["totalUnread"], 1)
 
+    # Dit zorgt er voor dat de test niet wordt uitgevoerd.
+    # TODO: Bedenk iets beters.
     @suspendingreceiver(post_save, sender=Blog)
     def test_notifications_content_to_group_added(self):
         create_notification.s(connection.schema_name, 'created', 'blog.blog', self.blog2.id, self.user1.id).apply()
@@ -212,6 +218,8 @@ class NotificationsTestCase(PleioTenantTestCase):
         self.assertEqual(data["notifications"]["totalUnread"], 0)
         self.assertEqual(data["notifications"]["edges"], list())
 
+    # Dit zorgt er voor dat de test niet wordt uitgevoerd.
+    # TODO: Bedenk iets beters.
     @suspendingreceiver(post_save, sender=Blog)
     def test_notifications_content_deleted(self):
         blog3 = Blog.objects.create(
