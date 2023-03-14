@@ -45,49 +45,49 @@ class TestViewSiteBackupTestCase(_.BaseTestCase):
         self.assertEqual(filter_calls, [{'site': site},
                                         {'type': AccessLog.AccessTypes.CREATE, 'category': "SITE_BACKUP:1"}])
 
-        @mock.patch("tenants.models.ClientManager.get")
-        @mock.patch("control.views.schema_config")
-        @mock.patch("control.views.schedule_backup")
-        def test_enable_site_submit_with_files(self, schedule_backup, schema_config, manager_get):
-            site = mock.MagicMock(spec=get_tenant_model())
-            site.schema_name = "demo"
-            site.id = 1
-            manager_get.return_value = site
-            schema_config.return_value = "Demo Site"
-            self.client.force_login(self.admin)
+    @mock.patch("tenants.models.ClientManager.get")
+    @mock.patch("control.views.schema_config")
+    @mock.patch("control.views.schedule_backup")
+    def test_enable_site_submit_with_files(self, schedule_backup, schema_config, manager_get):
+        site = mock.MagicMock(spec=get_tenant_model())
+        site.schema_name = "demo"
+        site.id = 1
+        manager_get.return_value = site
+        schema_config.return_value = "Demo Site"
+        self.client.force_login(self.admin)
 
-            response = self.client.post(_.reverse("site_backup", args=[1]), data={
-                'include_files': True,
-            })
+        response = self.client.post(_.reverse("site_backup", args=[1]), data={
+            'include_files': True,
+        })
 
-            self.maxDiff = None
+        self.maxDiff = None
 
-            self.assertEqual(response.status_code, HTTPStatus.FOUND)
-            self.assertEqual(response.url, _.reverse("site_backup", args=[1]))
-            self.assertEqual(schedule_backup.call_count, 1)
-            self.assertEqual(schedule_backup.call_args.args,
-                             (site, self.admin, True, False))
+        self.assertEqual(response.status_code, HTTPStatus.FOUND)
+        self.assertEqual(response.url, _.reverse("site_backup", args=[1]))
+        self.assertEqual(schedule_backup.call_count, 1)
+        self.assertEqual(schedule_backup.call_args.args,
+                         (site, self.admin, True, False))
 
-        @mock.patch("tenants.models.ClientManager.get")
-        @mock.patch("control.views.schema_config")
-        @mock.patch("control.views.schedule_backup")
-        def test_enable_site_submit_to_archive(self, schedule_backup, schema_config, manager_get):
-            site = mock.MagicMock(spec=get_tenant_model())
-            site.schema_name = "demo"
-            site.id = 1
-            manager_get.return_value = site
-            schema_config.return_value = "Demo Site"
+    @mock.patch("tenants.models.ClientManager.get")
+    @mock.patch("control.views.schema_config")
+    @mock.patch("control.views.schedule_backup")
+    def test_enable_site_submit_to_archive(self, schedule_backup, schema_config, manager_get):
+        site = mock.MagicMock(spec=get_tenant_model())
+        site.schema_name = "demo"
+        site.id = 1
+        manager_get.return_value = site
+        schema_config.return_value = "Demo Site"
 
-            self.client.force_login(self.admin)
+        self.client.force_login(self.admin)
 
-            response = self.client.post(_.reverse("site_backup", args=[1]), data={
-                'create_archive': True,
-            })
+        response = self.client.post(_.reverse("site_backup", args=[1]), data={
+            'create_archive': True,
+        })
 
-            self.maxDiff = None
+        self.maxDiff = None
 
-            self.assertEqual(response.status_code, HTTPStatus.FOUND)
-            self.assertEqual(response.url, _.reverse("site_backup", args=[1]))
-            self.assertEqual(schedule_backup.call_count, 1)
-            self.assertEqual(schedule_backup.call_args.args,
-                             (site, self.admin, False, True))
+        self.assertEqual(response.status_code, HTTPStatus.FOUND)
+        self.assertEqual(response.url, _.reverse("site_backup", args=[1]))
+        self.assertEqual(schedule_backup.call_count, 1)
+        self.assertEqual(schedule_backup.call_args.args,
+                         (site, self.admin, False, True))

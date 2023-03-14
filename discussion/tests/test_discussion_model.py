@@ -33,7 +33,7 @@ class TestDiscussionModelTestCase(PleioTenantTestCase):
             "richDescription": self.CONTENT
         })
 
-    def map_rich_text_fields(self):
+    def test_map_rich_text_fields(self):
         before = self.entity.serialize()
         expected = self.entity.serialize()
         expected['richDescription'] = f"new {self.CONTENT}"
