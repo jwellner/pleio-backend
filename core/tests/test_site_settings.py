@@ -325,10 +325,12 @@ class TestSiteSettingsTestCase(PleioTenantTestCase):
         self.assertEqual(data["siteSettings"]["fontOptions"], [
             {"value": "Arial", "label": "Arial"},
             {"value": "Open Sans", "label": "Open Sans"},
+            {"value": "Palanquin", "label": "Palanquin"},
             {"value": "PT Sans", "label": "PT Sans"},
             {"value": "Rijksoverheid Sans", "label": "Rijksoverheid Sans"},
             {"value": "Roboto", "label": "Roboto"},
-            {"value": "Source Sans Pro", "label": "Source Sans Pro"}
+            {"value": "Source Sans Pro", "label": "Source Sans Pro"},
+            {"value": "Source Serif Pro", "label": "Source Serif Pro"}
         ])
 
         self.assertEqual(data["siteSettings"]["font"], "Rijksoverheid Sans")

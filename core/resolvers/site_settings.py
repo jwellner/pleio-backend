@@ -173,10 +173,12 @@ def resolve_font_options(obj, info):
     # pylint: disable=unused-argument
     return [{"value": "Arial", "label": "Arial"},
             {"value": "Open Sans", "label": "Open Sans"},
+            {"value": "Palanquin", "label": "Palanquin"},
             {"value": "PT Sans", "label": "PT Sans"},
             {"value": "Rijksoverheid Sans", "label": "Rijksoverheid Sans"},
             {"value": "Roboto", "label": "Roboto"},
-            {"value": "Source Sans Pro", "label": "Source Sans Pro"}]
+            {"value": "Source Sans Pro", "label": "Source Sans Pro"},
+            {"value": "Source Serif Pro", "label": "Source Serif Pro"}]
 
 
 @site_settings_public.field('logo')
