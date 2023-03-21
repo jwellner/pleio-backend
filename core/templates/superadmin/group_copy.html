@@ -13,7 +13,7 @@
         <form method="post">
             {% csrf_token %}
             <input type="hidden" name="task" value="copy_group">
-            <p>Copy group to other site</p>
+            <p>Make a full copy of a group within a site or to another site</p>
             <div class="mb-3">
                 <label for="group" class="form-label">Group</label>
                 <select name="group"  class="form-control" id="group" aria-describedby="groupHelp">
@@ -32,7 +32,12 @@
                     <option value="{{ site.schema}}">{{ site.domain }} </option>
                     {% endfor %}
                 </select>
-                <div id="targetTenantHelp" class="form-text">Select the target site</div>
+                <div id="targetTenantHelp" class="form-text">Select the target site (if empty, a copy is made on the same site)</div>
+            </div>
+            <div class="mb-3">
+                <input type="checkbox" class="form-check-input" id="copy_members" name="copy_members" value="1" aria-describedby="copyMembersHelp">
+                <label class="form-check-label" for="copy_members">Copy members</label>
+                <div id="copyMembersHelp" class="form-text">Make a copy of all group members. This creates users on the target site if they do not exist!</div>
             </div>
             <button type="submit" class="btn btn-primary">Start group copy</button>
         </form>
@@ -46,6 +51,7 @@
         <th scope="col" width=175>Date</th>
         <th scope="col">Group ID</th>
         <th scope="col">Target tenant</th>
+        <th scope="col">Copy members</th>
         <th scope="col">Status</th>
         <th scope="col">Response</th>
       </tr>
@@ -56,6 +62,7 @@
         <td>{{ item.created_at|date:'Y-m-d H:i' }}</td>
         <td>{{ item.source_id }}</td>
         <td>{{ item.target_tenant }}</td>
+        <td>{{ item.copy_members }}</td>
         <td>{{ item.task_state }}</td>
         <td>{{ item.task_response }}</td>
       </tr>

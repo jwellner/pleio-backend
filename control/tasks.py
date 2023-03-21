@@ -2,7 +2,6 @@ from __future__ import absolute_import, unicode_literals
 
 import os
 import shutil
-import signal_disabler
 import subprocess
 
 from traceback import format_exc
@@ -21,16 +20,15 @@ from django.utils import timezone
 
 from control.lib import get_full_url, reverse
 from control.models import AccessLog, AccessCategory
+from control.utils.group_copy import GroupCopyRunner
 from core import config
 from core.elasticsearch import elasticsearch_status_report
 from core.exceptions import ExceptionDuringQueryIndex, UnableToTestIndex
-from core.models import SiteStat, Attachment, Entity, CommentMixin, Comment, GroupMembership, Group, Subgroup
-from core.lib import ACCESS_TYPE, access_id_to_acl, get_access_id, test_elasticsearch_index
-from core.models.rich_fields import ReplaceAttachments
+from core.models import SiteStat
+from core.lib import test_elasticsearch_index
 from core.utils.export import compress_path
 from core.tasks.elasticsearch_tasks import elasticsearch_delete_data_for_tenant, all_indexes
-from file.models import FileFolder
-from tenants.models import Client, Domain, GroupCopy, GroupCopyMapping, Agreement, AgreementVersion
+from tenants.models import Client, Domain, Agreement, AgreementVersion
 from user.models import User
 
 logger = get_task_logger(__name__)
@@ -475,419 +473,25 @@ def update_site(self, site_id, data):
     return True
 
 
-def get_file_field_data(source_schema_name, file_field):
-    file_data = None
-    with schema_context(source_schema_name):
-        try:
-            file_data = ContentFile(file_field.read())
-            file_data.name = file_field.name
-        except Exception:
-            pass
-    return file_data
-
-
-def copy_entity_file(source_schema, target_schema, target_entity, file_attribute):
-    """
-    Copy a file connected to an entity
-    """
-    with schema_context(source_schema):
-        source_file = getattr(target_entity, file_attribute)
-
-    if source_file:
-        file_contents = get_file_field_data(source_schema, source_file.upload)
-
-        with schema_context(target_schema):
-            target_file = FileFolder.objects.create(
-                owner=target_entity.owner,
-                upload=file_contents,
-                read_access=[ACCESS_TYPE.public],
-                write_access=[ACCESS_TYPE.user.format(target_entity.owner.id)]
-            )
-
-        setattr(target_entity, file_attribute, target_file)
-
-
-def copy_attachments(source_schema, target_schema, target_entity):
-    """
-    Copy entity attachments and replace rich_field links
-    """
-    with schema_context(source_schema):
-        # make it a list so it get looked up within context
-        attachments = list(Attachment.objects.filter(pk__in=[*target_entity.lookup_attachments()]))
-
-    attachment_map = ReplaceAttachments()
-    for attachment in attachments:
-        attachment_contents = get_file_field_data(source_schema, attachment.upload)
-
-        with schema_context(target_schema):
-            new_attachment = Attachment()
-            new_attachment.upload = attachment_contents
-            new_attachment.owner = target_entity.owner
-            new_attachment.save()
-            logger.info("saved new attachemnt %s", str(new_attachment.id))
-
-        attachment_map.append(str(attachment.id), str(new_attachment.id))
-
-    if hasattr(target_entity, 'replace_attachments'):
-        target_entity.replace_attachments(attachment_map)
-
-
-def get_or_create_user(copy, source_user_id):
-    created = False
-    with schema_context(copy.source_tenant):
-        source_user = User.objects.with_deleted().get(id=source_user_id)
-
-    with schema_context(copy.target_tenant):
-        user = User.objects.with_deleted().filter(email__iexact=source_user.email).first()
-
-        if not user:
-            with signal_disabler.disable():  # prevent auto join in groups
-                user = User.objects.create(
-                    name=source_user.name,
-                    email=source_user.email,
-                    picture=source_user.picture,
-                    external_id=source_user.external_id,
-                    is_active=source_user.is_active,
-                    ban_reason=source_user.ban_reason
-                )
-            created = True
-
-    with schema_context('public'):
-        GroupCopyMapping.objects.get_or_create(
-            copy=copy,
-            entity_type='User',
-            source_id=source_user.id,
-            target_id=user.id,
-            created=created
-        )
-
-    return user
-
-
 @shared_task(bind=False)
-def copy_group_to_tenant(source_schema, action_user_id, group_id, target_schema):
+def copy_group(source_schema, action_user_id, group_id, target_schema=None, copy_members=False):
     # pylint: disable=too-many-locals
     '''
-    Copy group from one tenant to another
+    Copy group 
     '''
-    now = timezone.now()
+    runner = GroupCopyRunner()
+    runner.run(copy_group.request.id, source_schema, action_user_id, group_id, target_schema, copy_members)
 
-    copy = GroupCopy.objects.create(
-        source_tenant=source_schema,
-        target_tenant=target_schema,
-        source_id=group_id,
-        task_id=copy_group_to_tenant.request.id
-    )
-
-    copy.task_id = copy_group_to_tenant.request.id
-    copy.save()
-
-    with schema_context(source_schema):
-        action_user = User.objects.get(id=action_user_id)
-        group = Group.objects.get(id=group_id)
-
-    with schema_context(target_schema):
-        target_group = group
-        target_group.owner = get_or_create_user(copy, group.owner_id)
-        target_group.created_at = now
-        target_group.updated_at = now
-        target_group.is_featured = False
-        target_group.is_auto_membership_enabled = False
-
-        copy_entity_file(source_schema, target_schema, target_group, "featured_image")
-        copy_entity_file(source_schema, target_schema, target_group, "icon")
-
-        target_group.pk = None
-        target_group.id = None
-
-        copy_attachments(source_schema, target_schema, target_group)
-
-        target_group.save()
-
-    copy.action_user_id = action_user.id
-    copy.target_id = target_group.id
-    copy.save()
-
-    logger.info("Created group %s", target_group)
-
-    with schema_context(copy.source_tenant):
-        subgroups = list(item for item in Subgroup.objects.filter(group__id=copy.source_id).all())
-
-    with schema_context(copy.target_tenant):
-        target_group = Group.objects.get(id=copy.target_id)
-
-        for s in subgroups:
-            subgroup_source_id = s.id
-            s.group = target_group
-            s.pk = None
-            s.id = None
-            s.save()
-
-            GroupCopyMapping.objects.create(
-                copy=copy,
-                entity_type='Subgroup',
-                source_id=subgroup_source_id,
-                target_id=s.id
-            )
-
-    logger.info("Added %i subgroups", len(subgroups))
-
-    return copy_group_memberships(copy.id)
+    return runner.state.id
 
 
 @shared_task(bind=False)
-def copy_file_from_source_tenant(source_schema, target_schema, dst_file):
+def copy_file_from_source_tenant(copy_id, source_file_id):
     '''
     Separate load heavy task to copy file from source tenant to target in group copy
     '''
-    src_file = dst_file.replace(os.path.join(settings.MEDIA_ROOT, target_schema), os.path.join(settings.MEDIA_ROOT, source_schema))
-
-    if os.path.isfile(src_file):
-        dst_folder = os.path.dirname(dst_file)
-        if not os.path.exists(dst_folder):
-            os.makedirs(dst_folder)
-
-        shutil.copy(src_file, dst_file)
-
-
-def copy_group_memberships(copy_id):
-    # pylint: disable=too-many-locals
-    # pylint: disable=too-many-statements
-    # pylint: disable=too-many-branches
-    '''
-    Copy group users from one tenant to another
-    '''
-    with schema_context("public"):
-        copy = GroupCopy.objects.get(id=copy_id)
-
-    with schema_context(copy.source_tenant):
-        memberships = list(item for item in GroupMembership.objects.filter(group__id=copy.source_id).all())
-
-    with schema_context(copy.target_tenant):
-        target_group = Group.objects.get(id=copy.target_id)
-
-        for m in memberships:
-            m.user = get_or_create_user(copy, m.user_id)
-            m.group = target_group
-            m.pk = None
-            m.id = None
-            m.save()
-
-    logger.info("Inserted %i group members", len(memberships))
-
-    # loop over all members and set subgroup memberships
-    subgroup_memberships = []
-    with schema_context(copy.source_tenant):
-        for subgroup in Subgroup.objects.filter(group__id=copy.source_id).all():
-            for member in subgroup.members.all():
-                subgroup_memberships.append({'subgroup_id': subgroup.id, 'user_id': member.id})
-
-    with schema_context(copy.target_tenant):
-        target_group = Group.objects.get(id=copy.target_id)
-        for membership in subgroup_memberships:
-            subgroup_id = GroupCopyMapping.objects.get(
-                copy=copy,
-                entity_type='Subgroup',
-                source_id=membership.get('subgroup_id')
-            ).target_id
-
-            subgroup = Subgroup.objects.get(id=subgroup_id)
-            user = get_or_create_user(copy, membership.get('user_id'))
-            subgroup.members.add(user)
-
-    logger.info("Added %i subgroup members", len(subgroup_memberships))
-
-    return copy_group_entities(copy.id)
-
-
-def copy_group_entities(copy_id):
-    # pylint: disable=too-many-locals
-    # pylint: disable=too-many-statements
-    # pylint: disable=too-many-branches
-    '''
-    Copy entities in group from one tenant to another
-    '''
-
-    with schema_context("public"):
-        copy = GroupCopy.objects.get(id=copy_id)
-
-    def transform_acl_to_access_id(acl):
-        access_id = get_access_id(acl)
-
-        if access_id > 10000:
-            old_subgroup_id = access_id - 10000
-            subgroup_map = GroupCopyMapping.objects.filter(
-                copy=copy,
-                entity_type='Subgroup',
-                source_id=old_subgroup_id
-            ).first()
-
-            if subgroup_map:
-                access_id = subgroup_map.target_id.int + 10000
-            else:
-                access_id = 0
-
-        return access_id
-
-    with schema_context(copy.source_tenant):
-        entities = list(item for item in Entity.objects.filter(group__id=copy.source_id).select_subclasses())
-
-    with schema_context(copy.target_tenant):
-        target_group = Group.objects.get(id=copy.target_id)
-
-        connect_parent = []
-        connect_best_answers = []
-        connect_sub_comments = []
-        connect_best_answers = []
-
-        for target_entity in entities:
-            source_entity_id = target_entity.id
-            parent_source_id = None
-            best_answer_source_id = None
-            comments = []
-            event_attendees = []
-
-            if target_entity.__class__.__name__ in ["Blog", "StatusUpdate", "Task", "FileFolder", "Wiki", "Event", "Question", "Discussion"]:
-
-                # default entity stuff
-                target_entity.group = target_group
-                target_entity.owner = get_or_create_user(copy, target_entity.owner_id)
-                target_entity.is_featured = False
-                target_entity.notifications_created = True
-                target_entity.read_access = access_id_to_acl(target_entity, transform_acl_to_access_id(target_entity.read_access))
-                target_entity.write_access = access_id_to_acl(target_entity, transform_acl_to_access_id(target_entity.write_access))
-
-                # specific entity type stuff
-                if target_entity.__class__.__name__ in ["Blog", "Wiki", "Event"]:
-                    copy_entity_file(copy.source_tenant, copy.target_tenant, target_entity, "featured_image")
-
-                if target_entity.__class__.__name__ in ["Blog", "StatusUpdate", "Task", "Wiki", "Event"]:
-                    copy_attachments(copy.source_tenant, copy.target_tenant, target_entity)
-
-                if target_entity.__class__.__name__ in ["FileFolder", "Wiki", "Event"]:
-                    with schema_context(copy.source_tenant):
-                        if target_entity.parent:
-                            parent_source_id = target_entity.parent.id
-                            target_entity.parent = None
-
-                if target_entity.__class__.__name__ in ["FileFolder"]:
-                    if target_entity.upload:
-                        copy_file_from_source_tenant.delay(copy.source_tenant, copy.target_tenant, target_entity.upload.path)
-                    if target_entity.thumbnail:
-                        copy_file_from_source_tenant.delay(copy.source_tenant, copy.target_tenant, target_entity.thumbnail.path)
-
-                if target_entity.__class__.__name__ in ["Question"]:
-                    with schema_context(copy.source_tenant):
-                        if target_entity.best_answer:
-                            best_answer_source_id = target_entity.best_answer.id
-                            target_entity.best_answer = None
-
-                if target_entity.__class__.__name__ in ["Event"]:
-                    with schema_context(copy.source_tenant):
-                        event_attendees = list(item for item in target_entity.attendees.all())
-
-                if target_entity.__class__ in CommentMixin.__subclasses__():
-                    with schema_context(copy.source_tenant):
-                        comments = list(target_entity.get_flat_comment_list())
-
-                target_entity.pk = None
-                target_entity.id = None
-
-                with signal_disabler.disable():
-                    target_entity.save()
-
-                GroupCopyMapping.objects.create(
-                    copy=copy,
-                    entity_type=target_entity.__class__.__name__,
-                    source_id=source_entity_id,
-                    target_id=target_entity.id
-                )
-
-                if parent_source_id:
-                    connect_parent.append({'entity_id': target_entity.id, 'parent_source_id': parent_source_id})
-
-                if best_answer_source_id:
-                    connect_best_answers.append({'entity_id': target_entity.id, 'best_answer_source_id': best_answer_source_id})
-
-                for comment in comments:
-                    container_source_id = None
-                    comment_source_id = comment.id
-                    comment.owner = get_or_create_user(copy, comment.owner_id)
-                    copy_attachments(copy.source_tenant, copy.target_tenant, comment)
-                    comment.pk = None
-                    comment.id = None
-                    with schema_context(copy.source_tenant):
-                        if comment.container:
-                            if comment.container.__class__.__name__ == 'Comment':  # is subcomment, for now set container to target_entity
-                                container_source_id = comment.container.id
-
-                    comment.container = target_entity
-
-                    with signal_disabler.disable():
-                        comment.save()
-
-                    if container_source_id:
-                        connect_sub_comments.append({'comment_id': comment.id, 'container_source_id': container_source_id})
-
-                    GroupCopyMapping.objects.create(
-                        copy=copy,
-                        entity_type=comment.__class__.__name__,
-                        source_id=comment_source_id,
-                        target_id=comment.id
-                    )
-
-                # add event attendees
-                for attendee in event_attendees:
-                    attendee.event = target_entity
-                    attendee.user = get_or_create_user(copy, attendee.user_id)
-                    attendee.pk = None
-                    attendee.id = None
-                    attendee.save()
-
-        logger.info("Inserted %i entities", len(entities))
-
-        # rebuild parent/child relations
-        for connect in connect_parent:
-            entity = Entity.objects.get_subclass(id=connect.get('entity_id'))
-            parent_id = GroupCopyMapping.objects.get(
-                copy=copy,
-                entity_type=entity.__class__.__name__,
-                source_id=connect.get('parent_source_id')
-            ).target_id
-            parent = Entity.objects.get_subclass(id=parent_id)
-            if parent != entity:
-                entity.parent = parent
-            with signal_disabler.disable():
-                entity.save()
-
-        # rebuild subcomment container relations
-        for connect in connect_sub_comments:
-            comment = Comment.objects.get(id=connect.get('comment_id'))
-            container_id = GroupCopyMapping.objects.get(
-                copy=copy,
-                entity_type=comment.__class__.__name__,
-                source_id=connect.get('container_source_id')
-            ).target_id
-            container = Comment.objects.get(id=container_id)
-            comment.container = container
-            with signal_disabler.disable():
-                comment.save()
-
-        # connect best anwswer
-        for connect in connect_best_answers:
-            entity = Entity.objects.get_subclass(id=connect.get('entity_id'))
-            comment_id = GroupCopyMapping.objects.get(
-                copy=copy,
-                entity_type='Comment',
-                source_id=connect.get('best_answer_source_id')
-            ).target_id
-            answer = Comment.objects.get(id=comment_id)
-            entity.best_answer = answer
-            entity.save()
-
-    logger.info("Rebuild %i relations", len(connect_parent) + len(connect_sub_comments) + len(connect_best_answers))
-
-    return copy.id
+    runner = GroupCopyRunner(copy_id)
+    runner.copy_file_data(source_file_id)
 
 
 @shared_task(bind=True)

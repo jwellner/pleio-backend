@@ -25,7 +25,7 @@ from core.models.agreement import CustomAgreement
 from core.tasks import replace_domain_links, elasticsearch_rebuild_for_tenant, elasticsearch_index_data_for_tenant
 from core.lib import tenant_schema, is_valid_domain
 from core.superadmin.forms import AuditLogFilter, CustomAgreementForm, SettingsForm, ScanIncidentFilter, OptionalFeaturesForm, SupportContractForm
-from control.tasks import get_db_disk_usage, get_file_disk_usage, copy_group_to_tenant
+from control.tasks import get_db_disk_usage, get_file_disk_usage, copy_group
 from core.tasks.elasticsearch_tasks import all_indexes
 from file.models import ScanIncident, FileFolder
 from tenants.models import Client, GroupCopy
@@ -178,12 +178,13 @@ class GroupCopyView(SuperAdminView):
     def post(self, request):
         try:
             assert request.POST.get("group"), "Provide group"
-            assert request.POST.get("target_tenant"), "Provide target tenant"
+            #assert request.POST.get("target_tenant"), "Provide target tenant"
 
             group_id = request.POST.get("group")
             target_tenant = request.POST.get("target_tenant")
             action_user_id = request.user.id
-            copy_group_to_tenant.delay(tenant_schema(), action_user_id, group_id, target_tenant)
+            copy_members = request.POST.get("copy_members") == "1"
+            copy_group.delay(tenant_schema(), action_user_id, group_id, target_tenant, copy_members)
             messages.success(request, f"Copy group for {group_id} to {target_tenant} started.")
 
         except AssertionError as e:

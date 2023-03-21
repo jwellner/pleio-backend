@@ -83,6 +83,8 @@ class GroupCopy(models.Model):
     )
     task_response = models.JSONField(null=True, blank=True)
 
+    copy_members = models.BooleanField(default=False)
+
     created_at = models.DateTimeField(default=timezone.now)
 
     class Meta:
