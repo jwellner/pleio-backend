@@ -83,6 +83,23 @@ class TestDiskFileModelTestCase(Base.TestFileModelTestCaseBase):
     def test_is_file(self):
         self.assertTrue(self.entity.is_file())
 
+    def test_standard_filename(self):
+        file: FileFolder = self.file_factory(self.relative_path(__file__, ['assets', 'grass.jpg']),
+                                             title='grass.jpg')
+        self.assertEqual(file.clean_filename(), "grass.jpg")
+
+        file.title = "Something else.jpg"
+        self.assertEqual(file.clean_filename(), 'something-else.jpg')
+
+        file.title = "Something else.JPG"
+        self.assertEqual(file.clean_filename(), 'something-else.jpg')
+
+        file.title = "Something else"
+        self.assertEqual(file.clean_filename(), 'something-else.jpg')
+
+        file.title = "Another ext.jpeg"
+        self.assertEqual(file.clean_filename(), 'another-ext.jpg')
+
 
 class TestFolderFileModelTestCase(Base.TestFileModelTestCaseBase):
 
