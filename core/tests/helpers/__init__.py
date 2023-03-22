@@ -65,7 +65,7 @@ class PleioTenantTestCase(FastTenantTestCase):
             fh.write(content)
         self._file_cleanup.append(filename)
 
-    def file_factory(self, filepath):
+    def file_factory(self, filepath, **kwargs):
         from file.models import FileFolder
         filename = os.path.basename(filepath)
         upload = None
@@ -74,7 +74,8 @@ class PleioTenantTestCase(FastTenantTestCase):
                 upload = ContentFile(fh.read(), filename)
         file = mixer.blend(FileFolder,
                            type=FileFolder.Types.FILE,
-                           upload=upload)
+                           upload=upload,
+                           **kwargs)
         if upload:
             upload_dir = os.path.dirname(file.upload.path)
             self._file_cleanup.append(os.path.join(upload_dir, filename))

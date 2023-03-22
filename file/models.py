@@ -204,6 +204,14 @@ class FileFolder(HasMediaMixin, TitleMixin, ModelWithFile, ResizedImageMixin, At
             return "%s.html" % self.slug
         return None
 
+    def clean_filename(self):
+        if not self.upload:
+            return self.title
+        # Take the extension from the diskfile, and the filename from self.title
+        _, ext = os.path.splitext(self.upload.path)
+        basename, _ = os.path.splitext(self.title)
+        return slugify(basename) + ext.lower()
+
     def get_media_content(self):
         if self.type == self.Types.FILE and not self.blocked:
             with open(self.upload.path, 'rb') as fh:

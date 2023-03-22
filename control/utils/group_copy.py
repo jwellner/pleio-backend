@@ -1,5 +1,7 @@
 from __future__ import absolute_import, unicode_literals
 
+import os.path
+
 import signal_disabler
 
 from celery.utils.log import get_task_logger
@@ -17,19 +19,20 @@ from control import tasks
 
 logger = get_task_logger(__name__)
 
-def get_file_field_data(source_schema_name, file_field):
+
+def get_file_field_data(source_schema_name, file_field, file_name):
     file_data = None
     with schema_context(source_schema_name):
         try:
             file_data = ContentFile(file_field.read())
-            file_data.name = file_field.name
+            file_data.name = file_name
         except Exception:
             pass
     return file_data
 
-class GroupCopyRunner:
 
-    state : GroupCopy
+class GroupCopyRunner:
+    state: GroupCopy
 
     def __init__(self, state_id=None):
         if state_id:
@@ -44,8 +47,10 @@ class GroupCopyRunner:
 
         if source_file.upload:
             mapping = self.state.mapping.filter(source_id=source_file_id, entity_type="FileFolder").first()
-            file_content = get_file_field_data(self.state.source_tenant, source_file.upload)
-            with schema_context(self.state.source_tenant):
+            file_content = get_file_field_data(source_schema_name=self.state.source_tenant,
+                                               file_field=source_file.upload,
+                                               file_name=source_file.clean_filename())
+            with schema_context(self.state.target_tenant):
                 target_file = FileFolder.objects.get(id=mapping.target_id)
                 target_file.upload = file_content
                 target_file.save()
@@ -58,7 +63,9 @@ class GroupCopyRunner:
             source_file = getattr(target_entity, file_attribute)
 
         if source_file:
-            file_contents = get_file_field_data(self.state.source_tenant, source_file.upload)
+            file_contents = get_file_field_data(source_schema_name=self.state.source_tenant,
+                                                file_field=source_file.upload,
+                                                file_name=source_file.clean_filename())
 
             with schema_context(self.state.target_tenant):
                 target_file = FileFolder.objects.create(
@@ -67,8 +74,7 @@ class GroupCopyRunner:
                     read_access=[ACCESS_TYPE.public],
                     write_access=[ACCESS_TYPE.user.format(target_entity.owner.id)]
                 )
-
-            setattr(target_entity, file_attribute, target_file)
+                setattr(target_entity, file_attribute, target_file)
 
     def copy_attachments(self, target_entity):
         """
@@ -80,7 +86,9 @@ class GroupCopyRunner:
 
         attachment_map = ReplaceAttachments()
         for attachment in attachments:
-            attachment_contents = get_file_field_data(self.state.source_tenant, attachment.upload)
+            attachment_contents = get_file_field_data(source_schema_name=self.state.source_tenant,
+                                                      file_field=attachment.upload,
+                                                      file_name=os.path.basename(attachment.name))
 
             with schema_context(self.state.target_tenant):
                 new_attachment = Attachment()
