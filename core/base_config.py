@@ -101,6 +101,7 @@ DEFAULT_SITE_CONFIG = {
     'COMMENT_ON_NEWS': (False, 'Comment on news'),
     'EVENT_EXPORT': (False, 'Event Export'),
     'EVENT_TILES': (False, 'Event Tiles'),
+    'EVENT_ADD_EMAIL_ATTENDEE': ('', 'Clearance for add attendees to event by any email address'),
     'QUESTIONER_CAN_CHOOSE_BEST_ANSWER': (False, 'Questioner can choose best answer'),
     'STATUS_UPDATE_GROUPS': (True, 'Status update groups'),
     'SUBGROUPS': (False, 'Subgroups'),

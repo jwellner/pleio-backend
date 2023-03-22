@@ -965,6 +965,7 @@ type Event implements Entity {
     canEdit: Boolean!
     canComment: Boolean
     canVote: Boolean
+    canAttendWithEmail: Boolean
     accessId: Int
     writeAccessId: Int
     isBookmarked: Boolean

@@ -107,7 +107,15 @@ body {
     margin-left: .25rem;
     margin-bottom: .5rem;
 }
+
 .input-field.checkbox-field {
     margin-left: -1rem;
     margin-bottom: 0;
+}
+
+.optional-features-form .select-input {
+    padding-left: 20px;
+}
+.optional-features-form .select-input .form-select {
+    width: auto;
 }

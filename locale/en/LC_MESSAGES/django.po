@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-02-24 09:06+0100\n"
+"POT-Creation-Date: 2023-03-21 16:58+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -29,7 +29,7 @@ msgstr "status update"
 msgid "Blog"
 msgstr "Blog"
 
-#: blog/core_hooks.py:26 core/lib.py:403
+#: blog/core_hooks.py:26 core/lib.py:402
 msgid "Blogs"
 msgstr "Blogs"
 
@@ -248,7 +248,7 @@ msgstr ""
 msgid "Group"
 msgstr "Group"
 
-#: core/core_hooks.py:12 core/lib.py:414
+#: core/core_hooks.py:12 core/lib.py:413
 msgid "Groups"
 msgstr "Groups"
 
@@ -256,19 +256,19 @@ msgstr "Groups"
 msgid "Provide a valid value."
 msgstr "Provide a valid value."
 
-#: core/forms.py:89 core/resolvers/site_settings.py:461
+#: core/forms.py:89 core/resolvers/site_settings.py:463
 msgid "Never"
 msgstr "Never"
 
-#: core/forms.py:90 core/resolvers/site_settings.py:460
+#: core/forms.py:90 core/resolvers/site_settings.py:462
 msgid "Daily"
 msgstr "Daily"
 
-#: core/forms.py:91 core/resolvers/site_settings.py:460
+#: core/forms.py:91 core/resolvers/site_settings.py:462
 msgid "Weekly"
 msgstr "Weekly"
 
-#: core/forms.py:92 core/resolvers/site_settings.py:461
+#: core/forms.py:92 core/resolvers/site_settings.py:463
 msgid "Monthly"
 msgstr "Monthly"
 
@@ -289,73 +289,73 @@ msgstr "Name"
 msgid "Profile field"
 msgstr "Profile field"
 
-#: core/lib.py:216 core/resolvers/mutation_import_users.py:29
+#: core/lib.py:215 core/resolvers/mutation_import_users.py:29
 #: core/resolvers/site_settings.py:90
 msgid "Just me"
 msgstr "Just me"
 
-#: core/lib.py:219
+#: core/lib.py:218
 #, python-format
 msgid "Group: %(group_name)s"
 msgstr "Group: %(group_name)s"
 
-#: core/lib.py:222
+#: core/lib.py:221
 #, python-format
 msgid "Subgroup: %(subgroup_name)s"
 msgstr "Subgroup: %(subgroup_name)s"
 
-#: core/lib.py:228 core/resolvers/mutation_import_users.py:30
+#: core/lib.py:227 core/resolvers/mutation_import_users.py:30
 #: core/resolvers/site_settings.py:91
 msgid "Logged in users"
 msgstr "Logged in users"
 
-#: core/lib.py:230 core/resolvers/mutation_import_users.py:33
+#: core/lib.py:229 core/resolvers/mutation_import_users.py:33
 #: core/resolvers/site_settings.py:95
 msgid "Public"
 msgstr "Public"
 
-#: core/lib.py:402
+#: core/lib.py:401
 msgid "Updates"
 msgstr "Updates"
 
-#: core/lib.py:404
+#: core/lib.py:403
 msgid "CMS pages"
 msgstr "CMS pages"
 
-#: core/lib.py:405 discussion/core_hooks.py:26
+#: core/lib.py:404 discussion/core_hooks.py:26
 msgid "Discussions"
 msgstr "Discussions"
 
-#: core/lib.py:406 event/core_hooks.py:26
+#: core/lib.py:405 event/core_hooks.py:26
 msgid "Events"
 msgstr "Events"
 
-#: core/lib.py:407 file/core_hooks.py:29
+#: core/lib.py:406 file/core_hooks.py:29
 msgid "Files"
 msgstr "Files"
 
-#: core/lib.py:408 news/core_hooks.py:11 news/core_hooks.py:18
+#: core/lib.py:407 news/core_hooks.py:11 news/core_hooks.py:18
 #: news/core_hooks.py:25 news/core_hooks.py:26
 msgid "News"
 msgstr "News"
 
-#: core/lib.py:409
+#: core/lib.py:408
 msgid "Polls"
 msgstr "Polls"
 
-#: core/lib.py:410 question/core_hooks.py:26
+#: core/lib.py:409 question/core_hooks.py:26
 msgid "Questions"
 msgstr "Questions"
 
-#: core/lib.py:411 core/templates/superadmin/tasks.html:8
+#: core/lib.py:410 core/templates/superadmin/tasks.html:8
 msgid "Tasks"
 msgstr "Tasks"
 
-#: core/lib.py:412
+#: core/lib.py:411
 msgid "Wiki pages"
 msgstr "Wiki pages"
 
-#: core/lib.py:413
+#: core/lib.py:412
 msgid "Comments"
 msgstr "Comments"
 
@@ -560,27 +560,27 @@ msgstr "Appointment"
 msgid "Agenda"
 msgstr "Agenda"
 
-#: core/resolvers/site_settings.py:211
+#: core/resolvers/site_settings.py:213
 msgid "Activity stream"
 msgstr "Activity stream"
 
-#: core/resolvers/site_settings.py:212
+#: core/resolvers/site_settings.py:214
 msgid "CMS page"
 msgstr "CMS page"
 
-#: core/resolvers/site_settings.py:724
+#: core/resolvers/site_settings.py:726
 msgid "Administrator"
 msgstr "Administrator"
 
-#: core/resolvers/site_settings.py:725
+#: core/resolvers/site_settings.py:727
 msgid "Editor"
 msgstr "Editor"
 
-#: core/resolvers/site_settings.py:726
+#: core/resolvers/site_settings.py:728
 msgid "Question expert"
 msgstr "Question expert"
 
-#: core/tasks/clamav.py:28 file/tasks.py:105
+#: core/tasks/clamav.py:28 file/tasks.py:117
 msgid "This file contains a virus"
 msgstr "This file contains a virus"
 
@@ -624,7 +624,7 @@ msgstr "Do you want to check in <strong>%(name)s</strong> (%(email)s)?"
 msgid "Yes, confirm"
 msgstr "Yes, confirm"
 
-#: core/templates/check_in/checked_in.html:8 event/models.py:284
+#: core/templates/check_in/checked_in.html:8 event/models.py:326
 msgid "Checked in"
 msgstr "Checked in"
 
@@ -633,16 +633,16 @@ msgstr "Checked in"
 msgid "You have checked in <strong>%(name)s</strong> (%(email)s)!"
 msgstr "You have checked in <strong>%(name)s</strong> (%(email)s)!"
 
-#: core/templates/edit_email_settings.html:17
+#: core/templates/edit_email_settings.html:16
 #, python-format
 msgid "Email preferences %(user_name)s:"
 msgstr "Email preferences %(user_name)s:"
 
-#: core/templates/edit_email_settings.html:22
+#: core/templates/edit_email_settings.html:21
 msgid "Save"
 msgstr "Save"
 
-#: core/templates/edit_email_settings.html:30
+#: core/templates/edit_email_settings.html:28
 #: core/templates/email/send_overview_emails.html:99
 #, python-format
 msgid "Go to %(site_name)s"
@@ -1289,6 +1289,22 @@ msgstr ""
 "Access is requested. You will receive an e-mail when the request is "
 "accepted."
 
+#: core/templates/superadmin/optional_features.html:43
+msgid "Allow authenticated visitors to add event attendees"
+msgstr "Allow authenticated visitors to add event attendees"
+
+#: core/templates/superadmin/optional_features.html:46
+msgid "Superadmins are allowed to add attendees"
+msgstr "Superadmins are allowed to add attendees"
+
+#: core/templates/superadmin/optional_features.html:48
+msgid "Site administrators are allowed to add attendees"
+msgstr "Site administrators are allowed to add attendees"
+
+#: core/templates/superadmin/optional_features.html:50
+msgid "Visitors with write privileges are allowed to add attendees"
+msgstr "Visitors with write privileges are allowed to add attendees"
+
 #: core/templates/superadmin/tasks.html:14
 msgid "Process all indexes or a specific index"
 msgstr "Process all indexes or a specific index"
@@ -1506,27 +1522,27 @@ msgstr "QR code for %s"
 msgid "Added to event %s from waitinglist"
 msgstr "Added to event %s from waitinglist"
 
-#: event/models.py:184
+#: event/models.py:226
 msgid "Accepted"
 msgstr "Accepted"
 
-#: event/models.py:185
+#: event/models.py:227
 msgid "Maybe"
 msgstr "Maybe"
 
-#: event/models.py:186
+#: event/models.py:228
 msgid "Rejected"
 msgstr "Rejected"
 
-#: event/models.py:187
+#: event/models.py:229
 msgid "At waitinglist"
 msgstr "At waitinglist"
 
-#: event/models.py:247
+#: event/models.py:289
 msgid "You already signed in for another sub-event in the same slot."
 msgstr "You already signed in for another sub-event in the same slot."
 
-#: event/resolvers/mutation_event_copy.py:63
+#: event/resolvers/mutation_event_copy.py:60
 #: event/tests/test_resolve_copy_entity.py:131
 #, python-format
 msgid "Copy %s"
@@ -1680,15 +1696,15 @@ msgstr "Message to event"
 msgid "External content author"
 msgstr "External content author"
 
-#: file/core_hooks.py:12 file/core_hooks.py:28 file/models.py:62
+#: file/core_hooks.py:12 file/core_hooks.py:28 file/models.py:75
 msgid "File"
 msgstr "File"
 
-#: file/core_hooks.py:16 file/core_hooks.py:33 file/models.py:63
+#: file/core_hooks.py:16 file/core_hooks.py:33 file/models.py:76
 msgid "Folder"
 msgstr "Folder"
 
-#: file/core_hooks.py:21 file/models.py:64 pad/core_hooks.py:10
+#: file/core_hooks.py:21 file/models.py:77 pad/core_hooks.py:10
 msgid "Pad"
 msgstr "Pad"
 
@@ -1705,7 +1721,7 @@ msgstr "Filescan found suspicous files on %(site_url)s"
 msgid "File contains virus"
 msgstr "File contains virus"
 
-#: file/tasks.py:95
+#: file/tasks.py:107
 msgid "File not found on file storage"
 msgstr "File not found on file storage"
 
@@ -1761,6 +1777,12 @@ msgstr "Wiki"
 #: wiki/core_hooks.py:26
 msgid "Wiki's"
 msgstr "Wiki's"
+
+#~ msgid "Superadmin only"
+#~ msgstr "Superadmin only"
+
+#~ msgid "Based on write privileges"
+#~ msgstr "Based on write privileges"
 
 #~ msgid "Filesize"
 #~ msgstr "Filesize"

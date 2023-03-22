@@ -10,7 +10,7 @@
 
     <p>Enabled features for {{ config.NAME }}</p>
 
-    <form method="post">
+    <form method="post" class="optional-features-form">
         {% csrf_token %}
         <div class="card">
             <h5 class="card-header">Features</h5>
@@ -37,6 +37,18 @@
                     <input type="checkbox" name="datahub_external_content_enabled" id="datahub_external_content_enabled" {% if config.DATAHUB_EXTERNAL_CONTENT_ENABLED %}
                            checked {% endif %} />
                     <label for="datahub_external_content_enabled">Enable external content from datahub</label>
+                </div>
+                {{ form.errors.edit_user_name_enabled }}
+                <div class="mb-2 select-input">
+                    <label for="event_add_email_attendee">{% trans "Allow authenticated visitors to add event attendees" %} </label>
+                    <select name="event_add_email_attendee" id="event_add_email_attendee" class="form-select" value="">
+                        <option value="">
+                            {% trans "Superadmins are allowed to add attendees" %}</option>
+                        <option {% if config.EVENT_ADD_EMAIL_ATTENDEE == 'admin' %}selected="selected" {% endif %}value="admin">
+                            {% trans "Site administrators are allowed to add attendees" %}</option>
+                        <option {% if config.EVENT_ADD_EMAIL_ATTENDEE == 'owner' %}selected="selected" {% endif %}value="owner">
+                            {% trans "Visitors with write privileges are allowed to add attendees" %}</option>
+                    </select>
                 </div>
                 {{ form.errors.edit_user_name_enabled }}
             </div>

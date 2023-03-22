@@ -62,6 +62,11 @@ def resolve_slots(obj: Event, info):
     return [slot['name'] for slot in obj.get_slots()]
 
 
+@event.field('canAttendWithEmail')
+def resolve_can_attend_with_email(obj: Event, info):
+    return obj.can_add_attendees_by_email(info.context["request"].user)
+
+
 @event.field('alreadySignedUpInSlot')
 def resolve_slot_already_signed_in_for_slot(obj, info):
     if not obj.parent:
