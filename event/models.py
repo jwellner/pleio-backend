@@ -7,6 +7,7 @@ from django.utils.translation import gettext, gettext_lazy as _
 from auditlog.registry import auditlog
 from django.db import models
 
+from core.constances import USER_ROLES
 from core.lib import datetime_utciso
 from core.models import (ArticleMixin, AttachmentMixin, BookmarkMixin, CommentMixin, Entity, FollowMixin,
                          NotificationMixin)
@@ -70,6 +71,15 @@ class Event(RichDescriptionMediaMixin, TitleMixin, CommentMixin, BookmarkMixin, 
     def is_full(self):
         if self.max_attendees and self.attendees.filter(state="accept").count() >= self.max_attendees:
             return True
+        return False
+
+    def can_add_attendees_by_email(self, user):
+        if not user.is_authenticated or user.is_superadmin:
+            return True
+        if config.EVENT_ADD_EMAIL_ATTENDEE == 'owner':
+            return self.can_write(user)
+        if config.EVENT_ADD_EMAIL_ATTENDEE == 'admin':
+            return user.has_role(USER_ROLES.ADMIN)
         return False
 
     def __str__(self):
@@ -178,7 +188,6 @@ class Event(RichDescriptionMediaMixin, TitleMixin, CommentMixin, BookmarkMixin, 
         # self.attendee_welcome_mail_content = callback(self.attendee_welcome_mail_content)
         self.rich_description = callback(self.rich_description)
         self.abstract = callback(self.abstract)
-
 
     def serialize(self):
         return {

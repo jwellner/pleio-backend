@@ -6,7 +6,7 @@ from graphql import GraphQLError
 from core import config
 from core.constances import (COULD_NOT_FIND, EMAIL_ALREADY_USED,
                              EVENT_INVALID_STATE, EVENT_IS_FULL, INVALID_EMAIL,
-                             NOT_LOGGED_IN)
+                             NOT_LOGGED_IN, NOT_AUTHORIZED)
 from core.lib import clean_graphql_input, generate_code, get_full_url
 from event.lib import validate_name
 from event.mail_builders.attend_event_request import \
@@ -14,6 +14,7 @@ from event.mail_builders.attend_event_request import \
 from event.mail_builders.qr_code import submit_mail_event_qr
 from event.models import Event, EventAttendee, EventAttendeeRequest
 from event.resolvers import shared as event_shared
+from user.models import User
 
 
 def resolve_attend_event_without_account(_, info, input):
@@ -21,8 +22,7 @@ def resolve_attend_event_without_account(_, info, input):
     # pylint: disable=unused-argument
 
     clean_input = clean_graphql_input(input, ['resend'])
-    email = clean_input.get("email")
-    name = validate_name(clean_input.get("name"))
+    user = info.context["request"].user
 
     try:
         event = Event.objects.get(id=clean_input.get("guid"))
@@ -30,10 +30,43 @@ def resolve_attend_event_without_account(_, info, input):
         raise GraphQLError(COULD_NOT_FIND)
 
     try:
-        validate_email(email)
+        validate_email(clean_input.get("email"))
     except ValidationError:
         raise GraphQLError(INVALID_EMAIL)
 
+    if not event.can_add_attendees_by_email(user):
+        raise GraphQLError(NOT_AUTHORIZED)
+
+    if user.is_authenticated:
+        resolve_add_email_to_event(event=event,
+                                   clean_input=clean_input)
+    else:
+        resolve_require_confirmation(event=event,
+                                     clean_input=clean_input)
+
+    return {
+        "entity": event
+    }
+
+
+def resolve_add_email_to_event(event, clean_input):
+    email = clean_input.get("email")
+    name = validate_name(clean_input.get("name"))
+    user = User.objects.filter(email=email).first()
+
+    if EventAttendee.objects.filter(event=event, email=email).exists():
+        return
+
+    EventAttendee.objects.create(event=event,
+                                 user=user,
+                                 email=email,
+                                 name=user.name if user else name,
+                                 state='accept')
+
+
+def resolve_require_confirmation(event, clean_input):
+    email = clean_input.get("email")
+    name = validate_name(clean_input.get("name"))
     code = ""
     try:
         code = EventAttendeeRequest.objects.get(email=email, event=event).code
@@ -53,10 +86,6 @@ def resolve_attend_event_without_account(_, info, input):
         'language': config.LANGUAGE,
         'link': get_full_url(f"/events/confirm/{event.guid}?email={email}&code={code}"),
     })
-
-    return {
-        "entity": event
-    }
 
 
 def resolve_attend_event(_, info, input):
