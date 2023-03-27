@@ -106,13 +106,20 @@ class Attachment(ModelWithFile, ResizedImageMixin, HasMediaMixin):
     def make_copy(self, user):
         new = Attachment()
         new_file = ContentFile(self.upload.read())
-        new_file.name = self.upload.name
+        new_file.name = self.clean_filename()
         new.upload = new_file
         new.owner = user
-
         new.save()
 
         return new
+
+    def clean_filename(self):
+        if not self.upload:
+            return self.name
+        # Take the extension from the diskfile, and the filename from self.title
+        _, ext = os.path.splitext(self.upload.path)
+        basename, _ = os.path.splitext(self.name)
+        return slugify(basename) + ext.lower()
 
     @property
     def type(self):
