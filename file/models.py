@@ -290,10 +290,9 @@ class FileFolder(HasMediaMixin, TitleMixin, ModelWithFile, ResizedImageMixin, At
     def make_copy(self, user):
         new = FileFolder()
         new_file = ContentFile(self.upload.read())
-        new_file.name = self.upload.name
+        new_file.name = self.clean_filename()
         new.upload = new_file
         new.owner = user
-
         new.save()
 
         return new

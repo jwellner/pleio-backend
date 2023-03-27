@@ -87,6 +87,27 @@ class AttachmentModelTestCase(PleioTenantTestCase):
         self.assertEqual(self.attachment.guid, str(self.attachment.id))
 
 
+    def test_standard_filename(self):
+        file: Attachment = AttachmentFactory(
+            upload=self.build_contentfile(self.relative_path(__file__, ['assets', 'avatar.jpg'])),
+            name='avatar.jpg',
+            attached=self.authenticatedUser
+        )
+        self.assertEqual(file.clean_filename(), "avatar.jpg")
+
+        file.name = "Something else.jpg"
+        self.assertEqual(file.clean_filename(), 'something-else.jpg')
+
+        file.name = "Something else.JPG"
+        self.assertEqual(file.clean_filename(), 'something-else.jpg')
+
+        file.name = "Something else"
+        self.assertEqual(file.clean_filename(), 'something-else.jpg')
+
+        file.name = "Another ext.jpeg"
+        self.assertEqual(file.clean_filename(), 'another-ext.jpg')
+
+
 class TestExifFunctionalityTestCase(PleioTenantTestCase):
 
     def setUp(self):
