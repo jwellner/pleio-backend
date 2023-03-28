@@ -29,21 +29,19 @@ class TemplateMailerBase(MailerBase):
 
     def send(self):
         self.assert_not_known_inactive_user(self.get_receiver_email())
+        with translation.override(self.get_language()):
+            html_template = get_template(self.get_template())
+            html_content = html_template.render(self.get_context())
+            text_content = html_to_text(html_content)
 
-        translation.activate(self.get_language())
+            from_mail = formataddr((config.NAME, settings.FROM_EMAIL))
 
-        html_template = get_template(self.get_template())
-        html_content = html_template.render(self.get_context())
-        text_content = html_to_text(html_content)
+            email = EmailMultiAlternatives(subject=self.get_subject(),
+                                           body=text_content,
+                                           from_email=from_mail,
+                                           to=[self.get_receiver_email()],
+                                           headers=self.get_headers())
+            email.attach_alternative(html_content, "text/html")
 
-        from_mail = formataddr((config.NAME, settings.FROM_EMAIL))
-
-        email = EmailMultiAlternatives(subject=self.get_subject(),
-                                       body=text_content,
-                                       from_email=from_mail,
-                                       to=[self.get_receiver_email()],
-                                       headers=self.get_headers())
-        email.attach_alternative(html_content, "text/html")
-
-        self.pre_send(email)
-        email.send()
+            self.pre_send(email)
+            email.send()

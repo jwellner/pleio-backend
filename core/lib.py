@@ -584,14 +584,10 @@ class NumberIncrement:
 
 def early_this_morning(reference=None):
     reference = reference or django_timezone.localtime()
-    return django_timezone.datetime(year=reference.year,
-                                    month=reference.month,
-                                    day=reference.day,
-                                    hour=0,
-                                    minute=0,
-                                    second=0,
-                                    microsecond=0,
-                                    tzinfo=reference.tzinfo)
+    return reference - django_timezone.timedelta(hours=reference.hour,
+                                                 minutes=reference.minute,
+                                                 seconds=reference.second,
+                                                 microseconds=reference.microsecond)
 
 
 def str_to_datetime(datetime_str):

@@ -23,13 +23,13 @@ class TestMailSystemTemplateMailerTestCase(PleioTenantTestCase):
     @mock.patch('core.mail_builders.template_mailer.TemplateMailerBase.assert_not_known_inactive_user')
     @mock.patch('core.mail_builders.template_mailer.TemplateMailerBase.pre_send')
     @mock.patch('core.mail_builders.template_mailer.TemplateMailerBase.get_headers')
-    @mock.patch('core.mail_builders.template_mailer.translation')
     @mock.patch('core.mail_builders.template_mailer.get_template')
     @mock.patch('core.mail_builders.template_mailer.html_to_text')
     @mock.patch('core.mail_builders.template_mailer.formataddr')
     @mock.patch('core.mail_builders.template_mailer.EmailMultiAlternatives')
-    def test_template_mailer_send(self, mocked_EmailMultiAlternatives, mocked_formataddr, mocked_html_to_text,
-                                  mocked_get_template, mocked_translation, mocked_get_headers,
+    @mock.patch('django.utils.translation.activate')
+    def test_template_mailer_send(self, mocked_activate, mocked_EmailMultiAlternatives, mocked_formataddr, mocked_html_to_text,
+                                  mocked_get_template, mocked_get_headers,
                                   pre_send, assert_not_known_inactive_user, build_context, get_subject, get_sender,
                                   get_receiver_email, get_receiver, get_template, get_language, get_context):
         from core.mail_builders.template_mailer import TemplateMailerBase
@@ -55,7 +55,7 @@ class TestMailSystemTemplateMailerTestCase(PleioTenantTestCase):
 
         self.assertEqual(assert_not_known_inactive_user.call_args.args, (get_receiver_email.return_value,),
                          msg="assert_not_known_inactive_user unexpectedly not called with get_receiver_email result.")
-        self.assertEqual(mocked_translation.activate.call_args.args, (get_language.return_value,),
+        self.assertEqual(mocked_activate.call_args_list[0].args, (get_language.return_value,),
                          msg="translation.activate unexpectedly not called with get_language result.")
         self.assertEqual(mocked_get_template.call_args.args, (get_template.return_value,),
                          msg="get_template unexpectedly not called with get_template result.")

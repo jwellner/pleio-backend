@@ -67,14 +67,13 @@ class CustomLocaleMiddleware(MiddlewareMixin):
     response_redirect_class = HttpResponseRedirect
 
     def process_request(self, request):
-        pass
-
-    def process_response(self, request, response):
         if not settings.RUN_AS_ADMIN_APP:
             if request.user.is_authenticated:
                 translation.activate(request.user.get_language())
             else:
                 translation.activate(config.LANGUAGE)
+
+    def process_response(self, request, response):
         request.LANGUAGE_CODE = translation.get_language()
         language = request.LANGUAGE_CODE
         language_from_path = translation.get_language_from_path(request.path_info)
