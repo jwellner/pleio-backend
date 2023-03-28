@@ -17,8 +17,7 @@ class TestContentSnapshotTestCase(PleioTenantTestCase):
     def setUp(self):
         super().setUp()
 
-        self.CREATED_AT = timezone.datetime(year=2000, month=2, day=20,
-                                            hour=23, minute=55, second=0)
+        self.CREATED_AT = timezone.datetime.fromisoformat("2000-02-20T23:55:00+01:00")
 
         self.owner = UserFactory()
         self.blog = BlogFactory(created_at=self.CREATED_AT,
