@@ -416,8 +416,8 @@ type confirmAttendEventWithoutAccountPayload {
 
 input copyEntityInput {
     guid: String!
-    ownerGuid: String!
     subtype: String!
+    ownerGuid: String
     copySubevents: Boolean
 }
 
