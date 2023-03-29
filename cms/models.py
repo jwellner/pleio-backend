@@ -108,7 +108,7 @@ class Page(RichDescriptionMediaMixin, TitleMixin, AttachmentMixin, RevisionMixin
 
         def update_attachments(widget):
             new_settings = []
-            for setting in widget['settings']:
+            for setting in widget.get('settings', []):
                 current_id = setting.get('attachmentId')
                 if attachment_map.has_attachment(current_id):
                     setting['attachmentId'] = attachment_map.translate(current_id)
