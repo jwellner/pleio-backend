@@ -9,7 +9,7 @@ logger = get_task_logger(__name__)
 
 
 @post_deploy_action(auto=False)
-def sync_site_attributes():
+def sync_site_attributes():  # pragma: no cover
     if is_schema_public():
         return
 
@@ -18,18 +18,7 @@ def sync_site_attributes():
 
 
 @post_deploy_action(auto=False)
-def sync_user_registration_date():
-    from concierge.tasks import sync_user_registration_date
-
-    if is_schema_public():
-        return
-
-    for user in User.objects.filter(is_active=True):
-        sync_user_registration_date.delay(tenant_schema(), str(user.id))
-
-
-@post_deploy_action(auto=False)
-def sync_user_avatars():
+def sync_user_avatars():  # pragma: no cover
     if is_schema_public():
         return
 

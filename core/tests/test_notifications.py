@@ -1,49 +1,41 @@
+from unittest.mock import patch
+
 from django.db import connection
 from notifications.admin import Notification
 from notifications.models import Notification
 
-from core.models import Group, Comment
+from core.factories import GroupFactory
+from core.models import Comment
 from core.tests.helpers import PleioTenantTestCase
-from user.models import User
+from user.factories import UserFactory
 from blog.models import Blog
 from core.constances import ACCESS_TYPE
 from core.tasks import create_notification
-from django.db.models.signals import post_save
-from mixer.backend.django import mixer
-
-import functools
-from django.dispatch import receiver
-
-
-def suspendingreceiver(signal, **decorator_kwargs):
-    def our_wrapper(func):
-        @receiver(signal, **decorator_kwargs)
-        @functools.wraps(func)
-        def fake_receiver(sender, **kwargs):
-            return
-
-        return fake_receiver
-
-    return our_wrapper
 
 
 class NotificationsTestCase(PleioTenantTestCase):
 
     def setUp(self):
         super().setUp()
-        self.user1 = mixer.blend(User)
-        self.user2 = mixer.blend(User)
-        self.group = mixer.blend(Group, owner=self.user1)
+
+        # let the test explicitly add notifications.
+        self.mocked_create_notification = patch('core.tasks.create_notification.delay').start()
+
+        self.user1 = UserFactory(email="group-owner@example.com")
+        self.user2 = UserFactory(email="member@example.com")
+        self.group = GroupFactory(owner=self.user1,
+                                  auto_notification=True)
         self.group.join(self.user2, 'member')
 
+
         self.blog1 = Blog.objects.create(
-            title="Blog1",
+            title="From the group owner",
             owner=self.user1,
             read_access=[ACCESS_TYPE.public],
             write_access=[ACCESS_TYPE.user.format(self.user1.id)]
         )
         self.blog2 = Blog.objects.create(
-            title="Blog2",
+            title="Another from the group owner",
             owner=self.user1,
             read_access=[ACCESS_TYPE.public],
             write_access=[ACCESS_TYPE.user.format(self.user1.id)],
@@ -145,9 +137,6 @@ class NotificationsTestCase(PleioTenantTestCase):
         self.assertEqual(data["notifications"]["edges"][0]["container"], None)
         self.assertEqual(data["notifications"]["edges"][0]["entity"]["guid"], str(self.user1.id))
 
-    # Dit zorgt er voor dat de test niet wordt uitgevoerd.
-    # TODO: Bedenk iets beters.
-    @suspendingreceiver(post_save, sender=Comment)
     def test_notifications_add_comment(self):
         i = 0
         while i < 10:
@@ -165,9 +154,6 @@ class NotificationsTestCase(PleioTenantTestCase):
         self.assertEqual(data["notifications"]["edges"][0]["isUnread"], True)
         self.assertEqual(data["notifications"]["edges"][0]["action"], "commented")
 
-    # Dit zorgt er voor dat de test niet wordt uitgevoerd.
-    # TODO: Bedenk iets beters.
-    @suspendingreceiver(post_save, sender=Comment)
     def test_notifications_unread_filter(self):
         variables = {
             "unread": True
@@ -192,9 +178,6 @@ class NotificationsTestCase(PleioTenantTestCase):
         self.assertEqual(data["notifications"]["total"], 1)
         self.assertEqual(data["notifications"]["totalUnread"], 1)
 
-    # Dit zorgt er voor dat de test niet wordt uitgevoerd.
-    # TODO: Bedenk iets beters.
-    @suspendingreceiver(post_save, sender=Blog)
     def test_notifications_content_to_group_added(self):
         create_notification.s(connection.schema_name, 'created', 'blog.blog', self.blog2.id, self.user1.id).apply()
 
@@ -218,9 +201,6 @@ class NotificationsTestCase(PleioTenantTestCase):
         self.assertEqual(data["notifications"]["totalUnread"], 0)
         self.assertEqual(data["notifications"]["edges"], list())
 
-    # Dit zorgt er voor dat de test niet wordt uitgevoerd.
-    # TODO: Bedenk iets beters.
-    @suspendingreceiver(post_save, sender=Blog)
     def test_notifications_content_deleted(self):
         blog3 = Blog.objects.create(
             title="Blog3",

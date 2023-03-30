@@ -158,14 +158,13 @@ def clean_graphql_input(values, always_include=None):
             (v is not None) or (k in allow_none)}
 
 
-def webpack_dev_server_is_available():
+def webpack_dev_server_is_available():  # pragma: no cover
     """Return true when webpack developer server is available"""
     # pylint: disable=import-outside-toplevel
 
     if settings.ENV != 'local':
         return False
 
-    # pragma: no cover
     docker_host = os.environ.get('DOCKER_LOCAL_MACHINE', None)
 
     if docker_host:

@@ -40,7 +40,7 @@ class TestUtilsClamavTestCase(PleioTenantTestCase):
 
         try:
             clamav.scan(self.file_path)
-            self.fail("Unexpectedly scanned non-existing file")
+            self.fail("Unexpectedly scanned non-existing file")  # pragma: no cover
         except clamav.FileScanError as e:
             self.assertFalse(self.clamav_socket.called)
             self.assertFalse(self.clamav_connection.instream.called)
@@ -54,7 +54,7 @@ class TestUtilsClamavTestCase(PleioTenantTestCase):
 
         try:
             clamav.scan(self.file_path)
-            self.fail("Unexpecedly did not recognize clamav virus found behaviour")
+            self.fail("Unexpecedly did not recognize clamav virus found behaviour")  # pragma: no cover
         except clamav.FileScanError as e:
             self.assertTrue(self.clamav_socket.called)
             self.assertTrue(self.clamav_connection.instream.called)
@@ -66,7 +66,7 @@ class TestUtilsClamavTestCase(PleioTenantTestCase):
 
         try:
             clamav.scan(self.file_path)
-            self.fail("Unexpecedly did not recognize clamav virus found behaviour")
+            self.fail("Unexpecedly did not recognize clamav virus found behaviour")  # pragma: no cover
         except clamav.FileScanError as e:
             self.assertTrue(self.clamav_socket.called)
             self.assertFalse(self.clamav_connection.instream.called)
@@ -80,7 +80,7 @@ class TestUtilsClamavTestCase(PleioTenantTestCase):
 
         try:
             clamav.scan(self.file_path)
-            self.fail("Unexpecedly did not recognize unexpected error behaviour")
+            self.fail("Unexpecedly did not recognize unexpected error behaviour")  # pragma: no cover
         except clamav.FileScanError as e:
             self.assertTrue(self.clamav_socket.called)
             self.assertTrue(self.clamav_connection.instream.called)

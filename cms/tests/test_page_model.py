@@ -15,7 +15,7 @@ class Wrapper:
             self.owner = EditorFactory()
             self.entity = self.entity_factory(owner=self.owner)
 
-        def entity_factory(self, **kwargs) -> Page:
+        def entity_factory(self, **kwargs) -> Page: # pragma: no cover
             raise NotImplementedError()
 
         def tearDown(self):

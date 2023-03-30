@@ -6,13 +6,14 @@ from django.db import migrations
 def forward_update_entity(apps, schema_editor):
     pass
 
-def reverse_update_entity(apps, schema_editor):
+
+def reverse_update_entity(apps, schema_editor): # pragma: no cover
     Blog = apps.get_model('blog', 'Blog')
     Blog.objects.filter(tmp_is_featured=True).update(is_featured=True)
     Blog.objects.filter(tmp_is_recommended=True).update(is_recommended=True)
 
-class Migration(migrations.Migration):
 
+class Migration(migrations.Migration):
     dependencies = [
         ('blog', '0008_auto_20220203_1503'),
     ]

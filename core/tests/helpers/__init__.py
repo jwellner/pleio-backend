@@ -80,7 +80,7 @@ class PleioTenantTestCase(FastTenantTestCase):
             upload_dir = os.path.dirname(file.upload.path)
             self._file_cleanup.append(os.path.join(upload_dir, filename))
             self._file_cleanup.append(file.upload.path)
-            if file.thumbnail.name:
+            if file.thumbnail.name:  # pragma: no cover
                 self._file_cleanup.append(file.thumbnail.path)
 
         return file
@@ -115,12 +115,12 @@ class PleioTenantTestCase(FastTenantTestCase):
         fail_reason = False
         try:
             yield
-            fail_reason = "Unexpectedly didn't find any errors in graphql result"
+            fail_reason = "Unexpectedly didn't find any errors in graphql result"  # pragma: no cover
         except GraphQlError as e:
-            if not e.has_message(expected):
+            if not e.has_message(expected):  # pragma: no cover
                 fail_reason = msg or f"Didn't find [{expected}] in {e.messages}"
 
-        if fail_reason:
+        if fail_reason:  # pragma: no cover
             self.fail(fail_reason)
 
     def assertDateEqual(self, left_date_string, right_date_string, *args, **kwargs):
@@ -153,7 +153,7 @@ class PleioTenantTestCase(FastTenantTestCase):
             } for p in paragraphs]
         })
 
-    def assertExif(self, fp, msg=None):
+    def assertExif(self, fp, msg=None):  # pragma: no cover
         image = None
         try:
             image = Image.open(fp)
@@ -222,19 +222,6 @@ class ElasticsearchTestCase(PleioTenantTestCase):
         time.sleep(.100)
 
 
-class QuerySetWith:
-    """ Class to help identify whether arguments are equal when a QuerySet is expected """
-
-    def __init__(self, result):
-        self.result = result
-
-    def __eq__(self, value):
-        if not isinstance(value, QuerySet):
-            return False
-
-        return Counter(list(value)) == Counter(self.result)
-
-
 @contextmanager
 def suppress_stdout():
     # pylint: disable=import-outside-toplevel
@@ -247,7 +234,7 @@ def suppress_stdout():
 
 
 def cleanup_path(path):
-    if path == get_system_root():
+    if path == get_system_root():  # pragma: no cover
         return
     try:
         if os.path.isfile(path):

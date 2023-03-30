@@ -93,7 +93,7 @@ class EventsTestCase(PleioTenantTestCase):
     @staticmethod
     def has_attendees(edges):
         for edge in edges:
-            if edge['attendees'] and len(edge['attendees']['edges']) > 0:
+            if edge['attendees'] and len(edge['attendees']['edges']) > 0:  # pragma: no cover
                 return True
         return False
 
