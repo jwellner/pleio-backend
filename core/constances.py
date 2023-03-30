@@ -67,6 +67,8 @@ OIDC_PROVIDER_OPTIONS = [
     {'value': 'fnv', 'label': 'Mijn FNV'},
     {'value': 'knb', 'label': 'Notariaat'},
     {'value': 'knb-test', 'label': 'Notariaat Test'},
+    {'value': 'surf', 'label': 'SURFconext'},
+    {'value': 'surf-test', 'label': 'SURFconext Test'},
 ]
 MISSING_REQUIRED_FIELD = "missing_required_field:%s"
 MEETINGS_NOT_ENABLED = "meetings_not_enabled"
