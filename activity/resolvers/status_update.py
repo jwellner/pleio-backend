@@ -1,7 +1,6 @@
 from ariadne import ObjectType
 from core.resolvers import shared
 
-
 status_update = ObjectType("StatusUpdate")
 
 
@@ -10,15 +9,18 @@ def resolve_excerpt(obj, info):
     # pylint: disable=unused-argument
     return obj.type_to_string
 
+
 @status_update.field("inGroup")
 def resolve_in_group(obj, info):
     # pylint: disable=unused-argument
     return obj.group is not None
 
+
 @status_update.field("group")
 def resolve_group(obj, info):
     # pylint: disable=unused-argument
     return obj.group
+
 
 @status_update.field("url")
 def resolve_url(obj, info):

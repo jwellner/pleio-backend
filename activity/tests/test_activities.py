@@ -316,7 +316,7 @@ class ActivitiesEventsTestCase(PleioTenantTestCase):
             read_access=[ACCESS_TYPE.public],
             write_access=[ACCESS_TYPE.user.format(self.user1.id)],
             start_date=timezone.now() + timezone.timedelta(days=4),
-            end_date = timezone.now() + timezone.timedelta(days=4)
+            end_date=timezone.now() + timezone.timedelta(days=4)
         )
         self.event_5_days_ago = Event.objects.create(
             owner=self.user1,
@@ -436,7 +436,6 @@ class ActivitiesEventsTestCase(PleioTenantTestCase):
             self.graphql_client.force_login(self.user2)
             self.graphql_client.post(self.query, variables)
 
-
     def test_entities_filter_by_upcoming(self):
         variables = {
             "limit": 20,
@@ -450,7 +449,6 @@ class ActivitiesEventsTestCase(PleioTenantTestCase):
         self.assertEqual(len(result["data"]["activities"]["edges"]), 3)
         self.assertEqual(result["data"]["activities"]["edges"][0]["entity"]["guid"], self.event_in_6_days.guid)
 
-
     def test_entities_filter_by_previous(self):
         variables = {
             "limit": 20,
@@ -463,7 +461,6 @@ class ActivitiesEventsTestCase(PleioTenantTestCase):
         result = self.graphql_client.post(self.query, variables)
         self.assertEqual(len(result["data"]["activities"]["edges"]), 2)
         self.assertEqual(result["data"]["activities"]["edges"][0]["entity"]["guid"], self.event_3_days_ago.guid)
-
 
     def test_entities_blog_event_filter_by_previous(self):
         variables = {
