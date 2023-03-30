@@ -235,6 +235,8 @@ class Group(TagsModel, FeaturedCoverMixin, AttachmentMixin):
             self.introduction = attachment_map.replace(self.introduction)
 
         for widget_id, widget in enumerate(self.widget_repository):
+            if 'settings' not in widget or not widget.get('settings'):
+                continue
             for setting_id, setting in enumerate(widget['settings']):
                 attachment_id = setting.get('attachmentId')
                 if attachment_map.has_attachment(attachment_id):
