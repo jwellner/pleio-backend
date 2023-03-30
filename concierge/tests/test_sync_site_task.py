@@ -1,34 +1,16 @@
 from unittest import mock
 
-from django.conf import settings
 from django.test import override_settings
 
-from concierge.constances import UPDATE_ORIGIN_SITE_URL
-from core.lib import tenant_summary, get_account_url
 from tenants.helpers import FastTenantTestCase
 
 
 class TestSyncSiteTestCase(FastTenantTestCase):
 
-    @mock.patch("concierge.tasks.requests.post")
-    @override_settings(ENV='test')
-    def test_submit_properly_formatted_request_to_concierge(self, mocked_post):
+    @mock.patch("concierge.tasks.api_sync_site")
+    def test_sync_site(self, mocked_sync_site):
         # pylint: disable=import-outside-toplevel
         from concierge.tasks import sync_site
         sync_site(self.tenant.schema_name)
 
-        expected_site_config = tenant_summary()
-
-        mocked_post.assert_called_with(
-            get_account_url(UPDATE_ORIGIN_SITE_URL),
-            data={
-                "origin_site_url": expected_site_config['url'],
-                "origin_site_name": expected_site_config['name'],
-                "origin_site_description": expected_site_config['description'],
-                "origin_site_api_token": expected_site_config['api_token'],
-            },
-            headers={
-                "x-oidc-client-id": settings.OIDC_RP_CLIENT_ID,
-                "x-oidc-client-secret": settings.OIDC_RP_CLIENT_SECRET,
-            }, 
-            timeout=10)
+        self.assertTrue(mocked_sync_site.called)

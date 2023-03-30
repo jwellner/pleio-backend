@@ -17,7 +17,7 @@ def get_edges(data):
         if data['edges'][0].get('entity'):
             return [edge['entity'] for edge in data['edges']]
 
-    return data['edges']
+    return data['edges']  # pragma: no cover
 
 
 class Template:

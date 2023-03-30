@@ -120,8 +120,7 @@ def add_site(self, schema_name, domain):
 
 
 @shared_task(bind=True)
-def delete_site(self, site_id):
-    # pragma: no cover
+def delete_site(self, site_id): # pragma: no cover
     # pylint: disable=unused-argument
     '''
     Delete site from control

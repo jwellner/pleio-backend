@@ -59,9 +59,7 @@ class TestWidgetSerializerTestCase(PleioTenantTestCase):
         try:
             # When.
             WidgetSerializer(self.widget_spec, self.acting_user).serialize()
-
-            self.fail("Unexpectedly did not respond correctly to the virus found behaviour")
+            self.fail("Unexpectedly did not respond correctly to the virus found behaviour")  # pragma: no cover
         except AttachmentVirusScanError as e:
-
             # Then.
             self.assertEqual(str(e), self.file_mock.name)

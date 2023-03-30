@@ -65,7 +65,7 @@ class TestCleanExternalContentTestCase(PleioTenantTestCase):
             params.pop(key)
             try:
                 ExternalContent.objects.create(**params)
-                self.fail("Expected %s to be mandatory" % key)
+                self.fail("Expected %s to be mandatory" % key)  # pragma: no cover
             except (ValidationError,
                     Entity.owner.RelatedObjectDoesNotExist):
                 pass

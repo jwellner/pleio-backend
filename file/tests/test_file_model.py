@@ -33,7 +33,7 @@ class Base:
 
             super().tearDown()
 
-        def file_entity_factory(self, **kwargs) -> FileFolder:
+        def file_entity_factory(self, **kwargs) -> FileFolder:  # pragma: no cover
             raise NotImplementedError()
 
         @mock.patch("core.models.Entity.serialize")

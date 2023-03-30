@@ -14,7 +14,7 @@ class Template:
         def owner_factory(self) -> User:
             return UserFactory()
 
-        def entity_factory(self):
+        def entity_factory(self):  # pragma: no cover
             raise NotImplementedError()
 
         def setUp(self):

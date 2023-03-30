@@ -39,10 +39,10 @@ class RevisionTemplate:
                     continue
                 self.assertEqual(content[key], value)
 
-        def build_entity(self, owner):
+        def build_entity(self, owner):  # pragma: no cover
             raise NotImplementedError()
 
-        def build_owner(self):
+        def build_owner(self):  # pragma: no cover
             raise NotImplementedError()
 
         def localSetUp(self):
@@ -136,7 +136,7 @@ class RevisionTemplate:
             return response['data']['revisions']['edges']
 
         def test_mutate_title(self):
-            if not self.useCommonTests:
+            if not self.useCommonTests:  # pragma: no cover
                 return
             self.localSetUp()
 
@@ -152,7 +152,7 @@ class RevisionTemplate:
             self.assertReferenceUnchanged(revision['content'], 'title')
 
         def test_mutate_rich_description(self):
-            if not self.useCommonTests:
+            if not self.useCommonTests:  # pragma: no cover
                 return
             self.localSetUp()
 
@@ -166,7 +166,7 @@ class RevisionTemplate:
             self.assertReferenceUnchanged(revision['content'], 'richDescription')
 
         def test_mutate_access_id(self):
-            if not self.useCommonTests:
+            if not self.useCommonTests:  # pragma: no cover
                 return
             self.localSetUp()
 
@@ -194,7 +194,7 @@ class RevisionTemplate:
             self.assertReferenceUnchanged(revision['content'], 'writeAccessId')
 
         def test_mutate_tags(self):
-            if not self.useCommonTests:
+            if not self.useCommonTests:  # pragma: no cover
                 return
             self.localSetUp()
 
@@ -208,7 +208,7 @@ class RevisionTemplate:
             self.assertReferenceUnchanged(revision['content'], 'tags')
 
         def test_mutate_tag_categories(self):
-            if not self.useCommonTests:
+            if not self.useCommonTests:  # pragma: no cover
                 return
             self.localSetUp()
 

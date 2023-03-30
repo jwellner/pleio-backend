@@ -9,8 +9,7 @@ from user.models import User
 
 
 class TestGroupWelcomeMailerTestCase(PleioTenantTestCase):
-
-    BLANK_HTML =  "<h2></h2><p>\n\n</p>  <p><strong>  \t\t</strong>"
+    BLANK_HTML = "<h2></h2><p>\n\n</p>  <p><strong>  \t\t</strong>"
 
     def setUp(self):
         super().setUp()
@@ -88,6 +87,6 @@ class TestGroupWelcomeMailerTestCase(PleioTenantTestCase):
 
         try:
             self.mailer.get_context()
-            self.fail("unexpectedly did not fail though the message is empty")
+            self.fail("unexpectedly did not fail though the message is empty")  # pragma: no cover
         except self.mailer.FailSilentlyError:
             pass

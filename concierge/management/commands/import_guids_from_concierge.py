@@ -4,7 +4,7 @@ from django.core.management import BaseCommand
 
 from concierge.api import fetch_mail_profile
 from concierge.tasks import submit_user_token
-from core.lib import is_schema_public, tenant_schema
+from core.lib import is_schema_public
 from user.models import User
 
 logger = logging.getLogger(__name__)
@@ -38,6 +38,6 @@ class Command(BaseCommand):
     def sync_user(self, user):
         try:
             assert user.external_id, "User has no external id."
-            submit_user_token(tenant_schema(), user)
+            submit_user_token(user)
         except Exception as e:
             logger.error("sync_user error %s at %s", e, user.email)

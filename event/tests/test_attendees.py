@@ -68,14 +68,13 @@ class AttendeesTestCase(PleioTenantTestCase):
         """
 
     def test_attendee_unique_email_constraint(self):
-
         EventAttendee.objects.create(
             event=self.eventPublic,
             state='accept',
             name='user1',
             email='test@test.nl'
         )
-        
+
         with self.assertRaises(ValidationError) as context:
             EventAttendee.objects.create(
                 event=self.eventPublic,
@@ -93,7 +92,7 @@ class AttendeesTestCase(PleioTenantTestCase):
             user=self.admin,
             email='test1@test.nl'
         )
-        
+
         with self.assertRaises(ValidationError) as context:
             EventAttendee.objects.create(
                 event=self.eventPublic,
@@ -277,7 +276,7 @@ class TestAttendeesSigningUpForSubevents(PleioTenantTestCase):
                                          email=user1.email,
                                          user=user1,
                                          state="accept")
-            self.fail("Unexpectedly not raising an exception for user at session %s" % self.slot1session2.title)
+            self.fail("Unexpectedly not raising an exception for user at session %s" % self.slot1session2.title)  # pragma: no cover
         except ValidationError as e:
             pass
 
@@ -285,7 +284,7 @@ class TestAttendeesSigningUpForSubevents(PleioTenantTestCase):
             EventAttendee.objects.create(event=self.slot1session2,
                                          email=email1,
                                          state="accept")
-            self.fail("Unexpectedly not raising an exception for email at session %s" % self.slot1session2.title)
+            self.fail("Unexpectedly not raising an exception for email at session %s" % self.slot1session2.title)  # pragma: no cover
         except ValidationError as e:
             pass
 

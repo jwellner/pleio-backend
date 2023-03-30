@@ -16,7 +16,7 @@ class ValidMailerSubclass(MailerBase):
         kwargs.setdefault('sender', None)
         super(ValidMailerSubclass, self).__init__(**kwargs)
 
-    def send(self):
+    def send(self): # pragma: no cover
         pass
 
     def get_receiver(self):

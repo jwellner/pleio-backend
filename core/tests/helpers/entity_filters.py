@@ -14,13 +14,13 @@ class Template:
                 self._owner = UserFactory()
             return self._owner
 
-        def subtype_factory(self, **kwargs):
+        def subtype_factory(self, **kwargs):  # pragma: no cover
             raise NotImplementedError()
 
-        def reference_factory(self, **kwargs):
+        def reference_factory(self, **kwargs):  # pragma: no cover
             raise NotImplementedError()
 
-        def get_subtype(self):
+        def get_subtype(self):  # pragma: no cover
             raise NotImplementedError()
 
         def setUp(self):
@@ -44,7 +44,7 @@ class Template:
             super().tearDown()
 
         def test_entity_query(self):
-            if not self.include_entity_query:
+            if not self.include_entity_query:  # pragma: no cover
                 return
 
             query = """
@@ -70,7 +70,7 @@ class Template:
             self.assertEqual(guids, {self.article1.guid, self.article2.guid})
 
         def test_activity_query(self):
-            if not self.include_activity_query:
+            if not self.include_activity_query:  # pragma: no cover
                 return
 
             query = """

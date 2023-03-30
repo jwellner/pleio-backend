@@ -2,6 +2,7 @@ from django.conf import settings
 from django.db import connections
 import random
 
+
 class PrimaryReplicaRouter:
 
     def __init__(self):
@@ -29,7 +30,7 @@ class PrimaryReplicaRouter:
         in the primary/replica pool.
         """
         db_set = {'default', 'replica'}
-        if obj1._state.db in db_set and obj2._state.db in db_set:
+        if obj1._state.db in db_set and obj2._state.db in db_set:  # pragma: no cover
             return True
         return None
 
@@ -45,13 +46,11 @@ def extra_set_tenant_method(wrapper_class, tenant):
     """
     Set tenant on the replica database (if it exists)
     """
-    if (
-        not bool(settings.DATABASES.get("replica", False)) or
-        not wrapper_class.settings_dict["DATABASE"] == "default"
-    ):
+    if (not bool(settings.DATABASES.get("replica", False)) or
+            not wrapper_class.settings_dict["DATABASE"] == "default"):
         return
 
-    try:
+    try:  # pragma: no cover
         replica_connection = connections["replica"]
     except Exception:
         return

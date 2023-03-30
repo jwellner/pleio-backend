@@ -1,4 +1,5 @@
 import logging
+import uuid
 from hashlib import md5
 
 import requests
@@ -6,74 +7,58 @@ from django.conf import settings
 from django.utils import timezone
 from requests import ConnectionError as RequestConnectionError
 
-from concierge.constances import FETCH_AVATAR_URL, FETCH_PROFILE_URL, FETCH_MAIL_PROFILE_URL
-from core.lib import get_account_url, tenant_api_token
+from concierge.constances import FETCH_AVATAR_URL, FETCH_PROFILE_URL, FETCH_MAIL_PROFILE_URL, REGISTER_ORIGIN_SITE_URL, UPDATE_ORIGIN_SITE_URL
+from core.lib import get_account_url, tenant_api_token, tenant_summary, tenant_schema
 from user.models import User
 
 logger = logging.getLogger(__name__)
 
 
+def sync_site():
+    client = ConciergeClient("update_origin_site")
+    return client.post(UPDATE_ORIGIN_SITE_URL, {f"origin_site_{key}": value for key, value in tenant_summary().items()})
+
+
 def fetch_avatar(user: User):
-    try:
-        url = get_account_url(FETCH_AVATAR_URL.format(user.email))
+    client = ConciergeClient("fetch_avatar")
+    return client.fetch(FETCH_AVATAR_URL.format(user.email))
 
-        response = requests.get(url, headers={
-            'x-oidc-client-id': settings.OIDC_RP_CLIENT_ID,
-            'x-oidc-client-secret': settings.OIDC_RP_CLIENT_SECRET,
-        }, timeout=30)
 
-        assert response.ok, f"{response.status_code}: {response.reason}"
-
-        return response.json()
-
-    except RequestConnectionError as e:
-        logger.warning("Error during fetch_avatar: %s; %s", e.__class__, repr(e))
-        return {
-            "error": str(e)
-        }
+def fetch_mail_profile(email):
+    client = ConciergeClient("fetch_mail_profile")
+    return client.fetch(FETCH_MAIL_PROFILE_URL.format(email))
 
 
 def fetch_profile(user: User):
     try:
         assert user.external_id, "No external ID found yet"
-        url = get_account_url(FETCH_PROFILE_URL.format(user.external_id))
 
-        response = requests.get(url, headers={
-            'x-oidc-client-id': settings.OIDC_RP_CLIENT_ID,
-            'x-oidc-client-secret': settings.OIDC_RP_CLIENT_SECRET,
-        }, timeout=30)
+        client = ConciergeClient('fetch_profile')
+        return client.fetch(FETCH_PROFILE_URL.format(user.external_id))
 
-        assert response.ok, response.reason
-
-        return response.json()
-
-    except (AssertionError, RequestConnectionError) as e:
+    except AssertionError as e:
         logger.warning("Error during fetch_profile: %s; %s", e.__class__, repr(e))
         return {
-            "error": str(e)
-        }
-
-
-def fetch_mail_profile(email):
-    response = None
-    try:
-        url = get_account_url(FETCH_MAIL_PROFILE_URL.format(email))
-
-        response = requests.get(url, headers={
-            'x-oidc-client-id': settings.OIDC_RP_CLIENT_ID,
-            'x-oidc-client-secret': settings.OIDC_RP_CLIENT_SECRET,
-        }, timeout=30)
-
-        assert response.ok, response.reason
-
-        return response.json()
-
-    except (AssertionError, RequestConnectionError) as e:
-        logger.warning("Error during fetch_mail_profile: %s; %s", e.__class__, repr(e))
-        return {
             "error": str(e),
-            "status_code": response.status_code if response else None
         }
+
+
+def submit_user_token(user):
+    from concierge.tasks import profile_updated_signal
+    client = ConciergeClient("register_origin_site")
+    token = uuid.uuid4()
+    user.profile.update_origin_token(token)
+    url = REGISTER_ORIGIN_SITE_URL.format(user.external_id)
+
+    data = {'origin_token': token}
+    data.update({f"origin_site_{key}": value for key, value in tenant_summary().items()})
+
+    client.post(url, data)
+    if client.is_ok():
+        profile_updated_signal.delay(tenant_schema(), token)
+    else:
+        user.profile.update_origin_token(None)
+        logger.warning("Failed to sync a user origin_token for reason '%s'", client.reason)
 
 
 class ApiTokenData:
@@ -119,3 +104,52 @@ class ApiTokenData:
     def assert_valid(self):
         self.assert_valid_checksum()
         self.assert_valid_timestamp()
+
+
+class ConciergeClient:
+    def __init__(self, resource_id):
+        self.method = resource_id
+        self.response = None
+
+    def fetch(self, resource):
+        self.response = None
+        try:
+            self.response = requests.get(get_account_url(resource), headers={
+                'x-oidc-client-id': settings.OIDC_RP_CLIENT_ID,
+                'x-oidc-client-secret': settings.OIDC_RP_CLIENT_SECRET,
+            }, timeout=30)
+
+            assert self.response.ok, self.response.reason
+
+            return self.response.json()
+        except (AssertionError, RequestConnectionError) as e:
+            logger.warning("Error during api call to concierge: %s; %s; %s", e.__class__, repr(e), self.method)
+            return {
+                "error": str(e),
+                "status_code": self.response.status_code if self.response else None
+            }
+
+    def post(self, resource, data):
+        self.response = None
+        try:
+            self.response = requests.post(get_account_url(resource), data=data, headers={
+                'x-oidc-client-id': settings.OIDC_RP_CLIENT_ID,
+                'x-oidc-client-secret': settings.OIDC_RP_CLIENT_SECRET,
+            }, timeout=30)
+
+            assert self.response.ok, self.response.reason
+
+            return self.response.json()
+        except (AssertionError, RequestConnectionError) as e:
+            logger.warning("Error during api call to concierge: %s; %s; %s", e.__class__, repr(e), self.method)
+            return {
+                "error": str(e),
+                "status_code": self.response.status_code if self.response else None
+            }
+
+    def is_ok(self):
+        return self.response.ok if self.response else False
+
+    @property
+    def reason(self):
+        return self.response.reason or "" if self.response else ""

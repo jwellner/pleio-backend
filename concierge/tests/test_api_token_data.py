@@ -37,7 +37,7 @@ class TestApiTokenData(PleioTenantTestCase):
             # When.
             self.api_token_data.assert_valid_timestamp()
 
-            self.fail("Unexpectedly did not recognize invalid parameters")
+            self.fail("Unexpectedly did not recognize invalid parameters")  # pragma: no cover
         except AssertionError:
 
             # Then. An exception
@@ -61,7 +61,8 @@ class TestApiTokenData(PleioTenantTestCase):
             # When
             self.api_token_data.assert_valid_checksum()
 
-            self.fail("Unexpectedly did not recognize invalid parameters")
+            self.fail("Unexpectedly did not recognize invalid parameters")  # pragma: no cover
+
         except AssertionError:
             # Then... an exception as expected
             pass

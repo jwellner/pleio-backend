@@ -298,6 +298,6 @@ class TestHandlerDatahubCleanupFilesTestCase(PleioTenantTestCase):
         # Article1 is probably deleted.
         try:
             self.article2.refresh_from_db()
-            self.fail("Article2 unexpectedly still exists in the database")
+            self.fail("Article2 unexpectedly still exists in the database")  # pragma: no cover
         except ExternalContent.DoesNotExist:
             pass
