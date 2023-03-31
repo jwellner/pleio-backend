@@ -86,18 +86,16 @@ class ApiTokenData:
                 # Checksum is not included in the checksum.
                 continue
 
-            expected_checksum.update(k.encode())
-            expected_checksum.update(v.encode())
-
+            expected_checksum.update(str(k).encode())
+            expected_checksum.update(str(v).encode())
         assert self.data.get('checksum') == expected_checksum.hexdigest()[:12], "Invalid checksum"
 
     def assert_valid_timestamp(self):
         assert self.data.get('timestamp'), "Timestamp is missing"
-
         try:
             due = timezone.now() - timezone.timedelta(minutes=int(settings.ACCOUNT_DATA_EXPIRE))
-            timestamp = timezone.datetime.fromisoformat(self.data.get('timestamp', ''))
-            assert timestamp > due, "Data expired"
+            timestamp = int(self.data.get('timestamp', due.timestamp()-1))
+            assert timestamp > due.timestamp(), "Data expired"
         except ValueError:
             raise AssertionError("Invalid timestmap format.")
 
