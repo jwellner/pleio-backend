@@ -6,7 +6,7 @@ from django.db import connection
 from tenants.models import Client
 from blog.models import Blog
 from core import config
-from core.utils.convert import tiptap_to_html
+from core.utils.convert import is_tiptap, tiptap_to_html
 from core.models import Comment
 from discussion.models import Discussion
 from flow.models import FlowId
@@ -82,11 +82,15 @@ def comment_handler(sender, instance, created, **kwargs):
             'Accept': 'application/json'
         }
         url = config.FLOW_APP_URL + 'api/externalcomments/'
+        description = instance.rich_description
+
+        if is_tiptap(description):
+            description = tiptap_to_html(description)
 
         json = {
             'case': flow_id,
             'author': instance.owner.name,
-            'description': tiptap_to_html(instance.rich_description)
+            'description': description
         }
 
         requests.post(url, headers=headers, json=json, timeout=30)
