@@ -5,6 +5,7 @@ from core.constances import INVALID_SUBTYPE
 from event.resolvers.mutation_event_copy import resolve_copy_event
 from cms.resolvers.mutation_copy_page import resolve_copy_page
 
+
 def resolve_copy_entity(_, info, input):
     # pylint: disable=redefined-builtin
 

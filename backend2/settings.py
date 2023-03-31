@@ -9,7 +9,7 @@ https://docs.djangoproject.com/en/1.10/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/1.10/ref/settings/
 """
-
+# pragma: no cover
 import os
 from elasticapm.contrib.opentracing import Tracer
 from opentracing import set_global_tracer

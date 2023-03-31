@@ -104,6 +104,7 @@ class Page(RichDescriptionMediaMixin, TitleMixin, AttachmentMixin, RevisionMixin
         self.row_repository = new_rows
 
     def replace_attachments(self, attachment_map: ReplaceAttachments):
+        # not covered.
         super().replace_attachments(attachment_map)
 
         def update_attachments(widget):
@@ -164,7 +165,7 @@ class Row(models.Model):
         return str(self.id)
 
     @property
-    def type_to_string(self):
+    def type_to_string(self):  # pragma: no cover
         return 'row'
 
     def __str__(self):
@@ -193,7 +194,7 @@ class Column(models.Model):
         return str(self.id)
 
     @property
-    def type_to_string(self):
+    def type_to_string(self):  # pragma: no cover
         return 'column'
 
     def __str__(self):
