@@ -84,7 +84,7 @@ class TiptapParserTestCase(FastTenantTestCase):
         tiptap.replace_attachment(original, replacement)
         result = tiptap.tiptap_json
 
-        self.assertEqual(result['attrs']['url'], "/attachment/%s" % replacement)
+        self.assertEqual(result['attrs']['url'], replacement)
 
     def test_replace_attachment_empty(self):
         original = ""

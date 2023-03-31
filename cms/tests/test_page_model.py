@@ -1,7 +1,9 @@
+import json
 from unittest import mock
 
 from cms.factories import CampagnePageFactory, TextPageFactory
 from cms.models import Page
+from core.models.rich_fields import ReplaceAttachments
 from core.tests.helpers import PleioTenantTestCase
 from user.factories import EditorFactory
 
@@ -15,7 +17,7 @@ class Wrapper:
             self.owner = EditorFactory()
             self.entity = self.entity_factory(owner=self.owner)
 
-        def entity_factory(self, **kwargs) -> Page: # pragma: no cover
+        def entity_factory(self, **kwargs) -> Page:  # pragma: no cover
             raise NotImplementedError()
 
         def tearDown(self):
@@ -37,7 +39,8 @@ class TestTextPageModelTestCase(Wrapper.BaseTestCase):
 
     def entity_factory(self, **kwargs):
         if not self.parent:
-            self.parent = TextPageFactory(owner=self.owner)
+            self.parent = TextPageFactory(owner=self.owner,
+                                          title="Parent page title")
         return TextPageFactory(title=self.TITLE,
                                rich_description=self.CONTENT,
                                position=self.POSITION,
@@ -66,6 +69,20 @@ class TestTextPageModelTestCase(Wrapper.BaseTestCase):
 
         self.assertNotEqual(after, before)
         self.assertEqual(after, expected)
+
+    def test_has_children(self):
+        self.assertTrue(self.parent.has_children())
+        self.assertFalse(self.entity.has_children())
+
+    def test_get_parents(self):
+        self.assertEqual(self.entity.parents, [self.parent])
+        self.assertEqual(self.parent.parents, [])
+
+    def test_infinite_loop_parents(self):
+        self.parent.parent = self.entity
+        self.parent.save()
+        self.assertEqual(self.entity.parents, [self.entity, self.parent])
+        self.assertEqual(self.parent.parents, [self.parent, self.entity])
 
 
 class TestCampagnePageModelTestCase(Wrapper.BaseTestCase):
@@ -170,3 +187,25 @@ class TestCampagnePageModelTestCase(Wrapper.BaseTestCase):
 
         self.assertNotEqual(after, before)
         self.assertEqual(after, expected)
+
+    def test_replace_attachments(self):
+        attachment = "2fecc15a-e2f3-4d20-bbec-8232905b563d"
+        new_attachment = "8aa52d82-15d9-4ad6-be70-729ff81107fe"
+        map = ReplaceAttachments()
+        map.append(attachment, new_attachment)
+        self.entity.row_repository[0]['columns'][0]['widgets'][0]['settings'][0]['attachmentId'] = attachment
+        self.entity.row_repository[0]['columns'][0]['widgets'][0]['settings'][1]['richDescription'] = json.dumps({
+            'type': 'doc',
+            'content': [{'type': "file",
+                         'attrs': {'url': attachment,
+                                   'name': "Demo",
+                                   'mimeType': 'text/plain',
+                                   'size': 42,
+                                   }}]})
+        self.entity.save()
+        self.assertIn(attachment, json.dumps(self.entity.row_repository))
+
+        self.entity.replace_attachments(map)
+
+        self.assertIn(new_attachment, json.dumps(self.entity.row_repository))
+        self.assertNotIn(attachment, json.dumps(self.entity.row_repository))
