@@ -45,7 +45,7 @@ class TestApiTokenData(PleioTenantTestCase):
 
     def test_valid_timestamp(self):
         # Given, update the timestamp to an isoformat datetime.
-        self.request.POST['timestamp'] = timezone.now().isoformat()
+        self.request.POST['timestamp'] = timezone.now().timestamp()
 
         # When
         self.api_token_data.assert_valid_timestamp()
@@ -55,7 +55,7 @@ class TestApiTokenData(PleioTenantTestCase):
 
     def test_invalid_token(self):
         # Given, change of parameters.
-        self.request.POST['timestamp'] = timezone.now().isoformat()
+        self.request.POST['timestamp'] = timezone.now().timestamp()
 
         try:
             # When
