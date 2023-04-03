@@ -21,3 +21,11 @@ class TestLibDatetimeFormat(PleioTenantTestCase):
 
         self.assertNotEqual(self.utc_time.isoformat(),
                             self.local_time.isoformat())
+
+    def test_format_non_time(self):
+        self.assertEqual(datetime_format("Foo"), "")
+
+    def test_format_datetime_with_seconds(self):
+        result = datetime_format(self.reference_time, seconds=True)
+
+        self.assertEqual(result, '2021-03-31 11:12:00')
