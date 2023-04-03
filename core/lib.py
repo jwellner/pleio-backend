@@ -1,5 +1,4 @@
 import base64
-from hashlib import md5
 
 import html2text
 import ipaddress
@@ -14,7 +13,6 @@ import uuid
 
 from bs4 import BeautifulSoup
 from colour import Color
-from inspect import isfunction
 from django.apps import apps
 from django.conf import settings
 from django.core.cache import cache
@@ -65,7 +63,7 @@ def get_model_by_subtype(subtype):
     try:
         model_name = TypeModels[subtype].value
         return apps.get_model(model_name)
-    except AttributeError:
+    except AttributeError:  # pragma: no cover
         return None
 
 
@@ -237,7 +235,7 @@ def get_core_hook(hook_name):
         for app_config in apps.get_app_configs():
             try:
                 hook_path = "{}.core_hooks.{}".format(app_config.name, hook_name)
-                assert isfunction(import_string(hook_path))
+                assert callable(import_string(hook_path))
                 result.append(hook_path)
             except ImportError:
                 pass
@@ -257,7 +255,7 @@ def test_elasticsearch_index(index_name):
     raise UnableToTestIndex()
 
 
-def get_hourly_cron_jobs():
+def get_hourly_cron_jobs():  # pragma: no cover
     for task_name in get_core_hook("get_hourly_cron_jobs"):
         yield from import_string(task_name)()
 
@@ -519,7 +517,7 @@ def get_client_ip(request):
     try:
         ipv4_version = ipaddress.IPv6Address(x_forwarded_for).ipv4_mapped
 
-        if ipv4_version:
+        if ipv4_version:  # pragma: no cover
             x_forwarded_for = str(ipv4_version)
     except Exception:
         pass

@@ -10,20 +10,6 @@ def resolve_excerpt(obj, info):
     return obj.type_to_string
 
 
-@news.field("startDate")
-def resolve_start_date(obj, info):
-    # pylint: disable=unused-argument
-    """Deprecated: not used in news"""
-    return None
-
-
-@news.field("endDate")
-def resolve_end_date(obj, info):
-    # pylint: disable=unused-argument
-    """Deprecated: not used in news"""
-    return None
-
-
 @news.field("source")
 def resolve_source(obj, info):
     # pylint: disable=unused-argument

@@ -48,7 +48,6 @@ def resolve_add_news(_, info, input):
 
     entity.add_follow(user)
 
-
     return {
         "entity": entity
     }
@@ -86,7 +85,6 @@ def resolve_edit_news(_, info, input):
     if user.has_role(USER_ROLES.ADMIN):
         shared.resolve_update_owner(entity, clean_input)
         shared.resolve_update_time_created(entity, clean_input)
-
 
     entity.save()
     shared.store_update_revision(revision, entity)
