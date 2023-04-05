@@ -376,21 +376,11 @@ def generate_code():
 
 
 def get_exportable_user_fields():
-    return [
-        {'field_type': 'userField', 'field': 'guid', 'label': 'guid'},
-        {'field_type': 'userField', 'field': 'name', 'label': 'name'},
-        {'field_type': 'userField', 'field': 'email', 'label': 'email'},
-        {'field_type': 'userField', 'field': 'created_at', 'label': 'created_at'},
-        {'field_type': 'userField', 'field': 'updated_at', 'label': 'updated_at'},
-        {'field_type': 'userField', 'field': 'last_online', 'label': 'last_online'},
-        {'field_type': 'userField', 'field': 'banned', 'label': 'banned'},
-        {'field_type': 'userField', 'field': 'ban_reason', 'label': 'ban_reason'},
-        {'field_type': 'userField', 'field': 'group_memberships', 'label': 'group_memberships'},
-        {'field_type': 'userField', 'field': 'receive_newsletter', 'label': 'receive_newsletter'},
-        {'field_type': 'userField', 'field': 'created_at_unix', 'label': 'created_at (U)'},
-        {'field_type': 'userField', 'field': 'updated_at_unix', 'label': 'updated_at (U)'},
-        {'field_type': 'userField', 'field': 'last_online_unix', 'label': 'last_online (U)'},
-    ]
+    from user.exporting import ExportUsers
+    return [{'field_type': 'userField',
+             'field': r.field,
+             'label': r.label,
+             } for r in ExportUsers.AVAILABLE_SERIALIZERS]
 
 
 def get_exportable_content_types():

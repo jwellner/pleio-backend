@@ -17,6 +17,7 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.http import (FileResponse, HttpResponse, HttpResponseRedirect,
                          StreamingHttpResponse, Http404)
 from django.shortcuts import redirect, render
+from django.template import loader
 from django.urls import reverse
 from django.utils.http import urlencode
 from django.utils.text import Truncator, slugify
@@ -64,13 +65,16 @@ def default(request, exception=None):
         'metadata': metadata,
     }
 
-    status = HTTPStatus.OK
+    status, reason = HTTPStatus.OK, None
     if isinstance(exception, HttpErrorReactPage):
         status = exception.status_code
+        reason = str(exception)
     elif isinstance(exception, Http404):
         status = HTTPStatus.NOT_FOUND
+        reason = str(exception)
 
-    return render(request, 'react.html', context, status=status)
+    content = loader.render_to_string('react.html', context, request)
+    return HttpResponse(content, status=status, reason=reason)
 
 
 def entity_view(request, entity_id=None, entity_title=None):
