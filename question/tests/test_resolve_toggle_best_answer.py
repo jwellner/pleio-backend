@@ -1,6 +1,7 @@
 from django.core.cache import cache
 from core.models import Comment
 from core.tests.helpers import PleioTenantTestCase
+from user.factories import QuestionManagerFactory, AdminFactory, UserFactory
 from user.models import User
 from question.models import Question
 from mixer.backend.django import mixer
@@ -11,9 +12,9 @@ class ToggleBestAnswerTestCase(PleioTenantTestCase):
 
     def setUp(self):
         super().setUp()
-        self.authenticatedUser = mixer.blend(User)
-        self.admin = mixer.blend(User, roles=[USER_ROLES.ADMIN])
-        self.question_manager = mixer.blend(User, roles=[USER_ROLES.QUESTION_MANAGER])
+        self.authenticatedUser = UserFactory()
+        self.admin = AdminFactory()
+        self.question_manager = QuestionManagerFactory()
 
         self.question = Question.objects.create(
             title="Test1",

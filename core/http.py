@@ -26,6 +26,10 @@ class NotAllowedReact(HttpErrorReactPage):
     status_code = HTTPStatus.METHOD_NOT_ALLOWED
 
 
+class BadRequestReact(HttpErrorReactPage):
+    status_code = HTTPStatus.BAD_REQUEST
+
+
 def file_blocked_response(request, filename, reason):
     content = loader.render_to_string(template_name="file_blocked.html",
                                       context={"filename": os.path.basename(filename),
