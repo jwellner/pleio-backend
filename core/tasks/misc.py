@@ -253,7 +253,10 @@ def image_resize(self, schema_name, resize_image_id):
 
             im.thumbnail(thumbnail_size, Image.LANCZOS)
             output = BytesIO()
-            im.save(output, im.format)
+
+            # Not all plugins support animated images (https://pillow.readthedocs.io/en/stable/reference/Image.html#PIL.Image.Image.is_animated)
+            is_animated = getattr(im, "is_animated", False)
+            im.save(output, im.format, save_all=is_animated)
             contents = output.getvalue()
 
             resized_image.mime_type = Image.MIME[im.format]

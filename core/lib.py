@@ -602,7 +602,9 @@ def strip_exif(upload_field):
         filepath = upload_field.path
         image = Image.open(filepath)
         if image.getexif():
-            image.save(filepath)
+            # Not all plugins support animated images (https://pillow.readthedocs.io/en/stable/reference/Image.html#PIL.Image.Image.is_animated)
+            is_animated = getattr(image, "is_animated", False)
+            image.save(filepath, save_all=is_animated)
     except (FileNotFoundError, ValueError,
             UnidentifiedImageError):
         pass
