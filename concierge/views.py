@@ -1,6 +1,7 @@
 import logging
 
 from django.conf import settings
+from django.db.models import Q
 from django.http import JsonResponse, HttpResponseBadRequest
 from django.views.decorators.csrf import csrf_exempt
 
@@ -39,3 +40,27 @@ def get_site_info(request):
         return JsonResponse(tenant_summary(with_favicon=True))
     except AssertionError:
         return HttpResponseBadRequest()
+
+
+@csrf_exempt
+def ban_user(request):
+    try:
+        assert request.method == 'POST'
+
+        api_data = ApiTokenData(request)
+        api_data.assert_valid()
+
+        user = User.objects.get(Q(email=api_data.data['email']) | Q(external_id=api_data.data['id']))
+        user.is_active = False
+        user.ban_reason = api_data.data['reason']
+        user.save()
+
+    except AssertionError as e:
+        if settings.DEBUG:
+            return HttpResponseBadRequest(str(e))
+        return HttpResponseBadRequest()
+
+    except User.DoesNotExist:
+        pass
+
+    return JsonResponse({"result": "OK"})
