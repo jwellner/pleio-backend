@@ -30,7 +30,9 @@ class EditGroupNotificationsTestCase(PleioTenantTestCase):
                 editGroupNotifications(input: $input) {
                     group {
                         guid
-                        notificationMode
+                        isNotificationsEnabled
+                        isNotificationDirectMailEnabled
+                        isNotificationPushEnabled
                         __typename
                     }
                     __typename
@@ -40,7 +42,9 @@ class EditGroupNotificationsTestCase(PleioTenantTestCase):
 
         variables = {
             "input": {
-                "notificationMode": 'direct',
+                "isNotificationsEnabled": True,
+                "isNotificationDirectMailEnabled": True,
+                "isNotificationPushEnabled": True,
                 "guid": self.group1.guid,
                 "userGuid": self.user1.guid
             }
@@ -51,7 +55,9 @@ class EditGroupNotificationsTestCase(PleioTenantTestCase):
 
         data = result["data"]
         self.assertEqual(data["editGroupNotifications"]["group"]["guid"], self.group1.guid)
-        self.assertEqual(data["editGroupNotifications"]["group"]["notificationMode"], 'direct')
+        self.assertEqual(data["editGroupNotifications"]["group"]["isNotificationsEnabled"], True)
+        self.assertEqual(data["editGroupNotifications"]["group"]["isNotificationDirectMailEnabled"], True)
+        self.assertEqual(data["editGroupNotifications"]["group"]["isNotificationPushEnabled"], True)
 
     def test_edit_group_notifications_by_admin(self):
         mutation = """
@@ -59,6 +65,9 @@ class EditGroupNotificationsTestCase(PleioTenantTestCase):
                 editGroupNotifications(input: $input) {
                     group {
                         guid
+                        isNotificationsEnabled
+                        isNotificationDirectMailEnabled
+                        isNotificationPushEnabled
                         __typename
                     }
                     __typename
@@ -68,7 +77,9 @@ class EditGroupNotificationsTestCase(PleioTenantTestCase):
 
         variables = {
             "input": {
-                "notificationMode": 'overview',
+                "isNotificationsEnabled": False,
+                "isNotificationDirectMailEnabled": False,
+                "isNotificationPushEnabled": False,
                 "guid": self.group1.guid,
                 "userGuid": self.user1.guid
             }
@@ -82,7 +93,9 @@ class EditGroupNotificationsTestCase(PleioTenantTestCase):
                 editGroupNotifications(input: $input) {
                     group {
                         guid
-                        notificationMode
+                        isNotificationsEnabled
+                        isNotificationDirectMailEnabled
+                        isNotificationPushEnabled
                         __typename
                     }
                     __typename
@@ -92,7 +105,9 @@ class EditGroupNotificationsTestCase(PleioTenantTestCase):
 
         variables = {
             "input": {
-                "notificationMode": 'disable',
+                "isNotificationsEnabled": True,
+                "isNotificationDirectMailEnabled": True,
+                "isNotificationPushEnabled": True,
                 "guid": self.group1.guid,
                 "userGuid": self.user1.guid
             }
@@ -110,7 +125,9 @@ class EditGroupNotificationsTestCase(PleioTenantTestCase):
                 editGroupNotifications(input: $input) {
                     group {
                         guid
-                        notificationMode
+                        isNotificationsEnabled
+                        isNotificationDirectMailEnabled
+                        isNotificationPushEnabled
                         __typename
                     }
                     __typename
@@ -120,7 +137,9 @@ class EditGroupNotificationsTestCase(PleioTenantTestCase):
 
         variables = {
             "input": {
-                "notificationMode": 'disable',
+                "isNotificationsEnabled": False,
+                "isNotificationDirectMailEnabled": False,
+                "isNotificationPushEnabled": False,
                 "guid": self.group1.guid,
                 "userGuid": self.user1.guid
             }
@@ -136,7 +155,9 @@ class EditGroupNotificationsTestCase(PleioTenantTestCase):
                 editGroupNotifications(input: $input) {
                     group {
                         guid
-                        notificationMode
+                        isNotificationsEnabled
+                        isNotificationDirectMailEnabled
+                        isNotificationPushEnabled
                         __typename
                     }
                     __typename
@@ -146,7 +167,9 @@ class EditGroupNotificationsTestCase(PleioTenantTestCase):
 
         variables = {
             "input": {
-                "notificationMode": 'overview',
+                "isNotificationsEnabled": True,
+                "isNotificationDirectMailEnabled": False,
+                "isNotificationPushEnabled": True,
                 "guid": self.group1.guid
             }
         }
@@ -156,7 +179,9 @@ class EditGroupNotificationsTestCase(PleioTenantTestCase):
 
         data = result["data"]
         self.assertEqual(data["editGroupNotifications"]["group"]["guid"], self.group1.guid)
-        self.assertEqual(data["editGroupNotifications"]["group"]["notificationMode"], 'overview')
+        self.assertEqual(data["editGroupNotifications"]["group"]["isNotificationsEnabled"], True)
+        self.assertEqual(data["editGroupNotifications"]["group"]["isNotificationDirectMailEnabled"], False)
+        self.assertEqual(data["editGroupNotifications"]["group"]["isNotificationPushEnabled"], True)
 
     def test_edit_group_notifications_by_anonymous(self):
         mutation = """
@@ -164,7 +189,9 @@ class EditGroupNotificationsTestCase(PleioTenantTestCase):
                 editGroupNotifications(input: $input) {
                     group {
                         guid
-                        notificationMode
+                        isNotificationsEnabled
+                        isNotificationDirectMailEnabled
+                        isNotificationPushEnabled
                         __typename
                     }
                     __typename
@@ -174,7 +201,9 @@ class EditGroupNotificationsTestCase(PleioTenantTestCase):
 
         variables = {
             "input": {
-                "notificationMode": 'disable',
+                "isNotificationsEnabled": True,
+                "isNotificationDirectMailEnabled": False,
+                "isNotificationPushEnabled": True,
                 "guid": self.group1.guid,
                 "userGuid": self.user1.guid
             }

@@ -143,7 +143,7 @@ class Group(TagsModel, FeaturedCoverMixin, AttachmentMixin):
             user=user,
             defaults={
                 'type': member_type,
-                'notification_mode': 'overview' if self.auto_notification else 'disable'
+                'is_notifications_enabled': self.auto_notification
             }
         )
 
@@ -165,10 +165,26 @@ class Group(TagsModel, FeaturedCoverMixin, AttachmentMixin):
         except ObjectDoesNotExist:
             return False
 
-    def set_member_notification_mode(self, user, notification_mode='overview'):
+    def set_member_is_notifications_enabled(self, user, is_notifications_enabled):
         member = self.members.filter(user=user).first()
         if member:
-            member.notification_mode = notification_mode
+            member.is_notifications_enabled = is_notifications_enabled
+            member.save()
+            return True
+        return False
+
+    def set_member_is_notification_direct_mail_enabled(self, user, is_notification_direct_mail_enabled):
+        member = self.members.filter(user=user).first()
+        if member:
+            member.is_notification_direct_mail_enabled = is_notification_direct_mail_enabled
+            member.save()
+            return True
+        return False
+
+    def set_member_is_notification_push_enabled(self, user, is_notification_push_enabled):
+        member = self.members.filter(user=user).first()
+        if member:
+            member.is_notification_push_enabled = is_notification_push_enabled
             member.save()
             return True
         return False
@@ -326,12 +342,6 @@ class GroupMembership(models.Model):
         ('pending', 'Pending')
     )
 
-    NOTIFICATION_MODES = (
-        ('disable', 'disable'),
-        ('overview', 'overview'),
-        ('direct', 'direct')
-    )
-
     user = models.ForeignKey(
         'user.User',
         related_name='memberships',
@@ -347,11 +357,11 @@ class GroupMembership(models.Model):
         related_name='members',
         on_delete=models.CASCADE
     )
-    notification_mode = models.CharField(
-        max_length=10,
-        choices=NOTIFICATION_MODES,
-        default='overview'
-    )
+
+    is_notifications_enabled = models.BooleanField(default=True)
+    is_notification_direct_mail_enabled = models.BooleanField(default=False)
+    is_notification_push_enabled = models.BooleanField(default=False)
+
     admin_weight = models.IntegerField(
         default=100,
         null=False,

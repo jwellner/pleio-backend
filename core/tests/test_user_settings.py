@@ -46,7 +46,9 @@ class UserSettingsTestCase(PleioTenantTestCase):
                         groupNotifications {
                             guid
                             name
-                            notificationMode
+                            isNotificationsEnabled
+                            isNotificationDirectMailEnabled
+                            isNotificationPushEnabled
                             __typename
                         }
                         __typename
@@ -85,9 +87,13 @@ class UserSettingsTestCase(PleioTenantTestCase):
         self.assertEqual(data["entity"]["languageOptions"], [{'value': 'nl', 'label': 'Nederlands'}, {'value': 'en', 'label': 'English'}])
         self.assertEqual(data["entity"]["emailOverview"]["frequency"], "weekly")
         self.assertEqual(data["entity"]["groupNotifications"][0]["guid"], self.group1.guid)
-        self.assertEqual(data["entity"]["groupNotifications"][0]["notificationMode"], 'overview')
+        self.assertEqual(data["entity"]["groupNotifications"][0]["isNotificationsEnabled"], True)
+        self.assertEqual(data["entity"]["groupNotifications"][0]["isNotificationDirectMailEnabled"], False)
+        self.assertEqual(data["entity"]["groupNotifications"][0]["isNotificationPushEnabled"], False)
         self.assertEqual(data["entity"]["groupNotifications"][1]["guid"], self.group2.guid)
-        self.assertEqual(data["entity"]["groupNotifications"][1]["notificationMode"], 'disable')
+        self.assertEqual(data["entity"]["groupNotifications"][1]["isNotificationsEnabled"], False)
+        self.assertEqual(data["entity"]["groupNotifications"][1]["isNotificationDirectMailEnabled"], False)
+        self.assertEqual(data["entity"]["groupNotifications"][1]["isNotificationPushEnabled"], False)
         cache.clear()
 
     def test_get_user_settings_by_admin(self):
@@ -111,9 +117,13 @@ class UserSettingsTestCase(PleioTenantTestCase):
         self.assertEqual(data["entity"]["languageOptions"], [{'value': 'nl', 'label': 'Nederlands'}])
         self.assertEqual(data["entity"]["emailOverview"]["frequency"], "weekly")
         self.assertEqual(data["entity"]["groupNotifications"][0]["guid"], self.group1.guid)
-        self.assertEqual(data["entity"]["groupNotifications"][0]["notificationMode"], 'overview')
+        self.assertEqual(data["entity"]["groupNotifications"][0]["isNotificationsEnabled"], True)
+        self.assertEqual(data["entity"]["groupNotifications"][0]["isNotificationDirectMailEnabled"], False)
+        self.assertEqual(data["entity"]["groupNotifications"][0]["isNotificationPushEnabled"], False)
         self.assertEqual(data["entity"]["groupNotifications"][1]["guid"], self.group2.guid)
-        self.assertEqual(data["entity"]["groupNotifications"][1]["notificationMode"], 'disable')
+        self.assertEqual(data["entity"]["groupNotifications"][1]["isNotificationsEnabled"], False)
+        self.assertEqual(data["entity"]["groupNotifications"][1]["isNotificationDirectMailEnabled"], False)
+        self.assertEqual(data["entity"]["groupNotifications"][1]["isNotificationPushEnabled"], False)
 
     def test_get_profile_items_by_logged_in_user(self):
         """

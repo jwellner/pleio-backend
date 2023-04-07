@@ -32,11 +32,14 @@ def resolve_edit_group_notifications(_, info, input):
     if not requested_user == user and not user.has_role(USER_ROLES.ADMIN):
         raise GraphQLError(COULD_NOT_SAVE)
 
-    if 'notificationMode' in clean_input:
-        if clean_input['notificationMode'] not in ['disable', 'overview', 'direct']:
-            raise GraphQLError(COULD_NOT_SAVE)
+    if 'isNotificationsEnabled' in clean_input:
+        group.set_member_is_notifications_enabled(requested_user, clean_input['isNotificationsEnabled'])
 
-        group.set_member_notification_mode(requested_user, clean_input['notificationMode'])
+    if 'isNotificationDirectMailEnabled' in clean_input:
+        group.set_member_is_notification_direct_mail_enabled(requested_user, clean_input['isNotificationDirectMailEnabled'])
+
+    if 'isNotificationPushEnabled' in clean_input:
+        group.set_member_is_notification_push_enabled(requested_user, clean_input['isNotificationPushEnabled'])
 
     return {
         "group": group
