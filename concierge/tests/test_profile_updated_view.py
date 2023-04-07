@@ -9,7 +9,7 @@ from user.factories import UserFactory
 
 
 class TestViewsTestCase(PleioTenantTestCase):
-    PROFILE_UPDATED = '/api/profile_updated/'
+    PROFILE_UPDATED = '/api/profile/update/'
 
     def setUp(self):
         super().setUp()
