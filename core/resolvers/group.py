@@ -137,8 +137,8 @@ def resolve_group_can_change_ownership(obj, info):
     return False
 
 
-@group.field("notificationMode")
-def resolve_group_notification_mode(obj, info):
+@group.field("isNotificationsEnabled")
+def resolve_group_is_notifications_enabled(obj, info):
     # pylint: disable=unused-argument
     user = info.context["request"].user
 
@@ -146,7 +146,35 @@ def resolve_group_notification_mode(obj, info):
         return None
 
     try:
-        return obj.members.get(user=user).notification_mode
+        return obj.members.get(user=user).is_notifications_enabled
+    except ObjectDoesNotExist:
+        return None
+
+
+@group.field("isNotificationDirectMailEnabled")
+def resolve_group_is_notification_direct_mail_enabled(obj, info):
+    # pylint: disable=unused-argument
+    user = info.context["request"].user
+
+    if not user.is_authenticated:
+        return None
+
+    try:
+        return obj.members.get(user=user).is_notification_direct_mail_enabled
+    except ObjectDoesNotExist:
+        return None
+
+
+@group.field("isNotificationPushEnabled")
+def resolve_group_is_notification_push_enabled(obj, info):
+    # pylint: disable=unused-argument
+    user = info.context["request"].user
+
+    if not user.is_authenticated:
+        return None
+
+    try:
+        return obj.members.get(user=user).is_notification_push_enabled
     except ObjectDoesNotExist:
         return None
 

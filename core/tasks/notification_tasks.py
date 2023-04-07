@@ -50,6 +50,7 @@ def create_notification(self, schema_name, verb, model_name, entity_id, sender_i
     # pylint: disable=too-many-arguments
     # pylint: disable=too-many-locals
     # pylint: disable=too-many-branches
+    # pylint: disable=too-many-nested-blocks
     '''
     task for creating a notification. If the content of the notification is in a group and the recipient has configured direct notifications
     for this group. An email task wil be triggered with this notification
@@ -70,7 +71,7 @@ def create_notification(self, schema_name, verb, model_name, entity_id, sender_i
         if verb == "created":
             recipients = []
             if instance.group:
-                for member in instance.group.members.filter(type__in=['admin', 'owner', 'member']).exclude(notification_mode='disable'):
+                for member in instance.group.members.filter(type__in=['admin', 'owner', 'member']).exclude(is_notifications_enabled=False):
                     if sender == member.user:
                         continue
                     if not instance.can_read(member.user):
@@ -100,25 +101,24 @@ def create_notification(self, schema_name, verb, model_name, entity_id, sender_i
         # tuple with list is returned, get the notification created
         notifications = notify.send(sender, recipient=recipients, verb=verb, action_object=instance)[0][1]
 
-        # only send direct notification for content in groups
+        # only send direct and push notification for content in groups
         if getattr(instance, 'group', None):
             from core.mail_builders.notifications import schedule_notification_mail, MailTypeEnum
             for notification in notifications:
                 try:
                     recipient = User.objects.get(id=notification.recipient_id)
-                    direct = GroupMembership.objects.get(user=recipient, group=instance.group).notification_mode == 'direct'
+                    membership = GroupMembership.objects.get(user=recipient, group=instance.group)
                 except Exception:
                     continue
 
                 # send email direct and mark emailed as True
-                if direct:
+                if membership.is_notification_direct_mail_enabled:
                     schedule_notification_mail(recipient, [notification], MailTypeEnum.DIRECT)
 
-        if config.PUSH_NOTIFICATIONS_ENABLED:
-            # send all notifications direct through web push
-            for recipient in recipients:
-                translation.activate(recipient.get_language())
-                payload = get_notification_payload(sender, verb, instance)
-                if payload:
-                    for subscription in WebPushSubscription.objects.filter(user=recipient):
-                        send_web_push_notification(subscription, payload)
+                # send push notification
+                if membership.is_notification_push_enabled and config.PUSH_NOTIFICATIONS_ENABLED:
+                    translation.activate(recipient.get_language())
+                    payload = get_notification_payload(sender, verb, instance)
+                    if payload:
+                        for subscription in WebPushSubscription.objects.filter(user=recipient):
+                            send_web_push_notification(subscription, payload)

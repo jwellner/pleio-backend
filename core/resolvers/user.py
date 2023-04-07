@@ -59,7 +59,9 @@ def resolve_group_notifications(obj, info):
                 {
                     "guid": membership.group.guid,
                     "name": membership.group.name,
-                    "notificationMode": membership.notification_mode
+                    "isNotificationsEnabled": membership.is_notifications_enabled,
+                    "isNotificationDirectMailEnabled": membership.is_notification_direct_mail_enabled,
+                    "isNotificationPushEnabled": membership.is_notification_push_enabled
                 }
             )
         return groups

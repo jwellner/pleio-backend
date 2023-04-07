@@ -666,7 +666,9 @@ input editGroupInput {
 input editGroupNotificationsInput {
     guid: String!
     userGuid: String
-    notificationMode: notificationModeOptions
+    isNotificationsEnabled: Boolean
+    isNotificationPushEnabled: Boolean
+    isNotificationDirectMailEnabled: Boolean
 }
 
 type editGroupNotificationsPayload {
@@ -1282,7 +1284,9 @@ type Group implements Entity {
     subgroups: SubgroupList
     welcomeMessage: String
     widgets: [Widget]
-    notificationMode: notificationModeOptions
+    isNotificationsEnabled: Boolean
+    isNotificationPushEnabled: Boolean
+    isNotificationDirectMailEnabled: Boolean
     showMemberProfileFields: [ProfileItem]
     requiredProfileFields: [ProfileItem]
     requiredProfileFieldsMessage: String
@@ -1302,8 +1306,9 @@ type GroupList {
 type GroupNotificationItem {
     guid: String!
     name: String!
-    """ If notification for group for user is enabled, the notification mode is used sending the notification by email. 'overview': notification in overview. 'direct': every notification a direct email """
-    notificationMode: notificationModeOptions
+    isNotificationsEnabled: Boolean
+    isNotificationPushEnabled: Boolean
+    isNotificationDirectMailEnabled: Boolean
 }
 
 type Invite {
@@ -2902,12 +2907,6 @@ input ImportUserFieldInput {
     userField: String!
     accessId: Int
     forceAccess: Boolean
-}
-
-enum notificationModeOptions {
-    disable,
-    overview,
-    direct
 }
 
 input addSiteSettingProfileFieldInput {
