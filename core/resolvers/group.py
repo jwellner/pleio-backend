@@ -287,11 +287,11 @@ def resolve_group_members(group, info, q=None, offset=0, limit=5, inSubgroupId=N
                                    user__is_active=True)
 
     if inSubgroupId:
-        subgroup_members = Subgroup.objects.get(id=inSubgroupId).members.all()
+        subgroup_members = Subgroup.objects.get(id=inSubgroupId).members.filter(is_superadmin=False, is_active=True)
         members = members.filter(user__in=subgroup_members)
 
     if notInSubgroupId:
-        subgroup_members = Subgroup.objects.get(id=notInSubgroupId).members.all()
+        subgroup_members = Subgroup.objects.get(id=notInSubgroupId).members.filter(is_superadmin=False, is_active=True)
         members = members.exclude(user__in=subgroup_members)
 
     if q:
