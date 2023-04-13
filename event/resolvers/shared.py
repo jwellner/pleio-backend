@@ -1,10 +1,13 @@
+from django.utils import timezone
 from graphql import GraphQLError
 
 from core import constances
-from core.constances import INVALID_DATE, COULD_NOT_ADD, SUBEVENT_OPERATION, NON_SUBEVENT_OPERATION
+from core.constances import INVALID_DATE, COULD_NOT_ADD, NON_SUBEVENT_OPERATION
+from core.lib import early_this_morning
 from core.utils.convert import tiptap_to_text
 from event.mail_builders.delete_event_attendees import submit_delete_event_attendees_mail
-from event.models import Event, EventAttendee
+from event.models import EventAttendee, Event
+from event.range.sync import EventRangeSync
 
 
 def resolve_update_startenddate(entity, clean_input):
@@ -106,9 +109,74 @@ def resolve_update_attendee_welcome_mail(entity, clean_input):
     if subject and not content:
         raise GraphQLError(constances.MISSING_REQUIRED_FIELD % 'attendeeWelcomeMailContent')
 
+
 def attending_events(info):
     user = info.context["request"].user
     if user.is_authenticated:
         return [str(pk) for pk in EventAttendee.objects.filter(user=user).values_list('event__id', flat=True)]
     # TODO: read from stored email in session?
     return []
+
+
+def _maybe_isodatetime(timestamp):
+    if isinstance(timestamp, timezone.datetime):
+        return timestamp.isoformat()
+    return timestamp
+
+
+def resolve_update_range_settings(entity, clean_input):
+    if 'rangeSettings' in clean_input:
+        if entity.start_date < early_this_morning():
+            raise GraphQLError(constances.EVENT_RANGE_IMMUTABLE)
+        if entity.parent or entity.children.count():
+            raise GraphQLError(constances.EVENT_RANGE_NOT_POSSIBLE)
+
+        # update range_settings.
+        entity.range_settings = clean_input['rangeSettings']
+        entity.range_settings['repeatUntil'] = _maybe_isodatetime(entity.range_settings.get('repeatUntil'))
+    elif entity.is_recurring:
+        entity.range_settings['updateRange'] = not entity.range_ignore
+    else:
+        return
+
+    if entity.range_settings['updateRange'] or not entity.range_starttime:
+        entity.range_starttime = entity.start_date
+
+
+def followup_range_setting_changes(entity):
+    if entity.is_recurring:
+        sync = EventRangeSync(entity)
+        sync.followup_settings_change()
+
+
+def assert_valid_new_range(clean_input):
+    if 'rangeSettings' not in clean_input:
+        return
+
+    if not clean_input['rangeSettings'].get('repeatUntil'):
+        return
+
+    settings = clean_input['rangeSettings']
+    start_date = clean_input['startDate']
+
+    if settings['repeatUntil'] >= start_date:
+        return
+
+    raise GraphQLError(constances.EVENT_INVALID_REPEAT_UNTIL_DATE)
+
+
+def assert_valid_updated_range(entity, clean_input):
+    if 'rangeSettings' not in clean_input:
+        return
+
+    settings = clean_input['rangeSettings']
+    if settings.get('repeatUntil'):
+        start_date = clean_input.get('startDate') or entity.start_date
+        if start_date <= settings.get('repeatUntil'):
+            return
+        raise GraphQLError(constances.EVENT_INVALID_REPEAT_UNTIL_DATE)
+
+    if settings.get('instanceLimit'):
+        if settings.get('instanceLimit') > Event.objects.get_range_before(entity).count():
+            return
+        raise GraphQLError(constances.EVENT_INVALID_REPEAT_INSTANCE_LIMIT)

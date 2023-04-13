@@ -1,10 +1,9 @@
 from ariadne import ObjectType
-from django.core.exceptions import ObjectDoesNotExist
 from core.resolvers import shared
 from django.db.models import Q, Case, When
 from core.constances import ENTITY_STATUS
 from core.lib import datetime_isoformat
-from event.models import Event, EventAttendee
+from event.models import Event
 from event.resolvers import shared as event_shared
 from core.constances import ATTENDEE_ORDER_BY, ORDER_DIRECTION
 
@@ -273,6 +272,17 @@ def resolve_attendees(obj, info, query=None, limit=20, offset=0, state=None,
         "totalReject": obj.attendees.filter(state="reject").count(),
         "totalCheckedIn": obj.attendees.filter(checked_in_at__isnull=False).count(),
     }
+
+
+@event.field("rangeSettings")
+def resolve_range_settings(obj, info):
+    # pylint: disable=unused-argument
+    if obj.is_recurring:
+        return {
+            'event': obj,
+            **obj.range_settings
+        }
+    return None
 
 
 event.set_field("guid", shared.resolve_entity_guid)

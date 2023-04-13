@@ -1,10 +1,11 @@
-from graphql import GraphQLError
+from typing import Union
+
 from django.core.exceptions import ObjectDoesNotExist
-from core.constances import NOT_LOGGED_IN, COULD_NOT_SAVE
 from core.models import Entity, Group
-from file.models import FileFolder
+from core.resolvers import shared
 from core.resolvers.mutation_delete_comment import resolve_delete_comment
 from core.utils.cleanup import schedule_cleanup_group_content_featured_images
+from file.models import FileFolder
 from file.resolvers.mutation import assert_not_referenced
 
 
@@ -12,10 +13,9 @@ def resolve_delete_entity(_, info, input):
     # pylint: disable=redefined-builtin
     user = info.context["request"].user
 
-    if not user.is_authenticated:
-        raise GraphQLError(NOT_LOGGED_IN)
+    shared.assert_authenticated(user)
 
-    entity = None
+    entity: Union[Entity, None]= None
 
     try:
         entity = Group.objects.get(id=input.get("guid"))
@@ -30,8 +30,8 @@ def resolve_delete_entity(_, info, input):
     if not entity:
         return resolve_delete_comment(_, info, input)
 
-    if not entity.can_write(user):
-        raise GraphQLError(COULD_NOT_SAVE)
+    shared.assert_write_access(entity, user)
+    shared.update_updated_at(entity)
 
     if isinstance(entity, Group):
         schedule_cleanup_group_content_featured_images(entity)

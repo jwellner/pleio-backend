@@ -83,6 +83,7 @@ class OptionalFeaturesForm(forms.Form):
     edit_user_name_enabled = forms.BooleanField(required=False)
     push_notifications_enabled = forms.BooleanField(required=False)
     datahub_external_content_enabled = forms.BooleanField(required=False)
+    recurring_events_enabled = forms.BooleanField(required=False)
     event_add_email_attendee = forms.CharField(required=False)
 
     def save(self):
@@ -91,6 +92,7 @@ class OptionalFeaturesForm(forms.Form):
         config.EDIT_USER_NAME_ENABLED = bool(data['edit_user_name_enabled'])
         config.PUSH_NOTIFICATIONS_ENABLED = bool(data['push_notifications_enabled'])
         config.DATAHUB_EXTERNAL_CONTENT_ENABLED = bool(data['datahub_external_content_enabled'])
+        config.RECURRING_EVENTS_ENABLED = bool(data['recurring_events_enabled'])
         config.EVENT_ADD_EMAIL_ATTENDEE = data['event_add_email_attendee']
 
 

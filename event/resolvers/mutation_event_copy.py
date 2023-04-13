@@ -38,6 +38,9 @@ def copy_event(event_id, user, parent=None):
     entity.read_access = access_id_to_acl(entity, get_access_id(entity.read_access))
     entity.write_access = access_id_to_acl(entity, 0)
 
+    # First of a new range.
+    entity.range_master = None
+
     if parent:
         entity.parent = parent
 

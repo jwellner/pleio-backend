@@ -21,6 +21,7 @@ def resolve_edit_event(_, info, input):
 
     shared.assert_authenticated(user)
     shared.assert_write_access(entity, user)
+    event_shared.assert_valid_updated_range(entity, clean_input)
 
     shared.resolve_update_title(entity, clean_input)
     shared.resolve_update_rich_description(entity, clean_input)
@@ -57,6 +58,7 @@ def resolve_edit_event(_, info, input):
     event_shared.resolve_update_qr_access(entity, clean_input)
     event_shared.resolve_update_slots_available(entity, clean_input)
     event_shared.resolve_update_attendee_welcome_mail(entity, clean_input)
+    event_shared.resolve_update_range_settings(entity, clean_input)
 
     # only admins can edit these fields
     if user.has_role(USER_ROLES.ADMIN):
@@ -65,6 +67,7 @@ def resolve_edit_event(_, info, input):
         shared.resolve_update_time_created(entity, clean_input)
 
     entity.save()
+    event_shared.followup_range_setting_changes(entity)
 
     return {
         "entity": entity

@@ -116,6 +116,7 @@ input addEntityInput {
     suggestedItems: [String]
     attendeeWelcomeMailSubject: String
     attendeeWelcomeMailContent: SecureRichText
+    rangeSettings: EventRangeSettingsInput
 }
 
 type addEntityPayload {
@@ -588,6 +589,7 @@ input editEntityInput {
     suggestedItems: [String]
     attendeeWelcomeMailSubject: String
     attendeeWelcomeMailContent: SecureRichText
+    rangeSettings: EventRangeSettingsInput
 }
 
 type editEntityPayload {
@@ -979,6 +981,41 @@ type Event implements Entity {
     lastSeen: DateTime
     attendeeWelcomeMailSubject: String
     attendeeWelcomeMailContent: SecureRichText
+    rangeSettings: EventRangeSettings
+}
+
+enum EventRangeType {
+    dayOfTheWeek
+    dayOfTheMonth
+    weekdaydOfTheMonth
+    daily
+}
+
+type EventRangeSettings {
+    repeatUntil: DateTime
+    instanceLimit: Int
+
+    type: EventRangeType
+    interval: Int
+
+    isIgnored: Boolean
+
+    """ Next event after a specific date or following this event. """
+    nextEvent(timeAfter: DateTime): Event
+}
+
+input EventRangeSettingsInput {
+    repeatUntil: DateTime
+    instanceLimit: Int
+
+    type: EventRangeType!
+    interval: Int!
+
+    """
+    True = alle volgende events in de reeks nemen de wijziging over
+    False = dit event komt buiten de reeks te staan
+    """
+    updateRange: Boolean!
 }
 
 """Show upcoming events or previous events"""
@@ -2307,6 +2344,7 @@ type Site {
     pushNotificationsEnabled: Boolean!
     datahubExternalContentEnabled: Boolean
     pageTagFilters(contentType: String!): PageTagFilter
+    recurringEventsEnabled: Boolean
 }
 
 type SiteSettings {

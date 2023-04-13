@@ -1,11 +1,16 @@
-from django.utils import timezone
-from django.utils.timezone import localtime
+from unittest import mock
+
+from django.utils.timezone import localtime, timedelta
 
 from core.factories import GroupFactory
 from core.tests.helpers import PleioTenantTestCase
 from event.factories import EventFactory
 from event.models import Event
+from core.constances import ACCESS_TYPE
+from django.utils import timezone
+
 from user.factories import UserFactory
+from user.models import User
 
 
 class AddEventTestCase(PleioTenantTestCase):
@@ -195,3 +200,95 @@ class AddEventTestCase(PleioTenantTestCase):
 
         entity = result["data"]["addEntity"]["entity"]
         self.assertTrue(entity['canEdit'])
+
+
+class TestAddRangeEventTestCase(PleioTenantTestCase):
+
+    def setUp(self):
+        super().setUp()
+
+        self.now = timezone.datetime.fromisoformat("2019-01-01T09:00:00+01:00")
+        self.timezone_now = mock.patch("django.utils.timezone.now").start()
+        self.timezone_now.return_value = self.now
+
+        self.authenticated_user = UserFactory()
+        self.variables = {
+            "input": {
+                "subtype": "event",
+                "title": "My first Event",
+                "richDescription": "richDescription",
+                "accessId": 0,
+                "writeAccessId": 0,
+                "startDate": (self.now + timedelta(days=1)).isoformat(),
+                "endDate": (self.now + timedelta(days=1, hours=1)).isoformat(),
+                "rangeSettings": {
+                    "type": "daily",
+                    "interval": 3,
+                    "updateRange": True,
+                }
+            },
+        }
+        self.mutation = """
+            mutation ($input: addEntityInput!) {
+                addEntity(input: $input) {
+                    entity {
+                        guid
+                        ... on Event {
+                            title
+                            startDate
+                            endDate
+                            rangeSettings {
+                                repeatUntil
+                                instanceLimit
+                                type
+                                interval
+                                isIgnored
+                            }
+                        }
+                    }
+                }
+            }
+        """
+
+    def tearDown(self):
+        for event in Event.objects.all():
+            event.delete()
+        self.authenticated_user.delete()
+        super().tearDown()
+
+    def test_add_range_event(self):
+        self.graphql_client.force_login(self.authenticated_user)
+        result = self.graphql_client.post(self.mutation, self.variables)
+        entity = result['data']['addEntity']['entity']
+        self.assertEqual(entity['title'], self.variables['input']['title'])
+
+        range_settings = entity['rangeSettings']
+        self.assertEqual({*range_settings.keys()}, {'repeatUntil',
+                                                    'instanceLimit',
+                                                    'type',
+                                                    'interval',
+                                                    'isIgnored'})
+        self.assertEqual(range_settings['repeatUntil'], None)
+
+        self.assertEqual(range_settings['repeatUntil'], None)
+        self.assertEqual(range_settings['instanceLimit'], None)
+        self.assertEqual(range_settings['type'], self.variables['input']['rangeSettings']['type'])
+        self.assertEqual(range_settings['interval'], self.variables['input']['rangeSettings']['interval'])
+        self.assertEqual(range_settings['isIgnored'], False)
+
+        db_entity = Event.objects.get(pk=entity['guid'])
+        self.assertIsNotNone(db_entity.range_starttime)
+        self.assertEqual(db_entity.range_starttime, db_entity.start_date)
+
+    def test_add_range_with_invalid_repeat_until_date(self):
+        self.variables['input']['rangeSettings']['repeatUntil'] = self.now.isoformat()
+
+        with self.assertGraphQlError('event_invalid_repeat_until_date'):
+            self.graphql_client.force_login(self.authenticated_user)
+            self.graphql_client.post(self.mutation, self.variables)
+
+    def test_add_range_with_valid_repeat_until_date(self):
+        self.variables['input']['rangeSettings']['repeatUntil'] = (self.now + timedelta(days=5)).isoformat()
+
+        self.graphql_client.force_login(self.authenticated_user)
+        self.graphql_client.post(self.mutation, self.variables)

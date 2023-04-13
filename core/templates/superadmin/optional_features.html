@@ -5,38 +5,45 @@
 {% block content %}
 
     <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-        <h1 class="h2">Optional Features</h1>
+        <h1 class="h2">{% trans "Optional Features" %}</h1>
     </div>
 
-    <p>Enabled features for {{ config.NAME }}</p>
+    <p>{% blocktrans with sitename=config.NAME %}Enabled features for {{ sitename }}{% endblocktrans %}</p>
 
     <form method="post" class="optional-features-form">
         {% csrf_token %}
         <div class="card">
-            <h5 class="card-header">Features</h5>
+            <h5 class="card-header">{% trans "Features" %}</h5>
             <div class="card-body">
                 <div class="mb-2 form-check">
                     <input type="checkbox" name="collab_editing_enabled" id="collab_editing_enabled" {% if config.COLLAB_EDITING_ENABLED %}
                            checked {% endif %} />
-                    <label for="collab_editing_enabled">Collaborative editing</label>
+                    <label for="collab_editing_enabled">{% trans "Collaborative editing" %}</label>
                 </div>
                 {{ form.errors.collab_editing_enabled }}
                 <div class="mb-2 form-check">
                     <input type="checkbox" name="push_notifications_enabled" id="push_notifications_enabled" {% if config.PUSH_NOTIFICATIONS_ENABLED %}
                            checked {% endif %} />
-                    <label for="push_notifications_enabled">Enable push notifications</label>
+                    <label for="push_notifications_enabled">{% trans "Enable push notifications" %}</label>
                 </div>
                 {{ form.errors.edit_user_name_enabled }}
                 <div class="mb-2 form-check">
                     <input type="checkbox" name="edit_user_name_enabled" id="edit_user_name_enabled" {% if config.EDIT_USER_NAME_ENABLED %}
                            checked {% endif %} />
-                    <label for="edit_user_name_enabled">Enable edit name</label>
+                    <label for="edit_user_name_enabled">{% trans "Enable override screen name" %}</label>
                 </div>
                 {{ form.errors.edit_user_name_enabled }}
                 <div class="mb-2 form-check">
-                    <input type="checkbox" name="datahub_external_content_enabled" id="datahub_external_content_enabled" {% if config.DATAHUB_EXTERNAL_CONTENT_ENABLED %}
+                    <input type="checkbox" name="datahub_external_content_enabled" id="datahub_external_content_enabled"
+                            {% if config.DATAHUB_EXTERNAL_CONTENT_ENABLED %}
                            checked {% endif %} />
-                    <label for="datahub_external_content_enabled">Enable external content from datahub</label>
+                    <label for="datahub_external_content_enabled">{% trans "Enable external content from datahub" %}</label>
+                </div>
+                {{ form.errors.recurring_events_enabled }}
+                <div class="mb-2 form-check">
+                    <input type="checkbox" name="recurring_events_enabled" id="recurring_events_enabled" {% if config.RECURRING_EVENTS_ENABLED %}
+                           checked {% endif %} />
+                    <label for="recurring_events_enabled">{% trans "Enable recurring events (Béta)" %}</label>
                 </div>
                 {{ form.errors.edit_user_name_enabled }}
                 <div class="mb-2 select-input">
@@ -54,18 +61,18 @@
             </div>
         </div>
         <br>
-        <button type="submit" class="btn btn-primary">Save</button>
+        <button type="submit" class="btn btn-primary">{% trans "Save" %}</button>
     </form>
     <br>
     <div class="card">
-        <h5 class="card-header">Profile field sets</h5>
+        <h5 class="card-header">{% trans "Profile field sets" %}</h5>
         <div class="card-body">
             {% if profile_sets %}
                 <table class="table">
                     <thead>
                     <tr>
-                        <th>Name</th>
-                        <th>Field</th>
+                        <th>{% trans "Name" %}</th>
+                        <th>{% trans "Field" %}</th>
                         <th></th>
                     </tr>
                     </thead>
@@ -75,15 +82,15 @@
                             <td>{{ profile_set.name }}</td>
                             <td>{{ profile_set.field }}</td>
                             <td>
-                                <a href="{% url "optional_features_edit_profile_field" profile_set.pk %}">edit</a> /
-                                <a href="{% url "optional_features_delete_profile_field" profile_set.pk %}">delete</a>
+                                <a href="{% url "optional_features_edit_profile_field" profile_set.pk %}">{% trans "update" %}</a> /
+                                <a href="{% url "optional_features_delete_profile_field" profile_set.pk %}">{% trans "delete" %}</a>
                             </td>
                         </tr>
                     {% endfor %}
                     </tbody>
                 </table>
             {% endif %}
-            <a class="btn btn-primary" href="{% url "optional_features_add_profile_field" %}">Add profile field set</a>
+            <a class="btn btn-primary" href="{% url "optional_features_add_profile_field" %}">{% trans "Add profile field set" %}</a>
         </div>
     </div>
 

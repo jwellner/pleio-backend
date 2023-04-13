@@ -59,6 +59,10 @@ COULD_NOT_ORDER_BY_START_DATE = "order_by_start_date_is_only_for_events"
 COULD_NOT_USE_EVENT_FILTER = "event_filter_is_only_for_events"
 EVENT_IS_FULL = "event_is_full"
 EVENT_INVALID_STATE = "event_invalid_state"
+EVENT_RANGE_NOT_POSSIBLE = 'event_range_not_possible'
+EVENT_RANGE_IMMUTABLE = 'event_range_immutable'
+EVENT_INVALID_REPEAT_UNTIL_DATE = 'event_invalid_repeat_until_date'
+EVENT_INVALID_REPEAT_INSTANCE_LIMIT = 'event_invalid_repeat_instance_limit'
 SUBEVENT_OPERATION = 'subevent_only_operation'
 NON_SUBEVENT_OPERATION = 'non_subevent_operation'
 REDIRECTS_HAS_LOOP = "redirects_has_loop"
@@ -75,7 +79,7 @@ MISSING_REQUIRED_FIELD = "missing_required_field:%s"
 MEETINGS_NOT_ENABLED = "meetings_not_enabled"
 VIDEOCALL_NOT_ENABLED = "videocall_not_enabled"
 VIDEOCALL_PROFILEPAGE_NOT_AVAILABLE = "videocall_profilepage_not_available"
-VIDEOCALL_LIMIT_REACHED="videocall_limit_reached"
+VIDEOCALL_LIMIT_REACHED = "videocall_limit_reached"
 
 DOWNLOAD_AS_OPTIONS = ['odt', 'html']
 
