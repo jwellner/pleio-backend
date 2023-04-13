@@ -39,6 +39,7 @@ def resolve_add_event(_, info, input):
         group = parent.group
 
     shared.assert_group_member(user, group)
+    event_shared.assert_valid_new_range(clean_input)
 
     entity = Event()
 
@@ -65,11 +66,13 @@ def resolve_add_event(_, info, input):
     event_shared.resolve_update_attend_without_account(entity, clean_input)
     event_shared.resolve_update_qr_access(entity, clean_input)
     event_shared.resolve_update_attendee_welcome_mail(entity, clean_input)
+    event_shared.resolve_update_range_settings(entity, clean_input)
 
     entity.save()
     entity.add_follow(user)
 
     event_shared.resolve_update_slots_available(entity, clean_input)
+    event_shared.followup_range_setting_changes(entity)
 
     return {
         "entity": entity

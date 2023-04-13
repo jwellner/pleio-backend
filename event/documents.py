@@ -49,6 +49,12 @@ class EventDocument(DefaultDocument):
     def prepare_tags(self, instance):
         return [x.lower() for x in instance.tags]
 
+    def get_queryset(self):
+        return super().get_queryset().filter(index_item=True)
+
+    def should_index_object(self, obj):
+        return obj.index_item
+
     class Index:
         name = 'event'
 

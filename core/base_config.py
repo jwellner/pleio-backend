@@ -3,6 +3,7 @@ from django.core.cache import cache
 from django.apps import apps
 
 DEFAULT_SITE_CONFIG = {
+    # TODO: Voeg variabele toe voor herhalende events aan/uit. Standaard uit.
     'BACKEND_VERSION': ('2.0', 'Backend version'),
     'NAME': ('Pleio 2.0', 'Name'),
     'DESCRIPTION': ('Omschrijving site', 'Description'),
@@ -175,6 +176,7 @@ DEFAULT_SITE_CONFIG = {
     'BLOCKED_USER_INTRO_MESSAGE': ('', "Custom message to show blocked users at login attempts."),
     'PUSH_NOTIFICATIONS_ENABLED': (False, "Push notifications enabled for this site"),
     'DATAHUB_EXTERNAL_CONTENT_ENABLED': (False, "Allow to add a datahub external content processor"),
+    'RECURRING_EVENTS_ENABLED': (False, "Enable recurring events (Béta)"),
     'PAGE_TAG_FILTERS': ([], "Specify what tags should be available per content type.")
 }
 """

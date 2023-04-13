@@ -306,7 +306,10 @@ def resolve_update_suggested_items(entity, clean_input):
 
 
 def update_updated_at(entity):
-    entity.updated_at = timezone.now()
+    if isinstance(entity, FileFolder):
+        entity.update_updated_at()  # update parent folder dates
+    else:
+        entity.updated_at = timezone.now()
 
 
 def update_publication_dates(entity, clean_input):

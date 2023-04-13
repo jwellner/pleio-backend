@@ -1011,6 +1011,12 @@ def resolve_datahub_external_content_enabled(obj, info):
     return config.DATAHUB_EXTERNAL_CONTENT_ENABLED
 
 
+@site_settings_public.field('recurringEventsEnabled')
+def resolve_recurring_events_enabled(obj, info):
+    # pylint: disable=unused-argument
+    return config.RECURRING_EVENTS_ENABLED
+
+
 @site_settings_private.field('pageTagFilters')
 def resolve_page_tag_filters(obj, info):
     # pylint: disable=unused-argument

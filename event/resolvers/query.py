@@ -1,5 +1,8 @@
+from copy import deepcopy
+
 from ariadne import ObjectType
 from core.lib import early_this_morning
+from event.lib import complement_expected_range
 from event.models import Event
 from django.db.models import Q
 
@@ -39,6 +42,8 @@ def resolve_events(obj, info, filter=None, containerGuid=None, offset=0, limit=2
     else:
         qs = qs.order_by('start_date', 'title')
 
+    complement_expected_range(deepcopy(qs),
+                              offset=offset, limit=limit)
     edges = qs[offset:offset + limit]
 
     return {

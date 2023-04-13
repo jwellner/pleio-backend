@@ -128,7 +128,7 @@ class PleioTenantTestCase(FastTenantTestCase):
         assert isinstance(left_date_string, str), "left_date_string should be a string. Is now %s." % type(
             left_date_string)
         assert isinstance(right_date_string, str), "right_date_string should be a string. Is now %s." % type(
-            left_date_string)
+            right_date_string)
 
         left = datetime.fromisoformat(left_date_string)
         right = datetime.fromisoformat(right_date_string)

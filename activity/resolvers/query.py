@@ -1,14 +1,16 @@
 import logging
+from copy import deepcopy
 
 from ariadne import ObjectType
 from graphql import GraphQLError
 from core.lib import early_this_morning
 from core.models import Entity
-from django.db.models import Q
+from django.db.models import Q, F
 from django.db.models.functions import Coalesce
 from core.constances import ORDER_BY, ORDER_DIRECTION, COULD_NOT_ORDER_BY_START_DATE, COULD_NOT_USE_EVENT_FILTER
 from core.resolvers.query_entities import conditional_tags_filter, conditional_tag_lists_filter
 from core.resolvers import query_entity_filters as filters
+from event.lib import complement_expected_range
 
 query = ObjectType("Query")
 
@@ -152,6 +154,10 @@ def resolve_activities(
             qs = qs.filter(conditional_event_filter(eventFilter))
         else:
             raise GraphQLError(COULD_NOT_USE_EVENT_FILTER)
+
+    if subtypes == ['event']:
+        qs2 = deepcopy(qs).annotate(start_date=F('event__start_date'))
+        complement_expected_range(qs2, offset, limit)
 
     qs = qs.order_by(*order).select_subclasses()
 

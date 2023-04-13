@@ -131,6 +131,7 @@ class SiteTestCase(PleioTenantTestCase):
                         showTagFilter
                         showTagCategories
                     }
+                    recurringEventsEnabled
                 }
             }
         """
@@ -222,6 +223,7 @@ class SiteTestCase(PleioTenantTestCase):
             ]
         })
         self.assertEqual(data['site']['pageTagFilters'], {'showTagFilter': False, 'showTagCategories': [], 'contentType': 'blog'})
+        self.assertEqual(data['site']["recurringEventsEnabled"], False)
 
     def test_site_closed(self):
         cache.set("%s%s" % (connection.schema_name, 'IS_CLOSED'), True)
@@ -264,3 +266,18 @@ class SiteTestCase(PleioTenantTestCase):
     def test_videocall_profilepage_disabled(self):
         result = self.graphql_client.post(self.query, {})
         self.assertEqual(result['data']['site']['videocallProfilepage'], False)
+
+    def test_recurring_events_enabled(self):
+        self.query = """
+            query SiteGeneralSettings {
+                site {
+                    recurringEventsEnabled
+                }
+            }
+        """
+        self.override_config(RECURRING_EVENTS_ENABLED=True)
+
+        self.graphql_client.force_login(self.user)
+        response = self.graphql_client.post(self.query, {})
+        response = response['data']
+        self.assertEqual(response['site']['recurringEventsEnabled'], True)

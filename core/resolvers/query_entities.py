@@ -1,6 +1,7 @@
 import logging
+from copy import deepcopy
 
-from django.db.models import Q
+from django.db.models import Q, F
 from django.db.models.functions import Coalesce, Lower
 
 from core.constances import (ORDER_DIRECTION, ORDER_BY, INVALID_SUBTYPE,
@@ -11,6 +12,7 @@ from graphql import GraphQLError
 
 from core.models.tags import Tag, flat_category_tags
 from core.resolvers import query_entity_filters as filters
+from event.lib import complement_expected_range
 
 logger = logging.getLogger(__name__)
 
@@ -98,6 +100,12 @@ def conditional_event_filter(date_filter):
     return Q(event__end_date__gte=early_this_morning())
 
 
+def conditional_owner_filter(owner_id):
+    if owner_id:
+        return Q(owner_id=owner_id)
+    return Q()
+
+
 def resolve_entities(
         _,
         info,
@@ -163,10 +171,12 @@ def resolve_entities(
                                conditional_group_filter(containerGuid) &
                                conditional_subtypes_filter(subtypes) &
                                conditional_tags_filter(tags, matchStrategy == 'any') &
-                               conditional_tag_lists_filter(tagCategories, matchStrategy != 'all'))
+                               conditional_tag_lists_filter(tagCategories, matchStrategy != 'all') &
+                               conditional_owner_filter(userGuid))
 
-    if userGuid:
-        entities = entities.filter(owner__id=userGuid)
+    if subtypes == ['event'] and eventFilter != 'previous':
+        qs2 = deepcopy(entities).annotate(start_date=F('event__start_date'))
+        complement_expected_range(qs2, offset, limit)
 
     if eventFilter:
         if subtypes == ['event']:

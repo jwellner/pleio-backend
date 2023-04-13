@@ -31,8 +31,21 @@ class BlogEntityFilter(EntityFilterBase):
 class EventEntityFilter(EntityFilterBase):
     key = "event"
 
+    def add_if_applicable(self, query, subtypes):
+        if subtypes == ['event']:
+            self.add_all_events(query)
+        else:
+            super().add_if_applicable(query, subtypes)
+
+    @staticmethod
+    def add_all_events(query):
+        query.add(~Q(event__isnull=True)
+                  & ~Q(event__parent__isnull=False), Q.OR)
+
     def add(self, query):
-        query.add(~Q(event__isnull=True) & ~Q(event__parent__isnull=False), Q.OR)
+        query.add(~Q(event__isnull=True)
+                  & ~Q(event__parent__isnull=False)
+                  & Q(event__index_item=True), Q.OR)
 
 
 class DiscussionEntityFilter(EntityFilterBase):
