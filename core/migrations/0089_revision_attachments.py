@@ -6,7 +6,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('core', '0086_file_scan_changes'),
+        ('core', '0088_remove_groupmembership_notification_mode'),
     ]
 
     operations = [
