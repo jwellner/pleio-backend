@@ -5,6 +5,7 @@ ALREADY_MEMBER_OF_GROUP = "already_member_of_group"
 ALREADY_REGISTERED = "already_registered"
 ALREADY_VOTED = "already_voted"
 FILE_NOT_CLEAN = "file_not_clean:{}"
+FILE_HAS_REFERENCES = "file_has_references"
 COULD_NOT_ADD = "could_not_add"
 COULD_NOT_DELETE = "could_not_delete"
 COULD_NOT_FIND = "could_not_find"
@@ -77,6 +78,11 @@ VIDEOCALL_PROFILEPAGE_NOT_AVAILABLE = "videocall_profilepage_not_available"
 VIDEOCALL_LIMIT_REACHED="videocall_limit_reached"
 
 DOWNLOAD_AS_OPTIONS = ['odt', 'html']
+
+PERSONAL_FILE = '__personal_file__'
+CONFIGURED_LOGO_FILE = 'LOGO'
+CONFIGURED_ICON_FILE = 'ICON'
+CONFIGURED_FAVICON_FILE = 'FAVICON'
 
 class ATTENDEE_ORDER_BY:
     name = 'name'

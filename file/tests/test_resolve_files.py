@@ -126,7 +126,7 @@ class TestFileQueryOrderByAccessWeight(PleioTenantTestCase):
         ])
 
 
-class FilesCase(PleioTenantTestCase):
+class FilesTestCase(PleioTenantTestCase):
 
     def setUp(self):
         super().setUp()

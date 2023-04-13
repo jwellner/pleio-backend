@@ -2,8 +2,8 @@ from django.contrib.auth.models import AnonymousUser
 from django.core.files.base import ContentFile
 
 from core.lib import get_full_url, replace_html_img_src
-from core.models import Attachment
 from core.tests.helpers import PleioTenantTestCase
+from file.models import FileFolder
 from user.factories import UserFactory
 
 
@@ -31,7 +31,7 @@ class TestLibReplaceHtmlImageSrc(PleioTenantTestCase):
         self.assertIn(get_full_url(expected_url), result)
 
     def test_replace_html_img_odt(self):
-        attachment = Attachment.objects.create(name='Demo.jpg',
+        attachment = FileFolder.objects.create(title='Demo.jpg',
                                                owner=self.visitor,
                                                upload=ContentFile("Content...", 'Demo.jpg'))
         expected_url = '/attachment/' + attachment.guid
@@ -47,7 +47,7 @@ class TestLibReplaceHtmlImageSrc(PleioTenantTestCase):
         self.assertIn(attachment.upload.path, result)
 
     def test_replace_html_img_anonymous_odt(self):
-        attachment = Attachment.objects.create(name='Demo.jpg',
+        attachment = FileFolder.objects.create(title='Demo.jpg',
                                                owner=self.visitor,
                                                upload=ContentFile("Content...", 'Demo.jpg'))
         expected_url = '/attachment/' + attachment.guid

@@ -10,11 +10,11 @@ from online_planner.meetings_api import MeetingsApi
 
 from cms.row_resolver import RowSerializer
 from core import config
-from core.constances import ACCESS_TYPE, USER_ROLES
+from core.constances import ACCESS_TYPE, USER_ROLES, FILE_NOT_CLEAN
 from core import constances
 from core.exceptions import AttachmentVirusScanError
 from core.lib import (access_id_to_acl, html_to_text,
-                      tenant_schema, get_access_id)
+                      tenant_schema, get_access_id, strip_exif)
 from core.models import EntityViewCount, Group, VideoCallGuest
 from core.models.revision import Revision
 from core.tasks.cleanup_tasks import cleanup_featured_image_files
@@ -337,7 +337,7 @@ def update_featured_image(entity, clean_input, image_owner=None):
     elif featured.get("image"):
         featured_image = FileFolder.objects.create(
             owner=entity.owner,
-            upload=featured.get("image")
+            upload=featured.get("image"),
         )
         if hasattr(entity, 'read_access'):
             featured_image.read_access = entity.read_access
@@ -356,6 +356,7 @@ def update_featured_image(entity, clean_input, image_owner=None):
         else:
             featured_image.delete()
             raise GraphQLError(constances.FILE_NOT_CLEAN.format(os.path.basename(featured_image.upload.name)))
+        post_upload_file(featured_image)
 
     elif not featured.get("imageGuid"):
         # No image, no guid, no video: cleanup.
@@ -585,6 +586,21 @@ def resolve_update_rows(entity, clean_input, user):
                 entity.row_repository.append(rowSerializer.serialize())
     except AttachmentVirusScanError as e:
         raise GraphQLError(constances.FILE_NOT_CLEAN.format(str(e)))
+
+
+def post_upload_file(entity: FileFolder):
+    if not config.PRESERVE_FILE_EXIF and entity.is_image():
+        strip_exif(entity.upload)
+
+
+def scan_file(file, delete_if_virus=False, delete_from_disk=False):
+    if file.is_file() and not file.scan():
+        filename = file.title
+        if delete_from_disk:
+            os.unlink(file.upload.path)
+        if delete_if_virus:
+            file.delete()
+        raise GraphQLError(FILE_NOT_CLEAN.format(filename))
 
 
 def assert_meetings_enabled():

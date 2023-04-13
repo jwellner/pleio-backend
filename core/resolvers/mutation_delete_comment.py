@@ -3,6 +3,7 @@ from django.core.exceptions import ObjectDoesNotExist
 from core.constances import COULD_NOT_FIND, COULD_NOT_SAVE, NOT_LOGGED_IN
 from core.models import Comment
 
+
 def resolve_delete_comment(_, info, input):
     # pylint: disable=redefined-builtin
     user = info.context["request"].user
@@ -18,7 +19,6 @@ def resolve_delete_comment(_, info, input):
 
     if not comment.can_write(user):
         raise GraphQLError(COULD_NOT_SAVE)
-
 
     comment.delete()
 

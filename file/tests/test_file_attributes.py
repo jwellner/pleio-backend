@@ -74,8 +74,6 @@ class TestFileAtrributesTestCase(PleioTenantTestCase):
         self.assertTrue(mocked_create_incident.called)
 
 
-
-
 class TestExifTestCase(PleioTenantTestCase):
 
     def setUp(self):

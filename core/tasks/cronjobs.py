@@ -9,10 +9,9 @@ from django.utils.translation import gettext
 
 from core import config
 from core.mail_builders.frequent_overview import schedule_frequent_overview_mail
-from core.models import SiteStat, Attachment, ResizedImage, Entity, AvatarExport
+from core.models import SiteStat, ResizedImage, Entity
 from core.tasks.notification_tasks import create_notifications_for_scheduled_content
 from core.resolvers import shared
-from core.constances import ENTITY_STATUS
 from django.conf import settings
 from django.core import management
 from django.core.exceptions import ObjectDoesNotExist
@@ -56,7 +55,7 @@ def dispatch_daily_cron():
         resize_pending_images.delay(client.schema_name)
         cleanup_auditlog.delay(client.schema_name)
         send_overview.delay(client.schema_name, 'daily')
-        cleanup_exports.delay(client.schema_name)
+        cleanup_orphaned_files.delay(client.schema_name)
 
 
 @shared_task
@@ -65,7 +64,6 @@ def dispatch_weekly_cron():
     for client in Client.objects.exclude(schema_name='public'):
         logger.info('Schedule weekly cron for %s', client.schema_name)
 
-        remove_floating_attachments.delay(client.schema_name)
         send_overview.delay(client.schema_name, 'weekly')
 
 
@@ -74,7 +72,6 @@ def dispatch_monthly_cron():
     for client in Client.objects.exclude(schema_name='public'):
         logger.info('Schedule weekly cron for %s', client.schema_name)
 
-        remove_floating_attachments.delay(client.schema_name)
         send_overview.delay(client.schema_name, "monthly")
 
 
@@ -112,13 +109,11 @@ def send_overview(schema_name, period):
 
 
 @shared_task
-def cleanup_exports(schema_name):
+def cleanup_orphaned_files(schema_name):
     with schema_context(schema_name):
         due_datetime = localtime() - timedelta(days=30)
-        for export in AvatarExport.objects.filter(updated_at__lte=due_datetime):
-            if export.file:
-                export.file.delete()
-            export.delete()
+        for file in FileFolder.objects.filter_orphaned_files().filter(created_at__lte=due_datetime):
+            file.delete()
 
 
 @shared_task
@@ -143,26 +138,18 @@ def save_file_disk_usage(schema_name):
     '''
     Save size by schema_name
     '''
-    total_size = 0
     with schema_context(schema_name):
         logger.info('get_file_size \'%s\'', schema_name)
 
         file_folder_size = 0
-        attachment_size = 0
 
         f = FileFolder.objects.filter(type=FileFolder.Types.FILE).aggregate(total_size=Sum('size'))
         if f.get('total_size', 0):
             file_folder_size = f.get('total_size', 0)
 
-        e = Attachment.objects.all().aggregate(total_size=Sum('size'))
-        if e.get('total_size', 0):
-            attachment_size = e.get('total_size', 0)
-
-        total_size = file_folder_size + attachment_size
-
         SiteStat.objects.create(
             stat_type='DISK_SIZE',
-            value=total_size
+            value=file_folder_size
         )
 
 
@@ -250,13 +237,6 @@ def ban_users_with_no_account(schema_name):
         if count:
             logger.info("Accounts blocked beacause of deleted account in pleio: %s", count)
         config.LAST_RECEIVED_DELETED_USER = last_received
-
-
-@shared_task
-def remove_floating_attachments(schema_name):
-    with schema_context(schema_name):
-        deleted = Attachment.objects.filter(attached_content_type=None).delete()
-        logger.info("%s: %d floating attachments were deleted.", schema_name, deleted[0])
 
 
 @shared_task

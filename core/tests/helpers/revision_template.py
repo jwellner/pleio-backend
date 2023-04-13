@@ -367,26 +367,36 @@ class RevisionTemplate:
                 "positionY": 10,
             })
             self.assertReferenceUnchanged(revision['content'], 'featured')
+            self.assertTrue(self.entity.attachments.filter(file=file).exists())
 
-        def test_mutate_featured_image_twice(self):
+        def test_mutate_featured_image_triple(self):
             if not self.useFeatured:
                 return
             self.localSetUp()
             file1 = self.file_factory(self.relative_path(__file__, ['..', 'assets', 'landscape.jpeg']))
             file2 = self.file_factory(self.relative_path(__file__, ['..', 'assets', 'landscape.jpeg']))
+            file3 = self.file_factory(self.relative_path(__file__, ['..', 'assets', 'landscape.jpeg']))
 
             self.applyChanges(title="First mutation",
                               featured={
                                   'imageGuid': file1.guid,
                                   'alt': "Landscape 1",
                               })
-            revisions = self.applyChanges(title="Second mutation",
+            self.applyChanges(title="Second mutation",
+                              featured={
+                                  'imageGuid': file2.guid,
+                                  'alt': "Landscape 2",
+                              })
+            revisions = self.applyChanges(title="Third mutation",
                                           featured={
-                                              'imageGuid': file2.guid,
-                                              'alt': "Landscape 2",
+                                              'imageGuid': file3.guid,
+                                              'alt': "Landscape 3",
                                           })
             self.assertNotEqual(revisions[0]['content']['featured']['imageGuid'], revisions[1]['content']['featured']['imageGuid'])
             self.assertNotEqual(revisions[0]['content']['featured']['image'], revisions[1]['content']['featured']['image'])
+            self.assertTrue(self.entity.attachments.filter(file=file1).exists())
+            self.assertTrue(self.entity.attachments.filter(file=file2).exists())
+            self.assertTrue(self.entity.attachments.filter(file=file3).exists())
 
         def test_featured_image_with_virus(self):
             if not self.useFeatured:

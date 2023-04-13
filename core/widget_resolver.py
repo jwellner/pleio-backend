@@ -75,24 +75,28 @@ class WidgetSettingSerializer(WidgetSerializerBase):
 
     @property
     def attachmentId(self):
-        from core.models import Attachment
+        from file.models import FileFolder
+        from core.resolvers import shared
         if not self.setting.get('attachmentId') and self.setting.get('attachment') and self.acting_user:
             attachment_input = self.setting.get('attachment')
             try:
-                attachment = Attachment.objects.get(id=attachment_input.get('id'))
-            except (Attachment.DoesNotExist, ValidationError, AttributeError):
-                attachment = Attachment.objects.create(upload=attachment_input, owner=self.acting_user)
+                attachment = FileFolder.objects.get(id=attachment_input.get('id'))
+            except (FileFolder.DoesNotExist, ValidationError, AttributeError):
+                attachment = FileFolder.objects.create(upload=attachment_input,
+                                                       owner=self.acting_user)
                 if not attachment.scan():
                     attachment.delete()
                     raise AttachmentVirusScanError(os.path.basename(attachment.upload.name))
+                shared.post_upload_file(attachment)
+
             self.setting['attachmentId'] = str(attachment.id)
         return self.setting.get('attachmentId')
 
     @property
     def attachment(self):
-        from core.models import Attachment
+        from file.models import FileFolder
         if self.attachmentId:
-            return Attachment.objects.filter(id=self.attachmentId).first()
+            return FileFolder.objects.filter(id=self.attachmentId).first()
 
     def serialize(self):
         return {

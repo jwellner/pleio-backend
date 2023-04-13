@@ -1,7 +1,5 @@
-import json
 from django.utils import timezone
 from django.contrib.auth.models import AnonymousUser
-from core.models.attachment import Attachment
 from core.models import Group
 from core.tests.helpers import PleioTenantTestCase
 from user.models import User
@@ -183,15 +181,14 @@ class AddBlogTestCase(PleioTenantTestCase):
         self.assertTrue(entity['canEdit'])
 
     def test_add_with_attachment(self):
-        attachment = mixer.blend(Attachment)
+        attachment = self.file_factory(self.relative_path(__file__, ['assets', 'featured.jpeg']))
 
         variables = self.data
-        variables["input"]["richDescription"] = json.dumps(
-            {'type': 'file', 'attrs': {'url': f"/attachment/entity/{attachment.id}"}})
+        variables["input"]["richDescription"] = self.tiptap_attachment(attachment)
 
         self.graphql_client.force_login(self.authenticatedUser)
         result = self.graphql_client.post(self.mutation, variables)
 
         entity = result["data"]["addEntity"]["entity"]
         blog = Blog.objects.get(id=entity["guid"])
-        self.assertTrue(blog.attachments.filter(id=attachment.id).exists())
+        self.assertTrue(blog.attachments.filter(file_id=attachment.id).exists())

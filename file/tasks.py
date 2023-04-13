@@ -12,7 +12,6 @@ from django_tenants.utils import schema_context
 from django.utils import timezone
 
 from core.lib import datetime_format
-from core.models import Attachment
 from file.helpers.post_processing import ensure_correct_file_without_signals
 from file.mail_builders.file_scan_found import schedule_file_scan_found_mail
 from file.models import FileFolder, ScanIncident
@@ -65,9 +64,6 @@ class ScheduleScan:
     def file_limit(self):
         return math.ceil(self.file_queryset().count() / int(settings.SCAN_CYCLE_DAYS))
 
-    def attachment_limit(self):
-        return math.ceil(self.attachment_queryset().count() / int(settings.SCAN_CYCLE_DAYS))
-
     @staticmethod
     def file_queryset():
         return FileFolder.objects.filter_files()
@@ -75,19 +71,9 @@ class ScheduleScan:
     def collect_files(self):
         return self.file_queryset().order_by('last_scan').values_list('id', flat=True)[:self.file_limit()]
 
-    @staticmethod
-    def attachment_queryset():
-        return Attachment.objects.all()
-
-    def collect_attachments(self):
-        return self.attachment_queryset().order_by('last_scan').values_list('id', flat=True)[:self.attachment_limit()]
-
     def generate_tasks(self, schema_name):
-        from core.tasks import scan_attachment
         for file_id in self.collect_files():
             yield scan_file.si(schema_name, str(file_id))
-        for file_id in self.collect_attachments():
-            yield scan_attachment.si(schema_name, str(file_id))
 
     def run(self, schema_name):
         chord([*self.generate_tasks(schema_name)],

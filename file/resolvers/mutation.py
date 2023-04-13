@@ -7,7 +7,7 @@ from django.utils.translation import gettext
 from graphql import GraphQLError
 
 from core import config
-from core.constances import ACCESS_TYPE, COULD_NOT_SAVE, FILE_NOT_CLEAN
+from core.constances import ACCESS_TYPE, COULD_NOT_SAVE, FILE_NOT_CLEAN, FILE_HAS_REFERENCES, PERSONAL_FILE
 from core.lib import access_id_to_acl, clean_graphql_input, strip_exif
 from core.models import Group
 from core.resolvers import shared
@@ -98,10 +98,9 @@ def resolve_add_file(_, info, input):
     entity = FileFolder()
 
     entity.owner = user
+    entity.upload = clean_input['file']
 
     shared.resolve_update_tags(entity, clean_input)
-
-    resolve_update_file(entity, clean_input)
 
     if parent:
         entity.parent = parent
@@ -120,10 +119,11 @@ def resolve_add_file(_, info, input):
 
     entity.save()
 
-    resolve_scan_file(entity, clean_input, delete_entity=True)
+    shared.scan_file(entity, delete_if_virus=True)
+    shared.post_upload_file(entity)
 
-    if not config.PRESERVE_FILE_EXIF and entity.is_image():
-        strip_exif(entity.upload)
+    if not group:
+        entity.persist_file()
 
     return {
         "entity": entity
@@ -225,8 +225,6 @@ def resolve_edit_file_folder(_, info, input):
     entity.update_updated_at()
     entity.save()
 
-    resolve_scan_file(entity, clean_input)
-
     return {
         "entity": entity
     }
@@ -288,16 +286,11 @@ def resolve_update_file(entity, clean_input):
         entity.upload = clean_input.get("file")
         if entity.thumbnail.name:
             entity.thumbnail.delete()
-        if not config.PRESERVE_FILE_EXIF:
-            strip_exif(entity.upload)
+        entity.checksum = None
+        shared.scan_file(entity, delete_from_disk=True)
+        shared.post_upload_file(entity)
 
 
-def resolve_scan_file(entity, clean_input, delete_entity=False):
-    if clean_input.get('file') and not entity.scan():
-        if delete_entity:
-            entity.delete()
-        else:
-            entity.blocked = True
-            entity.block_reason = gettext("File contains virus")
-            entity.save()
-        raise GraphQLError(FILE_NOT_CLEAN.format(os.path.basename(entity.upload.name)))
+def assert_not_referenced(entity: FileFolder):
+    if entity.referenced_by.exclude_personal_references().count() > 0:
+        raise GraphQLError(FILE_HAS_REFERENCES)

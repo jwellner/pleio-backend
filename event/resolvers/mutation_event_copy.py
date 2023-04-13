@@ -1,12 +1,9 @@
-import json
-
-from core.models import Attachment
-from core.resolvers import shared
-from core.utils.entity import load_entity_by_id
-from core.utils.tiptap_parser import Tiptap
-from core.lib import get_access_id, clean_graphql_input, access_id_to_acl
 from django.utils.translation import ugettext as _
 from django.utils import timezone
+
+from core.resolvers import shared
+from core.utils.entity import load_entity_by_id
+from core.lib import get_access_id, clean_graphql_input, access_id_to_acl
 from event.models import Event
 
 
@@ -16,17 +13,6 @@ def copy_event(event_id, user, parent=None):
     entity = Event.objects.get(id=event_id)
 
     now = timezone.now()
-
-    attachments = Attachment.objects.filter(pk__in=[a for a in entity.lookup_attachments()])
-    for x in attachments:
-        attachment_copy = x.make_copy(user)
-        tiptap = Tiptap(entity.rich_description)
-        tiptap.replace_attachment(x.id, attachment_copy.id)
-        entity.rich_description = json.dumps(tiptap.tiptap_json)
-
-    if entity.featured_image:
-        featured = entity.featured_image
-        entity.featured_image = featured.make_copy(user)
 
     # preserve time of original event
     if entity.start_date:

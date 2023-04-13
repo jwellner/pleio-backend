@@ -51,3 +51,4 @@ pypandoc==1.9
 validators==0.20.0
 pywebpush==1.14.0
 pandas==1.5.3
+ipython==8.11.0

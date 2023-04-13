@@ -1,34 +1,21 @@
+from django.utils import timezone
 from django.utils.timezone import localtime
 
-from core.models.attachment import Attachment
-import json
-from core.models import Group
+from core.factories import GroupFactory
 from core.tests.helpers import PleioTenantTestCase
-from user.models import User
+from event.factories import EventFactory
 from event.models import Event
-from core.constances import ACCESS_TYPE
-from mixer.backend.django import mixer
-from django.utils import timezone
+from user.factories import UserFactory
 
 
 class AddEventTestCase(PleioTenantTestCase):
 
     def setUp(self):
         super().setUp()
-        self.authenticated_user = mixer.blend(User)
-        self.group = mixer.blend(Group, owner=self.authenticated_user, is_membership_on_request=False)
-        self.group.join(self.authenticated_user, 'owner')
-
-        self.eventPublic = mixer.blend(Event,
-                                       owner=self.authenticated_user,
-                                       read_access=[ACCESS_TYPE.public],
-                                       write_access=[ACCESS_TYPE.user.format(self.authenticated_user.id)])
-
-        self.eventGroupPublic = mixer.blend(Event,
-                                            owner=self.authenticated_user,
-                                            read_access=[ACCESS_TYPE.public],
-                                            write_access=[ACCESS_TYPE.user.format(self.authenticated_user.id)],
-                                            group=self.group)
+        self.authenticated_user = UserFactory()
+        self.group = GroupFactory(owner=self.authenticated_user, is_membership_on_request=False)
+        self.eventPublic = EventFactory(owner=self.authenticated_user)
+        self.eventGroupPublic = EventFactory(owner=self.authenticated_user, group=self.group)
 
         self.data = {
             "input": {
@@ -181,18 +168,17 @@ class AddEventTestCase(PleioTenantTestCase):
         self.assertEqual(self.eventGroupPublic.children.first().guid, entity["guid"])
 
     def test_add_event_with_attachment(self):
-        attachment = mixer.blend(Attachment)
+        attachment = self.file_factory(self.relative_path(__file__, ['assets', 'landscape.jpeg']))
 
         variables = self.data
-        variables["input"]["richDescription"] = json.dumps(
-            {'type': 'file', 'attrs': {'url': f"/attachment/entity/{attachment.id}"}})
+        variables["input"]["richDescription"] = self.tiptap_attachment(attachment)
 
         self.graphql_client.force_login(self.authenticated_user)
         result = self.graphql_client.post(self.mutation, variables)
 
         entity = result["data"]["addEntity"]["entity"]
         event = Event.objects.get(id=entity["guid"])
-        self.assertTrue(event.attachments.filter(id=attachment.id).exists())
+        self.assertTrue(event.attachments.filter(file_id=attachment.id).exists())
 
     def test_add_minimal_entity(self):
         variables = {

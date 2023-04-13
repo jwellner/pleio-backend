@@ -26,7 +26,6 @@ def export_avatars(schema, avatar_export_id):
             read_access=[ACCESS_TYPE.user.format(avatar_export.initiator.guid)],
             write_access=[ACCESS_TYPE.user.format(avatar_export.initiator.guid)],
         )
-
         avatar_export.status = 'ready'
         avatar_export.save()
 

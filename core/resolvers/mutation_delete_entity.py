@@ -5,6 +5,7 @@ from core.models import Entity, Group
 from file.models import FileFolder
 from core.resolvers.mutation_delete_comment import resolve_delete_comment
 from core.utils.cleanup import schedule_cleanup_group_content_featured_images
+from file.resolvers.mutation import assert_not_referenced
 
 
 def resolve_delete_entity(_, info, input):
@@ -27,8 +28,6 @@ def resolve_delete_entity(_, info, input):
         pass
 
     if not entity:
-        # TODO: update frontend to use deleteComment
-        # raise GraphQLError(COULD_NOT_FIND)
         return resolve_delete_comment(_, info, input)
 
     if not entity.can_write(user):
@@ -39,6 +38,8 @@ def resolve_delete_entity(_, info, input):
 
     if isinstance(entity, FileFolder):
         entity.update_updated_at() # update parent folder dates
+        if not input.get("force"):
+            assert_not_referenced(entity)
 
     entity.delete()
 

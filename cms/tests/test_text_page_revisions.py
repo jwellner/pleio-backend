@@ -1,5 +1,4 @@
 from cms.factories import TextPageFactory
-from core.lib import get_access_id
 from core.tests.helpers.revision_template import RevisionTemplate
 from user.factories import EditorFactory
 

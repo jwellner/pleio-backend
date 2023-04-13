@@ -95,5 +95,12 @@ class Widget(AttachmentMixin, models.Model):
             if setting['key'] == key:
                 return setting['value']
 
+    def get_read_access(self):
+        if self.group:
+            return self.group.get_read_access()
+        if self.page:
+            return self.page.get_read_access()
+        return []
+
 
 auditlog.register(Widget)

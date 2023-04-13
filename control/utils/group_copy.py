@@ -1,7 +1,5 @@
 from __future__ import absolute_import, unicode_literals
 
-import os.path
-
 import signal_disabler
 
 from celery.utils.log import get_task_logger
@@ -9,25 +7,24 @@ from django_tenants.utils import schema_context
 from django.utils import timezone
 from django.core.files.base import ContentFile
 
-from core.models import Attachment, Entity, CommentMixin, Comment, GroupMembership, Group, Subgroup
-from core.lib import ACCESS_TYPE, access_id_to_acl, get_access_id
+from core.models import Entity, CommentMixin, Comment, GroupMembership, Group, Subgroup, AttachmentMixin
+from core.lib import ACCESS_TYPE, access_id_to_acl, get_access_id, get_file_checksum
+from core.models.featured import FeaturedCoverMixin
 from core.models.rich_fields import ReplaceAttachments
 from file.models import FileFolder
 from tenants.models import GroupCopy, GroupCopyMapping
 from user.models import User
-from control import tasks
 
 logger = get_task_logger(__name__)
 
 
-def get_file_field_data(source_schema_name, file_field, file_name):
+def get_file_field_data(file_field, filename):
     file_data = None
-    with schema_context(source_schema_name):
-        try:
-            file_data = ContentFile(file_field.read())
-            file_data.name = file_name
-        except Exception:
-            pass
+    try:
+        file_data = ContentFile(file_field.read())
+        file_data.name = filename
+    except Exception as e:
+        logger.error(e)
     return file_data
 
 
@@ -38,6 +35,55 @@ class GroupCopyRunner:
         if state_id:
             self.state = GroupCopy.objects.get(id=state_id)
 
+    @staticmethod
+    def file_exists(pk, schema):
+        with schema_context(schema):
+            return FileFolder.objects.filter(pk=pk).exists()
+
+    def _copy_attachment(self, source_attachment_id, target_owner_id):
+        if self.file_exists(source_attachment_id, self.state.target_tenant):
+            return source_attachment_id
+
+        if not self.file_exists(source_attachment_id, self.state.source_tenant):
+            return None
+
+        with schema_context(self.state.source_tenant):
+            source_attachment = FileFolder.objects.get(id=source_attachment_id)
+            attachment_contents = get_file_field_data(source_attachment.upload, source_attachment.clean_filename())
+
+        with schema_context(self.state.target_tenant):
+            checksum = None
+            if source_attachment.is_image():
+                checksum = source_attachment.checksum or get_file_checksum(attachment_contents)
+
+            existing_attachment = None
+            if checksum:
+                existing_attachment = FileFolder.objects \
+                    .filter_attachments() \
+                    .filter(checksum=checksum,
+                            last_scan=source_attachment.last_scan,
+                            size=source_attachment.size) \
+                    .first()
+
+            if existing_attachment:
+                logger.info("used existing attachment %s", existing_attachment.guid)
+                return existing_attachment.guid
+
+            new_attachment = FileFolder()
+            new_attachment.upload = attachment_contents
+            new_attachment.group = None
+            new_attachment.owner_id = target_owner_id
+            new_attachment.last_scan = source_attachment.last_scan
+            new_attachment.last_download = source_attachment.last_download
+            new_attachment.blocked = source_attachment.blocked
+            new_attachment.block_reason = source_attachment.block_reason
+            new_attachment.write_access = [ACCESS_TYPE.user.format(target_owner_id)]
+            new_attachment.checksum = checksum
+            new_attachment.save()
+
+            logger.info("saved new attachment %s", str(new_attachment.id))
+            return new_attachment.guid
+
     def copy_file_data(self, source_file_id):
         """
         Used in seperate task because of possible heavy load
@@ -47,57 +93,27 @@ class GroupCopyRunner:
 
         if source_file.upload:
             mapping = self.state.mapping.filter(source_id=source_file_id, entity_type="FileFolder").first()
-            file_content = get_file_field_data(source_schema_name=self.state.source_tenant,
-                                               file_field=source_file.upload,
-                                               file_name=source_file.clean_filename())
+            with schema_context(self.state.source_tenant):
+                file_content = get_file_field_data(source_file.upload, source_file.clean_filename())
+
             with schema_context(self.state.target_tenant):
                 target_file = FileFolder.objects.get(id=mapping.target_id)
                 target_file.upload = file_content
                 target_file.save()
-
-    def copy_entity_file(self, target_entity, file_attribute):
-        """
-        Copy a file connected to an entity
-        """
-        with schema_context(self.state.source_tenant):
-            source_file = getattr(target_entity, file_attribute)
-
-        if source_file:
-            file_contents = get_file_field_data(source_schema_name=self.state.source_tenant,
-                                                file_field=source_file.upload,
-                                                file_name=source_file.clean_filename())
-
-            with schema_context(self.state.target_tenant):
-                target_file = FileFolder.objects.create(
-                    owner=target_entity.owner,
-                    upload=file_contents,
-                    read_access=[ACCESS_TYPE.public],
-                    write_access=[ACCESS_TYPE.user.format(target_entity.owner.id)]
-                )
-                setattr(target_entity, file_attribute, target_file)
 
     def copy_attachments(self, target_entity):
         """
         Copy entity attachments and replace rich_field links
         """
         with schema_context(self.state.source_tenant):
-            # make it a list so it get looked up within context
-            attachments = list(Attachment.objects.filter(pk__in=[*target_entity.lookup_attachments()]))
+            attachment_ids = target_entity.lookup_attachments()
 
         attachment_map = ReplaceAttachments()
-        for attachment in attachments:
-            attachment_contents = get_file_field_data(source_schema_name=self.state.source_tenant,
-                                                      file_field=attachment.upload,
-                                                      file_name=os.path.basename(attachment.name))
+        for attachment_id in attachment_ids:
+            new_attachment_id = self._copy_attachment(attachment_id, target_entity.owner.guid)
 
-            with schema_context(self.state.target_tenant):
-                new_attachment = Attachment()
-                new_attachment.upload = attachment_contents
-                new_attachment.owner = target_entity.owner
-                new_attachment.save()
-                logger.info("saved new attachemnt %s", str(new_attachment.id))
-
-            attachment_map.append(str(attachment.id), str(new_attachment.id))
+            if attachment_id != new_attachment_id:
+                attachment_map.append(str(attachment_id), new_attachment_id)
 
         if hasattr(target_entity, 'replace_attachments'):
             target_entity.replace_attachments(attachment_map)
@@ -166,8 +182,10 @@ class GroupCopyRunner:
             target_group.is_featured = False
             target_group.is_auto_membership_enabled = False
 
-            self.copy_entity_file(target_group, "featured_image")
-            self.copy_entity_file(target_group, "icon")
+            if group.featured_image_id:
+                target_group.featured_image_id = self._copy_attachment(group.featured_image_id, target_group.owner.guid)
+            if group.icon_id:
+                target_group.icon_id = self._copy_attachment(group.icon_id, target_group.owner.guid)
 
             target_group.pk = None
             target_group.id = None
@@ -279,10 +297,10 @@ class GroupCopyRunner:
                     target_entity.write_access = access_id_to_acl(target_entity, self.transform_acl_to_access_id(target_entity.write_access))
 
                     # specific entity type stuff
-                    if target_entity.__class__.__name__ in ["Blog", "Wiki", "Event"]:
-                        self.copy_entity_file(target_entity, "featured_image")
+                    if isinstance(target_entity, (FeaturedCoverMixin,)) and target_entity.featured_image_id:
+                        target_entity.featured_image_id = self._copy_attachment(target_entity.featured_image_id, target_entity.owner.guid)
 
-                    if target_entity.__class__.__name__ in ["Blog", "StatusUpdate", "Task", "Wiki", "Event"]:
+                    if isinstance(target_entity, (AttachmentMixin,)):
                         self.copy_attachments(target_entity)
 
                     if target_entity.__class__.__name__ in ["FileFolder", "Wiki", "Event"]:
@@ -323,7 +341,8 @@ class GroupCopyRunner:
 
                     if target_entity.__class__.__name__ in ["FileFolder"]:
                         # start file copy in seperate process
-                        tasks.copy_file_from_source_tenant.delay(self.state.id, source_entity_id)
+                        from control.tasks import copy_file_from_source_tenant
+                        copy_file_from_source_tenant.delay(self.state.id, source_entity_id)
 
                     if parent_source_id:
                         connect_parent.append({'entity_id': target_entity.id, 'parent_source_id': parent_source_id})

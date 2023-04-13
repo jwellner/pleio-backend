@@ -1,7 +1,7 @@
 from django.core.files import File
 from django.conf import settings
-from core.models import Attachment
 from core.tests.helpers import PleioTenantTestCase
+from file.models import FileFolder
 from user.factories import UserFactory
 from unittest.mock import MagicMock, patch
 
@@ -46,8 +46,8 @@ class AddAttachmentTestCase(PleioTenantTestCase):
         with self.assertGraphQlError('not_logged_in'):
             self.graphql_client.post(self.mutation, variables)
 
-    @patch("core.models.Attachment.scan")
-    @patch("core.models.attachment.strip_exif")
+    @patch("file.models.FileFolder.scan")
+    @patch("core.resolvers.shared.strip_exif")
     @patch("core.lib.get_mimetype")
     @patch("{}.open".format(settings.DEFAULT_FILE_STORAGE))
     def test_add_attachment(self, mock_open, mock_mimetype, mocked_strip_exif, mocked_scan):
@@ -68,9 +68,9 @@ class AddAttachmentTestCase(PleioTenantTestCase):
         result = self.graphql_client.post(self.mutation, variables)
 
         data = result["data"]
-        attachment = Attachment.objects.get(id=data["addAttachment"]["attachment"]["id"])
+        attachment = FileFolder.objects.get(id=data["addAttachment"]["attachment"]["id"])
         self.assertEqual(data["addAttachment"]["attachment"]["id"], str(attachment.id))
-        self.assertEqual(data["addAttachment"]["attachment"]["url"], attachment.url)
+        self.assertEqual(data["addAttachment"]["attachment"]["url"], attachment.attachment_url)
         self.assertEqual(data["addAttachment"]["attachment"]["mimeType"], attachment.mime_type)
         self.assertEqual(data["addAttachment"]["attachment"]["name"], file_mock.name)
         self.assertTrue(mocked_strip_exif.called)

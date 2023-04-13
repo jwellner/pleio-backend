@@ -10,18 +10,12 @@ from django.utils.text import slugify
 from django.core.files.base import ContentFile
 from django.urls import reverse
 
-from core.lib import get_mimetype, strip_exif, get_basename, tenant_schema
+from core.lib import get_mimetype, strip_exif, get_basename
 from core.models.mixin import ModelWithFile, HasMediaMixin
 from core.models.image import ResizedImageMixin
 from core.utils import clamav
 
 logger = logging.getLogger(__name__)
-
-
-class AttachmentQuerySet(models.QuerySet):
-    def filter_attached(self, obj):
-        return self.filter(attached_object_id=obj.id,
-                           attached_content_type=ContentType.objects.get_for_model(obj).pk)
 
 
 def attachment_path(instance, filename):
@@ -32,8 +26,6 @@ def attachment_path(instance, filename):
 
 
 class Attachment(ModelWithFile, ResizedImageMixin, HasMediaMixin):
-    objects = AttachmentQuerySet.as_manager()
-
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     name = models.CharField(max_length=256, default="")
     upload = models.FileField(upload_to=attachment_path, blank=True, null=True, max_length=512)
@@ -53,7 +45,7 @@ class Attachment(ModelWithFile, ResizedImageMixin, HasMediaMixin):
     def save(self, *args, **kwargs):
         created = self._state.adding
         self.update_metadata()
-        super(Attachment, self).save(*args, **kwargs)
+        super().save(*args, **kwargs)
         self.strip_exif_on_add(created)
 
     def scan(self):

@@ -5,7 +5,7 @@ from io import BytesIO
 
 from django.utils import timezone
 
-from core.models import Entity, Attachment
+from core.models import Entity
 from core.models.mixin import HasMediaMixin
 
 logger = logging.getLogger(__name__)
@@ -19,6 +19,7 @@ class ContentSnapshot:
         self.user = User.objects.get(id=user_guid)
 
     def collect_content(self):
+        from file.models import FileReference
         buffer = BytesIO()
         zip_file = zipfile.ZipFile(buffer, mode='w', compression=zipfile.ZIP_DEFLATED)
         query = Entity.objects.filter(owner=self.user.guid)
@@ -32,7 +33,8 @@ class ContentSnapshot:
                     entity.get_media_content(),
                 )
                 has_files = True
-            for attachment in Attachment.objects.filter_attached(entity):
+            for reference in FileReference.objects.filter(container_fk=entity.id):
+                attachment = reference.file
                 if attachment.get_media_status():
                     zip_file.writestr(
                         os.path.join(folder, attachment.get_media_filename()),

@@ -1,7 +1,7 @@
 from django.core.files.base import ContentFile
 
 from blog.factories import BlogFactory
-from core.factories import GroupFactory, AttachmentFactory
+from core.factories import GroupFactory
 from core.tests.helpers import PleioTenantTestCase
 from core.models import Group
 from file.factories import FileFactory
@@ -195,41 +195,42 @@ class TestGroupDiskSize(PleioTenantTestCase):
 
         self.owner = UserFactory()
         self.group1 = GroupFactory(owner=self.owner)
-        self.blog1 = BlogFactory(owner=self.owner, group=self.group1)
-        self.file1 = FileFactory(
-            owner=self.owner,
-            upload=ContentFile(self.ONE_CONTENT, "Test1.txt"),
-            group=self.group1)
-        self.file2 = FileFactory(
-            owner=self.owner,
-            upload=ContentFile(self.TWO_CONTENT, "Test2.txt"),
-            group=self.group1)
-        self.attachment3 = AttachmentFactory(
-            attached=self.blog1,
-            upload=ContentFile(self.THREE_CONTENT, "Test3.txt"))
 
-        self.group2 = GroupFactory(owner=self.owner)
+        self.file1 = FileFactory(owner=self.owner,
+                                 upload=ContentFile(self.ONE_CONTENT, "Test1.txt"),
+                                 group=self.group1)
+        self.file2 = FileFactory(owner=self.owner,
+                                 upload=ContentFile(self.TWO_CONTENT, "Test2.txt"),
+                                 group=self.group1)
+        self.file3 = FileFactory(owner=self.owner,
+                                 upload=ContentFile(self.THREE_CONTENT, "Test3.txt"))
+
+        self.blog1 = BlogFactory(owner=self.owner, group=self.group1,
+                                 rich_description=self.tiptap_attachment(self.file3))
+
         self.file4 = FileFactory(
             owner=self.owner,
-            upload=ContentFile(self.FIVE_CONTENT, "Test4.txt"),
-            group=self.group2)
-        self.file5 = FileFactory(
-            owner=self.owner,
-            upload=ContentFile(self.SEVEN_CONTENT, "Test5.txt"),
-            group=self.group2)
-        self.attachment6 = AttachmentFactory(
-            attached=self.group2,
             upload=ContentFile(self.ELEVEN_CONTENT, "Test6.txt"))
+
+        self.group2 = GroupFactory(owner=self.owner,
+                                   featured_image=self.file4)
+
+        self.file5 = FileFactory(owner=self.owner,
+                                 upload=ContentFile(self.FIVE_CONTENT, "Test4.txt"),
+                                 group=self.group2)
+        self.file6 = FileFactory(owner=self.owner,
+                                 upload=ContentFile(self.SEVEN_CONTENT, "Test5.txt"),
+                                 group=self.group2)
 
         self.group3 = GroupFactory(owner=self.owner)
 
     def tearDown(self):
-        self.attachment6.delete()
+        self.file6.delete()
         self.file5.delete()
-        self.file4.delete()
         self.group2.delete()
+        self.file4.delete()
 
-        self.attachment3.delete()
+        self.file3.delete()
         self.file2.delete()
         self.file1.delete()
         self.group1.delete()

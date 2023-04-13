@@ -26,6 +26,7 @@ class EditFileFolderTestCase(PleioTenantTestCase):
         self.group.join(self.user1, 'member')
 
         self.folder1 = FileFolder.objects.create(
+            title="Folder 1 (L1)",
             owner=self.authenticatedUser,
             rich_description=self.PREVIOUS_DESCRIPTION,
             upload=None,
@@ -36,6 +37,7 @@ class EditFileFolderTestCase(PleioTenantTestCase):
             write_access=[ACCESS_TYPE.user.format(self.authenticatedUser.id)]
         )
         self.folder2 = FileFolder.objects.create(
+            title="Folder 2 (L1.1)",
             owner=self.authenticatedUser,
             rich_description=self.PREVIOUS_DESCRIPTION,
             upload=None,
@@ -46,6 +48,7 @@ class EditFileFolderTestCase(PleioTenantTestCase):
             write_access=[ACCESS_TYPE.user.format(self.authenticatedUser.id)]
         )
         self.folder3 = FileFolder.objects.create(
+            title="Folder 3 (L2)",
             owner=self.user1,
             rich_description=self.PREVIOUS_DESCRIPTION,
             upload=None,
@@ -57,6 +60,7 @@ class EditFileFolderTestCase(PleioTenantTestCase):
         )
 
         self.file2 = FileFolder.objects.create(
+            title="File 2 in folder 3",
             owner=self.authenticatedUser,
             rich_description=self.PREVIOUS_DESCRIPTION,
             upload=None,
@@ -67,24 +71,24 @@ class EditFileFolderTestCase(PleioTenantTestCase):
             write_access=[ACCESS_TYPE.user.format(self.authenticatedUser.id)]
         )
         self.file3 = FileFolder.objects.create(
+            title="File 3 in folder 2",
             owner=self.authenticatedUser,
             rich_description=self.PREVIOUS_DESCRIPTION,
             upload=None,
             type=FileFolder.Types.FILE,
             group=self.group,
             parent=self.folder2,
-            title="a file",
             read_access=[ACCESS_TYPE.public],
             write_access=[ACCESS_TYPE.user.format(self.authenticatedUser.id)]
         )
         self.file4 = FileFolder.objects.create(
+            title="File 4 in folder 2",
             owner=self.authenticatedUser,
             rich_description=self.PREVIOUS_DESCRIPTION,
             upload=None,
             type=FileFolder.Types.FILE,
             group=self.group,
             parent=self.folder2,
-            title="b file",
             read_access=[ACCESS_TYPE.public],
             write_access=[ACCESS_TYPE.user.format(self.authenticatedUser.id)]
         )
@@ -94,7 +98,7 @@ class EditFileFolderTestCase(PleioTenantTestCase):
             type=FileFolder.Types.FILE,
             group=self.group,
             parent=self.folder1,
-            title="Someone Elses file",
+            title="File 5 in folder 2 - Someone Elses file",
             read_access=[ACCESS_TYPE.public],
             write_access=[ACCESS_TYPE.user.format(self.user2.id)]
         )
@@ -229,23 +233,19 @@ class EditFileFolderTestCase(PleioTenantTestCase):
     def test_edit_folder_access_ids_recursive(self):
         mutation = """
             mutation editFileFolder($input: editFileFolderInput!) {
-            editFileFolder(input: $input) {
-                entity {
-                guid
-                ... on File {
-                    accessId
-                    writeAccessId
-                    __typename
+                editFileFolder(input: $input) {
+                    entity {
+                        guid
+                        ... on File {
+                            accessId
+                            writeAccessId
+                        }
+                        ... on Folder {
+                            accessId
+                            writeAccessId
+                        }
+                    }
                 }
-                ... on Folder {
-                    accessId
-                    writeAccessId
-                    __typename
-                }
-                __typename
-                }
-                __typename
-            }
             }
         """
         variables = {
@@ -262,7 +262,6 @@ class EditFileFolderTestCase(PleioTenantTestCase):
 
         entity = result["data"]["editFileFolder"]["entity"]
         self.assertEqual(entity["guid"], self.folder1.guid)
-        self.assertEqual(entity["__typename"], "Folder")
 
         query = """
             query OpenFolder($guid: String, $typeFilter: [String]) {
@@ -278,7 +277,6 @@ class EditFileFolderTestCase(PleioTenantTestCase):
                             accessId
                             writeAccessId
                             mimeType
-                            __typename
                         }
                         ... on Folder {
                             hasChildren
@@ -287,11 +285,8 @@ class EditFileFolderTestCase(PleioTenantTestCase):
                             url
                             accessId
                             writeAccessId
-                            __typename
                         }
-                    __typename
                     }
-                    __typename
                 }
             }
         """
@@ -325,23 +320,19 @@ class EditFileFolderTestCase(PleioTenantTestCase):
     def test_edit_folder_access_id_recursive(self):
         mutation = """
             mutation editFileFolder($input: editFileFolderInput!) {
-            editFileFolder(input: $input) {
-                entity {
-                guid
-                ... on File {
-                    accessId
-                    writeAccessId
-                    __typename
+                editFileFolder(input: $input) {
+                    entity {
+                        guid
+                        ... on File {
+                            accessId
+                            writeAccessId
+                        }
+                        ... on Folder {
+                            accessId
+                            writeAccessId
+                        }
+                    }
                 }
-                ... on Folder {
-                    accessId
-                    writeAccessId
-                    __typename
-                }
-                __typename
-                }
-                __typename
-            }
             }
         """
 
@@ -358,7 +349,6 @@ class EditFileFolderTestCase(PleioTenantTestCase):
 
         entity = result["data"]["editFileFolder"]["entity"]
         self.assertEqual(entity["guid"], self.folder1.guid)
-        self.assertEqual(entity["__typename"], "Folder")
 
         query = """
             query OpenFolder($guid: String, $typeFilter: [String]) {
@@ -373,7 +363,6 @@ class EditFileFolderTestCase(PleioTenantTestCase):
                             accessId
                             writeAccessId
                             mimeType
-                            __typename
                         }
                         ... on Folder {
                             hasChildren
@@ -383,11 +372,8 @@ class EditFileFolderTestCase(PleioTenantTestCase):
                             accessId
                             writeAccessId
                             mimeType
-                            __typename
                         }
-                    __typename
                     }
-                    __typename
                 }
             }
         """
@@ -419,23 +405,21 @@ class EditFileFolderTestCase(PleioTenantTestCase):
     def test_edit_folder_write_access_id_recursive(self):
         mutation = """
             mutation editFileFolder($input: editFileFolderInput!) {
-            editFileFolder(input: $input) {
-                entity {
-                guid
-                ... on File {
-                    accessId
-                    writeAccessId
-                    __typename
+                editFileFolder(input: $input) {
+                    entity {
+                        guid
+                        ... on File {
+                            title
+                            accessId
+                            writeAccessId
+                        }
+                        ... on Folder {
+                            title
+                            accessId
+                            writeAccessId
+                        }
+                    }
                 }
-                ... on Folder {
-                    accessId
-                    writeAccessId
-                    __typename
-                }
-                __typename
-                }
-                __typename
-            }
             }
         """
         variables = {
@@ -451,7 +435,6 @@ class EditFileFolderTestCase(PleioTenantTestCase):
 
         entity = result["data"]["editFileFolder"]["entity"]
         self.assertEqual(entity["guid"], self.folder1.guid)
-        self.assertEqual(entity["__typename"], "Folder")
 
         query = """
             query OpenFolder($guid: String, $typeFilter: [String]) {
@@ -466,7 +449,6 @@ class EditFileFolderTestCase(PleioTenantTestCase):
                             accessId
                             writeAccessId
                             mimeType
-                            __typename
                         }
                         ... on Folder {
                             hasChildren
@@ -476,11 +458,8 @@ class EditFileFolderTestCase(PleioTenantTestCase):
                             accessId
                             writeAccessId
                             mimeType
-                            __typename
                         }
-                    __typename
                     }
-                    __typename
                 }
             }
         """
@@ -512,23 +491,19 @@ class EditFileFolderTestCase(PleioTenantTestCase):
     def test_edit_folder_access_ids_not_recursive(self):
         mutation = """
             mutation editFileFolder($input: editFileFolderInput!) {
-            editFileFolder(input: $input) {
-                entity {
-                guid
-                ... on File {
-                    accessId
-                    writeAccessId
-                    __typename
+                editFileFolder(input: $input) {
+                    entity {
+                        guid
+                        ... on File {
+                            accessId
+                            writeAccessId
+                        }
+                        ... on Folder {
+                            accessId
+                            writeAccessId
+                        }
+                    }
                 }
-                ... on Folder {
-                    accessId
-                    writeAccessId
-                    __typename
-                }
-                __typename
-                }
-                __typename
-            }
             }
         """
 
@@ -545,7 +520,6 @@ class EditFileFolderTestCase(PleioTenantTestCase):
 
         entity = result["data"]["editFileFolder"]["entity"]
         self.assertEqual(entity["guid"], self.folder1.guid)
-        self.assertEqual(entity["__typename"], "Folder")
 
         query = """
             query OpenFolder($guid: String, $typeFilter: [String]) {
@@ -560,7 +534,6 @@ class EditFileFolderTestCase(PleioTenantTestCase):
                             accessId
                             writeAccessId
                             mimeType
-                            __typename
                         }
                         ... on Folder {
                             hasChildren
@@ -569,11 +542,8 @@ class EditFileFolderTestCase(PleioTenantTestCase):
                             url
                             accessId
                             writeAccessId
-                            __typename
                         }
-                    __typename
                     }
-                    __typename
                 }
             }
         """
@@ -605,23 +575,19 @@ class EditFileFolderTestCase(PleioTenantTestCase):
     def test_edit_folder_access_ids_recursive_no_read_access_file(self):
         mutation = """
             mutation editFileFolder($input: editFileFolderInput!) {
-            editFileFolder(input: $input) {
-                entity {
-                guid
-                ... on File {
-                    accessId
-                    writeAccessId
-                    __typename
+                editFileFolder(input: $input) {
+                    entity {
+                        guid
+                        ... on File {
+                            accessId
+                            writeAccessId
+                        }
+                        ... on Folder {
+                            accessId
+                            writeAccessId
+                        }
+                    }
                 }
-                ... on Folder {
-                    accessId
-                    writeAccessId
-                    __typename
-                }
-                __typename
-                }
-                __typename
-            }
             }
         """
         variables = {
@@ -638,7 +604,6 @@ class EditFileFolderTestCase(PleioTenantTestCase):
 
         entity = result["data"]["editFileFolder"]["entity"]
         self.assertEqual(entity["guid"], self.folder3.guid)
-        self.assertEqual(entity["__typename"], "Folder")
 
         query = """
             query OpenFolder($guid: String, $typeFilter: [String]) {
@@ -653,7 +618,6 @@ class EditFileFolderTestCase(PleioTenantTestCase):
                             accessId
                             writeAccessId
                             mimeType
-                            __typename
                         }
                         ... on Folder {
                             hasChildren
@@ -662,11 +626,8 @@ class EditFileFolderTestCase(PleioTenantTestCase):
                             url
                             accessId
                             writeAccessId
-                            __typename
                         }
-                    __typename
                     }
-                    __typename
                 }
             }
         """

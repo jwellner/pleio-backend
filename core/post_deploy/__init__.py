@@ -11,7 +11,7 @@ from post_deploy import post_deploy_action
 from core.lib import tenant_schema, is_schema_public, get_full_url
 from notifications.models import Notification
 
-from .migrate_rows_cols_widgets import deploy_action as migrate_rows_cols_widgets
+from .translate_attachment_to_filefolder import task as translate_attachment_to_filefolder_task
 
 logger = get_task_logger(__name__)
 
@@ -94,7 +94,7 @@ def entity_updated_at_from_report():
 
     if not os.path.isfile(report_file_path):
         logger.error("%s does not exist for tenant %s", report_file_path, tenant_schema())
-        return 
+        return
 
     df = pd.read_csv(report_file_path, delimiter=';')
     df["updated_at"] = pd.to_datetime(df["updated_at"])

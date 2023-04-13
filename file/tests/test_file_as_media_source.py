@@ -28,6 +28,10 @@ class TestUploadAsMediaSource(Template.MediaTestCase):
     EXTENSION = '.xyz'
     CONTENT = b'Binary content expected'
 
+    def setUp(self):
+        super().setUp()
+        self.expected_filename = "%s/%s%s" % (self.entity.guid, self.TITLE, self.EXTENSION)
+
     def entity_factory(self):
         return FileFactory(owner=self.owner,
                            title=self.TITLE,

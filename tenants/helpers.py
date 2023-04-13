@@ -26,3 +26,11 @@ class FastTenantTestCase(BaseFastTenantTestCase):
         path = os.path.join(f"%s/%s" % (settings.MEDIA_ROOT, connection.schema_name), folder)
         os.makedirs(path, exist_ok=True)
         return path
+
+
+def switch_schema(schema_name):
+    from django.db import connections
+    from django_tenants.utils import get_tenant_database_alias
+    tenant = Client.objects.get(schema_name=schema_name)
+    connection = connections[get_tenant_database_alias()]
+    connection.set_tenant(tenant)

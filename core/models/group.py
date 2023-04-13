@@ -11,7 +11,7 @@ from django.db.models import Q
 from django.utils.text import slugify
 from django.utils import timezone
 
-from core.lib import ACCESS_TYPE
+from core.lib import ACCESS_TYPE, get_access_ids, access_id_to_acl
 from core.constances import USER_ROLES
 from core.models.featured import FeaturedCoverMixin
 from core.utils.convert import tiptap_to_text
@@ -243,6 +243,8 @@ class Group(TagsModel, FeaturedCoverMixin, AttachmentMixin):
         yield from super().lookup_attachments()
         for widget in self.widget_repository or []:
             yield from WidgetSerializer(widget).attachments()
+        if self.icon:
+            yield self.icon.guid
 
     def replace_attachments(self, attachment_map: ReplaceAttachments):
         super().replace_attachments(attachment_map)
@@ -283,20 +285,22 @@ class Group(TagsModel, FeaturedCoverMixin, AttachmentMixin):
         return tiptap_to_text(self.rich_description)
 
     def disk_size(self):
-        from file.models import FileFolder
-        from core.models import Attachment, Entity
+        from file.models import FileFolder, FileReference
+        from core.models import Entity
 
         file_folder_size = 0
         attachment_size = 0
 
-        f = FileFolder.objects.filter(type=FileFolder.Types.FILE,
-                                      group=self.id).aggregate(total_size=models.Sum('size'))
+        ids = FileFolder.objects.filter_files().filter(group=self.id).values_list('id', flat=True)
+        f = FileFolder.objects.filter(id__in=ids).aggregate(total_size=models.Sum('size'))
         if f.get('total_size', 0):
             file_folder_size = f.get('total_size', 0)
 
-        ids = [id for id in Entity.objects.filter(group_id=self.id).values_list('pk', flat=True) or []]
-        ids.append(self.guid)
-        e = Attachment.objects.filter(attached_object_id__in=ids).aggregate(total_size=models.Sum('size'))
+        entities = Entity.objects.filter(group=self).values_list('id', flat=True)
+        e = FileReference.objects \
+            .filter(container_fk__in=[*entities, self.id]) \
+            .exclude(file__id__in=ids) \
+            .aggregate(total_size=models.Sum('file__size'))
         if e.get('total_size', 0):
             attachment_size = e.get('total_size', 0)
 
@@ -328,6 +332,12 @@ class Group(TagsModel, FeaturedCoverMixin, AttachmentMixin):
             'tags': sorted(self.tags),
             'tagCategories': self.category_tags,
         }
+
+    def get_read_access(self):
+        result = set()
+        for acid in get_access_ids(self):
+            result.update(access_id_to_acl(self, acid['id']))
+        return [*result]
 
 
 class GroupMembership(models.Model):

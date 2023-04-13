@@ -15,7 +15,6 @@ from poll.models import Poll
 from question.models import Question
 from task.models import Task
 from user.factories import UserFactory, AdminFactory
-from user.models import User
 from wiki.models import Wiki
 
 

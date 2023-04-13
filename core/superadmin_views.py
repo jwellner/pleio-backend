@@ -20,7 +20,7 @@ from celery.result import AsyncResult
 from core.constances import OIDC_PROVIDER_OPTIONS
 from core.elasticsearch import elasticsearch_status_report
 from core.forms import MeetingsSettingsForm, ProfileSetForm
-from core.models import Group, ProfileSet, Attachment
+from core.models import Group, ProfileSet
 from core.models.agreement import CustomAgreement
 from core.tasks import replace_domain_links, elasticsearch_rebuild_for_tenant, elasticsearch_index_data_for_tenant
 from core.lib import tenant_schema, is_valid_domain
@@ -98,10 +98,7 @@ class ScanLog(SuperAdminView):
             'form': form,
             'first_scanned_file': FileFolder.objects.order_by('last_scan').first(),
             'last_scanned_file': FileFolder.objects.order_by('-last_scan').first(),
-            'total_files': FileFolder.objects.count(),
-            'first_scanned_attachment': Attachment.objects.order_by('last_scan').first(),
-            'last_scanned_attachment': Attachment.objects.order_by('-last_scan').first(),
-            'total_attachments': Attachment.objects.count(),
+            'total_files': FileFolder.objects.count()
         }
 
         return render(request, 'superadmin/scanlog.html', context)

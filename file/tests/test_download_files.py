@@ -74,7 +74,6 @@ class DownloadFiles(FastTenantTestCase):
         )
 
     def test_bulk_download(self):
-
         path = '/bulk_download?folder_guids[]=' + str(self.folder1.id) + '&folder_guids[]=' + str(self.folder2.id) + '&file_guids[]=' + str(self.file.id)
         self.client.force_login(self.authenticatedUser)
         response = self.client.get(path)
@@ -88,10 +87,9 @@ class DownloadFiles(FastTenantTestCase):
             self.assertEqual(names[1], 'folder1/test.csv')
             self.assertEqual(names[2], 'folder2/test.csv')
             self.file.refresh_from_db()
-            self.assertIsNotNone(self.file.last_download)            
+            self.assertIsNotNone(self.file.last_download)
 
     def test_bulk_download_anonymous(self):
-
         path = '/bulk_download?folder_guids[]=' + str(self.folder1.id) + '&folder_guids[]=' + str(self.folder2.id)
         response = self.client.get(path)
 

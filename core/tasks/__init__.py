@@ -2,7 +2,7 @@ from .cronjobs import (dispatch_hourly_cron, dispatch_daily_cron, dispatch_weekl
                        dispatch_task, send_notifications, send_overview,
                        save_db_disk_usage, save_file_disk_usage,
                        ban_users_that_bounce, ban_users_with_no_account,
-                       remove_floating_attachments, resize_pending_images,
+                       resize_pending_images,
                        cleanup_auditlog, depublicate_content)
 from .elasticsearch_tasks import (elasticsearch_recreate_indices,
                                   elasticsearch_rebuild_all,
@@ -17,4 +17,3 @@ from .notification_tasks import create_notifications_for_scheduled_content, crea
 from .cleanup_tasks import do_cleanup_featured_image_files
 from .migrate_tags import migrate_tags, revert_tags
 from .exports import export_avatars
-from .clamav import scan_attachment

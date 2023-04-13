@@ -421,10 +421,12 @@ class ProfileSyncApiTests(FastTenantTestCase):
         self.assertEqual(response.json(), json_response)
 
     @patch("{}.open".format(settings.DEFAULT_FILE_STORAGE))
-    def test_change_avatar(self, mock_open):
+    @patch("file.models.FileFolder.scan")
+    def test_change_avatar(self, mock_scan, mock_open):
         file_mock = MagicMock(spec=File)
         file_mock.name = 'test.gif'
         file_mock.content_type = 'image/gif'
+        mock_scan.return_value = True
 
         mock_open.return_value = file_mock
 
@@ -453,6 +455,7 @@ class ProfileSyncApiTests(FastTenantTestCase):
 
         self.assertEqual(response.json(), json_response)
         self.assertIn('test.gif', self.user3.profile.picture_file.upload.name)
+        self.assertTrue(mock_scan.called)
 
     def test_change_avatar_non_existing_user(self):
         response = self.client.post('/profile_sync_api/users/' + str(uuid.uuid1()) + '/avatar',
