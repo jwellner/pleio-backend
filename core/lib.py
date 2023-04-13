@@ -84,6 +84,7 @@ def access_id_to_acl(obj, access_id):
     4: Group
     10000+: Subgroup
     """
+    from core.models import Group
     if "type_to_string" in dir(obj) and obj.type_to_string and obj.type_to_string == 'user':
         acl = [ACCESS_TYPE.user.format(obj.id)]
     else:
@@ -104,8 +105,10 @@ def access_id_to_acl(obj, access_id):
         acl.append(ACCESS_TYPE.logged_in)
     elif access_id == 2 and not in_closed_group:
         acl.append(ACCESS_TYPE.public)
-    elif access_id == 4 and obj.group:
+    elif access_id == 4 and hasattr(obj, 'group') and obj.group:
         acl.append(ACCESS_TYPE.group.format(obj.group.id))
+    elif access_id == 4 and isinstance(obj, (Group,)):
+        acl.append(ACCESS_TYPE.group.format(obj.id))
     elif access_id and access_id >= 10000 and obj.group:
         acl.append(ACCESS_TYPE.subgroup.format(access_id))
     return acl
@@ -422,13 +425,13 @@ def html_to_text(html):
 
 
 def replace_html_img_src(html, user, file_type):
-    from core.models import Attachment
+    from file.models import FileFolder
 
     def get_img_src(path, user):
         if file_type in ['odt']:
             try:
                 attachment_id = path.split('/')[2]
-                attachment = Attachment.objects.get(id=attachment_id)
+                attachment = FileFolder.objects.get(id=attachment_id)
                 if attachment.can_read(user):
                     path = attachment.upload.path
             except Exception:
@@ -550,6 +553,14 @@ def get_model_name(instance):
     return instance._meta.app_label + '.' + instance._meta.model_name
 
 
+def get_file_checksum(fh):
+    try:
+        from hashlib import md5
+        return md5(fh.read()).hexdigest()
+    except Exception:
+        pass
+
+
 def is_valid_uuid(val):
     try:
         uuid.UUID(str(val))
@@ -635,3 +646,9 @@ def get_page_tag_filters():
             yield stored_settings[setting['contentType']]
         else:
             yield setting
+
+
+def task_status(task_id):
+    from celery.result import AsyncResult
+    result = AsyncResult(task_id)
+    print(result.status)

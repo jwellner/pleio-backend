@@ -14,6 +14,10 @@ class Revision(models.Model):
 
     _container = models.ForeignKey(Entity, on_delete=models.CASCADE)
 
+    def __init__(self, *args, **kwargs):
+        self.original = {}
+        super().__init__(*args, **kwargs)
+
     @property
     def container(self):
         return load_entity_by_id(self._container.id, [Entity])
@@ -27,16 +31,32 @@ class Revision(models.Model):
     unchanged = models.JSONField(default=dict)
     created_at = models.DateTimeField(default=timezone.now)
     is_update = models.BooleanField(default=False)
+    attachments = models.JSONField(default=list)
 
-    original = {}
+    def lookup_attachments(self):
+        return self.attachments
+
+    def _load_attachments(self, container):
+        if not hasattr(container, 'lookup_attachments'):
+            self.attachments = []
+        else:
+            self.attachments = [str(id) for id in container.lookup_attachments()]
+
+    def _filter_unique_attachments(self, container):
+        if not hasattr(container, 'lookup_attachments'):
+            return
+        combined_attachments = {*self.attachments, *[str(id) for id in container.lookup_attachments()]}
+        self.attachments = [*combined_attachments]
 
     def start_tracking_changes(self, container):
+        self._load_attachments(container)
         self.original = container.serialize()
 
     def store_initial_version(self, container):
         self._container = container
         self.author = container.owner
         self.content = container.serialize()
+        self._load_attachments(container)
         self.save()
 
     def store_update_revision(self, container):
@@ -49,16 +69,18 @@ class Revision(models.Model):
                 self.content[key] = value
                 self.previous_content[key] = self.original[key]
         self.is_update = True
+        self._filter_unique_attachments(container)
         self.save()
 
     def store_publication_revision(self, container, previous_status):
         self.original['statusPublished'] = previous_status
         self.store_update_revision(container)
 
-    @property
-    def rich_fields(self):
-        if 'richDescription' in self.content:
-            yield self.content['richDescription']
+    def serialize_previous_version(self):
+        return {
+            **self.unchanged,
+            **self.previous_content,
+        }
 
     @property
     def guid(self):

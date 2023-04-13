@@ -1,7 +1,7 @@
-import json
+from django.core.files.base import ContentFile
 from django.utils import timezone
 from core.tests.helpers import PleioTenantTestCase
-from core.models.attachment import Attachment
+from file.factories import FileFactory
 from news.models import News
 from user.models import User
 from core.constances import USER_ROLES
@@ -18,6 +18,8 @@ class AddNewsTestCase(PleioTenantTestCase):
         self.editorUser = mixer.blend(User, roles=[USER_ROLES.EDITOR])
         self.relatedNews1 = mixer.blend(News)
         self.relatedNews2 = mixer.blend(News)
+        self.attachment = FileFactory(owner=self.authenticatedUser,
+                                      upload=ContentFile("Content!\n", name="some-file.txt"))
 
         self.data = {
             "input": {
@@ -72,6 +74,15 @@ class AddNewsTestCase(PleioTenantTestCase):
             }
         """
 
+    def tearDown(self):
+        self.attachment.delete()
+        self.relatedNews1.delete()
+        self.relatedNews2.delete()
+        self.editorUser.delete()
+        self.adminUser.delete()
+        self.authenticatedUser.delete()
+        super().tearDown()
+
     def test_add_news(self):
         with self.assertGraphQlError("could_not_add"):
             self.graphql_client.force_login(self.authenticatedUser)
@@ -115,15 +126,12 @@ class AddNewsTestCase(PleioTenantTestCase):
             self.graphql_client.post(self.mutation, self.minimal_data)
 
     def test_add_with_attachment(self):
-        attachment = mixer.blend(Attachment)
-
         variables = self.data
-        variables["input"]["richDescription"] = json.dumps(
-            {'type': 'file', 'attrs': {'url': f"/attachment/entity/{attachment.id}"}})
+        variables["input"]["richDescription"] = self.tiptap_attachment(self.attachment)
 
         self.graphql_client.force_login(self.editorUser)
         result = self.graphql_client.post(self.mutation, variables)
 
         entity = result["data"]["addEntity"]["entity"]
         news = News.objects.get(id=entity["guid"])
-        self.assertTrue(news.attachments.filter(id=attachment.id).exists())
+        self.assertTrue(news.attachments.filter(file_id=self.attachment.id).exists())

@@ -1,49 +1,36 @@
 import os
 
-from core.models.attachment import Attachment
-from tenants.helpers import FastTenantTestCase
-from django.core.files.base import ContentFile
-from mixer.backend.django import mixer
-from blog.models import Blog
-from file.models import FileFolder
+from blog.factories import BlogFactory
+from core.tests.helpers import PleioTenantTestCase
+from file.models import FileFolder, FileReference
+from user.factories import UserFactory
 
-class DeleteAttachmentTestCase(FastTenantTestCase):
 
-    def attach_file(self, instance, attr, filename):
-        setattr(instance, attr, ContentFile("Some content", filename))
-        instance.save()
+class DeleteAttachmentTestCase(PleioTenantTestCase):
 
-        return getattr(instance, attr).path
+    def setUp(self):
+        super().setUp()
 
-    def test_delete_removes_file(self):
-        blog = mixer.blend(Blog)
-        attachment = mixer.blend(Attachment, attached=blog)
-        path = self.attach_file(attachment, 'upload', 'testfile.txt')
-        self.assertTrue(os.path.isfile(path)) # assert file exists before starting test
+        self.owner = UserFactory()
+        self.blog = BlogFactory(owner=self.owner)
+        self.file = self.file_factory(self.relative_path(__file__, ['assets', 'landscape.jpeg']),
+                                      owner=self.owner)
+        self.reference, _ = FileReference.objects.get_or_create(container=self.blog, file=self.file)
+        self.path = self.file.upload.path
 
-        attachment.delete()
+    def test_delete_file(self):
+        self.assertTrue(os.path.isfile(self.path))  # assert file exists before starting test
 
-        self.assertFalse(os.path.exists(path))
+        self.file.delete()
 
-    def test_delete_removes_file_from_filefolder(self):
-        filefolder = mixer.blend(FileFolder)
-        path = self.attach_file(filefolder, 'upload', 'testfile.txt')
-        thumbnailPath = self.attach_file(filefolder, 'thumbnail', 'thumbnail.txt')
+        self.assertFalse(os.path.exists(self.path))
 
-        filefolder.delete()
+    def test_delete_blog(self):
+        self.assertTrue(os.path.isfile(self.path))
+        self.assertTrue(FileReference.objects.filter(container_fk=self.blog.id).exists())
 
-        self.assertFalse(os.path.isfile(path))
-        self.assertFalse(os.path.isfile(thumbnailPath))
+        self.blog.delete()
 
-    def test_delete_attachment_and_file(self):
-        blog = mixer.blend(Blog)
-
-        attachment = mixer.blend(Attachment, attached=blog)
-        path = self.attach_file(attachment, 'upload', 'testfile.txt')
-        self.assertTrue(os.path.isfile(path)) # assert file exists before starting test
-        self.assertEqual(attachment, Attachment.objects.filter(id=attachment.id).first())
-
-        blog.delete()
-
-        self.assertEqual(None, Attachment.objects.filter(id=attachment.id).first())
-        self.assertFalse(os.path.exists(path))
+        self.assertFalse(FileReference.objects.filter(container_fk=self.blog.id).exists())
+        self.assertTrue(os.path.isfile(self.path))
+        self.assertEqual([*FileFolder.objects.filter_orphaned_files()], [self.file])

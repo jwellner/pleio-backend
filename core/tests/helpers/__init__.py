@@ -100,7 +100,8 @@ class PleioTenantTestCase(FastTenantTestCase):
     def relative_path(root, path):
         return os.path.join(os.path.dirname(root), *path)
 
-    def build_contentfile(self, path):
+    @staticmethod
+    def build_contentfile(path):
         content = open(path, 'rb').read()
         return ContentFile(content, os.path.basename(path))
 
@@ -151,6 +152,16 @@ class PleioTenantTestCase(FastTenantTestCase):
                     'text': p,
                 }]
             } for p in paragraphs]
+        })
+
+    def tiptap_attachment(self, *files):
+        return json.dumps({
+            'type': 'doc',
+            'content': [{'type': 'file', 'attrs': {'guid': None,
+                                                   'url': file.attachment_url,
+                                                   'name': file.title,
+                                                   'mimeType': file.mime_type,
+                                                   'size': file.size}} for file in files]
         })
 
     def assertExif(self, fp, msg=None):  # pragma: no cover

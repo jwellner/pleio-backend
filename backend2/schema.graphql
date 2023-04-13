@@ -427,17 +427,10 @@ type copyEntityPayload {
 
 input deleteEntityInput {
     guid: String!
-}
-
-input deleteEntitiesInput {
-    guids: [String]
+    force: Boolean
 }
 
 type deleteEntityPayload {
-    success: Boolean
-}
-
-type deleteEntitiesPayload {
     success: Boolean
 }
 
@@ -1452,7 +1445,6 @@ type Mutation {
     editEntity(input: editEntityInput!): editEntityPayload
     copyEntity(input: copyEntityInput!): copyEntityPayload
     deleteEntity(input: deleteEntityInput!): deleteEntityPayload
-    deleteEntities(input: deleteEntitiesInput!): deleteEntitiesPayload
     toggleEntityArchived(guid: String!): archiveEntityPayload
     addFile(input: addFileInput!): addFilePayload
     editFileFolder(input: editFileFolderInput!): editFileFolderPayload

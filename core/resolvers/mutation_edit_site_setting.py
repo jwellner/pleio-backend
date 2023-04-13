@@ -3,22 +3,21 @@ import ipaddress
 from django.core.cache import cache
 from django.db import connection
 from django.utils import timezone
-from django.utils.translation import gettext
 from django_tenants.utils import parse_tenant_config_path
 from graphql import GraphQLError
 
 from core import config
 from core.constances import (COULD_NOT_SAVE, INVALID_VALUE,
                              REDIRECTS_HAS_DUPLICATE_SOURCE,
-                             REDIRECTS_HAS_LOOP)
-from core.lib import (access_id_to_acl, clean_graphql_input, get_language_options,
+                             REDIRECTS_HAS_LOOP, ACCESS_TYPE, CONFIGURED_FAVICON_FILE, CONFIGURED_ICON_FILE, CONFIGURED_LOGO_FILE)
+from core.lib import (clean_graphql_input, get_language_options,
                       is_valid_domain, is_valid_url_or_path)
 from core.mail_builders.site_access_changed import schedule_site_access_changed_mail
 from core.models import ProfileField, Setting
 from core.models.user import validate_profile_sections
 from core.resolvers import shared
 from file.helpers.images import resize_and_save_as_png
-from file.models import FileFolder
+from file.models import FileFolder, FileReference
 from user.models import User
 
 
@@ -272,22 +271,31 @@ def resolve_update_redirects(clean_input):
         save_setting('REDIRECTS', redirects)
 
 
+def create_configuration_file(upload_name, configuration_name, owner):
+    try:
+        file = FileFolder.objects.create(
+            owner=owner,
+            upload=upload_name,
+            write_access=[ACCESS_TYPE.user.format(owner.guid)],
+        )
+        shared.scan_file(file, delete_if_virus=True)
+        shared.post_upload_file(file)
+        FileReference.objects.update_configuration(configuration_name, [file.guid])
+        return file
+    except GraphQLError:
+        raise
+    except Exception:
+        raise GraphQLError(COULD_NOT_SAVE)
+
+
 def resolve_update_logo(user, clean_input):
     if 'logo' in clean_input:
         if not clean_input.get("logo"):
             raise GraphQLError("NO_FILE")
 
-        # TODO: upload to a logo folder?
-        logo = FileFolder()
-
-        logo.owner = user
-        logo.upload = clean_input.get("logo")
-
-        logo.read_access = access_id_to_acl(logo, 2)
-        logo.write_access = access_id_to_acl(logo, 0)
-
-        logo.save()
-
+        logo = create_configuration_file(clean_input.get("logo"),
+                                         configuration_name=CONFIGURED_LOGO_FILE,
+                                         owner=user)
         save_setting('LOGO', logo.embed_url)
 
 
@@ -305,16 +313,9 @@ def resolve_update_icon(user, clean_input):
         if not clean_input.get("icon"):
             raise GraphQLError("NO_FILE")
 
-        # TODO: upload to an icon folder?
-        icon = FileFolder()
-
-        icon.owner = user
-        icon.upload = clean_input.get("icon")
-
-        icon.read_access = access_id_to_acl(icon, 2)
-        icon.write_access = access_id_to_acl(icon, 0)
-
-        icon.save()
+        icon = create_configuration_file(clean_input.get("icon"),
+                                         configuration_name=CONFIGURED_ICON_FILE,
+                                         owner=user)
 
         save_setting('ICON', icon.embed_url)
 
@@ -333,19 +334,10 @@ def resolve_update_favicon(user, clean_input):
         if not clean_input.get("favicon"):
             raise GraphQLError("NO_FILE")
 
-        file = clean_input.get("favicon")
-
-        try:
-            favicon = FileFolder()
-            favicon.owner = user
-            favicon.upload = file
-            favicon.read_access = access_id_to_acl(favicon, 2)
-            favicon.write_access = access_id_to_acl(favicon, 0)
-            favicon.save()
-            resize_and_save_as_png(favicon, 180, 180)
-        except Exception:
-            raise GraphQLError(COULD_NOT_SAVE)
-
+        favicon = create_configuration_file(clean_input.get("favicon"),
+                                            configuration_name=CONFIGURED_FAVICON_FILE,
+                                            owner=user)
+        resize_and_save_as_png(favicon, 180, 180)
         save_setting('FAVICON', favicon.download_url)
 
 

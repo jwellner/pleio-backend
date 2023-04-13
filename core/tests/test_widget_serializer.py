@@ -4,10 +4,10 @@ from django.conf import settings
 from django.core.files import File
 
 from core.exceptions import AttachmentVirusScanError
-from core.models import Attachment
 from core.tests.helpers import PleioTenantTestCase
 from core.utils.clamav import FileScanError, FILE_SCAN
 from core.widget_resolver import WidgetSerializer
+from file.models import FileFolder
 from user.factories import UserFactory
 
 
@@ -39,9 +39,9 @@ class TestWidgetSerializerTestCase(PleioTenantTestCase):
 
     def test_contains_attachment(self):
         widget = WidgetSerializer(self.widget_spec, self.acting_user).serialize()
-        attachment = Attachment.objects.first()
+        attachment = FileFolder.objects.first()
 
-        self.assertEqual(attachment.name, self.file_mock.name)
+        self.assertEqual(attachment.title, self.file_mock.name)
         self.assertEqual({**widget}, {
             'type': 'demo',
             'settings': [

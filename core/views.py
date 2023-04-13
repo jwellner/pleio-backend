@@ -34,7 +34,7 @@ from core.http import HttpErrorReactPage, NotFoundReact, UnauthorizedReact, Forb
 from core.lib import (get_base_url, get_exportable_content_types, get_model_by_subtype,
                       get_tmp_file_path, is_schema_public, tenant_schema, replace_html_img_src)
 from core.mail_builders.site_access_request import schedule_site_access_request_mail
-from core.models import (Attachment, Comment, CommentRequest, Entity, Group,
+from core.models import (Comment, CommentRequest, Entity, Group,
                          ProfileField, SiteAccessRequest, UserProfileField)
 from core.models.agreement import CustomAgreement
 from core.resolvers.query_site import get_settings
@@ -42,6 +42,7 @@ from core.utils.convert import tiptap_to_html
 from core.utils.export import stream
 from core.utils.mail import EmailSettingsTokenizer, UnsubscribeTokenizer
 from event.lib import get_url
+from file.models import FileFolder
 from user.models import User
 
 logger = logging.getLogger(__name__)
@@ -493,29 +494,29 @@ def attachment(request, attachment_id, attachment_type=None):
     size = request.GET.get('size', None)
 
     try:
-        attachment = Attachment.objects.get(id=attachment_id)
+        file = FileFolder.objects.get(id=attachment_id)
 
-        if not attachment.can_read(user):
+        if not file.can_read(user):
             raise NotFoundReact("File not found")
 
-        if attachment.blocked:
-            return file_blocked_response(request, attachment.upload.name, attachment.block_reason)
+        if file.blocked:
+            return file_blocked_response(request, file.upload.name, file.block_reason)
 
-        return_file = attachment
+        return_file = file
 
-        if size:
-            resized_image = attachment.get_resized_image(size)
+        if file.is_image() and size:
+            resized_image = file.get_resized_image(size)
 
             if resized_image:
                 return_file = resized_image
             else:
-                return redirect(attachment.url)
+                return redirect(file.attachment_url)
 
         attachment_or_inline = "attachment" if not return_file.mime_type else "inline"
 
         response = StreamingHttpResponse(streaming_content=return_file.upload.open(), content_type=return_file.mime_type)
         response['Content-Length'] = return_file.upload.size
-        response['Content-Disposition'] = f"{attachment_or_inline}; filename=%s" % return_file.name
+        response['Content-Disposition'] = f"{attachment_or_inline}; filename=%s" % file.title
         return response
 
     except ObjectDoesNotExist:

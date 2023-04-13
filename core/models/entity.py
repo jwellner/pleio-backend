@@ -234,6 +234,9 @@ class Entity(TagsModel):
 
         return len(get_acl(user) & set(self.write_access)) > 0
 
+    def get_read_access(self):
+        return self.read_access
+
     def update_last_action(self, new_value):
         if new_value and new_value > self.last_action:
             self.last_action = new_value

@@ -1,5 +1,3 @@
-from core.models import Attachment
-from core.models.rich_fields import ReplaceAttachments
 from core.resolvers import shared
 from core.utils.entity import load_entity_by_id
 from core.lib import get_access_id, clean_graphql_input, access_id_to_acl
@@ -11,14 +9,6 @@ from cms.models import Page
 def create_copy(entity, user):
     # pylint: disable=redefined-builtin
     now = timezone.now()
-
-    attachment_map = ReplaceAttachments()
-    attachments = Attachment.objects.filter(pk__in=[*entity.lookup_attachments()])
-    for attachment in attachments:
-        new_attachment =  attachment.make_copy(user)
-        attachment_map.append(str(attachment.id), str(new_attachment.id))
-
-    entity.replace_attachments(attachment_map)
 
     entity.owner = user
     entity.notifications_created = False

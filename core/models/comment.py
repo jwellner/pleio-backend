@@ -135,6 +135,13 @@ class Comment(VoteMixin, MentionMixin, AttachmentMixin, CommentMixin):
             'containerGuid': str(self.container.id) if self.container else '',
         }
 
+    def get_read_access(self):
+        if hasattr(self.container, 'read_access'):
+            return self.container.read_access
+        if hasattr(self.container, 'get_read_access'):
+            return self.container.get_read_access()
+        return []
+
 
 class CommentRequest(models.Model):
     code = models.CharField(max_length=36)

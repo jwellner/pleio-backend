@@ -3,8 +3,8 @@ from django.core.files import File
 from unittest import mock
 
 from cms.factories import TextPageFactory
-from core.models import Attachment
 from core.tests.helpers import PleioTenantTestCase
+from file.models import FileFolder
 from user.factories import EditorFactory, AdminFactory, UserFactory
 
 
@@ -174,7 +174,7 @@ class AddCampagnePageTestCase(PleioTenantTestCase):
             self.graphql_client.force_login(self.user)
             self.graphql_client.post(self.mutation, self.variables)
 
-    @mock.patch("core.models.Attachment.scan")
+    @mock.patch("file.models.FileFolder.scan")
     @mock.patch("core.lib.get_mimetype")
     @mock.patch("{}.open".format(settings.DEFAULT_FILE_STORAGE))
     def test_add_page_with_widgets(self, mocked_open, mocked_mimetype, mocked_scan):
@@ -205,7 +205,7 @@ class AddCampagnePageTestCase(PleioTenantTestCase):
         self.graphql_client.force_login(self.admin)
         result = self.graphql_client.post(self.mutation, self.variables)
         rows = result['data']["addPage"]["entity"]["rows"]
-        expected_attachment: Attachment = Attachment.objects.first()
+        expected_attachment: FileFolder = FileFolder.objects.first()
         self.assertDictEqual({"data": rows}, {"data": [
             {"isFullWidth": True,
              "columns": [
@@ -227,8 +227,8 @@ class AddCampagnePageTestCase(PleioTenantTestCase):
                             "attachment": {
                                 "id": str(expected_attachment.id),
                                 "mimeType": expected_attachment.mime_type,
-                                "name": expected_attachment.name,
-                                "url": expected_attachment.url
+                                "name": expected_attachment.title,
+                                "url": expected_attachment.attachment_url
                             }}
                        ]}
                   ]}

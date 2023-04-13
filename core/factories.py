@@ -22,9 +22,3 @@ def GroupFactory(**attributes) -> Group:
     group = mixer.blend(Group, **attributes)
     group.join(attributes['owner'], 'owner')
     return group
-
-
-def AttachmentFactory(**kwargs):
-    assert kwargs.get('attached'), "Attachments are required to have 'attached' filled."
-    from core.models import Attachment
-    return mixer.blend(Attachment, **kwargs)

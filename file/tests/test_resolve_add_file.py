@@ -97,21 +97,20 @@ class AddFileTestCase(PleioTenantTestCase):
         """
 
     @patch("file.models.FileFolder.scan")
-    @patch("file.resolvers.mutation.strip_exif")
+    @patch("core.resolvers.shared.strip_exif")
     @patch("core.lib.get_mimetype")
     @patch("{}.open".format(settings.DEFAULT_FILE_STORAGE))
-    def test_add_file(self, mock_open, mock_mimetype, mocked_strip_exif, mocked_scan):
+    @patch("file.models.FileFolder.persist_file")
+    def test_add_file(self, persist_file, mock_open, mock_mimetype, mocked_strip_exif, mocked_scan):
         file_mock = MagicMock(spec=File)
         file_mock.name = 'test.gif'
         file_mock.content_type = 'image/gif'
-
+        mocked_scan.return_value = True
         mock_open.return_value = file_mock
         mock_mimetype.return_value = file_mock.content_type
 
-        variables = self.data
-
         self.graphql_client.force_login(self.authenticatedUser)
-        result = self.graphql_client.post(self.mutation, variables)
+        result = self.graphql_client.post(self.mutation, self.data)
 
         entity = result["data"]['addFile']['entity']
         self.assertEqual(entity["title"], file_mock.name)
@@ -123,6 +122,26 @@ class AddFileTestCase(PleioTenantTestCase):
         self.assertEqual(entity["tags"][1], "tag_two")
         self.assertTrue(mocked_strip_exif.called)
         self.assertTrue(mocked_scan.called)
+        self.assertFalse(persist_file.called)
+
+    @patch("file.models.FileFolder.scan")
+    @patch("core.resolvers.shared.strip_exif")
+    @patch("core.lib.get_mimetype")
+    @patch("{}.open".format(settings.DEFAULT_FILE_STORAGE))
+    @patch("file.models.FileFolder.persist_file")
+    def test_add_personal_file(self, persist_file, mock_open, mock_mimetype, mocked_strip_exif, mocked_scan):
+        file_mock = MagicMock(spec=File)
+        file_mock.name = 'test.gif'
+        file_mock.content_type = 'image/gif'
+        mocked_scan.return_value = True
+        mock_open.return_value = file_mock
+        mock_mimetype.return_value = file_mock.content_type
+
+        self.data['input']['containerGuid'] = None
+        self.graphql_client.force_login(self.authenticatedUser)
+        self.graphql_client.post(self.mutation, self.data)
+
+        self.assertTrueFalse(persist_file.called)
 
     @patch("core.lib.get_mimetype")
     @patch("{}.open".format(settings.DEFAULT_FILE_STORAGE))
@@ -134,11 +153,9 @@ class AddFileTestCase(PleioTenantTestCase):
         mock_open.return_value = file_mock
         mock_mimetype.return_value = file_mock.content_type
 
-        variables = self.data
-
         self.graphql_client.force_login(self.authenticatedUser2)
         with self.assertGraphQlError(USER_NOT_MEMBER_OF_GROUP):
-            self.graphql_client.post(self.mutation, variables)
+            self.graphql_client.post(self.mutation, self.data)
 
     @patch("core.lib.get_mimetype")
     @patch("{}.open".format(settings.DEFAULT_FILE_STORAGE))
@@ -238,7 +255,6 @@ class AddFileTestCase(PleioTenantTestCase):
         file_mock = MagicMock(spec=File)
         file_mock.name = 'test.gif'
         file_mock.content_type = 'image/gif'
-
         mock_open.return_value = file_mock
         mock_mimetype.return_value = file_mock.content_type
 
@@ -282,15 +298,12 @@ class AddFileTestCase(PleioTenantTestCase):
         file_mock = MagicMock(spec=File)
         file_mock.name = 'test.gif'
         file_mock.content_type = 'image/gif'
-
         mock_open.return_value = file_mock
         mock_mimetype.return_value = file_mock.content_type
 
-        variables = self.data
-        variables["input"]["containerGuid"] = self.authenticatedUser.guid
-
+        self.data["input"]["containerGuid"] = self.authenticatedUser.guid
         self.graphql_client.force_login(self.authenticatedUser)
-        result = self.graphql_client.post(self.mutation, variables)
+        result = self.graphql_client.post(self.mutation, self.data)
 
         entity = result["data"]["addFile"]["entity"]
         self.assertEqual(entity["title"], file_mock.name)

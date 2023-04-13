@@ -11,7 +11,7 @@ from core import config
 from core.constances import ACCESS_TYPE
 from core.lib import access_id_to_acl, validate_token
 from core.models import Group, ProfileField, UserProfileField
-from file.models import FileFolder
+from file.models import FileFolder, FileReference
 from profile_sync.models import Logs
 from user.models import User
 from django.utils import timezone
@@ -264,6 +264,12 @@ def avatar_user(request, user_id):
             read_access=[ACCESS_TYPE.public],
             write_access=[ACCESS_TYPE.user.format(user.id)]
         )
+
+        if not avatar_file.scan():
+            avatar_file.delete()
+            raise Exception("file contains virus")
+
+        FileReference.objects.update_configuration("user_avatar:%s" % user_id, [avatar_file.guid])
 
         if user.profile.picture_file:
             if user.profile.picture_file.upload:

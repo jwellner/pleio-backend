@@ -1,18 +1,18 @@
-import json
-import os
 import datetime
+
 from django.utils import timezone
 from django.utils.translation import ugettext_lazy
-from core.lib import datetime_isoformat
-from core.models import Group, Attachment
-from core.tests.helpers import PleioTenantTestCase
-from user.models import User
-from event.models import Event
-from core.constances import ACCESS_TYPE, USER_ROLES
 from mixer.backend.django import mixer
-from django.core.files.base import ContentFile
-from core.views import attachment
+
+from core.constances import ACCESS_TYPE, USER_ROLES
 from core.constances import ENTITY_STATUS
+from core.lib import datetime_isoformat
+from core.models import Group
+from core.tests.helpers import PleioTenantTestCase
+from core.views import attachment
+from event.models import Event
+from file.models import FileFolder
+from user.models import User
 
 
 class CopyEventTestCase(PleioTenantTestCase):
@@ -48,11 +48,8 @@ class CopyEventTestCase(PleioTenantTestCase):
                                            write_access=[ACCESS_TYPE.user.format(self.authenticatedUser.id)]
                                            )
 
-        self.attachment = mixer.blend(Attachment, attached=self.eventAttachment)
-        path = self.attach_file(self.attachment, 'upload', 'testfile.txt')
-        self.assertTrue(os.path.isfile(path))  # assert file exists before starting test
-
-        self.eventAttachment.rich_description = json.dumps({'type': 'file', 'attrs': {'url': f"/attachment/{self.attachment.id}"}})
+        self.attachment = self.file_factory(self.relative_path(__file__, ['assets', 'landscape.jpeg']))
+        self.eventAttachment.rich_description = self.tiptap_attachment(self.attachment)
         self.eventAttachment.save()
 
         self.data = {
@@ -117,12 +114,6 @@ class CopyEventTestCase(PleioTenantTestCase):
             }
         """
 
-    def attach_file(self, instance, attr, filename):
-        setattr(instance, attr, ContentFile("Some content", filename))
-        instance.save()
-
-        return getattr(instance, attr).path
-
     def test_copy_event(self):
         self.graphql_client.force_login(self.authenticatedUser)
         result = self.graphql_client.post(self.mutation, self.data)
@@ -161,19 +152,19 @@ class CopyEventTestCase(PleioTenantTestCase):
         data = result["data"]
         event = Event.objects.get(id=data["copyEntity"]["entity"]["guid"])
 
-        attachments = Attachment.objects.filter(pk__in=[a for a in event.lookup_attachments()])
+        attachments = FileFolder.objects.filter(pk__in=[*event.lookup_attachments()])
 
         access = [ACCESS_TYPE.user.format(self.admin.id)]
         self.assertEqual(event.read_access[0], access[0])
         self.assertEqual(event.write_access[0], access[0])
 
         for x in attachments:
-            self.assertTrue(event.attachments.filter(id=x.id).exists())
-            self.assertEqual(x.owner, self.admin)
+            self.assertTrue(event.attachments.filter(file_id=x.id).exists())
+            self.assertTrue(x.can_read(self.admin))
             response = attachment(self.graphql_client.request, x.id)
             self.assertEqual(response.status_code, 200)
 
-        self.assertNotEqual(data["copyEntity"]["entity"]["richDescription"], self.eventAttachment.rich_description)
+        self.assertEqual(data["copyEntity"]["entity"]["richDescription"], self.eventAttachment.rich_description)
 
     def test_copy_with_attachment_delete(self):
         self.graphql_client.force_login(self.admin)
@@ -182,7 +173,7 @@ class CopyEventTestCase(PleioTenantTestCase):
         data = result["data"]
         event = Event.objects.get(id=data["copyEntity"]["entity"]["guid"])
 
-        attachments = Attachment.objects.filter(pk__in=[a for a in event.lookup_attachments()])
+        attachments = FileFolder.objects.filter(pk__in=[*event.lookup_attachments()])
 
         mutation = """
             mutation deleteEntity($input: deleteEntityInput!) {
@@ -200,8 +191,8 @@ class CopyEventTestCase(PleioTenantTestCase):
         self.graphql_client.post(mutation, variables)
 
         for x in attachments:
-            self.assertTrue(event.attachments.filter(id=x.id).exists())
-            self.assertEqual(x.owner, self.admin)
+            self.assertTrue(event.attachments.filter(file_id=x.id).exists())
+            self.assertTrue(x.can_read(self.admin))
             response = attachment(self.graphql_client.request, x.id)
             self.assertEqual(response.status_code, 200)
 

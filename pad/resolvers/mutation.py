@@ -7,6 +7,7 @@ from core.resolvers import shared
 from core import config
 from file.models import FileFolder
 
+
 def resolve_add_pad(_, info, input):
     # pylint: disable=redefined-builtin
 
@@ -27,7 +28,7 @@ def resolve_add_pad(_, info, input):
                 parent = FileFolder.objects.get(id=clean_input.get("containerGuid"))
                 if not parent.can_write(user):
                     raise GraphQLError(COULD_NOT_SAVE)
-                if not parent.group: # Only add to parent in group
+                if not parent.group:  # Only add to parent in group
                     raise GraphQLError("INVALID_CONTAINER_GUID")
                 group = parent.group
             except ObjectDoesNotExist:

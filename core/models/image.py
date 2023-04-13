@@ -68,7 +68,7 @@ class ResizedImageMixin(models.Model):
         """ Return mime_type field """
 
     def is_image(self):
-        return str(self.mime_type_field).startswith('image/')
+        return str(self.mime_type_field or '').startswith('image/')
 
     def get_resized_image(self, size):
         if not self.is_image():

@@ -3,13 +3,15 @@ import os
 from hashlib import md5
 
 from auditlog.registry import auditlog
+from django.contrib.contenttypes.models import ContentType
+from django.contrib.contenttypes.fields import GenericForeignKey
 from django.urls import reverse
 from django.db import models
 from django.utils import timezone
 from model_utils.managers import InheritanceQuerySet
 
-from core.constances import DOWNLOAD_AS_OPTIONS
-from core.lib import generate_object_filename, get_mimetype, tenant_schema, get_basename
+from core.constances import DOWNLOAD_AS_OPTIONS, ACCESS_TYPE, PERSONAL_FILE
+from core.lib import generate_object_filename, get_mimetype, tenant_schema, get_basename, get_file_checksum
 from core.models import Entity, Tag
 from core.models.entity import EntityManager
 from core.models.mixin import ModelWithFile, TitleMixin, HasMediaMixin
@@ -38,10 +40,88 @@ def write_access_default():
     return []
 
 
+class FileReferenceQuerySet(models.QuerySet):
+
+    def exclude_personal_references(self):
+        return self.exclude(configuration=PERSONAL_FILE)
+
+
+class FileReferenceManager(models.Manager):
+
+    def get_queryset(self):
+        return FileReferenceQuerySet(self.model, using=self._db)
+
+    def persist_file(self, file):
+        super().get_or_create(file=file,
+                              container_ct=None,
+                              container_fk=None,
+                              configuration=PERSONAL_FILE)
+
+    def update_configuration(self, configuration, file_ids):
+        qs = self.get_queryset().filter(configuration=configuration)
+        if file_ids:
+            qs = qs.exclude(file_id__in=file_ids)
+        qs.delete()
+
+        if file_ids:
+            for guid in file_ids:
+                super().get_or_create(configuration=configuration,
+                                      file_id=guid)
+
+    def get_or_create(self, container, **kwargs):
+        try:
+            return self.get(container_fk=container.id, **kwargs), False
+        except FileReference.DoesNotExist:
+            return self.create(container=container,
+                               **kwargs), True
+
+    def exclude_personal_references(self):
+        return self.get_queryset().exclude_personal_references()
+
+
+class FileReference(models.Model):
+    objects = FileReferenceManager()
+
+    created_at = models.DateTimeField(default=timezone.now)
+
+    file = models.ForeignKey('file.FileFolder',
+                             blank=False,
+                             null=False,
+                             on_delete=models.CASCADE,
+                             related_name='referenced_by')
+    container_ct = models.ForeignKey(ContentType, blank=True, null=True, on_delete=models.CASCADE)
+    container_fk = models.UUIDField(blank=True, null=True)
+    container = GenericForeignKey(ct_field='container_ct', fk_field='container_fk')
+
+    configuration = models.CharField(max_length=256, blank=True, null=True)
+
+    def delete(self, using=None, keep_parents=False):
+        file = self.file
+        super().delete(using=using, keep_parents=keep_parents)
+
+        if file.refresh_read_access():
+            file.save()
+
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
+
+        if self.file.refresh_read_access():
+            self.file.save()
+
+
 class FileFolderQuerySet(InheritanceQuerySet):
 
     def filter_files(self):
         return self.filter(type=FileFolder.Types.FILE)
+
+    def filter_orphaned_files(self):
+        qs = self.filter_files()
+        return qs.filter(group__isnull=True,
+                         referenced_by__isnull=True)
+
+    def filter_attachments(self):
+        qs = self.filter_files()
+        return qs.filter(group__isnull=True)
 
 
 class FileFolderManager(EntityManager):
@@ -69,6 +149,12 @@ class FileFolderManager(EntityManager):
     def filter_files(self):
         return self.get_queryset().filter_files()
 
+    def filter_orphaned_files(self):
+        return self.get_queryset().filter_orphaned_files()
+
+    def filter_attachments(self):
+        return self.get_queryset().filter_attachments()
+
 
 class FileFolder(HasMediaMixin, TitleMixin, ModelWithFile, ResizedImageMixin, AttachmentMixin, Entity):
     class Types(models.TextChoices):
@@ -88,6 +174,7 @@ class FileFolder(HasMediaMixin, TitleMixin, ModelWithFile, ResizedImageMixin, At
 
     upload = models.FileField(upload_to=generate_object_filename, blank=True, null=True, max_length=512)
     thumbnail = models.FileField(upload_to='thumbnails/', blank=True, null=True)
+    checksum = models.CharField(max_length=32, blank=True, null=True)
 
     mime_type = models.CharField(null=True, blank=True, max_length=100)
     size = models.IntegerField(default=0)
@@ -144,6 +231,10 @@ class FileFolder(HasMediaMixin, TitleMixin, ModelWithFile, ResizedImageMixin, At
         return reverse('download', args=[self.id, os.path.basename(self.upload.name)])
 
     @property
+    def attachment_url(self):
+        return reverse('attachment', kwargs={'attachment_id': self.id, 'attachment_type': 'entity'})
+
+    @property
     def embed_url(self):
         if self.type != self.Types.FILE:
             return None
@@ -190,6 +281,29 @@ class FileFolder(HasMediaMixin, TitleMixin, ModelWithFile, ResizedImageMixin, At
             download_as_options.append({"type": option, "url": "/download_rich_description_as/{}/{}".format(self.guid, option)})
         return download_as_options
 
+    def is_referenced(self):
+        if self.group:
+            return True
+        if self.referenced_by.count() > 0:
+            return True
+        return False
+
+    def refresh_read_access(self):
+        if self.group:
+            return False
+        new_read_access = {ACCESS_TYPE.user.format(self.owner.guid)}
+        for referencing in self.referenced_by.all():
+            if referencing.configuration:
+                new_read_access.add(ACCESS_TYPE.public)
+            elif referencing.container:
+                for ac in referencing.container.get_read_access():
+                    new_read_access.add(ac)
+
+        if new_read_access != {*self.read_access}:
+            self.read_access = [*new_read_access]
+            return True
+        return False
+
     def get_media_status(self):
         if self.type == self.Types.PAD:
             return bool(self.rich_description)
@@ -199,7 +313,7 @@ class FileFolder(HasMediaMixin, TitleMixin, ModelWithFile, ResizedImageMixin, At
 
     def get_media_filename(self):
         if self.upload.name and self.upload.path:
-            return os.path.basename(self.upload.path)
+            return "%s/%s" % (self.pk, os.path.basename(self.upload.path))
         if self.type == self.Types.PAD:
             return "%s.html" % self.slug
         return None
@@ -220,12 +334,25 @@ class FileFolder(HasMediaMixin, TitleMixin, ModelWithFile, ResizedImageMixin, At
             return tiptap_to_html(self.rich_description)
         return None
 
+    def persist_file(self):
+        FileReference.objects.persist_file(file=self)
+
     def save(self, *args, **kwargs):
+        self.ensure_owner_read_access()
+        self.ensure_owner_write_access()
         self.update_metadata()
         super(FileFolder, self).save(*args, **kwargs)
         if not is_upload_complete(self):
             from file.tasks import post_process_file_attributes
             post_process_file_attributes.delay(tenant_schema(), str(self.id))
+
+    def ensure_owner_read_access(self):
+        if not self.read_access:
+            self.read_access = [ACCESS_TYPE.user.format(self.owner.guid)]
+
+    def ensure_owner_write_access(self):
+        if not self.write_access:
+            self.write_access = [ACCESS_TYPE.user.format(self.owner.guid)]
 
     def scan(self):
         try:
@@ -244,16 +371,32 @@ class FileFolder(HasMediaMixin, TitleMixin, ModelWithFile, ResizedImageMixin, At
         super(FileFolder, self).delete(*args, **kwargs)
 
     def update_metadata(self):
+        if self.upload:
+            self._update_type_size()
+        self._update_title()
+        self._update_checksum()
         self.read_access_weight = get_read_access_weight(self)
         self.write_access_weight = get_write_access_weight(self)
-        if self.upload:
-            try:
-                if not self.title:
-                    self.title = get_basename(self.upload.name)
-                self.mime_type = get_mimetype(self.upload.path)
-                self.size = self.upload.size
-            except FileNotFoundError:
-                pass
+
+    def _update_title(self):
+        if not self.title and self.upload:
+            self.title = get_basename(self.upload.name)
+
+    def _update_type_size(self):
+        try:
+            self.mime_type = get_mimetype(self.upload.path)
+            self.size = self.upload.size
+        except FileNotFoundError:
+            pass
+
+    def _update_checksum(self):
+        if self.checksum:
+            return
+        if not self.group and self.is_image():
+            self.checksum = get_file_checksum(self.upload)
+        else:
+            from core.tasks.misc import update_file_checksum
+            update_file_checksum.delay(tenant_schema(), self.guid)
 
     def update_updated_at(self):
         """ Needs to be executed before save so we can compare if the File or Folder moved to a new parent and also update those dates"""

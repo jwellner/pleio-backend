@@ -4,8 +4,8 @@ from django.conf import settings
 from django.core.files import File
 
 from cms.factories import TextPageFactory, CampagnePageFactory
-from core.models import Attachment
 from core.tests.helpers import PleioTenantTestCase
+from file.models import FileFolder
 from user.factories import EditorFactory
 from core.constances import ACCESS_TYPE
 from django.utils.text import slugify
@@ -154,7 +154,7 @@ class TestPagePropertiesTestCase(PleioTenantTestCase):
 
         self.file_open = mock.patch("{}.open".format(settings.DEFAULT_FILE_STORAGE)).start()
         self.file_open.return_value = self.file_mock
-        return Attachment.objects.create(upload="attachment.jpg", owner=self.owner)
+        return FileFolder.objects.create(upload="attachment.jpg", owner=self.owner)
 
     def test_zero_attachments_via_rows(self):
         found_attachments = [a_pk for a_pk in self.page.lookup_attachments()]

@@ -5,7 +5,6 @@ from django.contrib.contenttypes.fields import GenericRelation
 from pathlib import PurePosixPath
 from urllib.parse import unquote, urlparse
 
-from core.models.attachment import Attachment
 from core.models.shared import AbstractModel
 from core.utils.tiptap_parser import Tiptap
 from core.lib import is_valid_uuid, get_model_name, tenant_schema
@@ -76,7 +75,7 @@ class AttachmentMixin(RichFieldsMixin):
     class Meta:
         abstract = True
 
-    attachments = GenericRelation('core.Attachment', object_id_field='attached_object_id', content_type_field='attached_content_type')
+    attachments = GenericRelation('file.FileReference', object_id_field='container_fk', content_type_field='container_ct')
 
     def save(self, *args, **kwargs):
         super(AttachmentMixin, self).save(*args, **kwargs)
@@ -84,31 +83,41 @@ class AttachmentMixin(RichFieldsMixin):
 
     def lookup_attachments(self):
         yield from TipTapAttachments(*self.rich_fields).attachments()
-        yield from self.revision_attachments()
+
+        from .featured import FeaturedCoverMixin
+        if isinstance(self, (FeaturedCoverMixin,)) and self.featured_image:
+            yield self.featured_image.guid
 
     def revision_attachments(self):
         if hasattr(self, 'has_revisions') and self.has_revisions():
             for revision in self.revision_set.all():
-                yield from TipTapAttachments(*revision.rich_fields).attachments()
+                yield from revision.lookup_attachments()
 
     def update_attachments_links(self):
-        attachments_found = Attachment.objects.filter(id__in=[*self.lookup_attachments()])
+        attachments_found = {*self.lookup_attachments(), *self.revision_attachments()}
 
-        current = self.attachments.get_queryset()
+        current = {str(a.file_id) for a in self.attachments.get_queryset()}
 
         new = attachments_found.difference(current)
         removed = current.difference(attachments_found)
 
+        from file.models import FileReference, FileFolder
         for x in new:
-            x.attached = self
-            x.save()
+            if FileFolder.objects.filter(id=x).exists():
+                FileReference.objects.get_or_create(file_id=x, container=self)
 
-        for x in removed:
+        for x in self.attachments.filter(file_id__in=removed):
             x.delete()
 
     def replace_attachments(self, attachment_map: ReplaceAttachments):
         if hasattr(self, 'rich_description') and getattr(self, 'rich_description'):
             setattr(self, 'rich_description', attachment_map.replace(self.rich_description))
+
+    def get_read_access(self):
+        try:
+            return super().get_read_access()
+        except AttributeError:
+            raise NotImplementedError()
 
 
 class TipTapAttachments:

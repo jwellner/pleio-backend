@@ -5,11 +5,8 @@ from core.models.mixin import TitleMixin
 from core.utils.convert import tiptap_to_text
 from django.utils.text import slugify
 
-class Task(TitleMixin, AttachmentMixin, Entity):
-    """
-    Task
-    """
 
+class Task(TitleMixin, AttachmentMixin, Entity):
     class Meta:
         ordering = ['-published']
 

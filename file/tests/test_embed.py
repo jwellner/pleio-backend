@@ -20,7 +20,7 @@ class EmbedTestCase(PleioTenantTestCase):
         self.group = mixer.blend(Group, is_closed=True, owner=self.user)
         self.group.join(self.user)
 
-        upload=self.build_contentfile(self.relative_path(__file__, ['assets', 'upload.txt']))
+        upload = self.build_contentfile(self.relative_path(__file__, ['assets', 'upload.txt']))
 
         self.file = FileFolder.objects.create(
             owner=self.user,
