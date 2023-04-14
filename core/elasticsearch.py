@@ -7,7 +7,7 @@ from django_elasticsearch_dsl.registries import registry
 from django_elasticsearch_dsl.signals import BaseSignalProcessor
 from django_tenants.utils import parse_tenant_config_path
 from elasticsearch.helpers import BulkIndexError
-from elasticsearch_dsl import Search
+from elasticsearch_dsl import Index
 
 from core.lib import tenant_schema
 
@@ -96,19 +96,21 @@ def schedule_index_document(instance):
     elasticsearch_index_document.delay(schema_name, instance.id, instance.__class__.__name__)
 
 
-def elasticsearch_status_report(index_name=None, alert_only=False):
+def elasticsearch_status_report(index_name=None, report_on_alert=False):
     report = []
     for document_class in registry.get_documents():
         if not index_name or index_name == document_class.Index.name:
             document = document_class()
-            result = Search(index=document_class.Index.name).filter('term', tenant_name=tenant_schema()).execute()
             expected = document.get_queryset().count()
-            actual = result.hits.total.value
+
+            stats = Index(index_name).stats()
+            actual = stats['indices']['blog']['total']['docs']['count']
+
             less_then_expected = bool(actual < .95 * expected)
             more_then_expected = bool(.95 * actual > expected)
             alert = less_then_expected or more_then_expected
 
-            if alert or not alert_only:
+            if alert or not report_on_alert:
                 report.append({
                     "index": document.Index.name,
                     "expected": expected,
