@@ -221,14 +221,14 @@ class FileFolder(HasMediaMixin, TitleMixin, ModelWithFile, ResizedImageMixin, At
     @property
     def slug(self):
         if self.type == self.Types.FILE:
-            return os.path.basename(self.upload.name)
+            return os.path.basename(self.upload.name) or super().slug
         return super().slug
 
     @property
     def download_url(self):
         if self.type != self.Types.FILE:
             return None
-        return reverse('download', args=[self.id, os.path.basename(self.upload.name)])
+        return reverse('download', args=[self.id, self.slug])
 
     @property
     def attachment_url(self):
@@ -238,7 +238,7 @@ class FileFolder(HasMediaMixin, TitleMixin, ModelWithFile, ResizedImageMixin, At
     def embed_url(self):
         if self.type != self.Types.FILE:
             return None
-        return reverse('embed', args=[self.id, os.path.basename(self.upload.name)])
+        return reverse('embed', args=[self.id, self.slug])
 
     @property
     def thumbnail_url(self):
