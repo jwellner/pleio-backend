@@ -588,7 +588,7 @@ def update_elasticsearch_status_for_tenant(client_id):
             }
         try:
             index_status_result = {
-                "result": elasticsearch_status_report(alert_only=True)
+                "result": elasticsearch_status_report(report_on_alert=True)
             }
         except Exception as e:
             index_status_result = {"exception": e.__class__,
