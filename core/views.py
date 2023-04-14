@@ -162,6 +162,8 @@ def login(request):
         query_args["idp"] = config.IDP_ID
     if request.GET.get('next'):
         query_args["next"] = request.GET.get('next')
+    if request.GET.get('method') == 'register':
+        query_args["method"] = "register"
     query_args["provider"] = config.OIDC_PROVIDERS[0]
 
     redirect_url = reverse('oidc_authentication_init') + '?' + urlencode(query_args)
