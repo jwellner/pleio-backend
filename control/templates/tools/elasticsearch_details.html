@@ -8,6 +8,9 @@
         <a href="{% url "elasticsearch_status" %}">{% trans "Back to overview" %}</a>
     </div>
 
+    <h2 class="h3">{{ site_name }}</h2>
+    <p><a href="{{ site_url }}">{% trans "Visit the site" %}</a></p>
+
     <div class="d-flex justify-content-between">
         <div class="previous">
             {% if previous %}
@@ -21,9 +24,9 @@
         </div>
         <div class="next">
             {% if next %}
-                 <a href="{% url "elasticsearch_status" record.client.id next.id %}">
+                <a href="{% url "elasticsearch_status" record.client.id next.id %}">
                     {{ next.created_at }}
-                 </a>
+                </a>
             {% endif %}
         </div>
     </div>
