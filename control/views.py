@@ -3,30 +3,28 @@ import os
 import mimetypes
 import csv
 
+from django_tenants.utils import tenant_context, schema_context
 from io import StringIO
+from pip._internal.utils.filesystem import format_file_size
+from wsgiref.util import FileWrapper
 
 from django.conf import settings
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib import messages, auth
 from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
-from django.shortcuts import render, redirect, reverse
-from django.views.decorators.http import require_http_methods
-from django.utils.translation import gettext as _
 from django.http import FileResponse, HttpResponseNotFound, StreamingHttpResponse
-from wsgiref.util import FileWrapper
-
-from core.lib import get_base_url
-
-from pip._internal.utils.filesystem import format_file_size
+from django.shortcuts import render, redirect, reverse
+from django.utils.translation import gettext as _
+from django.views.decorators.http import require_http_methods
 
 from control.lib import get_full_url, schema_config
+from core.lib import get_full_url as subsite_url
 from control.utils.backup import schedule_backup
 from tenants.models import Client, Agreement, AgreementVersion
 from control.models import AccessLog, AccessCategory, SiteFilter, Task, ElasticsearchStatus
 from control.forms import AddSiteForm, DeleteSiteForm, ConfirmSiteBackupForm, SearchUserForm, AgreementAddForm, AgreementAddVersionForm
 from core.models import SiteStat
 from user.models import User
-from django_tenants.utils import tenant_context, schema_context
 
 logger = logging.getLogger(__name__)
 
@@ -478,7 +476,7 @@ def elasticsearch_status(request):
         with schema_context(client.schema_name):
             from core import config
             status['name'] = config.NAME
-            status['url'] = get_base_url()
+            status['url'] = subsite_url("/login") + '?next=/superadmin/tasks'
 
         if last_record:
             status["created_at"] = last_record.created_at
@@ -505,8 +503,15 @@ def elasticsearch_status_details(request, client_id, record_id=None):
     if not record:
         return HttpResponseNotFound("Invalid parameters")
 
+    with schema_context(client.schema_name):
+        from core import config
+        site_name = config.NAME
+        site_url = subsite_url("/login") + '?next=/superadmin/tasks'
+
     context = {
         'record': record,
+        'site_name': site_name,
+        'site_url': site_url,
         'previous': ElasticsearchStatus.objects.previous(record.client, record.created_at),
         'next': ElasticsearchStatus.objects.next(record.client, record.created_at),
     }
