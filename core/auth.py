@@ -55,6 +55,10 @@ class OIDCAuthenticateView(OIDCAuthenticationRequestView):
         if idp:
             extra_params.update({'idp': idp})
 
+        method = self.request.GET.get('method')
+        if method == 'register':
+            extra_params.update({"register": "1"})
+
         provider = self.request.GET.get('provider', None)
         providerOption = next(filter(lambda option: option['value'] == provider, OIDC_PROVIDER_OPTIONS), None)
         if providerOption and not providerOption.get('isDefault', False):
