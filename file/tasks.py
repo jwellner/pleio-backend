@@ -80,7 +80,7 @@ class ScheduleScan:
               schedule_scan_finished.si(schema_name)).apply_async()
 
 
-@shared_task(rate_limit="60/m")
+@shared_task(rate_limit="30/m")
 def scan_file(schema_name, file_id):
     try:
         with schema_context(schema_name):

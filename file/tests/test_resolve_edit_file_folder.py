@@ -1,3 +1,4 @@
+from django.core.files.base import ContentFile
 from django.utils import timezone
 from django.core.files import File
 from django.conf import settings
@@ -171,27 +172,15 @@ class EditFileFolderTestCase(PleioTenantTestCase):
         """
 
     @patch("file.models.FileFolder.scan")
-    @patch("file.resolvers.mutation.strip_exif")
-    @patch("core.lib.get_mimetype")
-    @patch("{}.save".format(settings.DEFAULT_FILE_STORAGE))
-    @patch("{}.open".format(settings.DEFAULT_FILE_STORAGE))
-    def test_edit_file_title(self, mock_open, mock_save, mock_mimetype, mocked_strip_exif, mocked_scan):
-        file_mock = MagicMock(spec=File)
-        file_mock.name = 'test.gif'
-        file_mock.content_type = 'image/gif'
-        file_mock.size = 123
-
-        mock_save.return_value = "test.gif"
-        mock_open.return_value = file_mock
-        mock_mimetype.return_value = file_mock.content_type
-
+    @patch("core.resolvers.shared.strip_exif")
+    def test_edit_file_title(self, mocked_strip_exif, mocked_scan):
         test_file = FileFolder.objects.create(
             rich_description=self.PREVIOUS_DESCRIPTION,
             read_access=[ACCESS_TYPE.logged_in],
             write_access=[ACCESS_TYPE.user.format(self.authenticatedUser.id)],
             owner=self.authenticatedUser,
             tags=["tag1", "tag2"],
-            upload=file_mock
+            upload=ContentFile(b"Image!", "example.jpg")
         )
 
         variables = self.data

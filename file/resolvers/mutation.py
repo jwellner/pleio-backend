@@ -1,14 +1,12 @@
 import logging
-import os
 
 from ariadne import ObjectType
 from django.core.exceptions import ObjectDoesNotExist
-from django.utils.translation import gettext
 from graphql import GraphQLError
 
 from core import config
-from core.constances import ACCESS_TYPE, COULD_NOT_SAVE, FILE_NOT_CLEAN, FILE_HAS_REFERENCES, PERSONAL_FILE
-from core.lib import access_id_to_acl, clean_graphql_input, strip_exif
+from core.constances import ACCESS_TYPE, COULD_NOT_SAVE, FILE_HAS_REFERENCES
+from core.lib import access_id_to_acl, clean_graphql_input
 from core.models import Group
 from core.resolvers import shared
 from core.utils.entity import load_entity_by_id
