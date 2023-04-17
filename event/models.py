@@ -387,6 +387,7 @@ class Event(RichDescriptionMediaMixin, TitleMixin, CommentMixin, BookmarkMixin, 
             'qrAccess': self.qr_access,
             'attendeeWelcomeMailContent': self.attendee_welcome_mail_content,
             'attendeeWelcomeMailSubject': self.attendee_welcome_mail_subject,
+            'suggestedItems': self.suggested_items or [],
             **super().serialize(),
         }
 

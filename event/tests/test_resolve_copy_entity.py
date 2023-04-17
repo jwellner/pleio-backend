@@ -4,6 +4,7 @@ from django.utils import timezone
 from django.utils.translation import ugettext_lazy
 from mixer.backend.django import mixer
 
+from blog.factories import BlogFactory
 from core.constances import ACCESS_TYPE, USER_ROLES
 from core.constances import ENTITY_STATUS
 from core.lib import datetime_isoformat
@@ -26,27 +27,27 @@ class CopyEventTestCase(PleioTenantTestCase):
         self.user2 = mixer.blend(User)
         self.group = mixer.blend(Group, owner=self.authenticatedUser, is_membership_on_request=False)
         self.group.join(self.authenticatedUser, 'owner')
+        self.suggested_item = BlogFactory(owner=self.authenticatedUser)
 
         self.eventPublic = mixer.blend(Event,
                                        owner=self.authenticatedUser,
                                        read_access=[ACCESS_TYPE.public],
                                        write_access=[ACCESS_TYPE.user.format(self.authenticatedUser.id)],
                                        start_date="2020-09-15 09:20:51.15+00",
-                                       end_date="2020-09-16 07:20:51.15+00"
-                                       )
+                                       end_date="2020-09-16 07:20:51.15+00",
+                                       suggested_items=[self.suggested_item.guid])
 
         self.eventGroup = mixer.blend(Event,
                                       owner=self.authenticatedUser,
                                       read_access=[ACCESS_TYPE.public],
                                       write_access=[ACCESS_TYPE.user.format(self.authenticatedUser.id)],
-                                      group=self.group
-                                      )
+                                      group=self.group,
+                                      suggested_items=[self.suggested_item.guid])
 
         self.eventAttachment = mixer.blend(Event,
                                            owner=self.authenticatedUser,
                                            read_access=[ACCESS_TYPE.public],
-                                           write_access=[ACCESS_TYPE.user.format(self.authenticatedUser.id)]
-                                           )
+                                           write_access=[ACCESS_TYPE.user.format(self.authenticatedUser.id)])
 
         self.attachment = self.file_factory(self.relative_path(__file__, ['assets', 'landscape.jpeg']))
         self.eventAttachment.rich_description = self.tiptap_attachment(self.attachment)
@@ -103,6 +104,9 @@ class CopyEventTestCase(PleioTenantTestCase):
                 maxAttendees
                 isFeatured
                 isPinned
+                suggestedItems {
+                    guid
+                }
             }
             mutation ($input: copyEntityInput!) {
                 copyEntity(input: $input) {
@@ -132,9 +136,9 @@ class CopyEventTestCase(PleioTenantTestCase):
         self.assertEqual(data["copyEntity"]["entity"]["rsvp"], self.eventPublic.rsvp)
         self.assertEqual(data["copyEntity"]["entity"]["group"], None)
         self.assertEqual(data["copyEntity"]["entity"]["owner"]["guid"], self.authenticatedUser.guid)
-
         self.assertFalse(data["copyEntity"]["entity"]["isFeatured"])
         self.assertFalse(data["copyEntity"]["entity"]["isPinned"])
+        self.assertEqual(data["copyEntity"]["entity"]["suggestedItems"], [{"guid": self.suggested_item.guid}])
 
     def test_copy_event_not_logged_in(self):
         with self.assertGraphQlError("not_logged_in"):

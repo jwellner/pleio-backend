@@ -1,4 +1,6 @@
 from django.utils import timezone
+
+from blog.factories import BlogFactory
 from core.models import Group
 from core.tests.helpers import PleioTenantTestCase
 from user.models import User
@@ -11,24 +13,25 @@ class AddWikiCase(PleioTenantTestCase):
 
     def setUp(self):
         super().setUp()
-        self.authenticatedUser = mixer.blend(User)
-        self.group = mixer.blend(Group, owner=self.authenticatedUser, is_membership_on_request=False)
-        self.group.join(self.authenticatedUser, 'owner')
+        self.authenticated_user = mixer.blend(User)
+        self.group = mixer.blend(Group, owner=self.authenticated_user, is_membership_on_request=False)
+        self.group.join(self.authenticated_user, 'owner')
+        self.suggested_item = BlogFactory(owner=self.authenticated_user)
 
         self.wikiPublic = Wiki.objects.create(
             title="Test public wiki",
             rich_description="JSON to string",
             read_access=[ACCESS_TYPE.public],
-            write_access=[ACCESS_TYPE.user.format(self.authenticatedUser.id)],
-            owner=self.authenticatedUser
+            write_access=[ACCESS_TYPE.user.format(self.authenticated_user.id)],
+            owner=self.authenticated_user
         )
 
         self.wikiGroupPublic = Wiki.objects.create(
             title="Test public wiki",
             rich_description="JSON to string",
             read_access=[ACCESS_TYPE.public],
-            write_access=[ACCESS_TYPE.user.format(self.authenticatedUser.id)],
-            owner=self.authenticatedUser,
+            write_access=[ACCESS_TYPE.user.format(self.authenticated_user.id)],
+            owner=self.authenticated_user,
             group=self.group
         )
 
@@ -51,6 +54,7 @@ class AddWikiCase(PleioTenantTestCase):
                 "timePublished": str(timezone.localtime()),
                 "scheduleArchiveEntity": str(timezone.localtime() + timezone.timedelta(days=10)),
                 "scheduleDeleteEntity": str(timezone.localtime() + timezone.timedelta(days=20)),
+                "suggestedItems": [self.suggested_item.guid]
             }
         }
         self.mutation = """
@@ -88,6 +92,9 @@ class AddWikiCase(PleioTenantTestCase):
                     positionY
                     alt
                 }
+                suggestedItems {
+                    guid
+                }
             }
             mutation ($input: addEntityInput!) {
                 addEntity(input: $input) {
@@ -103,7 +110,7 @@ class AddWikiCase(PleioTenantTestCase):
     def test_add_wiki(self):
         variables = self.data
 
-        self.graphql_client.force_login(self.authenticatedUser)
+        self.graphql_client.force_login(self.authenticated_user)
         result = self.graphql_client.post(self.mutation, variables)
         entity = result["data"]["addEntity"]["entity"]
 
@@ -118,12 +125,13 @@ class AddWikiCase(PleioTenantTestCase):
         self.assertDateEqual(entity["timePublished"], variables['input']['timePublished'])
         self.assertDateEqual(entity["scheduleArchiveEntity"], variables['input']['scheduleArchiveEntity'])
         self.assertDateEqual(entity["scheduleDeleteEntity"], variables['input']['scheduleDeleteEntity'])
+        self.assertEqual(entity["suggestedItems"], [{"guid": self.suggested_item.guid}])
 
     def test_add_wiki_to_parent(self):
         variables = self.data
         variables["input"]["containerGuid"] = self.wikiPublic.guid
 
-        self.graphql_client.force_login(self.authenticatedUser)
+        self.graphql_client.force_login(self.authenticated_user)
         result = self.graphql_client.post(self.mutation, variables)
         entity = result["data"]["addEntity"]["entity"]
 
@@ -141,7 +149,7 @@ class AddWikiCase(PleioTenantTestCase):
         variables = self.data
         variables["input"]["containerGuid"] = self.group.guid
 
-        self.graphql_client.force_login(self.authenticatedUser)
+        self.graphql_client.force_login(self.authenticated_user)
         result = self.graphql_client.post(self.mutation, variables)
 
         entity = result["data"]["addEntity"]["entity"]
@@ -156,7 +164,7 @@ class AddWikiCase(PleioTenantTestCase):
         variables = self.data
         variables["input"]["containerGuid"] = self.wikiGroupPublic.guid
 
-        self.graphql_client.force_login(self.authenticatedUser)
+        self.graphql_client.force_login(self.authenticated_user)
         result = self.graphql_client.post(self.mutation, variables)
         entity = result["data"]["addEntity"]["entity"]
 
@@ -180,7 +188,7 @@ class AddWikiCase(PleioTenantTestCase):
             }
         }
 
-        self.graphql_client.force_login(self.authenticatedUser)
+        self.graphql_client.force_login(self.authenticated_user)
         result = self.graphql_client.post(self.mutation, variables)
         entity = result["data"]["addEntity"]["entity"]
 

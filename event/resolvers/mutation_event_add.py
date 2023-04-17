@@ -54,6 +54,7 @@ def resolve_add_event(_, info, input):
     shared.resolve_update_abstract(entity, clean_input)
     shared.update_featured_image(entity, clean_input)
     shared.update_publication_dates(entity, clean_input)
+    shared.resolve_add_suggested_items(entity, clean_input)
 
     shared.update_is_featured(entity, user, clean_input)
 

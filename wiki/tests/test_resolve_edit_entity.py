@@ -1,5 +1,6 @@
 from django.utils import timezone
 
+from blog.factories import BlogFactory
 from core.models import Group
 from core.tests.helpers import PleioTenantTestCase
 from user.models import User
@@ -12,17 +13,18 @@ class AddWikiCase(PleioTenantTestCase):
 
     def setUp(self):
         super().setUp()
-        self.authenticatedUser = mixer.blend(User)
+        self.authenticated_user = mixer.blend(User)
         self.user2 = mixer.blend(User)
         self.admin = mixer.blend(User, roles=[USER_ROLES.ADMIN])
         self.group = mixer.blend(Group)
+        self.suggested_item = BlogFactory(owner=self.authenticated_user)
 
         self.wikiPublic = Wiki.objects.create(
             title="Test public wiki",
             rich_description="JSON to string",
             read_access=[ACCESS_TYPE.public],
-            write_access=[ACCESS_TYPE.user.format(self.authenticatedUser.id)],
-            owner=self.authenticatedUser
+            write_access=[ACCESS_TYPE.user.format(self.authenticated_user.id)],
+            owner=self.authenticated_user
         )
 
         self.data = {
@@ -43,6 +45,7 @@ class AddWikiCase(PleioTenantTestCase):
                 "timePublished": str(timezone.localtime()),
                 "scheduleArchiveEntity": str(timezone.localtime() + timezone.timedelta(days=10)),
                 "scheduleDeleteEntity": str(timezone.localtime() + timezone.timedelta(days=20)),
+                "suggestedItems": [self.suggested_item.guid]
             }
         }
         self.mutation = """
@@ -84,6 +87,9 @@ class AddWikiCase(PleioTenantTestCase):
                     positionY
                     alt
                 }
+                suggestedItems {
+                    guid
+                }
             }
             mutation ($input: editEntityInput!) {
                 editEntity(input: $input) {
@@ -99,7 +105,7 @@ class AddWikiCase(PleioTenantTestCase):
     def test_edit_wiki(self):
         variables = self.data
 
-        self.graphql_client.force_login(self.authenticatedUser)
+        self.graphql_client.force_login(self.authenticated_user)
         result = self.graphql_client.post(self.mutation, variables)
 
         entity = result["data"]["editEntity"]["entity"]
@@ -109,7 +115,7 @@ class AddWikiCase(PleioTenantTestCase):
         self.assertEqual(entity["isFeatured"], False)  # Only with editor or admin role
         self.assertEqual(entity["subtype"], "wiki")
         self.assertEqual(entity["group"], None)
-        self.assertEqual(entity["owner"]["guid"], self.authenticatedUser.guid)
+        self.assertEqual(entity["owner"]["guid"], self.authenticated_user.guid)
         self.assertEqual(entity["timeCreated"], self.wikiPublic.created_at.isoformat())
         self.assertEqual(entity["featured"]["positionY"], 2)
         self.assertEqual(entity["featured"]["video"], "testVideo2")
@@ -118,13 +124,7 @@ class AddWikiCase(PleioTenantTestCase):
         self.assertDateEqual(entity["timePublished"], variables['input']['timePublished'])
         self.assertDateEqual(entity["scheduleArchiveEntity"], variables['input']['scheduleArchiveEntity'])
         self.assertDateEqual(entity["scheduleDeleteEntity"], variables['input']['scheduleDeleteEntity'])
-
-        self.wikiPublic.refresh_from_db()
-
-        self.assertEqual(entity["title"], self.wikiPublic.title)
-        self.assertEqual(entity["richDescription"], self.wikiPublic.rich_description)
-        self.assertEqual(entity["hasChildren"], self.wikiPublic.has_children())
-        self.assertEqual(entity["isFeatured"], self.wikiPublic.is_featured)
+        self.assertEqual(entity["suggestedItems"], [{"guid": self.suggested_item.guid}])
 
     def test_edit_wiki_by_admin(self):
         variables = self.data

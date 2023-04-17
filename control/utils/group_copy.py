@@ -426,6 +426,8 @@ class GroupCopyRunner:
                 entity.best_answer = answer
                 entity.save()
 
+            # TODO Corrigeer ook suggestedItems
+
         logger.info("Rebuild %i relations", len(connect_parent) + len(connect_sub_comments) + len(connect_best_answers))
 
     def run(self, task_id, source_schema, action_user_id, group_id, target_schema=None, copy_members=False):

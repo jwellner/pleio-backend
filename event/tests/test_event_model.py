@@ -2,6 +2,7 @@ from unittest import mock
 
 from django.utils import timezone
 
+from blog.factories import BlogFactory
 from core.lib import datetime_utciso
 from core.tests.helpers import PleioTenantTestCase
 from event.factories import EventFactory
@@ -26,9 +27,9 @@ class TestEventModelTestCase(PleioTenantTestCase):
 
     def setUp(self):
         super().setUp()
-
         self.owner = UserFactory()
         self.parent = EventFactory(owner=self.owner)
+        self.suggested_item = BlogFactory(owner=self.owner)
         self.entity = EventFactory(owner=self.owner,
                                    parent=self.parent,
                                    title=self.TITLE,
@@ -40,11 +41,13 @@ class TestEventModelTestCase(PleioTenantTestCase):
                                    location=self.LOCATION,
                                    location_address=self.LOCATION_ADDRESS,
                                    location_link=self.LOCATION_LINK,
-                                   ticket_link=self.TICKET_LINK)
+                                   ticket_link=self.TICKET_LINK,
+                                   suggested_items=[self.suggested_item.guid])
 
     def tearDown(self):
         for event in Event.objects.all():
             event.delete()
+        self.suggested_item.delete()
         self.owner.delete()
         super().tearDown()
 
@@ -70,6 +73,7 @@ class TestEventModelTestCase(PleioTenantTestCase):
             'rsvp': False,
             'sharedViaSlot': [],
             'slotsAvailable': [],
+            'suggestedItems': [self.suggested_item.guid],
             'ticketLink': self.TICKET_LINK,
             'startDate': datetime_utciso(self.entity.start_date),
             'endDate': datetime_utciso(self.entity.end_date),

@@ -3,15 +3,18 @@ from core.resolvers import shared
 
 wiki = ObjectType("Wiki")
 
+
 @wiki.field("subtype")
 def resolve_excerpt(obj, info):
     # pylint: disable=unused-argument
     return obj.type_to_string
 
+
 @wiki.field("hasChildren")
 def resolve_has_children(obj, info):
     # pylint: disable=unused-argument
     return obj.has_children()
+
 
 @wiki.field("children")
 def resolve_children(obj, info):
@@ -21,25 +24,30 @@ def resolve_children(obj, info):
     except AttributeError:
         return []
 
+
 @wiki.field("parent")
 def resolve_parent(obj, info):
     # pylint: disable=unused-argument
     return obj.parent
+
 
 @wiki.field("inGroup")
 def resolve_in_group(obj, info):
     # pylint: disable=unused-argument
     return obj.group is not None
 
+
 @wiki.field("group")
 def resolve_group(obj, info):
     # pylint: disable=unused-argument
     return obj.group
 
+
 @wiki.field("url")
 def resolve_url(obj, info):
     # pylint: disable=unused-argument
     return obj.url
+
 
 @wiki.field("isFeatured")
 def resolve_is_featured(obj, info):
@@ -71,3 +79,4 @@ wiki.set_field("owner", shared.resolve_entity_owner)
 wiki.set_field("isPinned", shared.resolve_entity_is_pinned)
 wiki.set_field("featured", shared.resolve_entity_featured)
 wiki.set_field("lastSeen", shared.resolve_entity_last_seen)
+wiki.set_field("suggestedItems", shared.resolve_entity_suggested_items)

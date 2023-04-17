@@ -1,3 +1,4 @@
+from blog.factories import BlogFactory
 from core.models import Group
 from core.tests.helpers import PleioTenantTestCase
 from question.models import Question
@@ -11,9 +12,10 @@ class AddQuestionTestCase(PleioTenantTestCase):
 
     def setUp(self):
         super().setUp()
-        self.authenticatedUser = mixer.blend(User)
-        self.group = mixer.blend(Group, owner=self.authenticatedUser, is_membership_on_request=False)
-        self.group.join(self.authenticatedUser, 'owner')
+        self.authenticated_user = mixer.blend(User)
+        self.group = mixer.blend(Group, owner=self.authenticated_user, is_membership_on_request=False)
+        self.group.join(self.authenticated_user, 'owner')
+        self.suggested_item = BlogFactory(owner=self.authenticated_user)
 
         self.data = {
             "input": {
@@ -33,6 +35,7 @@ class AddQuestionTestCase(PleioTenantTestCase):
                 "timePublished": str(timezone.localtime()),
                 "scheduleArchiveEntity": str(timezone.localtime() + timezone.timedelta(days=10)),
                 "scheduleDeleteEntity": str(timezone.localtime() + timezone.timedelta(days=20)),
+                "suggestedItems": [self.suggested_item.guid]
             }
         }
         self.mutation = """
@@ -62,6 +65,9 @@ class AddQuestionTestCase(PleioTenantTestCase):
                 }
                 isClosed
                 isFeatured
+                suggestedItems {
+                    guid
+                }
             }
             mutation ($input: addEntityInput!) {
                 addEntity(input: $input) {
@@ -77,7 +83,7 @@ class AddQuestionTestCase(PleioTenantTestCase):
     def test_add_question(self):
         variables = self.data
 
-        self.graphql_client.force_login(self.authenticatedUser)
+        self.graphql_client.force_login(self.authenticated_user)
         result = self.graphql_client.post(self.mutation, variables)
 
         entity = result["data"]["addEntity"]["entity"]
@@ -93,12 +99,13 @@ class AddQuestionTestCase(PleioTenantTestCase):
         self.assertDateEqual(entity["timePublished"], variables['input']['timePublished'])
         self.assertDateEqual(entity["scheduleArchiveEntity"], variables['input']['scheduleArchiveEntity'])
         self.assertDateEqual(entity["scheduleDeleteEntity"], variables['input']['scheduleDeleteEntity'])
+        self.assertEqual(entity['suggestedItems'], [{"guid": self.suggested_item.guid}])
 
     def test_add_question_to_group(self):
         variables = self.data
         variables["input"]["containerGuid"] = self.group.guid
 
-        self.graphql_client.force_login(self.authenticatedUser)
+        self.graphql_client.force_login(self.authenticated_user)
         result = self.graphql_client.post(self.mutation, variables)
 
         entity = result["data"]["addEntity"]["entity"]
@@ -115,7 +122,7 @@ class AddQuestionTestCase(PleioTenantTestCase):
             }
         }
 
-        self.graphql_client.force_login(self.authenticatedUser)
+        self.graphql_client.force_login(self.authenticated_user)
         result = self.graphql_client.post(self.mutation, variables)
         entity = result["data"]["addEntity"]["entity"]
 
