@@ -987,7 +987,7 @@ type Event implements Entity {
 enum EventRangeType {
     dayOfTheWeek
     dayOfTheMonth
-    weekdaydOfTheMonth
+    weekdayOfTheMonth
     daily
 }
 
