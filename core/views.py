@@ -32,7 +32,7 @@ from core.constances import OIDC_PROVIDER_OPTIONS, USER_ROLES
 from core.forms import EditEmailSettingsForm, OnboardingForm, RequestAccessForm
 from core.http import HttpErrorReactPage, NotFoundReact, UnauthorizedReact, ForbiddenReact, file_blocked_response
 from core.lib import (get_base_url, get_exportable_content_types, get_model_by_subtype,
-                      get_tmp_file_path, is_schema_public, tenant_schema, replace_html_img_src)
+                      get_tmp_file_path, is_schema_public, tenant_schema, replace_html_img_src, registration_url)
 from core.mail_builders.site_access_request import schedule_site_access_request_mail
 from core.models import (Comment, CommentRequest, Entity, Group,
                          ProfileField, SiteAccessRequest, UserProfileField)
@@ -134,7 +134,9 @@ def entity_view(request, entity_id=None, entity_title=None):
 
 
 def register(request):
-    return redirect('/login?login_credentials=true&method=register')
+    if config.OIDC_PROVIDERS == ['pleio']:
+        return redirect(registration_url())
+    return redirect('/login?login_credentials=true')
 
 
 def logout(request):

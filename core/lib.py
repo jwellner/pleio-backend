@@ -18,6 +18,7 @@ from django.conf import settings
 from django.core.cache import cache
 from django.core.validators import URLValidator
 from django.db import connection
+from django.urls import reverse
 from django.utils import timezone as django_timezone
 from django.utils.module_loading import import_string
 from django.utils.text import slugify
@@ -652,3 +653,7 @@ def task_status(task_id):
     from celery.result import AsyncResult
     result = AsyncResult(task_id)
     print(result.status)
+
+
+def registration_url():
+    return reverse('oidc_authentication_init') + '?provider=pleio&method=register'
