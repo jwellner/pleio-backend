@@ -26,7 +26,7 @@ django-storages==1.12.3
 phpserialize==1.3
 python-memcached==1.59
 django-ses==2.6.1
-git+https://gitlab.com/pleio/textract.git@1.6.5-updated-requirements
+git+https://gitlab.com/pleio/textract.git@v1.6.5-pleio-1.0.1
 html2text==2020.1.16
 django-widget-tweaks==1.4.12
 pydash==5.1.2
