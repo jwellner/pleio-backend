@@ -417,7 +417,8 @@ type confirmAttendEventWithoutAccountPayload {
 
 input copyEntityInput {
     guid: String!
-    subtype: String!
+    """ TODO: Het veld `subtype` is overbodig. Kan weg zodra FE het niet meer gebruikt """
+    subtype: String
     ownerGuid: String
     copySubevents: Boolean
 }

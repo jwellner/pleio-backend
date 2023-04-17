@@ -57,7 +57,6 @@ class CopyEventTestCase(PleioTenantTestCase):
             "input": {
                 "guid": self.eventPublic.guid,
                 "ownerGuid": self.authenticatedUser.guid,
-                "subtype": "event",
                 "copySubevents": True
             }
         }
@@ -65,14 +64,12 @@ class CopyEventTestCase(PleioTenantTestCase):
             "input": {
                 "guid": self.eventAttachment.guid,
                 "ownerGuid": self.authenticatedUser.guid,
-                "subtype": "event"
             }
         }
         self.data3 = {
             "input": {
                 "guid": self.eventGroup.guid,
                 "ownerGuid": self.authenticatedUser.guid,
-                "subtype": "event"
             }
         }
 
