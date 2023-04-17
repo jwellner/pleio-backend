@@ -3,25 +3,30 @@ from core.resolvers import shared
 
 discussion = ObjectType("Discussion")
 
+
 @discussion.field("subtype")
 def resolve_excerpt(obj, info):
     # pylint: disable=unused-argument
     return "discussion"
+
 
 @discussion.field("inGroup")
 def resolve_in_group(obj, info):
     # pylint: disable=unused-argument
     return obj.group is not None
 
+
 @discussion.field("group")
 def resolve_group(obj, info):
     # pylint: disable=unused-argument
     return obj.group
 
+
 @discussion.field("url")
 def resolve_url(obj, info):
     # pylint: disable=unused-argument
     return obj.url
+
 
 @discussion.field("isFeatured")
 def resolve_is_featured(obj, info):
@@ -63,3 +68,4 @@ discussion.set_field("views", shared.resolve_entity_views)
 discussion.set_field("owner", shared.resolve_entity_owner)
 discussion.set_field("isPinned", shared.resolve_entity_is_pinned)
 discussion.set_field("lastSeen", shared.resolve_entity_last_seen)
+discussion.set_field("suggestedItems", shared.resolve_entity_suggested_items)

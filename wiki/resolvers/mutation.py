@@ -52,10 +52,10 @@ def resolve_add_wiki(_, info, input):
     shared.update_featured_image(entity, clean_input)
     shared.update_publication_dates(entity, clean_input)
     shared.update_is_featured(entity, user, clean_input)
+    shared.resolve_add_suggested_items(entity, clean_input)
 
     entity.save()
     shared.store_initial_revision(entity)
-
 
     return {
         "entity": entity
@@ -85,6 +85,7 @@ def resolve_edit_wiki(_, info, input):
     shared.update_publication_dates(entity, clean_input)
     shared.update_is_featured(entity, user, clean_input)
     shared.resolve_update_access_id(entity, clean_input)
+    shared.resolve_update_suggested_items(entity, clean_input)
     shared.update_updated_at(entity)
 
     if 'containerGuid' in clean_input:

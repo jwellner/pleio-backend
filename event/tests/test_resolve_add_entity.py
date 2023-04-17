@@ -2,6 +2,7 @@ from unittest import mock
 
 from django.utils.timezone import localtime, timedelta
 
+from blog.factories import BlogFactory
 from core.factories import GroupFactory
 from core.tests.helpers import PleioTenantTestCase
 from event.factories import EventFactory
@@ -19,6 +20,7 @@ class AddEventTestCase(PleioTenantTestCase):
         super().setUp()
         self.authenticated_user = UserFactory()
         self.group = GroupFactory(owner=self.authenticated_user, is_membership_on_request=False)
+        self.suggested_item = BlogFactory(owner=self.authenticated_user)
         self.eventPublic = EventFactory(owner=self.authenticated_user)
         self.eventGroupPublic = EventFactory(owner=self.authenticated_user, group=self.group)
 
@@ -46,6 +48,7 @@ class AddEventTestCase(PleioTenantTestCase):
                 "scheduleDeleteEntity": str(timezone.localtime() + timezone.timedelta(days=20)),
                 "attendeeWelcomeMailSubject": "Welcome subject",
                 "attendeeWelcomeMailContent": "Welcome content",
+                "suggestedItems": [self.suggested_item.guid]
             }
         }
         self.mutation = """
@@ -83,6 +86,9 @@ class AddEventTestCase(PleioTenantTestCase):
                 qrAccess
                 attendeeWelcomeMailSubject
                 attendeeWelcomeMailContent
+                suggestedItems {
+                    guid
+                }
             }
             mutation ($input: addEntityInput!) {
                 addEntity(input: $input) {
@@ -94,6 +100,22 @@ class AddEventTestCase(PleioTenantTestCase):
                 }
             }
         """
+        self.least_variables = {
+            'input': {
+                'title': "Simple event",
+                'subtype': "event",
+                'startDate': str(localtime()),
+                'endDate': str(localtime()),
+            }
+        }
+
+    def tearDown(self):
+        self.suggested_item.delete()
+        self.eventPublic.delete()
+        self.eventGroupPublic.delete()
+        self.group.delete()
+        self.authenticated_user.delete()
+        super().tearDown()
 
     def test_add_event(self):
         variables = self.data
@@ -120,6 +142,7 @@ class AddEventTestCase(PleioTenantTestCase):
         self.assertDateEqual(entity['scheduleDeleteEntity'], variables["input"]["scheduleDeleteEntity"])
         self.assertEqual(entity['attendeeWelcomeMailSubject'], variables['input']['attendeeWelcomeMailSubject'])
         self.assertEqual(entity['attendeeWelcomeMailContent'], variables['input']['attendeeWelcomeMailContent'])
+        self.assertEqual(entity['suggestedItems'], [{"guid": self.suggested_item.guid}])
 
     def test_add_event_to_group(self):
         variables = self.data
@@ -186,17 +209,8 @@ class AddEventTestCase(PleioTenantTestCase):
         self.assertTrue(event.attachments.filter(file_id=attachment.id).exists())
 
     def test_add_minimal_entity(self):
-        variables = {
-            'input': {
-                'title': "Simple event",
-                'subtype': "event",
-                'startDate': str(localtime()),
-                'endDate': str(localtime()),
-            }
-        }
-
         self.graphql_client.force_login(self.authenticated_user)
-        result = self.graphql_client.post(self.mutation, variables)
+        result = self.graphql_client.post(self.mutation, self.least_variables)
 
         entity = result["data"]["addEntity"]["entity"]
         self.assertTrue(entity['canEdit'])

@@ -1,4 +1,6 @@
 from django.utils import timezone
+
+from blog.factories import BlogFactory
 from core.models import Group
 from core.tests.helpers import PleioTenantTestCase
 from user.models import User
@@ -11,17 +13,18 @@ class EditDiscussionTestCase(PleioTenantTestCase):
 
     def setUp(self):
         super().setUp()
-        self.authenticatedUser = mixer.blend(User)
+        self.authenticated_user = mixer.blend(User)
         self.user2 = mixer.blend(User)
         self.admin = mixer.blend(User, roles=[USER_ROLES.ADMIN])
         self.group = mixer.blend(Group)
+        self.suggested_item = BlogFactory(owner=self.authenticated_user)
 
         self.discussionPublic = Discussion.objects.create(
             title="Test public event",
             rich_description="JSON to string",
             read_access=[ACCESS_TYPE.public],
-            write_access=[ACCESS_TYPE.user.format(self.authenticatedUser.id)],
-            owner=self.authenticatedUser,
+            write_access=[ACCESS_TYPE.user.format(self.authenticated_user.id)],
+            owner=self.authenticated_user,
             is_featured=False
         )
 
@@ -43,6 +46,7 @@ class EditDiscussionTestCase(PleioTenantTestCase):
                 "timePublished": str(timezone.localtime()),
                 "scheduleArchiveEntity": str(timezone.localtime() + timezone.timedelta(days=10)),
                 "scheduleDeleteEntity": str(timezone.localtime() + timezone.timedelta(days=20)),
+                "suggestedItems": [self.suggested_item.guid]
             }
         }
 
@@ -75,6 +79,9 @@ class EditDiscussionTestCase(PleioTenantTestCase):
                     guid
                 }
                 isFeatured
+                suggestedItems {
+                    guid
+                }
             }
             mutation ($input: editEntityInput!) {
                 editEntity(input: $input) {
@@ -90,7 +97,7 @@ class EditDiscussionTestCase(PleioTenantTestCase):
     def test_edit_discussion(self):
         variables = self.data
 
-        self.graphql_client.force_login(self.authenticatedUser)
+        self.graphql_client.force_login(self.authenticated_user)
         result = self.graphql_client.post(self.mutation, variables)
 
         entity = result["data"]["editEntity"]["entity"]
@@ -104,7 +111,7 @@ class EditDiscussionTestCase(PleioTenantTestCase):
         self.assertEqual(entity["richDescription"], self.discussionPublic.rich_description)
         self.assertEqual(entity["isFeatured"], False)
         self.assertEqual(entity["group"], None)
-        self.assertEqual(entity["owner"]["guid"], self.authenticatedUser.guid)
+        self.assertEqual(entity["owner"]["guid"], self.authenticated_user.guid)
         self.assertEqual(entity["timeCreated"], self.discussionPublic.created_at.isoformat())
         self.assertEqual(entity["featured"]["positionY"], 2)
         self.assertEqual(entity["featured"]["video"], "testVideo2")
@@ -113,10 +120,9 @@ class EditDiscussionTestCase(PleioTenantTestCase):
         self.assertDateEqual(entity["timePublished"], variables['input']['timePublished'])
         self.assertDateEqual(entity["scheduleArchiveEntity"], variables['input']['scheduleArchiveEntity'])
         self.assertDateEqual(entity["scheduleDeleteEntity"], variables['input']['scheduleDeleteEntity'])
-
+        self.assertEqual(entity['suggestedItems'], [{'guid': self.suggested_item.guid}])
 
     def test_edit_discussion_by_admin(self):
-
         variables = self.data
         variables["input"]["timeCreated"] = "2018-12-10T23:00:00.000Z"
         variables["input"]["groupGuid"] = self.group.guid
@@ -141,7 +147,6 @@ class EditDiscussionTestCase(PleioTenantTestCase):
         self.assertEqual(entity["group"]["guid"], self.group.guid)
         self.assertEqual(entity["owner"]["guid"], self.user2.guid)
         self.assertEqual(entity["timeCreated"], "2018-12-10T23:00:00+00:00")
-
 
     def test_edit_discussion_group_null_by_admin(self):
         variables = self.data

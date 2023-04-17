@@ -47,6 +47,7 @@ def resolve_edit_event(_, info, input):
 
     shared.update_is_featured(entity, user, clean_input)
     shared.update_updated_at(entity)
+    shared.resolve_update_suggested_items(entity, clean_input)
 
     event_shared.resolve_update_startenddate(entity, clean_input)
     event_shared.resolve_update_source(entity, clean_input)

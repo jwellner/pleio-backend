@@ -2,6 +2,7 @@ from unittest import mock
 
 from django.utils import timezone
 
+from blog.factories import BlogFactory
 from core.models import Group
 from core.tests.helpers import PleioTenantTestCase
 from event.factories import EventFactory
@@ -20,6 +21,7 @@ class EditEventTestCase(PleioTenantTestCase):
         self.user2 = mixer.blend(User)
         self.admin = mixer.blend(User, roles=[USER_ROLES.ADMIN])
         self.group = mixer.blend(Group)
+        self.suggested_item = BlogFactory(owner=self.authenticatedUser)
 
         self.eventPublic = Event.objects.create(
             title="Test public event",
@@ -56,6 +58,7 @@ class EditEventTestCase(PleioTenantTestCase):
                 "scheduleDeleteEntity": str(timezone.localtime() + timezone.timedelta(days=20)),
                 "attendeeWelcomeMailSubject": "Mail Subject",
                 "attendeeWelcomeMailContent": "Welcome Content",
+                "suggestedItems": [self.suggested_item.guid]
             }
         }
         self.mutation = """
@@ -96,6 +99,9 @@ class EditEventTestCase(PleioTenantTestCase):
                 qrAccess
                 attendeeWelcomeMailSubject
                 attendeeWelcomeMailContent
+                suggestedItems {
+                    guid
+                }
             }
             mutation ($input: editEntityInput!) {
                 editEntity(input: $input) {
@@ -107,6 +113,17 @@ class EditEventTestCase(PleioTenantTestCase):
                 }
             }
         """
+
+    def tearDown(self):
+        self.eventPublic.delete()
+        self.suggested_item.delete()
+        self.group.delete()
+
+        self.authenticatedUser.delete()
+        self.user2.delete()
+        self.admin.delete()
+
+        super().tearDown()
 
     def test_edit_event(self):
         variables = self.data
@@ -152,6 +169,7 @@ class EditEventTestCase(PleioTenantTestCase):
         self.assertDateEqual(entity['scheduleArchiveEntity'], self.data["input"]["scheduleArchiveEntity"])
         self.assertDateEqual(entity['scheduleDeleteEntity'], self.data["input"]["scheduleDeleteEntity"])
         self.assertEqual(entity["slotsAvailable"][0]['name'], self.data["input"]["slotsAvailable"][0]['name'])
+        self.assertEqual(entity['suggestedItems'], [{"guid": self.suggested_item.guid}])
 
     def test_edit_event_group_null_by_admin(self):
         variables = self.data

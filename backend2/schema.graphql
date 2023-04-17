@@ -530,6 +530,7 @@ type Discussion implements Entity {
     featured: Featured
     isPinned: Boolean!
     lastSeen: DateTime
+    suggestedItems: [Entity]
 }
 
 input editAvatarInput {
@@ -982,6 +983,7 @@ type Event implements Entity {
     attendeeWelcomeMailSubject: String
     attendeeWelcomeMailContent: SecureRichText
     rangeSettings: EventRangeSettings
+    suggestedItems: [Entity]
 }
 
 enum EventRangeType {
@@ -2056,6 +2058,7 @@ type Question implements Entity {
     isPinned: Boolean!
     isLocked: Boolean!
     lastSeen: DateTime
+    suggestedItems: [Entity]
 }
 
 input rejectMembershipRequestInput {
@@ -2784,6 +2787,7 @@ type Wiki implements Entity {
     isPinned: Boolean!
     featured: Featured
     lastSeen: DateTime
+    suggestedItems: [Entity]
 }
 
 type SiteAccessRequest {
