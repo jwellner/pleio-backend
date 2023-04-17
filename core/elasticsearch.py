@@ -103,8 +103,8 @@ def elasticsearch_status_report(index_name=None, report_on_alert=False):
             document = document_class()
             expected = document.get_queryset().count()
 
-            stats = Index(document_class.Index.name).stats()
-            actual = stats['indices'][document_class.Index.name]['total']['docs']['count']
+            from elasticsearch_dsl import Search
+            actual = Search(index=document_class.Index.name).filter('term', tenant_name=tenant_schema()).count()
 
             less_then_expected = bool(actual < .95 * expected)
             more_then_expected = bool(.95 * actual > expected)
