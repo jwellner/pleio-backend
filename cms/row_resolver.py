@@ -13,8 +13,12 @@ class RowSerializer(WidgetSerializerBase):
         return self.row.get('isFullWidth')
 
     @property
+    def has_columns(self):
+        return len(self.row.get('columns')) > 0
+
+    @property
     def columns(self):
-        return [ColumnSerializer(c, self.acting_user) for c in self.row.get('columns', []) or []]
+        return [ColumnSerializer(column, self.acting_user) for column in self.row.get('columns')]
 
     def serialize(self):
         result = defaultdict(list)
