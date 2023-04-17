@@ -296,6 +296,20 @@ class TestAttendeesSigningUpForSubevents(PleioTenantTestCase):
         EventAttendee.objects.create(event=self.slot2session1,
                                      email=email1,
                                      state="accept")
+        
+        # I am allowed to signup in a session in same slot if other attendee state is not accept
+        
+        subevent_attendee1 = EventAttendee.objects.get(event=self.slot1session1,
+                                     email=user1.email,
+                                     user=user1,
+                                     state="accept")
+        subevent_attendee1.state = "reject"
+        subevent_attendee1.save()
+        EventAttendee.objects.create(event=self.slot1session2,
+            email=user1.email,
+            user=user1,
+            state="accept"
+        )
 
     def test_already_signed_up_in_slot(self):
         # Given.
@@ -326,6 +340,28 @@ class TestAttendeesSigningUpForSubevents(PleioTenantTestCase):
         children = {c['title']: c['alreadySignedUpInSlot'] for c in result['data']['entity']['children']}
 
         # Then all is clear.
+        self.assertFalse(result['data']['entity']['slotsAvailable'][0]['alreadySignedUpInSlot'])
+        self.assertFalse(result['data']['entity']['slotsAvailable'][1]['alreadySignedUpInSlot'])
+        self.assertFalse(children[self.slot1session1.title])
+        self.assertFalse(children[self.slot1session2.title])
+        self.assertFalse(children[self.slot2session1.title])
+
+    def test_already_signed_up_as_rejected_in_slot(self):
+        # Given.
+        user1 = UserFactory(name="User one")
+
+        # When a user attends a subevent
+        EventAttendee.objects.create(event=self.slot1session2,
+                                     email=user1.email,
+                                     user=user1,
+                                     state="reject")
+
+        # And the attending user requests the event list
+        self.graphql_client.force_login(user1)
+        result = self.graphql_client.post(self.query, self.variables)
+        children = {c['title']: c['alreadySignedUpInSlot'] for c in result['data']['entity']['children']}
+
+        # Then: slot1 sessions no longer available
         self.assertFalse(result['data']['entity']['slotsAvailable'][0]['alreadySignedUpInSlot'])
         self.assertFalse(result['data']['entity']['slotsAvailable'][1]['alreadySignedUpInSlot'])
         self.assertFalse(children[self.slot1session1.title])

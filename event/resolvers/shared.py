@@ -113,7 +113,7 @@ def resolve_update_attendee_welcome_mail(entity, clean_input):
 def attending_events(info):
     user = info.context["request"].user
     if user.is_authenticated:
-        return [str(pk) for pk in EventAttendee.objects.filter(user=user).values_list('event__id', flat=True)]
+        return [str(pk) for pk in EventAttendee.objects.filter(user=user, state="accept").values_list('event__id', flat=True)]
     # TODO: read from stored email in session?
     return []
 
