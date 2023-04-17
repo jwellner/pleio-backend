@@ -4,6 +4,7 @@ from django.conf import settings
 from django.core.files import File
 
 from cms.factories import TextPageFactory, CampagnePageFactory
+from cms.resolvers.page import resolve_rows
 from core.tests.helpers import PleioTenantTestCase
 from file.models import FileFolder
 from user.factories import EditorFactory
@@ -134,6 +135,85 @@ class PageTestCase(PleioTenantTestCase):
         self.assertEqual(data["entity"]["children"][0]["guid"], self.page_child_child.guid)
         self.assertEqual(data["entity"]["owner"]["guid"], self.user1.guid)
         self.assertEqual(data["entity"]["owner"]["name"], self.user1.name)
+
+
+class TestCampagnePageTestCase(PleioTenantTestCase):
+    def setUp(self):
+        super().setUp()
+        self.owner = EditorFactory()
+        self.page = CampagnePageFactory(owner=self.owner,
+                                        row_repository=[
+                                            {"isFullWidth": False,
+                                             "columns": [
+                                                 {"width": [1],
+                                                  "widgets": [
+                                                      {"type": "title",
+                                                       "settings": [
+                                                           {"key": "title",
+                                                            "value": "Foo"}
+                                                       ]},
+                                                  ]}
+                                             ]},
+                                            {"isFullWidth": False,
+                                             "columns": []}
+                                        ])
+        self.query = """
+            query PageItem($guid: String!) {
+                entity(guid: $guid) {
+                    guid
+                    ...PageDetailFragment
+                    __typename
+                }
+            }
+
+            fragment PageDetailFragment on Page {
+                pageType
+                title
+                owner {
+                    guid
+                    name
+                }
+                rows {
+                    isFullWidth
+                    columns {
+                        width
+                        widgets {
+                            type
+                            settings {
+                                key
+                                value
+                                richDescription
+                                attachment {
+                                    id
+                                    mimeType
+                                    url
+                                    name
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        """
+        self.variables = {
+            'guid': self.page.guid
+        }
+
+    def tearDown(self):
+        self.page.delete()
+        self.owner.delete()
+        super().tearDown()
+
+    def test_load_campagne_page(self):
+        self.graphql_client.force_login(self.owner)
+        result = self.graphql_client.post(self.query, self.variables)
+        entity = result['data']['entity']
+
+        self.assertEqual(entity['guid'], self.page.guid)
+        self.assertEqual(entity['pageType'], 'campagne')
+        self.assertEqual(entity['title'], self.page.title)
+        self.assertEqual(entity['owner']['guid'], self.owner.guid)
+        self.assertEqual(len(entity['rows']), 1)
 
 
 class TestPagePropertiesTestCase(PleioTenantTestCase):

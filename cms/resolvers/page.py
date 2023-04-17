@@ -61,7 +61,8 @@ def resolve_can_edit(obj, info):
 @page.field("rows")
 def resolve_rows(obj, info):
     # pylint: disable=unused-argument
-    return [RowSerializer(row) for row in obj.row_repository or []]
+    rows = [RowSerializer(row) for row in obj.row_repository or []]
+    return filter(lambda row: row.has_columns, rows)
 
 
 page.set_field("guid", shared.resolve_entity_guid)
