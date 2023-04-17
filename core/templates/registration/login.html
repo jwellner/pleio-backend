@@ -48,10 +48,10 @@
                             {% endfor %}
                         {% endif %}
                     </div>
-                    {% if config.ALLOW_REGISTRATION and not banned %}
+                    {% if config.ALLOW_REGISTRATION and not banned and 'pleio' in config.OIDC_PROVIDERS %}
                         <div class="walled-garden_register content">
-                            {% blocktrans %}Don't have an account?{% endblocktrans %} <a href="/register" class=""
-                                                                                         rel="nofollow">{% blocktrans %}Register{% endblocktrans %}</a>
+                            {% blocktrans %}Don't have an account?{% endblocktrans %} <a href="{% registration_url %}" class=""
+                                                                                        rel="nofollow">{% trans "Register" %}</a>
                         </div>
                     {% endif %}
                 </fieldset>
