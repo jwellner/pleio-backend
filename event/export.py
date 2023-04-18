@@ -50,8 +50,7 @@ class AttendeeExporter:
         for state in self.EXPORT_STATES:
             for attendee in qs.filter(state=state):
                 if attendee.email not in processed:
-                    yield [*self.attendee_row(attendee),
-                           ", ".join(self.attendee_summary(attendee.email))]
+                    yield [*self.attendee_row(attendee)] + list(self.attendee_summary(attendee.email))
                     processed.append(attendee.email)
 
     def column_headers(self):
@@ -107,5 +106,5 @@ class AttendeeExporter:
         if main_attendee.exists():
             yield self.event.title
 
-        for attendee in EventAttendee.objects.filter(event__parent=self.event, **attendee_filters):
+        for attendee in EventAttendee.objects.filter(event__parent=self.event, **attendee_filters).order_by("event__start_date"):
             yield attendee.event.title
