@@ -30,7 +30,7 @@ class EditEventTestCase(PleioTenantTestCase):
             write_access=[ACCESS_TYPE.user.format(self.authenticatedUser.id)],
             owner=self.authenticatedUser,
             start_date=timezone.now(),
-            end_date=timezone.now()
+            end_date=timezone.now(),
         )
 
         self.data = {
@@ -51,6 +51,7 @@ class EditEventTestCase(PleioTenantTestCase):
                 "source": "https://www.pleio.nl",
                 "ticketLink": "https://www.pleio-bookings.com/my-first-event",
                 "attendEventWithoutAccount": True,
+                "enableMaybeAttendEvent": False,
                 "rsvp": True,
                 "qrAccess": True,
                 "timePublished": str(timezone.localtime()),
@@ -102,6 +103,7 @@ class EditEventTestCase(PleioTenantTestCase):
                 suggestedItems {
                     guid
                 }
+                enableMaybeAttendEvent
             }
             mutation ($input: editEntityInput!) {
                 editEntity(input: $input) {
@@ -170,6 +172,7 @@ class EditEventTestCase(PleioTenantTestCase):
         self.assertDateEqual(entity['scheduleDeleteEntity'], self.data["input"]["scheduleDeleteEntity"])
         self.assertEqual(entity["slotsAvailable"][0]['name'], self.data["input"]["slotsAvailable"][0]['name'])
         self.assertEqual(entity['suggestedItems'], [{"guid": self.suggested_item.guid}])
+        self.assertEqual(entity["enableMaybeAttendEvent"], self.data["input"]["enableMaybeAttendEvent"])
 
     def test_edit_event_group_null_by_admin(self):
         variables = self.data

@@ -25,13 +25,15 @@ def resolve_confirm_attend_event_without_account(_, info, input):
     # TODO: set default value for backwards compatibility, remove if frontend is altered
     state = clean_input.get("state", "accept")
 
-    if state not in ["accept", "reject", "maybe", "waitinglist"]:
-        raise GraphQLError(EVENT_INVALID_STATE)
-
     try:
         event = Event.objects.get(id=clean_input.get("guid"))
     except ObjectDoesNotExist:
         raise GraphQLError(COULD_NOT_FIND)
+
+    accepted_states = ["accept", "reject", "waitinglist"] + (["maybe"] if event.enable_maybe_attend_event else [])
+
+    if state not in accepted_states:
+        raise GraphQLError(EVENT_INVALID_STATE)
 
     try:
         validate_email(email)

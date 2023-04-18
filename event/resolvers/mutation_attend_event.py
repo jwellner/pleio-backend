@@ -124,7 +124,9 @@ def resolve_attend_event(_, info, input):
             name=user.name
         )
 
-    if clean_input["state"] not in ["accept", "reject", "maybe", "waitinglist"]:
+    accepted_states = ["accept", "reject", "waitinglist"] + (["maybe"] if event.enable_maybe_attend_event else [])
+
+    if clean_input["state"] not in accepted_states:
         raise GraphQLError(EVENT_INVALID_STATE)
 
     if clean_input["state"] == "accept" and not attendee.state == "accept":

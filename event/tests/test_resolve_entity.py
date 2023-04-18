@@ -138,6 +138,7 @@ class EventTestCase(PleioTenantTestCase):
                 children {
                     guid
                 }
+                enableMaybeAttendEvent
             }
             query GetEvent($guid: String!) {
                 entity(guid: $guid) {
@@ -180,6 +181,7 @@ class EventTestCase(PleioTenantTestCase):
         self.assertIsNotNone(entity["timePublished"])
         self.assertIsNone(entity["scheduleArchiveEntity"])
         self.assertIsNone(entity["scheduleDeleteEntity"])
+        self.assertEqual(entity["enableMaybeAttendEvent"], self.event_public.enable_maybe_attend_event)
 
         variables = {
             "guid": self.event_private.guid
@@ -226,6 +228,7 @@ class EventTestCase(PleioTenantTestCase):
         self.assertEqual(entity["attendees"]["edges"][2]["name"], 'test_name3')
         self.assertEqual(entity["attendees"]["edges"][3]["name"], 'test_name4')
         self.assertEqual(len(entity["attendees"]["edges"]), 4)
+        self.assertEqual(entity["enableMaybeAttendEvent"], self.event_private.enable_maybe_attend_event)
 
     def test_event_user(self):
         variables = {
@@ -252,6 +255,7 @@ class EventTestCase(PleioTenantTestCase):
         self.assertEqual(entity["attendEventWithoutAccount"], self.event_public.attend_event_without_account)
         self.assertEqual(entity["attendees"]["edges"][0]["name"], "test_name")
         self.assertEqual(entity["attendees"]["edges"][0]["email"], "")
+        self.assertEqual(entity["enableMaybeAttendEvent"], self.event_public.enable_maybe_attend_event)
 
         variables = {
             "guid": self.event_private.guid

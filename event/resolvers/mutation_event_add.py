@@ -68,6 +68,7 @@ def resolve_add_event(_, info, input):
     event_shared.resolve_update_qr_access(entity, clean_input)
     event_shared.resolve_update_attendee_welcome_mail(entity, clean_input)
     event_shared.resolve_update_range_settings(entity, clean_input)
+    event_shared.resolve_update_enable_maybe_attend_event(entity, clean_input)
 
     entity.save()
     entity.add_follow(user)

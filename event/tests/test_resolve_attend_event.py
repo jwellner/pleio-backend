@@ -256,3 +256,22 @@ class AttendEventTestCase(PleioTenantTestCase):
         self.assertEqual(data["attendEvent"]["entity"]["guid"], self.eventPublic.guid)
         self.assertEqual(len(data["attendEvent"]["entity"]["attendees"]["edges"]), 1)
         self.assertEqual(sub_attendee.state, 'accept')
+
+    def test_maybe_disabled(self):
+        self.disableMaybeEvent = EventFactory(
+            owner=self.attendee1,
+            max_attendees=2,
+            enable_maybe_attend_event=False
+        )
+
+        variables = {
+            "input": {
+                "guid": self.disableMaybeEvent.guid,
+                "state": 'maybe'
+            }
+        }
+
+        self.graphql_client.force_login(self.attendee1)
+
+        with self.assertGraphQlError("event_invalid_state"):
+            self.graphql_client.post(self.mutation, variables)

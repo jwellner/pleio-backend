@@ -63,6 +63,7 @@ class TestEventModelTestCase(PleioTenantTestCase):
             'attendeeWelcomeMailSubject': self.SUBJECT,
             'attendeeWelcomeMailContent': self.WELCOME,
             'attendEventWithoutAccount': False,
+            'enableMaybeAttendEvent': True,
             'externalLink': self.EXTERNAL_LINK,
             'location': self.LOCATION,
             'locationAddress': self.LOCATION_ADDRESS,
