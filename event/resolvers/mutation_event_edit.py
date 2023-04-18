@@ -60,6 +60,7 @@ def resolve_edit_event(_, info, input):
     event_shared.resolve_update_slots_available(entity, clean_input)
     event_shared.resolve_update_attendee_welcome_mail(entity, clean_input)
     event_shared.resolve_update_range_settings(entity, clean_input)
+    event_shared.resolve_update_enable_maybe_attend_event(entity, clean_input)
 
     # only admins can edit these fields
     if user.has_role(USER_ROLES.ADMIN):

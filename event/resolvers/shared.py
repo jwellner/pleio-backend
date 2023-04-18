@@ -62,6 +62,11 @@ def resolve_update_attend_without_account(entity, clean_input):
         entity.attend_event_without_account = clean_input.get("attendEventWithoutAccount")
 
 
+def resolve_update_enable_maybe_attend_event(entity, clean_input):
+    if 'enableMaybeAttendEvent' in clean_input:
+        entity.enable_maybe_attend_event = clean_input.get("enableMaybeAttendEvent")
+
+
 def resolve_update_qr_access(entity, clean_input):
     if 'qrAccess' in clean_input:
         entity.qr_access = clean_input.get("qrAccess")

@@ -104,6 +104,7 @@ class CopyEventTestCase(PleioTenantTestCase):
                 suggestedItems {
                     guid
                 }
+                enableMaybeAttendEvent
             }
             mutation ($input: copyEntityInput!) {
                 copyEntity(input: $input) {
@@ -136,6 +137,7 @@ class CopyEventTestCase(PleioTenantTestCase):
         self.assertFalse(data["copyEntity"]["entity"]["isFeatured"])
         self.assertFalse(data["copyEntity"]["entity"]["isPinned"])
         self.assertEqual(data["copyEntity"]["entity"]["suggestedItems"], [{"guid": self.suggested_item.guid}])
+        self.assertEqual(data["copyEntity"]["entity"]["enableMaybeAttendEvent"], self.eventPublic.enable_maybe_attend_event)
 
     def test_copy_event_not_logged_in(self):
         with self.assertGraphQlError("not_logged_in"):

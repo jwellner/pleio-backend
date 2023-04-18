@@ -41,6 +41,7 @@ class AddEventTestCase(PleioTenantTestCase):
                 "locationAddress": "Kerkstraat 10",
                 "source": "https://www.pleio.nl",
                 "attendEventWithoutAccount": True,
+                "enableMaybeAttendEvent": False,
                 "rsvp": True,
                 "qrAccess": True,
                 "timePublished": str(timezone.localtime()),
@@ -89,6 +90,7 @@ class AddEventTestCase(PleioTenantTestCase):
                 suggestedItems {
                     guid
                 }
+                enableMaybeAttendEvent
             }
             mutation ($input: addEntityInput!) {
                 addEntity(input: $input) {
@@ -143,6 +145,7 @@ class AddEventTestCase(PleioTenantTestCase):
         self.assertEqual(entity['attendeeWelcomeMailSubject'], variables['input']['attendeeWelcomeMailSubject'])
         self.assertEqual(entity['attendeeWelcomeMailContent'], variables['input']['attendeeWelcomeMailContent'])
         self.assertEqual(entity['suggestedItems'], [{"guid": self.suggested_item.guid}])
+        self.assertEqual(entity['enableMaybeAttendEvent'], variables['input']['enableMaybeAttendEvent'])
 
     def test_add_event_to_group(self):
         variables = self.data

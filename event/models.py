@@ -210,6 +210,7 @@ class Event(RichDescriptionMediaMixin, TitleMixin, CommentMixin, BookmarkMixin, 
     max_attendees = models.PositiveIntegerField(null=True, blank=True)
     rsvp = models.BooleanField(default=False)
     attend_event_without_account = models.BooleanField(default=False)
+    enable_maybe_attend_event = models.BooleanField(default=True)
 
     qr_access = models.BooleanField(default=False)
 
@@ -384,6 +385,7 @@ class Event(RichDescriptionMediaMixin, TitleMixin, CommentMixin, BookmarkMixin, 
             'maxAttendees': self.max_attendees,
             'rsvp': self.rsvp,
             'attendEventWithoutAccount': self.attend_event_without_account,
+            'enableMaybeAttendEvent': self.enable_maybe_attend_event,
             'qrAccess': self.qr_access,
             'attendeeWelcomeMailContent': self.attendee_welcome_mail_content,
             'attendeeWelcomeMailSubject': self.attendee_welcome_mail_subject,

@@ -117,6 +117,7 @@ input addEntityInput {
     attendeeWelcomeMailSubject: String
     attendeeWelcomeMailContent: SecureRichText
     rangeSettings: EventRangeSettingsInput
+    enableMaybeAttendEvent: Boolean
 }
 
 type addEntityPayload {
@@ -592,6 +593,7 @@ input editEntityInput {
     attendeeWelcomeMailSubject: String
     attendeeWelcomeMailContent: SecureRichText
     rangeSettings: EventRangeSettingsInput
+    enableMaybeAttendEvent: Boolean
 }
 
 type editEntityPayload {
@@ -985,6 +987,7 @@ type Event implements Entity {
     attendeeWelcomeMailContent: SecureRichText
     rangeSettings: EventRangeSettings
     suggestedItems: [Entity]
+    enableMaybeAttendEvent: Boolean
 }
 
 enum EventRangeType {

@@ -285,6 +285,12 @@ def resolve_range_settings(obj, info):
     return None
 
 
+@event.field("enableMaybeAttendEvent")
+def resolve_enable_maybe_attend_event(obj, info):
+    # pylint: disable=unused-argument
+    return obj.enable_maybe_attend_event
+
+
 event.set_field("guid", shared.resolve_entity_guid)
 event.set_field("status", shared.resolve_entity_status)
 event.set_field("title", shared.resolve_entity_title)
