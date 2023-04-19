@@ -4,7 +4,7 @@ import math
 import os
 from os.path import exists
 
-from celery import shared_task, chord
+from celery import shared_task, chord, signature
 from celery.utils.log import get_task_logger
 from django.conf import settings
 from django.utils.translation import gettext
@@ -49,7 +49,7 @@ def schedule_scan_finished(schema_name):
                                               error_count=error_count,
                                               admin=admin_user)
 
-        logger.info("Scanned found %i virusses @%s", incidents, schema_name)
+        logger.info("Scanned found %i incidents @%s", incidents.count(), schema_name)
 
 
 @shared_task
@@ -72,8 +72,8 @@ class ScheduleScan:
         return self.file_queryset().order_by('last_scan').values_list('id', flat=True)[:self.file_limit()]
 
     def generate_tasks(self, schema_name):
-        for file_id in self.collect_files():
-            yield scan_file.si(schema_name, str(file_id))
+        for count_down, file_id in enumerate([*self.collect_files()]):
+            yield signature(scan_file, args=(schema_name, str(file_id)), count_down=(1+count_down))
 
     def run(self, schema_name):
         chord([*self.generate_tasks(schema_name)],
