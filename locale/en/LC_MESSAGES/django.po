@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-04-12 09:22+0200\n"
+"POT-Creation-Date: 2023-04-19 16:27+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -29,7 +29,7 @@ msgstr "status update"
 msgid "Blog"
 msgstr "Blog"
 
-#: blog/core_hooks.py:26 core/lib.py:389
+#: blog/core_hooks.py:26 core/lib.py:393
 msgid "Blogs"
 msgstr "Blogs"
 
@@ -45,9 +45,9 @@ msgstr "Text page"
 msgid "Pages"
 msgstr "Pages"
 
-#: cms/resolvers/mutation_copy_page.py:32
-#: event/resolvers/mutation_event_copy.py:63
-#: event/tests/test_resolve_copy_entity.py:131
+#: cms/resolvers/mutation_copy_page.py:22
+#: event/resolvers/mutation_event_copy.py:49
+#: event/tests/test_resolve_copy_entity.py:124
 #, python-format
 msgid "Copy %s"
 msgstr "Copy %s"
@@ -179,54 +179,58 @@ msgstr "Elasticsearch status details"
 msgid "Back to overview"
 msgstr "Back to overview"
 
-#: control/templates/tools/elasticsearch_details.html:32
+#: control/templates/tools/elasticsearch_details.html:12
+msgid "Visit the site"
+msgstr "Visit the site"
+
+#: control/templates/tools/elasticsearch_details.html:35
 #: control/templates/tools/elasticsearch_summary.html:18
 msgid "Index status"
 msgstr "Index status"
 
-#: control/templates/tools/elasticsearch_details.html:36
-#: control/templates/tools/elasticsearch_details.html:77
+#: control/templates/tools/elasticsearch_details.html:39
+#: control/templates/tools/elasticsearch_details.html:80
 msgid "Index name"
 msgstr "Index name"
 
-#: control/templates/tools/elasticsearch_details.html:37
+#: control/templates/tools/elasticsearch_details.html:40
 #: core/templates/superadmin/tasks.html:36
 msgid "Expected"
 msgstr "Expected"
 
-#: control/templates/tools/elasticsearch_details.html:38
+#: control/templates/tools/elasticsearch_details.html:41
 #: core/templates/superadmin/tasks.html:37
 msgid "Actual"
 msgstr "Actual"
 
-#: control/templates/tools/elasticsearch_details.html:53
-#: control/templates/tools/elasticsearch_details.html:92
+#: control/templates/tools/elasticsearch_details.html:56
+#: control/templates/tools/elasticsearch_details.html:95
 msgid "Error"
 msgstr "Error"
 
-#: control/templates/tools/elasticsearch_details.html:57
-#: control/templates/tools/elasticsearch_details.html:96
+#: control/templates/tools/elasticsearch_details.html:60
+#: control/templates/tools/elasticsearch_details.html:99
 msgid "Type"
 msgstr "Type"
 
-#: control/templates/tools/elasticsearch_details.html:61
-#: control/templates/tools/elasticsearch_details.html:100
+#: control/templates/tools/elasticsearch_details.html:64
+#: control/templates/tools/elasticsearch_details.html:103
 msgid "Backtrace"
 msgstr "Backtrace"
 
-#: control/templates/tools/elasticsearch_details.html:68
-#: control/templates/tools/elasticsearch_details.html:107
+#: control/templates/tools/elasticsearch_details.html:71
+#: control/templates/tools/elasticsearch_details.html:110
 #: control/templates/tools/elasticsearch_summary.html:12
 msgid "Nothing to report"
 msgstr "Nothing to report"
 
-#: control/templates/tools/elasticsearch_details.html:73
+#: control/templates/tools/elasticsearch_details.html:76
 #: control/templates/tools/elasticsearch_summary.html:19
 msgid "Access status"
 msgstr "Access status"
 
-#: control/templates/tools/elasticsearch_details.html:78
-#: core/templates/superadmin/tasks.html:38 event/export.py:58
+#: control/templates/tools/elasticsearch_details.html:81
+#: core/templates/superadmin/tasks.html:38 event/export.py:57
 msgid "Status"
 msgstr "Status"
 
@@ -242,7 +246,7 @@ msgstr "Site"
 msgid "Report date"
 msgstr "Report date"
 
-#: control/views.py:252
+#: control/views.py:250
 #, python-format
 msgid ""
 "Backup site %(site_name)s is scheduled. The backup will soon be added to the"
@@ -251,11 +255,11 @@ msgstr ""
 "Backup site %(site_name)s is scheduled. The backup will soon be added to the"
 " list of backups below. Reference: %(task_id)s"
 
-#: core/core_hooks.py:11 core/views.py:467
+#: core/core_hooks.py:11 core/views.py:472
 msgid "Group"
 msgstr "Group"
 
-#: core/core_hooks.py:12 core/lib.py:400
+#: core/core_hooks.py:12 core/lib.py:404
 msgid "Groups"
 msgstr "Groups"
 
@@ -288,8 +292,8 @@ msgid "Receive overview emails"
 msgstr "Receive overview emails"
 
 #: core/forms.py:163 core/templates/registration/request.html:23
-#: core/templates/superadmin/optional_features.html:74 core/views.py:465
-#: event/export.py:58
+#: core/templates/superadmin/optional_features.html:74 core/views.py:470
+#: event/export.py:57
 msgid "Name"
 msgstr "Name"
 
@@ -297,73 +301,73 @@ msgstr "Name"
 msgid "Profile field"
 msgstr "Profile field"
 
-#: core/lib.py:212 core/resolvers/mutation_import_users.py:29
+#: core/lib.py:216 core/resolvers/mutation_import_users.py:29
 #: core/resolvers/site_settings.py:90
 msgid "Just me"
 msgstr "Just me"
 
-#: core/lib.py:215
+#: core/lib.py:219
 #, python-format
 msgid "Group: %(group_name)s"
 msgstr "Group: %(group_name)s"
 
-#: core/lib.py:218
+#: core/lib.py:222
 #, python-format
 msgid "Subgroup: %(subgroup_name)s"
 msgstr "Subgroup: %(subgroup_name)s"
 
-#: core/lib.py:224 core/resolvers/mutation_import_users.py:30
+#: core/lib.py:228 core/resolvers/mutation_import_users.py:30
 #: core/resolvers/site_settings.py:91
 msgid "Logged in users"
 msgstr "Logged in users"
 
-#: core/lib.py:226 core/resolvers/mutation_import_users.py:33
+#: core/lib.py:230 core/resolvers/mutation_import_users.py:33
 #: core/resolvers/site_settings.py:95
 msgid "Public"
 msgstr "Public"
 
-#: core/lib.py:388
+#: core/lib.py:392
 msgid "Updates"
 msgstr "Updates"
 
-#: core/lib.py:390
+#: core/lib.py:394
 msgid "CMS pages"
 msgstr "CMS pages"
 
-#: core/lib.py:391 discussion/core_hooks.py:26
+#: core/lib.py:395 discussion/core_hooks.py:26
 msgid "Discussions"
 msgstr "Discussions"
 
-#: core/lib.py:392 event/core_hooks.py:26
+#: core/lib.py:396 event/core_hooks.py:26
 msgid "Events"
 msgstr "Events"
 
-#: core/lib.py:393 file/core_hooks.py:29
+#: core/lib.py:397 file/core_hooks.py:29
 msgid "Files"
 msgstr "Files"
 
-#: core/lib.py:394 news/core_hooks.py:11 news/core_hooks.py:18
+#: core/lib.py:398 news/core_hooks.py:11 news/core_hooks.py:18
 #: news/core_hooks.py:25 news/core_hooks.py:26
 msgid "News"
 msgstr "News"
 
-#: core/lib.py:395
+#: core/lib.py:399
 msgid "Polls"
 msgstr "Polls"
 
-#: core/lib.py:396 question/core_hooks.py:26
+#: core/lib.py:400 question/core_hooks.py:26
 msgid "Questions"
 msgstr "Questions"
 
-#: core/lib.py:397 core/templates/superadmin/tasks.html:8
+#: core/lib.py:401 core/templates/superadmin/tasks.html:8
 msgid "Tasks"
 msgstr "Tasks"
 
-#: core/lib.py:398
+#: core/lib.py:402
 msgid "Wiki pages"
 msgstr "Wiki pages"
 
-#: core/lib.py:399
+#: core/lib.py:403
 msgid "Comments"
 msgstr "Comments"
 
@@ -560,11 +564,11 @@ msgstr "email"
 msgid "name"
 msgstr "name"
 
-#: core/resolvers/shared.py:619
+#: core/resolvers/shared.py:635
 msgid "Appointment"
 msgstr "Appointment"
 
-#: core/resolvers/shared.py:625
+#: core/resolvers/shared.py:641
 msgid "Agenda"
 msgstr "Agenda"
 
@@ -588,16 +592,12 @@ msgstr "Editor"
 msgid "Question expert"
 msgstr "Question expert"
 
-#: core/tasks/clamav.py:28 file/tasks.py:117
-msgid "This file contains a virus"
-msgstr "This file contains a virus"
-
-#: core/tasks/cronjobs.py:202 core/tests/test_auto_block_users.py:67
+#: core/tasks/cronjobs.py:190 core/tests/test_auto_block_users.py:67
 #: core/tests/test_auto_block_users.py:70 user/post_deploy.py:19
 msgid "Bouncing e-mail address"
 msgstr "Bouncing e-mail address"
 
-#: core/tasks/cronjobs.py:245 core/tests/test_auto_block_users.py:109
+#: core/tasks/cronjobs.py:233 core/tests/test_auto_block_users.py:109
 #: core/tests/test_auto_block_users.py:111 user/post_deploy.py:20
 msgid "User deleted externally"
 msgstr "User deleted externally"
@@ -632,7 +632,7 @@ msgstr "Do you want to check in <strong>%(name)s</strong> (%(email)s)?"
 msgid "Yes, confirm"
 msgstr "Yes, confirm"
 
-#: core/templates/check_in/checked_in.html:8 event/models.py:504
+#: core/templates/check_in/checked_in.html:8 event/models.py:507
 msgid "Checked in"
 msgstr "Checked in"
 
@@ -887,7 +887,7 @@ msgstr "Personal message"
 msgid "Direct notification"
 msgstr "Direct notification"
 
-#: core/templates/email/send_notification_emails.html:10 core/views.py:621
+#: core/templates/email/send_notification_emails.html:10 core/views.py:626
 msgid "Notification overview"
 msgstr "Notification overview"
 
@@ -905,7 +905,7 @@ msgstr "Unsubscribe"
 msgid "Adjust your email settings"
 msgstr "Adjust your email settings"
 
-#: core/templates/email/send_overview_emails.html:22 core/views.py:618
+#: core/templates/email/send_overview_emails.html:22 core/views.py:623
 msgid "Periodic overview"
 msgstr "Periodic overview"
 
@@ -1507,19 +1507,19 @@ msgstr "New mention on %(entity_type)s"
 msgid "%(sender_name)s has mentioned you at %(entity_title)s"
 msgstr "%(sender_name)s has mentioned you at %(entity_title)s"
 
-#: core/views.py:466 event/export.py:58
+#: core/views.py:471 event/export.py:57
 msgid "E-mail"
 msgstr "E-mail"
 
-#: core/views.py:468
+#: core/views.py:473
 msgid "Disk size"
 msgstr "Disk size"
 
-#: core/views.py:564
+#: core/views.py:569
 msgid "Your changes are saved"
 msgstr "Your changes are saved"
 
-#: core/views.py:624
+#: core/views.py:629
 #, python-format
 msgid "Successfully unsubscribed %(email)s from %(list_name)s"
 msgstr "Successfully unsubscribed %(email)s from %(list_name)s"
@@ -1541,7 +1541,7 @@ msgstr "All attendees"
 msgid "All events"
 msgstr "All events"
 
-#: event/export.py:58
+#: event/export.py:57
 msgid "Updated"
 msgstr "Updated"
 
@@ -1581,23 +1581,23 @@ msgstr "QR code for %s"
 msgid "Added to event %s from waitinglist"
 msgstr "Added to event %s from waitinglist"
 
-#: event/models.py:403
+#: event/models.py:406
 msgid "Accepted"
 msgstr "Accepted"
 
-#: event/models.py:404
+#: event/models.py:407
 msgid "Maybe"
 msgstr "Maybe"
 
-#: event/models.py:405
+#: event/models.py:408
 msgid "Rejected"
 msgstr "Rejected"
 
-#: event/models.py:406
+#: event/models.py:409
 msgid "At waitinglist"
 msgstr "At waitinglist"
 
-#: event/models.py:466
+#: event/models.py:469
 msgid "You already signed in for another sub-event in the same slot."
 msgstr "You already signed in for another sub-event in the same slot."
 
@@ -1714,12 +1714,16 @@ msgstr ""
 
 #: event/templates/email/delete_event_attendees.html:16
 #, python-format
-msgid "You are removed as attendee from %(title)s."
-msgstr "You are removed as attendee from %(title)s."
+msgid "You have signed out as a participant for %(title)s."
+msgstr "You have signed out as a participant for %(title)s."
 
 #: event/templates/email/delete_event_attendees.html:18
-msgid "If you have questions, please contact the event organizer."
-msgstr "If you have questions, please contact the event organizer."
+msgid ""
+"Did you not do this yourself and have questions? Please contact the event "
+"organizer."
+msgstr ""
+"Did you not do this yourself and have questions? Please contact the event "
+"organizer."
 
 #: event/templates/email/element/event_date_location.html:5
 #: event/templates/email/element/event_date_location.html:7
@@ -1749,15 +1753,15 @@ msgstr "Message to event"
 msgid "External content author"
 msgstr "External content author"
 
-#: file/core_hooks.py:12 file/core_hooks.py:28 file/models.py:75
+#: file/core_hooks.py:12 file/core_hooks.py:28 file/models.py:161
 msgid "File"
 msgstr "File"
 
-#: file/core_hooks.py:16 file/core_hooks.py:33 file/models.py:76
+#: file/core_hooks.py:16 file/core_hooks.py:33 file/models.py:162
 msgid "Folder"
 msgstr "Folder"
 
-#: file/core_hooks.py:21 file/models.py:77 pad/core_hooks.py:10
+#: file/core_hooks.py:21 file/models.py:163 pad/core_hooks.py:10
 msgid "Pad"
 msgstr "Pad"
 
@@ -1770,13 +1774,13 @@ msgstr "Folders"
 msgid "Filescan found suspicous files on %(site_url)s"
 msgstr "Filescan found suspicous files on %(site_url)s"
 
-#: file/resolvers/mutation.py:301
-msgid "File contains virus"
-msgstr "File contains virus"
-
-#: file/tasks.py:107
+#: file/tasks.py:93
 msgid "File not found on file storage"
 msgstr "File not found on file storage"
+
+#: file/tasks.py:103
+msgid "This file contains a virus"
+msgstr "This file contains a virus"
 
 #: file/templates/email/file_scan_found.html:6
 #, python-format
@@ -1830,6 +1834,9 @@ msgstr "Wiki"
 #: wiki/core_hooks.py:26
 msgid "Wiki's"
 msgstr "Wiki's"
+
+#~ msgid "File contains virus"
+#~ msgstr "File contains virus"
 
 #~ msgid "Superadmin only"
 #~ msgstr "Superadmin only"
