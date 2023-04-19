@@ -39,10 +39,10 @@ admin:
   resources:
     limits:
       cpu: 500m
-      memory: 512Mi
+      memory: 1024Mi
     requests:
-      cpu: 200m
-      memory: 250Mi
+      cpu: 500m
+      memory: 1024Mi
   tunnelConfig: |
     tunnel: control-test
     credentials-file: /etc/cloudflared/creds/credentials.json
