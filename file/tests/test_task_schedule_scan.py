@@ -5,7 +5,7 @@ from django.utils import timezone
 from core.tests.helpers import PleioTenantTestCase
 from file.factories import FileFactory
 from file.models import FileFolder
-from file.tasks import ScheduleScan, schedule_scan
+from file.tasks import ScheduleScan, schedule_scan, scan_file
 from user.factories import UserFactory
 
 
@@ -53,17 +53,18 @@ class TestTaskScheduleScanTestCase(PleioTenantTestCase):
         # second should be the middle of the scanned-before files.
         self.assertEqual([*result], [self.files[1]])
 
-    @mock.patch("file.tasks.scan_file")
+    @mock.patch("file.tasks.signature")
     @mock.patch("file.tasks.ScheduleScan.collect_files")
-    def test_generate_tasks(self, mocked_collect_files, mocked_scan_file):
+    def test_generate_tasks(self, mocked_collect_files, signature):
         mocked_collect_files.return_value = [self.files[0]]
-        mocked_scan_file.si.return_value = "SCAN_FILE_SIGNATURE"
+        signature.return_value = "SCAN_FILE_SIGNATURE"
 
         self.assertEqual([*ScheduleScan().generate_tasks(self.tenant.schema_name)], [
             "SCAN_FILE_SIGNATURE",
         ])
-        self.assertEqual(mocked_scan_file.si.call_args.args,
-                         (self.tenant.schema_name, str(self.files[0])))
+        self.assertEqual(signature.call_args.args, (scan_file,))
+        self.assertEqual(signature.call_args.kwargs, dict(args=(self.tenant.schema_name, str(self.files[0])),
+                                                          count_down=1))
 
     @mock.patch("file.tasks.chord")
     @mock.patch("file.tasks.ScheduleScan.generate_tasks")
