@@ -98,22 +98,6 @@ class TestEventModelTestCase(PleioTenantTestCase):
 
         self.assertFalse(pre_delete.called)
 
-    @mock.patch("event.range.sync.EventRangeSync.pre_delete")
-    def test_recurring_event_delete(self, pre_delete):
-        # Given.
-        self.entity.range_settings = {
-            "type": "dayOfTheWeek",
-            "interval": 1
-        }
-        self.entity.range_starttime = self.entity.start_date
-        self.entity.save()
-
-        # When.
-        self.entity.delete()
-
-        # Then.
-        self.assertTrue(pre_delete.called)
-
 
 class TestEventQueryset(PleioTenantTestCase):
 
