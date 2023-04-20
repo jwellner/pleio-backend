@@ -63,7 +63,8 @@ class TestMigrateAttachmentTestCase(PleioTenantTestCase):
         expected_content = open(self.attachment.upload.path, 'rb').read()
         expected_resized = [str(pk) for pk in self.attachment.resized_images.get_queryset().values_list('id', flat=True)]
 
-        new_file = migrate_attachment(self.attachment.guid)
+        new_file_id = migrate_attachment(self.tenant.schema_name, self.attachment.guid)
+        new_file = FileFolder.objects.get(pk=new_file_id)
         actual_content = open(new_file.upload.path, 'rb').read()
         actual_resized = [str(pk) for pk in new_file.resized_images.get_queryset().values_list('id', flat=True)]
 
