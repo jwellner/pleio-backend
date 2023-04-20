@@ -14,7 +14,7 @@ class RowSerializer(WidgetSerializerBase):
 
     @property
     def has_columns(self):
-        return len(self.row.get('columns')) > 0
+        return bool(self.row.get('columns'))
 
     @property
     def columns(self):
