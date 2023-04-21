@@ -7,6 +7,7 @@ from core.lib import clean_graphql_input, get_language_options
 
 def resolve_edit_notifications(_, info, input):
     # pylint: disable=redefined-builtin
+    # pylint: disable=too-many-branches
     # TODO: refactor to edit user settings
 
     user = info.context["request"].user
@@ -25,6 +26,24 @@ def resolve_edit_notifications(_, info, input):
 
     if 'emailNotifications' in clean_input:
         requested_user.profile.receive_notification_email = clean_input.get('emailNotifications')
+
+    if 'isMentionNotificationsEnabled' in clean_input:
+        requested_user.profile.is_mention_notifications_enabled = clean_input.get('isMentionNotificationsEnabled')
+
+    if 'isMentionNotificationPushEnabled' in clean_input:
+        requested_user.profile.is_mention_notification_push_enabled = clean_input.get('isMentionNotificationPushEnabled')
+
+    if 'isMentionNotificationDirectMailEnabled' in clean_input:
+        requested_user.profile.is_mention_notification_direct_mail_enabled = clean_input.get('isMentionNotificationDirectMailEnabled')
+
+    if 'isCommentNotificationsEnabled' in clean_input:
+        requested_user.profile.is_comment_notifications_enabled = clean_input.get('isCommentNotificationsEnabled')
+
+    if 'isCommentNotificationPushEnabled' in clean_input:
+        requested_user.profile.is_comment_notification_push_enabled = clean_input.get('isCommentNotificationPushEnabled')
+
+    if 'isCommentNotificationDirectMailEnabled' in clean_input:
+        requested_user.profile.is_comment_notification_direct_mail_enabled = clean_input.get('isCommentNotificationDirectMailEnabled')
 
     if 'emailNotificationsFrequency' in clean_input:
         if clean_input.get('emailNotificationsFrequency') > 0:

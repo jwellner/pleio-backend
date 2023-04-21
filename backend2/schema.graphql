@@ -682,6 +682,12 @@ input editNotificationsInput {
     emailNotificationsFrequency: Int
     newsletter: Boolean
     language: String
+    isMentionNotificationsEnabled: Boolean
+    isMentionNotificationPushEnabled: Boolean
+    isMentionNotificationDirectMailEnabled: Boolean
+    isCommentNotificationsEnabled: Boolean
+    isCommentNotificationPushEnabled: Boolean
+    isCommentNotificationDirectMailEnabled: Boolean
 }
 
 type editNotificationsPayload {
@@ -2664,6 +2670,12 @@ type User implements Entity {
     email: String
     emailNotifications: Boolean
     emailNotificationsFrequency: Int
+    isMentionNotificationsEnabled: Boolean
+    isMentionNotificationPushEnabled: Boolean
+    isMentionNotificationDirectMailEnabled: Boolean
+    isCommentNotificationsEnabled: Boolean
+    isCommentNotificationPushEnabled: Boolean
+    isCommentNotificationDirectMailEnabled: Boolean
     getsNewsletter: Boolean
     emailOverview: EmailOverview
     profile: [ProfileItem]

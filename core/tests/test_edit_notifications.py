@@ -32,6 +32,12 @@ class EditNotificationsTestCase(PleioTenantTestCase):
                         emailNotifications
                         emailNotificationsFrequency
                         language
+                        isMentionNotificationsEnabled
+                        isMentionNotificationPushEnabled
+                        isMentionNotificationDirectMailEnabled
+                        isCommentNotificationsEnabled
+                        isCommentNotificationPushEnabled
+                        isCommentNotificationDirectMailEnabled
                         __typename
                     }
                     __typename
@@ -42,6 +48,12 @@ class EditNotificationsTestCase(PleioTenantTestCase):
             "input": {
                 "guid": self.user1.guid,
                 "emailNotifications": True,
+                "isMentionNotificationsEnabled": False,
+                "isMentionNotificationDirectMailEnabled": True,
+                "isMentionNotificationPushEnabled": True,
+                "isCommentNotificationsEnabled": False,
+                "isCommentNotificationDirectMailEnabled": True,
+                "isCommentNotificationPushEnabled": True,
                 "emailNotificationsFrequency": 24,
                 "newsletter": True,
                 "language": "en"
@@ -57,6 +69,12 @@ class EditNotificationsTestCase(PleioTenantTestCase):
         self.assertEqual(data["editNotifications"]["user"]["emailNotifications"], True)
         self.assertEqual(data["editNotifications"]["user"]["emailNotificationsFrequency"], 24)
         self.assertEqual(data["editNotifications"]["user"]["language"], "en")
+        self.assertEqual(data["editNotifications"]["user"]["isMentionNotificationsEnabled"], False)
+        self.assertEqual(data["editNotifications"]["user"]["isMentionNotificationDirectMailEnabled"], True)
+        self.assertEqual(data["editNotifications"]["user"]["isMentionNotificationPushEnabled"], True)
+        self.assertEqual(data["editNotifications"]["user"]["isCommentNotificationsEnabled"], False)
+        self.assertEqual(data["editNotifications"]["user"]["isCommentNotificationDirectMailEnabled"], True)
+        self.assertEqual(data["editNotifications"]["user"]["isCommentNotificationPushEnabled"], True)
 
     def test_edit_notifications_by_admin(self):
         mutation = """
