@@ -13,7 +13,6 @@ from django.core.mail import send_mail
 from django.template.loader import render_to_string
 from django_tenants.utils import schema_context
 from django.core.management import call_command
-from django.core.files.base import ContentFile
 from django.conf import settings
 from django.db import connection
 from django.utils import timezone
@@ -24,18 +23,17 @@ from control.utils.group_copy import GroupCopyRunner
 from core import config
 from core.elasticsearch import elasticsearch_status_report
 from core.exceptions import ExceptionDuringQueryIndex, UnableToTestIndex
-from core.models import SiteStat
 from core.lib import test_elasticsearch_index
 from core.utils.export import compress_path
 from core.tasks.elasticsearch_tasks import elasticsearch_delete_data_for_tenant, all_indexes
-from tenants.models import Client, Domain, Agreement, AgreementVersion
+from tenants.models import Client, Domain
 from user.models import User
 
 logger = get_task_logger(__name__)
 
 
 @shared_task(bind=True, ignore_result=True)
-def poll_task_result(self):
+def followup_task_complete(self, *args):
     # pylint: disable=unused-argument
     '''
     Poll task status
@@ -64,34 +62,6 @@ def poll_task_result(self):
             task.run_followup()
 
         task.save()
-
-
-@shared_task(bind=True)
-def get_sites(self):
-    # pylint: disable=unused-argument
-    '''
-    Used to sync sites to control
-    '''
-    with schema_context('public'):
-        clients = Client.objects.exclude(schema_name='public')
-
-        sites = []
-        for client in clients:
-
-            agreements_accepted = True
-            for agreement in Agreement.objects.all():
-                if not agreement.latest_accepted_for_tenant(client):
-                    agreements_accepted = False
-
-            sites.append({
-                'id': client.id,
-                'name': client.schema_name,
-                'is_active': client.is_active,
-                'domain': client.get_primary_domain().domain,
-                'agreements_accepted': agreements_accepted
-            })
-
-        return sites
 
 
 @shared_task(bind=True)
@@ -400,57 +370,6 @@ end $$;"""
 
 
 @shared_task(bind=True)
-def get_sites_by_email(self, email):
-    # pylint: disable=unused-argument
-    '''
-    Get users by email
-    '''
-    clients = Client.objects.exclude(schema_name='public')
-
-    data = []
-    for client in clients:
-
-        with schema_context(client.schema_name):
-
-            user = User.objects.filter(email=email, is_active=True).first()
-            if user:
-                data.append({
-                    'user_name': user.name,
-                    'user_email': user.email,
-                    'user_external_id': user.external_id,
-                    'id': client.id,
-                    'schema': client.schema_name,
-                    'domain': client.get_primary_domain().domain
-                })
-
-    return data
-
-
-@shared_task(bind=False)
-def get_db_disk_usage(schema_name):
-    '''
-    Get db disk usage by schema_name
-    '''
-    with schema_context(schema_name):
-        try:
-            return SiteStat.objects.filter(stat_type='DB_SIZE').latest('created_at').value
-        except Exception:
-            return 0
-
-
-@shared_task(bind=False)
-def get_file_disk_usage(schema_name):
-    '''
-    Get file disk usage by schema_name
-    '''
-    with schema_context(schema_name):
-        try:
-            return SiteStat.objects.filter(stat_type='DISK_SIZE').latest('created_at').value
-        except Exception:
-            return 0
-
-
-@shared_task(bind=True)
 def update_site(self, site_id, data):
     # pylint: disable=unused-argument
     '''
@@ -491,68 +410,6 @@ def copy_file_from_source_tenant(copy_id, source_file_id):
     '''
     runner = GroupCopyRunner(copy_id)
     runner.copy_file_data(source_file_id)
-
-
-@shared_task(bind=True)
-def get_agreements(self):
-    # pylint: disable=unused-argument
-    '''
-    Get agreements
-    '''
-    result = []
-
-    with schema_context('public'):
-        agreements = Agreement.objects.all()
-        for agreement in agreements:
-            result.append({
-                'id': agreement.id,
-                'name': agreement.name,
-                'versions': [{
-                    'id': version.id,
-                    'version': version.version,
-                    'document': version.get_absolute_url(),
-                    'created_at': version.created_at
-                } for version in agreement.versions.all()]
-            })
-
-    return result
-
-
-@shared_task(bind=True)
-def add_agreement(self, name):
-    # pylint: disable=unused-argument
-    agreement = Agreement.objects.create(
-        name=name
-    )
-
-    return {
-        'id': agreement.id,
-        'name': agreement.name
-    }
-
-
-@shared_task(bind=True)
-def add_agreement_version(self, agreement_id, version, document_path):
-    # pylint: disable=unused-argument
-    with schema_context('public'):
-        agreement = Agreement.objects.get(id=agreement_id)
-
-        fd = open(document_path, "rb")
-
-        save_as = ContentFile(fd.read())
-        save_as.name = os.path.basename(fd.name)
-
-        version = AgreementVersion.objects.create(
-            agreement=agreement,
-            version=version,
-            document=save_as
-        )
-
-    return {
-        'id': version.id,
-        'version': version.version,
-        'document': version.get_absolute_url()
-    }
 
 
 @shared_task
