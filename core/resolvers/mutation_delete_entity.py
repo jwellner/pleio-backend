@@ -5,6 +5,7 @@ from core.models import Entity, Group
 from core.resolvers import shared
 from core.resolvers.mutation_delete_comment import resolve_delete_comment
 from core.utils.cleanup import schedule_cleanup_group_content_featured_images
+from event.models import Event
 from file.models import FileFolder
 from file.resolvers.mutation import assert_not_referenced
 
@@ -40,6 +41,10 @@ def resolve_delete_entity(_, info, input):
         entity.update_updated_at() # update parent folder dates
         if not input.get("force"):
             assert_not_referenced(entity)
+
+    if isinstance(entity, Event):
+        shared.resolve_pre_delete_event(entity)
+
 
     entity.delete()
 
