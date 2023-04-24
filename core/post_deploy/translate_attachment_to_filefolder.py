@@ -3,7 +3,6 @@ import os
 import re
 import uuid
 
-import kombu
 from celery import shared_task, chord
 from celery.utils.log import get_task_logger
 from django.db.models import Q
@@ -85,9 +84,7 @@ def migrate_attachment(schema_name, attachment_id):
             attachment.refresh_from_db()
             attachment.delete()
 
-            return file
-        except kombu.exceptions.EncodeError:
-            pass
+            return file.guid
         except Exception as e:
             if attachment:
                 logger.error("migrate_attachment error: %s %s@%s %s %s", tenant_schema(), attachment.name, attachment.attached_object_id, e.__class__, str(e))

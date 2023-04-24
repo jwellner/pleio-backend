@@ -20,12 +20,12 @@ from celery.result import AsyncResult
 from core.constances import OIDC_PROVIDER_OPTIONS
 from core.elasticsearch import elasticsearch_status_report
 from core.forms import MeetingsSettingsForm, ProfileSetForm
-from core.models import Group, ProfileSet
+from core.models import Group, ProfileSet, SiteStat
 from core.models.agreement import CustomAgreement
 from core.tasks import replace_domain_links, elasticsearch_rebuild_for_tenant, elasticsearch_index_data_for_tenant
 from core.lib import tenant_schema, is_valid_domain
 from core.superadmin.forms import AuditLogFilter, CustomAgreementForm, SettingsForm, ScanIncidentFilter, OptionalFeaturesForm, SupportContractForm
-from control.tasks import get_db_disk_usage, get_file_disk_usage, copy_group
+from control.tasks import copy_group
 from core.tasks.elasticsearch_tasks import all_indexes
 from file.models import ScanIncident, FileFolder
 from tenants.models import Client, GroupCopy
@@ -45,8 +45,16 @@ class Dashboard(SuperAdminView):
     http_method_names = ['get']
 
     def get(self, request):
-        db_usage = get_db_disk_usage(tenant_schema())
-        file_usage = get_file_disk_usage(tenant_schema())
+
+        try:
+            db_usage = SiteStat.objects.filter(stat_type='DB_SIZE').latest('created_at').value
+        except Exception:
+            db_usage = 0
+
+        try:
+            file_usage = SiteStat.objects.filter(stat_type='DISK_SIZE').latest('created_at').value
+        except Exception:
+            file_usage = 0
 
         context = {
             'stats': {

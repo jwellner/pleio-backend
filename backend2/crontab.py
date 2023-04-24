@@ -32,10 +32,6 @@ beat_schedule = {
         'task': 'control.tasks.update_elasticsearch_status',
         'schedule': crontab(minute=30, hour=6)
     },
-    'control_poll_task': {
-        'task': 'control.tasks.poll_task_result',
-        'schedule': 10.0,
-    },
     'process_range_events': {
         'task': 'event.tasks.process_range_events',
         'schedule': crontab(hour=3, minute=30),
