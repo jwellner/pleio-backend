@@ -73,7 +73,7 @@ def resolve_entity_suggested_items(obj, info):
     suggested = []
     if obj.suggested_items:
         for item in obj.suggested_items:
-            entity = load_entity_by_id(item, ['blog.Blog', 'news.News'], fail_if_not_found=False)
+            entity = load_entity_by_id(item, ['core.Entity'], fail_if_not_found=False)
             if entity:
                 suggested.append(entity)
 
