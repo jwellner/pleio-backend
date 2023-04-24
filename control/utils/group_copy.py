@@ -190,6 +190,7 @@ class GroupCopyRunner:
                 target_group.icon_id = self._copy_attachment(group.icon_id, target_group.owner.guid)
 
             target_group.pk = None
+            target_group.id = None
 
             self.copy_attachments(target_group)
 
@@ -211,6 +212,7 @@ class GroupCopyRunner:
                 subgroup_source_id = s.id
                 s.group = target_group
                 s.pk = None
+                s.id = None
                 s.save()
 
                 GroupCopyMapping.objects.create(
@@ -236,6 +238,7 @@ class GroupCopyRunner:
                 m.user = self.get_or_create_user(m.user_id)
                 m.group = target_group
                 m.pk = None
+                m.id = None
                 m.save()
 
         logger.info("Inserted %i group members", len(memberships))
@@ -328,6 +331,7 @@ class GroupCopyRunner:
                             comments = list(target_entity.get_flat_comment_list())
 
                     target_entity.pk = None
+                    target_entity.id = None
                     target_entity.save()
 
                     GroupCopyMapping.objects.create(
@@ -354,6 +358,7 @@ class GroupCopyRunner:
                         comment.owner = self.get_or_create_user(comment.owner_id)
                         self.copy_attachments(comment)
                         comment.pk = None
+                        comment.id = None
                         with schema_context(self.state.source_tenant):
                             if comment.container:
                                 if comment.container.__class__.__name__ == 'Comment':  # is subcomment, for now set container to target_entity
@@ -379,6 +384,7 @@ class GroupCopyRunner:
                             attendee.event = target_entity
                             attendee.user = None if not attendee.user_id else self.get_or_create_user(attendee.user_id)
                             attendee.pk = None
+                            attendee.id = None
                             attendee.save()
 
             logger.info("Inserted %i entities", len(entities))
