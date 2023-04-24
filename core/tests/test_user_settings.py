@@ -33,12 +33,6 @@ class UserSettingsTestCase(PleioTenantTestCase):
                         canEdit
                         emailNotifications
                         emailNotificationsFrequency
-                        isMentionNotificationsEnabled
-                        isMentionNotificationPushEnabled
-                        isMentionNotificationDirectMailEnabled
-                        isCommentNotificationsEnabled
-                        isCommentNotificationPushEnabled
-                        isCommentNotificationDirectMailEnabled                        
                         getsNewsletter
                         language
                         languageOptions {
@@ -87,12 +81,6 @@ class UserSettingsTestCase(PleioTenantTestCase):
         self.assertEqual(data["entity"]["canEdit"], True)
         self.assertEqual(data["entity"]["username"], self.user1.guid)
         self.assertEqual(data["entity"]["emailNotifications"], True)
-        self.assertEqual(data["entity"]["isMentionNotificationsEnabled"], True)
-        self.assertEqual(data["entity"]["isMentionNotificationDirectMailEnabled"], False)
-        self.assertEqual(data["entity"]["isMentionNotificationPushEnabled"], False)
-        self.assertEqual(data["entity"]["isCommentNotificationsEnabled"], True)
-        self.assertEqual(data["entity"]["isCommentNotificationDirectMailEnabled"], False)
-        self.assertEqual(data["entity"]["isCommentNotificationPushEnabled"], False)
         self.assertEqual(data["entity"]["emailNotificationsFrequency"], 4)
         self.assertEqual(data["entity"]["getsNewsletter"], False)
         self.assertEqual(data["entity"]["language"], 'nl')
@@ -124,12 +112,6 @@ class UserSettingsTestCase(PleioTenantTestCase):
         self.assertEqual(data["entity"]["username"], self.user1.guid)
         self.assertEqual(data["entity"]["emailNotifications"], True)
         self.assertEqual(data["entity"]["emailNotificationsFrequency"], 4)
-        self.assertEqual(data["entity"]["isMentionNotificationsEnabled"], True)
-        self.assertEqual(data["entity"]["isMentionNotificationDirectMailEnabled"], False)
-        self.assertEqual(data["entity"]["isMentionNotificationPushEnabled"], False)
-        self.assertEqual(data["entity"]["isCommentNotificationsEnabled"], True)
-        self.assertEqual(data["entity"]["isCommentNotificationDirectMailEnabled"], False)
-        self.assertEqual(data["entity"]["isCommentNotificationPushEnabled"], False)
         self.assertEqual(data["entity"]["getsNewsletter"], False)
         self.assertEqual(data["entity"]["language"], 'nl')
         self.assertEqual(data["entity"]["languageOptions"], [{'value': 'nl', 'label': 'Nederlands'}])
@@ -159,12 +141,6 @@ class UserSettingsTestCase(PleioTenantTestCase):
         self.assertEqual(data["entity"]["username"], self.user1.guid)
         self.assertEqual(data["entity"]["emailNotifications"], None)
         self.assertEqual(data["entity"]["emailNotificationsFrequency"], None)
-        self.assertEqual(data["entity"]["isMentionNotificationsEnabled"], None)
-        self.assertEqual(data["entity"]["isMentionNotificationDirectMailEnabled"], None)
-        self.assertEqual(data["entity"]["isMentionNotificationPushEnabled"], None)
-        self.assertEqual(data["entity"]["isCommentNotificationsEnabled"], None)
-        self.assertEqual(data["entity"]["isCommentNotificationDirectMailEnabled"], None)
-        self.assertEqual(data["entity"]["isCommentNotificationPushEnabled"], None)        
         self.assertEqual(data["entity"]["getsNewsletter"], None)
         self.assertEqual(data["entity"]["emailOverview"], None)
         self.assertEqual(data["entity"]["groupNotifications"], [])
@@ -184,12 +160,6 @@ class UserSettingsTestCase(PleioTenantTestCase):
         self.assertEqual(data["entity"]["username"], self.user1.guid)
         self.assertEqual(data["entity"]["emailNotifications"], None)
         self.assertEqual(data["entity"]["emailNotificationsFrequency"], None)
-        self.assertEqual(data["entity"]["isMentionNotificationsEnabled"], None)
-        self.assertEqual(data["entity"]["isMentionNotificationDirectMailEnabled"], None)
-        self.assertEqual(data["entity"]["isMentionNotificationPushEnabled"], None)
-        self.assertEqual(data["entity"]["isCommentNotificationsEnabled"], None)
-        self.assertEqual(data["entity"]["isCommentNotificationDirectMailEnabled"], None)
-        self.assertEqual(data["entity"]["isCommentNotificationPushEnabled"], None)    
         self.assertEqual(data["entity"]["getsNewsletter"], None)
         self.assertEqual(data["entity"]["emailOverview"], None)
         self.assertEqual(data["entity"]["groupNotifications"], [])

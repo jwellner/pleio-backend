@@ -36,15 +36,6 @@ class UserProfile(models.Model):
     user = models.OneToOneField('user.User', on_delete=models.CASCADE, related_name="_profile")
     last_online = models.DateTimeField(blank=True, null=True)
     receive_notification_email = models.BooleanField(default=True)
-    
-    is_mention_notifications_enabled = models.BooleanField(default=True)
-    is_mention_notification_direct_mail_enabled = models.BooleanField(default=False)
-    is_mention_notification_push_enabled = models.BooleanField(default=False)
-
-    is_comment_notifications_enabled = models.BooleanField(default=True)
-    is_comment_notification_direct_mail_enabled = models.BooleanField(default=False)
-    is_comment_notification_push_enabled = models.BooleanField(default=False)    
-
     notification_email_interval_hours = models.IntegerField(default=4)
     overview_email_interval = models.CharField(
         max_length=10,

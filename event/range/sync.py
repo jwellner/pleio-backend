@@ -93,7 +93,7 @@ class EventRangeSync:
         elif self.instance_limit is not None:
             full_range = Event.objects.get_full_range(self.event)
             if full_range.count() > self.instance_limit:
-                blacklist = full_range[self.instance_limit:]
+                blacklist = full_range[:full_range.count() - self.instance_limit]
 
         self.reposition_attendees.apply(blacklist=[e.guid for e in blacklist])
 

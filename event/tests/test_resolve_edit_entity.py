@@ -328,7 +328,7 @@ class TestEditRangeEventTestCase(PleioTenantTestCase):
         self.assertTrue(Event.objects.count() > 1)
 
     def test_set_instance_limit_less_then_number_of_items(self):
-        changing_item = Event.objects.get_full_range(self.event).last()
+        changing_item = Event.objects.get_full_range(self.event).first()
         self.variables['input']['guid'] = changing_item.guid
         self.variables['input']['rangeSettings']['instanceLimit'] = 1
         self.assertEqual(Event.objects.count(), 2)
@@ -338,7 +338,7 @@ class TestEditRangeEventTestCase(PleioTenantTestCase):
             self.graphql_client.post(self.mutation, self.variables)
 
     def test_set_repeat_until_beyond_changing_items_date(self):
-        changing_item = Event.objects.get_full_range(self.event).last()
+        changing_item = Event.objects.get_full_range(self.event).first()
         self.variables['input']['guid'] = changing_item.guid
         self.variables['input']['rangeSettings']['repeatUntil'] = (changing_item.start_date + timezone.timedelta(days=10)).isoformat()
         self.assertEqual(Event.objects.count(), 2)
@@ -348,7 +348,7 @@ class TestEditRangeEventTestCase(PleioTenantTestCase):
         self.assertTrue(Event.objects.count() > 1)
 
     def test_set_repeat_until_less_then_changing_items_date(self):
-        changing_item = Event.objects.get_full_range(self.event).last()
+        changing_item = Event.objects.get_full_range(self.event).first()
         self.variables['input']['guid'] = changing_item.guid
         self.variables['input']['rangeSettings']['repeatUntil'] = self.event.start_date.isoformat()
         self.assertEqual(Event.objects.count(), 2)

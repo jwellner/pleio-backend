@@ -639,10 +639,3 @@ def resolve_load_appointment_types():
 def resolve_load_agendas():
     agendas = MeetingsApi().get_agendas()
     return [{'id': a['Id'], 'name': a['Name'] or gettext('Agenda')} for a in agendas]
-
-
-def resolve_pre_delete_event(event):
-    if event.is_recurring:
-        from event.range.sync import EventRangeSync
-        sync = EventRangeSync(event)
-        sync.pre_delete()

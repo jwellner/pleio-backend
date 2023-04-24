@@ -1,9 +1,9 @@
 bleach==5.0.1
 Django==3.2.18
-psycopg2-binary==2.9.6
+psycopg2-binary==2.9.5
 django-db-mutex==1.1.0
 django-filter==2.4.0
-Pillow==9.5.0
+Pillow==9.2.0
 django-elasticsearch-dsl==7.2.2
 Celery==5.2.7
 uwsgi==2.0.21

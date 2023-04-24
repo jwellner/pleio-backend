@@ -76,13 +76,33 @@ class EventQuerySet(models.QuerySet):
                     cycles = cycles - 1
 
             if not item.range_ignore:
-                item.import_values(source=starter)
-
                 item.start_date = item.range_starttime + reference_offset
                 item.start_date += dst_time_delta(item.start_date, starter.start_date)
 
                 item.end_date = item.start_date + reference_duration
                 item.start_date += dst_time_delta(item.end_date, starter.end_date)
+
+                item.title = starter.title
+                item.rich_description = starter.rich_description
+                item.featured_image = starter.featured_image
+                item.featured_alt = starter.featured_alt
+                item.featured_video = starter.featured_video
+                item.featured_video_title = starter.featured_video_title
+                item.featured_position_y = starter.featured_position_y
+                item.abstract = starter.abstract
+                item.location = starter.location
+                item.location_address = starter.location_address
+                item.location_link = starter.location_link
+                item.external_link = starter.external_link
+                item.ticket_link = starter.ticket_link
+                item.max_attendees = starter.max_attendees
+                item.rsvp = starter.rsvp
+                item.attend_event_without_account = starter.attend_event_without_account
+                item.qr_access = starter.qr_access
+                item.attendee_welcome_mail_content = starter.attendee_welcome_mail_content
+                item.attendee_welcome_mail_subject = starter.attendee_welcome_mail_subject
+                item.read_access = starter.read_access
+                item.write_access = starter.write_access
 
             item.save()
             previous_item = item
@@ -95,7 +115,7 @@ class EventQuerySet(models.QuerySet):
             master = reference.range_master
         else:
             master = reference
-        return self.filter(Q(range_master=master) | Q(id=master.id)).order_by('range_starttime')
+        return self.filter(Q(range_master=master) | Q(id=master.id))
 
     def get_range_after(self, reference):
         if not reference.is_recurring:
@@ -323,6 +343,13 @@ class Event(RichDescriptionMediaMixin, TitleMixin, CommentMixin, BookmarkMixin, 
     def is_recurring(self):
         return self.range_settings and bool(self.range_settings.get('type'))
 
+    def delete(self, *args, **kwargs):
+        if self.is_recurring:
+            from event.range.sync import EventRangeSync
+            sync = EventRangeSync(self)
+            sync.pre_delete()
+        super().delete(*args, **kwargs)
+
     def update_subevents(self):
         """ Subevents are dependent on the main event, so when an event is saved, its subevents are updated """
         for child in Event.objects.filter(parent=self):
@@ -339,46 +366,6 @@ class Event(RichDescriptionMediaMixin, TitleMixin, CommentMixin, BookmarkMixin, 
         # self.attendee_welcome_mail_content = callback(self.attendee_welcome_mail_content)
         self.rich_description = callback(self.rich_description)
         self.abstract = callback(self.abstract)
-
-    def import_values(self, source):
-        # Local variables
-        self.title = source.title
-        self.rich_description = source.rich_description
-        self.abstract = source.abstract
-        self.parent = source.parent
-        self.slots_available = source.slots_available
-        self.shared_via_slot = source.shared_via_slot
-        self.location = source.location
-        self.location_address = source.location_address
-        self.location_link = source.location_link
-        self.external_link = source.external_link
-        self.ticket_link = source.ticket_link
-        self.max_attendees = source.max_attendees
-        self.rsvp = source.rsvp
-        self.attend_event_without_account = source.attend_event_without_account
-        self.enable_maybe_attend_event = source.enable_maybe_attend_event
-        self.qr_access = source.qr_access
-        self.attendee_welcome_mail_content = source.attendee_welcome_mail_content
-        self.attendee_welcome_mail_subject = source.attendee_welcome_mail_subject
-        self.suggested_items = source.suggested_items
-
-        # Inherited variables
-        self.group = source.group
-        self.published = source.published
-        self.schedule_archive_after = source.schedule_archive_after
-        self.schedule_delete_after = source.schedule_delete_after
-        self.read_access = source.read_access
-        self.write_access = source.write_access
-        self.tags = source.tags
-        self.category_tags = source.category_tags
-        self.is_pinned = source.is_pinned
-        self.is_featured = source.is_featured
-        self.is_recommended = source.is_recommended
-        self.featured_image = source.featured_image
-        self.featured_alt = source.featured_alt
-        self.featured_video = source.featured_video
-        self.featured_video_title = source.featured_video_title
-        self.featured_position_y = source.featured_position_y
 
     def serialize(self):
         return {

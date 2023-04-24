@@ -44,21 +44,12 @@ def create_notifications_for_scheduled_content(schema_name):
             create_notification.delay(tenant_schema(), 'created', get_model_name(instance), instance.id, instance.owner.id)
 
 
-def send_push(recipient, sender, verb, instance):
-    translation.activate(recipient.get_language())
-    payload = get_notification_payload(sender, verb, instance)
-    if payload:
-        for subscription in WebPushSubscription.objects.filter(user=recipient):
-            send_web_push_notification(subscription, payload)
-
-
 @shared_task(bind=True, ignore_result=True)
 def create_notification(self, schema_name, verb, model_name, entity_id, sender_id):
     # pylint: disable=unused-argument
     # pylint: disable=too-many-arguments
     # pylint: disable=too-many-locals
     # pylint: disable=too-many-branches
-    # pylint: disable=too-many-statements
     # pylint: disable=too-many-nested-blocks
     '''
     task for creating a notification. If the content of the notification is in a group and the recipient has configured direct notifications
@@ -99,15 +90,9 @@ def create_notification(self, schema_name, verb, model_name, entity_id, sender_i
                         continue
                     if not instance.can_read(follower):
                         continue
-                    # do not create not if is_comment_notifications_enabled is false for content outside groups
-                    if not getattr(instance, 'group', None) and not follower.profile.is_comment_notifications_enabled:
-                        continue
                     recipients.append(follower)
         elif verb == 'mentioned':
             recipients = User.objects.get_unmentioned_users(instance.mentioned_users, instance)
-            # if mention not in content in group, check is mention setting is enabled
-            if not getattr(instance, 'group', None):
-                recipients = [recipient for recipient in recipients if recipient.profile.is_mention_notifications_enabled]
         elif verb == 'custom':
             recipients = instance.recipients()
         else:
@@ -116,7 +101,7 @@ def create_notification(self, schema_name, verb, model_name, entity_id, sender_i
         # tuple with list is returned, get the notification created
         notifications = notify.send(sender, recipient=recipients, verb=verb, action_object=instance)[0][1]
 
-        # send direct mail and push notification for content in groups
+        # only send direct and push notification for content in groups
         if getattr(instance, 'group', None):
             from core.mail_builders.notifications import schedule_notification_mail, MailTypeEnum
             for notification in notifications:
@@ -132,31 +117,8 @@ def create_notification(self, schema_name, verb, model_name, entity_id, sender_i
 
                 # send push notification
                 if membership.is_notification_push_enabled and config.PUSH_NOTIFICATIONS_ENABLED:
-                    send_push(recipient, sender, verb, instance)
-
-        # send direct mail and push notification for content outside groups
-        else:
-            from core.mail_builders.notifications import schedule_notification_mail, MailTypeEnum
-            for notification in notifications:
-                try:
-                    recipient = User.objects.get(id=notification.recipient_id)
-                except Exception:
-                    continue
-
-                if (verb == "commented"):
-                    # send email direct and mark emailed as True
-                    if recipient.profile.is_comment_notification_direct_mail_enabled:
-                        schedule_notification_mail(recipient, [notification], MailTypeEnum.DIRECT)
-
-                    # send push notification
-                    if recipient.profile.is_comment_notification_push_enabled and config.PUSH_NOTIFICATIONS_ENABLED:
-                        send_push(recipient, sender, verb, instance)
-                
-                elif (verb == "mentioned"):
-                    # send email direct and mark emailed as True
-                    if recipient.profile.is_mention_notification_direct_mail_enabled:
-                        schedule_notification_mail(recipient, [notification], MailTypeEnum.DIRECT)
-
-                    # send push notification
-                    if recipient.profile.is_mention_notification_push_enabled and config.PUSH_NOTIFICATIONS_ENABLED:
-                        send_push(recipient, sender, verb, instance)         
+                    translation.activate(recipient.get_language())
+                    payload = get_notification_payload(sender, verb, instance)
+                    if payload:
+                        for subscription in WebPushSubscription.objects.filter(user=recipient):
+                            send_web_push_notification(subscription, payload)

@@ -1,8 +1,8 @@
-import django_filters
-import uuid
-
 from enum import Enum
-from celery import signature, chain
+
+import celery
+import django_filters
+
 from django.db import models
 from django.forms import Select, TextInput
 from django.utils import timezone
@@ -49,15 +49,11 @@ class SiteFilter(django_filters.FilterSet):
 class TaskManager(models.Manager):
 
     def create_task(self, name, arguments=None, **kwargs):
-        task_id = uuid.uuid4()
-        chain(
-            signature(name, arguments).set(task_id=str(task_id)),
-            signature('control.tasks.followup_task_complete')
-        ).apply_async()
+        remote_task = celery.current_app.send_task(name, arguments)
 
         task = self.model(
-            task_id=task_id,
-            state='PENDING',
+            task_id=remote_task.id,
+            state=remote_task.state,
             name=name,
             arguments=arguments,
             **kwargs,
