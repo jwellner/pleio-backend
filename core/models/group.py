@@ -197,11 +197,9 @@ class Group(TagsModel, FeaturedCoverMixin, AttachmentMixin):
         """
         Update Entity read_access when group is set to 'Closed'
         """
-        if self.is_closed:
+        if self.is_closed and self.id:
             # to prevent cyclic import
             Entity = apps.get_model('core', 'Entity')
-
-            assert self.id, "Group should have an ID when update read-access"
 
             filters = Q()
             filters.add(Q(group__id=self.id), Q.AND)

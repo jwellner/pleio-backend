@@ -189,7 +189,7 @@ class GroupCopyRunner:
             if group.icon_id:
                 target_group.icon_id = self._copy_attachment(group.icon_id, target_group.owner.guid)
 
-            target_group.pk = uuid.uuid4()
+            target_group.pk = None
 
             self.copy_attachments(target_group)
 
@@ -374,12 +374,12 @@ class GroupCopyRunner:
                             target_id=comment.id
                         )
 
-                    # add event attendees
-                    for attendee in event_attendees:
-                        attendee.event = target_entity
-                        attendee.user = self.get_or_create_user(attendee.user_id)
-                        attendee.pk = None
-                        attendee.save()
+                    if self.state.copy_members:
+                        for attendee in event_attendees:
+                            attendee.event = target_entity
+                            attendee.user = None if not attendee.user_id else self.get_or_create_user(attendee.user_id)
+                            attendee.pk = None
+                            attendee.save()
 
             logger.info("Inserted %i entities", len(entities))
 
