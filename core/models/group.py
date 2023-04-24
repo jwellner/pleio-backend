@@ -201,6 +201,8 @@ class Group(TagsModel, FeaturedCoverMixin, AttachmentMixin):
             # to prevent cyclic import
             Entity = apps.get_model('core', 'Entity')
 
+            assert self.id, "Group should have an ID when update read-access"
+
             filters = Q()
             filters.add(Q(group__id=self.id), Q.AND)
             filters.add(Q(read_access__overlap=list([ACCESS_TYPE.public, ACCESS_TYPE.logged_in])), Q.AND)

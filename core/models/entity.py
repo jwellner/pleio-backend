@@ -187,9 +187,8 @@ class Entity(TagsModel):
         if not self.group or not self.id:
             return
 
-        entity = Entity.objects.get(id=self.id)
-
-        if entity.read_access != self.read_access:
+        entity = Entity.objects.filter(id=self.id).first()
+        if entity and entity.read_access != self.read_access:
             for notification in Notification.objects.filter(action_object_object_id=self.id):
                 if not self.can_read(notification.recipient):
                     notification.delete()
