@@ -32,7 +32,7 @@ from core.constances import OIDC_PROVIDER_OPTIONS, USER_ROLES
 from core.forms import EditEmailSettingsForm, OnboardingForm, RequestAccessForm
 from core.http import HttpErrorReactPage, NotFoundReact, UnauthorizedReact, ForbiddenReact, file_blocked_response
 from core.lib import (get_base_url, get_exportable_content_types, get_model_by_subtype,
-                      get_tmp_file_path, is_schema_public, tenant_schema, replace_html_img_src, registration_url)
+                      get_tmp_file_path, is_schema_public, tenant_schema, replace_html_img_src, registration_url, access_id_to_acl)
 from core.mail_builders.site_access_request import schedule_site_access_request_mail
 from core.models import (Comment, CommentRequest, Entity, Group,
                          ProfileField, SiteAccessRequest, UserProfileField)
@@ -257,8 +257,11 @@ def onboarding(request):
                     else:
                         value = ''
 
-                user_profile_field, _ = UserProfileField.objects.get_or_create(user_profile=user.profile, profile_field=profile_field)
+                user_profile_field, created = UserProfileField.objects.get_or_create(user_profile=user.profile, profile_field=profile_field)
                 user_profile_field.value = value
+                if created:
+                    user_profile_field.read_access = access_id_to_acl(user, 1)
+                    user_profile_field.write_access = access_id_to_acl(user, 0)
                 user_profile_field.save()
             return HttpResponseRedirect('/')
 
