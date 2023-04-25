@@ -4,7 +4,7 @@ import math
 import os
 from os.path import exists
 
-from celery import shared_task, chord, signature
+from celery import shared_task, chord, signature, chain, group
 from celery.utils.log import get_task_logger
 from django.conf import settings
 from django.utils.translation import gettext
@@ -17,6 +17,7 @@ from file.mail_builders.file_scan_found import schedule_file_scan_found_mail
 from file.models import FileFolder, ScanIncident
 from file.helpers.images import resize_and_update_image
 from file.validators import is_upload_complete
+from tenants.models import Client
 from user.models import User
 
 logger = get_task_logger(__name__)
@@ -53,13 +54,26 @@ def schedule_scan_finished(schema_name):
 
 
 @shared_task
-def schedule_scan(schema_name):
+def schedule_scan_all_tenants():
+    tasks = []
+    for tenant in Client.objects.exclude(schema_name='public'):
+        tasks.append(signature(schedule_scan, kwargs={'schema_name': tenant.schema_name}))
+    chain(*tasks).apply_async()
+
+
+@shared_task
+def schedule_scan(result=None, schema_name=None):
     with schema_context(schema_name):
-        runner = ScheduleScan()
-        runner.run(schema_name)
+        runner = ScheduleScan(schema_name=schema_name,
+                              file_offset=result or 10)
+        return runner.run()
 
 
 class ScheduleScan:
+
+    def __init__(self, schema_name, file_offset):
+        self.schema_name = schema_name
+        self.file_offset = file_offset
 
     def file_limit(self):
         return math.ceil(self.file_queryset().count() / int(settings.SCAN_CYCLE_DAYS))
@@ -71,13 +85,14 @@ class ScheduleScan:
     def collect_files(self):
         return self.file_queryset().order_by('last_scan').values_list('id', flat=True)[:self.file_limit()]
 
-    def generate_tasks(self, schema_name):
+    def generate_tasks(self):
         for count_down, file_id in enumerate([*self.collect_files()]):
-            yield signature(scan_file, args=(schema_name, str(file_id)), count_down=(1+count_down))
+            yield signature(scan_file, args=(self.schema_name, str(file_id)), count_down=(self.file_offset + count_down))
 
-    def run(self, schema_name):
-        chord([*self.generate_tasks(schema_name)],
-              schedule_scan_finished.si(schema_name)).apply_async()
+    def run(self):
+        tasks = [*self.generate_tasks()]
+        chord(tasks, schedule_scan_finished.si(self.schema_name)).apply_async()
+        return len(tasks) + self.file_offset
 
 
 @shared_task(rate_limit="30/m")
@@ -94,7 +109,7 @@ def scan_file(schema_name, file_id):
                 file.save()
                 return
 
-            logger.info("Scan file %s, last scanned %s", os.path.basename(file.upload.name), datetime_format(file.last_scan))
+            logger.info("At %s Scan file %s, last scanned %s", schema_name,  os.path.basename(file.upload.name), datetime_format(file.last_scan))
             file.last_scan = timezone.now()
 
             result = file.scan()

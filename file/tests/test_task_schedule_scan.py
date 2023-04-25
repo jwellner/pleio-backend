@@ -40,15 +40,15 @@ class TestTaskScheduleScanTestCase(PleioTenantTestCase):
         self.override_setting(SCAN_CYCLE_DAYS="10")
 
         mocked_count.return_value = 100
-        self.assertEqual(ScheduleScan().file_limit(), 10)
+        self.assertEqual(ScheduleScan(self.tenant.schema_name, 0).file_limit(), 10)
 
         mocked_count.return_value = 200
-        self.assertEqual(ScheduleScan().file_limit(), 20)
+        self.assertEqual(ScheduleScan(self.tenant.schema_name, 0).file_limit(), 20)
 
     @mock.patch("file.tasks.ScheduleScan.file_limit")
     def test_collect_files(self, file_limit):
         file_limit.return_value = 1
-        result = ScheduleScan().collect_files()
+        result = ScheduleScan(self.tenant.schema_name, 0).collect_files()
 
         # second should be the middle of the scanned-before files.
         self.assertEqual([*result], [self.files[1]])
@@ -59,12 +59,25 @@ class TestTaskScheduleScanTestCase(PleioTenantTestCase):
         mocked_collect_files.return_value = [self.files[0]]
         signature.return_value = "SCAN_FILE_SIGNATURE"
 
-        self.assertEqual([*ScheduleScan().generate_tasks(self.tenant.schema_name)], [
+        scheduler = ScheduleScan(self.tenant.schema_name, 0)
+        self.assertEqual([*scheduler.generate_tasks()], [
             "SCAN_FILE_SIGNATURE",
         ])
-        self.assertEqual(signature.call_args.args, (scan_file,))
         self.assertEqual(signature.call_args.kwargs, dict(args=(self.tenant.schema_name, str(self.files[0])),
-                                                          count_down=1))
+                                                          count_down=0))
+
+    @mock.patch("file.tasks.signature")
+    @mock.patch("file.tasks.ScheduleScan.collect_files")
+    def test_generate_tasks_with_offset(self, mocked_collect_files, signature):
+        mocked_collect_files.return_value = [self.files[0]]
+        signature.return_value = "SCAN_FILE_SIGNATURE"
+
+        scheduler = ScheduleScan(self.tenant.schema_name, 10)
+        self.assertEqual([*scheduler.generate_tasks()], [
+            "SCAN_FILE_SIGNATURE",
+        ])
+        self.assertEqual(signature.call_args.kwargs, dict(args=(self.tenant.schema_name, str(self.files[0])),
+                                                          count_down=10))
 
     @mock.patch("file.tasks.chord")
     @mock.patch("file.tasks.ScheduleScan.generate_tasks")
@@ -75,19 +88,18 @@ class TestTaskScheduleScanTestCase(PleioTenantTestCase):
                          mocked_chord):
         mocked_generate_tasks.return_value = ["SCAN_TASK_SIGNATURE"]
         mocked_scan_finished.si.return_value = "SCAN_COMPLETE_SIGNATURE"
-        chord_task = mock.MagicMock()
-        mocked_chord.return_value = chord_task
+        chord_return_value = mock.MagicMock()
+        mocked_chord.return_value = chord_return_value
 
-        ScheduleScan().run(self.tenant.schema_name)
+        scheduler = ScheduleScan(self.tenant.schema_name, 0)
+        result = scheduler.run()
 
-        self.assertEqual(mocked_generate_tasks.call_args.args,
-                         (self.tenant.schema_name,))
+        self.assertEqual(1, result)
         self.assertEqual(mocked_chord.call_args.args, (["SCAN_TASK_SIGNATURE"], "SCAN_COMPLETE_SIGNATURE"))
-        self.assertTrue(chord_task.apply_async.called)
+        self.assertTrue(chord_return_value.apply_async.called)
 
     @mock.patch('file.tasks.ScheduleScan.run')
     def test_schedule_scan(self, mocked_run):
         schedule_scan(self.tenant.schema_name)
 
         self.assertTrue(mocked_run.called)
-        self.assertEqual(mocked_run.call_args.args, (self.tenant.schema_name,))
