@@ -76,6 +76,54 @@ def resolve_email_notifications(obj, info):
     return None
 
 
+@user.field("isMentionNotificationsEnabled")
+def resolve_is_mention_notifications_enabled(obj, info):
+    # pylint: disable=unused-argument
+    if is_user_or_admin(obj, info):
+        return obj.profile.is_mention_notifications_enabled
+    return None
+
+
+@user.field("isMentionNotificationPushEnabled")
+def resolve_is_mention_notification_push_enabled(obj, info):
+    # pylint: disable=unused-argument
+    if is_user_or_admin(obj, info):
+        return obj.profile.is_mention_notification_push_enabled
+    return None
+
+
+@user.field("isMentionNotificationDirectMailEnabled")
+def resolve_is_mention_notification_direct_mail_enabled(obj, info):
+    # pylint: disable=unused-argument
+    if is_user_or_admin(obj, info):
+        return obj.profile.is_mention_notification_direct_mail_enabled
+    return None
+
+
+@user.field("isCommentNotificationsEnabled")
+def resolve_is_comment_notifications_enabled(obj, info):
+    # pylint: disable=unused-argument
+    if is_user_or_admin(obj, info):
+        return obj.profile.is_comment_notifications_enabled
+    return None
+
+
+@user.field("isCommentNotificationPushEnabled")
+def resolve_is_comment_notification_push_enabled(obj, info):
+    # pylint: disable=unused-argument
+    if is_user_or_admin(obj, info):
+        return obj.profile.is_comment_notification_push_enabled
+    return None
+
+
+@user.field("isCommentNotificationDirectMailEnabled")
+def resolve_is_comment_notification_direct_mail_enabled(obj, info):
+    # pylint: disable=unused-argument
+    if is_user_or_admin(obj, info):
+        return obj.profile.is_comment_notification_direct_mail_enabled
+    return None
+
+
 @user.field("emailNotificationsFrequency")
 def resolve_email_notifications_frequency(obj, info):
     # pylint: disable=unused-argument

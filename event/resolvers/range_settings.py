@@ -35,4 +35,4 @@ def resolve_next_event(obj, info, timeAfter=None):
     if not event.range_closed:
         complete_range(event, early_this_morning(timeAfter) + timedelta(days=1))
 
-    return Event.objects.get_full_range(event).filter(start_date__gt=timeAfter).first()
+    return Event.objects.get_range_after(event).filter(start_date__gt=timeAfter).first()

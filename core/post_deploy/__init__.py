@@ -8,7 +8,7 @@ from django.conf import settings
 from django.db.models import Prefetch
 from post_deploy import post_deploy_action
 
-from core.lib import tenant_schema, is_schema_public, get_full_url
+from core.lib import tenant_schema, is_schema_public, get_full_url, access_id_to_acl
 from notifications.models import Notification
 
 from .translate_attachment_to_filefolder import task as translate_attachment_to_filefolder_task
@@ -111,3 +111,23 @@ def entity_updated_at_from_report():
             total += 1
 
     logger.error("Updated updated_at for %i entities in schema %s ", total, tenant_schema())
+
+
+@post_deploy_action
+def fix_user_profile_field_acl():
+    """
+    Fixes issue where onboarding set empty read_access on profile fields
+    """
+    if is_schema_public():
+        return
+
+    from core.models import UserProfileField
+
+    count = 0
+    for field in UserProfileField.objects.filter(read_access__len=0):
+        field.read_access = access_id_to_acl(field.user_profile.user, 1)
+        field.write_access = access_id_to_acl(field.user_profile.user, 0)
+        field.save()
+        count+=1
+
+    logger.info("Fixed ACL of %i profile fields in schema %s", count,  tenant_schema())

@@ -24,17 +24,12 @@ beat_schedule = {
         'schedule': crontab(minute=0, hour=21, day_of_month=1),
     },
     'file_scan': {
-        'task': 'core.tasks.cronjobs.dispatch_task',
+        'task': 'file.tasks.schedule_scan_all_tenants',
         'schedule': crontab(minute=15, hour=23),
-        'args': ['file.tasks.schedule_scan']
     },
     'elasticsearch_status': {
         'task': 'control.tasks.update_elasticsearch_status',
         'schedule': crontab(minute=30, hour=6)
-    },
-    'control_poll_task': {
-        'task': 'control.tasks.poll_task_result',
-        'schedule': 10.0,
     },
     'process_range_events': {
         'task': 'event.tasks.process_range_events',

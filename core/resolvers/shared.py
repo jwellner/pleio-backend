@@ -73,7 +73,7 @@ def resolve_entity_suggested_items(obj, info):
     suggested = []
     if obj.suggested_items:
         for item in obj.suggested_items:
-            entity = load_entity_by_id(item, ['blog.Blog', 'news.News'], fail_if_not_found=False)
+            entity = load_entity_by_id(item, ['core.Entity'], fail_if_not_found=False)
             if entity:
                 suggested.append(entity)
 
@@ -639,3 +639,10 @@ def resolve_load_appointment_types():
 def resolve_load_agendas():
     agendas = MeetingsApi().get_agendas()
     return [{'id': a['Id'], 'name': a['Name'] or gettext('Agenda')} for a in agendas]
+
+
+def resolve_pre_delete_event(event):
+    if event.is_recurring:
+        from event.range.sync import EventRangeSync
+        sync = EventRangeSync(event)
+        sync.pre_delete()

@@ -231,3 +231,39 @@ class OnboardingTestCase(PleioTenantTestCase):
         response = self.client.get('/', follow=True)
 
         self.assertTemplateUsed(response, 'react.html')
+
+    def test_onboarding_default_acl(self):
+        ProfileField.objects.update(is_mandatory=False)
+        self.update_session(onboarding_claims={
+            'email': 'test_acl@pleio.nl',
+            'name': 'test user',
+            'sub': '4321',
+        })
+        response = self.client.post("/onboarding")
+
+        self.assertEqual(response.status_code, HTTPStatus.FOUND)
+        self.assertEqual(response.url, "/")
+
+        new_user = User.objects.filter(external_id="4321").first()
+        self.assertTrue(new_user)
+        self.assertEqual(new_user.email, "test_acl@pleio.nl")
+
+        acl = { field.profile_field.guid: {
+                'read_access': field.read_access,
+                'write_access': field.write_access
+             } for field in UserProfileField.objects.filter(user_profile=new_user.profile)}
+
+        self.assertDictEqual(acl, {
+            self.profile_field1.guid: {
+                'read_access': ["user:{}".format(new_user.pk), "logged_in"],
+                'write_access': ["user:{}".format(new_user.pk)]
+            },
+            self.profile_field_multiselect.guid: {
+                'read_access': ["user:{}".format(new_user.pk), "logged_in"],
+                'write_access': ["user:{}".format(new_user.pk)]
+            },
+            self.profile_field_datefield.guid: {
+                'read_access': ["user:{}".format(new_user.pk), "logged_in"],
+                'write_access': ["user:{}".format(new_user.pk)]
+            },
+        })
