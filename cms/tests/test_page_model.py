@@ -90,6 +90,7 @@ class TestCampagnePageModelTestCase(Wrapper.BaseTestCase):
     CONTENT = "Page content"
     ROWS = [
         {"isFullWidth": False,
+         "backgroundColor": "orange",
          "columns": [
              {"width": 1,
               "widgets": [
@@ -124,6 +125,7 @@ class TestCampagnePageModelTestCase(Wrapper.BaseTestCase):
               ]}
          ]},
         {"isFullWidth": True,
+         "backgroundColor": "orange",
          "columns": [
              {"width": 2,
               "widgets": [

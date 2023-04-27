@@ -108,6 +108,7 @@ class EditCampagnePageTestCase(PleioTenantTestCase):
                             accessId
                             rows {
                                 isFullWidth
+                                backgroundColor
                                 columns {
                                     width
                                     widgets {
@@ -166,6 +167,7 @@ class EditCampagnePageTestCase(PleioTenantTestCase):
         mocked_mimetype.return_value = file_mock.content_type
         self.variables['input']['rows'] = [
             {"isFullWidth": True,
+             "backgroundColor": "orange",
              "columns": [
                  {"widgets": [{
                      "type": 'demo',
@@ -188,6 +190,7 @@ class EditCampagnePageTestCase(PleioTenantTestCase):
         expected_attachment: FileFolder = FileFolder.objects.first()
         self.assertDictEqual({"data": rows}, {"data": [
             {"isFullWidth": True,
+             "backgroundColor": "orange",
              "columns": [
                  {"width": None,
                   "widgets": [

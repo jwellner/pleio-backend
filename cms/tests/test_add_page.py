@@ -113,6 +113,7 @@ class AddCampagnePageTestCase(PleioTenantTestCase):
                             accessId
                             rows {
                                 isFullWidth
+                                backgroundColor
                                 columns {
                                     width
                                     widgets {
@@ -187,6 +188,7 @@ class AddCampagnePageTestCase(PleioTenantTestCase):
 
         self.variables['input']['rows'] = [
             {"isFullWidth": True,
+             "backgroundColor": 'orange',
              "columns": [
                  {"widgets": [{
                      "type": 'demo',
@@ -208,6 +210,7 @@ class AddCampagnePageTestCase(PleioTenantTestCase):
         expected_attachment: FileFolder = FileFolder.objects.first()
         self.assertDictEqual({"data": rows}, {"data": [
             {"isFullWidth": True,
+             "backgroundColor": 'orange',
              "columns": [
                  {"width": None,
                   "widgets": [

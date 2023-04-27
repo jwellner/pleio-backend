@@ -141,22 +141,27 @@ class TestCampagnePageTestCase(PleioTenantTestCase):
     def setUp(self):
         super().setUp()
         self.owner = EditorFactory()
+        self.ROWS = [
+            {"isFullWidth": False,
+             "backgroundColor": "orange",
+             "columns": [
+                 {"width": [1],
+                  "widgets": [
+                      {"type": "title",
+                       "settings": [
+                           {"key": "title",
+                            "value": "Foo",
+                            "richDescription": None,
+                            "attachment": None}
+                       ]},
+                  ]}
+             ]},
+            {"isFullWidth": False,
+             "backgroundColor": "orange",
+             "columns": []}
+        ]
         self.page = CampagnePageFactory(owner=self.owner,
-                                        row_repository=[
-                                            {"isFullWidth": False,
-                                             "columns": [
-                                                 {"width": [1],
-                                                  "widgets": [
-                                                      {"type": "title",
-                                                       "settings": [
-                                                           {"key": "title",
-                                                            "value": "Foo"}
-                                                       ]},
-                                                  ]}
-                                             ]},
-                                            {"isFullWidth": False,
-                                             "columns": []}
-                                        ])
+                                        row_repository=self.ROWS)
         self.query = """
             query PageItem($guid: String!) {
                 entity(guid: $guid) {
@@ -175,6 +180,7 @@ class TestCampagnePageTestCase(PleioTenantTestCase):
                 }
                 rows {
                     isFullWidth
+                    backgroundColor
                     columns {
                         width
                         widgets {
@@ -213,7 +219,7 @@ class TestCampagnePageTestCase(PleioTenantTestCase):
         self.assertEqual(entity['pageType'], 'campagne')
         self.assertEqual(entity['title'], self.page.title)
         self.assertEqual(entity['owner']['guid'], self.owner.guid)
-        self.assertEqual(len(entity['rows']), 1)
+        self.assertEqual(entity['rows'], [self.ROWS[0]])
 
 
 class TestPagePropertiesTestCase(PleioTenantTestCase):
