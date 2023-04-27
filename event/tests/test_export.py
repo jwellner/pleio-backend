@@ -17,16 +17,18 @@ class TestAttendeeExporterRowsTestCase(PleioTenantTestCase):
 
         self.owner = UserFactory()
         self.event = EventFactory(owner=self.owner,
-                                  title="Main event")
+                                  title="Main event",
+                                  rsvp=True)
         self.attendee = EventAttendee.objects.create(event=self.event,
                                                      state='accept',
-                                                     user=UserFactory(name="Attendee"))
+                                                     user=UserFactory(name="Attendee", email="attendee@example.com"))
         self.sub_event = EventFactory(owner=self.owner,
                                       parent=self.event,
-                                      title="Subevent")
+                                      title="Subevent",
+                                      rsvp=True)
         self.sub_attendee = EventAttendee.objects.create(event=self.sub_event,
                                                          state='accept',
-                                                         user=UserFactory(name="Sub Attendee"))
+                                                         user=UserFactory(name="Sub Attendee", email="subatten@example.com"))
 
         datetime_format = mock.patch("event.export.datetime_format").start()
         datetime_format.return_value = "TIMESTAMP"
@@ -58,8 +60,8 @@ class TestAttendeeExporterRowsTestCase(PleioTenantTestCase):
             [],
             ["Alle deelnemers"],
             ['Status', 'Bijgewerkt', 'Naam', 'E-mail', 'Alle evenementen'],
-            ['Aanvaard', 'TIMESTAMP', self.attendee.name, self.attendee.email, 'Main event'],
-            ['Aanvaard', 'TIMESTAMP', self.sub_attendee.name, self.sub_attendee.email, 'Subevent'],
+            ['Aanvaard', 'TIMESTAMP', self.attendee.name, self.attendee.email, 'Main event', ''],
+            ['Aanvaard', 'TIMESTAMP', self.sub_attendee.name, self.sub_attendee.email, '', 'Subevent'],
         ])
 
     def test_sub_event_rows(self):

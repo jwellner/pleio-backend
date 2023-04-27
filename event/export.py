@@ -12,6 +12,7 @@ class AttendeeExporter:
 
     def __init__(self, event, acting_user):
         self.event = event
+        self.children = [*self.event.children.filter(rsvp=True).order_by('start_date', 'title').values_list('pk', 'title')]
         self.acting_user = acting_user
         self.profile_fields = self.get_profile_fields()
 
@@ -103,8 +104,8 @@ class AttendeeExporter:
         attendee_filters = dict(email=attendee_mail, state='accept')
 
         main_attendee = EventAttendee.objects.filter(event=self.event, **attendee_filters)
-        if main_attendee.exists():
-            yield self.event.title
+        yield self.event.title if main_attendee.exists() else ""
 
-        for attendee in EventAttendee.objects.filter(event__parent=self.event, **attendee_filters).order_by("event__start_date"):
-            yield attendee.event.title
+        attended_sub_events = [*EventAttendee.objects.filter(event__parent=self.event, **attendee_filters).values_list('event_id', flat=True)]
+        for guid, title in self.children:
+            yield title if guid in attended_sub_events else ''
