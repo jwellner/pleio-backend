@@ -2157,10 +2157,12 @@ enum MenuState {
 
 type Row {
     isFullWidth: Boolean
+    backgroundColor: String
     columns: [Column]
 }
 input rowInput {
     isFullWidth: Boolean!
+    backgroundColor: String
     columns: [columnInput]
 }
 

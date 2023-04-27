@@ -13,6 +13,10 @@ class RowSerializer(WidgetSerializerBase):
         return self.row.get('isFullWidth')
 
     @property
+    def backgroundColor(self):
+        return self.row.get('backgroundColor')
+
+    @property
     def has_columns(self):
         return bool(self.row.get('columns'))
 
@@ -23,6 +27,7 @@ class RowSerializer(WidgetSerializerBase):
     def serialize(self):
         result = defaultdict(list)
         result['isFullWidth'] = self.isFullWidth
+        result['backgroundColor'] = self.backgroundColor
         for column in self.columns:
             result['columns'].append(column.serialize())
         return result

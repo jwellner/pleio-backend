@@ -84,6 +84,7 @@ class CopyCampagnePageTestCase(PleioTenantTestCase):
         
         self.rows = [{
             "isFullWidth": True,
+            "backgroundColor": "orange",
             "columns": [{
                     "widgets": [{
                     "type": 'demo',
@@ -121,6 +122,7 @@ class CopyCampagnePageTestCase(PleioTenantTestCase):
                             }
                             rows {
                                 isFullWidth
+                                backgroundColor
                                 columns {
                                     width
                                     widgets {
@@ -167,6 +169,7 @@ class CopyCampagnePageTestCase(PleioTenantTestCase):
         self.assertEqual(len(entity["rows"]), len(self.page.row_repository))
         self.assertEqual(entity["owner"]["guid"], user.guid)
         self.assertEqual(entity["rows"][0]["isFullWidth"], self.rows[0]["isFullWidth"])
+        self.assertEqual(entity["rows"][0]["backgroundColor"], self.rows[0]["backgroundColor"])
         self.assertEqual(entity["rows"][0]["columns"][0]["widgets"][0]["type"], "demo")
 
     def test_edit_page_by_admin(self):
