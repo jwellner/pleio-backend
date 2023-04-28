@@ -154,7 +154,7 @@ class ApiHandler(ApiHandlerBase):
             tags = TagCollector(record[category]['name'])
             self.tag_categories[category].add_value(*tags.get_values())
             return tags
-        except (AttributeError, KeyError):
+        except (AttributeError, KeyError, TypeError):
             return TagCollector()
 
     def _load_zone(self, record):
