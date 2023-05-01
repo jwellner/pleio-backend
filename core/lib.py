@@ -293,9 +293,12 @@ def delete_attached_file(filefield):
     if not filefield:
         return
 
-    file_path = filefield.path
-    if os.path.isfile(file_path):
-        os.remove(file_path)
+    try:
+        file_path = filefield.path
+        if os.path.exists(file_path) and os.path.isfile(file_path):
+            os.remove(file_path)
+    except FileNotFoundError:
+        pass
 
 
 def get_field_type(field_type):
