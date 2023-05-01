@@ -133,7 +133,7 @@ def resolve_update_range_settings(entity, clean_input):
     if 'rangeSettings' in clean_input:
         if entity.start_date < early_this_morning():
             raise GraphQLError(constances.EVENT_RANGE_IMMUTABLE)
-        if entity.parent or entity.children.count():
+        if entity.parent or (entity.pk and entity.children.count()):
             raise GraphQLError(constances.EVENT_RANGE_NOT_POSSIBLE)
 
         # update range_settings.
