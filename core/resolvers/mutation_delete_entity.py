@@ -1,6 +1,7 @@
 from typing import Union
 
 from django.core.exceptions import ObjectDoesNotExist
+
 from core.models import Entity, Group
 from core.resolvers import shared
 from core.resolvers.mutation_delete_comment import resolve_delete_comment
@@ -16,7 +17,7 @@ def resolve_delete_entity(_, info, input):
 
     shared.assert_authenticated(user)
 
-    entity: Union[Entity, None]= None
+    entity: Union[Entity, None] = None
 
     try:
         entity = Group.objects.get(id=input.get("guid"))
@@ -38,8 +39,11 @@ def resolve_delete_entity(_, info, input):
         schedule_cleanup_group_content_featured_images(entity)
 
     if isinstance(entity, FileFolder):
-        entity.update_updated_at() # update parent folder dates
+        entity.update_updated_at()  # update parent folder dates
         if not input.get("force"):
+            if entity.referenced_by.exists() and entity.group:
+                FileFolder.objects.filter(id=entity.pk).update(group=None)
+                return {"success": True}
             assert_not_referenced(entity)
 
     if isinstance(entity, Event):

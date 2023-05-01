@@ -135,17 +135,9 @@ class TipTapAttachments:
 
         yield from self.sources_to_attachment_ids(sources)
 
-    def sources_to_attachment_ids(self, sources):
+    @staticmethod
+    def sources_to_attachment_ids(sources):
         for source in sources:
-            # NOTE: this is a simple approach that fits the current urls "/attachment/<type>/<id>", it might not be sufficient for future changes
-            source_parts = PurePosixPath(unquote(urlparse(source).path)).parts
-            if len(source_parts) < 2:
-                continue
-
-            if not source_parts[1] == 'attachment':
-                continue
-
-            if not is_valid_uuid(source_parts[-1]):
-                continue
-
-            yield source_parts[-1]
+            for part in PurePosixPath(unquote(urlparse(source).path)).parts:
+                if is_valid_uuid(part):
+                    yield part

@@ -54,12 +54,11 @@ class RichFieldTestCase(PleioTenantTestCase):
 
         self.assertFileReferenceNotExists(self.file, self.blog)
 
-    def test_deleted_when_attached_deleted_wrong_url(self):
+    def test_deleted_when_attached_deleted_file_url(self):
         self.blog.rich_description = json.dumps({'type': 'file', 'attrs': {'url': f"/blabla/{self.file.id}"}})
         self.blog.save()
 
-        # Misschien zou hij het wél moeten registreren. Even afwachten.
-        self.assertFileReferenceNotExists(self.file, self.blog)
+        self.assertFileReferenceExists(self.file, self.blog)
 
     def test_replace_attachments(self):
         file1 = self.file_factory(self.relative_path(__file__, ['assets', 'landscape.jpeg']), owner=self.owner)

@@ -18,4 +18,5 @@ from .cleanup_tasks import do_cleanup_featured_image_files
 from .migrate_tags import migrate_tags, revert_tags
 from .exports import export_avatars
 
-from core.post_deploy.translate_attachment_to_filefolder import migrate_attachment, schedule_calculate_checksum
+from ..post_deploy.translate_attachment_to_filefolder import migrate_attachment, schedule_calculate_checksum
+from ..post_deploy.find_unreferenced_attachments import update_entity

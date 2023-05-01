@@ -1,6 +1,9 @@
+import os.path
+
 from django.core.files.base import ContentFile
 
 from blog.factories import BlogFactory
+from core.factories import GroupFactory
 from core.tests.helpers import PleioTenantTestCase
 from file.factories import FileFactory
 from file.models import FileReference
@@ -64,3 +67,18 @@ class TestDeleteFileTestCase(PleioTenantTestCase):
         result = self.graphql_client.post(self.mutation, self.variables)
 
         self.assertEqual(result['data']['deleteEntity']['success'], True)
+
+    def test_delete_file_from_group_with_article_relation(self):
+        group = GroupFactory(owner=self.owner)
+        BlogFactory(owner=self.owner, group=group, rich_description=self.tiptap_attachment(self.file))
+        self.file.group = group
+        self.file.save()
+
+        self.graphql_client.force_login(self.owner)
+        self.graphql_client.post(self.mutation, self.variables)
+        self.file.refresh_from_db()
+
+        self.assertIsNone(self.file.group)
+        self.assertTrue(os.path.exists(self.file.upload.path))
+        self.assertTrue(os.path.getsize(self.file.upload.path) > 1)
+
