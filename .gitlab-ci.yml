@@ -21,7 +21,7 @@ variables:
 .python:
   image: python:3.9.10
   tags:
-    - docker
+    - backend2
   before_script:
     - apt-get update && apt-get install --no-install-recommends -y pandoc
     - pip install -r requirements.txt
