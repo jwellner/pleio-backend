@@ -12,7 +12,7 @@ from model_utils.managers import InheritanceQuerySet
 
 from core.constances import DOWNLOAD_AS_OPTIONS, ACCESS_TYPE, PERSONAL_FILE
 from core.lib import generate_object_filename, get_mimetype, tenant_schema, get_basename, get_file_checksum
-from core.models import Entity, Tag
+from core.models import Entity, Tag, RevisionMixin
 from core.models.entity import EntityManager
 from core.models.mixin import ModelWithFile, TitleMixin, HasMediaMixin
 from core.models.rich_fields import AttachmentMixin
@@ -114,6 +114,9 @@ class FileFolderQuerySet(InheritanceQuerySet):
     def filter_files(self):
         return self.filter(type=FileFolder.Types.FILE)
 
+    def filter_pads(self):
+        return self.filter(type=FileFolder.Types.PAD)
+
     def filter_orphaned_files(self):
         qs = self.filter_files()
         return qs.filter(group__isnull=True,
@@ -149,6 +152,9 @@ class FileFolderManager(EntityManager):
     def filter_files(self):
         return self.get_queryset().filter_files()
 
+    def filter_pads(self):
+        return self.get_queryset().filter_pads()
+
     def filter_orphaned_files(self):
         return self.get_queryset().filter_orphaned_files()
 
@@ -156,7 +162,7 @@ class FileFolderManager(EntityManager):
         return self.get_queryset().filter_attachments()
 
 
-class FileFolder(HasMediaMixin, TitleMixin, ModelWithFile, ResizedImageMixin, AttachmentMixin, Entity):
+class FileFolder(HasMediaMixin, TitleMixin, ModelWithFile, ResizedImageMixin, AttachmentMixin, RevisionMixin, Entity):
     class Types(models.TextChoices):
         FILE = "File", _("File")
         FOLDER = "Folder", _("Folder")
@@ -280,6 +286,9 @@ class FileFolder(HasMediaMixin, TitleMixin, ModelWithFile, ResizedImageMixin, At
         for option in DOWNLOAD_AS_OPTIONS:
             download_as_options.append({"type": option, "url": "/download_rich_description_as/{}/{}".format(self.guid, option)})
         return download_as_options
+
+    def has_revisions(self):
+        return self.is_pad()
 
     def is_referenced(self):
         if self.group:
@@ -456,6 +465,9 @@ class FileFolder(HasMediaMixin, TitleMixin, ModelWithFile, ResizedImageMixin, At
 
     def is_file(self):
         return self.type == self.Types.FILE
+
+    def is_pad(self):
+        return self.type == self.Types.PAD
 
 
 class ScanIncidentManager(models.Manager):
