@@ -3,16 +3,39 @@ from copy import deepcopy
 
 from auditlog.registry import auditlog
 from django.db import models
+from model_utils.managers import InheritanceQuerySet
 
 from cms.row_resolver import RowSerializer
 from core.models import Entity, AttachmentMixin, RevisionMixin
 from core.constances import USER_ROLES
 from django.contrib.postgres.fields import ArrayField
 
+from core.models.entity import EntityManager
 from core.models.mixin import TitleMixin, RichDescriptionMediaMixin
 
 from core.models.rich_fields import ReplaceAttachments
 from core.widget_resolver import WidgetSerializer
+
+
+class PageQuerySet(InheritanceQuerySet):
+
+    def filter_campagne(self):
+        return self.filter(page_type='campagne')
+
+    def filter_text(self):
+        return self.exclude(page_type='campagne')
+
+
+class PageManager(EntityManager):
+
+    def get_queryset(self):
+        return PageQuerySet(model=Page, using=self._db)
+
+    def filter_campagne(self):
+        return self.get_queryset().filter_campagne()
+
+    def filter_text(self):
+        return self.get_queryset().filter_text()
 
 
 class Page(RichDescriptionMediaMixin, TitleMixin, AttachmentMixin, RevisionMixin, Entity):
@@ -27,6 +50,8 @@ class Page(RichDescriptionMediaMixin, TitleMixin, AttachmentMixin, RevisionMixin
     class Meta:
         # When positions are equal sort old -> new (used for menu's)
         ordering = ['position', 'published']
+
+    objects = PageManager()
 
     rich_description = models.TextField(null=True, blank=True)
 
