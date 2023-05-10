@@ -59,6 +59,7 @@ def resolve_add_pad(_, info, input):
     entity.write_access = access_id_to_acl(entity, clean_input.get("writeAccessId", 0))
 
     entity.save()
+    shared.store_initial_revision(entity)
 
     return {
         "entity": entity
@@ -77,6 +78,8 @@ def resolve_edit_pad(_, info, input):
 
     clean_input = clean_graphql_input(input)
 
+    revision = shared.resolve_start_revision(entity, user)
+
     shared.assert_authenticated(user)
     shared.assert_write_access(entity, user)
 
@@ -90,6 +93,7 @@ def resolve_edit_pad(_, info, input):
         entity.pad_state = clean_input.get("state")
 
     entity.save()
+    shared.store_update_revision(revision, entity)
 
     return {
         "entity": entity
