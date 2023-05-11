@@ -10,7 +10,7 @@ def task():
         return
 
     for group in Group.objects.all():
-        current_widgets = {w.get('type') for w in group.widget_repository or []}
+        current_widgets = [w.get('type') for w in group.widget_repository or []]
         if 'events' not in current_widgets:
             group.widget_repository = [{'type': "events", 'settings': []}, *group.widget_repository]
             group.save()
