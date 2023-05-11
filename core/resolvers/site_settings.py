@@ -956,6 +956,12 @@ def resolve_videocall_profilepage(*args):
     return config.VIDEOCALL_PROFILEPAGE
 
 
+@site_settings_private.field('sitePlan')
+def resolve_site_plan(obj, info):
+    # pylint: disable=unused-argument
+    return config.SITE_PLAN
+
+
 @site_settings_private.field('supportContractEnabled')
 def resolve_support_contract_enabled(obj, info):
     # pylint: disable=unused-argument

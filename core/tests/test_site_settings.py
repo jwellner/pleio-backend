@@ -6,7 +6,7 @@ from django.utils import timezone
 
 from core.models import ProfileField, SiteInvitation, SiteAccessRequest
 from core.tests.helpers import PleioTenantTestCase
-from user.factories import UserFactory
+from user.factories import UserFactory, AdminFactory
 from user.models import User
 from cms.models import Page
 from django.core.cache import cache
@@ -260,6 +260,7 @@ class TestSiteSettingsTestCase(PleioTenantTestCase):
 
                     pdfCheckerEnabled
                     collabEditingEnabled
+                    sitePlan
                     supportContractEnabled
                     supportContractHoursRemaining
                     searchArchiveOption
@@ -484,6 +485,7 @@ class TestSiteSettingsTestCase(PleioTenantTestCase):
         self.assertEqual(data["siteSettings"]["kalturaVideoPlayerId"], "")
         self.assertEqual(data["siteSettings"]["pdfCheckerEnabled"], True)
         self.assertEqual(data["siteSettings"]["collabEditingEnabled"], False)
+        self.assertEqual(data["siteSettings"]['sitePlan'], '')
         self.assertEqual(data["siteSettings"]["supportContractEnabled"], False)
         self.assertEqual(data["siteSettings"]["supportContractHoursRemaining"], 0)
         self.assertEqual(data['siteSettings']["searchArchiveOption"], 'nobody')
@@ -783,3 +785,35 @@ class TestSiteSettingsJavascriptSection(PleioTenantTestCase):
 
         self.assertIn(self.AUTHENTICATED_UUID, content)
         self.assertNotIn(self.ANONYMOUS_UUID, content)
+
+
+class TestSiteSettingsProperties(PleioTenantTestCase):
+
+    def setUp(self):
+        super().setUp()
+        self.admin = AdminFactory()
+        self.query = """
+        query SiteGeneralSettings {
+            siteSettings {
+                %s
+            }
+        }
+        """
+
+    def test_site_plan(self):
+        self.override_config(SITE_PLAN='foo')
+        self.graphql_client.force_login(self.admin)
+        response = self.graphql_client.post(self.query % 'sitePlan', {})
+        self.assertEqual(response['data']['siteSettings']['sitePlan'], 'foo')
+
+    def test_support_contract_enabled(self):
+        self.override_config(SUPPORT_CONTRACT_ENABLED=True)
+        self.graphql_client.force_login(self.admin)
+        response = self.graphql_client.post(self.query % 'supportContractEnabled', {})
+        self.assertEqual(response['data']['siteSettings']['supportContractEnabled'], True)
+
+    def test_support_contract_hours(self):
+        self.override_config(SUPPORT_CONTRACT_HOURS_REMAINING='9.2')
+        self.graphql_client.force_login(self.admin)
+        response = self.graphql_client.post(self.query % 'supportContractHoursRemaining', {})
+        self.assertEqual(response['data']['siteSettings']['supportContractHoursRemaining'], 9.2)

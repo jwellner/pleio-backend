@@ -107,9 +107,21 @@ body {
     margin-bottom: 0;
 }
 
+.contract-settings-form .select-input,
 .optional-features-form .select-input {
     padding-left: 20px;
 }
+
+.form-control.form-text,
+.form-control.form-select {
+    width: auto
+}
+
+.contract-settings-form .select-input .form-select,
 .optional-features-form .select-input .form-select {
     width: auto;
+}
+
+.contract-settings-form .label {
+    min-width: 125px
 }

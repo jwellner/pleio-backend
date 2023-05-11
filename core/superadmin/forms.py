@@ -97,10 +97,12 @@ class OptionalFeaturesForm(forms.Form):
 
 
 class SupportContractForm(forms.Form):
+    site_plan = forms.CharField(required=False)
     support_contract_enabled = forms.BooleanField(required=False)
     support_contract_hours_remaining = forms.FloatField(required=False)
 
     def save(self):
         data = self.cleaned_data
+        config.SITE_PLAN = data['site_plan']
         config.SUPPORT_CONTRACT_ENABLED = data['support_contract_enabled']
         config.SUPPORT_CONTRACT_HOURS_REMAINING = data['support_contract_hours_remaining']
