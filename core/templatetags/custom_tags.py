@@ -19,3 +19,8 @@ def hex_color_tint(color, tint=0.5):
 @register.simple_tag(name="registration_url", )
 def registration_url_tag():
     return registration_url()
+
+
+@register.filter(name="commaint", )
+def commaint_tag(number):
+    return "{:g}".format(number)

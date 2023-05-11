@@ -170,6 +170,7 @@ DEFAULT_SITE_CONFIG = {
     'VIDEOCALL_THROTTLE': (10, "Maximum number of room reservations per hour"),
     'VIDEOCALL_APPOINTMENT_TYPE': ([], "Setup what appointment-types trigger create a videocall link"),
 
+    'SITE_PLAN': ('', 'Site plan'),
     'SUPPORT_CONTRACT_ENABLED': (False, "Support contract enabled for site"),
     'SUPPORT_CONTRACT_HOURS_REMAINING': (0, "Support contract hours remaining for site"),
     'SEARCH_ARCHIVE_OPTION': ('nobody', "Allow filter archived articles on search"),

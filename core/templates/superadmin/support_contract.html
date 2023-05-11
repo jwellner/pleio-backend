@@ -1,6 +1,7 @@
 {% extends "superadmin/base.html" %}
 
 {% load i18n %}
+{% load custom_tags %}
 
 {% block content %}
 
@@ -10,21 +11,41 @@
 
     <p>Support contract for {{ config.NAME }}</p>
 
-    <form method="post">
+    <form method="post" class="contract-settings-form">
         {% csrf_token %}
+        <div class="card">
+            <h5 class="card-header">Site plan</h5>
+            <div class="card-body">
+                <div class="mb-2 form-check d-flex">
+                    <label for="site_plan" class="label pt-2">Selected site plan:</label>
+                    <select class="form-control form-select" name="site_plan" id="site_plan">
+                        <option value="" {% if not config.SITE_PLAN %}selected{% endif %}>Choose a value...</option>
+                        <option value="basic" {% if config.SITE_PLAN == 'basic' %}selected{% endif %}>Basic</option>
+                        <option value="plus" {% if config.SITE_PLAN == 'plus' %}selected{% endif %}>Plus</option>
+                        <option value="pro" {% if config.SITE_PLAN == 'pro' %}selected{% endif %}>Pro</option>
+                        <option value="pro_plus" {% if config.SITE_PLAN == 'pro_plus' %}selected{% endif %}>Pro+</option>
+                    </select>
+                </div>
+            </div>
+        </div>
         <div class="card">
             <h5 class="card-header">Contract</h5>
             <div class="card-body">
                 <div class="mb-2 form-check">
                     <label for="support_contract_enabled">Contract enabled:</label>
-                    <input type="checkbox" name="support_contract_enabled" id="support_contract_enabled" {% if config.SUPPORT_CONTRACT_ENABLED %} checked {% endif %} />
+                    <input type="checkbox" name="support_contract_enabled" id="support_contract_enabled" {% if config.SUPPORT_CONTRACT_ENABLED %}
+                           checked {% endif %} />
                 </div>
                 {{ form.errors.support_contract_enabled }}
-                <div class="mb-2 form-check">
-                    <label for="support_contract_hours_remaining">Hours remaining: </label>
-                    <input type="number" step="0.5" name="support_contract_hours_remaining" id="support_contract_hours_remaining" value="{{ config.SUPPORT_CONTRACT_HOURS_REMAINING }}"/>
+                <div class="mb-2 form-check d-flex">
+                    <label for="support_contract_hours_remaining" class="label pt-2">Hours remaining: </label>
+                    <input type="number" step="0.5"
+                           name="support_contract_hours_remaining"
+                           id="support_contract_hours_remaining"
+                           class="form-control form-text"
+                           value="{{ config.SUPPORT_CONTRACT_HOURS_REMAINING|commaint }}"/>
                 </div>
-                    {{ form.errors.support_contract_hours_remaining }}
+                {{ form.errors.support_contract_hours_remaining }}
             </div>
         </div>
         <br>
