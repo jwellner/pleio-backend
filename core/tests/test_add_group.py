@@ -19,7 +19,6 @@ class AddGroupCase(PleioTenantTestCase):
         self.admin = AdminFactory()
         self.profile_field = ProfileField.objects.create(key='profile_field', name='text_name', field_type='text_field')
 
-
         self.mutation = """
             mutation ($group: addGroupInput!) {
                 addGroup(input: $group) {
@@ -52,6 +51,10 @@ class AddGroupCase(PleioTenantTestCase):
                         defaultTagCategories {
                             name
                             values
+                        }
+                        widgets {
+                            type
+                            settings { key, value }
                         }
                     }
                 }
@@ -131,6 +134,7 @@ class AddGroupCase(PleioTenantTestCase):
         self.assertEqual(data["addGroup"]["group"]["requiredProfileFields"], [{"guid": self.profile_field.guid}])
         self.assertEqual(data["addGroup"]["group"]["defaultTags"], variables['group']['defaultTags'])
         self.assertEqual(data["addGroup"]["group"]["defaultTagCategories"], variables['group']['defaultTagCategories'])
+        self.assertEqual(data["addGroup"]["group"]["widgets"], [{'settings': [], 'type': 'groupMembers'}, ])
 
         cache.clear()
 
