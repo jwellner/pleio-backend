@@ -37,6 +37,13 @@ class GroupManager(models.Manager):
         return self.get_queryset().exclude(hidden_groups_where_users_isnt_a_member)
 
 
+def _default_widget_repository():
+    return [{
+        'type': 'groupMembers',
+        'settings': [],
+    }]
+
+
 class Group(TagsModel, FeaturedCoverMixin, AttachmentMixin):
     class Meta:
         ordering = ['name']
@@ -91,7 +98,7 @@ class Group(TagsModel, FeaturedCoverMixin, AttachmentMixin):
 
     content_presets = models.JSONField(default=dict)
 
-    widget_repository = models.JSONField(null=True, default=list)
+    widget_repository = models.JSONField(null=True, default=_default_widget_repository)
 
     def __str__(self):
         return f"Group[{self.name}]"

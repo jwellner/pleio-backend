@@ -31,11 +31,13 @@ class WidgetSerializer(WidgetSerializerBase):
         return [WidgetSettingSerializer(s, self.acting_user) for s in self.widget.get('settings', []) or []]
 
     def serialize(self):
-        result = defaultdict(list)
-        result['type'] = self.type
+        result = {
+            'type': self.type,
+            'settings': [],
+        }
         for setting in self.settings:
             result['settings'].append(setting.serialize())
-        return {**result}
+        return result
 
     def attachments(self):
         for setting in self.settings:
