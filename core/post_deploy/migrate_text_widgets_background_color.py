@@ -9,12 +9,14 @@ def _add_background_color_to_text_widgets(widget):
         for setting in widget.get('settings', []):
             if setting['key'] == 'backgroundColor':
                 return widget
-        widget['settings'].append({
+        new_settings = widget.get('settings') or []
+        new_settings.append({
             "key": "backgroundColor",
             "value": "white",
             "attachmentId": None,
             "richDescription": None
         })
+        widget['settings'] = new_settings
     return widget
 
 

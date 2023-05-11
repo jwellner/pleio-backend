@@ -106,11 +106,11 @@ def access_id_to_acl(obj, access_id):
         acl.append(ACCESS_TYPE.logged_in)
     elif access_id == 2 and not in_closed_group:
         acl.append(ACCESS_TYPE.public)
-    elif access_id == 4 and hasattr(obj, 'group') and obj.group:
+    elif access_id == 4 and getattr(obj, 'group', None):
         acl.append(ACCESS_TYPE.group.format(obj.group.id))
     elif access_id == 4 and isinstance(obj, (Group,)):
         acl.append(ACCESS_TYPE.group.format(obj.id))
-    elif access_id and access_id >= 10000 and obj.group:
+    elif access_id and access_id >= 10000 and getattr(obj, 'group', None):
         acl.append(ACCESS_TYPE.subgroup.format(access_id))
     return acl
 
