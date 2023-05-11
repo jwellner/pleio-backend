@@ -36,6 +36,7 @@ def resolve_download_as_options(obj, info):
 pad.set_field("guid", shared.resolve_entity_guid)
 pad.set_field("status", shared.resolve_entity_status)
 pad.set_field("title", shared.resolve_entity_title)
+pad.set_field("excerpt", shared.resolve_entity_excerpt)
 pad.set_field("tags", shared.resolve_entity_tags)
 pad.set_field("tagCategories", shared.resolve_entity_categories)
 pad.set_field("timeCreated", shared.resolve_entity_time_created)
