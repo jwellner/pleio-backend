@@ -14,6 +14,7 @@ from notifications.models import Notification
 from .translate_attachment_to_filefolder import task as translate_attachment_to_filefolder_task
 from .migrate_text_widgets_background_color import task as migrate_text_widgets_background_color_task
 from .add_initial_group_widgets import task as add_initial_group_widgets_task
+from .enable_push_notifications import task as enable_push_notifications_task
 
 logger = get_task_logger(__name__)
 
