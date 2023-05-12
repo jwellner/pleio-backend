@@ -28,7 +28,7 @@ variables:
 
 .python-test:
   services:
-    - postgres:12-alpine
+    - postgres:12.12-alpine
     - name: docker.elastic.co/elasticsearch/elasticsearch:7.16.2
       alias: elasticsearch
       variables:
