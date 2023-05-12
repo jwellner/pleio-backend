@@ -37,6 +37,15 @@ def resolve_content(obj, info):
     return content
 
 
+@revision.field('originalContent')
+def resolve_original_content(obj, info):
+    # pylint: disable=unused-argument
+    content = {}
+    content.update(obj.unchanged)
+    content.update(obj.previous_content)
+    return content
+
+
 @revision.field('type')
 def resolve_type(obj, info):
     # pylint: disable=unused-argument
