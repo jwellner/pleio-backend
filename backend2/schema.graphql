@@ -2114,6 +2114,7 @@ type Revision {
     description: String
     statusPublishedChanged: StatusPublished
     content: ContentVersion
+    originalContent: ContentVersion
     changedFields: [String]
     timeCreated: DateTime
     type: RevisionType

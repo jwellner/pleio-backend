@@ -67,6 +67,45 @@ class RevisionTemplate:
             }
 
             self.query = """
+            fragment Content on ContentVersion {
+                title
+                featured {
+                    video
+                    videoTitle
+                    image
+                    imageGuid
+                    positionY
+                    alt
+                }
+                abstract
+                richDescription
+                tags
+                tagCategories {
+                    name
+                    values
+                }
+                suggestedItems {
+                    guid
+                }
+                source
+                isRecommended
+                isFeatured
+                group {
+                    guid
+                }
+                parent {
+                    guid
+                }
+                owner {
+                    guid
+                }
+                accessId
+                writeAccessId
+                timeCreated
+                timePublished
+                scheduleArchiveEntity
+                scheduleDeleteEntity
+            }
             query GetRevisions ($guid: String!) {
                 revisions(containerGuid: $guid) {
                     edges {
@@ -80,43 +119,10 @@ class RevisionTemplate:
                         statusPublishedChanged
                         changedFields
                         content {
-                            title
-                            featured {
-                                video
-                                videoTitle
-                                image
-                                imageGuid
-                                positionY
-                                alt
-                            }
-                            abstract
-                            richDescription
-                            tags
-                            tagCategories {
-                                name
-                                values
-                            }
-                            suggestedItems {
-                                guid
-                            }
-                            source
-                            isRecommended
-                            isFeatured
-                            group {
-                                guid
-                            }
-                            parent {
-                                guid
-                            }
-                            owner {
-                                guid
-                            }
-                            accessId
-                            writeAccessId
-                            timeCreated
-                            timePublished
-                            scheduleArchiveEntity
-                            scheduleDeleteEntity
+                            ... Content
+                        }
+                        originalContent {
+                            ... Content
                         }
                     }
                 }
@@ -140,12 +146,14 @@ class RevisionTemplate:
                 return
             self.localSetUp()
 
+            original_value = self.entity.title
             revisions = self.applyChanges(title="new title")
             self.assertEqual(len(revisions), 1)
 
             revision = revisions[0]
             self.assertEqual(revision['author']['guid'], self.admin.guid)
             self.assertEqual(revision['changedFields'], ['title'])
+            self.assertEqual(revision['originalContent']['title'], original_value)
             self.assertEqual(revision['content']['title'], self.variables['input']['title'])
             self.assertEqual(revision['content']['richDescription'], self.variables['input']['richDescription'])
             self.assertEqual(revision['type'], 'update')
@@ -156,12 +164,15 @@ class RevisionTemplate:
                 return
             self.localSetUp()
 
+            original_value = self.entity.rich_description
             revisions = self.applyChanges(richDescription=self.tiptap_paragraph("new rich description"))
             self.assertEqual(len(revisions), 1)
 
             revision = revisions[0]
             self.assertEqual(revision['author']['guid'], self.admin.guid)
             self.assertEqual(revision['changedFields'], ['richDescription'])
+            self.assertEqual(revision['originalContent']['richDescription'], original_value)
+            self.assertEqual(revision['content']['richDescription'], self.variables['input']['richDescription'])
             self.assertEqual(revision['content']['richDescription'], self.variables['input']['richDescription'])
             self.assertReferenceUnchanged(revision['content'], 'richDescription')
 
@@ -170,12 +181,14 @@ class RevisionTemplate:
                 return
             self.localSetUp()
 
+            original_value = self.entity.serialize()['accessId']
             revisions = self.applyChanges(accessId=0)
             self.assertEqual(len(revisions), 1)
 
             revision = revisions[0]
             self.assertEqual(revision['author']['guid'], self.admin.guid)
             self.assertEqual(revision['changedFields'], ['accessId'])
+            self.assertEqual(revision['originalContent']['accessId'], original_value)
             self.assertEqual(revision['content']['accessId'], self.variables['input']['accessId'])
             self.assertReferenceUnchanged(revision['content'], 'accessId')
 
@@ -184,12 +197,14 @@ class RevisionTemplate:
                 return
             self.localSetUp()
 
+            original_value = self.entity.serialize()['writeAccessId']
             revisions = self.applyChanges(writeAccessId=1)
             self.assertEqual(len(revisions), 1)
 
             revision = revisions[0]
             self.assertEqual(revision['author']['guid'], self.admin.guid)
             self.assertEqual(revision['changedFields'], ['writeAccessId'])
+            self.assertEqual(revision['originalContent']['writeAccessId'], original_value)
             self.assertEqual(revision['content']['writeAccessId'], self.variables['input']['writeAccessId'])
             self.assertReferenceUnchanged(revision['content'], 'writeAccessId')
 
@@ -198,11 +213,13 @@ class RevisionTemplate:
                 return
             self.localSetUp()
 
+            original_value = self.entity.serialize()['tags']
             revisions = self.applyChanges(tags=['Foo', 'Bar', 'Baz'])
             self.assertEqual(len(revisions), 1)
 
             revision = revisions[0]
             self.assertEqual(revision['author']['guid'], self.admin.guid)
+            self.assertEqual(revision['originalContent']['tags'], original_value)
             self.assertEqual(revision['changedFields'], ['tags'])
             self.assertEqual(revision['content']['tags'], sorted(self.variables['input']['tags']))
             self.assertReferenceUnchanged(revision['content'], 'tags')
@@ -212,12 +229,14 @@ class RevisionTemplate:
                 return
             self.localSetUp()
 
+            original_value = self.entity.serialize()['tagCategories']
             revisions = self.applyChanges(tagCategories=[{'name': 'Demo', 'values': ['One', 'Two', 'Three']}])
             self.assertEqual(len(revisions), 1)
 
             revision = revisions[0]
             self.assertEqual(revision['author']['guid'], self.admin.guid)
             self.assertEqual(revision['changedFields'], ['tagCategories'])
+            self.assertEqual(revision['originalContent']['tagCategories'], original_value)
             self.assertEqual(revision['content']['tagCategories'], self.variables['input']['tagCategories'])
             self.assertReferenceUnchanged(revision['content'], 'tagCategories')
 
@@ -228,12 +247,14 @@ class RevisionTemplate:
 
             new_create_time = localtime() - timedelta(days=2)
 
+            original_value = self.entity.serialize()['timeCreated']
             revisions = self.applyChanges(timeCreated=str(new_create_time))
             self.assertEqual(len(revisions), 1)
 
             revision = revisions[0]
             self.assertEqual(revision['author']['guid'], self.admin.guid)
             self.assertEqual(revision['changedFields'], ['timeCreated'])
+            self.assertDateEqual(revision['originalContent']['timeCreated'], original_value)
             self.assertDateEqual(revision['content']['timeCreated'], self.variables['input']['timeCreated'])
             self.assertReferenceUnchanged(revision['content'], 'timeCreated')
 
@@ -244,12 +265,14 @@ class RevisionTemplate:
             self.entity.published = None
             self.entity.save()
 
+            original_value = self.entity.serialize()['timePublished'] or None
             revisions = self.applyChanges(timePublished=str(localtime()))
             self.assertEqual(len(revisions), 1)
 
             revision = revisions[0]
             self.assertEqual(revision['author']['guid'], self.admin.guid)
             self.assertEqual(revision['changedFields'], ['timePublished'])
+            self.assertEqual(revision['originalContent']['timePublished'], original_value)
             self.assertDateEqual(revision['content']['timePublished'], self.variables['input']['timePublished'])
             self.assertEqual(revision['statusPublishedChanged'], "published")
             self.assertReferenceUnchanged(revision['content'], 'timePublished')
@@ -259,12 +282,14 @@ class RevisionTemplate:
                 return
             self.localSetUp()
 
+            original_value = self.entity.serialize()['scheduleArchiveEntity'] or None
             revisions = self.applyChanges(scheduleArchiveEntity=str(localtime()))
             self.assertEqual(len(revisions), 1)
 
             revision = revisions[0]
             self.assertEqual(revision['author']['guid'], self.admin.guid)
             self.assertEqual(revision['changedFields'], ['scheduleArchiveEntity'])
+            self.assertEqual(revision['originalContent']['scheduleArchiveEntity'], original_value)
             self.assertEqual(revision['statusPublishedChanged'], "archived")
             self.assertDateEqual(revision['content']['scheduleArchiveEntity'], self.variables['input']['scheduleArchiveEntity'])
             self.assertReferenceUnchanged(revision['content'], 'scheduleArchiveEntity')
@@ -274,12 +299,14 @@ class RevisionTemplate:
                 return
             self.localSetUp()
 
+            original_value = self.entity.serialize()['scheduleDeleteEntity'] or None
             revisions = self.applyChanges(scheduleDeleteEntity=str(localtime()))
             self.assertEqual(len(revisions), 1)
 
             revision = revisions[0]
             self.assertEqual(revision['author']['guid'], self.admin.guid)
             self.assertEqual(revision['changedFields'], ['scheduleDeleteEntity'])
+            self.assertEqual(revision['originalContent']['scheduleDeleteEntity'], original_value)
             self.assertDateEqual(revision['content']['scheduleDeleteEntity'], self.variables['input']['scheduleDeleteEntity'])
             self.assertReferenceUnchanged(revision['content'], 'scheduleDeleteEntity')
 
@@ -288,12 +315,14 @@ class RevisionTemplate:
                 return
             self.localSetUp()
 
+            original_value = self.entity.serialize()['abstract']
             revisions = self.applyChanges(abstract=self.tiptap_paragraph("new abstract text"))
             self.assertEqual(len(revisions), 1)
 
             revision = revisions[0]
             self.assertEqual(revision['author']['guid'], self.admin.guid)
             self.assertEqual(revision['changedFields'], ['abstract'])
+            self.assertEqual(revision['originalContent']['abstract'], original_value)
             self.assertEqual(revision['content']['abstract'], self.variables['input']['abstract'])
             self.assertReferenceUnchanged(revision['content'], 'abstract')
 
@@ -302,12 +331,14 @@ class RevisionTemplate:
                 return
             self.localSetUp()
 
+            original_value = self.entity.serialize()['isRecommended']
             revisions = self.applyChanges(isRecommended=True)
             self.assertEqual(len(revisions), 1)
 
             revision = revisions[0]
             self.assertEqual(revision['author']['guid'], self.admin.guid)
             self.assertEqual(revision['changedFields'], ['isRecommended'])
+            self.assertEqual(revision['originalContent']['isRecommended'], original_value)
             self.assertEqual(revision['content']['isRecommended'], self.variables['input']['isRecommended'])
             self.assertReferenceUnchanged(revision['content'], 'isRecommended')
 
@@ -316,12 +347,14 @@ class RevisionTemplate:
                 return
             self.localSetUp()
 
+            original_value = self.entity.serialize()['isFeatured']
             revisions = self.applyChanges(isFeatured=True)
             self.assertEqual(len(revisions), 1)
 
             revision = revisions[0]
             self.assertEqual(revision['author']['guid'], self.admin.guid)
             self.assertEqual(revision['changedFields'], ['isFeatured'])
+            self.assertEqual(revision['originalContent']['isFeatured'], original_value)
             self.assertEqual(revision['content']['isFeatured'], self.variables['input']['isFeatured'])
             self.assertReferenceUnchanged(revision['content'], 'isFeatured')
 
@@ -330,6 +363,7 @@ class RevisionTemplate:
                 return
             self.localSetUp()
 
+            original_value = self.entity.serialize()['featured']
             revisions = self.applyChanges(featured={
                 'video': 'https://www.youtube.com/watch?v=FN2RM-CHkuI',
                 'videoTitle': "How to write instructions for making a peanutbutter-jelly sandwich"
@@ -339,6 +373,7 @@ class RevisionTemplate:
             revision = revisions[0]
             self.assertEqual(revision['author']['guid'], self.admin.guid)
             self.assertEqual(revision['changedFields'], ['featured'])
+            self.assertEqual(revision['originalContent']['featured'], original_value)
             self.assertDictEqual({k: v for k, v in revision['content']['featured'].items() if v}, self.variables['input']['featured'])
             self.assertReferenceUnchanged(revision['content'], 'featured')
 
@@ -348,6 +383,7 @@ class RevisionTemplate:
 
             self.localSetUp()
             file = self.file_factory(self.relative_path(__file__, ['..', 'assets', 'landscape.jpeg']))
+            original_value = self.entity.serialize()['featured']
 
             revisions = self.applyChanges(featured={
                 'imageGuid': file.guid,
@@ -360,6 +396,7 @@ class RevisionTemplate:
             revision = revisions[0]
             self.assertEqual(revision['author']['guid'], self.admin.guid)
             self.assertEqual(revision['changedFields'], ['featured'])
+            self.assertEqual(revision['originalContent']['featured'], original_value)
             self.assertDictEqual({k: v for k, v in revision['content']['featured'].items() if v}, {
                 "alt": "Landscape",
                 "imageGuid": file.guid,
@@ -423,7 +460,11 @@ class RevisionTemplate:
             if not self.useGroupGuid:
                 return
             self.localSetUp()
+            formerGroup = GroupFactory(owner=self.admin)
+            self.entity.group = formerGroup
+            self.entity.save()
             group = GroupFactory(owner=self.admin)
+            original_value = self.entity.serialize()['groupGuid']
 
             revisions = self.applyChanges(groupGuid=group.guid)
             self.assertEqual(len(revisions), 1)
@@ -431,6 +472,7 @@ class RevisionTemplate:
             revision = revisions[0]
             self.assertEqual(revision['author']['guid'], self.admin.guid)
             self.assertEqual(revision['changedFields'], ['groupGuid'])
+            self.assertEqual(revision['originalContent']['group']['guid'], original_value)
             left = revision['content']['group']['guid'] if revision['content'].get('group') else None
             right = self.variables['input']['groupGuid']
             self.assertEqual(left, right)
@@ -441,6 +483,7 @@ class RevisionTemplate:
                 return
             self.localSetUp()
             new_owner = UserFactory()
+            original_value = self.entity.serialize()['ownerGuid']
 
             revisions = self.applyChanges(ownerGuid=new_owner.guid)
             self.assertEqual(len(revisions), 1)
@@ -448,6 +491,7 @@ class RevisionTemplate:
             revision = revisions[0]
             self.assertEqual(revision['author']['guid'], self.admin.guid)
             self.assertEqual(revision['changedFields'], ['ownerGuid'])
+            self.assertEqual(revision['originalContent']['owner']['guid'], original_value)
             left = revision['content']['owner']['guid'] if revision['content'].get('owner') else None
             right = self.variables['input']['ownerGuid']
             self.assertEqual(left, right)
@@ -461,6 +505,7 @@ class RevisionTemplate:
             related_blog = BlogFactory(owner=self.owner)
             related_news = NewsFactory(owner=EditorFactory())
 
+            original_value = self.entity.serialize()['suggestedItems'] or None
             revisions = self.applyChanges(suggestedItems=[
                 related_blog.guid,
                 related_news.guid,
@@ -470,6 +515,7 @@ class RevisionTemplate:
             revision = revisions[0]
             self.assertEqual(revision['author']['guid'], self.admin.guid)
             self.assertEqual(revision['changedFields'], ['suggestedItems'])
+            self.assertEqual(revision['originalContent']['suggestedItems'], original_value)
             self.assertListEqual([item['guid'] for item in revision['content']['suggestedItems']], self.variables['input']['suggestedItems'])
             self.assertReferenceUnchanged(revision['content'], 'suggestedItems')
 
@@ -478,12 +524,14 @@ class RevisionTemplate:
                 return
             self.localSetUp()
 
+            original_value = self.entity.serialize()['source']
             revisions = self.applyChanges(source="New source description")
             self.assertEqual(len(revisions), 1)
 
             revision = revisions[0]
             self.assertEqual(revision['author']['guid'], self.admin.guid)
             self.assertEqual(revision['changedFields'], ['source'])
+            self.assertEqual(revision['originalContent']['source'], original_value)
             self.assertEqual(revision['content']['source'], self.variables['input']['source'])
             self.assertReferenceUnchanged(revision['content'], 'source')
 
@@ -492,14 +540,18 @@ class RevisionTemplate:
                 return
             self.localSetUp()
 
+            former_container = self.build_entity(self.owner)
             container = self.build_entity(self.owner)
 
             self.localSetUp()
+            self.entity.parent = former_container
+            self.entity.save()
             revisions = self.applyChanges(containerGuid=container.guid)
             self.assertEqual(len(revisions), 1)
 
             revision = revisions[0]
             self.assertEqual(revision['author']['guid'], self.admin.guid)
             self.assertEqual(revision['changedFields'], ['containerGuid'])
+            self.assertEqual(revision['originalContent']['parent']['guid'], former_container.guid)
             self.assertEqual(revision['content']['parent']['guid'], self.variables['input']['containerGuid'])
             self.assertReferenceUnchanged(revision['content'], 'containerGuid')
