@@ -41,7 +41,6 @@ class TestSearchExternalContentTestCase(ElasticsearchTestCase):
 
     @override_config(IS_CLOSED=False)
     def test_standard_search(self):
-        self.initialize_index()
         query = """
         query ElasticSearchQuery($query: String
                       $subtype: String

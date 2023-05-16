@@ -8,7 +8,6 @@ from user.models import User
 
 class TestExternalContentTagsTestCase(Template.TagsTestCaseTemplate):
     graphql_label = 'ExternalContent'
-    graphql_search_type = 'externalcontent'
     model = ExternalContent
 
     def setUp(self):

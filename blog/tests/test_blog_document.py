@@ -19,9 +19,7 @@ class AddBlogTestCase(ElasticsearchTestCase):
         )
 
     def test_blog_document(self):
-        self.initialize_index()
-
-        s = Search(index='_all').query(
+        s = Search(index='blog').query(
             Q('simple_query_string', query='Jan', fields=['owner.name'])
         ).filter(
             'term', tenant_name=self.tenant.schema_name

@@ -125,8 +125,6 @@ class TestUserTestCase(ElasticsearchTestCase):
             "limit": 20
         }
 
-        self.initialize_index()
-
         self.graphql_client.force_login(self.user1)
         result = self.graphql_client.post(self.query, variables)
 
@@ -138,8 +136,6 @@ class TestUserTestCase(ElasticsearchTestCase):
             "offset": 0,
             "limit": 20
         }
-
-        self.initialize_index()
 
         self.graphql_client.force_login(self.user1)
         result = self.graphql_client.post(self.query, variables)
@@ -153,8 +149,6 @@ class TestUserTestCase(ElasticsearchTestCase):
             "offset": 0,
             "limit": 20
         }
-
-        self.initialize_index()
 
         self.graphql_client.force_login(superadmin1)
         result = self.graphql_client.post(self.query, variables)
@@ -220,7 +214,6 @@ class TestUserProfileSetTestCase(ElasticsearchTestCase):
         super().tearDown()
 
     def test_similar_users_as_manager(self):
-        self.initialize_index()
         self.graphql_client.force_login(self.manager)
         result = self.graphql_client.post(self.query, self.variables)
 
@@ -230,13 +223,11 @@ class TestUserProfileSetTestCase(ElasticsearchTestCase):
         self.assertIn(self.similar_user.guid, user_guids)
 
     def test_similar_users_as_not_a_manager(self):
-        self.initialize_index()
         with self.assertGraphQlError("not_authorized"):
             self.graphql_client.force_login(self.similar_user)
             self.graphql_client.post(self.query, self.variables)
 
     def test_similar_users_as_invalid_user(self):
-        self.initialize_index()
         with self.assertGraphQlError("missing_required_field:demo_field"):
             self.graphql_client.force_login(self.invalid_user)
             self.graphql_client.post(self.query, self.variables)

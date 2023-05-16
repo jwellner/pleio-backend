@@ -221,14 +221,16 @@ class GraphQLClient():
 
 class ElasticsearchTestCase(PleioTenantTestCase):
 
+    def setUp(self):
+        super().setUp()
+        self.initialize_index()
+
     @override_settings(ENV='test')
     def initialize_index(self):
-        from core.tasks.elasticsearch_tasks import elasticsearch_delete_data_for_tenant, elasticsearch_index_data_for_tenant
+        from core.tasks.elasticsearch_tasks import elasticsearch_delete_data_for_tenant
         # elasticsearch needs time to settle changes before some delete?
         time.sleep(.100)
         elasticsearch_delete_data_for_tenant(self.tenant.schema_name, None)
-        time.sleep(.100)
-        elasticsearch_index_data_for_tenant(self.tenant.schema_name, None)
         time.sleep(.100)
 
 @contextmanager

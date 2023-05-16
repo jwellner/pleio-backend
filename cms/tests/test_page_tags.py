@@ -9,7 +9,6 @@ class TestPageTagsTestCase(Template.TagsTestCaseTemplate):
     graphql_update_mutation = 'editPage'
     graphql_update_input = 'editPageInput'
     graphql_label = 'Page'
-    graphql_search_type = 'page'
     model = Page
 
     variables_add = {'input': {

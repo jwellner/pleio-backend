@@ -11,7 +11,6 @@ class TestGroupTagsTestCase(Template.TagsTestCaseTemplate):
     graphql_add_input = 'addGroupInput'
     graphql_update_mutation = 'editGroup'
     graphql_update_input = 'editGroupInput'
-    graphql_type = 'group'
     model = Group
 
     variables_add = {'input': {

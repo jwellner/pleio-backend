@@ -58,7 +58,6 @@ class FiltersResolverTestCase(ElasticsearchTestCase):
                     value=self.profile_options[1])
 
     def test_filter_options_should_give_used_options(self):
-        self.initialize_index()
         options = get_filter_options(self.profile_field.key, self.owner)
 
         self.assertEqual(len(options), 2, msg="We verwachten 2 waarden.")
@@ -66,7 +65,6 @@ class FiltersResolverTestCase(ElasticsearchTestCase):
         self.assertTrue(self.profile_options[1] in options, msg="Verwacht de waarde `%s` in het resultaat." % self.profile_options[1])
 
     def test_filter_options_should_take_group_membership_into_account(self):
-        self.initialize_index()
         options = get_filter_options(self.profile_field.key, self.owner, self.group)
 
         self.assertEqual(len(options), 1, msg="We verwachten 1 waarde.")

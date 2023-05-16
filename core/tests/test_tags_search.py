@@ -36,7 +36,6 @@ class TestTagsSearchTestCase(ElasticsearchTestCase):
         group_t.tags = ['Tweewieler']
         group_t.save()
 
-        self.initialize_index()
         self.graphql_client.force_login(self.authenticated_user)
         result = self.graphql_client.post(self.query, self.variables)
         groups = [d['name'] for d in result['data']['search']['edges']]
@@ -50,7 +49,6 @@ class TestTagsSearchTestCase(ElasticsearchTestCase):
         group_t.tags = ['Tweewieler']
         group_t.save()
 
-        self.initialize_index()
         self.graphql_client.force_login(self.authenticated_user)
         result = self.graphql_client.post(self.query, self.variables)
         groups = [d['name'] for d in result['data']['search']['edges']]

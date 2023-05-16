@@ -15,7 +15,5 @@ class TestGroupSearchIndexTestCase(Template.SearchIndexTestTestCase):
 
 class TestEdgeCaseTestCase(ElasticsearchTestCase):
     def test_testcase(self):
-        self.initialize_index()
-
         with self.assertRaises(UnableToTestIndex):
             test_elasticsearch_index("foo_bar_baz")

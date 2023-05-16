@@ -56,8 +56,6 @@ class FiltersTestCase(ElasticsearchTestCase):
             }
         """
 
-        self.initialize_index()
-
         self.graphql_client.force_login(self.user)
         result = self.graphql_client.post(query, {})
 
@@ -115,8 +113,6 @@ class FiltersTestCase(ElasticsearchTestCase):
         variables = {
             "groupGuid": group.guid
         }
-
-        self.initialize_index()
 
         self.graphql_client.force_login(self.user)
         result = self.graphql_client.post(query, variables)

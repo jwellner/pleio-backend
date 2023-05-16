@@ -21,7 +21,6 @@ class Template:
             assert self.index_name, "Add an `index_name` to the testcase."
             assert self.expected_hook, "Add an `expected_hook` for the method you expect to get called."
 
-            self.initialize_index()
             expected_hook = mock.patch(self.expected_hook).start()
 
             test_elasticsearch_index(self.index_name)

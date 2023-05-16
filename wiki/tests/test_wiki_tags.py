@@ -4,7 +4,6 @@ from wiki.models import Wiki
 
 class TestWikiTagsTestCase(Template.TagsTestCaseTemplate):
     graphql_label = 'Wiki'
-    graphql_search_type = 'wiki'
     model = Wiki
 
     variables_add = {'input': {
