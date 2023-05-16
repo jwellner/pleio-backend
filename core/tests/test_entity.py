@@ -45,12 +45,6 @@ class EntityTestCase(PleioTenantTestCase):
                                                          group=self.group)
 
     def tearDown(self):
-        self.group.delete()
-        self.file.delete()
-        self.subFolder.delete()
-        self.folder.delete()
-        self.user1.delete()
-        self.authenticatedUser.delete()
         super().tearDown()
 
     def test_entity_user_anonymous(self):

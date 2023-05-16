@@ -23,7 +23,9 @@ class AddBlogTestCase(ElasticsearchTestCase):
 
         s = Search(index='_all').query(
             Q('simple_query_string', query='Jan', fields=['owner.name'])
-            )
+        ).filter(
+            'term', tenant_name=self.tenant.schema_name
+        )
         response = s.execute()
 
         for hit in response:

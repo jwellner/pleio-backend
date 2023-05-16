@@ -23,7 +23,6 @@ class TestMailerContentExportReadyTestCase(PleioTenantTestCase):
         self.switch_language('en')
 
     def tearDown(self):
-        self.file_folder.delete()
         self.owner.delete()
 
         super().tearDown()

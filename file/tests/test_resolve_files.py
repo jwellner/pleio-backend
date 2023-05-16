@@ -192,8 +192,6 @@ class FilesTestCase(PleioTenantTestCase):
         """
 
     def tearDown(self):
-        FileFolder.objects.all().delete()
-        self.authenticatedUser.delete()
         super().tearDown()
 
     def test_user_container(self):

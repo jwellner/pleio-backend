@@ -63,12 +63,6 @@ class SiteUsersTestCase(PleioTenantTestCase):
         """
 
     def tearDown(self):
-        self.admin1.delete()
-        self.admin2.delete()
-        self.user1.delete()
-        self.user2.delete()
-        self.user3.delete()
-        self.user4.delete()
         super().tearDown()
 
     def test_site_users_get_all_by_admin(self):

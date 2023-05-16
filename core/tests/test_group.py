@@ -46,11 +46,6 @@ class GroupTestCase(PleioTenantTestCase):
         self.invitation = GroupInvitation.objects.create(code="7d97cea90c83722c7262", invited_user=self.user3, group=self.group)
 
     def tearDown(self):
-        self.group.delete()
-        self.file.delete()
-        self.user1.delete()
-        self.user2 = mixer.blend(User)
-        self.authenticatedUser.delete()
         super().tearDown()
 
     def test_entity_group_invited_list(self):

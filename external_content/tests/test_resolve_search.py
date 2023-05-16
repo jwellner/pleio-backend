@@ -1,10 +1,11 @@
+import time
 from blog.factories import BlogFactory
-from core.tests.helpers import PleioTenantTestCase, ElasticsearchTestCase
+from core.tests.helpers import ElasticsearchTestCase, override_config
 from external_content.factories import ExternalContentFactory, ExternalContentSourceFactory
 from user.factories import UserFactory
 
 
-class TestSearchExternalContentTestCase(PleioTenantTestCase):
+class TestSearchExternalContentTestCase(ElasticsearchTestCase):
 
     def setUp(self):
         super().setUp()
@@ -12,47 +13,35 @@ class TestSearchExternalContentTestCase(PleioTenantTestCase):
         self.external_author = UserFactory()
         self.author = UserFactory()
 
-        self.override_config(IS_CLOSED=False)
+        with override_config(IS_CLOSED=False): # ACL is set on creation using the config
+            self.source = ExternalContentSourceFactory(name="Source", plural_name="Source1's")
+            self.source2 = ExternalContentSourceFactory(name="Source 2", plural_name="Source2's")
 
-        self.source = ExternalContentSourceFactory(name="Source", plural_name="Source1's")
-        self.source2 = ExternalContentSourceFactory(name="Source 2", plural_name="Source2's")
-
-        self.article1 = ExternalContentFactory(title="Article 1",
-                                               source=self.source,
-                                               owner=self.external_author)
-        self.article2 = ExternalContentFactory(title="Article 2",
-                                               source=self.source,
-                                               owner=self.external_author)
-        self.article3 = ExternalContentFactory(title="Article 3",
-                                               source=self.source,
-                                               owner=self.external_author)
-        self.article3 = ExternalContentFactory(title="Article 2.1",
-                                               source=self.source2,
-                                               owner=self.external_author)
+            self.article1 = ExternalContentFactory(title="Article 1",
+                                                source=self.source,
+                                                owner=self.external_author)
+            self.article2 = ExternalContentFactory(title="Article 2",
+                                                source=self.source,
+                                                owner=self.external_author)
+            self.article3 = ExternalContentFactory(title="Article 3",
+                                                source=self.source,
+                                                owner=self.external_author)
+            self.article4 = ExternalContentFactory(title="Article 2.1",
+                                                source=self.source2,
+                                                owner=self.external_author)
 
         self.blog1 = BlogFactory(owner=self.author,
                                  title="Blog 1")
         self.blog2 = BlogFactory(owner=self.author,
                                  title="Blog 2")
+        time.sleep(5)
 
     def tearDown(self):
-        self.article1.delete()
-        self.article2.delete()
-        self.article3.delete()
-
-        self.blog1.delete()
-        self.blog2.delete()
-
-        self.source.delete()
-        self.source2.delete()
-
-        self.author.delete()
-        self.external_author.delete()
-
         super().tearDown()
 
+    @override_config(IS_CLOSED=False)
     def test_standard_search(self):
-        ElasticsearchTestCase.initialize_index()
+        self.initialize_index()
         query = """
         query ElasticSearchQuery($query: String
                       $subtype: String
@@ -102,6 +91,7 @@ class TestSearchExternalContentTestCase(PleioTenantTestCase):
         self.assertEqual(len(result['data']['search']['totals']), 1)
         self.assertEqual(len(result['data']['search']['edges']), 3)
 
+    @override_config(IS_CLOSED=False)
     def test_entity_search(self):
         query = """
         query EntityQuery($orderBy: OrderBy

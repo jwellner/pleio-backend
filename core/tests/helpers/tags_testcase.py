@@ -1,9 +1,11 @@
+import time
 from django.utils.timezone import localtime
+from django.test import override_settings
 from mixer.backend.django import mixer
 
 from core.constances import ACCESS_TYPE
 from core.models import Tag
-from core.tests.helpers import PleioTenantTestCase, ElasticsearchTestCase
+from core.tests.helpers import ElasticsearchTestCase, override_config
 from core.utils.entity import load_entity_by_id
 from user.factories import UserFactory
 from user.models import User
@@ -24,13 +26,14 @@ class Template:
     # Q: Why the 'Base' wrapper?
     # A: To prevent this class to be executed without context.
 
-    class TagsTestCaseTemplate(PleioTenantTestCase):
+    class TagsTestCaseTemplate(ElasticsearchTestCase):
         graphql_payload = 'entity'
         graphql_update_mutation = 'editEntity'
         graphql_update_input = 'editEntityInput'
         graphql_add_mutation = 'addEntity'
         graphql_add_input = 'addEntityInput'
         graphql_label = None
+        graphql_search_type = None
         variables_add = {}
         model = None
 
@@ -70,7 +73,9 @@ class Template:
         def owner_factory(self):
             return UserFactory(email="owner@localhost")
 
-        def local_setup(self):
+        @override_settings(ENV='test')
+        def setUp(self):
+            super().setUp()
             assert self.graphql_label, "Please fill in the object name for this model in the graphql schema"
 
             self.owner = self.owner_factory()
@@ -93,6 +98,8 @@ class Template:
 
             self.article3 = self.article_factory(self.owner,
                                                  title='Never found')
+            
+            self.graphql_search_type = self.article3.type_to_string
 
             self.mutation_add = """
             mutation AddEntity($input: %s!) {
@@ -150,8 +157,8 @@ class Template:
 
         def get_query_search(self):
             return """
-            query IncludeSiteSearch($tags: [String], $categories: [TagCategoryInput], $matchStrategy: MatchStrategy) {
-                search(tags: $tags, tagCategories: $categories, matchStrategy: $matchStrategy) {
+            query IncludeSiteSearch($subtype: String, $tags: [String], $categories: [TagCategoryInput], $matchStrategy: MatchStrategy) {
+                search(subtype: $subtype, tags: $tags, tagCategories: $categories, matchStrategy: $matchStrategy) {
                     total
                     edges {
                         ... on %s {
@@ -204,11 +211,12 @@ class Template:
             }
             """
 
+        @override_settings(ENV='test')
+        @override_config(COLLAB_EDITING_ENABLED=True)
         def test_add_with_tags(self):
             if not self.include_add_edit:
                 return
 
-            self.local_setup()
             assert self.variables_add, "Provide self.variables_add where input contains sane defaults, similar to the article_factory method."
 
             self.variables_add['input']['tags'] = ['Foo']
@@ -228,11 +236,13 @@ class Template:
 
             self.assertEqual(entity['tags'], self.variables_add['input']['tags'])
             self.assertEqual(entity['tagCategories'], self.variables_add['input']['tagCategories'])
+            created_entity.delete()
 
+        @override_settings(ENV='test')
+        @override_config(COLLAB_EDITING_ENABLED=True)
         def test_update_tags(self):
             if not self.include_add_edit:
                 return
-            self.local_setup()
 
             self.graphql_client.force_login(self.owner)
             response = self.graphql_client.post(self.mutation_update, self.variables_update)
@@ -249,7 +259,7 @@ class Template:
 
         def iterate_query_search(self):
             if self.include_site_search:
-                ElasticsearchTestCase.initialize_index()
+                self.initialize_index()
                 yield self.get_query_search(), "search", "query.search"
             if self.include_entity_search:
                 yield self.get_query_entity(), "entities", "query.entities"
@@ -258,12 +268,14 @@ class Template:
             if self.include_group_search:
                 yield self.get_query_group(), "groups", "query.groups"
 
+        @override_settings(ENV='test')
+        @override_config(COLLAB_EDITING_ENABLED=True)
         def test_search_by_tag(self):
-            self.local_setup()
             self.graphql_client.force_login(self.owner)
 
             for query, data_key, message in self.iterate_query_search():
                 variables = {
+                    'subtype': self.graphql_search_type,
                     'tags': ['Foo', 'Bar']
                 }
 
@@ -279,12 +291,14 @@ class Template:
                 self.assertEqual(1, response['data'][data_key]['total'], msg="Unexpectedly not found exactly two matches at %s" % message)
                 self.assertIn(self.article1.guid, [e['guid'] for e in edges], msg="Unexpectedly not found article1 at %s" % message)
 
+        @override_settings(ENV='test')
+        @override_config(COLLAB_EDITING_ENABLED=True)
         def test_search_by_incomplete_category(self):
-            self.local_setup()
             self.graphql_client.force_login(self.owner)
 
             for query, data_key, message in self.iterate_query_search():
                 variables = {
+                    'subtype': self.graphql_search_type,
                     'categories': [{'name': 'Fruit', 'values': []}]
                 }
 
@@ -296,12 +310,14 @@ class Template:
                 self.assertIn(self.article2.guid, guids, msg="Unexpectedly not found article2 at %s" % message)
                 self.assertIn(self.article3.guid, guids, msg="Unexpectedly not found article3 at %s" % message)
 
+        @override_settings(ENV='test')
+        @override_config(COLLAB_EDITING_ENABLED=True)
         def test_search_entity_by_category(self):
-            self.local_setup()
             self.graphql_client.force_login(self.owner)
 
             for query, data_key, message in self.iterate_query_search():
                 variables = {
+                    'subtype': self.graphql_search_type,
                     'categories': [{'name': 'fruit', 'values': ['apple', 'grape']}]
                 }
                 response = self.graphql_client.post(query, variables)
@@ -323,15 +339,17 @@ class Template:
                 self.assertEqual(1, response['data'][data_key]['total'], msg="Unexpectedly not found exactly one match at %s" % message)
                 self.assertEqual(self.article1.guid, edges[0]['guid'], msg="Unexpectedly not found article1 at %s" % message)
 
+        @override_settings(ENV='test')
+        @override_config(COLLAB_EDITING_ENABLED=True)
         def test_search_tags_overflow(self):
-            self.local_setup()
             self.graphql_client.force_login(self.owner)
 
             for query, data_key, message in self.iterate_query_search():
                 # testing that 'tags' uses match-all
                 variables = {
+                    'subtype': self.graphql_search_type,
                     'tags': ['Foo',
-                             'Acme'],
+                            'Acme'],
                     'matchStrategy': 'all'
                 }
                 response = self.graphql_client.post(query, variables)
@@ -345,13 +363,15 @@ class Template:
                 self.assertEqual(1, response['data'][data_key]['total'], msg="Unexpectedly not found exactly one match at %s" % message)
                 self.assertEqual(self.article1.guid, edges[0]['guid'], msg="Unexpectedly not found article1 at %s" % message)
 
+        @override_settings(ENV='test')
+        @override_config(COLLAB_EDITING_ENABLED=True)
         def test_search_categories_overflow(self):
-            self.local_setup()
             self.graphql_client.force_login(self.owner)
 
             # testing that 'tagsList' uses match-any
             for query, data_key, message in self.iterate_query_search():
                 variables = {
+                    'subtype': self.graphql_search_type,
                     'categories': [
                         {'name': 'fruit', 'values': ['apple', 'not a fruit']},
                     ],
@@ -368,8 +388,9 @@ class Template:
                 self.assertEqual(1, response['data'][data_key]['total'], msg="Unexpectedly not found exactly one match at %s" % message)
                 self.assertEqual(self.article1.guid, edges[0]['guid'], msg="Unexpectedly not found article1 at %s" % message)
 
+        @override_settings(ENV='test')
+        @override_config(COLLAB_EDITING_ENABLED=True)
         def test_tag_properties(self):
-            self.local_setup()
 
             # pylint: disable=protected-access
             tag_with_synonyms = Tag.objects.get(label=self.article1._tag_summary[0])

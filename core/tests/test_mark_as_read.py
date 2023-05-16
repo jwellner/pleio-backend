@@ -12,8 +12,6 @@ class MarkAsReadTestCase(PleioTenantTestCase):
         self.user2 = mixer.blend(User)
 
     def tearDown(self):
-        self.user1.delete()
-        self.user2.delete()
         super().tearDown()
 
     def test_mark_as_read_user_anon(self):

@@ -4,8 +4,8 @@ import uuid
 from django.db import connection
 from django.utils import timezone
 
-from core.models import ProfileField, SiteInvitation, SiteAccessRequest
-from core.tests.helpers import PleioTenantTestCase
+from core.models import ProfileField, SiteInvitation, SiteAccessRequest, Setting
+from core.tests.helpers import PleioTenantTestCase, override_config
 from user.factories import UserFactory, AdminFactory
 from user.models import User
 from cms.models import Page
@@ -22,9 +22,6 @@ class TestSiteSettingsTestCase(PleioTenantTestCase):
 
     def setUp(self):
         super().setUp()
-
-        self.override_config(IS_CLOSED=False)
-
         self.user = mixer.blend(User, is_delete_requested=False)
         self.admin = mixer.blend(User, roles=['ADMIN'], is_delete_requested=False)
         self.delete_user = mixer.blend(User, is_delete_requested=True)
@@ -45,12 +42,6 @@ class TestSiteSettingsTestCase(PleioTenantTestCase):
                                                 updated_at=time_factory(days=-2))
         self.siteApprovedRequest2 = mixer.blend(SiteAccessRequest, email='johnny.f@example.com', name='Johnny F.', accepted=True,
                                                 updated_at=time_factory(days=-4))
-
-        self.override_config(ANONYMOUS_START_PAGE='cms')
-        self.override_config(ANONYMOUS_START_PAGE_CMS=self.cmsPage2.guid)
-        self.override_config(PAGE_TAG_FILTERS=[{'showTagFilter': False,
-                                                'showTagCategories': [],
-                                                'contentType': 'blog'}])
 
         self.query = """
             query SiteGeneralSettings {
@@ -283,25 +274,22 @@ class TestSiteSettingsTestCase(PleioTenantTestCase):
         """
 
     def tearDown(self):
-        self.siteAccessRequest0.delete()
-        self.siteAccessRequest1.delete()
-        self.siteAccessRequest2.delete()
-        self.siteApprovedRequest0.delete()
-        self.siteApprovedRequest1.delete()
-        self.siteApprovedRequest2.delete()
-        self.siteInvitation.delete()
-        self.profileField1.delete()
-        self.profileField2.delete()
-        self.cmsPage1.delete()
-        self.cmsPage2.delete()
-        self.delete_user.delete()
-        self.admin.delete()
-        self.user.delete()
         super().tearDown()
 
     def test_site_settings_by_admin(self):
-        self.graphql_client.force_login(self.admin)
-        result = self.graphql_client.post(self.query, {})
+
+        with override_config(
+            IS_CLOSED=False,
+            ANONYMOUS_START_PAGE='cms',
+            ANONYMOUS_START_PAGE_CMS=self.cmsPage2.guid,
+            PAGE_TAG_FILTERS=[{
+                'showTagFilter': False,
+                'showTagCategories': [],
+                'contentType': 'blog'
+            }]
+        ):
+            self.graphql_client.force_login(self.admin)
+            result = self.graphql_client.post(self.query, {})
 
         data = result["data"]
         self.assertEqual(data["siteSettings"]["name"], "Pleio 2.0")
@@ -598,11 +586,11 @@ class TestSiteSettingsTestCase(PleioTenantTestCase):
     def test_query_no_videocall_settings(self, get_appointment_types):
         get_appointment_types.return_value = [{"Id": "1000", "Name": "First"},
                                               {"Id": "1001", "Name": "Second"}]
-        self.override_config(VIDEOCALL_APPOINTMENT_TYPE=None,
-                             ONLINEAFSPRAKEN_ENABLED=True)
 
-        self.graphql_client.force_login(self.admin)
-        response = self.graphql_client.post(self.query, {})
+        with override_config(VIDEOCALL_APPOINTMENT_TYPE=None,
+                             ONLINEAFSPRAKEN_ENABLED=True):
+            self.graphql_client.force_login(self.admin)
+            response = self.graphql_client.post(self.query, {})
 
         self.assertEqual(response['data']['siteSettings']['appointmentTypeVideocall'], [
             {"name": "First",
@@ -615,10 +603,11 @@ class TestSiteSettingsTestCase(PleioTenantTestCase):
     def test_query_videocall_settings(self, get_appointment_types):
         get_appointment_types.return_value = [{"Id": "1000", "Name": "First"},
                                               {"Id": "1001", "Name": "Second"}]
-        self.override_config(VIDEOCALL_APPOINTMENT_TYPE=[{"id": "1000", "hasVideocall": True}],
-                             ONLINEAFSPRAKEN_ENABLED=True)
-        self.graphql_client.force_login(self.admin)
-        response = self.graphql_client.post(self.query, {})
+
+        with override_config(VIDEOCALL_APPOINTMENT_TYPE=[{"id": "1000", "hasVideocall": True}],
+                             ONLINEAFSPRAKEN_ENABLED=True):
+            self.graphql_client.force_login(self.admin)
+            response = self.graphql_client.post(self.query, {})
 
         self.assertEqual(
             response['data']['siteSettings']['appointmentTypeVideocall'],
@@ -629,12 +618,11 @@ class TestSiteSettingsTestCase(PleioTenantTestCase):
               "hasVideocall": False}]
         )
 
+    @override_config(ONLINEAFSPRAKEN_ENABLED=True)
     @mock.patch('core.resolvers.shared.MeetingsApi.get_appointment_types')
     def test_update_videocall_settings(self, get_appointment_types):
         get_appointment_types.return_value = [{"Id": "1000", "Name": "First"},
                                               {"Id": "1001", "Name": "Second"}]
-        self.override_config(VIDEOCALL_APPOINTMENT_TYPE=[{"id": "1000", "hasVideocall": True}],
-                             ONLINEAFSPRAKEN_ENABLED=True)
 
         mutation = """
         mutation UpdateSiteSettings($input: editSiteSettingInput!) {
@@ -649,106 +637,127 @@ class TestSiteSettingsTestCase(PleioTenantTestCase):
         }
         """
 
+        setting, _ = Setting.objects.get_or_create(key='VIDEOCALL_APPOINTMENT_TYPE')
+        setting.value = [{"id": "1000", "hasVideocall": True}]
+        setting.save()
+    
         self.graphql_client.force_login(self.admin)
         response = self.graphql_client.post(mutation, {"input": {
             "appointmentTypeVideocall": [
-                {"id": "1000",
-                 "hasVideocall": False},
-                {"id": "1001",
-                 "hasVideocall": True},
+                {"id": "1000", "hasVideocall": False},
+                {"id": "1001", "hasVideocall": True},
             ]
         }})
 
         self.assertEqual(response['data']['m']['r']['appointmentTypeVideocall'], [
-            {"name": "First",
-             "hasVideocall": False},
-            {"name": "Second",
-             "hasVideocall": True},
+            {"name": "First", "hasVideocall": False},
+            {"name": "Second","hasVideocall": True},
         ])
+
+        setting.refresh_from_db()
+
+        self.assertEqual(setting.value, [
+            {"id": "1000", "hasVideocall": False},
+            {"id": "1001", "hasVideocall": True},
+        ])
+
+        setting.delete()
 
 
 class TestSiteSettingsIsClosedTestCase(PleioTenantTestCase):
     def setUp(self):
         super().setUp()
-        cache.set("%s%s" % (connection.schema_name, 'IS_CLOSED'), True)
 
     def tearDown(self):
         cache.clear()
         super().tearDown()
 
+    @override_config(IS_CLOSED=True)
     def test_site_settings_is_closed_random(self):
         response = self.client.get("/981random3")
         self.assertTemplateUsed(response, 'registration/login.html')
 
+    @override_config(IS_CLOSED=True)
     def test_site_settings_is_closed_graphql(self):
         response = self.client.get("/graphql")
         self.assertTemplateUsed(response, 'registration/login.html')
 
+    @override_config(IS_CLOSED=True)
     def test_site_settings_is_closed_robots(self):
         response = self.client.get("/robots.txt")
         self.assertTemplateNotUsed(response, 'registration/login.html')
 
+    @override_config(IS_CLOSED=True)
     def test_site_settings_is_closed_sitemap(self):
         response = self.client.get("/sitemap.xml")
         self.assertTemplateNotUsed(response, 'registration/login.html')
 
+    @override_config(IS_CLOSED=True)
     def test_site_settings_is_closed_oidc(self):
         response = self.client.get("/oidc/test")
         self.assertTemplateNotUsed(response, 'registration/login.html')
 
+    @override_config(IS_CLOSED=True)
     def test_site_settings_is_closed_login(self):
         response = self.client.get("/login")
         self.assertTemplateNotUsed(response, 'registration/login.html')
 
+    @override_config(IS_CLOSED=True)
     def test_site_settings_is_closed_static(self):
         response = self.client.get("/static/favicon.ico")
         self.assertTemplateNotUsed(response, 'registration/login.html')
 
+    @override_config(IS_CLOSED=True)
     def test_site_settings_is_closed_featured_file(self):
         response = self.client.get("/file/featured/test.txt")
         self.assertTemplateNotUsed(response, 'registration/login.html')
 
+    @override_config(
+        IS_CLOSED=False,
+        WALLED_GARDEN_BY_IP_ENABLED=True,
+        WHITELISTED_IP_RANGES=['10.10.10.10']
+    )
     def test_site_settings_is_walled_garden_by_ip_enabled_but_whitelisted(self):
-        cache.set("%s%s" % (connection.schema_name, 'IS_CLOSED'), False)
-        cache.set("%s%s" % (connection.schema_name, 'WALLED_GARDEN_BY_IP_ENABLED'), True)
-        cache.set("%s%s" % (connection.schema_name, 'WHITELISTED_IP_RANGES'), ['10.10.10.10'])
-
         response = self.client.get("/981random3", REMOTE_ADDR='10.10.10.10')
 
         self.assertTemplateNotUsed(response, 'registration/login.html')
 
+    @override_config(
+        IS_CLOSED=False,
+        WALLED_GARDEN_BY_IP_ENABLED=True,
+        WHITELISTED_IP_RANGES=['10.10.10.11/32']
+    )
     def test_site_settings_is_walled_garden_by_ip_enabled_but_whitelisted_different_ip(self):
-        cache.set("%s%s" % (connection.schema_name, 'IS_CLOSED'), False)
-        cache.set("%s%s" % (connection.schema_name, 'WALLED_GARDEN_BY_IP_ENABLED'), True)
-        cache.set("%s%s" % (connection.schema_name, 'WHITELISTED_IP_RANGES'), ['10.10.10.11/32'])
-
         response = self.client.get("/981random3", REMOTE_ADDR='10.10.10.10')
 
         self.assertTemplateUsed(response, 'registration/login.html')
 
+    @override_config(
+        IS_CLOSED=False,
+        WALLED_GARDEN_BY_IP_ENABLED=True,
+        WHITELISTED_IP_RANGES=['10.10.10.0/24']
+    )
     def test_site_settings_is_walled_garden_by_ip_enabled_but_whitelisted_large_network(self):
-        cache.set("%s%s" % (connection.schema_name, 'IS_CLOSED'), False)
-        cache.set("%s%s" % (connection.schema_name, 'WALLED_GARDEN_BY_IP_ENABLED'), True)
-        cache.set("%s%s" % (connection.schema_name, 'WHITELISTED_IP_RANGES'), ['10.10.10.0/24'])
-
         response = self.client.get("/981random3", HTTP_X_FORWARDED_FOR='10.10.10.108')
 
         self.assertTemplateNotUsed(response, 'registration/login.html')
 
+    @override_config(
+        IS_CLOSED=False,
+        WALLED_GARDEN_BY_IP_ENABLED=True,
+        WHITELISTED_IP_RANGES=['10.10.11.0/24']
+    )
     def test_site_settings_is_walled_garden_by_ip_enabled_but_whitelisted_large_network_different_range(self):
-        cache.set("%s%s" % (connection.schema_name, 'IS_CLOSED'), False)
-        cache.set("%s%s" % (connection.schema_name, 'WALLED_GARDEN_BY_IP_ENABLED'), True)
-        cache.set("%s%s" % (connection.schema_name, 'WHITELISTED_IP_RANGES'), ['10.10.11.0/24'])
-
         response = self.client.get("/981random3", HTTP_X_FORWARDED_FOR='10.10.10.108')
 
         self.assertTemplateUsed(response, 'registration/login.html')
 
+    @override_config(
+        IS_CLOSED=False,
+        WALLED_GARDEN_BY_IP_ENABLED=False,
+        WHITELISTED_IP_RANGES=[]
+    )
     def test_site_settings_is_not_walled_garden_by_ip_enabled_but_whitelisted(self):
-        cache.set("%s%s" % (connection.schema_name, 'IS_CLOSED'), False)
-        cache.set("%s%s" % (connection.schema_name, 'WALLED_GARDEN_BY_IP_ENABLED'), False)
-        cache.set("%s%s" % (connection.schema_name, 'WHITELISTED_IP_RANGES'), [])
-
         response = self.client.get("/981random3", REMOTE_ADDR='10.10.10.10')
 
         self.assertTemplateNotUsed(response, 'registration/login.html')
@@ -760,28 +769,35 @@ class TestSiteSettingsJavascriptSection(PleioTenantTestCase):
         super().setUp()
 
         self.authenticated_user = UserFactory()
-
-        self.override_config(IS_CLOSED=False)
-
         self.AUTHENTICATED_UUID = str(uuid.uuid4())
         self.ANONYMOUS_UUID = str(uuid.uuid4())
 
-        self.override_config(STARTPAGE='cms',
-                             STARTPAGE_CMS=self.AUTHENTICATED_UUID)
-        self.override_config(ANONYMOUS_START_PAGE='cms',
-                             ANONYMOUS_START_PAGE_CMS=self.ANONYMOUS_UUID)
 
     def test_anonymous(self):
-        response = self.client.get('')
-        content = response.content.decode()
+        with override_config(
+            IS_CLOSED=False,
+            STARTPAGE='cms',
+            STARTPAGE_CMS=self.AUTHENTICATED_UUID,
+            ANONYMOUS_START_PAGE='cms',
+            ANONYMOUS_START_PAGE_CMS=self.ANONYMOUS_UUID,
+        ):
+            response = self.client.get('')
+            content = response.content.decode()
 
         self.assertNotIn(self.AUTHENTICATED_UUID, content)
         self.assertIn(self.ANONYMOUS_UUID, content)
 
     def test_authenticated_user(self):
-        self.client.force_login(self.authenticated_user)
-        response = self.client.get('')
-        content = response.content.decode()
+        with override_config(
+            IS_CLOSED=False,
+            STARTPAGE='cms',
+            STARTPAGE_CMS=self.AUTHENTICATED_UUID,
+            ANONYMOUS_START_PAGE='cms',
+            ANONYMOUS_START_PAGE_CMS=self.ANONYMOUS_UUID,
+        ):
+            self.client.force_login(self.authenticated_user)
+            response = self.client.get('')
+            content = response.content.decode()
 
         self.assertIn(self.AUTHENTICATED_UUID, content)
         self.assertNotIn(self.ANONYMOUS_UUID, content)

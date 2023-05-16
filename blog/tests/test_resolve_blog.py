@@ -35,10 +35,6 @@ class BlogTestCase(PleioTenantTestCase):
         )
 
     def tearDown(self):
-        self.blogPublic.delete()
-        self.blogPrivate.delete()
-        self.authenticatedUser.delete()
-        self.authenticatedAdminUser.delete()
         super().tearDown()
 
     def test_blog_anonymous(self):

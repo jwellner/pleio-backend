@@ -5,7 +5,7 @@ from zipfile import ZipFile
 from mixer.backend.django import mixer
 
 from blog.models import Blog
-from core.tests.helpers import PleioTenantTestCase
+from core.tests.helpers import PleioTenantTestCase, override_config
 from event.models import Event
 from user.factories import AdminFactory, UserFactory
 from wiki.models import Wiki
@@ -27,12 +27,6 @@ class TestExportSelectedContentTestCase(PleioTenantTestCase):
                                                                                                                        self.event.id)
 
     def tearDown(self):
-        self.wiki.delete()
-        self.event.delete()
-        self.blog2.delete()
-        self.blog1.delete()
-        self.user1.delete()
-        self.admin.delete()
         super().tearDown()
 
     def test_export_selected_content(self):
@@ -48,16 +42,15 @@ class TestExportSelectedContentTestCase(PleioTenantTestCase):
             self.assertEqual(names[0], 'blog-export.csv')
             self.assertEqual(names[1], 'event-export.csv')
 
+    @override_config(IS_CLOSED=False)
     def test_export_selected_content_anonymous(self):
-        self.override_config(IS_CLOSED=False)
-
         response = self.client.get(self.selection)
 
         self.assertEqual(response.status_code, HTTPStatus.UNAUTHORIZED)
         self.assertTemplateUsed("react.html")
 
+    @override_config(IS_CLOSED=False)
     def test_export_selected_content_as_visitor(self):
-        self.override_config(IS_CLOSED=False)
         self.client.force_login(self.user1)
 
         response = self.client.get(self.selection)

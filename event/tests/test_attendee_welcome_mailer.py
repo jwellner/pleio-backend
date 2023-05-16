@@ -28,12 +28,6 @@ class TestAttendeeWelcomeMailerTestCase(PleioTenantTestCase):
         self.mailer = AttendeeWelcomeMailMailer(attendee=self.attendee.id)
 
     def tearDown(self):
-        self.event.delete()
-        self.attendee.delete()
-
-        self.owner.delete()
-        self.attendee_user.delete()
-
         super().tearDown()
 
     @mock.patch("event.mail_builders.attendee_welcome_mail.TemplateMailerBase.build_context")

@@ -32,9 +32,6 @@ class DownloadRichDescriptionAsTestCase(FastTenantTestCase):
         )
 
     def tearDown(self):
-        self.pad.delete()
-        self.authenticatedUser.delete()
-        self.authenticatedAdminUser.delete()
         super().tearDown()
 
     def test_download_rich_description_on_non_existing_entity(self):

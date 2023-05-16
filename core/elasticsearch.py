@@ -75,6 +75,8 @@ class CustomSignalProcessor(BaseSignalProcessor):
 
 
 def retry_index_document(instance):
+    if settings.ENV == 'test':
+        return
     instance = parent_or_self(instance)
     if instance.__class__ in registry.get_models():
         schedule_index_document(instance)

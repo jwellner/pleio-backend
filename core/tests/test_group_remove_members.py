@@ -27,13 +27,6 @@ class ChangeGroupRoleTestCase(PleioTenantTestCase):
         """
 
     def tearDown(self):
-        self.group1.delete()
-        self.admin.delete()
-        self.user4.delete()
-        self.user3.delete()
-        self.user2.delete()
-        self.user1.delete()
-
         super().tearDown()
 
     def test_remove_group_members_by_owner(self):

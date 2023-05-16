@@ -16,7 +16,6 @@ class TestFetchProfileTestCase(PleioTenantTestCase):
                                 external_id=self.EXTERNAL_ID)
 
     def tearDown(self):
-        self.user.delete()
         super().tearDown()
 
     @mock.patch("concierge.api.ConciergeClient.fetch")

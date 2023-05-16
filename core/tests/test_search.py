@@ -1,11 +1,12 @@
 from django.utils import timezone
+from django.test import override_settings
 from mixer.backend.django import mixer
 
 from blog.factories import BlogFactory
 from blog.models import Blog
 from core.constances import ACCESS_TYPE
 from core.models import Group
-from core.tests.helpers import ElasticsearchTestCase, PleioTenantTestCase
+from core.tests.helpers import ElasticsearchTestCase, override_config
 from file.models import FileFolder
 from news.models import News
 from user.factories import UserFactory
@@ -14,10 +15,10 @@ from wiki.models import Wiki
 
 class SearchTestCase(ElasticsearchTestCase):
 
+    @override_config(COLLAB_EDITING_ENABLED=True)
+    @override_settings(ENV='test')
     def setUp(self):
         super().setUp()
-
-        self.override_config(COLLAB_EDITING_ENABLED=True)
 
         self.common_tag1 = "Alles moet weg"
         self.common_tag2 = "Niets blijft staan"
@@ -56,15 +57,16 @@ class SearchTestCase(ElasticsearchTestCase):
             'write_access': [ACCESS_TYPE.user.format(self.user.guid)],
         }
 
-        self.pad = FileFolder.objects.create(
-            type=FileFolder.Types.PAD,
-            title="Test group pad",
-            rich_description={"type": "doc", "content": [{"type": "paragraph", "content": [{"type": "text", "text": "padtest"}]}]},
-            read_access=[ACCESS_TYPE.public],
-            write_access=[ACCESS_TYPE.user.format(self.user.id)],
-            owner=self.user,
-            group=self.group
-        )
+        with override_settings(ENV='test'):
+            self.pad = FileFolder.objects.create(
+                type=FileFolder.Types.PAD,
+                title="Test group pad",
+                rich_description="padtest",
+                read_access=[ACCESS_TYPE.public],
+                write_access=[ACCESS_TYPE.user.format(self.user.id)],
+                owner=self.user,
+                group=self.group
+            )
         permission2 = {
             'owner': self.user2,
             'read_access': [ACCESS_TYPE.public],
@@ -78,6 +80,9 @@ class SearchTestCase(ElasticsearchTestCase):
         self.news1 = mixer.blend(News, title=self.common_tag1, **permission)
         self.news2 = mixer.blend(News, title=self.common_tag2, **permission)
         self.news3 = mixer.blend(News, title=self.common_tag2, **permission2)
+
+    def tearDown(self):
+        super().tearDown()
 
     def test_invalid_subtype(self):
         with self.assertGraphQlError("invalid_subtype"):
@@ -94,12 +99,14 @@ class SearchTestCase(ElasticsearchTestCase):
                 "subtypes": ["test"]
             })
 
+    @override_config(COLLAB_EDITING_ENABLED=True)
     def test_multiple_subtypes(self):
         variables = {
             "q": self.q,
             "subtypes": ["blog", "wiki", "pad"],
             "subtype": "blog"
         }
+
         self.initialize_index()
 
         self.graphql_client.force_login(self.user)
@@ -137,11 +144,10 @@ class SearchTestCase(ElasticsearchTestCase):
             "dateTo": "2016-44-03T19:00:00"
         }
 
-        self.initialize_index()
-
         with self.assertGraphQlError("invalid_date"):
             self.graphql_client.post(query, variables)
 
+    @override_config(COLLAB_EDITING_ENABLED=True)
     def test_pad_search(self):
         variables = {
             "q": "padtest",
@@ -181,6 +187,7 @@ class SearchTestCase(ElasticsearchTestCase):
         variables = {
             "ownerGuids": [str(self.user2.id)]
         }
+
         self.initialize_index()
 
         self.graphql_client.force_login(self.user)
@@ -196,7 +203,7 @@ class SearchTestCase(ElasticsearchTestCase):
         self.assertNotIn(self.blog1.guid, items)
 
 
-class TestSearchArchivedTestCase(PleioTenantTestCase):
+class TestSearchArchivedTestCase(ElasticsearchTestCase):
 
     def setUp(self):
         super().setUp()
@@ -229,7 +236,8 @@ class TestSearchArchivedTestCase(PleioTenantTestCase):
         }
 
     def test_filter_archived(self):
-        ElasticsearchTestCase.initialize_index()
+
+        self.initialize_index()
 
         self.graphql_client.force_login(self.user)
         result = self.graphql_client.post(self.query, self.variables)
@@ -267,16 +275,9 @@ class TestCaseSensitivityTitleSortingSearchTestCase(ElasticsearchTestCase):
                                       self.uppercase3], key=lambda b: b.title.lower())
 
     def tearDown(self):
-        self.lowercase.delete()
-        self.lowercase2.delete()
-        self.uppercase.delete()
-        self.uppercase2.delete()
-        self.uppercase3.delete()
-        self.owner.delete()
         super().tearDown()
 
     def test_search_query(self):
-        self.initialize_index()
         query = """
             query Search($query: String!, $orderBy: SearchOrderBy) {
                 search(q: $query, orderBy: $orderBy) {
@@ -293,6 +294,9 @@ class TestCaseSensitivityTitleSortingSearchTestCase(ElasticsearchTestCase):
             "query": '',
             "orderBy": 'title'
         }
+
+        self.initialize_index()
+
         self.graphql_client.force_login(self.owner)
         response = self.graphql_client.post(query, variables)
 

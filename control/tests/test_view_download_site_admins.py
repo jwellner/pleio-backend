@@ -15,10 +15,6 @@ class TestViewDownloadSiteAdminsTestCase(_.BaseTestCase):
         self.regular_user = UserFactory()
 
     def tearDown(self):
-        self.site_admin.delete()
-        self.another_site_admin.delete()
-        self.regular_user.delete()
-
         super().tearDown()
 
     def test_anonymous_visitor(self):

@@ -19,8 +19,6 @@ class TestAvatarExportCleanupTestCase(PleioTenantTestCase):
         FileFolder.objects.filter(id=self.old_file.id).update(created_at=self.old_file.created_at - timedelta(days=31))
 
     def tearDown(self):
-        for file in FileFolder.objects.all():
-            file.delete()
         super().tearDown()
 
     def test_remove_exports(self):

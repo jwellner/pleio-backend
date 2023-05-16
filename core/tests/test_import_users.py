@@ -3,7 +3,7 @@ from core.lib import get_tmp_file_path, access_id_to_acl
 from core.tasks import import_users
 from django.contrib.auth.models import AnonymousUser
 from core.models import ProfileField, UserProfileField
-from core.tests.helpers import PleioTenantTestCase
+from core.tests.helpers import PleioTenantTestCase, override_config
 from user.models import User
 from mixer.backend.django import mixer
 from unittest.mock import patch
@@ -16,8 +16,6 @@ class ImportUsersTestCase(PleioTenantTestCase):
 
     def setUp(self):
         super().setUp()
-
-        cache.set("%s%s" % (connection.schema_name, 'IS_CLOSED'), False)  # or we can not test access id 2
 
         self.csv_bytes = (
             b'column1;column2;column3;column4;column5\n'
@@ -50,10 +48,9 @@ class ImportUsersTestCase(PleioTenantTestCase):
     def tearDown(self):
         if os.path.exists(self.usersCsv):
             os.remove(self.usersCsv)
-        for user in User.objects.all():
-            user.delete()
         super().tearDown()
 
+    @override_config(IS_CLOSED=False)
     def test_import_users_step1_admin(self):
         mutation = """
             mutation ($input: importUsersStep1Input!) {
@@ -86,6 +83,7 @@ class ImportUsersTestCase(PleioTenantTestCase):
         self.assertEqual(data["csvColumns"], ["column1", "column2", "column3", 'column4', 'column5'])
         self.assertEqual(data["userFields"][3]["label"], self.profileField1.name)
 
+    @override_config(IS_CLOSED=False)
     @patch('core.tasks.import_users.delay')
     def test_import_users_step2_admin_new_users(self, mocked_import_users):
         mutation = """
@@ -133,6 +131,7 @@ class ImportUsersTestCase(PleioTenantTestCase):
         self.assertEqual(self.existing_user_profile_field2.value, 'row-2-5')
         self.assertEqual(self.existing_user_profile_field2.read_access, ['user:' + self.existing_user.guid])
 
+    @override_config(IS_CLOSED=False)
     def test_import_users_step2_admin_invalid_user_field(self):
         mutation = """
             mutation ($input: importUsersStep2Input!) {
@@ -155,6 +154,7 @@ class ImportUsersTestCase(PleioTenantTestCase):
             self.graphql_client.force_login(self.admin)
             self.graphql_client.post(mutation, variables)
 
+    @override_config(IS_CLOSED=False)
     def test_import_users_step2_admin_invalid_access_id(self):
         mutation = """
             mutation ($input: importUsersStep2Input!) {
@@ -177,6 +177,7 @@ class ImportUsersTestCase(PleioTenantTestCase):
             self.graphql_client.force_login(self.admin)
             self.graphql_client.post(mutation, variables)
 
+    @override_config(IS_CLOSED=False)
     @patch('core.tasks.misc.schedule_user_import_success')
     def test_import_user_step2_success_mail(self, mocked_mail):
         fields = [
@@ -190,6 +191,7 @@ class ImportUsersTestCase(PleioTenantTestCase):
 
         self.assertEqual(mocked_mail.call_count, 1)
 
+    @override_config(IS_CLOSED=False)
     @patch('core.tasks.misc.schedule_user_import_failed')
     def test_import_user_step2_error_mail(self, mocked_mail):
         fields = [

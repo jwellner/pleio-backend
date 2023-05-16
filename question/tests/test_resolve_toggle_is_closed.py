@@ -34,10 +34,6 @@ class ToggleIsClosedTestCase(PleioTenantTestCase):
         """
 
     def tearDown(self):
-        self.question.delete()
-        self.authenticatedUser.delete()
-        self.admin.delete()
-        self.question_manager.delete()
         super().tearDown()
 
     def test_toggle_is_closed_owner(self):

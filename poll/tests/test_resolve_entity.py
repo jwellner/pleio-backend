@@ -52,9 +52,6 @@ class PollTestCase(PleioTenantTestCase):
         """
 
     def tearDown(self):
-        self.pollPublic.delete()
-        self.pollPrivate.delete()
-        self.authenticatedUser.delete()
         super().tearDown()
 
     def test_poll_anonymous(self):

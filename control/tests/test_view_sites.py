@@ -1,9 +1,16 @@
 from http import HTTPStatus
 
 from control.tests.helpers import Control as _
+from core.tests.helpers import suppress_stdout
+from tenants.models import Client
 
 
 class TestViewSitesTestCase(_.BaseTestCase):
+
+    @suppress_stdout()
+    def setUp(self):
+        super().setUp()
+        self.demo, _ = Client.objects.get_or_create(schema_name="demo1")
 
     def test_anonymous_visitor(self):
         response = self.client.get(_.reverse("sites"))
@@ -18,7 +25,7 @@ class TestViewSitesTestCase(_.BaseTestCase):
 
         self.assertEqual(response.status_code, HTTPStatus.OK)
         self.assertTemplateUsed(response, "sites.html")
-        self.assertIn("fast_test", content.decode())
+        self.assertIn(self.demo.schema_name, content.decode())
 
     def test_invalid_paginator(self):
         self.client.force_login(self.admin)
@@ -26,7 +33,7 @@ class TestViewSitesTestCase(_.BaseTestCase):
         content = response.getvalue()
 
         self.assertEqual(response.status_code, HTTPStatus.OK)
-        self.assertIn("fast_test", content.decode())
+        self.assertIn(self.demo.schema_name, content.decode())
 
     def test_paginator_overflow(self):
         self.client.force_login(self.admin)
@@ -34,4 +41,4 @@ class TestViewSitesTestCase(_.BaseTestCase):
         content = response.getvalue()
 
         self.assertEqual(response.status_code, HTTPStatus.OK)
-        self.assertIn("fast_test", content.decode())
+        self.assertIn(self.demo.schema_name, content.decode())

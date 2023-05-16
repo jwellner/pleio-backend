@@ -72,9 +72,6 @@ class NewsTestCase(PleioTenantTestCase):
         """
 
     def tearDown(self):
-        self.newsPublic.delete()
-        self.newsPrivate.delete()
-        self.authenticatedUser.delete()
         super().tearDown()
 
     def test_news_anonymous(self):

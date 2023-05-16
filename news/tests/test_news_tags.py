@@ -5,6 +5,7 @@ from user.factories import EditorFactory
 
 class TestNewsTagsTestCase(Template.TagsTestCaseTemplate):
     graphql_label = 'News'
+    graphql_search_type = 'news'
     model = News
 
     variables_add = {'input': {

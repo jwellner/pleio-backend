@@ -47,10 +47,6 @@ class AttendEventTestCase(PleioTenantTestCase):
 
 
     def tearDown(self):
-        self.eventPublic.delete()
-        self.attendee1.delete()
-        self.attendee2.delete()
-        self.attendee3.delete()
         super().tearDown()
 
     def test_attend_event_accept(self):

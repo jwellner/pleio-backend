@@ -40,8 +40,6 @@ class TestGroupModelTestCase(PleioTenantTestCase):
                                    content_presets={"defaultTags": self.DEFAULT_TAGS})
 
     def tearDown(self):
-        self.entity.delete()
-        self.owner.delete()
         super().tearDown()
 
     @mock.patch('core.models.group.Group.serialize_featured')

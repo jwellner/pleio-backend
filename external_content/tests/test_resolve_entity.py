@@ -1,15 +1,14 @@
-from core.tests.helpers import PleioTenantTestCase
+from core.tests.helpers import PleioTenantTestCase, override_config
 from external_content.factories import ExternalContentSourceFactory, ExternalContentFactory
-from user.factories import AdminFactory
 
 
 class TestSingleExternalContentItemTestCase(PleioTenantTestCase):
 
     def setUp(self):
         super().setUp()
-        self.override_config(IS_CLOSED=False)
-        self.source = ExternalContentSourceFactory()
-        self.content = ExternalContentFactory(source=self.source)
+        with override_config(IS_CLOSED=False): # ACL is set on creation using the config
+            self.source = ExternalContentSourceFactory()
+            self.content = ExternalContentFactory(source=self.source)
         self.query = '''
         query Entity($guid: String) {
             entity(guid: $guid) {
@@ -43,10 +42,9 @@ class TestSingleExternalContentItemTestCase(PleioTenantTestCase):
         }
 
     def tearDown(self):
-        self.content.delete()
-        self.source.delete()
         super().tearDown()
 
+    @override_config(IS_CLOSED=False)
     def test_entity_properties(self):
         result = self.graphql_client.post(self.query, self.variables)
 

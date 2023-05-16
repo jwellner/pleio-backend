@@ -31,9 +31,6 @@ class ToggleUserRoleTestCase(PleioTenantTestCase):
         }
 
     def tearDown(self):
-        self.user1.delete()
-        self.user2.delete()
-        self.admin.delete()
         super().tearDown()
 
     def test_toggle_user_role_by_anonymous(self):

@@ -5,7 +5,7 @@ from unittest import mock
 
 from core import override_local_config
 from core.lib import early_this_morning
-from core.tests.helpers import PleioTenantTestCase
+from core.tests.helpers import PleioTenantTestCase, override_config
 from user.factories import UserFactory, AdminFactory
 
 
@@ -37,8 +37,6 @@ class TestScheduleAppointmentTestCase(PleioTenantTestCase):
                 }
             }
         }
-        self.override_config(ONLINEAFSPRAKEN_ENABLED=True)
-        self.override_config(VIDEOCALL_ENABLED=True)
 
         self.password = self.create_uuid()
         self.uuid4 = mock.patch('uuid.uuid4').start()
@@ -55,11 +53,12 @@ class TestScheduleAppointmentTestCase(PleioTenantTestCase):
         from uuid import uuid4
         return uuid4()
 
-    @override_local_config(ONLINEAFSPRAKEN_ENABLED=False)
+    @override_config(ONLINEAFSPRAKEN_ENABLED=False, VIDEOCALL_ENABLED=True)
     def test_error_message_when_not_enabled(self):
         with self.assertGraphQlError("meetings_not_enabled"):
             self.graphql_client.post(self.mutation, self.variables)
 
+    @override_config(ONLINEAFSPRAKEN_ENABLED=True, VIDEOCALL_ENABLED=True)
     def test_appointment_constraints_non_user_as_non_user(self):
         with self.assertGraphQlError("missing_required_field:attendee.firstName"):
             variables = deepcopy(self.variables)
@@ -81,6 +80,7 @@ class TestScheduleAppointmentTestCase(PleioTenantTestCase):
             variables['input']['attendee']['email'] = 'localhost'
             self.graphql_client.post(self.mutation, variables)
 
+    @override_config(ONLINEAFSPRAKEN_ENABLED=True, VIDEOCALL_ENABLED=True)
     def test_signup_without_videocall(self):
         result = self.graphql_client.post(self.mutation, self.variables)
 
@@ -106,11 +106,13 @@ class TestScheduleAppointmentTestCase(PleioTenantTestCase):
         })
 
     def test_signup_with_videocall_requires_videocall_enabled(self):
-        self.override_config(VIDEOCALL_APPOINTMENT_TYPE=[{"id": "1000", "hasVideocall": True}])
-        self.override_config(VIDEOCALL_ENABLED=False)
-
-        with self.assertGraphQlError("videocall_not_enabled"):
-            self.graphql_client.post(self.mutation, self.variables)
+        with override_config(
+            ONLINEAFSPRAKEN_ENABLED=True,
+            VIDEOCALL_ENABLED=False,
+            VIDEOCALL_APPOINTMENT_TYPE=[{"id": "1000", "hasVideocall": True}]
+        ):
+            with self.assertGraphQlError("videocall_not_enabled"):
+                self.graphql_client.post(self.mutation, self.variables)
 
     @mock.patch('core.resolvers.mutation_schedule_appointment.get_video_call_params')
     def test_signup_with_videocall(self, get_video_call_params):
@@ -118,9 +120,12 @@ class TestScheduleAppointmentTestCase(PleioTenantTestCase):
             "Foo": "Bar",
             "Baz": "Test123"
         }
-        self.override_config(VIDEOCALL_APPOINTMENT_TYPE=[{"id": "1000", "hasVideocall": True}])
-
-        result = self.graphql_client.post(self.mutation, self.variables)
+        with override_config(
+            ONLINEAFSPRAKEN_ENABLED=True,
+            VIDEOCALL_ENABLED=True,
+            VIDEOCALL_APPOINTMENT_TYPE=[{"id": "1000", "hasVideocall": True}]
+        ):
+            result = self.graphql_client.post(self.mutation, self.variables)
 
         self.assertEqual(get_video_call_params.call_count, 1)
         set_appointment_kwargs = self.set_appointment.call_args.kwargs

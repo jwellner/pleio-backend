@@ -5,7 +5,7 @@ from mixer.backend.django import mixer
 from core.factories import GroupFactory
 from core.mail_builders.group_resend_invitation import ResendGroupInvitationMailer
 from core.models import GroupInvitation
-from core.tests.helpers import PleioTenantTestCase
+from core.tests.helpers import PleioTenantTestCase, override_config
 from user.factories import UserFactory
 
 
@@ -32,8 +32,8 @@ class TestMailerGroupResendInvitationTestCase(PleioTenantTestCase):
         self.build_context.return_value = {}
         self.get_language = mock.patch("user.models.User.get_language").start()
         self.get_language.return_value = 'nl'
-        self.override_config(LANGUAGE='en')
 
+    @override_config(LANGUAGE='en')
     def test_properties(self):
         mailer = ResendGroupInvitationMailer(sender=self.owner.guid,
                                              invitation=self.invitation.id)
@@ -49,6 +49,7 @@ class TestMailerGroupResendInvitationTestCase(PleioTenantTestCase):
         self.assertEqual(mailer.get_sender(), self.owner)
         self.assertIn(self.group.name, mailer.get_subject())
 
+    @override_config(LANGUAGE='en')
     def test_properties_anonymous(self):
         mailer = ResendGroupInvitationMailer(sender=self.owner.guid,
                                              invitation=self.anonymous_invitation.id)

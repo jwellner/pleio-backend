@@ -33,8 +33,6 @@ class TestEntitiesFiles(PleioTenantTestCase):
         """
 
     def tearDown(self):
-        for file in FileFolder.objects.all():
-            file.delete()
         self.owner.delete()
 
         super().tearDown()

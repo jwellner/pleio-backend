@@ -19,10 +19,6 @@ class LeaveGroupTestCase(PleioTenantTestCase):
         self.mandatory_group.join(self.user3, 'member')
 
     def tearDown(self):
-        self.group.delete()
-        self.user1.delete()
-        self.user2.delete()
-        self.user3.delete()
         super().tearDown()
 
     def test_leave_group_anon(self):

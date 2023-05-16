@@ -31,7 +31,7 @@ class TestMailerInviteToSiteTestCase(PleioTenantTestCase):
         build_context.return_value = {}
 
         self.assertDictEqual(self.mailer.get_context(), {
-            'link': f'https://tenant.fast-test.com/login?invitecode={self.invitation.code}',
+            'link': f'https://{self.tenant.primary_domain}/login?invitecode={self.invitation.code}',
             'message': self.MESSAGE,
         })
         self.assertEqual(build_context.call_args.kwargs['user'], self.sender)

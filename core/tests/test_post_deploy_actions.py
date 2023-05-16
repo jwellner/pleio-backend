@@ -23,11 +23,6 @@ class TestMigrateRevisionAttachmentsTestCase(PleioTenantTestCase):
                                                 unchanged=self.blog.serialize())
 
     def tearDown(self):
-        self.revision.delete()
-        self.blog.delete()
-        self.featured_image.delete()
-        self.inline_attachment.delete()
-        self.owner.delete()
         super().tearDown()
 
     def test_migrate_revision(self):

@@ -4,7 +4,7 @@ from django.urls import reverse
 from mixer.backend.django import mixer
 
 from core.models import Group
-from core.tests.helpers import PleioTenantTestCase
+from core.tests.helpers import PleioTenantTestCase, override_config
 from user.factories import AdminFactory, UserFactory
 
 
@@ -17,8 +17,8 @@ class ExportGroupOwnersTestCase(PleioTenantTestCase):
         self.admin = AdminFactory()
         self.group1 = mixer.blend(Group, owner=self.user1)
 
+    @override_config(IS_CLOSED=False)
     def test_export_group_owners_not_logged_in(self):
-        self.override_config(IS_CLOSED=False)
         response = self.client.get(reverse("group_owners_export"))
         content = response.getvalue().decode()
 

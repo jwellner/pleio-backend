@@ -32,11 +32,6 @@ class SignalsTestCase(FastTenantTestCase):
         self.follow1 = self.blog1.add_follow(self.user2)
 
     def tearDown(self):
-        self.blog1.delete()
-        self.blog2.delete()
-        self.group.delete()
-        self.user1.delete()
-        self.user2.delete()
         super().tearDown()
 
     @mock.patch('core.tasks.create_notification.delay')

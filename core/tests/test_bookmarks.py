@@ -37,11 +37,6 @@ class BookmarkTestCase(PleioTenantTestCase):
         self.bookmark2 = self.blog2.add_bookmark(self.authenticatedUser)
 
     def tearDown(self):
-        self.bookmark1.delete()
-        self.bookmark2.delete()
-        self.blog1.delete()
-        self.blog2.delete()
-        self.authenticatedUser.delete()
         super().tearDown()
 
     def test_bookmark_list(self):

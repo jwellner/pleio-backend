@@ -30,9 +30,6 @@ class TestTaskScheduleScanTestCase(PleioTenantTestCase):
         ]
 
     def tearDown(self):
-        for f in FileFolder.objects.all():
-            f.delete()
-        self.owner.delete()
         super().tearDown()
 
     @mock.patch("file.models.FileFolderQuerySet.count")

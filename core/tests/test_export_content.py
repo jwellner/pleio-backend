@@ -7,7 +7,7 @@ from activity.models import StatusUpdate
 from blog.models import Blog
 from cms.models import Page
 from core.models import Comment
-from core.tests.helpers import PleioTenantTestCase
+from core.tests.helpers import PleioTenantTestCase, override_config
 from discussion.models import Discussion
 from file.models import FileFolder
 from news.models import News
@@ -41,27 +41,11 @@ class TestExportContentTestCase(PleioTenantTestCase):
             container=self.blog
         )
 
-        cache.set("%s%s" % (connection.schema_name, 'IS_CLOSED'), False)
-
     def tearDown(self):
-        self.comment.delete()
-        self.wiki.delete()
-        self.question.delete()
-        self.poll.delete()
-        self.file.delete()
-        self.news.delete()
-        self.page.delete()
-        self.discussion.delete()
-        self.blog2.delete()
-        self.blog.delete()
-        self.update.delete()
-        self.admin.delete()
-        self.user.delete()
-
         super().tearDown()
 
+    @override_config(IS_CLOSED=False)
     def test_export_content_blog_not_logged_in(self):
-        self.override_config(IS_CLOSED=False)
 
         response = self.client.get("/exporting/content/blog")
         content = response.getvalue().decode()
@@ -70,6 +54,7 @@ class TestExportContentTestCase(PleioTenantTestCase):
         self.assertNotIn(self.blog.title, content)
         self.assertTemplateUsed("react.html")
 
+    @override_config(IS_CLOSED=False)
     def test_export_content_blog_not_admin(self):
         self.client.force_login(self.user)
 
@@ -80,6 +65,7 @@ class TestExportContentTestCase(PleioTenantTestCase):
         self.assertNotIn(self.blog.title, content)
         self.assertTemplateUsed("react.html")
 
+    @override_config(IS_CLOSED=False)
     def test_not_enabled_for_export_content_type(self):
         invalid_content_type = "Taumatawhakatangihangakoauauotamateaturipukakapikimaungahoronukupokaiwhenuakitanatahu"
         self.client.force_login(self.admin)
@@ -89,56 +75,67 @@ class TestExportContentTestCase(PleioTenantTestCase):
         self.assertEqual(response.status_code, 404)
         self.assertTemplateUsed("react.html")
 
+    @override_config(IS_CLOSED=False)
     def test_export_content_activity(self):
         self.client.force_login(self.admin)
         response = self.client.get(reverse("content_export_type", args=["statusupdate"]))
         self.assertEqual(len(list(response.streaming_content)), 2)
 
+    @override_config(IS_CLOSED=False)
     def test_export_content_blog(self):
         self.client.force_login(self.admin)
         response = self.client.get(reverse("content_export_type", args=["blog"]))
         self.assertEqual(len(list(response.streaming_content)), 3)
 
+    @override_config(IS_CLOSED=False)
     def test_export_content_page(self):
         self.client.force_login(self.admin)
         response = self.client.get(reverse("content_export_type", args=["page"]))
         self.assertEqual(len(list(response.streaming_content)), 2)
 
+    @override_config(IS_CLOSED=False)
     def test_export_content_discussion(self):
         self.client.force_login(self.admin)
         response = self.client.get(reverse("content_export_type", args=["discussion"]))
         self.assertEqual(len(list(response.streaming_content)), 2)
 
+    @override_config(IS_CLOSED=False)
     def test_export_content_file(self):
         self.client.force_login(self.admin)
         response = self.client.get(reverse("content_export_type", args=["file"]))
         self.assertEqual(len(list(response.streaming_content)), 2)
 
+    @override_config(IS_CLOSED=False)
     def test_export_content_news(self):
         self.client.force_login(self.admin)
         response = self.client.get(reverse("content_export_type", args=["news"]))
         self.assertEqual(len(list(response.streaming_content)), 2)
-
+    
+    @override_config(IS_CLOSED=False)
     def test_export_content_poll(self):
         self.client.force_login(self.admin)
         response = self.client.get(reverse("content_export_type", args=["poll"]))
         self.assertEqual(len(list(response.streaming_content)), 2)
 
+    @override_config(IS_CLOSED=False)
     def test_export_content_question(self):
         self.client.force_login(self.admin)
         response = self.client.get(reverse("content_export_type", args=["question"]))
         self.assertEqual(len(list(response.streaming_content)), 2)
 
+    @override_config(IS_CLOSED=False)
     def test_export_content_wiki(self):
         self.client.force_login(self.admin)
         response = self.client.get(reverse("content_export_type", args=["wiki"]))
         self.assertEqual(len(list(response.streaming_content)), 2)
 
+    @override_config(IS_CLOSED=False)
     def test_export_content_task(self):
         self.client.force_login(self.admin)
         response = self.client.get(reverse("content_export_type", args=["task"]))
         self.assertEqual(len(list(response.streaming_content)), 2)
 
+    @override_config(IS_CLOSED=False)
     def test_export_content_comment(self):
         self.client.force_login(self.admin)
         response = self.client.get(reverse("content_export_type", args=["comment"]))

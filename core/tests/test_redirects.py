@@ -7,7 +7,7 @@ from django.test.utils import override_settings
 
 from tenants.helpers import FastTenantTestCase
 from tenants.models import Domain
-
+from core.tests.helpers import override_config
 
 class RedirectsTestCase(FastTenantTestCase):
 
@@ -23,8 +23,8 @@ class RedirectsTestCase(FastTenantTestCase):
             is_primary=False
         )
 
+    @override_config(REDIRECTS={"/path1": "/path2", "/path3": "/path4"})
     def test_redirect(self):
-        cache.set("%s%s" % (connection.schema_name, 'REDIRECTS'), {"/path1": "/path2", "/path3": "/path4"})
 
         request = self.request_factory.get("/path1", HTTP_HOST="www.example.com")
 

@@ -19,13 +19,6 @@ class ChangeGroupRoleTestCase(PleioTenantTestCase):
         self.group1.join(self.user4, 'admin')
 
     def tearDown(self):
-        self.group1.delete()
-        self.admin.delete()
-        self.user4.delete()
-        self.user3.delete()
-        self.user2.delete()
-        self.user1.delete()
-
         super().tearDown()
 
     @mock.patch('core.resolvers.mutation_change_group_role.schedule_change_group_ownership_mail')

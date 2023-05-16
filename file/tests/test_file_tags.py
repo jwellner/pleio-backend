@@ -1,4 +1,5 @@
 from django.core.files.base import ContentFile
+from django.test import override_settings
 
 from core.factories import GroupFactory
 from core.tests.helpers.tags_testcase import Template
@@ -9,6 +10,7 @@ from user.models import User
 class TestFileTagsTestCase(Template.TagsTestCaseTemplate):
     # Overrides:
     graphql_label = 'File'
+    graphql_search_type = 'file'
     graphql_update_mutation = 'editFileFolder'
     graphql_update_input = 'editFileFolderInput'
     graphql_add_mutation = 'addFile'
@@ -21,9 +23,9 @@ class TestFileTagsTestCase(Template.TagsTestCaseTemplate):
         'file': 'test.gif'
     }}
 
-    def local_setup(self):
-        self.override_setting(CLAMAV_HOST='')
-        super().local_setup()
+    @override_settings(CLAMAV_HOST='')
+    def setUp(self):
+        super().setUp()
 
     @property
     def container(self):
@@ -45,6 +47,7 @@ class TestFileTagsTestCase(Template.TagsTestCaseTemplate):
 class TestFolderTagsTestCase(Template.TagsTestCaseTemplate):
     # Overrides:
     graphql_label = 'Folder'
+    graphql_search_type = 'folder'
     graphql_update_mutation = 'editFileFolder'
     graphql_update_input = 'editFileFolderInput'
     model = FileFolder

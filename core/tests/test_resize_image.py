@@ -7,7 +7,7 @@ from mixer.backend.django import mixer
 
 from core.models.image import ResizedImage
 from core.tasks import image_resize
-from core.tests.helpers import PleioTenantTestCase
+from core.tests.helpers import PleioTenantTestCase, override_config
 from file.factories import FileFactory
 from user.models import User
 
@@ -18,7 +18,6 @@ class ResizeImageTestCase(PleioTenantTestCase):
         super().setUp()
 
         self.authenticatedUser = mixer.blend(User)
-        self.override_config(IS_CLOSED=False)
 
     def get_image(self, filename, size=(800, 1280)):
         output = BytesIO()
@@ -29,6 +28,7 @@ class ResizeImageTestCase(PleioTenantTestCase):
 
         return ContentFile(contents, filename)
 
+    @override_config(IS_CLOSED=False)
     @mock.patch('celery.current_app.send_task')
     def test_redirect(self, mock_send_task):
         attachment = FileFactory(owner=self.authenticatedUser,
@@ -38,6 +38,7 @@ class ResizeImageTestCase(PleioTenantTestCase):
         mock_send_task.assert_called_once()
         self.assertRedirects(response, attachment.attachment_url)
 
+    @override_config(IS_CLOSED=False)
     @mock.patch('celery.current_app.send_task')
     def test_resize_resolve(self, mock_send_task):
         attachment = FileFactory(owner=self.authenticatedUser,
@@ -54,6 +55,7 @@ class ResizeImageTestCase(PleioTenantTestCase):
 
         self.assertEqual(response.status_code, 200)
 
+    @override_config(IS_CLOSED=False)
     def test_resize_square(self):
         size = 414
         attachment = FileFactory(owner=self.authenticatedUser,
@@ -71,6 +73,7 @@ class ResizeImageTestCase(PleioTenantTestCase):
         self.assertEqual(resized.width, size)
         self.assertEqual(resized.height, size)
 
+    @override_config(IS_CLOSED=False)
     def test_resize_small(self):
         size = 414
         height = 10
@@ -88,6 +91,7 @@ class ResizeImageTestCase(PleioTenantTestCase):
         resized = Image.open(img.upload.open())
         self.assertEqual(resized.height, height)
 
+    @override_config(IS_CLOSED=False)
     def test_resize_vertical(self):
         size = 414
         attachment = FileFactory(owner=self.authenticatedUser,
@@ -104,6 +108,7 @@ class ResizeImageTestCase(PleioTenantTestCase):
         resized = Image.open(img.upload.open())
         self.assertEqual(resized.width, size)
 
+    @override_config(IS_CLOSED=False)
     def test_resize_horizontal(self):
         size = 414
         attachment = FileFactory(owner=self.authenticatedUser,

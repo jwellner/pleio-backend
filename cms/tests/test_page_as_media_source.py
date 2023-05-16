@@ -24,8 +24,6 @@ class CampagnePageAsMediaSourceTestCase(PleioTenantTestCase):
         self.entity = CampagnePageFactory(owner=self.owner)
 
     def tearDown(self):
-        self.entity.delete()
-        self.owner.delete()
         super().tearDown()
 
     def test_does_not_allow_campagne_page_as_media_source(self):

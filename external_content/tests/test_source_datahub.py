@@ -40,10 +40,6 @@ class TestAddDatahubSourceTestCase(PleioTenantTestCase):
         }
 
     def tearDown(self):
-        self.admin.delete()
-        self.authenticated_visitor.delete()
-        ExternalContentSource.objects.all().delete()
-
         super().tearDown()
 
     def test_anonymous_add_datahub_source(self):
@@ -110,7 +106,6 @@ class TestUpdateDatahubSourceTestCase(PleioTenantTestCase):
         }
 
     def tearDown(self):
-        self.source.delete()
         super().tearDown()
 
     def test_anonymous_update_datahub_source(self):

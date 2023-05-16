@@ -26,8 +26,6 @@ class TestQueryContentSourcesTestCase(PleioTenantTestCase):
         }
 
     def tearDown(self):
-        self.source.delete()
-        self.admin.delete()
         super().tearDown()
 
     def test_get_external_source(self):

@@ -1,6 +1,6 @@
 from django.db import connection
 from core.models import Group
-from core.tests.helpers import PleioTenantTestCase
+from core.tests.helpers import PleioTenantTestCase, override_config
 from user.models import User
 from django.core.cache import cache
 from mixer.backend.django import mixer
@@ -65,18 +65,13 @@ class UserSettingsTestCase(PleioTenantTestCase):
         """
 
     def tearDown(self):
-        self.group1.delete()
-        self.group2.delete()
-        self.user2.delete()
-        self.user1.delete()
         super().tearDown()
 
+    @override_config(EXTRA_LANGUAGES=['en'])
     def test_get_user_settings_by_owner(self):
         """
             User can see own settings
         """
-
-        cache.set("%s%s" % (connection.schema_name, 'EXTRA_LANGUAGES'), ['en'])
 
         variables = {"username": self.user1.guid}
 

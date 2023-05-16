@@ -39,10 +39,6 @@ class FiltersTestCase(ElasticsearchTestCase):
                                )
 
     def tearDown(self):
-        self.admin.delete()
-        self.other.delete()
-        self.user.delete()
-        Setting.objects.all().delete()
         cache.clear()
         super().tearDown()
 
@@ -120,7 +116,6 @@ class FiltersTestCase(ElasticsearchTestCase):
             "groupGuid": group.guid
         }
 
-        # Elasticsearch is accessed when groups queried.
         self.initialize_index()
 
         self.graphql_client.force_login(self.user)

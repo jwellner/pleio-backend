@@ -117,14 +117,6 @@ class EditEventTestCase(PleioTenantTestCase):
         """
 
     def tearDown(self):
-        self.eventPublic.delete()
-        self.suggested_item.delete()
-        self.group.delete()
-
-        self.authenticatedUser.delete()
-        self.user2.delete()
-        self.admin.delete()
-
         super().tearDown()
 
     def test_edit_event(self):

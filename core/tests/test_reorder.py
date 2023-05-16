@@ -129,24 +129,6 @@ class ReorderTestCase(PleioTenantTestCase):
                                  )
 
     def tearDown(self):
-        self.wiki9.delete()
-        self.wiki8.delete()
-        self.wiki7.delete()
-        self.wiki5.delete()
-        self.wiki4.delete()
-        self.wiki3.delete()
-        self.wiki2.delete()
-        self.wiki1.delete()
-        self.wiki6.delete()
-        self.page9.delete()
-        self.page8.delete()
-        self.page7.delete()
-        self.page5.delete()
-        self.page4.delete()
-        self.page3.delete()
-        self.page2.delete()
-        self.page1.delete()
-        self.page6.delete()
         super().tearDown()
 
     def test_reorder_page_move_up_position_by_admin(self):

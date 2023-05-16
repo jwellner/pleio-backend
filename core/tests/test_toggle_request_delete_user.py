@@ -23,8 +23,6 @@ class ToggleRequestDeleteUserTestCase(PleioTenantTestCase):
         """
 
     def tearDown(self):
-        self.user1.delete()
-        self.admin.delete()
         super().tearDown()
 
     def test_toggle_request_delete_not_logged_in(self):

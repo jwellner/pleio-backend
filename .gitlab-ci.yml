@@ -29,7 +29,7 @@ variables:
 .python-test:
   services:
     - postgres:12.12-alpine
-    - name: docker.elastic.co/elasticsearch/elasticsearch:7.16.2
+    - name: docker.elastic.co/elasticsearch/elasticsearch:7.17.7
       alias: elasticsearch
       variables:
         discovery.type: single-node
@@ -58,7 +58,7 @@ test:
     - mkdir -p static static-frontend
     - touch static-frontend/web.css static-frontend/vendor.js static-frontend/web.js
     - python manage.py collectstatic --noinput
-    - coverage run --source='.' manage.py test
+    - coverage run --source='.' manage.py test --failfast --timing --parallel 1
     - coverage report
 
 scan:

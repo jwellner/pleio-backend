@@ -6,7 +6,7 @@ from django_tenants.test.client import TenantClient
 from django.contrib.auth.models import AnonymousUser
 from django.core.cache import cache
 from core.models import Comment, CommentRequest
-from core.tests.helpers import PleioTenantTestCase
+from core.tests.helpers import PleioTenantTestCase, override_config
 from core.views import comment_confirm
 from user.models import User
 from blog.models import Blog
@@ -34,20 +34,16 @@ class CommentWithoutAccountTestCase(PleioTenantTestCase):
         )
 
         self.comments = mixer.cycle(1).blend(Comment, owner=self.authenticatedUser, container=self.blogPublic)
-
-        cache.set("%s%s" % (connection.schema_name, 'COMMENT_WITHOUT_ACCOUNT_ENABLED'), True)
-        cache.set("%s%s" % (connection.schema_name, 'IS_CLOSED'), False)
-
         self.client = TenantClient(self.tenant)
 
     def tearDown(self):
-        self.blogPublic.delete()
-        self.authenticatedUser.delete()
-
         super().tearDown()
 
+    @override_config(
+        COMMENT_WITHOUT_ACCOUNT_ENABLED=False,
+        IS_CLOSED=False
+    )
     def test_add_comment_disabled(self):
-        cache.set("%s%s" % (connection.schema_name, 'COMMENT_WITHOUT_ACCOUNT_ENABLED'), False)
 
         mutation = """
             mutation ($input: addCommentWithoutAccountInput!) {
@@ -68,6 +64,10 @@ class CommentWithoutAccountTestCase(PleioTenantTestCase):
         with self.assertGraphQlError("could_not_add"):
             self.graphql_client.post(mutation, variables)
 
+    @override_config(
+        COMMENT_WITHOUT_ACCOUNT_ENABLED=True,
+        IS_CLOSED=False
+    )
     def test_add_comment_invalidmail(self):
         mutation = """
             mutation ($input: addCommentWithoutAccountInput!) {
@@ -88,6 +88,10 @@ class CommentWithoutAccountTestCase(PleioTenantTestCase):
         with self.assertGraphQlError("invalid_email"):
             self.graphql_client.post(mutation, variables)
 
+    @override_config(
+        COMMENT_WITHOUT_ACCOUNT_ENABLED=True,
+        IS_CLOSED=False
+    )
     @mock.patch('core.resolvers.mutation_add_comment_without_account.schedule_comment_without_account_mail')
     def test_add_comment(self, mocked_mail):
         mutation = """
@@ -135,6 +139,10 @@ class CommentWithoutAccountTestCase(PleioTenantTestCase):
         self.assertEqual(comment.email, "test@test.com")
         self.assertEqual(comment.name, "Unit Tester")
 
+    @override_config(
+        COMMENT_WITHOUT_ACCOUNT_ENABLED=True,
+        IS_CLOSED=False
+    )
     def test_confirm_comment_non_comment(self):
         request = HttpRequest()
         random_id = uuid.uuid4()

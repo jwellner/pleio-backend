@@ -33,7 +33,6 @@ class TestDeleteFileTestCase(PleioTenantTestCase):
 
     def tearDown(self):
         self.file.delete()
-        self.owner.delete()
         super().tearDown()
 
     def test_delete_file_without_references(self):

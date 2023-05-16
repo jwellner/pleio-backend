@@ -28,13 +28,6 @@ class ToggleEntityIsPinnedTestCase(PleioTenantTestCase):
         """
 
     def tearDown(self):
-        self.user.delete()
-        self.admin.delete()
-        self.group_admin.delete()
-        self.group_user.delete()
-        self.blog1.delete()
-        self.blog2.delete()
-        self.group.delete()
         super().tearDown()
 
     def test_toggle_entity_is_pinned_by_anonymous(self):

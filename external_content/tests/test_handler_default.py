@@ -12,9 +12,6 @@ class TestHandlerDefaultTestCase(PleioTenantTestCase):
         self.handler = ApiHandler(self.source)
 
     def tearDown(self):
-        self.source.delete()
-        ExternalContent.objects.all().delete()
-
         super().tearDown()
 
     def test_pull(self):

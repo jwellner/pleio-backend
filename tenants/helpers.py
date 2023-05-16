@@ -27,10 +27,16 @@ class FastTenantTestCase(BaseFastTenantTestCase):
         os.makedirs(path, exist_ok=True)
         return path
 
+    @classmethod
+    def get_test_tenant_domain(cls):
+        """
+        Returns a unique domain name for the tenant based on DB name (to avoid collisions)
+        """
+        return "tenant-%s.fast-test.com" % str(hash(connection.settings_dict['NAME']))[-5:]
 
-def switch_schema(schema_name):
-    from django.db import connections
-    from django_tenants.utils import get_tenant_database_alias
-    tenant = Client.objects.get(schema_name=schema_name)
-    connection = connections[get_tenant_database_alias()]
-    connection.set_tenant(tenant)
+    @classmethod
+    def get_test_schema_name(cls):
+        """
+        Returns a unique schema name for the tenant based on DB name (to avoid collisions)
+        """
+        return "fast_test_%s" % str(hash(connection.settings_dict['NAME']))[-5:]

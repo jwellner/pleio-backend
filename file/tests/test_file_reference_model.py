@@ -16,8 +16,6 @@ class TestFileReferenceModelTestCase(PleioTenantTestCase):
                                 upload=ContentFile("Test!\n", "testfile.txt"))
 
     def tearDown(self):
-        self.file.delete()
-        self.owner.delete()
         super().tearDown()
 
     def test_delete_container_deletes_relation(self):

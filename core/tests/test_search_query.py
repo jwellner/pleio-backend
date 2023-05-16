@@ -9,7 +9,6 @@ class TestQueryJournalTestCase(ElasticsearchTestCase):
 
     def setUp(self):
         super().setUp()
-        self.initialize_index()
 
         self.authenticated_user = UserFactory()
         self.query = """
@@ -22,6 +21,12 @@ class TestQueryJournalTestCase(ElasticsearchTestCase):
         self.variables = {
             "query": faker.Faker().name()
         }
+
+        self.initialize_index()
+
+    
+    def tearDown(self):
+        super().tearDown()
 
     def test_search_query_creates_a_journal_record(self):
         self.graphql_client.post(self.query, self.variables)

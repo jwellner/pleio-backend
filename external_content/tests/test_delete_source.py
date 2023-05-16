@@ -37,11 +37,6 @@ class TestDeleteSourceTestCase(PleioTenantTestCase):
         }
 
     def tearDown(self):
-        ExternalContentSource.objects.all().delete()
-        ExternalContent.objects.all().delete()
-        self.admin_user.delete()
-        self.authenticated_user.delete()
-
         super().tearDown()
 
     def test_anonymous_delete_source(self):

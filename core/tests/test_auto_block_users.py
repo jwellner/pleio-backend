@@ -5,6 +5,7 @@ from mixer.backend.django import mixer
 from django.core.cache import cache
 
 from tenants.helpers import FastTenantTestCase
+from core.tests.helpers import override_config
 from user.models import User
 from unittest import mock
 from core.tasks import ban_users_that_bounce, ban_users_with_no_account
@@ -13,7 +14,6 @@ from core.tasks import ban_users_that_bounce, ban_users_with_no_account
 class AutoBlockUsersTests(FastTenantTestCase):
     def setUp(self):
         super().setUp()
-        cache.set("%s%s" % (connection.schema_name, 'LAST_RECEIVED_BOUNCING_EMAIL'), '2000-01-01')
 
         self.user1 = mixer.blend(User)
         self.user2 = mixer.blend(User)
@@ -22,12 +22,9 @@ class AutoBlockUsersTests(FastTenantTestCase):
 
     def tearDown(self):
         cache.clear()
-        self.user1.delete()
-        self.user2.delete()
-        self.user3.delete()
-        self.user4.delete()
         super().tearDown()
 
+    @override_config(LAST_RECEIVED_BOUNCING_EMAIL='2000-01-01')
     @override_settings(BOUNCER_URL='domain@url.nl')
     @override_settings(BOUNCER_TOKEN='fake_token')
     @mock.patch('requests.get')
@@ -69,6 +66,7 @@ class AutoBlockUsersTests(FastTenantTestCase):
         self.assertEqual(self.user4.is_active, False)
         self.assertEqual(self.user4.ban_reason, gettext('Bouncing e-mail address'))
 
+    @override_config(LAST_RECEIVED_BOUNCING_EMAIL='2000-01-01')
     @override_settings(ACCOUNT_API_URL='domain@url.nl')
     @override_settings(ACCOUNT_API_TOKEN='fake_token')
     @mock.patch('requests.get')

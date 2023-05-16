@@ -3,12 +3,13 @@ from traceback import format_exc
 
 from celery import chain
 from celery.utils.log import get_task_logger
-from elasticsearch import ConnectionError as ElasticsearchConnectionError
-
+from elasticsearch import (
+    ConnectionError as ElasticsearchConnectionError
+)
 from core.lib import get_model_by_subtype
 from django_elasticsearch_dsl.registries import registry
 from django_tenants.utils import schema_context
-from elasticsearch_dsl import Search
+from elasticsearch_dsl import Search, connections
 
 from core.models import Group, Entity
 from core.utils.elasticsearch import delete_document_if_found
@@ -150,6 +151,7 @@ def elasticsearch_index_data_for_tenant(schema_name, index_name=None):
 
 @app.task(ignore_result=True)
 def elasticsearch_delete_data_for_tenant(schema_name, index_name=None):
+    # pylint: disable=protected-access
     '''
     Delete tenant data from elasticsearch
     '''
@@ -165,14 +167,14 @@ def elasticsearch_delete_data_for_tenant(schema_name, index_name=None):
         models = _all_models()
 
     for index in registry.get_indices(models):
-        # pylint: disable=protected-access
-        s = Search(index=index._name).query().filter(
-            'term', tenant_name=schema_name
+        es_client = connections.get_connection()
+        es_client.delete_by_query(
+            index=index._name,
+            body=Search(index=index._name).filter("term", tenant_name=schema_name).to_dict(),
+            conflicts="proceed",
+            search_timeout="120s",
+            refresh=True
         )
-
-        # pylint: disable=protected-access
-        logger.info('deleting %i %s objects', s.count(), index._name)
-        s.delete()
 
 
 @app.task(autoretry_for=(ElasticsearchConnectionError,), retry_backoff=10, max_retries=10)

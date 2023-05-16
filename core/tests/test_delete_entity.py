@@ -29,17 +29,6 @@ class DeleteEntityTestCase(PleioTenantTestCase):
         self.groupQuestion1 = mixer.blend(Question, group=self.group1, owner=self.user1)
 
     def tearDown(self):
-        self.blog1.delete()
-        self.question1.delete()
-        self.groupBlog1.delete()
-        self.groupQuestion1.delete()
-
-        self.group1.delete()
-        self.group2.delete()
-
-        self.user1.delete()
-        self.user2.delete()
-        self.admin.delete()
         super().tearDown()
 
     def test_delete_entity_by_admin(self):

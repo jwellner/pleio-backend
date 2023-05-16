@@ -1,7 +1,7 @@
 from unittest import mock
 
 from core.resolvers.query_meetings import first_of_next_month, glue_date_time
-from core.tests.helpers import PleioTenantTestCase
+from core.tests.helpers import PleioTenantTestCase, override_config
 
 from django.utils import timezone
 
@@ -33,18 +33,19 @@ class TestResolveQueryAppointmentTimesTestCase(PleioTenantTestCase):
             'startDate': None,
             'endDate': None,
         }
-        self.override_config(ONLINEAFSPRAKEN_ENABLED=True)
 
+    @override_config(ONLINEAFSPRAKEN_ENABLED=False)
     def test_query_slots_when_it_is_disabled(self):
-        self.override_config(ONLINEAFSPRAKEN_ENABLED=False)
         with self.assertGraphQlError("meetings_not_enabled"):
             self.graphql_client.post(self.query, self.variables)
 
+    @override_config(ONLINEAFSPRAKEN_ENABLED=True)
     @mock.patch('core.resolvers.query_meetings.MeetingsApi.get_bookable_times')
     def test_without_parameters(self, get_bookable_times):
         result = self.graphql_client.post(self.query, self.variables)
         self.assertEqual(result['data']['data'], [])
 
+    @override_config(ONLINEAFSPRAKEN_ENABLED=True)
     @mock.patch('core.resolvers.query_meetings.MeetingsApi.get_bookable_times')
     def test_with_result(self, get_bookable_times):
         get_bookable_times.return_value = [
@@ -73,6 +74,7 @@ class TestResolveQueryAppointmentTimesTestCase(PleioTenantTestCase):
             {'startDateTime': '2020-02-03T10:00:00+01:00', 'endDateTime': '2020-02-03T11:00:00+01:00'},
         ])
 
+    @override_config(ONLINEAFSPRAKEN_ENABLED=True)
     @mock.patch('core.resolvers.query_meetings.MeetingsApi.get_bookable_times')
     def test_with_parameters(self, get_bookable_times):
         get_bookable_times.return_value = []

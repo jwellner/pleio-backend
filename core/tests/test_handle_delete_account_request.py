@@ -22,8 +22,6 @@ class HandleDeleteAccountRequestTestCase(PleioTenantTestCase):
         """
 
     def tearDown(self):
-        self.admin.delete()
-        self.user.delete()
         super().tearDown()
 
     @mock.patch('core.resolvers.mutation_handle_delete_account_request.schedule_user_delete_complete_mail')

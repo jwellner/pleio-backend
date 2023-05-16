@@ -124,10 +124,10 @@ class TiptapParserTestCase(FastTenantTestCase):
             {"type": "image", "attrs": {"src": "no/path/prefix"}}
         ]})
         file_json_localdomain = json.dumps({"content": [
-            {"type": "file", "attrs": {"url": "https://tenant.fast-test.com/foo/bar"}}
+            {"type": "file", "attrs": {"url": "https://%s/foo/bar" % self.tenant.primary_domain}}
         ]})
         image_json_localdomain = json.dumps({"content": [
-            {"type": "image", "attrs": {"src": "http://tenant.fast-test.com/no/path/prefix"}}
+            {"type": "image", "attrs": {"src": "http://%s/no/path/prefix" % self.tenant.primary_domain}}
         ]})
 
         # Expect no ValidationErrors being raised

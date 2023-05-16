@@ -1,6 +1,6 @@
 from unittest import mock
 
-from core.tests.helpers import PleioTenantTestCase
+from core.tests.helpers import PleioTenantTestCase, override_config
 
 
 class TestResolveQueryAppointmentDataTestCase(PleioTenantTestCase):
@@ -20,13 +20,13 @@ class TestResolveQueryAppointmentDataTestCase(PleioTenantTestCase):
             }
         }
         """
-        self.override_config(ONLINEAFSPRAKEN_ENABLED=True)
 
+    @override_config(ONLINEAFSPRAKEN_ENABLED=False)
     def test_appointments_disabled(self):
-        self.override_config(ONLINEAFSPRAKEN_ENABLED=False)
         with self.assertGraphQlError("meetings_not_enabled"):
             self.graphql_client.post(self.query, {})
 
+    @override_config(ONLINEAFSPRAKEN_ENABLED=True)
     @mock.patch('core.resolvers.query_meetings.MeetingsApi.get_appointment_types')
     @mock.patch('core.resolvers.query_meetings.MeetingsApi.get_agendas')
     def test_appointments_enabled(self, get_agendas, get_appointment_types):
@@ -34,6 +34,7 @@ class TestResolveQueryAppointmentDataTestCase(PleioTenantTestCase):
         self.assertEqual(result['data']['data']['agendas'], [])
         self.assertEqual(result['data']['data']['appointmentTypes'], [])
 
+    @override_config(ONLINEAFSPRAKEN_ENABLED=True)
     @mock.patch('core.resolvers.query_meetings.MeetingsApi.get_appointment_types')
     @mock.patch('core.resolvers.query_meetings.MeetingsApi.get_agendas')
     def test_appointments_enabled_with_agendas(self, get_agendas, get_appointment_types):
@@ -44,6 +45,7 @@ class TestResolveQueryAppointmentDataTestCase(PleioTenantTestCase):
                                                              {'id': '2', 'name': 'Agenda2'}])
         self.assertEqual(result['data']['data']['appointmentTypes'], [])
 
+    @override_config(ONLINEAFSPRAKEN_ENABLED=True)
     @mock.patch('core.resolvers.query_meetings.MeetingsApi.get_appointment_types')
     @mock.patch('core.resolvers.query_meetings.MeetingsApi.get_agendas')
     def test_appointments_enabled_with_appointment_types(self, get_agendas, get_appointment_types):

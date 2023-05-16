@@ -234,7 +234,8 @@ def get_access_ids(obj=None):
 
 def get_core_hook(hook_name):
     key = "CORE_HOOK_REPOSITORY:%s" % hook_name
-    if not cache.get(key):
+    result = cache.get(key)
+    if not result:
         result = []
         for app_config in apps.get_app_configs():
             try:
@@ -243,8 +244,8 @@ def get_core_hook(hook_name):
                 result.append(hook_path)
             except ImportError:
                 pass
-        cache.set(key, {'result': result})
-    return cache.get(key)['result']
+        cache.set(key, result)
+    return result
 
 
 def test_elasticsearch_index(index_name):

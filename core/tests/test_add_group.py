@@ -5,7 +5,7 @@ from django.core.files import File
 
 from core import override_local_config
 from core.models import ProfileField
-from core.tests.helpers import PleioTenantTestCase
+from core.tests.helpers import PleioTenantTestCase, override_config
 from user.factories import UserFactory, AdminFactory
 from unittest import mock
 
@@ -105,12 +105,11 @@ class AddGroupCase(PleioTenantTestCase):
         mock_open.return_value = file_mock
         mock_mimetype.return_value = file_mock.content_type
 
-        cache.set("%s%s" % (connection.schema_name, 'LIMITED_GROUP_ADD'), False)
-
         variables = self.data
 
-        self.graphql_client.force_login(self.user)
-        result = self.graphql_client.post(self.mutation, variables)
+        with override_config(LIMITED_GROUP_ADD=False):
+            self.graphql_client.force_login(self.user)
+            result = self.graphql_client.post(self.mutation, variables)
 
         data = result.get("data")
         self.assertEqual(data["addGroup"]["group"]["name"], variables["group"]["name"])
@@ -178,10 +177,6 @@ class AddGroupCase(PleioTenantTestCase):
     def test_add_group_member_fields(self):
         profile_field1 = ProfileField.objects.create(key='text_key', name='text_name', field_type='text_field')
 
-        cache.set("%s%s" % (connection.schema_name, 'PROFILE_SECTIONS'),
-                  [{"name": "section_one", "profileFieldGuids": [profile_field1.guid]}]
-                  )
-
         variables = {
             "group": {
                 "name": "Test123",
@@ -189,8 +184,9 @@ class AddGroupCase(PleioTenantTestCase):
             }
         }
 
-        self.graphql_client.force_login(self.admin)
-        result = self.graphql_client.post(self.mutation, variables)
+        with override_config(PROFILE_SECTIONS=[{"name": "section_one", "profileFieldGuids": [profile_field1.guid]}]):
+            self.graphql_client.force_login(self.admin)
+            result = self.graphql_client.post(self.mutation, variables)
 
         data = result["data"]
         self.assertEqual(data["addGroup"]["group"]["name"], variables["group"]["name"])
@@ -200,17 +196,13 @@ class AddGroupCase(PleioTenantTestCase):
     def test_add_prohibited_member_fields(self):
         profile_field1 = ProfileField.objects.create(key='text_key', name='text_name', field_type='html_field')
 
-        cache.set("%s%s" % (connection.schema_name, 'PROFILE_SECTIONS'),
-                  [{"name": "section_one", "profileFieldGuids": [profile_field1.guid]}]
-                  )
-
         variables = {
             "group": {
                 "name": "Test123",
                 "showMemberProfileFieldGuids": [str(profile_field1.id)]
             }
         }
-
-        with self.assertGraphQlError("Long text fields are not allowed to display on the member page."):
-            self.graphql_client.force_login(self.admin)
-            self.graphql_client.post(self.mutation, variables)
+        with override_config(PROFILE_SECTIONS=[{"name": "section_one", "profileFieldGuids": [profile_field1.guid]}]):
+            with self.assertGraphQlError("Long text fields are not allowed to display on the member page."):
+                self.graphql_client.force_login(self.admin)
+                self.graphql_client.post(self.mutation, variables)

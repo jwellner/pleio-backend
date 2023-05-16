@@ -23,8 +23,6 @@ class AttendEventTestCase(PleioTenantTestCase):
         EventAttendeeRequest.objects.create(code='1234567890', email='pete@tenant.fast-test.com', event=self.event)
 
     def tearDown(self):
-        self.event.delete()
-        self.authenticatedUser.delete()
         super().tearDown()
 
     @mock.patch("event.mail_builders.attendee_welcome_mail.send_mail")

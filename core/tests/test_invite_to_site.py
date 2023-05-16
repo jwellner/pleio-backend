@@ -13,9 +13,6 @@ class InviteToSiteTestCase(PleioTenantTestCase):
         self.admin = mixer.blend(User, roles=['ADMIN'])
 
     def tearDown(self):
-        self.admin.delete()
-        self.user2.delete()
-        self.user1.delete()
         super().tearDown()
 
     @mock.patch('core.resolvers.mutation_invite_to_site.generate_code', return_value='6df8cdad5582833eeab4')

@@ -22,10 +22,6 @@ class TestNewsModelTestCase(PleioTenantTestCase):
                                              container=self.parent)
 
     def tearDown(self):
-        self.entity.delete()
-        self.parent.delete()
-        self.owner.delete()
-
         super().tearDown()
 
     def test_serialize_authenticated(self):

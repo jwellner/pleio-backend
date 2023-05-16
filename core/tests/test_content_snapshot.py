@@ -35,11 +35,6 @@ class TestContentSnapshotTestCase(PleioTenantTestCase):
         self.content_snapshot = ContentSnapshot(self.owner.guid)
 
     def tearDown(self):
-        for file in FileFolder.objects.all():
-            file.delete()
-        self.blog.delete()
-        self.owner.delete()
-
         super().tearDown()
 
     @mock.patch('core.utils.export.content.BytesIO')

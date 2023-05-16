@@ -15,8 +15,6 @@ class VoteTestCase(PleioTenantTestCase):
                                  is_recommended=True)
 
     def tearDown(self):
-        self.blog1.delete()
-        self.authenticatedUser.delete()
         super().tearDown()
 
     def test_bookmark(self):

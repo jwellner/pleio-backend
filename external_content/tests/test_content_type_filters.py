@@ -10,7 +10,6 @@ class TestContentTypeFiltersTestCase(PleioTenantTestCase):
         self.source = ExternalContentSourceFactory()
 
     def tearDown(self):
-        self.source.delete()
         super().tearDown()
 
     def test_get_entity_filters(self):

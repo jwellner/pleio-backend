@@ -14,7 +14,6 @@ class TestLibReplaceHtmlImageSrc(PleioTenantTestCase):
         self.visitor = UserFactory()
 
     def tearDown(self):
-        self.visitor.delete()
         super().tearDown()
 
     def test_replace_html_img_src_html(self):

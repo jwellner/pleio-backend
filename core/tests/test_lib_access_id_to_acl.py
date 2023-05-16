@@ -19,9 +19,6 @@ class TestLibGetAccessIdsClosedSiteTestCase(PleioTenantTestCase):
                                 group=self.group)
 
     def tearDown(self):
-        self.group.delete()
-        self.blog.delete()
-        self.owner.delete()
         super().tearDown()
 
     def test_blog_access_id_to_acl(self):

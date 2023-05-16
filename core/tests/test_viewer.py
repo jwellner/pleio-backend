@@ -73,10 +73,6 @@ class ViewerTestCase(PleioTenantTestCase):
         }
 
     def tearDown(self):
-        self.group.delete()
-        self.groupUser.delete()
-        self.authenticatedUser.delete()
-        self.authenticatedAdminUser.delete()
         super().tearDown()
 
     def test_viewer_anonymous(self):

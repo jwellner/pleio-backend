@@ -24,10 +24,6 @@ class TestCheckInEventTestCase(PleioTenantTestCase):
                                      )
 
     def tearDown(self):
-        self.eventOwner.delete()
-        self.authenticatedUser.delete()
-        self.event.delete()
-        self.attendee1.delete()
         super().tearDown()
 
     def test_check_in_by_owner(self):

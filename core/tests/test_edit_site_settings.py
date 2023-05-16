@@ -3,7 +3,7 @@ from django.core.files import File
 from django.conf import settings
 from django.core.cache import cache
 from core.models import Setting, ProfileField
-from core.tests.helpers import PleioTenantTestCase
+from core.tests.helpers import PleioTenantTestCase, override_config
 from user.models import User
 from mixer.backend.django import mixer
 from unittest.mock import patch, MagicMock
@@ -19,20 +19,11 @@ class EditSiteSettingTestCase(PleioTenantTestCase):
         self.profileField2 = ProfileField.objects.create(key='text_key2', name='text_name', field_type='text_field')
         self.profileField3 = ProfileField.objects.create(key='text_key3', name='text_name', field_type='text_field')
         self.profileField4 = ProfileField.objects.create(key='text_key4', name='text_name', field_type='text_field')
-        self.EXPECTED_PAGE_TAG_FILTERS = [{'showTagFilter': False,
+        self.PAGE_TAG_FILTERS = [{'showTagFilter': False,
                                            'showTagCategories': [],
                                            'contentType': 'blog'}]
-        self.override_config(PAGE_TAG_FILTERS=self.EXPECTED_PAGE_TAG_FILTERS)
 
     def tearDown(self):
-        self.admin.delete()
-        self.profileField1.delete()
-        self.profileField2.delete()
-        self.profileField3.delete()
-        self.profileField4.delete()
-        self.user.delete()
-
-        Setting.objects.all().delete()
         cache.clear()
         super().tearDown()
 
@@ -354,8 +345,9 @@ class EditSiteSettingTestCase(PleioTenantTestCase):
             }
         }
 
-        self.graphql_client.force_login(self.admin)
-        result = self.graphql_client.post(mutation, variables)
+        with override_config(PAGE_TAG_FILTERS=self.PAGE_TAG_FILTERS):
+            self.graphql_client.force_login(self.admin)
+            result = self.graphql_client.post(mutation, variables)
 
         data = result["data"]
         self.assertEqual(data["editSiteSetting"]["siteSettings"]["language"], "en")
@@ -644,6 +636,7 @@ class EditSiteSettingTestCase(PleioTenantTestCase):
                 "isClosed": True
             }
         }
+
         result = self.graphql_client.post(mutation, variables)
 
         data = result["data"]
@@ -725,7 +718,6 @@ class EditSiteSettingTestCase(PleioTenantTestCase):
             self.graphql_client.post(mutation, variables)
 
     def test_edit_site_setting_walled_garden_by_ip(self):
-        cache.set("%s%s" % (connection.schema_name, 'ENABLE_SEARCH_ENGINE_INDEXING'), True)
 
         mutation = """
             mutation EditSiteSetting($input: editSiteSettingInput!) {

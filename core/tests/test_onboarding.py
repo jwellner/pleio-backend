@@ -4,7 +4,7 @@ from http import HTTPStatus
 from django.test import override_settings
 from django.utils import timezone
 
-from core.tests.helpers import PleioTenantTestCase
+from core.tests.helpers import PleioTenantTestCase, override_config
 from user.models import User
 from core.models import ProfileField, UserProfileField
 from mixer.backend.django import mixer
@@ -37,18 +37,7 @@ class OnboardingTestCase(PleioTenantTestCase):
         # prepare existing user
         self.existing_user = mixer.blend(User, is_active=True)
 
-        self.override_config(PROFILE_SECTIONS=[
-            {"name": "", "profileFieldGuids": [str(self.profile_field1.id)]}
-        ])
-        self.override_config(IS_CLOSED=True)
-        self.override_config(ONBOARDING_ENABLED=True)
-        self.override_config(ONBOARDING_INTRO="There is an intro")
-        self.override_config(ONBOARDING_FORCE_EXISTING_USERS=False)
-
     def tearDown(self):
-        ProfileField.objects.all().delete()
-        self.existing_user.delete()
-
         super().tearDown()
 
     @override_settings(AUTHENTICATION_BACKENDS=['django.contrib.auth.backends.ModelBackend'])
@@ -58,7 +47,14 @@ class OnboardingTestCase(PleioTenantTestCase):
             'name': 'test user'
         })
 
-        response = self.client.get('/onboarding', follow=True)
+        with override_config(
+            PROFILE_SECTIONS=[{"name": "", "profileFieldGuids": [str(self.profile_field1.id)]}],
+            IS_CLOSED=True,
+            ONBOARDING_ENABLED=True,
+            ONBOARDING_INTRO="There is an intro",
+            ONBOARDING_FORCE_EXISTING_USERS=False,
+        ):
+            response = self.client.get('/onboarding', follow=True)
 
         self.assertTemplateUsed(response, 'onboarding.html')
 
@@ -71,7 +67,14 @@ class OnboardingTestCase(PleioTenantTestCase):
 
         self.profile_field1.delete()
 
-        response = self.client.get('/onboarding', follow=True)
+        with override_config(
+            PROFILE_SECTIONS=[{"name": "", "profileFieldGuids": [str(self.profile_field1.id)]}],
+            IS_CLOSED=True,
+            ONBOARDING_ENABLED=True,
+            ONBOARDING_INTRO="There is an intro",
+            ONBOARDING_FORCE_EXISTING_USERS=False,
+        ):
+            response = self.client.get('/onboarding', follow=True)
 
         self.assertTemplateUsed(response, 'onboarding.html')
 
@@ -83,7 +86,14 @@ class OnboardingTestCase(PleioTenantTestCase):
             'name': 'test user'
         })
 
-        response = self.client.get('/onboarding', follow=True)
+        with override_config(
+            PROFILE_SECTIONS=[{"name": "", "profileFieldGuids": [str(self.profile_field1.id)]}],
+            IS_CLOSED=True,
+            ONBOARDING_ENABLED=True,
+            ONBOARDING_INTRO="There is an intro",
+            ONBOARDING_FORCE_EXISTING_USERS=False,
+        ):
+            response = self.client.get('/onboarding', follow=True)
 
         self.assertTemplateUsed(response, 'base_closed.html')
 
@@ -93,10 +103,16 @@ class OnboardingTestCase(PleioTenantTestCase):
             'email': 'test@pleio.nl',
             'name': 'test user'
         })
-        self.override_config(ONBOARDING_INTRO=None)
 
-        self.client.force_login(self.existing_user)
-        response = self.client.get('/onboarding')
+        with override_config(
+            PROFILE_SECTIONS=[{"name": "", "profileFieldGuids": [str(self.profile_field1.id)]}],
+            IS_CLOSED=True,
+            ONBOARDING_ENABLED=True,
+            ONBOARDING_INTRO=None,
+            ONBOARDING_FORCE_EXISTING_USERS=False,
+        ):
+            self.client.force_login(self.existing_user)
+            response = self.client.get('/onboarding')
 
         self.assertEqual(response.status_code, HTTPStatus.FOUND)
         self.assertEqual(response.url, '/')
@@ -115,11 +131,18 @@ class OnboardingTestCase(PleioTenantTestCase):
 
         expected_date = timezone.now()
 
-        response = self.client.post("/onboarding", data={
-            self.profile_field1.guid: "Field1 value",
-            self.profile_field_multiselect.guid: ["Foo", "Bar"],
-            self.profile_field_datefield.guid: expected_date.strftime("%d-%m-%Y"),
-        })
+        with override_config(
+            PROFILE_SECTIONS=[{"name": "", "profileFieldGuids": [str(self.profile_field1.id)]}],
+            IS_CLOSED=True,
+            ONBOARDING_ENABLED=True,
+            ONBOARDING_INTRO="There is an intro",
+            ONBOARDING_FORCE_EXISTING_USERS=False,
+        ):
+            response = self.client.post("/onboarding", data={
+                self.profile_field1.guid: "Field1 value",
+                self.profile_field_multiselect.guid: ["Foo", "Bar"],
+                self.profile_field_datefield.guid: expected_date.strftime("%d-%m-%Y"),
+            })
 
         self.assertEqual(response.status_code, HTTPStatus.FOUND)
         self.assertEqual(response["Location"], "/")
@@ -142,7 +165,15 @@ class OnboardingTestCase(PleioTenantTestCase):
             'name': 'test user',
             'sub': '1234',
         })
-        response = self.client.post("/onboarding")
+
+        with override_config(
+            PROFILE_SECTIONS=[{"name": "", "profileFieldGuids": [str(self.profile_field1.id)]}],
+            IS_CLOSED=True,
+            ONBOARDING_ENABLED=True,
+            ONBOARDING_INTRO="There is an intro",
+            ONBOARDING_FORCE_EXISTING_USERS=False,
+        ):
+            response = self.client.post("/onboarding")
 
         self.assertEqual(response.status_code, HTTPStatus.FOUND)
         self.assertEqual(response.url, "/")
@@ -176,8 +207,15 @@ class OnboardingTestCase(PleioTenantTestCase):
             'name': self.existing_user.name,
         })
 
-        self.client.force_login(self.existing_user)
-        response = self.client.get("/onboarding")
+        with override_config(
+            PROFILE_SECTIONS=[{"name": "", "profileFieldGuids": [str(self.profile_field1.id)]}],
+            IS_CLOSED=True,
+            ONBOARDING_ENABLED=True,
+            ONBOARDING_INTRO="There is an intro",
+            ONBOARDING_FORCE_EXISTING_USERS=False,
+        ):
+            self.client.force_login(self.existing_user)
+            response = self.client.get("/onboarding")
 
         self.assertEqual(response.status_code, HTTPStatus.OK)
         self.assertTemplateUsed(response, "onboarding.html")
@@ -194,22 +232,42 @@ class OnboardingTestCase(PleioTenantTestCase):
             'name': self.existing_user.name,
         })
 
-        self.client.force_login(self.existing_user)
-        response = self.client.get("/onboarding")
+        with override_config(
+            PROFILE_SECTIONS=[{"name": "", "profileFieldGuids": [str(self.profile_field1.id)]}],
+            IS_CLOSED=True,
+            ONBOARDING_ENABLED=True,
+            ONBOARDING_INTRO="There is an intro",
+            ONBOARDING_FORCE_EXISTING_USERS=False,
+        ):
+            self.client.force_login(self.existing_user)
+            response = self.client.get("/onboarding")
 
         self.assertNotIn(expected_prepopulated_value, response.content.decode())
 
     @override_settings(AUTHENTICATION_BACKENDS=['django.contrib.auth.backends.ModelBackend'])
     def test_onboarding_no_claim(self):
-        response = self.client.get('/onboarding', follow=True)
+        with override_config(
+            PROFILE_SECTIONS=[{"name": "", "profileFieldGuids": [str(self.profile_field1.id)]}],
+            IS_CLOSED=True,
+            ONBOARDING_ENABLED=True,
+            ONBOARDING_INTRO="There is an intro",
+            ONBOARDING_FORCE_EXISTING_USERS=False,
+        ):
+            response = self.client.get('/onboarding', follow=True)
 
         self.assertTemplateUsed(response, 'base_closed.html')
 
     @override_settings(AUTHENTICATION_BACKENDS=['django.contrib.auth.backends.ModelBackend'])
     def test_onboarding_redirect_existing_off(self):
-        self.client.force_login(self.existing_user)
-
-        response = self.client.get('/', follow=True)
+        with override_config(
+            PROFILE_SECTIONS=[{"name": "", "profileFieldGuids": [str(self.profile_field1.id)]}],
+            IS_CLOSED=True,
+            ONBOARDING_ENABLED=True,
+            ONBOARDING_INTRO="There is an intro",
+            ONBOARDING_FORCE_EXISTING_USERS=False,
+        ):
+            self.client.force_login(self.existing_user)
+            response = self.client.get('/', follow=True)
 
         self.assertTemplateUsed(response, 'react.html')
 
@@ -217,18 +275,29 @@ class OnboardingTestCase(PleioTenantTestCase):
     def test_onboarding_redirect_existing_on(self):
         self.client.force_login(self.existing_user)
 
-        self.override_config(ONBOARDING_FORCE_EXISTING_USERS=True)
-
-        response = self.client.get('/', follow=True)
+        with override_config(
+            PROFILE_SECTIONS=[{"name": "", "profileFieldGuids": [str(self.profile_field1.id)]}],
+            IS_CLOSED=True,
+            ONBOARDING_ENABLED=True,
+            ONBOARDING_INTRO="There is an intro",
+            ONBOARDING_FORCE_EXISTING_USERS=True,
+        ):
+            response = self.client.get('/', follow=True)
 
         self.assertTemplateUsed(response, 'onboarding.html')
 
     @override_settings(AUTHENTICATION_BACKENDS=['django.contrib.auth.backends.ModelBackend'])
     def test_onboarding_off(self):
         self.client.force_login(self.existing_user)
-        self.override_config(ONBOARDING_ENABLED=False)
 
-        response = self.client.get('/', follow=True)
+        with override_config(
+            PROFILE_SECTIONS=[{"name": "", "profileFieldGuids": [str(self.profile_field1.id)]}],
+            IS_CLOSED=True,
+            ONBOARDING_ENABLED=False,
+            ONBOARDING_INTRO="There is an intro",
+            ONBOARDING_FORCE_EXISTING_USERS=False,
+        ):
+            response = self.client.get('/', follow=True)
 
         self.assertTemplateUsed(response, 'react.html')
 
@@ -239,7 +308,15 @@ class OnboardingTestCase(PleioTenantTestCase):
             'name': 'test user',
             'sub': '4321',
         })
-        response = self.client.post("/onboarding")
+
+        with override_config(
+            PROFILE_SECTIONS=[{"name": "", "profileFieldGuids": [str(self.profile_field1.id)]}],
+            IS_CLOSED=True,
+            ONBOARDING_ENABLED=True,
+            ONBOARDING_INTRO="There is an intro",
+            ONBOARDING_FORCE_EXISTING_USERS=False,
+        ):
+            response = self.client.post("/onboarding")
 
         self.assertEqual(response.status_code, HTTPStatus.FOUND)
         self.assertEqual(response.url, "/")

@@ -28,7 +28,7 @@ class TestMailerSiteAccessRequestTestCase(PleioTenantTestCase):
 
         self.assertDictEqual(self.mailer.get_context(), {
             'request_name': self.NAME,
-            'site_admin_url': 'https://tenant.fast-test.com/admin/users/access-requests',
+            'site_admin_url': "https://%s/admin/users/access-requests" % self.tenant.primary_domain,
             'admin_name': self.admin.name,
         })
         self.assertEqual(self.mailer.get_language(), self.admin.get_language())

@@ -99,9 +99,6 @@ class TestComplementExpectedRange(PleioTenantTestCase):
         self.complete_range = mock.patch("event.range.sync.complete_range").start()
 
     def tearDown(self):
-        for event in Event.objects.all():
-            event.delete()
-        self.owner.delete()
         super().tearDown()
 
     def test_complement_expected_range(self):

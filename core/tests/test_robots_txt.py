@@ -4,12 +4,12 @@ from django.core.cache import cache
 from django.db import connection
 
 from tenants.helpers import FastTenantTestCase
-
+from core.tests.helpers import override_config
 
 class RobotsTxtTests(FastTenantTestCase):
 
+    @override_config(ENABLE_SEARCH_ENGINE_INDEXING=True)
     def test_enabled_get(self):
-        cache.set("%s%s" % (connection.schema_name, 'ENABLE_SEARCH_ENGINE_INDEXING'), True)
 
         response = self.client.get("/robots.txt")
 
@@ -19,8 +19,8 @@ class RobotsTxtTests(FastTenantTestCase):
         self.assertEqual(lines[0], "User-Agent: *")
         self.assertContains(response, "Sitemap:")
 
+    @override_config(ENABLE_SEARCH_ENGINE_INDEXING=False)
     def test_disabled_get(self):
-        cache.set("%s%s" % (connection.schema_name, 'ENABLE_SEARCH_ENGINE_INDEXING'), False)
         response = self.client.get("/robots.txt")
 
         self.assertEqual(response.status_code, HTTPStatus.OK)

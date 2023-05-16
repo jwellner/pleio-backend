@@ -79,20 +79,6 @@ class FilterUsersTestCase(ElasticsearchTestCase):
         """
 
     def tearDown(self):
-        self.owner.delete()
-        self.group.delete()
-        self.admin.delete()
-        self.profile_field.delete()
-        self.group_profile_field_setting.delete()
-        self.member1.delete()
-        self.profile1.delete()
-        self.user_profile_field1.delete()
-        self.member2.delete()
-        self.profile2.delete()
-        self.user_profile_field2.delete()
-        self.member3.delete()
-        self.pending_member.delete()
-        self.not_a_member.delete()
         super().tearDown()
 
     def graphql_sync_data(self, query, variables, visitor):

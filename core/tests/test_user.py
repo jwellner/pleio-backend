@@ -2,7 +2,7 @@ from mixer.backend.django import mixer
 
 from blog.factories import BlogFactory
 from core.models import ProfileField, ProfileSet, UserProfileField
-from core.tests.helpers import PleioTenantTestCase, ElasticsearchTestCase
+from core.tests.helpers import ElasticsearchTestCase, PleioTenantTestCase
 from user.factories import UserFactory, AdminFactory
 
 
@@ -88,7 +88,7 @@ class TestAdminUserTestCase(PleioTenantTestCase):
         self.assertFullControl(result['Superadmin2'], msg="Superadmin at Superadmin2")
 
 
-class TestUserTestCase(PleioTenantTestCase):
+class TestUserTestCase(ElasticsearchTestCase):
     def setUp(self):
         super().setUp()
 
@@ -125,7 +125,7 @@ class TestUserTestCase(PleioTenantTestCase):
             "limit": 20
         }
 
-        ElasticsearchTestCase.initialize_index()
+        self.initialize_index()
 
         self.graphql_client.force_login(self.user1)
         result = self.graphql_client.post(self.query, variables)
@@ -139,7 +139,7 @@ class TestUserTestCase(PleioTenantTestCase):
             "limit": 20
         }
 
-        ElasticsearchTestCase.initialize_index()
+        self.initialize_index()
 
         self.graphql_client.force_login(self.user1)
         result = self.graphql_client.post(self.query, variables)
@@ -154,7 +154,7 @@ class TestUserTestCase(PleioTenantTestCase):
             "limit": 20
         }
 
-        ElasticsearchTestCase.initialize_index()
+        self.initialize_index()
 
         self.graphql_client.force_login(superadmin1)
         result = self.graphql_client.post(self.query, variables)
@@ -163,7 +163,7 @@ class TestUserTestCase(PleioTenantTestCase):
         self.assertEqual(0, len(result['data']['users']['edges']))
 
 
-class TestUserProfileSetTestCase(PleioTenantTestCase):
+class TestUserProfileSetTestCase(ElasticsearchTestCase):
     def setUp(self):
         super().setUp()
 
@@ -217,15 +217,10 @@ class TestUserProfileSetTestCase(PleioTenantTestCase):
         }
 
     def tearDown(self):
-        self.manager.delete()
-        self.similar_user.delete()
-        self.other_user.delete()
-        self.invalid_user.delete()
-        self.field.delete()
         super().tearDown()
 
     def test_similar_users_as_manager(self):
-        ElasticsearchTestCase.initialize_index()
+        self.initialize_index()
         self.graphql_client.force_login(self.manager)
         result = self.graphql_client.post(self.query, self.variables)
 
@@ -235,13 +230,13 @@ class TestUserProfileSetTestCase(PleioTenantTestCase):
         self.assertIn(self.similar_user.guid, user_guids)
 
     def test_similar_users_as_not_a_manager(self):
-        ElasticsearchTestCase.initialize_index()
+        self.initialize_index()
         with self.assertGraphQlError("not_authorized"):
             self.graphql_client.force_login(self.similar_user)
             self.graphql_client.post(self.query, self.variables)
 
     def test_similar_users_as_invalid_user(self):
-        ElasticsearchTestCase.initialize_index()
+        self.initialize_index()
         with self.assertGraphQlError("missing_required_field:demo_field"):
             self.graphql_client.force_login(self.invalid_user)
             self.graphql_client.post(self.query, self.variables)
@@ -275,9 +270,6 @@ class TestBanReasonTestCase(PleioTenantTestCase):
         }
 
     def tearDown(self):
-        self.blog.delete()
-        self.banned.delete()
-        self.admin.delete()
         super().tearDown()
 
     def test_user_info_as_user(self):

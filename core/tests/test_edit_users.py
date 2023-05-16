@@ -16,8 +16,6 @@ class EditUsersTestCase(PleioTenantTestCase):
         self.admin = mixer.blend(User, roles=['ADMIN'])
 
     def tearDown(self):
-        self.user1.delete()
-        self.admin.delete()
         super().tearDown()
 
     def test_edit_users_by_anonymous(self):

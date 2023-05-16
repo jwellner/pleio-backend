@@ -2,6 +2,7 @@ from django_tenants.test.client import TenantClient
 from django.test import override_settings
 
 from tenants.helpers import FastTenantTestCase
+from core.tests.helpers import override_config
 from user.models import User
 from mixer.backend.django import mixer
 from django.core.cache import cache
@@ -13,14 +14,13 @@ class SuperadminTestCase(FastTenantTestCase):
     def setUp(self):
         super().setUp()
 
-        cache.set("%s%s" % (connection.schema_name, 'IS_CLOSED'), False)
-
         self.user = mixer.blend(User, is_active=True)
         self.user_admin = mixer.blend(User, is_active=True, roles=['ADMIN'])
         self.user_superadmin = mixer.blend(User, is_active=True, is_superadmin=True)
 
         self.client = TenantClient(self.tenant)
 
+    @override_config(IS_CLOSED=False)
     @override_settings(AUTHENTICATION_BACKENDS=['django.contrib.auth.backends.ModelBackend'])
     def test_anonymous(self):
 
@@ -28,6 +28,7 @@ class SuperadminTestCase(FastTenantTestCase):
 
         self.assertTemplateUsed(response, 'react.html')
 
+    @override_config(IS_CLOSED=False)
     @override_settings(AUTHENTICATION_BACKENDS=['django.contrib.auth.backends.ModelBackend'])
     def test_user(self):
 
@@ -36,6 +37,7 @@ class SuperadminTestCase(FastTenantTestCase):
 
         self.assertTemplateUsed(response, 'react.html')
 
+    @override_config(IS_CLOSED=False)
     @override_settings(AUTHENTICATION_BACKENDS=['django.contrib.auth.backends.ModelBackend'])
     def test_admin(self):
         self.client.force_login(self.user_admin)
@@ -44,6 +46,7 @@ class SuperadminTestCase(FastTenantTestCase):
 
         self.assertTemplateUsed(response, 'react.html')
 
+    @override_config(IS_CLOSED=False)
     @override_settings(AUTHENTICATION_BACKENDS=['django.contrib.auth.backends.ModelBackend'])
     def test_superadmin(self):
 

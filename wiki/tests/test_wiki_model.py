@@ -25,10 +25,6 @@ class TestNewsModelTestCase(PleioTenantTestCase):
                                   parent=self.parent)
 
     def tearDown(self):
-        self.entity.delete()
-        self.parent.delete()
-        self.owner.delete()
-
         super().tearDown()
 
     @mock.patch("wiki.models.Wiki.serialize_featured")

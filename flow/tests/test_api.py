@@ -6,6 +6,7 @@ from mixer.backend.django import mixer
 from django.core.cache import cache
 
 from tenants.helpers import FastTenantTestCase
+from core.tests.helpers import override_config
 from user.models import User
 from blog.models import Blog
 from core.constances import ACCESS_TYPE
@@ -18,12 +19,14 @@ class FlowApiTests(FastTenantTestCase):
 
         self.user1 = mixer.blend(User)
 
-        cache.set("%s%s" % (connection.schema_name, 'FLOW_ENABLED'), True)
-        cache.set("%s%s" % (connection.schema_name, 'FLOW_SUBTYPES'), ['blog', 'discussion'])
-        cache.set("%s%s" % (connection.schema_name, 'FLOW_APP_URL'), 'https://flow.test/')
-        cache.set("%s%s" % (connection.schema_name, 'FLOW_TOKEN'), '12341234')
-        cache.set("%s%s" % (connection.schema_name, 'FLOW_CASE_ID'), 1)
-        cache.set("%s%s" % (connection.schema_name, 'FLOW_USER_GUID'), self.user1.guid)
+        self.default_config = {
+            'FLOW_ENABLED': True,
+            'FLOW_SUBTYPES': ['blog', 'discussion'],
+            'FLOW_APP_URL': 'https://flow.test/',
+            'FLOW_TOKEN': '12341234',
+            'FLOW_CASE_ID': 1,
+            'FLOW_USER_GUID': self.user1.guid
+        }
 
     def tearDown(self):
         cache.clear()
@@ -50,7 +53,8 @@ class FlowApiTests(FastTenantTestCase):
             'Authorization': 'Bearer 12341234'
         }
 
-        response = self.client.post("/flow/comments/add", headers=headers, data=self.data)
+        with override_config(**self.default_config):
+            response = self.client.post("/flow/comments/add", headers=headers, data=self.data)
 
         comment = Comment.objects.all().first()
         self.assertEqual(comment.rich_description, 'test_description')
@@ -79,7 +83,8 @@ class FlowApiTests(FastTenantTestCase):
             'description': ''
         }
 
-        response = self.client.post("/flow/comments/add", headers=headers, data=self.data)
+        with override_config(**self.default_config):
+            response = self.client.post("/flow/comments/add", headers=headers, data=self.data)
 
         self.assertEqual(response.status_code, HTTPStatus.BAD_REQUEST)
 
@@ -105,15 +110,14 @@ class FlowApiTests(FastTenantTestCase):
             'description': 'test_description'
         }
 
-        response = self.client.post("/flow/comments/add", headers=headers, data=self.data)
+        with override_config(**self.default_config):
+            response = self.client.post("/flow/comments/add", headers=headers, data=self.data)
 
         self.assertEqual(response.status_code, HTTPStatus.BAD_REQUEST)
 
 
     @mock.patch('requests.post')
     def test_add_comment_flow_disabled(self, mocked_post):
-
-        cache.set("%s%s" % (connection.schema_name, 'FLOW_ENABLED'), False)
 
         mocked_post.return_value.json.return_value = {'id': 100}
 
@@ -133,15 +137,15 @@ class FlowApiTests(FastTenantTestCase):
             'description': 'test_description'
         }
 
-        response = self.client.post("/flow/comments/add", headers=headers, data=self.data)
+        new_config = {**self.default_config, 'FLOW_ENABLED': False}
+        with override_config(**new_config):
+            response = self.client.post("/flow/comments/add", headers=headers, data=self.data)
 
         self.assertEqual(response.status_code, HTTPStatus.BAD_REQUEST)
 
 
     @mock.patch('requests.post')
     def test_add_comment_wrong_token(self, mocked_post):
-
-        cache.set("%s%s" % (connection.schema_name, 'FLOW_ENABLED'), False)
 
         mocked_post.return_value.json.return_value = {'id': 100}
 
@@ -161,7 +165,8 @@ class FlowApiTests(FastTenantTestCase):
             'description': 'test_description'
         }
 
-        response = self.client.post("/flow/comments/add", headers=headers, data=self.data)
+        with override_config(**self.default_config):
+            response = self.client.post("/flow/comments/add", headers=headers, data=self.data)
 
         self.assertEqual(response.status_code, HTTPStatus.BAD_REQUEST)
 

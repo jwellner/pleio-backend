@@ -35,12 +35,6 @@ class Template:
             self.reference2 = self.reference_factory(owner=self.get_owner())
 
         def tearDown(self):
-            self.article1.delete()
-            self.article2.delete()
-            self.reference1.delete()
-            self.reference2.delete()
-            if self._owner:
-                self._owner.delete()
             super().tearDown()
 
         def test_entity_query(self):

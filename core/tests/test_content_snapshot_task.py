@@ -14,12 +14,6 @@ class TestActivitySnapshotTaskTestCase(PleioTenantTestCase):
         self.other_user = UserFactory()
 
     def tearDown(self):
-        for file in FileFolder.objects.all():
-            file.delete()
-
-        self.user.delete()
-        self.other_user.delete()
-
         super().tearDown()
 
     @mock.patch("core.mail_builders.content_export_ready.schedule_content_export_ready_mail")

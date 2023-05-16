@@ -1,4 +1,4 @@
-from core.tests.helpers.search_index_test_template import (PleioTenantTestCase, ElasticsearchTestCase, Template,
+from core.tests.helpers.search_index_test_template import (ElasticsearchTestCase, Template,
                                                            test_elasticsearch_index)
 from core.exceptions import UnableToTestIndex
 
@@ -13,9 +13,9 @@ class TestGroupSearchIndexTestCase(Template.SearchIndexTestTestCase):
     expected_hook = 'core.core_hooks._test_group_query'
 
 
-class TestEdgeCaseTestCase(PleioTenantTestCase):
+class TestEdgeCaseTestCase(ElasticsearchTestCase):
     def test_testcase(self):
-        ElasticsearchTestCase.initialize_index()
+        self.initialize_index()
 
         with self.assertRaises(UnableToTestIndex):
             test_elasticsearch_index("foo_bar_baz")

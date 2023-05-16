@@ -17,11 +17,6 @@ class TestVideocallModelsTestCase(PleioTenantTestCase):
         )
 
     def tearDown(self):
-        self.host.delete()
-        self.guest1.delete()
-        self.guest2.delete()
-        self.guest3.delete()
-        self.video_call.delete()
         super().tearDown()
 
     def test_guest_list(self):
