@@ -501,12 +501,13 @@ EXTERNAL_CONTENT_AUTHOR_EMAIL = "externalcontent@localhost"
 DB_MUTEX_TTL_SECONDS = 3600 * 6
 
 BLEACH_EMAIL_TAGS = [
-    "br", "p",
+    "br", "p", "a",
     "h2", "h3", "h4", "h5",
     "strong", "em", "u",
 ]
 BLEACH_EMAIL_ATTRIBUTES = {
     "*": [],
+    "a": ['target', 'href']
 }
 
 SCAN_CYCLE_DAYS = os.getenv("SCAN_CYCLE_DAYS") or 120
