@@ -1796,6 +1796,7 @@ enum Plugins {
     files
     wiki
     tasks
+    members
 }
 
 type Poll implements Entity {

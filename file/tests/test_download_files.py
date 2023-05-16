@@ -83,9 +83,7 @@ class DownloadFiles(FastTenantTestCase):
 
         with ZipFile(zip_file_content, 'r') as zip_file:
             names = zip_file.namelist()
-            self.assertIn('test.csv', names)
-            self.assertIn('folder1/test.csv', names)
-            self.assertIn('folder2/test.csv', names)
+            self.assertEqual(set(names), {'test.csv', 'folder1/test.csv', 'folder2/test.csv'})
             self.file.refresh_from_db()
             self.assertIsNotNone(self.file.last_download)
 

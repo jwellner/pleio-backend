@@ -44,6 +44,10 @@ def _default_widget_repository():
     }]
 
 
+def _default_plugins():
+    return ['members']
+
+
 class Group(TagsModel, FeaturedCoverMixin, AttachmentMixin):
     class Meta:
         ordering = ['name']
@@ -94,7 +98,7 @@ class Group(TagsModel, FeaturedCoverMixin, AttachmentMixin):
     auto_notification = models.BooleanField(default=False)
 
     plugins = ArrayField(models.CharField(
-        max_length=256), blank=True, default=list)
+        max_length=256), blank=True, default=_default_plugins)
 
     content_presets = models.JSONField(default=dict)
 
