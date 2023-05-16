@@ -42,7 +42,7 @@ def resolve_add_group(_, info, input):
     group.is_membership_on_request = clean_input.get("isMembershipOnRequest", False)
     group.auto_notification = clean_input.get("autoNotification", False)
     group.is_submit_updates_enabled = clean_input.get("isSubmitUpdatesEnabled", False)
-    group.plugins = clean_input.get("plugins", [])
+    group_shared.update_plugins(group, clean_input)
 
     group.content_presets['defaultTags'] = clean_input.get("defaultTags", [])
     group.content_presets['defaultTagCategories'] = clean_input.get("defaultTagCategories", [])
@@ -52,7 +52,6 @@ def resolve_add_group(_, info, input):
         group.is_leaving_group_disabled = clean_input.get("isLeavingGroupDisabled", False)
         group.is_auto_membership_enabled = clean_input.get("isAutoMembershipEnabled", False)
 
-    group.plugins = clean_input.get("plugins", [])
     group.tags = clean_input.get("tags", [])
     group_shared.update_widgets(group, clean_input)
 

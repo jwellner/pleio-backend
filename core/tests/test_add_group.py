@@ -56,6 +56,7 @@ class AddGroupCase(PleioTenantTestCase):
                             type
                             settings { key, value }
                         }
+                        plugins
                     }
                 }
             }
@@ -105,11 +106,12 @@ class AddGroupCase(PleioTenantTestCase):
         mock_open.return_value = file_mock
         mock_mimetype.return_value = file_mock.content_type
 
+        self.override_config(LIMITED_GROUP_ADD=False)
+
         variables = self.data
 
-        with override_config(LIMITED_GROUP_ADD=False):
-            self.graphql_client.force_login(self.user)
-            result = self.graphql_client.post(self.mutation, variables)
+        self.graphql_client.force_login(self.user)
+        result = self.graphql_client.post(self.mutation, variables)
 
         data = result.get("data")
         self.assertEqual(data["addGroup"]["group"]["name"], variables["group"]["name"])
@@ -134,8 +136,7 @@ class AddGroupCase(PleioTenantTestCase):
         self.assertEqual(data["addGroup"]["group"]["defaultTags"], variables['group']['defaultTags'])
         self.assertEqual(data["addGroup"]["group"]["defaultTagCategories"], variables['group']['defaultTagCategories'])
         self.assertEqual(data["addGroup"]["group"]["widgets"], [{'settings': [], 'type': 'groupMembers'}, ])
-
-        cache.clear()
+        self.assertEqual(data["addGroup"]["group"]['plugins'], ["members"])
 
     @override_local_config(LIMITED_GROUP_ADD=True)
     def test_add_group_limited_group_add(self):
