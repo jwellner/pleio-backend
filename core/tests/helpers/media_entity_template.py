@@ -24,8 +24,6 @@ class Template:
             self.expected_filename = "%s%s" % (self.TITLE, self.EXTENSION)
 
         def tearDown(self):
-            self.entity.delete()
-            self.owner.delete()
             super().tearDown()
 
         def test_get_media_status(self):

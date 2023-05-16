@@ -231,8 +231,6 @@ class TestRangeFollowupSettingsChangeTestCase(PleioTenantTestCase):
                                   range_settings={})
 
     def tearDown(self):
-        self.event.delete()
-        self.owner.delete()
         super().tearDown()
 
     @mock.patch("event.range.sync.EventRangeSync.apply_changes_to_followups")
@@ -325,13 +323,6 @@ class TestUpdateRangeIntervalTestCase(PleioTenantTestCase):
         self.per_time_events = {e.range_starttime: e for e in Event.objects.get_full_range(self.range_master)}
 
     def tearDown(self):
-        for attendee in EventAttendee.objects.all():
-            attendee.delete()
-        for event in Event.objects.all():
-            event.delete()
-        for user in User.objects.all():
-            user.delete()
-
         super().tearDown()
 
     def test_move_attendees(self):
@@ -407,9 +398,6 @@ class TestPreDeleteSyncBehaviourTestCase(PleioTenantTestCase):
         complete_range(self.range_master, timezone.now(), 3)
 
     def tearDown(self):
-        for event in Event.objects.all():
-            event.delete()
-        self.owner.delete()
         super().tearDown()
 
     def test_delete_third_item(self):

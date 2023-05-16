@@ -4,6 +4,7 @@ from question.models import Question
 
 class TestQuestionTagsTestCase(Template.TagsTestCaseTemplate):
     graphql_label = 'Question'
+    graphql_search_type = 'question'
     model = Question
 
     variables_add = {'input': {

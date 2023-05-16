@@ -80,14 +80,6 @@ class EventsTestCase(PleioTenantTestCase):
         """
 
     def tearDown(self):
-        self.eventFuture1.delete()
-        self.eventFuture2.delete()
-        self.eventFutureGroup.delete()
-        self.eventPast1.delete()
-        self.eventOneHourAgo.delete()
-        self.eventCurrentlyRunning.delete()
-        self.user1.delete()
-        self.user2.delete()
         super().tearDown()
 
     @staticmethod

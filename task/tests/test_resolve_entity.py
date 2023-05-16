@@ -60,9 +60,6 @@ class TaskTestCase(PleioTenantTestCase):
         """
 
     def tearDown(self):
-        self.taskPublic.delete()
-        self.taskPrivate.delete()
-        self.authenticatedUser.delete()
         super().tearDown()
 
     def test_task_anonymous(self):

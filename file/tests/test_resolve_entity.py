@@ -82,8 +82,6 @@ class FileFolderTestCase(PleioTenantTestCase):
         """
 
     def tearDown(self):
-        FileFolder.objects.all().delete()
-        self.authenticatedUser.delete()
         super().tearDown()
 
     @patch("core.lib.get_mimetype")

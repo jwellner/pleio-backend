@@ -59,16 +59,6 @@ class SubgroupsTestCase(PleioTenantTestCase):
         )
 
     def tearDown(self):
-        self.blog.delete()
-        self.subgroup1.delete()
-        self.group.delete()
-        self.user1.delete()
-        self.user2.delete()
-        self.user3.delete()
-        self.user4.delete()
-        self.user5.delete()
-        self.user6.delete()
-        self.admin.delete()
         super().tearDown()
 
     def test_query_subgroups_by_group_owner(self):

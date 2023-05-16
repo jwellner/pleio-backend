@@ -49,7 +49,6 @@ class EditPollTestCase(PleioTenantTestCase):
         """
 
     def tearDown(self):
-        self.authenticatedUser.delete()
         super().tearDown()
 
     def test_edit_poll(self):

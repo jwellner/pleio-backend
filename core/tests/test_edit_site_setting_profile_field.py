@@ -22,9 +22,6 @@ class EditSiteSettingProfileFieldTestCase(PleioTenantTestCase):
         )
 
     def tearDown(self):
-        self.admin.delete()
-        self.profileField1.delete()
-        self.user.delete()
         cache.clear()
         super().tearDown()
 

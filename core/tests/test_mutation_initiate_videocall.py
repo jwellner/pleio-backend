@@ -4,6 +4,7 @@ from core.models import VideoCall, VideoCallGuest
 from core.tasks import create_notification
 from core.tests.helpers import PleioTenantTestCase
 from user.factories import UserFactory
+from core.tests.helpers import override_config
 
 
 class TestMutationInitiateVideoCallTestCase(PleioTenantTestCase):
@@ -18,9 +19,6 @@ class TestMutationInitiateVideoCallTestCase(PleioTenantTestCase):
 
         self.host = UserFactory()
         self.guest = UserFactory()
-
-        self.override_config(VIDEOCALL_ENABLED=True,
-                             VIDEOCALL_PROFILEPAGE=True)
 
         self.HOST_URL = 'https://host/url/'
         self.GUEST_URL = 'https://guest/url/'
@@ -52,6 +50,7 @@ class TestMutationInitiateVideoCallTestCase(PleioTenantTestCase):
 
         super().tearDown()
 
+    @override_config(VIDEOCALL_ENABLED=True, VIDEOCALL_PROFILEPAGE=True)
     def test_invite_guest_user(self):
         self.graphql_client.force_login(self.host)
         result = self.graphql_client.post(self.query, self.variables)
@@ -88,8 +87,8 @@ class TestMutationInitiateVideoCallTestCase(PleioTenantTestCase):
              'sender_id': self.host.guid},
         ])
 
+    @override_config(VIDEOCALL_ENABLED=True, VIDEOCALL_PROFILEPAGE=True, VIDEOCALL_THROTTLE=1)
     def test_limit_reached(self):
-        self.override_config(VIDEOCALL_THROTTLE=1)
         video_call = VideoCall.objects.create(user=self.host,
                                               guest_url=self.GUEST_URL,
                                               host_url=self.HOST_URL)
@@ -105,8 +104,6 @@ class TestCreateNotificationForVideoCallTestCase(PleioTenantTestCase):
 
     def setUp(self):
         super().setUp()
-        self.override_config(VIDEOCALL_ENABLED=True,
-                             VIDEOCALL_PROFILEPAGE=True)
 
         self.host = UserFactory()
         self.guest = UserFactory()
@@ -144,6 +141,7 @@ class TestCreateNotificationForVideoCallTestCase(PleioTenantTestCase):
             'unread': True
         }
 
+    @override_config(VIDEOCALL_ENABLED=True, VIDEOCALL_PROFILEPAGE=True)
     def test_host_notification(self):
         create_notification(schema_name=self.tenant.schema_name,
                             verb='custom',
@@ -163,6 +161,7 @@ class TestCreateNotificationForVideoCallTestCase(PleioTenantTestCase):
         self.assertIn(self.HOST_URL, edges[0]['customMessage'])
         self.assertNotIn(self.GUEST_URL, edges[0]['customMessage'])
 
+    @override_config(VIDEOCALL_ENABLED=True, VIDEOCALL_PROFILEPAGE=True)
     def test_guest_notification(self):
         create_notification(schema_name=self.tenant.schema_name,
                             verb='custom',

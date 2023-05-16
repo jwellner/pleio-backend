@@ -15,12 +15,8 @@ class SendMessageToUserTestCase(PleioTenantTestCase):
         self.user2 = mixer.blend(User)
         self.user1.profile.language = 'en'
         self.user1.profile.save()
-        cache.set("%s%s" % (connection.schema_name, 'EXTRA_LANGUAGES'), ['en'])
 
     def tearDown(self):
-        self.user1.delete()
-        self.user2.delete()
-
         super().tearDown()
 
     def test_send_message_to_user_anon(self):

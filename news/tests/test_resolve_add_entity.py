@@ -75,12 +75,6 @@ class AddNewsTestCase(PleioTenantTestCase):
         """
 
     def tearDown(self):
-        self.attachment.delete()
-        self.relatedNews1.delete()
-        self.relatedNews2.delete()
-        self.editorUser.delete()
-        self.adminUser.delete()
-        self.authenticatedUser.delete()
         super().tearDown()
 
     def test_add_news(self):

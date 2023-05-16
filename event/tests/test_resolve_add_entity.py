@@ -112,11 +112,6 @@ class AddEventTestCase(PleioTenantTestCase):
         }
 
     def tearDown(self):
-        self.suggested_item.delete()
-        self.eventPublic.delete()
-        self.eventGroupPublic.delete()
-        self.group.delete()
-        self.authenticated_user.delete()
         super().tearDown()
 
     def test_add_event(self):
@@ -268,9 +263,6 @@ class TestAddRangeEventTestCase(PleioTenantTestCase):
         """
 
     def tearDown(self):
-        for event in Event.objects.all():
-            event.delete()
-        self.authenticated_user.delete()
         super().tearDown()
 
     def test_add_range_event(self):

@@ -15,8 +15,6 @@ class TestViewAddAgreementVersionTestCase(_.BaseTestCase):
         self.agreement = mixer.blend(Agreement)
 
     def tearDown(self):
-        self.agreement.delete()
-
         super().tearDown()
 
     def test_anonymous_visitor(self):

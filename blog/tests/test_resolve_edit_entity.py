@@ -100,11 +100,6 @@ class EditBlogTestCase(PleioTenantTestCase):
         }
 
     def tearDown(self):
-        self.blog.delete()
-        self.authenticatedUser.delete()
-        self.user2.delete()
-        self.admin.delete()
-        self.group.delete()
         super().tearDown()
 
     def test_edit_blog(self):

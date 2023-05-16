@@ -35,13 +35,6 @@ class DeleteSubgroupTestCase(PleioTenantTestCase):
         self.subgroup2.members.add(self.user4)
 
     def tearDown(self):
-        self.subgroup1.delete()
-        self.subgroup2.delete()
-        self.group.delete()
-        self.user1.delete()
-        self.user2.delete()
-        self.user3.delete()
-        self.admin.delete()
         super().tearDown()
 
     def test_delete_subgroup_by_group_owner(self):

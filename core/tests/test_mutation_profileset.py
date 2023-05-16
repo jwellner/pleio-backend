@@ -40,11 +40,6 @@ class TestMutationAddProfilesetManagerTestCase(PleioTenantTestCase):
         }
 
     def tearDown(self):
-        self.admin.delete()
-        self.user.delete()
-        self.another_user.delete()
-        self.field.delete()
-        self.profile_set.delete()
         super().tearDown()
 
     def test_anonymous_assign_profileset_to_user(self):
@@ -100,11 +95,6 @@ class TestMutationRemoveProfilesetManagerTestCase(PleioTenantTestCase):
         }
 
     def tearDown(self):
-        self.admin.delete()
-        self.user.delete()
-        self.another_user.delete()
-        self.field.delete()
-        self.profile_set.delete()
         super().tearDown()
 
     def test_anonymous_remove_profileset_to_user(self):

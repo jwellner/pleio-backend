@@ -64,12 +64,6 @@ class RecommendedTestCase(PleioTenantTestCase):
         """
 
     def tearDown(self):
-        self.blog1.delete()
-        self.blog2.delete()
-        self.blog3.delete()
-        self.news1.delete()
-        self.user2.delete()
-        self.user1.delete()
         super().tearDown()
 
     def test_recommended(self):

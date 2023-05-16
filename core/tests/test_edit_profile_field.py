@@ -36,11 +36,6 @@ class EditProfileFieldTestCase(PleioTenantTestCase):
         }])
 
     def tearDown(self):
-        self.admin.delete()
-        self.other.delete()
-        self.user.delete()
-        Setting.objects.all().delete()
-        cache.clear()
         super().tearDown()
 
     def test_edit_profile_field_by_user(self):

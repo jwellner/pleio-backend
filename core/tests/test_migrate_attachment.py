@@ -41,16 +41,6 @@ class TestMigrateAttachmentTestCase(PleioTenantTestCase):
         self.attachment.attached = self.blog
         self.attachment.save()
 
-    def tearDown(self):
-        for attachment in Attachment.objects.all():
-            attachment.delete()
-
-        for file in FileFolder.objects.all():
-            file.delete()
-
-        self.blog.delete()
-        self.owner.delete()
-
     def test_migrate_attachment(self):
         expected = {
             'id': self.attachment.id,

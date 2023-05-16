@@ -150,9 +150,6 @@ class EventTestCase(PleioTenantTestCase):
         """
 
     def tearDown(self):
-        self.event_public.delete()
-        self.event_private.delete()
-        self.authenticated_user.delete()
         super().tearDown()
 
     def test_event_anonymous(self):

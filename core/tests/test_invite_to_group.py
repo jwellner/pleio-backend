@@ -21,11 +21,6 @@ class InviteToGroupTestCase(PleioTenantTestCase):
         self.group1.join(self.user1, 'owner')
 
     def tearDown(self):
-        self.group1.delete()
-        self.admin.delete()
-        self.user2.delete()
-        self.user1.delete()
-
         super().tearDown()
 
     @mock.patch('core.resolvers.mutation_invite_to_group.generate_code', return_value='6df8cdad5582833eeab4')

@@ -33,7 +33,6 @@ class UpdateEntitiesPublicToLoggedInTestCase(FastTenantTestCase):
         )
 
     def tearDown(self):
-        Entity.objects.all().delete()
         super().tearDown()
 
     def test_update_read_access(self):

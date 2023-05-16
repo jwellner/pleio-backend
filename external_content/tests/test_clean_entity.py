@@ -4,7 +4,7 @@ from django.contrib.auth.models import AnonymousUser
 from django.core.exceptions import ValidationError
 
 from core.models import Entity
-from core.tests.helpers import PleioTenantTestCase
+from core.tests.helpers import PleioTenantTestCase, override_config
 from external_content.api_handlers.default import ApiHandler as DefaultHandler
 from external_content.factories import ExternalContentFactory, ExternalContentSourceFactory
 from external_content.models import ExternalContent, ExternalContentSource
@@ -20,9 +20,6 @@ class TestCleanExternalContentSourceTestCase(PleioTenantTestCase):
                                                            handler_id=DefaultHandler.ID)
 
     def tearDown(self):
-        self.source.delete()
-        ExternalContent.objects.all().delete()
-
         super().tearDown()
 
     @mock.patch("external_content.api_handlers.default.ApiHandler.pull")
@@ -49,11 +46,6 @@ class TestCleanExternalContentTestCase(PleioTenantTestCase):
         }
 
     def tearDown(self):
-        ExternalContent.objects.all().delete()
-        self.source.delete()
-        self.owner.delete()
-        self.other_user.delete()
-
         super().tearDown()
 
     def test_required_params_complete(self):
@@ -70,16 +62,16 @@ class TestCleanExternalContentTestCase(PleioTenantTestCase):
                     Entity.owner.RelatedObjectDoesNotExist):
                 pass
 
+    @override_config(IS_CLOSED=True)
     def test_access_on_closed_site(self):
-        self.override_config(IS_CLOSED=True)
         article = ExternalContent.objects.create(**self.required_params)
 
         self.assertFalse(article.can_read(AnonymousUser()))
         self.assertTrue(article.can_read(self.owner))
         self.assertTrue(article.can_read(self.other_user))
 
+    @override_config(IS_CLOSED=False)
     def test_access_on_public_site(self):
-        self.override_config(IS_CLOSED=False)
         article = ExternalContent.objects.create(**self.required_params)
 
         self.assertTrue(article.can_read(AnonymousUser()))
@@ -144,9 +136,6 @@ class TestCleanExternalContentQueryTestCase(PleioTenantTestCase):
         }
 
     def tearDown(self):
-        self.authenticated_user.delete()
-        self.article.delete()
-        self.source.delete()
         super().tearDown()
 
     def test_clean_content(self):

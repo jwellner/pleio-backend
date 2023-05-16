@@ -83,9 +83,6 @@ class WikiTestCase(PleioTenantTestCase):
         """
 
     def tearDown(self):
-        self.wikiPublic.delete()
-        self.wikiPrivate.delete()
-        self.authenticatedUser.delete()
         super().tearDown()
 
     def test_news_anonymous(self):

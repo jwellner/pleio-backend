@@ -24,9 +24,6 @@ class DeleteUserTestCase(PleioTenantTestCase):
         self.variables = {"input": {"guid": self.user.guid}}
 
     def tearDown(self):
-        self.user.delete()
-        self.admin.delete()
-        self.admin2.delete()
         super().tearDown()
 
     @mock.patch('core.resolvers.mutation_delete_user.schedule_user_delete_complete_mail')

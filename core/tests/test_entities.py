@@ -172,16 +172,6 @@ class EntitiesTestCase(PleioTenantTestCase):
         """
 
     def tearDown(self):
-        self.page1.delete()
-        self.page2.delete()
-        self.page3.delete()
-        self.blog1.delete()
-        self.blog2.delete()
-        self.blog3.delete()
-        self.group.delete()
-        self.admin.delete()
-        self.user.delete()
-        self.user2.delete()
         super().tearDown()
 
     def test_entities_all(self):

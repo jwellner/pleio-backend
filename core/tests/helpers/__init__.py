@@ -19,8 +19,6 @@ from django.utils.crypto import get_random_string
 from mixer.backend.django import mixer
 
 from backend2.schema import schema
-from django.db.models import QuerySet
-from collections import Counter
 
 from core.base_config import DEFAULT_SITE_CONFIG
 from tenants.helpers import FastTenantTestCase
@@ -223,15 +221,15 @@ class GraphQLClient():
 
 class ElasticsearchTestCase(PleioTenantTestCase):
 
-    @staticmethod
     @override_settings(ENV='test')
-    def initialize_index():
-        from core.lib import tenant_schema
-        from core.tasks.elasticsearch_tasks import elasticsearch_recreate_indices, elasticsearch_index_data_for_tenant
-        elasticsearch_recreate_indices()
-        elasticsearch_index_data_for_tenant(tenant_schema(), None)
+    def initialize_index(self):
+        from core.tasks.elasticsearch_tasks import elasticsearch_delete_data_for_tenant, elasticsearch_index_data_for_tenant
+        # elasticsearch needs time to settle changes before some delete?
         time.sleep(.100)
-
+        elasticsearch_delete_data_for_tenant(self.tenant.schema_name, None)
+        time.sleep(.100)
+        elasticsearch_index_data_for_tenant(self.tenant.schema_name, None)
+        time.sleep(.100)
 
 @contextmanager
 def suppress_stdout():
@@ -260,3 +258,20 @@ def cleanup_path(path):
 
 def get_system_root():
     return os.path.abspath(os.path.sep)
+
+
+@contextmanager
+def override_config(**kwargs):
+    for config, value in kwargs.items():
+        assert config in DEFAULT_SITE_CONFIG, "%s is not a valid key" % config
+
+    with mock.patch('core.base_config.cache.get') as mocked_cache:
+        def mock_cache_get(key, default=None):
+            for config, value in kwargs.items():
+                if key.endswith(config):
+                    return value
+            return default
+
+        mocked_cache.side_effect = mock_cache_get
+
+        yield

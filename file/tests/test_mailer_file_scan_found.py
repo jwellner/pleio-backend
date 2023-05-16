@@ -28,11 +28,11 @@ class TestMailerFileScanFoundTestCase(PleioTenantTestCase):
         self.assertDictEqual(self.mailer.get_context(), {
             'error_count': self.error_count,
             'virus_count': self.virus_count,
-            'scanlog_url': "https://tenant.fast-test.com/superadmin/scanlog"
+            'scanlog_url': "https://%s/superadmin/scanlog" % self.tenant.primary_domain,
         })
         self.assertEqual(self.mailer.get_language(), self.admin.get_language())
         self.assertEqual(self.mailer.get_template(), "email/file_scan_found.html")
         self.assertEqual(self.mailer.get_receiver(), self.admin)
         self.assertEqual(self.mailer.get_receiver_email(), self.admin.email)
         self.assertEqual(self.mailer.get_sender(), None)
-        self.assertEqual(self.mailer.get_subject(), "Filescan found suspicous files on https://tenant.fast-test.com")
+        self.assertEqual(self.mailer.get_subject(), "Filescan found suspicous files on https://%s" % self.tenant.primary_domain)

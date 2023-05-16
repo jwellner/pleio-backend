@@ -26,9 +26,6 @@ class RevokeInviteToSiteTestCase(PleioTenantTestCase):
 
 
     def tearDown(self):
-        self.admin.delete()
-        self.user2.delete()
-        self.user1.delete()
         super().tearDown()
 
     def test_revoke_invite_to_site_by_admin(self):

@@ -1,6 +1,6 @@
 from http import HTTPStatus
 
-from core.tests.helpers import PleioTenantTestCase
+from core.tests.helpers import PleioTenantTestCase, override_config
 from mixer.backend.django import mixer
 from user.factories import UserFactory, AdminFactory
 from core.models import CustomAgreement
@@ -20,8 +20,8 @@ class CustomSiteAgreementTestCase(PleioTenantTestCase):
             self.expected_content = fh.read()
 
     def test_site_custom_agreement_not_logged_in(self):
-        self.override_config(IS_CLOSED=False)
-        response = self.client.get("/custom_agreement/{}".format(self.agreement.id))
+        with override_config(IS_CLOSED=False):
+            response = self.client.get("/custom_agreement/{}".format(self.agreement.id))
         self.assertEqual(response.status_code, HTTPStatus.UNAUTHORIZED)
         self.assertTemplateUsed("react.html")
         self.assertFalse(hasattr(response, 'streaming_content'))

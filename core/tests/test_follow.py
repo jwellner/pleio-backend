@@ -21,9 +21,6 @@ class FollowTestCase(PleioTenantTestCase):
         )
 
     def tearDown(self):
-        # self.blog1.get_follow(self.authenticatedUser).delete()
-        self.blog1.delete()
-        self.authenticatedUser.delete()
         super().tearDown()
 
     def test_bookmark(self):

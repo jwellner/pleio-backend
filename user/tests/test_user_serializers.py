@@ -13,9 +13,6 @@ class TestUserSerializersTestCase(PleioTenantTestCase):
         self.entities = []
 
     def tearDown(self):
-        for entity in self.entities:
-            entity.delete()
-        self.user.delete()
         super().tearDown()
 
     def create_entity(self, factory, **kwargs):

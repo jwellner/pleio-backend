@@ -3,7 +3,7 @@ from unittest import mock
 from core.constances import ACCESS_TYPE
 from core.factories import GroupFactory
 from core.models import ProfileField, GroupProfileFieldSetting, UserProfileField
-from core.tests.helpers import PleioTenantTestCase
+from core.tests.helpers import PleioTenantTestCase, override_config
 from event.factories import EventFactory
 from event.models import EventAttendee
 from event.export import AttendeeExporter
@@ -141,76 +141,58 @@ class TestExportProfileFieldsTestCase(PleioTenantTestCase):
             state='accept',
             event=self.site_event,
         )
-        self.override_config(PROFILE_SECTIONS=[{"name": "", "profileFieldGuids": [
+        self.PROFILE_SECTIONS = [{"name": "", "profileFieldGuids": [
             self.field_free.guid,
             self.field_site_mandatory.guid,
             self.field_group_mandatory.guid
-        ]}])
+        ]}]
 
         datetime_format = mock.patch("event.export.datetime_format").start()
         datetime_format.return_value = "TIMESTAMP"
 
     def tearDown(self):
-        self.site_attendee.delete()
-        self.group_attendee.delete()
-
-        self.profile_site_mandatory_value.delete()
-        self.profile_group_mandatory_value.delete()
-        self.profile_free_field_value.delete()
-
-        self.setting_group_mandatory_field.delete()
-        self.setting_free_field.delete()
-
-        self.field_free.delete()
-        self.field_group_mandatory.delete()
-        self.field_site_mandatory.delete()
-
-        self.site_event.delete()
-        self.group_event.delete()
-
-        self.group.delete()
-        self.owner.delete()
         super().tearDown()
 
     def test_get_profile_fields(self):
-        exporter = AttendeeExporter(self.site_event, self.owner)
-        self.assertEqual(exporter.get_profile_fields(), [
-            self.field_free,
-            self.field_site_mandatory,
-            self.field_group_mandatory
-        ])
-        self.assertEqual(exporter.column_headers(), [
-            "Status", "Bijgewerkt", "Naam", "E-mail",
-            "Free field", "Site mandatory field", "Group mandatory field"
-        ])
-        self.assertEqual(exporter.profile_common_values(self.site_attendee), [
-            "Aanvaard",
-            "TIMESTAMP",
-            self.site_attendee.name,
-            self.site_attendee.email,
-        ])
-        self.assertEqual([*exporter.profile_field_values(self.site_attendee)], [
-            'Free field user1',
-            'Site mandatory field user1',
-            'Group mandatory field user1'
-        ])
+        with override_config(PROFILE_SECTIONS=self.PROFILE_SECTIONS):
+            exporter = AttendeeExporter(self.site_event, self.owner)
+            self.assertEqual(exporter.get_profile_fields(), [
+                self.field_free,
+                self.field_site_mandatory,
+                self.field_group_mandatory
+            ])
+            self.assertEqual(exporter.column_headers(), [
+                "Status", "Bijgewerkt", "Naam", "E-mail",
+                "Free field", "Site mandatory field", "Group mandatory field"
+            ])
+            self.assertEqual(exporter.profile_common_values(self.site_attendee), [
+                "Aanvaard",
+                "TIMESTAMP",
+                self.site_attendee.name,
+                self.site_attendee.email,
+            ])
+            self.assertEqual([*exporter.profile_field_values(self.site_attendee)], [
+                'Free field user1',
+                'Site mandatory field user1',
+                'Group mandatory field user1'
+            ])
 
-        exporter = AttendeeExporter(self.group_event, self.owner)
-        self.assertEqual(exporter.get_profile_fields(), [
-            self.field_free,
-            self.field_group_mandatory
-        ])
-        self.assertEqual(exporter.column_headers(), [
-            'Status', 'Bijgewerkt', 'Naam', 'E-mail',
-            'Free field', 'Group mandatory field'
-        ])
-        self.assertEqual(exporter.profile_common_values(self.group_attendee), [
-            'Aanvaard',
-            'TIMESTAMP',
-            self.group_attendee.name,
-            self.group_attendee.email,
-        ])
-        self.assertEqual([*exporter.profile_field_values(self.group_attendee)], [
-            'Free field user1',
-            'Group mandatory field user1'
-        ])
+            exporter = AttendeeExporter(self.group_event, self.owner)
+            self.assertEqual(exporter.get_profile_fields(), [
+                self.field_free,
+                self.field_group_mandatory
+            ])
+            self.assertEqual(exporter.column_headers(), [
+                'Status', 'Bijgewerkt', 'Naam', 'E-mail',
+                'Free field', 'Group mandatory field'
+            ])
+            self.assertEqual(exporter.profile_common_values(self.group_attendee), [
+                'Aanvaard',
+                'TIMESTAMP',
+                self.group_attendee.name,
+                self.group_attendee.email,
+            ])
+            self.assertEqual([*exporter.profile_field_values(self.group_attendee)], [
+                'Free field user1',
+                'Group mandatory field user1'
+            ])

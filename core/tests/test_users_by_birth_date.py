@@ -53,13 +53,6 @@ class UsersByBirthDateTestCase(PleioTenantTestCase):
         """
 
     def tearDown(self):
-        self.admin1.delete()
-        self.user1.delete()
-        self.user2.delete()
-        self.user3.delete()
-        self.user4.delete()
-        self.user5.delete()
-        self.user6.delete()
         super().tearDown()
 
     def test_users_by_birth_date_by_user(self):

@@ -28,10 +28,6 @@ class PadTestCase(PleioTenantTestCase):
         )
 
     def tearDown(self):
-        self.pad.delete()
-        self.authenticatedUser.delete()
-        self.authenticatedAdminUser.delete()
-        self.authenticatedNotGroupMember.delete()
         super().tearDown()
 
     def test_pad_owner(self):

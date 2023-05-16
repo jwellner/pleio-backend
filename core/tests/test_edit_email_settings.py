@@ -4,6 +4,7 @@ from django.db import connection
 
 from core.utils.mail import EmailSettingsTokenizer
 from tenants.helpers import FastTenantTestCase
+from core.tests.helpers import override_config
 from user.models import User
 from mixer.backend.django import mixer
 
@@ -16,17 +17,16 @@ class EditEmailSettingsTestCase(FastTenantTestCase):
         self.user = mixer.blend(User, is_active=True)
         self.user.profile.receive_notification_email = True
         self.user.profile.save()
-
-        cache.set("%s%s" % (connection.schema_name, 'IS_CLOSED'), False)
-
         self.client = TenantClient(self.tenant)
 
+    @override_config(IS_CLOSED=False)
     def test_edit_site_settings(self):
         signer = EmailSettingsTokenizer()
         response = self.client.get(signer.create_url(self.user))
 
         self.assertTemplateUsed(response, 'edit_email_settings.html')
 
+    @override_config(IS_CLOSED=False)
     def test_edit_site_settings_false_token(self):
         signer = EmailSettingsTokenizer()
         url = signer.create_url(self.user)
@@ -35,6 +35,7 @@ class EditEmailSettingsTestCase(FastTenantTestCase):
         self.assertEqual(response.status_code, 302)
         self.assertEqual(response.url, '/')
 
+    @override_config(IS_CLOSED=False)
     def test_edit_site_settings_change_settings(self):
         signer = EmailSettingsTokenizer()
         url = signer.create_url(self.user)

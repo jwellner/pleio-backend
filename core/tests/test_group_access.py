@@ -31,13 +31,6 @@ class TestGroupAccess(PleioTenantTestCase):
         )
 
     def tearDown(self):
-        self.blog1.delete()
-        self.site_user.delete()
-        self.group_owner.delete()
-        self.group_admin.delete()
-        self.group_user.delete()
-        self.group_user_blog_owner.delete()
-        self.site_admin.delete()
         super().tearDown()
 
     def test_open_group(self):

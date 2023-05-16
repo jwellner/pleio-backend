@@ -80,11 +80,10 @@ def resolve_search(_, info,
 
     response = s.execute()
 
-    # TODO: maybe response can be extended, so duplicate code can be removed
     for t in response.aggregations.type_terms.buckets:
         totals.append({"subtype": t.key,
-                       "total": t.doc_count,
-                       "title": subtypes_available[t.key]['plural']})
+                    "total": t.doc_count,
+                    "title": subtypes_available[t.key]['plural']})
         total = total + t.doc_count
 
     if subtype:

@@ -2,12 +2,11 @@ import json
 import uuid
 
 from django.conf import settings
-from django.core.cache import cache
-from django.db import connection
 from core.models import ProfileField, UserProfileField, Group
 from mixer.backend.django import mixer
 
 from tenants.helpers import FastTenantTestCase
+from core.tests.helpers import override_config
 from user.models import User
 from core.constances import ACCESS_TYPE
 from django.core.files import File
@@ -39,19 +38,17 @@ class ProfileSyncApiTests(FastTenantTestCase):
             'Authorization': 'Bearer 2312341234'
         }
 
-        cache.set("%s%s" % (connection.schema_name, 'PROFILE_SYNC_ENABLED'), True)
-        cache.set("%s%s" % (connection.schema_name, 'PROFILE_SYNC_TOKEN'), '2312341234')
-
     def tearDown(self):
-        cache.clear()
         super().tearDown()
 
+    @override_config(PROFILE_SYNC_ENABLED=True, PROFILE_SYNC_TOKEN='2312341234')
     def test_get_3_users(self):
         response = self.client.get('/profile_sync_api/users?limit=3&cursor=', headers=self.headers)
 
         self.assertEqual(len(response.json()["users"]), 3)
         self.assertEqual(response.json()["users"][0]["name"], self.user1.name)
 
+    @override_config(PROFILE_SYNC_ENABLED=True, PROFILE_SYNC_TOKEN='2312341234')
     def test_get_users_from_specific_id(self):
         path = '/profile_sync_api/users?limit=3&cursor=' + str(self.user3.id)
         response = self.client.get(path, headers=self.headers)
@@ -59,6 +56,7 @@ class ProfileSyncApiTests(FastTenantTestCase):
         self.assertEqual(len(response.json()["users"]), 2)
         self.assertEqual(response.json()["users"][0]["name"], self.user4.name)
 
+    @override_config(PROFILE_SYNC_ENABLED=True, PROFILE_SYNC_TOKEN='2312341234')
     def test_get_users_with_non_existing_cursor(self):
         path = '/profile_sync_api/users?limit=3&cursor=aa'
         response = self.client.get(path, headers=self.headers)
@@ -71,6 +69,7 @@ class ProfileSyncApiTests(FastTenantTestCase):
 
         self.assertEqual(response.json(), json_response)
 
+    @override_config(PROFILE_SYNC_ENABLED=True, PROFILE_SYNC_TOKEN='2312341234')
     def test_invalid_token(self):
         headers = {
             'Authorization': 'Bearer 2312341'
@@ -86,6 +85,7 @@ class ProfileSyncApiTests(FastTenantTestCase):
 
         self.assertEqual(response.json(), json_response)
 
+    @override_config(PROFILE_SYNC_ENABLED=True, PROFILE_SYNC_TOKEN='2312341234')
     def test_write_log(self):
         data = {
             "uuid": "asdasd78987wejkjasdljasd",
@@ -105,6 +105,7 @@ class ProfileSyncApiTests(FastTenantTestCase):
         self.assertEqual(response.json(), json_response)
         self.assertEqual(Logs.objects.all().count(), 1)
 
+    @override_config(PROFILE_SYNC_ENABLED=True, PROFILE_SYNC_TOKEN='2312341234')
     def test_write_log_missing_uuid(self):
         data = {
             "content": "contentcontent"
@@ -121,6 +122,7 @@ class ProfileSyncApiTests(FastTenantTestCase):
 
         self.assertEqual(response.json(), json_response)
 
+    @override_config(PROFILE_SYNC_ENABLED=True, PROFILE_SYNC_TOKEN='2312341234')
     def test_add_user(self):
         data = {
             "name": "User 7",
@@ -154,6 +156,7 @@ class ProfileSyncApiTests(FastTenantTestCase):
         new_field = UserProfileField.objects.filter(user_profile=new_user.profile, profile_field=self.profile_field1).first()
         self.assertEqual(new_field.value, 'Tester')
 
+    @override_config(PROFILE_SYNC_ENABLED=True, PROFILE_SYNC_TOKEN='2312341234')
     def test_add_user_with_existing_email(self):
         data = {
             "name": "User 7",
@@ -179,6 +182,7 @@ class ProfileSyncApiTests(FastTenantTestCase):
 
         self.assertEqual(response.json(), json_response)
 
+    @override_config(PROFILE_SYNC_ENABLED=True, PROFILE_SYNC_TOKEN='2312341234')
     def test_add_user_with_existing_external_id(self):
         data = {
             "name": "User 7",
@@ -205,6 +209,7 @@ class ProfileSyncApiTests(FastTenantTestCase):
 
         self.assertEqual(response.json(), json_response)
 
+    @override_config(PROFILE_SYNC_ENABLED=True, PROFILE_SYNC_TOKEN='2312341234')
     def test_update_user(self):
         user_profile_field = UserProfileField.objects.create(
             user_profile=self.user5.profile,
@@ -253,6 +258,7 @@ class ProfileSyncApiTests(FastTenantTestCase):
         self.assertEqual(updated_field.value, 'update_existing')
         self.assertEqual(updated_field.read_access, ['public'])
 
+    @override_config(PROFILE_SYNC_ENABLED=True, PROFILE_SYNC_TOKEN='2312341234')
     def test_update_user_with_non_available_email(self):
         data = {
             "guid": self.user5.guid,
@@ -281,6 +287,7 @@ class ProfileSyncApiTests(FastTenantTestCase):
 
         self.assertEqual(response.json(), json_response)
 
+    @override_config(PROFILE_SYNC_ENABLED=True, PROFILE_SYNC_TOKEN='2312341234')
     def test_update_user_with_non_available_external_id(self):
         data = {
             "guid": self.user5.guid,
@@ -309,6 +316,7 @@ class ProfileSyncApiTests(FastTenantTestCase):
 
         self.assertEqual(response.json(), json_response)
 
+    @override_config(PROFILE_SYNC_ENABLED=True, PROFILE_SYNC_TOKEN='2312341234')
     def test_delete_user(self):
         response = self.client.delete('/profile_sync_api/users/' + self.user2.guid,
                                       headers=self.headers,
@@ -321,6 +329,7 @@ class ProfileSyncApiTests(FastTenantTestCase):
         self.assertEqual(response.json(), json_response)
         self.assertEqual(User.objects.filter(id=self.user2.id, is_active=True).count(), 0)
 
+    @override_config(PROFILE_SYNC_ENABLED=True, PROFILE_SYNC_TOKEN='2312341234')
     def test_delete_non_existing_user(self):
         response = self.client.delete('/profile_sync_api/users/' + str(uuid.uuid1()),
                                       headers=self.headers,
@@ -334,6 +343,7 @@ class ProfileSyncApiTests(FastTenantTestCase):
 
         self.assertEqual(response.json(), json_response)
 
+    @override_config(PROFILE_SYNC_ENABLED=True, PROFILE_SYNC_TOKEN='2312341234')
     def test_ban_user(self):
         response = self.client.post('/profile_sync_api/users/' + self.user2.guid + '/ban',
                                     headers=self.headers,
@@ -360,6 +370,7 @@ class ProfileSyncApiTests(FastTenantTestCase):
         self.assertEqual(response.json(), json_response)
         self.assertEqual(User.objects.filter(id=self.user2.id, is_active=False, ban_reason='Verwijderd door Profile-Sync').count(), 1)
 
+    @override_config(PROFILE_SYNC_ENABLED=True, PROFILE_SYNC_TOKEN='2312341234')
     def test_ban_non_existing_user(self):
         headers = {
             'Authorization': 'Bearer 2312341234'
@@ -377,6 +388,7 @@ class ProfileSyncApiTests(FastTenantTestCase):
 
         self.assertEqual(response.json(), json_response)
 
+    @override_config(PROFILE_SYNC_ENABLED=True, PROFILE_SYNC_TOKEN='2312341234')
     def test_unban_user(self):
         user = mixer.blend(User, is_active=False, ban_reason='banned')
 
@@ -407,6 +419,7 @@ class ProfileSyncApiTests(FastTenantTestCase):
 
         user.delete()
 
+    @override_config(PROFILE_SYNC_ENABLED=True, PROFILE_SYNC_TOKEN='2312341234')
     def test_unban_non_existing_user(self):
         response = self.client.post('/profile_sync_api/users/' + str(uuid.uuid1()) + '/unban',
                                     headers=self.headers,
@@ -420,6 +433,7 @@ class ProfileSyncApiTests(FastTenantTestCase):
 
         self.assertEqual(response.json(), json_response)
 
+    @override_config(PROFILE_SYNC_ENABLED=True, PROFILE_SYNC_TOKEN='2312341234')
     @patch("{}.open".format(settings.DEFAULT_FILE_STORAGE))
     @patch("file.models.FileFolder.scan")
     def test_change_avatar(self, mock_scan, mock_open):
@@ -457,6 +471,7 @@ class ProfileSyncApiTests(FastTenantTestCase):
         self.assertIn('test.gif', self.user3.profile.picture_file.upload.name)
         self.assertTrue(mock_scan.called)
 
+    @override_config(PROFILE_SYNC_ENABLED=True, PROFILE_SYNC_TOKEN='2312341234')
     def test_change_avatar_non_existing_user(self):
         response = self.client.post('/profile_sync_api/users/' + str(uuid.uuid1()) + '/avatar',
                                     headers=self.headers,

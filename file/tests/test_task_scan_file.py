@@ -19,8 +19,6 @@ class TestTaskScanFileTestCase(PleioTenantTestCase):
         self.create_incident = mock.patch('file.models.ScanIncidentManager.create_from_file_folder').start()
 
     def tearDown(self):
-        self.file.delete()
-        self.owner.delete()
         super().tearDown()
 
     def test_scan_file_without_virus(self):

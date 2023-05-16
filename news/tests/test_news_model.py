@@ -25,9 +25,6 @@ class TestNewsModelTestCase(PleioTenantTestCase):
                                   source=self.SOURCE)
 
     def tearDown(self):
-        self.entity.delete()
-        self.owner.delete()
-
         super().tearDown()
 
     @mock.patch("news.models.News.serialize_featured")

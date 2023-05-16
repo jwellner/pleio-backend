@@ -45,10 +45,6 @@ class TestEventModelTestCase(PleioTenantTestCase):
                                    suggested_items=[self.suggested_item.guid])
 
     def tearDown(self):
-        for event in Event.objects.all():
-            event.delete()
-        self.suggested_item.delete()
-        self.owner.delete()
         super().tearDown()
 
     @mock.patch("core.models.Entity.serialize")

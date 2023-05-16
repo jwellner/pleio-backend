@@ -53,7 +53,7 @@ class TestAuthAuthenticateTestCase(BaseOIDCAuthBackendTestCase):
             "grant_type": "authorization_code",
             "code": self.request.GET['code'],
             "redirect_uri": mocked_absolutify.return_value,
-            "origin_url": "https://tenant.fast-test.com",
+            "origin_url": "https://%s" % self.tenant.primary_domain,
             "origin_name": config.NAME,
             "origin_description": config.DESCRIPTION,
             "origin_api_token": config.TENANT_API_TOKEN,

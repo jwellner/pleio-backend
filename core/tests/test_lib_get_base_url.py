@@ -10,12 +10,12 @@ class TestLibGetBaseUrlTestCase(PleioTenantTestCase):
 
     def test_local_base_url(self):
         with override_settings(ENV="local"):
-            self.assertEqual(get_base_url(), "http://tenant.fast-test.com:8000")
+            self.assertEqual(get_base_url(), "http://%s:8000" % self.tenant.primary_domain)
 
     def test_secure_base_url(self):
 
         with override_settings(ENV="not_local"):
-            self.assertEqual(get_base_url(), "https://tenant.fast-test.com")
+            self.assertEqual(get_base_url(), "https://%s" % self.tenant.primary_domain)
 
     @mock.patch("tenants.models.ClientManager.get")
     def test_error_at_base_url(self, manager_get):

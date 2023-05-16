@@ -10,7 +10,7 @@ from unittest import mock
 
 from core.factories import GroupFactory
 from core.models import Comment
-from core.tests.helpers import PleioTenantTestCase
+from core.tests.helpers import PleioTenantTestCase, override_config
 from user.factories import UserFactory
 from blog.models import Blog
 from core.constances import ACCESS_TYPE
@@ -123,11 +123,6 @@ class NotificationsTestCase(PleioTenantTestCase):
         """
 
     def tearDown(self):
-        self.blog1.delete()
-        self.blog2.delete()
-        self.group.delete()
-        self.user2.delete()
-        self.user1.delete()
         super().tearDown()
 
     def test_notifications_without_action_object(self):
@@ -241,8 +236,6 @@ class DirectNotificationsTestCase(PleioTenantTestCase):
     def setUp(self):
         super().setUp()
 
-        cache.set("%s%s" % (connection.schema_name, 'PUSH_NOTIFICATIONS_ENABLED'), True)
-
         self.user1 = UserFactory()
         self.user2 = UserFactory()
         self.group = GroupFactory(owner=self.user1,
@@ -284,15 +277,11 @@ class DirectNotificationsTestCase(PleioTenantTestCase):
         return notification
 
     def tearDown(self):
-        self.blog1.delete()
-        self.blog2.delete()
-        self.group.delete()
-        self.user2.delete()
-        self.user1.delete()
         super().tearDown()
 
 
     #test direct mail outside groups
+    @override_config(PUSH_NOTIFICATIONS_ENABLED=True)
     @mock.patch('core.mail_builders.notifications.schedule_notification_mail')
     def test_notification_direct_mail_comment_send(self, schedule_notification_mail):
         self.user2.profile.is_comment_notification_direct_mail_enabled = True
@@ -300,11 +289,13 @@ class DirectNotificationsTestCase(PleioTenantTestCase):
         create_notification.s(connection.schema_name, 'commented', 'blog.blog', self.blog2.id, self.user1.id).apply()
         schedule_notification_mail.assert_called_once()
 
+    @override_config(PUSH_NOTIFICATIONS_ENABLED=True)
     @mock.patch('core.mail_builders.notifications.schedule_notification_mail')
     def test_notification_direct_mail_comment_not_send(self, schedule_notification_mail):
         create_notification.s(connection.schema_name, 'commented', 'blog.blog', self.blog2.id, self.user1.id).apply()
         schedule_notification_mail.assert_not_called()
 
+    @override_config(PUSH_NOTIFICATIONS_ENABLED=True)
     @mock.patch('core.mail_builders.notifications.schedule_notification_mail')
     @mock.patch('user.models.UserManager.get_unmentioned_users')
     def test_notification_direct_mail_mention_send(self, mocked_get_unmentioned_users, mocked_schedule_notification_mail):
@@ -314,6 +305,7 @@ class DirectNotificationsTestCase(PleioTenantTestCase):
         create_notification.s(connection.schema_name, 'mentioned', 'core.comment', self.comment2.id, self.user1.id).apply()
         mocked_schedule_notification_mail.assert_called_once()
 
+    @override_config(PUSH_NOTIFICATIONS_ENABLED=True)
     @mock.patch('core.mail_builders.notifications.schedule_notification_mail')
     def test_notification_direct_mail_mention_not_send(self, schedule_notification_mail):
         create_notification.s(connection.schema_name, 'mentioned', 'core.comment', self.comment2.id, self.user1.id).apply()
@@ -322,6 +314,7 @@ class DirectNotificationsTestCase(PleioTenantTestCase):
 
 
     # test with general comment notifications disabled
+    @override_config(PUSH_NOTIFICATIONS_ENABLED=True)
     @mock.patch('core.mail_builders.notifications.schedule_notification_mail')
     def test_notification_direct_mail_comment_notifications_disabled_not_send(self, schedule_notification_mail):
         self.user2.profile.is_comment_notifications_enabled = False
@@ -331,6 +324,7 @@ class DirectNotificationsTestCase(PleioTenantTestCase):
         schedule_notification_mail.assert_not_called()
     
     # test with general mention notifications disabled
+    @override_config(PUSH_NOTIFICATIONS_ENABLED=True)
     @mock.patch('core.mail_builders.notifications.schedule_notification_mail')
     def test_notification_direct_mail_mention_notifications_disabled_not_send(self, schedule_notification_mail):
         self.user2.profile.is_mention_notifications_enabled = False
@@ -340,18 +334,21 @@ class DirectNotificationsTestCase(PleioTenantTestCase):
         schedule_notification_mail.assert_not_called()
 
     #test direct mail in groups
+    @override_config(PUSH_NOTIFICATIONS_ENABLED=True)
     @mock.patch('core.mail_builders.notifications.schedule_notification_mail')
     def test_notification_direct_mail_comment_in_group_send(self, schedule_notification_mail):
         self.group.set_member_is_notification_direct_mail_enabled(self.user2, True)
         create_notification.s(connection.schema_name, 'commented', 'blog.blog', self.blog1.id, self.user1.id).apply()
         schedule_notification_mail.assert_called_once()
 
+    @override_config(PUSH_NOTIFICATIONS_ENABLED=True)
     @mock.patch('core.mail_builders.notifications.schedule_notification_mail')
     def test_notification_direct_mail_comment_in_group_not_send(self, schedule_notification_mail):
         self.group.set_member_is_notification_direct_mail_enabled(self.user2, False)
         create_notification.s(connection.schema_name, 'commented', 'blog.blog', self.blog1.id, self.user1.id).apply()
         schedule_notification_mail.assert_not_called()
 
+    @override_config(PUSH_NOTIFICATIONS_ENABLED=True)
     @mock.patch('core.mail_builders.notifications.schedule_notification_mail')
     @mock.patch('user.models.UserManager.get_unmentioned_users')
     def test_notification_direct_mail_mention_in_group_send(self, mocked_get_unmentioned_users, schedule_notification_mail):
@@ -360,6 +357,7 @@ class DirectNotificationsTestCase(PleioTenantTestCase):
         create_notification.s(connection.schema_name, 'mentioned', 'core.comment', self.comment1.id, self.user1.id).apply()
         schedule_notification_mail.assert_called_once()
 
+    @override_config(PUSH_NOTIFICATIONS_ENABLED=True)
     @mock.patch('core.mail_builders.notifications.schedule_notification_mail')
     def test_notification_direct_mail_mention_in_group_not_send(self, schedule_notification_mail):
         self.group.set_member_is_notification_direct_mail_enabled(self.user2, False)
@@ -368,6 +366,7 @@ class DirectNotificationsTestCase(PleioTenantTestCase):
 
 
     #test push outside groups
+    @override_config(PUSH_NOTIFICATIONS_ENABLED=True)
     @mock.patch('core.tasks.notification_tasks.send_web_push_notification')
     def test_notification_push_comment_send(self, send_web_push_notification):
         self.user2.profile.is_comment_notification_push_enabled = True
@@ -375,11 +374,13 @@ class DirectNotificationsTestCase(PleioTenantTestCase):
         create_notification.s(connection.schema_name, 'commented', 'blog.blog', self.blog2.id, self.user1.id).apply()
         send_web_push_notification.assert_called_once()
 
+    @override_config(PUSH_NOTIFICATIONS_ENABLED=True)
     @mock.patch('core.tasks.notification_tasks.send_web_push_notification')
     def test_notification_push_comment_not_send(self, send_web_push_notification):
         create_notification.s(connection.schema_name, 'commented', 'blog.blog', self.blog2.id, self.user1.id).apply()
         send_web_push_notification.assert_not_called()
 
+    @override_config(PUSH_NOTIFICATIONS_ENABLED=True)
     @mock.patch('core.tasks.notification_tasks.send_web_push_notification')
     @mock.patch('user.models.UserManager.get_unmentioned_users')
     def test_notification_push_mention_send(self, mocked_get_unmentioned_users, send_web_push_notification):
@@ -389,12 +390,14 @@ class DirectNotificationsTestCase(PleioTenantTestCase):
         create_notification.s(connection.schema_name, 'mentioned', 'core.comment', self.comment2.id, self.user1.id).apply()
         send_web_push_notification.assert_called_once()
 
+    @override_config(PUSH_NOTIFICATIONS_ENABLED=True)
     @mock.patch('core.tasks.notification_tasks.send_web_push_notification')
     def test_notification_push_mention_not_send(self, send_web_push_notification):
         create_notification.s(connection.schema_name, 'mentioned', 'core.comment', self.comment2.id, self.user1.id).apply()
         send_web_push_notification.assert_not_called()
 
     # test with general comment notifications disabled
+    @override_config(PUSH_NOTIFICATIONS_ENABLED=True)
     @mock.patch('core.tasks.notification_tasks.send_web_push_notification')
     def test_notification_push_comment_notifications_disabled_not_send(self, send_web_push_notification):
         self.user2.profile.is_comment_notifications_enabled = False
@@ -404,6 +407,7 @@ class DirectNotificationsTestCase(PleioTenantTestCase):
         send_web_push_notification.assert_not_called()
     
     # test with general mention notifications disabled
+    @override_config(PUSH_NOTIFICATIONS_ENABLED=True)
     @mock.patch('core.tasks.notification_tasks.send_web_push_notification')
     def test_notification_push_mention_notifications_disabled_not_send(self, send_web_push_notification):
         self.user2.profile.is_mention_notifications_enabled = False
@@ -413,18 +417,21 @@ class DirectNotificationsTestCase(PleioTenantTestCase):
         send_web_push_notification.assert_not_called()
 
     #test push notifications in groups
+    @override_config(PUSH_NOTIFICATIONS_ENABLED=True)
     @mock.patch('core.tasks.notification_tasks.send_web_push_notification')
     def test_notification_push_comment_in_group_send(self, send_web_push_notification):
         self.group.set_member_is_notification_push_enabled(self.user2, True)
         create_notification.s(connection.schema_name, 'commented', 'blog.blog', self.blog1.id, self.user1.id).apply()
         send_web_push_notification.assert_called_once()
 
+    @override_config(PUSH_NOTIFICATIONS_ENABLED=True)
     @mock.patch('core.tasks.notification_tasks.send_web_push_notification')
     def test_notification_push_comment_in_group_not_send(self, send_web_push_notification):
         self.group.set_member_is_notification_push_enabled(self.user2, False)
         create_notification.s(connection.schema_name, 'commented', 'blog.blog', self.blog1.id, self.user1.id).apply()
         send_web_push_notification.assert_not_called()
 
+    @override_config(PUSH_NOTIFICATIONS_ENABLED=True)
     @mock.patch('core.tasks.notification_tasks.send_web_push_notification')
     @mock.patch('user.models.UserManager.get_unmentioned_users')
     def test_notification_push_mention_in_group_send(self, mocked_get_unmentioned_users, send_web_push_notification):
@@ -433,6 +440,7 @@ class DirectNotificationsTestCase(PleioTenantTestCase):
         create_notification.s(connection.schema_name, 'mentioned', 'core.comment', self.comment1.id, self.user1.id).apply()
         send_web_push_notification.assert_called_once()
 
+    @override_config(PUSH_NOTIFICATIONS_ENABLED=True)
     @mock.patch('core.tasks.notification_tasks.send_web_push_notification')
     def test_notification_push_mention_in_group_not_send(self, send_web_push_notification):
         self.group.set_member_is_notification_push_enabled(self.user2, False)

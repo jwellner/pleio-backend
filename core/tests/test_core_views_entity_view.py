@@ -22,12 +22,6 @@ class TestEntityViewTestCase(PleioTenantTestCase):
         self.group = GroupFactory(owner=self.owner)
 
     def tearDown(self):
-        self.blog.delete()
-        self.group.delete()
-        self.visitor.delete()
-        self.owner.delete()
-        self.admin.delete()
-
         super().tearDown()
 
     def test_view_blog(self):

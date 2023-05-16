@@ -42,12 +42,6 @@ class TestContentSnapshotsTestCase(PleioTenantTestCase):
         """
 
     def tearDown(self):
-        self.others_content_summary.delete()
-        self.my_content_summary.delete()
-        self.not_content_summary.delete()
-        self.other_user.delete()
-        self.authenticated_user.delete()
-
         super().tearDown()
 
     def test_anonymous_user_has_no_access(self):
@@ -83,7 +77,6 @@ class TestCreateContentSnapshotTestCase(PleioTenantTestCase):
         """
 
     def tearDown(self):
-        self.user.delete()
         super().tearDown()
 
     def test_anonymous_users_have_no_access(self):

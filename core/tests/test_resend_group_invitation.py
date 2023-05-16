@@ -23,12 +23,6 @@ class ResendGroupInvitationTestCase(PleioTenantTestCase):
         self.invitation = GroupInvitation.objects.create(code="7d97cea90c83722c7262", invited_user=self.user2, group=self.group1)
 
     def tearDown(self):
-        self.group1.delete()
-        self.admin.delete()
-        self.user3.delete()
-        self.user2.delete()
-        self.user1.delete()
-
         super().tearDown()
 
     @mock.patch('core.resolvers.mutation_resend_group_invitation.schedule_resend_group_invitation_mail')

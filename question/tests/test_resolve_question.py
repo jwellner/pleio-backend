@@ -1,7 +1,7 @@
 from django.db import connection
 from django.core.cache import cache
 from core.models import Comment
-from core.tests.helpers import PleioTenantTestCase
+from core.tests.helpers import PleioTenantTestCase, override_config
 from user.models import User
 from question.models import Question
 from mixer.backend.django import mixer
@@ -96,15 +96,11 @@ class QuestionTestCase(PleioTenantTestCase):
             }
         """
 
-        cache.set("%s%s" % (connection.schema_name, 'QUESTIONER_CAN_CHOOSE_BEST_ANSWER'), True)
-
     def tearDown(self):
-        self.questionPublic.delete()
-        self.questionPrivate.delete()
-        self.authenticatedUser.delete()
         cache.clear()
         super().tearDown()
 
+    @override_config(QUESTIONER_CAN_CHOOSE_BEST_ANSWER=True)
     def test_question_anonymous(self):
         variables = {
             "guid": self.questionPublic.guid
@@ -146,9 +142,11 @@ class QuestionTestCase(PleioTenantTestCase):
 
         self.assertEqual(entity, None)
 
+    @override_config(
+        QUESTIONER_CAN_CHOOSE_BEST_ANSWER=True,
+        QUESTION_LOCK_AFTER_ACTIVITY=False
+    )
     def test_question_owner(self):
-        cache.set("%s%s" % (connection.schema_name, 'QUESTION_LOCK_AFTER_ACTIVITY'), False)
-
         variables = {
             "guid": self.questionPrivate.guid
         }
@@ -179,9 +177,11 @@ class QuestionTestCase(PleioTenantTestCase):
         self.assertEqual(entity["url"], "/questions/view/{}/{}".format(self.questionPrivate.guid, slugify(self.questionPrivate.title)))
         self.assertEqual(entity["comments"][0]['guid'], self.comment2.guid)
 
+    @override_config(
+        QUESTIONER_CAN_CHOOSE_BEST_ANSWER=True,
+        QUESTION_LOCK_AFTER_ACTIVITY=True
+    )
     def test_question_owner_locked(self):
-        cache.set("%s%s" % (connection.schema_name, 'QUESTION_LOCK_AFTER_ACTIVITY'), True)
-
         variables = {
             "guid": self.questionPrivate.guid
         }

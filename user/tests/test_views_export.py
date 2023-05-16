@@ -3,7 +3,7 @@ from unittest import mock
 from django.http import HttpResponse
 from django.urls import reverse
 
-from core.tests.helpers import PleioTenantTestCase
+from core.tests.helpers import PleioTenantTestCase, override_config
 from user.exception import ExportError
 from user.factories import UserFactory, AdminFactory, EditorFactory
 
@@ -14,13 +14,14 @@ class TestViewsExportTestCase(PleioTenantTestCase):
         super().setUp()
         self.admin = AdminFactory(email="admin@example.com",
                                   name="admin")
-        self.override_config(IS_CLOSED=False)
 
+    @override_config(IS_CLOSED=False)
     def test_export_as_anonymous_user(self):
         response = self.client.get(reverse('users_export'))
         self.assertEqual(response.status_code, 401)
         self.assertEqual(response.reason_phrase, 'Not logged in')
 
+    @override_config(IS_CLOSED=False)
     def test_export_as_std_user(self):
         user = UserFactory(email="authenticated@example.com")
         self.client.force_login(user)
@@ -28,12 +29,14 @@ class TestViewsExportTestCase(PleioTenantTestCase):
         self.assertEqual(response.status_code, 405)
         self.assertEqual(response.reason_phrase, 'Not admin')
 
+    @override_config(IS_CLOSED=False)
     def test_views_export_no_fields(self):
         self.client.force_login(self.admin)
         response = self.client.get(reverse('users_export'))
         self.assertEqual(response.status_code, 400)
         self.assertEqual(response.reason_phrase, 'No fields passed')
 
+    @override_config(IS_CLOSED=False)
     @mock.patch('user.views.ExportUsers.stream')
     def test_export_custom_error(self, stream):
         stream.side_effect = ExportError("Foo")
@@ -43,6 +46,7 @@ class TestViewsExportTestCase(PleioTenantTestCase):
         self.assertEqual(response.status_code, 400)
         self.assertEqual(response.reason_phrase, 'Foo')
 
+    @override_config(IS_CLOSED=False)
     @mock.patch('user.views.StreamingHttpResponse')
     @mock.patch('user.views.ExportUsers')
     def test_export_using_expected_tools(self, ExportUsers, StreamingHttpResponse):
@@ -76,6 +80,7 @@ class TestViewsExportTestCase(PleioTenantTestCase):
             'content_type': 'text/csv'
         })
 
+    @override_config(IS_CLOSED=False)
     def test_export_returns_csv(self):
         expected_users = {UserFactory(email="user@example.com"),
                           EditorFactory(email="editor@example.com"),

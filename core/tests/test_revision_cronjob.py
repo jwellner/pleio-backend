@@ -42,11 +42,6 @@ class TestRevisionCronjobTestCase(PleioTenantTestCase):
                                     description="Version 1")
 
     def tearDown(self):
-        self.blog2.delete()
-        self.event.delete()
-        self.blog.delete()
-        self.user1.delete()
-
         super().tearDown()
 
     def test_revision_cronjob(self):

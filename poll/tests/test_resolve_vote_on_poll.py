@@ -48,12 +48,6 @@ class VoteOnPollTestCase(PleioTenantTestCase):
         """
 
     def tearDown(self):
-        self.poll_choice_1.delete()
-        self.poll_choice_2.delete()
-        self.poll_choice_3.delete()
-        self.poll.delete()
-        self.authenticatedUser1.delete()
-        self.authenticatedUser2.delete()
         super().tearDown()
 
     def test_vote_on_poll(self):

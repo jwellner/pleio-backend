@@ -65,11 +65,6 @@ class GroupsNotEmptyTestCase(PleioTenantTestCase):
         """
 
     def tearDown(self):
-        for group in self.groups:
-            group.delete()
-        self.group1.delete()
-        self.group2.delete()
-        self.user.delete()
         super().tearDown()
 
     def test_groups_default(self):
@@ -225,19 +220,6 @@ class TestGroupDiskSize(PleioTenantTestCase):
         self.group3 = GroupFactory(owner=self.owner)
 
     def tearDown(self):
-        self.file6.delete()
-        self.file5.delete()
-        self.group2.delete()
-        self.file4.delete()
-
-        self.file3.delete()
-        self.file2.delete()
-        self.file1.delete()
-        self.group1.delete()
-
-        self.group3.delete()
-
-        self.owner.delete()
         super().tearDown()
 
     def test_disk_size(self):

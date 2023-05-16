@@ -36,5 +36,4 @@ class Control:
             self.admin = UserFactory(is_superadmin=True)
 
         def tearDown(self):
-            self.admin.delete()
             super().tearDown()

@@ -58,13 +58,6 @@ class SendMessageToGroupTestCase(PleioTenantTestCase):
         """
 
     def tearDown(self):
-        self.group1.delete()
-        self.admin.delete()
-        self.user1.delete()
-        self.user2.delete()
-        self.user3.delete()
-        self.user4.delete()
-        self.user5.delete()
         super().tearDown()
 
     @mock.patch('core.resolvers.mutation_send_message_to_group.schedule_group_message_mail')

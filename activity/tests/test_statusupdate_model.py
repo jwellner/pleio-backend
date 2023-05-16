@@ -18,9 +18,6 @@ class TestStatusUpdateModelTestCase(PleioTenantTestCase):
                                                   rich_description=self.CONTENT)
 
     def tearDown(self):
-        self.entity.delete()
-        self.owner.delete()
-
         super().tearDown()
 
     @mock.patch("core.models.Entity.serialize")

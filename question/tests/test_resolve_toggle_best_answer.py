@@ -1,6 +1,6 @@
 from django.core.cache import cache
 from core.models import Comment
-from core.tests.helpers import PleioTenantTestCase
+from core.tests.helpers import PleioTenantTestCase, override_config
 from user.factories import QuestionManagerFactory, AdminFactory, UserFactory
 from user.models import User
 from question.models import Question
@@ -44,14 +44,11 @@ class ToggleBestAnswerTestCase(PleioTenantTestCase):
             }
         """
 
-        cache.set("%s%s" % (self.tenant.schema_name, 'QUESTIONER_CAN_CHOOSE_BEST_ANSWER'), True)
-
     def tearDown(self):
-        self.question.delete()
-        self.authenticatedUser.delete()
         cache.clear()
         super().tearDown()
 
+    @override_config(QUESTIONER_CAN_CHOOSE_BEST_ANSWER=True)
     def test_toggle_best_answer_owner(self):
         variables = {
             "input": {
@@ -86,6 +83,7 @@ class ToggleBestAnswerTestCase(PleioTenantTestCase):
 
         self.assertIsNone(self.question.best_answer)
 
+    @override_config(QUESTIONER_CAN_CHOOSE_BEST_ANSWER=True)
     def test_toggle_best_answer_admin(self):
         variables = {
             "input": {
@@ -120,6 +118,7 @@ class ToggleBestAnswerTestCase(PleioTenantTestCase):
 
         self.assertIsNone(self.question.best_answer)
 
+    @override_config(QUESTIONER_CAN_CHOOSE_BEST_ANSWER=True)
     def test_toggle_best_answer_question_manager(self):
         variables = {
             "input": {

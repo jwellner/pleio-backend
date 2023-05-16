@@ -22,12 +22,6 @@ class RejectMembershipRequestTestCase(PleioTenantTestCase):
         self.group1.join(self.user2, 'pending')
 
     def tearDown(self):
-        self.group1.delete()
-        self.admin.delete()
-        self.user3.delete()
-        self.user2.delete()
-        self.user1.delete()
-
         super().tearDown()
 
     @mock.patch('core.resolvers.mutation_reject_membership_request.schedule_reject_membership_mail')

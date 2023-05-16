@@ -73,13 +73,6 @@ class TrendingTestCase(PleioTenantTestCase):
 
 
     def tearDown(self):
-        self.blog1.delete()
-        self.blog2.delete()
-        self.blog3.delete()
-        self.blog4.delete()
-        self.blog5.delete()
-        self.user1.delete()
-        self.user2.delete()
         super().tearDown()
     
     def test_trending(self):

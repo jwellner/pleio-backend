@@ -88,8 +88,6 @@ class PageTestCase(PleioTenantTestCase):
         """
 
     def tearDown(self):
-        self.page_parent.delete()
-        self.user1.delete()
         super().tearDown()
 
     def test_parent_page_by_anonymous(self):
@@ -206,8 +204,6 @@ class TestCampagnePageTestCase(PleioTenantTestCase):
         }
 
     def tearDown(self):
-        self.page.delete()
-        self.owner.delete()
         super().tearDown()
 
     def test_load_campagne_page(self):

@@ -4,7 +4,7 @@ from django.core.files import File
 from django.core.cache import cache
 from core.factories import GroupFactory
 from core.models import ProfileField
-from core.tests.helpers import PleioTenantTestCase
+from core.tests.helpers import PleioTenantTestCase, override_config
 from file.factories import FileFactory
 from user.factories import UserFactory, AdminFactory
 from unittest.mock import patch, MagicMock
@@ -20,10 +20,6 @@ class TestEditGroupTestCase(PleioTenantTestCase):
         self.icon = FileFactory(owner=self.user, upload=self.build_contentfile(self.relative_path(__file__, ['assets', 'avatar.jpg'])))
 
     def tearDown(self):
-        self.icon.delete()
-        self.group.delete()
-        self.admin.delete()
-        self.user.delete()
         super().tearDown()
 
     def test_edit_group_anon(self):
@@ -161,10 +157,6 @@ class TestEditGroupTestCase(PleioTenantTestCase):
     def _build_profile_fields(self):
         profile_field1 = ProfileField.objects.create(key='text_key', name='text_name', field_type='text_field')
         profile_field2 = ProfileField.objects.create(key='text_key2', name='text_name2', field_type='text_field')
-
-        cache.set("%s%s" % (connection.schema_name, 'PROFILE_SECTIONS'),
-                  [{"name": "section_one", "profileFieldGuids": [profile_field1.guid, profile_field2.guid]}]
-                  )
         return [profile_field1, profile_field2]
 
     def test_edit_group_member_fields(self):
@@ -189,28 +181,31 @@ class TestEditGroupTestCase(PleioTenantTestCase):
             }
         }
 
-        self.graphql_client.force_login(self.user)
-        result = self.graphql_client.post(mutation, variables)
+        with override_config(
+            PROFILE_SECTIONS=[{"name": "section_one", "profileFieldGuids": [profile_field1.guid, profile_field2.guid]}]
+        ):
+            self.graphql_client.force_login(self.user)
+            result = self.graphql_client.post(mutation, variables)
 
-        data = result["data"]
-        self.assertEqual(data["editGroup"]["group"]["guid"], variables["group"]["guid"])
-        self.assertEqual(len(data["editGroup"]["group"]["showMemberProfileFields"]), 2)
-        self.assertEqual(data["editGroup"]["group"]["showMemberProfileFields"][0]["guid"], profile_field1.guid)
-        self.assertEqual(data["editGroup"]["group"]["showMemberProfileFields"][1]["guid"], profile_field2.guid)
+            data = result["data"]
+            self.assertEqual(data["editGroup"]["group"]["guid"], variables["group"]["guid"])
+            self.assertEqual(len(data["editGroup"]["group"]["showMemberProfileFields"]), 2)
+            self.assertEqual(data["editGroup"]["group"]["showMemberProfileFields"][0]["guid"], profile_field1.guid)
+            self.assertEqual(data["editGroup"]["group"]["showMemberProfileFields"][1]["guid"], profile_field2.guid)
 
-        variables = {
-            "group": {
-                "guid": self.group.guid,
-                "showMemberProfileFieldGuids": [profile_field2.guid]
+            variables = {
+                "group": {
+                    "guid": self.group.guid,
+                    "showMemberProfileFieldGuids": [profile_field2.guid]
+                }
             }
-        }
 
-        result = self.graphql_client.post(mutation, variables)
+            result = self.graphql_client.post(mutation, variables)
 
-        data = result["data"]
-        self.assertEqual(data["editGroup"]["group"]["guid"], variables["group"]["guid"])
-        self.assertEqual(len(data["editGroup"]["group"]["showMemberProfileFields"]), 1)
-        self.assertEqual(data["editGroup"]["group"]["showMemberProfileFields"][0]["guid"], profile_field2.guid)
+            data = result["data"]
+            self.assertEqual(data["editGroup"]["group"]["guid"], variables["group"]["guid"])
+            self.assertEqual(len(data["editGroup"]["group"]["showMemberProfileFields"]), 1)
+            self.assertEqual(data["editGroup"]["group"]["showMemberProfileFields"][0]["guid"], profile_field2.guid)
 
     def test_group_can_be_hidden_with_site_admin_perms(self):
         mutation = """
@@ -285,16 +280,19 @@ class TestEditGroupTestCase(PleioTenantTestCase):
             }
         }
 
-        self.graphql_client.force_login(self.user)
-        self.graphql_client.post(mutation, variables)
+        with override_config(
+            PROFILE_SECTIONS=[{"name": "section_one", "profileFieldGuids": [profile_field1.guid, profile_field2.guid]}]
+        ):
+            self.graphql_client.force_login(self.user)
+            self.graphql_client.post(mutation, variables)
 
-        from core.models.group import GroupProfileFieldSetting
-        required_fields = [obj.profile_field.guid for obj in
-                           GroupProfileFieldSetting.objects.filter(is_required=True, group=self.group)]
-        self.assertEqual(len(required_fields), 1,
-                         msg="We expected exactly one result as required GroupProfileFieldSetting")
-        self.assertEqual(required_fields, [profile_field1.guid],
-                         msg="We expected the first profile field as required GroupProfileFieldSetting")
+            from core.models.group import GroupProfileFieldSetting
+            required_fields = [obj.profile_field.guid for obj in
+                            GroupProfileFieldSetting.objects.filter(is_required=True, group=self.group)]
+            self.assertEqual(len(required_fields), 1,
+                            msg="We expected exactly one result as required GroupProfileFieldSetting")
+            self.assertEqual(required_fields, [profile_field1.guid],
+                            msg="We expected the first profile field as required GroupProfileFieldSetting")
 
     def test_edit_required_profile_fields_help_message(self):
         EXPECTED_MESSAGE = "I'd expect it to look like this"

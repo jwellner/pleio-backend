@@ -18,10 +18,6 @@ class EditGroupNotificationsTestCase(PleioTenantTestCase):
         self.group1.join(self.user2)
 
     def tearDown(self):
-        self.group1.delete()
-        self.admin.delete()
-        self.user2.delete()
-        self.user1.delete()
         super().tearDown()
 
     def test_edit_group_notifications_by_owner(self):

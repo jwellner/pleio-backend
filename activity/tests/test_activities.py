@@ -113,13 +113,6 @@ class ActivitiesTestCase(PleioTenantTestCase):
         """
 
     def tearDown(self):
-        self.comment.delete()
-        self.blog1.delete()
-        self.blog2.delete()
-        self.blog3.delete()
-        self.blog4.delete()
-        self.group1.delete()
-        self.group2.delete()
         super().tearDown()
 
     def test_activities_group_filter_all(self):

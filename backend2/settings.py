@@ -59,7 +59,8 @@ OIDC_AUTHENTICATE_CLASS = 'core.auth.OIDCAuthenticateView'
 # Elasticsearch
 ELASTICSEARCH_DSL = {
     'default': {
-        'hosts': os.getenv('ELASTICSEARCH_HOST')
+        'hosts': os.getenv('ELASTICSEARCH_HOST'),
+        'timeout': 120
     },
 }
 
@@ -509,3 +510,5 @@ BLEACH_EMAIL_ATTRIBUTES = {
 }
 
 SCAN_CYCLE_DAYS = os.getenv("SCAN_CYCLE_DAYS") or 120
+
+TEST_RUNNER = 'testrunner.PleioTestRunner'

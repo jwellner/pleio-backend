@@ -12,8 +12,6 @@ class TestEntityFilters(Template.TestEntityFiltersTestCase):
         return 'statusupdate'
 
     def tearDown(self):
-        if self._group:
-            self._group.delete()
         super().tearDown()
 
     def get_group(self):

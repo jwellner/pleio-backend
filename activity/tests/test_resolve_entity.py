@@ -61,9 +61,6 @@ class StatusUpdateTestCase(PleioTenantTestCase):
         """
 
     def tearDown(self):
-        self.statusPublic.delete()
-        self.statusPrivate.delete()
-        self.authenticated_user.delete()
         super().tearDown()
 
     def test_status_update_anonymous(self):

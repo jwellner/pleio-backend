@@ -42,9 +42,6 @@ class TestUserProfilesetTestCase(PleioTenantTestCase):
         """
 
     def tearDown(self):
-        self.user.delete()
-        self.field.delete()
-        self.profile_set.delete()
         super().tearDown()
 
     def test_query_users(self):
@@ -85,9 +82,6 @@ class TestGlobalProfilesetTestCase(PleioTenantTestCase):
         """
 
     def tearDown(self):
-        self.admin.delete()
-        self.field.delete()
-        self.profile_set.delete()
         super().tearDown()
 
     def test_site_settings(self):

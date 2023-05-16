@@ -40,9 +40,6 @@ class TestUpdateProfilesetTestCase(PleioTenantTestCase):
         self.DELETE_URL = reverse('optional_features_delete_profile_field', args=[self.profile_set.pk])
 
     def tearDown(self):
-        self.admin.delete()
-        self.field.delete()
-        self.profile_set.delete()
         super().tearDown()
 
     def test_edit_anonymous(self):

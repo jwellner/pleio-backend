@@ -7,6 +7,7 @@ from user.models import User
 
 class TestEventTagsTestCase(Template.TagsTestCaseTemplate):
     graphql_label = 'Event'
+    graphql_search_type = 'event'
     model = Event
 
     variables_add = {'input': {

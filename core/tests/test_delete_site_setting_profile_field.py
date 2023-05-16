@@ -1,7 +1,7 @@
 from django.db import connection
 from django.core.cache import cache
-from core.models import ProfileField, UserProfileField
-from core.tests.helpers import PleioTenantTestCase
+from core.models import ProfileField, UserProfileField, Setting
+from core.tests.helpers import PleioTenantTestCase, override_config
 from user.models import User
 from mixer.backend.django import mixer
 
@@ -19,13 +19,14 @@ class DeleteSiteSettingProfileFieldTestCase(PleioTenantTestCase):
         self.userProfileField2 = mixer.blend(UserProfileField, profile_field=self.profileField1, user_profile=self.user2.profile)
         self.userProfileField3 = mixer.blend(UserProfileField, profile_field=self.profileField2, user_profile=self.user2.profile)
 
+        self.profile_section_setting, _ = Setting.objects.get_or_create(key='PROFILE_SECTIONS')
+        self.profile_section_setting.value = [
+            {"name": "section_one", "profileFieldGuids": [str(self.profileField1.id)]},
+            {"name": "section_two", "profileFieldGuids": [str(self.profileField2.id)]}
+        ]
+        self.profile_section_setting.save()
+
     def tearDown(self):
-        self.admin.delete()
-        self.profileField1.delete()
-        self.profileField2.delete()
-        self.user1.delete()
-        self.user2.delete()
-        cache.clear()
         super().tearDown()
 
     def test_delete_site_setting_profile_field_by_anonymous(self):
@@ -86,11 +87,6 @@ class DeleteSiteSettingProfileFieldTestCase(PleioTenantTestCase):
         self.assertEqual(UserProfileField.objects.all().count(), 1)
 
     def test_profile_sections_after_delete_by_admin(self):
-        cache.set("%s%s" % (connection.schema_name, 'PROFILE_SECTIONS'),
-                  [{"name": "section_one", "profileFieldGuids": [str(self.profileField1.id)]},
-                   {"name": "section_two", "profileFieldGuids": [str(self.profileField2.id)]}]
-                  )
-
         mutation = """
             mutation deleteSiteSettingProfileField($input: deleteSiteSettingProfileFieldInput!) {
                 deleteSiteSettingProfileField(input: $input) {

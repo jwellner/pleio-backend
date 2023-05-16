@@ -1,6 +1,6 @@
 from django.http import HttpRequest
 
-from core.tests.helpers import PleioTenantTestCase
+from core.tests.helpers import PleioTenantTestCase, override_config
 from core.views import custom_css
 
 
@@ -10,8 +10,8 @@ class TestCoreViewsCustomCssTestCase(PleioTenantTestCase):
         super().setUp()
         self.request = HttpRequest()
 
+    @override_config(CUSTOM_CSS="Custom CSS")
     def test_default_custom_css(self):
-        self.override_config(CUSTOM_CSS="Custom CSS")
         response = custom_css(self.request)
         content = response.getvalue()
 

@@ -18,8 +18,6 @@ class TestCoreViewsRequestAccessTestCase(PleioTenantTestCase):
         }
 
     def tearDown(self):
-        self.admin.delete()
-
         super().tearDown()
 
     def test_start_request(self):

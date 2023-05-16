@@ -27,10 +27,6 @@ class Base:
                                                    rich_description=self.CONTENT)
 
         def tearDown(self):
-            self.entity.delete()
-            self.owner.delete()
-            self.folder.delete()
-
             super().tearDown()
 
         def file_entity_factory(self, **kwargs) -> FileFolder:  # pragma: no cover

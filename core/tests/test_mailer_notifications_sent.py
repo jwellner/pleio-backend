@@ -51,11 +51,6 @@ class SendNotificationEmailsTestCase(PleioTenantTestCase):
         self.verbs = ["created", "mentioned", "commented"]
 
     def tearDown(self):
-        self.blog1.delete()
-        self.user1.delete()
-        self.user2.delete()
-        self.user3.delete()
-        self.group.delete()
         super().tearDown()
 
     @mock.patch('core.mail_builders.notifications.schedule_notification_mail')

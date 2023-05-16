@@ -19,8 +19,6 @@ class TestBlogEntityTestCase(PleioTenantTestCase):
                                 abstract=self.ABSTRACT)
 
     def tearDown(self):
-        self.blog.delete()
-        self.owner.delete()
         super().tearDown()
 
     @mock.patch("core.models.Entity.serialize")

@@ -25,8 +25,6 @@ class SiteCustomAgreementsTestCase(PleioTenantTestCase):
         self.customagreement2 =  mixer.blend(CustomAgreement)
 
     def tearDown(self):
-        self.admin.delete()
-        self.user.delete()
         super().tearDown()
 
     def test_site_custom_agreements_by_admin(self):

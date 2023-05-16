@@ -4,6 +4,7 @@ from core.tests.helpers.tags_testcase import Template
 
 class TestBlogTagsTestCase(Template.TagsTestCaseTemplate):
     graphql_label = 'Blog'
+    graphql_search_type = 'blog'
     model = Blog
 
     variables_add = {'input': {

@@ -5,7 +5,7 @@ from django.utils import timezone
 from django.utils.timezone import now
 
 from core import config
-from core.tests.helpers import PleioTenantTestCase
+from core.tests.helpers import PleioTenantTestCase, override_config
 from external_content.api_handlers.datahub import ApiHandler, TagCollector
 from external_content.factories import ExternalContentSourceFactory, ExternalContentFactory
 from external_content.models import ExternalContent
@@ -26,10 +26,8 @@ class TestHandlerDatahubTestCase(PleioTenantTestCase):
                 'batchSize': self.BATCH_SIZE,
             })
         self.handler = ApiHandler(self.source)
-        self.override_config(DATAHUB_EXTERNAL_CONTENT_ENABLED=True)
 
     def tearDown(self):
-        self.source.delete()
         super().tearDown()
 
     def create_json_response_from_file(self, path):
@@ -40,16 +38,17 @@ class TestHandlerDatahubTestCase(PleioTenantTestCase):
         response.json.return_value = content
         return response
 
+    @override_config(DATAHUB_EXTERNAL_CONTENT_ENABLED=False)
     @mock.patch("external_content.api_handlers.datahub.ApiHandler.should_do_full_sync")
     @mock.patch("external_content.api_handlers.datahub.ApiHandler.full_sync")
     def test_run_with_datahub_external_content_disabled(self, full_sync, should_do_full_sync):
         should_do_full_sync.return_value = True
-        self.override_config(DATAHUB_EXTERNAL_CONTENT_ENABLED=False)
         self.handler.pull()
 
         self.assertFalse(should_do_full_sync.called)
         self.assertFalse(full_sync.called)
 
+    @override_config(DATAHUB_EXTERNAL_CONTENT_ENABLED=True)
     @mock.patch("external_content.api_handlers.datahub.requests.get")
     def test_pull_study_zones(self, requests_get):
         requests_get.return_value = self.create_json_response_from_file(['assets', 'datahub', 'studies.json'])
@@ -67,6 +66,7 @@ class TestHandlerDatahubTestCase(PleioTenantTestCase):
         self.assertEqual(query['limit'], self.source.settings['batchSize'])
         self.assertEqual(query['format'], 'json')
 
+    @override_config(DATAHUB_EXTERNAL_CONTENT_ENABLED=True)
     @mock.patch("external_content.api_handlers.datahub.requests.get")
     @mock.patch("external_content.api_handlers.datahub.ApiHandler.import_file")
     def test_pull_files(self, import_file, requests_get):
@@ -84,6 +84,7 @@ class TestHandlerDatahubTestCase(PleioTenantTestCase):
         self.assertEqual(requests_get.call_count, 2)
         self.assertEqual(import_file.call_count, 40)
 
+    @override_config(DATAHUB_EXTERNAL_CONTENT_ENABLED=True)
     @mock.patch("external_content.api_handlers.datahub.requests.get")
     def test_pull_files_since(self, requests_get):
         date_since = timezone.now()
@@ -101,6 +102,7 @@ class TestHandlerDatahubTestCase(PleioTenantTestCase):
                              "modified_after": date_since.isoformat()
                          }))
 
+    @override_config(DATAHUB_EXTERNAL_CONTENT_ENABLED=True)
     @mock.patch("external_content.api_handlers.datahub.ApiHandler.full_sync")
     @mock.patch("external_content.api_handlers.datahub.ApiHandler.update")
     def test_full_sync_not_called(self, update, full_sync):
@@ -113,6 +115,7 @@ class TestHandlerDatahubTestCase(PleioTenantTestCase):
         self.assertEqual(update.call_count, 0)
         self.assertEqual(full_sync.call_count, 0)
 
+    @override_config(DATAHUB_EXTERNAL_CONTENT_ENABLED=True)
     @mock.patch("external_content.api_handlers.datahub.ApiHandler.full_sync")
     @mock.patch("external_content.api_handlers.datahub.ApiHandler.update")
     def test_full_sync_called(self, update, full_sync):
@@ -125,6 +128,7 @@ class TestHandlerDatahubTestCase(PleioTenantTestCase):
         self.assertEqual(update.call_count, 0)
         self.assertEqual(full_sync.call_count, 1)
 
+    @override_config(DATAHUB_EXTERNAL_CONTENT_ENABLED=True)
     @mock.patch("external_content.api_handlers.datahub.ApiHandler.full_sync")
     @mock.patch("external_content.api_handlers.datahub.ApiHandler.update")
     def test_update_called(self, update, full_sync):
@@ -137,6 +141,7 @@ class TestHandlerDatahubTestCase(PleioTenantTestCase):
         self.assertEqual(update.call_count, 1)
         self.assertEqual(full_sync.call_count, 0)
 
+    @override_config(DATAHUB_EXTERNAL_CONTENT_ENABLED=True)
     @mock.patch("external_content.api_handlers.datahub.ApiHandler.pull_study_zones")
     @mock.patch("external_content.api_handlers.datahub.ApiHandler.pull_files")
     @mock.patch("external_content.api_handlers.datahub.ApiHandler.apply_tags")
@@ -149,6 +154,7 @@ class TestHandlerDatahubTestCase(PleioTenantTestCase):
         self.assertTrue(apply_tags.called)
         self.assertTrue(cleanup_files.called)
 
+    @override_config(DATAHUB_EXTERNAL_CONTENT_ENABLED=True)
     @mock.patch("external_content.api_handlers.datahub.ApiHandler.pull_study_zones")
     @mock.patch("external_content.api_handlers.datahub.ApiHandler.pull_files")
     @mock.patch("external_content.api_handlers.datahub.ApiHandler.apply_tags")
@@ -184,7 +190,6 @@ class TestHandlerDatahubImportFileTestCase(PleioTenantTestCase):
             self.files = json.load(fh)
 
     def tearDown(self):
-        self.source.delete()
         super().tearDown()
 
     def test_import_minimal_file_record(self):
@@ -282,9 +287,6 @@ class TestHandlerDatahubCleanupFilesTestCase(PleioTenantTestCase):
         self.article2 = ExternalContentFactory(source=self.source)
 
     def tearDown(self):
-        self.source.delete()
-        ExternalContent.objects.all().delete()
-
         super().tearDown()
 
     def test_delete_files(self):

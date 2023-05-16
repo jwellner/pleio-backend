@@ -1,7 +1,7 @@
 from django.contrib.auth.models import AnonymousUser
 
 from core.factories import GroupFactory
-from core.tests.helpers import PleioTenantTestCase
+from core.tests.helpers import PleioTenantTestCase, override_config
 from event.factories import EventFactory
 from user.factories import UserFactory, AdminFactory
 from event.models import EventAttendee
@@ -13,7 +13,7 @@ class AttendEventWithoutAccountTestCase(PleioTenantTestCase):
     def setUp(self):
         super().setUp()
 
-        self.override_config(EVENT_ADD_EMAIL_ATTENDEE='')
+        self.EVENT_ADD_EMAIL_ATTENDEE = ''
 
         self.authenticatedUser = UserFactory()
         self.owner = UserFactory()
@@ -46,8 +46,6 @@ class AttendEventWithoutAccountTestCase(PleioTenantTestCase):
         mock.patch('event.resolvers.mutation_attend_event.generate_code', return_value='6df8cdad5582833eeab4')
 
     def tearDown(self):
-        self.event.delete()
-        self.authenticatedUser.delete()
         super().tearDown()
 
     def test_create_attend_event_without_account_request(self):
@@ -113,7 +111,7 @@ class AttendEventByEmailTestCase(PleioTenantTestCase):
     def setUp(self):
         super().setUp()
 
-        self.override_config(EVENT_ADD_EMAIL_ATTENDEE='')
+        self.EVENT_ADD_EMAIL_ATTENDEE = ''
 
         self.group_owner = UserFactory()
         self.group = GroupFactory(owner=self.group_owner)
@@ -156,18 +154,19 @@ class AttendEventByEmailTestCase(PleioTenantTestCase):
         }
 
     def assertExpectation(self, user, description, expect_access):
-        self.graphql_client.force_login(user)
+        with override_config(EVENT_ADD_EMAIL_ATTENDEE=self.EVENT_ADD_EMAIL_ATTENDEE):
+            self.graphql_client.force_login(user)
 
-        result = self.graphql_client.post(self.query, self.query_variables)
-        msg = "Expected %s to be %s" % (description, 'rejected' if not expect_access else 'allowed')
-        self.assertEqual(result['data']['entity']['canAttendWithEmail'], expect_access, msg)
+            result = self.graphql_client.post(self.query, self.query_variables)
+            msg = "Expected %s to be %s" % (description, 'rejected' if not expect_access else 'allowed')
+            self.assertEqual(result['data']['entity']['canAttendWithEmail'], expect_access, msg)
 
-        if expect_access:
-            result = self.graphql_client.post(self.mutation, self.mutation_variables)
-            self.assertEqual(result['data']['mutation']['entity']['guid'], self.event.guid)
-        else:
-            with self.assertGraphQlError():
-                self.graphql_client.post(self.mutation, self.mutation_variables)
+            if expect_access:
+                result = self.graphql_client.post(self.mutation, self.mutation_variables)
+                self.assertEqual(result['data']['mutation']['entity']['guid'], self.event.guid)
+            else:
+                with self.assertGraphQlError():
+                    self.graphql_client.post(self.mutation, self.mutation_variables)
 
     def test_as_super_admin(self):
         self.assertExpectation(user=UserFactory(is_superadmin=True),
@@ -210,7 +209,7 @@ class AttendEventByEmailAllowAdminSettingTestCase(AttendEventByEmailTestCase):
 
     def setUp(self):
         super().setUp()
-        self.override_config(EVENT_ADD_EMAIL_ATTENDEE='admin')
+        self.EVENT_ADD_EMAIL_ATTENDEE='admin'
 
     expect_admin = True
 
@@ -219,7 +218,7 @@ class AttendEventByEmailAllowOwnerSettingTestCase(AttendEventByEmailTestCase):
 
     def setUp(self):
         super().setUp()
-        self.override_config(EVENT_ADD_EMAIL_ATTENDEE='owner')
+        self.EVENT_ADD_EMAIL_ATTENDEE='owner'
 
     expect_admin = True
     expect_group_admin = True

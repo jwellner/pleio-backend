@@ -28,12 +28,6 @@ class EditSubgroupTestCase(PleioTenantTestCase):
         self.subgroup.members.add(self.user3)
 
     def tearDown(self):
-        self.subgroup.delete()
-        self.group.delete()
-        self.user1.delete()
-        self.user2.delete()
-        self.user3.delete()
-        self.admin.delete()
         super().tearDown()
 
     def test_edit_subgroup_by_group_owner(self):

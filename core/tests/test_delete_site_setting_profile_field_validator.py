@@ -18,10 +18,6 @@ class DeleteSiteSettingProfileFieldValidatorTestCase(PleioTenantTestCase):
         self.profileField1.validators.add(self.profileFieldValidator2)
 
     def tearDown(self):
-        self.admin.delete()
-        self.profileFieldValidator1.delete()
-        self.profileFieldValidator2.delete()
-        self.user1.delete()
         super().tearDown()
 
     def test_delete_site_setting_profile_field_validator_by_anonymous(self):

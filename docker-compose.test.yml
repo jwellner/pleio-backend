@@ -16,7 +16,7 @@ services:
       CELERY_TASK_ALWAYS_EAGER: "True"
       MEDIA_ROOT: /tmp
     volumes:
-      - frontend-build:/app/static-frontend
+      - test-frontend-build:/app/static-frontend
     depends_on:
       - db
       - frontend
@@ -25,7 +25,7 @@ services:
   frontend:
     image: registry.gitlab.com/pleio/frontend:latest
     volumes:
-      - frontend-build:/shared
+      - test-frontend-build:/shared
     command: bash -c "cp -Rp /usr/share/nginx/html/. /shared && chown -R www-data:www-data /shared"
 
   db:
@@ -34,11 +34,9 @@ services:
       POSTGRES_PASSWORD: postgres
       LC_COLLATE: 'C.UTF-8'
       LC_CTYPE: 'C.UTF-8'
-    volumes:
-      - db_data:/var/lib/postgresql/data/
 
   elasticsearch:
-    image: docker.elastic.co/elasticsearch/elasticsearch:7.16.2
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.17.7
     environment:
       - discovery.type=single-node
       - bootstrap.memory_lock=true
@@ -47,10 +45,6 @@ services:
       interval: 20s
       retries: 10
       test: curl -s http://localhost:9200/_cluster/health | grep -vq '"status":"red"'
-    volumes:
-      - es_data:/usr/share/elasticsearch/data
 
 volumes:
-  frontend-build:
-  db_data:
-  es_data:
+  test-frontend-build:

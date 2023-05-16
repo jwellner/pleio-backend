@@ -157,7 +157,7 @@ class TestQrMailerTestCase(PleioTenantTestCase):
         mocked_get_code.return_value = "test_qr_code"
         mailer = QrMailer(attendee=self.attendee.id)
         result = mailer.get_qr_code_url()
-        self.assertEqual(result, "http://tenant.fast-test.com:8000/events/view/guest-list?code=test_qr_code")
+        self.assertEqual(result, "http://%s:8000/events/view/guest-list?code=test_qr_code" % self.tenant.primary_domain)
 
     def test_mail_builder_parameters_receiver_mail(self):
         from event.mail_builders.qr_code import QrMailer

@@ -19,11 +19,6 @@ class DeleteGroupInvitationTestCase(PleioTenantTestCase):
         self.invitation = GroupInvitation.objects.create(code="7d97cea90c83722c7262", invited_user=self.user2, group=self.group1)
 
     def tearDown(self):
-        self.group1.delete()
-        self.admin.delete()
-        self.user3.delete()
-        self.user2.delete()
-        self.user1.delete()
         super().tearDown()
 
     def test_delete_group_invitation_by_group_owner(self):

@@ -48,14 +48,6 @@ class JoinGroupTestCase(PleioTenantTestCase):
         """
 
     def tearDown(self):
-        self.group.delete()
-        self.group2.delete()
-        self.group_on_request.delete()
-        self.group_auto.delete()
-        self.user1.delete()
-        self.user2.delete()
-        self.user3.delete()
-
         super().tearDown()
 
     def test_join_group_anon(self):

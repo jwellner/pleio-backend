@@ -15,9 +15,6 @@ class TestDirectoryAsMediaSource(PleioTenantTestCase):
         self.entity = FolderFactory(owner=self.owner)
 
     def tearDown(self):
-        self.entity.delete()
-        self.owner.delete()
-
         super().tearDown()
 
     def test_folder_is_not_a_media_source(self):

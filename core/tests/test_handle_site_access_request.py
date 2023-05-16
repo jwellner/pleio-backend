@@ -23,8 +23,6 @@ class HandleSiteAccessRequestTestCase(PleioTenantTestCase):
         """
 
     def tearDown(self):
-        self.admin.delete()
-        self.user.delete()
         super().tearDown()
 
     @mock.patch('core.resolvers.mutation_handle_site_access_request.schedule_site_access_request_accepted_mail')

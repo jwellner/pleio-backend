@@ -71,20 +71,17 @@ def add_site(self, schema_name, domain):
     Create site from control
     '''
     with schema_context('public'):
-        try:
-            tenant = Client(schema_name=schema_name, name=schema_name)
-            tenant.save()
+        tenant = Client(schema_name=schema_name, name=schema_name)
+        tenant.save()
 
-            from tenants.tasks import update_post_deploy_tasks
-            update_post_deploy_tasks.delay(schema_name)
+        from tenants.tasks import update_post_deploy_tasks
+        update_post_deploy_tasks.delay(schema_name)
 
-            d = Domain()
-            d.domain = domain
-            d.tenant = tenant
-            d.is_primary = True
-            d.save()
-        except Exception as e:
-            raise Exception(e)
+        d = Domain()
+        d.domain = domain
+        d.tenant = tenant
+        d.is_primary = True
+        d.save()
 
         return tenant.id
 
@@ -96,24 +93,19 @@ def delete_site(self, site_id): # pragma: no cover
     Delete site from control
     '''
     with schema_context('public'):
-        try:
-            tenant = Client.objects.get(id=site_id)
-            tenant.auto_drop_schema = True
+        tenant = Client.objects.get(id=site_id)
+        tenant.auto_drop_schema = True
 
-            file_path = os.path.join(settings.MEDIA_ROOT, tenant.schema_name)
-            schema_name = tenant.schema_name
-            tenant.delete()
+        file_path = os.path.join(settings.MEDIA_ROOT, tenant.schema_name)
+        schema_name = tenant.schema_name
+        tenant.delete()
 
-            # remove elasticsearch data
-            elasticsearch_delete_data_for_tenant(schema_name)
+        # remove elasticsearch data
+        elasticsearch_delete_data_for_tenant(schema_name)
 
-            # delete files
-            if os.path.exists(file_path):
-                shutil.rmtree(file_path)
-
-        except Exception as e:
-            # raise general exception because remote doenst have Client exception
-            raise Exception(e)
+        # delete files
+        if os.path.exists(file_path):
+            shutil.rmtree(file_path)
 
     return True
 

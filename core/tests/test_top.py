@@ -74,14 +74,6 @@ class TopTestCase(PleioTenantTestCase):
         self.blog3.delete()
 
     def tearDown(self):
-        self.blog1.delete()
-        self.blog2.delete()
-        self.blog4.delete()
-        self.blog5.delete()
-        self.blog6.delete()
-        self.user1.delete()
-        self.user2.delete()
-        self.user3.delete()
         super().tearDown()
 
     def test_top(self):

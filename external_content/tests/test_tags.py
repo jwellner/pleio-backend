@@ -8,11 +8,15 @@ from user.models import User
 
 class TestExternalContentTagsTestCase(Template.TagsTestCaseTemplate):
     graphql_label = 'ExternalContent'
+    graphql_search_type = 'externalcontent'
     model = ExternalContent
 
-    def local_setup(self):
+    def setUp(self):
         self.source = ExternalContentSourceFactory(name="Demo")
-        super().local_setup()
+        super().setUp()
+
+    def tearDown(self):
+        super().tearDown()
 
     def article_factory(self, owner: User, **kwargs):
         kwargs.setdefault('source', self.source)

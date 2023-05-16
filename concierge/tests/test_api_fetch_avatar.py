@@ -12,7 +12,6 @@ class TestFetchAvatarTestCase(PleioTenantTestCase):
         self.user = UserFactory(email=self.EMAIL)
 
     def tearDown(self):
-        self.user.delete()
         super().tearDown()
 
     @mock.patch("concierge.api.ConciergeClient.fetch")

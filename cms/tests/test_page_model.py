@@ -21,8 +21,6 @@ class Wrapper:
             raise NotImplementedError()
 
         def tearDown(self):
-            self.entity.delete()
-            self.owner.delete()
             super().tearDown()
 
 
@@ -34,7 +32,6 @@ class TestTextPageModelTestCase(Wrapper.BaseTestCase):
     parent: Page = None
 
     def tearDown(self):
-        self.parent.delete()
         super().tearDown()
 
     def entity_factory(self, **kwargs):
