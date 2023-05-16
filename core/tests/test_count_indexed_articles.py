@@ -13,7 +13,6 @@ class TestCountNumberOfArticlesAtIndex(ElasticsearchTestCase):
             BlogFactory(owner=self.owner)
 
     def test_large_amount_of_articles(self):
-        self.initialize_index()
 
         result = elasticsearch_status_report('blog')
         self.assertEqual(result, [

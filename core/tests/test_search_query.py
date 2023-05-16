@@ -22,8 +22,6 @@ class TestQueryJournalTestCase(ElasticsearchTestCase):
             "query": faker.Faker().name()
         }
 
-        self.initialize_index()
-
     
     def tearDown(self):
         super().tearDown()

@@ -8,8 +8,6 @@ from core.tests.helpers import override_config
 class TestPadTagsTestCase(Template.TagsTestCaseTemplate):
     # Overrides:
     graphql_label = 'Pad'
-    graphql_search_type = 'pad'
-    graphql_type = 'pad'
     graphql_update_mutation = 'editPad'
     graphql_update_input = 'editPadInput'
     graphql_add_mutation = 'addPad'

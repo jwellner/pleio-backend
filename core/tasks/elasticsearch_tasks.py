@@ -166,15 +166,15 @@ def elasticsearch_delete_data_for_tenant(schema_name, index_name=None):
     else:
         models = _all_models()
 
+    es_client = connections.get_connection()
     for index in registry.get_indices(models):
-        es_client = connections.get_connection()
+        body = Search().query().filter("term", tenant_name=schema_name).to_dict()
         es_client.delete_by_query(
             index=index._name,
-            body=Search(index=index._name).filter("term", tenant_name=schema_name).to_dict(),
-            conflicts="proceed",
-            search_timeout="120s",
-            refresh=True
+            body=body,
+            conflicts="proceed"
         )
+        es_client.indices.refresh(index=index._name)
 
 
 @app.task(autoretry_for=(ElasticsearchConnectionError,), retry_backoff=10, max_retries=10)

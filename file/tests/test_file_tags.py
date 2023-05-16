@@ -10,7 +10,6 @@ from user.models import User
 class TestFileTagsTestCase(Template.TagsTestCaseTemplate):
     # Overrides:
     graphql_label = 'File'
-    graphql_search_type = 'file'
     graphql_update_mutation = 'editFileFolder'
     graphql_update_input = 'editFileFolderInput'
     graphql_add_mutation = 'addFile'
@@ -47,7 +46,6 @@ class TestFileTagsTestCase(Template.TagsTestCaseTemplate):
 class TestFolderTagsTestCase(Template.TagsTestCaseTemplate):
     # Overrides:
     graphql_label = 'Folder'
-    graphql_search_type = 'folder'
     graphql_update_mutation = 'editFileFolder'
     graphql_update_input = 'editFileFolderInput'
     model = FileFolder

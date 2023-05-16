@@ -259,7 +259,6 @@ class Template:
 
         def iterate_query_search(self):
             if self.include_site_search:
-                self.initialize_index()
                 yield self.get_query_search(), "search", "query.search"
             if self.include_entity_search:
                 yield self.get_query_entity(), "entities", "query.entities"

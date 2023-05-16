@@ -4,7 +4,6 @@ from discussion.models import Discussion
 
 class TestDiscussionTagsTestCase(Template.TagsTestCaseTemplate):
     graphql_label = 'Discussion'
-    graphql_search_type = 'discussion'
     model = Discussion
 
     variables_add = {'input': {

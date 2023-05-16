@@ -107,8 +107,6 @@ class SearchTestCase(ElasticsearchTestCase):
             "subtype": "blog"
         }
 
-        self.initialize_index()
-
         self.graphql_client.force_login(self.user)
         result = self.graphql_client.post(self.query, variables)
 
@@ -154,8 +152,6 @@ class SearchTestCase(ElasticsearchTestCase):
             "subtype": "pad"
         }
 
-        self.initialize_index()
-
         self.graphql_client.force_login(self.user)
         result = self.graphql_client.post(self.query, variables)
 
@@ -187,8 +183,6 @@ class SearchTestCase(ElasticsearchTestCase):
         variables = {
             "ownerGuids": [str(self.user2.id)]
         }
-
-        self.initialize_index()
 
         self.graphql_client.force_login(self.user)
         result = self.graphql_client.post(query, variables)
@@ -236,8 +230,6 @@ class TestSearchArchivedTestCase(ElasticsearchTestCase):
         }
 
     def test_filter_archived(self):
-
-        self.initialize_index()
 
         self.graphql_client.force_login(self.user)
         result = self.graphql_client.post(self.query, self.variables)
@@ -294,8 +286,6 @@ class TestCaseSensitivityTitleSortingSearchTestCase(ElasticsearchTestCase):
             "query": '',
             "orderBy": 'title'
         }
-
-        self.initialize_index()
 
         self.graphql_client.force_login(self.owner)
         response = self.graphql_client.post(query, variables)
