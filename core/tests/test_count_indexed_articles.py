@@ -12,6 +12,8 @@ class TestCountNumberOfArticlesAtIndex(ElasticsearchTestCase):
         for n in range(0, 11):
             BlogFactory(owner=self.owner)
 
+        self.populate_index()
+
     def test_large_amount_of_articles(self):
 
         result = elasticsearch_status_report('blog')

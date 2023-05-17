@@ -34,7 +34,8 @@ class TestSearchExternalContentTestCase(ElasticsearchTestCase):
                                  title="Blog 1")
         self.blog2 = BlogFactory(owner=self.author,
                                  title="Blog 2")
-        time.sleep(5)
+
+        self.populate_index()
 
     def tearDown(self):
         super().tearDown()

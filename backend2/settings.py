@@ -59,8 +59,7 @@ OIDC_AUTHENTICATE_CLASS = 'core.auth.OIDCAuthenticateView'
 # Elasticsearch
 ELASTICSEARCH_DSL = {
     'default': {
-        'hosts': os.getenv('ELASTICSEARCH_HOST'),
-        'timeout': 120
+        'hosts': os.getenv('ELASTICSEARCH_HOST')
     },
 }
 

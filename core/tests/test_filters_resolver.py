@@ -57,6 +57,8 @@ class FiltersResolverTestCase(ElasticsearchTestCase):
                     read_access=['public'],
                     value=self.profile_options[1])
 
+        self.populate_index()
+
     def test_filter_options_should_give_used_options(self):
         options = get_filter_options(self.profile_field.key, self.owner)
 
