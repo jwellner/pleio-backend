@@ -41,14 +41,13 @@ def resolve_delete_entity(_, info, input):
     if isinstance(entity, FileFolder):
         entity.update_updated_at()  # update parent folder dates
         if not input.get("force"):
-            if entity.referenced_by.exists() and entity.group:
-                FileFolder.objects.filter(id=entity.pk).update(group=None)
+            if entity.referenced_by.exists() and (entity.group or entity.parent):
+                FileFolder.objects.filter(id=entity.pk).update(group=None, parent=None)
                 return {"success": True}
             assert_not_referenced(entity)
 
     if isinstance(entity, Event):
         shared.resolve_pre_delete_event(entity)
-
 
     entity.delete()
 
