@@ -155,6 +155,7 @@ class Template:
                 }
             }
 
+
         def get_query_search(self):
             return """
             query IncludeSiteSearch($subtype: String, $tags: [String], $categories: [TagCategoryInput], $matchStrategy: MatchStrategy) {
@@ -259,6 +260,7 @@ class Template:
 
         def iterate_query_search(self):
             if self.include_site_search:
+                self.populate_index()
                 yield self.get_query_search(), "search", "query.search"
             if self.include_entity_search:
                 yield self.get_query_entity(), "entities", "query.entities"

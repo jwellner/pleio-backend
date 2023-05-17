@@ -116,6 +116,29 @@ docker-compose rm -f
 docker-compose pull
 ```
 
+#### Run unittests
+
+Run all unittests with --parallel option (fastest):
+
+```bash
+docker-compose -f docker-compose.test.yml build
+docker-compose -f docker-compose.test.yml run api /ci-test.sh --parallel
+```
+
+Run specific app tests:
+
+```bash
+docker-compose -f docker-compose.test.yml build
+docker-compose -f docker-compose.test.yml run api /ci-test.sh core --parallel
+```
+
+Run specific test:
+
+```bash
+docker-compose -f docker-compose.test.yml build
+docker-compose -f docker-compose.test.yml run api /ci-test.sh core.tests.test_entities.EntitiesTestCase 
+```
+
 ## Dnsmasq
 
 How to setup Dnsmasq for `*.local` domains on a mac:

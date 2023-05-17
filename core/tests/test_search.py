@@ -81,6 +81,8 @@ class SearchTestCase(ElasticsearchTestCase):
         self.news2 = mixer.blend(News, title=self.common_tag2, **permission)
         self.news3 = mixer.blend(News, title=self.common_tag2, **permission2)
 
+        self.populate_index()
+
     def tearDown(self):
         super().tearDown()
 
@@ -229,6 +231,8 @@ class TestSearchArchivedTestCase(ElasticsearchTestCase):
             'disabled': False
         }
 
+        self.populate_index()
+
     def test_filter_archived(self):
 
         self.graphql_client.force_login(self.user)
@@ -265,6 +269,8 @@ class TestCaseSensitivityTitleSortingSearchTestCase(ElasticsearchTestCase):
                                       self.uppercase,
                                       self.uppercase2,
                                       self.uppercase3], key=lambda b: b.title.lower())
+
+        self.populate_index()
 
     def tearDown(self):
         super().tearDown()

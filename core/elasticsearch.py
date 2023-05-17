@@ -51,7 +51,7 @@ class CustomSignalProcessor(BaseSignalProcessor):
         """Overwrite default handle_pre_delete and stop raising exception on error
         """
         try:
-            registry.delete(instance)
+            registry.delete(instance, raise_on_error=False)
         except Exception as e:
             if isinstance(e, BulkIndexError) and 'not_found' in str(e):
                 return

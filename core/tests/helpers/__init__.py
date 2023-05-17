@@ -6,6 +6,7 @@ from contextlib import contextmanager
 from datetime import datetime
 from unittest import mock
 
+from elasticsearch_dsl import connections
 from django.conf import settings
 from django.core.cache import cache
 from PIL import Image, UnidentifiedImageError
@@ -224,6 +225,7 @@ class ElasticsearchTestCase(PleioTenantTestCase):
     def setUp(self):
         super().setUp()
         self.initialize_index()
+        # use self.populate_index() in tests to populate the index after creating data
 
     @override_settings(ENV='test')
     def initialize_index(self):
@@ -231,6 +233,12 @@ class ElasticsearchTestCase(PleioTenantTestCase):
         # elasticsearch needs time to settle changes before some delete?
         time.sleep(.100)
         elasticsearch_delete_data_for_tenant(self.tenant.schema_name, None)
+        time.sleep(.100)
+
+    @override_settings(ENV='test')
+    def populate_index(self):
+        from core.tasks.elasticsearch_tasks import elasticsearch_index_data_for_tenant
+        elasticsearch_index_data_for_tenant(self.tenant.schema_name, None)
         time.sleep(.100)
 
 @contextmanager

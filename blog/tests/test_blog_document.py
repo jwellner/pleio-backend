@@ -18,6 +18,8 @@ class AddBlogTestCase(ElasticsearchTestCase):
             owner = self.authenticatedUser
         )
 
+        self.populate_index()
+
     def test_blog_document(self):
         s = Search(index='blog').query(
             Q('simple_query_string', query='Jan', fields=['owner.name'])

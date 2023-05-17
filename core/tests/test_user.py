@@ -125,6 +125,8 @@ class TestUserTestCase(ElasticsearchTestCase):
             "limit": 20
         }
 
+        self.populate_index()
+
         self.graphql_client.force_login(self.user1)
         result = self.graphql_client.post(self.query, variables)
 
@@ -136,6 +138,8 @@ class TestUserTestCase(ElasticsearchTestCase):
             "offset": 0,
             "limit": 20
         }
+
+        self.populate_index()
 
         self.graphql_client.force_login(self.user1)
         result = self.graphql_client.post(self.query, variables)
@@ -149,6 +153,8 @@ class TestUserTestCase(ElasticsearchTestCase):
             "offset": 0,
             "limit": 20
         }
+
+        self.populate_index()
 
         self.graphql_client.force_login(superadmin1)
         result = self.graphql_client.post(self.query, variables)
@@ -209,6 +215,8 @@ class TestUserProfileSetTestCase(ElasticsearchTestCase):
             'query': '',
             'guid': self.profile_set.guid,
         }
+
+        self.populate_index()
 
     def tearDown(self):
         super().tearDown()
