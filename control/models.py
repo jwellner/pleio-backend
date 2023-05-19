@@ -8,6 +8,9 @@ from django.forms import Select, TextInput
 from django.utils import timezone
 from django.utils.module_loading import import_string
 from django.utils.translation import gettext_lazy as _, pgettext_lazy
+from django_tenants.utils import schema_context
+
+from core.lib import tenant_schema
 from tenants.models import Client
 
 
@@ -193,3 +196,26 @@ class ElasticsearchStatus(models.Model):
         if 'message' in self.access_status:
             return self.access_status['message']
         return ""
+
+
+class FileOperationManager(models.Manager):
+
+    def add_log(self, operation, result):
+        current_schema = tenant_schema()
+
+        with schema_context('public'):
+            self.create(client=Client.objects.get(schema_name=current_schema),
+                        operation=operation,
+                        result=result)
+
+
+class FileOperationLog(models.Model):
+    class Meta:
+        ordering = ('operation', '-created_at',)
+
+    objects = FileOperationManager()
+
+    created_at = models.DateTimeField(default=timezone.now)
+    client = models.ForeignKey('tenants.Client', null=True, on_delete=models.CASCADE, related_name='file_operation_log')
+    operation = models.CharField(max_length=255)
+    result = models.JSONField(default=dict)
