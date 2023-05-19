@@ -16,6 +16,7 @@ class TestTaskScheduleScanTestCase(PleioTenantTestCase):
 
         self.owner = UserFactory()
         self.content = self.build_contentfile(self.relative_path(__file__, ['assets', 'navy.jpg']))
+        self.reference_time = timezone.now()
 
         self.files = [
             FileFactory(owner=self.owner,
@@ -55,29 +56,32 @@ class TestTaskScheduleScanTestCase(PleioTenantTestCase):
 
     @mock.patch("file.tasks.signature")
     @mock.patch("file.tasks.ScheduleScan.collect_files")
-    def test_generate_tasks(self, mocked_collect_files, signature):
+    @mock.patch("file.tasks.timezone.now")
+    def test_generate_tasks(self, timezone_now, mocked_collect_files, signature):
         mocked_collect_files.return_value = [self.files[0]]
         signature.return_value = "SCAN_FILE_SIGNATURE"
-
+        timezone_now.return_value = self.reference_time
         scheduler = ScheduleScan(self.tenant.schema_name, 0)
-        self.assertEqual([*scheduler.generate_tasks()], [
-            "SCAN_FILE_SIGNATURE",
-        ])
+
+        tasks = [*scheduler.generate_tasks()]
+
+        self.assertEqual(tasks, ["SCAN_FILE_SIGNATURE"])
         self.assertEqual(signature.call_args.kwargs, dict(args=(self.tenant.schema_name, str(self.files[0])),
-                                                          count_down=0))
+                                                          eta=self.reference_time))
 
     @mock.patch("file.tasks.signature")
     @mock.patch("file.tasks.ScheduleScan.collect_files")
-    def test_generate_tasks_with_offset(self, mocked_collect_files, signature):
+    @mock.patch("file.tasks.timezone.now")
+    def test_generate_tasks_with_offset(self, timezone_now, mocked_collect_files, signature):
         mocked_collect_files.return_value = [self.files[0]]
         signature.return_value = "SCAN_FILE_SIGNATURE"
-
+        timezone_now.return_value = self.reference_time
         scheduler = ScheduleScan(self.tenant.schema_name, 10)
-        self.assertEqual([*scheduler.generate_tasks()], [
-            "SCAN_FILE_SIGNATURE",
-        ])
+
+        tasks = [*scheduler.generate_tasks()]
+        self.assertEqual(tasks, ["SCAN_FILE_SIGNATURE"])
         self.assertEqual(signature.call_args.kwargs, dict(args=(self.tenant.schema_name, str(self.files[0])),
-                                                          count_down=10))
+                                                          eta=self.reference_time+timezone.timedelta(seconds=10)))
 
     @mock.patch("file.tasks.chord")
     @mock.patch("file.tasks.ScheduleScan.generate_tasks")
