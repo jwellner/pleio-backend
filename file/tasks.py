@@ -11,6 +11,7 @@ from django.utils.translation import gettext
 from django_tenants.utils import schema_context
 from django.utils import timezone
 
+from control.models import FileOperationLog
 from core.lib import datetime_format
 from file.helpers.post_processing import ensure_correct_file_without_signals
 from file.mail_builders.file_scan_found import schedule_file_scan_found_mail
@@ -86,12 +87,19 @@ class ScheduleScan:
         return self.file_queryset().order_by('last_scan').values_list('id', flat=True)[:self.file_limit()]
 
     def generate_tasks(self):
+        reference = timezone.now()
         for count_down, file_id in enumerate([*self.collect_files()]):
-            yield signature(scan_file, args=(self.schema_name, str(file_id)), count_down=(self.file_offset + count_down))
+            offset_seconds = self.file_offset + count_down
+            yield signature(scan_file, args=(self.schema_name, str(file_id)), eta=(reference+timezone.timedelta(seconds=offset_seconds)))
 
     def run(self):
         tasks = [*self.generate_tasks()]
         chord(tasks, schedule_scan_finished.si(self.schema_name)).apply_async()
+        FileOperationLog.objects.add_log("file.tasks.ScheduleScan", {
+            "file_offset": self.file_offset,
+            "selected_files": len(tasks),
+            "all_files": self.file_queryset().count(),
+        })
         return len(tasks) + self.file_offset
 
 
@@ -109,7 +117,7 @@ def scan_file(schema_name, file_id):
                 file.save()
                 return
 
-            logger.info("At %s Scan file %s, last scanned %s", schema_name,  os.path.basename(file.upload.name), datetime_format(file.last_scan))
+            logger.info("At %s Scan file %s, last scanned %s", schema_name, os.path.basename(file.upload.name), datetime_format(file.last_scan))
             file.last_scan = timezone.now()
 
             result = file.scan()
