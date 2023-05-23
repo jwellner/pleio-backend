@@ -40,3 +40,11 @@ class FastTenantTestCase(BaseFastTenantTestCase):
         Returns a unique schema name for the tenant based on DB name (to avoid collisions)
         """
         return "fast_test_%s" % str(hash(connection.settings_dict['NAME']))[-5:]
+
+
+def switch_schema(schema_name):
+    from django.db import connections
+    from django_tenants.utils import get_tenant_database_alias
+    tenant = Client.objects.get(schema_name=schema_name)
+    connection = connections[get_tenant_database_alias()]
+    connection.set_tenant(tenant)

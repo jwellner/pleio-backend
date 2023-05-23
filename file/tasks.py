@@ -84,7 +84,15 @@ class ScheduleScan:
         return FileFolder.objects.filter_files()
 
     def collect_files(self):
-        return self.file_queryset().order_by('last_scan').values_list('id', flat=True)[:self.file_limit()]
+        file_ids = self.file_queryset().order_by('last_scan').values_list('id', flat=True)[:self.file_limit()]
+        sorted_ids = [*self.file_queryset().order_by('size').filter(pk__in=file_ids).values_list('id', flat=True)]
+        while len(sorted_ids) > 0:
+            try:
+                yield sorted_ids.pop(len(sorted_ids) - 1)
+                yield sorted_ids.pop(0)
+                yield sorted_ids.pop(0)
+            except IndexError:
+                pass
 
     def generate_tasks(self):
         reference = timezone.now()
