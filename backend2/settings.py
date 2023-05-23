@@ -156,7 +156,6 @@ TENANT_APPS = [
     'question',
     'wiki',
     'activity',
-    'bookmark',
     'task',
     'file',
     'elgg',
